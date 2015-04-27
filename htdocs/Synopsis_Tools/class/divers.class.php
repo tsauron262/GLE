@@ -89,7 +89,7 @@ class synopsisHook {
         define('CHRONO_KEY_SITE_DUREE_DEP', 1029);
 
 
-        $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
+        $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat", "Logiciel");
         $tabTypeLigneSimple = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
 
 

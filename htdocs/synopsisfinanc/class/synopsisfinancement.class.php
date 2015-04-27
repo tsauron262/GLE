@@ -66,6 +66,10 @@ class Synopsisfinancement extends CommonObject {
         if (is_numeric($this->commC) == false || $this->commC < 0) {
             $erreurs[] = 'Le champs "commission commerciale" a besoin d\'un nombre';
         }
+        
+        if($this->commC>4){
+            $erreurs[]='La commission commerciale ne peu pas excéder 4 %';
+        }
 
         if (is_numeric($this->commF) == false || $this->commF < 0) {
             $erreurs[] = 'Le champs "commission financière" a besoin d\'un nombre';

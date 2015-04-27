@@ -86,7 +86,7 @@ $(window).load(function() {
     //Cacher prix quand ligne de text
     $("#select_type").change(function() {
         elems = $(this).parent().parent().parent().find("#tva_tx, input[name|='price_ht'], input[name|='qty'],  input[name|='remise_percent']");
-        if ($(this).val() != 0 && $(this).val() != 1 && $(this).val() != 2) {
+        if ($(this).val()>=100) {
             $("input[name|='price_ht']").val("0");
             elems.hide();
         }

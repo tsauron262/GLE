@@ -701,10 +701,11 @@ class pdf_azurFinanc extends ModelePDFPropales
                         $valfinance->fetch(null, $object->id);
                         if($valfinance->id>0){
                             $valfinance->calcul();
-                            $lib_condition_paiement="Proposition de financement: ".price($valfinance->loyer+0.005) . " €   X   " . $valfinance->nb_periode ." ". $valfinance::$tabM[$valfinance->periode]." soit " . price($valfinance->prix_final) . " €";
+                            $lib_condition_paiement="Proposition de financement: ".price($valfinance->loyer+0.005) . " € HT   X   " . $valfinance->nb_periode ." ". $valfinance::$tabM[$valfinance->periode];
                             if($valfinance->VR>0){
                                 $lib_condition_paiement.=" avec un VR de: ".price($valfinance->VR)." €";
                             }
+                            $lib_condition_paiement.="\n\nSous réserve d'acceptation bla bla bla...";
                         }else{
                             $lib_condition_paiement="Vous n'avez pas configurer le financement.";
                         }

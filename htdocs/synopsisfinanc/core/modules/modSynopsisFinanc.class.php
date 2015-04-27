@@ -79,6 +79,34 @@ class modSynopsisFinanc extends DolibarrModules
         $this->rights[$r][4] = 'read'; // Famille
 //        $this->rights[$r][5] = 'read'; // Droit
         $r ++;
+        
+        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][1] = 'Ecriture partielle';
+        $this->rights[$r][2] = 'r'; //useless
+        $this->rights[$r][3] = 0; // Default
+        $this->rights[$r][4] = 'write'; // Famille
+        $r ++;
+        
+        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][1] = 'Ecriture totale';
+        $this->rights[$r][2] = 'r'; //useless
+        $this->rights[$r][3] = 0; // Default
+        $this->rights[$r][4] = 'super_write'; // Famille
+        $r ++;
+        
+//        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+//        $this->rights[$r][1] = 'Taux';
+//        $this->rights[$r][2] = 'r'; //useless
+//        $this->rights[$r][3] = 0; // Default
+//        $this->rights[$r][4] = 'Taux'; // Famille
+//        $r ++;
+//        
+//        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+//        $this->rights[$r][1] = 'banque';
+//        $this->rights[$r][2] = 'r'; //useless
+//        $this->rights[$r][3] = 0; // Default
+//        $this->rights[$r][4] = 'bank'; // Famille
+//        $r ++;
 
 //        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
 //        $this->rights[$r][1] = 'Stat Global';

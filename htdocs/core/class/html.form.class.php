@@ -683,7 +683,7 @@ class Form
     {
     	global $langs,$conf;
 
-    	$out='';
+    	$out=''; $hidelabel = 3;
 
   //  	/* TODO Use ajax_autocompleter like for products (not finished)
     	if (! empty($conf->use_javascript_ajax) && ! empty($conf->global->COMPANY_USE_SEARCH_TO_SELECT) && ! $forcecombo)

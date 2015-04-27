@@ -241,6 +241,7 @@ class CronSynopsis {
     function verifCompteFermer() {
         global $user;
         $str = "";
+        print_r($user->array_options);
         if (isset($user->array_options['options_date_s'])) {
             $sql = $this->db->query("SELECT *  FROM `llx_user_extrafields`, llx_user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {

@@ -26,7 +26,8 @@
  *          - $type_conges pour différencier les congés payés ordinaires des rtt et congés exceptionnels. 
  *          - $fk_user_drh_valid : id drh si validation. 
  *          - $date_drh_valid : date de validation par le DRH
- *          - $fk_actioncomm : id actioncomm pour événement agenda, si statut = 2, 3 ou 6. 
+ *          - $fk_actioncomm : id actioncomm pour événement agenda, si statut = 2, 3 ou 6.
+ *          - $fk_substitute : id utilisateur remplaçant. 
  *      - Ajout config: 'drhUserId' et 'nbRTTDeducted'
  *      - Ajout méthodes:
  *          - getRTTforUser()
@@ -81,6 +82,7 @@ class Holiday extends CommonObject {
     var $optValue = '';
     var $optRowid = '';
     var $type_conges = ''; // 0: ordinaires, 1: exceptionnels, 2: rtt.
+    var $fk_substitute = '';
     public static $typesConges = array(
         0 => 'Congés payés',
         1 => 'Congés exceptionnels',
@@ -103,10 +105,12 @@ class Holiday extends CommonObject {
      * @return	int			Return 1
      */
     function updateSold() {
-        // Mets à jour les congés payés en début de mois
+        // Mets à jour les congés payés et RTT en début de mois
         $this->updateSoldeCP();
 
-        // Màj des RTT e, début de mois: 
+        // Mise à jour annuelle si besoin:
+        $this->annualUpdateSoldeCP();
+
         // Vérifie le nombre d'utilisateur et mets à jour si besoin
         $this->verifNbUsers($this->countActiveUsersWithoutCP(), $this->getConfCP('nbUser'));
         return 1;
@@ -149,7 +153,8 @@ class Holiday extends CommonObject {
         $sql.= "halfday,";
         $sql.= "statut,";
         $sql.= "fk_validator,";
-        $sql.= "type_conges";
+        $sql.= "type_conges,";
+        $sql.= "fk_substitute";
         $sql.= ") VALUES (";
 
         // User
@@ -161,7 +166,8 @@ class Holiday extends CommonObject {
         $sql.= " " . $this->halfday . ",";
         $sql.= " '1',";
         $sql.= " '" . $this->fk_validator . "',";
-        $sql.= " '" . $this->type_conges . "'";
+        $sql.= " '" . $this->type_conges . "',";
+        $sql.= (isset($this->fk_substitute) && !empty($this->fk_substitute)) ? "'" . (int) $this->fk_substitute . "'" : 'NULL';
         $sql.= ")";
 
         $this->db->begin();
@@ -222,7 +228,8 @@ class Holiday extends CommonObject {
         $sql.= " cp.note_private,";
         $sql.= " cp.note_public,";
         $sql.= " cp.type_conges,";
-        $sql.= " cp.fk_actioncomm";
+        $sql.= " cp.fk_actioncomm,";
+        $sql.= " cp.fk_substitute";
         $sql.= " FROM " . MAIN_DB_PREFIX . "holiday as cp";
         $sql.= " WHERE cp.rowid = " . $id;
 
@@ -258,6 +265,7 @@ class Holiday extends CommonObject {
                 $this->note_public = $obj->note_public;
                 $this->type_conges = $obj->type_conges;
                 $this->fk_actioncomm = $obj->fk_actioncomm;
+                $this->fk_substitute = $obj->fk_substitute;
             }
             $this->db->free($resql);
             return 1;
@@ -278,7 +286,7 @@ class Holiday extends CommonObject {
      *  @param      string	$filter     SQL Filter
      *  @return     int      			-1 if KO, 1 if OK, 2 if no result
      */
-    function fetchByUser($user_id, $order = '', $filter = '') {
+    function fetchByUser($user_id = '', $order = '', $filter = '', $substitute_id = '') {
         global $langs, $conf;
 
         $sql = "SELECT";
@@ -301,8 +309,9 @@ class Holiday extends CommonObject {
         $sql.= " cp.date_cancel,";
         $sql.= " cp.fk_user_cancel,";
         $sql.= " cp.detail_refuse,";
-        $sql .= "cp.type_conges,";
-        $sql .= "cp.fk_actioncomm,";
+        $sql.= "cp.type_conges,";
+        $sql.= "cp.fk_actioncomm,";
+        $sql.= "cp.fk_substitute,";
 
         $sql.= " uu.lastname as user_lastname,";
         $sql.= " uu.firstname as user_firstname,";
@@ -311,9 +320,17 @@ class Holiday extends CommonObject {
         $sql.= " ua.firstname as validator_firstname";
 
         $sql.= " FROM " . MAIN_DB_PREFIX . "holiday as cp, " . MAIN_DB_PREFIX . "user as uu, " . MAIN_DB_PREFIX . "user as ua";
-        $sql.= " WHERE cp.fk_user = uu.rowid AND cp.fk_validator = ua.rowid "; // Hack pour la recherche sur le tableau
-        $sql.= " AND cp.fk_user = '" . $user_id . "'";
-
+        $sql.= " WHERE cp.fk_user = uu.rowid AND cp.fk_validator = ua.rowid AND (";
+        if (!empty($user_id)) {
+            $sql.= "cp.fk_user = '" . $user_id . "'";
+            if (!empty($substitute_id))
+                $sql .= " OR ";
+            else
+                $sql .= ")";
+        }
+        if (!empty($substitute_id)) {
+            $sql.= "cp.fk_substitute = '" . $substitute_id . "')";
+        }
         // Filtre de séléction
         if (!empty($filter)) {
             $sql.= $filter;
@@ -367,6 +384,7 @@ class Holiday extends CommonObject {
                 $tab_result[$i]['detail_refuse'] = $obj->detail_refuse;
                 $tab_result[$i]['type_conges'] = $obj->type_conges;
                 $tab_result[$i]['fk_actioncomm'] = $obj->fk_actioncomm;
+                $tab_result[$i]['fk_substitute'] = $obj->fk_substitute;
 
                 $tab_result[$i]['user_firstname'] = $obj->user_firstname;
                 $tab_result[$i]['user_lastname'] = $obj->user_lastname;
@@ -420,6 +438,7 @@ class Holiday extends CommonObject {
         $sql.= " cp.detail_refuse,";
         $sql.= " cp.type_conges,";
         $sql.= " cp.fk_actioncomm,";
+        $sql.= " cp.fk_substitute,";
 
         $sql.= " uu.lastname as user_lastname,";
         $sql.= " uu.firstname as user_firstname,";
@@ -454,7 +473,7 @@ class Holiday extends CommonObject {
                 return 2;
             }
 
-            // On liste les résultats et on les ajoutent dans le tableau
+            // On liste les résultats et on les ajoute dans le tableau
             while ($i < $num) {
 
                 $obj = $this->db->fetch_object($resql);
@@ -482,6 +501,7 @@ class Holiday extends CommonObject {
                 $tab_result[$i]['detail_refuse'] = $obj->detail_refuse;
                 $tab_result[$i]['type_conges'] = $obj->type_conges;
                 $tab_result[$i]['fk_actioncomm'] = $obj->fk_actioncomm;
+                $tab_result[$i]['fk_substitute'] = $obj->fk_substitute;
 
                 $tab_result[$i]['user_firstname'] = $obj->user_firstname;
                 $tab_result[$i]['user_lastname'] = $obj->user_lastname;
@@ -590,9 +610,14 @@ class Holiday extends CommonObject {
             $error++;
         }
         if (isset($this->fk_actioncomm) && !empty($this->fk_actioncomm)) {
-            $sql.= " fk_actioncomm = '" . $this->fk_actioncomm . "'";
+            $sql.= " fk_actioncomm = '" . $this->fk_actioncomm . "',";
         } else {
-            $sql.= " fk_actioncomm = NULL";
+            $sql.= " fk_actioncomm = NULL,";
+        }
+        if (isset($this->fk_substitute) && !empty($this->fk_substitute)) {
+            $sql.= " fk_substitute = '" . $this->fk_substitute . "'";
+        } else {
+            $sql.= " fk_substitute = NULL";
         }
 
         $sql.= " WHERE rowid= '" . $this->rowid . "'";
@@ -676,24 +701,35 @@ class Holiday extends CommonObject {
      * 	@return boolean
      */
     function verifDateHolidayCP($fk_user, $dateDebut, $dateFin, $halfday = 0) {
-        $this->fetchByUser($fk_user, '', '');
-
+        $this->fetchByUser($fk_user, '', '', $fk_user); // On vérifie également les congés pour lesquels $fk_user est remplaçant
+        // Vérifications des conflits avec les congés existants pour cet utilisateur:
         foreach ($this->holiday as $infos_CP) {
             if ($infos_CP['statut'] == 4)
                 continue;  // ignore not validated holidays
             if ($infos_CP['statut'] == 5)
                 continue;  // ignore not validated holidays
 
-
-
-                
-// TODO Also use halfday for the check
             if ($dateDebut >= $infos_CP['date_debut'] && $dateDebut <= $infos_CP['date_fin'] ||
                     $dateFin <= $infos_CP['date_fin'] && $dateFin >= $infos_CP['date_debut']) {
-                return false;
+                // Mise à jour Synopsis - prise en compte des demies-journées
+                if ($halfday && $infos_CP['halfday']) {
+                    if ($dateDebut == $infos_CP['date_fin']) {
+                        if (($halfday < 0 || $halfday == 2) && $infos_CP['halfday'] > 0) {
+                            continue;
+                        }
+                    }
+                    if ($dateFin == $infos_CP['date_debut']) {
+                        if ($halfday > 0 && ($infos_CP['halfday'] < 0 || $infos_CP['halfday'] == 2)) {
+                            continue;
+                        }
+                    }
+                }
+                if ($infos_CP['fk_substitute'] == $fk_user)
+                    return -1;
+                return 0;
             }
         }
-        return true;
+        return 1;
     }
 
     /**
@@ -793,7 +829,7 @@ class Holiday extends CommonObject {
                 return $langs->trans('FinalApprovedCP') . ' ' . img_picto($langs->trans('FinalApprovedCP'), $pictoapproved);
         }
 
-        die ($statut);
+        die($statut);
         return $statut;
     }
 
@@ -931,13 +967,67 @@ class Holiday extends CommonObject {
     }
 
     /**
+     *  Ajout Synopsis - Mise à jour annuelle des soldes CP si besoin.
+     *  @return void
+     */
+    function annualUpdateSoldeCP() {
+        $now = new DateTime();
+        $nowYear = (int) $now->format('Y');
+        $lastUpdateYear = (int) $this->getConfCP('lastAnnualUpdate');
+
+        if (empty($lastUpdateYear)) {
+            $lastUpdateYear = $nowYear - 1;
+            $this->updateConfCP('lastAnnualUpdate', $lastUpdateYear);
+        }
+
+        if ($lastUpdateYear == $nowYear)
+            return;
+
+        $d = $this->getConfCP('cpNewYearDay');
+        if ((int) $d < 10)
+            $d = '0' . $d;
+
+        $m = $this->getConfCP('cpNewYearMonth');
+        if ((int) $m < 10)
+            $m = '0' . $m;
+
+        $y = $lastUpdateYear + 1;
+
+        if ((int) $now->format('Ymd') >= (int) ($y . $m . $d)) {
+            global $user, $langs;
+            $this->updateConfCP('lastAnnualUpdate', $nowYear);
+
+            $users = $this->fetchUsers(false, false);
+            $nbUser = count($users);
+            $drhUserID = $this->getConfCP('drhUserId');
+            $i = 0;
+            while ($i < $nbUser) {
+                $now_holiday_current = $this->getCurrentYearCPforUser($users[$i]['rowid']);
+                $now_holiday_next = $this->getNextYearCPforUser($users[$i]['rowid']);
+
+                $this->addLogCP($drhUserID, $users[$i]['rowid'], 'Mise à jour annuelle du solde des congés payés pour l\'année en cours', $now_holiday_next, true);
+                $this->addLogCP($drhUserID, $users[$i]['rowid'], 'Mise à jour annuelle du solde des congés payés pour l\'année suivante', 0);
+                $i++;
+            }
+
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "holiday_users SET";
+            $sql.= " nb_holiday_current = nb_holiday_next";
+            $sql.= ", nb_holiday_next = 0";
+
+            dol_syslog(get_class($this) . '::annualUpdateSoldeCP sql=' . $sql);
+            $result = $this->db->query($sql);
+            return $result;
+        }
+    }
+
+    /**
      * 	Met à jour le timestamp de la dernière mise à jour du solde des CP
      *
      * 	@param		int		$userID		Id of user
      * 	@param		int		$nbHoliday	Nb of days
      *  @return     int					0=Nothing done, 1=OK, -1=KO
      */
-    function updateSoldeCP($userID = '', $nbHoliday = '') {
+    function updateSoldeCP($userID = '', $nbHoliday = '', $currentYearSolde = false) {
         global $user, $langs;
         if (empty($userID) && empty($nbHoliday)) {
             // Si mise à jour pour tout le monde en début de mois (congés payés + rtt)
@@ -972,7 +1062,7 @@ class Holiday extends CommonObject {
                 $i = 0;
 
                 while ($i < $nbUser) {
-                    $now_holiday = $this->getCPforUser($users[$i]['rowid']);
+                    $now_holiday = $this->getNextYearCPforUser($users[$i]['rowid']);
                     $new_solde = $now_holiday + $nb_holiday;
 
                     $now_rtt = $this->getRTTforUser($users[$i]['rowid']);
@@ -984,7 +1074,7 @@ class Holiday extends CommonObject {
                 }
 
                 $sql2 = "UPDATE " . MAIN_DB_PREFIX . "holiday_users SET";
-                $sql2.= " nb_holiday = nb_holiday + " . $nb_holiday;
+                $sql2.= " nb_holiday_next = nb_holiday_next + " . $nb_holiday;
                 $sql2.= ", nb_rtt = nb_rtt + " . $nb_rtt;
 
                 dol_syslog(get_class($this) . '::updateSoldeCP sql=' . $sql2);
@@ -1002,14 +1092,16 @@ class Holiday extends CommonObject {
             // Mise à jour pour un utilisateur
             $nbHoliday = price2num($nbHoliday, 2);
 
-            // Mise à jour pour un utilisateur
             $sql = "UPDATE " . MAIN_DB_PREFIX . "holiday_users SET";
-            $sql.= " nb_holiday = " . $nbHoliday;
+            if ($currentYearSolde)
+                $sql.= " nb_holiday_current = ";
+            else
+                $sql.= " nb_holiday_next = ";
+            $sql.= $nbHoliday;
             $sql.= " WHERE fk_user = '" . $userID . "'";
 
             dol_syslog(get_class($this) . '::updateSoldeCP sql=' . $sql);
             $result = $this->db->query($sql);
-
             if ($result)
                 return 1;
             else
@@ -1084,8 +1176,8 @@ class Holiday extends CommonObject {
 
             foreach ($arrayofusers as $users) {
                 $sql = "INSERT INTO " . MAIN_DB_PREFIX . "holiday_users";
-                $sql.= " (fk_user, nb_holiday, nb_rtt)";
-                $sql.= " VALUES ('" . $userid . "','0','0')";
+                $sql.= " (fk_user, nb_holiday_next, nb_holiday_current, nb_rtt)";
+                $sql.= " VALUES ('" . $userid . "','0', '0', 0')";
 
                 $resql = $this->db->query($sql);
                 if (!$resql)
@@ -1094,7 +1186,7 @@ class Holiday extends CommonObject {
         }
         else {
             $sql = "INSERT INTO " . MAIN_DB_PREFIX . "holiday_users";
-            $sql.= " (fk_user, nb_holiday, nb_rtt)";
+            $sql.= " (fk_user, nb_holiday_next, nb_holiday_current, nb_rtt)";
             $sql.= " VALUES ('" . $userid . "','0','0')";
 
             $resql = $this->db->query($sql);
@@ -1118,22 +1210,171 @@ class Holiday extends CommonObject {
     }
 
     /**
-     *  Retourne le solde de congés payés pour un utilisateur
+     *  Ajout Synopsis - Retourne la date de début du décompte du solde CP à n+1)
+     *  @return string      Date début année n+1 (AAAA-MM-JJ)
+     */
+    function getCPNextYearDate($text = false, $yearAfter = false) {
+        $m = $this->getConfCP('cpNewYearMonth');
+        if ($m < 10)
+            $m = '0' . $m;
+        $d = $this->getConfCP('cpNewYearDay');
+        if ($d < 10)
+            $d = '0' . $d;
+        $y = (int) $this->getConfCP('lastAnnualUpdate');
+        $y++;
+        if ($yearAfter)
+            $y++;
+
+        if ($text)
+            return $d . ' / ' . $m . ' / ' . $y;
+        else
+            return $y . '-' . $m . '-' . $d;
+    }
+
+    /**
+     *  Modifs Synopsis - Retourne le détail des soldes des congés payés
+     *  Si une période est fournie : indique le nombre de jours ouvrés total et celui correspondant aux années n, n +1 et > à n+1
      *
      *  @param	int		$user_id    ID de l'utilisateur
-     *  @return float        		Retourne le solde de congés payés de l'utilisateur
+     *  @param date             $beginDate  Début période
+     *  @param date             $endDate    Fin période
+     *  @return        		Retourne le détail des soldes de congés payés
      */
-    function getCPforUser($user_id) {
+    function getCPforUser($user_id, $beginDate = '', $endDate = '', $halfday = 0, $timestamp = false) {
+        $solde = array(
+            'nb_holiday_next' => $this->getNextYearCPforUser($user_id),
+            'nb_holiday_current' => $this->getcurrentYearCPforUser($user_id)
+        );
 
-        $sql = "SELECT nb_holiday";
+        if (empty($beginDate) || empty($endDate))
+            return ($solde['nb_holiday_next'] + $solde['nb_holiday_current']);
+
+
+        if ($beginDate > $endDate) {
+            $solde['error'] = 'La date de débur de période indiquée est supérieure à la date de fin.';
+            return $solde;
+        }
+
+        if ($timestamp) {
+            $DT = new DateTime();
+            $DT->setTimestamp($beginDate);
+            $beginDate = $DT->format('Y-m-d');
+            $DT->setTimestamp($endDate);
+            $endDate = $DT->format('Y-m-d');
+            print 'Check dates: ' . $beginDate . ', ' . $endDate . '<br/>';
+        }
+
+        $nextYearDate = $this->getCPNextYearDate();
+        $nextYearDateAfter = $this->getCPNextYearDate(false, true);
+
+        // formatage des dates pour le calcul des jours ouvrés:
+        $beginDateGMT = '';
+        $matches = array();
+        if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})$/', $beginDate, $matches))
+            $beginDateGMT = dol_mktime(0, 0, 0, $matches[2], $matches[3], $matches[1]);
+        $endDateGMT = '';
+        if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})$/', $endDate, $matches))
+            $endDateGMT = dol_mktime(0, 0, 0, $matches[2], $matches[3], $matches[1]);
+        $nextYearDateGMT = '';
+        if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})$/', $nextYearDate, $matches))
+            $nextYearDateGMT = dol_mktime(0, 0, 0, $matches[2], $matches[3], $matches[1]);
+        $nextYearDateAfterGMT = '';
+        if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})$/', $nextYearDateAfter, $matches))
+            $nextYearDateAfterGMT = dol_mktime(0, 0, 0, $matches[2], $matches[3], $matches[1]);
+
+        if (empty($beginDateGMT) || empty($endDateGMT) || empty($nextYearDateGMT) || empty($nextYearDateAfterGMT)) {
+            $solde['error'] = 'Les dates indiquées ne sont pas au bon format (attendu : "AAAA-MM-JJ").';
+            return $solde;
+        }
+
+
+        $solde['nbOpenDayTotal'] = 0; // Nombre total de jours ouvrés de la période.
+        $solde['nbOpenDayCurrent'] = 0; // Nombre de jours ouvrés de la période inclus dans l'année n.
+        $solde['nbOpenDayNext'] = 0; // Nombre de jours ouvrés de la période inclus dans l'année n+1.
+        $solde['nbOpenDayNextAfter'] = 0; // Nombre de jours ouvrés de la période inclus après l'année n+1.
+
+        $hd_begin = 0;
+        $hd_end = 0;
+        if ($halfday == 2 || $halfday < 0)
+            $hd_begin = -1;
+        if ($halfday == 2 || $halfday > 0)
+            $hd_end = 1;
+
+        // Jours ouvrés total: 
+        $solde['nbOpenDayTotal'] = num_open_day($beginDateGMT, $endDateGMT, 0, 1, $halfday);
+
+        // Jours ouvrés de la période sur l'année en cours:
+        if ($beginDate < $nextYearDate) {
+            if ($endDate < $nextYearDate)
+                $solde['nbOpenDayCurrent'] = $solde['nbOpenDayTotal'];
+            else {
+                $solde['nbOpenDayCurrent'] = num_open_day($beginDateGMT, $nextYearDateGMT, 0, 0, $hd_begin);
+            }
+        }
+
+        // Jours ouvrés de la période sur l'année n+1:
+        if ($beginDate < $nextYearDate) {
+            if ($endDate < $nextYearDateAfter)
+                $solde['nbOpenDayNext'] = num_open_day($nextYearDateGMT, $endDateGMT, 0, 1, $hd_end);
+            else
+                $solde['nbOpenDayNext'] = num_open_day($nextYearDateGMT, $nextYearDateAfterGMT, 0, 0, 0);
+        } else if ($beginDate < $nextYearDateAfter) {
+            if ($endDate < $nextYearDateAfter)
+                $solde['nbOpenDayNext'] = $solde['nbOpenDayTotal'];
+            else
+                $solde['nbOpenDayNext'] = num_open_day($beginDateGMT, $nextYearDateAfterGMT, 0, 0, $hd_begin);
+        }
+
+        // Jours ouvrés de la période > à l'année n+1:
+        if ($endDate >= $nextYearDateAfter) {
+            if ($beginDate >= $nextYearDateAfter) {
+                $solde['nbOpenDayNextAfter'] = $solde['nbOpenDayTotal'];
+            } else {
+                $solde['nbOpenDayNextAfter'] = num_open_day($nextYearDateAfterGMT, $endDateGMT, 0, 1, $hd_end);
+            }
+        }
+        return $solde;
+    }
+
+    /**
+     *  Ajouts Synopsis - Retourne le solde de congés payés à l'année n+1 pour un utilisateur
+     *
+     *  @param	int		$user_id    ID de l'utilisateur
+     *  @return float        		Retourne le solde de congés payés de l'utilisateur à n+1
+     */
+    function getNextYearCPforUser($user_id) {
+
+        $sql = "SELECT nb_holiday_next";
         $sql.= " FROM " . MAIN_DB_PREFIX . "holiday_users";
         $sql.= " WHERE fk_user = '" . $user_id . "'";
 
-        dol_syslog(get_class($this) . '::getCPforUser sql=' . $sql);
+        dol_syslog(get_class($this) . '::getNextYearCPforUser sql=' . $sql);
         $result = $this->db->query($sql);
         if ($result) {
             $obj = $this->db->fetch_object($result);
-            return number_format($obj->nb_holiday, 2);
+            return number_format($obj->nb_holiday_next, 2);
+        } else {
+            return '0';
+        }
+    }
+
+    /**
+     *  Ajouts Synopsis - Retourne le solde de congés payés de l'année en cours pour un utilisateur
+     *
+     *  @param	int		$user_id    ID de l'utilisateur
+     *  @return float        		Retourne le solde de congés payés de l'utilisateur de l'année en cours
+     */
+    function getCurrentYearCPforUser($user_id) {
+
+        $sql = "SELECT nb_holiday_current";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "holiday_users";
+        $sql.= " WHERE fk_user = '" . $user_id . "'";
+
+        dol_syslog(get_class($this) . '::getCurrentYearCPforUser sql=' . $sql);
+        $result = $this->db->query($sql);
+        if ($result) {
+            $obj = $this->db->fetch_object($result);
+            return number_format($obj->nb_holiday_current, 2);
         } else {
             return '0';
         }
@@ -1682,7 +1923,7 @@ class Holiday extends CommonObject {
      * @param 	int		$new_solde			New value
      * @return number|string
      */
-    function addLogCP($fk_user_action, $fk_user_update, $type, $new_solde, $is_rtt = false) {
+    function addLogCP($fk_user_action, $fk_user_update, $type, $new_solde, $is_rtt = false, $currentYear = false) {
 
         global $conf, $langs;
 
@@ -1690,8 +1931,11 @@ class Holiday extends CommonObject {
         $prev_solde = '';
         if ($is_rtt)
             $prev_solde = $this->getRTTforUser($fk_user_update);
+        else if ($currentYear)
+            $prev_solde = $this->getCurrentYearCPforUser($fk_user_update);
         else
-            $prev_solde = $this->getCPforUser($fk_user_update);
+            $prev_solde = $this->getNextYearCPforUser($fk_user_update);
+
         $new_solde = number_format($new_solde, 2, '.', '');
 
         // Insert request
@@ -1851,14 +2095,14 @@ class Holiday extends CommonObject {
     }
 
     /**
-     *  Gestion agenda
+     *  Ajout Synopsis - Gestion agenda
      *
      *  @return	bool            ok ou non
      */
     function onStatusUpdate($user) {
         if (!isset($this->id) || empty($this->id))
             return false;
-        
+
 
         $ac = new ActionComm($this->db);
         $dateBegin = new DateTime($this->db->idate($this->date_debut));
@@ -1866,33 +2110,37 @@ class Holiday extends CommonObject {
         $userToDo = new User($this->db);
         $userToDo->fetch($this->fk_user);
         $check = true;
-        
-        
-        
+
+        $substitute = null;
+        if (isset($this->fk_substitute) && $this->fk_substitute > 0) {
+            $substitute = new User($this->db);
+            $substitute->fetch($this->fk_substitute);
+        }
+
         $fk_action = 0;
         $tabDebLib = explode(" ", $this->getTypeLabel());
-        if(isset($tabDebLib[0])){
+        if (isset($tabDebLib[0])) {
             $sql = $this->db->query("SELECT id 
-                FROM  `".MAIN_DB_PREFIX."c_actioncomm` 
-                WHERE  `libelle` LIKE  '%".$tabDebLib[0]."%'");
-            if($this->db->num_rows($sql) > 0){
+                FROM  `" . MAIN_DB_PREFIX . "c_actioncomm` 
+                WHERE  `libelle` LIKE  '%" . $tabDebLib[0] . "%'");
+            if ($this->db->num_rows($sql) > 0) {
                 $ligne = $this->db->fetch_object($sql);
                 $fk_action = $ligne->id;
             }
         }
-        
+
 
         if (isset($this->fk_actioncomm) && !empty($this->fk_actioncomm)) {
             $ac->fetch($this->fk_actioncomm);
         }
-        if($ac->id > 0){
+        if ($ac->id > 0) {
             if ($this->statut == 2 || $this->statut == 3 || $this->statut == 6) {
                 // Mise à jour
                 // On envisage la possibilité que les dates aient pu être modifiées
                 if ($this->statut == 6)
                     $ac->percentage = -1;
-                
-                if($fk_action)
+
+                if ($fk_action)
                     $ac->fk_action = $fk_action;
 
                 if (!$this->halfday) {
@@ -1908,20 +2156,20 @@ class Holiday extends CommonObject {
                     $dateBegin->setTime(14, 0, 0);
                     $dateEnd->setTime(19, 59, 59);
                 }
-                
-                
+
+
                 date_default_timezone_set("GMT");
-                
-                
+
+
                 $ac->datep = $dateBegin->format('Y-m-d H:i:s');
                 $ac->datef = $dateEnd->format('Y-m-d H:i:s');
-                $ac->note = $this->LibStatut($this->statut);
-                
-                
+                $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . dolGetFirstLastname($substitute->firstname, $substitute->lastname . '.') : 'Aucun rempaçant désigné.');
+
+
                 $result = $ac->update($userToDo);
-                
+
                 date_default_timezone_set("Europe/Paris");
-                
+
                 if ($result == 0) {
                     // Forçage de la màj (si $userToDo n'a pas les droits):
                     $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";
@@ -1958,7 +2206,7 @@ class Holiday extends CommonObject {
             } else {
                 // Suppression:
                 $result = $ac->delete();
-                if ($result < 0){
+                if ($result < 0) {
                     dol_syslog("Holiday::annulation suppression de l'event fail id action : " . $this->fk_actioncomm, LOG_ERR);
                     $check = false;
                 }
@@ -1971,11 +2219,11 @@ class Holiday extends CommonObject {
             $ac->fk_element = $this->id;
             $ac->elementtype = $this->element;
             $ac->usertodo = $userToDo;
-            
-            
-            if($fk_action)
+
+
+            if ($fk_action)
                 $ac->type_id = $fk_action;
-                
+
 
             if (!$this->halfday) {
                 $dateBegin->setTime(8, 0, 0);
@@ -1992,11 +2240,11 @@ class Holiday extends CommonObject {
             }
             $ac->datep = $dateBegin->format('Y-m-d H:i:s');
             $ac->datef = $dateEnd->format('Y-m-d H:i:s');
-            $ac->note = $this->LibStatut($this->statut);
+            $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . $substitute->firstname . ' ' . $substitute->lastname : 'Aucun rempaçant désigné.');
             $result = $ac->add($user);
             if ($result < 0)
                 $check = false;
-            else 
+            else
                 $this->fk_actioncomm = $result;
 //            {
 //                // Hack:
@@ -2018,4 +2266,65 @@ class Holiday extends CommonObject {
         return $check;
     }
 
+    /**
+     *  Ajout Synopsis - Liste des RDV à transmettre au remplaçant
+     *
+     *  @return	array            Liste des rowid actioncomm - 0 si erreur. 
+     */
+    function fetchRDV($fk_user = -1) {
+        if (empty($this->id) || empty($this->fk_user) || empty($this->date_debut) || empty($this->date_fin))
+            return 0;
+
+        if ($fk_user < 0 && empty($this->fk_user))
+            return 0;
+        
+        $dateBegin = new DateTime();
+        $dateBegin->setTimestamp($this->date_debut);
+        $dateEnd = new DateTime();
+        $dateEnd->setTimestamp($this->date_fin);
+
+        if (!$this->halfday) {
+            $dateBegin->setTime(8, 0, 0);
+            $dateEnd->setTime(19, 59, 59);
+        } else if ($this->halfday == 2) {
+            $dateBegin->setTime(14, 0, 0);
+            $dateEnd->setTime(13, 59, 59);
+        } else if ($this->halfday > 0) {
+            $dateBegin->setTime(8, 0, 0);
+            $dateEnd->setTime(13, 59, 59);
+        } else if ($this->halfday < 0) {
+            $dateBegin->setTime(14, 0, 0);
+            $dateEnd->setTime(19, 59, 59);
+        }
+
+
+        $sql = "SELECT `id` FROM " . MAIN_DB_PREFIX . "actioncomm WHERE `fk_user_action` = ".(($fk_user >= 0)?$fk_user:$this->fk_user);
+        $sql .= " AND `datep` <= ";
+        $sql .= "'".$dateEnd->format('Y-m-d H:i:s') . "' AND `datep2` >= '" . $dateBegin->format('Y-m-d H:i:s')."';";
+        
+        dol_syslog(get_class($this) . "::fetchRDV sql=" . $sql, LOG_DEBUG);
+        date_default_timezone_set("GMT");
+        $resql = $this->db->query($sql);
+        date_default_timezone_set("Europe/Paris");
+        
+        if ($resql) {
+            $i = 0;
+            $num = $this->db->num_rows($resql);
+            if (!$num)
+                return array();
+            
+            $list = array();
+            while ($i < $num) {
+                $obj = $this->db->fetch_object($resql);
+                if (isset($obj)) {
+                    if (empty($this->fk_actioncomm) || (!empty($this->fk_actioncomm) && $this->fk_actioncomm != $obj->id))
+                        $list[] = $obj->id;
+                }
+                $i++;
+            }
+            return $list;
+        }
+        return 0;
+    }
 }
+    

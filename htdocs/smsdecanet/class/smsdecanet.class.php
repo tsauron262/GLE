@@ -1,12 +1,12 @@
 <?php
-	class SMSDecanet {
+	class SMSDecanet extends CommonObject{
 		var $expe='';
 		var $dest='';
 		var $message='';
 		var $deferred='';
 		var $priority='';
 		var $class='';
-		var $error = false;
+		var $error;
 		
 		function SMSDecanet($DB) {
 			
@@ -15,7 +15,7 @@
 		function SmsSenderList() {
 			global $conf;
 			
-			$from = unserialize($conf->global->DECANETSMS_FROM);
+			$from = $conf->global->MAIN_MAIL_SMS_FROM;
 			return $from;
 		}
 		
@@ -40,8 +40,9 @@
 				'deferred'=>$this->deferred
 				);
 			$result = $this->sendRequest($donnees);
-			if(isset($result->error)) {
-				$this->error = $result->error;
+			if($result->code==1) {
+				$this->error = $result->details;
+				dol_syslog(get_class($this)."::SmsSend ".print_r($result->details, true), LOG_ERR);
 				return 0;
 			} else {
 				return $result->message_id;
@@ -49,9 +50,9 @@
 		}
 		
 		function sendRequest($donnees) {
-			global $conf;$conf->global->DECANETSMS_SSL = 0;
+			global $conf;
 			$url = (intval($conf->global->DECANETSMS_SSL)==1)?'https':'http';
-			$url='http://www.decanet.fr/api/sms.php';	
+			$url.='://www.decanet.fr/api/sms.php';	
 			foreach($donnees as $key=>$value) { $donnees_ctn .= $key.'='.$value.'&'; }
 			rtrim($donnees_ctn,'&');
 			$ch = curl_init();
@@ -59,6 +60,7 @@
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($ch,CURLOPT_POST,count($donnees));
 			curl_setopt($ch,CURLOPT_POSTFIELDS,$donnees_ctn);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 			$data=curl_exec($ch);
 			curl_close($ch);
 			return json_decode($data);

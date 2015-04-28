@@ -1275,3 +1275,9 @@ ADD  `nbVisiteCur` INT NOT NULL AFTER  `telemaintenanceCur`
 
 
 windows – fait chier
+
+
+
+di et fi curative
+
+//ds contrat ajouter preventive

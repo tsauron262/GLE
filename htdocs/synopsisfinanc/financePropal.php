@@ -287,7 +287,7 @@ if(isset($_POST["form2"])){
     $date_fin->add(new DateInterval('P'.$valfinance->duree.'M'));
     $date_fin=$date_fin->format('Y-m-d');
     
-    $contract->addline("Financement Propal ".$object->ref, $valfinance->loyer, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"],false), $date_fin, NULL, null, NULL, null, $valfinance->calc_no_commF());
+    $contract->addline("Financement Propal ".$object->ref, $valfinance->loyer, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"],false), $date_fin, 'HT', null, NULL, null, $valfinance->calc_no_commF());
 }
 
 if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG!=$montantAF+$VR+$pret) {

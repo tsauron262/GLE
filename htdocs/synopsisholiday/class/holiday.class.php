@@ -748,14 +748,18 @@ class Holiday extends CommonObject {
 
         $picto = 'holiday';
 
-        $label = $langs->trans("Show") . ': ' . $this->ref;
+        $label = $langs->trans("Show") . ': ' . $this->ref ;
+        
+        $userT = new User($this->db);
+        $userT->fetch($this->fk_user);
+        $userStr = " - ".$userT->getFullName($langs);
 
         if ($withpicto)
             $result.=($lien . img_object($label, $picto) . $lienfin);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         if ($withpicto != 2)
-            $result.=$lien . $this->ref . $lienfin;
+            $result.=$lien . $this->ref .$userStr. $lienfin;
         return $result;
     }
 

@@ -45,9 +45,9 @@ class modSmsDecanet extends DolibarrModules
 		$this->family = 'technic';
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		$this->description = "Envoi de SMS à vos clients";
-		$this->version = '3.6.2';
+		$this->version = '3.2.2';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
-		$this->special = 1;
+		$this->special = 0;
 		$this->picto='email';
 		$this->triggers = 0;
 		$this->dirs = array();
@@ -69,22 +69,9 @@ class modSmsDecanet extends DolibarrModules
 		$this->const[$r][4] = 0;
 		$r++;
 		
-		$this->tabs = array('thirdparty:+sendsms:SendSMS:smsdecanet@smsdecanet:$user->rights->smsdecanet->send:/smsdecanet/send.php?id=__ID__');
-		
+		$this->tabs = array('thirdparty:+sendsms:SendSMS:smsdecanet@smsdecanet:/smsdecanet/send.php?id=__ID__');
 		$this->rights = array();		// Permission array used by this module
 		$r=0;
-		$this->rights[$r][0] = 131360;
-		$this->rights[$r][1] = 'Envoyer un SMS unitaire';
-		$this->rights[$r][3] = 0;
-		$this->rights[$r][4] = 'send';
-		$r++;
-		$this->rights[$r][0] = 131361;
-		$this->rights[$r][1] = 'Envoyer un SMS en masse';
-		$this->rights[$r][3] = 0;
-		$this->rights[$r][4] = 'sendmulti';
-		$r++;
-		
-		
 		$this->menus = array();			// List of menus to add
 		$r=0;
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=tools',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
@@ -96,33 +83,20 @@ class modSmsDecanet extends DolibarrModules
 					'langs'=>'smsdecanet@smsdecanet',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>100,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'$user->rights->smsdecanet->send',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-					'target'=>'',
-					'user'=>0);				// 0=Menu for internal users,1=external users, 2=both
-		$r++;
-				$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=tools,fk_leftmenu=smsdecanet',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
-					'type'=>'left',			// This is a Left menu entry
-					'titre'=>'SMSSingleSend',
-					'mainmenu'=>'',
-					'leftmenu'=>'',
-					'url'=>'/smsdecanet/admin/smsdecanet.php?action=singlesms&mode=init',
-					'langs'=>'smsdecanet@smsdecanet',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-					'position'=>101,
-					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'$user->rights->smsdecanet->send',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'1',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);				// 0=Menu for internal users,1=external users, 2=both
 		$r++;
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=tools,fk_leftmenu=smsdecanet',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
 					'type'=>'left',			// This is a Left menu entry
-					'titre'=>'SMSMultiSend',
-					'mainmenu'=>'',
-					'leftmenu'=>'',
-					'url'=>'/smsdecanet/admin/smsdecanet.php?action=smsmulti&mode=init',
+					'titre'=>'SendOneSMS',
+					'mainmenu'=>'smsdecanet',
+					'leftmenu'=>'smsdecanet',
+					'url'=>'/smsdecanet/send.php',
 					'langs'=>'smsdecanet@smsdecanet',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-					'position'=>102,
+					'position'=>101,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'$user->rights->smsdecanet->sendmulti',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'1',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);				// 0=Menu for internal users,1=external users, 2=both
 		$r++;
@@ -145,9 +119,9 @@ class modSmsDecanet extends DolibarrModules
 	}
 	
 	function sendRequest($donnees) {
-		global $conf;
+		global $conf;$conf->global->DECANETSMS_SSL = 0;
 		$url = (intval($conf->global->DECANETSMS_SSL)==1)?'https':'http';
-		$url.='://www.decanet.fr/api/sms.php';	
+		$url='http://www.decanet.fr/api/sms.php';	
 		foreach($donnees as $key=>$value) { $donnees_ctn .= $key.'='.$value.'&'; }
 		rtrim($donnees_ctn,'&');
 		$ch = curl_init();
@@ -155,7 +129,6 @@ class modSmsDecanet extends DolibarrModules
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch,CURLOPT_POST,count($donnees));
 		curl_setopt($ch,CURLOPT_POSTFIELDS,$donnees_ctn);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		$data=curl_exec($ch);
 		curl_close($ch);
 		return json_decode($data);

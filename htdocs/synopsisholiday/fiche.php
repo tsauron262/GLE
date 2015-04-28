@@ -86,6 +86,7 @@ if ($action == 'create') {
         $valideur = GETPOST('valideur');
         $description = trim(GETPOST('description'));
         $userID = GETPOST('userID');
+        
         $is_rtt = GETPOST('is_rtt') ? true : false;
         $is_exception = GETPOST('is_exception') ? true : false;
 
@@ -108,7 +109,7 @@ if ($action == 'create') {
         }
 
         // Check if there is already holiday for this period
-        $verifCP = $cp->verifDateHolidayCP($userID, $date_debut, $date_fin, $halfday);
+        $verifCP = $cp->verifDateHolidayCP($userid, $date_debut, $date_fin, $halfday);
         if (!$verifCP) {
             header('Location: fiche.php?action=request&error=alreadyCP');
             exit;

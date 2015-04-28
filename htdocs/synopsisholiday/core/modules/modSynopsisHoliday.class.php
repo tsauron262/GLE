@@ -201,8 +201,8 @@ class modSynopsisHoliday extends DolibarrModules {
                 ) VALUES (
                 'drhUserId', '81'),(
                 'nbRTTDeducted', '1'), (
-                'cpNewYearDay', '1'), (
-                'cpNewYearMonth', '1'), (
+                'cpNewYearDay', '31'), (
+                'cpNewYearMonth', '12'), (
                 'lastAnnualUpdate', '0000'
             );");
 

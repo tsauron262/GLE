@@ -666,6 +666,9 @@ function getTypeAndId($url = null, $request = null) {
     } elseif (stripos($url, "expedition") != false) {
         $element_type = 'expedition';
         @$element_id = $request['id'];
+    } elseif (stripos($url, "synopsisholiday") != false) {
+        $element_type = 'synopsisholiday';
+        @$element_id = $request['id'];
     } else {
         return null;
     }

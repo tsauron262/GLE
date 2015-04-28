@@ -45,14 +45,11 @@ if ($_POST["action"] == 'majAccess')
 {
 	dolibarr_set_const($db, "DECANETSMS_EMAIL", $_POST["emailSMS"],'chaine',0,'',$conf->entity);
 	if($_POST['passSMS']!='')dolibarr_set_const($db, "DECANETSMS_PASS", $_POST["passSMS"],'chaine',0,'',$conf->entity);
-	dolibarr_set_const($db, "DECANETSMS_SSL", $_POST["sslSMS"],'entier',0,'',$conf->entity);
 }
 elseif ($_POST["action"] == 'majFrom')
 {
 	$from = unserialize($conf->global->DECANETSMS_FROM);
-	$frm = new stdClass();
-	$frm->number = $_POST['addSMS'];
-	$from[] = $frm;
+	$from[]->number = $_POST['addSMS'];
 	dolibarr_set_const($db, "DECANETSMS_FROM", serialize($from),'chaine',0,'',$conf->entity);
 }
 
@@ -85,7 +82,7 @@ $result = $sms->sendRequest($data);
 if(isset($result->error)) {
 	echo $result->error;
 } else {
-	echo '<strong>'.$langs->trans('CREDITSMS').'</strong>'.$result->credit.' '.$langs->trans('SMS').' - (<a href="http://www.decanet.fr/prix-sms-premium/france,FR" target="_blank"><strong>'.$langs->trans('RechargeSms').'</strong></a>)';
+	echo '<strong>'.$langs->trans('CREDITSMS').'</strong>'.$result->credit.' '.$langs->trans('SMS').' - (<a href="http://www.decanet.fr/commander/sms?lang='.$langs->defaultlang.'" target="_blank"><strong>'.$langs->trans('RechargeSms').'</strong></a>)';
 }
 echo '</td>';
 echo '</td>';
@@ -112,20 +109,41 @@ $var=!$var;
 echo "<tr ".$bc[$var].">";
 echo '<td>'.$langs->trans("passSMS").'</td>';
 echo '<td align="left"><input type="password" name="passSMS" size="50" class="flat"></td>';
-echo '<td align="right"></td>';
-echo '</tr>';
-$var=!$var;
-
-echo "<tr ".$bc[$var].">";
-echo '<td>'.$langs->trans("Cryptage SSL").'</td>';
-echo '<td align="left"><input type="checkbox" name="sslSMS" class="flat" value="1"';
-if($conf->global->DECANETSMS_SSL==1) echo ' checked';
-echo '></td>';
 echo '<td align="right"><input type="submit" class="button" value="'.$langs->trans("Modify").'"></td>';
 echo '</tr>';
 echo '</form>';
 echo '</table><br><br>';
 
+echo '<table class="noborder" width="100%">';
+echo '<tr class="liste_titre">';
+echo "  <td>".$langs->trans("ParametersAccount")."</td>\n";
+echo "  <td align=\"left\" ></td>";
+echo "  <td >&nbsp;</td></tr>";
+echo "<form method=\"post\" action=\"smsdecanet_conf.php\">";
+echo '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+echo "<input type=\"hidden\" name=\"action\" value=\"majFrom\">";
+echo "<tr ".$bc[$var].">";
+echo '<td>'.$langs->trans("addFrom").'</td>';
+echo '<td align="left"><input type="text" name="addSMS" size="50" class="flat"></td>';
+echo '<td align="right"><input type="submit" class="button" value="'.$langs->trans("Add").'"></td>';
+echo '</tr>';
+echo '</form>';
+$var=!$var;
+echo "<tr ".$bc[$var].">";
+echo '<td>'.$langs->trans('existant').'</td>';
+echo '<td align="left"></td>';
+echo '<td align="right"></td>';
+echo '</tr>';
+$from = unserialize($conf->global->DECANETSMS_FROM);
+foreach($from as $n) {
+	$var=!$var;
+	echo "<tr ".$bc[$var].">";
+	echo '<td> * '.$n->number.' - <a href="?del='.urlencode($n->number).'">'.$langs->trans("Delete").'</a></td>';
+	echo '<td align="left"></td>';
+	echo '<td align="right"></td>';
+	echo '</tr>';
+}
+echo '</table>';
 $db->close();
 
 llxFooter('$Date: 2010/03/10 15:00:00');

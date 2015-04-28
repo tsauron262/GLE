@@ -583,6 +583,12 @@ class synopsisHook {
                     $tabMenu[0] = "accountancy";
                 }
                 break;
+            case 'synopsisholiday': {
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsisholiday/class/holiday.class.php");
+                    $obj = new Holiday($db);
+                    $tabMenu[0] = "hrm";
+                }
+                break;
         }
         if (is_object($obj))
             @$obj->loadObject = false;

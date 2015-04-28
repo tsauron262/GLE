@@ -196,7 +196,7 @@ class Synopsis_Contrat extends Contrat {
                 $isMaint = true;
             if ($ligne->GMAO_Mixte['telemaintenance'])
                 $isTeleMaint = true;
-            if ($ligne->GMAO_Mixte['hotline'])
+            if ($ligne->GMAO_Mixte['hotline'] == -1 || $ligne->GMAO_Mixte['hotline'] > 0)
                 $isHotline = true;
 
             $prod = new Product($this->db);
@@ -1086,7 +1086,7 @@ class Synopsis_Contrat extends Contrat {
         echo $lien->displayForm();
         if ($ligne->GMAO_Mixte['nbVisiteAn'] <> 0) {
             echo "</td><td>";
-            echo "Nb Visite sur site : ";
+            echo "Nb Visite préventive : ";
             if ($ligne->GMAO_Mixte['nbVisiteAn'] == -1)
                 echo "illimité";
             else
@@ -1102,7 +1102,7 @@ class Synopsis_Contrat extends Contrat {
         }
         if ($ligne->GMAO_Mixte['telemaintenance'] <> 0) {
             echo "</td><td>";
-            echo "Nb Télémaintenance : ";
+            echo "Nb Télémaintenance préventive : ";
             if ($ligne->GMAO_Mixte['telemaintenance'] == -1)
                 echo "illimité";
             else

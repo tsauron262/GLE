@@ -1,0 +1,73 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 16 avr. 2015, 16:44:58
+    Author     : victor
+*/
+
+table.monnom{
+    border:1px solid black;
+    border-radius: 6px;
+    border-collapse: initial;
+    padding-bottom: 0;
+    width: auto;
+}
+
+.monnom th{
+    text-align: center;
+    //vertical-align: top;
+    border: 1px solid black;
+    color:black;
+    //padding: 5px;
+    //background-color: #6699ff;
+}
+
+.monnom td{
+    text-align: center;
+    vertical-align: auto;
+    padding: 5px;
+    color:black;
+    border: 1px solid #d3d3d3;
+    background-color: white;
+}
+
+.monnom .HG{
+    border-radius: 5px 0 0 0 ;
+}
+
+.monnom .HD{
+    border-radius: 0 5px 0 0;
+}
+
+.monnom .BG{
+    border-radius: 0 0 0 5px;
+}
+
+.monnom .BD{
+    border-radius: 0 0 5px 0;
+}
+
+.monnom .BB{
+    border-radius: 0 0 5px 5px;
+}
+
+.monnom .HH{
+    border-radius: 5px 5px 0 0 !important;
+}
+
+.monnom input{
+    width: 50%;
+}
+
+.monnom input[type="radio"]{
+    width: auto;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+.monnom select{
+    width: 60%;
+}

@@ -104,7 +104,7 @@ class Synopsisfinancement extends CommonObject {
     }
 
     function update($user) {
-        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '" WHERE rowid=' . $this->id . ';';
+        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="'.$this->contrat_id.'" WHERE rowid=' . $this->id . ';';
         //echo $req;
         if ($this->verif_integer() == true) {
 
@@ -154,6 +154,20 @@ class Synopsisfinancement extends CommonObject {
         } else {
             return 0;
         }
+    }
+    
+    function calc_no_commF(){
+        $this->emprunt2 = $this->montantAF * (100 + $this->commC);
+        
+        $this->mensualite2 = $this->emprunt2 * ($this->interet / (1 - pow((1 + $this->interet), -($this->duree))));
+
+        $this->mensualite02 = $this->pret / $this->duree;
+
+        $this->loyer2 = ($this->mensualite2 + $this->mensualite02) * $this->periode;
+
+        $this->nb_periode2 = $this->duree / $this->periode2;
+
+        return $this->prix_final2 = ($this->duree * ($this->mensualite2 + $this->mensualite02));
     }
 
 }

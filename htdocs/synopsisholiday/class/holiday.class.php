@@ -1187,7 +1187,7 @@ class Holiday extends CommonObject {
         else {
             $sql = "INSERT INTO " . MAIN_DB_PREFIX . "holiday_users";
             $sql.= " (fk_user, nb_holiday_next, nb_holiday_current, nb_rtt)";
-            $sql.= " VALUES ('" . $userid . "','0','0')";
+            $sql.= " VALUES ('" . $userid . "','0','0','0')";
 
             $resql = $this->db->query($sql);
             if (!$resql)

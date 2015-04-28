@@ -194,7 +194,7 @@ class modSynopsisHoliday extends DolibarrModules {
             "ALTER TABLE `llx_holiday` ADD `fk_actioncomm` INT( 11 ) NULL DEFAULT NULL;",
             "ALTER TABLE `llx_holiday` ADD `fk_substitute` INT( 11 ) NULL DEFAULT NULL;",
             "ALTER TABLE `llx_holiday_users` CHANGE `nb_holiday` `nb_holiday_next` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année n+1';",
-            "ALTER TABLE `llx_holiday_users` ADD `nb_holiday_current` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année en cours' AFTER `nb_holiday`;",
+            "ALTER TABLE `llx_holiday_users` ADD `nb_holiday_current` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année en cours' AFTER `nb_holiday_next`;",
             "INSERT INTO `llx_holiday_config` (
                 `name` ,
                 `value`
@@ -202,7 +202,7 @@ class modSynopsisHoliday extends DolibarrModules {
                 'drhUserId', '81'),(
                 'nbRTTDeducted', '1'), (
                 'cpNewYearDay', '1'), (
-                'cpNewYearMonth' '1'), (
+                'cpNewYearMonth', '1'), (
                 'lastAnnualUpdate', '0000'
             );");
 

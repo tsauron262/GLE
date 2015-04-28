@@ -345,13 +345,13 @@ print '</tr>' . "\n";
 $var = !$var;
 print '<tr ' . $bc[$var] . '>' . "\n";
 print '<td style="padding:5px;">' . $langs->trans('nbHolidayEveryMonthCP') . '</td>' . "\n";
-print '<td style="padding:5px;"><input class="flat" type="text" name="nbRTTEveryMonth" value="' . $cp->getConfCP('nbRTTEveryMonth') . '" size="5"/> ' . $langs->trans('DurationDays') . '</td>' . "\n";
+print '<td style="padding:5px;"><input class="flat" type="text" name="nbHolidayEveryMonth" value="' . $cp->getConfCP('nbHolidayEveryMonth') . '" size="5"/> ' . $langs->trans('DurationDays') . '</td>' . "\n";
 print '</tr>' . "\n";
 
 $var = !$var;
 print '<tr ' . $bc[$var] . '>' . "\n";
 print '<td style="padding:5px;">Nombre de jours de RTT ajoutés chaque mois</td>' . "\n";
-print '<td style="padding:5px;"><input class="flat" type="text" name="nbHolidayEveryMonth" value="' . $cp->getConfCP('nbHolidayEveryMonth') . '" size="5"/> ' . $langs->trans('DurationDays') . '</td>' . "\n";
+print '<td style="padding:5px;"><input class="flat" type="text" name="nbRTTEveryMonth" value="' . $cp->getConfCP('nbRTTEveryMonth') . '" size="5"/> ' . $langs->trans('DurationDays') . '</td>' . "\n";
 print '</tr>' . "\n";
 
 $var = !$var;

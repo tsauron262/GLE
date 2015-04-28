@@ -182,14 +182,9 @@ class ActionComm extends CommonObject
 
         $error=0;
         $now=dol_now();
-
-        // Check parameters
-        if (empty($this->userownerid))
-        {
-        	$this->errors[]='ErrorPropertyUserowneridNotDefined';
-        	return -1;
-        }
-
+        
+        /*deb mod drsi */ if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id && $user->id != $this->author->id)) $this->usertodo = $user; /*fmod drsi*/
+        
         // Clean parameters
         $this->label=dol_trunc(trim($this->label),128);
         $this->location=dol_trunc(trim($this->location),128);
@@ -271,7 +266,8 @@ class ActionComm extends CommonObject
         $sql.= "transparency,";
         $sql.= "fk_element,";
         $sql.= "elementtype,";
-        $sql.= "entity";
+        $sql.= "entity,";
+        /*mod drsi */$sql.= "ref_ext";
         $sql.= ") VALUES (";
         $sql.= "'".$this->db->idate($now)."',";
         $sql.= (strval($this->datep)!=''?"'".$this->db->idate($this->datep)."'":"null").",";
@@ -290,8 +286,10 @@ class ActionComm extends CommonObject
         $sql.= "'".$this->transparency."',";
         $sql.= (! empty($this->fk_element)?$this->fk_element:"null").",";
         $sql.= (! empty($this->elementtype)?"'".$this->elementtype."'":"null").",";
-        $sql.= $conf->entity;
+        $sql.= $conf->entity.",";
+        /*mod drsi */$sql.= "'".(isset($this->ref_ext)? $this->ref_ext : "")."'";
         $sql.= ")";
+        
 
         dol_syslog(get_class($this)."::add", LOG_DEBUG);
         $resql=$this->db->query($sql);
@@ -593,6 +591,10 @@ class ActionComm extends CommonObject
         global $langs,$conf,$hookmanager;
 
         $error=0;
+        
+        if(!isset($user->rights->agenda->myactions->create))
+            $user->getrights();
+        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
 
         // Clean parameters
         $this->label=trim($this->label);
@@ -605,7 +607,7 @@ class ActionComm extends CommonObject
         //if ($this->percentage == 100 && ! $this->dateend) $this->dateend = $this->date;
         if ($this->datep && $this->datef)   $this->durationp=($this->datef - $this->datep);		// deprecated
         //if ($this->date  && $this->dateend) $this->durationa=($this->dateend - $this->date);
-        if ($this->datep && $this->datef && $this->datep > $this->datef) $this->datef=$this->datep;
+        if ($this->datep && $this->datef && $this->datep > $this->datef) $this->datef=$this->datep+3600;
         //if ($this->date  && $this->dateend && $this->date > $this->dateend) $this->dateend=$this->date;
         if ($this->fk_project < 0) $this->fk_project = 0;
 
@@ -625,7 +627,7 @@ class ActionComm extends CommonObject
 
         $sql = "UPDATE ".MAIN_DB_PREFIX."actioncomm ";
         $sql.= " SET percent = '".$this->percentage."'";
-        if ($this->fk_action > 0) $sql.= ", fk_action = '".$this->fk_action."'";
+        if (isset($this->fk_action) && $this->fk_action > 0) $sql.= ", fk_action = '".$this->fk_action."'";
         $sql.= ", label = ".($this->label ? "'".$this->db->escape($this->label)."'":"null");
         $sql.= ", datep = ".(strval($this->datep)!='' ? "'".$this->db->idate($this->datep)."'" : 'null');
         $sql.= ", datep2 = ".(strval($this->datef)!='' ? "'".$this->db->idate($this->datef)."'" : 'null');
@@ -889,7 +891,7 @@ class ActionComm extends CommonObject
     function LibStatut($percent,$mode,$hidenastatus=0)
     {
         global $langs;
-
+/*mod drsi*/if ($percent==-2 ) return $langs->trans('Canceled');/*fmod drsi*/
         if ($mode == 0)
         {
         	if ($percent==-1 && ! $hidenastatus) return $langs->trans('StatusNotApplicable');
@@ -1119,6 +1121,9 @@ class ActionComm extends CommonObject
                     $dateend=$this->db->jdate($obj->datep2)-(empty($conf->global->AGENDA_EXPORT_FIX_TZ)?0:($conf->global->AGENDA_EXPORT_FIX_TZ*3600));
                     $duration=($datestart && $dateend)?($dateend - $datestart):0;
                     $event['summary']=$obj->label.($obj->socname?" (".$obj->socname.")":"");
+                    //Mod drsi pour lien ds agenda externe
+                    $obj->note = htmlToAgenda($obj->note);
+                    //fin mod rdsi
                     $event['desc']=$obj->note;
                     $event['startdate']=$datestart;
                     $event['enddate']=$dateend;		// Not required with type 'journal'

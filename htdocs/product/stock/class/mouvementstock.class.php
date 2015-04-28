@@ -75,6 +75,10 @@ class MouvementStock extends CommonObject
 
 		if (empty($fk_product)) return 0;
 
+		if (empty($fk_product)) return 0;
+
+		if (empty($fk_product)) return 0;
+		
 		$now=(! empty($datem) ? $datem : dol_now());
 
 		$this->db->begin();

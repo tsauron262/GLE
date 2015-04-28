@@ -1,0 +1,32 @@
+#tabs
+{
+    border-bottom: solid 1px #676767;
+    text-align: left;
+}
+
+.tabContainer
+{
+    padding:0;
+    margin:0;
+    position:relative;
+    z-index: 1;
+    float:left;
+    list-style:none;
+    text-align: left;
+}
+
+.tabContainer li
+{
+    float:left;
+    margin:0;
+    cursor: pointer;
+    background: f1f1f1;
+    border-top: solid 1px #676767;
+    border-left: solid 1px #676767;
+    border-right: solid 1px #ababab;
+}
+
+#tabContainer .selected, #tabContainer .selected:hover
+{
+    background: #fff;
+}

@@ -26,6 +26,11 @@
  */
 
 require '../main.inc.php';
+
+/* mod drsi  */
+if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER))
+    header("Location: ".str_replace("fichinter/list", "synopsisfichinter/list", $_SERVER['REQUEST_URI']));
+/* fmod drsi */ 
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fichinter/class/fichinter.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';

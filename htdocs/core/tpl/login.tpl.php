@@ -90,9 +90,7 @@ $(document).ready(function () {
 <!-- Password -->
 <tr><td valign="middle" class="loginfield nowrap"><strong><label for="password"><?php echo $langs->trans('Password'); ?></label></strong></td>
 <td valign="middle" class="nowrap">
-<span class="span-icon-password">
-<input id="password" name="password" class="flat input-icon-password" type="password" size="15" maxlength="30" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="off" />
-</span>
+<input id="password" name="password" class="flat" type="password" size="15" maxlength="30" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="<?php echo (defined('PORT_INTERNE') && $_SERVER["SERVER_PORT"] != PORT_INTERNE)? "off" : "on"; ?>" />
 </td></tr>
 <?php
 if (! empty($hookmanager->resArray['options'])) {

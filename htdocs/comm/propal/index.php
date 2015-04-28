@@ -343,6 +343,12 @@ if (! empty($conf->propal->enabled) && $user->rights->propale->lire)
 				print '</td></tr></table>';
 
 				print "</td>";
+				
+				$companystatic->id=$obj->socid;
+				$companystatic->name=$obj->socname;
+				$companystatic->client=$obj->client;
+				$companystatic->canvas=$obj->canvas;
+				print '<td align="left">'.$companystatic->getNomUrl(1,'customer',44).'</td>'."\n";
 
 				$companystatic->id=$obj->socid;
 				$companystatic->name=$obj->socname;

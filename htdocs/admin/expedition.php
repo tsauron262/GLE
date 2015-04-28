@@ -42,9 +42,6 @@ if (! $user->admin)
 
 $action=GETPOST('action','alpha');
 $value=GETPOST('value','alpha');
-$label = GETPOST('label','alpha');
-$scandir = GETPOST('scandir','alpha');
-$type='shipping';
 
 if (empty($conf->global->EXPEDITION_ADDON_NUMBER))
 {

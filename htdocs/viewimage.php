@@ -55,7 +55,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 $action=GETPOST('action','alpha');
 $original_file=GETPOST("file");
+$original_file = str_replace("capsim_mini.png", "capsim_mini.gif", $original_file);
+$original_file = str_replace("capsim_small.png", "capsim_small.gif", $original_file);
 $modulepart=GETPOST('modulepart','alpha');
+//die($modulepart."|");
 $urlsource=GETPOST("urlsource");
 $entity=GETPOST('entity')?GETPOST('entity','int'):$conf->entity;
 

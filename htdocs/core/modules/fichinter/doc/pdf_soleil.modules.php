@@ -104,7 +104,7 @@ class pdf_soleil extends ModelePDFFicheinter
 	 *  @param		int				$hideref			Do not show ref
 	 *  @return		int									1=OK, 0=KO
 	 */
-	function write_file($object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0)
+	function write_file($object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0,$hookmanager=false)
 	{
 		global $user,$langs,$conf,$mysoc,$db,$hookmanager;
 
@@ -197,7 +197,7 @@ class pdf_soleil extends ModelePDFFicheinter
 				$pdf->AddPage();
 				if (! empty($tplidx)) $pdf->useTemplate($tplidx);
 				$pagenb++;
-				$this->_pagehead($pdf, $object, 1, $outputlangs);
+				$this->_pagehead($pdf, $object, 1, $outputlangs, $hookmanager);
 				$pdf->SetFont('','', $default_font_size - 1);
 				$pdf->SetTextColor(0,0,0);
 
@@ -592,11 +592,10 @@ class pdf_soleil extends ModelePDFFicheinter
 			$pdf->SetTextColor(0,0,60);
 			$pdf->SetFont('','B',$default_font_size);
 			$pdf->MultiCell(80, 3, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
-			$posy=$pdf->getY();
 
 			// Show sender information
 			$pdf->SetFont('','', $default_font_size - 1);
-			$pdf->SetXY($posx+2,$posy);
+			$pdf->SetXY($posx+2,$posy+8);
 			$pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
 

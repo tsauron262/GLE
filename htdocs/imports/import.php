@@ -32,6 +32,9 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/import.lib.php';
 
+set_time_limit(150);
+ini_set("memory_limit","1200M");
+
 $langs->load("exports");
 $langs->load("compta");
 $langs->load("errors");
@@ -1329,6 +1332,8 @@ if ($step == 5 && $datatoimport)
                 	continue;
                 }
                 if ($excludefirstline && $sourcelinenb == 1) continue;
+                if ($excludefirstline >= 2 && $sourcelinenb == 2) continue;
+                if ($excludefirstline == 3 && $sourcelinenb == 3) continue;
 
                 //
                 $result=$obj->import_insert($arrayrecord,$array_match_file_to_database,$objimport,count($fieldssource),$importid);

@@ -1,0 +1,19 @@
+# Dolibarr language file - fr_FR - 
+CHARSET=UTF-8
+Module51487Name=SMS Decanet
+Module51487Desc=Envoi de SMS à vos clients
+DecanetSMSSetup=Configuration du module SMS Decanet
+ParametersAccount=Paramètres de votre compte Decanet.fr
+emailSMS=Adresse email
+passSMS=Mot de passe
+DiagnosticSMS=Diagnostic de votre compte SMS
+CREDITSMS=Crédit restant : 
+SMS=Sms
+RechargeSms=Cliquez ici pour recharger votre compte
+addFrom=Nouvel expéditeur :
+existant=Expéditeurs existants :
+errorRecipient=Numéro destinataire incorrect
+SendSMS=Envoyer un SMS
+yourMessage=Votre message
+SendOneSMS=Envoyer un SMS
+SendAllSMS=Envoyer un SMS à tous les tiers

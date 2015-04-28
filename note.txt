@@ -1,0 +1,1283 @@
+Synopsis_Tools/mailRequest.php?action=fusionCli&id="AVIDER"&id2=
+
+
+
+
+
+
+
+
+
+
+
+
+Contrat en tete + ligne plus
+
+connect precedent
+
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinter` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_soc` AS `fk_soc`,`f`.`fk_projet` AS `fk_projet`,`f`.`fk_contrat` AS `fk_contrat`,`sf`.`fk_commande` AS `fk_commande`,`f`.`ref` AS `ref`,`f`.`tms` AS `tms`,`f`.`datec` AS `datec`,`f`.`date_valid` AS `date_valid`,`f`.`datei` AS `datei`,`f`.`fk_user_author` AS `fk_user_author`,`f`.`fk_user_valid` AS `fk_user_valid`,`f`.`fk_statut` AS `fk_statut`,`f`.`duree` AS `duree`,`f`.`description` AS `description`,`f`.`note_private` AS `note_private`,`f`.`note_public` AS `note_public`,`f`.`model_pdf` AS `model_pdf`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`natureInter` AS `natureInter`,`f`.`entity` AS `entity` from (`llx_fichinter` `f` left join `llx_synopsisfichinter` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la vue `llx_Synopsis_fichinterdet`
+--
+DROP TABLE IF EXISTS `llx_Synopsis_fichinterdet`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinterdet` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_fichinter` AS `fk_fichinter`,`f`.`date` AS `date`,`f`.`description` AS `description`,`f`.`duree` AS `duree`,`f`.`rang` AS `rang`,`sf`.`fk_typeinterv` AS `fk_typeinterv`,`sf`.`fk_depProduct` AS `fk_depProduct`,`sf`.`tx_tva` AS `tx_tva`,`sf`.`pu_ht` AS `pu_ht`,`sf`.`qte` AS `qte`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`fk_contratdet` AS `fk_contratdet`,`sf`.`fk_commandedet` AS `fk_commandedet`,`sf`.`isForfait` AS `isForfait` from (`llx_fichinterdet` `f` left join `llx_synopsisfichinterdet` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+
+
+
+
+
+
+
+
+SECU :
+
+Extérieur redirection de port.
+
+- Apple ship to crypter
+
+//Delaie 15min
+
+//Activer captcha si distant + pas de stock mdp
+
+Vous étes responsable de votre mdp et de l'utilisation que vous en faite.
+
+SAV :
+
+- Piéce recu envoie message 
+
+- Lien rapide en haut de SAV TOUS
+
+DX6L7180DPMW : Garantie limitée Apple voir date
+
+Materiel jint case + autre
+
+- Description plus haut aprés etat machine
+
+Tous les cadre plus petit
+
+Tous sur un ecran 20pouce 1680*1050
+
+Préférence de contact pour le devis=> envoie devis
+
+- => envoie Mise a dispo
+
+-neuf -trés bon etat -usager
+
+- Description ajouter   "Rayure", "Écran cassé", "Liquide"
+
+Voir temps affichage liste
+
+Envoyer devis
+
+Attenteclient = attente info client
+
+
+S/N ou IMEI => 013711001134904
+
+- Recuperer Warning DQGLK7FWDTWG
+
+vérif si accident fonctionne => Déclaration 
+
+simptomes reste symptomes
+
+ajouter symtomes et résolution
+
+
+- Dans lien chrono chrono cacher ref
+
+Technicien = si vide user courant.
+
+technicien = hardware et sophtwer
+
+dans fiche rapide liste des tech mais pas remplir
+
+- dans date / h date de création
+
+
+
+
+AGENDA
+
+VOIR RDV VENDREDI
+
+bug ligne
+
+- par default heures ouvrées 8h 19h
+
+- afficher deb rdv a 9h
+
+voir gestion des taches
+
+- État / Pourcentage = État
+
+- A réaliser = A confirmer
+
+- Discription dans agenda plus trunc
+
+- dans di ajouter horraire est prendre en compte pour event
+
+ajouter liste des action pour lier + pour intervenant + date de la DI
+
++ créer evenement si existe pas que a la valid de la di
+
+//dans liste des nom classer par nom et par collones et afficher par nom prenom
+
+//dans liste dans evenement classer par nom
+
+//"Classement alphabetique horizontale"
+
+Dans evenement annulé "attention ceci va annulé les rdv des autres participants"
+
+Onglet Congés  + rtt (avec text imposé) + congés exceptionelle
+
+Ds agenda marquer absent pour tous les congés
+
+Fichier joint ds agenda.
+
+Proposiotion commerciale en devis
+
+- Atten client => envoie devis + trigger envoie
+
+//Charger le formulaire => valider
+
+- Change etat = ouverture message sms
+
+- Quand "Réparation en cours" bouton "A dispo"
+- aprés "Réparation fermée"
+
+//classer delivrer tous av 2014
+
+bug type urgence
+
+widget info
+
+//dans fiche normal de fi menu nature
+
+//Intervention "Pensser a ajouter une ligne en cas de déplacement."
+
+//fiche rapide verif heure arrivé depart
+
+//changer client FI, DI
+
+ds support ajouter contrat
+
+ds client ajouter onglet Etablissement
+
+
+
+- Ds commande apple saut de ligne
+
+- Ajouter etat attente piece voir importation du num
+
+- prise en charge de 45
+
+
+
+
+
+- dans new client   :
+// si individu privé : cacher tva...
+
+
+FLO
+
+enregistrer panier auto 
+voir importation 
+INSERT INTO `llx_synopsis_apple_repair` (`chronoId`, `repairNumber`, `repairConfirmNumber`, `serialUpdateConfirmNumber`, `closed`) VALUES ("2688", NULL, "G170866413", NULL, "0")
+Impossible de mettre à jour les données de la réparation (ID absent)
+
+La requête a été correctement transmise mais les données de retour n'ont pas pu être enregistrées correctement en base de données.
+Veuillez noter le numéro suivant (repair confirmation number) et le transmettre à l'équipe technique: G170866413
+
+ZZ501AAA0WP
+
+Famille => Famillematérielle
+
+Nature => Categorie SAV
+
+Categorie => famille prestation
+
+Libre3 => produit réservé
+
+
+
+
+
+- Doubler boutons Créer Réparation    
+
+- Voir date prise en charge date création chrono.
+
+- Inverser diago + 
+
+
+- Aligner les oui non
+
+- Requéte maj num série dérouler 
+
+- Aligner oui non raprocher checkbox et texte
+
+- Prôbléme de retour
+
+- Bug fichier joint
+
+
+
+
+DROP TABLE IF EXISTS `llx_synopsischrono_key_value_view`;
+DROP view IF EXISTS `llx_synopsischrono_key_value_view`;
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_synopsischrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_societe` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`llx_synopsischrono` `c` left join (`llx_synopsischrono_key` `k` left join `llx_synopsischrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)));
+
+
+
+
+DROP TABLE IF EXISTS `llx_projet`;
+DROP view IF EXISTS `llx_projet`;
+
+
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_projet` AS (select `llx_Synopsis_projet`.`rowid` AS `rowid`,`llx_Synopsis_projet`.`fk_soc` AS `fk_soc`,`llx_Synopsis_projet`.`date_create` AS `datec`,`llx_Synopsis_projet`.`tms` AS `tms`,`llx_Synopsis_projet`.`dateo` AS `dateo`,`llx_Synopsis_projet`.`date_cloture` AS `datee`,`llx_Synopsis_projet`.`ref` AS `ref`,`llx_Synopsis_projet`.`entity` AS `entity`,`llx_Synopsis_projet`.`title` AS `title`,`llx_Synopsis_projet`.`note` AS `description`,`llx_Synopsis_projet`.`fk_user_creat` AS `fk_user_creat`,_utf8'' AS `public`,`llx_Synopsis_projet`.`fk_statut` AS `fk_statut`,_utf8'' AS `note_private`,_utf8'' AS `note_public`,_utf8'' AS `model_pdf` from `llx_Synopsis_projet`);
+
+
+DROP TABLE IF EXISTS `llx_Synopsis_fichinter`;
+DROP view IF EXISTS `llx_Synopsis_fichinter`;
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinter` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_soc` AS `fk_soc`,`f`.`fk_projet` AS `fk_projet`,`f`.`fk_contrat` AS `fk_contrat`,`sf`.`fk_commande` AS `fk_commande`,`f`.`ref` AS `ref`,`f`.`tms` AS `tms`,`f`.`datec` AS `datec`,`f`.`date_valid` AS `date_valid`,`f`.`datei` AS `datei`,`f`.`fk_user_author` AS `fk_user_author`,`f`.`fk_user_valid` AS `fk_user_valid`,`f`.`fk_statut` AS `fk_statut`,`f`.`duree` AS `duree`,`f`.`description` AS `description`,`f`.`note_private` AS `note_private`,`f`.`note_public` AS `note_public`,`f`.`model_pdf` AS `model_pdf`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`natureInter` AS `natureInter`,`f`.`entity` AS `entity` from (`llx_fichinter` `f` left join `llx_synopsisfichinter` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+
+DROP TABLE IF EXISTS `llx_Synopsis_fichinterdet`;
+DROP view IF EXISTS `llx_Synopsis_fichinterdet`;
+
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinterdet` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_fichinter` AS `fk_fichinter`,`f`.`date` AS `date`,`f`.`description` AS `description`,`f`.`duree` AS `duree`,`f`.`rang` AS `rang`,`sf`.`fk_typeinterv` AS `fk_typeinterv`,`sf`.`fk_depProduct` AS `fk_depProduct`,`sf`.`tx_tva` AS `tx_tva`,`sf`.`pu_ht` AS `pu_ht`,`sf`.`qte` AS `qte`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`fk_contratdet` AS `fk_contratdet`,`sf`.`fk_commandedet` AS `fk_commandedet`,`sf`.`isForfait` AS `isForfait` from (`llx_fichinterdet` `f` left join `llx_synopsisfichinterdet` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+
+
+
+//Voir pdf date fin garentie
+
+
+//Voir prix 
+
+
+//Restituer bug page blanche
+
+
+//envoyer sms oui non
+
+//ds sms numero du centre
+
+
+
+
+//sms quand terminer (rediger) 
+
+
+//preference de contact tous court.
+
+//Test apple (garentie apple)
+
+//creer sav (fiche rapide)
+
+//virer creer sav
+
+
+//pdf type de garentie (hors garentie)
+
+
+//Garentie
+
+
+//Devis ajouter text
+
+
+//ajouter champ gsx
+
+//fin garentie et date debut
+
+
+
+//deplacer client au debut
+
+
+//virer nbDoc
+
+
+//Prise en charge sous garentie - total
+
+
+//Ajouter symptomes a la propal
+
+
+
+//Jean christophe ajouter text propal
+
+
+
+//Boutons restituer dans la liste
+
+//Ajouter SAVM ds pdf*
+
+//Valence et boutique
+
+//voir chambery   B
+
+
+RFD   Remboursement ou Remplacement
+RPL   Remboursement ou Remplacement.
+
+
+devis
+
+//dans pc ajouter tel et mail
+
+0381471171
+
+
+//dans chrono ajouter note
+
+
+
+
+//dans numero client ajouter centre
+
+
+//non de soc contact adresse
+
+
+//ECHANGE = 0 PRIX D'ACHAT
+
+
+//DS SAV BOUTON HORS GARENTIE 
+
+//majuscule sn nom client prenom premier lettre
+
+
+//quand ajout ligne apple ajouter service 
+
+
+
+//mail et tel ds propal
+
+
+//tous les centres que ceux
+
+//devis ss garentie 
+//commande piece
+
+/si req ou 0€  ou verifier par apple click envoyer devis
+
+
+//mail cc centre
+
+
+
+
+
+//voir pour confirmation hors garentie
+
+
+//ajouter résolution
+
+
+//voir deco + fiche rapide new client
+
+
+//tableau  virer     centre  ajouter symptomes et deplacer résolution
+
+
+
+Christian voir mail
+
+
+dominique horno 0695035348
+
+
+
+
+AJ TEXT NOTE avec date
+
+a coté du client modifier
+
+
+boutons entrer pas valider dans soc
+
+
+KBB VIDE = NIM SERIE SAV
+
+prix d'achat import
+
+
+
+escla 3003854
+
+
+
+
+requete create mailin 
+
+
+si loi europeen refusé => ajouter certif loie uro + facture choix garentie n/c + verifier par apple
+
+
+
+
+
+quand devis accepté reparation en cours
+
+
+voir devis accepté et pas devis
+
+
+
+voir prod accompte
+
+
+// acompte ht a 20     taper en ttc
+
+
+//voir pour payer 30 jours
+
+
+
+//voir devis refusé
+
+
+//numero foire 
+//G172827814
+
+
+//dans liste prod chrono allonger texte
+
+
+//annecy
+
+
+date reception = haujourd'hui
+
+//devis refusé
+
+
+//cocher virifier par apple = 0€
+
+
+
+//ajout prod entrer bug
+
+//voir géneration avant envoie
+
+
+ajouter les id
+
+
+
+
+//ds facture ajouter signature Récupérer le
+
+
+
+//prix de reivens dans chrono
+
+
+//vvoir regelemnt quand deja regler
+//si pas de mode de reglement pas de reglemnt.
+
+
+voir cadre pdf et chéque
+
+prix de reviens dans 8sens
+
+
+
+Réparation marquée comme complète
+
+
+//Attente signature devis => Attente client
+//aligner 
+
+
+//changement => reparation en cours
+
+
+//nouveau envoyer devis
+
+
+voir fermeture repa
+
+
+
+
+req verif : 
+select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture')
+
+
+
+
+
+
+voir di avec thera 
+
+virer horraire sur fi
+
+voir check if not garentie
+
+
+
+
+
+synopsis-erp.com
+
+gle.synopsis-erp.com
+
+
+
+CSR -  demande de certificat   apache2
+
+
+
+
+annulation dela premiere facture qquand revision
+
+
+
+Ligne qty a 0 quand devis refusé
+
+
+jonatan beloutchi thawte verisign soo mandrile
+
+
+//cacher composant + verifier cog
+
+
+
+//reenvoyer devis
+
+
+
+//Num de tel et mail pro.
+
+
+//Facture quand valider payer
+
+
+//Facture aprés révision
+
+
+//Vérifier facture negative. Accompte sous garentie.
+
+//montant ttc
+
+
+
+voir list utilisateur du même centre
+
+//Attribué a -  participant
+
+//agenda collones trie par prenom
+
+
+//voir contrat -1 visite + bug affichage
+
+
+//voir mode de reglement mail flo
+
+
+
+//dans garantie apple majuscules
+
+
+
+//quand modifier auto mois
+
+note modif aj utilsateeur
+
+
+prise en charge imediate.   Ecrire rouge + 96€   + prise en charge
+
+//+verifier par apple
+//iphone z52 b 
+//diago copié deux fois
+
+
+//DN661-6906
+
+//date commande date commande
+
+
+voir quand particulier pas double nom pdf + pc +voir sur devis facture
+
+
+dans devis type de machine.
+
+
+pas propal revisé
+
+
+//voir toute les factures posant prôbléme
+
+
+
+//voir synchro des mail
+
+
+//voir code postal pour ville
+
+
+
+dans prepacommande  les contrat  trie des nom  .
+
+
+
+
+fi horraire pourrie.  mail
+
+
+
+//ne pas repporter horraire sur fi
+
+
+//update `llx_societe` set nom = replace(nom, "-BI", "") WHERE 1
+//ssh port 1022
+
+
+
+//ds tier num de tel et mail, 
+
+
+//ds fiche rapide annuler "touche rapide"
+
+
+
+cheque pas sur propal et que si c'est chec
+
+
+(PROV932) en normal
+
+
+
+stat
+
+
+
+le devis n'a pas pue étre créer
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------SAV-TCU 80€    Hors garantie.
+
+
+ref 
+
+
+
+//fichier exel
+
+
+
+
+Voir réglement a 30 jours      empécher quand   montant est pas de mode de paiement.
+
+
+script payer facture a 0
+
+voir mail - suppr chéque ....
+
+Boutons régénérer les documents.
+
+Dans propal du chrono ajouter ttc
+
+
+Reste a payer que si != 0
+
+//quand verifier âr apple pas de verif
+
+
+
+
+
+dans action modifier suppr vboton modifier
+
+
+a confirmé    clignoter rdv
+
+
+Di choix du type
+
+
+//Commande quand terminer 
+
+//mail pc   "Si vous souhaiter comuniquer d'autre informations merci de repondre ce mail ou de contacter le " + tel
+
+
+//mail finit    "Ephesus
+
+
+//mail objet piece pice
+
+
+//cloturer toute inter a 0
+
+//marge 0 quand ---
+
+stat moteur de recherche de date, date pc pour nb et Ca sur facture
+menu deroulant date fact dat pc
+//nb pc pas facturer
+
+
+Raprochement filtre centre, collones sav
+
+
+
+//Filtre par centre par date de pc
+//num sav - centre - montant propal - statut fa -date - marge
+
+//TOTAUX nb - total
+
+
+
+
+veerouiller double envoie des pc
+
+modifier chrono   -    desactiver boutons
+
+
+
+//repasser dans commande plusieurs foix
+
+
+//facture  dans chrono ajouter ttc
+
+
+
+//recherche gsx l'un ou l'autre
+//click pour ouvrir filtrer par catégories 
+
+//domingo   lister date depasser logistique 
+
+
+//ajouter acompte   
+//ajouter marge
+//date fa
+
+
+//compte captcha
+
+
+
+
+10 €   pas quand unité entiére
+
+canal+ ou canal sat 
+service reiliation
+TSA 95905 Sergie pontoise
+Cedex 9
+
+31 janvier 2015
+
+
+
+
+
+envoie mail facture, devis, mise a dispo
+
+maj kbb iphone imei
+
+\'
+
+
+filtre des nom 
+garder les nomp cocher cookie
+
+
+Voir pour visite  (ajouter nb visite en plus)
+Sur facture est devis garantie .... en bas.
+Ne pas transfert de facture a 0 mais client
+
+Supprimer en cumulant avec code client
+
+
+gle.   ftp.bimp.fr
+Dossier GLE_8sens dans 38sensGle
+
+ip siege 178.23.154.59
+49  -  69
+
+
+hotline transfert a choix d'utilisateur envoie mail
+
+C8 en rouge
+
+
+voir crono vide 
+
+
+dans ho
+
+
+
+possibilité d'invité des participant. sous forme d'ics
+
+
+desactiver projet
+
+liste des type dans di
+dans di ajouter liste type
+- interv garantie
+- install
+- atelier
+- visite contrat
+- telemaint
+- avant vente
+
+
+Dans l'action trie par prenom
+dans liste agenda prenom
+
+
+
+
+
+
+agenda pas de date fin  dureee 1h
+14 2014
+
+dans agenda new date deb et fin dans safari
+
+recurence
+
+
+ajouter participant plus vite.
+
+
+dans agenda a conf voir visuelle
+
+sauvegarde config de l'agenda date + nbJours
+
+ne pas repercuté les horraire sur FI
+
+supprimmer di supprimerer rdv
+
+voir supprimé
+
+
+Document indicable style annexe + fichier joint   + specimen
+
+
+
+agenda date datepicker
+
+
+dans supprimer agenda "Attention en continouant vous allez suprimé le rdv pour tous les participant."
+
+
+voir suppr agenda message siparticipant
+
+
+stat 60 €
+
+
+fiche utilisateur : horraire + numéro cour fixe + portable + listeSite + dteEntree dateSortie
+
+
+cacher type
+
+
+demde congé agenda + remplacer par tech + mail + agenda remplacent
+
+
+
+
+grh pas decompté évenement familiaux
+prevoir zone de text.
+
+
+mail compte fermer
+
+
+//voi r login mdp 
+
+voir photo pc
+
+//mofiifer boutons actif derriere ancienne page
+
+
+etiquette voir new page
+
+
+
+
+VOIR SSL
+
+quand prix +45 pas de fr de port
+voir garantie pa
+
+tech ds mail
+
+adresse retour a la ligne  dans modifier et dans   pdf   PC   retour a la ligne 
+
+
+dans bas de PR imac S/N : ...
+
+
+devis refusé accompte passe produit
+
+
+
+diago ds note du tech
+
+
+mail au debut
++ changer
+
+
+virer diago quand revision
+
+
+
+
+voir commpte_v est caisse_v
+
+
+//exdport des factures.
+
+
+//ajouter initial du tech
+//102252
+//80.63
+//ay526be
+
+
+
+
+
+
+
+
+
+UPDATE `llx_facturedet` SET `buy_price_ht` = 30 WHERE `fk_product` = 3325
+
+013346009165368
+
+
+voir impression quand lon symptomes http://gle.bimp.fr/bimp/synopsischrono/fiche.php?action=cancel&id=9308 
++ nom colient en maj
+
+create whoml
+
+04
+
+//marge et par centree
+
+
+
+deplacement => deplacement sous contrat
+
+ajout a conf conf ou annulé
+
+
+voir nb inter max par ligne 
+
+
+
+
+
+
+CAISSE BAHADOURIAN
+
+
+
+UPDATE `llx_societe` SET datec = now() WHERE  `datec` < '2010-12-01 00:00:00' || datec is null
+
+
+virer en cours non applicable => confirmé
+
+
+drapeau dans recherche.
+
+
+nb chrono quand reviser
+
+
+quand commande dpiece envoyer devis
+
+quand terminer envoyer devis
+
+//en dessous de loginmdp ajouter sav
+
+//dans vendu prorata du réalisé total.
+
+//da&ns stat aj fk_commande fk_contrat
+
+//piece apple (trunc 2 chiffres)
+
+voir stat marge par user
+
+
+voir quand pas de mail client
+
+
+
+voir raprocher ajouter dans selection tech prepacoimmande
+
+
+
+voir clonner DI 
+
+voir pour les info DI voir pour les info ligne
+
+
+dans chrono chiffres du mois + chiffres du moi precedent
+
+
+arrondit prepacommande
+
+
+- dans stat voir ajouter appel hotline
+
+
+
+hotline ajout tu tech referent. du contrat  +  ligne lier au produit
+
+
+dans prise en charge afficher numero de contrat dans pdf aussi
+
+//voir calendrier di sans produit client
+
+// voir product / ref
+
+
+
+
+//Contact contrat ordre
+
+Voir liste contrat par commerciale
+
+
+Voir gestion facturatin trimestrielle (
+
+
+Activation de contrat classer delivrer les commande
+
+//Dans fiche client ne voir que les contrat actifs
+
+//Contrat code client a la ligne changer ref en ref contrat
+//+virer contenue de contrat garder resumer des service
+
+//transmie a  tous les groupes 
+
+//dans mail aj nom du client
+
+//bug dans contrat doc espace
+
+dans appel voir igne contrat lier au prod tous si pas de prod
+
+//auto extact gle
+
+voir rappel des periode de facturation
+
+//dans prepacommande technicien voir que les tech 
+
+roue dans process valider
+
+//dans di auto orange visite contrat
+
+//dans agenda changer date meme si valider
+
+si suppr di annuler rdv
+
+//dans new fi que les comm non delivrer
+
+voir doublons
+
+
+//voir apple addtopropal arrondie
+
+facture 
+
+
+new site soc
+
+
+hotline tech referent
+
+
+ac1411-119   1411-120
+
+
+0214 AC1502-0162   -0229
+
+
+pdf contrat trie des di   +    affichage di tech
+
+
+liaison propal facture bug + avoir lier tous seul
+
+nom prenom dans client
+
+
+
+CAS
+
+
+
+quand prepacommande tech ajouter au contrat
+
+
+
+contact fusionner vider.
+
+
+8081
+0878
+luc chate
+luc@resaunance
+
+
+
+
+thierry SARDA
+Site marchand prestashop
+
+hebergeur lws
+modules
+paypal pro
+facebook
+gestion du reglement de financement
+thierry.SARDA@gmail.com
+p8bikes.fr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+mail rdv pour user specifique
+
+
+
+VOIR RECHERCHE DE PROD DANS SUPPORT PAR SN SAV
+
+
+Voir pour message inter negative
+
+
+
+Prise en charge afficher geolocalise
+
+
+//Stat par centre pour tech
+
+//export centre sur chaque ligne
+
+
+//nom de soc quand contact pas affiché
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cietra  tetravine
+gestion himo
+hotline
+petit client gerance de biens
+ERP dev en VISION
+300 client 
+FONCIA
+
+
+http://localhost/gle_dev/synopsiscaldav/html/cal.php/calendars/admin/admin
+
+https://gle.synopsis-erp.com/bimp/synopsiscaldav/html/cal.php/calendars/admin/admin
+
+
+uid pour android diferent du ...
+
+13.85 +0.5+ 3.85 + 15.358
+
+
+
+pas de refacturer dans sav deja facturé
+
+pdf iphone
+
+voir afficher ttc facture
+voir accompte => accompte prise en charge
+
+
+
+//URGENT : stat pas de sav "n/c"
+
+
+voir doublons precedent dans ficherapide
+
+garantie dans propal puht * qte pas tot_ht
+
+
+
+//contact Nom - Prenom si deiferent de Societe.
+
+
+voir pour controle des rdv deja prie
+
+
+
+stat des tech aj facture
+
+
+//adresse dans pc
+
+voir reunion interne
+
+
+
+
+
+
+
+INSERT INTO `llx_extrafields` (`rowid`, `name`, `entity`, `elementtype`, `tms`, `label`, `type`, `size`, `fieldunique`, `fieldrequired`, `pos`, `param`) VALUES
+(38, '2visiteCur', 1, 'product', '2015-04-23 09:22:22', 'Visite Curative', 'int', '10', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:0:"";N;}}'),
+(39, '2teleMaintenanceCur', 1, 'product', '2015-04-23 09:32:04', 'Télémaintenance Curative', 'int', '10', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:0:"";N;}}');
+
+ALTER table `llx_product_extrafields` ADD 
+  `2teleMaintenanceCur` int(10) DEFAULT NULL,  ADD 
+  `2visiteCur` int(10) DEFAULT NULL;
+
+
+ALTER TABLE  `llx_Synopsis_contratdet_GMAO` ADD  `telemaintenanceCur` INT NOT NULL AFTER  `maintenance` ,
+ADD  `nbVisiteCur` INT NOT NULL AFTER  `telemaintenanceCur`
+
+
+windows – fait chier
+
+
+
+di et fi curative
+
+//ds contrat ajouter preventive

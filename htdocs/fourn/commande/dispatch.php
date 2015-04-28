@@ -435,6 +435,10 @@ if ($id > 0 || ! empty($ref))
 
 			print '</form>';
 		}
+		
+		dol_fiche_end();
+
+		dol_fiche_end();
 
 		dol_fiche_end();
 

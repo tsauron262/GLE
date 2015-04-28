@@ -1,0 +1,5 @@
+Desinstall
+
+Reinstall module Synopsis_Process
+
+Reinstaal module synopsischrono

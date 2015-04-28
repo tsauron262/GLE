@@ -136,7 +136,7 @@ class Form
         $ret='';
 
         // Check parameters
-        if (empty($typeofdata)) return 'ErrorBadParameter';
+        if (empty($typeofdata)) return 'ErrorBadParameterType';
 
         // When option to edit inline is activated
         if (! empty($conf->global->MAIN_USE_JQUERY_JEDITABLE) && ! preg_match('/^select;|datehourpicker/',$typeofdata)) // TODO add jquery timepicker
@@ -585,13 +585,14 @@ class Form
                 print '>&nbsp;</option>';
             }
 
-            print '<option value="0"';
-            if (0 == $selected) print ' selected="selected"';
-            print '>'.$langs->trans("Product");
-
-            print '<option value="1"';
-            if (1 == $selected) print ' selected="selected"';
-            print '>'.$langs->trans("Service");
+            
+        global $tabTypeLigne;
+        foreach ($tabTypeLigne as $id => $type) {
+            print '<option value="' . $id . '"';
+            if ($id == $selected)
+                print ' selected="selected"';
+            print '>' . $langs->trans($type);
+        }
 
             print '</select>';
             //if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"),1);
@@ -711,40 +712,41 @@ class Form
     {
     	global $langs,$conf;
 
-    	$out='';
+    	$out=''; $hidelabel = 3;
 
-    	/* TODO Use ajax_autocompleter like for products (not finished)
+  //  	/* TODO Use ajax_autocompleter like for products (not finished)
     	if (! empty($conf->use_javascript_ajax) && ! empty($conf->global->COMPANY_USE_SEARCH_TO_SELECT) && ! $forcecombo)
     	{
     		$placeholder='';
 
     		if ($selected && empty($selected_input_value))
     		{
-    			require_once DOL_DOCUMENT_ROOT.'/societe/ajaxcompanies.php';
+//                    $_POST['socid'] = $selected;
+//    			require_once DOL_DOCUMENT_ROOT.'/societe/ajaxcompanies.php';
     			$societe = new Societe($this->db);
     			$societe->fetch($selected);
-    			$selected_input_value=$societe->ref;
+    			$selected_input_value=$societe->name;
     		}
     		// mode=1 means customers products
     		$urloption='htmlname='.$htmlname.'&outjson=1&price_level='.$price_level.'&type='.$filtertype.'&mode=1&status='.$status.'&finished='.$finished;
-    		print ajax_autocompleter($selected, $htmlname, DOL_URL_ROOT.'/societe/ajax/company.php', $urloption, $conf->global->COMPANY_USE_SEARCH_TO_SELECT, 0, $ajaxoptions);
-    		if (empty($hidelabel)) print $langs->trans("RefOrLabel").' : ';
+    		$out.= ajax_autocompleter($selected, $htmlname, DOL_URL_ROOT.'/societe/ajax/company.php', $urloption, $conf->global->COMPANY_USE_SEARCH_TO_SELECT, 0, $ajaxoptions);
+    		if (empty($hidelabel)) $out.= $langs->trans("RefOrLabel").' : ';
     		else if ($hidelabel > 1) {
     			if (! empty($conf->global->MAIN_HTML5_PLACEHOLDER)) $placeholder=' placeholder="'.$langs->trans("RefOrLabel").'"';
     			else $placeholder=' title="'.$langs->trans("RefOrLabel").'"';
     			if ($hidelabel == 2) {
-    				print img_picto($langs->trans("Search"), 'search');
+    				$out.= img_picto($langs->trans("Search"), 'search');
     			}
     		}
-    		print '<input type="text" size="20" name="search_'.$htmlname.'" id="search_'.$htmlname.'" value="'.$selected_input_value.'"'.$placeholder.' />';
+    		$out.= '<input type="text" size="20" name="search_'.$htmlname.'" id="search_'.$htmlname.'" value="'.$selected_input_value.'"'.$placeholder.' />';
     		if ($hidelabel == 3) {
-    			print img_picto($langs->trans("Search"), 'search');
+    			$out.= img_picto($langs->trans("Search"), 'search');
     		}
     	}
     	else
-    	{*/
+    	{//*/
     		$out.=$this->select_thirdparty_list($selected,$htmlname,$filter,1,0,$forcecombo,array(),'',0,$limit);
-    	//}
+    	}
 
     	return $out;
     }
@@ -765,7 +767,7 @@ class Form
      */
     function select_company($selected='', $htmlname='socid', $filter='', $showempty=0, $showtype=0, $forcecombo=0, $events=array(), $limit=0)
     {
-		return $this->select_thirdparty_list($selected, $htmlname, $filter, $showempty, $showtype, $forcecombo, $events, '', 0, $limit);
+		return $this->select_thirdparty($selected, $htmlname, $filter, $showempty, $showtype, $forcecombo, $events, '', 0, $limit);
     }
 
     /**
@@ -802,17 +804,17 @@ class Form
         // Add criteria
         if ($filterkey && $filterkey != '')
         {
-			$sql.=" AND (";
+			$sql.=" AND (1";
         	if (! empty($conf->global->COMPANY_DONOTSEARCH_ANYWHERE))   // Can use index
         	{
-        		$sql.="(s.name LIKE '".$this->db->escape($filterkey)."%')";
+        		$sql.="(s.nom LIKE '".$this->db->escape($filterkey)."%')";
         	}
         	else
         	{
         		// For natural search
         		$scrit = explode(' ', $filterkey);
         		foreach ($scrit as $crit) {
-        			$sql.=" AND (s.name LIKE '%".$this->db->escape($crit)."%')";
+        			$sql.=" AND (s.nom LIKE '%".$this->db->escape($crit)."%' || s.code_client LIKE '".$this->db->escape($filterkey)."%')";
         		}
         	}
         	if (! empty($conf->barcode->enabled))
@@ -1268,8 +1270,10 @@ class Form
         if (is_array($exclude) && $excludeUsers) $sql.= " AND u.rowid NOT IN ('".$excludeUsers."')";
         if (is_array($include) && $includeUsers) $sql.= " AND u.rowid IN ('".$includeUsers."')";
         if (! empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) $sql.= " AND u.statut <> 0";
-        if (! empty($morefilter)) $sql.=" ".$morefilter;
-        $sql.= " ORDER BY u.lastname ASC";
+        if (! empty($morefilter)) $sql.=$morefilter;
+        //mod drsi trie nom annuler
+        $sql.= " ORDER BY u.firstname ASC";
+        //f mod drsi
 
         dol_syslog(get_class($this)."::select_dolusers", LOG_DEBUG);
         $resql=$this->db->query($sql);
@@ -1308,7 +1312,7 @@ class Form
                         $out.= '>';
                     }
 
-                    $out.= $userstatic->getFullName($langs, 0, 0, $maxlength);
+                    $out.= $userstatic->getFullName($langs, 0, -1, $maxlength);
                     // Complete name with more info
                     $moreinfo=0;
                     if (! empty($conf->global->MAIN_SHOW_LOGIN))
@@ -1566,6 +1570,11 @@ class Form
         {
             $sql.= " AND p.tosell = ".$status;
         }
+        // mod drsi
+        if(is_array($filtertype))
+            $sql .= " AND p.fk_product_type IN (".implode(",", $filtertype).")";
+        else
+        //fmod drsi
         if (strval($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
         // Add criteria on ref/label
         if ($filterkey != '')

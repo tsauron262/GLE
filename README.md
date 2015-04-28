@@ -1,6 +1,6 @@
-# DOLIBARR ERP & CRM
+# GLE ERP & CRM
 
-Dolibarr ERP & CRM is a modern software to manage your company or foundation activity (contacts, suppliers, invoices, orders, stocks, agenda, ...).It's an opensource software (wrote with PHP language) designed for small and medium companies, foundation and freelances. You can freely install, use and distribute it as a standalone application or as a web application to use it from every internet access and media.
+GLE ERP & CRM is a modern software to manage your company or foundation activity (contacts, suppliers, invoices, orders, stocks, agenda, ...).It's an opensource software (wrote with PHP language) designed for small and medium companies, foundation and freelances. You can freely install, use and distribute it as a standalone application or as a web application to use it from every internet access and media.
 
 ![ScreenShot](http://www.dolibarr.org/images/dolibarr_screenshot1_640x400.png)
 
@@ -21,21 +21,21 @@ If you already have installed a Web server and a Mysql database, you can install
 
 - Uncompress the downloaded archive.
 
-- Copy directory "dolibarr" and all its files inside your web server root, or copy directory anywhere and set up your web server to use "dolibarr/htdocs" as root for a new web server virtual host (second choice need to be server administrator).
+- Copy directory "GLE" and all its files inside your web server root, or copy directory anywhere and set up your web server to use "GLE/htdocs" as root for a new web server virtual host (second choice need to be server administrator).
   
 - Create an empty file "htdocs/conf/conf.php" and set permissions for your web server user (write permissions will be removed once install is finished).
   
-- From your browser, call the dolibarr "install/" page.
+- From your browser, call the GLE "install/" page.
 
 Url depends on choice made on first step:
 
-	http://localhost/dolibarr/htdocs/install/
+	http://localhost/GLE/htdocs/install/
 or
 
-	http://localhost/dolibarr/install/
+	http://localhost/GLE/install/
 or
 
-	http://yourdolibarrvirtualhost/install/
+	http://yourGLEvirtualhost/install/
    
 - Follow instructions provided by installer...
 
@@ -43,23 +43,23 @@ or
 
 ## UPGRADE
 
-To upgrade Dolibarr from an old version to this one:
+To upgrade GLE from an old version to this one:
 
-- Overwrite all old files inside old 'dolibarr' directory by files provided into new version package.
+- Overwrite all old files inside old 'GLE' directory by files provided into new version package.
   
 - If you came from version x.y.z to x.y.w (only third number differ), there is no need to run any migrate process.
   
-- If you came from a beta version or from any version x.y.z to any other where x or y number differs, you must call the Dolibarr "install/" page in your browser (this should be done automatically at first dolibarr access).
+- If you came from a beta version or from any version x.y.z to any other where x or y number differs, you must call the GLE "install/" page in your browser (this should be done automatically at first GLE access).
 
 This URL should looks like:
 
-	http://localhost/dolibarr/htdocs/install/
+	http://localhost/GLE/htdocs/install/
 or
 
-	http://localhost/dolibarr/install/
+	http://localhost/GLE/install/
 or
 
-	http://yourdolibarrhost/install/
+	http://yourGLEhost/install/
 
 Then choose the "update" option according to your case.
 Note: Migrate process can be ran safely several times.
@@ -72,7 +72,7 @@ See ChangeLog file found into package.
 
 
 
-## WHAT DOLIBARR CAN DO
+## WHAT GLE CAN DO
 
 ### Main modules/features:
 
@@ -125,8 +125,7 @@ See ChangeLog file found into package.
    Compatible with European directives (2006/112/CE ... 2010/45/UE) (http://europa.eu/legislation_summaries/taxation/l31057_en.htm)
    ...
 
-
-## WHAT DOLIBARR CAN'T DO YET (TODO LIST)
+This is features that GLE does not support completely yet:
 
 This is features that Dolibarr does not support completely yet:
 

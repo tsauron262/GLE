@@ -558,7 +558,7 @@ function dol_move($srcfile, $destfile, $newmask=0, $overwriteifexists=1)
         	else dol_syslog("files.lib.php::dol_move failed", LOG_WARNING);
         }
         if (empty($newmask) && ! empty($conf->global->MAIN_UMASK)) $newmask=$conf->global->MAIN_UMASK;
-        @chmod($newpathofsrcfile, octdec($newmask));
+        @chmod($newpathofdestfile, octdec($newmask));
     }
 
     return $result;
@@ -636,7 +636,7 @@ function dol_move_uploaded_file($src_file, $dest_file, $allowoverwrite, $disable
 		if (empty($disablevirusscan) && file_exists($src_file) && ! empty($conf->global->MAIN_ANTIVIRUS_COMMAND))
 		{
 			if (! class_exists('AntiVir')) {
-				require DOL_DOCUMENT_ROOT.'/core/class/antivir.class.php';
+				require_once DOL_DOCUMENT_ROOT.'/core/class/antivir.class.php';
 			}
 			$antivir=new AntiVir($db);
 			$result = $antivir->dol_avscan_file($src_file);

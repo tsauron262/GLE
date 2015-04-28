@@ -1,0 +1,933 @@
+@font-face {
+    font-family: 'FA';
+    src: url(./fonts/fontawesome.eot),
+        url(./fonts/fontawesome.ttf);
+}
+
+span.button {
+    border-radius: 6px;
+    border: 1px solid #A0A0A0;
+    padding: 4px 6px;
+    color: #646464;
+    font-weight: normal;
+    font-size: 13px;
+    margin: 0 3px;
+
+    background: rgb(252,252,252); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(226,226,226,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(226,226,226,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#e2e2e2',GradientType=0 ); /* IE6-9 */
+}
+span.button:hover {
+    cursor: pointer;
+    color: #282828;
+    border-color: #646464;
+
+    background: rgb(255,255,255); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(246,246,246,1) 65%, rgba(224,224,224,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(65%,rgba(246,246,246,1)), color-stop(100%,rgba(224,224,224,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e0e0e0',GradientType=0 ); /* IE6-9 */
+
+}
+span.button.redHover:hover{
+    color: #960000;
+    border-color: #960000;
+}
+span.button.greenHover:hover {
+    color: #199600;
+    border-color: #199600;
+}
+span.button.blueHover:hover {
+    color: #0050A0;
+    border-color: #0050A0;
+}
+span.button.deactivated,
+span.button.deactivated:hover {
+    color: #B4B4B4;
+    border-color: #B4B4B4;
+}
+label {
+    color: #505050;
+}
+.error:before {
+    content: '\f06a';
+    font-family: 'FA';
+    font-size: 20px;
+    margin-right: 8px;
+}
+.requestProcess {
+    font-weight: bold;
+    font-size: 14px;
+    color: #00468C;
+}
+.requestProcess:before {
+    font-family: 'FA';
+    content: '\f085';
+    margin-right: 10px;
+}
+.confirmation {
+    font-weight: bold;
+    font-size: 14px;
+    color: #209620;
+}
+.confirmation:before {
+    font-family: 'FA';
+    content: '\f00c';
+    margin-right: 10px;
+}
+.alert {
+    font-weight: bold;
+    font-size: 14px;
+    color: #FF870F;
+}
+.alert:before {
+    font-family: 'FA';
+    content: '\f071';
+    margin-right: 10px;
+}
+.info {
+    font-weight: bold;
+    font-size: 12px;
+    color: #354C64;
+}
+.info:before {
+    font-family: 'FA';
+    content: '\f05a';
+    margin-right: 10px;
+    font-weight: normal;
+    font-size: 15px;
+}
+
+/*Blocs*/
+.container {
+    margin: 10px 0 20px 0;
+    max-width: 1000px;
+}
+.captionContainer {
+    border: 1px solid #828282;
+    padding: 8px 10px;
+    color: #505050;
+    cursor: pointer;
+
+    background: rgb(252,252,252); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(226,226,226,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(226,226,226,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#e2e2e2',GradientType=0 ); /* IE6-9 */
+}
+.captionContainer:hover {
+    background: rgb(255,255,255); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(246,246,246,1) 65%, rgba(224,224,224,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(65%,rgba(246,246,246,1)), color-stop(100%,rgba(224,224,224,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(246,246,246,1) 65%,rgba(224,224,224,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e0e0e0',GradientType=0 ); /* IE6-9 */
+}
+.captionTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #292964;
+}
+.arrow.upArrow:after {
+    font-family: 'FA';
+    content: '\f0d8';
+    margin-left: 8px;
+}
+.arrow.downArrow:after {
+    font-family: 'FA';
+    content: '\f0d7';
+    margin-left: 8px;
+}
+.captionTitle:hover {
+    color: #2F2FA0;
+}
+.container .toolBar {
+    margin: 5px 0 15px 0;
+    text-align: right;
+}
+.container .toolBar span.button {
+    display: inline-block;
+    padding: 6px;
+}
+.blocContent {
+    margin: 10px 0;
+}
+
+/*Infos produit*/
+.productTile {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2A2A50;
+    padding: 8px 20px;
+}
+.infosProdTitle:before {
+    font-family: 'FA';
+    content: '\f05a';
+    margin-right: 10px;
+    font-weight: normal;
+}
+.productContainer {
+
+}
+.productContent {
+    border: 1px dotted #B4B4B4;
+    border-top: none;
+    padding: 10px 20px;
+    margin: 0;
+}
+.productContainer .productCaption {
+    background: rgb(242,242,242); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(242,242,242,1) 0%, rgba(219,219,219,1) 50%, rgba(232,232,232,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(242,242,242,1)), color-stop(50%,rgba(219,219,219,1)), color-stop(100%,rgba(232,232,232,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(242,242,242,1) 0%,rgba(219,219,219,1) 50%,rgba(232,232,232,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(242,242,242,1) 0%,rgba(219,219,219,1) 50%,rgba(232,232,232,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(242,242,242,1) 0%,rgba(219,219,219,1) 50%,rgba(232,232,232,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(242,242,242,1) 0%,rgba(219,219,219,1) 50%,rgba(232,232,232,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f2f2', endColorstr='#e8e8e8',GradientType=0 ); /* IE6-9 */
+}
+#requestResult,
+#requestsResponsesContainer {
+    margin: 20px;
+}
+div.productDatasContainer {
+    display: none;
+    margin-top: 30px;
+}
+img.productImg {
+    max-height: 200px;
+}
+.productName {
+    font-size: 16px;
+    font-weight: bold;
+}
+a.productPdfLink {
+    background: url("./pdf.gif") no-repeat 0 0 transparent;
+    margin-left: 30px;
+    padding-left: 20px;
+}
+tr.oddRow {
+    background-color: #F0F0F0;
+}
+tr.evenRow {
+    background-color: #fff;
+}
+td.rowTitle {
+    font-weight: bold;
+}
+.productDatas {
+    border: 1px solid #DCDCDC;
+    background: white;
+}
+.productDatas td {
+    padding: 3px 8px;
+}
+
+/*Panier de commande*/
+.cartTitle:before {
+    font-family: 'FA';
+    content: '\f07a';
+    margin-right: 10px;
+}
+.cartTitle span.subtitle {
+    font-size: 12px;
+    color: #787878;
+}
+.cartContent {
+    display: none;
+}
+th.comptiaCodeTitle {
+    display: none;
+}
+.noProducts:before {
+    font-family: 'FA';
+    font-size: 18px;
+    margin-right: 10px;
+    content: '\f057';
+}
+.noProducts {
+    color: #8C1E1E;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+}
+.cartProducts {
+    display: none;
+    border-collapse: collapse;
+}
+.cartProducts th {
+    font-weight: normal;
+    color: #292964;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #9999C8;
+}
+.cartProducts td {
+    vertical-align: middle;
+    padding: 2px 4px;
+    border-bottom: 1px dotted #B4B4B4;
+    font-weight: bold;
+    color: #323232;
+}
+.cartProducts td.ref {
+    font-weight: normal;
+    text-align: center;
+}
+.cartProducts td.price {
+    font-weight: normal;
+    color: #2F2FA0;
+    text-align: center;
+}
+.prodQtyDown.button,
+.prodQtyUp.button {
+    padding: 3px;
+    font-size: 10px;
+    font-family: 'FA';
+    margin: 0 2px;
+}
+.prodQtyDown:before {
+    content: '\f068';
+}
+.prodQtyUp:before {
+    content: '\f067';
+}
+span.removeCartProduct {
+    margin-left: 10px;
+    font-size: 14px;
+}
+.cartSave:before {
+    font-family: 'FA';
+    content: '\f0c7';
+    margin-right: 10px;
+}
+.cartLoad:before,
+.loadParts:before {
+    content: '\f090';
+    font-family: 'FA';
+    margin-right: 10px;
+}
+.addToPropal:before {
+    content: '\f055';
+    font-family: 'FA';
+    margin-right: 10px;
+}
+.cartRequestResults {
+    display: none;
+    text-align: center;
+    margin-top: 30px;
+}
+select.compTIACodeSelect,
+select.compTIAModifierSelect {
+    font-size: 11px;
+    width: 120px;
+    height: 20px;
+}
+
+/*Repairs*/
+span.repairsTitle:before {
+    font-family: 'FA';
+    content: '\f0ad';
+    margin-right: 8px;
+}
+span.importRepairDatas:before {
+    font-family: 'FA';
+    content: '\f0ed';
+    margin-right: 8px;
+}
+span.createNewRepair:before {
+    font-family: 'FA';
+    content: '\f055';
+    margin-right: 8px;
+}
+.repairsContent {
+    display: none;
+}
+.repairCaption {
+    padding: 10px 0;
+    margin: 10px 0;
+    border-top: 2px solid #DCDCDC;
+}
+.repairCaption .repairTitle {
+    font-size: 15px;
+    color: #323282;
+    font-weight: bold;
+}
+div.repairToolbar {
+    text-align: right;
+    display: inline-block;
+    float: right;
+}
+span.closeRepair {
+}
+span.closeRepair:before {
+    font-family: 'FA';
+    margin-right: 10px;
+    content: '\f057';
+}
+.importRepairForm {
+    border: 1px solid #DCDCDC;
+    margin: 15px;
+    padding: 15px;
+    display: none;
+}
+.importRepairForm label {
+    font-weight: bold;
+}
+.importRepairForm select {
+    font-size: 11px;
+}
+input.importNumber {
+    width: 150px;
+}
+.repairImportClose:before {
+    font-family: 'FA';
+    margin-right: 10px;
+    content: '\f057';
+}
+.repairImportSubmit:after {
+    font-family: 'FA';
+    margin-left: 10px;
+    content: '\f0a9';
+}
+div.importRepairResult,
+div.partsPendingSerialUpdateResults {
+    padding: 10px;
+}
+
+/*Composants en attente de retour*/
+div.partsPendingBloc {
+    border: 1px solid #787878;
+    border-radius: 6px;
+    margin: 15px 0;
+}
+.partsPendingCaption {
+    margin: 0 0 10px 0;
+    padding: 10px;
+    border-bottom: 1px solid #DCDCDC;
+
+    background: rgb(162,169,178); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(162,169,178,1) 0%, rgba(118,127,135,1) 36%, rgba(40,52,59,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(162,169,178,1)), color-stop(36%,rgba(118,127,135,1)), color-stop(100%,rgba(40,52,59,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a2a9b2', endColorstr='#28343b',GradientType=0 ); /* IE6-9 */
+}
+.partsPendingTitle {
+    font-size: 14px;
+    color: #fff;
+    font-weight: bold;
+}
+span.updateSerials {
+    box-shadow: none;
+}
+span.updateSerials:before {
+    font-family: 'FA';
+    margin-right: 10px;
+    content: '\f14c';
+}
+
+.partsPendingTable {
+    border-collapse: collapse;
+}
+.partsPendingTable th {
+    font-weight: normal;
+    color: #292964;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #9999C8;
+}
+.partsPendingTable td {
+    vertical-align: middle;
+    padding: 5px;
+    border-bottom: 1px dotted #B4B4B4;
+    font-weight: bold;
+    color: #323232;
+}
+.partsPendingTable td.ref {
+    font-weight: normal;
+    text-align: center;
+}
+
+a.getReturnLabel:before {
+    font-family: 'FA';
+    content: '\f02a';
+    margin-right: 8px;
+    font-weight: normal;
+    font-size: 14px;
+}
+
+div.serialUpdateFormContainer {
+    display: none;
+    margin: 10px 15px;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #DCDCDC;
+}
+span.closeSerialUpdateForm {
+    float: right;
+    color: #B4B4B4;
+    font-size: 12px;
+    cursor: pointer;
+}
+span.closeSerialUpdateForm:hover {
+    color: #B40000;
+}
+span.closeSerialUpdateForm:before {
+    font-family: 'FA';
+    margin-right: 10px;
+    content: '\f057';
+}
+
+/*Liste des composants*/
+.partsRequestResult {
+    display: none;
+}
+.componentsListContainer div.searchBloc {
+    display: inline-block;
+    margin: 10px 20px;
+}
+
+/*Type filter*/
+.filterTitle:before {
+    font-family: 'FA';
+    font-size: 16px;
+    content: '\f0b0';
+    margin-right: 10px;
+}
+.filterTitle:after {
+    font-family: 'FA';
+    font-size: 16px;
+    content: '\f0d7';
+    margin-left: 10px;
+}
+.filterTitle:hover {
+    color: #282828;
+    cursor: pointer;
+}
+.typeFiltersContent {
+    position: absolute;
+    display: none;
+    z-index: 99;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #B4B4B4;
+    box-shadow: 0 0 4px #787878;
+    max-width: 480px;
+}
+.typeFiltersContent span {
+    color: #787878;
+    font-size: 11px;
+    padding: 0 10px;
+}
+.typeFiltersContent span:hover {
+    color: #282828;
+    cursor: pointer;
+}
+.filterCheckAll:before {
+    font-family: 'FA';
+    content: '\f046';
+    margin-right: 8px;
+}
+.filterHideAll:before {
+    font-family: 'FA';
+    content: '\f096';
+    margin-right: 5px;
+}
+.typeFiltersContent label {
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/*Keywords Filter & Part search*/
+.keywordFilter {
+    width: 150px;
+}
+.addKeywordFilter:after {
+    font-family: 'FA';
+    margin-left: 8px;
+    content: '\f055';
+}
+.curKeywords,
+.searchResult {
+    margin: 0 20px;
+    font-size: 15px;
+    color: #282828;
+}
+.curKeywords div,
+.partSearchNum {
+    margin: 10px;
+    padding: 5px;
+    border-radius: 8px;
+    border : 1px solid #B4B4B4;
+    display: inline-block;
+    background-color: #fff;
+}
+span.keyword {
+    font-weight: bold;
+}
+span.keyword:before {
+    content: '\f0b0';
+    font-family: 'FA';
+    margin-right: 10px;
+    color: #505050;
+}
+span.kwType {
+    color: #646464;
+    font-size: 11px;
+}
+span.removeKeyWord,
+span.removeSearch {
+    margin-left: 12px;
+    color: #505050;
+}
+span.removeKeyWord:before,
+span.removeSearch:before,
+span.removeCartProduct:before {
+    content: '\f057';
+    font-family: 'FA';
+}
+span.removeCartProduct:hover,
+span.removeKeyWord:hover,
+span.removeSearch:hover {
+    color: #960000;
+    cursor: pointer;
+}
+.searchPartSubmit {
+    margin-left: 5px;
+}
+.searchPartSubmit:after {
+    font-family: 'FA';
+    margin-left: 8px;
+    content: '\f002';
+}
+span.searchNum:before {
+    font-family: 'FA';
+    margin-right: 8px;
+    content: '\f002';
+}
+
+/*parts*/
+.partsListTitle:before {
+    font-family: 'FA';
+    content: '\f039';
+    margin-right: 10px;
+    font-weight: normal;
+}
+.partsListContainer {
+    margin-top: 10px;
+}
+div.partGroup {
+
+}
+div.partGroupName {
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #D2D2D2;
+    color: #2D2D50;
+    font-weight: bold;
+    margin: 2px 0;
+
+    background: rgb(255,255,255); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(229,229,229,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+}
+div.partGroupName:before {
+    font-family: 'FA';
+    margin-right: 15px;
+}
+div.partGroupName.closed:before {
+    content: '\f0fe';
+}
+div.partGroupName.opened:before {
+    content: '\f146';
+}
+div.partGroupName:hover {
+    cursor: pointer;
+    color: #2F2FA0;
+    border-color: #A1A1D2;
+
+    background: rgb(255,255,255); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(225,225,244,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(225,225,244,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(225,225,244,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(225,225,244,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(225,225,244,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(225,225,244,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e1e1f4',GradientType=0 ); /* IE6-9 */
+
+}
+span.partsNbr {
+    font-size: 12px;
+    margin-left: 12px;
+    font-weight: normal;
+    color: #505050;
+}
+.partsList {
+    display: none;
+    margin-left: 10px;
+    padding-left: 20px;
+    border-left: 1px solid #C8C8C8;
+}
+.partsList table {
+    border: 1px solid #767F87;
+    border-collapse: collapse;
+}
+.partsLis tr.oddRow {
+    background-color: #D4D4DC;
+}
+.partsList th {
+    padding: 4px 0;
+    color: #fff;
+    font-weight: normal;
+
+    background: rgb(162,169,178); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(162,169,178,1) 0%, rgba(118,127,135,1) 36%, rgba(40,52,59,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(162,169,178,1)), color-stop(36%,rgba(118,127,135,1)), color-stop(100%,rgba(40,52,59,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(162,169,178,1) 0%,rgba(118,127,135,1) 36%,rgba(40,52,59,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a2a9b2', endColorstr='#28343b',GradientType=0 ); /* IE6-9 */
+
+}
+.partsList td {
+    font-size: 12px;
+    padding: 6px;
+    color: #464646;
+    border-bottom: 1px solid #A0A0A0;
+    text-align: center;
+}
+.partsList td.partName {
+    font-weight: bold;
+    text-align: left;
+}
+span.addToCart {
+    font-weight: bold;
+    margin: 0px 10px;
+    padding: 3px 5px;
+    margin: 0;
+    border-radius: 4px;
+}
+span.addToCart.activated {
+    color: #505050;
+}
+span.addToCart.deactivated {
+    color: #B4B4B4;
+}
+span.addToCart.activated:hover {
+    background-color: #00A000;
+    color: #fff;
+    cursor: pointer;
+}
+span.addToCart:before {
+    font-family: 'FA';
+    content: '\f064';
+    margin-right: 10px;
+}
+
+/*Repair Satus*/
+div.repairStatus {
+    padding: 15px;
+}
+
+/*Repairs*/
+div.repairPopUp {
+    display: none;
+    position: absolute;
+    margin: auto;
+    max-width: 80%;
+    top: 150px;
+    box-shadow: 0 0 12px #505050;
+    border-radius: 12px;
+    z-index: 9999;
+    padding: 30px;
+    background: #FFFCF5;
+}
+.loadFormResults,
+.repairFormContainer {
+    display: none;
+}
+span.hidePopUp:before {
+    font-family: 'FA';
+    content: '\f057';
+    margin-right: 10px;
+    font-size: 18px;
+}
+span.hidePopUp {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 20px;
+    color: #787878;
+    font-weight: bold;
+}
+span.hidePopUp:hover {
+    cursor: pointer;
+    color: #B40000;
+}
+.loadRepairForm:after {
+    font-family: 'FA';
+    content: '\f0a9';
+    margin-left: 10px;
+}
+
+/*formulaires*/
+div.requestTitle {
+    font-weight: bold;
+    font-size: 18px;
+    color: #003C78;
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+}
+p.requiredInfos {
+    text-align: right;
+    font-style: italic;
+    font-size: 11px;
+    color: #B40000;
+}
+p.requiredInfos span.required:before,
+div.requestFormInputs span.required:before {
+    font-family: 'FA';
+    color: #B40000;
+    content: '\f069';
+    font-size: 6px;
+    margin-left: 5px;
+}
+div.requestFormInputs div.dataBlock {
+    margin-bottom: 15px;
+}
+span.displayInfos:before {
+    color: #3574B4;
+    font-family: 'FA';
+    content: '\f059';
+    font-size: 16px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+div.labelInfos {
+    position: absolute;
+    display: none;
+    background-color: #fff;
+    padding: 5px;
+    border-radius: 6px;
+    box-shadow: 0 0 8px #808080;
+    color: #1D4064;
+    font-weight: bold;
+}
+div.requestFormInputs label {
+    color: #505050;
+    margin-bottom: 5px;
+    margin-right: 20px;
+    display: inline-block;
+}
+div.requestFormInputs label.dataTitle:before {
+    content: '\f054';
+    font-family: 'FA';
+    margin-right: 5px;
+    font-size: 12px;
+}
+div.requestFormInputs span.dataCheck {
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 12px;
+}
+div.requestFormInputs span.dataCheck span.ok {
+    color: #00A000;
+}
+div.requestFormInputs span.dataCheck span.notOk {
+    color: #B40000;
+}
+div.requestFormInputs span.dataCheck span.notOk:before {
+    font-family: 'FA';
+    content: '\f00d';
+    margin-right: 8px;
+    font-size: 16px;
+}
+div.requestFormInputs span.dataCheck span.ok:before {
+    font-family: 'FA';
+    content: '\f00c';
+    margin-right: 8px;
+    font-size: 16px;
+}
+div.requestFormInputs input {
+    width: 250px;
+}
+div.requestFormInputs input[type="radio"] {
+    width: 80px;
+}
+div.requestFormInputs fieldset {
+    border: 1px solid #CDCDCD;
+    border-radius: 12px;
+    margin: 20px 10px;
+}
+div.repairsPartsInputsTemplate,
+div.repairPartsContainer{
+    display: none;
+}
+div.partDatasBlock {
+    margin: 10px 0;
+    border-top: 1px solid #969696;
+}
+div.partDatasBlockTitle {
+    padding: 5px 0;
+    font-size: 14px;
+    color: #646464;
+    font-weight: bold;
+}
+div.partDatasBlockTitle:hover {
+    cursor: pointer;
+    color: #505050;
+}
+div.partDatasBlockTitle.closed:before {
+    font-family: 'FA';
+    margin-right: 15px;
+    content: '\f0fe';
+}
+div.partDatasBlockTitle.open:before {
+    font-family: 'FA';
+    margin-right: 15px;
+    content: '\f146';
+}
+div.partDatasContent {
+    display: none;
+    padding: 10px 20px;
+    border-left: 1px dotted #B4B4B4;
+}
+div.singleRequestFormContainer {
+    padding: 30px;
+    box-shadow: 0 0 12px #505050;
+    border-radius: 12px;
+    background: #FFFBF2;
+    width: 700px;
+}
+div.partsImportResults {
+    display: none;
+}
+div.dataInputTemplate {
+    display: none;
+}
+span.duplicateInput:before {
+    font-family: 'FA';
+    content: '\f055';
+    margin-right: 8px;
+}
+

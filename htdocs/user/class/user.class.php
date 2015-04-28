@@ -34,7 +34,7 @@ require_once DOL_DOCUMENT_ROOT .'/core/class/commonobject.class.php';
 
 
 /**
- *	Class to manage Dolibarr users
+ *	Class to manage GLE users
  */
 class User extends CommonObject
 {
@@ -1520,7 +1520,8 @@ class User extends CommonObject
 		// Define $urlwithroot
 		//$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
 		//$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
-		$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current
+                global $dolibarr_main_url_root;
+		$urlwithroot=$dolibarr_main_url_root;						// This is to use same domain name than current
 
 		if (! $changelater)
 		{
@@ -2359,7 +2360,7 @@ class User extends CommonObject
 		$this->users[$id_user]['fullname'] = $this->users[$id_user]['lastname'];
 		$i=0; $cursor_user=$id_user;
 
-		while ((empty($protection) || $i < $protection) && ! empty($this->parentof[$cursor_user]))
+		while ((empty($protection) || $i < $protection) && ! empty($this->parentof[$cursor_user]))	// Loop on each parent, one after one
 		{
 			$this->users[$id_user]['fullpath'] = '_'.$this->parentof[$cursor_user].$this->users[$id_user]['fullpath'];
 			$this->users[$id_user]['fullname'] = $this->users[$this->parentof[$cursor_user]]['lastname'].' >> '.$this->users[$id_user]['fullname'];

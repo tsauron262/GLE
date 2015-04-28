@@ -33,7 +33,7 @@
  * \brief 	Page to create/see an invoice
  */
 
-require '../main.inc.php';
+require_once '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php';
@@ -3285,7 +3285,7 @@ if ($action == 'create')
 				|| ($object->type == Facture::TYPE_CREDIT_NOTE && empty($discount->id))
 				|| ($object->type == Facture::TYPE_DEPOSIT && empty($discount->id)))
 				&& ($object->statut == 2 || $object->statut == 3)
-				&& $user->rights->facture->creer)				// A paid invoice (partially or completely)
+				&& $user->rights->facture->supprimer)				// A paid invoice (partially or completely)
 			{
 				if (! $objectidnext && $object->close_code != 'replaced') 				// Not replaced by another invoice
 				{
@@ -3423,6 +3423,7 @@ if ($action == 'create')
 			} else {
 				print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="' . $langs->trans("NotAllowed") . '">' . $langs->trans('Delete') . '</a></div>';
 			}
+					print '<div class="inline-block divButAction"><a class="butActionDelete" href="' . DOL_URL_ROOT.'/Synopsis_Tools/mailRequest.php?action=annulObj&id='.$id.'">' . $langs->trans('Demande Annulation') . '</a></div>';
 
 			print '</div>';
 		}
@@ -3513,6 +3514,58 @@ if ($action == 'create')
 			}
 
 			print '</div>';
+                        
+                        
+                        
+                        /*mod drsi lien propal*/
+                        print '<div id="propal" style="display:none">';
+
+			$sql = "SELECT s.rowid as socid, s.nom as name, s.client, c.rowid, c.ref, c.ref_client, c.total_ht";
+			$sql .= " FROM " . MAIN_DB_PREFIX . "societe as s";
+			$sql .= ", " . MAIN_DB_PREFIX . "propal as c";
+			$sql .= ' WHERE c.fk_soc = s.rowid AND c.fk_soc = ' . $soc->id . '';
+
+			$resqlorderlist = $db->query($sql);
+			if ($resqlorderlist) {
+				$num = $db->num_rows($resqlorderlist);
+				$i = 0;
+
+				print '<form action="" method="POST" name="LinkedPropal">';
+				print '<table class="noborder">';
+				print '<tr class="liste_titre">';
+				print '<td class="nowrap"></td>';
+				print '<td align="center">' . $langs->trans("Ref") . '</td>';
+				print '<td align="left">' . $langs->trans("RefCustomer") . '</td>';
+				print '<td align="left">' . $langs->trans("AmountHTShort") . '</td>';
+				print '<td align="left">' . $langs->trans("Company") . '</td>';
+				print '</tr>';
+				while ($i < $num) {
+					$objp = $db->fetch_object($resqlorderlist);
+					if ($objp->socid == $soc->id) {
+						$var = ! $var;
+						print '<tr ' . $bc [$var] . '>';
+						print '<td aling="left">';
+						print '<input type="radio" name="linkedPropal" value=' . $objp->rowid . '>';
+						print '<td align="center">' . $objp->ref . '</td>';
+						print '<td>' . $objp->ref_client . '</td>';
+						print '<td>' . price($objp->total_ht) . '</td>';
+						print '<td>' . $objp->name . '</td>';
+						print '</td>';
+						print '</tr>';
+					}
+
+					$i ++;
+				}
+				print '</table>';
+				print '<br><center><input type="submit" class="button" value="' . $langs->trans('ToLink') . '"></center>';
+				print '</form>';
+				$db->free($resqlorderlist);
+			} else {
+				dol_print_error($db);
+			}
+
+			print '</div>';
+                        /*f mod drsi*/
 		}
 
 		// Show link to elements

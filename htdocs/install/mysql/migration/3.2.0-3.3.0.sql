@@ -109,6 +109,8 @@ ALTER TABLE llx_ecm_directories ADD COLUMN fullpath varchar(255) AFTER cachenbof
 ALTER TABLE llx_ecm_directories MODIFY COLUMN fullpath varchar(255);
 ALTER TABLE llx_ecm_directories ADD COLUMN extraparams varchar(255) AFTER fullpath;
 ALTER TABLE llx_ecm_directories ADD COLUMN acl text;
+UPDATE llx_ecm_directories SET fk_user_c = NULL WHERE fk_user_c = 0;
+UPDATE llx_ecm_directories SET fk_user_m = NULL WHERE fk_user_m = 0;
 ALTER TABLE llx_ecm_directories ADD INDEX idx_ecm_directories_fk_user_c (fk_user_c);
 ALTER TABLE llx_ecm_directories ADD INDEX idx_ecm_directories_fk_user_m (fk_user_m);
 ALTER TABLE llx_ecm_directories ADD CONSTRAINT fk_ecm_directories_fk_user_c FOREIGN KEY (fk_user_c) REFERENCES llx_user (rowid);

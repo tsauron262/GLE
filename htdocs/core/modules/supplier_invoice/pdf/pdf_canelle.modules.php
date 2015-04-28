@@ -352,7 +352,7 @@ class pdf_canelle extends ModelePDFSuppliersInvoices
                     {
     					$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
                         $pdf->SetXY($this->posxtva, $curY);
-	       				$pdf->MultiCell($this->posxup-$this->posxtva-1, 3, $vat_rate, 0, 'R');
+	       				$pdf->MultiCell($this->posxup-$this->posxtva-0.8, 3, $vat_rate, 0, 'R');
                     }
 
 					// Unit price before discount

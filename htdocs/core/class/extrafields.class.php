@@ -771,6 +771,7 @@ class ExtraFields
 
 				dol_syslog(get_class($this).'::showInputField type=sellist', LOG_DEBUG);
 				$resql = $this->db->query($sql);
+
 				if ($resql)
 				{
 					$out.='<option value="0">&nbsp;</option>';

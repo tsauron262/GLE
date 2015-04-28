@@ -1,0 +1,3 @@
+
+$tmpProd->fetch_optionals($tmpProd->id);
+die("ici".$tmpProd->SLA."|".$tmpProd->array_options["options_2sla"]);

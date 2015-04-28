@@ -268,6 +268,8 @@ class ImportCsv extends ModeleImports
 		{
 			foreach($arrayres as $key => $val)
 			{
+                                                    if($val == "-1")
+                                                        $val = "0";
 				if (! empty($conf->global->IMPORT_CSV_FORCE_CHARSET))	// Forced charset
 				{
 					if (strtolower($conf->global->IMPORT_CSV_FORCE_CHARSET) == 'utf8')
@@ -607,7 +609,27 @@ class ImportCsv extends ModeleImports
 					if ($listfields)
 					{
 					    //var_dump($objimport->array_import_convertvalue); exit;
-
+                                            $update = false;
+                                            $updateTab = array();
+                                                foreach($sort_array_match_file_to_database as $id => $valeur){
+                                                    if($valeur == "s.code_client" ){
+                                                        $where = $valeur ." = '".$arrayrecord[($id-1)]['val']."'";
+                                                        $result = $this->db->query("SELECT * FROM ".$tablename." s WHERE ".$where);
+                                                        die("SELECT * FROM ".$tablename." s WHERE ".$where);
+                                                        if($this->db->num_rows($result) > 0)
+                                                        $update = true;
+                                                    }
+                                                    if($arrayrecord[($id-1)]['val'] == "-1")
+                                                        $arrayrecord[($id-1)]['val'] = 0;
+                                                    if(/*$valeur != "s.barcode" || */$arrayrecord[($id-1)]['val'] != "")
+                                                        $updateTab[] = $valeur ." = '".addslashes($arrayrecord[($id-1)]['val'])."'";
+//                                                    if($valeur == "s.nom")echo json_decode($arrayrecord[($id-1)]['val'], "UTF-8");echo "Cabinet	LEXCASE Soci&#142;t&#142; d'avocats";
+                                                }
+                                            if($update){
+                                                $sql = "UPDATE ".$tablename." s SET ".implode(",",$updateTab)." WHERE ".$where;
+//                                                echo $sql;
+                                            }
+                                            else{
 						// Build SQL request
 						if (empty($tablewithentity_cache[$tablename]))
 						{
@@ -628,7 +650,7 @@ class ImportCsv extends ModeleImports
 						//print '> '.join(',',$arrayrecord);
 						//print 'sql='.$sql;
 						//print '<br>'."\n";
-
+//$sql = "";
 						// Run insert request
 						if ($sql)
 						{
@@ -640,7 +662,7 @@ class ImportCsv extends ModeleImports
 							}
 							else
 							{
-								//print 'E';
+								print 'E'.$sql;
 								$this->errors[$error]['lib']=$this->db->lasterror();
 								$this->errors[$error]['type']='SQL';
 								$error++;

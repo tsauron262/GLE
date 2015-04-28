@@ -30,9 +30,9 @@ if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC','1');
 if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');
 
-require '../main.inc.php';
+require_once '../main.inc.php';
 
-
+global $db;
 /*
  * View
  */

@@ -66,6 +66,7 @@ $conffiletoshow = "htdocs/conf/conf.php";
 //$conffile = "/etc/dolibarr/conf.php";
 //$conffiletoshow = "/etc/dolibarr/conf.php";
 
+/*mod drsi*/ include("Synopsis_Tools/includeConf.inc.php"); /*f mod drsi */
 
 // Include configuration
 $result=@include_once $conffile;	// Keep @ because with some error reporting this break the redirect
@@ -74,6 +75,27 @@ if (! $result && ! empty($_SERVER["GATEWAY_INTERFACE"]))    // If install not do
 {
 	header("Location: install/index.php");
 	exit;
+}
+
+// Force PHP error_reporting setup (Dolibarr may report warning without this)
+if (! empty($dolibarr_strict_mode))
+{
+	error_reporting(E_ALL | E_STRICT);
+}
+else
+{
+	if (! defined('E_DEPRECATED')) define('E_DEPRECATED',0);	// For PHP < 5.3.0 compatibility
+	error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED));
+}
+
+// Disable php display errors
+if (! empty($dolibarr_main_prod)) ini_set('display_errors','Off');
+
+
+// Disable php display errors
+if (! empty($dolibarr_main_prod))
+{
+	ini_set('display_errors','Off');
 }
 
 // Force PHP error_reporting setup (Dolibarr may report warning without this)

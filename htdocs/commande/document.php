@@ -41,6 +41,13 @@ $confirm	= GETPOST('confirm');
 $id			= GETPOST('id','int');
 $ref		= GETPOST('ref');
 
+$mesg='';
+if (isset($_SESSION['DolMessage']))
+{
+	$mesg=$_SESSION['DolMessage'];
+	unset($_SESSION['DolMessage']);
+}
+
 // Security check
 if ($user->societe_id)
 {

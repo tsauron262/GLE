@@ -305,7 +305,7 @@ print "\n";
 print '<table style="font-size:14px;" class="centpercent" summary="Main table for Dolibarr demos">';
 
 print '<tr><td>';
-print '<center><img src="'.DOL_URL_ROOT.'/theme/dolibarr_logo.png" alt="Dolibarr logo"></center><br>';
+print '<center><img src="'.DOL_URL_ROOT.'/theme/gle_logo.png" alt="Dolibarr logo"></center><br>';
 print '<br>';
 
 print $langs->trans("DemoDesc").'<br>';

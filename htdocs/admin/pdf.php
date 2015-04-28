@@ -391,6 +391,27 @@ else	// Show
     print '<tr '.$bc[$var].'><td>'.$langs->trans("HideAnyVATInformationOnPDF").'</td><td colspan="2">';
     print yn($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT,1);
     print '</td></tr>';
+       
+    if ($conf->global->MAIN_FEATURES_LEVEL > 1)
+    {
+    	//Desc
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideDescOnPDF").'</td><td>';
+    	print yn($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC,1);
+    	print '</td></tr>';
+    	 
+    	//Ref
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideRefOnPDF").'</td><td>';
+    	print yn($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF,1);
+    	print '</td></tr>';
+    	 
+    	//Details
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideDetailsOnPDF").'</td><td>';
+    	print yn($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS,1);
+    	print '</td></tr>';
+    }
 
     
 	// Encrypt and protect PDF

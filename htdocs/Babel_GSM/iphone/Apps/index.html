@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <title>GLE++</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.6">
+    <meta name="apple-mobile-web-app-capable" content="YES">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="Parts/Transitions.css">
+    <link rel="stylesheet" href="css/custom-theme/jquery-ui-1.8.4.custom.css">
+    <script type="text/javascript" src="js/jquery-1.4.2.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.4.custom.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/setup.js" charset="utf-8"></script>
+    <script type="text/javascript" src="main.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/Header.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/utilities.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/Transitions.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/StackLayout.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/Browser.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/Text.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/List.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/PushButton.js" charset="utf-8"></script>
+    <script type="text/javascript" src="Parts/ButtonHandler.js" charset="utf-8"></script>
+</head>
+<body onload="load();">
+    <div id="browser">
+        <div id="header">
+            <div id="back_button" class="back_button_template dashcode-header-backbutton"></div>
+        </div>
+        <div id="stackLayout">
+            <div id="Menu">
+                <ul id="list">
+                    <li id="listRowTemplate" class="listRowTemplate_template">
+                        <div class="rowTitle_template" id="rowTitle"></div>
+                        <div id="rowArrow" class="rowArrow_template"></div>
+                    </li>
+                </ul>
+            </div>
+            <div id="fichetype">
+                <div id="detailBox">
+                    <div id="topRectangleShape">
+                    </div>
+                    <div id="detailTitle"></div>
+                    <div id="detailLocation"></div>
+                    <div id="detailDescription"></div>
+                </div>
+            </div>
+ <!--           <div id="menuClientDetail">
+                <input type="search" value="" placeholder="" results="10" incremental="incremental" id="searchfield">
+                <ul id="listDet">
+                    <li id="ModèleRangListeDet" class="ModèleRangListeDet_template" style="border-top-width: 0px; ">
+                        <div id="étiquetteDet" class="étiquetteDet_template"></div>
+                        <div id="flècheDet" class="flècheDet_template">
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            -->
+            <div id="menuClient">
+                <input type="search" value="" placeholder="" results="10" incremental="incremental" id="searchfield">
+                <ul id="list1">
+                    <li id="ModèleRangListe" class="ModèleRangListe_template" style="border-top-width: 0px; ">
+                        <div id="étiquette" class="étiquette_template"></div>
+                        <div id="flèche" class="flèche_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="menuProspect">
+                <input type="search" value="" placeholder="" results="10" incremental="incremental" id="searchfield1">
+                <ul id="list2">
+                    <li id="ModèleRangListe1" class="ModèleRangListe1_template" style="border-top-width: 0px; ">
+                        <div id="étiquette1" class="étiquette1_template"></div>
+                        <div id="flèche1" class="flèche1_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="menuContact">
+                <input type="search" value="" placeholder="" results="10" incremental="incremental" id="searchfield2">
+                <ul id="list3">
+                    <li id="ModèleRangListe2" class="ModèleRangListe2_template" style="border-top-width: 0px; ">
+                        <div id="étiquette2" class="étiquette2_template"></div>
+                        <div id="flèche2" class="flèche2_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="ficheClient">
+                <div id="fichieClientDet">
+                    <div id="topRectangleShape1">
+                    </div>
+                    <div id="detailTitle1"></div>
+                    <div id="detailLocation1"></div>
+                    <div id="detailDescription1"></div>
+                </div>
+                <ul id="list4">
+                    <li id="ModèleRangListe3" class="ModèleRangListe3_template" style="border-top-width: 0px; ">
+                        <div id="étiquette3" class="étiquette3_template"></div>
+                        <div id="flèche3" class="flèche3_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="ficheProspect">
+                <div id="fichieProspectDet">
+                    <div id="topRectangleShape2">
+                    </div>
+                    <div id="detailTitle2"></div>
+                    <div id="detailLocation2"></div>
+                    <div id="detailDescription2"></div>
+                </div>
+                <ul id="list12">
+                    <li id="ModèleRangListe11" class="ModèleRangListe11_template">
+                        <div id="étiquette11" class="étiquette11_template"></div>
+                        <div id="flèche11" class="flèche11_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="ficheContact">
+                <div id="fichieContactDet">
+                    <div id="topRectangleShape3">
+                    </div>
+                    <div id="detailTitle3"></div>
+                    <div id="detailLocation3"></div>
+                    <div id="detailDescription3"></div>
+                </div>
+                <ul id="list11">
+                    <li id="ModèleRangListe10" class="ModèleRangListe10_template">
+                        <div id="étiquette10" class="étiquette10_template"></div>
+                        <div id="flèche10" class="flèche10_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="fichePropal">
+                <div id="fichieContactDet1">
+                    <div id="topRectangleShape4">
+                    </div>
+                    <div id="detailTitle4"></div>
+                    <div id="detailLocation4"></div>
+                    <div id="detailDescription4"></div>
+                </div>
+                <ul id="list10">
+                    <li id="ModèleRangListe9" class="ModèleRangListe9_template">
+                        <div id="étiquette9" class="étiquette9_template"></div>
+                        <div id="flèche9" class="flèche9_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="ficheCommande">
+                <div id="fichieContactDet2">
+                    <div id="topRectangleShape5">
+                    </div>
+                    <div id="detailTitle5"></div>
+                    <div id="detailLocation5"></div>
+                    <div id="detailDescription5"></div>
+                </div>
+                <ul id="list9">
+                    <li id="ModèleRangListe8" class="ModèleRangListe8_template">
+                        <div id="étiquette8" class="étiquette8_template"></div>
+                        <div id="flèche8" class="flèche8_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="ficheFacture">
+                <div id="fichieContactDet3">
+                    <div id="topRectangleShape6">
+                    </div>
+                    <div id="detailTitle6"></div>
+                    <div id="detailLocation6"></div>
+                    <div id="detailDescription6"></div>
+                </div>
+                <ul id="list8">
+                    <li id="ModèleRangListe7" class="ModèleRangListe7_template">
+                        <div id="étiquette7" class="étiquette7_template"></div>
+                        <div id="flèche7" class="flèche7_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="listPropale">
+                <ul id="list5">
+                    <li id="ModèleRangListe4" class="ModèleRangListe4_template">
+                        <div id="étiquette4" class="étiquette4_template"></div>
+                        <div id="flèche4" class="flèche4_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="listCommande">
+                <ul id="list6">
+                    <li id="ModèleRangListe5" class="ModèleRangListe5_template">
+                        <div id="étiquette5" class="étiquette5_template"></div>
+                        <div id="flèche5" class="flèche5_template">
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="listFacture">
+                <ul id="list7">
+                    <li id="ModèleRangListe6" class="ModèleRangListe6_template">
+                        <div id="étiquette6" class="étiquette6_template"></div>
+                        <div id="flèche6" class="flèche6_template">
+                        </div>
+                    </li>
+                </ul>
+            </div></div>
+    </div>
+</body>
+</html>

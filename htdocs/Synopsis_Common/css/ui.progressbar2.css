@@ -1,0 +1,8 @@
+/* Progressbar
+----------------------------------*/
+
+
+
+.ui-progressbar2 { border:1px solid black;height:2em; text-align: left;background: #cc55bb   }
+
+.ui-progressbar2 .ui-progressbar-value {border:1px solid black;margin: -1px; height:100%;background-color:#bbddaa}

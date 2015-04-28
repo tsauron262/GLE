@@ -1,4 +1,5 @@
 <?php
+    error_reporting(E_ALL ^ (E_NOTICE));
 /* Copyright (C) 2002-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2003      Xavier Dutoit        <doli@sydesy.com>
  * Copyright (C) 2004-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
@@ -30,6 +31,9 @@
  *	\ingroup	core
  *	\brief      File that defines environment for Dolibarr pages only (variables not required by scripts)
  */
+
+
+
 
 //@ini_set('memory_limit', '64M');	// This may be useless if memory is hard limited by your PHP
 
@@ -159,7 +163,7 @@ if (! empty($_SERVER["QUERY_STRING"]))
 analyse_sql_and_script($_POST,0);
 
 // This is to make Dolibarr working with Plesk
-if (! empty($_SERVER['DOCUMENT_ROOT'])) set_include_path($_SERVER['DOCUMENT_ROOT'].'/htdocs');
+if (! empty($_SERVER['DOCUMENT_ROOT'])) set_include_path(get_include_path().":".$_SERVER['DOCUMENT_ROOT'].'/htdocs');
 
 // Include the conf.php and functions.lib.php
 require_once 'filefunc.inc.php';
@@ -200,7 +204,14 @@ if (ini_get('register_globals'))    // To solve bug in using $_SESSION
 
 // Init the 5 global objects
 // This include will set: $conf, $db, $langs, $user, $mysoc objects
-require_once 'master.inc.php';
+require_once("master.inc.php");
+
+
+/*Mod drsi*/
+include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
+$synopsisHook = new synopsisHook();
+global $synopsisHook;
+/*FMod Drsi*/
 
 // Activate end of page function
 register_shutdown_function('dol_shutdown');
@@ -220,7 +231,7 @@ if (isset($_SERVER["HTTP_USER_AGENT"]))
 
 
 // Force HTTPS if required ($conf->file->main_force_https is 0/1 or https dolibarr root url)
-if (! empty($conf->file->main_force_https))
+if (! empty($conf->file->main_force_https)/*moddrsi*/ && (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] != 'on')/*fmoddrsi*/)
 {
     $newurl='';
     if (is_numeric($conf->file->main_force_https))
@@ -392,6 +403,12 @@ if (! defined('NOLOGIN'))
                 exit;
             }
         }
+        
+        /*mod drsi*/
+        $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
+        if(isset($tabT[0]) && $tabT[0]['d'] > 2)
+            $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
+        /*f mod drsi*/
 
         // Verification security graphic code
         if (GETPOST("username","alpha",2) && ! empty($conf->global->MAIN_SECURITY_ENABLECAPTCHA))
@@ -470,6 +487,20 @@ if (! defined('NOLOGIN'))
                 $langs->load('main');
                 $langs->load('errors');
 
+                
+                /*mod drsi*/
+                $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
+                if(isset($tabT[0])){
+                    delElementElement("userErr", GETPOST("username","alpha",2));
+                    addElementElement("userErr", GETPOST("username","alpha",2), intval($tabT[0]['s'])+1, intval($tabT[0]['d'])+1);
+                }
+                else
+                    addElementElement("userErr", GETPOST("username","alpha",2), "1", "1");
+                if(isset($tabT[0]) && $tabT[0]['d'] > 1)
+                    $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
+                /*f mod drsi*/
+                
+                
                 // Bad password. No authmode has found a good password.
                 $user->trigger_mesg=$langs->trans("ErrorBadLoginPassword").' - login='.GETPOST("username","alpha",2);
                 // We set a generic message if not defined inside function checkLoginPassEntity or subfunctions
@@ -590,7 +621,18 @@ if (! defined('NOLOGIN'))
     // If we are here, this means authentication was successfull.
     if (! isset($_SESSION["dol_login"]))
     {
-        // New session for this login has started.
+        
+        
+        /*mod drsi*/
+        $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
+        if(isset($tabT[0])){
+                    delElementElement("userErr", GETPOST("username","alpha",2));
+                    addElementElement("userErr", GETPOST("username","alpha",2), $tabT[0]['s'], "1");
+        }
+        /*f mod drsi*/
+                
+                
+        // New session for this login.
     	$error=0;
 
     	// Store value into session (values always stored)
@@ -776,6 +818,9 @@ if (! defined('NOLOGIN'))
     // Load permissions
     $user->getrights();
 }
+        /* Mod drsi  */
+        $synopsisHook->initRightsSyn();
+        /*f mod drsi*/
 
 
 dol_syslog("--- Access to ".$_SERVER["PHP_SELF"]);
@@ -1598,6 +1643,10 @@ function left_menu($menu_array_before, $helppagename='', $moresearchform='', $me
     	$menumanager->menu_array_after = $menu_array_after;
 	    $menumanager->showmenu('left'); // output menu_array and menu found in database
 
+            /* Mod drsi*/
+            global $synopsisHook;
+            print $synopsisHook->getMenu();
+            /*FMod drsi*/
 
 	    // Show other forms
 	    if ($searchform)
@@ -1860,6 +1909,11 @@ if (! function_exists("llxFooter"))
     {
         global $conf, $langs;
 
+        //Modif drsi
+        global $synopsisHook;
+        $synopsisHook->footer();
+        //Fin modif drsi
+        
         // Global html output events ($mesgs, $errors, $warnings)
         dol_htmloutput_events();
 

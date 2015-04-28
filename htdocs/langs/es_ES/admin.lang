@@ -1522,6 +1522,7 @@ AccountancyCode=Código contable
 AccountancyCodeSell=Código contable ventas
 AccountancyCodeBuy=Código contable compras
 ##### Agenda #####
+
 AgendaSetup=Módulo configuración de acciones y agenda
 PasswordTogetVCalExport=Clave de autorización vcal export link
 PastDelayVCalExport=No exportar los eventos de más de

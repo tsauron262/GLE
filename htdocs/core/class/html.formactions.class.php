@@ -21,19 +21,19 @@
  *      \file       htdocs/core/class/html.formactions.class.php
  *      \ingroup    core
  *      \brief      Fichier de la classe des fonctions predefinie de composants html actions
- */
+*/
 
 
 /**
  *      Class to manage building of HTML components
- */
+*/
 class FormActions
 {
-    var $db;
-    var $error;
+	var $db;
+	var $error;
 
 
-    /**
+	/**
 	 *	Constructor
 	 *
 	 *  @param		DoliDB		$db      Database handler
@@ -61,6 +61,7 @@ class FormActions
         global $langs,$conf;
 
         $listofstatus = array(
+            '-2' => $langs->trans("Canceled"),
             '-1' => $langs->trans("ActionNotApplicable"),
             '0' => $langs->trans("ActionRunningNotStarted"),
             '50' => $langs->trans("ActionRunningShort"),
@@ -178,7 +179,7 @@ class FormActions
             elseif ($typeelement == 'fichinter') $title=$langs->trans('ActionsOnFicheInter');
         	else $title=$langs->trans("Actions");
 
-        	print_titre($title);
+			print_titre($title);
 
         	$total = 0;	$var=true;
         	print '<table class="noborder" width="100%">';
@@ -237,8 +238,8 @@ class FormActions
         	print '</table>';
         }
 
-        return $num;
-    }
+		return $num;
+	}
 
 
     /**

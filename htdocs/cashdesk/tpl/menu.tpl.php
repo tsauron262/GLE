@@ -23,6 +23,19 @@ include_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 include_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 include_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
 
+
+/*deb mod drsi*/
+if(isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0)
+       $_SESSION["CASHDESK_ID_THIRDPARTY"] = $_REQUEST['socid'];
+
+$form=new Form($db);
+
+print "<form style='float:right' action=''>";
+print $form->select_company($_SESSION["CASHDESK_ID_THIRDPARTY"],'socid','s.client in (1,3)');
+print "<input type='submit' value='Ok'/>";
+print "</form>";
+/*fmod drsi*/
+
 if (!empty($_SESSION["CASHDESK_ID_THIRDPARTY"]))
 {
 	$company=new Societe($db);

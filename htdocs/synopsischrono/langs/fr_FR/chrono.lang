@@ -1,0 +1,11 @@
+StatusDraft=Brouillon
+StatusValidated=Validé
+StatusRevised=Révisé
+StatusClotured=Cloturé
+StatusDraftShort=Brouil.
+StatusValidatedShort=Valid.
+StatusRevisedShort=Revis.
+StatusCloturedShort=Clot.
+StatusInValidation=En Attente de validation
+StatusInValidationShort=Att. Valid.
+ShowChrono=Afficher le Chrono

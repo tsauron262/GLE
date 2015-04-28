@@ -227,6 +227,34 @@ $server->wsdl->addComplexType(
 	)
 );
 
+// Define other specific objects
+$server->wsdl->addComplexType(
+	'group',
+	'complexType',
+	'struct',
+	'all',
+	'',
+	array(
+	'nom' => array('name'=>'nom','type'=>'xsd:string'),
+	'id' => array('name'=>'id','type'=>'xsd:string'),
+	'datec' => array('name'=>'datec','type'=>'xsd:string'),
+	'nb' => array('name'=>'nb','type'=>'xsd:string')
+	)
+);
+
+$server->wsdl->addComplexType(
+	'GroupsArray',
+	'complexType',
+	'array',
+	'',
+	'SOAP-ENC:Array',
+	array(),
+	array(
+	array('ref'=>'SOAP-ENC:arrayType','wsdl:arrayType'=>'tns:group[]')
+	),
+	'tns:group'
+);
+
 
 
 // 5 styles: RPC/encoded, RPC/literal, Document/encoded (not WS-I compliant), Document/literal, Document/literal wrapped

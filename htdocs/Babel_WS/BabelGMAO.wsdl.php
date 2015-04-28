@@ -1,0 +1,288 @@
+<?php
+header('text/xml');
+print <<<EOF
+<?xml version='1.0' encoding='UTF-8'?>
+<definitions name='Inventory'
+ targetNamespace='urn:GLE_GMAO'
+ xmlns:tns='urn:GLE_GMAO'
+ xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+ xmlns:xsd='http://www.w3.org/2001/XMLSchema'
+ xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
+ xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'
+ xmlns='http://schemas.xmlsoap.org/wsdl/'>
+
+    <message name='getItemCountRequest'>
+        <part name='upc' type='xsd:string'/>
+    </message>
+    <message name='getItemCountResponse'>
+        <part name='Result' type='xsd:integer'/>
+    </message>
+
+    <wsdl:message name="getContratListRequest">
+        <wsdl:part
+         name="Input"
+         type="xsd:int"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getContratListResponse">
+        <wsdl:part
+         name="contratList"
+         type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getItemListRequest">
+        <wsdl:part
+         name="Input"
+         type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="getItemListResponse">
+        <wsdl:part
+         name="ItemList"
+         type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="setContratNbTicketRequest">
+        <wsdl:part
+         name="newValue"
+         type="xsd:int"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="setContratNbTicketResponse">
+        <wsdl:part
+         name="newNbTicket"
+         type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="listSocWithContractRequest">
+    </wsdl:message>
+    <wsdl:message name="listSocWithContractResponse">
+        <wsdl:part
+            name="listSoc"
+            type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="createTicketActionRequest">
+        <wsdl:part
+            name="idSoc"
+            type="xsd:string"
+        >
+        </wsdl:part>
+        <wsdl:part
+            name="idCont"
+            type="xsd:int"
+        >
+        </wsdl:part>
+        <wsdl:part
+            name="userMail"
+            type="xsd:string"
+        >
+        </wsdl:part>
+        <wsdl:part
+            name="subject"
+            type="xsd:string"
+        >
+        </wsdl:part>
+        <wsdl:part
+            name="queue"
+            type="xsd:string"
+        >
+        </wsdl:part>
+        <wsdl:part
+            name="priority"
+            type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message name="createTicketActionResponse">
+        <wsdl:part
+            name="createTicketActionResponse"
+            type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <portType name='InventoryPortType'>
+        <operation name='getItemCount'>
+            <input message='tns:getItemCountRequest'/>
+            <output message='tns:getItemCountResponse'/>
+        </operation>
+        <wsdl:operation name="getItemList">
+            <wsdl:input message="tns:getItemListRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:getItemListResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setContratNbTicket">
+            <wsdl:input message="tns:setContratNbTicketRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:setContratNbTicketResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="listSocWithContract">
+            <wsdl:output message="tns:listSocWithContractResponse"></wsdl:output>
+        </wsdl:operation>
+    </portType>
+
+    <wsdl:portType name="BabelPortType">
+        <wsdl:operation name="getContratList">
+            <wsdl:input message="tns:getContratListRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:getContratListResponse">
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="createTicketAction">
+            <wsdl:input message="tns:createTicketActionRequest"></wsdl:input>
+            <wsdl:output message="tns:createTicketActionResponse"></wsdl:output>
+        </wsdl:operation>
+    </wsdl:portType>
+    <binding
+        name='InventoryBinding'
+        type='tns:InventoryPortType'
+    >
+        <soap:binding
+            style='rpc'
+            transport='http://schemas.xmlsoap.org/soap/http'
+        />
+        <operation name='getItemCount'>
+            <soap:operation
+                soapAction='urn:xmethods-delayed-quotes#getItemCount'
+            />
+            <input>
+                <soap:body
+                    use='encoded'
+                    namespace='urn:xmethods-delayed-quotes'
+                    encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'
+                />
+            </input>
+            <output>
+                <soap:body
+                    use='encoded'
+                    namespace='urn:xmethods-delayed-quotes'
+                    encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'
+                />
+            </output>
+        </operation>
+        <wsdl:operation name="getItemList">
+            <soap:operation
+                soapAction="urn:GLE_GMAO/getItemList"
+            />
+            <wsdl:input>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="setContratNbTicket">
+            <soap:operation
+                soapAction="urn:GLE_GMAO/setContratNbTicket"
+            />
+            <wsdl:input>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="listSocWithContract">
+            <soap:operation
+                soapAction="urn:GLE_GMAO/listSocWithContract"
+            />
+            <wsdl:output>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:output>
+        </wsdl:operation>
+    </binding>
+    <wsdl:binding
+        name="BabelBinding"
+        type="tns:BabelPortType"
+    >
+        <soap:binding
+            style="rpc"
+            transport="http://schemas.xmlsoap.org/soap/http"
+        />
+        <wsdl:operation name="getContratList">
+            <soap:operation
+                soapAction="urn:GLE_GMAO/getContratList"
+            />
+            <wsdl:input>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="createTicketAction">
+            <soap:operation
+                soapAction="urn:GLE_GMAO/createTicketAction"
+            />
+            <wsdl:input>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLE_GMAO"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <service name='InventoryService'>
+        <port name='InventoryPort' binding='tns:InventoryBinding'>
+EOF;
+            include_once('../conf/conf.php');
+            print "<soap:address location='".DOL_URL_ROOT."/Babel_WS/webservices.php'/>";
+print <<<EOF
+        </port>
+        <wsdl:port
+         name="BabelPort"
+         binding="tns:BabelBinding"
+        >
+EOF;
+            include_once('../conf/conf.php');
+            print "<soap:address location='".DOL_URL_ROOT."/Babel_WS/webservices.php'/>";
+print <<<EOF
+        </wsdl:port>
+    </service>
+</definitions>
+EOF;

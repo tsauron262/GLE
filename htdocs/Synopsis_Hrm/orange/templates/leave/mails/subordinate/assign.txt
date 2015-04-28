@@ -1,0 +1,10 @@
+Bonjour #subordinate,
+
+Vous êtes informé par ce message que le congé suivant a été attribué pour vous:
+
+Date(s)    Type     Durée (heures)    Commentaire
+#{#date    #type        #duration        #comments}
+
+Merci,
+
+GLE - HRM

@@ -282,6 +282,7 @@ $h++;
 
 print "<br>\n";
 
+$var=true;
 
 dol_fiche_head($head, $mode, $langs->trans("Modules"));
 

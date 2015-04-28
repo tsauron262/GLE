@@ -1,0 +1,93 @@
+/**
+  * GLE by Synopsis et DRSI
+  *
+  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Licence : Artistic Licence v2.0
+  *
+  * Version 1.1
+  * Create on : 4-1-2009
+  *
+  * Infos on http://www.finapro.fr
+  *
+  */
+/*
+html,body{
+    width:100%;
+    height:100%;
+
+    margin:0;padding:0;
+    background-color:#333;
+    text-align:center;
+}
+*/
+/* style for the visualization container */
+#log{
+    font-size: smaller;
+}
+
+#mycanvas
+{
+    overflow: auto;
+    height: 100%;
+}
+
+#infovis {
+    width:850px;
+    height:550px;
+    background-color:transparent;
+    border: 1px Solid #CCCCCC;
+    font-size: 12pt;
+    overflow: auto;
+}
+/*table{
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #FFFFFF;
+    background-color: #0000FF;
+}
+*/
+/* style for node labels */
+/*
+.node {
+    color: white;
+    background-color:transparent;
+    cursor:pointer;
+    font-weight:bold;
+    opacity:0.9;
+    border:1px solid red;
+}
+*/
+.node {
+    border: 1px solid #555;
+    background-color: #ccc;
+    color:#222;
+    cursor:pointer;
+    -webkit-border-radius: 8px 8px;
+    -moz-border-radius: 8px 8px;
+
+}
+.node:hover {
+    cursor:pointer;
+    color: #CFCFCF;
+    background-color:black;
+    font-weight:bold;
+    opacity:1;
+
+}
+
+
+.node1 {
+    border: 1px solid #555;
+    background-color: #fcc;
+    color:#222;
+    cursor:pointer;
+    -webkit-border-radius: 8px 8px;
+    -moz-border-radius: 8px 8px;
+}
+.node1:hover {
+    cursor:pointer;
+    color: #f22;
+    background-color:grey;
+    font-weight:bold;
+    opacity:1;
+}

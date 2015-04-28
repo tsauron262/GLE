@@ -1,0 +1,332 @@
+DiscountShort=Rem.
+isOpt=Opt?
+DescriptionShort=Desc.
+HTBeforeDiscount=Tot. HT avant rem.
+HTAfterDiscount=Tot. HT après rem.
+HTAfterDiscountLine=Tot. HT après rem. ligne
+RemiseGlob = Remise globale
+ProduitsCommande = Produits dans la commande
+BabelQtyOrdered = Qté com
+BabelQtyShipped = Qté exp
+BabelKeepToShip = Qté res
+BabelDateSending = Date exp
+BabelRefCustomerOrderShort = Ref. cli.
+
+//GSM BI
+BabelGSMpushECM = Placer dans l'ECM
+BabelGSMDlReport = Rapports statique
+BabelGSMGenReport = Rapports à la demande
+BabelGSMPush = Pousser
+BabelGSMGen = Générer
+BabelGSMBiTitle = Interface GSM Jasper BI
+BabelGSMPushZimbra = Placer dans Zimbra
+BabelGSMWhere = O&ugrave;?
+BabelGSMWhat = Quoi?
+BabelGSMConfirmCrush = Un fichier de l'ECM va etre ecraser OK ?
+
+oui = oui
+non = non
+
+BabelStepName = Etape
+BabelMandatory = Etape obligatoire ?
+BabelStepDesc = Description étape
+BabelStepDoc = Fichier associé à l'étape
+BabelStepValidator = Validateur de l'étape
+
+BabelOption = En Option
+DownloadZip=Télécharger tous les documents
+
+showUserPropal=Affiche les propositions commerciales crées par cet utilisateur
+showUserFacturePaye=Affiche les factures payées concernant cet utilisateur
+
+StatusSendingDelivered=Livré
+
+
+sautpage=Saut de Page :
+soustot=Sous total :
+header=Section :
+header1Stot=Sous Section :
+header1=Sous Section :
+desc=
+
+
+JASPER_HOST=IP/Nom Serveur Jasper
+JASPER_PORT=Port du webservice Jasper
+JASPER_PROTO=Protocole d'accès
+JASPER_PATH=Chemin du webservice
+JASPER_REPO_PATH_GENERATED=Chemin vers les rapports autogénérés
+JASPER_REPO_PATH_REPORT=Chemin vers les rapports PDF
+BABELJASPER_JASPER_USE_LDAP=Utilisation de LDAP pour l'accès à Jasper
+
+
+LoginIMDis=Désactiver par l'utilisation de LDAP pour le module IM
+LoginJaspDis=Désactiver par l'utilisation de LDAP pour le module BI
+LoginZimbraDis=Désactiver par l'utilisation de LDAP pour le module de collaboration (Zimbra)
+
+IMLogin=Login de l'utilisateur pour le service IM
+IMPass=Mot de passe de l'utilisateur pour le service IM
+
+jasperLogin=Login de l'utilisateur pour le service BI
+jasperPass=Mot de passe de l'utilisateur pour le service BI
+
+ZimbraLogin=Login de l'utilisateur pour le service de collaboration (Zimbra)
+ZimbraPass=Mot de passe de l'utilisateur pour le service de collaboration (facultatif)
+
+getFromZimbra=Recherche Zimbra
+
+PROPALAUTHOR=Créteur de la propale
+PROPALVALID=Validation de la propale
+PROPALCLOTURE=Cloture de la propale
+
+COMMANDEAUTHOR=Créteur de la commande
+COMMANDEVALID=Validation de la cammande
+COMMANDECLOTURE=Cloture de la commande
+
+FACTUREAUTHOR=Créateur de la commande
+FACTUREVALID=Validation de la cammande
+FACTURECLOTURE=Clôture de la commande
+
+SOCCOMMERCIAL=Commercial du compte
+
+StatusContactValidated=Contact valide
+StatusContactNotValidated=Contact invalide
+
+Opened=Ouverts
+
+
+PDFSynopsisDescription=Modèle standard de note de frais
+PDFContratSynopsisDescription=Modèle standard de contrat
+
+ConfirmDemandeValid=Confirmer la demande de validation ?
+ConfirmValidateNdf=Confirmer la validation de la note de frais ?
+ConfirmRefuseNdf=Confirmer le refus de la note de frais ?
+
+StatusTripDraft=Brouillon
+StatusTripProcessing=En cours
+StatusTripValidated=Validé
+StatusTripCloseRefuse=Refusé
+
+StatusTripDraftShort=Brouillon
+StatusTripProcessingShort=En cours
+StatusTripValidatedShort=Validé
+StatusTripCloseRefuseShort=Refusé
+
+BoxTitledeplacement=Informations Ndfs
+BoxLastdeplacement=Informations sur les derniers déplacements
+TechPeopleArea=Zone Technique
+MenuTechPeople=Interv./Dep.
+
+ECMFileManager=Liste des documents
+ECMAuto=Documents GLE
+propal=Proposit. commerciale
+order=Commande
+bill=Facture
+delivery=Livraison
+sending=Expédition
+supplierscommande=Commandes fournisseurs
+cheque=Bordereau de remise
+ECMMan=Autres
+MyZimbra=Mon Zimbra
+RacineZimDocument=Documents
+Briefcase=Fichiers
+
+DescBImodule=Ce module vous permet de consulter les rapports configurées dans JasperServer.<br>Les rapports disponibles sont <ul><li>onDemand : Rapport généré sur demande (peut prendre plusieurs minutes)<li> pré-programmé : Rapport généré régulièrement par JasperServer</ul>Il vous est aussi possible de copier le rapport dans l'ECM, dans votre compte Zimbra ...
+
+
+ZIMBRA_HOST=IP public ou nom public du serveur Zimbra
+ZIMBRA_DOMAIN=domaine du serveur Zimbra
+ZIMBRA_PROTO=Protocole d'accès au serveur Zimbra
+ZIMBRA_PREAUTH=Preauth Key du serveur Zimbra
+ZIMBRA_WEBDAVPROTO=Protocole webdav à utiliser pour joindre le serveur Zimbra
+ZIMBRA_ADMINUSER=Nom de l'utilisateur GLE dans Zimbra
+ZIMBRA_ADMINPASS=Mot de passe de l'utilisateur GLE dans Zimbra
+ZIMBRA_ZIMBRA_USE_LDAP=Synchronisation des comptes Zimbra/GLE
+
+BABELJASPER_JASPER_USE_LDAP=Synchronisation des comptes JasperServer/GLE
+JASPER_REPO_PATH_REPORT=Chemin vers les répertoires des rapports GLE
+JASPER_REPO_PATH_GENERATED=Chemin vers les répertoires des rapports auto-générés GLE
+JASPER_PATH=Chemin du WebService Jasper
+JASPER_PROTO=Protocole d'accè au serveur
+JASPER_PORT=Port TCP du serveur Jasper
+JASPER_HOST=IP public ou nom public du serveur Jasper
+
+Parameter=Paramètre
+Value=Valeur
+Examples=Exemple
+
+populateSoc=Importer société
+populateProp=Importer les propales
+populateCommande=Importer les commandes
+populateFacture=Importer les factures
+populateIntervention=Importer les interventions
+populateExpedition=Importer les expéditions
+populateLivraison=Importer les livraisons
+populateActionCom=Importer les actions com.
+populatePaiement=Importer les payements
+populatePaiementFourn=Importer les paiements fourn.
+populateContact=Importer les contacts
+populateCalUtilisateur=Importers les calendriers utilisateurs
+Reinit:Réinitialisation de Zimbra
+
+
+BABELIM=Messagerie instantannée
+BABELIM_HOST=IP ou nom public du serveur Jabber
+BABELIM_PORT=Port TCP du serveur Jabber
+BABELIM_PROTO=Protocole d'accès au serveur Jabber
+BABELIM_DOMAIN=Domaine configurer sur le serveur Jabber
+BABELIM_IM_USE_LDAP=Synchronisation des comptes GLE avec les comptes Jabber
+BABELIM_XMLSOCKETPORT=Port TCP pour l'accès au serveur jabber en mode xml socket
+
+MAGENTO_HOST=IP ou nom public du serveur Magento
+MAGENTO_PORT=Port TCP du serveur Magento
+MAGENTO_PROTO=Protocole d'accès du serveur Magento
+MAGENTO_PATH=Chemin vers le service SOAP
+MAGENTO_USER=Utilisateur SOAP Magento
+MAGENTO_PASS=Mot de passe utilisateur SOAP Magento
+
+
+up=Vers le haut
+down=Vers le bas
+Compta=Ctrl de gestion
+
+
+
+
+PushToZimbra=Synchro avec mon Zimbra
+
+
+Lines=Lignes
+Line=Ligne
+SearchABill=Chercher une facture
+
+Element=élément
+
+
+//Action Comm
+
+AC_TELOUT=Appel Téléphonique Sortant
+AC_FAX=Envoi Fax
+AC_PROP=Envoi Proposition
+AC_EMAIL=Envoi Email
+AC_RDV=Rendez-vous
+AC_COM=Envoi Commande
+AC_FAC=Envoi Facture
+AC_REL=Relance effectuée
+AC_CLO=Clôture
+AC_TELIN=Appel Téléphonique Entrant
+AC_OTH=Autre
+
+
+HelpProspection=Ce module permet de visualiser et de configurer des campagnes de prospection.
+Cloturer=Clôturé
+Prefix=Préfixe
+
+
+Delivered=Livré
+Canceled=Annulé
+
+
+CampagneStatusDraftShort=En préparation
+CampagneStatusSignedShort=En cours
+CampagneStatusOpenedShort=Validée
+CampagneStatusNotSignedShort=Refusée
+CampagneStatusBilled=Clôturée
+
+ConfirmDemandeValidateProp=Confirmer la demande de validation
+PropalStatusWaitingValidation=En attente de validation
+PropalStatusWaitingValidationShort=Valid. en cours
+MAGENTOSetupSaved=configuration de magento enregistrée
+
+CustomerPilotage=Pilotage GPI
+
+
+
+//GA
+ProductInGAStock=Produit en stock
+ProductInLocation=Produit en location
+ProductReSellL=Produit Cédé
+AddPropalGA=Créer une proposition
+LocationCard=Location
+RelatedContract=Contrats associés
+PDFcontratGASynopsisDescription=Synopsis Gestion d'Actif
+
+
+//Finapro
+
+PDFcontratGAfinaproStdDescription=Modèle standard finapro
+
+
+
+Module22229Name = Demandes Interventions
+Module8745Name = Fiche Intervention
+
+DI=Demande Intervention
+DIs=Demandes Intervention
+NewDI=Nouvelle DI
+AddDI=Créer demande  d'intervention
+ListOfDIs=Liste des demandes d'intervention
+ListOfMyDIs=Liste de mes DI
+LastInterventions=Les %s dernières demandes
+AllDI=Toutes les DI
+ConfirmModifDI=Êtes vous sur de vouloir modifier cette DI ?
+
+intervention=Fiche Intervention
+
+
+CreateDraftDI=Créer brouillon
+CustomerDoesNotHavePrefix=Le client n'a pas de préfixe de défini
+DIContact=Contact demande d'intervention
+DeleteDI=Supprimer la demande
+ValidateDI=Valider la demande
+DeleteDILine=Supprimer la ligne de DI
+ConfirmDeleteDI=Êtes-vous sûr de vouloir effacer cette demande ?
+ConfirmValidateDI=Êtes-vous sûr de vouloir valider cette DI ?
+ConfirmDeleteDILine=Êtes-vous sûr de vouloir effacer cette ligne ?
+
+AntarcticNumRefModelDesc1=Modèle de numérotation générique
+AntarcticNumRefModelError=Activation impossible
+DICard=Fiche DI
+ConfirmPrisEnChargeDI=Confirmer la prise en charge de la DI ?
+PrisEnCharge=Prise en charge
+PrisEnChargeTech=Prise en charge par le Tech
+ConfirmClotureDI=Confirmer la clôture de la demande d'intertvention?
+createFI=Créer une FI
+ConfirmClotureDIJS=Confirmer la clôture de la demande d\'intertvention?
+
+BoxLastsynopsisdemandeintervContrat = Mes dernières demandes d'intervention Contrat
+BoxLastsynopsisdemandeintervCommande = Mes dernières demandes d'intervention Commande
+BoxNextsynopsisdemandeinterv = Mes prochaines demandes d'intervention
+BoxLastsynopsisdemandeinterv = Mes dernières demandes d'intervention
+BoxLastFicheInterv = Mes dernières fiches d'intervention
+BoxTitlefichinter = Mes dernières fiches d'intervention
+
+DeValid = Dévalider
+ConfirmDeValidateIntervention = Confirmer la dévalidation de la FI ?
+
+
+
+
+
+
+NoTechRepresentativeAffected=Pas de technicien affecté
+
+createFI=Créer FI
+
+ConfirmValidateDI = Valider la demande d'intervention ?
+PrisEnCharge = Prise en charge inter
+ConfirmPrisEnChargeDI = Prendre en charge l\'intervention ?
+
+
+CardProduct2 = Produit de contrat
+CardProduct3 = Déplacement
+CardProduct4 = Déplacement contrat
+
+
+HISTONAV = Historique navigation
+
+SendContratByMail = Envoie du contrat par mail
+
+allDoc=Tous les Fichiers joints
+Tous les fichier joint=Tous les Fichiers joints
+
+CivilityShortM. = M.

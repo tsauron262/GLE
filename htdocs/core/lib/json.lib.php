@@ -62,7 +62,7 @@ function dol_json_encode($elements)
 		for ($i = 0, $last = ($num - 1); $i < $num; $i++)
 		{
 			if (! isset($elements[$keysofelements[$i]])) continue;
-			if (is_array($elements[$keysofelements[$i]]) || is_object($elements[$keysofelements[$i]])) $output.= json_encode($elements[$keysofelements[$i]]);
+			if (is_array($elements[$keysofelements[$i]]) || is_object($elements[$keysofelements[$i]])) $output.= /*amodifierdrsi*/@json_encode($elements[$keysofelements[$i]]);
 			else $output .= _val($elements[$keysofelements[$i]]);
 			if ($i !== $last) $output.= ',';
 		}

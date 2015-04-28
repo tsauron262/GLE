@@ -1071,7 +1071,26 @@ abstract class DolibarrModules
 	                    $this->db->free($resqlinsert);
                     }
 
-                    $this->db->free($resqlselect);
+                    dol_syslog(get_class($this)."::insert_permissions sql=".$sql, LOG_DEBUG);
+                    /*Mod drsi*/
+                    $oldLog = (isset($conf->syslog->enabled)? $conf->syslog->enabled : NULL);
+                    $conf->syslog->enabled = NULL;
+                    $resqlinsert=$this->db->query($sql,1);
+                    $conf->syslog->enabled = $oldLog;
+                    /* fin mod drsi */ 
+                    if (! $resqlinsert)
+                    {
+                        if ($this->db->errno() != "DB_ERROR_RECORD_ALREADY_EXISTS")
+                        {
+                            $this->error=$this->db->lasterror();
+                            dol_syslog(get_class($this)."::insert_permissions errno = ".$this->db->errno()." error ".$this->error, LOG_ERR);
+                            $err++;
+                            break;
+                        }
+                        else dol_syslog(get_class($this)."::insert_permissions record already exists", LOG_INFO);
+
+                    }
+                    $this->db->free($resqlinsert);
 
                     // If we want to init permissions on admin users
                     if ($reinitadminperms)

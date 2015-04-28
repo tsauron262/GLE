@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', 1);
+    error_reporting(E_ALL ^ (E_NOTICE));
 /* Copyright (C) 2005      Marc Barilley / Ocebo <marc@ocebo.com>
  * Copyright (C) 2005-2012 Laurent Destailleur   <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2011 Regis Houssin         <regis.houssin@capnetworks.com>

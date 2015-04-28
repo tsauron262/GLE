@@ -1,0 +1,42 @@
+.ui-datepicker {
+    width: 17em;
+    padding: .2em .2em 0;
+    z-index: 100999;
+}
+.error {
+    color: #FF0000;
+    text-decoration: underline;
+}
+.helper-progress-gle {
+    height: 12px;
+    margin-top: 0;
+}
+.ui-progressbar-value {
+    float: left;
+    z-index: 1;
+    position: static;
+}
+.imgSel {
+    position: relative;
+    float: left;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 0px;
+    margin: 3px;
+    margin-top: -2px;
+    border: 1px outset;
+}
+.imgSel:hover {
+    cursor: pointer;
+    border: 1px inset;
+}
+.imgSelOK {
+    border: 1px inset;
+    background-color: #CCCCCC;
+    opacity: 0.9
+}
+#colStcomm {
+    vertical-align: middle;
+    line-height: 0;
+    height: 12px;
+}

@@ -330,10 +330,25 @@ class pdf_crabe extends ModelePDFFactures
 				$iniY = $tab_top + 7;
 				$curY = $tab_top + 7;
 				$nexY = $tab_top + 7;
+                                
+                                /*mod drsi*/
+                                global $accTht, $accTtva;
+                                $accTht = $accTtva = 0;
+                                /*fmoddrsi*/
+                                
 
 				// Loop on each lines
 				for ($i = 0; $i < $nblignes; $i++)
 				{
+                                    
+                                        /*mod drsi*/
+                                        if($object->lines[$i]->desc == "Acompte" && $object->lines[$i]->total < 0){
+                                            $accTht = $object->lines[$i]->total_ht;
+                                            $accTtva = $object->lines[$i]->total_tva;
+                                            continue;
+                                        }
+                                        /*fmoddrsi*/
+        
 					$curY = $nexY;
 					$pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
 					$pdf->SetTextColor(0,0,0);
@@ -927,8 +942,9 @@ class pdf_crabe extends ModelePDFFactures
 		$pdf->SetXY($col1x, $tab2_top + 0);
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
 		$pdf->SetXY($col2x, $tab2_top + 0);
-		$pdf->MultiCell($largcol2, $tab2_hl, price($sign * ($object->total_ht + (! empty($object->remise)?$object->remise:0)), 0, $outputlangs), 0, 'R', 1);
-
+                /*mod drsi*/global $accTht, $accTtva;/*fmod drsi*/
+		$pdf->MultiCell($largcol2, $tab2_hl, price($sign * ($object->total_ht + (! empty($object->remise)?$object->remise:0))/*mod drsi*/-$accTht/*fmod drsi*/, 0, $outputlangs), 0, 'R', 1);
+//print_r($object);die;
 		// Show VAT by rates and total
 		$pdf->SetFillColor(248,248,248);
 
@@ -1121,7 +1137,19 @@ class pdf_crabe extends ModelePDFFactures
 				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($largcol2, $tab2_hl, price($sign * $object->total_ttc, 0, $outputlangs), $useborder, 'R', 1);
+				$pdf->MultiCell($largcol2, $tab2_hl, price($sign * $object->total_ttc /*mod drsi*/-$accTht -$accTtva/*fmod drsi*/, 0, $outputlangs), $useborder, 'R', 1);
+                                
+                                /*mod drsi*/
+                                if(-$accTht > 0){
+                                        $pdf->SetFillColor(248,248,248);
+                                        $index++;
+                                        $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
+                                        $pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("Acompte"), 0, 'L', 0);
+                                        $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
+                                        $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
+                                }
+                                /*fmod drsi*/
+                                
 			}
 		}
 
@@ -1131,16 +1159,20 @@ class pdf_crabe extends ModelePDFFactures
 		$depositsamount=$object->getSumDepositsUsed();
 		//print "x".$creditnoteamount."-".$depositsamount;exit;
 		$resteapayer = price2num($object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 'MT');
+//                die($accTht);
+                
 		if ($object->paye) $resteapayer=0;
 
-		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0)
+		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0  /*moddrs*/|| -$accTht > 0/*fmoddrsi*/)
 		{
 			// Already paid + Deposits
+                    if(($deja_regle + $depositsamount) > 0){
 			$index++;
 			$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
 			$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("Paid"), 0, 'L', 0);
 			$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 			$pdf->MultiCell($largcol2, $tab2_hl, price($deja_regle + $depositsamount, 0, $outputlangs), 0, 'R', 0);
+                    }
 
 			// Credit note
 			if ($creditnoteamount)

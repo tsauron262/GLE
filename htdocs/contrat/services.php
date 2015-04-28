@@ -139,7 +139,7 @@ if ($resql)
 	if ($search_contract) $param.='&amp;search_contract='.urlencode($search_contract);
 	if ($search_name)      $param.='&amp;search_name='.urlencode($search_name);
 	if ($search_service)  $param.='&amp;search_service='.urlencode($search_service);
-	if ($mode)            $param.='&amp;mode='.$mode;
+	if ($mode || $mode == "0")            $param.='&amp;mode='.$mode;
 	if ($filter)          $param.='&amp;filter='.$filter;
 	if (! empty($filter_op1) && $filter_op1 != -1) $param.='&amp;filter_op1='.urlencode($filter_op1);
 	if (! empty($filter_op2) && $filter_op2 != -1) $param.='&amp;filter_op2='.urlencode($filter_op2);
@@ -216,7 +216,14 @@ if ($resql)
 		print '<td>';
 		$contractstatic->id=$obj->cid;
 		$contractstatic->ref=$obj->ref?$obj->ref:$obj->cid;
-		print $contractstatic->getNomUrl(1,16);
+                /*dem mod drsi*/
+                if(isset($memoireIdC) && $memoireIdC == $contractstatic->id)
+                    print "--";
+                else{
+                    $memoireIdC = $contractstatic->id;
+                    print $contractstatic->getNomUrl(1,16);
+                }
+                /*f mod drsi*/
 		print '</td>';
 
 		// Service

@@ -1,0 +1,34 @@
+|======================================================================================================================================|
+|                                                                                                                                      |
+|        Module Affaire                                                                                                                |
+|                                                                                                                                      |
+|======================================================================================================================================|
+
+
+
+Objectif: Super Wrapper au module Projet pour la gestion financière / Evènementielle / Synthèse
+
+
+
+Module complémentaire de :
+    -> Projet
+    -> Propal
+    -> Commande
+    -> Facture
+    -> Commande Fourn
+    -> Facture Fourn
+    -> Contrat
+    -> Contrat de location
+    -> Litiges / SAV / retour client
+
+TODO:
+
+    -> Lié un projet / commande / propal ... à une affaire
+    -> Analyse croisée
+    -> Les Champs Affaire (event, nota, licences etc ... )
+    -> Fiche PN
+    -> Feuille de synthèse
+    -> Trigger pour : Creation de l'affaire : Création d'un calendrier
+                      ajout d'une element
+                      supprimer un element
+                      //Idem vcard ???

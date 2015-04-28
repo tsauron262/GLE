@@ -422,6 +422,17 @@ class Categorie extends CommonObject
 				$error++;
 			}
 		}
+		if (! $error)
+		{
+			$sql  = "DELETE FROM ".MAIN_DB_PREFIX."categorie_contact";
+			$sql .= " WHERE fk_categorie = ".$this->id;
+			if (!$this->db->query($sql))
+			{
+				$this->error=$this->db->lasterror();
+				dol_syslog("Error sql=".$sql." ".$this->error, LOG_ERR);
+				$error++;
+			}
+		}
 
 		// Delete category
 		if (! $error)
@@ -913,6 +924,7 @@ class Categorie extends CommonObject
 
 		// We count number of _ to have level
 		$this->cats[$id_categ]['level']=dol_strlen(preg_replace('/[^_]/i','',$this->cats[$id_categ]['fullpath']));
+
 
 		return;
 	}

@@ -58,10 +58,9 @@ $price_by_qty_rowid = GETPOST('pbq', 'int');
 dol_syslog(join(',', $_GET));
 // print_r($_GET);
 
-if (! empty($action) && $action == 'fetch' && ! empty($id))
-{
-	require DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-
+if (! empty($action) && $action == 'fetch' && ! empty($id)) {
+	require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+	
 	$outjson = array();
 
 	$object = new Product($db);
@@ -187,6 +186,6 @@ if (! empty($action) && $action == 'fetch' && ! empty($id))
 	$db->close();
 
 	if ($outjson)
-		print json_encode($arrayresult);
+		print @json_encode($arrayresult);
 }
 

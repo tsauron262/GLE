@@ -889,10 +889,15 @@ abstract class CommonObject
         $sql.= " FROM ".(empty($nodbprefix)?MAIN_DB_PREFIX:'').$this->table_element." as te";
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && empty($user->rights->societe->client->voir))) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON ".$alias.".rowid = sc.fk_soc";
-        $sql.= " WHERE te.".$fieldid." < '".$this->db->escape($this->ref)."'";
+        $sql.= " WHERE te.".$fieldid." < '".$this->db->escape(/*mod drsi*/$this->id/*f mod drsi*/)."'";
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " AND sc.fk_user = " .$user->id;
         if (! empty($filter)) $sql.=" AND ".$filter;
-        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ' AND te.fk_soc = s.rowid';			// If we need to link to societe to limit select to entity
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
+            if($this->table_element == "user")
+            $sql.= ' AND te.fk_societe = s.rowid';
+            else
+            $sql.= ' AND te.fk_soc = s.rowid';// If we need to link to societe to limit select to entity
+        }/*fmoddrsi*/
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) $sql.= ' AND te.entity IN ('.getEntity($this->element, 1).')';
 
         //print $sql."<br>";
@@ -910,10 +915,15 @@ abstract class CommonObject
         $sql.= " FROM ".(empty($nodbprefix)?MAIN_DB_PREFIX:'').$this->table_element." as te";
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON ".$alias.".rowid = sc.fk_soc";
-        $sql.= " WHERE te.".$fieldid." > '".$this->db->escape($this->ref)."'";
+        $sql.= " WHERE te.".$fieldid." > '".$this->db->escape(/*mod drsi*/$this->id/*f mod drsi*/)."'";
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " AND sc.fk_user = " .$user->id;
         if (! empty($filter)) $sql.=" AND ".$filter;
-        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ' AND te.fk_soc = s.rowid';			// If we need to link to societe to limit select to entity
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
+            if($this->table_element == "user")
+            $sql.= ' AND te.fk_societe = s.rowid';
+            else
+            $sql.= ' AND te.fk_soc = s.rowid';// If we need to link to societe to limit select to entity
+        }/*fmoddrsi*/
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) $sql.= ' AND te.entity IN ('.getEntity($this->element, 1).')';
         // Rem: Bug in some mysql version: SELECT MIN(rowid) FROM llx_socpeople WHERE rowid > 1 when one row in database with rowid=1, returns 1 instead of null
 
@@ -2959,9 +2969,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_products'] += $pv - $pa;
 				}
 				elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '2') { // remise globale considérée comme service
@@ -2970,9 +2980,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_services'] += $pv - $pa;
 				}
 				elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '3') { // remise globale prise en compte uniqt sur total
@@ -2990,9 +3000,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_products'] += $pv - $pa;
 				}
 				elseif ($type == 1) {  // service
@@ -3003,9 +3013,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_services'] += $pv - $pa;
 				}
 			}
@@ -3021,9 +3031,9 @@ abstract class CommonObject
 			$marginInfos['mark_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pv_services'];
 
 		// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-		if ($marginInfos['pv_total'] < 0)
+/*mod drsi		if ($marginInfos['pv_total'] < 0)
 			$marginInfos['total_margin'] = -1 * (abs($marginInfos['pv_total']) - $marginInfos['pa_total']);
-		else
+		else fmod drsi*/
 			$marginInfos['total_margin'] = $marginInfos['pv_total'] - $marginInfos['pa_total'];
 		if ($marginInfos['pa_total'] > 0)
 			$marginInfos['total_margin_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pa_total'];

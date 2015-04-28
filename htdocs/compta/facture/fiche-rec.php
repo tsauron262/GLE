@@ -411,6 +411,7 @@ else
 			print '<tr><td>'.$langs->trans("AmountTTC").'</td><td colspan="3">'.price($object->total_ttc,'',$langs,1,-1,-1,$conf->currency).'</td>';
 			print '</tr>';
 
+
 			// Payment term
 			print '<tr><td>'.$langs->trans("PaymentConditions").'</td><td colspan="3">';
 			$form->form_conditions_reglement($_SERVER['PHP_SELF'].'?id='.$object->id, $object->cond_reglement_id,'none');

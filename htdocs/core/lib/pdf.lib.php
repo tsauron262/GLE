@@ -334,7 +334,8 @@ function pdf_build_address($outputlangs,$sourcecompany,$targetcompany='',$target
 	{
 		if ($usecontact)
 		{
-			$stringaddress .= ($stringaddress ? "\n" : '' ).$outputlangs->convToOutputCharset($targetcontact->getFullName($outputlangs,1));
+                        if($targetcompany->nom != $targetcontact->getFullName($outputlangs,1, 0))
+			$stringaddress .= ($stringaddress ? "\n" : '' ).$outputlangs->convToOutputCharset($targetcontact->getFullName($outputlangs,1, 0));
 
 			if (!empty($targetcontact->address)) {
 				$stringaddress .= ($stringaddress ? "\n" : '' ).$outputlangs->convToOutputCharset(dol_format_address($targetcontact))."\n";
@@ -753,6 +754,11 @@ function pdf_pagefoot(&$pdf,$outputlangs,$paramfreetext,$fromcompany,$marge_bass
 	}
 
 	// Line 3 of company infos
+        if($fromcompany->name == "BIMP")
+	$line3="OLYS ";
+    else {
+        
+    $line3 = "";}
 	// Juridical status
 	if ($fromcompany->forme_juridique_code)
 	{

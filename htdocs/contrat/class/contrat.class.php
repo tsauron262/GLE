@@ -1242,7 +1242,6 @@ class Contrat extends CommonObject
 	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0)
 	{
 		global $user, $langs, $conf, $mysoc;
-
 		dol_syslog(get_class($this)."::addline $desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type, $pu_ttc, $info_bits");
 
 		if ($this->statut >= 0)
@@ -1289,6 +1288,7 @@ class Contrat extends CommonObject
 			$total_localtax1= $tabprice[9];
 			$total_localtax2= $tabprice[10];
 
+echo $price_base_type."ici".$pu."|".$qty."|".$total_ht;die;
 			$localtax1_type=$localtaxes_type[0];
 			$localtax2_type=$localtaxes_type[2];
 
@@ -1347,17 +1347,11 @@ class Contrat extends CommonObject
 				$result=$this->update_statut($user);
 				if ($result > 0)
 				{
-				    // Call trigger
-				    $result=$this->call_trigger('LINECONTRACT_CREATE',$user);
-				    if ($result < 0)
-				    {
-				        $this->db->rollback();
-				        return -1;
-				    }
-				    // End call triggers
-
-					$this->db->commit();
-					return 1;
+                                    /*Mod drsi retourne id */
+                                    $id = $this->db->last_insert_id(MAIN_DB_PREFIX . "contratdet");
+                                    $this->db->commit();
+                                    return $id;
+                                    /* fmod drsi */
 				}
 				else
 				{

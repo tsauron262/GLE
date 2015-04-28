@@ -27,6 +27,8 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         
         $ligne->label = str_replace("'", "", $ligne->label);
         $ligne->note = str_replace("'", "", $ligne->note);
+        $ligne->label = str_replace('\\', "", $ligne->label);
+        $ligne->note = str_replace("\\", "", $ligne->note);
 
 
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;

@@ -25,8 +25,8 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         if ($ligne->label == "")
             $ligne->label = "N/C";
         
-        $ligne->label = str_replace("'", "", $ligne->label);
-        $ligne->note = str_replace("'", "", $ligne->note);
+//        $ligne->label = str_replace("'", "", $ligne->label);
+//        $ligne->note = str_replace("'", "", $ligne->note);
         $ligne->label = str_replace('\\', "", $ligne->label);
         $ligne->note = str_replace("\\", "", $ligne->note);
 

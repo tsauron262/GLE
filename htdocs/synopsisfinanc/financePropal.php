@@ -28,86 +28,86 @@ restrictedArea($user, 'propal', $id, '');
 
 $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '<script>$(document).ready(function(){'
-            . '$("#socid").change(function(e){'//fonction de changement de rapporteur
-                . 'var send=$("#socid").val();'
-                . 'if(send>0){'
-                    . '$.ajax({'
-                        . 'url:"'.DOL_URL_ROOT.'/synopsischrono/ajax/contactSoc-xml_response.php",'
-                        . 'method: "POST",'
-                        . 'data: {"socid":send},'
-                        . 'dataType: "HTML",'
-                        . 'success: function(data){'
-                            . '$("#contactid").html(data);'
-                        . '},'
-                        . 'error: function(){'
-                            . 'alert("Erreur: connexion impossible.");'
-                        . '}'
-                    . '});'
-                . '}else{'
-                    . '$("#contactid").html("");'
-                . '}'
-            . '});'
-            . '$("#banque").change(function(e){'//fonction mise à jour donnée en fonction fric dispo du client
-                . 'if($("#banque").val()!=""){'
-                    . '$("#taux").val($("#banque").val());'
-                . '}'
-                . '$("#Bcache").val($("#banque option:selected").html());'
-            . '});'
-            . '$("#bouton").click(function(e){'
-                . 'e.preventDefault();'
-                . 'calc();'
-            . '});'
-            . '$("#pretAP").change(function(e){'
-                . 'calc();'
-            . '});'
-            . '$(".rad").change(function(e){'
-                . 'init_location(true);'
-            . '});'
-            . 'init_location(false);'
+        . '$("#socid").change(function(e){'//fonction de changement de rapporteur
+        . 'var send=$("#socid").val();'
+        . 'if(send>0){'
+        . '$.ajax({'
+        . 'url:"' . DOL_URL_ROOT . '/synopsischrono/ajax/contactSoc-xml_response.php",'
+        . 'method: "POST",'
+        . 'data: {"socid":send},'
+        . 'dataType: "HTML",'
+        . 'success: function(data){'
+        . '$("#contactid").html(data);'
+        . '},'
+        . 'error: function(){'
+        . 'alert("Erreur: connexion impossible.");'
+        . '}'
+        . '});'
+        . '}else{'
+        . '$("#contactid").html("");'
+        . '}'
+        . '});'
+        . '$("#banque").change(function(e){'//fonction mise à jour donnée en fonction fric dispo du client
+        . 'if($("#banque").val()!=""){'
+        . '$("#taux").val($("#banque").val());'
+        . '}'
+        . '$("#Bcache").val($("#banque option:selected").html());'
+        . '});'
+        . '$("#bouton").click(function(e){'
+        . 'e.preventDefault();'
+        . 'calc();'
+        . '});'
+        . '$("#pretAP").change(function(e){'
+        . 'calc();'
+        . '});'
+        . '$(".rad").change(function(e){'
+        . 'init_location(true);'
+        . '});'
+        . 'init_location(false);'
         . '});'
         . 'function init_location(valdef){'
-            . 'var radio=$(".rad:checked");'
-            . 'if($(radio).val()=="financier"){'
-                . '$(".pr").fadeOut();'
-                . '$("#preter").val(0);'
-                . '$(".vr").fadeOut();'
-                . '$("#VR").val(0);'
-                . 'if(valdef)'
-                    . '$("#montant").val((parseFloat($("#tot").html().replace(" ","").replace(",","."))));'
-            . '}'
-            . 'if($(radio).val()=="operationnel"){'
-                . '$(".pr").fadeOut();'
-                . '$("#preter").val(0);'
-                . '$(".vr").fadeIn();'
-                . 'if(valdef)'
-                    . '$("#VR").val(parseFloat($("#matos").html().replace(" ", "").replace(",","."))*0.15);'
-                . 'if(valdef)'
-                    . '$("#montant").val(parseFloat($("#tot").html().replace(" ","").replace(",","."))-$("#VR").val());'
-            . '}'
-            . 'if($(radio).val()=="evol+"){'
-                . '$(".pr").fadeIn();'
-                . '$(".vr").fadeOut();'
-                . '$("#VR").val(0);'
-                . 'if(valdef){'
-                    . '$("#preter").val(parseFloat($("#matos").html().replace(" ", "").replace(",",".")));'
-                    . '$("#montant").val(parseFloat($("#tot").html().replace(" ","").replace(",","."))-$("#preter").val());'
-                . '}'
-            . '}'
+        . 'var radio=$(".rad:checked");'
+        . 'if($(radio).val()=="financier"){'
+        . '$(".pr").fadeOut();'
+        . '$("#preter").val(0);'
+        . '$(".vr").fadeOut();'
+        . '$("#VR").val(0);'
+        . 'if(valdef)'
+        . '$("#montant").val((parseFloat($("#tot").html().replace(" ","").replace(",","."))));'
+        . '}'
+        . 'if($(radio).val()=="operationnel"){'
+        . '$(".pr").fadeOut();'
+        . '$("#preter").val(0);'
+        . '$(".vr").fadeIn();'
+        . 'if(valdef)'
+        . '$("#VR").val(parseFloat($("#matos").html().replace(" ", "").replace(",","."))*0.15);'
+        . 'if(valdef)'
+        . '$("#montant").val(parseFloat($("#tot").html().replace(" ","").replace(",","."))-$("#VR").val());'
+        . '}'
+        . 'if($(radio).val()=="evol+"){'
+        . '$(".pr").fadeIn();'
+        . '$(".vr").fadeOut();'
+        . '$("#VR").val(0);'
+        . 'if(valdef){'
+        . '$("#preter").val(parseFloat($("#matos").html().replace(" ", "").replace(",",".")));'
+        . '$("#montant").val(parseFloat($("#tot").html().replace(" ","").replace(",","."))-$("#preter").val());'
+        . '}'
+        . '}'
         . '}'
         . 'function calc(){'
-            . 'var fric_dispo = parseFloat($("#pretAP").val());'
+        . 'var fric_dispo = parseFloat($("#pretAP").val());'
         . 'if(fric_dispo>0){'
-            . 'var mois = parseFloat($("#mensuel").val());'
-            . 'var dure = parseFloat($("#duree").val());'
-            . 'var cC=parseFloat($("#commC").val());'
-            . 'var cF=parseFloat($("#commF").val());'
-            . 'var mensualite=fric_dispo/mois;'
-            . 'var interet = parseFloat($("#taux").val());'
-            . 'interet=interet/100/12;'
-            . 'var emprunt = mensualite / (interet / (1 - Math.pow(1+interet, -dure)));'
-            . 'var res=emprunt/((100+cC)/100*(100+cF)/100);'
-            . 'res=Math.round(res*100)/100;'
-            . '$("#montant").val(res);'
+        . 'var mois = parseFloat($("#mensuel").val());'
+        . 'var dure = parseFloat($("#duree").val());'
+        . 'var cC=parseFloat($("#commC").val());'
+        . 'var cF=parseFloat($("#commF").val());'
+        . 'var mensualite=fric_dispo/mois;'
+        . 'var interet = parseFloat($("#taux").val());'
+        . 'interet=interet/100/12;'
+        . 'var emprunt = mensualite / (interet / (1 - Math.pow(1+interet, -dure)));'
+        . 'var res=emprunt/((100+cC)/100*(100+cF)/100);'
+        . 'res=Math.round(res*100)/100;'
+        . '$("#montant").val(res);'
         . '}}'
         . '</script>';
 
@@ -135,22 +135,21 @@ $totLogiciel = 0;
 foreach ($object->lines as $obj) {
     if ($obj->product_type == 1) {
         $totService+=$obj->subprice;
-    }elseif ($obj->product_type == 5) {
+    } elseif ($obj->product_type == 5) {
         $totLogiciel+=$obj->subprice;
-    }elseif($obj->fk_product){
-        $prod=new product($db);
-        require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-        $cate=new Categorie($db);
-        $ctg=$cate->containing($obj->fk_product, "product");
-        $find=false;
+    } elseif ($obj->fk_product) {
+        $prod = new product($db);
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+        $cate = new Categorie($db);
+        $ctg = $cate->containing($obj->fk_product, "product");
+        $find = false;
         foreach ($ctg as $obj2) {
-            if(stripos($obj2->label,"logiciel")!==FALSE){
-                $find=true;
+            if (stripos($obj2->label, "logiciel") !== FALSE) {
+                $find = true;
             }
         }
-        if($find==true){
+        if ($find == true) {
             $totLogiciel+=$obj->subprice;
-
         }
 //        $prod->fetch($obj->fk_product);
         //print_r($ctg);
@@ -188,11 +187,11 @@ $periode = 1;
 $VR = 0;
 $pret = 0;
 $location = "financier";
-$socid=0;
+$socid = 0;
 //$socid = $object->socid;
 $idoldcontact = 0;
 $idcontact = 0;
-$idoldcontact_rowid=0;
+$idoldcontact_rowid = 0;
 
 
 if ($valfinance->id) {
@@ -215,11 +214,12 @@ foreach ($contact as $key => $value) {
         $socid = $value["socid"];
         $idcontact = $value["id"];
         $idoldcontact = $value["id"];
-        $idoldcontact_rowid=$value["rowid"];
+        $idoldcontact_rowid = $value["rowid"];
     }
 }
 
-if (isset($_POST['form1'])) {
+
+if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $montantAF = $_POST['montantAF'];
     $commC = $_POST['commC'];
     $duree = $_POST['duree'];
@@ -251,7 +251,6 @@ if (isset($_POST['form1'])) {
     $valfinance->location = $location;
 
     $valfinance->calcul();
-
     if ($valfinance->id > 0)
         $valfinance->update($user);
     else
@@ -270,28 +269,29 @@ if (isset($_POST['form1'])) {
     $result = propale_pdf_create($db, $object, GETPOST('model') ? GETPOST('model') : "azurFinanc", $outputlangs, $hidedetails, $hidedesc, $hideref);
 }
 
-if(isset($_POST["form2"])){
-    include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-    $contract=new Contrat($db);
+if (isset($_POST["form2"]) && !$valfinance->contrat_id > 0) {
+    include_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
+    $contract = new Contrat($db);
     //print_r (convertirDate($_POST["datesign"],false));
-    $contract->date_contrat=convertirDate($_POST["datesign"],false);
-    $contract->socid=$object->socid;
-    $contract->commercial_suivi_id=$user->id;
-    $contract->commercial_signature_id=$user->id;
+    $contract->date_contrat = convertirDate($_POST["datesign"], false);
+    $contract->socid = $object->socid;
+    $contract->commercial_suivi_id = $user->id;
+    $contract->commercial_signature_id = $user->id;
     $contract->create($user);
-    
-    $valfinance->contrat_id=$contract->id;
+
+    $valfinance->contrat_id = $contract->id;
     $valfinance->update($user);
-    
-    $date_fin=new DateTime(convertirDate($_POST["datesign"],false));
-    $date_fin->add(new DateInterval('P'.$valfinance->duree.'M'));
-    $date_fin=$date_fin->format('Y-m-d');
-    
-    $contract->addline("Financement Propal ".$object->ref, $valfinance->loyer, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"],false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
+
+    $date_fin = new DateTime(convertirDate($_POST["datesign"], false));
+    $date_fin->add(new DateInterval('P' . $valfinance->duree . 'M'));
+    $date_fin = $date_fin->format('Y-m-d');
+
+    $contract->addline("Financement Propal " . $object->ref, $valfinance->loyer, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"], false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
     addElementElement("propal", "contrat", $object->id, $contract->id);
 }
 
-if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG!=$montantAF+$VR+$pret) {
+
+if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret) {
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";
 }
 
@@ -308,11 +308,11 @@ if ($user->rights->synopsisFinanc->write) {
     require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
     $form = new Form($db);
     echo $form->select_thirdparty($socid, "socid");
-    if($socid>0)
-        echo $form->selectcontacts($socid, $idcontact,"contactid",1);
+    if ($socid > 0)
+        echo $form->selectcontacts($socid, $idcontact, "contactid", 1);
     else
         echo "<select id='contactid' class='flat' name='contactid'></select>";
-    
+
     echo "<br/><hr/><br/>";
     echo "<input type='hidden' name='form1'/>";
 
@@ -372,7 +372,7 @@ if ($user->rights->synopsisFinanc->write) {
         echo '<input type="hidden" id="Bcache" name="Bcache" value=""/>';
         echo '<tr>';
     }
-    echo "<td class='BB' colspan='2'><input type='submit' class='butAction' value='Valider'/></td>";
+    echo "<td class='BB' colspan='2'><input type='submit' class='butAction' value='Valider' " . (($valfinance->contrat_id > 0) ? "disabled='disabled'" : "") . " /></td>";
     echo '</tr>';
     echo '</table>';
     echo '</form>';
@@ -380,28 +380,28 @@ if ($user->rights->synopsisFinanc->write) {
 
 if ($valfinance->id > 0) {
 
-if($montantAF+$VR+$pret>0){
-    echo "<br/><hr/><br/>";
+    if ($montantAF + $VR + $pret > 0) {
+        echo "<br/><hr/><br/>";
 
-    echo "Montant Total a emprunter sur la periode : " . price($valfinance->emprunt);
+        echo "Montant Total a emprunter sur la periode : " . price($valfinance->emprunt);
 
-    echo"<br/><br/>";
+        echo"<br/><br/>";
 
 
 
-    echo $tabM[$valfinance->periode] . ": " . price(($valfinance->loyer) + 0.005) . " €   X   " . $valfinance->nb_periode . " periodes soit " . price($valfinance->prix_final) . " € HT";
+        echo $tabM[$valfinance->periode] . ": " . price(($valfinance->loyer) + 0.005) . " €   X   " . $valfinance->nb_periode . " periodes soit " . price($valfinance->prix_final) . " € HT";
 
-    if ($valfinance->VR > 0) {
+        if ($valfinance->VR > 0) {
 
-        echo " avec un VR de: " . price($valfinance->VR) . " €";
-    }
-    
-    echo '<br/><br/><form method="post">';
+            echo " avec un VR de: " . price($valfinance->VR) . " €";
+        }
+
+        echo '<br/><br/><form method="post">';
         echo '<input type="hidden" name="form2" value="form2"/>';
         echo "signer le: <input type='text' name='datesign' value='' class='datePicker'/>";
-        echo '<input type="submit" name="signer" class="butAction" value="transformer en contrat" '.(($valfinance->contrat_id>0) ? "disabled='disabled'" : "").' />';
-    echo "</form>";
-}
+        echo '<input type="submit" name="signer" class="butAction" value="transformer en contrat" ' . (($valfinance->contrat_id > 0) ? "disabled='disabled'" : "") . ' />';
+        echo "</form>";
+    }
 }
 echo '</div>';
 echo '<div class="fichehalfleft">';

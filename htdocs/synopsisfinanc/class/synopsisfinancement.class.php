@@ -43,10 +43,13 @@ class Synopsisfinancement extends CommonObject {
 
     function calcul() {
         $this->emprunt = $this->montantAF * ((100 + $this->commC) / 100 * (100 + $this->commF) / 100);
-
-        $this->interet = $this->taux / 100 / 12;
-
-        $this->mensualite = $this->emprunt * ($this->interet / (1 - pow((1 + $this->interet), -($this->duree))));
+        
+        if($this->taux>0){
+            $this->interet = $this->taux / 100 / 12;
+            $this->mensualite = $this->emprunt * ($this->interet / (1 - pow((1 + $this->interet), -($this->duree))));
+        }else{
+            $this->mensualite = $this->emprunt/$this->duree;
+        }
 
         $this->mensualite0 = $this->pret / $this->duree;
 
@@ -159,8 +162,13 @@ class Synopsisfinancement extends CommonObject {
     function calc_no_commF(){
         $this->emprunt2 = $this->montantAF * (100 + $this->commC);
         
-        $this->mensualite2 = $this->emprunt2 * ($this->interet / (1 - pow((1 + $this->interet), -($this->duree))));
-
+        if($this->taux>0){
+            //$this->interet = $this->taux / 100 / 12;
+            $this->mensualite2 = $this->emprunt2 * ($this->interet / (1 - pow((1 + $this->interet), -($this->duree))));
+        }else{
+            $this->mensualite2 = $this->emprunt2/$this->duree;
+        }
+        
         $this->mensualite02 = $this->pret / $this->duree;
 
         $this->loyer2 = ($this->mensualite2 + $this->mensualite02) * $this->periode;

@@ -471,7 +471,7 @@ class PDO extends AbstractBackend {
         $user = new \User($db);
         $user->fetch($calendarId);
 
-        $action->type_id = 1;
+        $action->type_id = 5;
         global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
         $objectDataTemp = $calendarData;
         $objectEtagTemp = $extraData['etag'];

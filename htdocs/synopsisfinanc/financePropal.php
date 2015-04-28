@@ -287,7 +287,8 @@ if(isset($_POST["form2"])){
     $date_fin->add(new DateInterval('P'.$valfinance->duree.'M'));
     $date_fin=$date_fin->format('Y-m-d');
     
-    $contract->addline("Financement Propal ".$object->ref, $valfinance->loyer, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"],false), $date_fin, 'HT', null, NULL, null, $valfinance->calc_no_commF());
+    $contract->addline("Financement Propal ".$object->ref, $valfinance->loyer, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"],false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
+    addElementElement("propal", "contrat", $object->id, $contract->id);
 }
 
 if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG!=$montantAF+$VR+$pret) {
@@ -417,7 +418,12 @@ $delallowed = $user->rights->propal->supprimer;
 $var = true;
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 $formfile = new FormFile($db);
+echo "<br/>";
 $somethingshown = $formfile->show_documents('propal', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);
+echo "</div>";
+
+echo "<div class='fichehalfright'>";
+$somethingshown = $object->showLinkedObjectBlock();
 
 
 

@@ -71,3 +71,7 @@ table.monnom{
 .monnom select{
     width: 60%;
 }
+
+.fichehalfright{
+    width: 49% !important;
+}

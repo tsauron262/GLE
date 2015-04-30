@@ -79,7 +79,7 @@ function widget_statOfcService() {
           $objp = $db->fetch_object($result);
           $var=!$var;
           $table2 .= "<tr $bc[$var]>";
-          $table2 .= '<td><a href="'.DOL_URL_ROOT.'/product/stats/fiche.php?id='.$objp->rowid.'">';
+          $table2 .= '<td><a href="'.DOL_URL_ROOT.'/product/stats/card.php?id='.$objp->rowid.'">';
         if ($objp->fk_product_type==1) $table2 .= img_object($langs->trans("ShowService"),"service");
         else $table2 .= img_object($langs->trans("ShowProduct"),"product");
           $table2 .= " ";

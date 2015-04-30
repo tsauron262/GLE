@@ -61,7 +61,7 @@ $requete = "SELECT
     {
         while($res=$db->fetch_object($resql))
         {
-            $rul = $dolibarr_main_url_root . DOL_URL_ROOT."/fourn/livraison/fiche.php?id=".$res->rowid;
+            $rul = $dolibarr_main_url_root . DOL_URL_ROOT."/fourn/livraison/card.php?id=".$res->rowid;
             if ($res->date_creation && $showLivraisonCreate)
             {
                $arrRes = $BCalc->pushDateArr(

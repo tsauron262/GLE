@@ -47,7 +47,7 @@ $dir = $conf->global->BIMP_PATH_IMPORT;
 //UTF8 pour les mail de la messagerie "prepa commande"
 //Expedition => statut notifier
 //Liste prépa commande / 10/50 Derniers contrat à saisir
-//Problème icone dans commande/fiche.php?id= (contrat et déplacement)
+//Problème icone dans commande/card.php?id= (contrat et déplacement)
 //Notification de nouvelle intervention :> sujet manquant (mauvais codage des caractères accentués)
 //Widget Logistique => toutes expedition à préparer. => Lister les commandes avec date de livraison, le dépot à, => faire 4 colonnes :> La ref commande, la date de livraison, le destinataire deu tas à monter etat financier (icone) + Attention, commanbde expédié si total(effacé)
 //Renouvellemenent dans modif société faute de frappe
@@ -151,11 +151,11 @@ $dir = $conf->global->BIMP_PATH_IMPORT;
 // ref client/code client ds pdf contrat
 // stats produit => redirige vers liste_orig.php
 // liste_orig.php => prob marche pas avec contrat et deplacement
-// Contrat contrat/fiche.php => prob ordre select_user
+// Contrat contrat/card.php => prob ordre select_user
 // Remettre liste au lieu de carte dans product/liste.php recherche par ref
 // Contrat -> commandedet => prob accent
 // total ht ds contrat bug
-// contrat en double si non rattaché à un produit http://192.168.1.10/GLE/contrat/fiche.php?id=3
+// contrat en double si non rattaché à un produit http://192.168.1.10/GLE/contrat/card.php?id=3
 // limite contrat warning 30j
 // BI stats trimestre + annuel
 // BI doubleValue in duration (2 rapport 4 ss rapport)
@@ -172,7 +172,7 @@ $dir = $conf->global->BIMP_PATH_IMPORT;
 //Vendu par gamme => valign=top
 //Modif modele Einstein
 //PrepaCommande champs intervenant => pas trier dans le bon ordre (prenom nom)
-//Date dans FI=> prob accent dans liste et fiche.php
+//Date dans FI=> prob accent dans liste et card.php
 //LDAP
 //ChangeLog du 29/11/2010
 //Stats rapport BI intervention par mois % intervenant % type Interv % societe

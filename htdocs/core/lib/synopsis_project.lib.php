@@ -45,20 +45,20 @@ function synopsis_project_prepare_head($projet)
     $h = 0;
     $head = array();
 
-    $head[$h][0] = DOL_URL_ROOT.'/projet/fiche.php?id='.$projet->id;
+    $head[$h][0] = DOL_URL_ROOT.'/projet/card.php?id='.$projet->id;
     $head[$h][1] = $langs->trans("Project");
     $head[$h][2] = 'project';
     $h++;
 
     if ($projet->hasTache == 1)
     {
-        $head[$h][0] = DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$projet->id;
+        $head[$h][0] = DOL_URL_ROOT.'/projet/tasks/card.php?id='.$projet->id;
         $head[$h][1] = $langs->trans("Tasks");
         $head[$h][2] = 'tasks';
         $h++;
     } else if ($projet->hasTacheLight == 1)
     {
-        $head[$h][0] = DOL_URL_ROOT.'/projet/tasks/fiche.php?mode=light&id='.$projet->id;
+        $head[$h][0] = DOL_URL_ROOT.'/projet/tasks/card.php?mode=light&id='.$projet->id;
         $head[$h][1] = $langs->trans("Tasks");
         $head[$h][2] = 'tasks';
         $h++;

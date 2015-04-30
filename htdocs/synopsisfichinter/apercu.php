@@ -192,7 +192,7 @@ if ($_GET["id"] > 0) {
                 // Client
                 print "<tr><td class='ui-widget-header ui-state-default'>".$langs->trans("Customer")."</td>";
                 print '<td colspan="2" class="ui-widget-content">';
-                print '<a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$societe->id.'">'.$societe->nom.'</a>';
+                print '<a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$societe->id.'">'.$societe->nom.'</a>';
                 print '</td>';
                 print '</tr>';
 

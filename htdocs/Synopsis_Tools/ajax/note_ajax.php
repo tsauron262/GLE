@@ -14,7 +14,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
 
 
     if (stripos($url, '/societe/') !== false
-            || stripos($url, '/comm/fiche.php')
+            || stripos($url, '/comm/card.php')
             || stripos($url, '/categories/categorie.php')
             || stripos($url, '/Synopsis_Tools/allDocumentSoc.php') !== false) {
         $droit1 = $user->rights->societe->lire;
@@ -27,7 +27,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit1 = $user->rights->commande->lire;
         $droit2 = $user->rights->commande->creer;
     }
-    if (stripos($url, '/synopsischrono/fiche.php') !== false) {
+    if (stripos($url, '/synopsischrono/card.php') !== false) {
         $table = MAIN_DB_PREFIX . "synopsischrono";
         $droit1 = true;
         $droit2 = true;

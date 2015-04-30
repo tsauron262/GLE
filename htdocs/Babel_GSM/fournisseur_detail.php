@@ -385,7 +385,7 @@ print $soc->nom;
             $var=!$var;
             print '<tr '.$bc[$var].'>';
             print '<td>';
-            print '<a href="facture/fiche.php?facid='.$obj->rowid.'">';
+            print '<a href="facture/card.php?facid='.$obj->rowid.'">';
             print img_object($langs->trans('ShowBill'),'bill').' '.$obj->facnumber.'</a> '.dol_trunc($obj->libelle,14).'</td>';
             print '<td align="center" >'.dol_print_date($db->jdate($obj->df),'day').'</td>';
             print '<td align="right" >'.price($obj->amount).'</td>';

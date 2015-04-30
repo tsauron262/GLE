@@ -117,7 +117,7 @@ class box_produits extends ModeleBoxes {
                     'align' => 'left',
                     'logo' => ($objp->fk_product_type==1?'object_service':'object_product'),
                     'text' => $objp->label,
-                    'url' => DOL_URL_ROOT."/product/fiche.php?id=".$objp->rowid);
+                    'url' => DOL_URL_ROOT."/product/card.php?id=".$objp->rowid);
 
                     if ($objp->price_base_type == 'HT')
                     {

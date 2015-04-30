@@ -76,7 +76,7 @@ function widget_listFactureCess() {
                     $facturestatic->type=$res->type;
                     $facturestatic->statut = $res->fk_statut;
                     $table .= $facturestatic->getNomUrl(1,'');
-                    $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
+                    $table .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                     $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td>';
                     $table .=  '<td align="right" nowrap="nowrap">'.$facturestatic->getLibStatut(5).'</td></tr>';
                     $total += $res->total_ht;
@@ -88,7 +88,7 @@ function widget_listFactureCess() {
                 $facturestatic->type=$res->type;
                 $facturestatic->statut = $res->fk_statut;
                 $table2 .= $facturestatic->getNomUrl(1,'');
-                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,24).'</a></td>';
+                $table2 .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->socid.'">'.dol_trunc($res->nom,24).'</a></td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.$facturestatic->getLibStatut(5).'</td></tr>';
                 $total2 += $res->total_ht;

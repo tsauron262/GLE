@@ -639,7 +639,7 @@ print '<BR>';
 
             if ($conf->agenda->enabled && $user->rights->agenda->myactions->create)
             {
-                print '<td align="center"><a href="'.DOL_URL_ROOT.'/comm/action/fiche.php?action=create&backtopage=1&actioncode=AC_RDV&contactid='.$obj->rowid.'&socid='.$objsoc->id.'">';
+                print '<td align="center"><a href="'.DOL_URL_ROOT.'/comm/action/card.php?action=create&backtopage=1&actioncode=AC_RDV&contactid='.$obj->rowid.'&socid='.$objsoc->id.'">';
                 print img_object($langs->trans("Rendez-Vous"),"action");
                 print '</a></td>';
             }

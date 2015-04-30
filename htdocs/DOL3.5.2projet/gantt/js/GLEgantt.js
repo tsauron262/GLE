@@ -802,10 +802,10 @@ function redrawResizeDrag()
 	    delTask(taskid);
 	} else if (action == 'DI')
 {
-	    location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&leftmenu=ficheinter"
+	    location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/card.php?action=create&leftmenu=ficheinter"
 	} else if (action == 'FI')
 {
-	    location.href=DOL_URL_ROOT+"/fichinter/fiche.php?action=create&leftmenu=ficheinter"
+	    location.href=DOL_URL_ROOT+"/fichinter/card.php?action=create&leftmenu=ficheinter"
 	}
 
     });

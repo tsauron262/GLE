@@ -211,7 +211,7 @@ Rico.onLoad( function() {
     prefetchBuffer: false,
     headingSort   : 'hover',
     columnSpecs   : [ {canHide: 0, visible: false, canDrag:false},
-                      {width:250,control: new MyCustomColumn1("<?php print DOL_URL_ROOT; ?>/user/fiche.php?id={7}",'',"<img height='12pt' border='0' src='/dolibarr-24dev/htdocs/theme/auguria/img/object_user.png'></img>")},
+                      {width:250,control: new MyCustomColumn1("<?php print DOL_URL_ROOT; ?>/user/card.php?id={7}",'',"<img height='12pt' border='0' src='/dolibarr-24dev/htdocs/theme/auguria/img/object_user.png'></img>")},
                       {canHide: 0, visible: false, canDrag:false},
                       {width:150,ClassName:"aligncenter",type: "date",dateFmt:"mmm yyyy",control: new MyCustomColumn1("<?php print DOL_URL_ROOT; ?>/Babel_TechPeople/deplacements/ficheNdf.php?id={0}")},
                       {width:150, type:'number', suffix:'&euro;', decPlaces:2,thouSep:" ", ClassName:"aligncenter"},

@@ -894,7 +894,7 @@ function top_menu($head, $title="", $target="")
     $menutop->showmenu();
 
     // Lien sur fiche du login
-    print '<a class="login" href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$user->id.'"';
+    print '<a class="login" href="'.DOL_URL_ROOT.'/user/card.php?id='.$user->id.'"';
     print $menutop->atarget?(' target="'.$menutop->atarget.'"'):'';
     print '>'.$user->login.'</a>';
 

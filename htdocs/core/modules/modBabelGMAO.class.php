@@ -341,7 +341,7 @@ $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:/Synopsis_Contrat/an
 $requete = "INSERT INTO `".MAIN_DB_PREFIX."menu` (`rowid`,`menu_handler`,`module`,`type`,`mainmenu`,`fk_menu`,`position`,`url`,`target`,`titre`,`langs`,`level`,`leftmenu`,`perms`,`user`)
 VALUES
     (2223587, 'auguria', NULL, 'left', 'GMAO', 5046, 1, '/product/index.php?leftmenu=service&type=2', '', 'Contrat', 'products', 0, '', '$user->rights->produit->lire', 2),
-    (2223588, 'auguria', NULL, 'left', 'GMAO', 2223587, 0, '/product/fiche.php?leftmenu=service&action=create&type=2', '', 'NewContrat', 'products', 1, '', '$user->rights->produit->creer', 2),
+    (2223588, 'auguria', NULL, 'left', 'GMAO', 2223587, 0, '/product/card.php?leftmenu=service&action=create&type=2', '', 'NewContrat', 'products', 1, '', '$user->rights->produit->creer', 2),
     (2223589, 'auguria', NULL, 'left', 'GMAO', 2223587, 1, '/product/liste.php?leftmenu=service&type=2', '', 'List', 'products', 1, '', '$user->rights->GMAO->lire', 2);
 ";
     $res = $this->db->query($requete);

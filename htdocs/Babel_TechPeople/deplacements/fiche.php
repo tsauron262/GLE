@@ -36,9 +36,9 @@
 //
 
 /**
-   \file           htdocs/compta/deplacement/fiche.php
+   \file           htdocs/compta/deplacement/card.php
    \brief          Page fiche d'un deplacement
-   \version        $Id: fiche.php,v 1.28 2008/06/04 00:19:36 eldy Exp $
+   \version        $Id: card.php,v 1.28 2008/06/04 00:19:36 eldy Exp $
 */
 
 require_once("./pre.inc.php");
@@ -102,7 +102,7 @@ if ($_POST["action"] == 'add' && $user->rights->deplacement->creer)
         if ($id > 0)
         {
             $db->commit();
-            header ( "Location: fiche.php?id=".$id);
+            header ( "Location: card.php?id=".$id);
             exit;
         }
         else
@@ -159,7 +159,7 @@ if ($_POST["action"] == 'update' && $user->rights->deplacement->creer)
 
         if ($result > 0)
         {
-            Header("Location: fiche.php?id=".$_POST["id"]);
+            Header("Location: card.php?id=".$_POST["id"]);
             exit;
         }
         else
@@ -188,7 +188,7 @@ if ($_GET["action"] == 'create')
     print_fiche_titre($langs->trans("NewTrip"));
     if ($mesg) print $mesg."<br>";
 
-    print "<form name='add' action=\"fiche.php\" method=\"post\">\n";
+    print "<form name='add' action=\"card.php\" method=\"post\">\n";
     print '<input type="hidden" name="action" value="add">';
 
     print '<table class="border" width="100%">';
@@ -264,7 +264,7 @@ if ($_GET["action"] == 'create')
 
                 dol_fiche_head($head, 0, $langs->trans("Dep."));
 
-                print "<form name='update' action=\"fiche.php\" method=\"post\">\n";
+                print "<form name='update' action=\"card.php\" method=\"post\">\n";
                 print '<input type="hidden" name="action" value="update">';
                 print '<input type="hidden" name="id" value="'.$deplacement->id.'">';
 
@@ -328,7 +328,7 @@ if ($_GET["action"] == 'create')
                 if ($_GET["action"] == 'delete')
                 {
                     $html = new Form($db);
-                    $html->form_confirm("fiche.php?id=".$id,$langs->trans("DeleteTrip"),$langs->trans("ConfirmDeleteTrip"),"confirm_delete");
+                    $html->form_confirm("card.php?id=".$id,$langs->trans("DeleteTrip"),$langs->trans("ConfirmDeleteTrip"),"confirm_delete");
                     print '<br>';
                 }
                 $soc = new Societe($db);
@@ -382,8 +382,8 @@ if ($_GET["action"] != 'create' && $_GET["action"] != 'edit')
 {
 
   if ($ndf->statut <2 ||  $ndf->statut >3){
-      print '<a class="butAction" href="fiche.php?action=edit&id='.$id.'">'.$langs->trans('Modify').'</a>';
-      print '<a class="butActionDelete" href="fiche.php?action=delete&id='.$id.'">'.$langs->trans('Delete').'</a>';
+      print '<a class="butAction" href="card.php?action=edit&id='.$id.'">'.$langs->trans('Modify').'</a>';
+      print '<a class="butActionDelete" href="card.php?action=delete&id='.$id.'">'.$langs->trans('Delete').'</a>';
   }
 
 }

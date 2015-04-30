@@ -369,7 +369,7 @@ class contratMaintenance extends Synopsis_Contrat {
 
             if ($this->statut == 0 && $nbofservices)
             {
-                if ($user->rights->contrat->creer) $html .=  '<a class="butAction" href="fiche.php?id='.$this->id.'&amp;action=valid">'.$langs->trans("Validate").'</a>';
+                if ($user->rights->contrat->creer) $html .=  '<a class="butAction" href="card.php?id='.$this->id.'&amp;action=valid">'.$langs->trans("Validate").'</a>';
 //                else $html .=  '<a class="butActionRefused" href="#" title="'.$langs->trans("NotEnoughPermissions").'">'.$langs->trans("Validate").'</a>';
             }
 
@@ -382,7 +382,7 @@ class contratMaintenance extends Synopsis_Contrat {
 */
             if ($this->nbofservicesclosed < $nbofservices)
             {
-                    $html .=  '<a class="butAction" href="fiche.php?id='.$this->id.'&amp;action=close">'.$langs->trans("CloseAllContracts").'</a>';
+                    $html .=  '<a class="butAction" href="card.php?id='.$this->id.'&amp;action=close">'.$langs->trans("CloseAllContracts").'</a>';
             }
 
 //             $html .=  "<a class='butAction' href=".$_SERVER['PHP_SELF']."?id=".$this->id."&action=generatePdf>G&eacute;n&eacute;rer</a>";
@@ -391,7 +391,7 @@ class contratMaintenance extends Synopsis_Contrat {
             // - Droit de supprimer
             if ($this->statut != 2 && (($user->rights->contrat->creer && $this->statut == 0) || $user->rights->contrat->supprimer))
             {
-                $html .=  '<a class="butActionDelete" href="fiche.php?id='.$this->id.'&amp;action=delete">'.$langs->trans("Delete").'</a>';
+                $html .=  '<a class="butActionDelete" href="card.php?id='.$this->id.'&amp;action=delete">'.$langs->trans("Delete").'</a>';
             }
 
             $html .=  "</div>";

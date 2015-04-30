@@ -67,7 +67,7 @@ if ( $user->rights->propale->valider == 1)
                         $tmpsoc = new Societe($db);
                         $tmpsoc->id = $res->fk_soc;
                         $tmpsoc->fetch($res->fk_soc);
-                        $table .= "<tr class='".$arrCss[$bool]."'><td><a href=\"fiche.php?id=".$res->rowid."\">".img_object("","propal")." ".$res->ref."</a></td>";
+                        $table .= "<tr class='".$arrCss[$bool]."'><td><a href=\"card.php?id=".$res->rowid."\">".img_object("","propal")." ".$res->ref."</a></td>";
                         $table .= "<td>".$tmpsoc->getNomUrl(1)."</td>\n";
                         $table .= "<td align=\"right\">".date("d/m/Y",$res->uts)."</td></tr>\n";
                         $total += $res->total_ht;
@@ -76,7 +76,7 @@ if ( $user->rights->propale->valider == 1)
                 $tmpsoc = new Societe($db);
                 $tmpsoc->id = $res->fk_soc;
                 $tmpsoc->fetch($res->fk_soc);
-                $table2 .= "<tr class='".$arrCss[$bool]."'><td><a href=\"fiche.php?id=".$res->rowid."\">".img_object("","propal")." ".$res->ref."</a></td>";
+                $table2 .= "<tr class='".$arrCss[$bool]."'><td><a href=\"card.php?id=".$res->rowid."\">".img_object("","propal")." ".$res->ref."</a></td>";
                 $table2 .= "<td>".$tmpsoc->getNomUrl(1)."</td>\n";
                 $table2 .= "<td align=\"right\">".date("d/m/Y",$res->uts)."</td></tr>\n";
                 $total2 += $res->total_ht;

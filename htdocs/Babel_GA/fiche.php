@@ -35,10 +35,10 @@
  */
 
 /**
-        \file       htdocs/comm/fiche.php
+        \file       htdocs/comm/card.php
         \ingroup    commercial
         \brief      Onglet client de la fiche societe
-        \version    $Id: fiche.php,v 1.209 2008/08/06 13:06:59 eldy Exp $
+        \version    $Id: card.php,v 1.209 2008/08/06 13:06:59 eldy Exp $
 */
 
 require_once("./pre.inc.php");
@@ -461,7 +461,7 @@ if ($socid > 0)
                 $objp = $db->fetch_object($resql);
                 $var=!$var;
                 print "<tr $bc[$var]>";
-                print '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$objp->cid.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$objp->ref."</a>\n";
+                print '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$objp->cid.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$objp->ref."</a>\n";
                 print '</td><td align="right" width="80">'.dol_print_date($db->jdate($objp->dc),'day')."</td>\n";
                 print '<td align="right" width="120">'.price($objp->total_ht).'</td>';
                 print '<td align="right" width="100">'.$commande_static->LibStatut($objp->fk_statut,$objp->facture,5).'</td></tr>';
@@ -562,7 +562,7 @@ if ($socid > 0)
             {
                 $objp = $db->fetch_object($resql);
                 print "<tr $bc[$var]>";
-                print '<td nowrap><a href="'.DOL_URL_ROOT."/fichinter/fiche.php?id=".$objp->id."\">".img_object($langs->trans("ShowPropal"),"propal")." ".$objp->ref."</a>\n";
+                print '<td nowrap><a href="'.DOL_URL_ROOT."/fichinter/card.php?id=".$objp->id."\">".img_object($langs->trans("ShowPropal"),"propal")." ".$objp->ref."</a>\n";
                 print "</td><td align=\"right\">".dol_print_date($db->jdate($objp->di),'day')."</td>\n";
                 print '</tr>';
                 $var=!$var;
@@ -602,7 +602,7 @@ if ($socid > 0)
                 $obj = $db->fetch_object($result);
                 $var = !$var;
                 print "<tr $bc[$var]>";
-                print '<td><a href="../projet/fiche.php?id='.$obj->rowid.'">'.img_object($langs->trans("ShowProject"),"project")." ".$obj->title.'</a></td>';
+                print '<td><a href="../projet/card.php?id='.$obj->rowid.'">'.img_object($langs->trans("ShowProject"),"project")." ".$obj->title.'</a></td>';
 
                 print "<td align=\"right\">".$obj->ref ."</td></tr>";
                 $i++;
@@ -635,34 +635,34 @@ if ($socid > 0)
     if ($conf->commande->enabled && $user->rights->commande->creer)
     {
         $langs->load("orders");
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/commande/fiche.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddOrder").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/commande/card.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddOrder").'</a>';
     }
     if ($conf->projet->enabled && $user->rights->projet->creer)
     {
         $langs->load("project");
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/projet/fiche.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddProject").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/projet/card.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddProject").'</a>';
     }
 
     if ($user->rights->contrat->creer)
     {
         $langs->load("contracts");
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/contrat/fiche.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddContract").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/contrat/card.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddContract").'</a>';
     }
 
     if ($conf->fichinter->enabled && $user->rights->ficheinter->creer)
     {
         $langs->load("fichinter");
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/fichinter/fiche.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddIntervention").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/fichinter/card.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddIntervention").'</a>';
     }
 
     if ($conf->agenda->enabled && $user->rights->agenda->myactions->create)
     {
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/comm/action/fiche.php?action=create&socid='.$objsoc->id.'">'.$langs->trans("AddAction").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/comm/action/card.php?action=create&socid='.$objsoc->id.'">'.$langs->trans("AddAction").'</a>';
     }
 
     if ($user->rights->societe->contact->creer)
     {
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/contact/fiche.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddContact").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/contact/card.php?socid='.$objsoc->id.'&amp;action=create">'.$langs->trans("AddContact").'</a>';
     }
 
     print '</div>';

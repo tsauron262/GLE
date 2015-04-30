@@ -240,7 +240,7 @@
                         var datei=jQuery('#datei').val();
                         var userid = jQuery('#userid').find(':selected').val();
                         var comLigneId = jQuery('#comLigneId').find(':selected').val();
-                        location.href=DOL_URL_ROOT+'/fichInter/fiche.php?action=create&datei='+datei+"&comLigneId="+comLigneId+"&userid="+userid;
+                        location.href=DOL_URL_ROOT+'/fichInter/card.php?action=create&datei='+datei+"&comLigneId="+comLigneId+"&userid="+userid;
                     }
                 },
                 Annuler: function(){
@@ -255,12 +255,12 @@
         });
         jQuery('.modFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^modFI-/,"");
-            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?id='+id;
+            location.href=DOL_URL_ROOT+'/fichinter/card.php?id='+id;
         });
         jQuery('.validFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^validFI-/,"");
             jQuery.ajax({
-                url: DOL_URL_ROOT+'/fichinter/fiche.php?id='+id+'&action=confirm_validate&confirm=yes',
+                url: DOL_URL_ROOT+'/fichinter/card.php?id='+id+'&action=confirm_validate&confirm=yes',
                 data: "",
                 datatype: "xml",
                 type: "POST",
@@ -272,11 +272,11 @@
         });
 //        jQuery('.validFI').click(function(){
 //            var id = jQuery(this).attr('id').replace(/^validFI-/,"");
-//            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?id='+id+'&action=confirm_validate&confirm=yes';
+//            location.href=DOL_URL_ROOT+'/fichinter/card.php?id='+id+'&action=confirm_validate&confirm=yes';
 //        });
         jQuery('.rafraichePrixFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^rafraichePrixFI-/,"");
-            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?action=rafraichePrixFI&id='+id;
+            location.href=DOL_URL_ROOT+'/fichinter/card.php?action=rafraichePrixFI&id='+id;
         });
 
 

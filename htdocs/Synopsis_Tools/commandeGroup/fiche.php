@@ -14,7 +14,7 @@
  */
 /**
  *
- * Name : fiche.php
+ * Name : card.php
  * GLE-1.2
  */
 require_once('../../main.inc.php');
@@ -31,7 +31,7 @@ if ($_REQUEST['action'] == "create") {
     if ($id < 0) {
         header('location: nouveau.php');
     } else {
-        header('location: fiche.php?id=' . $id);
+        header('location: card.php?id=' . $id);
     }
 }
 

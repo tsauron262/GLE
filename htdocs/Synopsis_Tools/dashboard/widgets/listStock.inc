@@ -56,13 +56,13 @@ function widget_listStock() {
                 {
                     $var=!$var;
                     $table .= "<tr $bc[$var]>";
-                    $table .= "<td><a href=\"fiche.php?id=$objp->rowid\">".img_object($langs->trans("ShowStock"),"stock")." ".$objp->label."</a></td>\n";
+                    $table .= "<td><a href=\"card.php?id=$objp->rowid\">".img_object($langs->trans("ShowStock"),"stock")." ".$objp->label."</a></td>\n";
                     $table .= '<td align="right">'.$entrepot->LibStatut($objp->statut,3).'</td>';
                     $table .= "</tr>\n";
                 }
                 $var=!$var;
                 $table2 .= "<tr $bc[$var]>";
-                $table2 .= "<td><a href=\"fiche.php?id=$objp->rowid\">".img_object($langs->trans("ShowStock"),"stock")." ".$objp->label."</a></td>\n";
+                $table2 .= "<td><a href=\"card.php?id=$objp->rowid\">".img_object($langs->trans("ShowStock"),"stock")." ".$objp->label."</a></td>\n";
                 $table2 .= '<td align="right">'.$entrepot->LibStatut($objp->statut,3).'</td>';
                 $table2 .= "</tr>\n";
                 $i++;

@@ -876,9 +876,9 @@ function cartouche_campagne($db,$id,$title='Nouvelle campagne de prospection')
             $nom = ($res->ufirstname?$res->ufirstname." ".$res->uname:$res->uname);
             if ($res->isResponsable == 1)
             {
-                $strResponsable = '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$res->uid.'">'.img_object('',"user")." ".$nom."</a>";
+                $strResponsable = '<a href="'.DOL_URL_ROOT.'/user/card.php?id='.$res->uid.'">'.img_object('',"user")." ".$nom."</a>";
             } else {
-                $strCommerciaux .= '<tr><td><a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$res->uid.'">'.img_object('',"user")." ".$nom."</a></td></tr>";
+                $strCommerciaux .= '<tr><td><a href="'.DOL_URL_ROOT.'/user/card.php?id='.$res->uid.'">'.img_object('',"user")." ".$nom."</a></td></tr>";
             }
         }
     }

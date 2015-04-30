@@ -75,7 +75,7 @@ function widget_statOfcProjetMonActiviteEffective() {
                 $objp = $db->fetch_object($result);
                 $var = !$var;
                 $table2 .= "<tr $bc[$var]>";
-                $table2 .= '<td><a href="' . DOL_URL_ROOT . '/product/stats/fiche.php?id=' . $objp->rowid . '">' . $objp->title . "</a>";
+                $table2 .= '<td><a href="' . DOL_URL_ROOT . '/product/stats/card.php?id=' . $objp->rowid . '">' . $objp->title . "</a>";
                 $table2 .= '<td>' . $projet->sec2time($objp->td);
                 $i++;
             }

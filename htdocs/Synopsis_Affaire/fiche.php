@@ -297,19 +297,19 @@ if ($_GET["action"] != 'edit')
 {
     if ( $user->rights->affaire->creer && $affaire->statut < 2)
     {
-        print '<a class="butAction" href="fiche.php?action=edit&amp;id='.$affaire->id.'">'.$langs->trans("Modify").'</a>';
+        print '<a class="butAction" href="card.php?action=edit&amp;id='.$affaire->id.'">'.$langs->trans("Modify").'</a>';
     }
     if ( $user->rights->affaire->valider && $affaire->statut == 0)
     {
-        print '<a class="butAction" href="fiche.php?action=valid&amp;id='.$affaire->id.'">'.$langs->trans("Validate").'</a>';
+        print '<a class="butAction" href="card.php?action=valid&amp;id='.$affaire->id.'">'.$langs->trans("Validate").'</a>';
     }
     if ( $user->rights->affaire->creer && $affaire->statut == 1)
     {
-        print '<a class="butAction" href="fiche.php?action=cloture&amp;id='.$affaire->id.'">'.$langs->trans("Cl&ocirc;turer").'</a>';
+        print '<a class="butAction" href="card.php?action=cloture&amp;id='.$affaire->id.'">'.$langs->trans("Cl&ocirc;turer").'</a>';
     }
     if ($user->rights->affaire->effacer)
     {
-        print '<a class="butActionDelete" href="fiche.php?action=delete&amp;id='.$affaire->id.'">'.$langs->trans("Delete").'</a>';
+        print '<a class="butActionDelete" href="card.php?action=delete&amp;id='.$affaire->id.'">'.$langs->trans("Delete").'</a>';
     }
 }
 

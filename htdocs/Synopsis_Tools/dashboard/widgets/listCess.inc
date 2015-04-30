@@ -61,7 +61,7 @@ function widget_listCess() {
             {
                 $table .= '<tr class="'.$cssClass[$bool].'">';
                 $table .= '   <td style="overflow: hidden; white-space: nowrap;">';
-                if ($res->cessionnaire == 1) $table .= "<a href=\"".DOL_URL_ROOT."/comm/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("cessionnaire"),"company")." ".$res->nom."</a></td>";
+                if ($res->cessionnaire == 1) $table .= "<a href=\"".DOL_URL_ROOT."/comm/card.php?socid=".$res->rowid."\">".img_object($langs->trans("cessionnaire"),"company")." ".$res->nom."</a></td>";
                 $table .= '<td align="right" nowrap>';
                 if ($res->cessionnaire == 1) $table .= $langs->trans("Cessionnaire");
                 $table .= "</td>";
@@ -69,7 +69,7 @@ function widget_listCess() {
             }
             $table2 .= '<tr class="'.$cssClass[$bool].'">';
             $table2 .= '   <td style="overflow: hidden; white-space: nowrap;">';
-            if ($res->cessionnaire == 1) $table2 .= "<a href=\"".DOL_URL_ROOT."/comm/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("cessionnaire"),"company")." ".$res->nom."</a></td>";
+            if ($res->cessionnaire == 1) $table2 .= "<a href=\"".DOL_URL_ROOT."/comm/card.php?socid=".$res->rowid."\">".img_object($langs->trans("cessionnaire"),"company")." ".$res->nom."</a></td>";
             $table2 .= '<td align="right" nowrap>';
             if ($res->cessionnaire == 1) $table2 .= $langs->trans("Cessionnaire");
             $table2 .= "</td>";

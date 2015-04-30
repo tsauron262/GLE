@@ -177,7 +177,7 @@ class SAV {
 
         $result='';
 
-        $lien = '<a title="'.$this->nom.'" href="'.DOL_URL_ROOT.'/Babel_GMAO/SAV/fiche.php?id='.$this->id.'">';
+        $lien = '<a title="'.$this->nom.'" href="'.DOL_URL_ROOT.'/Babel_GMAO/SAV/card.php?id='.$this->id.'">';
         $lienfin='</a>';
 
         if ($withpicto) $result.=($lien.img_object($langs->trans("ShowSav").': '.$this->ref,'sav').$lienfin.' ');

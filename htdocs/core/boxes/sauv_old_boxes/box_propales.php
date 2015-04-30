@@ -116,7 +116,7 @@ class box_propales extends ModeleBoxes {
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
                     'text' => dol_trunc($objp->nom,40),
-                    'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
+                    'url' => DOL_URL_ROOT."/comm/card.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array(
                     'align' => 'right',

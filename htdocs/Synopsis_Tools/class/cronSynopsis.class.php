@@ -416,14 +416,14 @@ class CronSynopsis {
     private function lienFusion($id1, $id2) {
         global $nbIframeMax, $nbIframe;
         $return = "<br/>";
-        $lien = DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $id1;
+        $lien = DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $id1;
         $return .= '<a href="' . $lien . '">Prod 1</a>';
         if ($nbIframe < $nbIframeMax) {
             $nbIframe++;
             $return .= '<iframe width="600" height="600" src="' . $lien . '&nomenu=true"></iframe>';
         }
         $return .= '<form action=""><input type="hidden" name="action" value="fusionChrono"/><input type="hidden" name="id1" value="' . $id1 . '"/><input type="hidden" name="id2" value="' . $id2 . '"/><input type="submit" value="Garder 1" class="butAction"/></form>';
-        $lien = DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $id2;
+        $lien = DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $id2;
 
         $return .= '<a href="' . $lien . '">Prod 2</a>';
         $return .= '<form action=""><input type="hidden" name="action" value="fusionChrono"/><input type="hidden" name="id1" value="' . $id2 . '"/><input type="hidden" name="id2" value="' . $id1 . '"/><input type="submit" value="Garder 2" class="butAction"/></form>';

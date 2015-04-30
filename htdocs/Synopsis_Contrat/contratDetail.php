@@ -74,7 +74,7 @@ if ($_REQUEST['action'] == 'delete') {
     if ($sql) {
         $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO WHERE contratdet_refid = " . $idLigne;
         $sql = $db->query($requete);
-        header('location: ' . DOL_URL_ROOT . "/contrat/fiche.php?id=" . $id);
+        header('location: ' . DOL_URL_ROOT . "/contrat/card.php?id=" . $id);
     } else {
         $msg = "Impossible de supprimer la ligne";
     }
@@ -216,9 +216,9 @@ if ($id > 0) {
             print '<span style="float:right;"><a href="' . $_SERVER["PHP_SELF"] . '?action=classer&amp;id=' . $id . '">' . img_edit($langs->trans("SetProject")) . '</a></span>';
         print '</th><td colspan="3" class="ui-widget-content">';
         if ($_REQUEST["action"] == "classer") {
-            $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "projetid");
+            $form->form_project("card.php?id=$id", $contrat->socid, $contrat->fk_projet, "projetid");
         } else {
-            $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "none");
+            $form->form_project("card.php?id=$id", $contrat->socid, $contrat->fk_projet, "none");
         }
         print "</td></tr>";
     }
@@ -546,13 +546,13 @@ if ($id > 0) {
     print 'var fk_contratdet = "' . $_REQUEST['id'] . '";';
     print <<<EOF
         jQuery('#NouvDI').click(function(){
-            location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
+            location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/card.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
         });
         jQuery('#supprLigne').click(function(){
             jQuery('#delDialog').dialog('open');
         });
         jQuery('#NouvFI').click(function(){
-            location.href=DOL_URL_ROOT+"/synopsisfichinter/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
+            location.href=DOL_URL_ROOT+"/synopsisfichinter/card.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
         });
         jQuery('#delDialog').dialog({
             buttons: {

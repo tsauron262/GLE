@@ -60,7 +60,7 @@ function PLines(&$inc, $parent, $lines, &$level, &$var)
       if ($lines[$i][1] == $parent)
     {
     print "<tr $bc[$var]>\n<td>";
-    print '<a href="fiche.php?id='.$lines[$i][5].'">'.$lines[$i][4]."</a></td><td>\n";
+    print '<a href="card.php?id='.$lines[$i][5].'">'.$lines[$i][4]."</a></td><td>\n";
 
     for ($k = 0 ; $k < $level ; $k++)
         {

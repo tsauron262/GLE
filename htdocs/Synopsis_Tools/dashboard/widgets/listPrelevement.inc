@@ -55,14 +55,14 @@ function widget_listPrelevement() {
               {
                   $table .=  "<tr $bc[$var]><td>";
                   $table .=  '<img border="0" src="./statut'.$obj->statut.'.png"></a>&nbsp;';
-                  $table .=  '<a href="fiche.php?id='.$obj->rowid.'">'.$obj->ref."</a></td>\n";
+                  $table .=  '<a href="card.php?id='.$obj->rowid.'">'.$obj->ref."</a></td>\n";
                   $table .=  '<td>'.dol_print_date($obj->datec,"dayhour")."</td>\n";
                   $table .=  '<td align="right">'.price($obj->amount)."</td>\n";
                   $table .=  "</tr>\n";
               }
               $table2 .=  "<tr $bc[$var]><td>";
               $table2 .=  '<img border="0" src="./statut'.$obj->statut.'.png"></a>&nbsp;';
-              $table2 .=  '<a href="fiche.php?id='.$obj->rowid.'">'.$obj->ref."</a></td>\n";
+              $table2 .=  '<a href="card.php?id='.$obj->rowid.'">'.$obj->ref."</a></td>\n";
               $table2 .=  '<td>'.dol_print_date($obj->datec,"dayhour")."</td>\n";
               $table2 .=  '<td align="right">'.price($obj->amount)."</td>\n";
               $table2 .=  "</tr>\n";

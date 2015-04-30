@@ -851,7 +851,7 @@ EOF;
                                             cache: false,
                                             success: function(msg){
                                                 if (jQuery(msg).find('OK')&& jQuery(msg).find('OK').text() == 'OK'){
-                                                    location.href="fiche.php?id="+contratId;
+                                                    location.href="card.php?id="+contratId;
                                                 }
                                             }
                                         });
@@ -1080,7 +1080,7 @@ EOF;
                      submitdata : {id: contratId, action:"editFactPer"},
                      data       : "{'m':'Mensuelle','t':'Trimestrielle','y':'Annuelle','':'Manuelle'}",
                      callback: function(a,b){
-                        if (a != 'KO') location.href='fiche.php?id='+contratId;
+                        if (a != 'KO') location.href='card.php?id='+contratId;
                      }
                  });
 
@@ -1098,7 +1098,7 @@ EOF;
                      submitdata : {id: contratId, action:"editProrata"},
                      data       : "{'1':'Prorata Temporis','0':'P&eacute;riode commenc&eacute;e'}",
                      callback: function(a,b){
-                        if (a != 'KO') location.href='fiche.php?id='+contratId;
+                        if (a != 'KO') location.href='card.php?id='+contratId;
                      }
                  });
 
@@ -1115,7 +1115,7 @@ EOF;
                      submitdata : {id: contratId, action:"edittva"},
                      data       : "{'19.6':'19,6%','5.5':'5,5%','0':'0%'}",
                      callback: function(a,b){
-                        if (a != 'KO') location.href='fiche.php?id='+contratId;
+                        if (a != 'KO') location.href='card.php?id='+contratId;
                      }
                  });
 
@@ -1135,7 +1135,7 @@ EOF;
                           return retval;
                      },
                      callback: function(a,b){
-                        if (a != 'KO') location.href='fiche.php?id='+contratId;
+                        if (a != 'KO') location.href='card.php?id='+contratId;
                      }
                  });
                  jQuery('#dateFin').editable(DOL_URL_ROOT+'/Babel_GA/ajax/contratLoc_fiche_ajax.php?action=editDateFin', {
@@ -1153,7 +1153,7 @@ EOF;
                           return retval;
                      },
                      callback: function(a,b){
-                        if (a != 'KO') location.href='fiche.php?id='+contratId;
+                        if (a != 'KO') location.href='card.php?id='+contratId;
                      }
                  });
             });
@@ -1173,7 +1173,7 @@ EOF;
 
             if ($this->statut == 0)
             {
-                //if ($user->rights->contrat->creer) $html .=  '<a class="butAction" href="fiche.php?id='.$this->id.'&amp;action=valid">'.$langs->trans("Validate").'</a>';
+                //if ($user->rights->contrat->creer) $html .=  '<a class="butAction" href="card.php?id='.$this->id.'&amp;action=valid">'.$langs->trans("Validate").'</a>';
                 if ($user->rights->GA->contrat->Valider && $this->total_ht > 0 && $this->cessionnaire_refid ."x" != "x" && $this->fournisseur_refid."x" != 'x') $html .=  '<a class="butAction" href="#" id="ValidateContrat">'.$langs->trans("Validate").'</a>';
                 $html .= "<script>";
                 $html .= "var urlBase='".DOL_URL_ROOT."/Babel_GA/ajax/contrat_validate-xmlresponse.php';";
@@ -1414,7 +1414,7 @@ EOF;
                 $html .= "</form></div>";
             }
 
-            //$html .=  '<a class="butAction" href="fiche.php?id='.$this->id.'&amp;action=close">'.$langs->trans("Cloturer").'</a>';
+            //$html .=  '<a class="butAction" href="card.php?id='.$this->id.'&amp;action=close">'.$langs->trans("Cloturer").'</a>';
             if ($this->statut == 0)
             {
                 $html .=  '<button class="butAction" href="#" id="validateGA">'.$langs->trans("Validate").'</button>';
@@ -1429,7 +1429,7 @@ EOF;
             // - Droit de supprimer
             if (($user->rights->contrat->creer && $this->statut == 0) || $user->rights->contrat->supprimer || $user->rights->GA->contrat->Effacer)
             {
-                $html .=  '<button class="butActionDelete" onclick=\'href="fiche.php?id='.$this->id.'&amp;action=delete"\'>'.$langs->trans("Delete").'</button>';
+                $html .=  '<button class="butActionDelete" onclick=\'href="card.php?id='.$this->id.'&amp;action=delete"\'>'.$langs->trans("Delete").'</button>';
             }
 
             $html .=  "</div>";

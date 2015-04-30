@@ -1320,7 +1320,7 @@ if ($id > 0 || !empty($ref)) {
                 print '<td colspan="3">';
                 $proj = new Project($db);
                 $proj->fetch($object->fk_project);
-                print '<a href="../projet/fiche.php?id=' . $object->fk_project . '" title="' . $langs->trans('ShowProject') . '">';
+                print '<a href="../projet/card.php?id=' . $object->fk_project . '" title="' . $langs->trans('ShowProject') . '">';
                 print $proj->ref;
                 print '</a>';
                 print '</td>';
@@ -1340,7 +1340,7 @@ if ($id > 0 || !empty($ref)) {
         print '<td>Doc. indicable :<td>';
         if ($db->num_rows($resql) > 0) {
             $res = $db->fetch_object($resql);
-            print '<a href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $res->id . '">' . $res->refb . '</a>';
+            print '<a href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $res->id . '">' . $res->refb . '</a>';
         } else {
             $res = $db->fetch_object($resql);
             print '<a href="' . DOL_URL_ROOT . '/synopsischrono/nouveau.php?id=' . $propal->socid . '&propalid=' . $propal->id . '&typeid=1">A creer</a>';
@@ -1523,7 +1523,7 @@ if ($id > 0 || !empty($ref)) {
             // Create an order
             if ($conf->commande->enabled && $object->statut == 2 && $user->societe_id == 0) {
                 if ($user->rights->commande->creer) {
-                    print '<a class="butAction" href="' . DOL_URL_ROOT . '/commande/fiche.php?action=create&amp;origin=' . $object->element . '&amp;originid=' . $object->id . '&amp;socid=' . $object->socid . '">' . $langs->trans("AddOrder") . '</a>';
+                    print '<a class="butAction" href="' . DOL_URL_ROOT . '/commande/card.php?action=create&amp;origin=' . $object->element . '&amp;originid=' . $object->id . '&amp;socid=' . $object->socid . '">' . $langs->trans("AddOrder") . '</a>';
                 }
             }
 
@@ -1846,7 +1846,7 @@ if ($id > 0 || !empty($ref)) {
             print '</td></tr></table>';
 
             if ($objp->client == 1) {
-                $url = DOL_URL_ROOT . '/comm/fiche.php?socid=' . $objp->rowid;
+                $url = DOL_URL_ROOT . '/comm/card.php?socid=' . $objp->rowid;
             } else {
                 $url = DOL_URL_ROOT . '/comm/prospect/fiche.php?socid=' . $objp->rowid;
             }

@@ -73,7 +73,7 @@ function drawGraph($affaire)
          $graph->addNode(
            $affaire->nom,
            array(
-             'URL'   => DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$affaire->id,
+             'URL'   => DOL_URL_ROOT.'/Synopsis_Affaire/card.php?id='.$affaire->id,
              'label' => ''.$affaire->nom,
              'shape' => 'folder',
              'fontsize' => '16',
@@ -95,7 +95,7 @@ function drawGraph($affaire)
          $graph->addNode(
            $res->ref,
            array(
-             'URL'   => DOL_URL_ROOT.'/commande/fiche.php?id='.$res->fk_commande,
+             'URL'   => DOL_URL_ROOT.'/commande/card.php?id='.$res->fk_commande,
              'label' => ''.$res->ref,
              'shape' => 'doubleoctagon',
              'fontsize' => '10',
@@ -187,7 +187,7 @@ function drawGraph($affaire)
              $graph->addNode(
                $res3->ref,
                array(
-                 'URL'   => DOL_URL_ROOT.'/expedition/fiche.php?id='.$res3->rowid,
+                 'URL'   => DOL_URL_ROOT.'/expedition/card.php?id='.$res3->rowid,
                  'label' => ''.$res3->ref,
                  'shape' => 'diamond',
                  'fontsize' => '10',
@@ -210,7 +210,7 @@ function drawGraph($affaire)
                  $graph->addNode(
                    $res3a->ref,
                    array(
-                     'URL'   => DOL_URL_ROOT.'/livraison/fiche.php?id='.$res3a->rowid,
+                     'URL'   => DOL_URL_ROOT.'/livraison/card.php?id='.$res3a->rowid,
                      'label' => ''.$res3a->ref,
                      'shape' => 'hexagon',
                      'fontsize' => '10',

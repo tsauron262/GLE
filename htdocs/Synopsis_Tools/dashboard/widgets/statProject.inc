@@ -75,7 +75,7 @@ function widget_statProject() {
                 $row = $db->fetch_row($resql);
                 $var = !$var;
                 $table .= "<tr $bc[$var]>";
-                $table .= '<td nowrap="nowrap"><a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $row[1] . '">' . img_object($langs->trans("ShowProject"), "project") . " " . $row[0] . '</a></td>';
+                $table .= '<td nowrap="nowrap"><a href="' . DOL_URL_ROOT . '/projet/card.php?id=' . $row[1] . '">' . img_object($langs->trans("ShowProject"), "project") . " " . $row[0] . '</a></td>';
                 $table .= '<td align="right">' . $row[2] . '</td>';
                 $table .= '<td align="right"><div style="height: 16px; border:1px solid #000000;" id="progBar' . $row[1] . '"></div></td>';
                 $table .= "</tr>\n";

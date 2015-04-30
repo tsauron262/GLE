@@ -76,7 +76,7 @@ function widget_listChargeAPayer() {
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
                     $table2 .= $facturestatic->getNomUrl(1,'');
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                     $total2 += $res->total_ttc;
                     $iter++;

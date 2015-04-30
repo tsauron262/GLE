@@ -105,7 +105,7 @@ class box_fournisseurs extends ModeleBoxes {
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                     'logo' => $this->boximg,
                     'text' => $objp->nom,
-                    'url' => DOL_URL_ROOT."/fourn/fiche.php?socid=".$objp->socid);
+                    'url' => DOL_URL_ROOT."/fourn/card.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'right',
                     'text' => dol_print_date($objp->dc, "day"));

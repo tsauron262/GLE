@@ -315,8 +315,8 @@ print '<div id="gridListProjPager" class="scroll" style="text-align:center;"></d
 //      $objp = $db->fetch_object($resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print "<td><a href=\"fiche.php?id=$objp->projectid\">".img_object($langs->trans("ShowProject"),"project")." ".$objp->ref."</a></td>\n";
-//      print "<td><a href=\"fiche.php?id=$objp->projectid\">".$objp->title."</a></td>\n";
+//      print "<td><a href=\"card.php?id=$objp->projectid\">".img_object($langs->trans("ShowProject"),"project")." ".$objp->ref."</a></td>\n";
+//      print "<td><a href=\"card.php?id=$objp->projectid\">".$objp->title."</a></td>\n";
 //
 //      // Company
 //      print '<td>';

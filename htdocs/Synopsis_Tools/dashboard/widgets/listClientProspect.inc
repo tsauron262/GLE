@@ -60,7 +60,7 @@ function widget_listClientProspect() {
             {
                 $table .= '<tr class="'.$cssClass[$bool].'">';
                 $table .= '   <td style="overflow: hidden; white-space: nowrap;">';
-                if ($res->client == 1) $table .= "<a href=\"".DOL_URL_ROOT."/comm/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowCustomer"),"company")." ".$res->nom."</a></td>";
+                if ($res->client == 1) $table .= "<a href=\"".DOL_URL_ROOT."/comm/card.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowCustomer"),"company")." ".$res->nom."</a></td>";
                 if ($res->client == 2) $table .= "<a href=\"".DOL_URL_ROOT."/comm/prospect/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowCustomer"),"company")." ".$res->nom."</a></td>";
                 $table .= '<td align="right" nowrap>';
                 if ($res->client == 1) $table .= $langs->trans("Customer");
@@ -70,7 +70,7 @@ function widget_listClientProspect() {
             }
             $table2 .= '<tr class="'.$cssClass[$bool].'">';
             $table2 .= '   <td style="overflow: hidden; white-space: nowrap;">';
-            if ($res->client == 1) $table2 .= "<a href=\"".DOL_URL_ROOT."/comm/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowCustomer"),"company")." ".$res->nom."</a></td>";
+            if ($res->client == 1) $table2 .= "<a href=\"".DOL_URL_ROOT."/comm/card.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowCustomer"),"company")." ".$res->nom."</a></td>";
             if ($res->client == 2) $table2 .= "<a href=\"".DOL_URL_ROOT."/comm/prospect/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowCustomer"),"company")." ".$res->nom."</a></td>";
             $table2 .= '<td align="right" nowrap>';
             if ($res->client == 1) $table2 .= $langs->trans("Customer");

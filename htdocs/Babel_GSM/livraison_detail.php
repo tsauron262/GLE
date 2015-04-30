@@ -131,7 +131,7 @@ if ($_GET["livraison_id"] > 0)
 //                $h++;
 //            }
 
-//            $head[$h][0] = DOL_URL_ROOT."/livraison/fiche.php?id=".$livraison->id;
+//            $head[$h][0] = DOL_URL_ROOT."/livraison/card.php?id=".$livraison->id;
 //            $head[$h][1] = $langs->trans("DeliveryCard");
 //            $hselected = $h;
 //            $h++;
@@ -326,14 +326,14 @@ if ($_GET["livraison_id"] > 0)
                         $var=!$var;
                         $objp = $db->fetch_object($resql);
                         print "<tr $bc[$var]>";
-                        print '<td align="left"><a href="'.DOL_URL_ROOT.'/livraison/fiche.php?id='.$objp->livraison_id.'">'.img_object($langs->trans("ShowSending"),'sending').' '.$objp->ref.'<a></td>';
+                        print '<td align="left"><a href="'.DOL_URL_ROOT.'/livraison/card.php?id='.$objp->livraison_id.'">'.img_object($langs->trans("ShowSending"),'sending').' '.$objp->ref.'<a></td>';
                         if ($objp->fk_product > 0)
                         {
                             $product = new Product($db);
                             $product->fetch($objp->fk_product);
 
                             print '<td>';
-                            print '<a href="'.DOL_URL_ROOT.'/product/fiche.php?id='.$objp->fk_product.'">'.img_object($langs->trans("ShowProduct"),"product").' '.$product->ref.'</a> - '.$product->libelle;
+                            print '<a href="'.DOL_URL_ROOT.'/product/card.php?id='.$objp->fk_product.'">'.img_object($langs->trans("ShowProduct"),"product").' '.$product->ref.'</a> - '.$product->libelle;
                             if ($objp->description) print nl2br($objp->description);
                             print '</td>';
                         }

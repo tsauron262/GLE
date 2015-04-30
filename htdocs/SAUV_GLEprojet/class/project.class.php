@@ -732,7 +732,7 @@ class Project extends CommonObject {
         	}
         	else
         	{
-            	$lien = '<a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $this->id . '">';
+            	$lien = '<a href="' . DOL_URL_ROOT . '/projet/card.php?id=' . $this->id . '">';
             	$lienfin = '</a>';
         	}
         }
@@ -1383,9 +1383,9 @@ class Project extends CommonObject {
 //        if ($this->hasGantt == 1)
 //            $lien = '<a href="' . DOL_URL_ROOT . '/projet/gantt/gantt.php?id=' . $this->id . '">';
 //        else if ($this->hasTacheLight == 1)
-//            $lien = '<a href="' . DOL_URL_ROOT . '/projet/tasks/fiche.php?mode=Light&id=' . $this->id . '">';
+//            $lien = '<a href="' . DOL_URL_ROOT . '/projet/tasks/card.php?mode=Light&id=' . $this->id . '">';
 //        else
-//            $lien = '<a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $this->id . '">';
+//            $lien = '<a href="' . DOL_URL_ROOT . '/projet/card.php?id=' . $this->id . '">';
 //        $lienfin = '</a>';
 //
 //        $label = $this->ref ."-".$this->title;

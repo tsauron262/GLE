@@ -66,7 +66,7 @@ class gsxDatas {
                 'returnFormat' => 'php',
             );
         } else {
-            echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/fiche.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
+            echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
             return 0;
         }
         $this->setSerial($serial);

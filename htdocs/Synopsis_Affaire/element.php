@@ -193,7 +193,7 @@ print "</div>";
         }
         if ($key == 'order' && $conf->commande->enabled && $user->rights->commande->creer)
         {
-            print '<a class="butAction" href="'.DOL_URL_ROOT.'/commande/fiche.php?socid='.$affaire->societe->id.'&amp;action=create&amp;projetid='.$affaire->id.'">'.$langs->trans("AddCustomerOrder").'</a>';
+            print '<a class="butAction" href="'.DOL_URL_ROOT.'/commande/card.php?socid='.$affaire->societe->id.'&amp;action=create&amp;projetid='.$affaire->id.'">'.$langs->trans("AddCustomerOrder").'</a>';
         }
         if ($key == 'invoice' && $conf->facture->enabled && $user->rights->facture->creer)
         {
@@ -204,11 +204,11 @@ print "</div>";
     {
         if ($key == 'order_supplier' && $conf->fournisseur->enabled && $user->rights->fournisseur->commande->creer)
         {
-            print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/facture/fiche.php?socid='.$affaire->societe->id.'&amp;action=create&amp;projetid='.$affaire->id.'">'.$langs->trans("AddSupplierInvoice").'</a>';
+            print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/facture/card.php?socid='.$affaire->societe->id.'&amp;action=create&amp;projetid='.$affaire->id.'">'.$langs->trans("AddSupplierInvoice").'</a>';
         }
         if ($key == 'invoice_supplier' && $conf->fournisseur->enabled && $user->rights->fournisseur->facture->creer)
         {
-            print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/commande/fiche.php?socid='.$affaire->societe->id.'&amp;action=create&amp;projetid='.$affaire->id.'">'.$langs->trans("AddSupplierOrder").'</a>';
+            print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/commande/card.php?socid='.$affaire->societe->id.'&amp;action=create&amp;projetid='.$affaire->id.'">'.$langs->trans("AddSupplierOrder").'</a>';
         }
     }
     print '</div>';

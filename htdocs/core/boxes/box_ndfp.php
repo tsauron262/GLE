@@ -130,12 +130,12 @@ class box_ndfp extends ModeleBoxes {
 
 					$this->info_box_contents[$i][2] = array('td' => 'align="left" width="16"',
                     'logo' => 'user',
-                    'url' => DOL_URL_ROOT."/user/fiche.php?id=".$objp->fk_user);
+                    'url' => DOL_URL_ROOT."/user/card.php?id=".$objp->fk_user);
 
 					$this->info_box_contents[$i][3] = array('td' => 'align="left"',
                     'text' => $userstatic->getFullName($langs),
                     'maxlength' => 40,
-                    'url' => DOL_URL_ROOT."/user/fiche.php?id=".$objp->fk_user);
+                    'url' => DOL_URL_ROOT."/user/card.php?id=".$objp->fk_user);
 
 					$this->info_box_contents[$i][4] = array('td' => 'align="right"',
                     'text' => dol_print_date($db->jdate($objp->datec),'day'),

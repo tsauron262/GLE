@@ -308,9 +308,9 @@ function infoContrat($contrat) {
             print '<span style="float:right;"><a href="' . $_SERVER["PHP_SELF"] . '?action=classer&amp;id=' . $id . '">' . img_edit($langs->trans("SetProject")) . '</a></span>';
         print '</th><td colspan="3" class="ui-widget-content">';
         if (isset($_REQUEST["action"]) && $_REQUEST["action"] == "classer") {
-            $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "projetid");
+            $form->form_project("card.php?id=$id", $contrat->socid, $contrat->fk_projet, "projetid");
         } else {
-            $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "none");
+            $form->form_project("card.php?id=$id", $contrat->socid, $contrat->fk_projet, "none");
         }
         print "</td></tr>";
     }

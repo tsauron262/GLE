@@ -29,7 +29,12 @@
  *       \brief      Page of a contract
  */
 
-require ("../main.inc.php");
+require '../main.inc.php';
+if(isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)){
+    require DOL_DOCUMENT_ROOT.'/contrat/fiche.php';
+    die;
+}
+
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php';

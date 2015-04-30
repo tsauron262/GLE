@@ -33,10 +33,10 @@ while($result = $db->fetch_object($sql)){
     echo "<td>".$result->message."</td>";
     echo "<td>".$result->mailTo."</td>";
     echo "<td>".$result->libelle."</td>";
-    echo "<td><a href='".DOL_URL_ROOT."/Synopsis_Tools/notificationUser/fiche.php?id=".$result->idNU."'>".img_edit("Modifier")."</a></td>";
+    echo "<td><a href='".DOL_URL_ROOT."/Synopsis_Tools/notificationUser/card.php?id=".$result->idNU."'>".img_edit("Modifier")."</a></td>";
     echo "</tr>";
 }
 echo "</table>";
 
-echo "<div class='divButAction'><a href='" . DOL_URL_ROOT . "/Synopsis_Tools/notificationUser/fiche.php'><input type='button' class='butAction' value='Nouveau'/></a></div>";
+echo "<div class='divButAction'><a href='" . DOL_URL_ROOT . "/Synopsis_Tools/notificationUser/card.php'><input type='button' class='butAction' value='Nouveau'/></a></div>";
 ?>

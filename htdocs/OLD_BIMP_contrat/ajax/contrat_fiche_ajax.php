@@ -227,7 +227,7 @@ switch ($action) {
             $result = $contrat->create($user, $langs, $conf);
             if ($result > 0) {
 //TODO
-                Header("Location: fiche.php?id=" . $contrat->id);
+                Header("Location: card.php?id=" . $contrat->id);
                 exit;
             } else {
                 $mesg = '<div class="error ui-state-error">' . $contrat->error . '</div>';

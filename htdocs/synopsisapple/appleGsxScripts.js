@@ -1435,7 +1435,7 @@ function traiteCommandeRetour(html, $resultContainer) {
             if (prix > 0)
                 alert("Attention la réparation n'est pas prise sous garantie. Prix : " + prix + " €");
 
-            window.location.replace(window.location.href.replace("fiche.php", "request.php") + "&actionEtat=commandeOK&sendSms=" + confirm("Envoyer SMS ?") + "&prix=" + prix);
+            window.location.replace(window.location.href.replace("card.php", "request.php") + "&actionEtat=commandeOK&sendSms=" + confirm("Envoyer SMS ?") + "&prix=" + prix);
         }
         if (html.indexOf('<formSus>OK</formSus>') !== -1) {
             htmlFormSus = html.replace("<formSus>OK</formSus>", "");

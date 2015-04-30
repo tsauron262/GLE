@@ -104,7 +104,7 @@ class box_clients extends ModeleBoxes {
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                     'logo' => $this->boximg,
                     'text' => stripslashes($objp->nom),
-                    'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
+                    'url' => DOL_URL_ROOT."/comm/card.php?socid=".$objp->socid);
 
                             $this->info_box_contents[$i][1] = array('align' => 'right',
                             'text' => dol_print_date($objp->dc, "day"));

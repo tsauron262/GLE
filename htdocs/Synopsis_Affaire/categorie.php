@@ -181,7 +181,7 @@ function formCategory($db,$object,$type,$typeid)
     if ($user->rights->categorie->creer)
     {
         print '<td align="right">';
-        print '<a class="butAction" href="'.DOL_URL_ROOT.'/categories/fiche.php?action=create&amp;origin='.$object->id.'&type='.$typeid.'">'.$langs->trans("NewCat").'</a>';
+        print '<a class="butAction" href="'.DOL_URL_ROOT.'/categories/card.php?action=create&amp;origin='.$object->id.'&type='.$typeid.'">'.$langs->trans("NewCat").'</a>';
         print '</td>';
     }
     print '</tr>';

@@ -36,5 +36,5 @@ Details :
 11) Validation PN (bascule payer / non payer)
 12) Calcul des PN , ajoute prix achat ??? en oui :(
 13) lié commande fournisseur et commande client pour calcul PN
-14) donc calcul de la PN à faire pour chaque commande /fourn/commande/fiche.php à modifier + checker si prise de produit dans stocks
+14) donc calcul de la PN à faire pour chaque commande /fourn/commande/card.php à modifier + checker si prise de produit dans stocks
 15) gestion des insentives

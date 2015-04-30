@@ -770,7 +770,7 @@ class Project extends CommonObject {
 
         if ($option != 'nolink')
         {
-            $lien = '<a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . '/projet/card.php?id=' . $this->id . '">';
             $lienfin = '</a>';
         }
 

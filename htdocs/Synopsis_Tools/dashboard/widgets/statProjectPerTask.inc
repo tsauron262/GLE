@@ -69,7 +69,7 @@ function widget_statProjectPerTask() {
               $row = $db->fetch_row( $resql);
               $var=!$var;
               $table .= "<tr $bc[$var]>";
-              $table .= '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+              $table .= '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
               $table .= '<td align="center">'.$row[2].'</td>';
               $table .= "</tr>\n";
 

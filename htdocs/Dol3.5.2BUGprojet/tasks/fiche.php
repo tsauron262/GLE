@@ -13,10 +13,10 @@
  *
  */
 /**
-  \file       htdocs/projet/tasks/fiche.php
+  \file       htdocs/projet/tasks/card.php
   \ingroup    projet
   \brief      Fiche taches d'un projet
-  \version    $Id: fiche.php,v 1.20 2008/02/25 20:03:27 eldy Exp $
+  \version    $Id: card.php,v 1.20 2008/02/25 20:03:27 eldy Exp $
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");

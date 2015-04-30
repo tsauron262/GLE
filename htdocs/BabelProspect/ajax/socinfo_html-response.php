@@ -231,9 +231,9 @@ EOF;
                                     $com->fetch($resCom->fk_commande);
                                     if ($noheader)
                                     {
-                                        array_push($commandeHTMLArr , "<a target=_top href='".DOL_URL_ROOT."/commande/fiche.php?id=".$com->id."'>".img_object('commande','order').$com->ref ."</a>");
+                                        array_push($commandeHTMLArr , "<a target=_top href='".DOL_URL_ROOT."/commande/card.php?id=".$com->id."'>".img_object('commande','order').$com->ref ."</a>");
                                     } else {
-                                        array_push($commandeHTMLArr , "<a href='".DOL_URL_ROOT."/commande/fiche.php?id=".$com->id."'>".img_object('commande','order').$com->ref ."</a>");
+                                        array_push($commandeHTMLArr , "<a href='".DOL_URL_ROOT."/commande/card.php?id=".$com->id."'>".img_object('commande','order').$com->ref ."</a>");
                                     }
 
                                     array_push($commandeStatutHTMLArr , $com->getLibStatut(6));
@@ -604,7 +604,7 @@ EOF;
                 while ($res=$db->fetch_object($resql))
                 {
                     print "<tr>";
-                    print "<td><a href='".DOL_URL_ROOT."/contrat/fiche.php?id=".$res->cid."'>".img_object('contract','contract')." ".$res->ref."</a>";
+                    print "<td><a href='".DOL_URL_ROOT."/contrat/card.php?id=".$res->cid."'>".img_object('contract','contract')." ".$res->ref."</a>";
                     print "<td align='center'>".$res->date_contrat;
                     print "<td>".$res->title;
                     print "<td width= 100px><table width=100%  class='nobordernopadding' width='100%'>";
@@ -626,7 +626,7 @@ EOF;
                                     require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
                                     $comm = new Commande($db);
                                     $comm->fetch($val1);
-                                    print "</table><td><a href='".DOL_URL_ROOT."/commande/fiche.php?id=".$comm->id."'>".$comm->ref."</a>";
+                                    print "</table><td><a href='".DOL_URL_ROOT."/commande/card.php?id=".$comm->id."'>".$comm->ref."</a>";
                                 break;
                                 case 'f':
                                     print '';
@@ -661,7 +661,7 @@ EOF;
                                 require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
                                 $comm = new Commande($db);
                                 $comm->fetch($val1);
-                                print "<a href='".DOL_URL_ROOT."/commande/fiche.php?id=".$comm->id."'>".$comm->ref."</a>";
+                                print "<a href='".DOL_URL_ROOT."/commande/card.php?id=".$comm->id."'>".$comm->ref."</a>";
                         }
                     } else if ($key=='fa') {
                         foreach($val as $key1=>$val1)

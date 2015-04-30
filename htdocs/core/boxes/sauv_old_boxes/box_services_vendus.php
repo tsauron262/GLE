@@ -136,12 +136,12 @@ class box_services_vendus extends ModeleBoxes {
                     'logo' => ($objp->fk_product_type==1?'object_service':'object_product'),
                     'text' => $objp->label,
                     'maxlength' => 16,
-                    'url' => DOL_URL_ROOT."/contrat/fiche.php?id=".$objp->rowid);
+                    'url' => DOL_URL_ROOT."/contrat/card.php?id=".$objp->rowid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
                     'text' => $objp->nom,
                     'maxlength' => 40,
-                    'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
+                    'url' => DOL_URL_ROOT."/comm/card.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
                     'text' => dol_print_date($objp->datem,'day'));

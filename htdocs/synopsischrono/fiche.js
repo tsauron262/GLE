@@ -117,7 +117,7 @@ function ajNoteContrat() {
         divDest = selectCtr.parent().parent().parent().parent().parent().parent();
 
         if (idCtr > 0) {
-            var datas = 'url=' + "/contrat/fiche.php?id=" + idCtr;
+            var datas = 'url=' + "/contrat/card.php?id=" + idCtr;
             datas = datas + '&type=note';
             jQuery.ajax({
                 url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/note_ajax.php',

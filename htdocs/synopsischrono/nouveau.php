@@ -84,7 +84,7 @@ if ($_REQUEST['action'] == 'add') {
     $chrono->projetid = addslashes($_REQUEST['projet']);
     $res = $chrono->create();
     if ($res > 0) {
-        header('Location: fiche.php?action=Modify&id=' . $res);
+        header('Location: card.php?action=Modify&id=' . $res);
     } else {
         $msg = "Erreur !";
     }

@@ -47,7 +47,7 @@ $html = new Form($db);
         print <<<EOF
 
 
-        <form id="createSAV" method="POST" action="fiche.php?action=create">
+        <form id="createSAV" method="POST" action="card.php?action=create">
         <table cellpadding=15 width=100%>
         <tr>
         <th class="ui-widget-header ui-state-default">Description
@@ -215,8 +215,8 @@ var maxi = 0;
 
                 function sendData_MoveOn(pData)
                 {
-                    var url = "fiche.php?action=create";
-                    jQuery.post(url, pData, function(msg){ var res=jQuery(msg).find('OK'); if (res){ location.href='fiche.php?id='+jQuery(msg).find('OK').text(); } else { console.log('err');} },"xml");
+                    var url = "card.php?action=create";
+                    jQuery.post(url, pData, function(msg){ var res=jQuery(msg).find('OK'); if (res){ location.href='card.php?id='+jQuery(msg).find('OK').text(); } else { console.log('err');} },"xml");
                 }
 </script>
 <div id='dialogMultiProduct'>

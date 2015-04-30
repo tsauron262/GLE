@@ -46,10 +46,10 @@
  */
 
 /**
-  \file       htdocs/synopsisfichinter/fiche.php
+  \file       htdocs/synopsisfichinter/card.php
   \brief      Fichier fiche intervention
   \ingroup    ficheinter
-  \version    $Id: fiche.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
+  \version    $Id: card.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
 $afficherLigneContrat = false;
 
@@ -211,9 +211,9 @@ $usergroup = new UserGroup($db);
 $groups = $usergroup->listGroupsForUser($user->id);
 if (!($user->admin || isset($groups[11])) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
     if (isset($_REQUEST['id']) && stripos($_SERVER['REQUEST_URI'], "?") === false)
-        header('Location: ' . str_replace("fiche.php", "ficheFast.php?id=" . $_REQUEST['id'], "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        header('Location: ' . str_replace("card.php", "ficheFast.php?id=" . $_REQUEST['id'], "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
     else
-        header('Location: ' . str_replace("fiche.php", "ficheFast.php", "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        header('Location: ' . str_replace("card.php", "ficheFast.php", "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
 
 
 if (isset($_POST["action"]) && $_POST["action"] == 'update') {
@@ -604,7 +604,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
     $numpr = $modFicheinter->getNextValue($societe, $fichinter);
 
     if ($_REQUEST["socid"]) {
-        print "<form name='fichinter' action=\"fiche.php\" method=\"post\">";
+        print "<form name='fichinter' action=\"card.php\" method=\"post\">";
 
         print '<table class="border" cellpadding=15 width="100%">';
 
@@ -637,7 +637,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
                 print '<tr><td class="ui-widget-content" width="130">' . $langs->trans("NoProject") . '</td>';
 
                 if ($user->rights->projet->creer) {
-                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
+                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/card.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
                 }
                 print '</tr></table>';
             } else {
@@ -834,7 +834,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         $societe = new Societe($db);
         $societe->fetch($socid);
 
-        print "<form name='synopsisdemandeinterv' action=\"fiche.php\" method=\"post\">";
+        print "<form name='synopsisdemandeinterv' action=\"card.php\" method=\"post\">";
         print "<input type='hidden' name='action' value='add'>";
         print "<input type='hidden' name='comLigneId' value='" . $_REQUEST['comLigneId'] . "'>";
         print "<input type='hidden' name='fk_commande' value='" . $res->rowid . "'>";
@@ -887,7 +887,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
                 print '<tr><td width="130"  class="ui-widget-content">' . $langs->trans("NoProject") . '</td>';
 
                 if ($user->rights->projet->creer) {
-                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
+                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/card.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
                 }
                 print '</tr></table>';
             } else {
@@ -1114,7 +1114,7 @@ EOF;
         print '</table>';
         print '</form>';
     } else {
-        print "<form name='fichinter' action=\"fiche.php\" method=\"get\">";
+        print "<form name='fichinter' action=\"card.php\" method=\"get\">";
         print '<table class="border" width="100%" cellpadding=15>';
         print "<tr><th class=\"ui-widget-header ui-state-default\">" . $langs->trans("Company") . "</td><td class=\"ui-widget-content\">";
         print $html->select_company('', 'socid', '', 1);
@@ -1243,7 +1243,7 @@ EOF;
             print '</th><td colspan="3" class="ui-widget-content">';
             print $langs->trans("NoProject") . '&nbsp;&nbsp;';
             if ($fichinter->brouillon)
-                print '<a class="butAction" href=../projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans('AddProject') . '</a>';
+                print '<a class="butAction" href=../projet/card.php?socid=' . $societe->id . '&action=create>' . $langs->trans('AddProject') . '</a>';
             print '</td>';
         } else {
             if (($fichinter->statut == 0 || $user->rights->synopsisficheinter->modifAfterValid) && $user->rights->synopsisficheinter->creer) {
@@ -1260,7 +1260,7 @@ EOF;
                 if (!empty($fichinter->projetidp)) {
                     $proj = new Project($db);
                     $proj->fetch($fichinter->projetidp);
-                    print '<a href="../projet/fiche.php?id=' . $fichinter->projetidp . '" title="' . $langs->trans('ShowProject') . '">';
+                    print '<a href="../projet/card.php?id=' . $fichinter->projetidp . '" title="' . $langs->trans('ShowProject') . '">';
                     print $proj->title;
                     print '</a></th>';
                 } else {
@@ -1349,7 +1349,7 @@ EOF;
             print "<table class='nobordernopadding' width=100%>";
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
-                    print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/synopsisdemandeinterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'synopsisdemandeinterv@synopsisdemandeinterv') . " " . $res->ref . "</a></td></tr>";
+                    print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/synopsisdemandeinterv/card.php?id=" . $res->rowid . "'>" . img_object('', 'synopsisdemandeinterv@synopsisdemandeinterv') . " " . $res->ref . "</a></td></tr>";
                 }
             }
             print "</table>";
@@ -1388,14 +1388,14 @@ EOF;
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editExtra-' . $res->id) {
             switch ($res->type) {
                 case "date": {
-                        print "<td colspan='" . $colspan . "'  valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'>";
+                        print "<td colspan='" . $colspan . "'  valign='middle' class='ui-widget-content'><form action='card.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'>";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
                         print "<input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='datePicker'>";
                         print "<input type='hidden' name='type-" . $res->id . "' value='date'>&nbsp;&nbsp;&nbsp;<button class='ui-button'>OK</button></FORM>";
                     }
                     break;
                 case "textarea": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
                         print "&nbsp;&nbsp;<textarea name='extraKey-" . $res->id . "'>" . $res->extra_value . "</textarea>";
                         print "<input type='hidden' name='type-" . $res->id . "' value='comment'>&nbsp;&nbsp;&nbsp;<button class='ui-button'>OK</button></FORM>";
@@ -1403,28 +1403,28 @@ EOF;
                     break;
                 default:
                 case "text": {
-                        print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="fiche.php?id=' . $fichinter->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
+                        print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="card.php?id=' . $fichinter->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
                         print '&nbsp;&nbsp;<input value="' . $res->extra_value . '" type="text" name="extraKey-' . $res->id . '">';
                         print "<input type='hidden' name='type-" . $res->id . "' value='".$res->type."'>&nbsp;&nbsp;&nbsp;<button class='ui-button'>OK</button></FORM>";
                     }
                     break;
                 case "datetime": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
                         print "&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='dateTimePicker'>";
                         print "<input type='hidden' name='type-" . $res->id . "' value='datetime'>&nbsp;&nbsp;&nbsp;<button class='ui-button'>OK</button></FORM>";
                     }
                     break;
                 case "checkbox": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
                         print "&nbsp;&nbsp;<input type='checkbox' " . ($res->extra_value == 1 ? 'CHECKED' : "") . "  name='extraKey-" . $res->id . "'>";
                         print "<input type='hidden' name='type-" . $res->id . "' value='checkbox'>&nbsp;&nbsp;&nbsp;<button class='ui-button'>OK</button></FORM>";
                     }
                     break;
                 case "3stars": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
 //                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
                         print starratingPhp("extraKey-" . $res->id, ($res->extra_value == 'Moyen' ? 1 : ($res->extra_value == 'Non' ? 0 : ($res->extra_value ? 1 : -1))), 3, $iter = 1);
@@ -1432,7 +1432,7 @@ EOF;
                     }
                     break;
                 case "5stars": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
 //                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
                         print starratingPhp("extraKey-" . $res->id, $res->extra_value, 5, $iter = 1);
@@ -1440,9 +1440,9 @@ EOF;
                     }
                     break;
                 case "radio": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
-//                    print "<form action='fiche.php?id=".$fichinter->id."' method='POST'><input type='hidden' name='action' value='editExtra'>";                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_values_choice WHERE key_refid = ".$res->id;
+//                    print "<form action='card.php?id=".$fichinter->id."' method='POST'><input type='hidden' name='action' value='editExtra'>";                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_values_choice WHERE key_refid = ".$res->id;
                         $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice
                          WHERE key_refid = " . $res->id;
@@ -1970,7 +1970,7 @@ EOF;
                 $url = $_SERVER["PHP_SELF"] . '?id=' . $fichinter->id . '&action=confirm_validate&confirm=yes';
                 print 'href="#" onClick="dialogConfirm(\'' . $url . '\',\'' . dol_escape_js(str_replace("<b></b>", $fichinter->ref, $langs->trans('ConfirmValidateIntervention'))) . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'validate\')"';
             } else {
-                print 'href="fiche.php?id=' . $_REQUEST["id"] . '&action=validate"';
+                print 'href="card.php?id=' . $_REQUEST["id"] . '&action=validate"';
             }
             print '>' . $langs->trans("Valid") . '</a>';
         }
@@ -1981,7 +1981,7 @@ EOF;
                 $url = $_SERVER["PHP_SELF"] . '?id=' . $fichinter->id . '&action=confirm_devalidate&confirm=yes';
                 print 'href="#" onClick="dialogConfirm(\'' . $url . '\',\'' . dol_escape_js(str_replace("<b></b>", $fichinter->ref, $langs->trans('ConfirmDeValidateIntervention'))) . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'validate\')"';
             } else {
-                print 'href="fiche.php?id=' . $_REQUEST["id"] . '&action=devalidate"';
+                print 'href="card.php?id=' . $_REQUEST["id"] . '&action=devalidate"';
             }
             print '>' . $langs->trans("DeValid") . '</a>';
         }

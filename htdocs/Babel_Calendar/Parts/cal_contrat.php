@@ -82,7 +82,7 @@ if ($resql)
     {
 
 
-        $url = $dolibarr_main_url_root."/contrat/fiche.php?id=".$res->rowid;
+        $url = $dolibarr_main_url_root."/contrat/card.php?id=".$res->rowid;
         if ($res->datec && $showContratCreate)
         {
             $arrRes = $BCalc->pushDateArr(

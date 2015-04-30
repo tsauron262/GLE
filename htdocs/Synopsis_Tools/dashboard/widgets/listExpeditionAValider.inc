@@ -130,19 +130,19 @@ AND  `targettype` LIKE  'shipping')";
 
                 if ($i < 10)
                 {
-                    //$table .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"fiche.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
+                    //$table .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"card.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
                     //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
-                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
-                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
+                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
+                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
                     $table .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'">'.$obj->ref.'</a></td>';
                     $table .= '<td>'.$obj->date_livraison.'</td>';
                     $table .= '<td>'.$log_ok.' , '.$log_stat.'</td>';
                     $table .= '<td>'.$fin_ok.' , '.$fin_stat.'</td></tr>';
                 }
-                //$table2 .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"fiche.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
+                //$table2 .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"card.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
                 //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
-                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
-                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
+                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
+                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
                 $table2 .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'">'.$obj->ref.'</a></td>';
                 $table2 .= '<td>'.$obj->date_livraison.'</td>';
                 $table2 .= '<td>'.$log_ok.', '.$log_stat.'</td>';
@@ -300,20 +300,20 @@ function widget_listExpeditionAValider() {
 //                    $staticcontrat->id=$obj->idContrat;
 
                 if ($i < 10) {
-                    //$table .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"fiche.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
+                    //$table .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"card.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
                     //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
-                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
-                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
+                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
+                    //$table .= '<td><a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
                     $table .= '<tr ' . $bc[$var] . '' . '><td>' . $staticcontrat->getNomUrl(1, '', 15) . '</td>';
                     $table .= '<td>' . $societe->getNomUrl(1, '', 12) . '</td>';
                     $table .= '<td>' . $obj->date_livraison . '</td>';
                     $table .= '<td>' . $log_ok . ' , ' . $log_stat . '</td>';
                     $table .= '<td>' . $fin_ok . ' , ' . $fin_stat . '</td></tr>';
                 }
-                //$table2 .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"fiche.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
+                //$table2 .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"card.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";
                 //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
-                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
-                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
+                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
+                //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
                 $table2 .= '<tr ' . $bc[$var] . '' . '><td>' . $expedition->getNomUrl(1, '') . '</td>';
                 $table2 .= '<td>' . $staticcontrat->getNomUrl(1, '') . '</td>';
                 $table2 .= '<td>' . $societe->getNomUrl(1) . '</td>';

@@ -8,5 +8,5 @@ $tabT = explode("/", $date);
 if(isset($tabT[2]))
     $date = $tabT[2]."/".$tabT[1]."/".$tabT[0];
 $contrat->setDateContrat($date);
-header("location: ".DOL_URL_ROOT."/contrat/fiche.php?id=".$_REQUEST['id']);
+header("location: ".DOL_URL_ROOT."/contrat/card.php?id=".$_REQUEST['id']);
 ?>

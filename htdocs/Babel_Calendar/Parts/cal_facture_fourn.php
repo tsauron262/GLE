@@ -65,7 +65,7 @@ if ($showFactureFourn){
         {
             while($res=$db->fetch_object($resql))
             {
-                $url = $dolibarr_main_url_root."/fourn/facture/fiche.php?facid=".$res->rowid;
+                $url = $dolibarr_main_url_root."/fourn/facture/card.php?facid=".$res->rowid;
                 if ($res->datec && $showFactureFournCreate)
                 {
                    $arrRes = $BCalc->pushDateArr(

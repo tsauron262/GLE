@@ -35,10 +35,10 @@
  */
 
 /**
- *    \file       htdocs/projet/fiche.php
+ *    \file       htdocs/projet/card.php
  *    \ingroup    projet
  *    \brief      Fiche projet
- *    \version    $Id: fiche.php,v 1.57.2.1 2008/09/10 09:46:02 eldy Exp $
+ *    \version    $Id: card.php,v 1.57.2.1 2008/09/10 09:46:02 eldy Exp $
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
@@ -76,7 +76,7 @@ if ($_REQUEST['action'] == "valid" && $user->rights->synopsisprojet->creer) {
     $pro = new Project($db);
     $pro->fetch($_REQUEST['id']);
     if ($pro->valid() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
+        header('location: card.php?id=' . $_REQUEST['id']);
     } else {
         $msg = "Ne peut lancer la planification de ce projet " . $pro->error;
     }
@@ -85,7 +85,7 @@ if ($_REQUEST['action'] == "cloture" && $user->rights->synopsisprojet->creer) {
     $pro = new Project($db);
     $pro->fetch($_REQUEST['id']);
     if ($pro->cloture() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
+        header('location: card.php?id=' . $_REQUEST['id']);
     } else {
         $msg = "Ne peut cl&ocirc;turer ce projet " . $pro->error;
     }
@@ -94,7 +94,7 @@ if ($_REQUEST['action'] == "launch" && $user->rights->synopsisprojet->creer) {
     $pro = new Project($db);
     $pro->fetch($_REQUEST['id']);
     if ($pro->launch() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
+        header('location: card.php?id=' . $_REQUEST['id']);
     } else {
         $msg = "Ne peut lancer ce projet " . $pro->error;
     }
@@ -119,7 +119,7 @@ if ($_REQUEST['action'] == 'add' && $user->rights->synopsisprojet->creer) {
 
     $result = $pro->create($user);
     if ($result > 0) {
-        Header("Location:fiche.php?id=" . $pro->id);
+        Header("Location:card.php?id=" . $pro->id);
         exit;
     } else {
         $langs->load("errors");
@@ -675,21 +675,21 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     if ($_REQUEST['action'] != "edit" &&
             ($projet->user_resp_id == $user->id || $user->rights->synopsisprojet->modAll)) {
         if ($user->rights->synopsisprojet->creer) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
         }
 
         if ($user->rights->synopsisprojet->creer && $projet->statut == 0) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=valid">' . $langs->trans("Planifier") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=valid">' . $langs->trans("Planifier") . '</a>';
         }
         if ($user->rights->synopsisprojet->creer && $projet->statut == 5) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=launch">' . $langs->trans("Lancer") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=launch">' . $langs->trans("Lancer") . '</a>';
         }
         if ($user->rights->synopsisprojet->creer && $projet->statut == 10) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=cloture">' . $langs->trans("Cloturer") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=cloture">' . $langs->trans("Cloturer") . '</a>';
         }
 
         if ($user->rights->synopsisprojet->supprimer) {
-            print '<a class="butActionDelete" href="fiche.php?id=' . $projet->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
+            print '<a class="butActionDelete" href="card.php?id=' . $projet->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
         }
     }
 

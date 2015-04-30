@@ -22,7 +22,7 @@
  */
 
 /**
- *  \file       htdocs/product/fiche.php
+ *  \file       htdocs/product/card.php
  *  \ingroup    product
  *  \brief      Page to show product
  */
@@ -555,7 +555,7 @@ if (empty($reshook))
 
         if ($result > 0)
         {
-            header("Location: ".DOL_URL_ROOT."/commande/fiche.php?id=".$commande->id);
+            header("Location: ".DOL_URL_ROOT."/commande/card.php?id=".$commande->id);
             exit;
         }
     }
@@ -1445,7 +1445,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
                     print "<tr ".$bc[$var].">";
                     print '<td nowrap="nowrap">';
                     print "<a href=\"../comm/propal.php?id=".$objp->propalid."\">".img_object($langs->trans("ShowPropal"),"propal")." ".$objp->ref."</a></td>\n";
-                    print "<td><a href=\"../comm/fiche.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,18)."</a></td>\n";
+                    print "<td><a href=\"../comm/card.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,18)."</a></td>\n";
                     print "<td nowrap=\"nowrap\">".dol_print_date($objp->dp,"%d %b")."</td>\n";
                     print '<td><input type="hidden" name="propalid" value="'.$objp->propalid.'">';
                     print '<input type="text" class="flat" name="qty" size="1" value="1"></td><td nowrap>'.$langs->trans("ReductionShort");
@@ -1561,8 +1561,8 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
                     print '<input type="hidden" name="action" value="addincommande">';
                     print "<tr ".$bc[$var].">";
                     print '<td nowrap="nowrap">';
-                    print "<a href=\"../commande/fiche.php?id=".$objc->commandeid."\">".img_object($langs->trans("ShowOrder"),"order")." ".$objc->ref."</a></td>\n";
-                    print "<td><a href=\"../comm/fiche.php?socid=".$objc->socid."\">".dol_trunc($objc->nom,18)."</a></td>\n";
+                    print "<a href=\"../commande/card.php?id=".$objc->commandeid."\">".img_object($langs->trans("ShowOrder"),"order")." ".$objc->ref."</a></td>\n";
+                    print "<td><a href=\"../comm/card.php?socid=".$objc->socid."\">".dol_trunc($objc->nom,18)."</a></td>\n";
                     print "<td nowrap=\"nowrap\">".dol_print_date($db->jdate($objc->dc),"%d %b")."</td>\n";
                     print '<td><input type="hidden" name="commandeid" value="'.$objc->commandeid.'">';
                     print '<input type="text" class="flat" name="qty" size="1" value="1"></td><td nowrap>'.$langs->trans("ReductionShort");
@@ -1676,7 +1676,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
                     print "<tr $bc[$var]>";
                     print "<td nowrap>";
                     print "<a href=\"../compta/facture.php?facid=".$objp->factureid."\">".img_object($langs->trans("ShowBills"),"bill")." ".$objp->facnumber."</a></td>\n";
-                    print "<td><a href=\"../comm/fiche.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,18)."</a></td>\n";
+                    print "<td><a href=\"../comm/card.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,18)."</a></td>\n";
                     print "<td nowrap=\"nowrap\">".dol_print_date($db->jdate($objp->df),"%d %b")."</td>\n";
                     print '<td><input type="hidden" name="factureid" value="'.$objp->factureid.'">';
                     print '<input type="text" class="flat" name="qty" size="1" value="1"></td><td nowrap>'.$langs->trans("ReductionShort");
@@ -1740,7 +1740,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status)
                         print '<input type="hidden" name="action" value="addinfacture">';
                         print "<tr ".$bc[$var].">";
                         print "<td><a href=\"../compta/facture.php?facid=".$objp->factureid."\">$objp->facnumber</a></td>\n";
-                        print "<td><a href=\"../comm/fiche.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,24)."</a></td>\n";
+                        print "<td><a href=\"../comm/card.php?socid=".$objp->socid."\">".dol_trunc($objp->nom,24)."</a></td>\n";
                         print "<td colspan=\"2\">".$langs->trans("Qty");
                         print "</td>";
                         print '<td><input type="hidden" name="factureid" value="'.$objp->factureid.'">';

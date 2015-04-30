@@ -224,9 +224,9 @@ EOF;
             print '</th><td colspan="3" class="ui-widget-content">';
             if ($_REQUEST["action"] == "classer")
             {
-                $form->form_project("fiche.php?id=$id",$contrat->socid,$contrat->fk_projet,"projetid");
+                $form->form_project("card.php?id=$id",$contrat->socid,$contrat->fk_projet,"projetid");
             } else {
-                $form->form_project("fiche.php?id=$id",$contrat->socid,$contrat->fk_projet,"none");
+                $form->form_project("card.php?id=$id",$contrat->socid,$contrat->fk_projet,"none");
             }
             print "</td></tr>";
         }

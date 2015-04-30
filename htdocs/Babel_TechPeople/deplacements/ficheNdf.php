@@ -306,7 +306,7 @@ Rico.onLoad( function() {
     panels:['Description','Détails'],
     headingSort   : 'hover',
     columnSpecs   : [ { canHide: 0, visible: false, canDrag:false},
-                      {Hdg:"Date", width:100,ClassName:'aligncenter', type: "date",dateFmt:"dd mmm yyyy",control: new MyCustomColumn1("<?php print DOL_URL_ROOT; ?>/Babel_TechPeople/deplacements/fiche.php?id={0}")},
+                      {Hdg:"Date", width:100,ClassName:'aligncenter', type: "date",dateFmt:"dd mmm yyyy",control: new MyCustomColumn1("<?php print DOL_URL_ROOT; ?>/Babel_TechPeople/deplacements/card.php?id={0}")},
                       {Hdg:"Soci&eacute;t&eacute;", width:250,control: new MyCustomColumn1("<?php print DOL_URL_ROOT; ?>/soc.php?socid={9}",'',"<img height='12pt' border='0' src='<?php print DOL_URL_ROOT; ?>/theme/auguria/img/object_company.png'></img>")},
                       {Hdg:'Lieu', width:300},
                       {Hdg:"Type", control:new MyCustomColumn2(4),ClassName:"alignright"},
@@ -514,7 +514,7 @@ $formfile = new FormFile($db);
 //  $head[$h][2] = 'Mois';
 //  $h++;
 //
-//  $head[$h][0] = DOL_URL_ROOT.'/Babel_TechPeople/deplacements/fiche.php??action=create';
+//  $head[$h][0] = DOL_URL_ROOT.'/Babel_TechPeople/deplacements/card.php??action=create';
 //  $head[$h][1] = $langs->trans('Ajout d\'une ndf');
 //  $head[$h][2] = 'Ajoute';
 //    $h++;

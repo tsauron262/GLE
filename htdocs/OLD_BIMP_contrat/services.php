@@ -182,12 +182,12 @@ if ($resql)
         $obj = $db->fetch_object($resql);
         $var=!$var;
         print "<tr $bc[$var]>";
-        print '<td><a href="fiche.php?id='.$obj->cid.'">'.img_object($langs->trans("ShowContract"),"contract").' '.$obj->cref.'</a></td>';
+        print '<td><a href="card.php?id='.$obj->cid.'">'.img_object($langs->trans("ShowContract"),"contract").' '.$obj->cref.'</a></td>';
 	if($mode != "6"){
 		print '<td>';
 		if ($obj->pid)
 		{
-		    print '<a href="../product/fiche.php?id='.$obj->pid.'">'.img_object($langs->trans("ShowService"),"service").' '.dol_trunc($obj->label,20).'</a>';
+		    print '<a href="../product/card.php?id='.$obj->pid.'">'.img_object($langs->trans("ShowService"),"service").' '.dol_trunc($obj->label,20).'</a>';
 		}
 		else
 		{
@@ -195,7 +195,7 @@ if ($resql)
 		}
 		print '</td>';
 	}
-        print '<td><a href="../comm/fiche.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.dol_trunc($obj->nom,44).'</a></td>';
+        print '<td><a href="../comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.dol_trunc($obj->nom,44).'</a></td>';
         // Date debut
         if ($mode == "0") {
             print '<td align="center">';
@@ -216,7 +216,7 @@ if ($resql)
         else print '&nbsp;&nbsp;&nbsp;&nbsp;';
         print '</td>';
         print '<td align="right">';
-        print '<a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->cid.'&line='.$obj->rowid.'">';
+        print '<a href="'.DOL_URL_ROOT.'/contrat/card.php?id='.$obj->cid.'&line='.$obj->rowid.'">';
         print $staticcontratligne->LibStatut($obj->statut,5);
         print '</a></td>';
         print "</tr>\n";

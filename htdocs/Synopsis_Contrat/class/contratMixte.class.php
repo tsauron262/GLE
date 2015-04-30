@@ -1602,7 +1602,7 @@ EOF;
         return ($html);
     }
 
-    public function validate($user, $force_number = '') {
+    public function validate($user, $force_number = '', $notrigger = 0) {
         global $langs, $conf;
         $sql = "UPDATE " . MAIN_DB_PREFIX . "contrat SET statut = 1 ,date_valid=now()";
         $sql .= " WHERE rowid = " . $this->id . " AND statut = 0";
@@ -1827,7 +1827,7 @@ EOF;
 
             if ($this->statut == 0 && $nbofservices) {
                 if ($user->rights->contrat->creer)
-                    $html .= '<a class="butAction" href="fiche.php?id=' . $this->id . '&amp;action=valid">' . $langs->trans("Validate") . '</a>';
+                    $html .= '<a class="butAction" href="card.php?id=' . $this->id . '&amp;action=valid">' . $langs->trans("Validate") . '</a>';
 //                else $html .=  '<a class="butActionRefused" href="#" title="'.$langs->trans("NotEnoughPermissions").'">'.$langs->trans("Validate").'</a>';
             }
 
@@ -1839,7 +1839,7 @@ EOF;
               }
              */
             if ($this->nbofservicesclosed < $nbofservices) {
-                $html .= '<a class="butAction" href="fiche.php?id=' . $this->id . '&amp;action=close">' . $langs->trans("CloseAllContracts") . '</a>';
+                $html .= '<a class="butAction" href="card.php?id=' . $this->id . '&amp;action=close">' . $langs->trans("CloseAllContracts") . '</a>';
             }
             if ($this->statut == 1) {
                 $html .= '<a class="butAction" href="#" onClick="openDialogAdd();">' . $langs->trans("Avenants") . '</a>';
@@ -1868,7 +1868,7 @@ EOF;
             // - Droit de creer + mode brouillon (erreur creation)
             // - Droit de supprimer
             if ($this->statut != 2 && (($user->rights->contrat->creer && $this->statut == 0) || $user->rights->contrat->supprimer)) {
-                $html .= '<a class="butActionDelete" href="fiche.php?id=' . $this->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
+                $html .= '<a class="butActionDelete" href="card.php?id=' . $this->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
             }
 
             $html .= "</div>";

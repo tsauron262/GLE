@@ -98,7 +98,7 @@ class modSynopsisHoliday extends DolibarrModules {
             'titre' => 'MenuAddCP',
             'mainmenu' => 'hrm',
             'leftmenu' => '1', // To say if we can overwrite leftmenu
-            'url' => '/synopsisholiday/fiche.php?&action=request',
+            'url' => '/synopsisholiday/card.php?&action=request',
             'langs' => 'holiday@synopsisholiday',
             'position' => 1,
             'perms' => '$user->rights->holiday->write',

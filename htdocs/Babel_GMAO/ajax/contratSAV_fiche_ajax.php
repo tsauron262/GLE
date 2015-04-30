@@ -243,7 +243,7 @@ if ($_REQUEST['dateFinConf'])
         if ($result > 0)
         {
 //TODO
-            Header("Location: fiche.php?id=".$contrat->id);
+            Header("Location: card.php?id=".$contrat->id);
             exit;
         }
         else {

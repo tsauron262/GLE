@@ -72,7 +72,7 @@ function llxHeader($head = '', $title='', $help_url='', $target='', $disablejs=0
 			while ($i < $numr)
 			{
 				$objp = $db->fetch_object($resql);
-				$menu->add('/compta/bank/fiche.php?id='.$objp->rowid,$objp->label,1,$user->rights->banque->lire);
+				$menu->add('/compta/bank/card.php?id='.$objp->rowid,$objp->label,1,$user->rights->banque->lire);
                 if ($objp->rappro && $objp->courant != 2)  // If not cash account and can be reconciliate
                 {
 				    $menu->add('/compta/bank/rappro.php?account='.$objp->rowid,$langs->trans("Conciliate"),2,$user->rights->banque->consolidate);

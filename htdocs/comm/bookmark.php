@@ -125,7 +125,7 @@ if ($resql)
       print "<tr ".$bc[$var].">";
       //print "<td>" . ($i + 1 + ($limit * $page)) . "</td>";
       print "<td align=\"center\"><b>".$obj->bid."</b></td>";
-      print "<td><a href='".DOL_URL_ROOT."/user/fiche.php?id=".$obj->fk_user."'>".img_object($langs->trans("ShowUser"),"user").' '.$obj->lastname." ".$obj->firstname."</a></td>\n";
+      print "<td><a href='".DOL_URL_ROOT."/user/card.php?id=".$obj->fk_user."'>".img_object($langs->trans("ShowUser"),"user").' '.$obj->lastname." ".$obj->firstname."</a></td>\n";
       print '<td align="center">'.dol_print_date($db->jdate($obj->dateb))."</td>";
       print "<td><a href=\"index.php?socid=".$obj->rowid."\">".img_object($langs->trans("ShowCompany"),"company").' '.$obj->name."</a></td>\n";
       print '<td align="center">'.$obj->url."</td>";

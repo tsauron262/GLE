@@ -54,7 +54,7 @@ if ($showSociete){
                 $url = $dolibarr_main_url_root."/comm/prospect/fiche.php?socid=".$res->rowid;
                 if ($res->client=1)
                 {
-                    $url = $dolibarr_main_url_root."/comm/fiche.php?socid=".$res->rowid;
+                    $url = $dolibarr_main_url_root."/comm/card.php?socid=".$res->rowid;
                 }
                 if ($res->datec && $showSocieteCreate)
                 {

@@ -97,7 +97,7 @@ $langs->load("project@projet");
 
         print "<br/>";
         print "<div style='padding-left: 25px;'>";
-        print "<form action='fiche.php?action=create' method='GET'>";
+        print "<form action='card.php?action=create' method='GET'>";
         print "<input type='hidden' name='action' value='create' >";
         print "<table cellpadding=15 width=700>";
         print "<tr><th style='font-size: 12pt' class='ui-widget-header ui-state-default' colspan=2>Choix du destinataire";

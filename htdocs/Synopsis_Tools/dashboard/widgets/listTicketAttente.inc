@@ -48,7 +48,7 @@ function widget_listTicketAttente() {
                 $table .= '   </td><td style="overflow: hidden; white-space: nowrap;">';
                 $table .= '            ' . $val['Priority'];
                 $table .= '   </td><td style="overflow: hidden; white-space: nowrap;">';
-                $table .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/fiche.php?id=' . $val['id'] . '">' . $val['subject'] . '</a>';
+                $table .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/card.php?id=' . $val['id'] . '">' . $val['subject'] . '</a>';
                 $table .= '   </td><td style="overflow: hidden; white-space: nowrap;">' . date('d/m/Y', $val['date']);
                 $table .= '    </td>';
                 $table .= '</tr>';
@@ -58,7 +58,7 @@ function widget_listTicketAttente() {
                 $table2 .= '   </td><td style="overflow: hidden; white-space: nowrap;">';
                 $table2 .= '            ' . $val['Priority'];
                 $table2 .= '   </td><td style="overflow: hidden; white-space: nowrap;">';
-                $table2 .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/fiche.php?id=' . $val['id'] . '">' . $val['subject'] . '</a>';
+                $table2 .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/card.php?id=' . $val['id'] . '">' . $val['subject'] . '</a>';
                 $table2 .= '   </td><td style="overflow: hidden; white-space: nowrap;">';
                 $table2 .= '            ' . $val['date'];
                 $table2 .= '   </td><td style="overflow: hidden; white-space: nowrap;">' . date('d/m/Y', $val['date']);

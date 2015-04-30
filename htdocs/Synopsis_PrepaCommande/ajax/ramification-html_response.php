@@ -51,7 +51,7 @@
         print "<td class='ui-widget-content'>".$durr;
         if ($user->rights->SynopsisPrepaCom->interventions->Modifier)
         {
-            print "<td class='ui-widget-content'><button onClick='location.href=\"".DOL_URL_ROOT."/fichinter/fiche.php?id=".$res->rowid."\"' class='butAction'>Modifier</button><button onClick='associateFI(".$res->rowid.");' class='butAction'>Associ&eacute;</button>";
+            print "<td class='ui-widget-content'><button onClick='location.href=\"".DOL_URL_ROOT."/fichinter/card.php?id=".$res->rowid."\"' class='butAction'>Modifier</button><button onClick='associateFI(".$res->rowid.");' class='butAction'>Associ&eacute;</button>";
         }
     }
     print "</table>";

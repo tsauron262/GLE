@@ -52,7 +52,7 @@ function chrono_prepare_head($objsoc)
     $h = 0;
     $head = array();
 
-    $head[$h][0] = DOL_URL_ROOT.'/synopsischrono/fiche.php?id='.$objsoc->id;
+    $head[$h][0] = DOL_URL_ROOT.'/synopsischrono/card.php?id='.$objsoc->id;
     $head[$h][1] = $langs->trans("Card");
     $head[$h][2] = 'chrono';
     $h++;

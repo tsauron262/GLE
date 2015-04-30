@@ -475,7 +475,7 @@ print "</TABLE>\n";
     {
         print_titre($langs->trans("NewSending"));
 
-        print '<form method="GET" action="'.DOL_URL_ROOT.'/expedition/fiche.php">';
+        print '<form method="GET" action="'.DOL_URL_ROOT.'/expedition/card.php">';
         print '<input type="hidden" name="action" value="create">';
         print '<input type="hidden" name="id" value="'.$commande->id.'">';
         print '<input type="hidden" name="origin" value="commande">';
@@ -502,7 +502,7 @@ print "</TABLE>\n";
 
           if (sizeof($entrepot->list_array()) <= 0)
         {
-            print ' &nbsp; Aucun entrep&ocirc;t d&eacute;finit, <a href="'.DOL_URL_ROOT.'/product/stock/fiche.php?action=create">definissez en un</a>';
+            print ' &nbsp; Aucun entrep&ocirc;t d&eacute;finit, <a href="'.DOL_URL_ROOT.'/product/stock/card.php?action=create">definissez en un</a>';
         }
         print '</td></tr>';
         /*

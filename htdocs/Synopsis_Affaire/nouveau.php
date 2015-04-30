@@ -63,7 +63,7 @@ if ($_REQUEST['action'] == 'nouveau')
         $result=$interface->run_triggers('AFFAIRE_NEW',$user,$user,$langs,$conf);
         if ($result < 0) { $error++; }
         // Fin appel triggers
-        header('location: fiche.php?id='.$ret);
+        header('location: card.php?id='.$ret);
     } else {
         $msg = "Erreur d'insertion";
     }

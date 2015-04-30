@@ -33,6 +33,12 @@
  */
 
 require '../main.inc.php';
+if(isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE)){
+    require DOL_DOCUMENT_ROOT.'/Synopsis_Tools/product/fiche.php';
+    die;
+}
+
+
 require_once DOL_DOCUMENT_ROOT.'/core/class/canvas.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';

@@ -617,7 +617,7 @@ class Chrono extends CommonObject {
             $titre = "<span style='color:red'>" . $titre . "</span>";
 
 
-        $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
+        $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
         if (stripos($this->picto, '[KEY|')) {
@@ -632,7 +632,7 @@ class Chrono extends CommonObject {
         }
 
         if ($option == 6) {
-            $lien = '<a title="' . $this->nom . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
+            $lien = '<a title="' . $this->nom . '" href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $this->id . '">';
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {

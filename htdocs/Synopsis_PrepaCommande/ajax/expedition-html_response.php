@@ -361,7 +361,7 @@ EOF;
                     $product = new Product($db);
                     $product->fetch($objp->fk_product);
                     print '<td>';
-                    print '<a href="' . DOL_URL_ROOT . '/product/fiche.php?id=' . $objp->fk_product . '">';
+                    print '<a href="' . DOL_URL_ROOT . '/product/card.php?id=' . $objp->fk_product . '">';
                     print img_object($langs->trans("Product"), "product") . ' ' . $product->ref . '</a>';
                     print traite_str($product->libelle ? ' - ' . $product->libelle : '');
                     print '</td>';
@@ -427,7 +427,7 @@ EOF;
                     $langs->load("orders");
                     print_titre($langs->trans("NewSending") . " " . $langs->trans("Order") . " " . $commande->getNomUrl(1));
 
-                    print '<form method="GET" action="' . DOL_URL_ROOT . '/expedition/fiche.php">';
+                    print '<form method="GET" action="' . DOL_URL_ROOT . '/expedition/card.php">';
                     print '<input type="hidden" name="action" value="create">';
                     print '<input type="hidden" name="id" value="' . $commande->id . '">';
                     print '<input type="hidden" name="origin" value="commande">';
@@ -450,7 +450,7 @@ EOF;
                     }
 
                     if (sizeof($entrepot->list_array()) <= 0) {
-                        print ' &nbsp; Aucun entrep&ocirc;t d&eacute;finit, <a href="' . DOL_URL_ROOT . '/product/stock/fiche.php?action=create">definissez en un</a>';
+                        print ' &nbsp; Aucun entrep&ocirc;t d&eacute;finit, <a href="' . DOL_URL_ROOT . '/product/stock/card.php?action=create">definissez en un</a>';
                     }
                     print '</td></tr>';
                     /*
@@ -477,7 +477,7 @@ EOF;
 //$origin='commande',$origin_id,$filter='',$display=true
             if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
                 print '<table cellpadding=10 class="border" width="100%">';
-                print '<tr><td class="ui-widget-header" align="right"><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/fiche.php?action=create&origin=commande&object_id=' . $_REQUEST["id"] . '\'" class="butAction">Expedier</button><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/commande.php?id=' . $commande->id . '\'" class="butAction">Modifier</button>';
+                print '<tr><td class="ui-widget-header" align="right"><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/card.php?action=create&origin=commande&object_id=' . $_REQUEST["id"] . '\'" class="butAction">Expedier</button><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/commande.php?id=' . $commande->id . '\'" class="butAction">Modifier</button>';
                 print '</table>';
             }
         }

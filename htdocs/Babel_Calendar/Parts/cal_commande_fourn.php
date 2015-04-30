@@ -66,7 +66,7 @@ if ($showCommandeFourn)
         {
             while($res=$db->fetch_object($resql))
             {
-                $url = $dolibarr_main_url_root."/fourn/commande/fiche.php?id=".$res->rowid;
+                $url = $dolibarr_main_url_root."/fourn/commande/card.php?id=".$res->rowid;
                 if ($res->date_creation && $showCommandeFournCreate)
                 {
                    $arrRes = $BCalc->pushDateArr(

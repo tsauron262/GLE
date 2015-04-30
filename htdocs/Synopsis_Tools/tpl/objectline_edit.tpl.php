@@ -65,7 +65,7 @@
 
 	<?php } else if ($line->fk_product > 0) { ?>
 
-		<a href="<?php echo DOL_URL_ROOT.'/product/fiche.php?id='.$line->fk_product; ?>">
+		<a href="<?php echo DOL_URL_ROOT.'/product/card.php?id='.$line->fk_product; ?>">
 		<?php
 		if ($line->product_type==1) echo img_object($langs->trans('ShowService'),'service');
 		else print img_object($langs->trans('ShowProduct'),'product');

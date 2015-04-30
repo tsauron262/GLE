@@ -71,7 +71,7 @@ function initSimult(){
     $("div.wc-title a").click(function(){
         id = $(this).parent().find(".idAction").attr("value");
         titre = $(this).html();
-        dispatchePopIFrame(DOL_URL_ROOT + "/comm/action/fiche.php?id=" + id + "&action=edit&optioncss=print", function(){ $('#calendar').weekCalendar('refresh');}, titre, 100);
+        dispatchePopIFrame(DOL_URL_ROOT + "/comm/action/card.php?id=" + id + "&action=edit&optioncss=print", function(){ $('#calendar').weekCalendar('refresh');}, titre, 100);
         return false;
     });
 }

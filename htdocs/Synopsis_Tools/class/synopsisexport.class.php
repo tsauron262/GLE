@@ -422,7 +422,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                 }
 
                 if ($nom == "refSav" && $this->sortie == "html")
-                    $valeur = "<a href='" . DOL_URL_ROOT . "/synopsischrono/fiche.php?ref=" . $valeur . "'>" . $valeur . "</a>";
+                    $valeur = "<a href='" . DOL_URL_ROOT . "/synopsischrono/card.php?ref=" . $valeur . "'>" . $valeur . "</a>";
 
                 if ((stripos($nom, "_ht") !== false || stripos($nom, "_ttc") !== false || stripos($nom, "Total") !== false
                         ) && is_numeric($valeur)) {

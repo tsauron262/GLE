@@ -27,10 +27,10 @@
  */
 
 /**
- *  \file       htdocs/product/fiche.php
+ *  \file       htdocs/product/card.php
  *  \ingroup    product
  *  \brief      Page de la fiche produit
- *  \version    $Id: fiche.php,v 1.242 2008/08/04 00:30:52 eldy Exp $
+ *  \version    $Id: card.php,v 1.242 2008/08/04 00:30:52 eldy Exp $
  */
 //require("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/product.lib.php");
@@ -81,7 +81,7 @@ if ($_GET["action"] == 'fastappro') {
     $product = new Product($db);
     $product->fetch($_GET["id"]);
     $result = $product->fastappro($user);
-    Header("Location: fiche.php?id=" . $_GET["id"]);
+    Header("Location: card.php?id=" . $_GET["id"]);
     exit;
 }
 
@@ -192,7 +192,7 @@ if ($_POST["action"] == 'add' && $user->rights->produit->creer) {
                 $db->query($requete);
             }
             //Redirect
-            Header("Location: fiche.php?id=" . $id);
+            Header("Location: card.php?id=" . $id);
             exit;
         } else {
             $mesg = '<div class="error ui-state-error">' . $langs->trans($product->error) . '</div>';
@@ -419,7 +419,7 @@ if ($_GET["action"] == 'clone' && $user->rights->produit->creer) {
                     $db->close();
                 }
 
-                Header("Location: fiche.php?id=$id");
+                Header("Location: card.php?id=$id");
                 exit;
             } else {
                 if ($product->error == 'ErrorProductAlreadyExists') {
@@ -487,7 +487,7 @@ if ($_GET["action"] == 'cloneToProduct' && $user->rights->produit->creer) {
                     $db->close();
                 }
 
-                Header("Location: fiche.php?id=$id");
+                Header("Location: card.php?id=$id");
                 exit;
             } else {
                 if ($product->error == 'ErrorProductAlreadyExists') {
@@ -553,7 +553,7 @@ if ($_GET["action"] == 'cloneToLocation' && $user->rights->produit->creer) {
                     $db->close();
                 }
 
-                Header("Location: fiche.php?id=$id");
+                Header("Location: card.php?id=$id");
                 exit;
             } else {
                 if ($product->error == 'ErrorProductAlreadyExists') {
@@ -709,7 +709,7 @@ if ($_POST["action"] == 'addincommande') {
     );
 
     if ($result > 0) {
-        Header("Location: " . DOL_URL_ROOT . "/commande/fiche.php?id=" . $commande->id);
+        Header("Location: " . DOL_URL_ROOT . "/commande/card.php?id=" . $commande->id);
         exit;
     }
 }
@@ -774,7 +774,7 @@ if ($_POST["action"] == 'addinfacture' && $user->rights->facture->creer) {
 
 if (isset($_POST["cancel"]) && $_POST["cancel"] == $langs->trans("Cancel")) {
     $action = '';
-    Header("Location: fiche.php?id=" . $_POST["id"]);
+    Header("Location: card.php?id=" . $_POST["id"]);
     exit;
 }
 
@@ -813,7 +813,7 @@ if ($_GET["action"] == 'create' && $user->rights->produit->creer) {
         print $mesg . "\n";
 
     if (!$conf->global->PRODUCT_CANVAS_ABILITY || !$_GET["canvas"]) {
-        print '<form action="fiche.php" method="post">';
+        print '<form action="card.php" method="post">';
         print '<input type="hidden" name="action" value="add">';
         print '<input type="hidden" name="type" value="' . $_GET["type"] . '">' . "\n";
 
@@ -1337,7 +1337,7 @@ EOF;
             // Confirmation de la suppression de la facture
             if ($_GET["action"] == 'delete') {
                 $html = new Form($db);
-                $html->form_confirm("fiche.php?id=" . $product->id, $langs->trans("DeleteProduct"), $langs->trans("ConfirmDeleteProduct"), "confirm_delete");
+                $html->form_confirm("card.php?id=" . $product->id, $langs->trans("DeleteProduct"), $langs->trans("ConfirmDeleteProduct"), "confirm_delete");
                 print "<br />\n";
             }
 
@@ -1768,7 +1768,7 @@ EOF;
 
         if ($product->canvas == '') {
             print "<!-- CUT HERE -->\n";
-            print "<form action=\"fiche.php\" method=\"post\">\n";
+            print "<form action=\"card.php\" method=\"post\">\n";
             print '<input type="hidden" name="action" value="update">';
             print '<input type="hidden" name="id" value="' . $product->id . '">';
             print '<input type="hidden" name="canvas" value="' . $product->canvas . '">';
@@ -2303,7 +2303,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status) {
                     print "<tr " . $bc[$var] . ">";
                     print '<td nowrap="nowrap">';
                     print "<a href=\"../comm/propal.php?id=" . $objp->propalid . "\">" . img_object($langs->trans("ShowPropal"), "propal") . " " . $objp->ref . "</a></td>\n";
-                    print "<td><a href=\"../comm/fiche.php?socid=" . $objp->socid . "\">" . dol_trunc($objp->nom, 18) . "</a></td>\n";
+                    print "<td><a href=\"../comm/card.php?socid=" . $objp->socid . "\">" . dol_trunc($objp->nom, 18) . "</a></td>\n";
                     print "<td nowrap=\"nowrap\">" . dol_print_date($objp->dp, "%d %b") . "</td>\n";
                     print '<td><input type="hidden" name="propalid" value="' . $objp->propalid . '">';
                     print '<input type="text" class="flat" name="qty" size="1" value="1"></td><td nowrap>' . $langs->trans("ReductionShort");
@@ -2409,8 +2409,8 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status) {
                     print '<input type="hidden" name="action" value="addincommande">';
                     print "<tr " . $bc[$var] . ">";
                     print '<td nowrap="nowrap">';
-                    print "<a href=\"../commande/fiche.php?id=" . $objc->commandeid . "\">" . img_object($langs->trans("ShowOrder"), "order") . " " . $objc->ref . "</a></td>\n";
-                    print "<td><a href=\"../comm/fiche.php?socid=" . $objc->socid . "\">" . dol_trunc($objc->nom, 18) . "</a></td>\n";
+                    print "<a href=\"../commande/card.php?id=" . $objc->commandeid . "\">" . img_object($langs->trans("ShowOrder"), "order") . " " . $objc->ref . "</a></td>\n";
+                    print "<td><a href=\"../comm/card.php?socid=" . $objc->socid . "\">" . dol_trunc($objc->nom, 18) . "</a></td>\n";
                     print "<td nowrap=\"nowrap\">" . dol_print_date($db->jdate($objc->dc), "%d %b") . "</td>\n";
                     print '<td><input type="hidden" name="commandeid" value="' . $objc->commandeid . '">';
                     print '<input type="text" class="flat" name="qty" size="1" value="1"></td><td nowrap>' . $langs->trans("ReductionShort");
@@ -2513,7 +2513,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status) {
                     print "<tr $bc[$var]>";
                     print "<td nowrap>";
                     print "<a href=\"../compta/facture.php?facid=" . $objp->factureid . "\">" . img_object($langs->trans("ShowBills"), "bill") . " " . $objp->facnumber . "</a></td>\n";
-                    print "<td><a href=\"../comm/fiche.php?socid=" . $objp->socid . "\">" . dol_trunc($objp->nom, 18) . "</a></td>\n";
+                    print "<td><a href=\"../comm/card.php?socid=" . $objp->socid . "\">" . dol_trunc($objp->nom, 18) . "</a></td>\n";
                     print "<td nowrap=\"nowrap\">" . dol_print_date($db->jdate($objp->df), "%d %b") . "</td>\n";
                     print '<td><input type="hidden" name="factureid" value="' . $objp->factureid . '">';
                     print '<input type="text" class="flat" name="qty" size="1" value="1"></td><td nowrap>' . $langs->trans("ReductionShort");
@@ -2570,7 +2570,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status) {
                         print '<input type="hidden" name="action" value="addinfacture">';
                         print "<tr " . $bc[$var] . ">";
                         print "<td><a href=\"../compta/facture.php?facid=" . $objp->factureid . "\">$objp->facnumber</a></td>\n";
-                        print "<td><a href=\"../comm/fiche.php?socid=" . $objp->socid . "\">" . dol_trunc($objp->nom, 24) . "</a></td>\n";
+                        print "<td><a href=\"../comm/card.php?socid=" . $objp->socid . "\">" . dol_trunc($objp->nom, 24) . "</a></td>\n";
                         print "<td colspan=\"2\">" . $langs->trans("Qty");
                         print "</td>";
                         print '<td><input type="hidden" name="factureid" value="' . $objp->factureid . '">';

@@ -120,12 +120,12 @@ if ($resql)
 
       $var=!$var;
       print "<tr $bc[$var]>";
-      print '<td><a href="fiche.php?id='.$objp->rowid.'">'.img_object($langs->trans("ShowTrip"),"trip").' '.$objp->rowid.'</a></td>';
+      print '<td><a href="card.php?id='.$objp->rowid.'">'.img_object($langs->trans("ShowTrip"),"trip").' '.$objp->rowid.'</a></td>';
       print '<td>'.$langs->trans($objp->type).'</td>';
       print '<td>'.dol_print_date($db->jdate($objp->dd),'day').'</td>';
       if ($objp->socid) print '<td>'.$soc->getNomUrl(1).'</td>';
       else print '<td>&nbsp;</td>';
-      print '<td align="left"><a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$objp->rowid.'">'.img_object($langs->trans("ShowUser"),"user").' '.$objp->firstname.' '.$objp->name.'</a></td>';
+      print '<td align="left"><a href="'.DOL_URL_ROOT.'/user/card.php?id='.$objp->rowid.'">'.img_object($langs->trans("ShowUser"),"user").' '.$objp->firstname.' '.$objp->name.'</a></td>';
       print '<td align="right">'.$objp->km.'</td>';
       print "</tr>\n";
 

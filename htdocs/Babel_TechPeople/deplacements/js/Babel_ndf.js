@@ -30,10 +30,10 @@ Rico.onLoad(
             columnSpecs:  [
                {canHide: 0, visible: false, canDrag:false},
                {canHide: 0, visible: false, type: "date",dateFmt:"mmyyyy"},
-               { width:30,control: new Rico.TableColumn.link(DOL_URL_ROOT+"/Babel_TechPeople/deplacements/fiche.php?id={0}")},
+               { width:30,control: new Rico.TableColumn.link(DOL_URL_ROOT+"/Babel_TechPeople/deplacements/card.php?id={0}")},
                {canHide: 0, visible: false, canDrag:false},
                {canHide: 0, visible: false, canDrag:false},
-               {filterUI:'t5',width:150 , control: new Rico.TableColumn.link(DOL_URL_ROOT+"/user/fiche.php?id={4}","",5)},
+               {filterUI:'t5',width:150 , control: new Rico.TableColumn.link(DOL_URL_ROOT+"/user/card.php?id={4}","",5)},
                {width:160,suffix:" &euro;" , type:"number", decPlaces:"2", decPoint:",", thouSep:" " },
                { width:150 },
             ]

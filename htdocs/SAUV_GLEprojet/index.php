@@ -131,7 +131,7 @@ $js = '
 //      $row = $db->fetch_row( $resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/projet/fiche.php?id='.$row[1].'">'.img_object($langs->trans("ShowProject"),"project")." ".$row[0].'</a></td>';
+//      print '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/projet/card.php?id='.$row[1].'">'.img_object($langs->trans("ShowProject"),"project")." ".$row[0].'</a></td>';
 //      print '<td align="right">'.$row[2].'</td>';
 //      print '<td align="right"><div style="height: 16px; border:1px solid #000000;" id="progBar'.$row[1].'"></div></td>';
 //      print "</tr>\n";
@@ -383,7 +383,7 @@ if ( $resql )
 
 			print "<tr ".$bc[$var].">";
 			print '<td>'.$username.'</td>';
-			print '<td><a href="'.DOL_URL_ROOT.'/projet/fiche.php?id='.$obj->projectid.'">'.$obj->title.'</a></td>';
+			print '<td><a href="'.DOL_URL_ROOT.'/projet/card.php?id='.$obj->projectid.'">'.$obj->title.'</a></td>';
 			print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/task.php?id='.$obj->taskid.'&withproject=1">'.$obj->label.'</a></td>';
 			print '<td>'.dol_print_date($db->jdate($obj->dateo)).'</td>';
 			print '<td>'.dol_print_date($db->jdate($obj->datee)).'</td>';

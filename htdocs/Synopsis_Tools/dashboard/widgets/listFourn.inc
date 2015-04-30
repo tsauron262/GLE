@@ -60,7 +60,7 @@ function widget_listFourn() {
             {
                 $table .= '<tr class="'.$cssClass[$bool].'">';
                 $table .= '   <td style="overflow: hidden; white-space: nowrap;">';
-                if ($res->fournisseur == 1) $table .= "<a href=\"".DOL_URL_ROOT."/comm/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowSupplier"),"company")." ".$res->nom."</a></td>";
+                if ($res->fournisseur == 1) $table .= "<a href=\"".DOL_URL_ROOT."/comm/card.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowSupplier"),"company")." ".$res->nom."</a></td>";
                 $table .= '<td align="right" nowrap>';
                 if ($res->fournisseur == 1) $table .= $langs->trans("Supplier");
                 $table .= "</td>";
@@ -68,7 +68,7 @@ function widget_listFourn() {
             }
             $table2 .= '<tr class="'.$cssClass[$bool].'">';
             $table2 .= '   <td style="overflow: hidden; white-space: nowrap;">';
-            if ($res->fournisseur == 1) $table2 .= "<a href=\"".DOL_URL_ROOT."/comm/fiche.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowSupplier"),"company")." ".$res->nom."</a></td>";
+            if ($res->fournisseur == 1) $table2 .= "<a href=\"".DOL_URL_ROOT."/comm/card.php?socid=".$res->rowid."\">".img_object($langs->trans("ShowSupplier"),"company")." ".$res->nom."</a></td>";
             $table2 .= '<td align="right" nowrap>';
             if ($res->fournisseur == 1) $table2 .= $langs->trans("Supplier");
             $table2 .= "</td>";

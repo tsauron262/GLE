@@ -709,7 +709,7 @@ class RecruitmentController {
                 //CREATE GLE USER HERE !!!!!!!!
                 //
 
-                //cf http://127.0.0.1/GLE-1.1/main/htdocs//user/fiche.php?action=create&idmenu=402
+                //cf http://127.0.0.1/GLE-1.1/main/htdocs//user/card.php?action=create&idmenu=402
 
 
 //                  $edituser->lastname           = $_POST["nom"];

@@ -24,7 +24,7 @@ function sav_prepare_head($objsoc)
     $h = 0;
     $head = array();
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_GMAO/SAV/fiche.php?id='.$objsoc->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Babel_GMAO/SAV/card.php?id='.$objsoc->id;
     $head[$h][1] = $langs->trans("Fiche");
     $head[$h][2] = 'index';
     $h++;

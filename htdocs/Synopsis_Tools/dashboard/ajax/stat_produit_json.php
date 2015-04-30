@@ -72,9 +72,9 @@ if ($result)
       {
           $nolabel=false;
           $radius=150;
-          $arrVal[$i]=array("value" => round($res->c), "label" => dol_trunc($res->label,45), "on-click" => $dolibarr_main_url_root.'/product/fiche.php?id='.$res->rowid );
+          $arrVal[$i]=array("value" => round($res->c), "label" => dol_trunc($res->label,45), "on-click" => $dolibarr_main_url_root.'/product/card.php?id='.$res->rowid );
       } else {
-          $arrVal[$i]=array("value" => round($res->c), "label" => dol_trunc($res->label,20), "on-click" => $dolibarr_main_url_root.'/product/fiche.php?id='.$res->rowid );
+          $arrVal[$i]=array("value" => round($res->c), "label" => dol_trunc($res->label,20), "on-click" => $dolibarr_main_url_root.'/product/card.php?id='.$res->rowid );
       }
       $i++;
   }

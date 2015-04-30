@@ -376,7 +376,7 @@ EOF;
     print '</th><td colspan="4" class="ui-widget-content">';
     if ($user->rights->commande->creer && isset($_REQUEST['action']) && $_REQUEST['action'] == 'RefCustomerOrder')
     {
-        print '<form action="fiche.php?id='.$id.'" method="post">';
+        print '<form action="card.php?id='.$id.'" method="post">';
         print '<input type="hidden" name="action" value="set_ref_client">';
         print '<input type="text" class="flat" size="20" name="ref_client" value="'.utf8_encodeRien($commande->ref_client).'">';
         print ' <input type="submit" class="button" value="'.$langs->trans('Modify').'">';

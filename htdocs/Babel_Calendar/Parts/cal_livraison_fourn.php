@@ -62,7 +62,7 @@
 //    {
 //        while($res=$db->fetch_object($resql))
 //        {
-//            $url = DOL_URL_ROOT."/fourn/livraison/fiche.php?id=".$res->rowid;
+//            $url = DOL_URL_ROOT."/fourn/livraison/card.php?id=".$res->rowid;
 //            if ($res->date_creation && $showLivraisonCreate)
 //            {
 //               $arrRes = $BCalc->pushDateArr(

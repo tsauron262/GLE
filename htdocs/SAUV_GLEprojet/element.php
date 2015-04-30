@@ -294,7 +294,7 @@ foreach ($listofreferent as $key => $value) {
                 print '<a class="butAction" href="' . DOL_URL_ROOT . '/comm/addpropal.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddProp") . '</a>';
             }
             if ($key == 'order' && isset($conf->commande->enabled) && $user->rights->commande->creer) {
-                print '<a class="butAction" href="' . DOL_URL_ROOT . '/commande/fiche.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddCustomerOrder") . '</a>';
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/commande/card.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddCustomerOrder") . '</a>';
             }
             if ($key == 'invoice' && isset($conf->facture->enabled) && $user->rights->facture->creer) {
                 print '<a class="butAction" href="' . DOL_URL_ROOT . '/compta/facture.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddCustomerInvoice") . '</a>';
@@ -302,10 +302,10 @@ foreach ($listofreferent as $key => $value) {
         }
         if ($projet->societe->fournisseur) {
             if ($key == 'order_supplier' && isset($conf->fournisseur->enabled) && $user->rights->fournisseur->commande->creer) {
-                print '<a class="butAction" href="' . DOL_URL_ROOT . '/fourn/facture/fiche.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddSupplierInvoice") . '</a>';
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/fourn/facture/card.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddSupplierInvoice") . '</a>';
             }
             if ($key == 'invoice_supplier' && isset($conf->fournisseur->enabled) && $user->rights->fournisseur->facture->creer) {
-                print '<a class="butAction" href="' . DOL_URL_ROOT . '/fourn/commande/fiche.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddSupplierOrder") . '</a>';
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/fourn/commande/card.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddSupplierOrder") . '</a>';
             }
         }
         print '</div>';
@@ -521,7 +521,7 @@ foreach ($listofreferent as $key => $value)
 				}
 				if ($key == 'order' && ! empty($conf->commande->enabled) && $user->rights->commande->creer)
 				{
-					print '<a class="butAction" href="'.DOL_URL_ROOT.'/commande/fiche.php?socid='.$project->societe->id.'&amp;action=create&amp;origin='.$project->element.'&amp;originid='.$project->id.'">'.$langs->trans("AddCustomerOrder").'</a>';
+					print '<a class="butAction" href="'.DOL_URL_ROOT.'/commande/card.php?socid='.$project->societe->id.'&amp;action=create&amp;origin='.$project->element.'&amp;originid='.$project->id.'">'.$langs->trans("AddCustomerOrder").'</a>';
 				}
 				if ($key == 'invoice' && ! empty($conf->facture->enabled) && $user->rights->facture->creer)
 				{
@@ -532,11 +532,11 @@ foreach ($listofreferent as $key => $value)
 			{
 				if ($key == 'order_supplier' && ! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->commande->creer)
 				{
-					print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/facture/fiche.php?socid='.$project->societe->id.'&amp;action=create&amp;origin='.$project->element.'&amp;originid='.$project->id.'">'.$langs->trans("AddSupplierInvoice").'</a>';
+					print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/facture/card.php?socid='.$project->societe->id.'&amp;action=create&amp;origin='.$project->element.'&amp;originid='.$project->id.'">'.$langs->trans("AddSupplierInvoice").'</a>';
 				}
 				if ($key == 'invoice_supplier' && ! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture->creer)
 				{
-					print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/commande/fiche.php?socid='.$project->societe->id.'&amp;action=create&amp;origin='.$project->element.'&amp;originid='.$project->id.'">'.$langs->trans("AddSupplierOrder").'</a>';
+					print '<a class="butAction" href="'.DOL_URL_ROOT.'/fourn/commande/card.php?socid='.$project->societe->id.'&amp;action=create&amp;origin='.$project->element.'&amp;originid='.$project->id.'">'.$langs->trans("AddSupplierOrder").'</a>';
 				}
 			}
 		}

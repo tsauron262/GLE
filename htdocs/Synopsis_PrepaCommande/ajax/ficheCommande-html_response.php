@@ -415,7 +415,7 @@ EOF;
         print '</table>';
         print "<br/>";
         print '<table cellpadding=10 class="border" width="700">';
-        print '<tr><td class="ui-widget-header" align="right"><button onClick="location.href=\'' . DOL_URL_ROOT . '/commande/fiche.php?id=' . $id . '\'" class="butAction">Modifier</button>';
+        print '<tr><td class="ui-widget-header" align="right"><button onClick="location.href=\'' . DOL_URL_ROOT . '/commande/card.php?id=' . $id . '\'" class="butAction">Modifier</button>';
         print '</table>';
     }
 }

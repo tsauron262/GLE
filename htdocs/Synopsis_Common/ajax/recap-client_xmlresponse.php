@@ -85,7 +85,7 @@ if ($_REQUEST['level'] == 1)
                         while ($resCom = $com->db->fetch_object($resqlCom))
                         {
                             $com->fetch($resCom->fk_commande);
-                            array_push($commandeHTMLArr , "<a href='".DOL_URL_ROOT."/commande/fiche.php?id=".$com->id."'>".img_object('commande','order').$com->ref ."</a>");
+                            array_push($commandeHTMLArr , "<a href='".DOL_URL_ROOT."/commande/card.php?id=".$com->id."'>".img_object('commande','order').$com->ref ."</a>");
                             array_push($commandeStatutHTMLArr , $com->getLibStatut(6));
 
 
@@ -102,7 +102,7 @@ if ($_REQUEST['level'] == 1)
                                 while ($resFac = $fac->db->fetch_object($resqlFac))
                                 {
                                     $fac->fetch($resFac->fk_facture);
-                                    array_push($factureHTMLArr , "<a href='".DOL_URL_ROOT."/facture/fiche.php?id=".$fac->id."'>".img_object('facture','bill') . $fac->ref ."</a>");
+                                    array_push($factureHTMLArr , "<a href='".DOL_URL_ROOT."/facture/card.php?id=".$fac->id."'>".img_object('facture','bill') . $fac->ref ."</a>");
                                     array_push($factureStatutHTMLArr , $fac->getLibStatut(2));
                                     $PayStr = "";
                                     if ($fac->paye == 1)
@@ -131,7 +131,7 @@ if ($_REQUEST['level'] == 1)
                         while ($resFac = $fac->db->fetch_object($resqlFac))
                         {
                             $fac->fetch($resFac->fk_facture);
-                            array_push($factureHTMLArr , "<a href='".DOL_URL_ROOT."/facture/fiche.php?id=".$fac->id."'>".img_object('facture','bill').$fac->ref ."</a>");
+                            array_push($factureHTMLArr , "<a href='".DOL_URL_ROOT."/facture/card.php?id=".$fac->id."'>".img_object('facture','bill').$fac->ref ."</a>");
                             array_push($factureStatutHTMLArr , $fac->getLibStatut(2));
                             $PayStr = "";
                             if ($fac->paye == 1)
@@ -249,7 +249,7 @@ if ($_REQUEST['level'] == 1)
 //            {
 //                while ($res=$db->fetch_object($resql))
 //                {
-//                    print "<td><a href='".DOL_URL_ROOT."/contrat/fiche.php?id=".$res->cid."'>".img_object('contract','contract')." ".$res->ref."</a>";
+//                    print "<td><a href='".DOL_URL_ROOT."/contrat/card.php?id=".$res->cid."'>".img_object('contract','contract')." ".$res->ref."</a>";
 //                    print "<td align='center'>".$res->date_contrat;
 //                    print "<td>".$res->title;
 //                    print "<td width= 100px><table width=100%  class='nobordernopadding' width='100%'>";
@@ -271,7 +271,7 @@ if ($_REQUEST['level'] == 1)
 //                                    require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 //                                    $comm = new Commande($db);
 //                                    $comm->fetch($val1);
-//                                    print "</table><td><a href='".DOL_URL_ROOT."/commande/fiche.php?id=".$comm->id."'>".$comm->ref."</a>";
+//                                    print "</table><td><a href='".DOL_URL_ROOT."/commande/card.php?id=".$comm->id."'>".$comm->ref."</a>";
 //                                break;
 //                                case 'f':
 //                                    print '';
@@ -306,7 +306,7 @@ if ($_REQUEST['level'] == 1)
 //                                require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 //                                $comm = new Commande($db);
 //                                $comm->fetch($val1);
-//                                print "<a href='".DOL_URL_ROOT."/commande/fiche.php?id=".$comm->id."'>".$comm->ref."</a>";
+//                                print "<a href='".DOL_URL_ROOT."/commande/card.php?id=".$comm->id."'>".$comm->ref."</a>";
 //                        }
 //                    } else if ($key=='fa') {
 //                        foreach($val as $key1=>$val1)
@@ -616,9 +616,9 @@ if ($_REQUEST['level'] == 1)
                             $url="";
                             if ($val['source'] != "external")
                             {
-                                $url = "<A href='".DOL_URL_ROOT . "/user/fiche.php?id=".($val['id']) .'\'>'.$val['nom'].'</A>';
+                                $url = "<A href='".DOL_URL_ROOT . "/user/card.php?id=".($val['id']) .'\'>'.$val['nom'].'</A>';
                             } else {
-                                $url = "<A href='".DOL_URL_ROOT . "/contact/fiche.php?id=".($val['id']).'\'>'.$val['nom'].'</A>';
+                                $url = "<A href='".DOL_URL_ROOT . "/contact/card.php?id=".($val['id']).'\'>'.$val['nom'].'</A>';
                             }
 //                            print $url;
                             $xml .= "\t\t<nomCont element='".$val1."'  >". $cdataStart. $url .$cdataStop ."</nomCont>\n";
@@ -628,7 +628,7 @@ if ($_REQUEST['level'] == 1)
                             {
                                 $soc = new Societe($db);
                                 $soc->fetch($val1);
-                                $url = "<A href='".DOL_URL_ROOT."/societe/fiche.php?socid=".$soc->id."'\' >".$soc->name." </A> ";
+                                $url = "<A href='".DOL_URL_ROOT."/societe/card.php?socid=".$soc->id."'\' >".$soc->name." </A> ";
                             } else {
                                 $url = $conf->global->MAIN_INFO_SOCIETE_NOM;
                             }

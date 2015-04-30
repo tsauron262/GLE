@@ -68,7 +68,7 @@ if ($showCommande)
         {
             while($res=$db->fetch_object($resql))
             {
-                $url = $dolibarr_main_url_root."/commande/fiche.php?id=".$res->rowid;
+                $url = $dolibarr_main_url_root."/commande/card.php?id=".$res->rowid;
                 $url = "";
                 if ($res->date_creation && $showCommandeCreate)
                 {

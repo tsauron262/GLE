@@ -34,10 +34,10 @@
  */
 
 /**
-  \file       htdocs/synopsisdemandeinterv/fiche.php
+  \file       htdocs/synopsisdemandeinterv/card.php
   \brief      Fichier fiche intervention
   \ingroup    synopsisdemandeinterv
-  \version    $Id: fiche.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
+  \version    $Id: card.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
 $activeLigneContrat = false;
 
@@ -155,7 +155,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_Cloture' && $_
         $mesg = '<div class="error ui-state-error">' . $synopsisdemandeinterv->error . '</div>';
     }
     if ($result >= 0) {
-        header('Location: fiche.php?id=' . $synopsisdemandeinterv->id);
+        header('Location: card.php?id=' . $synopsisdemandeinterv->id);
 //        require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
 //        $fichinter = new Fichinter($db);
 //
@@ -194,7 +194,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_Cloture' && $_
 //                }
 //                if ($result > 0)
 //                {
-//                    header('Location: '.DOL_URL_ROOT.'/fichinter/fiche.php?id='.$result);
+//                    header('Location: '.DOL_URL_ROOT.'/fichinter/card.php?id='.$result);
 //                } else {
 //                    $mesg='<div class="error ui-state-error">'.$fichinter->error.'</div>';
 //                    $_REQUEST["action"] = 'create';
@@ -313,7 +313,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
 //                    print '<br/>';
                 $objLigneFiche->insert($user);
             }
-            header('Location: ' . DOL_URL_ROOT . '/fichinter/fiche.php?id=' . $result);
+            header('Location: ' . DOL_URL_ROOT . '/fichinter/card.php?id=' . $result);
         } else {
             $mesg = '<div class="error ui-state-error">Impossible de créer la FI' . $fichinter->error . '</div>';
         }
@@ -736,7 +736,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 //var_dump($modsynopsisdemandeinterv);
     if ($_REQUEST["socid"] > 0) {
 
-        print "<form name='synopsisdemandeinterv' action=\"fiche.php\" method=\"post\">";
+        print "<form name='synopsisdemandeinterv' action=\"card.php\" method=\"post\">";
 
         print '<table cellpadding=15 class="border" width="100%">';
 
@@ -769,7 +769,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
                 print '<tr><td width="130"  class="ui-widget-content">' . $langs->trans("NoProject") . '</td>';
 
                 if ($user->rights->projet->creer) {
-                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
+                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/card.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
                 }
                 print '</tr></table>';
             } else {
@@ -965,7 +965,7 @@ EOF;
         $societe = new Societe($db);
         $societe->fetch($socid);
 
-        print "<form name='synopsisdemandeinterv' action=\"fiche.php\" method=\"post\">";
+        print "<form name='synopsisdemandeinterv' action=\"card.php\" method=\"post\">";
         print "<input type='hidden' name='action' value='add'>";
         print "<input type='hidden' name='comLigneId' value='" . $_REQUEST['comLigneId'] . "'>";
         print "<input type='hidden' name='fk_commande' value='" . $res->rowid . "'>";
@@ -1017,7 +1017,7 @@ EOF;
                 print '<tr><td width="130"  class="ui-widget-content">' . $langs->trans("NoProject") . '</td>';
 
                 if ($user->rights->projet->creer) {
-                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
+                    print '<td class="ui-widget-content"><a href=' . DOL_URL_ROOT . '/projet/card.php?socid=' . $societe->id . '&action=create>' . $langs->trans("Add") . '</a></td>';
                 }
                 print '</tr></table>';
             } else {
@@ -1242,7 +1242,7 @@ EOF;
         print '</table>';
         print '</form>';
     } else {
-        print "<form name='synopsisdemandeinterv' action=\"fiche.php\" method=\"get\">";
+        print "<form name='synopsisdemandeinterv' action=\"card.php\" method=\"get\">";
         print '<table class="border" width="100%">';
         print "<tr><th class='ui-widget-header ui-state-default'>" . $langs->trans("Company") . "</th><td>";
         print $html->select_company('', 'socid', '', 1);
@@ -1370,7 +1370,7 @@ EOF;
             print '<td class="ui-widget-content" colspan=3>';
             print $langs->trans("NoProject") . '&nbsp;&nbsp;';
             if ($synopsisdemandeinterv->brouillon)
-                print '<a class="butAction" href=../DOL3.5.2projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans('AddProject') . '</a>';
+                print '<a class="butAction" href=../DOL3.5.2projet/card.php?socid=' . $societe->id . '&action=create>' . $langs->trans('AddProject') . '</a>';
             print '</td>';
         } else {
             if ($synopsisdemandeinterv->statut == 0 && $user->rights->synopsisdemandeinterv->creer) {
@@ -1390,7 +1390,7 @@ EOF;
                     print '<td colspan="3" class="ui-widget-content">';
                     $proj = new Project($db);
                     $proj->fetch($synopsisdemandeinterv->projetidp);
-                    print '<../DOL3.5.2projet/fiche.phpiche.php?id=' . $synopsisdemandeinterv->projetidp . '" title="' . $langs->trans('ShowProject') . '">';
+                    print '<../DOL3.5.2projet/card.phpiche.php?id=' . $synopsisdemandeinterv->projetidp . '" title="' . $langs->trans('ShowProject') . '">';
                     print $proj->title;
                     print '</a>';
                     print '</td>';
@@ -1525,14 +1525,14 @@ EOF;
             if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra-' . $res->id) {
                 switch ($res->type) {
                     case "date": {
-                            print "<td  colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            print "<td  colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
                             print "&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='datePicker'>";
                             print "<input type='hidden' name='type-" . $res->id . "' value='date'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
                         }
                         break;
                     case "textarea": {
-                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
                             print "&nbsp;&nbsp;<textarea name='extraKey-" . $res->id . "'>" . $res->extra_value . "</textarea>";
                             print "<input type='hidden' name='type-" . $res->id . "' value='comment'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
@@ -1540,28 +1540,28 @@ EOF;
                         break;
                     default:
                     case "text": {
-                            print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="fiche.php?id=' . $synopsisdemandeinterv->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
+                            print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="card.php?id=' . $synopsisdemandeinterv->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
                             print '&nbsp;&nbsp;<input value="' . $res->extra_value . '" type="text" name="extraKey-' . $res->id . '">';
                             print "<input type='hidden' name='type-" . $res->id . "' value='" . $res->type . "'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
                         }
                         break;
                     case "datetime": {
-                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
                             print "&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='dateTimePicker'>";
                             print "<input type='hidden' name='type-" . $res->id . "' value='datetime'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
                         }
                         break;
                     case "checkbox": {
-                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
                             print "<input type='checkbox' " . ($res->extra_value == 1 ? 'CHECKED' : "") . "  name='extraKey-" . $res->id . "'>";
                             print "<input type='hidden' name='type-" . $res->id . "' value='checkbox'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
                         }
                         break;
                     case "3stars": {
-                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
 //                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
                             print starratingPhp("extraKey-" . $res->id, $res->extra_value, 3, $iter = 1);
@@ -1569,7 +1569,7 @@ EOF;
                         }
                         break;
                     case "5stars": {
-                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='card.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
 //                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
                             print starratingPhp("extraKey-" . $res->id, $res->extra_value, 5, $iter = 1);
@@ -1579,7 +1579,7 @@ EOF;
                     case "radio": {
                             print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                            print "<form action='fiche.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            print "<form action='card.php?id=" . $synopsisdemandeinterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice WHERE key_refid = " . $res->id;
                             $sql1 = $db->query($requete);
                             if ($db->num_rows($sql1) > 0) {

@@ -96,7 +96,7 @@ function widget_listCommandeATraiter() {
 
 //                    $table .= $formfile->html . "&nbsp;";
 
-                    $table .= '<a href="fiche.php?socid=' . $res->socid . '">' . dol_trunc($res->nom, 18) . '</a></td>';
+                    $table .= '<a href="card.php?socid=' . $res->socid . '">' . dol_trunc($res->nom, 18) . '</a></td>';
                     $table .= '<td align="right" nowrap="nowrap">' . price($res->total_ttc) . '</td>';
                     //$table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc - $res->tot_fttc).'</td>';
                     $table .= '<td>' . $commandestatic->LibStatut($res->fk_statut, $res->facture, 3) . '</td>';
@@ -105,8 +105,8 @@ function widget_listCommandeATraiter() {
                 }
                 $table2 .= '<tr class=' . $arrCss[$bool] . '>
                             <td  nowrap="nowrap">' .
-                        "<a href=\"" . DOL_URL_ROOT . "/commande/fiche.php?id=" . $res->rowid . "\">" . img_object($langs->trans("ShowOrder"), "order") . " " . $res->ref . '</a></td>';
-                $table2 .= '<td nowrap="nowrap"><a href="fiche.php?socid=' . $res->socid . '">' . dol_trunc($res->nom, 18) . '</a></td>';
+                        "<a href=\"" . DOL_URL_ROOT . "/commande/card.php?id=" . $res->rowid . "\">" . img_object($langs->trans("ShowOrder"), "order") . " " . $res->ref . '</a></td>';
+                $table2 .= '<td nowrap="nowrap"><a href="card.php?socid=' . $res->socid . '">' . dol_trunc($res->nom, 18) . '</a></td>';
                 $table2 .= '<td align="right" nowrap="nowrap">' . price($res->total_ttc) . '</td>';
                 //$table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc - $res->tot_fttc).'</td>';
                 $table2 .= '<td>' . $commandestatic->LibStatut($res->fk_statut, $res->facture, 3) . '</td>';

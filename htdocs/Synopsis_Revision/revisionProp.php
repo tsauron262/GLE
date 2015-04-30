@@ -93,7 +93,7 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
     print '<td><br/>Doc. indicable : ';
     if ($db->num_rows($resql) > 0) {
         while($res = $db->fetch_object($resql))
-            print '<br/><a href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $res->id . '">' . $res->refb . '</a><br/>';
+            print '<br/><a href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $res->id . '">' . $res->refb . '</a><br/>';
     } else {
         print '<br/><a href="' . DOL_URL_ROOT . '/synopsischrono/nouveau.php?id=' . $propal->socid . '&propalid=' . $propal->id . '&typeid=1">A creer</a><br/>';
     }

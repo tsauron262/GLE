@@ -66,7 +66,7 @@ function widget_listProjetMonActiviteDetail() {
             {
               $var=!$var;
               $table .= "<tr $bc[$var]>";
-              $table .= '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+              $table .= '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
               $table .= '<td align="center">'.$projet->sec2hour($row[2]).'</td>';
               $table .= "</tr>\n";
               $total += $row[2];
@@ -110,7 +110,7 @@ function widget_listProjetMonActiviteDetail() {
             {
               $var=!$var;
                 $table .= "<tr $bc[$var]>";
-              $table .= '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+              $table .= '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
               $table .= '<td align="center">'.$projet->sec2hour($row[2]).'</td>';
               $table .= "</tr>\n";
               $total += $row[2];

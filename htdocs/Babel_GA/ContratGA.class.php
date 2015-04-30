@@ -819,7 +819,7 @@ EOF;
 
             if ($this->statut == 0)
             {
-                //if ($user->rights->contrat->creer) $html .=  '<a class="butAction" href="fiche.php?id='.$this->id.'&amp;action=valid">'.$langs->trans("Validate").'</a>';
+                //if ($user->rights->contrat->creer) $html .=  '<a class="butAction" href="card.php?id='.$this->id.'&amp;action=valid">'.$langs->trans("Validate").'</a>';
                 if ($user->rights->GA->contrat->Valider && $this->total_ht > 0 && $this->cessionnaire_refid ."x" != "x" && $this->fournisseur_refid."x" != 'x') $html .=  '<a class="butAction" href="#" id="ValidateContrat">'.$langs->trans("Validate").'</a>';
                 $html .= "<script>";
                 $html .= "var urlBase='".DOL_URL_ROOT."/Babel_GA/ajax/contrat_validate-xmlresponse.php';";
@@ -1066,7 +1066,7 @@ EOF;
                 $html .= "</form></div>";
             }
 
-            //$html .=  '<a class="butAction" href="fiche.php?id='.$this->id.'&amp;action=close">'.$langs->trans("Cloturer").'</a>';
+            //$html .=  '<a class="butAction" href="card.php?id='.$this->id.'&amp;action=close">'.$langs->trans("Cloturer").'</a>';
             if ($this->statut > 0)
             {
                 $html .=  '<a class="butAction" href="#" id="clotureGA">'.$langs->trans("Cloturer").'</a>';
@@ -1076,7 +1076,7 @@ EOF;
             // - Droit de supprimer
             if (($user->rights->contrat->creer && $this->statut == 0) || $user->rights->contrat->supprimer || $user->rights->GA->contrat->Effacer)
             {
-                $html .=  '<a class="butActionDelete" href="fiche.php?id='.$this->id.'&amp;action=delete">'.$langs->trans("Delete").'</a>';
+                $html .=  '<a class="butActionDelete" href="card.php?id='.$this->id.'&amp;action=delete">'.$langs->trans("Delete").'</a>';
             }
 
             $html .=  "</div>";

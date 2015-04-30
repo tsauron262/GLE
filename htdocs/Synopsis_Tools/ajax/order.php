@@ -27,7 +27,7 @@ if ($type == "contratdet" && $newRang >= 0) {
     $champFk = "contratdet_refid IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat = " . $idFk . ")";
     $nomTab = MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO";
     $champId = "contratdet_refid";
-    $header = "Location: ../../contrat/fiche.php?id=" . $idFk;
+    $header = "Location: ../../contrat/card.php?id=" . $idFk;
 }
 if ($type == "chrono_key" && $newRang >= 0) {
     $champFk = "model_refid = " . $idFk . "";

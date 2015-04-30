@@ -53,7 +53,7 @@ function llxHeader($head = "") {
   $menu = new Menu();
 
   $menu->add("index.php",$langs->trans("Trips"));
-  $menu->add_submenu("fiche.php?action=create",$langs->trans("NewTrip"));
+  $menu->add_submenu("card.php?action=create",$langs->trans("NewTrip"));
 
   left_menu($menu->liste);
 }

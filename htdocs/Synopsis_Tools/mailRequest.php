@@ -61,7 +61,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_
     $db->query("UPDATE " . MAIN_DB_PREFIX . "actioncomm SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
     }
 
-    header("Location:" . DOL_URL_ROOT . "/comm/fiche.php?socid=" . $id);
+    header("Location:" . DOL_URL_ROOT . "/comm/card.php?socid=" . $id);
 }
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majRevision") {

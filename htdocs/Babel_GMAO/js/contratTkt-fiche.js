@@ -278,7 +278,7 @@
                                     });
                                     jQuery('#sortable').disableSelection();
                                     jQuery('#addDialog').dialog("close");
-                                    location.href="fiche.php?id="+idContratCurrent;
+                                    location.href="card.php?id="+idContratCurrent;
                                 } else {
                                     alert ('Il y a eu une erreur !!');
                                     console.log(jQuery(msg).find('KO').text());
@@ -526,7 +526,7 @@
                                     });
                                     jQuery('#sortable').disableSelection();
                                     jQuery('#modDialog').dialog("close");
-                                    location.href="fiche.php?id="+idContratCurrent;
+                                    location.href="card.php?id="+idContratCurrent;
                                 } else {
                                     alert ('Il y a eu une erreur !!');
                                     console.log(jQuery(msg).find('KO').text());

@@ -206,7 +206,7 @@ jQuery(function() {
                         {
                             if (jQuery(msg).find('OK').text() == 'OK') {
                                 //                                    console.log(msg);
-                                location.href='fiche.php?id='+idContratCurrent;
+                                location.href='card.php?id='+idContratCurrent;
                             } else {
                                 //error
                                 console.log(msg);
@@ -282,7 +282,7 @@ jQuery(function() {
                         success:function(msg){
                             if (jQuery(msg).find('OK')) {
                                 jQuery(this).dialog("close");
-                                location.href = "fiche.php?id=" + idContratCurrent;
+                                location.href = "card.php?id=" + idContratCurrent;
                             }
                         }
                     });
@@ -316,7 +316,7 @@ jQuery(function() {
                     success:function(msg){
                         if(jQuery(msg).find('OK')){
                             jQuery(this).dialog("close");
-                            location.href="fiche.php?id="+idContratCurrent;
+                            location.href="card.php?id="+idContratCurrent;
                         }
                     }
                 });
@@ -736,7 +736,7 @@ function closeLine(obj,idContrat,idLigne)
                 {
                     if (jQuery(msg).find('OK').text() == 'OK') {
                         //                                    console.log(msg);
-                        location.href='fiche.php?id='+idContratCurrent;
+                        location.href='card.php?id='+idContratCurrent;
                     } else {
                         //error
                         console.log(msg);
@@ -807,7 +807,7 @@ function editLine(obj,idContrat,idLigne)
                         {
                             if (jQuery(msg).find('OK').text() == 'OK') {
                                 //                                    console.log(msg);
-                                location.href='fiche.php?id='+idContratCurrent;
+                                location.href='card.php?id='+idContratCurrent;
                             } else {
                                 //error
                                 console.log(msg);

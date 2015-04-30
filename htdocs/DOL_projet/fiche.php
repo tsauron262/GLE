@@ -18,7 +18,7 @@
  */
 
 /**
- *	\file       htdocs/projet/fiche.php
+ *	\file       htdocs/projet/card.php
  *	\ingroup    projet
  *	\brief      Project card
  */
@@ -158,7 +158,7 @@ if ($action == 'add' && $user->rights->projet->creer)
         {
             $db->commit();
 
-            header("Location:fiche.php?id=".$object->id);
+            header("Location:card.php?id=".$object->id);
             exit;
         }
         else
@@ -660,7 +660,7 @@ else
         {
             if ($userWrite > 0)
             {
-                print '<a class="butAction" href="fiche.php?id='.$object->id.'&action=validate">'.$langs->trans("Valid").'</a>';
+                print '<a class="butAction" href="card.php?id='.$object->id.'&action=validate">'.$langs->trans("Valid").'</a>';
             }
             else
             {
@@ -673,7 +673,7 @@ else
         {
             if ($userWrite > 0)
             {
-                print '<a class="butAction" href="fiche.php?id='.$object->id.'&amp;action=edit">'.$langs->trans("Modify").'</a>';
+                print '<a class="butAction" href="card.php?id='.$object->id.'&amp;action=edit">'.$langs->trans("Modify").'</a>';
             }
             else
             {
@@ -686,7 +686,7 @@ else
         {
             if ($userWrite > 0)
             {
-                print '<a class="butAction" href="fiche.php?id='.$object->id.'&amp;action=close">'.$langs->trans("Close").'</a>';
+                print '<a class="butAction" href="card.php?id='.$object->id.'&amp;action=close">'.$langs->trans("Close").'</a>';
             }
             else
             {
@@ -699,7 +699,7 @@ else
         {
             if ($userWrite > 0)
             {
-                print '<a class="butAction" href="fiche.php?id='.$object->id.'&amp;action=reopen">'.$langs->trans("ReOpen").'</a>';
+                print '<a class="butAction" href="card.php?id='.$object->id.'&amp;action=reopen">'.$langs->trans("ReOpen").'</a>';
             }
             else
             {
@@ -712,7 +712,7 @@ else
         {
             if ($userWrite > 0)
             {
-                print '<a class="butAction" href="fiche.php?id='.$object->id.'&action=clone">'.$langs->trans('ToClone').'</a>';
+                print '<a class="butAction" href="card.php?id='.$object->id.'&action=clone">'.$langs->trans('ToClone').'</a>';
             }
             else
             {
@@ -725,7 +725,7 @@ else
         {
             if ($userDelete > 0)
             {
-                print '<a class="butActionDelete" href="fiche.php?id='.$object->id.'&amp;action=delete">'.$langs->trans("Delete").'</a>';
+                print '<a class="butActionDelete" href="card.php?id='.$object->id.'&amp;action=delete">'.$langs->trans("Delete").'</a>';
             }
             else
             {

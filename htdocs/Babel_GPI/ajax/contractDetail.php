@@ -254,12 +254,12 @@
 
                 if ($val['source']=='internal')
                 {
-                    $xml .=  '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$val['id'].'">';
+                    $xml .=  '<a href="'.DOL_URL_ROOT.'/user/card.php?id='.$val['id'].'">';
                     $xml .=  img_object($langs->trans("ShowUser"),"user").' '.$val['nom'].'</a>';
                 }
                 if ($val['source']=='external')
                 {
-                    $xml .=  '<a href="'.DOL_URL_ROOT.'/contact/fiche.php?id='.$val['id'].'">';
+                    $xml .=  '<a href="'.DOL_URL_ROOT.'/contact/card.php?id='.$val['id'].'">';
                     $xml .=  img_object($langs->trans("ShowContact"),"contact").' '.$val['nom'].'</a>';
                 }
                 $xml .= "]]></nom>";
@@ -514,12 +514,12 @@
 
                 if ($val['source']=='internal')
                 {
-                    $xml .=  '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$val['id'].'">';
+                    $xml .=  '<a href="'.DOL_URL_ROOT.'/user/card.php?id='.$val['id'].'">';
                     $xml .=  img_object($langs->trans("ShowUser"),"user").' '.$val['nom'].'</a>';
                 }
                 if ($val['source']=='external')
                 {
-                    $xml .=  '<a href="'.DOL_URL_ROOT.'/contact/fiche.php?id='.$val['id'].'">';
+                    $xml .=  '<a href="'.DOL_URL_ROOT.'/contact/card.php?id='.$val['id'].'">';
                     $xml .=  img_object($langs->trans("ShowContact"),"contact").' '.$val['nom'].'</a>';
                 }
                 $xml .= "]]></nom>";

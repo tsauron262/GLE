@@ -223,7 +223,7 @@ if ($action == 'create')
 		$numprojet=select_projects($soc->id,$projectid);
 		if ($numprojet==0)
 		{
-			print ' &nbsp; <a href="../projet/fiche.php?socid='.$soc->id.'&action=create">'.$langs->trans("AddProject").'</a>';
+			print ' &nbsp; <a href="../projet/card.php?socid='.$soc->id.'&action=create">'.$langs->trans("AddProject").'</a>';
 		}
 		print '</td>';
 		print '</tr>';

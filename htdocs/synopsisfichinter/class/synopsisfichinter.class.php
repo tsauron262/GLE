@@ -941,9 +941,9 @@ class Synopsisfichinter extends Fichinter {
 //        $result = '';
 //        $urlOption = '';
 //
-//        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/fiche.php?id=' . $this->id . '">';
+//        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/card.php?id=' . $this->id . '">';
 //        if ($option == 6)
-//            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/fiche.php?id=' . $this->id . '">';
+//            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/card.php?id=' . $this->id . '">';
 //        $lienfin = '</a>';
 //
 //        $picto = 'intervention';

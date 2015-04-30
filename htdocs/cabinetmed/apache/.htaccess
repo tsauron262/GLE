@@ -1,4 +1,4 @@
 
 RewriteEngine on
-RewriteRule ^/comm/fiche.php$  /societe/soc.php  [L]
+RewriteRule ^/comm/card.php$  /societe/soc.php  [L]
 

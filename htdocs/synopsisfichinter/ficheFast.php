@@ -50,10 +50,10 @@
  */
 
 /**
-  \file       htdocs/synopsisfichinter/fiche.php
+  \file       htdocs/synopsisfichinter/card.php
   \brief      Fichier fiche intervention
   \ingroup    ficheinter
-  \version    $Id: fiche.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
+  \version    $Id: card.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
@@ -219,7 +219,7 @@ if ($_REQUEST["id"] > 0) {
         print "<table class='nobordernopadding' width=100%>";
         if ($resql = $db->query($requete)) {
             while ($res = $db->fetch_object($resql)) {
-                print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/synopsisdemandeinterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'intervention') . " " . $res->ref . "</a></td></tr>";
+                print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/synopsisdemandeinterv/card.php?id=" . $res->rowid . "'>" . img_object('', 'intervention') . " " . $res->ref . "</a></td></tr>";
             }
         }
         print "</table>";

@@ -157,7 +157,7 @@ function widget_statOfcSoldeBanque() {
                 {
                     if ($links[$key]['type']=='payment') {
                         $table2 .=  ' - ';
-                        $table2 .=  '<a href="'.DOL_URL_ROOT.'/compta/paiement/fiche.php?id='.$links[$key]['url_id'].'">';
+                        $table2 .=  '<a href="'.DOL_URL_ROOT.'/compta/paiement/card.php?id='.$links[$key]['url_id'].'">';
                         if (preg_match('/^\((.*)\)$/i',$links[$key]['label'],$reg))
                         {
                             // Label generique car entre parentheses. On l'affiche en le traduisant
@@ -169,7 +169,7 @@ function widget_statOfcSoldeBanque() {
                         $table2 .=  '</a>';
                     } else if ($links[$key]['type']=='payment_supplier') {
                         $table2 .=  ' - ';
-                        $table2 .=  '<a href="'.DOL_URL_ROOT.'/fourn/paiement/fiche.php?id='.$links[$key]['url_id'].'">';
+                        $table2 .=  '<a href="'.DOL_URL_ROOT.'/fourn/paiement/card.php?id='.$links[$key]['url_id'].'">';
                         if (preg_match('/^\((.*)\)$/i',$links[$key]['label'],$reg))
                         {
                             // Label generique car entre parentheses. On l'affiche en le traduisant

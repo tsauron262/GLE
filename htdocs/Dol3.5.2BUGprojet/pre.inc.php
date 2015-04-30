@@ -59,7 +59,7 @@ function llxHeader($head = "", $title="", $help_url='', $noscript = false)
 
   $menu = new Menu();
 
-  $menu->add(DOL_URL_ROOT."/projet/fiche.php?leftmenu=projects&action=create", $langs->trans("Customers"));
+  $menu->add(DOL_URL_ROOT."/projet/card.php?leftmenu=projects&action=create", $langs->trans("Customers"));
 
   $menu->add(DOL_URL_ROOT."/projet/", $langs->trans("Projects"));
   $menu->add_submenu(DOL_URL_ROOT."/projet/liste.php", $langs->trans("List"));

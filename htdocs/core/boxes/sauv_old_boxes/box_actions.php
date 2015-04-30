@@ -118,11 +118,11 @@ class box_actions extends ModeleBoxes {
                     'logo' => ("task"),
                     'text' => dol_trunc($label,12),
                     'text2'=> $late,
-                    'url' => DOL_URL_ROOT."/comm/action/fiche.php?id=".$objp->id);
+                    'url' => DOL_URL_ROOT."/comm/action/card.php?id=".$objp->id);
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
                     'text' => dol_trunc($objp->nom,20),
-                    'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
+                    'url' => DOL_URL_ROOT."/comm/card.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
                     'text' => dol_print_date($objp->dp, "dayhour"));

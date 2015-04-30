@@ -22,7 +22,7 @@ $(window).load(function() {
 //    }, 5000);
 
 
-    if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/fiche.php") > -1) {
+    if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/card.php") > -1) {
         $("body").keypress(function(e) {
             if (e.which == 13)
                 return false
@@ -544,7 +544,7 @@ function popOjectAffiche(id, type, callBack, titreNotif, nbLoad) {//Affiche ici
     else if (type == 'commande')
         urlT = DOL_URL_ROOT + "/Synopsis_PrepaCommande/prepacommande.php?optioncss=print&id=";
     else if (type == 'newContact')
-        urlT = DOL_URL_ROOT + "/contact/fiche.php?action=create&optioncss=print&socid=";
+        urlT = DOL_URL_ROOT + "/contact/card.php?action=create&optioncss=print&socid=";
     else if (type == 'newSoc')
         urlT = DOL_URL_ROOT + "/societe/soc.php?leftmenu=customers&action=create&type=c&optioncss=print&cc=";
     else if (type == 'sms')
@@ -576,7 +576,7 @@ function ajoutPictoConnect() {
             }
             if (ok == true) {
                 lien = parent.find("a").last().attr("href");
-                if (lien.indexOf("fiche.php") > 0 ||
+                if (lien.indexOf("card.php") > 0 ||
                         lien.indexOf("listDetail.php") > 0 ||
                         lien.indexOf("prepacommande.php") > 0)
                     parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="' + DOL_URL_ROOT + '/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');

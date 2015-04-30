@@ -118,12 +118,12 @@ class box_ficheInterv extends ModeleBoxes {
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                     'logo' => $picto,
                     'text' => ($objp->ref?$objp->ref:"-"),
-                    'url' => DOL_URL_ROOT."/fichinter/fiche.php?id=".$objp->diid);
+                    'url' => DOL_URL_ROOT."/fichinter/card.php?id=".$objp->diid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
                     'text' => $objp->nom,
                     'maxlength'=>40,
-                    'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
+                    'url' => DOL_URL_ROOT."/comm/card.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
                     'text' => dol_print_date($objp->datei,'day'),

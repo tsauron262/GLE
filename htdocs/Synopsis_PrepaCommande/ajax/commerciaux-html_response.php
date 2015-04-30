@@ -97,7 +97,7 @@ if ($socid>0)
 
           if (!$user->rights->societe->client->voir)
           {
-            print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
+            print '<a href="'.DOL_URL_ROOT.'/user/card.php?id='.$obj->rowid.'">';
             print img_object($langs->trans("ShowUser"),"user").' ';
             print stripslashes($obj->firstname)." " .stripslashes($obj->lastname)."\n";
             print '</a><br>';
@@ -105,7 +105,7 @@ if ($socid>0)
           }
           else
           {
-            print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
+            print '<a href="'.DOL_URL_ROOT.'/user/card.php?id='.$obj->rowid.'">';
             print img_object($langs->trans("ShowUser"),"user").' ';
             print utf8_encodeRien($obj->firstname." " .$obj->lastname."\n");
             print '</a>&nbsp;';
@@ -177,7 +177,7 @@ if ($socid>0)
                 $obj = $db->fetch_object($resql);
                 $var=!$var;
                 print "<tr $bc[$var]><td>";
-                print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
+                print '<a href="'.DOL_URL_ROOT.'/user/card.php?id='.$obj->rowid.'">';
                 print img_object($langs->trans("ShowUser"),"user").' ';
                 print stripslashes($obj->firstname)." " .stripslashes($obj->lastname)."\n";
                 print '</a>';

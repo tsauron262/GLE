@@ -60,7 +60,7 @@ function affaire_prepare_head($affaire)
     $h = 0;
     $head = array();
 
-    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/card.php?id='.$affaire->id;
     $head[$h][1] = $langs->trans("Fiche");
     $head[$h][2] = 'index';
     $h++;

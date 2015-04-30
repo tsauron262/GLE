@@ -3260,7 +3260,7 @@ class Zimbra {
                 $typeId = false;
                 if ($resql) {
                     while ($res = $db->fetch_object($resql)) {
-                        $url = $this->dolibarr_main_url_root . "/compta/paiement/fiche.php?id=" . $res->rowid;
+                        $url = $this->dolibarr_main_url_root . "/compta/paiement/card.php?id=" . $res->rowid;
                         //get Loc Zimbra
                         $requeteLocZim = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
@@ -3388,7 +3388,7 @@ class Zimbra {
                             $url = $this->dolibarr_main_url_root . "/Babel_Ressource/resa.php?ressource_id=" . $res->rowid;
 
 
-                            $tmpUser = $this->dolibarr_main_url_root . "/user/fiche.php?id=" . $resql->fk_user_resp;
+                            $tmpUser = $this->dolibarr_main_url_root . "/user/card.php?id=" . $resql->fk_user_resp;
 //print $objPai->date_achat ." - ". $res->rowid."<br>";
                             $arrRes = $this->Babel_pushDateArr(
                                     $objPai->date_achat, "Ress " . "" . $res->nom . "", "Ressource " . $res->nom . "<BR><P>" . $res->description . "<BR><P>" . $tmpUser, $res->nom, $id, "" . MAIN_DB_PREFIX . "Synopsis_global_ressource", 1, //all day
@@ -3465,7 +3465,7 @@ class Zimbra {
                 $typeId = false;
                 if ($resql) {
                     while ($res = $db->fetch_object($resql)) {
-                        $url = $this->dolibarr_main_url_root . "/compta/paiement/fiche.php?id=" . $res->rowid;
+                        $url = $this->dolibarr_main_url_root . "/compta/paiement/card.php?id=" . $res->rowid;
                         //get Loc Zimbra
                         $requeteLocZim = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
@@ -3565,7 +3565,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/fourn/facture/fiche.php?facid=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/fourn/facture/card.php?facid=" . $res->rowid;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -3658,7 +3658,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/fichinter/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/fichinter/card.php?id=" . $res->rowid;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -3754,7 +3754,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/fichinter/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/fichinter/card.php?id=" . $res->rowid;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -3845,7 +3845,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/fichinter/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/fichinter/card.php?id=" . $res->rowid;
                 if ($res->datec) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($userId);
@@ -3943,7 +3943,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/synopsisdemandeinterv/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/synopsisdemandeinterv/card.php?id=" . $res->rowid;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4035,7 +4035,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/synopsisdemandeinterv/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/synopsisdemandeinterv/card.php?id=" . $res->rowid;
                 if ($res->datec) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($userId);
@@ -4132,7 +4132,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/synopsisdemandeinterv/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/synopsisdemandeinterv/card.php?id=" . $res->rowid;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4233,7 +4233,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/expedition/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/expedition/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4335,7 +4335,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/expedition/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/expedition/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4434,7 +4434,7 @@ class Zimbra {
             while ($res = $db->fetch_object($resql)) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($userId);
-                $url = $this->dolibarr_main_url_root . "/expedition/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/expedition/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4529,7 +4529,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/livraison/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/livraison/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4625,7 +4625,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/livraison/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/livraison/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4718,7 +4718,7 @@ class Zimbra {
             while ($res = $db->fetch_object($resql)) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($userId);
-                $url = $this->dolibarr_main_url_root . "/livraison/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/livraison/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4813,7 +4813,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/comm/action/fiche.php?id=" . $res->id;
+                $url = $this->dolibarr_main_url_root . "/comm/action/card.php?id=" . $res->id;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4897,7 +4897,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/comm/action/fiche.php?id=" . $res->id;
+                $url = $this->dolibarr_main_url_root . "/comm/action/card.php?id=" . $res->id;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -4975,7 +4975,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/commande/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/commande/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -5079,7 +5079,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/commande/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/commande/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -5178,7 +5178,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/commande/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/commande/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($userId);
@@ -5282,7 +5282,7 @@ class Zimbra {
 
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/fourn/commande/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/fourn/commande/card.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -5661,7 +5661,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/contrat/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/contrat/card.php?id=" . $res->rowid;
                 if ($res->date_ouverture) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($userId);
@@ -5775,7 +5775,7 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/contrat/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/contrat/card.php?id=" . $res->rowid;
                 if ($res->datec) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($userId);

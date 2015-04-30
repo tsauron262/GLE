@@ -1,4 +1,4 @@
 <?php
 $_REQUEST['nomenu'] = true;
-include("fiche.php");
+include("card.php");
 ?>

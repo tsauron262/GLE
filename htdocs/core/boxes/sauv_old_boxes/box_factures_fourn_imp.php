@@ -113,11 +113,11 @@ class box_factures_fourn_imp extends ModeleBoxes {
                     'logo' => $this->boximg,
                     'text' => $objp->facnumber,
                     'text2'=> $late,
-                    'url' => DOL_URL_ROOT."/fourn/facture/fiche.php?facid=".$objp->facid);
+                    'url' => DOL_URL_ROOT."/fourn/facture/card.php?facid=".$objp->facid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
                     'text' => $objp->nom,
-                    'url' => DOL_URL_ROOT."/fourn/fiche.php?socid=".$objp->socid);
+                    'url' => DOL_URL_ROOT."/fourn/card.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
                     'text' => dol_print_date($objp->datelimite,'day'));

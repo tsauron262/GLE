@@ -499,7 +499,7 @@ class Contact extends CommonObject
 	 */
 	function fetch($id, $user=0, $ref_ext='')
 	{
-		dol_syslog(get_class($this)."::fetch ".$this->error, LOG_ERR);
+//		dol_syslog(get_class($this)."::fetch ".$this->error, LOG_ERR);
 		global $langs;
 
 		$langs->load("companies");

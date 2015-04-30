@@ -354,7 +354,7 @@ function setStatutDi(id, statut){
                         var datei=jQuery('#datei').val();
                         var userid = jQuery('#userid').find(':selected').val();
                         var comLigneId = jQuery('#comLigneId').find(':selected').val();
-                        location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/fiche.php?action=create&datei='+datei+"&comLigneId="+comLigneId+"&userid="+userid;
+                        location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/card.php?action=create&datei='+datei+"&comLigneId="+comLigneId+"&userid="+userid;
                     }
                 },
                 Annuler: function(){
@@ -488,7 +488,7 @@ function setStatutDi(id, statut){
         });
         jQuery('.modDI').click(function(){
             var id = jQuery(this).attr('id').replace(/^modDI-/,"");
-            location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/fiche.php?id='+id;
+            location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/card.php?id='+id;
         });
         jQuery('.cloneDI').click(function(){
             var id = jQuery(this).attr('id').replace(/^cloneDI-/,"");

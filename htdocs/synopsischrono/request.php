@@ -99,7 +99,7 @@ if (isset($_REQUEST['actionEtat'])) {
     }
 
     if ($action == "commandeOK" && $chrono->extraValue[$chrono->id]['Etat']['value'] == 1) {
-        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Attention, le SAV été deja au statut Attente Pièce !"));
+        header("Location:card.php?id=" . $_GET['id'] . "&msg=" . urlencode("Attention, le SAV été deja au statut Attente Pièce !"));
         die;
     }
 
@@ -204,7 +204,7 @@ if (isset($_REQUEST['actionEtat'])) {
     }
 
     if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Résolution']['value'] == "") {
-        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Veuillez compléter  résolution svp!"));
+        header("Location:card.php?id=" . $_GET['id'] . "&msg=" . urlencode("Veuillez compléter  résolution svp!"));
         die;
     }
 
@@ -224,7 +224,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
     if ($action == "attenteClient1" && $chrono->extraValue[$chrono->id]['Diagnostic']['value'] == "") {
-        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Veuillez compléter diagnostic svp!"));
+        header("Location:card.php?id=" . $_GET['id'] . "&msg=" . urlencode("Veuillez compléter diagnostic svp!"));
         die;
     }
 
@@ -274,7 +274,7 @@ if (isset($_REQUEST['actionEtat'])) {
     }
 
     if ($action == "restituer" && $propal->total_ttc > 0 && !(isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0)) {
-        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Attention, " . price($propal->total_ttc) . " € A payer, merci de remplir le moyen de paiement !"));
+        header("Location:card.php?id=" . $_GET['id'] . "&msg=" . urlencode("Attention, " . price($propal->total_ttc) . " € A payer, merci de remplir le moyen de paiement !"));
         die;
     }
 
@@ -331,7 +331,7 @@ if (isset($_REQUEST['actionEtat'])) {
 }
 
 if ($ok){
-//    header("Location:fiche.php?id=" . $_GET['id']);
+//    header("Location:card.php?id=" . $_GET['id']);
   header('Status: 301 Moved Permanently', false, 301);    
     header("Location:" . $_SERVER["HTTP_REFERER"]);
 }

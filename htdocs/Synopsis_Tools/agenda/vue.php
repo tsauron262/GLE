@@ -181,7 +181,7 @@ $js .= <<<EOF
                 back = document.location.href;
                 back = escape(back);
                 back = back.replace(/\//g, "%2F");
-                newUrl = "../../comm/action/fiche.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
+                newUrl = "../../comm/action/card.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
                 dispatchePopIFrame(newUrl, function(){ $('#calendar').weekCalendar('refresh'); }, 'New Action', 100);
     //            window.location.href = newUrl;
             }

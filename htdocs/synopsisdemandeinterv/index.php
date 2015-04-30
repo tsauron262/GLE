@@ -125,8 +125,8 @@ if ($result) {
         $objp = $db->fetch_object($result);
         $var = !$var;
         print "<tr $bc[$var]>";
-        print "<td><a href=\"fiche.php?id=" . $objp->fichid . "\">" . img_object($langs->trans("Show"), "synopsisdemandeinterv@synopsisdemandeinterv") . ' ' . $objp->ref . "</a></td>\n";
-        print '<td><a href="' . DOL_URL_ROOT . '/comm/fiche.php?socid=' . $objp->socid . '">' . img_object($langs->trans("ShowCompany"), "company") . ' ' . dol_trunc($objp->nom, 44) . "</a></td>\n";
+        print "<td><a href=\"card.php?id=" . $objp->fichid . "\">" . img_object($langs->trans("Show"), "synopsisdemandeinterv@synopsisdemandeinterv") . ' ' . $objp->ref . "</a></td>\n";
+        print '<td><a href="' . DOL_URL_ROOT . '/comm/card.php?socid=' . $objp->socid . '">' . img_object($langs->trans("ShowCompany"), "company") . ' ' . dol_trunc($objp->nom, 44) . "</a></td>\n";
         print '<td>' . nl2br($objp->description) . '</td>';
         print '<td align="center">' . dol_print_date($db->jdate($objp->dp), 'day') . "</td>\n";
         print '<td align="right">' . ConvertSecondToTime($objp->duree) . '</td>';

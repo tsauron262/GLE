@@ -40,7 +40,7 @@ $langs->load('deliveries');
 $langs->load('products');
 
 if ($user->societe_id)
-    header("Location: " . DOL_URL_ROOT . "/commande/fiche.php?id=" . $_REQUEST['id']);
+    header("Location: " . DOL_URL_ROOT . "/commande/card.php?id=" . $_REQUEST['id']);
 
 if (!$user->rights->commande->lire)
     accessforbidden();

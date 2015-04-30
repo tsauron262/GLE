@@ -226,7 +226,7 @@ if ($id > 0 || ! empty($ref))
 		// $contactAlreadySelected = $commande->getListContactId('external');	// On ne doit pas desactiver un contact deja selectionner car on doit pouvoir le seclectionner une deuxieme fois pour un autre type
 		$nbofcontacts=$html->select_contacts(0, '', 'contactid', 1, '', '', 1);
 		if ($nbofcontacts == 0) print $langs->trans("NoContactDefined");
-        print ' <a href="'.DOL_URL_ROOT.'/contact/fiche.php?leftmenu=contacts&action=create&backtopage='.urlencode($_SERVER["PHP_SELF"]).'?socid='.$socid.'">'.$langs->trans("Add").'</a>';
+        print ' <a href="'.DOL_URL_ROOT.'/contact/card.php?leftmenu=contacts&action=create&backtopage='.urlencode($_SERVER["PHP_SELF"]).'?socid='.$socid.'">'.$langs->trans("Add").'</a>';
 		print '</td>';
 		print '<td>';
 		$formcompany->selectTypeContact($societe, '', 'type','external','libelle',1);

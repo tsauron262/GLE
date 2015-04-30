@@ -74,7 +74,7 @@ function widget_listContratServiceModifie() {
                     if ($obj->nb_late)
                         $table .= img_warning($langs->trans("Late"));
                     $table .= '</td>';
-                    $table .= '<td><a href="' . DOL_URL_ROOT . '/contrat/fiche.php?id=' . $obj->fk_contrat . '">' . img_object($langs->trans("ShowService"), "service");
+                    $table .= '<td><a href="' . DOL_URL_ROOT . '/contrat/card.php?id=' . $obj->fk_contrat . '">' . img_object($langs->trans("ShowService"), "service");
                     if ($obj->note)
                         $table .= ' ' . dol_trunc(html_entity_decode($obj->note), 20) . '</a></td>';
                     else
@@ -85,7 +85,7 @@ function widget_listContratServiceModifie() {
                     $staticcompany->nom = $obj->nom;
                     $table .= $staticcompany->getNomUrl(1, '', 20);
                     $table .= '</td>';
-                    $table .= '<td nowrap="nowrap" align="right"><a href="' . DOL_URL_ROOT . '/contrat/fiche.php?id=' . $obj->fk_contrat . '&ligne=' . $obj->cid . '">';
+                    $table .= '<td nowrap="nowrap" align="right"><a href="' . DOL_URL_ROOT . '/contrat/card.php?id=' . $obj->fk_contrat . '&ligne=' . $obj->cid . '">';
                     $table .= $staticcontratligne->LibStatut($obj->statut, 5);
                     $table .= '</a></td>';
                     $table .= "</tr>\n";
@@ -98,7 +98,7 @@ function widget_listContratServiceModifie() {
                 if ($obj->nb_late)
                     $table2 .= img_warning($langs->trans("Late"));
                 $table2 .= '</td>';
-                $table2 .= '<td><a href="' . DOL_URL_ROOT . '/contrat/fiche.php?id=' . $obj->fk_contrat . '">' . img_object($langs->trans("ShowService"), "service");
+                $table2 .= '<td><a href="' . DOL_URL_ROOT . '/contrat/card.php?id=' . $obj->fk_contrat . '">' . img_object($langs->trans("ShowService"), "service");
                 if ($obj->note)
                     $table2 .= ' ' . dol_trunc(html_entity_decode($obj->note), 20) . '</a></td>';
                 else
@@ -109,7 +109,7 @@ function widget_listContratServiceModifie() {
                 $staticcompany->nom = $obj->nom;
                 $table2 .= $staticcompany->getNomUrl(1, '', 20);
                 $table2 .= '</td>';
-                $table2 .= '<td nowrap="nowrap" align="right"><a href="' . DOL_URL_ROOT . '/contrat/fiche.php?id=' . $obj->fk_contrat . '&ligne=' . $obj->cid . '">';
+                $table2 .= '<td nowrap="nowrap" align="right"><a href="' . DOL_URL_ROOT . '/contrat/card.php?id=' . $obj->fk_contrat . '&ligne=' . $obj->cid . '">';
                 $table2 .= $staticcontratligne->LibStatut($obj->statut, 5);
                 $table2 .= '</a></td>';
                 $table2 .= "</tr>\n";

@@ -49,7 +49,7 @@ function synopsisdemandeinterv_prepare_head($synopsisdemandeinterv)
   $h = 0;
   $head = array();
 
-  $head[$h][0] = DOL_URL_ROOT.'/synopsisdemandeinterv/fiche.php?id='.$synopsisdemandeinterv->id;
+  $head[$h][0] = DOL_URL_ROOT.'/synopsisdemandeinterv/card.php?id='.$synopsisdemandeinterv->id;
   $head[$h][1] = $langs->trans("Card");
   $head[$h][2] = 'card';
   $h++;

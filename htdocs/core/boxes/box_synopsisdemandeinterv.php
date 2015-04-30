@@ -136,21 +136,21 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                     $this->info_box_contents[$i][$y] = array('align' => 'left',
                         'logo' => $picto,
                         'text' => ($objp->ref ? $objp->ref : "-"),
-                        'url' => DOL_URL_ROOT . "/synopsisdemandeinterv/fiche.php?id=" . $objp->diid);
+                        'url' => DOL_URL_ROOT . "/synopsisdemandeinterv/card.php?id=" . $objp->diid);
                     $y++;
 
                     if (!isset($_REQUEST['next'])) {
                         $this->info_box_contents[$i][$y] = array('align' => 'left',
                             'logo' => 'intervention',
                             'text' => ($objp->FIref ? $objp->FIref : "-"),
-                            'url' => DOL_URL_ROOT . "/fichinter/fiche.php?id=" . $objp->FIId);
+                            'url' => DOL_URL_ROOT . "/fichinter/card.php?id=" . $objp->FIId);
                     $y++;
                     }
 
                     $this->info_box_contents[$i][$y] = array('align' => 'left',
                         'text' => $objp->nom,
                         'maxlength' => 30,
-                        'url' => DOL_URL_ROOT . "/comm/fiche.php?socid=" . $objp->socid);
+                        'url' => DOL_URL_ROOT . "/comm/card.php?socid=" . $objp->socid);
                     $y++;
 
                     $this->info_box_contents[$i][$y] = array('align' => 'right',
@@ -170,7 +170,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                         'align' => 'right',
                         'width' => 18,
                         'text' => $objp->nomTech,
-                        'url' => DOL_URL_ROOT . "/user/fiche.php?id=" . $objp->fk_user_prisencharge);
+                        'url' => DOL_URL_ROOT . "/user/card.php?id=" . $objp->fk_user_prisencharge);
                     $y++;
 
 
@@ -180,7 +180,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                             'align' => 'right',
                             'width' => 18,
                             'text' => $objp->cref,
-                            'url' => DOL_URL_ROOT . "/commande/fiche.php?id=" . $objp->fk_commande);
+                            'url' => DOL_URL_ROOT . "/commande/card.php?id=" . $objp->fk_commande);
                     }
                     else
                         $this->info_box_contents[$i][$y] = array('text' => '&nbsp;');
@@ -192,7 +192,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                             'align' => 'right',
                             'width' => 18,
                             'text' => $objp->ctref,
-                            'url' => DOL_URL_ROOT . "/contrat/fiche.php?id=" . $objp->fk_contrat);
+                            'url' => DOL_URL_ROOT . "/contrat/card.php?id=" . $objp->fk_contrat);
                     }
                     else
                         $this->info_box_contents[$i][$y] = array('text' => '&nbsp;');

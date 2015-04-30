@@ -218,7 +218,7 @@ function printOneDayOneUser($userId, $date, $printUser = false, $printDate = fal
         $minuteDeb = date('H', $debu) * 60 + date('i', $debu);
         $minuteDur = $duree / 60;
         print '<div id="event_' . $i . '" class="event eventAbss" style="top:' . (($minuteDeb * $coefx) + $constx) . '%; height:' . (($minuteDur > $minHeight ? $minuteDur : $minHeight) * $coefx) . '%; left:' . $coefy . '%;">';
-        print "<a href='".DOL_URL_ROOT."/comm/action/fiche.php?id=" . $result->id . "'>" . $result->label;
+        print "<a href='".DOL_URL_ROOT."/comm/action/card.php?id=" . $result->id . "'>" . $result->label;
         print "<br/>" . date("H:i", $debuV) . " - " . date("H:i", $finV) . "</a>";
         print "<br/>" . $result->note;
         print '</div>';

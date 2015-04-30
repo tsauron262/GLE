@@ -61,7 +61,7 @@ $requete = "SELECT
             {
                 while($res=$db->fetch_object($resql))
                 {
-                    $url = $dolibarr_main_url_root ."/fichinter/fiche.php?id=".$res->rowid;
+                    $url = $dolibarr_main_url_root ."/fichinter/card.php?id=".$res->rowid;
                     if ($res->datec && $showInterventionCreate)
                     {
 

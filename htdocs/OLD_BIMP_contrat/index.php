@@ -344,7 +344,7 @@ $js = '
 //        print $staticcontrat->getNomUrl(1,16);
 //        print '</td>';
 //        print '<td nowrap="1">';
-//        print '<a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
+//        print '<a href="'.DOL_URL_ROOT.'/contrat/card.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
 //        if ($obj->note) print ' '.dol_trunc(html_entity_decode($obj->note),20).'</a></td>';
 //        else print '</a> '.dol_trunc($obj->label,20).'</td>';
 //        print '<td>';
@@ -408,7 +408,7 @@ $js = '
 //        print $staticcontrat->getNomUrl(1,16);
 //        if ($obj->nb_late) print img_warning($langs->trans("Late"));
 //        print '</td>';
-//        print '<td><a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
+//        print '<td><a href="'.DOL_URL_ROOT.'/contrat/card.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
 //        if ($obj->note) print ' '.dol_trunc(html_entity_decode($obj->note),20).'</a></td>';
 //        else print '</a> '.dol_trunc($obj->label,20).'</td>';
 //        print '<td>';
@@ -417,7 +417,7 @@ $js = '
 //        $staticcompany->nom=$obj->nom;
 //        print $staticcompany->getNomUrl(1,'',20);
 //        print '</td>';
-//        print '<td nowrap="nowrap" align="right"><a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->fk_contrat.'&ligne='.$obj->cid.'">';
+//        print '<td nowrap="nowrap" align="right"><a href="'.DOL_URL_ROOT.'/contrat/card.php?id='.$obj->fk_contrat.'&ligne='.$obj->cid.'">';
 //        print $staticcontratligne->LibStatut($obj->statut,5);
 //        print '</a></td>';
 //        print "</tr>\n";

@@ -1312,9 +1312,9 @@ class Contrat extends CommonObject {
 
         $result = '';
 
-        $lien = '<a href="' . DOL_URL_ROOT . '/contrat/fiche.php?id=' . $this->id . '">';
+        $lien = '<a href="' . DOL_URL_ROOT . '/contrat/card.php?id=' . $this->id . '">';
         if ($option == 6) {
-            $lien = '<a href="' . DOL_URL_ROOT . '/contrat/fiche.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . '/contrat/card.php?id=' . $this->id . '">';
         }
         $lienfin = '</a>';
 
@@ -1891,7 +1891,7 @@ class Contrat extends CommonObject {
 
             if ($this->statut == 0 && $nbofservices) {
                 if ($user->rights->contrat->creer)
-                    $html .= '<a class="butAction" href="fiche.php?id=' . $this->id . '&amp;action=valid">' . $langs->trans("Validate") . '</a>';
+                    $html .= '<a class="butAction" href="card.php?id=' . $this->id . '&amp;action=valid">' . $langs->trans("Validate") . '</a>';
                 else
                     $html .= '<a class="butActionRefused" href="#" title="' . $langs->trans("NotEnoughPermissions") . '">' . $langs->trans("Validate") . '</a>';
             }
@@ -1905,7 +1905,7 @@ class Contrat extends CommonObject {
             }
 
             if ($this->nbofservicesclosed < $nbofservices) {
-                $html .= '<a class="butAction" href="fiche.php?id=' . $this->id . '&amp;action=close">' . $langs->trans("CloseAllContracts") . '</a>';
+                $html .= '<a class="butAction" href="card.php?id=' . $this->id . '&amp;action=close">' . $langs->trans("CloseAllContracts") . '</a>';
             }
 
             $html .= "<a class='butAction' href=" . $_SERVER['PHP_SELF'] . "?id=" . $this->id . "&action=generatePdf>G&eacute;n&eacute;rer</a>";
@@ -1913,7 +1913,7 @@ class Contrat extends CommonObject {
             // - Droit de creer + mode brouillon (erreur creation)
             // - Droit de supprimer
             if (($user->rights->contrat->creer && $this->statut == 0) || $user->rights->contrat->supprimer) {
-                $html .= '<a class="butActionDelete" href="fiche.php?id=' . $this->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
+                $html .= '<a class="butActionDelete" href="card.php?id=' . $this->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
             }
 
             $html .= "</div>";
@@ -2204,7 +2204,7 @@ class ContratLigne {
 
         $result = '';
 
-        $lien = '<a href="' . DOL_URL_ROOT . '/contrat/fiche.php?id=' . $this->fk_contrat . '">';
+        $lien = '<a href="' . DOL_URL_ROOT . '/contrat/card.php?id=' . $this->fk_contrat . '">';
         $lienfin = '</a>';
 
         $picto = 'contract';

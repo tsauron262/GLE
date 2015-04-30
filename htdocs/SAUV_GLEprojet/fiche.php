@@ -35,10 +35,10 @@
  */
 
 /**
- *    \file       htdocs/projet/fiche.php
+ *    \file       htdocs/projet/card.php
  *    \ingroup    projet
  *    \brief      Fiche projet
- *    \version    $Id: fiche.php,v 1.57.2.1 2008/09/10 09:46:02 eldy Exp $
+ *    \version    $Id: card.php,v 1.57.2.1 2008/09/10 09:46:02 eldy Exp $
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
@@ -174,7 +174,7 @@ if (empty($reshook))
 	        {
 	            $db->commit();
 
-	            header("Location:fiche.php?id=".$object->id);
+	            header("Location:card.php?id=".$object->id);
 	            exit;
 	        }
 	        else
@@ -542,12 +542,12 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     dol_fiche_head($head, 'project', $langs->trans("Project"));
 
     if ($_REQUEST['action'] == 'delete') {
-        $html->form_confirm("fiche.php?id=" . $_GET["id"], $langs->trans("DeleteAProject"), $langs->trans("ConfirmDeleteAProject"), "confirm_delete");
+        $html->form_confirm("card.php?id=" . $_GET["id"], $langs->trans("DeleteAProject"), $langs->trans("ConfirmDeleteAProject"), "confirm_delete");
         print "<br>";
     }
 
     if ($_REQUEST['action'] == 'edit') {
-        print '<form method="post" action="fiche.php">';
+        print '<form method="post" action="card.php">';
         print '<input type="hidden" name="action" value="update">';
         print '<input type="hidden" name="id" value="' . $_GET["id"] . '">';
 
@@ -695,21 +695,21 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     if ($_REQUEST['action'] != "edit" &&
             ($projet->user_resp_id == $user->id || $user->rights->synopsisprojet->modAll)) {
         if ($user->rights->synopsisprojet->creer) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
         }
 
         if ($user->rights->synopsisprojet->creer && $projet->statut == 0) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=valid">' . $langs->trans("Planifier") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=valid">' . $langs->trans("Planifier") . '</a>';
         }
         if ($user->rights->synopsisprojet->creer && $projet->statut == 5) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=launch">' . $langs->trans("Lancer") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=launch">' . $langs->trans("Lancer") . '</a>';
         }
         if ($user->rights->synopsisprojet->creer && $projet->statut == 10) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=cloture">' . $langs->trans("Cloturer") . '</a>';
+            print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=cloture">' . $langs->trans("Cloturer") . '</a>';
         }
 
         if ($user->rights->synopsisprojet->supprimer) {
-            print '<a class="butActionDelete" href="fiche.php?id=' . $projet->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
+            print '<a class="butActionDelete" href="card.php?id=' . $projet->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
         }
     }
 

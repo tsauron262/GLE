@@ -41,7 +41,7 @@ EOF;
     print "</div>";
     print "<br/>";
     print "<div class='tabs'>";
-    print "<form id='grpForm' action='fiche.php?action=create' method='POST'>";
+    print "<form id='grpForm' action='card.php?action=create' method='POST'>";
     print "<table cellpadding=15 width=500>";
     print "<tr><th class='ui-widget-header ui-state-default'>Nom du groupe</th>";
     print "    <td align=center class='ui-widget-content'><input class='required' type='text' name='nom' id='nom' size=30 ></td>";

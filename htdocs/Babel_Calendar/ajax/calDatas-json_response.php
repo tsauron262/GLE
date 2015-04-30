@@ -59,7 +59,7 @@ if ($type == 'Affaire' && $id > 0)
                    'end'=> $res->dateAff + 3600,
                    'editable' => false,
                    'color'=> $arrColor[0],
-                   'url' => DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$res->affaire_id
+                   'url' => DOL_URL_ROOT.'/Synopsis_Affaire/card.php?id='.$res->affaire_id
                    );
         if($res->affaire_id != $remAffaire && $remAffaire)
             $iter++;
@@ -93,7 +93,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dc,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/contrat/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/contrat/card.php?id='.$res1->element_id
                                    );
                         if($res2->dm >0)
                         $arr[]=array('id'=>"c-dm-".$res2->rowid,
@@ -103,7 +103,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dm,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/contrat/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/contrat/card.php?id='.$res1->element_id
                                    );
                         if($res2->dfv >0)
                         $arr[]=array('id'=>"c-dfv-".$res2->rowid,
@@ -113,7 +113,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dfv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/contrat/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/contrat/card.php?id='.$res1->element_id
                                    );
                         if($res2->dv >0)
                         $arr[]=array('id'=>"c-dv-".$res2->rowid,
@@ -123,7 +123,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/contrat/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/contrat/card.php?id='.$res1->element_id
                                    );
                     }
                 }
@@ -151,7 +151,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dc,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                         if($res2->dl >0)
                         $arr[]=array('id'=>"co-dl-".$res2->rowid,
@@ -161,7 +161,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dl,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                         if($res2->dliv >0)
                         $arr[]=array('id'=>"co-dliv-".$res2->rowid,
@@ -171,7 +171,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dliv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                         if($res2->dcl >0)
                         $arr[]=array('id'=>"co-dcl-".$res2->rowid,
@@ -181,7 +181,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dcll,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                         if($res2->dv >0)
                         $arr[]=array('id'=>"co-dv-".$res2->rowid,
@@ -191,7 +191,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                     }
                 }
@@ -216,7 +216,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dc,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                         if($res2->dcl >0)
                         $arr[]=array('id'=>"cof-dcl-".$res2->rowid,
@@ -226,7 +226,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dcl,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                         if($res2->dv >0)
                         $arr[]=array('id'=>"cof-dv-".$res2->rowid,
@@ -236,7 +236,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/commande/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/commande/card.php?id='.$res1->element_id
                                    );
                     }
                 }
@@ -260,7 +260,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dc,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/expedition/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/expedition/card.php?id='.$res1->element_id
                                    );
                         if($res2->dv >0)
                         $arr[]=array('id'=>"e-dv-".$res2->rowid,
@@ -270,7 +270,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/expedition/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/expedition/card.php?id='.$res1->element_id
                                    );
                     }
                 }
@@ -360,7 +360,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dc,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/fourn/facture/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/fourn/facture/card.php?id='.$res1->element_id
                                    );
                         if($res2->dv >0)
                         $arr[]=array('id'=>"ff-dv-".$res2->rowid,
@@ -370,7 +370,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/fourn/facture/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/fourn/facture/card.php?id='.$res1->element_id
                                    );
                         if($res2->dlr >0)
                         $arr[]=array('id'=>"ff-dlr-".$res2->rowid,
@@ -380,7 +380,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dlr,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/fourn/facture/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/fourn/facture/card.php?id='.$res1->element_id
                                    );
                         $requete= "SELECT UNIX_TIMESTAMP(datep) as dc
                                      FROM ".MAIN_DB_PREFIX."paiementfourn_facturefourn as pf,
@@ -398,7 +398,7 @@ if ($type == 'Affaire' && $id > 0)
                                        'end'=> $res3->dc,
                                        'editable' => false,
                                        'color'=> $color,
-                                       'url' => DOL_URL_ROOT.'/fourn/facture/fiche.php?id='.$res1->element_id
+                                       'url' => DOL_URL_ROOT.'/fourn/facture/card.php?id='.$res1->element_id
                                        );
 
                         }
@@ -424,7 +424,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dc,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/livraison/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/livraison/card.php?id='.$res1->element_id
                                    );
                         if($res2->dv >0)
                         $arr[]=array('id'=>"liv-dv-".$res2->rowid,
@@ -434,7 +434,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/livraison/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/livraison/card.php?id='.$res1->element_id
                                    );
                         }
                 }
@@ -460,7 +460,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dc,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/projet/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/projet/card.php?id='.$res1->element_id
                                    );
                         if($res2->dv >0)
                         $arr[]=array('id'=>"proj-dv-".$res2->rowid,
@@ -470,7 +470,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dv,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/projet/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/projet/card.php?id='.$res1->element_id
                                    );
                         if($res2->dl >0)
                         $arr[]=array('id'=>"proj-dl-".$res2->rowid,
@@ -480,7 +480,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dl,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/projet/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/projet/card.php?id='.$res1->element_id
                                    );
                         if($res2->dcl >0)
                         $arr[]=array('id'=>"proj-dv-".$res2->rowid,
@@ -490,7 +490,7 @@ if ($type == 'Affaire' && $id > 0)
                                    'end'=> $res2->dcl,
                                    'editable' => false,
                                    'color'=> $color,
-                                   'url' => DOL_URL_ROOT.'/projet/fiche.php?id='.$res1->element_id
+                                   'url' => DOL_URL_ROOT.'/projet/card.php?id='.$res1->element_id
                                    );
                         }
                 }
@@ -633,7 +633,7 @@ if ($type == 'Affaire' && $id > 0)
                    'end'=> $res->dateAff + 3600,
                    'editable' => false,
                    'color'=> $color,
-                   'url' => DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$res->affaire_id
+                   'url' => DOL_URL_ROOT.'/Synopsis_Affaire/card.php?id='.$res->affaire_id
                    );
         if($res->affaire_id != $remAffaire && $remAffaire)
             $iter++;

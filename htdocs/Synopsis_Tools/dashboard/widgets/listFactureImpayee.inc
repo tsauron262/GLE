@@ -101,7 +101,7 @@ function widget_listFactureImpayee() {
 
                             $table .= $formfile->html;
 
-                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->am).'</td>';
                             $table .=  '<td>'.$facturestatic->LibStatut($res->paye,$res->fk_statut,3,$res->am).'</td>';
@@ -119,7 +119,7 @@ function widget_listFactureImpayee() {
                     $table2 .= $formfile->showdocuments('facture',$filename,$filedir,$urlsource,'','','','','',1,42,false);
                     $table2 .= $formfile->html;
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->am).'</td>';
                     $table2 .=  '<td>'.$facturestatic->LibStatut($res->paye,$res->fk_statut,3,$res->am).'</td>';

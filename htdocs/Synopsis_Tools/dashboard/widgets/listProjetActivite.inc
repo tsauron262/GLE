@@ -71,7 +71,7 @@ function widget_listProjetActivite() {
 
                 $var = !$var;
                 $table .= "<tr $bc[$var]>";
-                $table .= '<td><a href="' . DOL_URL_ROOT . '/projet/tasks/fiche.php?id=' . $obj->rowid . '">' . $obj->title . '</a></td>';
+                $table .= '<td><a href="' . DOL_URL_ROOT . '/projet/tasks/card.php?id=' . $obj->rowid . '">' . $obj->title . '</a></td>';
                 $table .= '<td align="right">' . $projet->sec2hour($obj->total) . '</td>';
                 $table .= "</tr>\n";
                 $table .= "</table><br />";
@@ -112,7 +112,7 @@ function widget_listProjetActivite() {
                 $projet->fetch($obj->rowid);
                 $var = !$var;
                 $table .= "<tr $bc[$var]>";
-                $table .= '<td><a href="' . DOL_URL_ROOT . '/projet/tasks/fiche.php?id=' . $obj->rowid . '">' . $obj->title . '</a></td>';
+                $table .= '<td><a href="' . DOL_URL_ROOT . '/projet/tasks/card.php?id=' . $obj->rowid . '">' . $obj->title . '</a></td>';
                 $table .= '<td align="right">' . $projet->sec2hour($obj->total) . '</td>';
                 $table .= "</tr>\n";
                 $i++;
@@ -158,7 +158,7 @@ function widget_listProjetActivite() {
                 $projet->fetch($obj->rowid);
                 $var = !$var;
                 $table .= "<tr $bc[$var]>";
-                $table .= '<td><a href="' . DOL_URL_ROOT . '/projet/tasks/fiche.php?id=' . $obj->rowid . '">' . $obj->title . '</a></td>';
+                $table .= '<td><a href="' . DOL_URL_ROOT . '/projet/tasks/card.php?id=' . $obj->rowid . '">' . $obj->title . '</a></td>';
                 $table .= '<td align="right">' . $projet->sec2hour($obj->total) . '</td>';
                 $table .= "</tr>\n";
                 $i++;

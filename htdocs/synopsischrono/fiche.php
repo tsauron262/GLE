@@ -2,7 +2,7 @@
 
 /*
 
- * Name : fiche.php
+ * Name : card.php
  * GLE-1.2
  */
 
@@ -592,7 +592,7 @@ if ($chr->id > 0) {
           {
           while ($res = $db->fetch_object($resql))
           {
-          print "<td class='ui-widget-content'><a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$res->rowid."'>".$res->title."</a></td>";
+          print "<td class='ui-widget-content'><a href='".DOL_URL_ROOT."/projet/card.php?id=".$res->rowid."'>".$res->title."</a></td>";
           //print "<td class='ui-widget-content'>azerttyy</a></td>";
           }
           } */
@@ -637,7 +637,7 @@ if ($chr->id > 0) {
             } else {
                 if ($resql = $db->query($requete)) {
                     while ($res = $db->fetch_object($resql)) {
-                        print "<a href='" . DOL_URL_ROOT . "/projet/fiche.php?id=" . $res->rowid . "'>" . $res->ref . " : " . $res->title . "</a>";
+                        print "<a href='" . DOL_URL_ROOT . "/projet/card.php?id=" . $res->rowid . "'>" . $res->ref . " : " . $res->title . "</a>";
                     }
                 }
             }

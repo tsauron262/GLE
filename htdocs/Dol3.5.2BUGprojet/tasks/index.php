@@ -212,7 +212,7 @@ llxFooter('$Date: 2008/06/19 08:50:59 $ - $Revision: 1.60 $');
 //      $row = $db->fetch_row( $resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
 //      print '<td align="center">'.$row[2].'</td>';
 //      print "</tr>\n";
 //
@@ -270,7 +270,7 @@ llxFooter('$Date: 2008/06/19 08:50:59 $ - $Revision: 1.60 $');
 //      $row = $db->fetch_row( $resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
 //      print '<td>'.sec2hour($row[2]).'</td>';
 //      print '<td>'.sec2hour($row[3]).'</td>';
 //      print "</tr>\n";

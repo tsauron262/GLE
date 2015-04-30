@@ -115,7 +115,7 @@ if ( $resql )
       $row = $db->fetch_row( $resql);
       $var=!$var;
       print "<tr $bc[$var]>";
-      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
       print '<td align="center">'.$row[2].'</td>';
       print "</tr>\n";
 
@@ -156,7 +156,7 @@ if ( $resql )
     {
       $var=!$var;
       print "<tr $bc[$var]>";
-      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
       print '<td align="center">'.sec2hour($row[2]).'</td>';
       print "</tr>\n";
       $total += $row[2];
@@ -200,7 +200,7 @@ if ( $resql )
     {
       $var=!$var;
         print "<tr $bc[$var]>";
-      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
       print '<td align="center">'.sec2hour($row[2]).'</td>';
       print "</tr>\n";
       $total += $row[2];
@@ -245,7 +245,7 @@ if ( $resql )
     {
       $var=!$var;
         print "<tr ".$bc[$var].">";
-      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
       print '<td align="center">'.sec2hour($row[2]).'</td>';
       print "</tr>\n";
       $total += $row[2];
@@ -288,7 +288,7 @@ if ( $resql )
   while ($row = $db->fetch_row($resql))
     {
       print "<tr $bc[$var]>";
-      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
       print '<td align="center">'.sec2hour($row[2]).'</td>';
       print "</tr>\n";
       $var=!$var;
@@ -329,7 +329,7 @@ if ( $resql )
   while ($row = $db->fetch_row($resql))
   {
       print "<tr $bc[$var]>";
-      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
       print '<td align="center">'.sec2hour($row[2]).'</td>';
       print "</tr>\n";
       $var=!$var;

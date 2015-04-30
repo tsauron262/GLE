@@ -139,7 +139,7 @@ $js = '
 //      $row = $db->fetch_row( $resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$row[1].'">'.$row[0].'</a></td>';
+//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$row[1].'">'.$row[0].'</a></td>';
 //      print '<td align="center">'.$row[2].'</td>';
 //      print "</tr>\n";
 //
@@ -209,7 +209,7 @@ $js = '
 //      $obj = $db->fetch_object( $resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$obj->rowid.'">'.$obj->title.'</a></td>';
+//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$obj->rowid.'">'.$obj->title.'</a></td>';
 //      print '<td align="right">'.sec2hour($obj->total).'</td>';
 //      print "</tr>\n";
 //      $i++;
@@ -254,7 +254,7 @@ $js = '
 //      $obj = $db->fetch_object($resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$obj->rowid.'">'.$obj->title.'</a></td>';
+//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$obj->rowid.'">'.$obj->title.'</a></td>';
 //      print '<td align="right">'.sec2hour($obj->total).'</td>';
 //      print "</tr>\n";
 //      $i++;
@@ -299,7 +299,7 @@ $js = '
 //      $obj = $db->fetch_object($resql);
 //      $var=!$var;
 //      print "<tr $bc[$var]>";
-//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/fiche.php?id='.$obj->rowid.'">'.$obj->title.'</a></td>';
+//      print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/card.php?id='.$obj->rowid.'">'.$obj->title.'</a></td>';
 //      print '<td align="right">'.sec2hour($obj->total).'</td>';
 //      print "</tr>\n";
 //      $i++;

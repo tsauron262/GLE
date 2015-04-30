@@ -43,7 +43,7 @@ function synopsisfichinter_prepare_head($fichinter)
   $h = 0;
   $head = array();
 
-  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/fiche.php?id='.$fichinter->id;
+  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/card.php?id='.$fichinter->id;
   $head[$h][1] = $langs->trans("Card");
   $head[$h][2] = 'card';
   $h++;

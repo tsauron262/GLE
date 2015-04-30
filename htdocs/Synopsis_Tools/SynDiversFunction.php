@@ -46,7 +46,7 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
         $out.='<td colspan="5" align="right">';
         $permok = $user->rights->agenda->myactions->create;
         if (($object->id || $objcon->id) && $permok) {
-            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/fiche.php?action=create';
+            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/card.php?action=create';
             if (get_class($object) == 'Societe')
                 $out.='&amp;socid=' . $object->id;
             $out.=(!empty($objcon->id) ? '&amp;contactid=' . $objcon->id : '') . '&amp;backtopage=1&amp;percentage=-1">';
@@ -618,10 +618,10 @@ function getTypeAndId($url = null, $request = null) {
     if (stripos($url, "compta/facture") != false) {
         $element_type = 'facture';
         @$element_id = $request['facid'];
-    } elseif (stripos($url, "societe/soc.php") || stripos($url, "comm/fiche.php?socid=") || stripos($url, "comm/prospect/fiche.php?socid=")) {
+    } elseif (stripos($url, "societe/soc.php") || stripos($url, "comm/card.php?socid=") || stripos($url, "comm/prospect/fiche.php?socid=")) {
         $element_type = 'societe';
         @$element_id = $request['socid'];
-    } elseif (stripos($url, "product/fiche.php") != false) {
+    } elseif (stripos($url, "product/card.php") != false) {
         $element_type = 'product';
         @$element_id = $request['id'];
     } elseif (stripos($url, "projet/tasks/task.php") != false) {
@@ -645,7 +645,7 @@ function getTypeAndId($url = null, $request = null) {
     } elseif (stripos($url, "contrat/") != false) {
         $element_type = 'contrat';
         @$element_id = $request['id'];
-    } elseif (stripos($url, "user/fiche.php") != false) {
+    } elseif (stripos($url, "user/card.php") != false) {
         $element_type = 'user';
         @$element_id = $request['id'];
     } elseif (stripos($url, "comm/propal.php") != false) {

@@ -172,7 +172,7 @@ function init(jsonUrl){
 
                     var path = location.pathname;
                         path = path.replace(/liste.php$/gi,"");
-                    location.href=path+"/fiche.php?id="+prodid;
+                    location.href=path+"/card.php?id="+prodid;
                 };
                 label.onmouseover = function(){
                     //send to ajax => get info on product, display on extra div ??

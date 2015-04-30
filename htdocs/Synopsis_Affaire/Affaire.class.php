@@ -212,7 +212,7 @@ class Affaire extends CommonObject {
         global $langs;
 
         $result='';
-        $lien = '<a href="'.DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$this->id. $get_params .'">';
+        $lien = '<a href="'.DOL_URL_ROOT.'/Synopsis_Affaire/card.php?id='.$this->id. $get_params .'">';
         $lienfin='</a>';
 
         $picto='affaire';

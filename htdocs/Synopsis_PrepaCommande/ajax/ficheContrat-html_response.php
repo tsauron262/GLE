@@ -191,7 +191,7 @@ var nbResult = 0;
 function boucleAttendreResult(nbResultT){
     if(nbResult == nbResultT){
         if(ok == true)
-           location.href=DOL_URL_ROOT+"/contrat/fiche.php?id="+jQuery('#fk_contratT').find(':selected').val();
+           location.href=DOL_URL_ROOT+"/contrat/card.php?id="+jQuery('#fk_contratT').find(':selected').val();
         else
            alert("Il y a eu une erreur");
     }
@@ -218,7 +218,7 @@ for(i=0;i < tabLigne.length;i++){
            success:function(msg){
             id = $(msg).find("ajax-response").text();
             if(id > 0)
-                location.href=DOL_URL_ROOT+"/contrat/fiche.php?id="+id;
+                location.href=DOL_URL_ROOT+"/contrat/card.php?id="+id;
            },
            error:function(msg){
            nbResult++;
@@ -266,7 +266,7 @@ function createContrat2(pId,ligneId)
         cache:false,
         success:function(msg){
             if(jQuery(msg).find('OK').length > 0)
-                location.href=DOL_URL_ROOT+"/contrat/fiche.php?id="+idContrat;
+                location.href=DOL_URL_ROOT+"/contrat/card.php?id="+idContrat;
         }
     });
     //TODO passer en paramètre le numéro de ligne pour l'enregistrer dans la liaison contratdet<->commandedet
@@ -274,7 +274,7 @@ function createContrat2(pId,ligneId)
 
 function createContrat(pId)
 {
-    location.href=DOL_URL_ROOT+"/contrat/fiche.php?action=create&socid="+socId+"&comId="+comId+"&originLine="+pId+"&returnPrepacom=1&typeContrat=7";
+    location.href=DOL_URL_ROOT+"/contrat/card.php?action=create&socid="+socId+"&comId="+comId+"&originLine="+pId+"&returnPrepacom=1&typeContrat=7";
 }
 </script>
 EOF;

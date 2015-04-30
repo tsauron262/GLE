@@ -1190,9 +1190,9 @@ class Synopsisdemandeinterv extends CommonObject {
         $result = '';
         $urlOption = '';
 
-        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisdemandeinterv/fiche.php?id=' . $this->id . '">';
+        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisdemandeinterv/card.php?id=' . $this->id . '">';
         if ($option == 6)
-            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisdemandeinterv/fiche.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisdemandeinterv/card.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
         $picto = 'synopsisdemandeinterv@synopsisdemandeinterv';

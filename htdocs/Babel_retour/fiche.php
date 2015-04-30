@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : fiche.php
+  * Name : card.php
   * GLE-1.2
   */
 //Fiche litige
@@ -320,7 +320,7 @@ if ($retourId>0)
                             }
                         });
                         //Send datas
-                        location.href = "fiche.php?id="+retourId+"&action=validateProdList"+data+"&typeRef="+typeRef;
+                        location.href = "card.php?id="+retourId+"&action=validateProdList"+data+"&typeRef="+typeRef;
                     }
                 </script>
 
@@ -549,7 +549,7 @@ EOF;
             require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
             $html = new Form($db);
             $ref = "";
-            print "<form action='fiche.php?id=".$retourId."&action=update' method='POST'>";
+            print "<form action='card.php?id=".$retourId."&action=update' method='POST'>";
             print "<table cellpadding='15' width='80%'><tbody>";
             print "       <tr><th class='ui-widget-header ui-state-default'>Client : </th>";
             print "<td class='ui-widget-content' colspan=2>".$html->select_company($retour->fk_soc,'societe_id','',1,false,"reinit();")."</td>";

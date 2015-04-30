@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : minifiche.php
+  * Name : minicard.php
   * GLE-1.2
   */
 

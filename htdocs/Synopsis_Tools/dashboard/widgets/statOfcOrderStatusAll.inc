@@ -81,7 +81,7 @@ function widget_statOfcOrderStatusAll() {
                 $objp = $db->fetch_object($result);
                 $var = !$var;
                 $table2 .= "<tr $bc[$var]>";
-                $table2 .= '<td><a href="' . DOL_URL_ROOT . '/commande/fiche.php?id=' . $objp->rowid . '">';
+                $table2 .= '<td><a href="' . DOL_URL_ROOT . '/commande/card.php?id=' . $objp->rowid . '">';
                 $table2 .= img_object($langs->trans("Order"), "order");
                 $table2 .= " ";
                 $table2 .= $objp->ref . '</a></td>';

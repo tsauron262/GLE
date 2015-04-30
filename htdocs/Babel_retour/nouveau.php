@@ -105,7 +105,7 @@ jQuery(document).ready(function(){
                     jQuery('#mainTable').parent().append(html);
                     jQuery('.addedElement').selectmenu({style: 'dropdown', maxHeight: 300 });
                     jQuery('.addedElement').change(function(){
-                        location.href='fiche.php?action=create&fk_soc='+socid+"&element_id="+jQuery(this).find(':selected').val()+"&element_type="+jQuery(this).attr('id');
+                        location.href='card.php?action=create&fk_soc='+socid+"&element_id="+jQuery(this).find(':selected').val()+"&element_type="+jQuery(this).attr('id');
                     });
                 },
             })
@@ -188,7 +188,7 @@ jQuery(document).ready(function(){
                     jQuery('#mainTable').parent().append(html);
                     jQuery('.addedElement').selectmenu({style: 'dropdown', maxHeight: 300 });
                     jQuery('.addedElement').change(function(){
-                        location.href='fiche.php?action=create&fk_soc='+socid+"&element_id="+jQuery(this).find(':selected').val()+"&element_type="+jQuery(this).attr('id');
+                        location.href='card.php?action=create&fk_soc='+socid+"&element_id="+jQuery(this).find(':selected').val()+"&element_type="+jQuery(this).attr('id');
                     });
                 },
             })
@@ -379,7 +379,7 @@ jQuery(document).ready(function(){
                         var type = jQuery(this).find('type').text();
                         var dbtype = jQuery(this).find('dbtype').text();
                         html += "<tr><td "+classN+">"+soc+"</td><td "+classN+">"+type+"</td><td "+classN+">"+url+"</td><td "+classN+">\
-                                        <button onClick='location.href=\"fiche.php?action=create&fk_soc="+socid+"&element_id="+ eid +"&element_type="+dbtype+"\"' class='ui-widget-header ui-state-default ui-corner-all butAction'>S&eacute;l&eacute;cionner</button></td>";
+                                        <button onClick='location.href=\"card.php?action=create&fk_soc="+socid+"&element_id="+ eid +"&element_type="+dbtype+"\"' class='ui-widget-header ui-state-default ui-corner-all butAction'>S&eacute;l&eacute;cionner</button></td>";
                     });
                     html += "</table>";
                     jQuery('#mainTable').parent().append(html);

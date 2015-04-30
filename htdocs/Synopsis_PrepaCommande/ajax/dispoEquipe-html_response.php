@@ -70,10 +70,10 @@ print <<<EOF
 var eventsMenu = {
     bindings: {
         'editer': function(t) {
-            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?action=create&socid='+socId;
+            location.href=DOL_URL_ROOT+'/fichinter/card.php?action=create&socid='+socId;
         },
         'reserver': function(t) {
-            location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/fiche.php?action=create&socid='+socId;
+            location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/card.php?action=create&socid='+socId;
         }
     }
 };

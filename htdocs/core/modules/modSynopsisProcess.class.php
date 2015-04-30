@@ -838,7 +838,7 @@ class modSynopsisProcess extends DolibarrModules {
 (15, \'SELECT concat(ref,\'\' - \'\',title) as texte FROM llx_projet ORDER BY ref desc\', \'\', \'a:1:{i:0;s:0:"";}\', 1000, \'req_projet\', \'liste des projets\', \'N;\', \'texte\', \'\', NULL, NULL, NULL, \'texte\', \'texte\', \'N;\'),
 (1000, \'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid ORDER BY s.nom\', \'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid AND [[indexField]] ORDER BY s.nom\', \'a:1:{i:0;s:0:"";}\', 10000, \'requete Contrat/Soc\', \'contrat + soc\', \'a:1:{i:0;s:3:"ref";}\', \'rowid\', \'c\', NULL, NULL, NULL, \'fk_soc\', \'nom\', \'a:1:{s:3:"ref";s:0:"";}\'),
 (1001, \'SELECT rowid, nom FROM llx_societe\', \'\', \'a:1:{i:0;s:0:"";}\', 10000, \'Sociétés\', \'Liste des sociétés\', \'a:1:{i:0;s:3:"nom";}\', \'rowid\', \'\', NULL, NULL, NULL, \'\', \'\', \'a:1:{s:3:"nom";s:0:"";}\'),
-(1002, \'Select rowid, ref, Label FROM llx_product WHERE fk_product_type=0\', \'\', \'a:1:{i:0;s:0:"";}\', 100, \'Produits\', \'Liste des produits\', \'a:3:{i:0;s:5:"rowid";i:1;s:3:"ref";i:2;s:5:"Label";}\', \'rowid\', \'\', NULL, NULL, NULL, \'\', \'\', \'a:3:{s:5:"rowid";s:32:"lien(product/fiche.php?id=[VAL])";s:3:"ref";s:0:"";s:5:"Label";s:13:"finLien([VAL]";}\');
+(1002, \'Select rowid, ref, Label FROM llx_product WHERE fk_product_type=0\', \'\', \'a:1:{i:0;s:0:"";}\', 100, \'Produits\', \'Liste des produits\', \'a:3:{i:0;s:5:"rowid";i:1;s:3:"ref";i:2;s:5:"Label";}\', \'rowid\', \'\', NULL, NULL, NULL, \'\', \'\', \'a:3:{s:5:"rowid";s:32:"lien(product/card.php?id=[VAL])";s:3:"ref";s:0:"";s:5:"Label";s:13:"finLien([VAL]";}\');
 ',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_src` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1621,25 +1621,25 @@ class modSynopsisProcess extends DolibarrModules {
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element` (`id`, `label`, `type`, `rang`, `ficheUrl`, `_GET_id`, `classFile`) VALUES
 (1, \'Propale\', \'Propal\', 1, \'/comm/propal.php\', \'propalid\', \'/comm/propal/class/propal.class.php\'),
-(2, \'Commande\', \'Commande\', 2, \'/commande/fiche.php\', \'id\', \'/commande/class/commande.class.php\'),
+(2, \'Commande\', \'Commande\', 2, \'/commande/card.php\', \'id\', \'/commande/class/commande.class.php\'),
 (3, \'Facture\', \'Facture\', 3, \'/compta/facture.php\', \'facid\', \'/compta/facture/class/facture.class.php\'),
-(4, \'Exp&eacute;dition\', \'Expedition\', 4, \'/expedition/fiche.php\', \'id\', \'/expedition/class/expedition.class.php\'),
-(5, \'Action co.\', \'ActionComm\', 5, \'/comm/action/fiche.php\', \'id\', \'/actioncomm.class.php\'),
-(6, \'Affaire\', \'Affaire\', 6, \'/Synopsis_Affaire/fiche.php\', \'id\', \'/Synopsis_Affaire/Affaire.class.php\'),
-(7, \'Facture fournisseur\', \'FactureFournisseur\', 7, \'/fourn/facture/fiche.php\', \'facid\', \'/fourn/class/fournisseur.facture.class.php\'),
-(8, \'Commande fournisseur\', \'CommandeFournisseur\', 8, \'/fourn/commande/fiche.php\', \'id\', \'/fourn/class/fournisseur.commande.class.php\'),
-(9, \'Contrat\', \'Contrat\', 9, \'/contrat/fiche.php\', \'id\', \'/contrat/class/contrat.class.php\'),
+(4, \'Exp&eacute;dition\', \'Expedition\', 4, \'/expedition/card.php\', \'id\', \'/expedition/class/expedition.class.php\'),
+(5, \'Action co.\', \'ActionComm\', 5, \'/comm/action/card.php\', \'id\', \'/actioncomm.class.php\'),
+(6, \'Affaire\', \'Affaire\', 6, \'/Synopsis_Affaire/card.php\', \'id\', \'/Synopsis_Affaire/Affaire.class.php\'),
+(7, \'Facture fournisseur\', \'FactureFournisseur\', 7, \'/fourn/facture/card.php\', \'facid\', \'/fourn/class/fournisseur.facture.class.php\'),
+(8, \'Commande fournisseur\', \'CommandeFournisseur\', 8, \'/fourn/commande/card.php\', \'id\', \'/fourn/class/fournisseur.commande.class.php\'),
+(9, \'Contrat\', \'Contrat\', 9, \'/contrat/card.php\', \'id\', \'/contrat/class/contrat.class.php\'),
 (10, \'Campagne\', \'Campagne\', 10, \'/BabelProspect/affichePropection.php\', \'action=list&campagneId=\', \'/BabelProspect/Campagne.class.php\'),
-(11, \'Chrono\', \'Chrono\', 11, \'/synopsischrono/fiche.php\', \'id\', \'/synopsischrono/Chrono.class.php\'),
+(11, \'Chrono\', \'Chrono\', 11, \'/synopsischrono/card.php\', \'id\', \'/synopsischrono/Chrono.class.php\'),
 (12, \'Tiers\', \'Societe\', 12, \'/soc.php\', \'socid\', \'/societe.class.php\'),
-(13, \'Contact\', \'Contact\', 13, \'/contact/fiche.php\', \'id\', \'/contact.class.php\'),
-(14, \'Demande intervention\', \'synopsisdemandeinterv\', 14, \'/synopsisdemandeinterv/fiche.php\', \'id\', \'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php\'),
-(15, \'Fiche intervention\', \'Fichinter\', 15, \'/fichinter/fiche.php\', \'id\', \'/fichinter/class/fichinter.class.php\'),
-(16, \'Livraison\', \'Livraison\', 16, \'/livraison/fiche.php\', \'id\', \'/livraison/class/livraison.class.php\'),
-(17, \'Paiement\', \'Paiement\', 17, \'/compta/paiement/fiche.php\', \'id\', \'/paiement.class.php\'),
-(18, \'Paiement fournisseur\', \'PaiementFourn\', 18, \'/fourn/paiement/fiche.php\', \'id\', \'/fourn/facture/paiementfourn.class.php\'),
-(19, \'Product\', \'Product\', 19, \'/product/fiche.php\', \'id\', \'/product/class/product.class.php\'),
-(20, \'Projet\', \'Project\', 20, \'/projet/fiche.php\', \'id\', \'/projet/class/project.class.php\');',
+(13, \'Contact\', \'Contact\', 13, \'/contact/card.php\', \'id\', \'/contact.class.php\'),
+(14, \'Demande intervention\', \'synopsisdemandeinterv\', 14, \'/synopsisdemandeinterv/card.php\', \'id\', \'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php\'),
+(15, \'Fiche intervention\', \'Fichinter\', 15, \'/fichinter/card.php\', \'id\', \'/fichinter/class/fichinter.class.php\'),
+(16, \'Livraison\', \'Livraison\', 16, \'/livraison/card.php\', \'id\', \'/livraison/class/livraison.class.php\'),
+(17, \'Paiement\', \'Paiement\', 17, \'/compta/paiement/card.php\', \'id\', \'/paiement.class.php\'),
+(18, \'Paiement fournisseur\', \'PaiementFourn\', 18, \'/fourn/paiement/card.php\', \'id\', \'/fourn/facture/paiementfourn.class.php\'),
+(19, \'Product\', \'Product\', 19, \'/product/card.php\', \'id\', \'/product/class/product.class.php\'),
+(20, \'Projet\', \'Project\', 20, \'/projet/card.php\', \'id\', \'/projet/class/project.class.php\');',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element_trigger` (
   `element_refid` int(11) DEFAULT NULL,
   `trigger_refid` int(11) DEFAULT NULL,
@@ -1788,11 +1788,11 @@ class modSynopsisProcess extends DolibarrModules {
   PRIMARY KEY (`rowid`));",
             "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`, `hasMultiValue`) VALUES
 (1, 'ContratLigne (N)', '', '".MAIN_DB_PREFIX."contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `".MAIN_DB_PREFIX."contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id=', 1),
-(2, 'Appel', '', '".MAIN_DB_PREFIX."synopsischrono', 'appel', 'model_refid = 100', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 1),
-(3, 'ProduitCli', '', '".MAIN_DB_PREFIX."synopsischrono', 'productCli', 'model_refid = 101', 0, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 1),
-(4, 'Licence', '', '".MAIN_DB_PREFIX."synopsischrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'synopsischrono/fiche.php?id=', 1),
-(5, 'Compte Utilisateur', '', '".MAIN_DB_PREFIX."synopsischrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 1),
-(6, 'Site', '', '".MAIN_DB_PREFIX."synopsischrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 0);");
+(2, 'Appel', '', '".MAIN_DB_PREFIX."synopsischrono', 'appel', 'model_refid = 100', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/card.php?id=', 1),
+(3, 'ProduitCli', '', '".MAIN_DB_PREFIX."synopsischrono', 'productCli', 'model_refid = 101', 0, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/card.php?id=', 1),
+(4, 'Licence', '', '".MAIN_DB_PREFIX."synopsischrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'synopsischrono/card.php?id=', 1),
+(5, 'Compte Utilisateur', '', '".MAIN_DB_PREFIX."synopsischrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/card.php?id=', 1),
+(6, 'Site', '', '".MAIN_DB_PREFIX."synopsischrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/card.php?id=', 0);");
         $retour = $this->_init($sql);
 
         include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");

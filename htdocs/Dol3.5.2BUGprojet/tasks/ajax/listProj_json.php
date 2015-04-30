@@ -233,8 +233,8 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     $proj->fetch($row['id']);
     $overallprogress = '<div class="progressbar ui-corner-all">'.round($row['avanc']).'</div>';
     $responce->rows[$i]['cell']=array($row['id'],
-                                      "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row['id']."'>".$row['nom']."</a>",
-                                      "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row['id']."'>".$row['ref']."</a>",
+                                      "<a href='".DOL_URL_ROOT."/projet/card.php?id=".$row['id']."'>".$row['nom']."</a>",
+                                      "<a href='".DOL_URL_ROOT."/projet/card.php?id=".$row['id']."'>".$row['ref']."</a>",
                                       $row['dateo'],
                                       $proj->getLibStatut(4),
                                       $overallprogress,

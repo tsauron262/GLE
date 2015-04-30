@@ -346,12 +346,12 @@ if ($id > 0)
                 print '<td>';
                 if ($tab[$i]['source']=='internal')
                 {
-                    print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$tab[$i]['id'].'">';
+                    print '<a href="'.DOL_URL_ROOT.'/user/card.php?id='.$tab[$i]['id'].'">';
                     print img_object($langs->trans("ShowUser"),"user").' '.$tab[$i]['nom'].'</a>';
                 }
                 if ($tab[$i]['source']=='external')
                 {
-                    print '<a href="'.DOL_URL_ROOT.'/contact/fiche.php?id='.$tab[$i]['id'].'">';
+                    print '<a href="'.DOL_URL_ROOT.'/contact/card.php?id='.$tab[$i]['id'].'">';
                     print img_object($langs->trans("ShowContact"),"contact").' '.$tab[$i]['nom'].'</a>';
                 }
                 print '</td>';

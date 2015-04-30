@@ -165,7 +165,7 @@ print <<<EOF
 <script>
 jQuery(document).ready(function(){
     jQuery('#addDI').click(function(){
-        location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&socid="+socId+"&fk_commande="+comId;
+        location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/card.php?action=create&socid="+socId+"&fk_commande="+comId;
     });
 
 });
@@ -676,7 +676,7 @@ jQuery(document).ready(function(){
 
 //
 //function createDI(pId){
-//    location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&comLigneId="+pId;
+//    location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/card.php?action=create&comLigneId="+pId;
 //}
 function reinitAutoPrice()
 {

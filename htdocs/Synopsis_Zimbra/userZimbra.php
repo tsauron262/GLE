@@ -23,7 +23,7 @@
  */
 
 /**
- *       \file       htdocs/user/fiche.php
+ *       \file       htdocs/user/card.php
  *       \brief      Tab of user card
  */
 require("../main.inc.php");

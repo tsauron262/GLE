@@ -39,8 +39,8 @@ function widget_listSAVAttenteTraitement() {
             $soc = new Societe($db);
             $soc->fetch($res->societe_refid);
             $socname = $soc->getNomUrl(4);
-            $table .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/fiche.php?id=' . $res->id . '">' . $socname . '</a>';
-            $table .= '   </td><td style="overflow: hidden; white-space: nowrap;"><a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/fiche.php?id=' . $res->id . '">';
+            $table .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/card.php?id=' . $res->id . '">' . $socname . '</a>';
+            $table .= '   </td><td style="overflow: hidden; white-space: nowrap;"><a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/card.php?id=' . $res->id . '">';
             $table .= '        ' . img_object("SAV", 'sav');
             $table .= '            ' . $res->descriptif_produit;
             $table .= '            </a>';
@@ -70,8 +70,8 @@ function widget_listSAVAttenteTraitement() {
             $soc = new Societe($db);
             $soc->fetch($res->societe_refid);
             $socname = $soc->getNomUrl(4);
-            $table2 .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/fiche.php?id=' . $res->id . '">' . $socname . '</a>';
-            $table2 .= '   </td><td style="overflow: hidden; white-space: nowrap;"><a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/fiche.php?id=' . $res->id . '">';
+            $table2 .= '       <a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/card.php?id=' . $res->id . '">' . $socname . '</a>';
+            $table2 .= '   </td><td style="overflow: hidden; white-space: nowrap;"><a href="' . DOL_URL_ROOT . '/Babel_GMAO/SAV/card.php?id=' . $res->id . '">';
             $table2 .= '        ' . img_object("SAV", 'sav');
             $table2 .= '            ' . $res->descriptif_produit;
             $table2 .= '            </a>';

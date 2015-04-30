@@ -70,7 +70,7 @@ WHERE
     {
         while($res=$db->fetch_object($resql))
         {
-           $url = $dolibarr_main_url_root."/expedition/fiche.php?id=".$res->rowid;
+           $url = $dolibarr_main_url_root."/expedition/card.php?id=".$res->rowid;
             if ($res->date_creation && $showExpeditionCreate)
             {
                $arrRes = $BCalc->pushDateArr(

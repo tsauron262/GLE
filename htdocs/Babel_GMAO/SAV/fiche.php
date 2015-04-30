@@ -351,20 +351,20 @@ $form =new Form($db);
     switch ($objsav->statut)
     {
         case "0":
-            print '<a href="fiche.php?id='.$id.'&amp;action=prisecharge" class="butAction">Prendre en charge</a>';
+            print '<a href="card.php?id='.$id.'&amp;action=prisecharge" class="butAction">Prendre en charge</a>';
         break;
         case "10":
-            print '<a href="fiche.php?id='.$id.'&amp;action=externalise" class="butAction">Externaliser</a>';
-            print '<a href="fiche.php?id='.$id.'&amp;action=repare" class="butAction">R&eacute;par&eacute;</a>';
+            print '<a href="card.php?id='.$id.'&amp;action=externalise" class="butAction">Externaliser</a>';
+            print '<a href="card.php?id='.$id.'&amp;action=repare" class="butAction">R&eacute;par&eacute;</a>';
         break;
         case "20":
-            print '<a href="fiche.php?id='.$id.'&amp;action=reparer" class="butAction">Classer r&eacute;par&eacute;</a>';
+            print '<a href="card.php?id='.$id.'&amp;action=reparer" class="butAction">Classer r&eacute;par&eacute;</a>';
         break;
         case "50":
-            print '<a href="fiche.php?id='.$id.'&amp;action=miseadispo" class="butAction">Mise &agrave; disposition client</a>';
+            print '<a href="card.php?id='.$id.'&amp;action=miseadispo" class="butAction">Mise &agrave; disposition client</a>';
         break;
         case "80":
-            print '<a href="fiche.php?id='.$id.'&amp;action=termine" class="butAction">Termin&eacute;</a>';
+            print '<a href="card.php?id='.$id.'&amp;action=termine" class="butAction">Termin&eacute;</a>';
         break;
     }
     print '</div>';
@@ -400,7 +400,7 @@ $form =new Form($db);
                         {
                             if (jQuery(msg).find('OK').length>0)
                             {
-                                location.href='fiche.php?id='+SAVid;
+                                location.href='card.php?id='+SAVid;
                             }
                         }
                     });

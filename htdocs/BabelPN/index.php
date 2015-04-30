@@ -89,7 +89,7 @@ llxHeader('',$langs->trans('Fiche PN'),'Fiche PN');
                     print '<a name="'.$objp->rowid.'"></a>'; // ancre pour retourner sur la ligne;
 
                     // Affiche ligne produit
-                    $text = '<a href="'.DOL_URL_ROOT.'/product/fiche.php?id='.$objp->fk_product.'">';
+                    $text = '<a href="'.DOL_URL_ROOT.'/product/card.php?id='.$objp->fk_product.'">';
                     if ($objp->fk_product_type==1) $text.= img_object($langs->trans('ShowService'),'service');
                     else $text.= img_object($langs->trans('ShowProduct'),'product');
                     $text.= ' '.$objp->ref.'</a>';
@@ -241,7 +241,7 @@ llxHeader('',$langs->trans('Fiche PN'),'Fiche PN');
                 print '<a name="'.$objp->rowid.'"></a>'; // ancre pour retourner sur la ligne
                 if ($objp->fk_product > 0)
                 {
-                    print '<a href="'.DOL_URL_ROOT.'/product/fiche.php?id='.$objp->fk_product.'">';
+                    print '<a href="'.DOL_URL_ROOT.'/product/card.php?id='.$objp->fk_product.'">';
                     if ($objp->fk_product_type==1) print img_object($langs->trans('ShowService'),'service');
                     else print img_object($langs->trans('ShowProduct'),'product');
                     print ' '.$objp->ref.'</a>';

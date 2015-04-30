@@ -121,7 +121,7 @@ class box_deplacement extends ModeleBoxes {
                         $this->info_box_contents[$i][1] = array('align' => 'left',
                         'text' => $tuser->getNomUrl(1),
                         'maxlength'=>30,
-                        'url' => DOL_URL_ROOT."/users/fiche.php?socid=".$deplacementtatic->fk_user_author);
+                        'url' => DOL_URL_ROOT."/users/card.php?socid=".$deplacementtatic->fk_user_author);
 
                         $this->info_box_contents[$i][0] = array('align' => 'center', 'vertical-align' => 'center',
                         'text' => date('m/Y',$deplacementtatic->tsperiode),

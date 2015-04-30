@@ -30,7 +30,7 @@ class Boucle /* extends Thread */ {
             if($note != '' && $note2 != '')
                 $note1 .= "<br/>";
             $return .= "<msgAction>" .$note1.$note2. "</msgAction>";
-//            $return .= "<msgAction><a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $result->id . "'>" . $result->label . "</a><br/>" . $result->note . "</msgAction>";
+//            $return .= "<msgAction><a href='" . DOL_URL_ROOT . "/comm/action/card.php?id=" . $result->id . "'>" . $result->label . "</a><br/>" . $result->note . "</msgAction>";
             $changement = true;
         } /*elseif ($db->num_rows($sql2) > 0) {
             $result = $db->fetch_object($sql2);

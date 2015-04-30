@@ -8,10 +8,10 @@
 
 
 /**
- *       \file       htdocs/contrat/fiche.php
+ *       \file       htdocs/contrat/card.php
  *       \ingroup    contrat
  *       \brief      Fiche contrat
- *       \version    $Id: fiche.php,v 1.132 2008/08/07 20:46:15 eldy Exp $
+ *       \version    $Id: card.php,v 1.132 2008/08/07 20:46:15 eldy Exp $
  */
 require_once("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php');
@@ -54,7 +54,7 @@ if ($_REQUEST['action'] == "doChangeDateContrat") {
         $sql = $db->query($requete);
     }
     if ($result > 0) {
-        header("Location: fiche.php?id=" . $_REQUEST['id']);
+        header("Location: card.php?id=" . $_REQUEST['id']);
         exit;
     } else {
         $mesg = $contrat->error;
@@ -76,7 +76,7 @@ if ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc') {
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
         contrat_pdf_create($db, $contrat->id, $_REQUEST['model']);
     }
-    header('location: fiche.php?id=' . $contrat->id . "#documentAnchor");
+    header('location: card.php?id=' . $contrat->id . "#documentAnchor");
 }
 
 if ($_REQUEST['action'] == "chgSrvAction") {
@@ -94,7 +94,7 @@ if ($_POST["action"] == 'confirm_active' && $_POST["confirm"] == 'yes' && $user-
     $result = $contrat->active_line($user, $_REQUEST["ligne"], $_REQUEST["date"], $_REQUEST["dateend"]);
 
     if ($result > 0) {
-        Header("Location: fiche.php?id=" . $contrat->id);
+        Header("Location: card.php?id=" . $contrat->id);
         exit;
     } else {
         $mesg = $contrat->error;
@@ -107,7 +107,7 @@ if ($_POST["action"] == 'confirm_closeline' && $_POST["confirm"] == 'yes' && $us
     $result = $contrat->close_line($user, $_REQUEST["ligne"], $_REQUEST["dateend"]);
 
     if ($result > 0) {
-        Header("Location: fiche.php?id=" . $contrat->id);
+        Header("Location: card.php?id=" . $contrat->id);
         exit;
     } else {
         $mesg = $contrat->error;
@@ -186,7 +186,7 @@ if ($_REQUEST['typeContrat'] == 'LocationFinanciere' && $_REQUEST["action"] == '
     $contrat->typeContrat = 6;
     $result = $contrat->create($user, $langs, $conf);
     if ($result > 0) {
-        Header("Location: fiche.php?id=" . $contrat->id);
+        Header("Location: card.php?id=" . $contrat->id);
         exit;
     } else {
         $mesg = '<div class="error ui-state-error">' . $contrat->error . '</div>';
@@ -258,7 +258,7 @@ if ($_REQUEST['typeContrat'] == 'LocationFinanciere' && $_REQUEST["action"] == '
         if ($_REQUEST['returnPrepacom'] > 0) {
             header("Location: " . DOL_URL_ROOT . "/Synopsis_PrepaCommande/prepacommande.php?id=" . $_REQUEST['returnPrepacom']);
         } else {
-            header("Location: fiche.php?id=" . $contrat->id);
+            header("Location: card.php?id=" . $contrat->id);
         }
         exit;
     } else {
@@ -499,7 +499,7 @@ if ($_REQUEST["action"] == 'deleteline' && $user->rights->contrat->creer) {
     $result = $contrat->delete_line($_REQUEST["lineid"]);
 
     if ($result >= 0) {
-        Header("Location: fiche.php?id=" . $contrat->id);
+        Header("Location: card.php?id=" . $contrat->id);
         exit;
     } else {
         $mesg = $contrat->error;
@@ -654,7 +654,7 @@ if ($_REQUEST["action"] == 'create') {
             $soc = new Societe($db);
             $soc->fetch($obj->rowid);
 
-            print '<form name="contrat" id="contrat" action="fiche.php" method="post">';
+            print '<form name="contrat" id="contrat" action="card.php" method="post">';
 
             print '<input type="hidden" name="action" value="add">';
             print '<input type="hidden" name="socid" value="' . $soc->id . '">' . "\n";
@@ -1103,7 +1103,7 @@ EOF;
          * Confirmation de la suppression du contrat
          */
         if ($_REQUEST["action"] == 'delete') {
-            $form->form_confirm("fiche.php?id=$id", $langs->trans("DeleteAContract"), $langs->trans("ConfirmDeleteAContract"), "confirm_delete");
+            $form->form_confirm("card.php?id=$id", $langs->trans("DeleteAContract"), $langs->trans("ConfirmDeleteAContract"), "confirm_delete");
             print '<br>';
         }
 
@@ -1112,12 +1112,12 @@ EOF;
          */
         if ($_REQUEST["action"] == 'valid') {
             //$numfa = contrat_get_num($soc);
-            $form->form_confirm("fiche.php?id=$id", $langs->trans("ValidateAContract"), $langs->trans("ConfirmValidateContract"), "confirm_valid");
+            $form->form_confirm("card.php?id=$id", $langs->trans("ValidateAContract"), $langs->trans("ConfirmValidateContract"), "confirm_valid");
             print '<br>';
         }
         if ($_REQUEST["action"] == 'devalid') {
             //$numfa = contrat_get_num($soc);
-            $form->form_confirm("fiche.php?id=$id", $langs->trans("D&eacute;-valider le contrat"), $langs->trans("Voulez vous vraiment d&eacute;-valider le contrat ?"), "confirm_devalid");
+            $form->form_confirm("card.php?id=$id", $langs->trans("D&eacute;-valider le contrat"), $langs->trans("Voulez vous vraiment d&eacute;-valider le contrat ?"), "confirm_devalid");
             print '<br>';
         }
 
@@ -1125,7 +1125,7 @@ EOF;
          * Confirmation de la fermeture
          */
         if ($_REQUEST["action"] == 'close') {
-            $form->form_confirm("fiche.php?id=$id", $langs->trans("CloseAContract"), $langs->trans("ConfirmCloseContract"), "confirm_close");
+            $form->form_confirm("card.php?id=$id", $langs->trans("CloseAContract"), $langs->trans("ConfirmCloseContract"), "confirm_close");
             print '<br>';
         }
 
@@ -1133,7 +1133,7 @@ EOF;
          *   Contrat
          */
         if ($contrat->brouillon && $user->rights->contrat->creer) {
-            print '<form action="fiche.php?id=' . $id . '" method="post">';
+            print '<form action="card.php?id=' . $id . '" method="post">';
             print '<input type="hidden" name="action" value="setremise">';
         }
 
@@ -1169,9 +1169,9 @@ EOF;
         // Date
         if (($contrat->statut == 0 || ($contrat->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED)) && $user->rights->contrat->creer) {
 
-            print '<tr><th class="ui-widget-header ui-state-default"><a href="fiche.php?action=changeDateContrat&id=' . $contrat->id . '">' . img_edit($langs->trans("Date"), 1) . '</a> ' . $langs->trans("Date") . '</th>';
+            print '<tr><th class="ui-widget-header ui-state-default"><a href="card.php?action=changeDateContrat&id=' . $contrat->id . '">' . img_edit($langs->trans("Date"), 1) . '</a> ' . $langs->trans("Date") . '</th>';
             if ($_REQUEST['action'] == 'changeDateContrat') {
-                print '    <td colspan="3" class="ui-widget-content"><form method="post" action="fiche.php?action=doChangeDateContrat&id=' . $contrat->id . '"><input class="datepicker" value="' . dol_print_date($contrat->date_contrat, "day") . '" name="dateContrat"><button class="ui-button">Modifier</button></form></td></tr>';
+                print '    <td colspan="3" class="ui-widget-content"><form method="post" action="card.php?action=doChangeDateContrat&id=' . $contrat->id . '"><input class="datepicker" value="' . dol_print_date($contrat->date_contrat, "day") . '" name="dateContrat"><button class="ui-button">Modifier</button></form></td></tr>';
             } else
                 print '    <td colspan="3" class="ui-widget-content">' . dol_print_date($contrat->date_contrat, "day") . "</td></tr>\n";
         } else {
@@ -1188,9 +1188,9 @@ EOF;
                 print '<span style="float:right;"><a href="' . $_SERVER["PHP_SELF"] . '?action=classer&amp;id=' . $id . '">' . img_edit($langs->trans("SetProject")) . '</a></span>';
             print '</th><td colspan="3" class="ui-widget-content">';
             if ($_REQUEST["action"] == "classer") {
-                $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "projetid");
+                $form->form_project("card.php?id=$id", $contrat->socid, $contrat->fk_projet, "projetid");
             } else {
-                $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "none");
+                $form->form_project("card.php?id=$id", $contrat->socid, $contrat->fk_projet, "none");
             }
             print "</td></tr>";
         }
@@ -1423,7 +1423,7 @@ EOF;
 
         $groups = $user->listGroupIn();
         if ($contrat->statut != 0 && ($user->admin || isset($groups[11]))) {
-            print '<div class="tabsAction"><a class="butAction" href="fiche.php?id=' . $contrat->id . '&amp;action=devalid">' . $langs->trans("D&eacute;-Valider") . '</a></div>';
+            print '<div class="tabsAction"><a class="butAction" href="card.php?id=' . $contrat->id . '&amp;action=devalid">' . $langs->trans("D&eacute;-Valider") . '</a></div>';
         }
     }
 }

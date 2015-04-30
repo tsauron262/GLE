@@ -39,7 +39,7 @@ function widget_statRemiseCheque() {
           $table .= "<tr ".$bc[$var].">";
           $table .= '<td>'.$langs->trans("BankChecksToReceipt").'</td>';
           $table .= '<td align="right">';
-          $table .= '<a href="'.DOL_URL_ROOT.'/compta/paiement/cheque/fiche.php?leftmenu=customers_bills_checks&action=new">'.$num.'</a>';
+          $table .= '<a href="'.DOL_URL_ROOT.'/compta/paiement/cheque/card.php?leftmenu=customers_bills_checks&action=new">'.$num.'</a>';
           $table .= '</td></tr>';
           $table .= "</table>\n";
         }

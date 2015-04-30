@@ -36,7 +36,7 @@ if(!defined('EURO'))
 class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
-
+    var $object;
 
     /**
     \brief      Constructeur
@@ -44,7 +44,10 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
     */
     function __construct($db)
     {
+        
+        
 
+        
         global $conf,$langs,$mysoc;
 
         $langs->load("main");
@@ -64,7 +67,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
         $this->marge_haute=40;
         $this->marge_basse=25;
 
-        $this->option_logo = 0;                    // Affiche logo
+        $this->option_logo = 1;                    // Affiche logo
 
         // Recupere emmetteur
         $this->emetteur=$mysoc;
@@ -115,9 +118,12 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
-                $file = $dir ."/Courrier_signature_".date("d_m_Y")."_" . $propref . ".pdf";
+                $file = $dir ."/Contrat_de_financement_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
+            require_once (DOL_DOCUMENT_ROOT . "/synopsisfinanc/class/synopsisfinancement.class.php");
+            $valfinance=new Synopsisfinancement($this->db);
+            $valfinance->fetch(NULL,NULL,$this->contrat->id);
 
             if (! file_exists($dir))
             {
@@ -173,9 +179,12 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
                 $pdf->SetFont(''/*'Arial'*/, 'B', 12);
 
 //Encart societe
-                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6,($contrat->societe->titre."x" != "x"?$contrat->societe->titre." ":"").$contrat->societe->nom,0,'L');
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6,"Le locataire:",0,'L');
                 $pdf->SetFont(''/*'Arial'*/, '', 11);
+                $pdf->SetXY($this->marge_gauche, $this->marge_haute+6);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6, "La société: ".$contrat->societe->nom,0,'L');
+                
                 $pdf->SetX($this->marge_gauche + 100);
 
 //representant légal : signataire contrat
@@ -204,50 +213,9 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contrat->societe->address."\n".$contrat->societe->zip." ".$contrat->societe->town,0,'L');
 
 //Date
-                $pdf->SetFont(''/*'Arial'*/, '', 10);
-                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute + 44);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 50) ,6,"Lyon, le ".date("d/m/Y"),0,'L');
-
-//Objet
-                $pdf->SetFont(''/*'Arial'*/, 'U', 10);
-                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 60);
-                $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
-                $pdf->SetFont(''/*'Arial'*/, '', 10);
-                $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_encodeRien("Signature de votre contrat ".$contrat->ref),0,'L');
-                $remY = $pdf->GetY();
-                $pdf->SetFont(''/*'Arial'*/, 'U', 10);
-                $pdf->SetXY($this->marge_gauche,$remY);
-                $pdf->MultiCell(23 ,4,"Code Client : ",0,'L');
-                $pdf->SetFont(''/*'Arial'*/, '', 10);
-                $pdf->SetXY($this->marge_gauche + 23,$remY);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_encodeRien($contrat->societe->code_client),0,'L');
-
-//Madame, Monsieur
-                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 90);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Madame, Monsieur,"),0,'L');
-
-                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Vous avez souscrit un contrat de services et nous vous en remercions."),0,'L');
-
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Votre numéro de contrat est ".$contrat->ref."."),0,'L');
-
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Merci de parapher chaque page et de nous retourner les différents exemplaires ci-joints
-dûment remplis et signés, afin de finaliser votre dossier."),0,'L');
-
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Si vous optez pour le prélèvement automatique, merci de compléter et de signer l'autorisation de prélèvement ci-jointe et de nous la retourner accompagnée de votre RIB."),0,'L');
-
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
-Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
-
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+18);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_encodeRien("Mme OLAGNON
-Direction Technique
-"),0,'L');
+//                $pdf->SetFont(''/*'Arial'*/, '', 10);
+//                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute + 44);
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 50) ,6,"Lyon, le ".date("d/m/Y"),0,'L');
 
 
                 $this->_pagefoot($pdf,$outputlangs);

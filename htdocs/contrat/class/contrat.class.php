@@ -1288,7 +1288,7 @@ class Contrat extends CommonObject
 			$total_localtax1= $tabprice[9];
 			$total_localtax2= $tabprice[10];
 
-echo $price_base_type."ici".$pu."|".$qty."|".$total_ht;die;
+
 			$localtax1_type=$localtaxes_type[0];
 			$localtax2_type=$localtaxes_type[2];
 

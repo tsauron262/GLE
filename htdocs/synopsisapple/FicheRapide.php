@@ -33,7 +33,7 @@ $("form#form").submit(function(){
 $echo = "";
 
 if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
-    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "societe");
+    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "societe WHERE fk_user_creat = ".$user->id);
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);
         $_REQUEST['socid'] = $result->max;
@@ -41,7 +41,7 @@ if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
 }
 
 if (isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0 && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] == "max") {
-    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "socpeople WHERE fk_soc=" . $_REQUEST["socid"]);
+    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "socpeople WHERE fk_soc=" . $_REQUEST["socid"]." AND fk_user_creat = ".$user->id);
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);
         $_REQUEST['contactid'] = $result->max;

@@ -14,8 +14,10 @@
 		
 		function SmsSenderList() {
 			global $conf;
-			
-			$from = $conf->global->MAIN_MAIL_SMS_FROM;
+                        
+			$obj = new stdClass();
+                        @$obj->number = $conf->global->MAIN_MAIL_SMS_FROM;
+			$from[] = $obj;
 			return $from;
 		}
 		
@@ -45,7 +47,7 @@
 				dol_syslog(get_class($this)."::SmsSend ".print_r($result->details, true), LOG_ERR);
 				return 0;
 			} else {
-				return $result->message_id;
+				return 1;
 			}
 		}
 		
@@ -61,6 +63,7 @@
 			curl_setopt($ch,CURLOPT_POST,count($donnees));
 			curl_setopt($ch,CURLOPT_POSTFIELDS,$donnees_ctn);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+			curl_setopt($ch, CURLOPT_SSLVERSION , 3);
 			$data=curl_exec($ch);
 			curl_close($ch);
 			return json_decode($data);

@@ -2408,7 +2408,7 @@ class lien extends formulaireSource {
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_lien WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
         if($this->db->num_rows < 1)
-            return "";
+            return 0;
         $result = $this->db->fetch_object($sql);
         $this->table = $result->table;
         $this->nomElem = $result->nomElem;

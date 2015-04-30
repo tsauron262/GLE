@@ -155,6 +155,7 @@ class modSmsDecanet extends DolibarrModules
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch,CURLOPT_POST,count($donnees));
 		curl_setopt($ch,CURLOPT_POSTFIELDS,$donnees_ctn);
+		curl_setopt($ch, CURLOPT_SSLVERSION , 3);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		$data=curl_exec($ch);
 		curl_close($ch);

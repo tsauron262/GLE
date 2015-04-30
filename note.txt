@@ -1281,3 +1281,22 @@ windows – fait chier
 di et fi curative
 
 //ds contrat ajouter preventive
+
+
+
+DELETE FROM `llx_boxes` WHERE `box_id` = 1
+DELETE FROM `llx_boxes_def` WHERE `rowid` = 1
+
+
+0970721233
+
+
+
+voir tva normal suisse
+
+
+
+
+derniére version :
+
+- action/comm fiche.php modif sur card.php

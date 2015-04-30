@@ -956,6 +956,8 @@ class FormOther
        			if (empty($boxorder)) $boxorder.='A:';
   				$boxorder.=$boxid.',';
         	}
+                
+                asort($arrayboxtoactivatelabel);
 
         	//var_dump($boxidactivatedforuser);
 

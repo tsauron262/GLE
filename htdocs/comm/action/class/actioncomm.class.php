@@ -526,6 +526,11 @@ class ActionComm extends CommonObject
         global $user,$langs,$conf;
 
         $error=0;
+        
+        /* mod drsi */
+        if(!$this->id)
+            return 0;
+        /*fmod drsi*/
 
         $this->db->begin();
 

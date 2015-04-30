@@ -43,11 +43,11 @@
  */
 include_once(DOL_DOCUMENT_ROOT . "/core/boxes/modules_boxes.php");
 
-class box_synopsisdemandeinterv extends ModeleBoxes {
+class box_synopsisNextdemandeinterv extends ModeleBoxes {
 
     public $boxcode = "lastficheInterv";
     public $boximg = "object_fichinter";
-    public $boxlabel;
+    public $boxlabel = "BoxNextsynopsisdemandeinterv";
     public $depends = array("synopsisdemandeinterv");
     public $db;
     public $param;
@@ -57,11 +57,11 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
     /**
      *      \brief      Constructeur de la classe
      */
-    function box_ficheInterv() {
+    function box_synopsisNextdemandeinterv() {
         global $langs;
         $langs->load("boxes");
 
-        $this->boxlabel = $langs->trans("BoxLastsynopsisdemandeinterv");
+        $this->boxlabel = $langs->trans("BoxNextsynopsisdemandeinterv");
     }
 
     /**
@@ -74,7 +74,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
         include_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
         $DIStatic = new Synopsisdemandeinterv($db);
 
-        $text = $langs->trans((isset($_REQUEST['next']))? "BoxNextsynopsisdemandeinterv" : "BoxLastsynopsisdemandeinterv", $max);
+        $text = $langs->trans("BoxNextsynopsisdemandeinterv", $max);
         $this->info_box_head = array(
             'text' => "" . $text,
             'limit' => strlen($text)
@@ -84,11 +84,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
             $sql = "SELECT DI.rowid as diid,
                            DI.ref,
                            DI.fk_commande,
-                           DI.fk_contrat,
                            c.ref as cref,
-                           ct.ref as ctref,
-                           FI.ref as FIref,
-                           FI.rowid as FIId,
                            concat(tech.firstname, concat(' ', tech.lastname)) as nomTech,
                            " . MAIN_DB_PREFIX . "societe.nom,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
@@ -97,25 +93,15 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                       FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv DI
                  LEFT JOIN " . MAIN_DB_PREFIX . "societe ON DI.fk_soc = " . MAIN_DB_PREFIX . "societe.rowid
                  LEFT JOIN " . MAIN_DB_PREFIX . "commande c ON DI.fk_commande = c.rowid
-                 LEFT JOIN " . MAIN_DB_PREFIX . "contrat ct ON DI.fk_contrat = ct.rowid
                  LEFT JOIN " . MAIN_DB_PREFIX . "user tech ON DI.fk_user_prisencharge = tech.rowid
-                 LEFT JOIN " . MAIN_DB_PREFIX . "element_element DIFI ON DIFI.sourcetype = 'DI' AND DIFI.targettype='FI' AND DIFI.fk_source = DI.rowid
-                 LEFT JOIN " . MAIN_DB_PREFIX . "fichinter FI ON DIFI.fk_target = FI.rowid WHERE 1 ";
-            if (isset($_REQUEST['next']))
-                $sql .= " AND FI.rowid IS NULL AND DI.fk_statut < 2 ";
-            if (isset($_REQUEST['filtreUser']))
-                $sql .= " AND (DI.fk_user_author = " . $_REQUEST['filtreUser'] . "
-                        OR DI.fk_user_valid = " . $_REQUEST['filtreUser'] . "
-                        OR DI.fk_user_prisencharge = " . $_REQUEST['filtreUser'] . ")";
+                     WHERE DI.fk_statut < 3
+                     AND (DI.fk_user_author = " . $user->id . "
+                        OR DI.fk_user_valid = " . $user->id . "
+                        OR DI.fk_user_prisencharge = " . $user->id . " OR 1)
+                            AND DI.rowid not in (SELECT fk_source FROM " . MAIN_DB_PREFIX . "element_element DIFI WHERE DIFI.sourcetype = 'DI' AND DIFI.targettype='FI')";
             if (isset($_REQUEST['lien_commande']))
-                $sql .= " AND DI.fk_commande > 0 ";
-            if (isset($_REQUEST['lien_contrat']))
-                $sql .= " AND DI.fk_contrat > 0 ";
-            $sql .= " ORDER BY datei ";
-            if (isset($_REQUEST['next']))
-                $sql.= "asc";
-            else
-                $sql.= "desc";
+                $sql .= " AND DI.fk_commande IS NOT NULL ";
+            $sql .= "ORDER BY datei asc";
             $sql.= $db->plimit($max, 0);
 
             $result = $db->query($sql);
@@ -131,72 +117,42 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
 
                     $picto = 'synopsisdemandeinterv@synopsisdemandeinterv';
 
-                    $y = 0;
-                    
-                    $this->info_box_contents[$i][$y] = array('align' => 'left',
+                    $this->info_box_contents[$i][0] = array('align' => 'left',
                         'logo' => $picto,
                         'text' => ($objp->ref ? $objp->ref : "-"),
                         'url' => DOL_URL_ROOT . "/synopsisdemandeinterv/card.php?id=" . $objp->diid);
-                    $y++;
 
-                    if (!isset($_REQUEST['next'])) {
-                        $this->info_box_contents[$i][$y] = array('align' => 'left',
-                            'logo' => 'intervention',
-                            'text' => ($objp->FIref ? $objp->FIref : "-"),
-                            'url' => DOL_URL_ROOT . "/fichinter/card.php?id=" . $objp->FIId);
-                    $y++;
-                    }
-
-                    $this->info_box_contents[$i][$y] = array('align' => 'left',
+                    $this->info_box_contents[$i][1] = array('align' => 'left',
                         'text' => $objp->nom,
                         'maxlength' => 30,
                         'url' => DOL_URL_ROOT . "/comm/card.php?socid=" . $objp->socid);
-                    $y++;
 
-                    $this->info_box_contents[$i][$y] = array('align' => 'right',
+                    $this->info_box_contents[$i][2] = array('align' => 'right',
                         'text' => dol_print_date($objp->datei, 'day'),
                     );
-                    $y++;
 
-                    $this->info_box_contents[$i][$y] = array(
+                    $this->info_box_contents[$i][3] = array(
                         'align' => 'right',
                         'width' => 10,
                         'text' => $DIStatic->LibStatut($objp->fk_statut, 3));
-                    $y++;
 
 
-                    $this->info_box_contents[$i][$y] = array(
+                    $this->info_box_contents[$i][4] = array(
                         'logo' => 'user',
                         'align' => 'right',
                         'width' => 18,
                         'text' => $objp->nomTech,
                         'url' => DOL_URL_ROOT . "/user/card.php?id=" . $objp->fk_user_prisencharge);
-                    $y++;
 
 
-                    if ($objp->fk_commande > 0) {
-                        $this->info_box_contents[$i][$y] = array(
-                            'logo' => 'order',
+                    if (isset($_REQUEST['lien_commande'])) {
+                        $this->info_box_contents[$i][5] = array(
+                            'logo' => 'contract',
                             'align' => 'right',
                             'width' => 18,
                             'text' => $objp->cref,
                             'url' => DOL_URL_ROOT . "/commande/card.php?id=" . $objp->fk_commande);
                     }
-                    else
-                        $this->info_box_contents[$i][$y] = array('text' => '&nbsp;');
-                    
-                    
-                    if ($objp->fk_contrat > 0) {
-                        $this->info_box_contents[$i][$y] = array(
-                            'logo' => 'contract',
-                            'align' => 'right',
-                            'width' => 18,
-                            'text' => $objp->ctref,
-                            'url' => DOL_URL_ROOT . "/contrat/card.php?id=" . $objp->fk_contrat);
-                    }
-                    else
-                        $this->info_box_contents[$i][$y] = array('text' => '&nbsp;');
-                    $y++;
 
                     $i++;
                 }
@@ -209,6 +165,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                         $this->info_box_contents[$i][2] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][3] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][4] = array('text' => '&nbsp;');
+                        $this->info_box_contents[$i][5] = array('text' => '&nbsp;');
                     } else {
                         $this->info_box_contents[$i][0] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][1] = array('text' => '&nbsp;');

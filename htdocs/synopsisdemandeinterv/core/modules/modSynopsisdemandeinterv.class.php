@@ -103,7 +103,9 @@ class modsynopsisdemandeinterv  extends DolibarrModules
     // Boites
     $this->boxes = array();
     $r=0;
-    $this->boxes[$r][1] = "box_synopsisdemandeinterv.php";
+    $this->boxes[$r][1] = "box_synopsisdemandeinterv.php@synopsisdemandeinterv";
+    $r++;
+    $this->boxes[$r][1] = "box_synopsisNextdemandeinterv.php@synopsisdemandeinterv";
     $r++;
 
     // Permissions

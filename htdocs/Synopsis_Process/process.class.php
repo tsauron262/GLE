@@ -2552,6 +2552,11 @@ EOF;
 
     function getValues() {
         global $langs;
+        
+        if($this->champId == "" || $this->champVueSelect == "")
+            return "";
+        
+        
         $sup = $return = "";
         $i = 0;
         $sql = $this->db->query($this->reqValues);

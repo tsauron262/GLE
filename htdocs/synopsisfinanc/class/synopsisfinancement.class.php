@@ -34,6 +34,7 @@ class Synopsisfinancement extends CommonObject {
     var $location;
     var $loyer;
     var $nb_periode;
+    static $TPeriode = array(1 => "Mensuel", 3 => "Trimestriel", 4 => "Quadrimestriel", 6 => "Semestriel");
     static $tabM = array(1 => "Mois", 3 => "Trimestres", 4 => "Quadrimestres", 6 => "Semestres");
     static $rad = array("financier" => "Location financière", "operationnel" => "Location operationnel", "evol+" => "Location à taux 0");
 
@@ -173,7 +174,7 @@ class Synopsisfinancement extends CommonObject {
 
         $this->loyer2 = ($this->mensualite2 + $this->mensualite02) * $this->periode;
 
-        $this->nb_periode2 = $this->duree / $this->periode2;
+        $this->nb_periode2 = $this->duree / $this->periode;
 
         return $this->prix_final2 = ($this->duree * ($this->mensualite2 + $this->mensualite02));
     }

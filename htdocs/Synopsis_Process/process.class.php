@@ -2553,7 +2553,7 @@ EOF;
     function getValues() {
         global $langs;
         
-        if($this->champId == "" || $this->champVueSelect == "")
+        if($this->champId."x" == "x" || $this->champVueSelect."x" == "x")
             return "";
         
         

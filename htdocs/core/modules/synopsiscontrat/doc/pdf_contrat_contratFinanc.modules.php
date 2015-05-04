@@ -37,6 +37,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
     var $object;
+    var $pdf;
 
     /**
     \brief      Constructeur
@@ -74,6 +75,64 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
         if (! $this->emetteur->pays_code) $this->emetteur->pays_code=substr($langs->defaultlang,-2);    // Par defaut, si n'etait pas defini
 
 
+    }
+    
+    /**
+     * Print chapter
+     * @param $num (int) chapter number
+     * @param $title (string) chapter title
+     * @param $file (string) name of the file containing the chapter body
+     * @param $mode (boolean) if true the chapter body is in HTML, otherwise in simple text.
+     * @public
+     */
+    public function PrintChapter($num, $title, $file, $mode=false) {
+        // add a new page
+        $this->pdf->AddPage();
+        // disable existing columns
+        $this->pdf->resetColumns();
+        // print chapter title
+        $this->ChapterTitle($num, $title);
+        // set columns
+        $this->pdf->setEqualColumns(3, 63);
+        // print chapter body
+        $this->ChapterBody($file, $mode);
+    }
+
+    /**
+     * Set chapter title
+     * @param $num (int) chapter number
+     * @param $title (string) chapter title
+     * @public
+     */
+    public function ChapterTitle($num, $title) {
+        $this->pdf->SetFont('helvetica', '', 14);
+        $this->pdf->SetFillColor(200, 220, 255);
+        $this->pdf->Cell(180, 6, 'Chapter '.$num.' : '.$title, 0, 1, '', 1);
+        $this->pdf->Ln(4);
+    }
+
+    /**
+     * Print chapter body
+     * @param $file (string) name of the file containing the chapter body
+     * @param $mode (boolean) if true the chapter body is in HTML, otherwise in simple text.
+     * @public
+     */
+    public function ChapterBody($file, $mode=false) {
+        $this->pdf->selectColumn();
+        // get esternal file content
+        $content = file_get_contents($file, false);
+        // set font
+        $this->pdf->SetFont('', '', 7);
+        $this->pdf->SetTextColor(50, 50, 50);
+        // print content
+        if ($mode) {
+            // ------ HTML MODE ------
+            $this->pdf->writeHTML($content, true, false, true, false, 'J');
+        } else {
+            // ------ TEXT MODE ------
+            $this->pdf->Write(0, $content, '', 0, 'J', true, 0, false, true, 0);
+        }
+        $this->pdf->Ln();
     }
 
     /**
@@ -145,6 +204,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
                 $nblignes = sizeof($contrat->lignes);
                 // Protection et encryption du pdf
                 $pdf = pdf_getInstance($this->format);
+                $this->pdf=$pdf;
                 if (class_exists('TCPDF'))
                 {
                     $pdf->setPrintHeader(false);
@@ -314,7 +374,43 @@ l’article 1 ci-dessus.", 0, 'L');
                 
                 $Y=$Y+12;
                 $pdf->SetXY($X, $Y);
-                $pdf->Write(6, "Fait à Lyon le ".$contrat->date_contrat);
+                $pdf->Write(6, "Fait à Lyon le ".  dol_print_date($contrat->date_contrat));
+                
+                //emplacement des signature
+                //locataire
+                $Y=$Y+6;
+                $pdf->SetXY($X, $Y);
+                $pdf->Write(6, "Pour le Locataire");
+                $pdf->SetXY($X, $Y+6);
+                $pdf->Write(6, "Signature et cachet(lu et approuvé)");
+                $pdf->SetXY($X, $Y+12);
+                $pdf->Write(6, "Pour le Locataire");
+                $pdf->SetXY($X, $Y+18);
+                $pdf->Write(6, "Qualité");
+                $pdf->SetXY($X, $Y+24);
+                $pdf->Write(6, "NOM");
+                
+                //loueur
+                $X=$X+75;
+                //$Y=$Y-24;
+                $pdf->SetXY($X,$Y);
+                $pdf->Write(6, "Pour le Loueur");
+                $pdf->SetXY($X, $Y+6);
+                $pdf->Write(6, "Signature et cachet");
+                
+                //cessionnaire
+                $X=$X+60;
+                //$Y=$Y-6;
+                $pdf->SetXY($X,$Y);
+                $pdf->Write(6, "Pour le Cessionnaire");
+                $pdf->SetXY($X, $Y+6);
+                $pdf->Write(6, "Signature et cachet");
+                
+                $X=$this->marge_gauche;
+                $Y=$Y+30;
+                $pdf->SetXY($X, $Y);
+                
+                $this->PrintChapter(1, 'LOREM IPSUM [TEXT]', DOL_DOCUMENT_ROOT.'/synopsisfinanc/doc/banque_test.txt', false);
 
 //representant légal : signataire contrat
                 $requete = "SELECT fk_socpeople

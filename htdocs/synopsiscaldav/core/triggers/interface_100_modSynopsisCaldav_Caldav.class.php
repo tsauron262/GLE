@@ -121,7 +121,7 @@ class InterfaceCaldav {
             global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
             $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : "-".$object->id.".ics";
             $objectEtag2 = (isset($objectEtagTemp) && $objectEtagTemp != "") ? $objectEtagTemp : random(15);
-            $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? $objectDataTemp : "";
+            $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? addslashes($objectDataTemp) : "";
             $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."')");
         }
         if ($action == "ACTION_DELETE"){

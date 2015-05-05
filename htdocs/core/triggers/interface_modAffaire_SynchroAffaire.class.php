@@ -121,7 +121,7 @@ class InterfaceSynchroAffaire
 
         // Mettre ici le code a executer en reaction de l'action
 global $langs;
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         switch ($action)
         {
 

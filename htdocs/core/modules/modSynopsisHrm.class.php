@@ -87,7 +87,7 @@ class modSynopsisHrm extends DolibarrModules {
                               'mainmenu'=>'RH',
                               'leftmenu'=>'0',
                               'url'=>'/Synopsis_Hrm/index.php',
-                              'langs' => 'synopsisGene@Synopsis_Tools',
+                              'langs' => 'synopsisGene@synopsistools',
                               'position'=>120,
                               'perms'=>'$user->rights->hrm->hrm->Utilisateur || $user->rights->hrm->hrm->Admin',
                               'target'=>'',

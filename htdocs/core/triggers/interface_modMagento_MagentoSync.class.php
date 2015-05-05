@@ -120,7 +120,7 @@ class InterfaceMagentoSync
         // Mettre ici le code e executer en reaction de l'action
 
         require_once(DOL_DOCUMENT_ROOT . '/Magento/magento_product.class.php');
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         $db=$this->db;
 
         $mag_Product= new magento_product($conf);

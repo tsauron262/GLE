@@ -91,7 +91,7 @@ class Repair {
         if (!$this->update())
             return false;
 
-//        require_once(DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
+//        require_once(DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php");
 //        $chrono = new Chrono($this->db);
 //        $chrono->fetch($chronoId);
 //        $chrono->setDatas($chronoId, array(1056=>1));

@@ -935,29 +935,29 @@ class Synopsisfichinter extends Fichinter {
       \param        option            Sur quoi pointe le lien: 0=fiche commande,3=fiche compta commande,4=fiche expedition commande
       \return        string            Chaine avec URL
      */
-//    function getNomUrl($withpicto = 0, $option = 0) {
-//        global $langs;
-//
-//        $result = '';
-//        $urlOption = '';
-//
-//        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/card.php?id=' . $this->id . '">';
-//        if ($option == 6)
-//            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/card.php?id=' . $this->id . '">';
-//        $lienfin = '</a>';
-//
-//        $picto = 'intervention';
-//        $label = $langs->trans("InterventionCard") . ': ' . $this->ref;
-//
-//        if ($withpicto)
-//            $result.=($lien . img_object($label, $picto) . $lienfin);
-//        if ($withpicto && $option == 6)
-//            $result.=($lien . img_object($label, $picto, 16, 16, false, true) . $lienfin);
-//        if ($withpicto && $withpicto != 2)
-//            $result.=' ';
-//        $result.=$lien . $this->ref . $lienfin;
-//        return $result;
-//    }
+    function getNomUrl($withpicto = 0, $option = 0) {
+        global $langs;
+
+        $result = '';
+        $urlOption = '';
+
+        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/card.php?id=' . $this->id . '">';
+        if ($option == 6)
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisfichinter/card.php?id=' . $this->id . '">';
+        $lienfin = '</a>';
+
+        $picto = 'intervention';
+        $label = $langs->trans("InterventionCard") . ': ' . $this->ref;
+
+        if ($withpicto)
+            $result.=($lien . img_object($label, $picto) . $lienfin);
+        if ($withpicto && $option == 6)
+            $result.=($lien . img_object($label, $picto, 16, 16, false, true) . $lienfin);
+        if ($withpicto && $withpicto != 2)
+            $result.=' ';
+        $result.=$lien . $this->ref . $lienfin;
+        return $result;
+    }
 
 }
 

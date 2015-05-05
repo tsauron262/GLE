@@ -49,7 +49,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/functions.lib.php");
 
 $langs->load('compta');
 $langs->load('other');
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $action=empty($_GET['action']) ? (empty($_POST['action']) ? '' : $_POST['action']) : $_GET['action'];
 

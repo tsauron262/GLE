@@ -95,7 +95,7 @@ $langs->load("bills");
 $langs->load("companies");
 $langs->load("deliveries");
 $langs->load("sendings");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 //$secondary =  "<SPAN id='mnubut_sec1' class='mnubut_sec' onClick='MenuDisplayCSS_secondary(\"facture_info\",\"livraison_id\",$livraisonid)'>Info</SPAN>\n";
 print $gsm->MainMenu($secondary);

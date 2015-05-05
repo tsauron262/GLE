@@ -43,7 +43,7 @@
 function llxHeader($head = "", $urlp = "",$disableScriptaculous=0)
 {
   global $user, $conf, $langs;
-  $langs->load("synopsisGene@Synopsis_Tools");
+  $langs->load("synopsisGene@synopsistools");
 
   top_htmlhead($head,"",$disableScriptaculous);
 

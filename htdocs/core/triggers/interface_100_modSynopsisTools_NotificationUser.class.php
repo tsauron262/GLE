@@ -111,7 +111,7 @@ class InterfaceNotificationUser {
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
     function run_trigger($action, $object, $user, $langs, $conf) {
-        $sql = $this->db->query("SELECT nu.* FROM " . MAIN_DB_PREFIX . "Synopsis_Tools_notificationUser nu, " . MAIN_DB_PREFIX . "Synopsis_trigger t WHERE fk_trigger = t.id AND nu.active = 1 AND t.code LIKE '" . $action . "'");
+        $sql = $this->db->query("SELECT nu.* FROM " . MAIN_DB_PREFIX . "synopsistools_notificationUser nu, " . MAIN_DB_PREFIX . "Synopsis_trigger t WHERE fk_trigger = t.id AND nu.active = 1 AND t.code LIKE '" . $action . "'");
         if ($this->db->num_rows($sql) > 0) {
             while ($result = $this->db->fetch_object($sql)) {
                 $sujet = $this->replaceTextMail($result->sujet, $object);

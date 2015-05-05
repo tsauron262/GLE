@@ -20,7 +20,7 @@
 
 
 require_once("./pre.inc.php");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $jspath = DOL_URL_ROOT.'/Synopsis_Common/jquery/';
 $header .= '<script language="javascript" src="'.$jspath.'jquery.validate.min.js"></script>'."\n";
 

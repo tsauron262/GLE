@@ -29,7 +29,7 @@
 
 
 llxHeader('',$langs->trans('Proposal'),'Proposition');
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
     $user->getrights('');
 

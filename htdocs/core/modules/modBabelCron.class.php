@@ -143,7 +143,7 @@ class modBabelCron extends DolibarrModules
                             'titre'=>'Ordonnancement',
                             'mainmenu'=>'home',
                             'url'=>'/Babel_Cron/index.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'langs' => 'synopsisGene@synopsistools',
                             'rowid'=>$this->numero . $r,
                             'position'=>$pos,
                             'perms'=>'$user->rights->Cron->Global->Afficher || $user->rights->Cron->Global->Modifier ',

@@ -37,7 +37,7 @@ if (!$user->rights->sCalBabel->sCalBabel->Modification)
 
 $langs->load("admin");
 $langs->load("other");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load("BabelCalc");
 $langs->load("other");
 

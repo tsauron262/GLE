@@ -1,7 +1,7 @@
 <?php
 
 require_once('../../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 
 

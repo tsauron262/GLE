@@ -119,7 +119,7 @@ class InterfaceTriggerForm
         require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
         // Mettre ici le code a executer en reaction de l'action
         global $langs;
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
  //       switch ($action)
         $requete= "SELECT p.id,
                           e.id as eid

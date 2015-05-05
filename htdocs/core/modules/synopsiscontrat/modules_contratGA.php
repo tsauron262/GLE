@@ -109,7 +109,7 @@ class ModeleSynopsiscontratGA extends CommonDocGenerator
 function contratGA_pdf_create($db, $id, $modele='', $outputlangs='')
 {
     global $langs;
-    $langs->load("synopsisGene@Synopsis_Tools");
+    $langs->load("synopsisGene@synopsistools");
     $langs->load("contracts");
 
     $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/";
@@ -249,7 +249,7 @@ class ModeleNumRefContratGA
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoDescription");
     }
 
@@ -260,7 +260,7 @@ class ModeleNumRefContratGA
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoExample");
     }
 

@@ -24,7 +24,7 @@ $jqueryuipath = DOL_URL_ROOT."/Synopsis_Common/jquery/ui";
 $css = DOL_URL_ROOT."/Synopsis_Common/css";
 $imgPath = DOL_URL_ROOT."/Synopsis_Common/images";
 
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $header = ' <script src="'.$jspath.'/jquery-1.3.2.js" type="text/javascript"></script>';
 $header .= ' <script src="'.$jqueryuipath.'/jquery-ui.js" type="text/javascript"></script>';
@@ -220,7 +220,7 @@ print "</form>";
 function llxHeader($head = "", $urlp = "",$disableScriptaculous=0)
 {
     global $user, $conf, $langs;
-    $langs->load("synopsisGene@Synopsis_Tools");
+    $langs->load("synopsisGene@synopsistools");
 
     top_menu($head,"Admin GPI","",1);
     left_menu($menu->liste);

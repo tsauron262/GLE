@@ -13,7 +13,7 @@
  */
  require_once("pre.inc.php");
  require_once("main.inc.php");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
  $processid = $_GET['process_id'];
 $filejs = 'js/SynopsisProcess.js';

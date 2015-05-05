@@ -21,7 +21,7 @@ require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load("process@Synopsis_Process");
 
 //$user_id = $_REQUEST['userId'];

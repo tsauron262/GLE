@@ -79,7 +79,7 @@ $gsm = new gsm($db,$user);
 
 
 $langs->load("propal");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 
 

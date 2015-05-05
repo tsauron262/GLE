@@ -21,7 +21,7 @@ require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/Babel_Magento/magento_sales.class.php");
 require_once(DOL_DOCUMENT_ROOT."/Babel_Magento/magento_customer.class.php");
 
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;

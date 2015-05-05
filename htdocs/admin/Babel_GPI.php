@@ -22,7 +22,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 $langs->load("admin");
 $langs->load("contracts");
 $langs->load("other");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 if (!$user->admin)
   accessforbidden();

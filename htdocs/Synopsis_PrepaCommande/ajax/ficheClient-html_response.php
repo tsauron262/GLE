@@ -43,7 +43,7 @@
     $langs->load('companies');
     $langs->load('bills');
     $langs->load('propal');
-    $langs->load("synopsisGene@Synopsis_Tools");
+    $langs->load("synopsisGene@synopsistools");
     $langs->load('deliveries');
     $langs->load('products');
 

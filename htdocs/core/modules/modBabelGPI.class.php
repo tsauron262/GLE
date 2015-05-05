@@ -143,7 +143,7 @@ class modBabelGPI extends DolibarrModules
                             'titre'=>'Acc&egrave;s externe',
                             'mainmenu'=>'home',
                             'url'=>'/Babel_GPI/pilotage.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'langs' => 'synopsisGene@synopsistools',
                             'rowid'=>$this->numero . $r,
                             'position'=>$pos,
                             'perms'=>'$user->rights->GPI->Global->Afficher || $user->rights->GPI->Global->Modifier ',

@@ -27,7 +27,7 @@ if ($user->rights->JasperBabel->JasperBabel->Affiche != 1 || $user->rights->Babe
     print "Ce module ne vous est pas accessible";
     exit(0);
 }
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 if ($conf->global->MAIN_MODULE_ZIMBRA == 1)
 {
     require_once(DOL_DOCUMENT_ROOT."/Synopsis_Zimbra/Zimbra.class.php");

@@ -22,7 +22,7 @@ require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
 
 $langs->load("affaire@Synopsis_Affaire");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('companies');
 $langs->load('commercial');
 

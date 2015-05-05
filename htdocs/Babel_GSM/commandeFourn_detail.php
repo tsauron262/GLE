@@ -93,7 +93,7 @@ $langs->load("propal");
 $langs->load("orders");
 $langs->load("bills");
 $langs->load("sendings");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $commandeid=$_GET['commande_id'];
 if ("x".$commandeid == "x")

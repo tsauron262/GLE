@@ -60,7 +60,7 @@ class ModeleNumRefChrono
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoDescription");
     }
 
@@ -71,7 +71,7 @@ class ModeleNumRefChrono
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoExample");
     }
 

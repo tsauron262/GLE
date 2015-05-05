@@ -27,7 +27,7 @@ require("./pre.inc.php");
 
 $langs->load("products");
 $langs->load("companies");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 if ($conf->global->MAIN_MODULE_BABELGA."x"!="1x")
 {
     header('location: ../index.php');

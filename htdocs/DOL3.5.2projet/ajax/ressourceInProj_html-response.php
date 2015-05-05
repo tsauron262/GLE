@@ -32,7 +32,7 @@ require_once('../../main.inc.php');
 $langs->load("companies");
 $langs->load("commercial");
 $langs->load("bills");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $projId = $_REQUEST['projet_id'];
 

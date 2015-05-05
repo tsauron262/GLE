@@ -42,7 +42,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/Babel_Magento/magento_soap.class.php");
 
 $langs->load("product");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;

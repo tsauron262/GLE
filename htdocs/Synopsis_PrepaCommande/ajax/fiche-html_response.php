@@ -21,7 +21,7 @@ require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/modules/commande/modules_commande.php");
 require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
-require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/commandeGroup/commandeGroup.class.php');
+require_once(DOL_DOCUMENT_ROOT . '/synopsistools/commandeGroup/commandeGroup.class.php');
 require_once(DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/order.lib.php");
 if ($conf->projet->enabled)
@@ -36,7 +36,7 @@ $langs->load('sendings');
 $langs->load('companies');
 $langs->load('bills');
 $langs->load('propal');
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('deliveries');
 $langs->load('products');
 

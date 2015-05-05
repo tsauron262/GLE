@@ -30,7 +30,7 @@ $js ='<script src="'.DOL_URL_ROOT.'/Synopsis_Common/js/rico2/src/prototype.js" t
 <script src="'.DOL_URL_ROOT.'/Synopsis_Common/js/rico2/src/rico.js" type="text/javascript"></script>';
 //print $js;
 llxHeader($js);
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 require "applib.php";
 //var_dump($user->rights->TechPeople->ndf);
 if ($user->rights->TechPeople->ndf->Affiche || $user->rights->TechPeople->ndf->Valide){

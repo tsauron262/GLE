@@ -67,7 +67,7 @@ require_once('../magento_sales.class.php');
 require_once('../magento_customer.class.php');
 require_once('../magento_product.class.php');
 global $langs;
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('companies');
 $magSal  = new magento_sales($conf);
 $magSal->connect();

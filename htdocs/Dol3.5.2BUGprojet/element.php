@@ -60,7 +60,7 @@ if (!isset($_REQUEST['action']))
     $_REQUEST['action'] = '';
 
 require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");

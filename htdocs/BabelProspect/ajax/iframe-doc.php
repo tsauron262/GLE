@@ -40,7 +40,7 @@ $langs->load("orders");
 $langs->load("propal");
 $langs->load("bills");
 $langs->load("contracts");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 // Load permissions
 $user->getrights('ecm');

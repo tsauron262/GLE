@@ -539,7 +539,7 @@ class gsxDatas {
             case 'CreateIndirectOnsiteRepair':
             case 'CreateWholeUnitExchange':
                 if (isset($chronoId)) {
-                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
                     $chrono = new Chrono($db);
                     $chrono->fetch($chronoId);
                     $chrono->getValues($chronoId);

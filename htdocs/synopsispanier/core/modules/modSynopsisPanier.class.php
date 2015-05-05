@@ -46,7 +46,7 @@ class modSynopsisPanier extends DolibarrModules
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISPANIER';
         $this->special = 0;
-        $this->picto='tools@Synopsis_Tools';
+        $this->picto='tools@synopsistools';
 
         // Dir
         $this->dirs = array("synopsispanier");
@@ -84,7 +84,7 @@ class modSynopsisPanier extends DolibarrModules
 
         $this->menus = array();            // List of menus to add
         
-        $this->tabs = array('thirdparty:+panier:Panier:synopsisGene@Synopsis_Tools:/synopsispanier/affichePanier.php?idReferent=__ID__&type=tiers');
+        $this->tabs = array('thirdparty:+panier:Panier:synopsisGene@synopsistools:/synopsispanier/affichePanier.php?idReferent=__ID__&type=tiers');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

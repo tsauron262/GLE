@@ -17,7 +17,7 @@
   * GLE-1.2
   */
   require_once('pre.inc.php');
-  require_once(DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
+  require_once(DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php");
   require_once(DOL_DOCUMENT_ROOT."/synopsischrono/core/lib/synopsischrono.lib.php");
   $js = "";
    $id = $_REQUEST['id'];

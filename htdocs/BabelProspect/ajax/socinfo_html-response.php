@@ -30,7 +30,7 @@ $userId = $_REQUEST['userid'];
 $campagne_id = $_REQUEST['campagneId'];
 $socid = $_REQUEST['socid'];
 
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('companies');
 $langs->load('compta');
 $langs->load('orders');

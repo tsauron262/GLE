@@ -523,7 +523,7 @@ jQuery(function() {
                 
                 
                 
-                var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
+                var url = DOL_URL_ROOT + '/synopsistools/product/ajaxproducts.php';
                 //                if (fkProd > 0) {
                 jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('productClause').text()+'</div>');
                 
@@ -576,7 +576,7 @@ jQuery(function() {
             //                            console.log(errorThrown);
             //                        },
             //                        success: function(data){
-            //                            var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
+            //                            var url = DOL_URL_ROOT + '/synopsistools/product/ajaxproducts.php';
             //                            var curId = 'keysearchp_idContratprod_mod';
             //                            var retId = 'ajdynfieldp_idContratprod_mod';
             //                            var tmpHtml = jQuery('<div></div>');
@@ -598,7 +598,7 @@ jQuery(function() {
             //                    if (jQuery(msg).find('fk_product').text() + "x" != "x") {
             //
             //                        jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('productClause').text()+'</div>');
-            //                        var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
+            //                        var url = DOL_URL_ROOT + '/synopsistools/product/ajaxproducts.php';
             //                        var curId = 'keysearchp_idprod_mod';
             //                        var retId = 'ajdynfieldp_idprod_mod';
             //                        var param = 'htmlname=p_idprod_mod&price_level=&type=0&mode=1&status=1&prodId=' + jQuery(msg).find('fk_product').text();

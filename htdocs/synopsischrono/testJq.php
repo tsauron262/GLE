@@ -1,7 +1,7 @@
 <?php
 
 require_once('../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/chronoDetailList.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 llxHeader($js, $titre);

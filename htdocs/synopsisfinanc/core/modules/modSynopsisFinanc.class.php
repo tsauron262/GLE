@@ -46,7 +46,7 @@ class modSynopsisFinanc extends DolibarrModules
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISFINANC';
         $this->special = 0;
-        $this->picto='tools@Synopsis_Tools';
+        $this->picto='tools@synopsistools';
 
         // Dir
         //$this->dirs = array("synopsisFinanc");
@@ -127,7 +127,7 @@ class modSynopsisFinanc extends DolibarrModules
 //					'mainmenu'=>'Process',
 //					'leftmenu'=>'apple',
 //					'url'=>'/synopsisapple/test.php',
-//					'langs'=>'global@Synopsis_Tools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+//					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 //					'position'=>200,
 //					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 //					'perms'=>'synopsisapple@read    ',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
@@ -140,7 +140,7 @@ class modSynopsisFinanc extends DolibarrModules
 //					'mainmenu'=>'apple',
 //					'leftmenu'=>'apple',
 //					'url'=>'/synopsisapple/FicheRapide.php',
-//					'langs'=>'global@Synopsis_Tools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+//					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 //					'position'=>201,
 //					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 //					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
@@ -153,7 +153,7 @@ class modSynopsisFinanc extends DolibarrModules
 //					'mainmenu'=>'apple',
 //					'leftmenu'=>'apple',
 //					'url'=>'/synopsisapple/test.php',
-//					'langs'=>'global@Synopsis_Tools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+//					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 //					'position'=>201,
 //					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 //					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
@@ -166,15 +166,15 @@ class modSynopsisFinanc extends DolibarrModules
 //					'mainmenu'=>'apple',
 //					'leftmenu'=>'apple',
 //					'url'=>'/synopsisapple/exportSav.php',
-//					'langs'=>'global@Synopsis_Tools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+//					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 //					'position'=>201,
 //					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 //					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 //					'target'=>'',
 //					'user'=>0);	
         
-//        $this->tabs = array('contract:+financ:Financement:synopsisGene@Synopsis_Tools:/synopsisfinanc/financeContrat.php?id=__ID__');
-        $this->tabs = array('propal:+financ:Financement:synopsisGene@Synopsis_Tools:/synopsisfinanc/financePropal.php?id=__ID__');
+//        $this->tabs = array('contract:+financ:Financement:synopsisGene@synopsistools:/synopsisfinanc/financeContrat.php?id=__ID__');
+        $this->tabs = array('propal:+financ:Financement:synopsisGene@synopsistools:/synopsisfinanc/financePropal.php?id=__ID__');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

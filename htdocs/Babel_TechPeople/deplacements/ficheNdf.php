@@ -25,7 +25,7 @@
 require_once('./pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/core/lib/deplacement.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $id =$_REQUEST['id'];
 

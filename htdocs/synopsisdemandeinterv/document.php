@@ -48,7 +48,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 
 $langs->load('compta');
 $langs->load('other');
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('interventions');
 
 $action = empty($_GET['action']) ? (empty($_POST['action']) ? '' : $_POST['action']) : $_GET['action'];

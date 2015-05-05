@@ -25,7 +25,7 @@ $langs->load("admin");
 $langs->load("bills");
 $langs->load("deplacement");
 $langs->load("other");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 if (!$user->admin)
   accessforbidden();

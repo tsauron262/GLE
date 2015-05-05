@@ -1473,7 +1473,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $outputlangs->load("main");
         $outputlangs->load("bills");
         $outputlangs->load("contract");
-        $outputlangs->load('synopsisGene@Synopsis_Tools');
+        $outputlangs->load('synopsisGene@synopsistools');
         $outputlangs->load("companies");
 
         //Affiche le filigrane brouillon - Print Draft Watermark
@@ -1623,7 +1623,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $outputlangs->load("main");
         $outputlangs->load("bills");
         $outputlangs->load("contract");
-        $outputlangs->load('synopsisGene@Synopsis_Tools');
+        $outputlangs->load('synopsisGene@synopsistools');
         $outputlangs->load("companies");
 
         //Affiche le filigrane brouillon - Print Draft Watermark
@@ -1729,7 +1729,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $outputlangs->load("main");
         $outputlangs->load("bills");
         $outputlangs->load("contract");
-        $outputlangs->load('synopsisGene@Synopsis_Tools');
+        $outputlangs->load('synopsisGene@synopsistools');
         $outputlangs->load("companies");
 
         //Affiche le filigrane brouillon - Print Draft Watermark

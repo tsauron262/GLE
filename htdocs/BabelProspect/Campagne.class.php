@@ -535,7 +535,7 @@ class Campagne {
     function LibStatut($statut,$mode=1)
     {
         global $langs;
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
 
         if ($mode == 0)
         {

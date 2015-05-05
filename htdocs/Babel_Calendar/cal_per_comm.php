@@ -61,7 +61,7 @@ $dtreeJs .= '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/Babel
 
 
 llxHeader($dtreeJs.$css);
-$langs->load('synopsisGene@Synopsis_Tools');
+$langs->load('synopsisGene@synopsistools');
 $langs->load('BabelCal');
 
 

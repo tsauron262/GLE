@@ -24,7 +24,7 @@ require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 $langs->load("companies");
 $langs->load("commercial");
 $langs->load("bills");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 // Security check
 $socid = isset($_GET["socid"])?$_GET["socid"]:'';

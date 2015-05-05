@@ -43,7 +43,7 @@ if ($actionsave)
     $i+=dolibarr_set_const($db,'MAIN_MODULE_GEOBI_LNGDEFAULT',trim($_POST["GEOBI_LNGDEFAULT"]),'',0);
     $i+=dolibarr_set_const($db,'MAIN_MODULE_GEOBI_LATDEFAULT',trim($_POST["GEOBI_LATDEFAULT"]),'',0);
 
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
     if ($i >= 2)
     {
         $db->commit();

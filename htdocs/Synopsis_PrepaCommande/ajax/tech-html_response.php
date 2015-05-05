@@ -30,7 +30,7 @@ $socid=$res->fk_soc;
     $langs->load("customers");
     $langs->load("suppliers");
     $langs->load("banks");
-    $langs->load("synopsisGene@Synopsis_Tools");
+    $langs->load("synopsisGene@synopsistools");
 
     // Security check
     //$socid = isset($_GET["socid"])?$_GET["socid"]:'';

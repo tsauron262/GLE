@@ -9,7 +9,7 @@
  * GLE-1.2
  */
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 
 $langs->load("chrono@synopsischrono");
 

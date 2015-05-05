@@ -5,7 +5,7 @@ require '../main.inc.php';
 
 global $tabCentre;
 
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 
 require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
 include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');

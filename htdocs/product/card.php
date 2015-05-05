@@ -34,7 +34,7 @@
 
 require '../main.inc.php';
 if(isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE)){
-    require DOL_DOCUMENT_ROOT.'/Synopsis_Tools/product/fiche.php';
+    require DOL_DOCUMENT_ROOT.'/synopsistools/product/fiche.php';
     die;
 }
 

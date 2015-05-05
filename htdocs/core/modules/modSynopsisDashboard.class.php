@@ -1078,7 +1078,7 @@ class modSynopsisDashboard extends DolibarrModules {
      */
 //	function load_tables()
 //	{
-//		return $this->_load_tables('/Synopsis_Tools/dasboard2/sql/');
+//		return $this->_load_tables('/synopsistools/dasboard2/sql/');
 //	}
 }
 

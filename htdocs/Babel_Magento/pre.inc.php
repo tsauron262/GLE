@@ -33,7 +33,7 @@
   */
 require("../main.inc.php");
 
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 function llxHeader($head = "", $urlp = "")
 {

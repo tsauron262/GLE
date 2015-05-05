@@ -43,11 +43,11 @@ require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/lib/synopsischrono.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 
 $langs->load("companies");
 $langs->load('other');
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $mesg = "";
 

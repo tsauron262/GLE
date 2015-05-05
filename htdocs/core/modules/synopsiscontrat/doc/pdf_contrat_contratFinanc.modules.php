@@ -22,6 +22,11 @@ require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
+
+
+
+
+
 //TODO  addresse livraison lié au contrat
 //TODO filtre sur statuts ???
 
@@ -207,7 +212,13 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
                 $this->pdf=$pdf;
                 if (class_exists('TCPDF'))
                 {
-                    $pdf->setPrintHeader(false);
+                    
+                 if(get_class($pdf) == "FPDI"){
+                    $pdf = getNewPdf($this->format);
+                    $this->pdf=$pdf;
+                 }
+                    
+                    $pdf->setPrintHeader(true);
                     $pdf->setPrintFooter(false);
                 }
 
@@ -217,6 +228,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
                     $pdf1->setPrintHeader(false);
                     $pdf1->setPrintFooter(false);
                 }
+                
 
                 $pdf->Open();
                 $pdf1->Open();
@@ -240,7 +252,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat
                 //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
 
                 // Tete de page
-                $this->_pagehead($pdf, $contrat, 1, $outputlangs);
+//                $this->_pagehead($pdf, $contrat, 1, $outputlangs);
                 $pdf->SetFont(''/*'Arial'*/, 'B', 9);
 
 //locataire/////////////////////////////////////////////////////////////////////
@@ -470,13 +482,14 @@ l’article 1 ci-dessus.", 0, 'L');
         return 0;   // Erreur par defaut
     }
 
-    function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage=0)
+    function Header(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage=0)
     {
         global $conf, $langs;
         if ($currentPage > 1)
         {
             $showadress=0;
         }
+        die;
     }
 
 
@@ -509,5 +522,13 @@ l’article 1 ci-dessus.", 0, 'L');
 
 }
 
+function getNewPdf($format){
+    class FPDI222 extends FPDI {
+        function setHeader(){
+
+        }
+    }
+    return new FPDI222('P', 'mm', $format);
+}
 
 ?>

@@ -18,7 +18,7 @@
   */
 
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/Chrono.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/class/chrono.class.php');
 
 
 // The get widget handler.
@@ -128,8 +128,8 @@ function widget_listChronoModele[MARK1]() {
         'settings' => true,
         'reload' => true,
         'fullscreen' => utf8_encode($table2),
-        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
-        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
+        'fullscreenScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/fullscreen.js',
+        'fullscreenInitScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/initFullscreen.js',
       );
 
     }else {

@@ -89,7 +89,7 @@ $langs->load("orders");
 $langs->load("bills");
 $langs->load("companies");
 $langs->load("sendings");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $factureid=$_GET['facture_id'];
 if ("x".$factureid == "x")

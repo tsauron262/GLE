@@ -112,7 +112,7 @@ class ModeleImputations extends CommonDocGenerator
 function imputations_pdf_create($db, $id, $modele='', $outputlangs='')
 {
     global $langs,$conf,$user;
-    $langs->load("synopsisGene@Synopsis_Tools");
+    $langs->load("synopsisGene@synopsistools");
     $langs->load("projects");
     $dir = DOL_DOCUMENT_ROOT."/core/modules/imputation/";
     $modelisok=0;

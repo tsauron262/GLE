@@ -22,7 +22,7 @@
 
 require_once("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/Chrono.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/class/chrono.class.php');
 
 if (!$user->admin && !$user->local_admin)
     accessforbidden();
@@ -49,7 +49,7 @@ $id = $_REQUEST['id'];
     $widgetTxt = file_get_contents(DOL_DOCUMENT_ROOT."/synopsischrono/widget_modele/widget-modele.tpl");
     $widgetTxt = preg_replace('/\[MARK1\]/',$id,$widgetTxt);
     $widgetTxt = preg_replace('/\[MARK2\]/',utf8_encode($titre),$widgetTxt);
-    $newFile = DOL_DOCUMENT_ROOT."/Synopsis_Tools/dashboard/widgets/listChronoModele".$id.".inc";
+    $newFile = DOL_DOCUMENT_ROOT."/synopsistools/dashboard/widgets/listChronoModele".$id.".inc";
     if(is_file($newFile))
     {
         unlink ($newFile);
@@ -249,7 +249,7 @@ $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToM
 
 print_fiche_titre($langs->trans("Chrono"),$linkback,'setup');
 
-require_once(DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
 $chr = new Chrono($db);
 $chr->model_refid=$_REQUEST['id'];
@@ -461,8 +461,8 @@ print '<br>';
     while ($res = $db->fetch_object($sql)){
         print "<tr>";
         
-        print "    <td width=30 align=center class='ui-widget-content'><a href='".DOL_URL_ROOT."/Synopsis_Tools/ajax/order.php?type=chrono_key&idElem=".$res->id."&idFk=".$_REQUEST['id']."&newRang=".($res->rang + 1)."&oldRang=".$res->rang."'>\/</a>";
-        print "   <a href='".DOL_URL_ROOT."/Synopsis_Tools/ajax/order.php?type=chrono_key&idElem=".$res->id."&idFk=".$_REQUEST['id']."&newRang=".($res->rang - 1)."&oldRang=".$res->rang."'>/\</a>";
+        print "    <td width=30 align=center class='ui-widget-content'><a href='".DOL_URL_ROOT."/synopsistools/ajax/order.php?type=chrono_key&idElem=".$res->id."&idFk=".$_REQUEST['id']."&newRang=".($res->rang + 1)."&oldRang=".$res->rang."'>\/</a>";
+        print "   <a href='".DOL_URL_ROOT."/synopsistools/ajax/order.php?type=chrono_key&idElem=".$res->id."&idFk=".$_REQUEST['id']."&newRang=".($res->rang - 1)."&oldRang=".$res->rang."'>/\</a>";
         print "<td width=20% class='ui-widget-content'>".$res->nom;
         print "    <td width=40% class='ui-widget-content'>".$res->description;
         print "    <td width=10% class='ui-widget-content'>".$res->extraCss;

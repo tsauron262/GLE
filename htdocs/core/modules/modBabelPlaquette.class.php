@@ -107,7 +107,7 @@ class modBabelPlaquette extends DolibarrModules
                             'mainmenu'=>'Plaquettes',
                             'leftmenu'=>'1',        // To say if we can overwrite leftmenu
                             'url'=>'/Babel_plaquette/index.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'langs' => 'synopsisGene@synopsistools',
                             'position'=>130,
                             'perms'=>'$user->rights->Plaquette->Global->AffichePlaquette',
                             'target'=>'',

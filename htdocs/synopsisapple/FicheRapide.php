@@ -10,9 +10,9 @@ require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 require_once DOL_DOCUMENT_ROOT . '/Synopsis_Process/process.class.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsischrono/Chrono.class.php';
-$js = "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/Synopsis_Tools/css/global.css' />";
-$js.= "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/Synopsis_Tools/css/BIMP.css' />";
+require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
+$js = "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/synopsistools/css/global.css' />";
+$js.= "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/synopsistools/css/BIMP.css' />";
 $js.= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 $js.= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/fiche.js' ></script>";
 $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContact2").click(function() {
@@ -328,7 +328,7 @@ if ($socid != "") {
     echo "<td class='ui-widget-content' colspan='1'>";
     echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='NoMachine' class='required'/>";
     echo "<span id='patientez' style='display:none; margin-left:15px;'>";
-    echo "<img src='" . DOL_URL_ROOT . "/Synopsis_Tools/img/load.gif' title='Chargement des informations GSX en cours' alt='Chargement des informations GSX en cours'/>";
+    echo "<img src='" . DOL_URL_ROOT . "/synopsistools/img/load.gif' title='Chargement des informations GSX en cours' alt='Chargement des informations GSX en cours'/>";
     echo "</span>";
     echo "</td>";
     echo "</tr>";

@@ -1,1 +1,0 @@
-Desinstall + reinstall synopsis_Tools

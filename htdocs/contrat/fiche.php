@@ -1186,10 +1186,10 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                                 location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
                             });
                             elem.find(".haut").click(function(){
-                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk="+idCt+"&newRang="+(j-1)+"&oldRang="+j;
+                                location.href = DOL_URL_ROOT+"/synopsistools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk="+idCt+"&newRang="+(j-1)+"&oldRang="+j;
                             });
                             elem.find(".bas").click(function(){
-                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk="+idCt+"&newRang="+(j+1)+"&oldRang="+j;
+                                location.href = DOL_URL_ROOT+"/synopsistools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk="+idCt+"&newRang="+(j+1)+"&oldRang="+j;
                             });
                         });
             });</script>';

@@ -132,12 +132,12 @@ class InterfaceZimbraSync {
         }
         if (!$langs)
             global $langs;
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         // Actions
 //        if ($action == 'COMPANY_CREATE')
 //        {
 //            dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-//            $langs->load("synopsisGene@Synopsis_Tools");
+//            $langs->load("synopsisGene@synopsistools");
 //
 ////            file_put_contents("/tmp/somefile","created soc".$objet->nom);
 //            //on cree le calendrier  on ajoute la date e création de la société

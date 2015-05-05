@@ -45,7 +45,7 @@ require_once("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/deplacement.lib.php");
 
 $langs->load("trips");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 // Security check
 $id=isset($_GET["id"])?$_GET["id"]:$_POST["id"];

@@ -8,7 +8,7 @@
  * GLE-1.2
  */
 require_once('../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/chronoDetailList.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 
@@ -150,7 +150,7 @@ foreach ($tabModel as $model => $data) {
     $html .= '<div id="pan' . $nomDiv . '">';
 
     if ($model == 105) {
-//        $html .= "<a class='butAction' href='".DOL_URL_ROOT."/Synopsis_Tools/FicheRapide.php/'>Créer SAV</a><br/><br/>";
+//        $html .= "<a class='butAction' href='".DOL_URL_ROOT."/synopsistools/FicheRapide.php/'>Créer SAV</a><br/><br/>";
     } else {
         $html .= "<a class='butAction' onclick='" . $champJs . " "
                 . "         ajaxAddChrono(" . $model . ", \"" . $socid . "\", tabChamp, function(id){"

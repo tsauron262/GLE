@@ -131,7 +131,7 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
 //$centre = "CB";
 
 
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
 $export = new synopsisexport($db, $sortie);
 $export->exportChronoSav($centre, $typeAff, $typeAff2, $paye, $dateDeb, $dateFin, $blockCentre);
 

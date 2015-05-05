@@ -26,7 +26,7 @@ require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
 
 $langs->load('companies');
 $langs->load('commercial');
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
  $parentId = $_REQUEST['parent'];
  $user_id = $_REQUEST['userId'];

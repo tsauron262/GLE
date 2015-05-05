@@ -41,7 +41,7 @@
 require ("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 
-//$langs->load("synopsisGene@Synopsis_Tools");
+//$langs->load("synopsisGene@synopsistools");
 //$langs->load("companies");
 //$langs->load("bills");
 //$langs->load("orders");

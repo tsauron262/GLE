@@ -30,7 +30,7 @@ if (!$user->admin)
 
 $langs->load("admin");
 $langs->load("other");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $def = array();
 $actionsave=$_POST["save"];

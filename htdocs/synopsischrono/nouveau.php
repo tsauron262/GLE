@@ -74,7 +74,7 @@ $js .= <<< EOF
 EOF;
 
 if ($_REQUEST['action'] == 'add') {
-    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
     $chrono = new Chrono($db);
     $chrono->description = addslashes($_REQUEST['description']);
     $chrono->socid = addslashes($_REQUEST['socid']);

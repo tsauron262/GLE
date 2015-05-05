@@ -209,8 +209,8 @@ class pdf_panier_ extends ModeleSynopsispanier {
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-//                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
-//                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');
+//                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/synopsistools/font/VeraMoBI.php');
+//                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/synopsistools/font/fq-logo.php');
                 // Tete de page
 //                $panier = new Object();
 

@@ -9,7 +9,7 @@ include("./listByObjet.php");die;
  * GLE-1.2
  */
 require_once('pre.inc.php');
-require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/chronoDetailList.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 

@@ -100,7 +100,7 @@ class ModeleContratGMAO extends CommonDocGenerator {
  */
 function contratGMAO_pdf_create($db, $id, $modele = '', $outputlangs = '') {
     global $langs, $conf;
-    $langs->load("synopsisGene@Synopsis_Tools");
+    $langs->load("synopsisGene@synopsistools");
     $langs->load("contracts");
 
     $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/doc/";
@@ -232,7 +232,7 @@ class ModeleNumRefContratGMAO {
     function info() {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoDescription");
     }
 
@@ -242,7 +242,7 @@ class ModeleNumRefContratGMAO {
     function getExample() {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoExample");
     }
 

@@ -42,7 +42,7 @@
 */
 
 include_once("modules_chrono.php");
-include_once("Chrono.class.php");
+include_once("class/chrono.class.php");
 
 
 /**

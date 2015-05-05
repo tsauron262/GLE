@@ -23,10 +23,10 @@ require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/prospect.class.php");
 
 $langs->load("propal");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('companies');
 $langs->load('commercial');
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
  $user_id = $_REQUEST['userId'];
 

@@ -31,7 +31,7 @@ $campagneId = $_REQUEST['campagneId'];
 //$langs->load("companies");
 //$langs->load("commercial");
 //$langs->load("bills");
-//$langs->load("synopsisGene@Synopsis_Tools");
+//$langs->load("synopsisGene@synopsistools");
 
 //// Security check
 //$socid = isset($_GET["socid"])?$_GET["socid"]:'';
@@ -46,7 +46,7 @@ $campagneId = $_REQUEST['campagneId'];
 $langs->load("companies");
 $langs->load("commercial");
 $langs->load("bills");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 // Security check
 $socid = isset($_GET["socid"])?$_GET["socid"]:'';

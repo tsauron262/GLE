@@ -56,7 +56,7 @@ if (isset($_GET['action'])) {
 //        case 'addCartToPropal':
 //            if (isset($_GET['chronoId'])) {
 //                require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-//                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+//                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 //                $chr = new Chrono($db);
 //                $chr->fetch($_GET['chronoId']);
 //                $propalId = $chr->propalid;
@@ -178,7 +178,7 @@ if (isset($_GET['action'])) {
             if ($cart->saveCart()) {
                 if (isset($_POST['addToPropal']) && ($_POST['addToPropal'] == 1)) {
                     require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
                     $chr = new Chrono($db);
                     $chr->fetch($_GET['chronoId']);
                     $propalId = $chr->propalid;

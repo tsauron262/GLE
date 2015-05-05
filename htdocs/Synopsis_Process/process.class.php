@@ -114,7 +114,7 @@ function printHead($type, $id, $js = '') {
             break;
         case "Chrono": {
 
-                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
                 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/lib/synopsischrono.lib.php");
                 $obj = new Chrono($db);
                 $obj->fetch($id);

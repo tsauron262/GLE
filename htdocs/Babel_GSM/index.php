@@ -26,7 +26,7 @@ if ($user->rights->BabelGSM->BabelGSM->Affiche !=1)
     exit(0);
 }
 global $user;
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 //require ("./main.inc.php");
 
 require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");

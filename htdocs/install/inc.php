@@ -76,7 +76,7 @@ $conffiletoshow = "htdocs/conf/conf.php";
 //$conffile = "/etc/dolibarr/conf.php";
 //$conffiletoshow = "/etc/dolibarr/conf.php";
 
-/*mod drsi*/ include("../Synopsis_Tools/includeConf.inc.php"); /*f mod drsi */
+/*mod drsi*/ include("../synopsistools/includeConf.inc.php"); /*f mod drsi */
 
 if (! defined('DONOTLOADCONF') && file_exists($conffile))
 {

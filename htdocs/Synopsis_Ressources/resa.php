@@ -35,7 +35,7 @@ $ressourceId = $_REQUEST['ressource_id'];
 $langs->load("companies");
 $langs->load("commercial");
 $langs->load("bills");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 
 

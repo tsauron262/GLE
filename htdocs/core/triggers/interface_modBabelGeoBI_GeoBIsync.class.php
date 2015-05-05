@@ -119,7 +119,7 @@ class InterfaceGeoBIsync
 
         // Mettre ici le code e executer en reaction de l'action
         if (!$langs) global $langs;
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
         $db=$this->db;
         require_once(DOL_DOCUMENT_ROOT.'/hrm/hrm.class.php');
         $hrm = new hrm($db);

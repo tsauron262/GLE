@@ -274,7 +274,7 @@ class pdf_azurSAV extends ModelePDFPropales
                                 
                                 
                                 //img agree
-                                $pdf->Image(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/img/agree.jpg", 80, 6, 60, null);
+                                $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg", 80, 6, 60, null);
                                 
                                 
                                 

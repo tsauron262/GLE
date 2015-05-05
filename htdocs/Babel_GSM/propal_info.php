@@ -86,7 +86,7 @@ $gsm = new gsm($db,$user);
 
 
 $langs->load("propal");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('companies');
 $langs->load('compta');
 $langs->load('bills');

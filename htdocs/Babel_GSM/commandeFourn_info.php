@@ -94,7 +94,7 @@ require_once(DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php');
 
 $langs->load("propal");
 $langs->load("deliveries");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 $langs->load('companies');
 $langs->load('compta');
 $langs->load('bills');

@@ -26,7 +26,7 @@ $project_id=$_REQUEST['projet_id'];
 $langs->load("companies");
 $langs->load("commercial");
 $langs->load("bills");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 // Security check
 $socid = isset($_GET["socid"])?$_GET["socid"]:'';

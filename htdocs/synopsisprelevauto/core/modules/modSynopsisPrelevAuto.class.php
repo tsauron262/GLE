@@ -46,7 +46,7 @@ class modSynopsisPrelevAuto extends DolibarrModules
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISPRELEVAUTO';
         $this->special = 0;
-        $this->picto='tools@Synopsis_Tools';
+        $this->picto='tools@synopsistools';
 
         // Dir
         $this->dirs = array("synopsisprelevauto");
@@ -91,7 +91,7 @@ $this->menus = array();			// List of menus to add
 					'mainmenu'=>'tools',
 					'leftmenu'=>'prelevAuto',
 					'url'=>'/synopsisprelevauto/list.php',
-					'langs'=>'global@Synopsis_Tools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>200,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=>'1',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
@@ -104,14 +104,14 @@ $this->menus = array();			// List of menus to add
 					'mainmenu'=>'prelevAuto',
 					'leftmenu'=>'prelevAuto',
 					'url'=>'/synopsisprelevauto/list.php',
-					'langs'=>'global@Synopsis_Tools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>201,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=>'1',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);	
         
-        $this->tabs = array('contract:+prelevAuto:Prélèvement:synopsisGene@Synopsis_Tools:/synopsisprelevauto/prelev.php?id=__ID__&type=contrat');
+        $this->tabs = array('contract:+prelevAuto:Prélèvement:synopsisGene@synopsistools:/synopsisprelevauto/prelev.php?id=__ID__&type=contrat');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

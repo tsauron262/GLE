@@ -149,7 +149,7 @@ function pictoSMS($idChrono) {
     else {
         $return = "";
         foreach ($tabMessage as $message)
-            $return .= '<a href="#" onclick="dispatchePopObject(\'&msg=' . urlencode($message[2]) . '&fromsms=' . $fromsms . '&to=' . $to . '\', \'sms\',function(){}, \'SMS\', 100);">' . (($message[0] != "") ? img_picto($message[1], $message[0] . "@Synopsis_Tools") : $message[1]) . '</a> ';
+            $return .= '<a href="#" onclick="dispatchePopObject(\'&msg=' . urlencode($message[2]) . '&fromsms=' . $fromsms . '&to=' . $to . '\', \'sms\',function(){}, \'SMS\', 100);">' . (($message[0] != "") ? img_picto($message[1], $message[0] . "@synopsistools") : $message[1]) . '</a> ';
         return $return;
     }
 }

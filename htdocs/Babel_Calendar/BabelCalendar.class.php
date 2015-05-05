@@ -18,7 +18,7 @@ class BabelCalendar {
 
     public function BabelCalendar($langs) {
           $this->langs = $langs;
-          $this->langs->load('synopsisGene@Synopsis_Tools');
+          $this->langs->load('synopsisGene@synopsistools');
           $this->langs->load("BabelCal");
     }
 

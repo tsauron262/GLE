@@ -21,7 +21,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 $langs->load("admin");
 $langs->load("bills");
 $langs->load("other");
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 if (!$user->admin || !$conf->global->MAIN_MODULE_BABELGA)
   accessforbidden();

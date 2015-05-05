@@ -1,4 +1,5 @@
 <?php
+
 /*
  * GLE by Synopsis et DRSI
  *
@@ -13,31 +14,26 @@
  */
 
 /**     \defgroup   ProspectBabel     Module ProspectBabel
-        \brief      Module pour inclure ProspectBabel dans Dolibarr
-*/
-
+  \brief      Module pour inclure ProspectBabel dans Dolibarr
+ */
 /**
-        \file       htdocs/core/modules/modProspectBabel.class.php
-        \ingroup    ProspectBabel
-        \brief      Fichier de description et activation du module de Prospection Babel
-*/
-
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+  \file       htdocs/core/modules/modProspectBabel.class.php
+  \ingroup    ProspectBabel
+  \brief      Fichier de description et activation du module de Prospection Babel
+ */
+include_once(DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php");
 
 /**     \class      modProspectBabel
-        \brief      Classe de description et activation du module de Prospection Babel
-*/
+  \brief      Classe de description et activation du module de Prospection Babel
+ */
+class modSynopsisChrono extends DolibarrModules {
 
-class modSynopsisChrono extends DolibarrModules
-{
-
-   /**
-    *   \brief      Constructeur. Definit les noms, constantes et boites
-    *   \param      DB      handler d'acces base
-    */
-    function modSynopsisChrono($DB)
-    {
-        $this->db = $DB ;
+    /**
+     *   \brief      Constructeur. Definit les noms, constantes et boites
+     *   \param      DB      handler d'acces base
+     */
+    function modSynopsisChrono($DB) {
+        $this->db = $DB;
         $this->numero = 8000;
 
         $this->family = "Synopsis";
@@ -46,7 +42,7 @@ class modSynopsisChrono extends DolibarrModules
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISCHRONO';
         $this->special = 0;
-        $this->picto='chrono@synopsischrono';
+        $this->picto = 'chrono@synopsischrono';
 
         // Dir
         $this->dirs = array();
@@ -64,77 +60,74 @@ class modSynopsisChrono extends DolibarrModules
 
 //        // Boites
 //        $this->boxes = array();
-
-    // Boites
+        // Boites
 //    $this->boxes = array();
 //    $r=0;
 //    $this->boxes[$r][1] = "box_deplacement.php";
 //    $r++;
-
-
         // Permissions
         $this->rights = array();
         $this->rights_class = 'synopsischrono';
 
         $r = 0;
 
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Acc&egrave;s au module chrono';
         $this->rights[$r][2] = 'r'; //useless
         $this->rights[$r][3] = 1; // Default
         $this->rights[$r][4] = 'read'; // Droit
         $r ++;
 
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'G&eacute;n&eacute;rer un num&eacute;ro chrono';
         $this->rights[$r][2] = 'r'; //useless
         $this->rights[$r][3] = 1; // Default
         $this->rights[$r][4] = 'Generer'; // Droit
         $r ++;
 
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Modifier un chrono';
         $this->rights[$r][2] = 'r'; //useless
         $this->rights[$r][3] = 1; // Default
         $this->rights[$r][4] = 'Modifier'; // Droit
         $r ++;
 
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Valider un chrono';
         $this->rights[$r][2] = 'r'; //useless
         $this->rights[$r][3] = 1; // Default
         $this->rights[$r][4] = 'Valider'; // Droit
         $r ++;
 
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Modifier un chrono apr&egrave;s validation';
         $this->rights[$r][2] = 'r'; //useless
         $this->rights[$r][3] = 1; // Default
         $this->rights[$r][4] = 'ModifierApresValide'; // Droit
         $r ++;
 
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][0] = $this->numero . $r; // this->numero ."". 1
         $this->rights[$r][1] = 'Supprimer un chrono brouillon';
         $this->rights[$r][2] = 'r'; //useless
         $this->rights[$r][3] = 1; // Default
         $this->rights[$r][4] = 'Supprimer'; // Droit
         $r ++;
 
-/*
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
-        $this->rights[$r][1] = 'Afficher le module 2';
-        $this->rights[$r][2] = 'r'; //useless
-        $this->rights[$r][3] = 1; // Default
-        $this->rights[$r][4] = 'Global'; // Famille
-        $this->rights[$r][5] = 'read'; // Droit
-        $r ++;
-        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
-        $this->rights[$r][1] = 'Afficher le module3';
-        $this->rights[$r][2] = 'r'; //useless
-        $this->rights[$r][3] = 1; // Default
-        $this->rights[$r][4] = 'Global'; // Famille
-        $this->rights[$r][5] = 'run'; // Droit
-        $r ++;*/
+        /*
+          $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+          $this->rights[$r][1] = 'Afficher le module 2';
+          $this->rights[$r][2] = 'r'; //useless
+          $this->rights[$r][3] = 1; // Default
+          $this->rights[$r][4] = 'Global'; // Famille
+          $this->rights[$r][5] = 'read'; // Droit
+          $r ++;
+          $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+          $this->rights[$r][1] = 'Afficher le module3';
+          $this->rights[$r][2] = 'r'; //useless
+          $this->rights[$r][3] = 1; // Default
+          $this->rights[$r][4] = 'Global'; // Famille
+          $this->rights[$r][5] = 'run'; // Droit
+          $r ++; */
 
 //
 //        $this->menu[$r]=array('fk_menu'=>0,
@@ -154,7 +147,7 @@ class modSynopsisChrono extends DolibarrModules
 //                            'titre'=>'Campagne de prospection',
 //                            'mainmenu'=>'prospection',
 //                            'url'=>'/BabelProspect/nouvelleProspection.php',
-//                            'langs' => 'synopsisGene@Synopsis_Tools',
+//                            'langs' => 'synopsisGene@synopsistools',
 //                            'position'=>100,
 //                            'perms'=>'$user->rights->prospectbabe->Prospection->Affiche',
 //                            'target'=>'',
@@ -163,104 +156,108 @@ class modSynopsisChrono extends DolibarrModules
 
 
         $this->menus = array();            // List of menus to add
-        $r=0;
+        $r = 0;
 //        $this->menu[$r]=array(
 //                            'type'=>'top',
 //                            'titre'=>'Chrono',
 //                            'mainmenu'=>'Process',
 //                            'leftmenu'=>'0',        // To say if we can overwrite leftmenu
 //                            'url'=>'/synopsischrono/index.php',
-//                            'langs' => 'synopsisGene@Synopsis_Tools',
+//                            'langs' => 'synopsisGene@synopsistools',
 //                            'position'=>130,
 //                            'perms'=>'$user->rights->synopsischrono->read',
 //                            'target'=>'',
 //                            'user'=>0);
         $s = $r;
         $r++;
-        $this->menu[$r]=array('fk_menu'=> 'fk_mainmenu=Process',
-                            'type'=>'left',
-                            'titre'=>'Chrono',
-                            'mainmenu'=>'Process',
-                            'leftmenu'=>'Chrono',        // To say if we can overwrite leftmenu
-                            'url'=>'/synopsischrono/index.php?leftmenu=chrono',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'position'=>1,
-                            'perms'=>'$user->rights->synopsischrono->read',
-                            'target'=>'',
-                            'user'=>0);
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=Process',
+            'type' => 'left',
+            'titre' => 'Chrono',
+            'mainmenu' => 'Process',
+            'leftmenu' => 'Chrono', // To say if we can overwrite leftmenu
+            'url' => '/synopsischrono/index.php?leftmenu=chrono',
+            'langs' => 'synopsisGene@synopsistools',
+            'position' => 1,
+            'perms' => '$user->rights->synopsischrono->read',
+            'target' => '',
+            'user' => 0);
         $s = $r;
         $r++;
-        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=Chrono',
-                            'type'=>'left',
-                            'titre'=>'Liste',
-                            'mainmenu'=>'Process',
-                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
-                            'url'=>'/synopsischrono/liste.php?leftmenu=chrono',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'position'=>1,
-                            'perms'=>'$user->rights->synopsischrono->read',
-                            'target'=>'',
-                            'user'=>0);
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=Process,fk_leftmenu=Chrono',
+            'type' => 'left',
+            'titre' => 'Liste',
+            'mainmenu' => 'Process',
+            'leftmenu' => '1', // To say if we can overwrite leftmenu
+            'url' => '/synopsischrono/liste.php?leftmenu=chrono',
+            'langs' => 'synopsisGene@synopsistools',
+            'position' => 1,
+            'perms' => '$user->rights->synopsischrono->read',
+            'target' => '',
+            'user' => 0);
         $r++;
-        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=Chrono',
-                            'type'=>'left',
-                            'titre'=>'Liste d&eacute;tails',
-                            'mainmenu'=>'Process',
-                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
-                            'url'=>'/synopsischrono/listDetail.php?leftmenu=chrono',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'position'=>1,
-                            'perms'=>'$user->rights->synopsischrono->read',
-                            'target'=>'',
-                            'user'=>0);
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=Process,fk_leftmenu=Chrono',
+            'type' => 'left',
+            'titre' => 'Liste d&eacute;tails',
+            'mainmenu' => 'Process',
+            'leftmenu' => '1', // To say if we can overwrite leftmenu
+            'url' => '/synopsischrono/listDetail.php?leftmenu=chrono',
+            'langs' => 'synopsisGene@synopsistools',
+            'position' => 1,
+            'perms' => '$user->rights->synopsischrono->read',
+            'target' => '',
+            'user' => 0);
 
         $r++;
-        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=Chrono',
-                            'type'=>'left',
-                            'titre'=>'Nouveau',
-                            'mainmenu'=>'Process',
-                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
-                            'url'=>'/synopsischrono/nouveau.php?leftmenu=chrono',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'position'=>2,
-                            'perms'=>'$user->rights->synopsischrono->Generer',
-                            'target'=>'',
-                            'user'=>0);
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=Process,fk_leftmenu=Chrono',
+            'type' => 'left',
+            'titre' => 'Nouveau',
+            'mainmenu' => 'Process',
+            'leftmenu' => '1', // To say if we can overwrite leftmenu
+            'url' => '/synopsischrono/nouveau.php?leftmenu=chrono',
+            'langs' => 'synopsisGene@synopsistools',
+            'position' => 2,
+            'perms' => '$user->rights->synopsischrono->Generer',
+            'target' => '',
+            'user' => 0);
         $r++;
-        
-        
-        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools',
-                            'type'=>'left',
-                            'titre'=>'Chrono',
-                            'mainmenu'=>'SynopsisTools',
-                            'leftmenu' => 'SynopsisChrono',
-                            'url'=>'/synopsischrono/liste.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'perms'=>'$user->rights->synopsischrono->read',
-                            'position'=>15,
-                            'target'=>'',
-                            'user'=>0);
+
+
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools',
+            'type' => 'left',
+            'titre' => 'Chrono',
+            'mainmenu' => 'SynopsisTools',
+            'leftmenu' => 'SynopsisChrono',
+            'url' => '/synopsischrono/liste.php',
+            'langs' => 'synopsisGene@synopsistools',
+            'perms' => '$user->rights->synopsischrono->read',
+            'position' => 15,
+            'target' => '',
+            'user' => 0);
         $r++;
-        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools,fk_leftmenu=SynopsisChrono',
-                            'type'=>'left',
-                            'titre'=>'Config',
-                            'url'=>'/synopsischrono/admin/synopsischrono.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'perms'=>'$user->rights->synopsischrono->Generer',
-                            'position'=>151,
-                            'target'=>'',
-                            'user'=>0);
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=SynopsisChrono',
+            'type' => 'left',
+            'titre' => 'Config',
+            'url' => '/synopsischrono/admin/synopsischrono.php',
+            'langs' => 'synopsisGene@synopsistools',
+            'perms' => '$user->rights->synopsischrono->Generer',
+            'position' => 151,
+            'target' => '',
+            'user' => 0);
         $r++;
+
+        $this->module_parts = array(
+            'hooks' => array('printTopRightMenu', 'toprightmenu', 'printSearchForm')  // Set here all hooks context you want to support
+        );
     }
-   /**
-    *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
-    *               Definit egalement les repertoires de donnees e creer pour ce module.
-    */
-  function init()
-  {
+
+    /**
+     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
+     *               Definit egalement les repertoires de donnees e creer pour ce module.
+     */
+    function init() {
         $this->remove();
-    $sql = array("UPDATE ".MAIN_DB_PREFIX."menu set Titre = 'Chrono/Process', url = '/synopsischrono/index.php' WHERE Titre = 'Process' AND type ='top'", 
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono` (
+        $sql = array("UPDATE " . MAIN_DB_PREFIX . "menu set Titre = 'Chrono/Process', url = '/synopsischrono/index.php' WHERE Titre = 'Process' AND type ='top'",
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime DEFAULT NULL,
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -285,7 +282,7 @@ class modSynopsisChrono extends DolibarrModules
   KEY `fk_socpeople` (`fk_socpeople`),
   KEY `fk_societe` (`fk_societe`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_conf` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_conf` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `titre` varchar(50) DEFAULT NULL,
   `description` text,
@@ -322,7 +319,7 @@ class modSynopsisChrono extends DolibarrModules
 //(102, 'Licence', '', 0, 0, 0, 0, 0, 0, NULL, 'LIC-{0000}', '2013-11-03', '2013-11-18 01:04:56', 1, 0, 1, 0, 'Nom', 1),
 //(103, 'Compte Utilisateur', '', 0, 0, 1, 0, 0, 0, NULL, 'USER{00000}', '2013-11-03', '2013-11-18 00:57:45', 1, 0, 1, 0, 'Description', 2),
 //(104, 'Site', '', 0, 0, 1, 0, 0, 0, NULL, 'Site{0000}', '2013-11-18', '2013-11-18 01:03:21', 1, 0, 1, 0, 'Nom', 1);",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_form_fct_value` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_form_fct_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fct_refid` int(11) DEFAULT NULL,
   `label` varchar(50) DEFAULT NULL,
@@ -332,7 +329,7 @@ class modSynopsisChrono extends DolibarrModules
   KEY `model_refid` (`chrono_conf_refid`),
   KEY `fct_refid` (`fct_refid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_group_rights` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_group_rights` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `chrono_refid` int(11) DEFAULT NULL,
   `group_refid` int(11) DEFAULT NULL,
@@ -340,7 +337,7 @@ class modSynopsisChrono extends DolibarrModules
   `valeur` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_key` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) DEFAULT NULL,
   `description` longtext,
@@ -417,7 +414,7 @@ class modSynopsisChrono extends DolibarrModules
 //(1028, 'Technicien', '', 104, 6, 9, '', 1),
 //(1029, 'Durée déplacement (en h)', '', 104, 1, NULL, '', 1),
 //(1030, 'Produits', '', 104, 10, 3, 'type:site', 1);",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_key_type_valeur` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) DEFAULT NULL,
   `hasSubValeur` tinyint(4) DEFAULT '0',
@@ -438,42 +435,42 @@ class modSynopsisChrono extends DolibarrModules
   `sourceIsOption` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;",
-        "INSERT IGNORE INTO `".MAIN_DB_PREFIX."synopsischrono_key_type_valeur` (`id`, `nom`, `hasSubValeur`, `subValeur_table`, `subValeur_idx`, `subValeur_text`, `phpClass`, `htmlTag`, `htmlEndTag`, `endNeeded`, `cssClass`, `cssScript`, `jsCode`, `valueIsChecked`, `valueIsSelected`, `valueInTag`, `valueInValueField`, `sourceIsOption`) VALUES
+            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur` (`id`, `nom`, `hasSubValeur`, `subValeur_table`, `subValeur_idx`, `subValeur_text`, `phpClass`, `htmlTag`, `htmlEndTag`, `endNeeded`, `cssClass`, `cssScript`, `jsCode`, `valueIsChecked`, `valueIsSelected`, `valueInTag`, `valueInValueField`, `sourceIsOption`) VALUES
 (1, 'Texte', 0, NULL, NULL, NULL, NULL, '<input>', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL),
 (2, 'Date', 0, NULL, NULL, NULL, NULL, '<input>', NULL, NULL, 'datepicker', NULL, NULL, NULL, NULL, NULL, 1, NULL),
 (3, 'Date/Heure', 0, NULL, NULL, NULL, NULL, '<input>', NULL, NULL, 'datetimepicker', NULL, NULL, NULL, NULL, NULL, 1, NULL),
 (4, 'Case à cocher', 0, NULL, NULL, NULL, NULL, '<input type=''checkbox''>', NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL),
-(6, 'Requête', 1, '".MAIN_DB_PREFIX."Synopsis_Process_form_requete', 'id', 'label', 'requete', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1),
-(7, 'Constante', 1, '".MAIN_DB_PREFIX."Synopsis_Process_form_global', 'id', 'label', 'globalvar', '<input type=''hidden''>', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(8, 'Liste', 1, '".MAIN_DB_PREFIX."Synopsis_Process_form_list', 'id', 'label', 'listform', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1),
+(6, 'Requête', 1, '" . MAIN_DB_PREFIX . "Synopsis_Process_form_requete', 'id', 'label', 'requete', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1),
+(7, 'Constante', 1, '" . MAIN_DB_PREFIX . "Synopsis_Process_form_global', 'id', 'label', 'globalvar', '<input type=''hidden''>', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(8, 'Liste', 1, '" . MAIN_DB_PREFIX . "Synopsis_Process_form_list', 'id', 'label', 'listform', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1),
 (9, 'Description', 0, NULL, NULL, NULL, NULL, '<textarea>', '</textarea>', 1, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL),
 (10, 'Lien', 1, 'llx_Synopsis_Process_lien', 'rowid', 'label', 'lien', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1);",
-        /*"CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_key_value_view` (
-`id` int(11)
-,`nom` varchar(50)
-,`description` longtext
-,`model_refid` int(11)
-,`type_valeur` int(11)
-,`type_subvaleur` int(11)
-,`extraCss` longtext
-,`inDetList` tinyint(1)
-,`key_id` int(11)
-,`chrono_id` int(11)
-,`chrono_value` longtext
-,`date_create` datetime
-,`ref` varchar(500)
-,`desc_chrono` longtext
-,`fk_soc` int(11)
-,`fk_user_create` int(11)
-,`fk_socpeople` int(11)
-,`fk_user_modif` int(11)
-,`fk_statut` int(11)
-,`validation_number` int(11)
-,`revision` int(11)
-,`chrono_conf_id` int(11)
-,`orig_ref` varchar(500)
-);",*/
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_Multivalidation` (
+            /* "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_key_value_view` (
+              `id` int(11)
+              ,`nom` varchar(50)
+              ,`description` longtext
+              ,`model_refid` int(11)
+              ,`type_valeur` int(11)
+              ,`type_subvaleur` int(11)
+              ,`extraCss` longtext
+              ,`inDetList` tinyint(1)
+              ,`key_id` int(11)
+              ,`chrono_id` int(11)
+              ,`chrono_value` longtext
+              ,`date_create` datetime
+              ,`ref` varchar(500)
+              ,`desc_chrono` longtext
+              ,`fk_soc` int(11)
+              ,`fk_user_create` int(11)
+              ,`fk_socpeople` int(11)
+              ,`fk_user_modif` int(11)
+              ,`fk_statut` int(11)
+              ,`validation_number` int(11)
+              ,`revision` int(11)
+              ,`chrono_conf_id` int(11)
+              ,`orig_ref` varchar(500)
+              );", */
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_Multivalidation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_refid` int(11) DEFAULT NULL,
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -485,7 +482,7 @@ class modSynopsisChrono extends DolibarrModules
   PRIMARY KEY (`id`),
   UNIQUE KEY `multivalidation_chrono_uniq_key` (`right_refid`,`validation_number`,`chrono_refid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_rights` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_rights` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `chrono_refid` int(11) DEFAULT NULL,
   `user_refid` int(11) DEFAULT NULL,
@@ -493,7 +490,7 @@ class modSynopsisChrono extends DolibarrModules
   `valeur` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_rights_def` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_rights_def` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(50) DEFAULT NULL,
   `description` longtext,
@@ -505,7 +502,7 @@ class modSynopsisChrono extends DolibarrModules
   `isValidationForAll` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;",
-        "INSERT IGNORE INTO `".MAIN_DB_PREFIX."synopsischrono_rights_def` (`id`, `label`, `description`, `dflt`, `code`, `rang`, `active`, `isValidationRight`, `isValidationForAll`) VALUES
+            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsischrono_rights_def` (`id`, `label`, `description`, `dflt`, `code`, `rang`, `active`, `isValidationRight`, `isValidationForAll`) VALUES
 (1, 'Voir', 'Voir le chrono', 1, 'voir', 1, 1, NULL, 0),
 (2, 'Modifer', 'Modifier le chrono', 0, 'modifier', 2, 1, NULL, 0),
 (3, 'Valider', 'Valider le chrono', 0, 'valider', 3, 1, 1, 1),
@@ -513,7 +510,7 @@ class modSynopsisChrono extends DolibarrModules
 (5, 'Valider(Dir)', 'Valider le chrono (Direction)', 0, 'validerDir', 5, 1, 1, 0),
 (6, 'Valider(Com)', 'Valider le chrono (Commercial)', 0, 'validerCom', 6, 1, 1, 0),
 (7, 'Supprimer', 'Supprimer le chrono', 0, 'supprimer', 7, 1, NULL, 0);",
-        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_value` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `chrono_refid` int(11) DEFAULT NULL,
   `value` longtext,
@@ -522,28 +519,28 @@ class modSynopsisChrono extends DolibarrModules
   KEY `key_id` (`key_id`),
   KEY `chrono_refid` (`chrono_refid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
-        "DROP TABLE IF EXISTS `".MAIN_DB_PREFIX."synopsischrono_key_value_view`;",
-        "DROP VIEW IF EXISTS `".MAIN_DB_PREFIX."synopsischrono_key_value_view`;",
-        "CREATE VIEW `".MAIN_DB_PREFIX."synopsischrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_societe` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`".MAIN_DB_PREFIX."synopsischrono` `c` left join (`".MAIN_DB_PREFIX."synopsischrono_key` `k` left join `".MAIN_DB_PREFIX."synopsischrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)));
+            "DROP TABLE IF EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view`;",
+            "DROP VIEW IF EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view`;",
+            "CREATE VIEW `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_societe` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`" . MAIN_DB_PREFIX . "synopsischrono` `c` left join (`" . MAIN_DB_PREFIX . "synopsischrono_key` `k` left join `" . MAIN_DB_PREFIX . "synopsischrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)));
 ");
 //    $this->dirs[0] = $conf->chrono->dir_output;
 
-    return $this->_init($sql);
-  }
+        return $this->_init($sql);
+    }
 
-  /**
-   *    \brief      Fonction appelee lors de la desactivation d'un module.
-   *                Supprime de la base les constantes, boites et permissions du module.
-   */
-  function remove()
-  {
+    /**
+     *    \brief      Fonction appelee lors de la desactivation d'un module.
+     *                Supprime de la base les constantes, boites et permissions du module.
+     */
+    function remove() {
 //    $requete = "DELETE FROM ".MAIN_DB_PREFIX."menu WHERE module = 'Chrono' ";
 //    $sql = $this->db->query($requete);
 //    if (!$sql) print $this->db->error;
-
 //    $sql = array("DROP TABLE ".MAIN_DB_PREFIX."synopsischrono_conf, ".MAIN_DB_PREFIX."synopsischrono_key, ".MAIN_DB_PREFIX."synopsischrono_key_type_valeur, ".MAIN_DB_PREFIX."synopsischrono_rights_def");
-      $sql = array();
-    return $this->_remove($sql);
-  }
+        $sql = array();
+        return $this->_remove($sql);
+    }
+
 }
+
 ?>

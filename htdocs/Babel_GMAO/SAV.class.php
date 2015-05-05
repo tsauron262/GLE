@@ -141,7 +141,7 @@ class SAV {
     public function getNextNumRef($soc)
     {
         global $db, $langs;
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("synopsisGene@synopsistools");
 
         $dir = DOL_DOCUMENT_ROOT . "/core/modules/sav/";
         if (defined("SAV_ADDON") && SAV_ADDON)

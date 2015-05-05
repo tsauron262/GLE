@@ -23,7 +23,7 @@ require_once(DOL_DOCUMENT_ROOT .'/commande/class/commande.class.php');
 
 
 $langs->load("companies");
-$langs->load('synopsisGene@Synopsis_Tools');
+$langs->load('synopsisGene@synopsistools');
 $langs->load("propal");
 $langs->load("order");
 $langs->load("main");

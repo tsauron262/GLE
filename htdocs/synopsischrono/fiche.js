@@ -120,7 +120,7 @@ function ajNoteContrat() {
             var datas = 'url=' + "/contrat/card.php?id=" + idCtr;
             datas = datas + '&type=note';
             jQuery.ajax({
-                url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/note_ajax.php',
+                url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
                 data: datas,
                 datatype: "xml",
                 type: "POST",

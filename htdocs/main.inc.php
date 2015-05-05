@@ -208,7 +208,7 @@ require_once("master.inc.php");
 
 
 /*Mod drsi*/
-include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
+include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
 $synopsisHook = new synopsisHook();
 global $synopsisHook;
 /*FMod Drsi*/
@@ -1646,6 +1646,8 @@ function left_menu($menu_array_before, $helppagename='', $moresearchform='', $me
             /* Mod drsi*/
             global $synopsisHook;
             print $synopsisHook->getMenu();
+            $reshook=$hookmanager->executeHooks('printMenuAfter',$parameters);
+            print $reshook;
             /*FMod drsi*/
 
 	    // Show other forms

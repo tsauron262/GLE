@@ -22,7 +22,7 @@ llxHeader();
 
 if (!($user->admin || $user->local_admin)) accessforbidden();
 
-$langs->load("synopsisGene@Synopsis_Tools");
+$langs->load("synopsisGene@synopsistools");
 
 $h=0;
   $head[$h][0] = DOL_URL_ROOT.'/Babel_GPI/admin.php';

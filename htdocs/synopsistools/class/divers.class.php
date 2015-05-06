@@ -121,6 +121,7 @@ class synopsisHook {
         ob_start();
         self::$reload = true;
     }
+    
 
     function initRightsSyn() {
         global $conf, $user, $db;
@@ -128,11 +129,15 @@ class synopsisHook {
 
 
         //bimp pas de logo pour sav
-        if ($user->id) {
-            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-            $groupSav = new UserGroup($db);
-            $groupSav->fetch('', "XX SAV");
-            if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id]))
+        if ($user->id && isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
+            
+            
+//            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
+//            $groupSav = new UserGroup($db);
+//            $groupSav->fetch('', "XX SAV");
+//            if (isset($groupSav->members[$user->id]))
+            
+            if(userInGroupe("XX Sav", $user->id))
                 $conf->global->MAIN_SHOW_LOGO = false;
         }
 
@@ -245,11 +250,13 @@ class synopsisHook {
         echo "</div>";
 
         echo "<div class='notificationText'></div><div class='notificationObj'></div>";
+        
+        $nbReq = $db->countReq;
 
         $time = (microtime(true) - self::$timeDeb);
         if ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time");
-        echo "<span class='timePage'>" . $time . " s</span>";
+        echo "<span class='timePage'>" . number_format($time,4) . " s | ".$nbReq." requetes</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
             echo "<br/>";
             echo "<br/>";
@@ -260,6 +267,10 @@ class synopsisHook {
         }
     }
 
+    public static function getObj($type) {
+        $tabResult = self::getObjAndMenu($type);
+        return $tabResult[0];
+    }
 
 }
 

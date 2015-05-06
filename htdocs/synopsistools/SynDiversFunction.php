@@ -602,11 +602,10 @@ function getIdInUrl($url, $nomId = "id") {
         if (stripos($val, $nomId) !== false)
             return str_replace($nomId . "=", "", $val);
     }
-    if(isset($_REQUEST[$nomId]))
+    if (isset($_REQUEST[$nomId]))
         return $_REQUEST[$nomId];
     return false;
 }
-
 
 function getAdresseLivraisonComm($commId) {
     global $db, $langs;
@@ -693,20 +692,19 @@ function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = nul
         $tabWhere[] = "targettype = '" . $typeD . "'";
     $req .= implode(" AND ", $tabWhere);
 
-    if (isset($idS)){
-        if(is_array($idS))
-        $req .= " AND fk_source IN ('" . implode("','",$idS)."')";
+    if (isset($idS)) {
+        if (is_array($idS))
+            $req .= " AND fk_source IN ('" . implode("','", $idS) . "')";
         else
-        $req .= " AND fk_source = " . $idS;
+            $req .= " AND fk_source = " . $idS;
     }
-    if (isset($idD)){
-        if(is_array($idD))
-        $req .= " AND fk_target IN ('" . implode("','",$idD)."')";
+    if (isset($idD)) {
+        if (is_array($idD))
+            $req .= " AND fk_target IN ('" . implode("','", $idD) . "')";
         else
-        $req .= " AND fk_target = " . $idD;
-        
+            $req .= " AND fk_target = " . $idD;
     }
-    
+
 //    echo $req;
     $sql = $db->query($req);
     $tab = array();
@@ -777,7 +775,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
         $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
         $return = $mailfile->sendfile();
-        if(!$return)
+        if (!$return)
             $_SESSION['error']["Mail non envoyé"] = 1;
         else
             $_SESSION['error']["Mail envoyé"] = 0;
@@ -979,7 +977,6 @@ function traiteHeure($result) {
     return $result;
 }
 
-
 function traiteCarac($str, $replace = "_") {
     $str = str_replace(array("é", "è", "ê"), "e", $str);
     $str = str_replace(array("ù", "û"), "u", $str);
@@ -987,22 +984,19 @@ function traiteCarac($str, $replace = "_") {
     $str = str_replace(array("ç"), "c", $str);
     $str = str_replace(array("à", "â"), "a", $str);
     $replaceArr = array("\\", "/", "°", "'", "(", ")");
-    if($replace != " ")
+    if ($replace != " ")
         $replaceArr[] = " ";
     $return = str_replace($replaceArr, $replace, $str);
-    if($replace != " ")
-    $return =  urlencode($return);
-    return $return; 
+    if ($replace != " ")
+        $return = urlencode($return);
+    return $return;
 }
-
-
 
 function select_type_of_lines2($selected = '', $htmlname = 'type', $showempty = 0, $hidetext = 0, $forceall = 0) {
     global $db, $langs, $user, $conf;
 
     // If product & services are enabled or both disabled.
-    if ($forceall || (!empty($conf->product->enabled) && !empty($conf->service->enabled))
-            || (empty($conf->product->enabled) && empty($conf->service->enabled))) {
+    if ($forceall || (!empty($conf->product->enabled) && !empty($conf->service->enabled)) || (empty($conf->product->enabled) && empty($conf->service->enabled))) {
         if (empty($hidetext))
             print $langs->trans("Type") . ': ';
         print '<select class="flat" id="select_' . $htmlname . '" name="' . $htmlname . '">';
@@ -1051,6 +1045,14 @@ function convertirDate($date, $enFr = true, $nowSiNull = false) {
         else
             return '';
     }
+}
+
+function userInGroupe($groupe, $idUser) {
+    global $db;
+    $result = $db->query('SELECT ug.rowid FROM `' . MAIN_DB_PREFIX . 'usergroup` g, `' . MAIN_DB_PREFIX . 'usergroup_user` ug  WHERE g.`nom` = "' . $groupe . '" AND ug.`fk_user` = "' . $idUser . '" AND `fk_usergroup` = g.rowid');
+    if ($db->num_rows($result) > 0)
+        return true;
+    return false;
 }
 
 ?>

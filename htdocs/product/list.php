@@ -162,6 +162,7 @@ else
     if (dol_strlen($type))
     {
     	if ($type == 1) $sql.= " AND p.fk_product_type = '1'";
+    	elseif ($type > 1) $sql.= " AND p.fk_product_type = '".$type."'";
     	else $sql.= " AND p.fk_product_type <> '1'";
     }
 	if ($sref)     $sql .= natural_search('p.ref', $sref);

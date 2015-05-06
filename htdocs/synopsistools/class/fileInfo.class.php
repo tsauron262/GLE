@@ -58,6 +58,7 @@ class fileInfo {
         if (stripos($nom, ".php")) {
             include($this->pathFileInfo . $nom);
             $this->tabSql = $tabSql;
+            $this->tabActiveModule = $activeModule;
             $this->php = $php;
             return $text;
         } else
@@ -90,6 +91,14 @@ class fileInfo {
             foreach ($this->tabSql as $req)
                 if (!$db->query($req))
                     echo "Erreur SQl : " . $req . "<br/>";
+        
+        if(isset($this->tabActiveModule) && is_array($this->tabActiveModule)){
+            require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
+            foreach($this->tabActiveModule as $module)
+                activateModule($module);
+        }
+                
+                
         if (isset($this->php))
             eval($this->php);
         $this->marquFileVue($nom);
@@ -113,6 +122,10 @@ class fileInfo {
                 $message .= "Appli Sql : <br/><br/>";
                 $message .= implode("<br/>", $this->tabSql)."<br/><br/>";
             }
+            if (count($this->tabActiveModule) > 0) {
+                $message .= "Activation de module : <br/><br/>";
+                $message .= implode("<br/>", $this->tabActiveModule)."<br/><br/>";
+            }
             if ($this->php != "")
                 $message .= "Appli php : <br/><br/>" . $this->php;
             $message .= "<br/><br/><form action='' name='form' method='post'><input type='hidden' name='file' value='" . $nom . "'/><input type='submit' name='appli' value='Oui'/><input type='submit' name='appli' value='Non'/></form>";
@@ -123,6 +136,7 @@ class fileInfo {
     private function marquFileVue($nom) {
         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsistools_fileInfo (file) VALUES ('" . $nom . "')";
         $sql = $this->db->query($requete);
+        $this->fileVue[9999999999] = array("nom" => $nom, "date" => '01/01/2000');
     }
 
 }

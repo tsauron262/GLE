@@ -280,7 +280,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=products,fk_leftmenu=service',
                 'type' => 'left',
                 'titre' => $type,
-                'url' => '/product/liste.php?type='.$id,
+                'url' => '/product/list.php?type='.$id,
                 'langs' => 'synopsisGene@synopsistools',
                 'position' => 122,
                 'perms' => '$user->rights->produit->lire',

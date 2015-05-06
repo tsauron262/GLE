@@ -61,10 +61,11 @@ class ActionsSynopsischrono {
         }
 
 
-        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-        $groupSav = new UserGroup($db);
-        $groupSav->fetch('', "XX SAV");
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id])) {
+        
+//        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
+//        $groupSav = new UserGroup($db);
+//        $groupSav->fetch('', "XX SAV");
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Sav", $user->id)) {
             $hrefFin = "#pangridChronoDet105";
             $return .= '<div class="blockvmenupair'.($context==1 ? ' vmenu':'').'">';
             $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
@@ -89,6 +90,15 @@ class ActionsSynopsischrono {
                     $tabResult[$centre][$ligne2->EtatVal] = 0;
                 $tabResult[$centre][$ligne2->EtatVal] += $ligne2->nb;
             }
+            
+            
+            $tabStatut = array();
+            $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7" . " ORDER BY id ASC");
+            while ($ligne = $db->fetch_object($result)) {
+                $tabStatut[] = $ligne;
+            }
+            
+            
 
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
@@ -97,8 +107,7 @@ class ActionsSynopsischrono {
                 $return .= '<div class="menu_contenu ' . ($ligne3['forUrl'] != "Tous" ? 'menu_contenueCache' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
-                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7" . " ORDER BY id ASC");
-                while ($ligne = $db->fetch_object($result)) {
+                foreach($tabStatut as $ligne){
                     $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$ligne->valeur]) ? $tabResult[$centre][$ligne->valeur] : 0);
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     if ($nb == "")
@@ -127,10 +136,10 @@ class ActionsSynopsischrono {
 
 
 
-        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-        $groupHotline = new UserGroup($db);
-        $groupHotline->fetch('', "XX Hotline");
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupHotline->members[$user->id])) {
+//        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
+//        $groupHotline = new UserGroup($db);
+//        $groupHotline->fetch('', "XX Hotline");
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Hotline", $user->id)) {
             $hrefFin = "#pangridChronoDet100";
             $return .= '<div class="blockvmenupair'.($context==1 ? ' vmenu':'').'">';
 //            $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);

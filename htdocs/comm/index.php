@@ -150,7 +150,7 @@ if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 	if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid)	$sql.= " AND s.rowid = ".$socid;
 
-	$resql=$db->query($sql);
+	$resql=$db->query($sql/*mod drsi*/." LIMIT 0,30"/*f md drsi*/);
 	if ($resql)
 	{
 		print '<table class="noborder" width="100%">';
@@ -217,7 +217,7 @@ if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 	if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid)	$sql.= " AND c.fk_soc = ".$socid;
 
-	$resql = $db->query($sql);
+	$resql = $db->query($sql/*mod drsi*/." LIMIT 0,30"/*f md drsi*/);
 	if ($resql)
 	{
 		print '<table class="noborder" width="100%">';
@@ -472,7 +472,7 @@ if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 	if ($socid) $sql.= " AND s.rowid = ".$socid;
 	$sql.= " ORDER BY p.rowid DESC";
 
-	$result=$db->query($sql);
+	$result=$db->query($sql/*mod drsi*/." LIMIT 0,30"/*f md drsi*/);
 	if ($result)
 	{
 		$total = 0;

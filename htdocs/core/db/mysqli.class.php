@@ -39,6 +39,8 @@ class DoliDBMysqli extends DoliDB
     const VERSIONMIN='4.1.0';
 	//! Resultset of last query
 	private $_results;
+        
+        public $countReq = 0;
 
     /**
 	 *	Constructor.
@@ -257,6 +259,7 @@ class DoliDBMysqli extends DoliDB
     function query($query,$usesavepoint=0,$type='auto')
     {
         $query = trim($query);
+        $this->countReq ++;
 
 	    if (! in_array($query,array('BEGIN','COMMIT','ROLLBACK'))) dol_syslog('sql='.$query, LOG_DEBUG);
 

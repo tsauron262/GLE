@@ -35,13 +35,13 @@ include_once(DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php");
  * 		\class      modMyModule
  *      \brief      Description and activation class for module MyModule
  */
-class modSynopsisHisto extends DolibarrModules {
+class modSynopsishisto extends DolibarrModules {
 
     /**
      *   \brief      Constructor. Define names, constants, directories, boxes, permissions
      *   \param      DB      Database handler
      */
-    function modSynopsisHisto($DB) {
+    function modSynopsishisto($DB) {
         global $langs, $conf;
 
         $this->db = $DB;

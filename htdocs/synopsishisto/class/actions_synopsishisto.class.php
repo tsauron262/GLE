@@ -380,6 +380,16 @@ class histoNavigation {
                     $data['urls'] = array("/".$data['type']."/card.php");
                 if (!isset($data['nomIdUrl']))
                     $data['nomIdUrl'] = "id";
+                
+                global $conf;
+                
+                $version = isset($conf->global->MAIN_VERSION_LAST_UPGRADE)? $conf->global->MAIN_VERSION_LAST_UPGRADE : $conf->global->MAIN_VERSION_LAST_INSTALL;
+                if(substr($version,0,1) > 2 && substr($version,2,1) < 7)
+                    foreach ($data['urls'] as $idT => $url)
+                        $data['urls'][$idT] = str_replace("card.php", "fiche.php", $url);
+//                echo "<pre>";print_r($conf);
+                
+                    
 
                 $tabTypeObject2[$typeT] = $data;
                 }

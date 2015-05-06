@@ -359,7 +359,7 @@ if ($user->rights->synopsisFinanc->write) {
 
     if ($user->rights->synopsisFinanc->super_write) {
         echo '<tr>';
-        $tabB = array("" => "", "Axa" => 2, "NBP" => 4);
+        $tabB = array("" => "", "Grenke" => 2, "SEPA" => 4, "BNP" => 3);
         echo '<td>Banque:<hr/>Taux</td><td><select id="banque">';
         foreach ($tabB as $nomB => $tauxT) {
             echo '<option value="' . $tauxT . '"' . (($nomB == $banque) ? 'selected="selected"' : "" ) . '>' . $nomB . '</option>';

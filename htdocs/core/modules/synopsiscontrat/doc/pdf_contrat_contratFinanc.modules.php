@@ -42,6 +42,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
     public $emetteur;    // Objet societe qui emet
     var $contrat;
     var $pdf;
+    var $margin_bottom = 25;
 
     /**
       \brief      Constructeur
@@ -232,18 +233,18 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $pdf->setPrintFooter(true);
                 }
 
-                $pdf1 = pdf_getInstance($this->format);
-                if (class_exists('TCPDF')) {
-                    $pdf1->setPrintHeader(false);
-                    $pdf1->setPrintFooter(false);
-                }
-                
+//                $pdf1 = pdf_getInstance($this->format);
+//                if (class_exists('TCPDF')) {
+//                    $pdf1->setPrintHeader(false);
+//                    $pdf1->setPrintFooter(false);
+//                }
+
 
                 $pdf->Open();
-                $pdf1->Open();
+                //$pdf1->Open();
                 $pdf->AddPage();
-                $pdf1->AddPage();
-                $pdf1->SetFont(''/* 'Arial' */, '', 8);
+                //$pdf1->AddPage();
+                //$pdf1->SetFont(''/* 'Arial' */, '', 8);
 
                 $pdf->SetDrawColor(128, 128, 128);
 
@@ -254,8 +255,8 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                $pdf->SetAutoPageBreak(1, 25);
+                //$pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
+                $pdf->SetAutoPageBreak(1, $this->margin_bottom);
 
 
                 //$pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
@@ -304,24 +305,25 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le loueur:", 0, 'L');
 
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . $this->emetteur->forme_juridique . " au capital de " . price($this->emetteur->capital) . " € dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
-                    $contact = $contrat->Liste_Contact(-1, "internal");
-                    $nomC = "";
-                    foreach ($contact as $key => $value) {
-                        if ($value["fk_c_type_contact"] == 10) {
-                            $idcontact = $value["id"];
-                            $cont = new User($this->db);
-                            $cont->fetch($idcontact);
-                            $nomC = "Représentée par " . $cont->getFullName($langs);
-                            $grade = $cont->job;
-                            if ($grade != "") {
-                                $nomC.=" intervenant en qualité de " . $grade;
-                            }
+                //print_r($this->emetteur);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . " au capital de " . price($this->emetteur->capital) . " € dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
+                $contact = $contrat->Liste_Contact(-1, "internal");
+                $nomC = "";
+                foreach ($contact as $key => $value) {
+                    if ($value["fk_c_type_contact"] == 10) {
+                        $idcontact = $value["id"];
+                        $cont = new User($this->db);
+                        $cont->fetch($idcontact);
+                        $nomC = "Représentée par " . $cont->getFullName($langs);
+                        $grade = $cont->job;
+                        if ($grade != "") {
+                            $nomC.=" intervenant en qualité de " . $grade . ".";
                         }
                     }
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $nomC, 0, 'L');
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l'accepte, aux Conditions Générales ci-annexées composées de deux pages recto et aux Conditions Particulières suivantes :", 0, 'L');
-                
+                }
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $nomC, 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l'accepte, aux Conditions Générales ci-annexées composées de deux pages recto et aux Conditions Particulières suivantes :", 0, 'L');
+
 //description de l'équipement///////////////////////////////////////////////////
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'L');
                 $pdf->SetFont(''/* 'Arial' */, 'B', 9);
@@ -359,6 +361,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($W * 2, 6, "N° de série", 1, 'L', true);
 
 ////////////////fin entete du tableau///////////////////////////////////////////
+////////////////debut corps tableau/////////////////////////////////////////////
                 $X = $this->marge_gauche;
                 $color_id = 0;
                 foreach ($propal->lines as $obj) {
@@ -367,23 +370,46 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     } else {
                         $pdf->setColor('fill', 235, 235, 235);
                     }
-                    $X = $this->marge_gauche;
-                    $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
-                    $X = $this->marge_gauche + $W;
-                    $pdf->setX($X);
-                    $pdf->Cell($W * 7, 6, $obj->desc, 1, NULL, 'L', TRUE);
-                    $X = $this->marge_gauche + $W * 8;
-                    $pdf->setX($X);
-                    if ($M_N == true) {
-                        $pdf->Cell($W, 6, "marque", 1, null, 'L', true);
-                        $X = $this->marge_gauche + $W * 10;
-                        $pdf->MultiCell($W * 2, 6, "", 1, 'L', true);
+                    if ($obj->fk_product) {
+                        $prod = new product($this->db);
+                        $prod->fetch($obj->fk_product);
+                        
+                        $X = $this->marge_gauche;
+                        $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
+                        $X = $this->marge_gauche + $W;
+                        $pdf->setX($X);
+                        $pdf->Cell($W * 7, 6, dol_trunc($prod->ref . " - ". $prod->libelle . " - " .$obj->desc, 40), 1, NULL, 'L', TRUE);
+                        $X = $this->marge_gauche + $W * 8;
+                        $pdf->setX($X);
+                        if ($M_N == true) {
+                            $pdf->Cell($W, 6, "marque", 1, null, 'L', true);
+                            $X = $this->marge_gauche + $W * 10;
+                            $pdf->MultiCell($W * 2, 6, "", 1, 'L', true);
+                        } else {
+                            $pdf->MultiCell($W * 2, 6, "", 1, 'L', true);
+                        }
+                        $color_id = ($color_id + 1) % 2;
+                        
                     } else {
-                        $pdf->MultiCell($W * 2, 6, "", 1, 'L', true);
+                        
+                        $X = $this->marge_gauche;
+                        $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
+                        $X = $this->marge_gauche + $W;
+                        $pdf->setX($X);
+                        $pdf->Cell($W * 7, 6, dol_trunc($obj->desc, 40), 1, NULL, 'L', TRUE);
+                        $X = $this->marge_gauche + $W * 8;
+                        $pdf->setX($X);
+                        if ($M_N == true) {
+                            $pdf->Cell($W, 6, "marque", 1, null, 'L', true);
+                            $X = $this->marge_gauche + $W * 10;
+                            $pdf->MultiCell($W * 2, 6, "", 1, 'L', true);
+                        } else {
+                            $pdf->MultiCell($W * 2, 6, "", 1, 'L', true);
+                        }
+                        $color_id = ($color_id + 1) % 2;
                     }
-                    $color_id = ($color_id + 1) % 2;
                 }
-
+//fin corps tableau/////////////////////////////////////////////////////////////
 //fin tableau///////////////////////////////////////////////////////////////////
 //
 //
@@ -406,8 +432,11 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 
                 $X = $this->marge_gauche;
                 //$Y = $this->marge_haute + 132;
-                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 4;
-
+                if($valfinance->VR>0){
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 5;
+                }else{
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 4;
+                }
 
 ///////////////////////debut tableau////////////////////////////////////////////
                 $pdf->SetX($X);
@@ -416,8 +445,12 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 6, "NOMBRE DE LOYERS", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
                 $pdf->Cell($W, 6, "MONTANT HT", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
                 $pdf->Cell($W, 6, "PERIODICITE", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
-                $pdf->MultiCell($W, 6, "DUREE", 1, 'C', FALSE, 1, NULL, null, null, null, null, null, null, 'M');
-                //$pdf->MultiCell($W, 6, "DUREE", 1, 'C');
+                if($valfinance->VR>0){
+                    $pdf->Cell($W, 6, "DUREE", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
+                    $pdf->MultiCell($W, 6, "VR", 1, 'C', FALSE, 1, NULL, null, null, null, null, null, null, 'M');
+                }else{
+                    $pdf->MultiCell($W, 6, "DUREE", 1, 'C', FALSE, 1, NULL, null, null, null, null, null, null, 'M');
+                }
 //fin entete////////////////////////////////////////////////////////////////////
                 //$pdf->SetX($X);
 //debut corps///////////////////////////////////////////////////////////////////
@@ -425,11 +458,16 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 8);
                 $pdf->Cell($W, 6, $valfinance->nb_periode, 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
-                $pdf->Cell($W, 6, price($valfinance->loyer + 0.005), 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, price($valfinance->loyer + 0.005)." €", 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
                 $pdf->Cell($W, 6, Synopsisfinancement::$TPeriode[$valfinance->periode], 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
-                $pdf->MultiCell($W, 6, $valfinance->nb_periode . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
+                if($valfinance->VR>0){
+                    $pdf->Cell($W, 6, $valfinance->nb_periode . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                    $pdf->MultiCell($W, 6, price($valfinance->VR)." €", 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
+                }else{
+                    $pdf->MultiCell($W, 6, $valfinance->nb_periode . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
+                }
 //fin corps/////////////////////////////////////////////////////////////////////
 //////////////////////////////////fin tableau///////////////////////////////////
 
@@ -470,7 +508,9 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 //emplacement des signature
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 3;
                 //locataire
+                $pdf->SetAutoPageBreak(1, 0);
                 $pdf->MultiCell($W, 6, "Pour le Locataire" . "\n" . "Signature et cachet(lu et approuvé)" . "\n" . "Qualité" . "\n" . "NOM", 0, 'L', false, 0);
+
 
                 //loueur
                 $X = $X + $W;
@@ -481,6 +521,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $X = $X + $W;
                 $pdf->SetX($X);
                 $pdf->MultiCell($W, 6, "Pour le Cessionnaire" . "\n" . "Signature et cachet", 0, 'C', false, 0);
+                $pdf->SetAutoPageBreak(1, $this->margin_bottom);
 
                 $X = $this->marge_gauche;
                 $pdf->SetX($X);
@@ -489,8 +530,17 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $this->marge_droite = $this->marge_droite - 5; /* TODO */
                 $this->marge_haute = $this->marge_haute - 5;
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
-
+                
+                if($valfinance->banque!=""){
+                    if(file_exists(DOL_DATA_ROOT.'/synopsisfinanc/doc/banque_'.$valfinance->banque.'.txt')){
+                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_'.$valfinance->banque.'.txt', false);
+                    }else{
+                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
+                    }
+                }else{
+                    $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
+                }
+                
                 $pdf->SetAutoPageBreak(1, 0);
                 $pdf->setFont('', '', 8);
                 $X = $this->marge_gauche + 10;
@@ -589,7 +639,7 @@ function getNewPdf($format) {
                 $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo;
             }
             if (is_readable($logo)) {
-                $this->Image($logo, 90, 5, 0,25);
+                $this->Image($logo, 90, 5, 0, 25);
             }
         }
 
@@ -597,7 +647,7 @@ function getNewPdf($format) {
             $this->SetAutoPageBreak(1, 0);
             $this->SetXY(190, 289);
             $this->MultiCell(15, 3, '' . $this->PageNo() . '/{:ptp:}', 0, 'R', 0);
-            $this->SetAutoPageBreak(1, 25);
+            $this->SetAutoPageBreak(1, $this->margin_bottom);
         }
 
     }

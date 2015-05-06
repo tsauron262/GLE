@@ -132,7 +132,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
             foreach ($tabContent as $id => $ligne) {
                 if ($this->pdf->getY() < 500 && $this->pdf->getX() < 60 && (count($tabContent) - $id) < 17)
                     $this->pdf->SetAutoPageBreak(1, 55);
-                
+
                 $style = "";
                 if (stripos($ligne, "<g>") > -1) {
                     $ligne = str_replace("<g>", "", $ligne);
@@ -250,7 +250,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(1, 25);
-                
+
 
                 //$pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
                 //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
@@ -269,9 +269,9 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetXY($this->marge_gauche + 60, $this->marge_haute + 6);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $contrat->societe->forme_juridique . " au capital de " . price($contrat->societe->capital) . " €", 0, 'L');
                 $pdf->setX($this->marge_gauche);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Immatriculé sous le N°: " . $contrat->societe->idprof4 . " auprès du RCS", 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Immatriculé sous le Numéro RCS: " . $contrat->societe->idprof4, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Dont le siège sociale est situé au " . $contrat->societe->address . " " . $contrat->societe->zip . " " . $contrat->societe->town, 0, 'L');
-                /* faire la requete pour le représentant */
+                /* requete pour le représentant */
                 $contact = $contrat->Liste_Contact(-1, "external");
                 $nomC = "";
                 foreach ($contact as $key => $value) {
@@ -286,9 +286,6 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                         }
                     }
                 }
-                //$nom_provisoir = $contrat->societe->firstname . " " . $contrat->societe->lastnam; //variable temporaire à modifier par la vrai valeur
-                //$grade_provisoir = $contrat->societe->status; //variable temporaire à modifier par la vrai valeur
-
 
                 /* fin requete */
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $nomC, 0, 'L');
@@ -301,15 +298,24 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le loueur:", 0, 'L');
 
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
-                if ($this->emetteur->name == "Aegis") {
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société FINAPRO, SARL au capital de 50 000 € dont le siège social est situé à Jouques (13490), Parc du Deffend - 23 boulevard du Deffend,
-enregistrée sous le n° 443 247 978 au RCS d'Aix en Provence,", 0, 'L'); //print_r($this->emetteur);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Représentée par Madame Patricia RODDIER, intervenant en qualité de Gérante", 0, 'L');
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l'accepte, aux Conditions Générales ci-annexées composées de deux pages recto : Feuillet A et Feuillet B et aux Conditions Particulières suivantes :", 0, 'L');
-                } else {
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "!!! erreur nom entreprise !!!", 0, 'L');
-                }
-
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . $this->emetteur->forme_juridique . " au capital de " . price($this->emetteur->capital) . " € dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
+                    $contact = $contrat->Liste_Contact(-1, "internal");
+                    $nomC = "";
+                    foreach ($contact as $key => $value) {
+                        if ($value["fk_c_type_contact"] == 10) {
+                            $idcontact = $value["id"];
+                            $cont = new User($this->db);
+                            $cont->fetch($idcontact);
+                            $nomC = "Représentée par " . $cont->getFullName($langs);
+                            $grade = $cont->job;
+                            if ($grade != "") {
+                                $nomC.=" intervenant en qualité de " . $grade;
+                            }
+                        }
+                    }
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $nomC, 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l'accepte, aux Conditions Générales ci-annexées composées de deux pages recto et aux Conditions Particulières suivantes :", 0, 'L');
+                
 //description de l'équipement///////////////////////////////////////////////////
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'L');
                 $pdf->SetFont(''/* 'Arial' */, 'B', 9);
@@ -475,9 +481,23 @@ enregistrée sous le n° 443 247 978 au RCS d'Aix en Provence,", 0, 'L'); //prin
 
                 $this->marge_gauche = $this->marge_gauche - 25;
                 $this->marge_droite = $this->marge_droite - 5; /* TODO */
-                $this->marge_haute = $this->marge_haute - 10;
+                $this->marge_haute = $this->marge_haute - 5;
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
+
+                $pdf->SetAutoPageBreak(1, 0);
+                $pdf->setFont('', '', 8);
+                $X = $this->marge_gauche + 10;
+                $pdf->SetXY($X, $this->page_hauteur - 50);
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 3;
+                $pdf->MultiCell($W, 6, "Pour le locataire" . "\n" . "Signature et cachet(lu et approuver)" . "\n" . "\n" . "Qualité" . "\n" . "\n" . "Nom", 0, 'L');
+                $X = $X + $W;
+                $pdf->SetXY($X, $this->page_hauteur - 50);
+                $pdf->MultiCell($W, 6, "Pour le loueur", 0, 'C');
+                $X = $X + $W;
+                $pdf->SetXY($X, $this->page_hauteur - 50);
+                $pdf->MultiCell($W, 6, "Pour le Cessionnaire", 0, 'C');
+                $pdf->SetAutoPageBreak(1, 55);
 
                 $this->_pagefoot($pdf, $outputlangs);
 
@@ -508,18 +528,18 @@ enregistrée sous le n° 443 247 978 au RCS d'Aix en Provence,", 0, 'L'); //prin
         return 0;   // Erreur par defaut
     }
 
-    function header(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0) {
-        global $conf, $langs;
-        $logo = false;
-        if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
-            $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png";
-        } else {
-            $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
-        }
-        if (is_readable($logo)) {
-            $pdf->Image($logo, 75, 13, 0, 24);
-        }
-    }
+//    function header(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0) {
+//        global $conf, $langs;
+//        $logo = false;
+//        if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
+//            $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png";
+//        } else {
+//            $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
+//        }
+//        if (is_readable($logo)) {
+//            $pdf->Image($logo, 75, 13, 0, 24);
+//        }
+//    }
 
     /*
      *   \brief      Affiche le pied de page
@@ -563,10 +583,10 @@ function getNewPdf($format) {
                 $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo;
             }
             if (is_readable($logo)) {
-                $this->Image($logo, 75, 7, 0, 24);
+                $this->Image($logo, 90, 5, 0,25);
             }
         }
-        
+
         function setFooter() {
             $this->SetAutoPageBreak(1, 0);
             $this->SetXY(190, 289);

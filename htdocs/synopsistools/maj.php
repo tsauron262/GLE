@@ -203,7 +203,7 @@ llxFooter();
         return array(
             array($oldPref . "user", MAIN_DB_PREFIX . "user",
                 array("rowid", "external_id", "datec", "tms", "login", "pass", "pass_crypted", "pass_temp", "name", "firstname", "office_phone", "office_fax", "user_mobile", "email", "admin", /* "local_admin",  "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", "statut", "lang", /* "CV_ndf", "Propal_seuilWarn", "PropalWarnValidator", "Propal_seuilValidResp", "Propal_validatorResp", "empnumber", "IM_user_name" */),
-                array("rowid", /* "entity", */ "ref_ext"/* , "ref_int" */, "datec", "tms", "login", "pass", "pass_crypted", "pass_temp"/* , "civilite" */, "lastname", "firstname", "office_phone", "office_fax", "user_mobile", "email"/* , "signature" */, "admin", /* "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", /* "openid", */ "statut", /* "photo", */ "lang")
+                array("rowid", /* "entity", */ "ref_ext"/* , "ref_int" */, "datec", "tms", "login", "pass", "pass_crypted", "pass_temp"/* , "civility" */, "lastname", "firstname", "office_phone", "office_fax", "user_mobile", "email"/* , "signature" */, "admin", /* "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", /* "openid", */ "statut", /* "photo", */ "lang")
             ),
 //        array($oldPref . "user_rights", MAIN_DB_PREFIX . "user_rights",
 //            array(),
@@ -231,11 +231,11 @@ llxFooter();
             ),
             array($oldPref . "socpeople", MAIN_DB_PREFIX . "socpeople",
                 array('rowid', 'datec', 'tms', 'fk_soc', 'civilite', 'name', 'firstname', 'address', 'cp', 'ville', 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'/* , 'email2', 'email3', 'email4' */),
-                array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', */ 'civilite', 'lastname', 'firstname', 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note_private', /* 'default_lang', 'canvas', */ 'import_key')
+                array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', */ 'civility', 'lastname', 'firstname', 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note_private', /* 'default_lang', 'canvas', */ 'import_key')
             ),
             array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "socpeople",
                 array('rowid+100000', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
-                array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */ 'lastname', /* 'firstname', */ 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */ 'fax', /* 'email', 'jabberid', 'priv', */ 'fk_user_creat', 'fk_user_modif', 'note_private'/* , 'default_lang', 'canvas' */, 'import_key')
+                array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', 'civility', */ 'lastname', /* 'firstname', */ 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */ 'fax', /* 'email', 'jabberid', 'priv', */ 'fk_user_creat', 'fk_user_modif', 'note_private'/* , 'default_lang', 'canvas' */, 'import_key')
             ),
             array($oldPref . "element_contact", MAIN_DB_PREFIX . "element_contact",
                 array('rowid', 'datecreate', 'statut', 'element_id', 'fk_c_type_contact', 'fk_socpeople'/* , 'inPDF' */),

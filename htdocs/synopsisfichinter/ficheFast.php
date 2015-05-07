@@ -268,7 +268,7 @@ if ($_REQUEST["id"] > 0) {
         $selectHtml .= "<OPTION value='-1'>Selectionner-></OPTION>";
         $dfltPrice = 0;
         while ($res3 = $db->fetch_object($sql3)) {
-            if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21 || $res3->id == 22) {
+            if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21 || $res3->id == 22 || $res3->id == 26 || $res3->id == 27) {
                 if ($res3->id == $prestation->fk_typeinterv) {
                     $selectHtml .= "<OPTION SELECTED value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
                 } else {

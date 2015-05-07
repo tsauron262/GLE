@@ -790,8 +790,8 @@ if (is_dir($dir)) {
                                         $sqlUpt[] = " phone = '" . $val["PcvMocTel"] . "'";
                                     if ($res->phone_mobile != $val['PcvMocPort'])
                                         $sqlUpt[] = " phone_mobile = '" . $val['PcvMocPort'] . "'";
-                                    if ($res->civilite != $genre)
-                                        $sqlUpt[] = " civilite = '" . $genre . "'";
+                                    if ($res->civility != $genre)
+                                        $sqlUpt[] = " civility = '" . $genre . "'";
                                     if (count($sqlUpt) > 0) {
                                         $updtStr = join(',', $sqlUpt);
                                         $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople SET " . $updtStr . " WHERE rowid =" . $socContact;
@@ -809,7 +809,7 @@ if (is_dir($dir)) {
                                     }
                                 } else {
                                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople
-                                    (datec,fk_soc,civilite,lastname,firstname,phone,phone_mobile,import_key, fk_user_creat)
+                                    (datec,fk_soc,civility,lastname,firstname,phone,phone_mobile,import_key, fk_user_creat)
                              VALUES (now()," . $socid . ",'" . $genre . "','" . $nom . "','" . $prenom . "','" . $val['PcvMocTel'] . "','" . $val['PcvMocPort'] . "'," . $socpeopleExternalId . ", NULL)";
                                     $sql = requeteWithCache($requete);
                                     if ($sql) {

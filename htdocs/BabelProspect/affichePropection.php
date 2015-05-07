@@ -160,11 +160,11 @@ print "<a rel='toptop'>&nbsp;</a>";
     print '<tr><td style="width: 75px;">Soci&eacute;t&eacute; :</td><td><div id="societeNameCont"></div></td></tr>';
     print '<tr><td style="width: 75px;">Civilit&eacute; :</td><td>';
     print '<select id="contactCivil" name="contactCivil">';
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_civilite WHERE active = 1 ORDER BY rowid";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_civility WHERE active = 1 ORDER BY rowid";
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($sql))
     {
-        print "<option value='".$res->civilite."' >".$res->civilite."</option>";
+        print "<option value='".$res->civility."' >".$res->civility."</option>";
     }
     print '</select></td></tr>';
     print '<tr><td style="width: 75px;"><em>*</em>&nbsp;&nbsp;Nom :</td><td><input id="contactNom"  name="contactNom" type="text"></td></tr>';

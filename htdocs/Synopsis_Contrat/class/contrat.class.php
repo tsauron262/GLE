@@ -1029,7 +1029,7 @@ class Synopsis_Contrat extends Contrat {
             $newArr[$id]['email'] = $obj->email;
             $newArr[$id]['tel'] = $obj->phone_pro;
             $newArr[$id]['fax'] = $obj->fax;
-            foreach (array('fullname' => 'fullname', 'civilite' => 'civility', 'nom' => 'lastname', 'prenom' => 'firstname') as $val0 => $val1) {
+            foreach (array('fullname' => 'fullname', 'civility' => 'civility', 'nom' => 'lastname', 'prenom' => 'firstname') as $val0 => $val1) {
                 $result = $elem[$val1];
                 if ($val0 == 'fullname')
                     $result = $elem['civility'] . " " . $elem['lastname'] . " " . $elem['firstname'];

@@ -244,11 +244,11 @@ $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
             $tmpSoc->fetch($res->fk_soc);
             $res = $this->db->fetch_object($sql);
             $tel = "\nTel: " . ($res->phone . "x" != "x" ? $res->phone : $tmpSoc->phone) . "        email : " . $res->email;
-            $civilite = $res->civilite;
-            if ($langs->trans("CivilityShort" . $res->civilite) != "Short" . $civilite)
-                $civilite = $langs->trans("CivilityShort" . $res->civilite);
-            $to = $civilite . " " . $res->name . " " . $res->firstname;
-            $to_signature = $civilite . " " . $res->name . " " . $res->firstname;
+            $civility = $res->civility;
+            if ($langs->trans("CivilityShort" . $res->civility) != "Short" . $civility)
+                $civility = $langs->trans("CivilityShort" . $res->civility);
+            $to = $civility . " " . $res->name . " " . $res->firstname;
+            $to_signature = $civility . " " . $res->name . " " . $res->firstname;
             if ($res->address . "x" != "x") {
                 $to .= "\n" . $res->address . " " . $res->cp . " " . $res->ville;
             }

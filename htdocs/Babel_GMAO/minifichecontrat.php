@@ -106,7 +106,7 @@
 
             print "<tr><td colspan=2>&nbsp;";
             print "<tr><th rowspan=".$rowspan." width=20%>Contacts Contrat";
-            print "    <td>Nom: ".utf8_encode($socpeop->civilite_id. " ".$socpeop->nom. " ".$socpeop->prenom);
+            print "    <td>Nom: ".utf8_encode($socpeop->civility_id. " ".$socpeop->nom. " ".$socpeop->prenom);
             if ($socpeop->poste."x" != "x")
             {
                 print "<tr><td>Poste: ".utf8_encode($socpeop->poste);
@@ -154,7 +154,7 @@
 
             print "<tr><td colspan=2>&nbsp;";
             print "<tr><th rowspan=".$rowspan." width=20%>Contacts";
-            print "    <td>Nom: ".utf8_encode($socpeop->civilite_id. " ".$socpeop->nom. " ".$socpeop->prenom);
+            print "    <td>Nom: ".utf8_encode($socpeop->civility_id. " ".$socpeop->nom. " ".$socpeop->prenom);
             if ($socpeop->poste."x" != "x")
             {
                 print "<tr><td>Poste: ".utf8_encode($socpeop->poste);

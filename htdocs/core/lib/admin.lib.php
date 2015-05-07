@@ -666,7 +666,6 @@ function activateModule($value,$withdeps=1)
     $modFile = $modName . ".class.php";
 
     
-    echo $modFile;
     // Loop on each directory to fill $modulesdir
     $modulesdir = array();
     foreach ($conf->file->dol_document_root as $type => $dirroot)

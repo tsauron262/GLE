@@ -22,6 +22,7 @@ function widget_boxsynopsisdemandeinterv() {
         $_REQUEST['lien_contrat'] = true;
 //        $_REQUEST['next'] = true;
     return boxToWidget("box_synopsisdemandeinterv.php", "DI - " . $langs->trans("BoxLastsynopsisdemandeinterv"), true);
+    
 }
 
 // The widget settings handler.

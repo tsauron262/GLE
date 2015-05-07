@@ -52,6 +52,7 @@ function widget_NavigationUser() {
                 {
 
                     $var=!$var;
+                    require_once (DOL_DOCUMENT_ROOT."/synopsishisto/class/actions_synopsishisto.class.php");
                     $ret = histoNavigation::histoUser($res);
 //                    $table .= print_r($ret,1);
                     if ($i < ($conf->global->SYNOPSIS_HISTO_LENGTH>0?"  ".$conf->global->SYNOPSIS_HISTO_LENGTH:" 5")){

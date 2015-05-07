@@ -255,7 +255,7 @@ if (! defined('NOREQUIRESOC'))
     if (is_numeric($conf->global->MAIN_INFO_SOCIETE_PAYS))
     {
         $mysoc->pays_id=$conf->global->MAIN_INFO_SOCIETE_PAYS;
-        $sql  = "SELECT code from ".MAIN_DB_PREFIX."c_pays";
+        $sql  = "SELECT code from ".MAIN_DB_PREFIX."c_country";
         $sql .= " WHERE rowid = ".$conf->global->MAIN_INFO_SOCIETE_PAYS;
         $result=$db->query($sql);
         if ($result)

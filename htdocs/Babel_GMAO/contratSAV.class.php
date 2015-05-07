@@ -261,7 +261,7 @@ class contratSAV extends Synopsis_Contrat{
     }
    
    */
-    public function validate($user, $force_number='')
+    public function validate($user, $force_number='', $notrigger = 0)
     {
         global $langs, $conf;
         $sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 1 ,date_valid=now()";

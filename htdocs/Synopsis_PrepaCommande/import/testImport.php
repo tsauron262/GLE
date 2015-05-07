@@ -2356,7 +2356,7 @@ function processPays($codePays) {
                 }
                 break;
         }
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_pays WHERE code = '" . $codePays . "'";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_country WHERE code = '" . $codePays . "'";
         $sql = requeteWithCache($requete);
         $res = fetchWithCache($sql);
         return ($res->rowid);

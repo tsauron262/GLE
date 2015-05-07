@@ -24,7 +24,7 @@ function widget_listFactureFournBrouillon() {
     $table2 = '<p>';
 
 
-    $sql  = "SELECT f.facnumber, f.rowid, f.total_ttc, f.type,";
+    $sql  = "SELECT f.ref as facnumber, f.rowid, f.total_ttc, f.type,";
     $sql.= " s.nom, s.rowid as socid";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
     $sql .= " FROM ".MAIN_DB_PREFIX."facture_fourn as f, ".MAIN_DB_PREFIX."societe as s";

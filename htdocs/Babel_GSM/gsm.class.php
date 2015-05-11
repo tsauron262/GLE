@@ -562,10 +562,10 @@ print '<BR>';
         $cont = new Contact($this->db);
         $cont->fetch($id);
         $ret='';
-        if ($option && $cont->civilite_id)
+        if ($option && $cont->civility_id)
         {
-            if ($langs->transnoentities("Civility".$cont->civilite_id)!="Civility".$cont->civilite_id) $ret.=$langs->transnoentities("Civility".$cont->civilite_id).' ';
-            else $ret.=$cont->civilite_id.' ';
+            if ($langs->transnoentities("Civility".$cont->civility_id)!="Civility".$cont->civility_id) $ret.=$langs->transnoentities("Civility".$cont->civility_id).' ';
+            else $ret.=$cont->civility_id.' ';
         }
 
         if ($nameorder)

@@ -28,8 +28,12 @@
  *	\brief      Page to list orders
  */
 
-
 require '../main.inc.php';
+if(isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE)){
+    require DOL_DOCUMENT_ROOT.'/commande/liste.php';
+    die;
+}
+
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';

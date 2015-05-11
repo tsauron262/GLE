@@ -144,7 +144,7 @@ class NdfpForm
         
         // Load TVA, use id instead of value
         $sql  = "SELECT DISTINCT t.taux, t.rowid, t.recuperableonly";
-        $sql.= " FROM ".MAIN_DB_PREFIX."c_tva as t, ".MAIN_DB_PREFIX."c_pays as p";
+        $sql.= " FROM ".MAIN_DB_PREFIX."c_tva as t, ".MAIN_DB_PREFIX."c_country as p";
         $sql.= " WHERE t.fk_pays = p.rowid";
         $sql.= " AND t.active = 1";
         $sql.= " AND p.code IN ('".$mysoc->pays_code."')";

@@ -443,9 +443,9 @@ switch($action)
                 $cont->ville = "";
                 $cont->fk_pays = "";
                 $cont->address = "";
-                $cont->civilite = "";
+                $cont->civility = "";
                 $cont->cp = "";
-                $cont->civilite = "";
+                $cont->civility = "";
                 $cont->note = "";
 //$cont->create();
 

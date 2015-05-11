@@ -86,7 +86,7 @@ class plaquette {
             require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
             $contact = new Contact();
             $contact->fetch($contact_id);
-            $text = preg_replace("/##GENRE_DEST##/",$contact->civilite_id,$text);
+            $text = preg_replace("/##GENRE_DEST##/",$contact->civility_id,$text);
             $text = preg_replace("/##NOM_DEST##/",$contact->nom,$text);
             $text = preg_replace("/##PRENOM_DEST##/",$contact->prenom,$text);
             $text = preg_replace("/##EMAIL_DEST##/",$contact->email,$text);

@@ -62,7 +62,8 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
     }
 
     public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null) {
-        global $user;
+        global $user, $tabVal;
+        $tabVal = array();
 
         if ($typeAff2 != "fact")
             $where = " `revisionNext` = 0 ";
@@ -256,7 +257,6 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
 
 
         if ($this->sortie != 'file') {
-            global $tabVal;
             foreach ($tabVal as $val => $nb)
                 if ($nb > 1)
                     echo "<br/>Facture en double : " . $val;

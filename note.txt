@@ -1302,6 +1302,15 @@ derniére version :
 - action/comm fiche.php modif sur card.php
 
 
-RENAME TABLE  `llx_Synopsis_Tools_fileInfo` TO  `llx_synopsistools_fileInfo` ;
-RENAME TABLE  `llx_Synopsis_Tools_notificationUser` TO  `llx_synopsistools_notificationUser` ;
-RENAME TABLE  `llx_Synopsis_Tools_bug` TO  `llx_synopsistools_bug` ;
+
+
+
+
+Voir pour MAJ : 
+Liste commande groupe
+
+
+
+
+
+RENAME TABLE `llx_Synopsis_Tools_fileInfo` TO `llx_synopsistools_fileInfo` ;

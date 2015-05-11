@@ -16,7 +16,7 @@ require_once('../../main.inc.php');
  $socid = $_REQUEST['socid'];
 
          $requete = "SELECT rowid,
-                            civilite,
+                            civility,
                             name,
                             firstname
                        FROM ".MAIN_DB_PREFIX."socpeople
@@ -27,7 +27,7 @@ require_once('../../main.inc.php');
         $i=0;
         while($row = $db->fetch_array($result,MYSQL_ASSOC))
         {
-            $name = htmlentities(utf8_decode($row["civilite"]. " ".utf8_encode($row["name"]. " ".$row["firstname"])));
+            $name = htmlentities(utf8_decode($row["civility"]. " ".utf8_encode($row["name"]. " ".$row["firstname"])));
             $responce->rows[$i]['id']=$row["rowid"];
             $responce->rows[$i]['cell']=$name;
             $i++;

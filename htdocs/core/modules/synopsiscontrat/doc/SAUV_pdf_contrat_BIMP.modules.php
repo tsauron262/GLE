@@ -945,12 +945,12 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
                     $arr['email'] = 'Email';
                     $arr['fax'] = utf8_encodeRien('N° fax');
                     $arr['tel'] = utf8_encodeRien('N° tel');
-                    $arr['civilite'] = 'Civilit&eacute;';
+                    $arr['civility'] = 'Civilit&eacute;';
                     $arr['nom'] = 'Nom';
                     $arr['prenom'] = 'Pr&eacute;om';
 
                     foreach ($contrat->list_all_valid_contacts() as $key => $val) {
-                        foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+                        foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
                             $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
                             $annexe = preg_replace('/' . $code . "/", $val['obj']->$val0, $annexe);
                         }
@@ -1014,11 +1014,11 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
             $tmpSoc->fetch($res->fk_soc);
             $res = $this->db->fetch_object($sql);
             $tel = "\nTel: " . ($res->phone . "x" != "x" ? $res->phone : $tmpSoc->phone) . "        email : " . $res->email;
-            $civilite = $res->civilite;
-            if ($langs->trans("CivilityShort" . $res->civilite) != "CivilityShort" . $civilite)
-                $civilite = $langs->trans("CivilityShort" . $res->civilite);
-            $to = $civilite . " " . $res->name . " " . $res->firstname;
-            $to_signature = $civilite . " " . $res->name . " " . $res->firstname;
+            $civility = $res->civility;
+            if ($langs->trans("CivilityShort" . $res->civility) != "CivilityShort" . $civility)
+                $civility = $langs->trans("CivilityShort" . $res->civility);
+            $to = $civility . " " . $res->name . " " . $res->firstname;
+            $to_signature = $civility . " " . $res->name . " " . $res->firstname;
             if ($res->address . "x" != "x") {
                 $to .= "\n" . $res->address . " " . $res->cp . " " . $res->ville;
             }

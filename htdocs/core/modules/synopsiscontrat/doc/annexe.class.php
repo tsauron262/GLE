@@ -123,7 +123,7 @@ class annexe {
             //Tritement des contact
             $contacts = array();
             foreach ($contrat->list_all_valid_contacts() as $key => $val) {
-                foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+                foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
                     $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
                     $annexe = preg_replace('/' . $code . "/", $val[$val0], $annexe);
                 }
@@ -131,7 +131,7 @@ class annexe {
 Mail : Contact-external-CUSTOMER-email
 Tél. : Contact-external-CUSTOMER-tel
 ');
-                foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+                foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
                     $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
                     $result = $val[$val0];
                     $tempStr = preg_replace('/' . $code . "/", $result, $tempStr);
@@ -284,7 +284,7 @@ AND  el.`targettype` LIKE  'fi' LEFT JOIN ".MAIN_DB_PREFIX."fichinter fi ON fi.r
         $arr['email'] = 'Email';
         $arr['fax'] = utf8_encodeRien('N° fax');
         $arr['tel'] = utf8_encodeRien('N° tel');
-        $arr['civilite'] = 'Civilit&eacute;';
+        $arr['civility'] = 'Civilit&eacute;';
         $arr['nom'] = 'Nom';
         $arr['prenom'] = 'Pr&eacute;om';
 

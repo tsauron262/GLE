@@ -236,7 +236,7 @@ function getHelp($contrat, $user, $mysoc){
     print "<tr><td>Italic<td>&#139;i&#155;";
     print "<tr><td>Souligner<td>&#139;s&#155;";
     print "<tr><th class='ui-widget-header'>Variable Annexe<th class='ui-widget-header'>Libelle<th class='ui-widget-header'>Example";
-//manque cp ville tel email fax nom prenom civilite
+//manque cp ville tel email fax nom prenom civility
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Utilisateur";
 
     print "<tr><td>User-fullname<td>Mon nom complet<td>" . $user->getFullName($langs);
@@ -308,12 +308,12 @@ function getHelp($contrat, $user, $mysoc){
     $arr['email'] = 'Email';
     $arr['fax'] = utf8_encodeRien('N° fax');
     $arr['tel'] = utf8_encodeRien('N° tel');
-    $arr['civilite'] = 'Civilit&eacute;';
+    $arr['civility'] = 'Civilit&eacute;';
     $arr['nom'] = 'Nom';
     $arr['prenom'] = 'Pr&eacute;om';
 
     foreach ($contrat->list_all_valid_contacts() as $key => $val) {
-        foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+        foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
             if (in_array("Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0, $remCode))
                 continue;
             $remCode[] = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;

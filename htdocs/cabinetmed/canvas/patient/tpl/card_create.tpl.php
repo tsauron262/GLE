@@ -89,7 +89,7 @@ $object->country_id=$_POST["country_id"]?$_POST["country_id"]:$mysoc->country_id
 if ($object->country_id)
 {
     $sql = "SELECT code, libelle";
-    $sql.= " FROM ".MAIN_DB_PREFIX."c_pays";
+    $sql.= " FROM ".MAIN_DB_PREFIX."c_country";
     $sql.= " WHERE rowid = ".$object->country_id;
     $resql=$db->query($sql);
     if ($resql)

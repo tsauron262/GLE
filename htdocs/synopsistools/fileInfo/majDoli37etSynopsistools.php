@@ -30,11 +30,16 @@ $tabSql = array(
     
     
     
-    "UPDATE llx_Synopsis_Histo_User SET element_type = 'synopsischrono' WHERE element_type = 'chrono'"
+    "UPDATE llx_Synopsis_Histo_User SET element_type = 'synopsischrono' WHERE element_type = 'chrono'",
+    "DELETE FROM llx_const WHERE name = 'MAIN_MODULE_GOOGLE_HOOKS'",
+    "DELETE FROM llx_boxes WHERE box_id IN (SELECT rowid FROM llx_boxes_def WHERE file = 'box_demandeInterv.php')",
+    "DELETE FROM llx_boxes_def WHERE file = 'box_demandeInterv.php'",
+    "DELETE FROM llx_boxes WHERE box_id IN (SELECT rowid FROM llx_boxes_def WHERE file = 'box_synopsisdemandeinterv.php')",
+    "DELETE FROM llx_boxes_def WHERE file = 'box_synopsisdemandeinterv.php'"
     
 );
 
-$activeModule = array("modSynopsisChrono", "modSynopsishisto");
+$activeModule = array("modSynopsisdemandeinterv", "modSynopsisChrono", "modSynopsishisto");
 
 $text = "Maj des table contenant Synopsis_Tools";
 

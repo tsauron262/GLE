@@ -42,7 +42,7 @@
         $contact->phone_mobile = $gsm;
         $contact->phone_pro = $tel;
         $contact->email=$email;
-        $contact->civilite_id = $civil;
+        $contact->civility_id = $civil;
         $contact->firstname = $prenom;
         $contact->note = $note;
         $contact->create($user);

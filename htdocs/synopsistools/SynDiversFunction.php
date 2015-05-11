@@ -194,8 +194,11 @@ function boxToWidget($file, $title, $setting = false) {
     $langs->load('commercial');
     $langs->load("boxes");
 
-
-    require_once(DOL_DOCUMENT_ROOT . '/core/boxes/' . $file);
+    $file2 = DOL_DOCUMENT_ROOT . '/core/boxes/' . $file;
+    if(!is_file($file2))
+        $file2 = DOL_DOCUMENT_ROOT."/".str_replace(array("box_", ".php"), "", $file)."/core/boxes/".$file;
+    die($file2);
+    require_once($file2);
     $nameShort = preg_replace('/.php$/', '', $file);
     $box = new $nameShort($db);
 

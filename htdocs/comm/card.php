@@ -558,6 +558,10 @@ if ($id > 0)
 	 */
 	if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 	{
+                /*deb mod drsi Commande*/
+                if(isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE))
+                    $commande_static=new Synopsis_Commande($db);
+                else/*f mod drsi*/
 		$commande_static=new Commande($db);
 
 		$sql = "SELECT s.nom, s.rowid,";
@@ -607,12 +611,37 @@ if ($id > 0)
 			{
 				$objp = $db->fetch_object($resql);
 				$var=!$var;
-				print "<tr ".$bc[$var].">";
+                                /* Mod drsi */
+                                $commande_static->id = $objp->cid;
+                                if(isset($memoireG) && count($memoireG) > 0 && !isset($memoireG[$commande_static->id])){
+                                        echo "</table></tr></td>";
+                                }
+                               if(isset($memoireG) && count($memoireG) > 0 && isset($memoireG[$commande_static->id])){
+                                    $MAXLIST++;
+                                }
+                                else{
+                                    $memoireG = $commande_static->listGroupMember(false);
+                                    if(count($memoireG) > 0){
+//                                        $MAXLIST++;
+                                        echo "<tr class='impaire'><td>".$commande_static->OrderGroup->getNomUrl(1)."<br/><span align='right'>".$commande_static->OrderGroup->qteInGrp." commandes Total : ".price($commande_static->OrderGroup->total_ht)." €</span></td><td  colspan='3'><table class='noborder'>";
+                                    }
+                                }
+                                     
+				print "<tr $bc[$var]>";
+                                if(isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE))
+                                    print '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$objp->cid.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$objp->ref."</a>\n";
+                                else
+//				print "<tr ".$bc[$var].">";
+                                /*Fin mod drsi */
 				print '<td class="nowrap"><a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$objp->cid.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$objp->ref."</a>\n";
 				print '</td><td align="right" width="80">'.dol_print_date($db->jdate($objp->dc),'day')."</td>\n";
 				print '<td align="right" style="min-width: 60px">'.price($objp->total_ht).'</td>';
 				print '<td align="right" style="min-width: 60px" class="nowrap">'.$commande_static->LibStatut($objp->fk_statut,$objp->facture,5).'</td></tr>';
 				$i++;
+                                /*deb mod drsi */
+                                if(isset($memoireG) && count($memoireG) > 0 && $i==min($MAXLIST, $num))
+                                        echo "</table></tr></td>";
+                                /*f mod drsi*/
 			}
 			$db->free($resql);
 
@@ -663,7 +692,7 @@ if ($id > 0)
 				print '<td class="nowrap">';
 				$contrat->id=$objp->id;
 				$contrat->ref=$objp->ref?$objp->ref:$objp->id;
-				print $contrat->getNomUrl(1,12);
+				print $contrat->getNomUrl(1,/*mod drsi 20*/25/*f mod drsi*/);
 				print "</td>\n";
 				print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->dc),'day')."</td>\n";
 				print '<td width="20">&nbsp;</td>';
@@ -722,7 +751,7 @@ if ($id > 0)
 
 				print "<tr ".$bc[$var].">";
 				print '<td class="nowrap"><a href="'.DOL_URL_ROOT.'/fichinter/card.php?id='.$objp->id.'">'.img_object($langs->trans("ShowPropal"),"propal").' '.$objp->ref.'</a></td>'."\n";
-                //print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->startdate)).'</td>'."\n";
+                /*MODDRS*/print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->startdate)).'</td>'."\n";/*fmoddrsi*/
 				print '<td align="right" width="120">'.convertSecondToTime($objp->duration).'</td>'."\n";
 				print '<td align="right" width="100">'.$fichinter_static->getLibStatut(5).'</td>'."\n";
 				print '</tr>';

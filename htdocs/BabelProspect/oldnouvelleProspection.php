@@ -286,7 +286,7 @@ switch ($action)
                                ".MAIN_DB_PREFIX."societe.fk_secteur,
                                ".MAIN_DB_PREFIX."c_secteur.libelle AS secteurStr
                               FROM ".MAIN_DB_PREFIX."societe
-                         LEFT JOIN ".MAIN_DB_PREFIX."c_pays on ".MAIN_DB_PREFIX."c_pays.rowid=".MAIN_DB_PREFIX."societe.fk_pays
+                         LEFT JOIN ".MAIN_DB_PREFIX."c_country on ".MAIN_DB_PREFIX."c_country.rowid=".MAIN_DB_PREFIX."societe.fk_pays
                          LEFT JOIN ".MAIN_DB_PREFIX."c_typent on ".MAIN_DB_PREFIX."c_typent.id=".MAIN_DB_PREFIX."societe.fk_typent
                          LEFT JOIN ".MAIN_DB_PREFIX."c_forme_juridique on ".MAIN_DB_PREFIX."c_forme_juridique.rowid = ".MAIN_DB_PREFIX."societe.fk_forme_juridique
                          LEFT JOIN ".MAIN_DB_PREFIX."c_departements on ".MAIN_DB_PREFIX."c_departements.rowid = ".MAIN_DB_PREFIX."societe.fk_departement
@@ -331,7 +331,7 @@ switch ($action)
                                ".MAIN_DB_PREFIX."societe.fk_secteur,
                                ".MAIN_DB_PREFIX."c_secteur.libelle AS secteurStr
                               FROM ".MAIN_DB_PREFIX."societe
-                         LEFT JOIN ".MAIN_DB_PREFIX."c_pays on ".MAIN_DB_PREFIX."c_pays.rowid=".MAIN_DB_PREFIX."societe.fk_pays
+                         LEFT JOIN ".MAIN_DB_PREFIX."c_country on ".MAIN_DB_PREFIX."c_country.rowid=".MAIN_DB_PREFIX."societe.fk_pays
                          LEFT JOIN ".MAIN_DB_PREFIX."c_typent on ".MAIN_DB_PREFIX."c_typent.id=".MAIN_DB_PREFIX."societe.fk_typent
                          LEFT JOIN ".MAIN_DB_PREFIX."c_forme_juridique on ".MAIN_DB_PREFIX."c_forme_juridique.rowid = ".MAIN_DB_PREFIX."societe.fk_forme_juridique
                          LEFT JOIN ".MAIN_DB_PREFIX."c_departements on ".MAIN_DB_PREFIX."c_departements.rowid = ".MAIN_DB_PREFIX."societe.fk_departement
@@ -427,7 +427,7 @@ switch ($action)
                                ".MAIN_DB_PREFIX."societe.fk_secteur,
                                ".MAIN_DB_PREFIX."c_secteur.libelle AS secteurStr
                               FROM ".MAIN_DB_PREFIX."societe
-                         LEFT JOIN ".MAIN_DB_PREFIX."c_pays on ".MAIN_DB_PREFIX."c_pays.rowid=".MAIN_DB_PREFIX."societe.fk_pays
+                         LEFT JOIN ".MAIN_DB_PREFIX."c_country on ".MAIN_DB_PREFIX."c_country.rowid=".MAIN_DB_PREFIX."societe.fk_pays
                          LEFT JOIN ".MAIN_DB_PREFIX."c_typent on ".MAIN_DB_PREFIX."c_typent.id=".MAIN_DB_PREFIX."societe.fk_typent
                          LEFT JOIN ".MAIN_DB_PREFIX."c_forme_juridique on ".MAIN_DB_PREFIX."c_forme_juridique.rowid = ".MAIN_DB_PREFIX."societe.fk_forme_juridique
                          LEFT JOIN ".MAIN_DB_PREFIX."c_departements on ".MAIN_DB_PREFIX."c_departements.rowid = ".MAIN_DB_PREFIX."societe.fk_departement

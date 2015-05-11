@@ -442,7 +442,7 @@ function contactFiche_updatepage(xmlDoc)
  * prenom
  * email
  * societe
- * titre / civilite
+ * titre / civility
  * poste
  * address
  * cp

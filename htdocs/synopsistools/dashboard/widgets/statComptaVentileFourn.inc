@@ -19,8 +19,8 @@ function widget_statComptaVentileFourn() {
     $table .= '<table class="noborder" width="100%">';
     $table .= '<tr class="liste_titre"><td>Type</td><td align="center">'.$langs->trans("NbOfLines").'</td><td align="center">'.$langs->trans("AccountNumber").'</td><td align="center">'.$langs->trans("TransID").'</td></tr>';
 
-    $sql = "SELECT count(*), ccg.intitule, ccg.rowid,ccg.numero FROM ".MAIN_DB_PREFIX."facture_fourn_det as fd";
-    $sql.= " ,".MAIN_DB_PREFIX."compta_compte_generaux as ccg";
+    $sql = "SELECT count(*), ccg.label as intitule, ccg.rowid,ccg.account_number as numero FROM ".MAIN_DB_PREFIX."facture_fourn_det as fd";
+    $sql.= " ,".MAIN_DB_PREFIX."accountingaccount as ccg";
     $sql.= " WHERE fd.fk_code_ventilation = ccg.rowid";
     $sql.= " GROUP BY ccg.rowid";
     //$table .= $sql;

@@ -28,6 +28,13 @@ restrictedArea($user, 'propal', $id, '');
 
 $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '<script>$(document).ready(function(){'
+        . 'if($("#check")[0].checked==false){'
+        . '$("#po_degr").val(0);'
+        . '$(".degr").hide();'
+        . '$("#dure_degr").val(0);'
+        . '}else{'
+        . '$(".degr").show();'
+        . '}'
         . '$("#socid").change(function(e){'//fonction de changement de rapporteur
         . 'var send=$("#socid").val();'
         . 'if(send>0){'
@@ -56,6 +63,12 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '$("#bouton").click(function(e){'
         . 'e.preventDefault();'
         . 'calc();'
+        . '});'
+        . '$("#check").change(function(e){'
+        . 'if($("#check")[0].checked==false){'
+        . '$(".degr").val(0);'
+        . '}'
+        . '$(".degr").toggle(400);'
         . '});'
         . '$("#pretAP").change(function(e){'
         . 'calc();'
@@ -95,14 +108,21 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '}'
         . '}'
         . 'function calc(){'
-        . 'var fric_dispo = parseFloat($("#pretAP").val());'
-        . 'if(fric_dispo>0){'
+        . 'var pret=parseFloat($("#preter").val());'
         . 'var mois = parseFloat($("#mensuel").val());'
         . 'var dure = parseFloat($("#duree").val());'
         . 'var cC=parseFloat($("#commC").val());'
         . 'var cF=parseFloat($("#commF").val());'
-        . 'var mensualite=fric_dispo/mois;'
+        . 'var fric_dispo = parseFloat($("#pretAP").val());'
+        . 'if(pret>0){'
+        . 'var loyerpret=pret/dure;'
+        . '}else{'
+        . 'var loyerpret=0;'
+        . '}'
+        . 'if(fric_dispo>0){'
+        . 'var mensualite=fric_dispo/mois-loyerpret;'
         . 'var interet = parseFloat($("#taux").val());'
+        . 'alert(mensualite);'
         . 'interet=interet/100/12;'
         . 'var emprunt = mensualite / (interet / (1 - Math.pow(1+interet, -dure)));'
         . 'var res=emprunt/((100+cC)/100*(100+cF)/100);'
@@ -192,6 +212,8 @@ $socid = 0;
 $idoldcontact = 0;
 $idcontact = 0;
 $idoldcontact_rowid = 0;
+$duree_degr=0;
+$pourcent_degr=0;
 
 
 if ($valfinance->id) {
@@ -205,6 +227,8 @@ if ($valfinance->id) {
     $pret = $valfinance->pret;
     $VR = $valfinance->VR;
     $location = $valfinance->location;
+    $duree_degr=$valfinance->duree_degr;
+    $pourcent_degr=$valfinance->pourcent_degr;
 }
 
 $contact = $object->Liste_Contact(-1, "external");
@@ -228,6 +252,8 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $pret = $_POST["preter"];
     $location = $_POST["rad"];
     $socid = $_POST["socid"];
+    $duree_degr=$_POST["duree_degr"];
+    $pourcent_degr=$_POST["pour_degr"];
 
     //droit totale
     if ($user->rights->synopsisFinanc->super_write) {
@@ -249,6 +275,8 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $valfinance->pret = $pret;
     $valfinance->propal_id = $object->id;
     $valfinance->location = $location;
+    $valfinance->duree_degr=$duree_degr;
+    $valfinance->pourcent_degr=$pourcent_degr;
 
     $valfinance->calcul();
     if ($valfinance->id > 0)
@@ -296,10 +324,8 @@ if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $
 }
 
 
-//eoihaeofhaofhamofbieaufbaielufbaepimofvnaemiofeaiofvbeaiou
 
 
-$tabM = array(1 => "Mensuel", 3 => "Trimestriel", 4 => "Quadrimestriel", 6 => "Semestriel");
 if ($user->rights->synopsisFinanc->write) {
 
 
@@ -333,21 +359,41 @@ if ($user->rights->synopsisFinanc->write) {
 
     echo '<tr>';
     echo "<td>Type de période: </td><td><select id='mensuel' name='periode'>";
-    foreach ($tabM as $val => $mensualite) {
+    foreach (Synopsisfinancement::$TPeriode as $val => $mensualite) {
         echo "<option value='" . $val . "'" . (($val == $periode) ? 'selected="selected"' : "") . ">" . $mensualite . "</option>";
     }
     echo "</select></td>";
     echo '</tr>';
 
     echo '<tr>';
-    $tabD = array(24 => "24 mois", 36 => "36 mois", 48 => "48 mois", 240 => "240 mois");
-    echo "<td>Durée du financement: </td><td><select id='duree' name='duree'>";
-    foreach ($tabD as $dure => $mois) {
+    echo "<td>Durée du financement <span class='degr'>(1ère periode)</span>: </td><td><select id='duree' name='duree'>";
+    foreach (Synopsisfinancement::$tabD as $dure => $mois) {
         echo "<option value='" . $dure . "'" . (($dure == $duree) ? 'selected="selected"' : "") . ">" . $mois . "</option>";
     }
     echo "</select></td>";
     echo '</tr>';
 
+    echo '<tr>';
+    echo '<td>Financement à 2 periodes:</td>';
+    echo '<td><INPUT type="checkbox" id="check" name="tarif_degr" value="degr" '.(($valfinance->duree_degr>0 || $valfinance->pourcent_degr>0)? "checked='checked'" : "").' /></td>';
+    echo '</tr>';
+
+    echo '<tr class="degr">';
+    echo '<td>Durée de la 2nd periode:</td>';
+    //echo '<td><INPUT type="text" id="dure_degr" name="duree_degr" value="'.$duree_degr.'"/></td>';
+    echo "<td><select id='dure_degr' name='duree_degr'>";
+    echo '<option value="0"></option>';
+    foreach (Synopsisfinancement::$tabD as $dure => $mois) {
+        echo "<option value='" . $dure . "'" . (($dure == $duree_degr) ? 'selected="selected"' : "") . ">" . $mois . "</option>";
+    }
+    echo "</select></td>";
+    echo '</tr>';
+
+    echo '<tr class="degr">';
+    echo '<td>Pourcentage du total de la 2nd priode:</td>';
+    echo '<td><INPUT type="text" id="po_degr" name="pour_degr" value="'.$pourcent_degr.'"/></td>';
+    echo '</tr>';
+    
     echo '<tr>';
     echo '<td>Commissions: </td>';
     echo "<td>Commerciale:<br/><input type='text' id='commC' name='commC' value='" . $commC . "'/>%";
@@ -383,18 +429,26 @@ if ($valfinance->id > 0) {
     if ($montantAF + $VR + $pret > 0) {
         echo "<br/><hr/><br/>";
 
-        echo "Montant Total a emprunter sur la periode : " . price($valfinance->emprunt);
+        echo "Montant Total a emprunter sur toute la durée : " . price($valfinance->emprunt_total);
 
         echo"<br/><br/>";
 
 
 
-        echo $tabM[$valfinance->periode] . ": " . price(($valfinance->loyer) + 0.005) . " €   X   " . $valfinance->nb_periode . " periodes soit " . price($valfinance->prix_final) . " € HT";
+        echo Synopsisfinancement::$TPeriode[$valfinance->periode] . ": " . price(($valfinance->loyer1) + 0.005) . " €   X   " . $valfinance->nb_periode . " periodes";
 
+        if($valfinance->duree_degr>0 && $valfinance->pourcent_degr>0){
+//            echo"<br/><br/>";
+            echo ' puis '.price(($valfinance->loyer2) + 0.005) . " €   X ". $valfinance->nb_periode2." periodes";
+        }
+        
+        echo " soit " . price($valfinance->prix_final) . " € HT";
+        
         if ($valfinance->VR > 0) {
 
             echo " avec un VR de: " . price($valfinance->VR) . " €";
         }
+        
 
         echo '<br/><br/><form method="post">';
         echo '<input type="hidden" name="form2" value="form2"/>';

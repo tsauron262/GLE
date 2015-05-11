@@ -458,7 +458,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 8);
                 $pdf->Cell($W, 6, $valfinance->nb_periode, 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
-                $pdf->Cell($W, 6, price($valfinance->loyer + 0.005)." €", 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, price($valfinance->loyer1 + 0.005)." €", 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
                 $pdf->Cell($W, 6, Synopsisfinancement::$TPeriode[$valfinance->periode], 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
@@ -469,6 +469,28 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($W, 6, $valfinance->nb_periode . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
                 }
 //fin corps/////////////////////////////////////////////////////////////////////
+//transition
+                $pdf->MultiCell($W, 6, "suivie de:",0,'L');
+//fin transition
+//
+//entete dégresif
+//
+                $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                $pdf->Cell($W, 6, "NOMBRE DE LOYERS", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, "MONTANT HT", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, "PERIODICITE", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
+                $pdf->MultiCell($W, 6, "DUREE", 1, 'C', FALSE, 1, NULL, null, null, null, null, null, null, 'M');
+//
+//fin entete degressif
+//corps prix dégressif
+//
+                $pdf->SetFont('', '', 8);
+                $pdf->Cell($W, 6, $valfinance->nb_periode2, 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, price($valfinance->loyer2 + 0.005)." €", 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, Synopsisfinancement::$TPeriode[$valfinance->periode], 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->MultiCell($W, 6, $valfinance->nb_periode2 . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
+//
+//fin corps prix dégressif
 //////////////////////////////////fin tableau///////////////////////////////////
 
 

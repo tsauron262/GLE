@@ -90,6 +90,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -233,10 +234,10 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                     $mail = $addr->email;
                 }
                 $address = $chrono->societe->name;
-                
-                if($contact != "" && $contact != $chrono->societe->name)
-                    $address .= "\n".$contact;
-                
+
+                if ($contact != "" && $contact != $chrono->societe->name)
+                    $address .= "\n" . $contact;
+
                 $address .= "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
 
                 $pdf->SetXY('20', '71');
@@ -254,10 +255,10 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                     $pdf->SetXY('41', '53.5');
                     $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
                 }
-                
-                if($chrono->valuesPlus[1066]->value != ""){
+
+                if ($chrono->valuesPlus[1066]->value != "") {
                     $pdf->SetXY(12, 45);
-                    $pdf->MultiCell(100, 6, "N° de dossier prestataire : ".$chrono->valuesPlus[1066]->value, 0, 'L');
+                    $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $chrono->valuesPlus[1066]->value, 0, 'L');
                 }
 
 
@@ -288,26 +289,45 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('15', '138.5');
                 $pdf->SetFont('', '', 12);
                 $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
-                
-                if($chrono->valuesPlus[1055]->value == 2)
-                    $pdf->SetTextColor(256,0,0);
-                    
+
+                if ($chrono->valuesPlus[1055]->value == 2)
+                    $pdf->SetTextColor(256, 0, 0);
+
                 $pdf->SetXY('28.5', '160.3');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1055]->valueStr, 0, 'L');
-                
-                if($chrono->valuesPlus[1068]->value == 1){
-                $pdf->SetFont('', '', 9);
-                $pdf->SetTextColor("black");
-                $pdf->SetXY('6', '245');
-                $pdf->MultiCell(100, 6, "- J'accepte les frais de 96 TTC de prise en charge urgente", 0, 'L');
-                $pdf->SetXY('62', '115');
-                $pdf->SetFont('', '', 20);
-                $pdf->SetTextColor(255,102,0);
-                $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
+
+                $cgv = "";
+                $cgv.= "-La société BIMP ne peut pas être tenue responsable de la parte éventuelle de données, quelque soit le support.\n\n";
+
+                if (stripos($chrono2->description, "Iphone") !== false) {
+                    $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+                    $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE;" . "\n" . "Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
+                    $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
+                } else {
+                    $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
+                    $cgv.="\n";
+                    $cgv.="-Les frais de prise en charge diagnostic de 45€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
                 }
-                
-                
-                
+//                $pdf->SetX(6);
+//                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
+//                $pdf->SetX(6);
+                $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 0.75€ par jour.\n\n";
+
+                if ($chrono->valuesPlus[1068]->value == 1) {
+                    $pdf->SetXY('62', '115');
+                    $pdf->SetFont('', '', 20);
+                    $pdf->SetTextColor(255, 102, 0);
+                    $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
+                    $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
+                }
+
+
+                $pdf->SetTextColor("black");
+//                $pdf->SetXY('6', '245');
+                $pdf->SetFont('', '', 8);
+                $pdf->SetXY('6', '197');
+                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
+
 //                //info pour prise en charge
 //                $pdf->SetFont('', '', 9);
 //                $pdf->SetTextColor(0,0,0);
@@ -317,17 +337,15 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 //                $pdf->MultiCell(90, 6, "Mdp : ".$chrono2->valuesPlus[1057]->valueStr, 0, '');
 //                $pdf->SetXY(100, 260);
 //                $pdf->MultiCell(90, 6, "Systéme : ".$chrono2->valuesPlus[1067]->valueStr, 0, '');
-                
-
                 //etiquette ref
                 for ($i = 0; $i < 5; $i++) {
-                $pdf->SetFont('', '', 11);
-                $pdf->SetTextColor(256,0,0);
+                    $pdf->SetFont('', '', 11);
+                    $pdf->SetTextColor(256, 0, 0);
                     $x = ('8' + ($i * 38.8));
                     $pdf->SetXY($x, '269.9');
                     $pdf->MultiCell(38, 6, $chrono->ref, 0, 'C');
-                $pdf->SetFont('', '', 10);
-                $pdf->SetTextColor("black");
+                    $pdf->SetFont('', '', 10);
+                    $pdf->SetTextColor("black");
                     $pdf->SetXY($x, '278');
                     $pdf->MultiCell(38, 6, $chrono->societe->nom, 0, 'C');
                 }

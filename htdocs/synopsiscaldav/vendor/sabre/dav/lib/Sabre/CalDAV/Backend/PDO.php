@@ -341,7 +341,7 @@ class PDO extends AbstractBackend {
      */
     public function getCalendarObjects($calendarId) {
 
-        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ?');
+        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, size FROM ' . $this->calendarObjectTableName . ' WHERE lastoccurence > "' . mktime(0, 0, 0, date("m") - 4, date("d"), date("Y")) . '" AND calendarid = ?');
         $stmt->execute(array($calendarId));
 
         $result = array();
@@ -388,28 +388,45 @@ class PDO extends AbstractBackend {
         $filename = '-id' . $row['id'] . ".ics";
         $action->build_exportfile('ical', 'event', 0, $filename, array('id' => $row['id']));
         $outputfile = $conf->agenda->dir_temp . '/' . $filename;
+        
+        
 
 
         $calData = file_get_contents($outputfile);
 
-        $calendarData2 = array();//$this->traiteTabIcs($row['agendaplus'], array());
-//        dol_syslog("1 \n".$calData,3);
+        $calendarData2 = array(); //$this->traiteTabIcs($row['agendaplus'], array());
+        
+        /* Participant */
+        $action->id = $row['id'];
+        $action->fetch_userassigned();
+        foreach($action->userassigned as $val){
+            if($val['id'] != $calendarId){
+            $userT = new \User($db);
+            $userT->fetch($val['id']);
+            if($userT->email != "")
+                $calendarData2[9999 . $row['id'] . $val['id']] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:".$userT->email;
+            }
+        }
+        
+        
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
+        
+        
+        
+        
         $calData = $this->traiteIcsTab($calendarData2);
-//        dol_syslog("2 \n".$calData,3);
 
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],
             'lastmodified' => $row['lastmodified'],
-            'etag' => '"' . $row['etag'] . '"',
+            'etag' => '' . $row['etag'] . '',
             'calendarid' => $row['calendarid'],
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
 
-//        dol_syslog("Objet calendar " . $objectUri." | ".print_r($calData,true),3);
 
         return $return;
     }
@@ -450,7 +467,6 @@ class PDO extends AbstractBackend {
 //
 //        return '"' . $extraData['etag'] . '"';
 
-
         $extraData = $this->getDenormalizedData($calendarData);
         $calendarData2 = $this->traiteTabIcs($calendarData, array());
 
@@ -476,18 +492,52 @@ class PDO extends AbstractBackend {
         $objectDataTemp = $calendarData;
         $objectEtagTemp = $extraData['etag'];
         $objectUriTemp = $objectUri;
+        
+        $this->traiteParticipant($action, $calendarData2, $user);
+        
+        $action->userownerid = $user->id;
         $action->add($user);
 
-        $this->userIdCaldavPlus($calendarId);
+//        $this->userIdCaldavPlus($calendarId);
     }
     
-    public function userIdCaldavPlus($calendarId){
-        $tabT = getElementElement("user", "idCaldav", $calendarId);
-        if (isset($tabT[0]))
-            setElementElement("user", "idCaldav", $calendarId, $tabT[0]['d']);
-        else
-            addElementElement("user", "idCaldav", $object->usertodo->id, 1);        
+    public function traiteParticipant($action, $calendarData2, $user){
+        global $db;
+        $tabMail = array();
+        foreach($calendarData2 as $ligne){
+            if(stripos($ligne, "ATTENDEE") !== false){
+                $tabT = explode("mailto:", $ligne);
+                if(isset($tabT[0]))
+                        $tabMail[] = $tabT[1];
+            }
+            if(stripos($ligne, "CUTYPE") != false){
+                $tabT = explode("mailto:", $ligne);
+                if(isset($tabT[0]))
+                        $tabMail[] = $tabT[1];
+            }
+        }
+        
+        $action->userassigned = array($user->id => array('id' => $user->id));
+        foreach($tabMail as $mail){
+            $mail = str_replace ("\n", "", $mail);
+            $mail = str_replace ("\r", "", $mail);
+            $sql = $db->query("SELECT rowid 
+FROM  `llx_user` 
+WHERE  `email` LIKE  '".$mail."'");
+            if($db->num_rows($sql) > 0){
+                $ligne = $db->fetch_object($sql);
+                $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid);
+            }
+        }
     }
+
+//    public function userIdCaldavPlus($calendarId) {
+//        $tabT = getElementElement("user", "idCaldav", $calendarId);
+//        if (isset($tabT[0]))
+//            setElementElement("user", "idCaldav", $calendarId, $tabT[0]['d']);
+//        else
+//            addElementElement("user", "idCaldav", $object->usertodo->id, 1);
+//    }
 
     /**
      * Updates an existing calendarobject, based on it's uri.
@@ -508,19 +558,18 @@ class PDO extends AbstractBackend {
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
 
         $extraData = $this->getDenormalizedData($calendarData);
-//        dol_syslog(print_r($calendarData, true), 3);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($extraData['etag'], $calendarData, /* $extraData['size'], $extraData['componentType'], $extraData['firstOccurence'], $extraData['lastOccurence'] , */ $calendarId, $objectUri));
 //        $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarTableName . ' SET ctag = ctag + 1 WHERE id = ?');
 //        $stmt->execute(array($calendarId));
-        
-        
+
+
         global $objectEtagTemp;
         $objectEtagTemp = $extraData['etag'];
-        
-        $this->userIdCaldavPlus($calendarId);
-        
+
+//        $this->userIdCaldavPlus($calendarId);
+
 
         global $db, $conf;
         $sql = $db->query("SELECT fk_object FROM " . MAIN_DB_PREFIX . "synopsiscaldav_event WHERE uri = '" . $objectUri . "'");
@@ -549,6 +598,8 @@ class PDO extends AbstractBackend {
             $user->fetch($calendarId);
 
 
+            $this->traiteParticipant($action, $calendarData2, $user);
+            
             $action->update($user);
         }
 
@@ -556,19 +607,26 @@ class PDO extends AbstractBackend {
     }
 
     function traiteTabIcs($tab, $tabResult = array()) {
+//        $tabT = preg_replace("(mailto:[a-z1-9]+)\n ([a-z1-9]+[@])", "$1$2", $tabT);
+        $tab = str_replace("\n ", "", $tab);
         $tabT = explode("\n", $tab);
         foreach ($tabT as $ligneT) {
             $tabT2 = array();
-            if (stripos($ligneT, 'BEGIN:') === false && !(stripos($ligneT, 'END:') === 0))
-                $tabT2 = preg_split("/[:;]/", $ligneT); 
+            if (stripos($ligneT, 'BEGIN:') === false && !(stripos($ligneT, 'END:') === 0) && stripos($ligneT, "ATTENDEE;") === false && stripos($ligneT, "CUTYPE") === false)
+                $tabT2 = preg_split("/[:;]/", $ligneT);
             if (isset($tabT2[1]))
-                $tabResult[$tabT2[0]] = preg_replace("/".$tabT2[0] . "[:;]/", "", $ligneT);
+                $tabResult[$tabT2[0]] = preg_replace("/" . $tabT2[0] . "[:;]/", "", $ligneT);
             else
                 $tabResult[] = $ligneT;
         }
         $position = '';
         $tabCore = $tabHead = array();
         foreach ($tabResult as $clef => $val) {
+            //Pour ce tour
+            if (stripos($val, "PARTICIPANT") > -1)
+                $position = 'core';
+            
+            //pour le tour d'apres
             if (stripos($val, "BEGIN:VCALENDAR") > -1)
                 $position = 'header';
             elseif (stripos($val, "BEGIN:VEVENT") > -1)
@@ -582,10 +640,10 @@ class PDO extends AbstractBackend {
                     $tabCore[$clef] = $val;
             }
         }
-        $tabCore["TZNAME"] = "CET";
-        $tabHead["TZNAME"] = "CET";
-        $tabHead["TZOFFSETFROM"] = "+0200";
-        $tabHead["TZOFFSETTO"] = "+0100";
+//        $tabCore["TZNAME"] = "CET";
+//        $tabHead["TZNAME"] = "CET";
+//        $tabHead["TZOFFSETFROM"] = "+0200";
+//        $tabHead["TZOFFSETTO"] = "+0100";
 
         $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, array("BEGIN:VEVENT"), $tabCore, array("END:VEVENT", "END:VCALENDAR"));
 
@@ -595,9 +653,12 @@ class PDO extends AbstractBackend {
     function traiteIcsTab($tab) {
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
-            if (!is_integer($clef))
-                $tab2[] = $clef . ":" . $ligne;
-            else
+            if (!is_integer($clef)) {
+                if (stripos($ligne, "=") !== false)
+                    $tab2[] = $clef . ";" . $ligne;
+                else
+                    $tab2[] = $clef . ":" . $ligne;
+            } else
                 $tab2[] = $ligne;
         }
         return implode("\n", $tab2);
@@ -691,19 +752,21 @@ class PDO extends AbstractBackend {
 
 
 
-        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+        $stmt = $this->pdo->prepare('SELECT id FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$row)
             return null;
 
-        global $db, $conf;
+        global $db, $conf, $user;
+        $user = new \User($db);
+        $user->fetch($calendarId);
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
         $action->fetch($row['id']);
         $action->delete();
-        $this->userIdCaldavPlus($calendarId);
+//        $this->userIdCaldavPlus($calendarId);
     }
 
     /**

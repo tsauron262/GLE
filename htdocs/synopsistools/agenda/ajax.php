@@ -8,11 +8,12 @@ require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 if ($_REQUEST['id'] > 0) {
     $actioncomm = new ActionComm($db);
     $actioncomm->fetch($_REQUEST['id']);
+    $actioncomm->fetch_userassigned();
     
     if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $actioncomm->usertodo->id)){
         //pas le droit
     }else{
-    $actioncomm->usertodo->id = $newTabUser2[$_REQUEST['setUser']];
+//    $actioncomm->usertodo->id = $newTabUser2[$_REQUEST['setUser']];
     $actioncomm->datep = $_REQUEST['start'] / 1000;
     $actioncomm->datef = ($_REQUEST['end'] / 1000) - 60;
     if($_REQUEST['clone'] == "true"){

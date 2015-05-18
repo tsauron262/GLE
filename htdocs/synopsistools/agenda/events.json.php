@@ -13,14 +13,34 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
     
     
     $heureOuvree = (isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true');
-    $sql = ("SELECT *, (`datep2` - `datep`) as duree FROM " . MAIN_DB_PREFIX . "actioncomm a LEFT JOIN " . MAIN_DB_PREFIX . "actioncomm_extrafields on fk_object = a.id WHERE ((datep < '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep >= '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "') "//Rdv dbut ds periode fin aprés
+    $sql = ("SELECT *, (`datep2` - `datep`) as duree "
+            . "FROM " . MAIN_DB_PREFIX . "actioncomm a LEFT JOIN " . MAIN_DB_PREFIX . "actioncomm_extrafields on fk_object = a.id "
+            . "LEFT JOIN ".MAIN_DB_PREFIX."actioncomm_resources ar ON ar.fk_actioncomm = a.id AND ar.element_type = 'user'"
+            . "WHERE ((datep < '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep >= '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "') "//Rdv dbut ds periode fin aprés
             . "|| (datep2 <= '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')" //fin ds la periode
-            . "|| (datep2 > '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep < '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')) AND fk_user_action IN (" . implode(",", $newTabUser2) . ") AND (fk_action > 40 || fk_action < 9) order by datep ASC ");
+            . "|| (datep2 > '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep < '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "'))"
+            . " AND (fk_user_action IN (" . implode(",", $newTabUser2) . ") || ar.fk_element IN (" . implode(",", $newTabUser2) . ")) AND (fk_action NOt IN (3,8,9,10,30,31)) order by datep ASC ");
     $result = $db->query($sql); //avant et aprés periode
-//echo $sql;
+//echo $sql;die;
     $f = 0;
-    while ($ligne = $db->fetch_object($result)) {
-        $userId = $newTabUser[$ligne->fk_user_action];
+    $tabTest = array();
+    while ($ligne = $db->fetch_object($result)) {//print_r($ligne);
+        $userId = -1;
+        
+        if($ligne->fk_element > 0 && isset($newTabUser[$ligne->fk_element])){
+            $userId = $newTabUser[$ligne->fk_element];
+        }
+        elseif(isset($newTabUser[$ligne->fk_user_action]))
+            $userId = $newTabUser[$ligne->fk_user_action];
+        
+        
+        if($userId < 0) 
+            continue;//Pas d'utilisateur concerné.
+        
+        
+        if(isset($tabTest[$userId][$ligne->id]))
+            continue;//Evenement deja envoyer
+        $tabTest[$userId][$ligne->id] = true;
 
         if ($ligne->label == "")
             $ligne->label = "N/C";
@@ -51,7 +71,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         if (!isset($ligne->datep))
             $ligne->datep = $ligne->datep2;
 
-        if ($ligne->conf == 1 && $ligne->fk_user_action != $user->id) {
+        if ($ligne->conf == 1 && $userId != $user->id) {
             $text = "Confidentiel";
             $ligne->fk_action = 999;
         }

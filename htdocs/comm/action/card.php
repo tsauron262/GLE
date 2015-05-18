@@ -716,13 +716,14 @@ if ($action == 'create')
 		if (!empty($user->societe_id)) {
 			print $form->select_thirdparty_list($user->societe_id,'socid','',1,1,0,$events);
 		} else {
-			print $form->select_thirdparty_list('','socid','',1,1,0,$events);
+			print $form->select_thirdparty('','socid','',1,1,0,$events);
 		}
 
 	}
 	print '</td></tr>';
 
 	print '<tr><td class="nowrap">'.$langs->trans("ActionOnContact").'</td><td>';
+        if(GETPOST('socid','int'))
 	$form->select_contacts(GETPOST('socid','int'),GETPOST('contactid'),'contactid',1);
 	print '</td></tr>';
 
@@ -1017,8 +1018,10 @@ if ($id > 0)
 
 		dol_fiche_end();
 
-		print '<center><input type="submit" class="button" name="edit" value="'.$langs->trans("Save").'">';
-		print ' &nbsp; &nbsp; <input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
+		print '<center><input type="submit" class="button butAction" name="edit" value="'.$langs->trans("Save").'">';
+		print ' &nbsp; &nbsp; <input type="submit" class="button butAction" name="cancel" value="'.$langs->trans("Cancel").'">';
+                /*mod drsi */print '<a class="butActionDelete" href="card.php?action=delete&id='.$object->id.'">'.$langs->trans("Delete").'</a>';/*fmod drsi*/
+        
 		print '</center>';
 
 		print '</form>';

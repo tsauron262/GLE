@@ -673,13 +673,18 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
             $nbLoad++;
 
 
+
         $(this).contents().find("input[name='cancel'], input[name='edit'], input[value='Ajouter'], input[value='Ajouter'], div.ui-dialog-buttonset span.ui-button-text").click(function() {
 //            fermerIframe($(this).parent(), callBack);
             nbLoad = 1;
         });
+        
+        $(this).contents().find("input[name='updateassignedtouser'], input[name='addassignedtouser']").click(function() {
+            nbLoad = 100;
+        });
         i++;
         urlStr = iFrame.find("iframe").get(0).contentWindow.location.toString();
-        if (i > nbLoad && urlStr.indexOf("delete", 0) === -1) {
+        if (i > nbLoad && urlStr.indexOf("delete", 0) === -1 && urlStr.indexOf("assignedtouser", 0) === -1) {
 //        $("#id-container").show();
             fermerIframe($(this).parent(), callBack);
         }

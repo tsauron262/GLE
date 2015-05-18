@@ -102,16 +102,22 @@ class InterfaceCaldav {
     function run_trigger($action, $object, $user, $langs, $conf) {
         global $user, $db;
         if ($action == "ACTION_MODIFY" || $action == "ACTION_CREATE" || $action == "ACTION_DELETE") {
-            if (isset($object->usertodo->id) && $object->usertodo->id > 0){
 //                $db->query("UPDATE " . MAIN_DB_PREFIX . "user_extrafields SET ctag = ctag+1 WHERE fk_object = " . $object->usertodo->id);
                 
+                $object->fetch_userassigned();
                 
-                $tabT = getElementElement("user", "idCaldav", $object->usertodo->id);
-                if(isset($tabT[0]))
-                    setElementElement ("user", "idCaldav", $object->usertodo->id, $tabT[0]['d']+1);
-                else
-                    addElementElement ("user", "idCaldav", $object->usertodo->id, 1);
-            }
+                $tIdUser = array();
+                if (isset($object->usertodo->id) && $object->usertodo->id > 0)
+                    $tIdUser[$object->usertodo->id] = $object->usertodo->id;
+                foreach($object->userassigned as $val)
+                    $tIdUser[$val['id']] = $val['id'];
+                foreach($tIdUser as $idUser){
+                    $tabT = getElementElement("user", "idCaldav", $idUser);
+                    if(isset($tabT[0]))
+                        setElementElement ("user", "idCaldav", $idUser, $tabT[0]['d']+1);
+                    else
+                        addElementElement ("user", "idCaldav", $idUser, 1);
+                }
                 
         }
         if ($action == "ACTION_MODIFY"){

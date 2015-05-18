@@ -54,7 +54,7 @@ class histoNavigation {
         global $db, $user, $conf, $langs;
         $langs->load("histo@synopsishisto");
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
-        $return = '<div class="blockvmenupair'.($context==1 ? ' vmenu':'').'">';
+        $return = '<div class="blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
         $return .= '<div class="menu_titre">';
         $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTONAV") . '</a>';
         $return .= "</div>";
@@ -101,8 +101,7 @@ class histoNavigation {
             return (false);
         }
     }
-    
-    
+
     public static function getObj($type) {
         $tabResult = self::getObjAndMenu($type);
         return $tabResult[0];
@@ -292,13 +291,26 @@ class histoNavigation {
 
         if (isset($tabTypeObject[$type])) {
             $data = $tabTypeObject[$type];
+            if(is_file(DOL_DOCUMENT_ROOT . $data['path'])){
             require_once DOL_DOCUMENT_ROOT . $data['path'];
             $nomObj = $data['obj'];
-            $obj = new $nomObj($db);
+            if(class_exists($nomObj)){
+                $obj = new $nomObj($db);
+                if(!method_exists($obj, "getNomUrl")){
+                    dol_syslog("Pas de methode getNomUrl dans la class ".$nomObj,3);
+                    $obj = false;
+                }
+            }
+            else{
+                dol_syslog("Impossible de charger l'object ".$nomObj,3);
+            }
             $tabMenu[0] = $data['tabMenu1'];
             $tabMenu[1] = $data['tabMenu2'];
+            }
+            else
+                dol_syslog("Impossible de chargger le fichier ".DOL_DOCUMENT_ROOT . $data['path'],3);
         } else {
-            die("Type inconnue : " . $type);
+            dol_syslog("Type inconnue : " . $type, 3);
         }
 
 
@@ -309,15 +321,15 @@ class histoNavigation {
     }
 
     public static function getTabTypeObject($typeFiltre = null) {
-        $tabTypeObject = array('synopsischrono' => array("obj"=>"Chrono", "tabMenu1" => "Process"),
+        $tabTypeObject = array('synopsischrono' => array("obj" => "Chrono", "tabMenu1" => "Process"),
             'propal' => array("path" => "/comm/propal/class/propal.class.php",
                 "tabMenu1" => "commercial",
                 "tabMenu2" => "propals",
-                "urls"=>array("comm/propal.php")),
+                "urls" => array("comm/propal.php")),
             'facture' => array("path" => "/compta/facture/class/facture.class.php",
                 "tabMenu1" => "accountancy",
-                "urls"=>array("compta/facture.php"),
-                "nomIdUrl"=>"facid"),
+                "urls" => array("compta/facture.php"),
+                "nomIdUrl" => "facid"),
             'fichinter' => array(),
             'synopsisfichinter' => array("tabMenu1" => "synopsisficheinter"),
             'synopsisdemandeinterv' => array("tabMenu1" => "synopsisficheinter"),
@@ -327,15 +339,18 @@ class histoNavigation {
             'livraison' => array(),
             'commande' => array("tabMenu1" => "commercial",
                 "tabMenu2" => "orders",
-                "urls"=>array("Synopsis_PrepaCommande/prepacommande.php", "commande/card.php")),
+                "urls" => array("Synopsis_PrepaCommande/prepacommande.php", "commande/card.php")),
             'banque' => array("obj" => 'Account',
                 "path" => "/compta/bank/class/account.class.php",
-                "urls"=>array("compta/bank/card.php")),
+                "urls" => array("compta/bank/card.php")),
             'contact' => array("tabMenu1" => "companies"),
             'societe' => array("tabMenu1" => "companies",
-                 "urls"=>array("comm/card.php"),
-                 "nomIdUrl"=>"socid"),
+                "urls" => array("comm/card.php"),
+                "nomIdUrl" => "socid"),
             'projet' => array("obj" => 'project',
+                "tabMenu1" => "synopsisprojet"),
+            'synopsisprojet' => array("obj" => 'synopsisproject',
+                "path" => "/synopsisprojet/class/synopsisproject.class.php",
                 "tabMenu1" => "synopsisprojet"),
             'tache' => array("obj" => 'Task',
                 "path" => "/projet/class/task.class.php",
@@ -348,7 +363,13 @@ class histoNavigation {
                 "tabMenu2" => "users"),
             'ndfp' => array("tabMenu1" => "accountancy"),
             'synopsisholiday' => array("obj" => 'holiday',
-                "tabMenu1" => "hrm"));
+                "tabMenu1" => "hrm"),
+//            'UserGroup' => array("path" => "/user/class/usergroup.class.php",
+//                "urls" => array("/group/card.php")),
+               'synopsistasks' => array('urls' => array("synopsisprojet/tasks/task.php"),
+                   'path' => '/synopsisprojet/class/task.class.php',
+                   'obj' => 'Task')
+            );
 
         $tabTypeObject2 = array();
         foreach ($tabTypeObject as $typeT => $data) {
@@ -360,38 +381,40 @@ class histoNavigation {
 
                 if (!isset($data['path']))
                     $data['path'] = "/" . $data['type'] . "/class/" . strtolower($data['obj']) . ".class.php";
-                if (!is_file(DOL_DOCUMENT_ROOT . $data['path'])){
+                if (!is_file(DOL_DOCUMENT_ROOT . $data['path'])) {
                     $data['path1'] = $data['path'];
                     $data['path'] = "/core/class/" . $data['obj'] . ".class.php";
                 }
-                if (!is_file(DOL_DOCUMENT_ROOT . $data['path'])){
-                        if($typeFiltre != null)
-                    die("impossible de charger " . $data['path1'] . " ni ".$data['path']);
+                if (!is_file(DOL_DOCUMENT_ROOT . $data['path'])) {
+                    if ($typeFiltre != null)
+                        die("impossible de charger " . $data['path1'] . " ni " . $data['path']);
+                    else
+                        dol_syslog("Impossible de charger " . DOL_DOCUMENT_ROOT . $data['path'], 3);
                 }
                 else {
 
-                if (!isset($data['tabMenu1']))
-                    $data['tabMenu1'] = "";
-                if (!isset($data['tabMenu2']))
-                    $data['tabMenu2'] = "";
-                
-                
-                if (!isset($data['urls']))
-                    $data['urls'] = array("/".$data['type']."/card.php");
-                if (!isset($data['nomIdUrl']))
-                    $data['nomIdUrl'] = "id";
-                
-                global $conf;
-                
-                $version = isset($conf->global->MAIN_VERSION_LAST_UPGRADE)? $conf->global->MAIN_VERSION_LAST_UPGRADE : $conf->global->MAIN_VERSION_LAST_INSTALL;
-                if(substr($version,0,1) > 2 && substr($version,2,1) < 7)
-                    foreach ($data['urls'] as $idT => $url)
-                        $data['urls'][$idT] = str_replace("card.php", "fiche.php", $url);
-//                echo "<pre>";print_r($conf);
-                
-                    
+                    if (!isset($data['tabMenu1']))
+                        $data['tabMenu1'] = "";
+                    if (!isset($data['tabMenu2']))
+                        $data['tabMenu2'] = "";
 
-                $tabTypeObject2[$typeT] = $data;
+
+                    if (!isset($data['urls']))
+                        $data['urls'] = array("/" . $data['type'] . "/card.php");
+                    if (!isset($data['nomIdUrl']))
+                        $data['nomIdUrl'] = "id";
+
+                    global $conf;
+
+                    $version = isset($conf->global->MAIN_VERSION_LAST_UPGRADE) ? $conf->global->MAIN_VERSION_LAST_UPGRADE : $conf->global->MAIN_VERSION_LAST_INSTALL;
+                    if (substr($version, 0, 1) > 2 && substr($version, 2, 1) < 7)
+                        foreach ($data['urls'] as $idT => $url)
+                            $data['urls'][$idT] = str_replace("card.php", "fiche.php", $url);
+//                echo "<pre>";print_r($conf);
+
+
+
+                    $tabTypeObject2[$typeT] = $data;
                 }
             }
         }
@@ -399,7 +422,7 @@ class histoNavigation {
     }
 
     public static function getTypeAndId($url = null, $request = null) {
-        
+
         if ($url == NULL)
             $url = $_SERVER['REQUEST_URI'];
         if ($request == NULL)
@@ -407,75 +430,75 @@ class histoNavigation {
         if (stripos($url, "ajax") != false) {
             return null;
         }
-        
-        
+
+
         $tabTypeObject = self::getTabTypeObject();
-        foreach ($tabTypeObject as $typeT => $dataT){
-            foreach($dataT['urls'] as $filtreUrl){
-            if(stripos($url, $filtreUrl) !== false){
-                $element_type = $typeT;
-                $element_id = $request[$dataT['nomIdUrl']];
-            }
+        foreach ($tabTypeObject as $typeT => $dataT) {
+            foreach ($dataT['urls'] as $filtreUrl) {
+                if (stripos($url, $filtreUrl) !== false) {
+                    $element_type = $typeT;
+                    $element_id = $request[$dataT['nomIdUrl']];
+                }
             }
         }
-    return array($element_type, $element_id);
-        /*if (stripos($url, "compta/facture") != false) {
-            $element_type = 'facture';
-            @$element_id = $request['facid'];
-        } elseif (stripos($url, "societe/soc.php") || stripos($url, "comm/card.php?socid=") || stripos($url, "comm/prospect/fiche.php?socid=")) {
-            $element_type = 'societe';
-            @$element_id = $request['socid'];
-        } elseif (stripos($url, "product/card.php") != false) {
-            $element_type = 'product';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "projet/tasks/task.php") != false) {
-            $element_type = 'tache';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "projet/") != false) {
-            $element_type = 'projet';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "commande/") != false) {
-            $element_type = 'commande';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "compta/bank/") != false) {
-            $element_type = 'banque';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "fichinter/") != false) {
-            $element_type = 'FI';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "synopsisdemandeinterv/") != false) {
-            $element_type = 'DI';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "contrat/") != false) {
-            $element_type = 'contrat';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "user/card.php") != false) {
-            $element_type = 'user';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "comm/propal.php") != false) {
-            $element_type = 'propal';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "/synopsischrono/admin/synopsischrono") != false) {
-            $element_type = 'configChrono';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "synopsischrono") != false) {
-            $element_type = 'chrono';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "Synopsis_Process") != false) {
-            $element_type = 'process';
-            @$element_id = $request['process_id'];
-        } elseif (stripos($url, "ndfp") != false) {
-            $element_type = 'ndfp';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "expedition") != false) {
-            $element_type = 'expedition';
-            @$element_id = $request['id'];
-        } elseif (stripos($url, "synopsisholiday") != false) {
-            $element_type = 'synopsisholiday';
-            @$element_id = $request['id'];
-        } else {
-            return null;
-        }*/
+        return array($element_type, $element_id);
+        /* if (stripos($url, "compta/facture") != false) {
+          $element_type = 'facture';
+          @$element_id = $request['facid'];
+          } elseif (stripos($url, "societe/soc.php") || stripos($url, "comm/card.php?socid=") || stripos($url, "comm/prospect/fiche.php?socid=")) {
+          $element_type = 'societe';
+          @$element_id = $request['socid'];
+          } elseif (stripos($url, "product/card.php") != false) {
+          $element_type = 'product';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "projet/tasks/task.php") != false) {
+          $element_type = 'tache';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "projet/") != false) {
+          $element_type = 'projet';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "commande/") != false) {
+          $element_type = 'commande';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "compta/bank/") != false) {
+          $element_type = 'banque';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "fichinter/") != false) {
+          $element_type = 'FI';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "synopsisdemandeinterv/") != false) {
+          $element_type = 'DI';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "contrat/") != false) {
+          $element_type = 'contrat';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "user/card.php") != false) {
+          $element_type = 'user';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "comm/propal.php") != false) {
+          $element_type = 'propal';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "/synopsischrono/admin/synopsischrono") != false) {
+          $element_type = 'configChrono';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "synopsischrono") != false) {
+          $element_type = 'chrono';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "Synopsis_Process") != false) {
+          $element_type = 'process';
+          @$element_id = $request['process_id'];
+          } elseif (stripos($url, "ndfp") != false) {
+          $element_type = 'ndfp';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "expedition") != false) {
+          $element_type = 'expedition';
+          @$element_id = $request['id'];
+          } elseif (stripos($url, "synopsisholiday") != false) {
+          $element_type = 'synopsisholiday';
+          @$element_id = $request['id'];
+          } else {
+          return null;
+          } */
     }
 
 }

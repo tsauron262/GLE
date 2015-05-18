@@ -2,6 +2,7 @@
 
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
+require_once DOL_DOCUMENT_ROOT.'/core/lib/agenda.lib.php';
 
 global $isMobile;
 if($isMobile)
@@ -181,7 +182,7 @@ $js .= <<<EOF
                 back = document.location.href;
                 back = escape(back);
                 back = back.replace(/\//g, "%2F");
-                newUrl = "../../comm/action/card.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
+                newUrl = "../../comm/action/card.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&assignedtouser="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
                 dispatchePopIFrame(newUrl, function(){ $('#calendar').weekCalendar('refresh'); }, 'New Action', 100);
     //            window.location.href = newUrl;
             }
@@ -334,23 +335,36 @@ EOF;
 llxHeader($js);
 
 
+
+$head = calendars_prepare_head($paramnoaction);
+
+dol_fiche_head($head, "team", $langs->trans('Agenda'), 0, 'action');
+
+
+echo "<div class='floatL'>";
 printMenu($tabUser);
+echo "</div>";
 
 
+echo "<div class='floatL'>";
 echo '<form>Interval : <select name="timeTranche">';
 foreach(array(5,10,15,20,30) as $time)
     echo '<option value="'.(60/$time).'" '.((60/$time) == $_SESSION['paraAgenda']['timeTranche'] ? 'selected="selected"' : "") .'>'.$time.'</option>';
 echo '</select>';
 echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><input type='checkbox' id='workHour' name='workHour' ".("true" == $_SESSION['paraAgenda']['workHour'] ? 'checked="checked"' : "") .'/>';
 echo "<input type='submit' value='Ok' class='butAction'/></form>";
+echo "</div>";
 
 
+
+echo "<div class='floatL'>";
 echo '<input type="text" class="datePicker" id="dateChange"/>';
 echo "<button class='butAction' onclick='"
 . "dateTab = $(\"#dateChange\").attr(\"value\").split(\"/\");"
 . "dateStr = dateTab[2] +\"-\"+ dateTab[1] +\"-\"+ dateTab[0];"
 . "$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date(dateStr));"
         . "' >Ok</button>";
+echo "</div><div class='clear'></div>";
 
 
 echo '

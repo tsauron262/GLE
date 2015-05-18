@@ -1,5 +1,5 @@
 $(window).load(function() {
-    $("input[name='transparency']").parent().parent().hide();
+//    $("input[name='transparency']").parent().parent().hide();
     $("input[name='priority']").parent().parent().hide();
     $("input[name='percentage'], .hideifna").remove();
 

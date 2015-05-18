@@ -1,5 +1,5 @@
 <?php
-header ('Location:../../synopsistools/agenda/vue.php?mainmenu=agenda&leftmenu=');die;
+//header ('Location:../../synopsistools/agenda/vue.php?mainmenu=agenda&leftmenu=');die;
 /* Copyright (C) 2001-2004 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2003      Eric Seigne          <erics@rycks.com>
  * Copyright (C) 2004-2015 Laurent Destailleur  <eldy@users.sourceforge.net>

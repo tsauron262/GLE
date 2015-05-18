@@ -141,7 +141,8 @@ IF(fk_target, fk_target, '0') as ctag, 'Calendrier GLE' as description, 0 as cal
         " CREATE OR REPLACE VIEW principals AS (SELECT `rowid` as id, CONCAT('principals/', `login`) as uri, `email`, `login` as displayname, 'null' as vcardurl FROM `llx_user`);",
 
         " "
-        . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, e.`fk_user_action` as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `llx_actioncomm` e, llx_synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now());");
+//        . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, e.`fk_user_action` as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `llx_actioncomm` e, llx_synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now());");
+          . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, IF(ar.fk_element, ar.fk_element, e.`fk_user_action`) as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `llx_actioncomm` e LEFT JOIN llx_actioncomm_resources ar ON ar.fk_actioncomm = e.id AND ar.element_type = 'user', llx_synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now());");
     
     global $db;
     $sql2 = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."actioncomm");

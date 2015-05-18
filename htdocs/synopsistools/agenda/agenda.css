@@ -68,3 +68,8 @@ text-align: center;
 div.wc-cal-event div.wc-title,div.wc-cal-event div.wc-title a{
     color: black!important;
 }
+
+.ui-button, .floatL{
+    z-index: 100;
+    position: relative;
+}

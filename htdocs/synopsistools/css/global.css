@@ -408,3 +408,8 @@ table.espace th, table.espace td{
     padding: 10px;
     text-align: center;
 }
+
+.floatL{
+    float: left;
+    margin: 3px 50px 10px;
+}

@@ -1,7 +1,7 @@
 <?php
 require_once('../../main.inc.php');
 
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
 require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php");
     $_REQUEST['chrono_id'] = $_REQUEST['id'];
     $lien = new lien($db);

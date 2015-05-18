@@ -828,7 +828,7 @@ class Chrono extends CommonObject {
 
             if ($res->hasSubValeur == 1) {
                 if ($res->sourceIsOption) {
-                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
                     $tmp = $res->phpClass;
                     $obj = new $tmp($this->db);
                     $obj->cssClassM = $res->extraCss;
@@ -871,7 +871,7 @@ class Chrono extends CommonObject {
                 } else {
                     //Beta
                     if ($res->phpClass == 'fct' || $res->phpClass == 'globalvar')
-                        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
                     $tmp = $res->phpClass;
                     $obj = new $tmp($this->db);
                     $obj->cssClassM = $res->extraCss;

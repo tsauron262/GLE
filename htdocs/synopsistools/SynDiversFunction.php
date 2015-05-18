@@ -337,7 +337,7 @@ function launchRunningProcess($db, $type_str, $element_id) {
     global $conf, $user;
     if ($element_id != '') {
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
-            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
             $arrProcess = getRunningProcess($db, $type_str, $element_id);
             $blocking = false;
             foreach ($arrProcess as $processId => $arrTmp1) {

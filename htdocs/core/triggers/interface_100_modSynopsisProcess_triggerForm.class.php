@@ -116,7 +116,7 @@ class InterfaceTriggerForm
      */
     function run_trigger($action,$object,$user,$langs,$conf)
     {
-        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
         // Mettre ici le code a executer en reaction de l'action
         global $langs;
         $langs->load("synopsisGene@synopsistools");

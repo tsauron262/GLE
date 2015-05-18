@@ -138,7 +138,7 @@ switch ($action)
         $responce->total = $total_pages;
         $responce->records = $count;
         $i=0;
-        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
         while($obj = $db->fetch_object($result))
         {
             $listForm = new listForm($db);

@@ -8,6 +8,7 @@
 
 require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/lib/synopsischrono.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");

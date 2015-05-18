@@ -535,7 +535,7 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
     if ($hasSubValeur) {
 //var_dump($phpClass);
         if ($sourceIsOption) {
-            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
             $tmp = $phpClass;
             $obj = new $tmp($db);
             $obj->cssClassM = $extraCss;
@@ -562,7 +562,7 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
         } else {
             //Beta
             if ($phpClass == 'globalvar') {
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
                 $tmp = $phpClass;
                 $obj = new $tmp($db);
             $obj->cssClassM = $extraCss;
@@ -570,7 +570,7 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
                 $obj->fetch($hasSubValeur);
                 return $obj->getValue($val);
             } elseif ($phpClass == 'fct') {
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
                 $tmp = $phpClass;
                 $obj = new $tmp($db);
             $obj->cssClassM = $extraCss;

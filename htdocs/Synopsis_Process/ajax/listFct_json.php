@@ -119,7 +119,7 @@ switch ($action)
         $start = $limit*$page - $limit; // do not put $limit*($page - 1)
         if ($start<0) $start = 0;
 
-        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
 
         $sql = "SELECT f.id,
                        concat(f.class,'::',f.fct) as label,

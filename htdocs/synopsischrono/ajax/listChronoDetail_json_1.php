@@ -441,7 +441,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
     //synopsischrono_key_type_valeur
     if ($hasSubValeur > 0) {
 //var_dump($phpClass);
-        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
         $tmp = $phpClass;
         $obj = new $tmp($db);
         $obj->cssClassM = $extraCss;
@@ -474,7 +474,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
 //        } else {
 //            //Beta
 //             if ($phpClass == 'globalvar') {
-//                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+//                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 //                $tmp = $phpClass;
 //                $obj = new $tmp($db);
 //                $obj->cssClassM = $extraCss;
@@ -482,7 +482,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
 //                $obj->fetch($hasSubValeur);
 //                return $obj->getValue($val);
 //            } elseif ($phpClass == 'fct') {
-//                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+//                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 //                $tmp = $phpClass;
 //                $obj = new $tmp($db);
 //                $obj->cssClassM = $extraCss;

@@ -19,7 +19,7 @@
   */
 
     require_once('../../main.inc.php');
-    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Process/process.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Process/class/process.class.php');
     $id = preg_replace('/^sortable_/','',$_REQUEST['id']);
     $type = $_REQUEST['type'];
     $xml="";

@@ -18,7 +18,7 @@
  * GLE-1.2
  */
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 
 $langs->load("process@Synopsis_Process");
 

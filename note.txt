@@ -1314,3 +1314,21 @@ Liste commande groupe
 
 
 RENAME TABLE `llx_Synopsis_Tools_fileInfo` TO `llx_synopsistools_fileInfo` ;
+
+
+
+
+INSERT INTO llx_projet_task  (SELECT rowid, 
+'' as ref, 1 as entity, 
+fk_projet, fk_task_parent, 
+null as datec, 
+tms, 
+null as dateo,
+null as datee,
+null as datev,
+title as label,
+note as description,
+duration_effective,
+null as planned_workload,
+progress, level as priority, fk_user_creat,
+null as fk_user_valid, statut as fk_statut, '' as note_private, '' as note_public, 1 as rang, '' as model_pdf FROM llx_Synopsis_projet_task)

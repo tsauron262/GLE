@@ -256,7 +256,7 @@ class histoNavigation {
 //                }
 //                break;
 //            case 'process': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+//                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 //                    $obj = new processDet($db);
 //                    $tabMenu[0] = "Process";
 //                }
@@ -356,7 +356,7 @@ class histoNavigation {
                 "path" => "/projet/class/task.class.php",
                 "tabMenu1" => "synopsisprojet"),
             'process' => array("obj" => 'processDet',
-                "path" => "/Synopsis_Process/process.class.php",
+                "path" => "/Synopsis_Process/class/process.class.php",
                 "tabMenu1" => "Process"),
             'product' => array("tabMenu1" => "products"),
             'user' => array("tabMenu1" => "home",

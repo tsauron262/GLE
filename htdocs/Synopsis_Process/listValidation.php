@@ -24,7 +24,7 @@
 
 
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 
 global $langs;
 $langs->load("process@Synopsis_Process");
@@ -334,7 +334,6 @@ llxHeader($js, utf8_decode('Liste process &agrave; valider'));
 
 
 
-//require_once('process.class.php');
 //$process = new process($db);
 //$process->fetch(4);
 //var_dump($process->canValidate());

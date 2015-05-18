@@ -301,11 +301,10 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 if (stripos($chrono2->description, "Iphone") !== false) {
                     $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
-                    $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE;" . "\n" . "Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
+                    $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
                     $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
                 } else {
                     $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
-                    $cgv.="\n";
                     $cgv.="-Les frais de prise en charge diagnostic de 45€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
                 }
 //                $pdf->SetX(6);
@@ -325,7 +324,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetTextColor("black");
 //                $pdf->SetXY('6', '245');
                 $pdf->SetFont('', '', 8);
-                $pdf->SetXY('6', '197');
+                $pdf->SetXY('7', '197');
                 $pdf->MultiCell(145, 6, $cgv, 0, 'L');
 
 //                //info pour prise en charge

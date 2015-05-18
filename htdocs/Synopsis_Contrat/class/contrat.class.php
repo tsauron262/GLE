@@ -1073,7 +1073,7 @@ class Synopsis_Contrat extends Contrat {
     }
 
     function lignePlus($object) {
-        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
         $ligne = new Synopsis_ContratLigne($this->db);
         $ligne->fetch($object->rowid);
         echo "<table width='100%'><tr class='impair'><td>";

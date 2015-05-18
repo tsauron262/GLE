@@ -18,7 +18,7 @@
  * GLE-1.1
  */
 require_once('../../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 
 $langs->load("synopsisGene@synopsistools");

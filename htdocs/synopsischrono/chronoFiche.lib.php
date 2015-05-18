@@ -57,7 +57,7 @@ function getValueForm3($res, $chrid, $keyid, $socid, $withEntete = true) {
             $tag = preg_replace('/>$/', "", $res->htmlTag);
             $html = "";
             $html .= $tag;
-            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
             $tmp = $res->phpClass;
             $obj = new $tmp($db);
             $obj->socid = $socid;
@@ -158,7 +158,7 @@ EOF;
         } else {
             //Beta
             if ($res->phpClass == 'fct')
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
             $tmp = $res->phpClass;
             $obj = new $tmp($db);
             $obj->socid = $socid;
@@ -253,7 +253,7 @@ EOF;
 //                $tag = preg_replace('/>$/', "", $res->htmlTag);
 //                $html = "";
 //                $html .= $tag;
-//                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+//                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 //                $tmp = $res->phpClass;
 //                $obj = new $tmp($db);
 //                $obj->socid = $socid;
@@ -354,7 +354,7 @@ EOF;
 //            } else {
 //                //Beta
 //                if ($res->phpClass == 'fct')
-//                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+//                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 //                $tmp = $res->phpClass;
 //                $obj = new $tmp($db);
 //                $obj->socid = $socid;

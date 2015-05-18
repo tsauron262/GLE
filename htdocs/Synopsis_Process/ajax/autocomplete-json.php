@@ -2,7 +2,7 @@
 
 
 require_once('../../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
 
 $limite=($_REQUEST['limit']>0?$_REQUEST['limit']:10);
 

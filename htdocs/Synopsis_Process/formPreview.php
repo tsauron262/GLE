@@ -27,7 +27,7 @@
 
 
   $id = $_REQUEST['id'];
-  require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+  require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
   $form = new formulaire($db);
   $res = $form->fetch($id);
   $js="";

@@ -9,7 +9,7 @@ require_once('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
-require_once DOL_DOCUMENT_ROOT . '/Synopsis_Process/process.class.php';
+require_once DOL_DOCUMENT_ROOT . '/Synopsis_Process/class/process.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
 $js = "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/synopsistools/css/global.css' />";
 $js.= "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/synopsistools/css/BIMP.css' />";

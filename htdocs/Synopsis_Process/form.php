@@ -39,7 +39,7 @@ if ($processDetId > 0 && (!$element_id > 0 || !$process_id)) {
 
 if (!$user->rights->process->lire) {
     if ($process_id > 0) {
-        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
         $process = new process($db);
         $res1 = $process->fetch($process_id);
         $process->getGlobalRights();
@@ -56,7 +56,7 @@ if ($_REQUEST['action'] == 'saveDatas') {
 }
 if ($_REQUEST['action'] == 'askValid') {
     saveDatas($db, $_REQUEST, $process_id, $element_id, $processDetId, false);
-    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
     $processDet = new processDet($db);
     $res1 = $processDet->fetch($processDetId);
     $res = $processDet->ask_valid();
@@ -70,7 +70,7 @@ if ($_REQUEST['action'] == 'askValid') {
     }
 }
 if ($_REQUEST['action'] == 'validAction') {
-    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
     $process = new process($db);
     $res1 = $process->fetch($process_id);
     $processDet = new processDet($db);
@@ -82,7 +82,7 @@ if ($_REQUEST['action'] == 'validAction') {
 }
 
 if ($_REQUEST['action'] == 'validationForm') {
-    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
     $process = new process($db);
     $res1 = $process->fetch($process_id);
     $process->validateDet($element_id, $type);
@@ -93,7 +93,7 @@ if ($_REQUEST['action'] == 'validationForm') {
 //        eval($eval);
 }
 if ($_REQUEST['action'] == 'reviser' && $processDetId > 0) {
-    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
     $processDet = new processDet($db);
     $processDet->fetch($processDetId);
     $res = $processDet->set_revised();
@@ -107,7 +107,7 @@ if ($_REQUEST['action'] == 'reviser' && $processDetId > 0) {
     }
 }
 if ($_REQUEST['action'] == 'modAfterValid' && $processDetId > 0) {
-    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
     $processDet = new processDet($db);
     $processDet->fetch($processDetId);
     $res = $processDet->unvalidate();
@@ -128,7 +128,7 @@ displayForm($db, $displayHead, $process_id, $element_id, $processDetId);
 
 function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = true) {
 //      require_once('Var_Dump.php');
-    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
     $process = new process($db);
     $res1 = $process->fetch($process_id);
     $process->getGlobalRights();
@@ -284,7 +284,7 @@ function displayForm($db, $displayHead = true, $process_id, $element_id = false,
 
     $langs->load("process@Synopsis_Process");
 
-    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
     $process = new process($db);
     $processDet = new processDet($db);
     $res1 = $process->fetch($process_id, false);

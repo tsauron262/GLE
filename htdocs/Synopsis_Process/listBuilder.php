@@ -19,7 +19,7 @@
 
 
   require_once('pre.inc.php');
-  require_once('process.class.php');
+  require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Process/class/process.class.php');
 
 
 

@@ -19,7 +19,7 @@
 
 
 require_once('./pre.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
 $js = <<<EOF
     <script>
       jQuery(document).ready(function(){

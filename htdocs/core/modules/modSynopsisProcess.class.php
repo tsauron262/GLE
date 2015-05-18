@@ -1795,7 +1795,7 @@ class modSynopsisProcess extends DolibarrModules {
 (6, 'Site', '', '".MAIN_DB_PREFIX."synopsischrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/card.php?id=', 0);");
         $retour = $this->_init($sql);
 
-        include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+        include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
         process::majTabsProcess($this->db);
 
         return $retour;
@@ -1808,7 +1808,7 @@ class modSynopsisProcess extends DolibarrModules {
     function remove() {
 //        $sql = array('DROP TABLE ' . MAIN_DB_PREFIX . 'Synopsis_Process, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_global, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list_members, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_model, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_requete, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_src, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_class_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_rights, ' . MAIN_DB_PREFIX . 'Synopsis_Process_rights_def, ' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element, ' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element_trigger, '. MAIN_DB_PREFIX . 'Synopsis_revision_model, '. MAIN_DB_PREFIX .'Synopsis_trigger');
         $sql = array();
-        include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+        include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
         process::deleteTabsProcess($this->db);
 
         return $this->_remove($sql);

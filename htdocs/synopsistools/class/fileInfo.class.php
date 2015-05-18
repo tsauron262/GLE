@@ -94,8 +94,10 @@ class fileInfo {
         
         if(isset($this->tabActiveModule) && is_array($this->tabActiveModule)){
             require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-            foreach($this->tabActiveModule as $module)
+            foreach($this->tabActiveModule as $module){
+                unActivateModule($module, 0);
                 activateModule($module);
+            }
         }
                 
                 

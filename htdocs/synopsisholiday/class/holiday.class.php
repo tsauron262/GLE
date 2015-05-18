@@ -1015,7 +1015,7 @@ class Holiday extends CommonObject {
             }
 
             $sql = "UPDATE " . MAIN_DB_PREFIX . "holiday_users SET";
-            $sql.= " nb_holiday_current = nb_holiday_next";
+            $sql.= " nb_holiday = nb_holiday_next";
             $sql.= ", nb_holiday_next = 0";
 
             dol_syslog(get_class($this) . '::annualUpdateSoldeCP sql=' . $sql);
@@ -1098,7 +1098,7 @@ class Holiday extends CommonObject {
 
             $sql = "UPDATE " . MAIN_DB_PREFIX . "holiday_users SET";
             if ($currentYearSolde)
-                $sql.= " nb_holiday_current = ";
+                $sql.= " nb_holiday = ";
             else
                 $sql.= " nb_holiday_next = ";
             $sql.= $nbHoliday;
@@ -1180,7 +1180,7 @@ class Holiday extends CommonObject {
 
             foreach ($arrayofusers as $users) {
                 $sql = "INSERT INTO " . MAIN_DB_PREFIX . "holiday_users";
-                $sql.= " (fk_user, nb_holiday_next, nb_holiday_current, nb_rtt)";
+                $sql.= " (fk_user, nb_holiday_next, nb_holiday, nb_rtt)";
                 $sql.= " VALUES ('" . $userid . "','0', '0', 0')";
 
                 $resql = $this->db->query($sql);
@@ -1190,7 +1190,7 @@ class Holiday extends CommonObject {
         }
         else {
             $sql = "INSERT INTO " . MAIN_DB_PREFIX . "holiday_users";
-            $sql.= " (fk_user, nb_holiday_next, nb_holiday_current, nb_rtt)";
+            $sql.= " (fk_user, nb_holiday_next, nb_holiday, nb_rtt)";
             $sql.= " VALUES ('" . $userid . "','0','0','0')";
 
             $resql = $this->db->query($sql);
@@ -1370,7 +1370,7 @@ class Holiday extends CommonObject {
      */
     function getCurrentYearCPforUser($user_id) {
 
-        $sql = "SELECT nb_holiday_current";
+        $sql = "SELECT nb_holiday";
         $sql.= " FROM " . MAIN_DB_PREFIX . "holiday_users";
         $sql.= " WHERE fk_user = '" . $user_id . "'";
 
@@ -1378,7 +1378,7 @@ class Holiday extends CommonObject {
         $result = $this->db->query($sql);
         if ($result) {
             $obj = $this->db->fetch_object($result);
-            return number_format($obj->nb_holiday_current, 2);
+            return number_format($obj->nb_holiday, 2);
         } else {
             return '0';
         }

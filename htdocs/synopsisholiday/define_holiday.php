@@ -69,7 +69,7 @@ if ($action == 'update' && isset($_POST['update_cp'])) {
     $nowValueCurrent = null;
     $nowValueNext = null;
 
-    $sql = 'SELECT `nb_holiday_current` as current, `nb_holiday_next` as next FROM ' . MAIN_DB_PREFIX . 'holiday_users WHERE `fk_user` = ' . $userID;
+    $sql = 'SELECT `nb_holiday` as current, `nb_holiday_next` as next FROM ' . MAIN_DB_PREFIX . 'holiday_users WHERE `fk_user` = ' . $userID;
     $result = $db->query($sql);
     if ($result) {
         if ($db->num_rows($result)) {

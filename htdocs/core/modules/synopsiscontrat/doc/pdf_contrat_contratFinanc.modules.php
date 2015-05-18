@@ -373,12 +373,12 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     if ($obj->fk_product) {
                         $prod = new product($this->db);
                         $prod->fetch($obj->fk_product);
-                        
+
                         $X = $this->marge_gauche;
                         $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
                         $X = $this->marge_gauche + $W;
                         $pdf->setX($X);
-                        $pdf->Cell($W * 7, 6, dol_trunc($prod->ref . " - ". $prod->libelle . " - " .$obj->desc, 40), 1, NULL, 'L', TRUE);
+                        $pdf->Cell($W * 7, 6, dol_trunc($prod->ref . " - " . $prod->libelle . " - " . $obj->desc, 40), 1, NULL, 'L', TRUE);
                         $X = $this->marge_gauche + $W * 8;
                         $pdf->setX($X);
                         if ($M_N == true) {
@@ -389,9 +389,8 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                             $pdf->MultiCell($W * 2, 6, "", 1, 'L', true);
                         }
                         $color_id = ($color_id + 1) % 2;
-                        
                     } else {
-                        
+
                         $X = $this->marge_gauche;
                         $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
                         $X = $this->marge_gauche + $W;
@@ -432,9 +431,9 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 
                 $X = $this->marge_gauche;
                 //$Y = $this->marge_haute + 132;
-                if($valfinance->VR>0){
+                if ($valfinance->VR > 0) {
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 5;
-                }else{
+                } else {
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 4;
                 }
 
@@ -445,10 +444,10 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 6, "NOMBRE DE LOYERS", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
                 $pdf->Cell($W, 6, "MONTANT HT", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
                 $pdf->Cell($W, 6, "PERIODICITE", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
-                if($valfinance->VR>0){
+                if ($valfinance->VR > 0) {
                     $pdf->Cell($W, 6, "DUREE", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
                     $pdf->MultiCell($W, 6, "VR", 1, 'C', FALSE, 1, NULL, null, null, null, null, null, null, 'M');
-                }else{
+                } else {
                     $pdf->MultiCell($W, 6, "DUREE", 1, 'C', FALSE, 1, NULL, null, null, null, null, null, null, 'M');
                 }
 //fin entete////////////////////////////////////////////////////////////////////
@@ -458,17 +457,39 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 8);
                 $pdf->Cell($W, 6, $valfinance->nb_periode, 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
-                $pdf->Cell($W, 6, price($valfinance->loyer + 0.005)." €", 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, price($valfinance->loyer1 + 0.005) . " €", 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
                 $pdf->Cell($W, 6, Synopsisfinancement::$TPeriode[$valfinance->periode], 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
                 //$pdf->setColor('fill', 230, 230, 250);
-                if($valfinance->VR>0){
+                if ($valfinance->VR > 0) {
                     $pdf->Cell($W, 6, $valfinance->nb_periode . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
-                    $pdf->MultiCell($W, 6, price($valfinance->VR)." €", 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
-                }else{
+                    $pdf->MultiCell($W, 6, price($valfinance->VR) . " €", 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
+                } else {
                     $pdf->MultiCell($W, 6, $valfinance->nb_periode . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
                 }
 //fin corps/////////////////////////////////////////////////////////////////////
+//transition
+                $pdf->MultiCell($W, 6, "suivie de:", 0, 'L');
+//fin transition
+//
+//entete dégresif
+//
+                $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                $pdf->Cell($W, 6, "NOMBRE DE LOYERS", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, "MONTANT HT", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, "PERIODICITE", 1, NULL, 'C', FALSE, NULL, NULL, null, null, 'C');
+                $pdf->MultiCell($W, 6, "DUREE", 1, 'C', FALSE, 1, NULL, null, null, null, null, null, null, 'M');
+//
+//fin entete degressif
+//corps prix dégressif
+//
+                $pdf->SetFont('', '', 8);
+                $pdf->Cell($W, 6, $valfinance->nb_periode2, 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, price($valfinance->loyer2 + 0.005) . " €", 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->Cell($W, 6, Synopsisfinancement::$TPeriode[$valfinance->periode], 1, NULL, 'C', TRUE, NULL, NULL, null, null, 'C');
+                $pdf->MultiCell($W, 6, $valfinance->nb_periode2 . " " . Synopsisfinancement::$tabM[$valfinance->periode], 1, 'C', true, 1, NULL, null, null, null, null, null, null, 'M');
+//
+//fin corps prix dégressif
 //////////////////////////////////fin tableau///////////////////////////////////
 
 
@@ -526,21 +547,21 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $X = $this->marge_gauche;
                 $pdf->SetX($X);
 
-                $this->marge_gauche = $this->marge_gauche - 25;
-                $this->marge_droite = $this->marge_droite - 5; /* TODO */
-                $this->marge_haute = $this->marge_haute - 5;
-                $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                
-                if($valfinance->banque!=""){
-                    if(file_exists(DOL_DATA_ROOT.'/synopsisfinanc/doc/banque_'.$valfinance->banque.'.txt')){
-                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_'.$valfinance->banque.'.txt', false);
-                    }else{
+//                $this->marge_gauche = $this->marge_gauche - 25;
+//                $this->marge_droite = $this->marge_droite - 5; /* TODO */
+//                $this->marge_haute = $this->marge_haute - 5;
+//                $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
+
+                if ($valfinance->banque != "") {
+                    if (file_exists(DOL_DATA_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt')) {
+                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt', false);
+                    } else {
                         $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
                     }
-                }else{
+                } else {
                     $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
                 }
-                
+
                 $pdf->SetAutoPageBreak(1, 0);
                 $pdf->setFont('', '', 8);
                 $X = $this->marge_gauche + 10;
@@ -555,7 +576,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($W, 6, "Pour le Cessionnaire", 0, 'C');
                 $pdf->SetAutoPageBreak(1, 55);
 
-                $this->_pagefoot($pdf, $outputlangs);
+//                $this->_pagefoot($pdf, $outputlangs);
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
@@ -564,6 +585,138 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $this->file = $file;
                 $pdf->Output($file, 'f');
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+                if ($valfinance->pourcent_degr > 0 && $valfinance->duree_degr > 0) {
+                    $file = $dir . "/Condition_d_evolution.pdf";
+
+                    if (file_exists($dir)) {
+                        $pdf = "";
+                        $nblignes = sizeof($contrat->lignes);
+                        // Protection et encryption du pdf
+                        $pdf = pdf_getInstance($this->format);
+                        $this->pdf = $pdf;
+                        if (class_exists('TCPDF')) {
+                            if (get_class($pdf) == "FPDI") {
+                                $pdf = getNewPdf($this->format);
+                                $this->pdf = $pdf;
+                            }
+                            $pdf->setPrintHeader(true);
+                            $pdf->setPrintFooter(true);
+                        }
+                    }
+
+                    $pdf->annulenb_page = true;
+
+                    $pdf->Open();
+
+                    $pdf->SetDrawColor(128, 128, 128);
+
+
+                    $pdf->SetTitle($contrat->ref);
+                    $pdf->SetSubject($outputlangs->transnoentities("Contract"));
+                    $pdf->SetCreator("GLE " . GLE_VERSION);
+                    $pdf->SetAuthor($user->getFullName($langs));
+
+//                    $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
+
+                    $pdf->AddPage();
+                    $this->marge_gauche-=10;
+                    $x = $this->marge_gauche;
+                    $y = $this->marge_haute;
+                    $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
+
+                    $pdf->SetXY($x, $y);
+
+                    $pdf->SetFillColor(240,240,250);
+                    $pdf->setFont('', 'B', 16);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "CONDITION D'EVOLUTION", 1, 'C',true,1,null,null,null,null,null,null,null,'M');
+
+                    $y+=12;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "CONTRAT N°" . $this->contrat->ref . " CONCLUE ENTRE:", 0, 'L',false,1,null,null,null,null,null,null,null,'M');
+                    //le locataire
+                    $y+=12;
+                    $pdf->SetXY($x, $y);
+                    $pdf->setFont('', 'B', 9);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "LE LOCATAIRE", 1, 'L',false,1,null,null,null,null,null,null,null,'M');
+                    //sa description
+                    $y+=6;
+                    $pdf->setFont('', '', 8);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, $contrat->societe->nom . "\n" . $contrat->societe->address . "\n \n" . $contrat->societe->zip . "     " . $contrat->societe->town . "\n" . "N° RCS: " . $contrat->societe->idprof4, 1, 'L',false,1);
+
+                    $y+=24;
+                    $pdf->setFont('', 'B', 9);
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "LE LOUEUR", 1, 'L',false,1,null,null, true,0,false,true,0,'M');
+                    $y+=6;
+                    $pdf->setFont('', '', 8);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, $this->emetteur->name . "\n" . $this->emetteur->address . "\n \n" . $this->emetteur->zip . "     " . $this->emetteur->town . "\n" . "N° RCS: " . $this->emetteur->idprof4, 1, 'L',false,1);
+
+                    $pdf->setFont('', '', 6.5);
+                    $y+=24;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 1 – La présente convention a pour but de définir les conditions commerciales et d’évolution des matériels informatiques dont les spécificités figurent aux conditions particulières de l’ensemble des contrats de location conclus entre le locataire et le loueur.",0,'L');
+
+                    $y+=12;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 2 – Ces conditions d’évolutions sont rattachées exclusivement aux contrats de location dits ‘’ taux O%’’ et leurs évolutions. En cas d’annulation ou de remplacement desdits contrats, ces conditions commerciales seront nulles et non avenues. Ces conditions ne peuvent en aucun cas remettre en cause l’ensemble des conditions générales et particulières du contrat de location.",0,'L');
+
+                    $y+=14;
+                    $pdf->SetXY($x, $y);
+                    //die("test functuon".$this->ConvNumberLetter($valfinance->duree,0,0));
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 3 – A l’issue d’une période irrévocable, sauf accord écrit entre les deux parties, de " . $this->ConvNumberLetter($valfinance->duree,0,0) . " mois et au plus tard au ". $this->ConvNumberLetter($valfinance->duree,0,0) ."-ième mois de location, la société ".$this->emetteur->name." offrira la possibilité au locataire de faire évoluer l’ensemble des équipements informatiques objet du présent contrat. Cette modification se matérialisera par la mise en place d’un nouveau contrat dont la durée et le loyer seront identiques au présent contrat, si toutefois le périmètre informatique et/ou financier reste(nt) constant(s). Si le nombre de matériel augmente ou si le locataire décide le changement d’architecture de son informatique, le loyer ne pourra être maintenu constant, et sera calculé proportionnellement aux adjonctions rendues nécessaires. La modification s’effectuera soit par remplacement du matériel soit par adjonction de nouveau matériel quand cela est possible. Le choix du constructeur du nouveau matériel sera laissé au locataire il devra toutefois faire partie des constructeurs validés par le loueur.",0,'L');
+                    $pdf->setFont('','UI',6.5);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "Il est expressément entendu entre les parties que le fruit de la revente du matériel « sortant » du contrat effacera les loyers restant à régler.",0,'L');
+                    $y+=25;
+                    $pdf->SetXY($x, $y);
+                    $pdf->setFont('','',6.5);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 4 – La modification du matériel devra toutefois avoir reçue préalablement l’accord du comité des engagements financiers. Après acceptation du comité, ".$this->emetteur->name." adressera par écrit une proposition d’évolution des équipements informatiques objet du présent contrat. A compter de la réception de cette proposition le locataire disposera d’un délai de deux mois pour donner son accord à ÉPHÉSUS FINANCES"/* <- se renseigner auprès de patricia sur ce nom*/.", passé ce délai si le locataire refuse les évolutions, le présent contrat se poursuivra jusqu'à son terme sans que le locataire ne puisse se prévaloir de l’absence d’évolution pour ne pas respecter ses obligations contractuelles.",0,'L');
+                    $y+=15;
+                    $pdf->SetXY($x, $y);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 5 – A tous moments le locataire peut mettre fin au présent contrat suivant les conditions générales et l’article 11 du présent contrat. Toutefois si celle-ci intervient après une période irrévocable de ".$valfinance->duree." mois ".$this->emetteur->name." s’engage à reverser le fruit de la vente du matériel informatique déduction faite des frais de re-commercialisation s’élevant à 10% du montant du prix d’origine du matériel. Le locataire s’engage quant à lui à respecter ses obligations contractuelles.",0,'L');
+                    $pdf->setFont('','UI',6.5);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "Si le locataire décide de ne pas bénéficier de sa possibilité d’évolution et mène son contrat au terme, le montant de rachat du dit matériel sera de 15,00 (quinze euros) au profit du partenaire informatique du locataire.",0,'L');
+                    $pdf->setFont('','',6.5);
+                    
+                    $y+=22;
+                    $pdf->SetXY($x, $y);
+                    $w=($this->page_largeur-$this->marge_gauche-$this->marge_doite)/2;
+                    $pdf->setFont('','B',9);
+                    $pdf->MultiCell($w, 6, "LE LOCATAIRE"."\n"."Fait à"."\n"."Le"."\n"."Cachet et signature", 0, 'L', FALSE,0);
+                    $pdf->MultiCell($w, 6, "LE LOUEUR"."\n"."Fait à"."\n"."Le"."\n"."Cachet et signature", 0, 'L', FALSE,0);
+                    
+                    $pdf->SetAutoPageBreak(1);
+                    $y=280;
+                    $pdf->SetXY($x, $y);
+                    $pdf->SetTextColor(130,130,130);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, $this->emetteur->address." - ".$this->emetteur->zip." ".$this->emetteur->town." - tel: ".$this->emetteur->phone."\n"." ".getFormeJuridiqueLabel($this->emetteur->forme_juridique_code)." au Capital de ".price($this->emetteur->capital)." Euros - N° SIRET: ".$this->emetteur->idprof2." - APE: ".$this->emetteur->idprof3,0,'C');
+                    
+                    if (method_exists($pdf, 'AliasNbPages'))
+                        $pdf->AliasNbPages();
+                    $pdf->Close();
+                    $pdf->Output($file, 'f');
+                }
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+//                $pdf=new PDF();
+//                $this->file="Condition d'évolution";
+//                
+//                
+//                
+//                $pdf->Output($file, 'f');
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
                 //$langs->setPhpLang();    // On restaure langue session
 
 
@@ -584,6 +737,200 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
         return 0;   // Erreur par defaut
     }
 
+    function ConvNumberLetter($Nombre, $Devise, $Langue) {
+        $dblEnt = '';
+        $byDec = '';
+        $bNegatif = '';
+        $strDev = '';
+        $strCentimes = '';
+
+        if ($Nombre < 0) {
+            $bNegatif = true;
+            $Nombre = abs($Nombre);
+        }
+        $dblEnt = intval($Nombre);
+        $byDec = round(($Nombre - $dblEnt) * 100);
+        if ($byDec == 0) {
+            if ($dblEnt > 999999999999999) {
+                return "#TropGrand";
+            }
+        } else {
+            if ($dblEnt > 9999999999999.99) {
+                return "#TropGrand";
+            }
+        }
+        switch ($Devise) {
+            case 0 :
+                if ($byDec > 0)
+                    $strDev = " virgule";
+                break;
+            case 1 :
+                $strDev = " Euro";
+                if ($byDec > 0)
+                    $strCentimes = $strCentimes . " Cents";
+                break;
+            case 2 :
+                $strDev = " Dollar";
+                if ($byDec > 0)
+                    $strCentimes = $strCentimes . " Cent";
+                break;
+        }
+        if (($dblEnt > 1) && ($Devise != 0))
+            $strDev = $strDev . "s";
+
+        $NumberLetter = $this->ConvNumEnt(floatval($dblEnt), $Langue) . $strDev . " " . $this->ConvNumDizaine($byDec, $Langue) . $strCentimes;
+        return $NumberLetter;
+    }
+
+    private function ConvNumEnt($Nombre, $Langue) {
+        $byNum = $iTmp = $dblReste = '';
+        $StrTmp = '';
+        $NumEnt = '';
+        $iTmp = $Nombre - (intval($Nombre / 1000) * 1000);
+        $NumEnt = $this->ConvNumCent(intval($iTmp), $Langue);
+        $dblReste = intval($Nombre / 1000);
+        $iTmp = $dblReste - (intval($dblReste / 1000) * 1000);
+        $StrTmp = $this->ConvNumCent(intval($iTmp), $Langue);
+        switch ($iTmp) {
+            case 0 :
+                break;
+            case 1 :
+                $StrTmp = "mille ";
+                break;
+            default :
+                $StrTmp = $StrTmp . " mille ";
+        }
+        $NumEnt = $StrTmp . $NumEnt;
+        $dblReste = intval($dblReste / 1000);
+        $iTmp = $dblReste - (intval($dblReste / 1000) * 1000);
+        $StrTmp = $this->ConvNumCent(intval($iTmp), $Langue);
+        switch ($iTmp) {
+            case 0 :
+                break;
+            case 1 :
+                $StrTmp = $StrTmp . " million ";
+                break;
+            default :
+                $StrTmp = $StrTmp . " millions ";
+        }
+        $NumEnt = $StrTmp . $NumEnt;
+        $dblReste = intval($dblReste / 1000);
+        $iTmp = $dblReste - (intval($dblReste / 1000) * 1000);
+        $StrTmp = $this->ConvNumCent(intval($iTmp), $Langue);
+        switch ($iTmp) {
+            case 0 :
+                break;
+            case 1 :
+                $StrTmp = $StrTmp . " milliard ";
+                break;
+            default :
+                $StrTmp = $StrTmp . " milliards ";
+        }
+        $NumEnt = $StrTmp . $NumEnt;
+        $dblReste = intval($dblReste / 1000);
+        $iTmp = $dblReste - (intval($dblReste / 1000) * 1000);
+        $StrTmp = $this->ConvNumCent(intval($iTmp), $Langue);
+        switch ($iTmp) {
+            case 0 :
+                break;
+            case 1 :
+                $StrTmp = $StrTmp . " billion ";
+                break;
+            default :
+                $StrTmp = $StrTmp . " billions ";
+        }
+        $NumEnt = $StrTmp . $NumEnt;
+        return $NumEnt;
+    }
+
+    private function ConvNumDizaine($Nombre, $Langue) {
+        $TabUnit = $TabDiz = '';
+        $byUnit = $byDiz = '';
+        $strLiaison = '';
+
+        $TabUnit = array("", "un", "deux", "trois", "quatre", "cinq", "six", "sept",
+            "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze", "quinze",
+            "seize", "dix-sept", "dix-huit", "dix-neuf");
+        $TabDiz = array("", "", "vingt", "trente", "quarante", "cinquante",
+            "soixante", "soixante", "quatre-vingt", "quatre-vingt");
+        if ($Langue == 1) {
+            $TabDiz[7] = "septante";
+            $TabDiz[9] = "nonante";
+        } else if ($Langue == 2) {
+            $TabDiz[7] = "septante";
+            $TabDiz[8] = "huitante";
+            $TabDiz[9] = "nonante";
+        }
+        $byDiz = intval($Nombre / 10);
+        $byUnit = $Nombre - ($byDiz * 10);
+        $strLiaison = "-";
+        if ($byUnit == 1)
+            $strLiaison = " et ";
+        switch ($byDiz) {
+            case 0 :
+                $strLiaison = "";
+                break;
+            case 1 :
+                $byUnit = $byUnit + 10;
+                $strLiaison = "";
+                break;
+            case 7 :
+                if ($Langue == 0)
+                    $byUnit = $byUnit + 10;
+                break;
+            case 8 :
+                if ($Langue != 2)
+                    $strLiaison = "-";
+                break;
+            case 9 :
+                if ($Langue == 0) {
+                    $byUnit = $byUnit + 10;
+                    $strLiaison = "-";
+                }
+                break;
+        }
+        $NumDizaine = $TabDiz[$byDiz];
+        if ($byDiz == 8 && $Langue != 2 && $byUnit == 0)
+            $NumDizaine = $NumDizaine . "s";
+        if ($TabUnit[$byUnit] != "") {
+            $NumDizaine = $NumDizaine . $strLiaison . $TabUnit[$byUnit];
+        } else {
+            $NumDizaine = $NumDizaine;
+        }
+        return $NumDizaine;
+    }
+
+    private function ConvNumCent($Nombre, $Langue) {
+        $TabUnit = '';
+        $byCent = $byReste = '';
+        $strReste = '';
+        $NumCent = '';
+        $TabUnit = array("", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix");
+
+        $byCent = intval($Nombre / 100);
+        $byReste = $Nombre - ($byCent * 100);
+        $strReste = $this->ConvNumDizaine($byReste, $Langue);
+        switch ($byCent) {
+            case 0 :
+                $NumCent = $strReste;
+                break;
+            case 1 :
+                if ($byReste == 0)
+                    $NumCent = "cent";
+                else
+                    $NumCent = "cent " . $strReste;
+                break;
+            default :
+                if ($byReste == 0)
+                    $NumCent = $TabUnit[$byCent] . " cents";
+                else
+                    $NumCent = $TabUnit[$byCent] . " cent " . $strReste;
+        }
+        return $NumCent;
+    }
+
+}
+
 //    function header(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0) {
 //        global $conf, $langs;
 //        $logo = false;
@@ -597,60 +944,137 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 //        }
 //    }
 
-    /*
-     *   \brief      Affiche le pied de page
-     *   \param      pdf     objet PDF
-     */
+/*
+ *   \brief      Affiche le pied de page
+ *   \param      pdf     objet PDF
+ */
 
-    function _pagefoot(&$pdf, $outputlangs) {
-        
+function _pagefoot(&$pdf, $outputlangs) {
+    
+}
+
+function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {
+    $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
+    $rgbArray = array();
+    if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
+        $colorVal = hexdec($hexStr);
+        $rgbArray['red'] = 0xFF & ($colorVal >> 0x10);
+        $rgbArray['green'] = 0xFF & ($colorVal >> 0x8);
+        $rgbArray['blue'] = 0xFF & $colorVal;
+    } elseif (strlen($hexStr) == 3) { //if shorthand notation, need some string manipulations
+        $rgbArray['red'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
+        $rgbArray['green'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
+        $rgbArray['blue'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+    } else {
+        return false; //Invalid hex color code
     }
+    return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
+}
 
-    function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {
-        $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
-        $rgbArray = array();
-        if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
-            $colorVal = hexdec($hexStr);
-            $rgbArray['red'] = 0xFF & ($colorVal >> 0x10);
-            $rgbArray['green'] = 0xFF & ($colorVal >> 0x8);
-            $rgbArray['blue'] = 0xFF & $colorVal;
-        } elseif (strlen($hexStr) == 3) { //if shorthand notation, need some string manipulations
-            $rgbArray['red'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
-            $rgbArray['green'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
-            $rgbArray['blue'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
-        } else {
-            return false; //Invalid hex color code
+function int2str($a) {
+    $joakim = explode('.', $a);
+    if (isset($joakim[1]) && $joakim[1] != '') {
+        return int2str($joakim[0]) . ' virgule ' . int2str($joakim[1]);
+    }
+    if ($a < 0)
+        return 'moins ' . int2str(-$a);
+    if ($a < 17) {
+        switch ($a) {
+            case 0: return 'zero';
+            case 1: return 'un';
+            case 2: return 'deux';
+            case 3: return 'trois';
+            case 4: return 'quatre';
+            case 5: return 'cinq';
+            case 6: return 'six';
+            case 7: return 'sept';
+            case 8: return 'huit';
+            case 9: return 'neuf';
+            case 10: return 'dix';
+            case 11: return 'onze';
+            case 12: return 'douze';
+            case 13: return 'treize';
+            case 14: return 'quatorze';
+            case 15: return 'quinze';
+            case 16: return 'seize';
         }
-        return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
+    } else if ($a < 20) {
+        return 'dix-' . int2str($a - 10);
+    } else if ($a < 100) {
+        if ($a % 10 == 0) {
+            switch ($a) {
+                case 20: return 'vingt';
+                case 30: return 'trente';
+                case 40: return 'quarante';
+                case 50: return 'cinquante';
+                case 60: return 'soixante';
+                case 70: return 'soixante-dix';
+                case 80: return 'quatre-vingt';
+                case 90: return 'quatre-vingt-dix';
+            }
+        } elseif (substr($a, -1) == 1) {
+            if (((int) ($a / 10) * 10) < 70) {
+                return int2str((int) ($a / 10) * 10) . '-et-un';
+            } elseif ($a == 71) {
+                return 'soixante-et-onze';
+            } elseif ($a == 81) {
+                return 'quatre-vingt-un';
+            } elseif ($a == 91) {
+                return 'quatre-vingt-onze';
+            }
+        } elseif ($a < 70) {
+            return int2str($a - $a % 10) . '-' . int2str($a % 10);
+        } elseif ($a < 80) {
+            return int2str(60) . '-' . int2str($a % 20);
+        } else {
+            return int2str(80) . '-' . int2str($a % 20);
+        }
+    } else if ($a == 100) {
+        return 'cent';
+    } else if ($a < 200) {
+        return int2str(100) . ' ' . int2str($a % 100);
+    } else if ($a < 1000) {
+        if ($a % 100 == 0)
+            return int2str((int) ($a / 100)) . ' ' . int2str(100);
+        if ($a % 100 != 0)
+            return int2str((int) ($a / 100)) . ' ' . int2str(100) . ' ' . int2str($a % 100);
+    } else if ($a == 1000) {
+        return 'mille';
+    } else if ($a < 2000) {
+        return int2str(1000) . ' ' . int2str($a % 1000) . ' ';
+    } else if ($a < 1000000) {
+        return int2str((int) ($a / 1000)) . ' ' . int2str(1000) . ' ' . int2str($a % 1000);
     }
-
 }
 
 function getNewPdf($format) {
+    if (!class_exists("FPDI222")) {
 
-    class FPDI222 extends FPDI {
+        class FPDI222 extends FPDI {
 
-        function setHeader() {
-            global $conf, $langs, $mysoc;
-            $logo = false;
-            if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo . "noalpha.png")) {
-                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo . "noalpha.png";
-            } else {
-                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo;
+            function setHeader() {
+                global $conf, $langs, $mysoc;
+                $logo = false;
+                if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo . "noalpha.png")) {
+                    $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo . "noalpha.png";
+                } else {
+                    $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo;
+                }
+                if (is_readable($logo)) {
+                    $this->Image($logo, 90, 5, 0, 25);
+                }
             }
-            if (is_readable($logo)) {
-                $this->Image($logo, 90, 5, 0, 25);
-            }
-        }
 
-        function setFooter() {
-            $this->SetAutoPageBreak(1, 0);
-            $this->SetXY(190, 289);
-            $this->MultiCell(15, 3, '' . $this->PageNo() . '/{:ptp:}', 0, 'R', 0);
-            $this->SetAutoPageBreak(1, $this->margin_bottom);
+            function setFooter() {
+                $this->SetAutoPageBreak(1, 0);
+                $this->SetXY(190, 289);
+                if (!isset($this->annulenb_page) || !$this->annulenb_page)
+                    $this->MultiCell(15, 3, '' . $this->PageNo() . '/{:ptp:}', 0, 'R', 0);
+                $this->SetAutoPageBreak(1, $this->margin_bottom);
+            }
+
         }
 
     }
-
     return new FPDI222('P', 'mm', $format);
 }

@@ -25,13 +25,16 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
     $f = 0;
     $tabTest = array();
     while ($ligne = $db->fetch_object($result)) {//print_r($ligne);
-        $userId = -1;
+        $userIdV = $userId = -1;
         
         if($ligne->fk_element > 0 && isset($newTabUser[$ligne->fk_element])){
+            $userIdV = $ligne->fk_element;
             $userId = $newTabUser[$ligne->fk_element];
         }
-        elseif(isset($newTabUser[$ligne->fk_user_action]))
+        elseif(isset($newTabUser[$ligne->fk_user_action])){
+            $userIdV = $ligne->fk_user_action;
             $userId = $newTabUser[$ligne->fk_user_action];
+        }
         
         
         if($userId < 0) 
@@ -71,7 +74,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         if (!isset($ligne->datep))
             $ligne->datep = $ligne->datep2;
 
-        if ($ligne->conf == 1 && $userId != $user->id) {
+        if ($ligne->conf == 1 && $userIdV != $user->id) {
             $text = "Confidentiel";
             $ligne->fk_action = 999;
         }

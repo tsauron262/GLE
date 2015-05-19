@@ -150,7 +150,8 @@ if ($action == 'add')
 	}
 
     $percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):GETPOST("percentage");	// If status is -1 or 100, percentage is not defined and we must use status
-
+        if(GETPOST("complete") == -2)
+            $percentage = -2;
     // Clean parameters
 	$datep=dol_mktime($fulldayevent?'00':GETPOST("aphour"), $fulldayevent?'00':GETPOST("apmin"), 0, GETPOST("apmonth"), GETPOST("apday"), GETPOST("apyear"));
 	$datef=dol_mktime($fulldayevent?'23':GETPOST("p2hour"), $fulldayevent?'59':GETPOST("p2min"), $fulldayevent?'59':'0', GETPOST("p2month"), GETPOST("p2day"), GETPOST("p2year"));
@@ -340,7 +341,8 @@ if ($action == 'update')
         $p2hour=GETPOST('p2hour');
         $p2min=GETPOST('p2min');
 		$percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
-
+                if(GETPOST("complete") == -2)
+                    $percentage = -2;
 	    // Clean parameters
 		if ($aphour == -1) $aphour='0';
 		if ($apmin == -1) $apmin='0';

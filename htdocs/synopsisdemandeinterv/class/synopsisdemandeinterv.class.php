@@ -593,7 +593,7 @@ class Synopsisdemandeinterv extends CommonObject {
             $action->label = $this->description . " DI : " . $this->ref;
             $action->note = $this->description;
             $action->usertodo = $this->user_prisencharge;
-
+            $action->userassigned = array('id' => $this->user_prisencharge->id);
 
             if ($update)
                 $action->update($user);

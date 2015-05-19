@@ -19,7 +19,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             . "WHERE ((datep < '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep >= '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "') "//Rdv dbut ds periode fin aprés
             . "|| (datep2 <= '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')" //fin ds la periode
             . "|| (datep2 > '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep < '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "'))"
-            . " AND (fk_user_action IN (" . implode(",", $newTabUser2) . ") || ar.fk_element IN (" . implode(",", $newTabUser2) . ")) AND (fk_action NOt IN (3,8,9,10,30,31)) order by datep ASC ");
+            . " AND (fk_user_action IN (" . implode(",", $newTabUser2) . ") || ar.fk_element IN (" . implode(",", $newTabUser2) . ")) AND (fk_action NOT IN (3,8,9,10,30,31,40)) order by datep ASC ");
     $result = $db->query($sql); //avant et aprés periode
 //echo $sql;die;
     $f = 0;

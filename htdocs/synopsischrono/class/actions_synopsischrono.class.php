@@ -83,7 +83,7 @@ class ActionsSynopsischrono {
                 $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
             }
             $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(id) as nb, CentreVal, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY CentreVal, EtatVal");
+            $result2 = $db->query("SELECT COUNT(id) as nb, CentreVal, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105_simple` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY CentreVal, EtatVal");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                 if (!isset($tabResult[$centre][$ligne2->EtatVal]))

@@ -298,55 +298,64 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
 }
 
 if (isset($_POST["form2"])) {
-    include_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
-    $contract = new Contrat($db);
-    //print_r (convertirDate($_POST["datesign"],false));
-    $contract->date_contrat = convertirDate($_POST["datesign"], false);
-    $contract->socid = $object->socid;
-    $contract->commercial_suivi_id = $user->id;
-    $contract->commercial_signature_id = $user->id;
-    $contract->create($user);
 
-    $valfinance->contrat_id = $contract->id;
-    $valfinance->update($user);
-
-    $date_fin = new DateTime(convertirDate($_POST["datesign"], false));
-    $date_fin->add(new DateInterval('P' . $valfinance->duree . 'M'));
-    $date_fin = $date_fin->format('Y-m-d');
-
-    $contract->addline("Financement Propal " . (($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) ? "(1ère période) " : "") . $object->ref, $valfinance->loyer1, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"], false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
-
-    if ($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) {
-        $date_debut2 = new DateTime($date_fin);
-        $date_debut2->add(new DateInterval('P1D'));
-        $date_debut2 = $date_debut2->format('Y-m-d');
-
-        $date_fin2 = new DateTime($date_debut2);
-        $date_fin2->add(new DateInterval('P' . $valfinance->duree_degr . 'M'));
-        $date_fin2 = $date_fin2->format('Y-m-d');
-
-        $contract->addline("Financement Propal (2nd période)" . $object->ref, $valfinance->loyer2, $valfinance->nb_periode2, 20, null, null, NULL, NULL, $date_debut2, $date_fin2, "HT", null, NULL, null, $valfinance->calc_no_commF());
+    $contrat_facture_exist = false;
+    if ($valfinance->contrat_id > 0) {
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        $ctr = new Contrat($db);
+        $ctr->fetch($valfinance->contrat_id);
+        if ($ctr->id)
+            $contrat_facture_exist = true;
     }
+    if (!$contrat_facture_exist) {
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        $contract = new Contrat($db);
+        //print_r (convertirDate($_POST["datesign"],false));
+        $contract->date_contrat = convertirDate($_POST["datesign"], false);
+        $contract->socid = $object->socid;
+        $contract->commercial_suivi_id = $user->id;
+        $contract->commercial_signature_id = $user->id;
+        $contract->create($user);
 
-    addElementElement("propal", "contrat", $object->id, $contract->id);
+        $valfinance->contrat_id = $contract->id;
+
+        $date_fin = new DateTime(convertirDate($_POST["datesign"], false));
+        $date_fin->add(new DateInterval('P' . $valfinance->duree . 'M'));
+        $date_fin = $date_fin->format('Y-m-d');
+
+        $contract->addline("Financement Propal " . (($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) ? "(1ère période) " : "") . $object->ref, $valfinance->loyer1, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"], false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
+
+        if ($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) {
+            $date_debut2 = new DateTime($date_fin);
+            $date_debut2->add(new DateInterval('P1D'));
+            $date_debut2 = $date_debut2->format('Y-m-d');
+
+            $date_fin2 = new DateTime($date_debut2);
+            $date_fin2->add(new DateInterval('P' . $valfinance->duree_degr . 'M'));
+            $date_fin2 = $date_fin2->format('Y-m-d');
+
+            $contract->addline("Financement Propal (2nd période)" . $object->ref, $valfinance->loyer2, $valfinance->nb_periode2, 20, null, null, NULL, NULL, $date_debut2, $date_fin2, "HT", null, NULL, null, $valfinance->calc_no_commF());
+        }
+
+        addElementElement("propal", "contrat", $object->id, $contract->id);
 
 
-    include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-    $facture = new Facture($db);
+        include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+        $facture = new Facture($db);
 
-    $facture->date_creation = convertirDate($_POST["datesign"], false);
-    $facture->socid = $object->socid;
-    $facture->create($user);
+        $facture->date = convertirDate($_POST["datesign"], false);
+        $facture->socid = $object->socid;
+        $facture->create($user);
 
-    $valfinance->facture_id = $facture->id;
-    $valfinance->update($user);
-    
-    $facture->addline("Commission financière:", $valfinance->commF1 + $valfinance->commF2, $valfinance->nb_periode + $valfinance->nb_periode2, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
+        $valfinance->facture_id = $facture->id;
+        $valfinance->update($user);
+
+        $facture->addline("Commission financière:", $valfinance->commFM1 + $valfinance->commFM2, 1, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
 
 
-    addElementElement("propal", "facture", $object->id, $facture->id);
+        addElementElement("propal", "facture", $object->id, $facture->id);
+    }
 }
-
 
 if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret) {
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";

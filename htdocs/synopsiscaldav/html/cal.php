@@ -26,7 +26,7 @@
 
 ini_set("session.cookie_httponly", 1);
 ini_set("display_errors", 0);
-//ini_set("log_errors", 1);
+ini_set("log_errors", 1);
 
 define("BAIKAL_CONTEXT", TRUE);
 define("PROJECT_CONTEXT_BASEURI", "/");

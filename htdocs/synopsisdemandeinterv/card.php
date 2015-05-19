@@ -219,7 +219,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
     $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
     $synopsisdemandeinterv->id = $_REQUEST["id"];
     $synopsisdemandeinterv->fetch($_REQUEST["id"]);
-    require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
     $fichinter = new Synopsisfichinter($db);
 
     $fichinter->date = $synopsisdemandeinterv->date;
@@ -313,7 +313,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
 //                    print '<br/>';
                 $objLigneFiche->insert($user);
             }
-            header('Location: ' . DOL_URL_ROOT . '/fichinter/card.php?id=' . $result);
+            header('Location: ' . DOL_URL_ROOT . '/synopsisfichinter/card.php?id=' . $result);
         } else {
             $mesg = '<div class="error ui-state-error">Impossible de créer la FI' . $fichinter->error . '</div>';
         }
@@ -1448,8 +1448,8 @@ EOF;
         print '<td colspan=3 class="ui-widget-content">';
         print "<table class='nobordernopadding' width=100%>";
         foreach ($tabFI as $idFI) {
-            require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
-            $inter = new fichinter($db);
+            require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
+            $inter = new Synopsisfichinter($db);
             $inter->fetch($idFI);
             print "<tr><td class='ui-widget-content'>" . $inter->getNomUrl(1) . "</td></tr>";
         }

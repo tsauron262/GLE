@@ -194,7 +194,7 @@ class PropaleStats extends Stats
 	 */
 	function getAllByProduct($year)
 	{
-		$sql = "SELECT product.ref, COUNT(product.ref) as nb, SUM(tl.".$this->field_line.") as total, AVG(tl.".$this->field_line.") as avg";
+/*mod drsi trop trop long		$sql = "SELECT product.ref, COUNT(product.ref) as nb, SUM(tl.".$this->field_line.") as total, AVG(tl.".$this->field_line.") as avg";
 		$sql.= " FROM ".$this->from.", ".$this->from_line.", ".MAIN_DB_PREFIX."product as product";
 		if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		$sql.= " WHERE ".$this->where;
@@ -204,6 +204,6 @@ class PropaleStats extends Stats
         $sql.= $this->db->order('nb','DESC');
         //$sql.= $this->db->plimit(20);
 
-		return $this->_getAllByProduct($sql);
+		return $this->_getAllByProduct($sql);*/
 	}	
 }

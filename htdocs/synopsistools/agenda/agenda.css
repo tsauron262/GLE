@@ -73,3 +73,7 @@ div.wc-cal-event div.wc-title,div.wc-cal-event div.wc-title a{
     z-index: 100;
     position: relative;
 }
+
+.twhite{
+    color:white;
+}

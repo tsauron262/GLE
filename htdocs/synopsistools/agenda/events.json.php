@@ -75,7 +75,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             $ligne->datep = $ligne->datep2;
 
         if ($ligne->conf == 1 && $userIdV != $user->id) {
-            $text = "Confidentiel";
+            $text = "<span class='twhite'>Confidentiel</span>";
             $ligne->fk_action = 999;
         }
 

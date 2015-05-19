@@ -212,8 +212,8 @@ $socid = 0;
 $idoldcontact = 0;
 $idcontact = 0;
 $idoldcontact_rowid = 0;
-$duree_degr=0;
-$pourcent_degr=0;
+$duree_degr = 0;
+$pourcent_degr = 0;
 
 
 if ($valfinance->id) {
@@ -227,8 +227,8 @@ if ($valfinance->id) {
     $pret = $valfinance->pret;
     $VR = $valfinance->VR;
     $location = $valfinance->location;
-    $duree_degr=$valfinance->duree_degr;
-    $pourcent_degr=$valfinance->pourcent_degr;
+    $duree_degr = $valfinance->duree_degr;
+    $pourcent_degr = $valfinance->pourcent_degr;
 }
 
 $contact = $object->Liste_Contact(-1, "external");
@@ -252,8 +252,8 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $pret = $_POST["preter"];
     $location = $_POST["rad"];
     $socid = $_POST["socid"];
-    $duree_degr=$_POST["duree_degr"];
-    $pourcent_degr=$_POST["pour_degr"];
+    $duree_degr = $_POST["duree_degr"];
+    $pourcent_degr = $_POST["pour_degr"];
 
     //droit totale
     if ($user->rights->synopsisFinanc->super_write) {
@@ -275,8 +275,8 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $valfinance->pret = $pret;
     $valfinance->propal_id = $object->id;
     $valfinance->location = $location;
-    $valfinance->duree_degr=$duree_degr;
-    $valfinance->pourcent_degr=$pourcent_degr;
+    $valfinance->duree_degr = $duree_degr;
+    $valfinance->pourcent_degr = $pourcent_degr;
 
     $valfinance->calcul();
     if ($valfinance->id > 0)
@@ -297,7 +297,7 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $result = propale_pdf_create($db, $object, GETPOST('model') ? GETPOST('model') : "azurFinanc", $outputlangs, $hidedetails, $hidedesc, $hideref);
 }
 
-if (isset($_POST["form2"]) && !$valfinance->contrat_id > 0) {
+if (isset($_POST["form2"])) {
     include_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
     $contract = new Contrat($db);
     //print_r (convertirDate($_POST["datesign"],false));
@@ -314,8 +314,37 @@ if (isset($_POST["form2"]) && !$valfinance->contrat_id > 0) {
     $date_fin->add(new DateInterval('P' . $valfinance->duree . 'M'));
     $date_fin = $date_fin->format('Y-m-d');
 
-    $contract->addline("Financement Propal " . $object->ref, $valfinance->loyer, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"], false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
+    $contract->addline("Financement Propal " . (($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) ? "(1ère période) " : "") . $object->ref, $valfinance->loyer1, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"], false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
+
+    if ($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) {
+        $date_debut2 = new DateTime($date_fin);
+        $date_debut2->add(new DateInterval('P1D'));
+        $date_debut2 = $date_debut2->format('Y-m-d');
+
+        $date_fin2 = new DateTime($date_debut2);
+        $date_fin2->add(new DateInterval('P' . $valfinance->duree_degr . 'M'));
+        $date_fin2 = $date_fin2->format('Y-m-d');
+
+        $contract->addline("Financement Propal (2nd période)" . $object->ref, $valfinance->loyer2, $valfinance->nb_periode2, 20, null, null, NULL, NULL, $date_debut2, $date_fin2, "HT", null, NULL, null, $valfinance->calc_no_commF());
+    }
+
     addElementElement("propal", "contrat", $object->id, $contract->id);
+
+
+    include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+    $facture = new Facture($db);
+
+    $facture->date_creation = convertirDate($_POST["datesign"], false);
+    $facture->socid = $object->socid;
+    $facture->create($user);
+
+    $valfinance->facture_id = $facture->id;
+    $valfinance->update($user);
+    
+    $facture->addline("Commission financière:", $valfinance->commF1 + $valfinance->commF2, $valfinance->nb_periode + $valfinance->nb_periode2, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
+
+
+    addElementElement("propal", "facture", $object->id, $facture->id);
 }
 
 
@@ -375,7 +404,7 @@ if ($user->rights->synopsisFinanc->write) {
 
     echo '<tr>';
     echo '<td>Financement à 2 periodes:</td>';
-    echo '<td><INPUT type="checkbox" id="check" name="tarif_degr" value="degr" '.(($valfinance->duree_degr>0 || $valfinance->pourcent_degr>0)? "checked='checked'" : "").' /></td>';
+    echo '<td><INPUT type="checkbox" id="check" name="tarif_degr" value="degr" ' . (($valfinance->duree_degr > 0 || $valfinance->pourcent_degr > 0) ? "checked='checked'" : "") . ' /></td>';
     echo '</tr>';
 
     echo '<tr class="degr">';
@@ -391,9 +420,9 @@ if ($user->rights->synopsisFinanc->write) {
 
     echo '<tr class="degr">';
     echo '<td>Pourcentage du total de la 2nd priode:</td>';
-    echo '<td><INPUT type="text" id="po_degr" name="pour_degr" value="'.$pourcent_degr.'"/></td>';
+    echo '<td><INPUT type="text" id="po_degr" name="pour_degr" value="' . $pourcent_degr . '"/></td>';
     echo '</tr>';
-    
+
     echo '<tr>';
     echo '<td>Commissions: </td>';
     echo "<td>Commerciale:<br/><input type='text' id='commC' name='commC' value='" . $commC . "'/>%";
@@ -418,7 +447,16 @@ if ($user->rights->synopsisFinanc->write) {
         echo '<input type="hidden" id="Bcache" name="Bcache" value=""/>';
         echo '<tr>';
     }
-    echo "<td class='BB' colspan='2'><input type='submit' class='butAction' value='Valider' " . (($valfinance->contrat_id > 0) ? "disabled='disabled'" : "") . " /></td>";
+    $contrat_exist = false;
+    if ($valfinance->contrat_id > 0) {
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        $ctr = new Contrat($db);
+        $ctr->fetch($valfinance->contrat_id);
+        if ($ctr->id)
+            $contrat_exist = true;
+    }
+
+    echo "<td class='BB' colspan='2'><input type='submit' class='butAction' value='Valider' " . (($contrat_exist) ? "disabled='disabled'" : "") . " /></td>";
     echo '</tr>';
     echo '</table>';
     echo '</form>';
@@ -437,23 +475,23 @@ if ($valfinance->id > 0) {
 
         echo Synopsisfinancement::$TPeriode[$valfinance->periode] . ": " . price(($valfinance->loyer1) + 0.005) . " €   X   " . $valfinance->nb_periode . " periodes";
 
-        if($valfinance->duree_degr>0 && $valfinance->pourcent_degr>0){
+        if ($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) {
 //            echo"<br/><br/>";
-            echo ' puis '.price(($valfinance->loyer2) + 0.005) . " €   X ". $valfinance->nb_periode2." periodes";
+            echo ' puis ' . price(($valfinance->loyer2) + 0.005) . " €   X " . $valfinance->nb_periode2 . " periodes";
         }
-        
+
         echo " soit " . price($valfinance->prix_final) . " € HT";
-        
+
         if ($valfinance->VR > 0) {
 
             echo " avec un VR de: " . price($valfinance->VR) . " €";
         }
-        
+
 
         echo '<br/><br/><form method="post">';
         echo '<input type="hidden" name="form2" value="form2"/>';
         echo "signer le: <input type='text' name='datesign' value='' class='datePicker'/>";
-        echo '<input type="submit" name="signer" class="butAction" value="transformer en contrat" ' . (($valfinance->contrat_id > 0) ? "disabled='disabled'" : "") . ' />';
+        echo '<input type="submit" name="signer" class="butAction" value="transformer en contrat" ' . (($contrat_exist) ? "disabled='disabled'" : "") . ' />';
         echo "</form>";
     }
 }

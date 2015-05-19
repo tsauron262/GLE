@@ -205,7 +205,7 @@ class modSynopsisFinanc extends DolibarrModules
 //            . "CONSTRAINT Finance_FK_modify FOREIGN KEY (user_modify) REFERENCES ".MAIN_DB_PREFIX."user (rowid)"
 //        . ");";
     $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisfinancement` (
-  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+`rowid` int(11) NOT NULL,
   `user_create` int(11) NOT NULL,
   `user_modify` int(11) DEFAULT NULL,
   `fk_propal` int(11) NOT NULL,
@@ -221,6 +221,8 @@ class modSynopsisFinanc extends DolibarrModules
   `commF` float DEFAULT NULL,
   `taux` float DEFAULT NULL,
   `banque` varchar(25) DEFAULT NULL,
+  `duree_degr` int(11) NOT NULL,
+  `pourcent_degr` int(11) NOT NULL,
   PRIMARY KEY (`rowid`),
   KEY `Finance_FK_Propal` (`fk_propal`),
   KEY `Finance_FK_Contrat` (`fk_contrat`),
@@ -232,11 +234,9 @@ class modSynopsisFinanc extends DolibarrModules
     $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES
 (2, 'azurFinanc', 1, 'propal', 'Proposotion de financement', NULL);";
     
-    $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES
-(3, 'contratFinanc', 1, 'synopsiscontrat', 'contrat de financement', NULL);";
-    
-    
     $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."c_type_contact` (`rowid`, `element`, `source`, `code`, `libelle`, `active`, `module`) VALUES ('780', 'propal', 'external', 'rapp', 'Rapporteur', '1', 'synopsisFinanc');";
+    
+    $sql[]="INSERT INTO  `".MAIN_DB_PREFIX."document_model` (`rowid` ,`nom` ,`entity` ,`type` ,`libelle` ,`description`)VALUES (NULL ,  'contratFinanc',  '1',  'synopsiscontrat',  'Financement', NULL);";
     
     return $this->_init($sql);
   }

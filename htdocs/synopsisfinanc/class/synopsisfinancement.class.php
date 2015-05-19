@@ -70,22 +70,22 @@ class Synopsisfinancement extends CommonObject {
 
 
         $this->p_degr = $this->pourcent_degr / 100;
-        
-        $this->montantAF1 = $this->montantAF *(1 - $this->p_degr);
-        $this->montantAF2 = $this->montantAF *($this->p_degr);
-        
+
+        $this->montantAF1 = $this->montantAF * (1 - $this->p_degr);
+        $this->montantAF2 = $this->montantAF * ($this->p_degr);
+
         $this->commCM1 = $this->montantAF1 * (($this->commC) / 100);
-        $this->commFM1 = ($this->montantAF1+$this->commCM1) * (($this->commF) / 100);
+        $this->commFM1 = ($this->montantAF1 + $this->commCM1) * (($this->commF) / 100);
         $this->commCM2 = $this->montantAF2 * (($this->commC) / 100);
-        $this->commFM2 = ($this->montantAF2+$this->commCM2) * (($this->commF) / 100);
+        $this->commFM2 = ($this->montantAF2 + $this->commCM2) * (($this->commF) / 100);
 
 
-        $this->emprunt1 =  $this->montantAF1+$this->commCM1+$this->commFM1;
-        $this->emprunt2 =  $this->montantAF2+$this->commCM2+$this->commFM2;
-        
-        $this->emprunt_total=$this->emprunt1+$this->emprunt2;
-        
-        
+        $this->emprunt1 = $this->montantAF1 + $this->commCM1 + $this->commFM1;
+        $this->emprunt2 = $this->montantAF2 + $this->commCM2 + $this->commFM2;
+
+        $this->emprunt_total = $this->emprunt1 + $this->emprunt2;
+
+
 
         $this->pret1 = $this->pret * (1 - $this->p_degr);
         $this->pret2 = $this->pret * ($this->p_degr);
@@ -106,8 +106,8 @@ class Synopsisfinancement extends CommonObject {
         //puis
         //
         //
-        $this->prix_final1=($this->nb_periode * $this->loyer1);
-        $this->prix_final2=($this->nb_periode2 * $this->loyer2);
+        $this->prix_final1 = ($this->nb_periode * $this->loyer1);
+        $this->prix_final2 = ($this->nb_periode2 * $this->loyer2);
 
         $this->prix_final = $this->prix_final1 + $this->prix_final2; //prix final que le financé aura payer au total
     }
@@ -173,7 +173,7 @@ class Synopsisfinancement extends CommonObject {
     }
 
     function update($user) {
-        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="' . $this->contrat_id . '", duree_degr=' . $this->duree_degr . ', pourcent_degr=' . $this->pourcent_degr . ', fk_facture='.$this->facture_id.' WHERE rowid=' . $this->id . ';';
+        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="' . $this->contrat_id . '", duree_degr=' . $this->duree_degr . ', pourcent_degr=' . $this->pourcent_degr . ', fk_facture=' . $this->facture_id . ' WHERE rowid=' . $this->id . ';';
         //echo $req;
         if ($this->verif_integer() == true) {
 

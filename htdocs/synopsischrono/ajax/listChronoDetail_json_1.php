@@ -100,7 +100,7 @@ if ($searchOn == 'true') {
 
     if ($_REQUEST['fkprojet'] != "") {
         $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "projet p, " . MAIN_DB_PREFIX . "synopsischrono WHERE projetid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['fkprojet'] . "%\" OR p.title LIKE \"%" . $_REQUEST['fkprojet'] . "%\"))";
-        $searchFieldT = 'id';
+        $searchFieldT = 'chr.id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
@@ -130,13 +130,13 @@ if ($searchOn == 'true') {
     }
     if ($_REQUEST['fk_societe'] != "") {
         $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_societe = p.rowid AND (p.rowid = " . $_REQUEST['fk_societe'] . "))";
-        $searchFieldT = 'id';
+        $searchFieldT = 'chr.id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
     if ($_REQUEST['soc'] != "") {
         $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_societe = p.rowid AND (p.nom LIKE \"%" . $_REQUEST['soc'] . "%\"))";
-        $searchFieldT = 'id';
+        $searchFieldT = 'chr.id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
@@ -279,7 +279,7 @@ if (!$withRev) {
     $wh .= " AND revisionNext < 1"; //revision is NULL ";
 } else {
     $sousReq = "(SELECT orig_ref FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
-    $wh .= " AND id <>" . $_REQUEST['chrono_refid'] . " AND  (orig_ref = " . $sousReq . " || ref = " . $sousReq . ")";
+    $wh .= " AND chr.id <>" . $_REQUEST['chrono_refid'] . " AND  (orig_ref = " . $sousReq . " || ref = " . $sousReq . ")";
 }
 
 

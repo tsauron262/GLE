@@ -88,7 +88,7 @@ while ($result = $db->fetch_object($sql)) {
     $nomI = $result->titre;
     $titre = $nomI;
     if (isset($result->picto) && $result->picto != '') {
-        $result->picto = preg_replace('/\[KEY\|[0-9]*\]/', "$1", $result->picto);
+        $result->picto = preg_replace('/\[KEY\|[0-9]*-[a-zA-Z0-9]*\]/', "$1", $result->picto);
         $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
     }
     $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);

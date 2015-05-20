@@ -274,7 +274,7 @@ foreach ($tabDiff as $val) {
     $duree = 0;
     $i = 0;
 //    if ($i > 0) {
-        $sql2 = $db->query("SELECT SUM(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as sum, count(id) as nb
+        $sql2 = $db->query("SELECT SUM(TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut))) as sum, count(id) as nb
  FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_100 WHERE Contrat = ".$contrat->id . $val['Sup'] ." AND Date_H_Fin > 0 AND Date_H_Debut > 0 GROUP BY Contrat");
         while ($result2 = $db->fetch_object($sql2)){
             $duree += duree_to_secondes($result2->sum);

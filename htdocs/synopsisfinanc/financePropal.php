@@ -25,6 +25,10 @@ $langs->load("propal");
 
 $id = $_REQUEST['id'];
 restrictedArea($user, 'propal', $id, '');
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/propal.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+$object = new Propal($db);
+$object->fetch($id);
 
 $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '<script>$(document).ready(function(){'
@@ -130,14 +134,59 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '}}'
         . '</script>';
 
+//if(isset(GETPOST('action', 'alpha')))
+    $action = GETPOST('action', 'alpha');
+
+// Generation doc (depuis lien ou depuis cartouche doc)
+if ($action == 'builddoc' && $user->rights->propal->creer) {
+    if (GETPOST('model')) {
+        $object->setDocModel($user, GETPOST('model'));
+    }
+    if (GETPOST('fk_bank')) { // this field may come from an external module
+        $object->fk_bank = GETPOST('fk_bank');
+    } else {
+        $object->fk_bank = $object->fk_account;
+    }
+
+    // Define output language
+    $outputlangs = $langs;
+    if (!empty($conf->global->MAIN_MULTILANGS)) {
+        $outputlangs = new Translate("", $conf);
+        $newlang = (GETPOST('lang_id') ? GETPOST('lang_id') : $object->thirdparty->default_lang);
+        $outputlangs->setDefaultLang($newlang);
+    }
+    $ret = $object->fetch($id); // Reload to get new records
+    $result = $object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+
+    if ($result <= 0) {
+        dol_print_error($db, $result);
+        exit();
+    } else {
+        header('Location: ' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . (empty($conf->global->MAIN_JUMP_TAG) ? '' : '#builddoc'));
+        exit();
+    }
+}
+
+// Remove file in doc form
+else if ($action == 'remove_file' && $user->rights->propal->creer) {
+    if ($object->id > 0) {
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $langs->load("other");
+        $upload_dir = $conf->propal->dir_output;
+        $file = $upload_dir . '/' . GETPOST('file');
+        $ret = dol_delete_file($file, 0, 0, 0, $object);
+        if ($ret)
+            setEventMessage($langs->trans("FileWasRemoved", GETPOST('file')));
+        else
+            setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('file')), 'errors');
+    }
+}
+
 llxHeader($js, 'Finanacement');
 
 
 
-require_once(DOL_DOCUMENT_ROOT . "/core/lib/propal.lib.php");
-require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-$object = new Propal($db);
-$object->fetch($id);
 $head = propal_prepare_head($object);
 
 
@@ -343,18 +392,18 @@ if (isset($_POST["form2"])) {
         $facture = new Facture($db);
 
         $facture->date = convertirDate($_POST["datesign"], false);
-        
-        if($valfinance->banque!=""){
-            $testBanque=$db->query('SELECT * FROM '.MAIN_DB_PREFIX.'societe WHERE nom like "%'.$valfinance->banque.'%"');
-            if($db->num_rows($testBanque)>0){
+
+        if ($valfinance->banque != "") {
+            $testBanque = $db->query('SELECT * FROM ' . MAIN_DB_PREFIX . 'societe WHERE nom like "%' . $valfinance->banque . '%"');
+            if ($db->num_rows($testBanque) > 0) {
                 $row = $db->fetch_object($testBanque);
-                $facture->socid=$row->rowid;
+                $facture->socid = $row->rowid;
             }
         }
-        if(!$facture->socid){
+        if (!$facture->socid) {
             $facture->socid = $object->socid;
         }
-        
+
         $facture->create($user);
 
         $valfinance->facture_id = $facture->id;

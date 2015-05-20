@@ -195,8 +195,8 @@ function boxToWidget($file, $title, $setting = false) {
     $langs->load("boxes");
 
     $file2 = DOL_DOCUMENT_ROOT . '/core/boxes/' . $file;
-    if(!is_file($file2))
-        $file2 = DOL_DOCUMENT_ROOT."/".str_replace(array("box_", ".php"), "", $file)."/core/boxes/".$file;
+    if (!is_file($file2))
+        $file2 = DOL_DOCUMENT_ROOT . "/" . str_replace(array("box_", ".php"), "", $file) . "/core/boxes/" . $file;
     die($file2);
     require_once($file2);
     $nameShort = preg_replace('/.php$/', '', $file);
@@ -1030,24 +1030,43 @@ function select_type_of_lines2($selected = '', $htmlname = 'type', $showempty = 
 }
 
 function convertirDate($date, $enFr = true, $nowSiNull = false) {
-    $tabDate = explode('-', $date);
+    $tab0 = explode(" ", $date);
+
+    $tabDate = explode('-', $tab0[0]);
     if (!isset($tabDate[1]))
-        $tabDate = explode('/', $date);
-    if (isset($tabDate[2]) && $date != "0000-00-00") {
+        $tabDate = explode('/', $tab0[0]);
+    if (isset($tabDate[2]) && $tab0[0] != "0000-00-00") {
         if (($tabDate[0] > 32 && $enFr) || ($tabDate[2] > 32 && !$enFr))
-            return $tabDate[2] . '-' . $tabDate[1] . '-' . $tabDate[0];
+            $return = $tabDate[2] . '-' . $tabDate[1] . '-' . $tabDate[0];
         else
-            return $tabDate[0] . '-' . $tabDate[1] . '-' . $tabDate[2];
+            $return = $tabDate[0] . '-' . $tabDate[1] . '-' . $tabDate[2];
+
+
+
+
+        //Pour les heure
+        if (isset($tab0[1])) {
+            $tab1 = explode(":", $tab0[1]);
+            if (isset($tab1[2]))
+                $return .= " " . $tab1[0] . ":" . $tab1[1] . ":" . $tab1[2];
+            elseif (isset($tab1[1]))
+                $return .= " " . $tab1[0] . ":" . $tab1[1] . ":00";
+            elseif (isset($tab1[0]))
+                $return .= " " . $tab1[0] . ":00:00";
+        }
     }
     else {
         if ($nowSiNull)
             if ($enFr)
-                return date("d-m-Y");
+                $return = date("d-m-Y");
             else
-                return date("Y-m-d");
+                $return = date("Y-m-d");
         else
-            return '';
+            $return = $date;
     }
+
+
+    return $return;
 }
 
 function userInGroupe($groupe, $idUser) {

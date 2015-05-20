@@ -132,7 +132,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chrono->contactid = $_REQUEST["contactid"];
             $chronoid = $chrono->create();
             if ($chronoid > 0) {
-                $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1));
+                $dataArr = array(1045 => date("Y/m/d H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1));
                 $test = $chrono->setDatas($chronoid, $dataArr);
                 if ($test) {
                     $socid = "";
@@ -230,13 +230,13 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     header("Location: ./FicheRapide.php?idChrono=" . $chrono->id);
                     die;
                 } else {
-                    $echo .= "Echec de l'Enregistrement";
+                    $echo .= "Echec de l'Enregistrement 1";
                 }
             } else {
-                $echo .= "Echec de l'Enregistrement";
+                $echo .= "Echec de l'Enregistrement 2";
             }
         } else {
-            $echo .= "Echec de l'Enregistrement";
+            $echo .= "Echec de l'Enregistrement 3";
         }
     }
 }
@@ -539,11 +539,11 @@ if ($socid != "") {
 
 function existProd($nomachine) {
     global $db;
-    $requete = "SELECT chrono_refid FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE key_id = 1011 and value = '" . $nomachine . "';";
+    $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 WHERE N__Serie = '" . $nomachine . "';";
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0) {
         $obj = $db->fetch_object($sql);
-        $return = $obj->chrono_refid;
+        $return = $obj->id;
         return $return;
     } else {
         return -1;

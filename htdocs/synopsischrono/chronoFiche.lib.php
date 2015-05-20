@@ -1,10 +1,11 @@
 <?php
 
 function getValueForm($chrid, $keyid, $socid, $withEntete = true) {
+    require_once(DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php");
     global $db, $user;
     $requete = "SELECT k.nom,
                            k.id,
-                           v.`value`,
+                           "/*v.`value`,*/."
                            t.nom as typeNom,
                            t.hasSubValeur,
                            t.subValeur_table,
@@ -26,14 +27,20 @@ function getValueForm($chrid, $keyid, $socid, $withEntete = true) {
                            t.phpClass
                       FROM " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur AS t,
                            " . MAIN_DB_PREFIX . "synopsischrono_key AS k
-                      LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $chrid . "
+                "/*      LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $chrid . "*/."
                      WHERE t.id = k.type_valeur
                        AND k.id = " . $keyid;
 //    print $requete;
     $sql = $db->query($requete);
-    while ($res = $db->fetch_object($sql)) {
+    
+    $chrono = new Chrono($db);
+    $chrono->fetch($chrid);
+    $chrono->getValuesPlus();
+    $res = $chrono->valuesPlus[$keyid];
+    
+//    while ($res = $db->fetch_object($sql)) {
         getValueForm3($res, $chrid, $keyid, $socid, $withEntete);
-    }
+//    }
 }
 
 function getValueForm2($res, $chr, $withEntete = true) {
@@ -79,12 +86,12 @@ function getValueForm3($res, $chrid, $keyid, $socid, $withEntete = true) {
                       <script>
 jQuery(document).ready(function(){
 EOF;
-                print "jQuery('#Chrono-" . $res->id . "').jDoubleSelect({\n";
+                print "jQuery('#Chrono" . $res->id . "').jDoubleSelect({\n";
                 print <<<EOF
         text:'',
         finish: function(){
 EOF;
-                print " jQuery('#Chrono-" . $res->id . "_jDS').each(function(){
+                print " jQuery('#Chrono" . $res->id . "_jDS').each(function(){
                             var select = $(this);
 //                            $(select).combobox({
 //                                selected: function(event, ui) {
@@ -95,14 +102,14 @@ EOF;
       });
         },
         el1_change: function(){";
-                print " /*jQuery('#Chrono-" . $res->id . "_jDS_2').selectmenu({\n";
+                print " /*jQuery('#Chrono" . $res->id . "_jDS_2').selectmenu({\n";
                 print <<<EOF
                 style:'dropdown',
                 maxHeight: 300
             });*/
         },
 EOF;
-                print "el2_dest: jQuery('#destChrono-" . $res->id . "'),\n";
+                print "el2_dest: jQuery('#destChrono" . $res->id . "'),\n";
                 print <<<EOF
     });
 });
@@ -119,8 +126,8 @@ EOF;
             if ($res->valueIsChecked) {
                 $html .= ($res->value == 1 ? " CHECKED " : "");
             }
-            $html .= " name='Chrono-" . $res->id . "' ";
-            $html .= " id='Chrono-" . $res->id . "' ";
+            $html .= " name='Chrono" . $res->id . "' ";
+            $html .= " id='Chrono" . $res->id . "' ";
             $html.=">";
             if ($res->valueInTag) {
                 $html .= $res->value;
@@ -143,14 +150,14 @@ EOF;
                     }
                     $html .= "</OPTGROUP>";
                 }
-                $html .= "<td><div id='destChrono-" . $res->id . "'></div>";
+                $html .= "<td><div id='destChrono" . $res->id . "'></div>";
                 $html .= "</table>";
-                echo ajax_combobox("Chrono-" . $res->id . "_jDS", "", 3);
+                echo ajax_combobox("Chrono" . $res->id . "_jDS", "", 3);
             } else {
                 foreach ($obj->valuesArr as $key => $val) {
                     $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key ? "SELECTED" : "") . " value='" . $key . "'>" . $val . "</OPTION>";
                 }
-                echo ajax_combobox("Chrono-" . $res->id . "", "", 3);
+                echo ajax_combobox("Chrono" . $res->id . "", "", 3);
             }
             if ($res->endNeeded == 1)
                 $html .= $res->htmlEndTag;
@@ -174,16 +181,20 @@ EOF;
         
         
         if ($res->valueIsChecked){
-            $html .= "<input type='hidden' name='Chrono-" . $res->id . "' value='forChecked'/>";
+            $html .= "<input type='hidden' name='Chrono" . $res->id . "' value='forChecked'/>";
             $suffixe = "_check";
         }
         
         $html .= $tag;
 
+//        if ($res->cssClass == 'datetimepicker') {
+//            if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})[\W]([0-9]{2})[\W]([0-9]{2})/', $res->value, $arr)) {
+////                        $res->value = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
+//            }
+//        }
+
         if ($res->cssClass == 'datetimepicker') {
-            if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})[\W]([0-9]{2})[\W]([0-9]{2})/', $res->value, $arr)) {
-//                        $res->value = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
-            }
+            $res->value = convertirDate($res->value);
         }
 
         if ($res->extraCss . $res->cssClass . "x" != "x") {
@@ -195,8 +206,8 @@ EOF;
         if ($res->valueIsChecked) {
             $html .= ($res->value == 1 ? " CHECKED " : "");
         }
-        $html .= " name='Chrono-" . $res->id .$suffixe. "' ";
-        $html .= " id='Chrono-" . $res->id . "' ";
+        $html .= " name='Chrono" . $res->id .$suffixe. "' ";
+        $html .= " id='Chrono" . $res->id . "' ";
         $html.=">";
         if ($res->valueInTag) {
             $html .= $res->value;
@@ -275,12 +286,12 @@ EOF;
 //                      <script>
 //jQuery(document).ready(function(){
 //EOF;
-//                    print "jQuery('#Chrono-" . $res->id . "').jDoubleSelect({\n";
+//                    print "jQuery('#Chrono" . $res->id . "').jDoubleSelect({\n";
 //                    print <<<EOF
 //        text:'',
 //        finish: function(){
 //EOF;
-//                    print " jQuery('#Chrono-" . $res->id . "_jDS').each(function(){
+//                    print " jQuery('#Chrono" . $res->id . "_jDS').each(function(){
 //                            var select = $(this);
 ////                            $(select).combobox({
 ////                                selected: function(event, ui) {
@@ -291,14 +302,14 @@ EOF;
 //      });
 //        },
 //        el1_change: function(){";
-//                    print " /*jQuery('#Chrono-" . $res->id . "_jDS_2').selectmenu({\n";
+//                    print " /*jQuery('#Chrono" . $res->id . "_jDS_2').selectmenu({\n";
 //                    print <<<EOF
 //                style:'dropdown',
 //                maxHeight: 300
 //            });*/
 //        },
 //EOF;
-//                    print "el2_dest: jQuery('#destChrono-" . $res->id . "'),\n";
+//                    print "el2_dest: jQuery('#destChrono" . $res->id . "'),\n";
 //                    print <<<EOF
 //    });
 //});
@@ -315,8 +326,8 @@ EOF;
 //                if ($res->valueIsChecked) {
 //                    $html .= ($res->value == 1 ? " CHECKED " : "");
 //                }
-//                $html .= " name='Chrono-" . $res->id . "' ";
-//                $html .= " id='Chrono-" . $res->id . "' ";
+//                $html .= " name='Chrono" . $res->id . "' ";
+//                $html .= " id='Chrono" . $res->id . "' ";
 //                $html.=">";
 //                if ($res->valueInTag) {
 //                    $html .= $res->value;
@@ -339,14 +350,14 @@ EOF;
 //                        }
 //                        $html .= "</OPTGROUP>";
 //                    }
-//                    $html .= "<td><div id='destChrono-" . $res->id . "'></div>";
+//                    $html .= "<td><div id='destChrono" . $res->id . "'></div>";
 //                    $html .= "</table>";
-//                    echo ajax_combobox("Chrono-" . $res->id . "_jDS", "", 3);
+//                    echo ajax_combobox("Chrono" . $res->id . "_jDS", "", 3);
 //                } else {
 //                    foreach ($obj->valuesArr as $key => $val) {
 //                        $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key ? "SELECTED" : "") . " value='" . $key . "'>" . $val . "</OPTION>";
 //                    }
-//                    echo ajax_combobox("Chrono-" . $res->id . "", "", 3);
+//                    echo ajax_combobox("Chrono" . $res->id . "", "", 3);
 //                }
 //                if ($res->endNeeded == 1)
 //                    $html .= $res->htmlEndTag;
@@ -384,8 +395,8 @@ EOF;
 //            if ($res->valueIsChecked) {
 //                $html .= ($res->value == 1 ? " CHECKED " : "");
 //            }
-//            $html .= " name='Chrono-" . $res->id . "' ";
-//            $html .= " id='Chrono-" . $res->id . "' ";
+//            $html .= " name='Chrono" . $res->id . "' ";
+//            $html .= " id='Chrono" . $res->id . "' ";
 //            $html.=">";
 //            if ($res->valueInTag) {
 //                $html .= $res->value;

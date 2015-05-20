@@ -283,9 +283,11 @@ if (!$withRev) {
 }
 
 
-$requete = "SELECT view.*, soc.nom as socname, soc.rowid as socid FROM llx_synopsischrono_view_" . $id . " view LEFT JOIN llx_societe soc ON soc.rowid = fk_societe WHERE 1 " . $wh;
+$requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid FROM llx_synopsischrono_chrono_" . $id . " tview, llx_synopsischrono chr LEFT JOIN llx_societe soc ON soc.rowid = fk_societe WHERE tview.id = chr.id " . $wh;
 
 $requete .= $wh1;
+if($sidx == "id")
+    $sidx = "chr.id";
 $requete .= " ORDER BY " . $sidx . " " . $sord . "";
 
 //echo($requete);die;
@@ -368,12 +370,12 @@ if ($sql) {
 //            if(!$value > 0)
 //                die($keyname.print_r($res, true));
             if ($model->type_valeur == 3) {
-                $value = inversDate($value);
+//                $value = inversDate($value);
                 $value = (strtotime($value) > 0 ? date('Y-m-d H:i:s', strtotime($value)) : "");
             } elseif ($model->type_valeur == 2) {
-                $value = inversDate($value);
+//                $value = inversDate($value);
                 $value = (strtotime($value) > 0 ? date('Y-m-d', strtotime($value)) : "");
-            } elseif ($model->type_subvaleur > 0 && $model->type_valeur != "8") {
+            } elseif ($model->type_subvaleur > 0 /*&& $model->type_valeur != "8"*/) {
                 $value = parseValue1($res->id, $value, $model);
             }
             
@@ -453,6 +455,8 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
         } elseif ($phpClass == 'fct') {
             echo $obj->call_function_chronoModule($chr->model_refid, $chr->id);
         } elseif ($sourceIsOption) {
+//            if($phpClass == "liste")
+//        echo($phpClass."ici".$val);
             $obj->getValue($val);
             if (isset($obj->tabVal[0])) {
                 $val = $obj->tabVal[0];

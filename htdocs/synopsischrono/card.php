@@ -71,8 +71,9 @@ if ($action == 'createPC' && $chr->propal->id == 0) {
 
 if ($action == "cancel") {
     if ($chr->socid == 0 && $chr->description == '') {
-        $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE `value` is not null AND `chrono_refid` =" . $chr->id);
-        if ($db->num_rows($result) == 0)
+//        $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE `value` is not null AND `chrono_refid` =" . $chr->id);
+//        if ($db->num_rows($result) == 0)
+        if($chr->fk_user_modif < 1 && $chr->socid < 1)
             $action = 'supprimer';
     }
 }
@@ -205,7 +206,7 @@ if ($action == 'modifier') {
     $res = $chr->update($chr->id);
     $dataArr = $tabChronoValue = array();
     foreach ($_REQUEST as $key => $val) {
-        if (preg_match('/^Chrono-([0-9]*)$/', $key, $arrTmp)) {
+        if (preg_match('/^Chrono([0-9]*)$/', $key, $arrTmp)) {
             $requete = "SELECT * FROM "
                     . "" . MAIN_DB_PREFIX . "synopsischrono_key k, "
                     . "" . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur tk "
@@ -252,15 +253,15 @@ if ($action == 'modifier') {
         $socStr = $chr->societe->getNomUrl(1);
         else
             $socStr = "n/c";
-        if (isset($_REQUEST["Chrono-1071"]) && $_REQUEST["Chrono-1071"] > 0) {
+        if (isset($_REQUEST["Chrono1071"]) && $_REQUEST["Chrono1071"] > 0) {
             $group = new UserGroup($db);
-            $group->fetch($_REQUEST["Chrono-1071"]);
+            $group->fetch($_REQUEST["Chrono1071"]);
             foreach ($group->members as $tech) {
                 mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $socStr . " été transmis a votre groupe.");
             }
-        } elseif (isset($_REQUEST["Chrono-1070"]) && $_REQUEST["Chrono-1070"] > 0) {
+        } elseif (isset($_REQUEST["Chrono1070"]) && $_REQUEST["Chrono1070"] > 0) {
             $tech = new User($db);
-            $tech->fetch($_REQUEST["Chrono-1070"]);
+            $tech->fetch($_REQUEST["Chrono1070"]);
             mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $socStr . " vous a été transmis.");
         }
     }
@@ -304,7 +305,7 @@ $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/
 //$js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.datetimepicker.js" type="text/javascript"></script>';
 //launchRunningProcess($db,'Chrono',$_GET['id']);
 define('REQUIRE_JQUERY_TIMEPICKER', true);
-define('REQUIRE_JQUERY_MULTISELECT', true);
+//define('REQUIRE_JQUERY_MULTISELECT', true);
 
 
 

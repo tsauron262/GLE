@@ -2608,24 +2608,28 @@ EOF;
         return $html;
     }
 
-    private static function traitePicto($picto, $id) {
+    public static function traitePicto($picto, $id, $text = "") {
         global $db;
-        if (stripos($picto, '[KEY|')) {
-            $tabT = explode('[KEY|', $picto);
+            $paterne = '[KEY|';
+        if (stripos($picto, $paterne)) {
+            $tabT = explode($paterne, $picto);
             $tabT = explode(']', $tabT[1]);
-            $keyId = $tabT[0];
+            $paterne .= $tabT[0]."]";
+            $tabT2 = explode("-",$tabT[0]);
+            $keyId = $tabT2[0];
+            $keyId2 = $tabT2[1];
             $val = "";
             if (is_numeric($id)) {
-                $result = $db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $id . " AND key_id = " . $keyId);
+                $result = $db->query("SELECT ".$keyId2." as value FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_". $keyId ." WHERE id = " . $id );
                 if ($db->num_rows($result > 0)) {
                     $ligne = $db->fetch_object($result);
                     $val = $ligne->value;
                 }
             } else
                 $val = 0;
-            $picto = str_replace('[KEY|' . $keyId . ']', $val, $picto);
+            $picto = str_replace($paterne, $val, $picto);
         }
-        return ($picto != '') ? img_picto($text, $picto) : "";
+        return ($picto != '') ? img_picto($text, "object_".$picto) : "";
     }
 
     function getValue($id) {
@@ -3155,17 +3159,21 @@ class fct extends formulaireSource {
                 $paramsArr[$params->label] = $params->valeur;
             }
 
+            /*
+             * Impossible 
+             */
+            dol_syslog("Erreur a corriger process.class.php ln ~3160",3);
 
             //Get Fonction Params in the form
-            $requete = "SELECT v.valeur
-                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value as v,
-                               " . MAIN_DB_PREFIX . "synopsischrono_form_fct_value as f
-                         WHERE f.label = '" . $this->paramsForHtmlName . "'
-                           AND f.fct_refid = '" . $this->id . "'
-                           AND v.chrono_refid = " . $chronoId . "
-                           AND v.nom = f.valeur
-                           AND f.chrono_conf_refid =" . $modeleId
-            ;
+//            $requete = "SELECT v.valeur
+//                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value as v,
+//                               " . MAIN_DB_PREFIX . "synopsischrono_form_fct_value as f
+//                         WHERE f.label = '" . $this->paramsForHtmlName . "'
+//                           AND f.fct_refid = '" . $this->id . "'
+//                           AND v.chrono_refid = " . $chronoId . "
+//                           AND v.nom = f.valeur
+//                           AND f.chrono_conf_refid =" . $modeleId
+//            ;
             $sql = $this->db->query($requete);
 //            print "<br/>".$requete."<br/>";
             while ($res1 = $this->db->fetch_object($sql)) {
@@ -3199,10 +3207,15 @@ class fct extends formulaireSource {
             }
         } else if ($modeleId > 0) {
             //Get Fonction Params
-            $requete = "SELECT *
-                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
-                         WHERE fct_refid = " . $this->id . "
-                           AND chrono_refid = " . $modeleId;
+            
+            /*
+             * Impossible 
+             */
+            dol_syslog("Erreur a corriger process.class.php ln ~3200",3);
+//            $requete = "SELECT *
+//                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
+//                         WHERE fct_refid = " . $this->id . "
+//                           AND chrono_refid = " . $modeleId;
             $sql = $this->db->query($requete);
             $params = new fct_values($this->db);
             $paramsArr = array();

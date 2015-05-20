@@ -2713,7 +2713,7 @@ class Synopsis_ContratLigne extends ContratLigne {
         }
         
         
-        $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1010");
+        $sql = $this->db->query("SELECT  Produit as value FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 WHERE id =" . $idProdCli . "");
         if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
             $result = $this->db->fetch_object($sql);
             if ($result->value > 0) {
@@ -2723,13 +2723,13 @@ class Synopsis_ContratLigne extends ContratLigne {
             }
         }
 
-        $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1012");
-        if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
-            $result = $this->db->fetch_object($sql);
-            $html .= "(" . $result->value . ") ";
-        }
+//        $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1012");
+//        if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+//            $result = $this->db->fetch_object($sql);
+//            $html .= "(" . $result->value . ") ";
+//        }
 
-        $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1011");
+        $sql = $this->db->query("SELECT S_N as value FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 WHERE id =" . $idProdCli . "");
         if ($this->db->num_rows($sql) > 0) {
             $result = $this->db->fetch_object($sql);
             $html .= ($result->value != "" && $opt != "SN") ? " [SN : " : "";

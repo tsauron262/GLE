@@ -1,6 +1,7 @@
 <?php
 
 require_once(DOL_DOCUMENT_ROOT . "/core/class/commonobject.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 
 class Chrono extends CommonObject {
 
@@ -35,6 +36,8 @@ class Chrono extends CommonObject {
     public $extraValue = array();
     public $loadObject = true;
     private static $tabModelStat = array();
+    private static $tabIdToNomChamp = array();
+    private static $tabNomNomChampToId = array();
 
     public function Chrono($DB) {
         $this->db = $DB;
@@ -266,20 +269,29 @@ class Chrono extends CommonObject {
         }
         //Nouvelle revision
         $oldId = $this->id;
-        $newId = $this->create_revision_from($newRef, ($this->revision ? $this->revision + 1 : 1));
+
+
+        $newId = $this->create();
+        $this->ref = $newRef;
+        $this->revision = ($this->revision ? $this->revision + 1 : 1);
+        $this->update($this->id);
+        $this->getValues();
+        $this->setDatas($this->id, $this->values);
+
+//        $newId = $this->create_revision_from($newRef, ($this->revision ? $this->revision + 1 : 1));
         //Copie extra value
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $_REQUEST['id'];
-        $sql = $this->db->query($requete);
-        while ($res = $this->db->fetch_object($sql)) {
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono_value
-                                    ( chrono_refid,
-                                      value,
-                                      key_id)
-                             VALUES ( " . $newId . " ,
-                                      '" . addslashes($res->value) . "' ,
-                                      " . $res->key_id . " )";
-            $sql1 = $this->db->query($requete);
-        }
+//        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $_REQUEST['id'];
+//        $sql = $this->db->query($requete);
+//        while ($res = $this->db->fetch_object($sql)) {
+//            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono_value
+//                                    ( chrono_refid,
+//                                      value,
+//                                      key_id)
+//                             VALUES ( " . $newId . " ,
+//                                      '" . addslashes($res->value) . "' ,
+//                                      " . $res->key_id . " )";
+//            $sql1 = $this->db->query($requete);
+//        }
 
         $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_statut = 3, revisionNext = " . $newId . " WHERE id = " . $oldId;
         $sqlA = $this->db->query($requete);
@@ -343,6 +355,10 @@ class Chrono extends CommonObject {
             $requete .= ", fk_socpeople = NULL ";
         if ($this->note != "")
             $requete .= ", note = '" . addslashes($this->note) . "'";
+
+        $requete .= ", orig_ref = '" . $this->orig_ref . "'";
+        $requete .= ", revision = '" . $this->revision . "'";
+
         $requete .= ", fk_user_modif = " . $user->id;
         $requete .= " WHERE id = " . $id;
         $sql = $this->db->query($requete);
@@ -461,7 +477,7 @@ class Chrono extends CommonObject {
 
     public function supprimer($id) {
         $this->db->begin();
-        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $id;
+        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $this->model_refid . " WHERE id = " . $id;
         $sql = $this->db->query($requete);
         $requete1 = "DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $id;
         $sql1 = $this->db->query($requete1);
@@ -619,26 +635,27 @@ class Chrono extends CommonObject {
 
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $this->id . '">';
         $lienfin = '</a>';
+        
 
-        if (stripos($this->picto, '[KEY|')) {
-            $tabT = explode('[KEY|', $this->picto);
-            $tabT = explode(']', $tabT[1]);
-            $keyId = $tabT[0];
-//            echo "<pre>";
-//            print_r($this);
-//            die("ici".$this->extraValueById[$this->id][$keyId]['value']);
-            $val = $this->extraValueById[$this->id][$keyId]['value'];
-            $this->picto = str_replace('[KEY|' . $keyId . ']', $val, $this->picto);
-        }
+//        if (stripos($this->picto, '[KEY|')) {
+//            $tabT = explode('[KEY|', $this->picto);
+//            $tabT = explode(']', $tabT[1]);
+//            $keyId = $tabT[0];
+////            echo "<pre>";
+////            print_r($this);
+////            die("ici".$this->extraValueById[$this->id][$keyId]['value']);
+//            $val = $this->extraValueById[$this->id][$keyId]['value'];
+//            $this->picto = str_replace('[KEY|' . $keyId . ']', $val, $this->picto);
+//        }
 
         if ($option == 6) {
             $lien = '<a title="' . $this->nom . '" href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $this->id . '">';
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {
-            $result.=($lien . img_object($langs->trans("Chrono") . ': ' . $titre, $this->picto, false, false, false, true) . $lienfin . ' ');
+            $result.=($lien . lien::traitePicto($this->picto,$this->id,$langs->trans("Chrono") . ': ' . $titre) . $lienfin . ' ');
         } else if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowChrono") . ': ' . $titre, $this->picto) . $lienfin . ' ');
+            $result.=($lien . lien::traitePicto($this->picto,$this->id,$langs->trans("ShowChrono") . ': ' . $titre) . $lienfin . ' ');
 
         $result.=$lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
         return $result;
@@ -696,7 +713,10 @@ class Chrono extends CommonObject {
         $sql = $this->db->query($requete);
         if ($sql) {
             $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "synopsischrono");
-            return ($this->id);
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $this->model_refid . " (id) VALUES (" . $this->id . ")";
+            $sql = $this->db->query($requete);
+            if ($sql)
+                return ($this->id);
         } else {
             return (-1);
             print "$requete";
@@ -748,14 +768,14 @@ class Chrono extends CommonObject {
             while ($res = $this->db->fetch_object($sql)) {
                 $this->keysList[$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
                 $this->keysListId[] = $res->id;
-                
+
                 $this->keysListByModel[$this->model_refid][$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
                 $this->keysListIdByModel[$this->model_refid][] = $res->id;
             }
         }
     }
 
-    public function getValues($chrono_id = null) {
+    public function getValues($chrono_id = null, $queId = false) {
         if ($chrono_id == null)
             $chrono_id = $this->id;
         if (count($this->keysListIdByModel[$this->model_refid]) < 1) {
@@ -764,18 +784,42 @@ class Chrono extends CommonObject {
         if (count($this->keysListId) > 0) {
             $keyStr = join(',', $this->keysListIdByModel[$this->model_refid]);
 
-            $requete = "SELECT *
-                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
-                         WHERE chrono_refid = " . $chrono_id . " AND key_id in (" . $keyStr . ")";
-            $sql = $this->db->query($requete);
-            while ($res = $this->db->fetch_object($sql)) {
-                $value = stripslashes($res->value);
-                $key = $this->keysList[$res->key_id]['nom'];
-                $desc = $this->keysList[$res->key_id]['description'];
-                $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);
-                $this->values[$key] = $value;
-                $this->values[$res->key_id] = $value;
-                $this->extraValueById[$chrono_id][$res->key_id] = array('value' => $value, 'description' => $desc);
+//            $requete = "SELECT *
+//                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
+//                         WHERE chrono_refid = " . $chrono_id . " AND key_id in (" . $keyStr . ")";
+//            $sql = $this->db->query($requete);
+//            while ($res = $this->db->fetch_object($sql)) {
+//                $value = stripslashes($res->value);
+//                $key = $this->keysList[$res->key_id]['nom'];
+//                $desc = $this->keysList[$res->key_id]['description'];
+//                $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);
+//                $this->values[$key] = $value;
+//                $this->values[$res->key_id] = $value;
+//                $this->extraValueById[$chrono_id][$res->key_id] = array('value' => $value, 'description' => $desc);
+//            }
+            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $this->model_refid . " WHERE id = " . $chrono_id);
+            while ($tab = $this->db->fetch_array($sql)) {
+                foreach ($tab as $nom => $val) {
+                    if (!is_int($nom)) {
+                        $value = stripslashes($val);
+
+                        foreach ($this->keysList as $idT => $tabT)
+                            if ($tabT['nom'] == $nom)
+                                $key_id = $idT;
+
+//                        $key = $this->keysList[$res->key_id]['nom'];
+                        $key = $nom;
+                        if ($key_id) {
+                            $desc = $this->keysList[$key_id]['description'];
+                            $this->values[$key_id] = $value;
+                            $this->extraValueById[$chrono_id][$key_id] = array('value' => $value, 'description' => $desc);
+                        }
+                        if (!$queId) {
+                            $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);
+                            $this->values[$key] = $value;
+                        }
+                    }
+                }
             }
         }
     }
@@ -784,7 +828,6 @@ class Chrono extends CommonObject {
         $requete = "SELECT k.nom,
                            k.id,
                            k.extraCss,
-                           v.`value`,
                            t.nom as typeNom,
                            t.hasSubValeur,
                            t.subValeur_table,
@@ -807,14 +850,26 @@ class Chrono extends CommonObject {
                            t.phpClass
                       FROM " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur AS t,
                            " . MAIN_DB_PREFIX . "synopsischrono_key AS k
-                      LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $this->id . "
+                      " . /* LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $this->id . */"
                      WHERE t.id = k.type_valeur
                        AND k.model_refid = " . $this->model->id
                 . " ORDER BY k.rang";
+
+        $sql2 = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $this->model->id . " WHERE id = " . $this->id);
+        if ($this->db->num_rows($sql2) < 1)
+            die("Pas de correspondance dans synopsischrono_chrono_" . $this->model_refid . " pour l'id " . $this->id);
+        $res2 = $this->db->fetch_object($sql2);
+
+
         //print $requete;
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)) {
-            $res->value = stripslashes($res->value);
+//            $res->value = stripslashes($res->value);
+            $nameChamp = traiteCarac($res->nom) . "Val";
+            if (!isset($res2->$nameChamp))
+                $nameChamp = str_replace("Val", "", $nameChamp);
+
+            $res->value = stripslashes($res2->$nameChamp);
             if ($res->type_valeur == 10) {
                 $sqlT = $this->db->query("SELECT `nomElem` FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_lien` WHERE `rowid` = " . $res->type_subvaleur);
                 if ($this->db->num_rows($sqlT) > 0) {
@@ -828,7 +883,6 @@ class Chrono extends CommonObject {
 
             if ($res->hasSubValeur == 1) {
                 if ($res->sourceIsOption) {
-                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
                     $tmp = $res->phpClass;
                     $obj = new $tmp($this->db);
                     $obj->cssClassM = $res->extraCss;
@@ -890,7 +944,10 @@ class Chrono extends CommonObject {
                 } else {
                     $html .= $res->value;
                 }
-                $res->valueHtml = $html;
+                if ($res->type_valeur == 3)
+                    $res->valueHtml = dol_print_date($html, "dayhour");
+                else
+                    $res->valueHtml = $html;
                 $res->valueStr = $html;
             }
 
@@ -899,39 +956,85 @@ class Chrono extends CommonObject {
         }
     }
 
+    private function idChampToNom($id = null, $nom = null) {
+        if (is_null($id) && is_null($nom))
+            die("Idchamptonom pas de paramétre");
+        if (!$this->model_refid > 0)
+            die("Pas de model type");
+
+        if (!isset(self::$tabIdToNomChamp[$this->model_refid])) {
+            self::$tabIdToNomChamp[$this->model_refid] = array();
+            self::$tabNomNomChampToId[$this->model_refid] = array();
+
+            $requete = "SELECT *
+                      FROM " . MAIN_DB_PREFIX . "synopsischrono_key
+                     WHERE model_refid = " . $this->model_refid;
+            $sql = $this->db->query($requete);
+            while ($res = $this->db->fetch_object($sql)) {
+                self::$tabIdToNomChamp[$this->model_refid][$res->id] = traiteCarac($res->nom);
+                self::$tabNomNomChampToId[$this->model_refid][traiteCarac($res->nom)] = $res->id;
+            }
+        }
+
+        if (isset($id))
+            return self::$tabIdToNomChamp[$this->model_refid][$id];
+        else {
+            return self::$tabNomNomChampToId[$this->model_refid][traiteCarac($nom)];
+        }
+    }
+
     public function setDatas($chrono_id, $dataArr) {
         $this->db->begin();
         //Delete datas
         $retVal = false;
-        foreach ($dataArr as $keyId => $value) {
-            //Set Value
-            $value = addslashes($value);
-            $requete = "SELECT *
-                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
-                         WHERE key_id = " . $keyId . "
-                           AND chrono_refid = " . $chrono_id;
-            $sql = $this->db->query($requete);
-            if ($this->db->num_rows($sql) > 0) {
-                $requete = "UPDATE `" . MAIN_DB_PREFIX . "synopsischrono_value`
-                               SET `value`='" . $value . "'
-                             WHERE key_id = " . $keyId . "
-                               AND chrono_refid = " . $chrono_id;
-            } else {
 
-                $requete = "INSERT INTO `" . MAIN_DB_PREFIX . "synopsischrono_value`
-                                        (`value`,`chrono_refid`,`key_id`)
-                                        VALUES
-                                        ('" . $value . "', " . $chrono_id . ", " . $keyId . ")";
-            }
-            $sql = $this->db->query($requete);
-            if ($sql) {
-                $retVal = true;
-            } else {
-                $retVal = false;
-                $this->db->rollback();
-                return (-1);
-            }
-        }
+
+//        print_r($dataArr);die;
+
+        $tabUpdate = array();
+        foreach ($dataArr as $keyId => $value) {
+            $value = convertirDate($value, false);
+            echo $value;
+
+            if (is_numeric($keyId))
+                $keyId = $this->idChampToNom($keyId);
+
+            $tabUpdate[] = $keyId . " = '" . $value . "'";
+
+
+
+            //Set Value
+//            $value = addslashes($value);
+//            $requete = "SELECT *
+//                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
+//                         WHERE key_id = " . $keyId . "
+//                           AND chrono_refid = " . $chrono_id;
+//            $sql = $this->db->query($requete);
+//            if ($this->db->num_rows($sql) > 0) {
+//                $requete = "UPDATE `" . MAIN_DB_PREFIX . "synopsischrono_value`
+//                               SET `value`='" . $value . "'
+//                             WHERE key_id = " . $keyId . "
+//                               AND chrono_refid = " . $chrono_id;
+//            } else {
+//
+//                $requete = "INSERT INTO `" . MAIN_DB_PREFIX . "synopsischrono_value`
+//                                        (`value`,`chrono_refid`,`key_id`)
+//                                        VALUES
+//                                        ('" . $value . "', " . $chrono_id . ", " . $keyId . ")";
+//            }
+//            $sql = $this->db->query($requete);
+//            if ($sql) {
+//                $retVal = true;
+//            } else {
+//                $retVal = false;
+//                $this->db->rollback();
+//                return (-1);
+//            }
+        }//die;
+
+        $retVal = $this->db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $this->model_refid . " SET " . implode(", ", $tabUpdate) . " WHERE id =" . $this->id);
+
+
         $this->db->commit();
         return($retVal);
     }

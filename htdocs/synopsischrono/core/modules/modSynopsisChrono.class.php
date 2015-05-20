@@ -509,7 +509,7 @@ class modSynopsisChrono extends DolibarrModules {
 (4, 'Valider(Tech)', 'Valider le chrono (Technicien)', 0, 'validerTech', 4, 1, 1, 0),
 (5, 'Valider(Dir)', 'Valider le chrono (Direction)', 0, 'validerDir', 5, 1, 1, 0),
 (6, 'Valider(Com)', 'Valider le chrono (Commercial)', 0, 'validerCom', 6, 1, 1, 0),
-(7, 'Supprimer', 'Supprimer le chrono', 0, 'supprimer', 7, 1, NULL, 0);",
+(7, 'Supprimer', 'Supprimer le chrono', 0, 'supprimer', 7, 1, NULL, 0);"/*,
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `chrono_refid` int(11) DEFAULT NULL,
@@ -522,7 +522,7 @@ class modSynopsisChrono extends DolibarrModules {
             "DROP TABLE IF EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view`;",
             "DROP VIEW IF EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view`;",
             "CREATE VIEW `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_societe` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`" . MAIN_DB_PREFIX . "synopsischrono` `c` left join (`" . MAIN_DB_PREFIX . "synopsischrono_key` `k` left join `" . MAIN_DB_PREFIX . "synopsischrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)));
-");
+"*/);
 //    $this->dirs[0] = $conf->chrono->dir_output;
 
         return $this->_init($sql);

@@ -153,89 +153,89 @@ class CronSynopsis {
     }
 
     function majChrono() {
-        $finReq = "" . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid NOT IN (SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono)";
-        $sqlValueChronoSansParent = $this->db->query("SELECT * FROM " . $finReq);
-        while ($resultValueChronoSansParent = $this->db->fetch_object($sqlValueChronoSansParent))
-            $this->erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
-        $delSansParent = $this->db->query("DELETE FROM " . $finReq);
-        if ($this->db->affected_rows($delSansParent) > 0)
-            $this->erreur($this->db->affected_rows($delSansParent) . " lignes supprimé dans la table chrono_value</br></br>");
-
-
-
-//    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono";
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value";
-        $tabFusion = array();
-        $sql = $this->db->query($requete);
-        while ($result = $this->db->fetch_object($sql)) {
-            if (isset($tabChrono[$result->chrono_refid][$result->key_id])) {
-                if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == $result->value) {
-                    $this->supprLigneChronoValue($result->id, "identique " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
-                    continue;
-                } else {
-                    if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == null) {
-                        $this->supprLigneChronoValue($tabChrono[$result->chrono_refid][$result->key_id]['id'], "1er null " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
-                        continue;
-                    } elseif ($result->value == null || $result->value == "") {
-                        $this->supprLigneChronoValue($result->id, "deuxieme null " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
-                        continue;
-                    } else {
-                        $tabDay = explode("-", $result->value);
-                        $tabHour = explode(":", $result->value);
-                        if (isset($tabDay[2]) && isset($tabHour[2])) {
-                            $dateF = new DateTime($tabChrono[$result->chrono_refid][$result->key_id]['val']);
-                            $dateActu = new DateTime($result->value);
-                            $interval = date_diff($dateF, $dateActu);
-                            if ($interval->format('%R%a') > -2 && $interval->format('%R%a') < 2) {
-                                $this->supprLigneChronoValue($result->id, "date moins de 24h de diff " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
-                                continue;
-                            }
-                        }
-                    }
-                }
-                $this->erreur("<br/>gros gros gros probléme deux clef pour meme champ diferent." . $tabChrono[$result->chrono_refid][$result->key_id]['val'] . "  |  " . $result->value);
-                continue;
-            }
-            $tabChrono[$result->chrono_refid][$result->key_id] = array('val' => $result->value, 'id' => $result->id);
-            if ($result->key_id == "1011" && stripos($result->value, "clients mac") === false && stripos($result->value, "Postes clients Mac") === false && stripos($result->value, "Postes Apple") === false && stripos($result->value, "clients pc") === false && stripos($result->value, "Serveur mac") === false && stripos($result->value, "Postes Mac") === false && stripos($result->value, "Postes clients Apple") === false && stripos($result->value, "NC") === false) {
-                if (!isset($tabSN[$result->value]))//Tous vas bien c'est la premiere fois que on a cette sn
-                    $tabSN[$result->value] = $result->chrono_refid;
-                else {
-                    $oldId = $tabSN[$result->value];
-                    $newId = $result->chrono_refid;
-                    $idOldProd = $tabChrono[$oldId][1010]['val'];
-                    $idNewProd = $tabChrono[$result->chrono_refid][1010]['val'];
-                    $tabProdIgnore = array(0, 559, 561, 560);
-                    if ($oldId == $newId)
-                        die("Oups");
-                    if ($idOldProd == $idNewProd)//Identique que un autre fusion
-                        $tabFusion[$oldId][$newId] = $newId;
-                    elseif (in_array($idNewProd, $tabProdIgnore))
-                        $tabFusion[$oldId][$newId] = $newId;
-                    elseif (in_array($idOldProd, $tabProdIgnore))
-                        $tabFusion[$newId][$oldId] = $oldId;
-                    else { //Meme num de serie mais pas meme product //probleme
-                        $this->erreur("<br/>" . $result->value . "probléme" . $oldId . "|" . $newId . "||||" . $idOldProd . "|" . $idNewProd);
-                        $this->titre($this->lienFusion($oldId, $newId));
-                    }
-                }
-            }
-        }
-        foreach ($tabFusion as $idMettre => $tabIdFaible) {
-            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $idMettre);
-            $chrono_maitre = $this->db->fetch_object($sql);
-            foreach ($tabIdFaible as $idFaible) {
-                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $idFaible);
-                $chrono_faible = $this->db->fetch_object($sql);
-                if ($chrono_maitre->fk_societe != $chrono_faible->fk_societe) {
-                    $this->erreur("<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc " . $chrono_maitre->fk_societe . "|" . $chrono_faible->fk_societe);
-                    $this->titre($this->lienFusion($idMettre, $idFaible));
-                } elseif ($idMettre == $idFaible)
-                    $this->erreur("<br/><br/>Meme id " . $idMettre);
-                else
-                    $this->fusionChrono($idMettre, $idFaible);
-            }
-        }
+//        $finReq = "" . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid NOT IN (SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono)";
+//        $sqlValueChronoSansParent = $this->db->query("SELECT * FROM " . $finReq);
+//        while ($resultValueChronoSansParent = $this->db->fetch_object($sqlValueChronoSansParent))
+//            $this->erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
+//        $delSansParent = $this->db->query("DELETE FROM " . $finReq);
+//        if ($this->db->affected_rows($delSansParent) > 0)
+//            $this->erreur($this->db->affected_rows($delSansParent) . " lignes supprimé dans la table chrono_value</br></br>");
+//
+//
+//
+////    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono";
+//        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value";
+//        $tabFusion = array();
+//        $sql = $this->db->query($requete);
+//        while ($result = $this->db->fetch_object($sql)) {
+//            if (isset($tabChrono[$result->chrono_refid][$result->key_id])) {
+//                if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == $result->value) {
+//                    $this->supprLigneChronoValue($result->id, "identique " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
+//                    continue;
+//                } else {
+//                    if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == null) {
+//                        $this->supprLigneChronoValue($tabChrono[$result->chrono_refid][$result->key_id]['id'], "1er null " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
+//                        continue;
+//                    } elseif ($result->value == null || $result->value == "") {
+//                        $this->supprLigneChronoValue($result->id, "deuxieme null " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
+//                        continue;
+//                    } else {
+//                        $tabDay = explode("-", $result->value);
+//                        $tabHour = explode(":", $result->value);
+//                        if (isset($tabDay[2]) && isset($tabHour[2])) {
+//                            $dateF = new DateTime($tabChrono[$result->chrono_refid][$result->key_id]['val']);
+//                            $dateActu = new DateTime($result->value);
+//                            $interval = date_diff($dateF, $dateActu);
+//                            if ($interval->format('%R%a') > -2 && $interval->format('%R%a') < 2) {
+//                                $this->supprLigneChronoValue($result->id, "date moins de 24h de diff " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
+//                                continue;
+//                            }
+//                        }
+//                    }
+//                }
+//                $this->erreur("<br/>gros gros gros probléme deux clef pour meme champ diferent." . $tabChrono[$result->chrono_refid][$result->key_id]['val'] . "  |  " . $result->value);
+//                continue;
+//            }
+//            $tabChrono[$result->chrono_refid][$result->key_id] = array('val' => $result->value, 'id' => $result->id);
+//            if ($result->key_id == "1011" && stripos($result->value, "clients mac") === false && stripos($result->value, "Postes clients Mac") === false && stripos($result->value, "Postes Apple") === false && stripos($result->value, "clients pc") === false && stripos($result->value, "Serveur mac") === false && stripos($result->value, "Postes Mac") === false && stripos($result->value, "Postes clients Apple") === false && stripos($result->value, "NC") === false) {
+//                if (!isset($tabSN[$result->value]))//Tous vas bien c'est la premiere fois que on a cette sn
+//                    $tabSN[$result->value] = $result->chrono_refid;
+//                else {
+//                    $oldId = $tabSN[$result->value];
+//                    $newId = $result->chrono_refid;
+//                    $idOldProd = $tabChrono[$oldId][1010]['val'];
+//                    $idNewProd = $tabChrono[$result->chrono_refid][1010]['val'];
+//                    $tabProdIgnore = array(0, 559, 561, 560);
+//                    if ($oldId == $newId)
+//                        die("Oups");
+//                    if ($idOldProd == $idNewProd)//Identique que un autre fusion
+//                        $tabFusion[$oldId][$newId] = $newId;
+//                    elseif (in_array($idNewProd, $tabProdIgnore))
+//                        $tabFusion[$oldId][$newId] = $newId;
+//                    elseif (in_array($idOldProd, $tabProdIgnore))
+//                        $tabFusion[$newId][$oldId] = $oldId;
+//                    else { //Meme num de serie mais pas meme product //probleme
+//                        $this->erreur("<br/>" . $result->value . "probléme" . $oldId . "|" . $newId . "||||" . $idOldProd . "|" . $idNewProd);
+//                        $this->titre($this->lienFusion($oldId, $newId));
+//                    }
+//                }
+//            }
+//        }
+//        foreach ($tabFusion as $idMettre => $tabIdFaible) {
+//            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $idMettre);
+//            $chrono_maitre = $this->db->fetch_object($sql);
+//            foreach ($tabIdFaible as $idFaible) {
+//                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $idFaible);
+//                $chrono_faible = $this->db->fetch_object($sql);
+//                if ($chrono_maitre->fk_societe != $chrono_faible->fk_societe) {
+//                    $this->erreur("<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc " . $chrono_maitre->fk_societe . "|" . $chrono_faible->fk_societe);
+//                    $this->titre($this->lienFusion($idMettre, $idFaible));
+//                } elseif ($idMettre == $idFaible)
+//                    $this->erreur("<br/><br/>Meme id " . $idMettre);
+//                else
+//                    $this->fusionChrono($idMettre, $idFaible);
+//            }
+//        }
     }
 
     function verifCompteFermer() {
@@ -436,18 +436,18 @@ class CronSynopsis {
         return $return;
     }
 
-    private function supprLigneChronoValue($id, $text) {
-        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE id =" . $id);
-        $this->erreur("<br/>1 ligne supprimer " . $text . "<br/>");
-        ;
-    }
+//    private function supprLigneChronoValue($id, $text) {
+//        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE id =" . $id);
+//        $this->erreur("<br/>1 ligne supprimer " . $text . "<br/>");
+//        ;
+//    }
 
-    private function fusionChrono($idMaitre, $idFaible) {
-        $this->db->query("UPDATE " . MAIN_DB_PREFIX . "element_element SET fk_target = " . $idMaitre . " WHERE targettype = 'productCli' AND fk_target = " . $idFaible);
-        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id=" . $idFaible);
-        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid=" . $idFaible);
-        $this->erreur("<br/>FUSION OK :" . $idMaitre . "|" . $idFaible);
-    }
+//    private function fusionChrono($idMaitre, $idFaible) {
+//        $this->db->query("UPDATE " . MAIN_DB_PREFIX . "element_element SET fk_target = " . $idMaitre . " WHERE targettype = 'productCli' AND fk_target = " . $idFaible);
+//        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id=" . $idFaible);
+//        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid=" . $idFaible);
+//        $this->erreur("<br/>FUSION OK :" . $idMaitre . "|" . $idFaible);
+//    }
 
     private function erreur($text) {
         global $nbErreur;

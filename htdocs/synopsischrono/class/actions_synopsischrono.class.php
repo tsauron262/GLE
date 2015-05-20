@@ -83,7 +83,7 @@ class ActionsSynopsischrono {
                 $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
             }
             $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(id) as nb, CentreVal, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105_simple` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY CentreVal, EtatVal");
+            $result2 = $db->query("SELECT COUNT(chr.id) as nb, Centre as CentreVal, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_105` chrP, `" . MAIN_DB_PREFIX . "synopsischrono` chr WHERE chr.id = chrP.id AND " . ($centre ? "Centre IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY Centre, Etat");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                 if (!isset($tabResult[$centre][$ligne2->EtatVal]))
@@ -157,7 +157,7 @@ class ActionsSynopsischrono {
             $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 5");
 
 
-            $result2 = $db->query("SELECT COUNT(id) as nb, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` group by EtatVal");
+            $result2 = $db->query("SELECT COUNT(id) as nb, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_100` group by Etat");
             $tabResult = array();
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->EtatVal] = $ligne2->nb;

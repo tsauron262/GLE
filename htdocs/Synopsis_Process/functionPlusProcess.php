@@ -10,20 +10,12 @@ function getSNChrono($idChrono, $source) {
     $ordre = 1;
 
     $returnStr = "";
-    $return = array();
     $result = getElementElement($source, $dest, $idChrono, null, $ordre);
     if (count($result) > 0) {
         $return1 = array();
         $chronoTab = array();
         foreach ($result as $chrono) 
-//            {
             $chronoTab[] = $chrono['d'];
-        $req = "SELECT `value`, key_id  FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` IN (" . implode(",", $key) . ") Order BY chrono_refid";
-        $sql = $db->query($req);
-//        print_r($req);die;
-        while ($result = $db->fetch_object($sql))
-            $returnStr .= $keyI[$result->key_id]." ".$result->value."\n";
-//        }
         $result2 = getElementElement($source, $dest, null, $chronoTab);
         $chrono2 = new Chrono($db);
         foreach($result2 as $ligne2){
@@ -31,6 +23,16 @@ function getSNChrono($idChrono, $source) {
                 $chrono2->fetch($ligne2['s']);
                 $returnStr .= $chrono2->getNomUrl(1)."</br>";
             }
+        }
+        
+//        $req = "SELECT `value`, key_id  FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` IN (" . implode(",", $key) . ") Order BY chrono_refid";
+        $req = "SELECT *  FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_101` WHERE `id` IN (" . implode(",", $chronoTab) . ")";
+        $sql = $db->query($req);
+        while ($result = $db->fetch_object($sql)){
+//            $returnStr .= $keyI[$result->key_id]." ".$result->value."\n";
+            $returnStr .= $result->N__Serie."\n";
+            $returnStr .= "Login : ".$result->Login_Admin."\n";
+            $returnStr .= "Mdp : ".$result->Mdp_Admin."\n";
         }
     }
 

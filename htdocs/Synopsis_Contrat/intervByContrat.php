@@ -262,25 +262,26 @@ print "<td>Réalisé <td " . ($pourcPro > 100 ? "style='color:red'" : "") . "> "
 
 
 print '<tr>';
-$sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, `" . MAIN_DB_PREFIX . "synopsischrono_value` cv WHERE `key_id` = 1037 AND c.model_refid = 100 AND cv.chrono_refid = c.id AND cv.value= " . $contrat->id . $val['Sup'] . " GROUP by c.id");
-$i = 0;
-while ($result = $db->fetch_object($sql)) {
-    $i++;
-    $tabId [] = $result->id;
-}
+//$sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, `" . MAIN_DB_PREFIX . "synopsischrono_value` cv WHERE `key_id` = 1037 AND c.model_refid = 100 AND cv.chrono_refid = c.id AND cv.value= " . $contrat->id . $val['Sup'] . " GROUP by c.id");
+//$i = 0;
+//while ($result = $db->fetch_object($sql)) {
+//    $i++;
+//    $tabId [] = $result->id;
+//}
 $tabDiff = array(array("Titre" => "Appel Total", "Sup" => ""),
-    array("Titre" => "Appel 1 An", "Sup" => " AND DATE(c.date_create) > DATE_ADD(NOW(), INTERVAL -1 YEAR)"));
+    array("Titre" => "Appel 1 An", "Sup" => " AND DATE(Date_H_Debut) > DATE_ADD(NOW(), INTERVAL -1 YEAR)"));
 foreach ($tabDiff as $val) {
     $duree = 0;
-    if ($i > 0) {
-        $sql2 = $db->query("SELECT TIMEDIFF(STR_TO_DATE(cv2.value, '%d/%m/%Y %H:%i'), 
-STR_TO_DATE(cv1.value, '%d/%m/%Y %H:%i')) as sum
- FROM " . MAIN_DB_PREFIX . "synopsischrono_value cv1, " . MAIN_DB_PREFIX . "synopsischrono_value cv2 WHERE cv1.chrono_refid = cv2.chrono_refid AND cv1.key_id = 1031 AND cv2.key_id = 1033 AND cv1.chrono_refid IN(" . implode(",", $tabId) . ") GROUP BY cv1.chrono_refid");
+    $i = 0;
+//    if ($i > 0) {
+        $sql2 = $db->query("SELECT SUM(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as sum, count(id) as nb
+ FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_100 WHERE Contrat = ".$contrat->id . $val['Sup'] ." AND Date_H_Fin > 0 AND Date_H_Debut > 0 GROUP BY Contrat");
         while ($result2 = $db->fetch_object($sql2)){
             $duree += duree_to_secondes($result2->sum);
+            $i = $result2->nb;
 //            $dateT = new DateTime($result2->sum);
 //            echo $dateT.day;
-        }
+//        }
     }
     $duree = sec2time($duree);
     print "<td>" . $val['Titre'] . "</td><td>" . $i . " (" . $duree . ")</td>";
@@ -579,7 +580,12 @@ function sec2time($sec) {
 
 function duree_to_secondes($duree){
 	$array_duree=explode(":",$duree);
+        if(isset($array_duree[2]))
 	$secondes=3600*$array_duree[0]+60*$array_duree[1]+$array_duree[2];
+        elseif(isset($array_duree[1]))
+	$secondes=60*$array_duree[0]+$array_duree[1];
+        else
+            $secondes = $duree;
 	return $secondes;
 }
 ?>

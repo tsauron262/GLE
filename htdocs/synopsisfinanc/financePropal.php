@@ -70,7 +70,7 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '});'
         . '$("#check").change(function(e){'
         . 'if($("#check")[0].checked==false){'
-        . '$(".degr").val(0);'
+        . '$(".degr input, .degr select").val(0);'
         . '}'
         . '$(".degr").toggle(400);'
         . '});'
@@ -118,6 +118,8 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . 'var cC=parseFloat($("#commC").val());'
         . 'var cF=parseFloat($("#commF").val());'
         . 'var fric_dispo = parseFloat($("#pretAP").val());'
+        . 'var pourc_periode2=parseFloat($("#po_degr").val());'//der
+        . 'pourc_periode2=1-(pourc_periode2/100);'//der
         . 'if(pret>0){'
         . 'var loyerpret=pret/dure;'
         . '}else{'
@@ -127,14 +129,19 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . 'var mensualite=fric_dispo/mois-loyerpret;'
         . 'var interet = parseFloat($("#taux").val());'
         . 'interet=interet/100/12;'
+        . 'if(interet==0){'
+        . 'var emprunt = mensualite * dure'
+        . '}else{'
         . 'var emprunt = mensualite / (interet / (1 - Math.pow(1+interet, -dure)));'
+        . '}'
         . 'var res=emprunt/((100+cC)/100*(100+cF)/100);'
         . 'res=Math.round(res*100)/100;'
+        . 'res=res*pourc_periode2;'//der
         . '$("#montant").val(res);'
         . '}}'
         . '</script>';
 
-//if(isset(GETPOST('action', 'alpha')))
+
     $action = GETPOST('action', 'alpha');
 
 // Generation doc (depuis lien ou depuis cartouche doc)

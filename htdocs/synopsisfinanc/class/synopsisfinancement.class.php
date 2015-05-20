@@ -112,7 +112,7 @@ class Synopsisfinancement extends CommonObject {
         $this->prix_final = $this->prix_final1 + $this->prix_final2; //prix final que le financé aura payer au total
     }
 
-    function verif_integer() {
+    function verif_integer($user) {
         $erreurs = array();
         if (is_numeric($this->montantAF) == false || $this->montantAF < 0) {
             $erreurs[] = 'Le premier champs a besoin d\'un nombre';
@@ -122,8 +122,10 @@ class Synopsisfinancement extends CommonObject {
             $erreurs[] = 'Le champs "commission commerciale" a besoin d\'un nombre';
         }
 
-        if ($this->commC > 4) {
-            $erreurs[] = 'La commission commerciale ne peu pas excéder 4 %';
+        if(!$user->rights->synopsisFinanc->super_write){
+            if ($this->commC > 4) {
+                $erreurs[] = 'La commission commerciale ne peu pas excéder 4 %';
+            }
         }
 
         if (is_numeric($this->commF) == false || $this->commF < 0) {
@@ -166,7 +168,7 @@ class Synopsisfinancement extends CommonObject {
 
     function insert($user) {
         $req = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsisfinancement`(`user_create`, `fk_propal`, `montantAF`, `periode`, `duree`, `commC`, `commF`, `taux`, `banque`, preter, VR, type_location,duree_degr,pourcent_degr) VALUES (' . $user->id . ',' . $this->propal_id . ',' . $this->montantAF . ',' . $this->periode . ',' . $this->duree . ',' . $this->commC . ',' . $this->commF . ',' . $this->taux . ',"' . $this->banque . '",' . $this->pret . ',' . $this->VR . ',"' . $this->location . '",' . $this->duree_degr . ',' . $this->pourcent_degr . ');';
-        if ($this->verif_integer() == true) {
+        if ($this->verif_integer($user) == true) {
             $this->db->query($req);
             $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'synopsisfinancement');
         }
@@ -175,7 +177,7 @@ class Synopsisfinancement extends CommonObject {
     function update($user) {
         $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="' . $this->contrat_id . '", duree_degr=' . $this->duree_degr . ', pourcent_degr=' . $this->pourcent_degr . ', fk_facture="' . $this->facture_id . '" WHERE rowid=' . $this->id . ';';
         //echo $req;
-        if ($this->verif_integer() == true) {
+        if ($this->verif_integer($user) == true) {
 
             $this->db->query($req);
         }

@@ -121,7 +121,7 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . 'var pourc_periode2=parseFloat($("#po_degr").val());'//der
         . 'pourc_periode2=1-(pourc_periode2/100);'//der
         . 'if(pret>0){'
-        . 'var loyerpret=pret/dure;'
+        . 'var loyerpret=pret*pourc_periode2/dure;'
         . '}else{'
         . 'var loyerpret=0;'
         . '}'
@@ -136,13 +136,13 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '}'
         . 'var res=emprunt/((100+cC)/100*(100+cF)/100);'
         . 'res=Math.round(res*100)/100;'
-        . 'res=res*pourc_periode2;'//der
+        . 'res=res/pourc_periode2;'//der
         . '$("#montant").val(res);'
         . '}}'
         . '</script>';
 
 
-    $action = GETPOST('action', 'alpha');
+$action = GETPOST('action', 'alpha');
 
 // Generation doc (depuis lien ou depuis cartouche doc)
 if ($action == 'builddoc' && $user->rights->propal->creer) {
@@ -423,7 +423,7 @@ if (isset($_POST["form2"])) {
     }
 }
 
-if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret) {
+if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret && ($valfinance->montantAF - $totG) > 1) {
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";
 }
 
@@ -563,11 +563,13 @@ if ($valfinance->id > 0) {
         }
 
 
-        echo '<br/><br/><form method="post">';
-        echo '<input type="hidden" name="form2" value="form2"/>';
-        echo "signer le: <input type='text' name='datesign' value='' class='datePicker'/>";
-        echo '<input type="submit" name="signer" class="butAction" value="transformer en contrat" ' . (($contrat_exist) ? "disabled='disabled'" : "") . ' />';
-        echo "</form>";
+        if ($user->rights->synopsisFinanc->write) {
+            echo '<br/><br/><form method="post">';
+            echo '<input type="hidden" name="form2" value="form2"/>';
+            echo "signer le: <input type='text' name='datesign' value='' class='datePicker'/>";
+            echo '<input type="submit" name="signer" class="butAction" value="transformer en contrat" ' . (($contrat_exist) ? "disabled='disabled'" : "") . ' />';
+            echo "</form>";
+        }
     }
 }
 echo '</div>';

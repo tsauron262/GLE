@@ -122,7 +122,6 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . 'if(fric_dispo>0){'
         . 'var mensualite=fric_dispo/mois-loyerpret;'
         . 'var interet = parseFloat($("#taux").val());'
-        . 'alert(mensualite);'
         . 'interet=interet/100/12;'
         . 'var emprunt = mensualite / (interet / (1 - Math.pow(1+interet, -dure)));'
         . 'var res=emprunt/((100+cC)/100*(100+cF)/100);'
@@ -294,7 +293,7 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     }
 
     require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
-    $result = propale_pdf_create($db, $object, GETPOST('model') ? GETPOST('model') : "azurFinanc", $outputlangs, $hidedetails, $hidedesc, $hideref);
+    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref);
 }
 
 if (isset($_POST["form2"])) {
@@ -344,7 +343,18 @@ if (isset($_POST["form2"])) {
         $facture = new Facture($db);
 
         $facture->date = convertirDate($_POST["datesign"], false);
-        $facture->socid = $object->socid;
+        
+        if($valfinance->banque!=""){
+            $testBanque=$db->query('SELECT * FROM '.MAIN_DB_PREFIX.'societe WHERE nom like "%'.$valfinance->banque.'%"');
+            if($db->num_rows($testBanque)>0){
+                $row = $db->fetch_object($testBanque);
+                $facture->socid=$row->rowid;
+            }
+        }
+        if(!$facture->socid){
+            $facture->socid = $object->socid;
+        }
+        
         $facture->create($user);
 
         $valfinance->facture_id = $facture->id;
@@ -387,7 +397,7 @@ if ($user->rights->synopsisFinanc->write) {
     }
     echo '</th></tr>';
     echo'<tr>';
-    echo "<td><div class='pr'>Somme préter au client: <hr/></div><div class='vr'>VR: <hr/></div>Somme financée au client: <hr/>Argent disponible du client: </td>";
+    echo "<td><div class='pr'>Somme préter au client: <hr/></div><div class='vr'>VR: <hr/></div>Somme financée au client: <hr/>Argent disponible du client (par mois): </td>";
     echo "<td>"
     . "<div class='pr'><input type='text' id='preter' name='preter' value='" . $pret . "' /><hr/></div>"
     . "<div class='vr'><input type='text' id='VR' name='VR' value='" . $VR . "' /><hr/></div>";

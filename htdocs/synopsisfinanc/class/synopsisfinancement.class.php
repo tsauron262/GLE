@@ -173,7 +173,7 @@ class Synopsisfinancement extends CommonObject {
     }
 
     function update($user) {
-        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="' . $this->contrat_id . '", duree_degr=' . $this->duree_degr . ', pourcent_degr=' . $this->pourcent_degr . ', fk_facture=' . $this->facture_id . ' WHERE rowid=' . $this->id . ';';
+        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="' . $this->contrat_id . '", duree_degr=' . $this->duree_degr . ', pourcent_degr=' . $this->pourcent_degr . ', fk_facture="' . $this->facture_id . '" WHERE rowid=' . $this->id . ';';
         //echo $req;
         if ($this->verif_integer() == true) {
 
@@ -211,6 +211,7 @@ class Synopsisfinancement extends CommonObject {
             $this->banque = $row->banque;
             $this->propal_id = $row->fk_propal;
             $this->contrat_id = $row->fk_contrat;
+            $this->facture_id = $row->fk_facture;
             $this->id = $row->rowid;
             $this->facture_id = $row->fk_facture;
             $this->user_cre = $row->user_create;

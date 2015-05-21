@@ -30,6 +30,7 @@ if ($conf->propal->enabled)
 if ($conf->contrat->enabled)
     require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 
 
 $langs->load("contracts");

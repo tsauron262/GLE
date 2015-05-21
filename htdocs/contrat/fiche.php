@@ -1159,7 +1159,7 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                         idContratCurrent = "' . $id . '";
                     $(document).ready(function(){ 
                     var z = 0;
-                        $(\'img[alt="Supprimer"]\').each(function(){
+                        $(\'img[title="Supprimer"]\').each(function(){
                             z++;
                             var j = z;
                             var id = $(this).parent().attr("href");

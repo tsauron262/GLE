@@ -263,7 +263,7 @@ function largeur_fenetre()
 
 function hauteur_fenetre()
 {
- if (window.innerHeight) return window.innerWidth;
+ if (window.innerHeight) return window.innerHeight;
  else if (document.body && document.body.offsetHeight) return document.body.offsetHeight;
  else return 0;
 }
@@ -275,6 +275,7 @@ function traiteScroll(heightDif) {
     height = parseInt(window.innerHeight);
 //    width = parseInt(window.innerWidth);
     width = largeur_fenetre();
+//    grandeTaille = parseInt($("body").innerHeight());
     grandeTaille = parseInt($("body").innerHeight());
     minimuAGagne = grandeTaille - height;
     appli = false;
@@ -282,11 +283,17 @@ function traiteScroll(heightDif) {
     elem = null;
     if (hauteurMenu < height && (0 || minimuAGagne > 0)) {
         $("#id-right div").each(function() {
+//                if($(this).attr("class") == "fiche")
+//                alert($(this).attr("class")+" | ");
             if (!$(this).is(".fichehalfright, .fichehalfleft") && !$(this).is(".fichehalfleft")) {
                 taille = $(this).innerHeight();
                 newTailleT = taille - minimuAGagne - 10;
                 reductionVisibilite = height / newTailleT;
                 nbPages = taille / newTailleT;
+//                if($(this).attr("class") == "fiche"){
+//                alert($(this).attr("class")+" | "+newTailleT+" | "+grandeTaille);
+//            alert(hauteur_fenetre());
+//                }
                 if ($(this).is(":visible")
                         && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 300) {
                     newTaille = newTailleT;
@@ -297,6 +304,7 @@ function traiteScroll(heightDif) {
         });
 
         if (appli) {
+//            alert("appli");
             if (!$(elem).attr("old-width"))
                 $(elem).attr("old-width", $(elem).css("width"));
             oldPadding = parseInt($(elem).css("padding-right").replace("px", ""));

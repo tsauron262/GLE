@@ -136,7 +136,7 @@ class UserGroup extends CommonObject
 	 *	@param		int		$userid 	User id to search
 	 * 	@return		array     			Array of groups objects
 	 */
-	function listGroupsForUser($userid)
+	function listGroupsForUser($userid, $mode = 1)
 	{
 		global $conf, $user;
 
@@ -166,7 +166,10 @@ class UserGroup extends CommonObject
 				if (! array_key_exists($obj->rowid, $ret))
 				{
 					$newgroup=new UserGroup($this->db);
-					$newgroup->fetch($obj->rowid);
+                                        if($mode == 1)
+                                            $newgroup->fetch($obj->rowid);
+                                        else
+					$newgroup->id = $obj->rowid;
 					$ret[$obj->rowid]=$newgroup;
 				}
 

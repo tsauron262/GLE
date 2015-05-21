@@ -514,7 +514,7 @@ class Chrono extends CommonObject {
 //        $groups = $userObj->listGroupIn();
         require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
         $usergroup = new UserGroup($this->db);
-        $groups = $usergroup->listGroupsForUser($userObj->id);
+        $groups = $usergroup->listGroupsForUser($userObj->id,0);
         //  var_dump($groups);
         foreach ($groups as $group) {
             $group = $this->getGrpRights($group);

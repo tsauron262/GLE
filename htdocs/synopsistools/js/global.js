@@ -333,7 +333,7 @@ function traiteScroll(heightDif) {
             //Test
             if (parseInt($("body").innerHeight()) > (height - 5) || widthBody > width){
                 scrollY = initScroll();
-                alert("reinit");
+//                alert("reinit");
             }
 
 //            if(!window.chrome)

@@ -192,6 +192,9 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $contrat->fetch_lines(true);
             }
 
+            $contrat->societe=new Societe($this->db);
+            $contrat->societe->fetch($contrat->socid);
+            
             // Definition de $dir et $file
             if ($contrat->specimen) {
                 $dir = $conf->synopsiscontrat->dir_output;

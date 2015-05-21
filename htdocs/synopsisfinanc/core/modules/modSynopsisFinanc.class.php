@@ -236,7 +236,7 @@ class modSynopsisFinanc extends DolibarrModules
     
     $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."c_type_contact` (`rowid`, `element`, `source`, `code`, `libelle`, `active`, `module`) VALUES ('780', 'propal', 'external', 'rapp', 'Rapporteur', '1', 'synopsisFinanc');";
     
-    $sql[]="INSERT INTO  `".MAIN_DB_PREFIX."document_model` (`rowid` ,`nom` ,`entity` ,`type` ,`libelle` ,`description`)VALUES (NULL ,  'contratFinanc',  '1',  'synopsiscontrat',  'Financement', NULL);";
+    $sql[]="INSERT INTO  ".MAIN_DB_PREFIX."document_model (`rowid` ,`nom` ,`entity` ,`type` ,`libelle` ,`description`) VALUES (NULL ,  'contratFinanc',  '1',  'synopsiscontrat',  'Financement', NULL);";
     
     return $this->_init($sql);
   }

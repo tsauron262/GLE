@@ -63,6 +63,9 @@ class Synopsisfinancement extends CommonObject {
 
     function calcul() {
 
+        $mode = true;//default true
+        $mode_comm = false;//default false
+
         $this->nb_periode = $this->duree / $this->periode;
         $this->nb_periode2 = $this->duree_degr / $this->periode; //nombre de période de remboursement durant toute la durée du financement
         $this->interet = $this->taux / 100 / 12; //calcul des interets par mois en fonction du taux
@@ -75,10 +78,19 @@ class Synopsisfinancement extends CommonObject {
         $this->montantAF2 = $this->montantAF * ($this->p_degr);
 
         $this->commCM1 = $this->montantAF1 * (($this->commC) / 100);
-        $this->commFM1 = ($this->montantAF1 + $this->commCM1) * (($this->commF) / 100);
-        $this->commCM2 = $this->montantAF2 * (($this->commC) / 100);
-        $this->commFM2 = ($this->montantAF2 + $this->commCM2) * (($this->commF) / 100);
+        if ($mode) {
+            $this->commFM1 = ($this->montantAF1 + $this->commCM1) * (($this->commF) / 100);
+        } else {
+            $this->commFM1 = $this->montantAF1 * (($this->commF) / 100);
+        }
 
+        $this->commCM2 = $this->montantAF2 * (($this->commC) / 100);
+        if ($mode) {
+            $this->commFM2 = ($this->montantAF2 + $this->commCM2) * (($this->commF) / 100);
+        } else {
+            $this->commFM2 = $this->montantAF2 * (($this->commF) / 100);
+        }
+        echo 'commF='.$this->commFM1."\n";
 
         $this->emprunt1 = $this->montantAF1 + $this->commCM1 + $this->commFM1;
         $this->emprunt2 = $this->montantAF2 + $this->commCM2 + $this->commFM2;
@@ -90,7 +102,23 @@ class Synopsisfinancement extends CommonObject {
         $this->pret1 = $this->pret * (1 - $this->p_degr);
         $this->pret2 = $this->pret * ($this->p_degr);
 
-
+        if ($mode_comm) {
+            $this->commCP1 = $this->pret1 * (($this->commC) / 100);
+            if ($mode) {
+                $this->commFP1 = ($this->pret1 + $this->commCP1) * (($this->commF) / 100);
+            } else {
+                $this->commFP1 = $this->pret1 * (($this->commF) / 100);
+            }
+            $this->commCP2 = $this->pret2 * (($this->commC) / 100);
+            if ($mode) {
+                $this->commFP2 = ($this->pret2 + $this->commCP2) * (($this->commF) / 100);
+            } else {
+                $this->commFP2 = $this->pret2 * (($this->commF) / 100);
+            }
+            $this->pret1 = $this->pret1 + $this->commCP1 + $this->commFP1;
+            $this->pret2 = $this->pret2 + $this->commCP2 + $this->commFP2;
+            echo $this->commFP1." , ".$this->commFP2;
+        }
 
 
         $this->loyer1 = $this->calculLoyer($this->emprunt1, $this->pret1, $this->duree);
@@ -122,7 +150,7 @@ class Synopsisfinancement extends CommonObject {
             $erreurs[] = 'Le champs "commission commerciale" a besoin d\'un nombre';
         }
 
-        if(!$user->rights->synopsisFinanc->super_write){
+        if (!$user->rights->synopsisFinanc->super_write) {
             if ($this->commC > 4) {
                 $erreurs[] = 'La commission commerciale ne peu pas excéder 4 %';
             }
@@ -224,7 +252,7 @@ class Synopsisfinancement extends CommonObject {
             $this->duree_degr = $row->duree_degr;
             $this->pourcent_degr = $row->pourcent_degr;
 
-            $this->calcul();
+//            $this->calcul();
         } else {
             return 0;
         }

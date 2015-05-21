@@ -333,12 +333,11 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $valfinance->duree_degr = $duree_degr;
     $valfinance->pourcent_degr = $pourcent_degr;
 
-    $valfinance->calcul();
     if ($valfinance->id > 0)
         $valfinance->update($user);
     else
         $valfinance->insert($user);
-
+    
     if ($idoldcontact != $idcontact) {
         if ($idoldcontact > 0) {
             $object->delete_contact($idoldcontact_rowid);
@@ -351,6 +350,7 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
     $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref);
 }
+    $valfinance->calcul();
 
 if (isset($_POST["form2"])) {
 

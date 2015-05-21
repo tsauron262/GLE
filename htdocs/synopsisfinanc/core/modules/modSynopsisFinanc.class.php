@@ -58,7 +58,7 @@ class modSynopsisFinanc extends DolibarrModules
         $this->module_parts = array('triggers' => 0);
 
         // Dependences
-        $this->depends = array('modPropale');
+        $this->depends = array('modPropale','modContrat','modFacture');
         $this->requiredby = array();
 
         // Constantes

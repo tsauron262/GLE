@@ -2141,7 +2141,7 @@ EOF;
 if (isset($synopsisdemandeinterv->fk_commande) && $synopsisdemandeinterv->fk_commande > 0) {
     print "<br/><br/><div id='replaceResult'>";
 
-    $_REQUEST['id'] = $synopsisdemandeinterv->fk_commande;
+    $idCommande = $synopsisdemandeinterv->fk_commande;
     require(DOL_DOCUMENT_ROOT . "/Synopsis_PrepaCommande/ajax/getResults-html_response.php");
 
     print "</div>";

@@ -387,6 +387,7 @@ elseif (($commande->statut == 1 || $commande->statut == 2) && $user->rights->com
 print "<div id='replaceResult'>";
 
 
+$idCommande = $commande->id;
 require(DOL_DOCUMENT_ROOT . "/Synopsis_PrepaCommande/ajax/getResults-html_response.php");
 
 print "</div>";

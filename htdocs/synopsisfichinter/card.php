@@ -206,10 +206,11 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 
 
 //$groups = $user->listGroupIn();
-require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-$usergroup = new UserGroup($db);
-$groups = $usergroup->listGroupsForUser($user->id);
-if (!($user->admin || isset($groups[11])) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
+//require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
+//$usergroup = new UserGroup($db);
+//$groups = $usergroup->listGroupsForUser($user->id,1);
+$accesGrTech = userInGroupe(11, $user->id);
+if (!($user->admin || $accesGrTech) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
     if (isset($_REQUEST['id']) && stripos($_SERVER['REQUEST_URI'], "?") === false)
         header('Location: ' . str_replace("card.php", "ficheFast.php?id=" . $_REQUEST['id'], "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
     else

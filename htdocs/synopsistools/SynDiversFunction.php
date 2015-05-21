@@ -1071,10 +1071,16 @@ function convertirDate($date, $enFr = true, $nowSiNull = false) {
 
 function userInGroupe($groupe, $idUser) {
     global $db;
-    $result = $db->query('SELECT ug.rowid FROM `' . MAIN_DB_PREFIX . 'usergroup` g, `' . MAIN_DB_PREFIX . 'usergroup_user` ug  WHERE g.`nom` = "' . $groupe . '" AND ug.`fk_user` = "' . $idUser . '" AND `fk_usergroup` = g.rowid');
-    if ($db->num_rows($result) > 0)
-        return true;
-    return false;
+    if (!is_numeric($groupe)) {
+        $result = $db->query('SELECT ug.rowid FROM `' . MAIN_DB_PREFIX . 'usergroup` g, `' . MAIN_DB_PREFIX . 'usergroup_user` ug  WHERE g.`nom` = "' . $groupe . '" AND ug.`fk_user` = "' . $idUser . '" AND `fk_usergroup` = g.rowid');
+        if ($db->num_rows($result) > 0)
+            return true;
+        return false;
+    }
+    else {
+        $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup_user WHERE   `fk_usergroup` = " . $groupe . " AND `fk_user` =" . $idUser);
+        return $db->num_rows($sql);
+    }
 }
 
 ?>

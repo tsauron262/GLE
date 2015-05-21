@@ -356,7 +356,7 @@ class Synopsis_Commande extends Commande {
 
     function fetch($id, $ref = '', $ref_ext = '', $ref_int = '') {
         $return = parent::fetch($id, $ref, $ref_ext, $ref_int);
-        if (isset($this->id)) {
+        if (isset($this->id) && $this->id > 0) {
             $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $this->id);
             if ($this->db->num_rows($sql) < 1) {
                 $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande (`rowid`) VALUES (" . $this->id . ")");

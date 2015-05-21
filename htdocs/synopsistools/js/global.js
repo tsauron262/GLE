@@ -241,9 +241,9 @@ function initScroll() {
     $(".reglabe, .reglabe2").each(function() {
         scrollY += $(this).scrollTop();
         $(this).height('auto');
-        if ($(this).attr("old-width"))
-            $(this).width($(this).attr("old-width"));
-        else
+//        if ($(this).attr("old-width"))
+//            $(this).width($(this).attr("old-width"));
+//        else
             $(this).width('auto');
         if ($(this).attr("old-padding-right"))
             $(this).css("padding-right", $(this).attr("old-padding-right") + "px");
@@ -254,12 +254,27 @@ function initScroll() {
     return scrollY;
 }
 
+function largeur_fenetre()
+{
+ if (window.innerWidth) return window.innerWidth;
+ else if (document.body && document.body.offsetWidth) return document.body.offsetWidth;
+ else return 0;
+}
+
+function hauteur_fenetre()
+{
+ if (window.innerHeight) return window.innerWidth;
+ else if (document.body && document.body.offsetHeight) return document.body.offsetHeight;
+ else return 0;
+}
+
 function traiteScroll(heightDif) {
     scrollY = initScroll();
 //        alert(scrollY);
     hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight()) + 30;
     height = parseInt(window.innerHeight);
-    width = parseInt(window.innerWidth);
+//    width = parseInt(window.innerWidth);
+    width = largeur_fenetre();
     grandeTaille = parseInt($("body").innerHeight());
     minimuAGagne = grandeTaille - height;
     appli = false;
@@ -269,11 +284,11 @@ function traiteScroll(heightDif) {
         $("#id-right div").each(function() {
             if (!$(this).is(".fichehalfright, .fichehalfleft") && !$(this).is(".fichehalfleft")) {
                 taille = $(this).innerHeight();
-                newTailleT = taille - minimuAGagne - 5;
+                newTailleT = taille - minimuAGagne - 10;
                 reductionVisibilite = height / newTailleT;
                 nbPages = taille / newTailleT;
                 if ($(this).is(":visible")
-                        && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30) {
+                        && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 300) {
                     newTaille = newTailleT;
                     elem = $(this);
                     appli = true;
@@ -297,16 +312,29 @@ function traiteScroll(heightDif) {
             padding = parseInt($(elem).css("padding-top").replace("px", "")) + parseInt($(elem).css("padding-bottom").replace("px", ""));
 //            alert(margin+padding);
             $(elem).height(newTaille - padding);
-            $(elem).width($(elem).width() - 20);
+//            $(elem).width($(elem).width() - 20);
             $(elem).css("padding-right", (oldPadding + 15) + "px");
             if (scrollY > 250)
                 scrollY = scrollY - 250;
+            
+            
+            largeurMenu = 180;
+            widthBody1 = $("#id-right").innerWidth()+largeurMenu;
+            widthBody2 = parseInt($("body").innerWidth());
+            if(widthBody1 > widthBody2)
+                widthBody = widthBody1;
+            else
+                widthBody = widthBody2;
 //            
-//            alert(scrollY);
+//            alert(parseInt($("body").innerWidth()));
+//            alert(widthBody);
+//            alert("Fenetre : "+width);
 
             //Test
-            if (parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)
+            if (parseInt($("body").innerHeight()) > (height - 5) || widthBody > width){
                 scrollY = initScroll();
+                alert("reinit");
+            }
 
 //            if(!window.chrome)
             $(elem).scrollTop(scrollY);

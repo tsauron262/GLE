@@ -104,12 +104,15 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             $hour2 = $date2->format("H");
             if ($heureOuvree && intval($hour) < 8)
                 $date1->setTime(8, 0);
+//            if ($heureOuvree && intval($hour) >= 20)
+//                $date1->setTime(19, 0);
+//            if ($heureOuvree && intval($hour2) < 8)
+//                $date2->setTime(9, 0);
             if ($heureOuvree && intval($hour2) >= 20)
                 $date2->setTime(20, 0);
 
 
 
-            if (!$heureOuvree || (intval($hour2) == 0 || intval($hour2) > 8))
                 $eventsStr[] = '{"id":' . $ligne->id . ', "start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"' . $text . '", "userId": ' . $userId . $colorStr . '}';
         }
         $f = $f + 1;

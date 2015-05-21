@@ -183,7 +183,7 @@ class ActionComm extends CommonObject
         $error=0;
         $now=dol_now();
         
-        /*deb mod drsi */ if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id && $user->id != $this->author->id)) $this->usertodo = $user; /*fmod drsi*/
+        /*deb mod drsi */ if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->userownerid && $user->id != $this->author->id)) $this->userownerid = $user->id; /*fmod drsi*/
         
         // Clean parameters
         $this->label=dol_trunc(trim($this->label),128);
@@ -213,7 +213,6 @@ class ActionComm extends CommonObject
         // Be sure assigned user is defined as an array of array('id'=>,'mandatory'=>,...).
         if (empty($this->userassigned) || count($this->userassigned) == 0 || ! is_array($this->userassigned))
         	$this->userassigned = array($userownerid=>array('id'=>$userownerid));
-
         if (! $this->type_id || ! $this->type_code)
         {
         	$key=empty($this->type_id)?$this->type_code:$this->type_id;
@@ -599,7 +598,7 @@ class ActionComm extends CommonObject
         
         if(!isset($user->rights->agenda->myactions->create))
             $user->getrights();
-        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
+        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->userownerid)) return 0; /*fmod drsi*/
 
         // Clean parameters
         $this->label=trim($this->label);

@@ -105,7 +105,7 @@ $bool = false;
     {
         $usertodo->fetch($affectTo);
     }
-    $actioncomm->usertodo = $usertodo;
+    $actioncomm->userownerid = $usertodo->id;
 
     $actioncomm->note = trim($note);
     if (isset($contactid)) $actioncomm->contact = $contact;

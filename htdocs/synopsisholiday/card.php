@@ -58,7 +58,7 @@ $droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holida
 
 // Si création de la demande:
 if ($action == 'create') {
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
 
     // Si pas le droit de créer une demande
     if (($userid == $user->id && empty($user->rights->holiday->write)) ||
@@ -192,7 +192,7 @@ if ($action == 'update') {
         exit;
     }
 
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
     $cp->fetch($_POST['holiday_id']);
 
     $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user && ($droitAll)));
@@ -276,7 +276,7 @@ if ($action == 'update') {
 
 // Si suppression de la demande:
 if ($action == 'confirm_delete' && GETPOST('confirm') == 'yes') {
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
     $cp->fetch($id);
 
     if ((($user->id == $cp->fk_user) || $user->rights->holiday->delete || $droitAll) &&
@@ -299,7 +299,7 @@ if ($action == 'confirm_delete' && GETPOST('confirm') == 'yes') {
 
 // Si envoi de la demande:
 if ($action == 'confirm_send') {
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
     $cp->fetch($id);
     $drhUserId = $cp->getConfCP('drhUserId');
     // Si brouillon et créateur
@@ -393,7 +393,7 @@ if ($action == 'confirm_send') {
 
 // Si Validation de la demande par le valideur:
 if ($action == 'confirm_valid') {
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
     $cp->fetch($id);
 
     // Si statut en attente de validation et valideur = utilisateur
@@ -479,7 +479,7 @@ if ($action == 'confirm_valid') {
 
 // Si validation de la demande par le DRH: 
 if ($action == 'drh_confirm_valid') {
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
     $cp->fetch($id);
     $drhUserId = $cp->getConfCP('drhUserId');
 
@@ -593,7 +593,7 @@ if ($action == 'drh_confirm_valid') {
 // Si refus de la demande par le valideur:
 if ($action == 'confirm_refuse') {
     if (!empty($_POST['detail_refuse'])) {
-        $cp = new Holiday($db);
+        $cp = new SynopsisHoliday($db);
         $cp->fetch($_GET['id']);
 
         // Si statut en attente de validation et valideur = utilisateur
@@ -656,7 +656,7 @@ if ($action == 'confirm_refuse') {
 // Si refus de la demande par le DRH:
 if ($action == 'drh_confirm_refuse') {
     if (!empty($_POST['detail_refuse'])) {
-        $cp = new Holiday($db);
+        $cp = new SynopsisHoliday($db);
         $cp->fetch($_GET['id']);
         $drhUserId = $cp->getConfCP('drhUserId');
 
@@ -720,7 +720,7 @@ if ($action == 'drh_confirm_refuse') {
 
 // Si annulation de la demande:
 if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
     $cp->fetch($_GET['id']);
     $drhUserId = $cp->getConfCP('drhUserId');
     // Si statut en attente de validation et valideur ou drh = utilisateur
@@ -829,7 +829,7 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
 if ($action == 'save_substitute') {
     $substitute_id = GETPOST('substitute_user_id', 'int');
 
-    $cp = new Holiday($db);
+    $cp = new SynopsisHoliday($db);
     $cp->fetch($_GET['id']);
 
     $cpUser = new User($db);
@@ -904,7 +904,7 @@ if ($action == 'save_substitute') {
                 $actioncomm->fetch($rdv_id);
                 $actioncomm->id = null;
                 $actioncomm->fk_element = $rdv_id;
-                $actioncomm->usertodo = $substitute;
+                $actioncomm->userownerid = $substitute->id;
                 $note = $actioncomm->note;
                 $actioncomm->note = 'Remplacement de ' . $cpUser->firstname . ' ' . $cpUser->lastname . ($note ? ' - ' . $note : '');
                 if ($actioncomm->add($substitute) < 0)
@@ -951,7 +951,7 @@ if ($action == 'save_substitute') {
  */
 
 $form = new Form($db);
-$cp = new Holiday($db);
+$cp = new SynopsisHoliday($db);
 
 $listhalfday = array('morning' => $langs->trans("Morning"), "afternoon" => $langs->trans("Afternoon"));
 
@@ -1403,7 +1403,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 print '<tr>';
                 print '<td>Type de congés</td>';
                 if (!$edit) {
-                    print '<td>' . Holiday::$typesConges[$cp->type_conges] . '</td>';
+                    print '<td>' . SynopsisHoliday::$typesConges[$cp->type_conges] . '</td>';
                 } else {
                     print '<td>';
                     print '<input type="checkbox" name="is_exception" id="is_exception" style="margin-right: 10px"';

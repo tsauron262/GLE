@@ -83,8 +83,8 @@ $search_statut = GETPOST('select_statut');
  * View
  */
 
-$holiday = new Holiday($db);
-$holidaystatic = new Holiday($db);
+$holiday = new SynopsisHoliday($db);
+$holidaystatic = new SynopsisHoliday($db);
 $fuser = new User($db);
 
 // Update sold

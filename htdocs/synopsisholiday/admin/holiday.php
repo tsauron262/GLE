@@ -70,7 +70,7 @@ llxheader('', $langs->trans('TitleAdminCP'));
 $linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">' . $langs->trans("BackToModuleList") . '</a>';
 print_fiche_titre($langs->trans('ConfCP'), $linkback);
 
-$cp = new Holiday($db);
+$cp = new SynopsisHoliday($db);
 
 // Contrôle du formulaire
 if ($action == "add") {

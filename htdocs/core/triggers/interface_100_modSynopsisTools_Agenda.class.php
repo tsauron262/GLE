@@ -110,18 +110,18 @@ class InterfaceAgenda {
                     $di->fetch($object->fk_element);
                     $di->set_date_delivery($user, $object->datep, true);
 //                    $di->getExtra();
-                    if (!isset($object->usertodo->id) || !$object->usertodo->id > 0) {
+                    if (!isset($object->userownerid) || !$object->userownerid > 0) {
                         $object->fetch_userassigned();
                         foreach ($object->userassigned as $userT) {
-                            $userTt = new User($this->db);
-                            $userTt->fetch($userT['id']);
-                            @$object->usertodo = $userTt;
+                            @$object->userownerid = $userT['id'];
                         }
                     }
 
+                    $userTodo = new User($this->db);
+                    $userTodo->fetch($object->userownerid);
 
-                    if ($di->fk_user_prisencharge != $object->usertodo->id)
-                        $di->preparePrisencharge($object->usertodo);
+                    if ($di->fk_user_prisencharge != $object->userownerid)
+                        $di->preparePrisencharge($userTodo);
                     $di->update();
                     return false;
                 }

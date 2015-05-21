@@ -48,7 +48,7 @@ $action = GETPOST('action');
 
 $form = new Form($db);
 $userstatic = new User($db);
-$holiday = new Holiday($db);
+$holiday = new SynopsisHoliday($db);
 
 
 llxHeader(array(), $langs->trans('CPTitreMenu'));

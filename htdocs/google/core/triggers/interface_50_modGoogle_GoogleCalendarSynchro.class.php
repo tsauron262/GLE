@@ -119,9 +119,9 @@ class InterfaceGoogleCalendarSynchro
 		{
 			// L'utilisateur concerné est l'utilisateur affecté à l'évènement dans Dolibarr
 			// TODO : à rendre configurable ? (choix entre créateur / affecté / réalisateur)
-			if(empty($object->usertodo->id)) return 0;
+			if(empty($object->userownerid)) return 0;
 
-			$fuser->fetch($object->usertodo->id);
+			$fuser->fetch($object->userownerid);
 
                         if(!isset($fuser->conf->GOOGLE_LOGIN) || !isset($fuser->conf->GOOGLE_PASSWORD))
                             return 0;

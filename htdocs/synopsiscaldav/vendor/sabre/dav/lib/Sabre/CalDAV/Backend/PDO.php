@@ -536,7 +536,7 @@ WHERE  `email` LIKE  '".$mail."'");
 //        if (isset($tabT[0]))
 //            setElementElement("user", "idCaldav", $calendarId, $tabT[0]['d']);
 //        else
-//            addElementElement("user", "idCaldav", $object->usertodo->id, 1);
+//            addElementElement("user", "idCaldav", $object->userownerid, 1);
 //    }
 
     /**

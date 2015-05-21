@@ -361,7 +361,7 @@ function sendSms($chrono, $text) {
 
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         $smsfile = new CSMSFile($to, $fromsms, $text);
-        echo $smsfile->sendfile();
+        $return = $smsfile->sendfile();
         
         
         if(!$return)

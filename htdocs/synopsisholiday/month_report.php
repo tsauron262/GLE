@@ -45,11 +45,11 @@ if(!$user->rights->holiday->month_report) accessforbidden();
 
 $html = new Form($db);
 $htmlother = new FormOther($db);
-$holidaystatic = new Holiday($db);
+$holidaystatic = new SynopsisHoliday($db);
 
 llxHeader(array(),$langs->trans('CPTitreMenu'));
 
-$cp = new Holiday($db);
+$cp = new SynopsisHoliday($db);
 
 $month = GETPOST('month_start');
 $year = GETPOST('year_start');

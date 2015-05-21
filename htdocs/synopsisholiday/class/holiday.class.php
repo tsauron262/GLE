@@ -43,11 +43,12 @@
  */
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+require_once DOL_DOCUMENT_ROOT . '/holiday/class/holiday.class.php';
 
 /**
  * 	Class of the module paid holiday. Developed by Teclib ( http://www.teclib.com/ )
  */
-class Holiday extends CommonObject {
+class SynopsisHoliday extends Holiday {
 
     public $element = 'holiday';
     public $table_element = 'holiday';
@@ -2183,12 +2184,12 @@ class Holiday extends CommonObject {
                     if ($this->statut == 6)
                         $sql .= ", percent = -1";
                     $sql.= " WHERE id=" . $ac->id;
-                    dol_syslog("Holiday::onStatusUpdate sql=" . $sql);
+                    dol_syslog("SynopsisHoliday::onStatusUpdate sql=" . $sql);
                     if ($this->db->query($sql)) {
                         $this->db->commit();
                     } else {
                         $this->db->rollback();
-                        dol_syslog("Holiday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
+                        dol_syslog("SynopsisHoliday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
                         $check = false;
                     }
                 } else if ($result < 0) {
@@ -2204,14 +2205,14 @@ class Holiday extends CommonObject {
 //                        $this->db->commit();
 //                    } else {
 //                        $this->db->rollback();
-//                        dol_syslog("Holiday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
+//                        dol_syslog("SynopsisHoliday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
 //                    }
 //                }
             } else {
                 // Suppression:
                 $result = $ac->delete();
                 if ($result < 0) {
-                    dol_syslog("Holiday::annulation suppression de l'event fail id action : " . $this->fk_actioncomm, LOG_ERR);
+                    dol_syslog("SynopsisHoliday::annulation suppression de l'event fail id action : " . $this->fk_actioncomm, LOG_ERR);
                     $check = false;
                 }
             }
@@ -2222,7 +2223,7 @@ class Holiday extends CommonObject {
             $ac->transparency = 1;
             $ac->fk_element = $this->id;
             $ac->elementtype = $this->element;
-            $ac->usertodo = $userToDo;
+            $ac->userownerid = $userToDo->id;
 
 
             if ($fk_action)
@@ -2260,7 +2261,7 @@ class Holiday extends CommonObject {
 //                    $this->db->commit();
 //                } else {
 //                    $this->db->rollback();
-//                    dol_syslog("Holiday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
+//                    dol_syslog("SynopsisHoliday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
 //                }
 //            }
         } else if ($this->statut == 1 || $this->statut == 4 || $this->statut == 5) {

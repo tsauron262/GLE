@@ -568,7 +568,7 @@ function afficheParType($tabIdFi) {
     
     
 //hotline
-    $req = "SELECT COUNT(id) as nb, SUM(TO_SECONDS(`Date_H_Fin`) - TO_SECONDS(`Date_H_Debut`))/3600 as sum FROM `llx_synopsischrono_chrono_100` WHERE Date_H_Debut > 0 AND Date_H_Fin > 0 ";
+    $req = "SELECT COUNT(c.id) as nb, SUM(TO_SECONDS(`Date_H_Fin`) - TO_SECONDS(`Date_H_Debut`))/3600 as sum FROM `llx_synopsischrono_chrono_100` ct, llx_synopsischrono c WHERE ct.id = c.id AND Date_H_Debut > 0 AND Date_H_Fin > 0 ";
     
     if($_REQUEST['filterUser'] > 0)
         $req .= " AND `fk_user_author` = ".$_REQUEST['filterUser'];

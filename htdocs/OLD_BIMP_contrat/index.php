@@ -131,7 +131,7 @@ $js = '
 //if ($conf->contrat->enabled)
 //{
 //    $var=false;
-//    print '<form method="post" action="'.DOL_URL_ROOT.'/contrat/liste.php">';
+//    print '<form method="post" action="'.DOL_URL_ROOT.'/contrat/list.php">';
 //    print '<table class="noborder" width="100%">';
 //    print '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchAContract").'</td></tr>';
 //    print '<tr '.$bc[$var].'>';

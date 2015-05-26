@@ -499,7 +499,7 @@ if ($socid > 0)
             {
                 print '<tr class="liste_titre">';
                 print '<td colspan="4"><table width="100%" class="noborder"><tr><td>'.$langs->trans("LastContracts",($num<=$MAXLIST?"":$MAXLIST)).'</td>';
-                print '<td align="right"><a href="'.DOL_URL_ROOT.'/contrat/liste.php?socid='.$objsoc->id.'">'.$langs->trans("AllContracts").' ('.$num.')</a></td></tr></table></td>';
+                print '<td align="right"><a href="'.DOL_URL_ROOT.'/contrat/list.php?socid='.$objsoc->id.'">'.$langs->trans("AllContracts").' ('.$num.')</a></td></tr></table></td>';
                 print '</tr>';
             }
             $i = 0;

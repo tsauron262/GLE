@@ -5,7 +5,7 @@
  */
 
 /**
-        \file       htdocs/contrat/liste.php
+        \file       htdocs/contrat/list.php
         \ingroup    contrat
         \brief      Page liste des contrats
         \version    $Id: liste.php,v 1.29 2008/04/07 17:16:46 eldy Exp $

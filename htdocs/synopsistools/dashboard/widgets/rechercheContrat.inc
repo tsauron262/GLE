@@ -15,7 +15,7 @@ function widget_rechercheContrat() {
     if ($conf->contrat->enabled && $user->rights->contrat->lire)
     {
       $var=false;
-      $table .= '<form method="post" action="'.DOL_URL_ROOT.'/contrat/liste.php">';
+      $table .= '<form method="post" action="'.DOL_URL_ROOT.'/contrat/list.php">';
       $table .=  '<table class="noborder" width="100%">';
       $table .=  '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchAContract").'</td></tr>';
       $table .=  '<tr class="impair">';

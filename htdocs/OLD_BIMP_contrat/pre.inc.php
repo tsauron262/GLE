@@ -51,7 +51,7 @@ function llxHeader($head = "", $title="", $help_url='', $noscript = false)
 
   $menu->add(DOL_URL_ROOT."/contrat/index.php", $langs->trans("Contracts"));
   $menu->add_submenu(DOL_URL_ROOT."/societe.php", $langs->trans("NewContract"));
-  $menu->add_submenu(DOL_URL_ROOT."/contrat/liste.php", $langs->trans("List"));
+  $menu->add_submenu(DOL_URL_ROOT."/contrat/list.php", $langs->trans("List"));
   $menu->add_submenu(DOL_URL_ROOT."/contrat/services.php", $langs->trans("MenuServices"));
   $menu->add_submenu(DOL_URL_ROOT."/contrat/services.php?mode=0", $langs->trans("MenuInactiveServices"), 2 , true);
   $menu->add_submenu(DOL_URL_ROOT."/contrat/services.php?mode=4", $langs->trans("MenuRunningServices"), 2 , true);

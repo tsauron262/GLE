@@ -345,7 +345,7 @@ if ($sql) {
 //            if ($db->fetch_object($sql1))
 //                $hasRev = true;
 //            if ($res1->cnt > 0) $hasRev = true;
-            $hasRev = ($res->orig_ref && $res->orig_ref != "");
+            $hasRev = ($res->orig_ref && $res->orig_ref != "" && $res->orig_ref != $res->ref);
             $arr[] = ($hasRev ? '<div class="hasRev">1</div>' : '<div class="hasRev">0</div>');
         } else {
             $arr[] = ('<div class="hasRev">0</div>');

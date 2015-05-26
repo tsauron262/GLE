@@ -1,5 +1,8 @@
 <?php
 $expirer = true;
 
-require("../contrat/liste.php");
+$_POST["sortfield"] = "date_fin_validite";
+$_POST["sortorder"] = "ASC";
+
+require("../contrat/list.php");
 

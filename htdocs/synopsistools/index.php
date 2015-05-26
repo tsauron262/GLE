@@ -60,42 +60,42 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 
 
 
-if (isset($_REQUEST['propalMail'])) {
-    $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `llx_propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918 AND total_ht != 382.78");
-    $text = array();
-    while ($ligne = $db->fetch_object($sql)) {
-        $user = 0;
-        $sql2 = $db->query("SELECT * FROM `llx_synopsischrono_view_105` WHERE propalid = " . $ligne->fk_propal);
-        if ($db->num_rows($sql2) > 0) {
-            $ligne2 = $db->fetch_object($sql2);
-            $user = $ligne2->Technicien;
-//            echo "<br/>oooooooooo";
-        }
-        $prop = new Propal($db);
-        $prop->fetch($ligne->fk_propal);
-        if($prop->statut != 3){
-        if (!$user > 0) {
-//            echo $ligne->fk_propal.$prop->getNomUrl(1);
-            $user = $prop->user_author_id;
-        }
-
-//        echo "<br/>" . $user . "|";
-        -
-        $userObj = new User($db);
-        $userObj->fetch($user);
-        $str = "Suite à un problème technique certaines lignes de cette propal ne sont plus juste.<br/>Merci de vérifier l'objet en question.<br/>" . $prop->getNomUrl(1) . "<br/><br/>";
-        if (isset($text[$user]))
-            $text[$user][1] = $text[$user][1].$str;
-        else
-            $text[$user] = array($userObj, $str);
-        }
-    }
-    foreach ($text as $id => $tab) {
-        echo $tab[0]->email . "Problème technique GLE" . $tab[1];
-        if($_REQUEST['propalMail'] == "mail")
-        mailSyn2("Problème technique GLE", $tab[0]->email.",jc.cannet@bimp.fr", "", $tab[1]);
-    }
-}
+//if (isset($_REQUEST['propalMail'])) {
+//    $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `llx_propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918 AND total_ht != 382.78");
+//    $text = array();
+//    while ($ligne = $db->fetch_object($sql)) {
+//        $user = 0;
+//        $sql2 = $db->query("SELECT * FROM `llx_synopsischrono_view_105` WHERE propalid = " . $ligne->fk_propal);
+//        if ($db->num_rows($sql2) > 0) {
+//            $ligne2 = $db->fetch_object($sql2);
+//            $user = $ligne2->Technicien;
+////            echo "<br/>oooooooooo";
+//        }
+//        $prop = new Propal($db);
+//        $prop->fetch($ligne->fk_propal);
+//        if($prop->statut != 3){
+//        if (!$user > 0) {
+////            echo $ligne->fk_propal.$prop->getNomUrl(1);
+//            $user = $prop->user_author_id;
+//        }
+//
+////        echo "<br/>" . $user . "|";
+//        -
+//        $userObj = new User($db);
+//        $userObj->fetch($user);
+//        $str = "Suite à un problème technique certaines lignes de cette propal ne sont plus juste.<br/>Merci de vérifier l'objet en question.<br/>" . $prop->getNomUrl(1) . "<br/><br/>";
+//        if (isset($text[$user]))
+//            $text[$user][1] = $text[$user][1].$str;
+//        else
+//            $text[$user] = array($userObj, $str);
+//        }
+//    }
+//    foreach ($text as $id => $tab) {
+//        echo $tab[0]->email . "Problème technique GLE" . $tab[1];
+//        if($_REQUEST['propalMail'] == "mail")
+//        mailSyn2("Problème technique GLE", $tab[0]->email.",jc.cannet@bimp.fr", "", $tab[1]);
+//    }
+//}
 
 if(isset($_REQUEST['lienFactProp'])){
     $sql = $db->query("SELECT f.* FROM llx_facture f LEFT JOIN llx_element_element e ON `sourcetype` LIKE  'propal'

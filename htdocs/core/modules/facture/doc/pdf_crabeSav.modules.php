@@ -249,7 +249,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                 
                                 $tabT = getElementElement("propal", "facture", null, $object->id);
                                 if(count($tabT) > 0){
-                                $result = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_view_105 WHERE propalid = ".$tabT[0]['s']);
+                                $result = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_chrono_105 ct, ".MAIN_DB_PREFIX."synopsischrono c WHERE ct.id = c.id AND propalid = ".$tabT[0]['s']);
                                 if($this->db->num_rows($result) > 0 ){
                                     $ligne = $this->db->fetch_object($result);
                                     if(isset($ligne->Centre)){
@@ -262,7 +262,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                             $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
                                         }
                                         $req = "SELECT N__Serie 
-FROM  `llx_element_element`, llx_synopsischrono_view_101 v 
+FROM  `llx_element_element`, llx_synopsischrono_chrono_101 v 
 WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."
 AND  `targettype` LIKE  'productCli'";
                                         $result2 = $this->db->query($req);

@@ -340,11 +340,22 @@ else {
     echo "Quelque chose c'est mal passé : ";
 }
 
+function testNumSms($to){
+        $to = str_replace(" ", "", $to);
+        if ($to == "" || (stripos($to, "06") !== 0 && stripos($to, "+336") !== 0))
+            return 0;
+        return 1;
+}
+
 function sendSms($chrono, $text) {
     if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms']) {
-        if (is_object($chrono->contact) && $chrono->contact->phone_mobile != "")
+        if (is_object($chrono->contact) && testNumSms($chrono->contact->phone_mobile))
             $to = $chrono->contact->phone_mobile;
-        elseif (is_object($chrono->societe) && $chrono->societe->phone != "")
+        elseif (is_object($chrono->contact) && testNumSms($chrono->contact->phone_pro))
+            $to = $chrono->contact->phone_pro;
+        elseif (is_object($chrono->contact) && testNumSms($chrono->contact->phone_perso))
+            $to = $chrono->contact->phone_perso;
+        elseif (is_object($chrono->societe) && testNumSms($chrono->societe->phone))
             $to = $chrono->societe->phone;
         $fromsms = urlencode('SAV BIMP');
 

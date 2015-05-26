@@ -44,7 +44,7 @@
 			$result = $this->sendRequest($donnees);
 			if($result->code==1) {
 				$this->error = $result->details;
-				dol_syslog(get_class($this)."::SmsSend ".print_r($result->details, true), LOG_ERR);
+				dol_syslog(get_class($this)."::SmsSend ".print_r($result, true), LOG_ERR);
 				return 0;
 			} else {
 				return 1;

@@ -106,7 +106,21 @@ if (!empty($search_ref_supplier)) {
 if ($sall) {
     $sql .= natural_search(array('s.nom', 'cd.label', 'cd.description'), $sall);
 }
+
+
+/*mod drsi */
+if($expirer)
+$sql.= " AND cd.statut < 5";
+/*f mod drsi */
+
 $sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_supplier, s.nom, s.rowid";
+
+/*mod drsi */
+if($expirer)
+$sql.= " HAVING nb_late > 0";
+/*f mod drsi */
+
+
 $sql.= $db->order($sortfield,$sortorder);
 $sql.= $db->plimit($conf->liste_limit + 1, $offset);
 
@@ -161,7 +175,7 @@ if ($resql)
         $obj = $db->fetch_object($resql);
         $var=!$var;
         print '<tr '.$bc[$var].'>';
-        print '<td class="nowrap"><a href="card.php?id='.$obj->cid.'">';
+        print '<td class="nowrap"><a href="'./*mod drsi*/ DOL_URL_ROOT.'/contrat/'./*fmoddrsi*/'card.php?id='.$obj->cid.'">';
         print img_object($langs->trans("ShowContract"),"contract").' '.(isset($obj->ref) ? $obj->ref : $obj->cid) .'</a>';
         if ($obj->nb_late) print img_warning($langs->trans("Late"));
         print '</td>';

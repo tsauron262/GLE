@@ -63,6 +63,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
     }
 
     public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null) {
+        echo "Momantanement indisponible";return "";
         global $user, $tabVal;
         $tabVal = array();
 

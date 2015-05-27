@@ -244,7 +244,7 @@ switch ($action)
             $hasRev = false;
             if ($chrono->model->hasRevision == 1 )
             {
-                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE revision IS NOT NULL AND  orig_ref = '".$chrono->ref."'";
+                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE revision IS NOT NULL AND  orig_ref = '".$chrono->ref."' AND ref != orig_ref";
                 $sql = $db->query($requete);
                 if ($db->num_rows($sql) > 0) $hasRev = true;
             }

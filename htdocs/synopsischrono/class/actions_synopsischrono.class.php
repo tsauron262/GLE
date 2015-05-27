@@ -169,7 +169,7 @@ class ActionsSynopsischrono {
                 $nb = $tabResult[$ligne->valeur];
 
                 $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
-                $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nb . " : " . $ligne->label . "</a>";
+                $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->valeur) . $hrefFin . "'>" . $nb . " : " . $ligne->label . "</a>";
                 $return .= "</span><br/>";
             }
 

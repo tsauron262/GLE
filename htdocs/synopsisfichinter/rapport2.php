@@ -657,6 +657,10 @@ function afficheParType($tabIdFi) {
 
 function testFi($tabIdFi, $tabResult, $alert = true) {
     global $total_ht, $additionP, $db;
+    
+    if(count($tabIdFi) == 0)
+        return array();
+    
     /*  test */
     $additionPT = price($total_ht - $additionP - $tabResult[0][2]);
     if ($additionPT != 0 && $alert)

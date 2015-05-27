@@ -356,14 +356,14 @@ if (isset($_POST["form2"])) {
 
     $contrat_facture_exist = false;
     if ($valfinance->contrat_id > 0) {
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $ctr = new Contrat($db);
         $ctr->fetch($valfinance->contrat_id);
         if ($ctr->id)
             $contrat_facture_exist = true;
     }
     if (!$contrat_facture_exist) {
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $contract = new Contrat($db);
         //print_r (convertirDate($_POST["datesign"],false));
         $contract->date_contrat = convertirDate($_POST["datesign"], false);
@@ -423,8 +423,8 @@ if (isset($_POST["form2"])) {
         addElementElement("propal", "facture", $object->id, $facture->id);
     }
 }
-
-if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret && ($valfinance->montantAF - $totG) > 1) {
+$dif=$valfinance->montantAF + $valfinance->VR + $valfinance->pret - $totG;
+if ($dif>=1 || $dif<=-1){
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";
 }
 
@@ -520,12 +520,12 @@ if ($user->rights->synopsisFinanc->write) {
         echo "<input id='taux' type='text' name='taux' value='" . $tauxInteret . "'/>%</td>";
         echo '</tr>';
 
-        echo '<input type="hidden" id="Bcache" name="Bcache" value=""/>';
+        echo '<input type="hidden" id="Bcache" name="Bcache" value="'.$banque.'"/>';
         echo '<tr>';
     }
     $contrat_exist = false;
     if ($valfinance->contrat_id > 0) {
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $ctr = new Contrat($db);
         $ctr->fetch($valfinance->contrat_id);
         if ($ctr->id)

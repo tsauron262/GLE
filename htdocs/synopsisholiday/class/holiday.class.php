@@ -751,9 +751,13 @@ class SynopsisHoliday extends Holiday {
 
         $label = $langs->trans("Show") . ': ' . $this->ref ;
         
-        $userT = new User($this->db);
-        $userT->fetch($this->fk_user);
-        $userStr = " - ".$userT->getFullName($langs);
+        $userStr = "";
+        
+        if($this->fk_user){
+            $userT = new User($this->db);
+            $userT->fetch($this->fk_user);
+            $userStr = " - ".$userT->getFullName($langs);
+        }
 
         if ($withpicto)
             $result.=($lien . img_object($label, $picto) . $lienfin);

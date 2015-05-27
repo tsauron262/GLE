@@ -203,7 +203,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
     }
 
-    if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Résolution']['value'] == "") {
+    if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Resolution']['value'] == "") {
         header("Location:card.php?id=" . $_GET['id'] . "&msg=" . urlencode("Veuillez compléter  résolution svp!"));
         die;
     }

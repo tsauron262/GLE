@@ -231,12 +231,11 @@ class modSynopsisFinanc extends DolibarrModules
   KEY `Finance_FK_modify` (`user_modify`)
 )";
     
-    $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES
-( 'azurFinanc', 1, 'propal', 'Proposotion de financement', NULL);";
-    
-    $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."c_type_contact` (`rowid`, `element`, `source`, `code`, `libelle`, `active`, `module`) VALUES ('780', 'propal', 'external', 'rapp', 'Rapporteur', '1', 'synopsisFinanc');";
+    $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'azurFinanc', 1, 'propal', 'Proposotion de financement', NULL);";
     
     $sql[]="INSERT INTO  ".MAIN_DB_PREFIX."document_model (`nom` ,`entity` ,`type` ,`libelle` ,`description`) VALUES (  'contratFinanc',  '1',  'synopsiscontrat',  'Financement', NULL);";
+    
+    $sql[] = "INSERT INTO ".MAIN_DB_PREFIX."c_type_contact (`rowid`, `element`, `source`, `code`, `libelle`, `active`, `module`) VALUES ('780', 'propal', 'external', 'rapp', 'Rapporteur', '1', 'synopsisFinanc');";
     
     return $this->_init($sql);
   }
@@ -248,6 +247,13 @@ class modSynopsisFinanc extends DolibarrModules
   function remove()
   {
       $sql = array();
+      
+      $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azurFinanc';";
+      
+      $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'contratFinanc';";
+      
+      $sql[]="DELETE FROM ".MAIN_DB_PREFIX."c_type_contact WHERE code=780;";
+      
     return $this->_remove($sql);
   }
 }

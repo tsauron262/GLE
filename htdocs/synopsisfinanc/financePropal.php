@@ -520,7 +520,7 @@ if ($user->rights->synopsisFinanc->write) {
         echo "<input id='taux' type='text' name='taux' value='" . $tauxInteret . "'/>%</td>";
         echo '</tr>';
 
-        echo '<input type="hidden" id="Bcache" name="Bcache" value=""/>';
+        echo '<input type="hidden" id="Bcache" name="Bcache" value="'.$banque.'"/>';
         echo '<tr>';
     }
     $contrat_exist = false;

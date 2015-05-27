@@ -232,7 +232,7 @@ class modSynopsisFinanc extends DolibarrModules
 )";
     
     $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES
-(2, 'azurFinanc', 1, 'propal', 'Proposotion de financement', NULL);";
+(null, 'azurFinanc', 1, 'propal', 'Proposotion de financement', NULL);";
     
     $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."c_type_contact` (`rowid`, `element`, `source`, `code`, `libelle`, `active`, `module`) VALUES ('780', 'propal', 'external', 'rapp', 'Rapporteur', '1', 'synopsisFinanc');";
     

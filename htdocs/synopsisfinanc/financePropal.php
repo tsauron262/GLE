@@ -398,7 +398,8 @@ if (isset($_POST["form2"])) {
         include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
         $facture = new Facture($db);
 
-        $facture->date = convertirDate($_POST["datesign"], false);
+        $facture->date = $db->idate(convertirDate($_POST["datesign"], false));
+        $facture->cond_reglement_id=1;
 
         if ($valfinance->banque != "") {
             $testBanque = $db->query('SELECT * FROM ' . MAIN_DB_PREFIX . 'societe WHERE nom like "%' . $valfinance->banque . '%"');

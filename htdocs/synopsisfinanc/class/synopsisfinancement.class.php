@@ -90,7 +90,7 @@ class Synopsisfinancement extends CommonObject {
         } else {
             $this->commFM2 = $this->montantAF2 * (($this->commF) / 100);
         }
-        echo 'commF='.$this->commFM1."\n";
+//        echo 'commF='.$this->commFM1."\n";
 
         $this->emprunt1 = $this->montantAF1 + $this->commCM1 + $this->commFM1;
         $this->emprunt2 = $this->montantAF2 + $this->commCM2 + $this->commFM2;
@@ -117,7 +117,7 @@ class Synopsisfinancement extends CommonObject {
             }
             $this->pret1 = $this->pret1 + $this->commCP1 + $this->commFP1;
             $this->pret2 = $this->pret2 + $this->commCP2 + $this->commFP2;
-            echo $this->commFP1." , ".$this->commFP2;
+//            echo $this->commFP1." , ".$this->commFP2;
         }
 
 

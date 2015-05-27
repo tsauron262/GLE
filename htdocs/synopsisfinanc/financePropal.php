@@ -525,7 +525,7 @@ if ($user->rights->synopsisFinanc->write) {
     }
     $contrat_exist = false;
     if ($valfinance->contrat_id > 0) {
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $ctr = new Contrat($db);
         $ctr->fetch($valfinance->contrat_id);
         if ($ctr->id)

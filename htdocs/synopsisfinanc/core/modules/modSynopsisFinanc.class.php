@@ -205,7 +205,7 @@ class modSynopsisFinanc extends DolibarrModules
 //            . "CONSTRAINT Finance_FK_modify FOREIGN KEY (user_modify) REFERENCES ".MAIN_DB_PREFIX."user (rowid)"
 //        . ");";
     $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisfinancement` (
-`rowid` int(11) NOT NULL,
+`rowid` int(11) NOT NULL AUTO_INCREMENT,
   `user_create` int(11) NOT NULL,
   `user_modify` int(11) DEFAULT NULL,
   `fk_propal` int(11) NOT NULL,

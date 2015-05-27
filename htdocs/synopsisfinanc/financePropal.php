@@ -424,7 +424,7 @@ if (isset($_POST["form2"])) {
     }
 }
 
-if (($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret && ($valfinance->montantAF - $totG) > 1) {
+if ((($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret && (($valfinance->montantAF - $totG) >= 1) ||  ($valfinance->montantAF - $totG) <= -1)){
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";
 }
 

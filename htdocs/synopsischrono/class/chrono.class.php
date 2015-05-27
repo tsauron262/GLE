@@ -999,7 +999,7 @@ class Chrono extends CommonObject {
             if (is_numeric($keyId))
                 $keyId = $this->idChampToNom($keyId);
 
-            $tabUpdate[] = $keyId . " = '" . $value . "'";
+            $tabUpdate[] = $keyId . " = '" . addslashes($value) . "'";
 
 
 

@@ -171,7 +171,7 @@ if ($_REQUEST['type'] > 0)
     $wh .=  " AND " . $searchField . " ".$oper." '".$searchString."'";
 }
 
-$wh .= " AND revision is NULL ";
+$wh .= " AND (revision is NULL || revision = 0) ";
 
 
 //if(isset($_REQUEST['filtre']))

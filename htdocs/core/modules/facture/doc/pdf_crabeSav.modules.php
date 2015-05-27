@@ -254,7 +254,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                     $ligne = $this->db->fetch_object($result);
                                     if(isset($ligne->Centre)){
                                         global $tabCentre;
-                                        $centre = $tabCentre[$ligne->CentreVal];
+//                                        $centre = $tabCentre[$ligne->CentreVal];
                                         $tech = "";
                                         if (isset($ligne->Technicien) && $ligne->Technicien > 0) {
                                             $userT = new User($this->db);

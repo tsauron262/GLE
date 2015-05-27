@@ -70,9 +70,9 @@ if ($_REQUEST['FiltreCentre'] != "") {
     if ($_REQUEST['FiltreCentre'] == "Tous") {
 
         $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
-        $wh1 .= " AND CentreVal IN ('" . $centre . "')";
+        $wh1 .= " AND Centre IN ('" . $centre . "')";
     } else
-        $wh1 .= " AND CentreVal LIKE '" . $_REQUEST['FiltreCentre'] . "'";
+        $wh1 .= " AND Centre LIKE '" . $_REQUEST['FiltreCentre'] . "'";
 }
 
 //die($wh1."ll".$_REQUEST['FiltreCentre']);

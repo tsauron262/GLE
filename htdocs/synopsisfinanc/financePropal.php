@@ -356,14 +356,14 @@ if (isset($_POST["form2"])) {
 
     $contrat_facture_exist = false;
     if ($valfinance->contrat_id > 0) {
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $ctr = new Contrat($db);
         $ctr->fetch($valfinance->contrat_id);
         if ($ctr->id)
             $contrat_facture_exist = true;
     }
     if (!$contrat_facture_exist) {
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/Contrat.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $contract = new Contrat($db);
         //print_r (convertirDate($_POST["datesign"],false));
         $contract->date_contrat = convertirDate($_POST["datesign"], false);

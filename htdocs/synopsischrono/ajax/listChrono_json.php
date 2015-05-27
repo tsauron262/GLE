@@ -174,11 +174,14 @@ if ($_REQUEST['type'] > 0)
 $wh .= " AND revision is NULL ";
 
 
-//$_REQUEST['filtre'] = "C02H21L8DHJQ";
+//if(isset($_REQUEST['filtre']))
+//    $wh .= "AND (id IN (SELECT chrono_refid 
+//FROM  `llx_synopsischrono_value` 
+//WHERE  `value` LIKE  '%".$_REQUEST['filtre']."%') OR ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%' OR nom LIKE  '%".$_REQUEST['filtre']."%') ";
+
+
 if(isset($_REQUEST['filtre']))
-    $wh .= "AND (id IN (SELECT chrono_refid 
-FROM  `llx_synopsischrono_value` 
-WHERE  `value` LIKE  '%".$_REQUEST['filtre']."%') OR ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%' OR nom LIKE  '%".$_REQUEST['filtre']."%') ";
+    $wh .= "AND (ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%' OR nom LIKE  '%".$_REQUEST['filtre']."%') ";
 
 switch ($action)
 {

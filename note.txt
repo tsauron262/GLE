@@ -1332,3 +1332,22 @@ duration_effective,
 null as planned_workload,
 progress, level as priority, fk_user_creat,
 null as fk_user_valid, statut as fk_statut, '' as note_private, '' as note_public, 1 as rang, '' as model_pdf FROM llx_Synopsis_projet_task)
+
+
+
+
+Voir piece recue 
+
+A gauche filtre
+
+
+DATE fin now   "getDate" of null
+
+recherche
+
+
+voir solde compte en plus
+
+
+voir GRH    groupe  d'utilisateur   
+voir annulation congés annulé agenda et annulé remplacement ds agenda     

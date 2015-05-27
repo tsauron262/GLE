@@ -423,8 +423,8 @@ if (isset($_POST["form2"])) {
         addElementElement("propal", "facture", $object->id, $facture->id);
     }
 }
-
-if ((($valfinance->montantAF + $valfinance->VR + $valfinance->pret) != $totG && $totG != $montantAF + $VR + $pret && (($valfinance->montantAF - $totG) >= 1) ||  ($valfinance->montantAF - $totG) <= -1)){
+$dif=$valfinance->montantAF + $valfinance->VR + $valfinance->pret - $totG;
+if ($dif>=1 || $dif<=-1){
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";
 }
 

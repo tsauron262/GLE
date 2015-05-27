@@ -113,7 +113,7 @@ class ActionsSynopsischrono {
                     if ($nb == "")
                         $nb = "0";
                     $nbStr = ($nb < 10 ? "&nbsp;&nbsp;" . $nb : ($nb < 100 ? "&nbsp;" . $nb : $nb));
-                    $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
+                    $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->valeur) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
                     $return .= "</span><br/>";
                 }
                 $return .= '</div>';

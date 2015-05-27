@@ -46,7 +46,7 @@ function bouttonEtatSav($idChrono) {
     $chrono->loadObject = false;
     $chrono->fetch($idChrono);
     $chrono->getValues();
-    $etatSav = $chrono->values[1056];
+    $etatSav = $chrono->values['Etat'];
     if ($chrono->propalid) {
 //        require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
 //        $propal = new Propal($db);

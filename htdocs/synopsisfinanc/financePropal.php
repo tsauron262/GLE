@@ -394,6 +394,7 @@ if (isset($_POST["form2"])) {
 
         addElementElement("propal", "contrat", $object->id, $contract->id);
 
+        $contract->validate($user);
 
         include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
         $facture = new Facture($db);
@@ -417,7 +418,7 @@ if (isset($_POST["form2"])) {
         $valfinance->facture_id = $facture->id;
         $valfinance->update($user);
 
-        $facture->addline("Commission financière du contrat N°".$contract->ref.":", $valfinance->commFP1 + $valfinance->commFP2+$valfinance->commFM1+$valfinance->commFM2, 1, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
+        $facture->addline("Commission financière du contrat ".$contract->ref.":", $valfinance->commFP1 + $valfinance->commFP2+$valfinance->commFM1+$valfinance->commFM2, 1, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
 
 
         addElementElement("propal", "facture", $object->id, $facture->id);

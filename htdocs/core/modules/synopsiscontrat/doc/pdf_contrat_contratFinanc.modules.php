@@ -192,9 +192,9 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $contrat->fetch_lines(true);
             }
 
-            $contrat->societe=new Societe($this->db);
+            $contrat->societe = new Societe($this->db);
             $contrat->societe->fetch($contrat->socid);
-            
+
             // Definition de $dir et $file
             if ($contrat->specimen) {
                 $dir = $conf->synopsiscontrat->dir_output;
@@ -278,7 +278,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute + 6);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100), 6, "La société: " . $contrat->societe->nom, 0, 'L');
                 $pdf->SetXY($this->marge_gauche + 60, $this->marge_haute + 6);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $contrat->societe->forme_juridique . (($contrat->societe->capital>0)?" au capital de " . price($contrat->societe->capital) . " €" : "") , 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $contrat->societe->forme_juridique . (($contrat->societe->capital > 0) ? " au capital de " . price($contrat->societe->capital) . " €" : ""), 0, 'L');
                 $pdf->setX($this->marge_gauche);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Immatriculé sous le Numéro RCS: " . $contrat->societe->idprof4, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Dont le siège sociale est situé au " . $contrat->societe->address . " " . $contrat->societe->zip . " " . $contrat->societe->town, 0, 'L');
@@ -310,7 +310,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
                 //print_r($this->emetteur);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital>0)? " au capital de " . price($this->emetteur->capital) . " €" : "" ). " dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital > 0) ? " au capital de " . price($this->emetteur->capital) . " €" : "" ) . " dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
                 $contact = $contrat->Liste_Contact(-1, "internal");
                 $nomC = "";
                 foreach ($contact as $key => $value) {
@@ -382,7 +382,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                         $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
                         $X = $this->marge_gauche + $W;
                         $pdf->setX($X);
-                        $pdf->Cell($W * 7, 6, dol_trunc($prod->ref . " - " . $prod->libelle . " - " . $obj->desc, 40), 1, NULL, 'L', TRUE);
+                        $pdf->Cell($W * 7, 6, dol_trunc($prod->ref . " - " . $prod->libelle . " - " . $obj->desc, 49), 1, NULL, 'L', TRUE);
                         $X = $this->marge_gauche + $W * 8;
                         $pdf->setX($X);
                         if ($M_N == true) {
@@ -643,58 +643,58 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $pdf->setFont('', 'B', 16);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "CONDITION D'EVOLUTION", 1, 'C', true, 1, null, null, null, null, null, null, null, 'M');
 
-                    $y=$pdf->GetY()+6;
+                    $y = $pdf->GetY() + 6;
                     $pdf->SetXY($x, $y);
                     $pdf->setFont('', '', 12);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "CONTRAT N°" . $this->contrat->ref . " CONCLUE ENTRE:", 0, 'L', false, 1, null, null, null, null, null, null, null, 'M');
                     //le locataire
-                    $y=$pdf->GetY()+6;
+                    $y = $pdf->GetY() + 6;
                     $pdf->SetXY($x, $y);
                     $pdf->setFont('', 'B', 9);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "   LE LOCATAIRE", 1, 'L', false, 1, null, null, null, null, null, null, null, 'M');
                     //sa description
-                    $y=$pdf->GetY();
+                    $y = $pdf->GetY();
                     $pdf->SetXY($x, $y);
                     $pdf->setFont('', '', 8);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6,"     ". $contrat->societe->nom . "\n     " . $contrat->societe->address . "\n\n     " . $contrat->societe->zip . "     " . $contrat->societe->town . "\n     " . "N° RCS: " . $contrat->societe->idprof4, 1, 'L', false, 1);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "     " . $contrat->societe->nom . "\n     " . $contrat->societe->address . "\n\n     " . $contrat->societe->zip . "     " . $contrat->societe->town . "\n     " . "N° RCS: " . $contrat->societe->idprof4, 1, 'L', false, 1);
 
-                    $y=$pdf->GetY()+6;
+                    $y = $pdf->GetY() + 6;
                     $pdf->setFont('', 'B', 9);
                     $pdf->SetXY($x, $y);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "   LE LOUEUR", 1, 'L', false, 1, null, null, true, 0, false, true, 0, 'M');
-                    
-                    $y=$pdf->GetY();
+
+                    $y = $pdf->GetY();
                     $pdf->SetXY($x, $y);
                     $pdf->setFont('', '', 8);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6,"     ". $this->emetteur->name . "\n     " . $this->emetteur->address . "\n\n     " . $this->emetteur->zip . "     " . $this->emetteur->town . "\n     " . "N° RCS: " . $this->emetteur->idprof4, 1, 'L', false, 1);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "     " . $this->emetteur->name . "\n     " . $this->emetteur->address . "\n\n     " . $this->emetteur->zip . "     " . $this->emetteur->town . "\n     " . "N° RCS: " . $this->emetteur->idprof4, 1, 'L', false, 1);
 
                     $pdf->setFont('', '', 6.5);
-                    $y=$pdf->GetY()+6;
+                    $y = $pdf->GetY() + 6;
                     $pdf->SetXY($x, $y);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 1 – La présente convention a pour but de définir les conditions commerciales et d’évolution des matériels informatiques dont les spécificités figurent aux conditions particulières de l’ensemble des contrats de location conclus entre le locataire et le loueur.\n", 0, 'J');
 
-                    $y=$pdf->GetY()+2;
+                    $y = $pdf->GetY() + 2;
                     $pdf->SetXY($x, $y);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 2 – Ces conditions d’évolutions sont rattachées exclusivement aux contrats de location dits ‘’ taux O%’’ et leurs évolutions. En cas d’annulation ou de remplacement desdits contrats, ces conditions commerciales seront nulles et non avenues. Ces conditions ne peuvent en aucun cas remettre en cause l’ensemble des conditions générales et particulières du contrat de location.\n", 0, 'J');
 
-                    $y=$pdf->GetY()+2;
+                    $y = $pdf->GetY() + 2;
                     $pdf->SetXY($x, $y);
                     //die("test functuon".$this->ConvNumberLetter($valfinance->duree,0,0));
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 3 – A l’issue d’une période irrévocable, sauf accord écrit entre les deux parties, de " . $this->ConvNumberLetter($valfinance->duree, 0, 0) . " mois et au plus tard au " . $this->ConvNumberLetter($valfinance->duree, 0, 0) . "-ième mois de location, la société " . $this->emetteur->name . " offrira la possibilité au locataire de faire évoluer l’ensemble des équipements informatiques objet du présent contrat.\nCette modification se matérialisera par la mise en place d’un nouveau contrat dont la durée et le loyer seront identiques au présent contrat, si toutefois le périmètre informatique et/ou financier reste(nt) constant(s).\nSi le nombre de matériel augmente ou si le locataire décide le changement d’architecture de son informatique, le loyer ne pourra être maintenu constant, et sera calculé proportionnellement aux adjonctions rendues nécessaires.\nLa modification s’effectuera soit par remplacement du matériel soit par adjonction de nouveau matériel quand cela est possible.\nLe choix du constructeur du nouveau matériel sera laissé au locataire il devra toutefois faire partie des constructeurs validés par le loueur.\n", 0, 'J');
                     $pdf->setFont('', 'UI', 6.5);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "Il est expressément entendu entre les parties que le fruit de la revente du matériel « sortant » du contrat effacera les loyers restant à régler.\n", 0, 'L');
-                    $y=$pdf->GetY()+2;
+                    $y = $pdf->GetY() + 2;
                     $pdf->SetXY($x, $y);
                     $pdf->setFont('', '', 6.5);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 4 – La modification du matériel devra toutefois avoir reçue préalablement l’accord du comité des engagements financiers.\nAprès acceptation du comité, " . $this->emetteur->name . " adressera par écrit une proposition d’évolution des équipements informatiques objet du présent contrat. A compter de la réception de cette proposition le locataire disposera d’un délai de deux mois pour donner son accord à ÉPHÉSUS FINANCES"/* <- se renseigner auprès de patricia sur ce nom */ . ", passé ce délai si le locataire refuse les évolutions, le présent contrat se poursuivra jusqu'à son terme sans que le locataire ne puisse se prévaloir de l’absence d’évolution pour ne pas respecter ses obligations contractuelles.\n", 0, 'J');
-                    $y=$pdf->GetY()+2;
+                    $y = $pdf->GetY() + 2;
                     $pdf->SetXY($x, $y);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 5 – A tous moments le locataire peut mettre fin au présent contrat suivant les conditions générales et l’article 11 du présent contrat. Toutefois si celle-ci intervient après une période irrévocable de " . $valfinance->duree . " mois " . $this->emetteur->name . " s’engage à reverser le fruit de la vente du matériel informatique déduction faite des frais de re-commercialisation s’élevant à 10% du montant du prix d’origine du matériel. Le locataire s’engage quant à lui à respecter ses obligations contractuelles.\n", 0, 'J');
                     $pdf->setFont('', 'UI', 6.5);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "Si le locataire décide de ne pas bénéficier de sa possibilité d’évolution et mène son contrat au terme, le montant de rachat du dit matériel sera de 15,00 (quinze euros) au profit du partenaire informatique du locataire.\n", 0, 'J');
                     $pdf->setFont('', '', 6.5);
 
-                    $y=$pdf->GetY()+6;
+                    $y = $pdf->GetY() + 6;
                     $pdf->SetXY($x, $y);
                     $w = ($this->page_largeur - $this->marge_gauche - $this->marge_doite) / 2;
                     $pdf->setFont('', 'B', 9);
@@ -705,7 +705,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $y = 280;
                     $pdf->SetXY($x, $y);
                     $pdf->SetTextColor(130, 130, 130);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, $this->emetteur->address . " - " . $this->emetteur->zip . " " . $this->emetteur->town . " - tel: " . $this->emetteur->phone . "\n" . " " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital>0)? " au Capital de " . price($this->emetteur->capital)." Euros" : "") . " - N° SIRET: " . $this->emetteur->idprof2 . " - APE: " . $this->emetteur->idprof3, 0, 'C');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, $this->emetteur->address . " - " . $this->emetteur->zip . " " . $this->emetteur->town . " - tel: " . $this->emetteur->phone . "\n" . " " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital > 0) ? " au Capital de " . price($this->emetteur->capital) . " Euros" : "") . " - N° SIRET: " . $this->emetteur->idprof2 . " - APE: " . $this->emetteur->idprof3, 0, 'C');
 
                     if (method_exists($pdf, 'AliasNbPages'))
                         $pdf->AliasNbPages();

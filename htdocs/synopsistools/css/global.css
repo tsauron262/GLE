@@ -310,7 +310,7 @@ span.timePage {
 
 .red, tr.red td.ui-widget-content, tr.red td.ui-widget-content a{
     color: white;
-    background-color: #BF0000;
+    background-color: #BF0000!important;
     background-image: none;
 }
 

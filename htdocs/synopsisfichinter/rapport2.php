@@ -571,25 +571,26 @@ function afficheParType($tabIdFi) {
     $req = "SELECT COUNT(c.id) as nb, SUM(TO_SECONDS(`Date_H_Fin`) - TO_SECONDS(`Date_H_Debut`))/3600 as sum FROM `llx_synopsischrono_chrono_100` ct, llx_synopsischrono c WHERE ct.id = c.id AND Date_H_Debut > 0 AND Date_H_Fin > 0 ";
     
     if($_REQUEST['filterUser'] > 0)
-        $req .= " AND `fk_user_author` = ".$_REQUEST['filterUser'];
+        $req .= " AND `Tech` = ".$_REQUEST['filterUser'];
     if (isset($_GET['dateDeb']) && isset($_GET['dateFin']) && $_GET['dateDeb'] != '' && $_GET['dateFin'] != '')
         $req .= " AND `Date_H_Debut` < STR_TO_DATE('".$_GET['dateFin']."', '%d/%m/%Y') AND `Date_H_Debut` > STR_TO_DATE('".$_GET['dateDeb']."', '%d/%m/%Y')";
 //    die($req);
-    $sql = $db->query($req." AND Contrat is NULL");
+    $sql = $db->query($req." AND (Contrat IS NULL || Contrat = 0)");
     $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." € hors contrat<br/>";
+    echo "<br/>".$result->nb." appels durant ".price($result->sum)." h soit ".($result->sum*50)." € hors contrat<br/>";
+    
+    
+    
+    $sql = $db->query($req." AND Contrat > 0");
+//    die($req." AND Contrat is not NULL");
+    $result = $db->fetch_object($sql);
+    echo "<br/>".$result->nb." appels durant ".price($result->sum)." h soit ".($result->sum*50)." € sous contrat<br/>";
     
     
     
     $sql = $db->query($req." AND Contrat is not NULL");
     $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." € sous contrat<br/>";
-    
-    
-    
-    $sql = $db->query($req." AND Contrat is not NULL");
-    $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." € au Total<br/>";
+    echo "<br/>".$result->nb." appels durant ".price($result->sum)." h soit ".($result->sum*50)." € au Total<br/>";
     
     $tabResult[-1001][2] += ($result->sum*50);
     
@@ -656,6 +657,10 @@ function afficheParType($tabIdFi) {
 
 function testFi($tabIdFi, $tabResult, $alert = true) {
     global $total_ht, $additionP, $db;
+    
+    if(count($tabIdFi) == 0)
+        return array();
+    
     /*  test */
     $additionPT = price($total_ht - $additionP - $tabResult[0][2]);
     if ($additionPT != 0 && $alert)

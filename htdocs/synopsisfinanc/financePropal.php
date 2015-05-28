@@ -284,6 +284,8 @@ if ($valfinance->id) {
     $location = $valfinance->location;
     $duree_degr = $valfinance->duree_degr;
     $pourcent_degr = $valfinance->pourcent_degr;
+    
+    $valfinance->calcul();
 }
 
 $contact = $object->Liste_Contact(-1, "external");
@@ -335,8 +337,10 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
 
     if ($valfinance->id > 0)
         $valfinance->update($user);
+    
     else
         $valfinance->insert($user);
+    $valfinance->calcul();
     
     if ($idoldcontact != $idcontact) {
         if ($idoldcontact > 0) {
@@ -350,7 +354,7 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
     $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref);//génération auto
 }
-    $valfinance->calcul();
+//    $valfinance->calcul();
 
 if (isset($_POST["form2"])) {
 
@@ -376,6 +380,7 @@ if (isset($_POST["form2"])) {
 
         $date_fin = new DateTime(convertirDate($_POST["datesign"], false));
         $date_fin->add(new DateInterval('P' . $valfinance->duree . 'M'));
+        $date_fin->sub(new DateInterval('P1D'));
         $date_fin = $date_fin->format('Y-m-d');
 
         $contract->addline("Financement Propal " . (($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) ? "(1ère période) " : "") . $object->ref, $valfinance->loyer1, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"], false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
@@ -387,6 +392,7 @@ if (isset($_POST["form2"])) {
 
             $date_fin2 = new DateTime($date_debut2);
             $date_fin2->add(new DateInterval('P' . $valfinance->duree_degr . 'M'));
+            $date_fin2->sub(new DateInterval('P1D'));
             $date_fin2 = $date_fin2->format('Y-m-d');
 
             $contract->addline("Financement Propal (2nd période)" . $object->ref, $valfinance->loyer2, $valfinance->nb_periode2, 20, null, null, NULL, NULL, $date_debut2, $date_fin2, "HT", null, NULL, null, $valfinance->calc_no_commF());

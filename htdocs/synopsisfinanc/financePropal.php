@@ -97,7 +97,7 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '$("#preter").val(0);'
         . '$(".vr").fadeIn();'
         . 'if(valdef)'
-        . '$("#VR").val(parseFloat($("#matos").html().replace(" ", "").replace(",","."))*0.15);'
+        . '$("#VR").val(parseFloat($("#matos").html().replace(" ", "").replace(",","."))*0.15);'//calc vr matos
         . 'if(valdef)'
         . '$("#montant").val(parseFloat($("#tot").html().replace(" ","").replace(",","."))-$("#VR").val());'
         . '}'
@@ -348,7 +348,7 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     }
 
     require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
-    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref);
+    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref);//génération auto
 }
     $valfinance->calcul();
 
@@ -417,14 +417,14 @@ if (isset($_POST["form2"])) {
         $valfinance->facture_id = $facture->id;
         $valfinance->update($user);
 
-        $facture->addline("Commission financière:", $valfinance->commFM1 + $valfinance->commFM2, 1, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
+        $facture->addline("Commission financière du contrat N°".$contract->ref.":", $valfinance->commFP1 + $valfinance->commFP2+$valfinance->commFM1+$valfinance->commFM2, 1, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
 
 
         addElementElement("propal", "facture", $object->id, $facture->id);
     }
 }
 $dif=$valfinance->montantAF + $valfinance->VR + $valfinance->pret - $totG;
-if ($dif>=1 || $dif<=-1){
+if (($dif>=1 || $dif<=-1) && $valfinance->montantAF!=""){
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";
 }
 
@@ -438,9 +438,9 @@ if ($user->rights->synopsisFinanc->write) {
 
     require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
     $form = new Form($db);
-    echo $form->select_thirdparty($socid, "socid");
+    echo "entreprise du rapporteur:".$form->select_thirdparty($socid, "socid");
     if ($socid > 0)
-        echo $form->selectcontacts($socid, $idcontact, "contactid", 1);
+        echo "<br/>nom du rapporteur:".$form->selectcontacts($socid, $idcontact, "contactid", 1);
     else
         echo "<select id='contactid' class='flat' name='contactid'></select>";
 
@@ -495,7 +495,7 @@ if ($user->rights->synopsisFinanc->write) {
     echo '</tr>';
 
     echo '<tr class="degr">';
-    echo '<td>Pourcentage du total de la 2nd priode:</td>';
+    echo '<td>Pourcentage du total pour la 2nd priode:</td>';
     echo '<td><INPUT type="text" id="po_degr" name="pour_degr" value="' . $pourcent_degr . '"/></td>';
     echo '</tr>';
 

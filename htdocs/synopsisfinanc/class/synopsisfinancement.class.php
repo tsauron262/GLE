@@ -63,8 +63,8 @@ class Synopsisfinancement extends CommonObject {
 
     function calcul() {
 
-        $mode = true;//default true
-        $mode_comm = false;//default false
+        $mode = TRUE;//default true - calculer la comm financière sans la comm commerciale quand désactiver
+        $mode_comm = true;//default false - calcule les commission sur le pret si activé .. peut etre couplé avec le mode du dessus
 
         $this->nb_periode = $this->duree / $this->periode;
         $this->nb_periode2 = $this->duree_degr / $this->periode; //nombre de période de remboursement durant toute la durée du financement

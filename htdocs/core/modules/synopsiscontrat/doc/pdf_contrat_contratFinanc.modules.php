@@ -278,7 +278,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute + 6);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100), 6, "La société: " . $contrat->societe->nom, 0, 'L');
                 $pdf->SetXY($this->marge_gauche + 60, $this->marge_haute + 6);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $contrat->societe->forme_juridique . (($contrat->societe->capital!="")?" au capital de " . price($contrat->societe->capital) . " €" : "") , 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $contrat->societe->forme_juridique . (($contrat->societe->capital>0)?" au capital de " . price($contrat->societe->capital) . " €" : "") , 0, 'L');
                 $pdf->setX($this->marge_gauche);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Immatriculé sous le Numéro RCS: " . $contrat->societe->idprof4, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Dont le siège sociale est situé au " . $contrat->societe->address . " " . $contrat->societe->zip . " " . $contrat->societe->town, 0, 'L');
@@ -310,7 +310,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
                 //print_r($this->emetteur);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital!="")? " au capital de " . price($this->emetteur->capital) . " €" : "" ). " dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital>0)? " au capital de " . price($this->emetteur->capital) . " €" : "" ). " dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
                 $contact = $contrat->Liste_Contact(-1, "internal");
                 $nomC = "";
                 foreach ($contact as $key => $value) {
@@ -705,7 +705,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $y = 280;
                     $pdf->SetXY($x, $y);
                     $pdf->SetTextColor(130, 130, 130);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, $this->emetteur->address . " - " . $this->emetteur->zip . " " . $this->emetteur->town . " - tel: " . $this->emetteur->phone . "\n" . " " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital!="")? " au Capital de " . price($this->emetteur->capital)." Euros" : "") . " - N° SIRET: " . $this->emetteur->idprof2 . " - APE: " . $this->emetteur->idprof3, 0, 'C');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, $this->emetteur->address . " - " . $this->emetteur->zip . " " . $this->emetteur->town . " - tel: " . $this->emetteur->phone . "\n" . " " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital>0)? " au Capital de " . price($this->emetteur->capital)." Euros" : "") . " - N° SIRET: " . $this->emetteur->idprof2 . " - APE: " . $this->emetteur->idprof3, 0, 'C');
 
                     if (method_exists($pdf, 'AliasNbPages'))
                         $pdf->AliasNbPages();

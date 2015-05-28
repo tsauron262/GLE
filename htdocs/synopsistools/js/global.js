@@ -1,11 +1,11 @@
-$(window).load(function() {
+$(window).load(function () {
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if ($("div.tmenudiv").is(':visible')) {
-        $(window).resize(function() {
+        $(window).resize(function () {
             traiteScroll(heightDif);
         });
-        $("a").click(function() {
-            setTimeout(function() {
+        $("a").click(function () {
+            setTimeout(function () {
                 traiteScroll(heightDif);
             }, 100);
         });
@@ -23,7 +23,7 @@ $(window).load(function() {
 
 
     if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/card.php") > -1) {
-        $("body").keypress(function(e) {
+        $("body").keypress(function (e) {
             if (e.which == 13)
                 return false
         });
@@ -46,8 +46,8 @@ $(window).load(function() {
     //		alert('Enter oser    was pressed.'+e.keyCode );
     //    });
 
-    $(".ui-search-toolbar input").focusout(function() {
-        setTimeout(function() {
+    $(".ui-search-toolbar input").focusout(function () {
+        setTimeout(function () {
             var e = jQuery.Event("keypress", {
                 keyCode: 13
             });
@@ -57,7 +57,7 @@ $(window).load(function() {
 
 
     //    if ((navigator.appName).search(/Safari.+/) != -1){
-    $(".formdoc a").each(function() {
+    $(".formdoc a").each(function () {
         if ($(this).attr('href').search(/.pdf/i) >= 0)
             $(this).attr("target", "");
     });
@@ -68,7 +68,7 @@ $(window).load(function() {
 
     //    $(".nonactif").hide();
 
-    $(".syntab li").click(function() {
+    $(".syntab li").click(function () {
         $(".syntab li").removeClass("actif");
         $(this).addClass("actif");
         $(".syntabelem").fadeOut();
@@ -76,7 +76,7 @@ $(window).load(function() {
     });
     $(".syntab .default").click();
 
-    $(".editDate").click(function() {
+    $(".editDate").click(function () {
         $(".editDateDiv").fadeIn();
         $(this).fadeOut();
     });
@@ -84,9 +84,9 @@ $(window).load(function() {
 
 
     //Cacher prix quand ligne de text
-    $("#select_type").change(function() {
+    $("#select_type").change(function () {
         elems = $(this).parent().parent().parent().find("#tva_tx, input[name|='price_ht'], input[name|='qty'],  input[name|='remise_percent']");
-        if ($(this).val()>=100) {
+        if ($(this).val() >= 100) {
             $("input[name|='price_ht']").val("0");
             elems.hide();
         }
@@ -99,7 +99,7 @@ $(window).load(function() {
 
 
     //Cacher tva.. quand privé
-    $("#radioprivate, #radiocompany").click(function() {
+    $("#radioprivate, #radiocompany").click(function () {
         cible = $("input[name='idprof1']");
         tabCible = Array();
         tabCible.push(cible.parent().parent());
@@ -120,19 +120,84 @@ $(window).load(function() {
     $(selector).prev().hide();
     $(selector).next().hide();
     $(selector).hide();
-    
-    $(".butCache").click(function(){
-        $(".panCache#"+$(this).attr("id").replace("but", "pan")).show();
+
+    $(".butCache").click(function () {
+        $(".panCache#" + $(this).attr("id").replace("but", "pan")).show();
         $(this).hide();
     });
-    
-    
+
+
     $(".datePicker").datepicker();
+
+
+
+
+    /*rsponsive victor*/
+    $('#id-container').prepend("<div id='but-menu'></div>");
+    var is_open = false;
+
+    $('#but-menu').click(function (e) {
+        if (is_open == false) {
+            open_menu();
+        } else {
+            close_menu();
+        }
+    });
+
+    $('.vmenu').click(function (e) {
+        e.stopPropagation();
+    });
+
+    $('#id-left').click(function (e) {
+        if (is_open == true) {
+            close_menu();
+        }
+    });
+
+    $(window).on("touchstart", function (e) {
+        ts=e.originalEvent.touches[0].clientX;
+    });
+    
+    $(window).on("touchmove",function(e){
+        var te=e.originalEvent.changedTouches[0].clientX;
+        if(te>ts && (te-ts>100 || ts-te>100)){
+            open_menu();
+        }
+        if(te<ts && (te-ts>100 || ts-te>100)){
+            close_menu();
+        }
+    });
+
+//    $('body').addEventListener(swl,open_menu,false);
+
+    function close_menu() {
+        $('#id-left').clearQueue().animate({"left": '-190'});
+        $('#id-left').css("height", "10px");
+        $('#id-left').css("width", "auto");
+        $('.vmenu').css("height", "10px");
+        $('.vmenu').css("width", "174px");
+        $('#id-right').fadeIn();
+        is_open = false;
+    }
+
+    function open_menu() {
+        $('#id-left').clearQueue().animate({"left": '0'});
+        $('#id-left').css("height", "100%");
+        $('.vmenu').css("height", "10px");
+        $('#id-left').css("width", "100%");
+        $('.vmenu').css("width", "50%");
+        $('#id-right').fadeOut();
+        is_open = true;
+    }
+
+    /*responsive victor*/
+
+
 });
 
 function ajoutNotification(id, titre, msg) {
     $("div.notificationText").append("<div class='oneNotification'><input type='hidden' class='idNotification' value='" + id + "'/><div class='titreNotification'><table style='width:100%'><tr><td>" + titre + "</td><td style='text-align:right;'><span class='marqueVueNotification editable'>X</span></td></tr></table></div>" + msg + "</div>");
-    $("span.marqueVueNotification").click(function() {
+    $("span.marqueVueNotification").click(function () {
         notifHtml = $(this).parent().parent().parent().parent().parent().parent();
         datas = 'idVue=' + notifHtml.find(".idNotification").val();
         jQuery.ajax({
@@ -141,7 +206,7 @@ function ajoutNotification(id, titre, msg) {
             datatype: "xml",
             type: "POST",
             cache: false,
-            success: function(msg) {
+            success: function (msg) {
                 if (msg.indexOf('<ok>ok</ok>') !== -1)
                     notifHtml.fadeOut();
             }
@@ -174,7 +239,7 @@ function initSynchServ(idAction) {
     boucleSynchServ(idAction);
 }
 function initSynchClient(optioncss) {
-    $(document).bind("ajaxComplete", function() {
+    $(document).bind("ajaxComplete", function () {
         initLienConnect(optioncss);
     });
     initLienConnect(optioncss);
@@ -188,7 +253,7 @@ function boucleSynchServ(idAction) {
         datatype: "xml",
         type: "POST",
         cache: false,
-        success: function(msg) {
+        success: function (msg) {
             modif = false;
             idActionT = $(msg).find("idAction").html();
             if (idActionT > 0) {
@@ -216,13 +281,13 @@ function boucleSynchServ(idAction) {
             if (modif)
                 boucleSynchServ(idAction);
             else {
-                setTimeout(function() {
+                setTimeout(function () {
                     boucleSynchServ(idAction);
                 }, 10 * 1000);
             }
         },
-        error: function() {
-            setTimeout(function() {
+        error: function () {
+            setTimeout(function () {
                 boucleSynchServ(idAction);
                 timeTentative = timeTentative * 1.3;
             }, timeTentative * 1000);
@@ -238,13 +303,13 @@ function dialogConfirm(url, titre, yes, no, id) {
 
 function initScroll() {
     scrollY = $(window).scrollTop();
-    $(".reglabe, .reglabe2").each(function() {
+    $(".reglabe, .reglabe2").each(function () {
         scrollY += $(this).scrollTop();
         $(this).height('auto');
 //        if ($(this).attr("old-width"))
 //            $(this).width($(this).attr("old-width"));
 //        else
-            $(this).width('auto');
+        $(this).width('auto');
         if ($(this).attr("old-padding-right"))
             $(this).css("padding-right", $(this).attr("old-padding-right") + "px");
         $(this).removeClass("reglabe");
@@ -256,16 +321,22 @@ function initScroll() {
 
 function largeur_fenetre()
 {
- if (window.innerWidth) return window.innerWidth;
- else if (document.body && document.body.offsetWidth) return document.body.offsetWidth;
- else return 0;
+    if (window.innerWidth)
+        return window.innerWidth;
+    else if (document.body && document.body.offsetWidth)
+        return document.body.offsetWidth;
+    else
+        return 0;
 }
 
 function hauteur_fenetre()
 {
- if (window.innerHeight) return window.innerHeight;
- else if (document.body && document.body.offsetHeight) return document.body.offsetHeight;
- else return 0;
+    if (window.innerHeight)
+        return window.innerHeight;
+    else if (document.body && document.body.offsetHeight)
+        return document.body.offsetHeight;
+    else
+        return 0;
 }
 
 function traiteScroll(heightDif) {
@@ -282,7 +353,7 @@ function traiteScroll(heightDif) {
     newTaille = 0;
     elem = null;
     if (hauteurMenu < height && (0 || minimuAGagne > 0)) {
-        $("#id-right div").each(function() {
+        $("#id-right div").each(function () {
 //                if($(this).attr("class") == "fiche")
 //                alert($(this).attr("class")+" | ");
             if (!$(this).is(".fichehalfright, .fichehalfleft") && !$(this).is(".fichehalfleft")) {
@@ -324,12 +395,12 @@ function traiteScroll(heightDif) {
             $(elem).css("padding-right", (oldPadding + 15) + "px");
             if (scrollY > 250)
                 scrollY = scrollY - 250;
-            
-            
+
+
             largeurMenu = 180;
-            widthBody1 = $("#id-right").innerWidth()+largeurMenu;
+            widthBody1 = $("#id-right").innerWidth() + largeurMenu;
             widthBody2 = parseInt($("body").innerWidth());
-            if(widthBody1 > widthBody2)
+            if (widthBody1 > widthBody2)
                 widthBody = widthBody1;
             else
                 widthBody = widthBody2;
@@ -339,7 +410,7 @@ function traiteScroll(heightDif) {
 //            alert("Fenetre : "+width);
 
             //Test
-            if (parseInt($("body").innerHeight()) > (height - 5) || widthBody > width){
+            if (parseInt($("body").innerHeight()) > (height - 5) || widthBody > width) {
                 scrollY = initScroll();
 //                alert("reinit");
             }
@@ -447,7 +518,7 @@ function ajNoteAjax() {
         datatype: "xml",
         type: "POST",
         cache: false,
-        success: function(msg) {
+        success: function (msg) {
             if (msg != "0") {
                 if ($("a#note").size() > 0)
                     tab = "note";
@@ -478,7 +549,7 @@ function ajNoteAjax() {
                 //                    shownHideNote();   
                 //                })
 
-                editAjax(jQuery('#notePublicEdit'), datas, function() {
+                editAjax(jQuery('#notePublicEdit'), datas, function () {
                     hideNote()
                 });
 
@@ -502,7 +573,7 @@ function ajNoteAjax() {
     function hideNote() {
         if (fermable) {
             fermer = true;
-            setTimeout(function() {
+            setTimeout(function () {
                 if (fermer)
                     $(".noteAjax .note").slideUp({
                         width: 'toggle'
@@ -514,7 +585,7 @@ function ajNoteAjax() {
 
 
 function editAjax(elem, datas, callOut) {
-    elem.click(function() {
+    elem.click(function () {
         if (fermable) {
             fermable = false;
             var text = jQuery(elem).html().split('<br>').join('\n');
@@ -524,7 +595,7 @@ function editAjax(elem, datas, callOut) {
             $(elem).removeClass('editable');
             $(elem).find(".editableTextarea").focus();
             $(elem).find(".editableTextarea").val($(".editableTextarea").val() + "\n");
-            $(elem).find(".editableTextarea").focusout(function() {
+            $(elem).find(".editableTextarea").focusout(function () {
                 fermable = true;
                 if (callOut)
                     callOut();
@@ -535,7 +606,7 @@ function editAjax(elem, datas, callOut) {
                     datatype: "xml",
                     type: "POST",
                     cache: false,
-                    success: function(msg) {
+                    success: function (msg) {
                         if (msg.indexOf("[1]") > -1) {
                             msg = msg.replace("[1]", "");
                         }
@@ -588,7 +659,7 @@ function popOjectAffiche(id, type, callBack, titreNotif, nbLoad) {//Affiche ici
     popIFrame(urlT + id, callBack, titreNotif, nbLoad);
 }
 function ajoutPictoConnect() {
-    $("a").each(function() {
+    $("a").each(function () {
         ok = false;
         if ($(this).attr('onclick') == undefined && $(this).attr('href') != undefined) {
             $(this).attr("target", "iframePrinc");
@@ -622,7 +693,7 @@ function ajoutPictoConnect() {
 }
 function initLienConnect(optioncss) {
     if (optioncss == "print") {
-        $("form").each(function() {
+        $("form").each(function () {
             if ($(this).attr("action").indexOf("?") > 0)
                 $(this).attr("action", $(this).attr("action") + "&optioncss=print");
             else
@@ -632,19 +703,19 @@ function initLienConnect(optioncss) {
 
 
     ajoutPictoConnect();
-    $(".pasTraiter.popConnect").each(function() {
-        $(this).click(function() {
+    $(".pasTraiter.popConnect").each(function () {
+        $(this).click(function () {
             tabT = $(this).attr("id").split("-");
             nom = $(this).attr("id").replace(tabT[0] + "-" + tabT[1] + "-" + tabT[2] + "-", "");
             if (tabT[0] == 'connect')
-                dispatchePopObject(tabT[2], tabT[1], function() {
+                dispatchePopObject(tabT[2], tabT[1], function () {
                 }, nom, 100);
             else if (tabT[0] == 'connectUrl') {
                 if (tabT[1].indexOf("?") > 0)
                     tabT[1] = tabT[1] + "&optioncss=print"
                 else
                     tabT[1] = tabT[1] + "?optioncss=print"
-                dispatchePopIFrame(tabT[1], function() {
+                dispatchePopIFrame(tabT[1], function () {
                 }, nom, 100);
             }
 
@@ -656,7 +727,7 @@ function initLienConnect(optioncss) {
 
 function initTransmission(elem) {
     if (typeof (CallBackPlus) != 'undefined') {
-        $("iframe[name='" + elem + "']").load(function() {
+        $("iframe[name='" + elem + "']").load(function () {
             eval(elem + '.CallBackPlus = CallBackPlus;');
 //            eval(elem + '.initLienConnect();');
             if (elem != "iframePrinc")
@@ -667,7 +738,7 @@ function initTransmission(elem) {
 //            eval(elem + '.initLienConnect();');
 
 
-        $("iframe.fullScreen").load(function() {
+        $("iframe.fullScreen").load(function () {
             iFramePrinc(false);
             eval('url = document.location.href;' +
                     'newUrl = url.replace(window.location.hash, "") + "#" +' + elem + '.location;' +
@@ -700,22 +771,22 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
 
     iFrame = $("#iFrame" + nbIframe + "");
 
-    iFrame.find("span.fermer").click(function() {
+    iFrame.find("span.fermer").click(function () {
         fermerIframe($(this).parent(), callBack);
     });
     var i = 0;
-    iFrame.find("iframe").load(function() {
+    iFrame.find("iframe").load(function () {
         if ($(this).contents().find("#username").size() > 0)
             $nbLoad++;
 
 
 
-        $(this).contents().find("input[name='cancel'], input[name='edit'], input[value='Ajouter'], input[value='Ajouter'], div.ui-dialog-buttonset span.ui-button-text").click(function() {
+        $(this).contents().find("input[name='cancel'], input[name='edit'], input[value='Ajouter'], input[value='Ajouter'], div.ui-dialog-buttonset span.ui-button-text").click(function () {
 //            fermerIframe($(this).parent(), callBack);
             nbLoad = 1;
         });
-        
-        $(this).contents().find("input[name='updateassignedtouser'], input[name='addassignedtouser']").click(function() {
+
+        $(this).contents().find("input[name='updateassignedtouser'], input[name='addassignedtouser']").click(function () {
             nbLoad = 100;
         });
         i++;
@@ -725,14 +796,14 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
             fermerIframe($(this).parent(), callBack);
         }
     });
-    iFrame.find("span.petit").click(function() {
+    iFrame.find("span.petit").click(function () {
 //        id = $(this).parent().attr("id").replace("iFrame", "");
         iFramePrinc(true);
     });
-    $(".bottomObj").click(function() {
+    $(".bottomObj").click(function () {
         return false;
     });
-    $("#lienIFrame" + nbIframe).click(function() {
+    $("#lienIFrame" + nbIframe).click(function () {
         $(".bottomObj").removeClass("actif");
         $(this).addClass("actif");
         id = $(this).attr("id").replace("lienIFrame", "");
@@ -785,7 +856,7 @@ function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
         type: "POST",
         datatype: "xml",
         data: "model=" + model_refid + "&socid=" + socid + champSup,
-        success: function(msg) {
+        success: function (msg) {
             callBack(msg);
         }
     });
@@ -797,7 +868,7 @@ function ajaxManipElementElement(action, sourcetype, targettype, idsource, idtar
         type: "POST",
         datatype: "xml",
         data: "action=" + action + "&sourcetype=" + sourcetype + "&targettype=" + targettype + "&idsource=" + idsource + "&idtarget=" + idtarget + "&ordre=" + ordre,
-        success: function(msg) {
+        success: function (msg) {
             callBack(msg);
         }
     });
@@ -812,7 +883,7 @@ function addChrono(element, socid, callBack) {
 function supprLigne(element) {
     firstParent = $(element).parent();
     parentDiv = $(firstParent).parent();
-    callBack = function(ok) {
+    callBack = function (ok) {
         if (ok == "ok")
             $(firstParent).fadeOut();
     };
@@ -825,7 +896,7 @@ function supprLigne(element) {
 
 
 function cacherSuppr(element) {
-    $(element).fadeOut(function() {
+    $(element).fadeOut(function () {
         $(element).remove();
     });
 }
@@ -833,10 +904,10 @@ function cacherSuppr(element) {
 
 
 function autoSave(actionSave) {
-    jQuery("*").click(function() {
+    jQuery("*").click(function () {
         initTimeSave();
     });
-    jQuery("*").keypress(function() {
+    jQuery("*").keypress(function () {
         initTimeSave();
     });
     enreg = false;
@@ -845,7 +916,7 @@ function autoSave(actionSave) {
             enreg = true;
             actionSave();
         }
-        setTimeout(function() {
+        setTimeout(function () {
             boucleSave();
         }, 1000);
     }

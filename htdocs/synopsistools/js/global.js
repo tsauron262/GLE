@@ -132,65 +132,66 @@ $(window).load(function () {
 
 
 
-    /*rsponsive victor*/
-    $('#id-container').prepend("<div id='but-menu'></div>");
-    var is_open = false;
-
-    $('#but-menu').click(function (e) {
-        if (is_open == false) {
-            open_menu();
-        } else {
-            close_menu();
-        }
-    });
-
-    $('.vmenu').click(function (e) {
-        e.stopPropagation();
-    });
-
-    $('#id-left').click(function (e) {
-        if (is_open == true) {
-            close_menu();
-        }
-    });
-
-    $(window).on("touchstart", function (e) {
-        ts=e.originalEvent.touches[0].clientX;
-    });
-    
-    $(window).on("touchmove",function(e){
-        var te=e.originalEvent.changedTouches[0].clientX;
-        if(te>ts && (te-ts>100 || ts-te>100)){
-            open_menu();
-        }
-        if(te<ts && (te-ts>100 || ts-te>100)){
-            close_menu();
-        }
-    });
-
-//    $('body').addEventListener(swl,open_menu,false);
-
-    function close_menu() {
-        $('#id-left').clearQueue().animate({"left": '-190'});
-        $('#id-left').css("height", "10px");
-        $('#id-left').css("width", "auto");
-        $('.vmenu').css("height", "10px");
-        $('.vmenu').css("width", "174px");
-        $('#id-right').fadeIn();
-        is_open = false;
-    }
-
-    function open_menu() {
-        $('#id-left').clearQueue().animate({"left": '0'});
-        $('#id-left').css("height", "100%");
-        $('.vmenu').css("height", "10px");
-        $('#id-left').css("width", "100%");
-        $('.vmenu').css("width", "50%");
-        $('#id-right').fadeOut();
-        is_open = true;
-    }
-
-    /*responsive victor*/
+//    /*rsponsive victor*/
+//    $('#id-container').prepend("<div id='but-menu'></div>");
+//    var is_open = false;
+//
+//    $('#but-menu').click(function (e) {
+//        if (is_open == false) {
+//            open_menu();
+//        } else {
+//            close_menu();
+//        }
+//    });
+//
+//    $('.vmenu').click(function (e) {
+//        e.stopPropagation();
+//    });
+//
+//    $('#id-left').click(function (e) {
+//        if (is_open == true) {
+//            close_menu();
+//        }
+//    });
+//
+//    $(window).on("touchstart", function (e) {
+//        ts=e.originalEvent.touches[0].clientX;
+//    });
+//    
+//    $(window).on("touchend",function(e){
+//        var te=e.originalEvent.changedTouches[0].clientX;
+//        if(te-ts>350){
+//            open_menu();
+//        }
+//        if(ts-te>200){
+//            close_menu();
+//        }
+//    });
+//
+////    $('body').addEventListener(swl,open_menu,false);
+//
+//    function close_menu() {
+//        $('#id-left').clearQueue().animate({"left": '-190'});
+//        $('#id-left').css("height", "10px");
+//        $('#id-left').css("width", "auto");
+//        $('.vmenu').css("height", "10px");
+//        $('.vmenu').css("overflow", "hidden");
+//        $('.vmenu').css("width", "174px");
+//        $('#id-right').fadeIn();
+//        is_open = false;
+//    }
+//
+//    function open_menu() {
+//        $('#id-left').clearQueue().animate({"left": '0'});
+//        $('#id-left').css("height", "100%");
+//        $('.vmenu').css("height", "auto");
+//        $('#id-left').css("width", "100%");
+//        $('.vmenu').css("width", "50%");
+//        $('#id-right').fadeOut();
+//        is_open = true;
+//    }
+//
+//    /*responsive victor*/
 
 
 });

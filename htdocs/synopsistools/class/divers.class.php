@@ -184,6 +184,7 @@ class synopsisHook {
 
         //css
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/synopsistools/css/global.css" />' . "\n";
+//        $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/synopsistools/jquerymobile/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.css" />' . "\n";
 //        $return .= '<link rel="stylesheet" href="' . DOL_URL_ROOT . '/synopsistools/jquery/mobile/jquery.mobile-1.4.3.min.css">';
         $cssSoc = "/synopsistools/css/" . MAIN_INFO_SOCIETE_NOM . ".css";
         if (is_file(DOL_DOCUMENT_ROOT . $cssSoc))
@@ -221,6 +222,7 @@ class synopsisHook {
 //                . 'alert("Test en cours !!! Nombreuses errerurs de chargement possible.");'
                 . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/js/global.js"></script>';
+//        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/jquerymobile/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>';
 
         $jsSoc = "/synopsistools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
         if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))

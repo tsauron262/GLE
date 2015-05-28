@@ -857,6 +857,16 @@ if ($id > 0)
 
 	print '<div class="tabsAction">';
 
+	if (! empty($conf->propal->enabled) && $user->rights->propal->supprimer)
+	{
+		$langs->load("propal");
+                print '<div class="inline-block divButAction">';
+                print '<div class="panCache" id="panCacheFusSuppr">'. $form->select_thirdparty() . "<br/><br/>";
+                print '<a class="butAction" id="fusSuppr" onclick=\'location.href="'.DOL_URL_ROOT.'/synopsistools/mailRequest.php?action=fusionCli&id='.$object->id.'&id2="+$("#socid").val()\'>Fusioner Vider</a></div>';
+		print '<a class="butAction butCache" id="butCacheFusSuppr">Fusioner Vider</a>';
+                print "</div>";
+	}
+
 	if (! empty($conf->propal->enabled) && $user->rights->propal->creer)
 	{
 		$langs->load("propal");

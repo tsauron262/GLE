@@ -91,6 +91,8 @@ class histoNavigation {
                     $nomUrl = str_replace('">', $replace, $obj->getNomUrl(1));
                 else
                     $nomUrl = str_replace('">', $replace, $obj->getNomUrl(1, '', 20));
+                if(isset($tabResult[2]) && isset($tabResult[2][1]))
+                    $nomUrl = str_replace ($tabResult[2][0], $tabResult[2][1], $nomUrl);
                 return ("&nbsp;&nbsp;<span href='#' title='" . $res->element_type . " " . $res->ref . "' class='vsmenu' style='font-size: 8.5px;'>" . $nomUrl . "</span>");
             } else {
                 return ("&nbsp;&nbsp;<span href='#' title='" . $res->element_type . " " . $res->ref . " (supprimer)' class='vsmenu ui-widget-error' style='font-size: 8.5px;'><del>" . dol_trunc($res->ref, 25) . "</del></span>");
@@ -317,7 +319,7 @@ class histoNavigation {
 
         if (is_object($obj))
             @$obj->loadObject = false;
-        return array($obj, $tabMenu);
+        return array($obj, $tabMenu, isset($data['changeNomUrl']) ? $data['changeNomUrl'] : array());
     }
 
     public static function getTabTypeObject($typeFiltre = null) {
@@ -339,7 +341,13 @@ class histoNavigation {
             'livraison' => array(),
             'commande' => array("tabMenu1" => "commercial",
                 "tabMenu2" => "orders",
-                "urls" => array("Synopsis_PrepaCommande/prepacommande.php", "commande/card.php")),
+                "urls" => array("commande/card.php")),
+            'synopsiscommande' => array("obj" => 'commande',
+                "path" => "/commande/class/commande.class.php",
+                "tabMenu1" => "commercial",
+                "tabMenu2" => "orders",
+                "urls" => array("Synopsis_PrepaCommande/prepacommande.php"),
+                "changeNomUrl" => array("commande/card.php", "Synopsis_PrepaCommande/prepacommande.php")),
             'banque' => array("obj" => 'Account',
                 "path" => "/compta/bank/class/account.class.php",
                 "urls" => array("compta/bank/card.php")),

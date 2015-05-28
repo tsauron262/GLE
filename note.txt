@@ -1350,4 +1350,18 @@ voir solde compte en plus
 
 
 voir GRH    groupe  d'utilisateur   
-voir annulation congés annulé agenda et annulé remplacement ds agenda     
+voir annulation congés annulé agenda et annulé remplacement ds agenda 
+
+de la - pouyr la
+pdf contrat auto
+voir capitaux
+num contrat ds facture
+
+
+
+voir dedoublon    +     groupe agenda   
+
+
+
+voir pour gestion des id 8sens
+

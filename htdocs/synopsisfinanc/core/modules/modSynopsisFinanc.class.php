@@ -252,7 +252,7 @@ class modSynopsisFinanc extends DolibarrModules
       
       $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'contratFinanc';";
       
-      $sql[]="DELETE FROM ".MAIN_DB_PREFIX."c_type_contact WHERE code=780;";
+      //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."c_type_contact WHERE rowid=780;";
       
     return $this->_remove($sql);
   }

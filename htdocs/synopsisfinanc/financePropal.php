@@ -97,7 +97,7 @@ $js = '<link rel="stylesheet" href="css/stylefinance.css">'
         . '$("#preter").val(0);'
         . '$(".vr").fadeIn();'
         . 'if(valdef)'
-        . '$("#VR").val(parseFloat($("#matos").html().replace(" ", "").replace(",","."))*0.15);'
+        . '$("#VR").val(parseFloat($("#matos").html().replace(" ", "").replace(",","."))*0.15);'//calc vr matos
         . 'if(valdef)'
         . '$("#montant").val(parseFloat($("#tot").html().replace(" ","").replace(",","."))-$("#VR").val());'
         . '}'
@@ -284,6 +284,8 @@ if ($valfinance->id) {
     $location = $valfinance->location;
     $duree_degr = $valfinance->duree_degr;
     $pourcent_degr = $valfinance->pourcent_degr;
+    
+    $valfinance->calcul();
 }
 
 $contact = $object->Liste_Contact(-1, "external");
@@ -335,8 +337,10 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
 
     if ($valfinance->id > 0)
         $valfinance->update($user);
+    
     else
         $valfinance->insert($user);
+    $valfinance->calcul();
     
     if ($idoldcontact != $idcontact) {
         if ($idoldcontact > 0) {
@@ -348,9 +352,9 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     }
 
     require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
-    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref);
+    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref);//génération auto
 }
-    $valfinance->calcul();
+//    $valfinance->calcul();
 
 if (isset($_POST["form2"])) {
 
@@ -376,6 +380,7 @@ if (isset($_POST["form2"])) {
 
         $date_fin = new DateTime(convertirDate($_POST["datesign"], false));
         $date_fin->add(new DateInterval('P' . $valfinance->duree . 'M'));
+        $date_fin->sub(new DateInterval('P1D'));
         $date_fin = $date_fin->format('Y-m-d');
 
         $contract->addline("Financement Propal " . (($valfinance->duree_degr > 0 && $valfinance->pourcent_degr > 0) ? "(1ère période) " : "") . $object->ref, $valfinance->loyer1, $valfinance->nb_periode, 20, null, null, NULL, NULL, convertirDate($_POST["datesign"], false), $date_fin, "HT", null, NULL, null, $valfinance->calc_no_commF());
@@ -387,6 +392,7 @@ if (isset($_POST["form2"])) {
 
             $date_fin2 = new DateTime($date_debut2);
             $date_fin2->add(new DateInterval('P' . $valfinance->duree_degr . 'M'));
+            $date_fin2->sub(new DateInterval('P1D'));
             $date_fin2 = $date_fin2->format('Y-m-d');
 
             $contract->addline("Financement Propal (2nd période)" . $object->ref, $valfinance->loyer2, $valfinance->nb_periode2, 20, null, null, NULL, NULL, $date_debut2, $date_fin2, "HT", null, NULL, null, $valfinance->calc_no_commF());
@@ -394,6 +400,7 @@ if (isset($_POST["form2"])) {
 
         addElementElement("propal", "contrat", $object->id, $contract->id);
 
+        $contract->validate($user);
 
         include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
         $facture = new Facture($db);
@@ -417,14 +424,14 @@ if (isset($_POST["form2"])) {
         $valfinance->facture_id = $facture->id;
         $valfinance->update($user);
 
-        $facture->addline("Commission financière:", $valfinance->commFM1 + $valfinance->commFM2, 1, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
+        $facture->addline("Commission financière du contrat ".$contract->ref.":", $valfinance->commFP1 + $valfinance->commFP2+$valfinance->commFM1+$valfinance->commFM2, 1, 7, NULL, NULL, NULL, null, convertirDate($_POST["datesign"], false), "HT");
 
 
         addElementElement("propal", "facture", $object->id, $facture->id);
     }
 }
 $dif=$valfinance->montantAF + $valfinance->VR + $valfinance->pret - $totG;
-if ($dif>=1 || $dif<=-1){
+if (($dif>=1 || $dif<=-1) && $valfinance->montantAF!=""){
     echo "<div class='redT'><br/>Attention: le total à financer n'est plus égale au total de la propal</div><br/>";
 }
 
@@ -438,9 +445,9 @@ if ($user->rights->synopsisFinanc->write) {
 
     require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
     $form = new Form($db);
-    echo $form->select_thirdparty($socid, "socid");
+    echo "entreprise du rapporteur:".$form->select_thirdparty($socid, "socid");
     if ($socid > 0)
-        echo $form->selectcontacts($socid, $idcontact, "contactid", 1);
+        echo "<br/>nom du rapporteur:".$form->selectcontacts($socid, $idcontact, "contactid", 1);
     else
         echo "<select id='contactid' class='flat' name='contactid'></select>";
 
@@ -495,7 +502,7 @@ if ($user->rights->synopsisFinanc->write) {
     echo '</tr>';
 
     echo '<tr class="degr">';
-    echo '<td>Pourcentage du total de la 2nd priode:</td>';
+    echo '<td>Pourcentage du total pour la 2nd priode:</td>';
     echo '<td><INPUT type="text" id="po_degr" name="pour_degr" value="' . $pourcent_degr . '"/></td>';
     echo '</tr>';
 

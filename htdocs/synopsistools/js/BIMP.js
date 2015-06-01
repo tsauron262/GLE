@@ -131,6 +131,8 @@ $(window).load(function() {
                         valeurTG = tabResult[1];
                         valeurG = tabResult[2];
                         valeurD = tabResult[3];
+                        valeurPlus = tabResult[4];
+                        input.parent().append(valeurPlus);
                     }
                 }
                 else

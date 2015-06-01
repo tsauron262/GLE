@@ -78,7 +78,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
                 accessforbidden("", 0, 0);
                 return 1;
             }
-            $where .= " AND CentreVal IN ('" . implode("','", $blockCentre) . "')";
+            $where .= " AND Centre IN ('" . implode("','", $blockCentre) . "')";
         }
 
         $champDate = "fact.datec";

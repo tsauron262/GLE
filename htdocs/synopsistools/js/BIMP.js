@@ -93,7 +93,7 @@ $(window).load(function() {
 
 
 
-    $("input#NoMachine, input#Chrono-1011").focusout(function() {
+    $("input#NoMachine, input#Chrono1011").focusout(function() {
         input = $(this);
         input.val(input.val().toUpperCase());
 

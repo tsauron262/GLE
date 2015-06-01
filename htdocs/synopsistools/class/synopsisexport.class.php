@@ -140,8 +140,8 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $partReqFin = "  Group BY chrono.id LIMIT 0,100000";
         }
 
-
-        $where .= " AND chronoT.id = chrono.id ";
+        if ($typeAff2 != "fact")
+            $where .= " AND chronoT.id = chrono.id ";
         $partReq5 = " FROM  llx_synopsischrono_chrono_105 chronoT, llx_synopsischrono chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
         $partReq5 .= " LEFT JOIN  llx_societe soc on  soc.rowid = propal.fk_soc ";
 //        $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
@@ -223,7 +223,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }
-//        } elseif ($typeAff == "parCentre" || $centre) {
+        } elseif ($typeAff == "parCentre" || $centre) {
 //            $req = "SELECT label, valeur, propalid
 //FROM  `".MAIN_DB_PREFIX."Synopsis_Process_form_list_members` ls, ".MAIN_DB_PREFIX."synopsischrono_view_105 chrono
 //WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
@@ -232,8 +232,10 @@ FROM  `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` ls, " . MAIN_DB
 WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 //            $req = "SELECT label, valeur, propalid
 //FROM  llx_synopsischrono_view_105 chrono LEFT JOIN `llx_Synopsis_Process_form_list_members` ls ON `list_refid` =11 AND chrono.CentreVal = ls.valeur WHERE 1";
-            if ($centre)
+            if ($centre){
                 $req .= " AND centre = '" . $centre . "'";
+                $blockCentre = true;
+            }
             $result = $this->db->query($req);
 
             $tabMateriel = array();

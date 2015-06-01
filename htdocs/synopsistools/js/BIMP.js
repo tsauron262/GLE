@@ -173,12 +173,12 @@ $(window).load(function() {
     });
 
 
-    elem = "#Chrono-1034, #inputautocompleteChrono-1034";
+    elem = "#Chrono1034, #inputautocompleteChrono1034";
     $(elem).focusout(function() {
         initTrans(elem);
     });
     initTrans(elem);
-    $("#inputautocompleteChrono-1070, #inputautocompleteChrono-1071").focusout(function() {
+    $("#inputautocompleteChrono1070, #inputautocompleteChrono1071").focusout(function() {
         $("#mailTrans").attr("checked", "checked");
     });
 });

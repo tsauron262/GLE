@@ -228,7 +228,7 @@ class gsxDatas {
                         $html .= '<tr class="oddRow"><td class="rowTitle">Note</td><td>' . $datas['notes'] . '</td></tr>' . "\n";
 
                     if (isset($datas['activationLockStatus']) && $datas['activationLockStatus'] !== '')
-                        $html .= '<tr class="oddRow"><td class="rowTitle">Localisé</td><td>' . $datas['activationLockStatus'] . '</td></tr>' . "\n";
+                        $html .= '<tr class="oddRow" style="color:red;"><td class="rowTitle">Localisé</td><td>' . $datas['activationLockStatus'] . '</td></tr>' . "\n";
 
                     if (isset($datas['manualURL']) && $datas['manualURL'] !== '')
                         $html .= '<tr style="height: 30px;"><td colspan="2"><a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a></td></tr>' . "\n";

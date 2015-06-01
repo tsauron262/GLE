@@ -105,9 +105,9 @@ $(window).load(function() {
         }
         else {
             inputM = $('input[name="description"]');
-            inputG = $("#Chrono-1015");
-            inputTG = $("#Chrono-1064");
-            inputD = $("#Chrono-1014");
+            inputG = $("#Chrono1015");
+            inputTG = $("#Chrono1064");
+            inputD = $("#Chrono1014");
             input.parent().append("<div id='reponse'></div>");
         }
             zoneRep = $("#reponse");

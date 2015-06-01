@@ -271,7 +271,6 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
     }
 
     private function statLigneFacture($titre, $req) {
-        echo $req;
         $return1 = $return2 = "";
         $result2 = $this->db->query($req);
 //

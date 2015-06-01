@@ -393,7 +393,7 @@ class CMailFile
 				if (! $dest)
 				{
 					$this->error="Failed to send mail with php mail to HOST=".ini_get('SMTP').", PORT=".ini_get('smtp_port')."<br>Recipient address '$dest' invalid";
-					dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR);
+					dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR, 0, "_mail");
 				}
 				else
 				{
@@ -422,7 +422,7 @@ class CMailFile
 					if (! $res)
 					{
 						$this->error="Failed to send mail with php mail to HOST=".ini_get('SMTP').", PORT=".ini_get('smtp_port')."<br>Check your server logs and your firewalls setup";
-						dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR);
+						dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR, 0, "_mail");
 					}
 					else
 					{
@@ -466,14 +466,14 @@ class CMailFile
 				if (! $from)
 				{
 					$this->error="Failed to send mail with smtps lib to HOST=".$server.", PORT=".$conf->global->MAIN_MAIL_SMTP_PORT."<br>Sender address '$from' invalid";
-					dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR);
+					dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR, 0, "_mail");
 					$res=false;
 				}
 				$dest=$this->smtps->getTo();
 				if (! $dest)
 				{
 					$this->error="Failed to send mail with smtps lib to HOST=".$server.", PORT=".$conf->global->MAIN_MAIL_SMTP_PORT."<br>Recipient address '$dest' invalid";
-					dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR);
+					dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR, 0, "_mail");
 					$res=false;
 				}
 
@@ -490,7 +490,7 @@ class CMailFile
 					else
 					{
 						if (empty($this->error)) $this->error=$result;
-						dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR);
+						dol_syslog("CMailFile::sendfile: mail end error=".$this->error, LOG_ERR, 0, "_mail");
 						$res=false;
 					}
 				}

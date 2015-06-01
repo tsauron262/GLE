@@ -1029,7 +1029,7 @@ function select_type_of_lines2($selected = '', $htmlname = 'type', $showempty = 
     }
 }
 
-function convertirDate($date, $enFr = true, $nowSiNull = false) {
+function convertirDate($date, $enFr = true, $nowSiNull = false, $delimiteur = "-") {
     $tab0 = explode(" ", $date);
 
     $tabDate = explode('-', $tab0[0]);
@@ -1037,9 +1037,9 @@ function convertirDate($date, $enFr = true, $nowSiNull = false) {
         $tabDate = explode('/', $tab0[0]);
     if (isset($tabDate[2]) && $tab0[0] != "0000-00-00") {
         if (($tabDate[0] > 32 && $enFr) || ($tabDate[2] > 32 && !$enFr))
-            $return = $tabDate[2] . '-' . $tabDate[1] . '-' . $tabDate[0];
+            $return = $tabDate[2] . $delimiteur . $tabDate[1] . $delimiteur . $tabDate[0];
         else
-            $return = $tabDate[0] . '-' . $tabDate[1] . '-' . $tabDate[2];
+            $return = $tabDate[0] . $delimiteur . $tabDate[1] . $delimiteur . $tabDate[2];
 
 
 
@@ -1058,7 +1058,7 @@ function convertirDate($date, $enFr = true, $nowSiNull = false) {
     else {
         if ($nowSiNull)
             if ($enFr)
-                $return = date("d-m-Y");
+                $return = date("d".$delimiteur."m".$delimiteur."Y");
             else
                 $return = date("Y-m-d");
         else

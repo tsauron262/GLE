@@ -945,7 +945,7 @@ class Chrono extends CommonObject {
                     $html .= $res->value;
                 }
                 if ($res->type_valeur == 3)
-                    $res->valueHtml = dol_print_date($html, "dayhour");
+                    $res->valueHtml = dol_print_date($html, "dayhour", 'gmt');
                 else
                     $res->valueHtml = $html;
                 $res->valueStr = $html;

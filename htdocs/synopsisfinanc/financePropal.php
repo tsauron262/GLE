@@ -401,9 +401,6 @@ if (isset($_POST["form2"])) {
         addElementElement("propal", "contrat", $object->id, $contract->id);
 
         $contract->validate($user);
-        
-        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
-        contrat_pdf_create($db, $contract->id, "contratFinanc");
 
         include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
         $facture = new Facture($db);
@@ -431,6 +428,11 @@ if (isset($_POST["form2"])) {
 
 
         addElementElement("propal", "facture", $object->id, $facture->id);
+        
+        
+        
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+        contrat_pdf_create($db, $contract->id, "contratFinanc");
     }
 }
 $dif=$valfinance->montantAF + $valfinance->VR + $valfinance->pret - $totG;

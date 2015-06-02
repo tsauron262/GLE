@@ -401,6 +401,9 @@ if (isset($_POST["form2"])) {
         addElementElement("propal", "contrat", $object->id, $contract->id);
 
         $contract->validate($user);
+        
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+        contrat_pdf_create($db, $contract->id, "contratFinanc");
 
         include_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
         $facture = new Facture($db);
@@ -445,9 +448,9 @@ if ($user->rights->synopsisFinanc->write) {
 
     require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
     $form = new Form($db);
-    echo "entreprise du rapporteur:".$form->select_thirdparty($socid, "socid");
+    echo "Entreprise du rapporteur:".$form->select_thirdparty($socid, "socid")."<br/>Nom du rapporteur:";
     if ($socid > 0)
-        echo "<br/>nom du rapporteur:".$form->selectcontacts($socid, $idcontact, "contactid", 1);
+        echo $form->selectcontacts($socid, $idcontact, "contactid", 1);
     else
         echo "<select id='contactid' class='flat' name='contactid'></select>";
 

@@ -63,12 +63,12 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
     }
 
     public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null) {
-        echo "Momentanément indisponible";return "";
+//        echo "Momentanément indisponible";return "";
         global $user, $tabVal;
         $tabVal = array();
 
         if ($typeAff2 != "fact")
-            $where = " `revisionNext` = 0 ";
+            $where = " (`revisionNext` = 0 || `revisionNext` is NULL) ";
         else {
             $where = " 1 ";
         }
@@ -78,7 +78,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
                 accessforbidden("", 0, 0);
                 return 1;
             }
-            $where .= " AND CentreVal IN ('" . implode("','", $blockCentre) . "')";
+            $where .= " AND Centre IN ('" . implode("','", $blockCentre) . "')";
         }
 
         $champDate = "fact.datec";
@@ -133,16 +133,16 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         } else {
             $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
             $totalVendu = "SUM(factdet.total_ht)";
-            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye";
+            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye";
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else
             $partReqFin = "  Group BY chrono.id LIMIT 0,100000";
         }
 
-
-
-        $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
+        if ($typeAff2 != "fact")
+            $where .= " AND chronoT.id = chrono.id ";
+        $partReq5 = " FROM  llx_synopsischrono_chrono_105 chronoT, llx_synopsischrono chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
         $partReq5 .= " LEFT JOIN  llx_societe soc on  soc.rowid = propal.fk_soc ";
 //        $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
         $partReq5 .= " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
@@ -176,7 +176,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 
 
         if ($typeAff == "parTypeMat") {
-            $result = $this->db->query("SELECT description, id FROM llx_synopsischrono_view_101");
+            $result = $this->db->query("SELECT description, c.id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 ct," . MAIN_DB_PREFIX . "synopsischrono c WHERE c.id = ct.id;");
 
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
@@ -200,7 +200,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }
         } elseif ($typeAff == "parTypeGar") {
-            $result = $this->db->query("SELECT Type_garantie as description, id FROM llx_synopsischrono_view_101");
+            $result = $this->db->query("SELECT Type_garantie as description, id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101");
 
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
@@ -224,13 +224,18 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }
         } elseif ($typeAff == "parCentre" || $centre) {
+//            $req = "SELECT label, valeur, propalid
+//FROM  `".MAIN_DB_PREFIX."Synopsis_Process_form_list_members` ls, ".MAIN_DB_PREFIX."synopsischrono_view_105 chrono
+//WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             $req = "SELECT label, valeur, propalid
-FROM  `llx_Synopsis_Process_form_list_members` ls, llx_synopsischrono_view_105 chrono
-WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
+FROM  `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` ls, " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 ct , " . MAIN_DB_PREFIX . "synopsischrono chrono
+WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 //            $req = "SELECT label, valeur, propalid
 //FROM  llx_synopsischrono_view_105 chrono LEFT JOIN `llx_Synopsis_Process_form_list_members` ls ON `list_refid` =11 AND chrono.CentreVal = ls.valeur WHERE 1";
-            if ($centre)
-                $req .= " AND centreVal = '" . $centre . "'";
+            if ($centre){
+                $req .= " AND centre = '" . $centre . "'";
+                $blockCentre = true;
+            }
             $result = $this->db->query($req);
 
             $tabMateriel = array();
@@ -332,10 +337,8 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             }
             else {
                 if ($print)
-                    echo "<span style='color:red;'>Impossible d'exporté ".$file."</span>";
-            
+                    echo "<span style='color:red;'>Impossible d'exporté " . $file . "</span>";
             }
-
         } else {
             echo "<style>"
             . "td{"

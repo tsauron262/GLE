@@ -887,6 +887,8 @@ if ($action == 'create')
                     //var_dump($product);
                     $stock = $product->stock_warehouse[$warehouse_id]->real;
                     $stock+=0;  // Convertit en numerique
+                    /*mod drsi*/if($stock == 0 )
+                        $stock = 10000;/*mod drsi*/
                     $defaultqty=min($quantityToBeDelivered, $stock);
                     if (($line->product_type == 1 && empty($conf->global->STOCK_SUPPORTS_SERVICES)) || $defaultqty < 0) $defaultqty=0;
                 }

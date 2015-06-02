@@ -93,7 +93,7 @@ $(window).load(function() {
 
 
 
-    $("input#NoMachine, input#Chrono-1011").focusout(function() {
+    $("input#NoMachine, input#Chrono1011").focusout(function() {
         input = $(this);
         input.val(input.val().toUpperCase());
 
@@ -105,9 +105,9 @@ $(window).load(function() {
         }
         else {
             inputM = $('input[name="description"]');
-            inputG = $("#Chrono-1015");
-            inputTG = $("#Chrono-1064");
-            inputD = $("#Chrono-1014");
+            inputG = $("#Chrono1015");
+            inputTG = $("#Chrono1064");
+            inputD = $("#Chrono1014");
             input.parent().append("<div id='reponse'></div>");
         }
             zoneRep = $("#reponse");
@@ -131,6 +131,8 @@ $(window).load(function() {
                         valeurTG = tabResult[1];
                         valeurG = tabResult[2];
                         valeurD = tabResult[3];
+                        valeurPlus = tabResult[4];
+                        input.parent().append(valeurPlus);
                     }
                 }
                 else
@@ -171,12 +173,12 @@ $(window).load(function() {
     });
 
 
-    elem = "#Chrono-1034, #inputautocompleteChrono-1034";
+    elem = "#Chrono1034, #inputautocompleteChrono1034";
     $(elem).focusout(function() {
         initTrans(elem);
     });
     initTrans(elem);
-    $("#inputautocompleteChrono-1070, #inputautocompleteChrono-1071").focusout(function() {
+    $("#inputautocompleteChrono1070, #inputautocompleteChrono1071").focusout(function() {
         $("#mailTrans").attr("checked", "checked");
     });
 });

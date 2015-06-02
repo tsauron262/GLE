@@ -253,7 +253,10 @@ if (isset($_GET['action'])) {
 //                            $garantie = $datas['coverageEndDate'];
                             $garantie = dateAppleToDate($datas['coverageEndDate']);
                             $dateAchat = dateAppleToDate($datas['estimatedPurchaseDate']);
-                            echo "tabResult = Array('" . $machineinfo . "', '" . $typeGarantie . "', '" . $garantie . "', '" . $dateAchat . "');";
+                            $infoPlus = "";
+                            if (isset($datas['activationLockStatus']) && $datas['activationLockStatus'] !== '')
+                            $infoPlus = "<p style=\"color:red;\">".addslashes ($datas['activationLockStatus'])."</p>";
+                            echo "tabResult = Array('" . $machineinfo . "', '" . $typeGarantie . "', '" . $garantie . "', '" . $dateAchat . "', '".$infoPlus."');";
                         }
                     }
                 }

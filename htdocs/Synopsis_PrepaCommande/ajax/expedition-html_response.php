@@ -429,7 +429,7 @@ EOF;
 
                     print '<form method="GET" action="' . DOL_URL_ROOT . '/expedition/card.php">';
                     print '<input type="hidden" name="action" value="create">';
-                    print '<input type="hidden" name="id" value="' . $commande->id . '">';
+//                    print '<input type="hidden" name="id" value="' . $commande->id . '">';
                     print '<input type="hidden" name="origin" value="commande">';
                     print '<input type="hidden" name="object_id" value="' . $commande->id . '">';
                     print '<table class="border" width="100%">';

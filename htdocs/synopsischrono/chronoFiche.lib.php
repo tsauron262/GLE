@@ -194,7 +194,7 @@ EOF;
 //        }
 
         if ($res->cssClass == 'datetimepicker') {
-            $res->value = convertirDate($res->value);
+            $res->value = convertirDate($res->value, false, false, "/");
         }
 
         if ($res->extraCss . $res->cssClass . "x" != "x") {

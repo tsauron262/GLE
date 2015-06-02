@@ -414,9 +414,9 @@ table.espace th, table.espace td{
     margin: 3px 50px 10px;
 }
 
-@media (max-width: 940px) ,(max-device-width: 940px)
+/*@media (max-width: 940px) ,(max-device-width: 940px)
 {
-    #but-menu/*.vmenu,#tmenu_tooltip*/{
+    #but-menu.vmenu,#tmenu_tooltip{
         display: block;
         width: 25px;
         height: 25px;
@@ -448,11 +448,11 @@ table.espace th, table.espace td{
 
     .tmenu li div, .vmenu a, .vmenu div, .vmenu span, label, form, div, tbody, .vmenu span{
         
-        font-size: 25px!important;
+        font-size: 15px!important;
     }
     
     a img, td img{
-        height: 25px!important;
+        height: 15px!important;
     }
     
     .topmenuimage, .mainmenu.tmenudisabled{
@@ -500,11 +500,11 @@ table.espace th, table.espace td{
         float: none!important;
     }
 
-    /*    #tmenu_tooltip{
+        #tmenu_tooltip{
             position: ;
             z-index: 12;
-        }*/
-    /*    #id-container{
+        }
+        #id-container{
             
         }*/
     
@@ -520,6 +520,20 @@ table.espace th, table.espace td{
     }
 }
 
+
+@media (max-device-width: 940px)
+{
+    .tmenu li div, .vmenu a, .vmenu div, .vmenu span, label, form, div, tbody, .vmenu span{
+        
+        font-size: 25px!important;
+    }
+    
+    a img, td img{
+        height: 25px!important;
+    }
+}
+
+
 @media(min-width: 941px) and (min-device-width: 941px){
     .vmenu, .vmenu a, .vmenu div{
         font-size: 1em!important;
@@ -530,4 +544,9 @@ table.espace th, table.espace td{
     #id-right{
         display: table-cell!important;
     }
-}
+    
+    
+    .vmenu{
+        height: auto;
+    }
+}*/

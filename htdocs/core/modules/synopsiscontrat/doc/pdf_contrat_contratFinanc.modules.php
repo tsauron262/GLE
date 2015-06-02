@@ -399,7 +399,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                         $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
                         $X = $this->marge_gauche + $W;
                         $pdf->setX($X);
-                        $pdf->Cell($W * 7, 6, dol_trunc($obj->desc, 40), 1, NULL, 'L', TRUE);
+                        $pdf->Cell($W * 7, 6, dol_trunc($obj->desc, 49), 1, NULL, 'L', TRUE);
                         $X = $this->marge_gauche + $W * 8;
                         $pdf->setX($X);
                         if ($M_N == true) {
@@ -826,7 +826,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                         $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
                         $X = $this->marge_gauche + $W;
                         $pdf->setX($X);
-                        $pdf->Cell($W * 7, 6, dol_trunc($prod->ref . " - " . $prod->libelle . " - " . $obj->desc, 40), 1, NULL, 'L', TRUE);
+                        $pdf->Cell($W * 7, 6, dol_trunc($prod->ref . " - " . $prod->libelle . " - " . $obj->desc, 49), 1, NULL, 'L', TRUE);
                         $X = $this->marge_gauche + $W * 8;
                         $pdf->setX($X);
                         if ($M_N == true) {
@@ -844,7 +844,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                         $pdf->Cell($W, 6, $obj->qty, 1, NULL, 'L', true);
                         $X = $this->marge_gauche + $W;
                         $pdf->setX($X);
-                        $pdf->Cell($W * 7, 6, dol_trunc($obj->desc, 40), 1, NULL, 'L', TRUE);
+                        $pdf->Cell($W * 7, 6, dol_trunc($obj->desc, 49), 1, NULL, 'L', TRUE);
                         $X = $this->marge_gauche + $W * 8;
                         $pdf->setX($X);
                         if ($M_N == true) {

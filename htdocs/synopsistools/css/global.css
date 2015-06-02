@@ -429,16 +429,22 @@ table.espace th, table.espace td{
     }
 
     #id-left{
-        left: -190px;
-        position: absolute;
+        top:0;
+        left: -300px;
+        position: fixed;
         padding-top: 30px;
+        height: 100%;
+        width: 300px;
+        background-color: black;
+        border: black solid 1px;
     }
     
 
-    /*    .vmenu{
-            position: absolute;
-            
-        }*/
+        div.vmenu{
+            overflow: scroll;
+            width: 95%;
+            height: 50%;
+        }
 
     .tmenu li div, .vmenu a, .vmenu div, .vmenu span, label, form, div, tbody, .vmenu span{
         
@@ -476,6 +482,23 @@ table.espace th, table.espace td{
         width: 75%;
         font-size:28px!important;
     }
+    
+    input.rad{
+        width: 20px!important;
+        display: inline-block;
+    }
+    
+    input[type="label"]{
+        
+    }
+    
+    select{
+        height: 40px;
+    }
+    
+    .fichehalfright{
+        float: none!important;
+    }
 
     /*    #tmenu_tooltip{
             position: ;
@@ -484,6 +507,17 @@ table.espace th, table.espace td{
     /*    #id-container{
             
         }*/
+    
+    #id_cach{
+        width:100%;
+        height:100%;
+        z-index:50; 
+        position:fixed;
+        top:0;
+        background: silver;
+        opacity: 0;
+        display: none
+    }
 }
 
 @media(min-width: 941px) and (min-device-width: 941px){

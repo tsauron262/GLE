@@ -204,8 +204,8 @@ class modSynopsisHoliday extends DolibarrModules {
                 'nbRTTDeducted', '1'), (
                 'cpNewYearDay', '31'), (
                 'cpNewYearMonth', '12'), (
-                'lastAnnualUpdate', '0000'),
-                'nbRTTEveryMonth', '1.0416'
+                'lastAnnualUpdate', '0000'), (
+                'nbRTTEveryMonth', '1.0416')
             );");
 
         return $this->_init($sql);

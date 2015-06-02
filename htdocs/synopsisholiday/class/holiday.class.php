@@ -34,6 +34,10 @@
  *          - updateSoldeRTT()
  *          - getTypeLabel()
  *          - onStatusUpdate() // gestion des événements dans l'agenda lors de la màj du statut
+ * 
+ * Mise à jour 2 : Gestion des utilisateurs multiples pour une même instance Holiday. 
+ *      - $this->fk_user peut être un array.
+ *      - Ajout variable $fk_group
  */
 
 /**
@@ -58,6 +62,7 @@ class SynopsisHoliday extends Holiday {
     var $rowid;
     var $ref;
     var $fk_user;
+    var $fk_group = '';
     var $date_create = '';
     var $description;
     var $date_debut = '';   // Date start in PHP server TZ
@@ -131,7 +136,12 @@ class SynopsisHoliday extends Holiday {
         $now = dol_now();
 
         // Check parameters
-        if (empty($this->fk_user) || !is_numeric($this->fk_user) || $this->fk_user < 0) {
+        if (is_array($this->fk_user)) {
+            if (!count($this->fk_user)) {
+                $this->error = "ErrorBadParameter";
+                return -1;
+            }
+        } else if (empty($this->fk_user) || !is_numeric($this->fk_user) || $this->fk_user < 0) {
             $this->error = "ErrorBadParameter";
             return -1;
         }
@@ -147,6 +157,7 @@ class SynopsisHoliday extends Holiday {
         // Insert request
         $sql = "INSERT INTO " . MAIN_DB_PREFIX . "holiday(";
         $sql.= "fk_user,";
+        $sql.= "fk_group,";
         $sql.= "date_create,";
         $sql.= "description,";
         $sql.= "date_debut,";
@@ -159,7 +170,11 @@ class SynopsisHoliday extends Holiday {
         $sql.= ") VALUES (";
 
         // User
-        $sql.= "'" . $this->fk_user . "',";
+        if (is_array($this->fk_user))
+            $sql.= "NULL,";
+        else
+            $sql.= "'" . $this->fk_user . "',";
+        $sql.= "'" . (!empty($this->fk_group) ? $this->fk_group : 'NULL') . "',";
         $sql.= " '" . $this->db->idate($now) . "',";
         $sql.= " '" . $this->db->escape($this->description) . "',";
         $sql.= " '" . $this->db->idate($this->date_debut) . "',";
@@ -182,19 +197,57 @@ class SynopsisHoliday extends Holiday {
 
         if (!$error) {
             $this->rowid = $this->db->last_insert_id(MAIN_DB_PREFIX . "holiday");
-        }
+            $this->db->commit();
+            if (is_array($this->fk_user)) {
+                foreach ($this->fk_user as $user_id) {
+                    if (is_numeric($user_id) && $user_id >= 0) {
+                        $sql2 = 'INSERT INTO ' . MAIN_DB_PREFIX . 'holiday_group(fk_holiday, fk_user) VALUES (' . $this->rowid . ', ' . $user_id . ')';
+                        $result = $this->db->query($sql2);
+                        if (!$result) {
+                            $error++;
+                            $this->errors[] = "Erreur: " . $this->db->lasterror();
+                        }
+                    }
+                }
+            }
+        } else
+            $this->db->rollback();
 
-        // Commit or rollback
         if ($error) {
             foreach ($this->errors as $errmsg) {
                 dol_syslog(get_class($this) . "::create " . $errmsg, LOG_ERR);
                 $this->error.=($this->error ? ', ' . $errmsg : $errmsg);
             }
-            $this->db->rollback();
             return -1 * $error;
-        } else {
-            $this->db->commit();
+        } else
             return $this->rowid;
+    }
+
+    /**
+     * 	Ajout Synopsis : Charge la liste des utilisateurs pour un congé collecif
+     *
+     *  @param	int		$holiday_id         Id Holiday
+     *  @return int         		 array - Liste des user_id 
+     */
+    function fetchGroupUsers($holiday_id) {
+        $sql = 'SELECT `fk_user` FROM ' . MAIN_DB_PREFIX . 'holiday_group WHERE `fk_holiday`= ' . $holiday_id;
+        $result = $this->db->query($sql);
+        if ($result) {
+            $users = array();
+            $num = $this->db->num_rows($result);
+            $i = 0;
+            if ($num) {
+                while ($i < $num) {
+                    $obj = $this->db->fetch_object($result);
+                    $users[] = $obj->fk_user;
+                    $i++;
+                }
+            }
+            return $users;
+        } else {
+            $this->error = "Error " . $this->db->lasterror();
+            dol_syslog(get_class($this) . "::fetchGroupUsers " . $this->db->lasterror(), LOG_ERR);
+            return -1;
         }
     }
 
@@ -210,6 +263,7 @@ class SynopsisHoliday extends Holiday {
         $sql = "SELECT";
         $sql.= " cp.rowid,";
         $sql.= " cp.fk_user,";
+        $sql.= " cp.fk_group,";
         $sql.= " cp.date_create,";
         $sql.= " cp.description,";
         $sql.= " cp.date_debut,";
@@ -244,6 +298,7 @@ class SynopsisHoliday extends Holiday {
                 $this->rowid = $obj->rowid; // deprecated
                 $this->ref = $obj->rowid;
                 $this->fk_user = $obj->fk_user;
+                $this->fk_group = $obj->fk_group;
                 $this->date_create = $this->db->jdate($obj->date_create);
                 $this->description = $obj->description;
                 $this->date_debut = $this->db->jdate($obj->date_debut);
@@ -269,11 +324,12 @@ class SynopsisHoliday extends Holiday {
                 $this->fk_substitute = $obj->fk_substitute;
             }
             $this->db->free($resql);
+            
+            if (empty($this->fk_user))
+                $this->fk_user = $this->fetchGroupUsers($this->id);
             return 1;
         } else {
             $this->error = "Error " . $this->db->lasterror();
-            echo $this->error;
-            die();
             dol_syslog(get_class($this) . "::fetch " . $this->error, LOG_ERR);
             return -1;
         }
@@ -294,6 +350,7 @@ class SynopsisHoliday extends Holiday {
         $sql.= " cp.rowid,";
 
         $sql.= " cp.fk_user,";
+        $sql.= " cp.fk_group,";
         $sql.= " cp.date_create,";
         $sql.= " cp.description,";
         $sql.= " cp.date_debut,";
@@ -310,9 +367,9 @@ class SynopsisHoliday extends Holiday {
         $sql.= " cp.date_cancel,";
         $sql.= " cp.fk_user_cancel,";
         $sql.= " cp.detail_refuse,";
-        $sql.= "cp.type_conges,";
-        $sql.= "cp.fk_actioncomm,";
-        $sql.= "cp.fk_substitute,";
+        $sql.= " cp.type_conges,";
+        $sql.= " cp.fk_actioncomm,";
+        $sql.= " cp.fk_substitute,";
 
         $sql.= " uu.lastname as user_lastname,";
         $sql.= " uu.firstname as user_firstname,";
@@ -320,10 +377,11 @@ class SynopsisHoliday extends Holiday {
         $sql.= " ua.lastname as validator_lastname,";
         $sql.= " ua.firstname as validator_firstname";
 
-        $sql.= " FROM " . MAIN_DB_PREFIX . "holiday as cp, " . MAIN_DB_PREFIX . "user as uu, " . MAIN_DB_PREFIX . "user as ua";
-        $sql.= " WHERE cp.fk_user = uu.rowid AND cp.fk_validator = ua.rowid AND (";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "holiday as cp, " . MAIN_DB_PREFIX . "user as uu, " . MAIN_DB_PREFIX . "user as ua, " . MAIN_DB_PREFIX . "holiday_group as hg";
+        $sql.= " WHERE uu.rowid = " . $user_id . " AND cp.fk_validator = ua.rowid AND hg.fk_user = " . $user_id . " AND (";
         if (!empty($user_id)) {
-            $sql.= "cp.fk_user = '" . $user_id . "'";
+            $sql.= "(cp.fk_user = '" . $user_id . "' OR ";
+            $sql .= "cp.rowid = hg.fk_holiday)";
             if (!empty($substitute_id))
                 $sql .= " OR ";
             else
@@ -364,7 +422,8 @@ class SynopsisHoliday extends Holiday {
 
                 $tab_result[$i]['rowid'] = $obj->rowid;
                 $tab_result[$i]['ref'] = $obj->rowid;
-                $tab_result[$i]['fk_user'] = $obj->fk_user;
+                $tab_result[$i]['fk_user'] = !empty($obj->fk_user) ? $obj->fk_user : $user_id;
+                $tab_result[$i]['fk_group'] = $obj->fk_group;
                 $tab_result[$i]['date_create'] = $this->db->jdate($obj->date_create);
                 $tab_result[$i]['description'] = $obj->description;
                 $tab_result[$i]['date_debut'] = $this->db->jdate($obj->date_debut);
@@ -414,13 +473,13 @@ class SynopsisHoliday extends Holiday {
      *  @param      string	$filter     SQL Filter
      *  @return     int      			-1 if KO, 1 if OK, 2 if no result
      */
-    function fetchAll($order, $filter) {
+    function fetchAll($order, $filter, $group_cp = false) {
         global $langs;
 
         $sql = "SELECT";
         $sql.= " cp.rowid,";
 
-        $sql.= " cp.fk_user,";
+        $sql.= $group_cp ? " cp.fk_group," : " cp.fk_user,";
         $sql.= " cp.date_create,";
         $sql.= " cp.description,";
         $sql.= " cp.date_debut,";
@@ -441,19 +500,29 @@ class SynopsisHoliday extends Holiday {
         $sql.= " cp.fk_actioncomm,";
         $sql.= " cp.fk_substitute,";
 
-        $sql.= " uu.lastname as user_lastname,";
-        $sql.= " uu.firstname as user_firstname,";
+        if (!$group_cp) {
+            $sql.= " uu.lastname as user_lastname,";
+            $sql.= " uu.firstname as user_firstname,";
 
-        $sql.= " ua.lastname as validator_lastname,";
-        $sql.= " ua.firstname as validator_firstname";
+            $sql.= " ua.lastname as validator_lastname,";
+            $sql.= " ua.firstname as validator_firstname";
 
-        $sql.= " FROM " . MAIN_DB_PREFIX . "holiday as cp, " . MAIN_DB_PREFIX . "user as uu, " . MAIN_DB_PREFIX . "user as ua";
-        $sql.= " WHERE cp.fk_user = uu.rowid AND cp.fk_validator = ua.rowid "; // Hack pour la recherche sur le tableau
+            $sql.= " FROM " . MAIN_DB_PREFIX . "holiday as cp, " . MAIN_DB_PREFIX . "user as uu, " . MAIN_DB_PREFIX . "user as ua";
+            $sql.= " WHERE cp.fk_user = uu.rowid AND cp.fk_validator = ua.rowid "; // Hack pour la recherche sur le tableau
+        } else {
+            $sql.= " ua.lastname as validator_lastname,";
+            $sql.= " ua.firstname as validator_firstname";
+
+            $sql.= " FROM " . MAIN_DB_PREFIX . "holiday as cp, " . MAIN_DB_PREFIX . "user as ua";
+            $sql.= " WHERE cp.fk_user IS NULL AND cp.fk_validator = ua.rowid ";
+        }
+
+
+        //
         // Filtrage de séléction
         if (!empty($filter)) {
             $sql.= $filter;
         }
-
         // Ordre d'affichage
         if (!empty($order)) {
             $sql.= $order;
@@ -462,26 +531,24 @@ class SynopsisHoliday extends Holiday {
         dol_syslog(get_class($this) . "::fetchAll sql=" . $sql, LOG_DEBUG);
         $resql = $this->db->query($sql);
 
+        $tab_result = $this->holiday;
         // Si pas d'erreur SQL
         if ($resql) {
-
             $i = 0;
-            $tab_result = $this->holiday;
             $num = $this->db->num_rows($resql);
-
-            // Si pas d'enregistrement
-            if (!$num) {
-                return 2;
-            }
 
             // On liste les résultats et on les ajoute dans le tableau
             while ($i < $num) {
-
                 $obj = $this->db->fetch_object($resql);
 
                 $tab_result[$i]['rowid'] = $obj->rowid;
                 $tab_result[$i]['ref'] = $obj->rowid;
-                $tab_result[$i]['fk_user'] = $obj->fk_user;
+
+                if ($group_cp)
+                    $tab_result[$i]['fk_group'] = $obj->fk_group;
+                else
+                    $tab_result[$i]['fk_user'] = $obj->fk_user;
+
                 $tab_result[$i]['date_create'] = $this->db->jdate($obj->date_create);
                 $tab_result[$i]['description'] = $obj->description;
                 $tab_result[$i]['date_debut'] = $this->db->jdate($obj->date_debut);
@@ -504,14 +571,21 @@ class SynopsisHoliday extends Holiday {
                 $tab_result[$i]['fk_actioncomm'] = $obj->fk_actioncomm;
                 $tab_result[$i]['fk_substitute'] = $obj->fk_substitute;
 
-                $tab_result[$i]['user_firstname'] = $obj->user_firstname;
-                $tab_result[$i]['user_lastname'] = $obj->user_lastname;
+                if (!$group_cp) {
+                    $tab_result[$i]['user_firstname'] = $obj->user_firstname;
+                    $tab_result[$i]['user_lastname'] = $obj->user_lastname;
+                } else {
+                    $tab_result[$i]['user_firstname'] = '';
+                    $tab_result[$i]['user_lastname'] = '';
+                }
 
                 $tab_result[$i]['validator_firstname'] = $obj->validator_firstname;
                 $tab_result[$i]['validator_lastname'] = $obj->validator_lastname;
-
                 $i++;
             }
+            if (!count($tab_result))
+                return 2;
+
             // Retourne 1 et ajoute le tableau à la variable
             $this->holiday = $tab_result;
             return 1;
@@ -630,6 +704,24 @@ class SynopsisHoliday extends Holiday {
         if (!$resql) {
             $error++;
             $this->errors[] = "Error " . $this->db->lasterror();
+            $this->db->rollback();
+        } else {
+            $this->db->commit();
+            if (is_array($this->fk_user)) {
+                $result = $this->db->query('DELETE FROM ' . MAIN_DB_PREFIX . 'holiday_group WHERE `fk_holiday`= ' . $this->rowid);
+                if (!$result) {
+                    $this->errors[] = 'Echec de la mise à jour de la table "holiday_group" (req. DELETE)';
+                    $error++;
+                } else {
+                    foreach ($this->fk_user as $user_id) {
+                        $result = $this->db->query('INSERT INTO ' . MAIN_DB_PREFIX . 'holiday_group(fk_holiday, fk_user) VALUES(' . $this->rowid . ', ' . $user_id . ')');
+                        if (!$result) {
+                            $this->errors[] = 'Echec de la mise à jour de la table "holiday_group" (req. INSERT INTO userId: ' . $user_id . ')';
+                            $error++;
+                        }
+                    }
+                }
+            }
         }
 
         // Commit or rollback
@@ -638,10 +730,10 @@ class SynopsisHoliday extends Holiday {
                 dol_syslog(get_class($this) . "::update " . $errmsg, LOG_ERR);
                 $this->error.=($this->error ? ', ' . $errmsg : $errmsg);
             }
-            $this->db->rollback();
+
             return -1 * $error;
         } else {
-            $this->db->commit();
+
             return 1;
         }
     }
@@ -658,38 +750,43 @@ class SynopsisHoliday extends Holiday {
         $error = 0;
 
         $sql = "DELETE FROM " . MAIN_DB_PREFIX . "holiday";
-        $sql.= " WHERE rowid=" . $this->rowid;
+        $sql.= " WHERE `rowid`= " . $this->rowid;
 
         $this->db->begin();
-
         dol_syslog(get_class($this) . "::delete sql=" . $sql);
         $resql = $this->db->query($sql);
+        
         if (!$resql) {
             $error++;
             $this->errors[] = "Error " . $this->db->lasterror();
-        }
-
-        if (!$error) {
-            
-        }
-
-        // Commit or rollback
-        if ($error) {
-            foreach ($this->errors as $errmsg) {
-                dol_syslog(get_class($this) . "::delete " . $errmsg, LOG_ERR);
-                $this->error.=($this->error ? ', ' . $errmsg : $errmsg);
-            }
             $this->db->rollback();
-            return -1 * $error;
         } else {
             $this->db->commit();
+            if (is_array($this->fk_user)) {
+                $this->db->begin();
+                $result = $this->db->query('DELETE FROM ' . MAIN_DB_PREFIX . 'holiday_group WHERE `fk_holiday`= ' . $this->rowid);
+                if (!$result) {
+                    $error++;
+                    $this->errors[] = "Error " . $this->db->lasterror();
+                    $this->db->rollback();
+                } else
+                    $this->db->commit();
+            }
             if ($this->fk_actioncomm) {
                 $ac = new ActionComm($this->db);
                 $ac->fetch($this->fk_actioncomm);
                 $ac->delete();
             }
-            return 1;
         }
+
+        if ($error) {
+            foreach ($this->errors as $errmsg) {
+                dol_syslog(get_class($this) . "::delete " . $errmsg, LOG_ERR);
+                $this->error.=($this->error ? ', ' . $errmsg : $errmsg);
+            }
+            return -1 * $error;
+        }
+        return 1;
     }
 
     /**
@@ -749,14 +846,19 @@ class SynopsisHoliday extends Holiday {
 
         $picto = 'holiday';
 
-        $label = $langs->trans("Show") . ': ' . $this->ref ;
-        
+        $label = $langs->trans("Show") . ': ' . $this->ref;
+
         $userStr = "";
-        
-        if($this->fk_user){
-            $userT = new User($this->db);
-            $userT->fetch($this->fk_user);
-            $userStr = " - ".$userT->getFullName($langs);
+
+        $usersList = '';
+        if (!empty($this->fk_user)) {
+            if (is_numeric($this->fk_user)) {
+                $userT = new User($this->db);
+                $userT->fetch($this->fk_user);
+                $userStr = " - " . $userT->getFullName($langs);
+            } else if (is_array($this->fk_user)) {
+                $userStr = ' - Congés collectifs';
+            }
         }
 
         if ($withpicto)
@@ -764,7 +866,7 @@ class SynopsisHoliday extends Holiday {
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         if ($withpicto != 2)
-            $result.=$lien . $this->ref .$userStr. $lienfin;
+            $result.=$lien . $this->ref . $userStr . $lienfin;
         return $result;
     }
 
@@ -2112,6 +2214,8 @@ class SynopsisHoliday extends Holiday {
         if (!isset($this->id) || empty($this->id))
             return false;
 
+        if (is_array($this->fk_user))
+            return true;
 
         $ac = new ActionComm($this->db);
         $dateBegin = new DateTime($this->db->idate($this->date_debut));
@@ -2286,7 +2390,7 @@ class SynopsisHoliday extends Holiday {
 
         if ($fk_user < 0 && empty($this->fk_user))
             return 0;
-        
+
         $dateBegin = new DateTime();
         $dateBegin->setTimestamp($this->date_debut);
         $dateEnd = new DateTime();
@@ -2307,21 +2411,21 @@ class SynopsisHoliday extends Holiday {
         }
 
 
-        $sql = "SELECT `id` FROM " . MAIN_DB_PREFIX . "actioncomm WHERE `fk_user_action` = ".(($fk_user >= 0)?$fk_user:$this->fk_user);
+        $sql = "SELECT `id` FROM " . MAIN_DB_PREFIX . "actioncomm WHERE `fk_user_action` = " . (($fk_user >= 0) ? $fk_user : $this->fk_user);
         $sql .= " AND `datep` <= ";
-        $sql .= "'".$dateEnd->format('Y-m-d H:i:s') . "' AND `datep2` >= '" . $dateBegin->format('Y-m-d H:i:s')."';";
-        
+        $sql .= "'" . $dateEnd->format('Y-m-d H:i:s') . "' AND `datep2` >= '" . $dateBegin->format('Y-m-d H:i:s') . "';";
+
         dol_syslog(get_class($this) . "::fetchRDV sql=" . $sql, LOG_DEBUG);
         date_default_timezone_set("GMT");
         $resql = $this->db->query($sql);
         date_default_timezone_set("Europe/Paris");
-        
+
         if ($resql) {
             $i = 0;
             $num = $this->db->num_rows($resql);
             if (!$num)
                 return array();
-            
+
             $list = array();
             while ($i < $num) {
                 $obj = $this->db->fetch_object($resql);
@@ -2335,5 +2439,5 @@ class SynopsisHoliday extends Holiday {
         }
         return 0;
     }
+
 }
-    

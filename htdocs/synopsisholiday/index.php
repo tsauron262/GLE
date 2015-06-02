@@ -59,7 +59,7 @@ $pageprev = $page - 1;
 $pagenext = $page + 1;
 
 $id = GETPOST('id');
-
+$holidaystatic = new SynopsisHoliday($db);
 
 $search_ref = GETPOST('search_ref');
 $month_create = GETPOST('month_create');
@@ -72,6 +72,13 @@ $search_employe = GETPOST('search_employe');
 $search_valideur = GETPOST('search_valideur');
 $search_statut = GETPOST('select_statut');
 
+$droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) ||
+        (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
+$isDrh = ($user->id == $holidaystatic->getConfCP('drhUserId'));
+if ($isDrh || $droitAll) {
+    $search_group = GETPOST('search_group');
+    $showGroups = GETPOST('show_groups_cp');
+}
 
 /*
  * Actions
@@ -84,28 +91,23 @@ $search_statut = GETPOST('select_statut');
  */
 
 $holiday = new SynopsisHoliday($db);
-$holidaystatic = new SynopsisHoliday($db);
 $fuser = new User($db);
 
 // Update sold
 $holiday->updateSold();
 
-
-
-if (($search_valideur == $user->id || isset($_REQUEST['myValid'])) && $holiday->getConfCP('drhUserId') == $user->id){
+if (($search_valideur == $user->id || isset($_REQUEST['myValid'])) && $isDrh) {
     $search_statut = 3;
     $search_valideur = 0;
-}
-elseif (isset($_REQUEST['myValid'])){
+} elseif (isset($_REQUEST['myValid'])) {
     $search_valideur = $user->id;
 }
 
 //deuxieme test pour le filtre
-if($search_valideur > 0)
+if ($search_valideur > 0)
     $search_statut = 2;
 
 $id2 = $search_valideur;
-
 
 $max_year = 5;
 $min_year = 10;
@@ -166,8 +168,15 @@ if ($year_create > 0) {
 }
 
 // EMPLOYE
-if (!empty($search_employe) && $search_employe != -1) {
-    $filter.= " AND cp.fk_user = '" . $db->escape($search_employe) . "'\n";
+if (empty($showGroups) && !$showGroups) {
+    if (!empty($search_employe) && $search_employe != -1) {
+        $filter.= " AND cp.fk_user = '" . $db->escape($search_employe) . "'\n";
+    }
+}
+
+// GROUPE
+else if (!empty($search_group) && $search_group != -1) {
+    $filter.= " AND cp.fk_group = '" . $db->escape($search_group) . "'\n";
 }
 
 // VALIDEUR
@@ -194,10 +203,10 @@ if ($id > 0) {
     $user_id = $fuser->id;
 }
 // Récupération des congés payés de l'utilisateur ou de tous les users
-if ((!$user->rights->holiday->write_all && !$user->rights->holiday->lire_tous) || $id > 0) {
+if ((!$droitAll && !$isDrh) || $id > 0) {
     $holiday_payes = $holiday->fetchByUser($user_id, $order, $filter);
 } else {
-    $holiday_payes = $holiday->fetchAll($order, $filter);
+    $holiday_payes = $holiday->fetchAll($order, $filter, $showGroups);
 }
 // Si erreur SQL
 if ($holiday_payes == '-1') {
@@ -265,13 +274,13 @@ $nextCPYearDateAfter = $holiday->getCPNextYearDate(true, true);
 $nbRtt = $holiday->getRTTforUser($user_id);
 print '<b>Année en cours : </b>';
 print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
-print '&nbsp;(A utiliser avant le <b>'.$nextCPYearDate.'</b>).';
+print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
 print '<br/>';
 print '<b>Année n+1 : </b>';
 print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_next . ' / ' . $nbdeduced . ')' : '');
-print '&nbsp;(A utiliser à partir du <b>'.$nextCPYearDate.'</b> et avant le <b>'.$nextCPYearDateAfter.'</b>).';
+print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
 print '<br/>';
-print 'Solde RTT : <b>'.round($nbRtt, 2).' jours</b>';
+print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
 
 if ($id > 0) {
     dol_fiche_end();
@@ -280,12 +289,30 @@ if ($id > 0) {
     dol_fiche_end();
 }
 
-print '<form method="get" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
+print '<form id="searchForm" method="get" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
+print '<div style="margin: 15px 0">';
+if ($isDrh || $droitAll) {
+    print '<input type="radio" id="showGroupsCp_no" name="show_groups_cp" value="0"'.(!$showGroups?' checked':'').'/>';
+    print '<label style="margin: 0 30px 0 5px">Afficher les congés individuels</label>';
+    print '<input type="radio" id="showGroupsCp_yes" name="show_groups_cp" value="1"'.($showGroups?' checked':'').'/>';
+    print '<label style="margin-left: 5px">Afficher les congés collectifs</label>';
+    print '</div>';
+    print '<script type="text/javascript">';
+    print '$(document).ready(function() {';
+    print "$('input[name=show_groups_cp]').change(function() {";
+    print "$('#searchForm').submit();";
+    print "});";
+    print '});';
+    print '</script>';
+}
 print '<table class="noborder" width="100%;">';
 print "<tr class=\"liste_titre\">";
 print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "cp.rowid", "", '', '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("DateCreateCP"), $_SERVER["PHP_SELF"], "cp.date_create", "", '', 'align="center"', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("Employe"), $_SERVER["PHP_SELF"], "cp.fk_user", "", '', '', $sortfield, $sortorder);
+if (!$showGroups)
+    print_liste_field_titre($langs->trans("Employe"), $_SERVER["PHP_SELF"], "cp.fk_user", "", '', '', $sortfield, $sortorder);
+else
+    print_liste_field_titre("Groupe", $_SERVER["PHP_SELF"], "cp.fk_group", "", '', '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("ValidatorCP"), $_SERVER["PHP_SELF"], "cp.fk_validator", "", '', '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("DateDebCP"), $_SERVER["PHP_SELF"], "cp.date_debut", "", '', 'align="center"', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("DateFinCP"), $_SERVER["PHP_SELF"], "cp.date_fin", "", '', 'align="center"', $sortfield, $sortorder);
@@ -307,16 +334,20 @@ $formother->select_year($year_create, 'year_create', 1, $min_year, 0);
 print '</td>';
 
 // UTILISATEUR
-if ($user->rights->holiday->write_all || $user->rights->holiday->lire_tous) {
+if ($droitAll || $isDrh) {
     print '<td class="liste_titre" align="left">';
-    $form->select_users($search_employe, "search_employe", 1, "", 0, '');
+    if (!$showGroups) {
+        $form->select_users($search_employe, "search_employe", 1, "", 0, '');
+    } else {
+        $form->select_dolgroups($search_group, "search_group", 1);
+    }
     print '</td>';
 } else {
     print '<td class="liste_titre">&nbsp;</td>';
 }
 
 // VALIDEUR
-if (($user->rights->holiday->write_all) || ($user->rights->holiday->lire_tous)) {
+if ($droitAll) {
     print '<td class="liste_titre" align="left">';
 
     $validator = new UserGroup($db);
@@ -361,17 +392,23 @@ print "</tr>\n";
 
 // Lines
 if (!empty($holiday->holiday)) {
-    $userstatic = new User($db);
+    if (!$showGroups)
+        $userstatic = new User($db);
+    else
+        $groupstatic = new UserGroup($db);
     $approbatorstatic = new User($db);
 
     foreach ($holiday->holiday as $infos_CP) {
         $var = !$var;
 
         // Utilisateur
-        $userstatic->id = $infos_CP['fk_user'];
-        $userstatic->lastname = $infos_CP['user_lastname'];
-        $userstatic->firstname = $infos_CP['user_firstname'];
-
+        if (isset($userstatic)) {
+            $userstatic->id = $infos_CP['fk_user'];
+            $userstatic->lastname = $infos_CP['user_lastname'];
+            $userstatic->firstname = $infos_CP['user_firstname'];
+        } else if (isset($groupstatic)) {
+            $groupstatic->fetch($infos_CP['fk_group']);
+        }
         // Valideur
         $approbatorstatic->id = $infos_CP['fk_validator'];
         $approbatorstatic->lastname = $infos_CP['validator_lastname'];
@@ -384,9 +421,15 @@ if (!empty($holiday->holiday)) {
         $holidaystatic->id = $infos_CP['rowid'];
         $holidaystatic->ref = $infos_CP['rowid'];
         print $holidaystatic->getNomUrl(1);
+
         print '</td>';
         print '<td style="text-align: center;">' . dol_print_date($date, 'day') . '</td>';
-        print '<td>' . $userstatic->getNomUrl('1') . '</td>';
+        print '<td>';
+        if (!$showGroups)
+            print $userstatic->getNomUrl('1');
+        else
+            print $groupstatic->name;
+        print '</td>';
         print '<td>' . $approbatorstatic->getNomUrl('1') . '</td>';
         print '<td align="center">' . dol_print_date($infos_CP['date_debut'], 'day') . '</td>';
         print '<td align="center">' . dol_print_date($infos_CP['date_fin'], 'day') . '</td>';

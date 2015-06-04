@@ -857,7 +857,13 @@ class SynopsisHoliday extends Holiday {
                 $userT->fetch($this->fk_user);
                 $userStr = " - " . $userT->getFullName($langs);
             } else if (is_array($this->fk_user)) {
-                $userStr = ' - Congés collectifs';
+                if (isset($this->fk_group) && !empty($this->fk_group)) {
+                    $userGroup = new UserGroup($this->db);
+                    if ($userGroup->fetch($this->fk_group) > 0)
+                        $userStr = ' - Groupe: <b>'.$userGroup->name.'</b>';
+                }
+                if (empty($userStr))
+                    $userStr = ' - Congés collectifs';
             }
         }
 
@@ -2210,18 +2216,13 @@ class SynopsisHoliday extends Holiday {
      *
      *  @return	bool            ok ou non
      */
-    function onStatusUpdate($user) {
+    function onStatusUpdate($updateUser) {
         if (!isset($this->id) || empty($this->id))
             return false;
-
-        if (is_array($this->fk_user))
-            return true;
 
         $ac = new ActionComm($this->db);
         $dateBegin = new DateTime($this->db->idate($this->date_debut));
         $dateEnd = new DateTime($this->db->idate($this->date_fin));
-        $userToDo = new User($this->db);
-        $userToDo->fetch($this->fk_user);
         $check = true;
 
         $substitute = null;
@@ -2269,22 +2270,27 @@ class SynopsisHoliday extends Holiday {
                     $dateBegin->setTime(14, 0, 0);
                     $dateEnd->setTime(19, 59, 59);
                 }
-
+                
+                // Idem pour la liste des users: 
+                if (is_array($this->fk_user)) {
+                    $userAssigned = array();
+                    foreach ($this->fk_user as $user_id)
+                        $userAssigned[] = array('id' => $user_id, 'transparency' => 1);
+                    $ac->userassigned = $userAssigned;
+                }
 
                 date_default_timezone_set("GMT");
-
 
                 $ac->datep = $dateBegin->format('Y-m-d H:i:s');
                 $ac->datef = $dateEnd->format('Y-m-d H:i:s');
                 $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . dolGetFirstLastname($substitute->firstname, $substitute->lastname . '.') : 'Aucun rempaçant désigné.');
 
-
-                $result = $ac->update($userToDo);
+                $result = $ac->update($updateUser);
 
                 date_default_timezone_set("Europe/Paris");
 
                 if ($result == 0) {
-                    // Forçage de la màj (si $userToDo n'a pas les droits):
+                    // Forçage de la màj (si $updateUser n'a pas les droits):
                     $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";
                     $sql .= "SET note = '" . $this->db->escape($ac->note) . "'";
                     $sql .= ", datep = '" . $dateBegin->format('Y-m-d H:i:s') . "'";
@@ -2331,9 +2337,16 @@ class SynopsisHoliday extends Holiday {
             $ac->transparency = 1;
             $ac->fk_element = $this->id;
             $ac->elementtype = $this->element;
-            $ac->userownerid = $userToDo->id;
-
-
+            
+            if (is_array($this->fk_user)) {
+                $usersAssigned = array();
+                foreach ($this->fk_user as $user_id) 
+                    $userAssigned[] = array('id' => $user_id, 'transparency' => 1);
+                $ac->userassigned = $userAssigned;
+            } else {
+                $ac->userownerid = $this->fk_user;
+            }
+            
             if ($fk_action)
                 $ac->type_id = $fk_action;
 
@@ -2354,7 +2367,7 @@ class SynopsisHoliday extends Holiday {
             $ac->datep = $dateBegin->format('Y-m-d H:i:s');
             $ac->datef = $dateEnd->format('Y-m-d H:i:s');
             $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . $substitute->firstname . ' ' . $substitute->lastname : 'Aucun rempaçant désigné.');
-            $result = $ac->add($user);
+            $result = $ac->add($updateUser);
             if ($result < 0)
                 $check = false;
             else
@@ -2388,7 +2401,7 @@ class SynopsisHoliday extends Holiday {
         if (empty($this->id) || empty($this->fk_user) || empty($this->date_debut) || empty($this->date_fin))
             return 0;
 
-        if ($fk_user < 0 && empty($this->fk_user))
+        if (is_array($this->fk_user) || ($fk_user < 0 && empty($this->fk_user)))
             return 0;
 
         $dateBegin = new DateTime();

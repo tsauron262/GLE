@@ -440,6 +440,8 @@ class pdf_azur extends ModelePDFPropales
 
 					$pdf->SetFont('','', $default_font_size - 1);   // On repositionne la police par defaut
 
+                                        
+                                        /*mod drsi*/if($object->lines[$i]->product_type < 100){
 					// VAT Rate
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
 					{
@@ -516,6 +518,7 @@ class pdf_azur extends ModelePDFPropales
 						$pdf->line($this->marge_gauche, $nexY+1, $this->page_largeur - $this->marge_droite, $nexY+1);
 						$pdf->SetLineStyle(array('dash'=>0));
 					}
+                                        }/*fmoddrsi*/
 
 					$nexY+=2;    // Passe espace entre les lignes
 

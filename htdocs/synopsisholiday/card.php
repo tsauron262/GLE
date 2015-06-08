@@ -127,7 +127,7 @@ if ($action == 'create') {
             if ($nb_ferie)
                 $nbopenedday = 0;
         }
-        if ($nbopenedday < 1) {
+        if ($nbopenedday < 0.5) {
             header('Location: card.php?action=request&error=DureeHoliday');
             exit;
         }
@@ -236,7 +236,7 @@ if ($action == 'update') {
                 if ($nb_ferie)
                     $nbopenedday = 0;
             }
-            if ($nbopenedday < 1) {
+            if ($nbopenedday < 0.5) {
                 header('Location: card.php?id=' . $_POST['holiday_id'] . '&action=edit&error=DureeHoliday');
                 exit;
             }

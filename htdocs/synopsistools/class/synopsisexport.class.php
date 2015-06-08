@@ -74,10 +74,10 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         }
 
         if ($blockCentre) {
-            if ($typeAff2 == "fact") {
-                accessforbidden("", 0, 0);
-                return 1;
-            }
+//            if ($typeAff2 == "fact") {
+//                accessforbidden("", 0, 0);
+//                return 1;
+//            }
             $where .= " AND Centre IN ('" . implode("','", $blockCentre) . "')";
         }
 
@@ -160,7 +160,8 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $partReq5 = " FROM llx_societe soc, llx_facturedet det, llx_facture fact ";
             $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
             $partReq5 .= " LEFT JOIN  llx_propal propal on  propal.rowid = el.fk_source ";
-//            $partReq5 .= " LEFT JOIN  llx_synopsischrono_view_105 chrono on  chrono.propalId = el.fk_source";
+            $partReq5 .= " LEFT JOIN  llx_synopsischrono chrono1 ON chrono1.propalId = el.fk_source ";
+            $partReq5 .= " LEFT JOIN llx_synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
             $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL) AND ";
             $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;

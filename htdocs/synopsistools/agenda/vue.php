@@ -177,6 +177,7 @@ $js .= <<<EOF
             save(calEvent);
         } else{
                 start = calEvent.start.getTime();
+        console.log(calEvent);
                 end = calEvent.end.getTime();
                 end -= 60*1000;
                 back = document.location.href;

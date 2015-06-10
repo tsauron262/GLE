@@ -355,8 +355,8 @@ if ($action == 'confirm_send') {
                 if (empty($cp->type_conges) || !$cp->type_conges) {
                     $soldes = $cp->getCPforUser($cp->fk_user, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
                     if (!isset($soldes['error'])) {
-                        if ($soldes['nb_holiday_current'] < $soldes['nbOpenDayCurrent'] ||
-                                $soldes['nb_holiday_next'] < $soldes['nbOpenDayNext']) {
+                        if (($soldes['nbOpenDayCurrent'] > 0 && $soldes['nb_holiday_current'] < $soldes['nbOpenDayCurrent']) ||
+                                ($soldes['nbOpenDayNext'] > 0 && $soldes['nb_holiday_next'] < $soldes['nbOpenDayNext'])) {
                             $message.= "\n";
                             $message.= $langs->transnoentities("HolidaysToValidateAlertSolde") . "\n";
                         }

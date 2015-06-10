@@ -92,19 +92,20 @@ $holiday->updateSold();
 
 
 
-if (($search_valideur == $user->id || isset($_REQUEST['myValid'])) && $holiday->getConfCP('drhUserId') == $user->id){
+if ((/*$search_valideur == $user->id || */isset($_REQUEST['myValid'])) && $holiday->getConfCP('drhUserId') == $user->id){
     $search_statut = 3;
-    $search_valideur = 0;
+    $search_valideur = null;
+    $id2 = $user->id;
 }
 elseif (isset($_REQUEST['myValid'])){
     $search_valideur = $user->id;
+    $search_statut = 2;
 }
 
 //deuxieme test pour le filtre
 if($search_valideur > 0)
-    $search_statut = 2;
+    $id2 = $search_valideur;
 
-$id2 = $search_valideur;
 
 
 $max_year = 5;

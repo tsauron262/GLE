@@ -352,7 +352,7 @@ if ($ok){
     header("Location:" . $_SERVER["HTTP_REFERER"]);
 }
 else {
-    dol_syslog("Page request des chrono sav sans parametre action vamide trouvé Ancien etat : " . $chrono->extraValue[$chrono->id]['Etat']['value'] . " Nouveau : " . $action, 4);
+    dol_syslog("Page request des chrono sav sans parametre action valide trouvé :! Ancien etat : " . $chrono->extraValue[$chrono->id]['Etat']['value'] . " Nouveau : " . $action, 4);
     echo "Quelque chose c'est mal passé : ";
 }
 

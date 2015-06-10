@@ -59,6 +59,9 @@ $search_status		= GETPOST("search_status",'int');
 $search_sale  = GETPOST("search_sale");
 $search_categ = GETPOST("search_categ",'int');
 $catid        = GETPOST("catid",'int');
+
+
+$search_phone        = GETPOST("search_phone");
 // If the internal user must only see his customers, force searching by him
 if (!$user->rights->societe->client->voir && !$socid) $search_sale = $user->id;
 
@@ -101,7 +104,7 @@ $thirdpartystatic=new Societe($db);
 $help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
 llxHeader('',$langs->trans("ThirdParty"),$help_url);
 
-$sql = "SELECT s.rowid, s.nom as name, s.client, s.zip, s.town, st.libelle as stcomm, s.prefix_comm, s.code_client, s.code_compta, s.status as status,";
+$sql = "SELECT s.phone, s.rowid, s.nom as name, s.client, s.zip, s.town, st.libelle as stcomm, s.prefix_comm, s.code_client, s.code_compta, s.status as status,";
 $sql.= " s.datec, s.canvas";
 if ((!$user->rights->societe->client->voir && !$socid) || $search_sale) $sql .= ", sc.fk_soc, sc.fk_user"; // We need these fields in order to filter by sale (including the case where the user can only see his prospects)
 $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
@@ -127,6 +130,9 @@ if ($search_town) {
 }
 if ($search_code)  $sql.= " AND s.code_client LIKE '%".$db->escape($search_code)."%'";
 if ($search_compta) $sql.= " AND s.code_compta LIKE '%".$db->escape($search_compta)."%'";
+
+
+if ($search_phone) $sql.= " AND replace(s.phone, ' ', '') LIKE '%".$db->escape(str_replace(" ", "", $search_phone))."%'";
 
 if ($search_status!='') $sql .= " AND s.status = ".$db->escape($search_status);
 // Insert sale filter
@@ -191,6 +197,11 @@ if ($result)
 	print_liste_field_titre($langs->trans("Zip"),$_SERVER["PHP_SELF"],"s.zip","",$param,"",$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("Town"),$_SERVER["PHP_SELF"],"s.town","",$param,"",$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("CustomerCode"),$_SERVER["PHP_SELF"],"s.code_client","",$param,"",$sortfield,$sortorder);
+        
+        
+	print_liste_field_titre($langs->trans("Tél"),$_SERVER["PHP_SELF"],"s.phone","",$param,"",$sortfield,$sortorder);
+        
+        
     print_liste_field_titre($langs->trans("AccountancyCode"),$_SERVER["PHP_SELF"],"s.code_compta","",$param,'align="left"',$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("DateCreation"),$_SERVER["PHP_SELF"],"datec","",$param,'align="right"',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"],"s.status","",$param,'align="center"',$sortfield,$sortorder);
@@ -217,6 +228,14 @@ if ($result)
     print '<td class="liste_titre">';
     print '<input type="text" class="flat" name="search_code" value="'.$search_code.'" size="10">';
     print '</td>';
+    
+    
+
+    print '<td class="liste_titre">';
+    print '<input type="text" class="flat" name="search_phone" value="'.$search_phone.'" size="10">';
+    print '</td>';
+    
+    
 
     print '<td align="left" class="liste_titre">';
     print '<input type="text" class="flat" name="search_compta" value="'.$search_compta.'" size="10">';
@@ -260,6 +279,7 @@ if ($result)
 		print '<td>'.$obj->zip.'</td>';
         print '<td>'.$obj->town.'</td>';
         print '<td>'.$obj->code_client.'</td>';
+        print '<td>'.$obj->phone.'</td>';
         print '<td>'.$obj->code_compta.'</td>';
         print '<td align="right">'.dol_print_date($db->jdate($obj->datec),'day').'</td>';
         print '<td align="center">'.$thirdpartystatic->getLibStatut(3);

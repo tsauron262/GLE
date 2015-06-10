@@ -29,7 +29,7 @@ class synopsisexport {
 
 
         $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-, email , total, total_ttc, IF(idtech8sens > 0, idtech8sens, id8Sens) as id8Sens, chronoT.Centre FROM  `llx_facture` fact
+, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `llx_facture` fact
 
 
 LEFT JOIN llx_element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid

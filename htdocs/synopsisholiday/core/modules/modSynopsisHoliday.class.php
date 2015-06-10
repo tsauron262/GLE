@@ -165,7 +165,7 @@ class modSynopsisHoliday extends DolibarrModules {
         $r++;
         $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=hrm,fk_leftmenu=holiday',
             'type' => 'left',
-            'titre' => 'Mes Validations',
+            'titre' => 'Mes Validations à traiter',
             'mainmenu' => 'hrm',
             'leftmenu' => '1', // To say if we can overwrite leftmenu
             'url' => '/synopsisholiday/index.php?&myValid=true',
@@ -177,8 +177,8 @@ class modSynopsisHoliday extends DolibarrModules {
 
 
         $this->tabs = array('user:-paidholidays',
-            'user:+paidholidaysRtt:Congés RTT:@monmodule:/synopsisholiday/index.php?id=__ID__',
-            'user:+paidholidaysRtt2:Valid Congés RTT:@monmodule:/synopsisholiday/index.php?search_valideur=__ID__');
+            'user:+paidholidaysRtt:Congés RTT perso:@monmodule:/synopsisholiday/index.php?id=__ID__',
+            'user:+paidholidaysRtt2:Valid Congés RTT à traiter:@monmodule:/synopsisholiday/index.php?search_valideur=__ID__');
     }
 
     /**

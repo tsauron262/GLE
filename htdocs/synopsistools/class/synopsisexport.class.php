@@ -20,6 +20,7 @@ class synopsisexport {
     }
 
     public function exportFactureSav($print = true) {
+        echo "Debut export : <br/>";
 //        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 //, email , total, total_ttc, id8Sens FROM  `llx_facture` fact, llx_societe soc
 //LEFT JOIN llx_element_element el, llx_user_extrafields ue, llx_synopsischrono_view_105 chrono 
@@ -28,7 +29,7 @@ class synopsisexport {
 
 
         $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-, email , total, total_ttc, IF(idtech8sens > 0, idtech8sens, id8Sens) as id8Sens FROM  `llx_facture` fact
+, email , total, total_ttc, IF(idtech8sens > 0, idtech8sens, id8Sens) as id8Sens, chronoT.Centre FROM  `llx_facture` fact
 
 
 LEFT JOIN llx_element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid
@@ -41,6 +42,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 
 
         while ($ligne = $this->db->fetch_object($result)) {
+            $this->annulExport = false;
             $return1 = $return2 = "";
             $return1 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', true);
             $return2 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', false);
@@ -55,11 +57,14 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             }
             $return = $return1 . $return2;
 //            echo $return;
-            $this->sortie($return, $ligne->facnumber, "factureSav", $ligne->factid, $print);
+            if (!$this->annulExport) {
+                $this->sortie($return, $ligne->facnumber, "factureSav", $ligne->factid, $print);
 
-            if ($print)
-                echo "<br/>Facture : " . $ligne->facnumber . " exporté.<br/>";
+                if ($print)
+                    echo "<br/>Facture : " . $ligne->facnumber . " exporté.<br/>";
+            }
         }
+        echo "Fin export : <br/>";
     }
 
     public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null) {
@@ -233,7 +238,7 @@ FROM  `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` ls, " . MAIN_DB
 WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 //            $req = "SELECT label, valeur, propalid
 //FROM  llx_synopsischrono_view_105 chrono LEFT JOIN `llx_Synopsis_Process_form_list_members` ls ON `list_refid` =11 AND chrono.CentreVal = ls.valeur WHERE 1";
-            if ($centre){
+            if ($centre) {
                 $req .= " AND centre = '" . $centre . "'";
                 $blockCentre = true;
             }
@@ -400,6 +405,24 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                     else
                         $tabVal[$valeur] = 1;
                 }
+
+                if ($nom == "id8Sens") {
+                    if ($valeur <= 1) {
+                        if (isset($ligne->Centre) && $ligne->Centre != "") {
+                            global $tabCentre;
+                            if (isset($tabCentre[$ligne->Centre][3]) && $tabCentre[$ligne->Centre][3] > 0)
+                                $valeur = $tabCentre[$ligne->Centre][3];
+                            else{
+                                dol_syslog("Pas d'id tech, pas de tech referent DANS centre pour export facture " . print_r($ligne, 1), 3);
+                                $this->annulExport = true;
+                            }
+                        } else{
+                            dol_syslog("Pas d'id tech, pas de centre pour export facture " . print_r($ligne, 1), 3);
+                            $this->annulExport =true;
+                        }
+                    }
+                }
+
 
                 if ($nom == 'objSoc') {
                     $tabT = explode("|", $valeur);

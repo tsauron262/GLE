@@ -102,17 +102,17 @@ class FormActions
                     else if (defaultvalue == 0) {
 						percentage.val(0);
                     	percentage.attr('disabled', 'disabled');
-                        $('.hideifna').show();
+//                        $('.hideifna').show();
                     }
                     else if (defaultvalue == 100) {
 						percentage.val(100);
                         percentage.attr('disabled', 'disabled');
-                        $('.hideifna').show();
+//                        $('.hideifna').show();
                     }
                     else {
                     	if (defaultvalue == 50 && (percentage.val() == 0 || percentage.val() == 100)) { percentage.val(50) };
                     	percentage.removeAttr('disabled');
-                        $('.hideifna').show();
+//                        $('.hideifna').show();
                     }
                 }
                 </script>\n";

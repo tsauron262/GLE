@@ -277,7 +277,8 @@ if ($resql) {
     print $selSoc;
     if ($user->rights->synopsisficheinter->rapportTous) {
         echo "<td align=center>Intervenant";
-        $html->select_users($_REQUEST['filterUser'], 'filterUser', 1, '', 0, 1);
+//        $html->select_users($_REQUEST['filterUser'], 'filterUser', 1, '', 0, 1);
+        print select_dolusersInGroup($html, 3, $_REQUEST['filterUser'], 'filterUser', 1, '', 0, true);
         $filterUser = false;
     }
 
@@ -670,10 +671,10 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
     if ($tabResult[0][2] != 0) {
         $requeteType7 = "SELECT fk_fichinter FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
         $result7 = $db->query($requeteType7);
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][2]) . "€ (" . price($tabResult[0][0] / 3600) . "h ) sur le réalisé due aux " . $db->num_rows($result7) . " interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][2]) . "€ (" . price($tabResult[0][0] / 3600) . "h ) sur le réalisé due aux " . $db->num_rows($result7) . " interventions réalisées sans type dont les 30 premières sont listées ci dessous<br/>";
         $i = 0;
         while ($ligne = $db->fetch_object($result7)) {
-            if ($i < 10) {
+            if ($i < 30) {
                 $fi = new Fichinter($db);
                 $fi->fetch($ligne->fk_fichinter);
                 echo $fi->getNomUrl(1) . "<br/>";
@@ -687,10 +688,10 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
     if ($tabResult[0][3] != 0) {
         $requeteType7 = "SELECT fk_synopsisdemandeinterv FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet fdet WHERE fdet.fk_synopsisdemandeinterv IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_synopsisdemandeinterv";
         $result7 = $db->query($requeteType7);
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][3]) . "€ (" . price($tabResult[0][1] / 3600) . "h ) sur le prévue due aux " . $db->num_rows($result7) . " demande d'interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][3]) . "€ (" . price($tabResult[0][1] / 3600) . "h ) sur le prévue due aux " . $db->num_rows($result7) . " demande d'interventions réalisées sans type dont les 30 premières sont listées ci dessous<br/>";
         $i = 0;
         while ($ligne = $db->fetch_object($result7)) {
-            if ($i < 10) {
+            if ($i < 30) {
                 $fi = new Synopsisdemandeinterv($db);
                 $fi->fetch($ligne->fk_synopsisdemandeinterv);
                 echo $fi->getNomUrl(1) . "<br/>";
@@ -722,10 +723,10 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
     $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `llx_element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
     $resultPasDeDI = $db->query($requetePasDeDI);
     if ($db->num_rows($resultPasDeDI) > 0) {
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevu due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les dix premières sont listées ci dessous<br/>";
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevu due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les 30 premières sont listées ci dessous<br/>";
         $i = 0;
         while ($ligne = $db->fetch_object($resultPasDeDI)) {
-            if ($i < 10) {
+            if ($i < 30) {
                 $fi = new Fichinter($db);
                 $fi->fetch($ligne->fk_fichinter);
                 echo $fi->getNomUrl(1) . "<br/>";

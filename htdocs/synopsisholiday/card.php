@@ -1145,7 +1145,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<td>';
         print '<span>';
         print '<input type="checkbox" name="is_exception" id="is_exception" style="margin-right: 10px"/>';
-        print '<label for="is_exception">Il s\'agit d\'une demande de congés exceptionnels</label>';
+        print '<label for="is_exception">Il s\'agit d\'une demande de congés exceptionnels (Ne décompte pas le solde)</label>';
         print '</span><br/>';
         print '<span>';
         print '<input type="checkbox" name="is_rtt" id="is_rtt" style="margin-right: 10px"/>';

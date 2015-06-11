@@ -363,6 +363,8 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         if ($afficheTitre === "Total") {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
+                if($nom == "Centre")
+                    continue;
 //            if($nom == 'product_type')
 //                $nom = 'ref_prod';
 
@@ -375,6 +377,8 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         elseif ($afficheTitre) {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
+                if($nom == "Centre")
+                    continue;
 //            if($nom == 'product_type')
 //                $nom = 'ref_prod';
 
@@ -388,6 +392,8 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         else {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
+                if($nom == "Centre")
+                    continue;
                 if ($nom == 'product_type') {
                     if ($valeur == -100)
                         $valeur = "GEN-SAV-ACOMPTE";

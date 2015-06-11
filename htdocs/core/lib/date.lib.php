@@ -571,7 +571,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 	if ((($timestampEnd - $timestampStart) % 86400) != 0) return 'ErrorDates must use same hours and must be GMT dates';
 
 	$i=0;
-	while ($timestampStart < $timestampEnd && ($i < 50000))		// Loop end when equals (Test on i is a security loop to avoid infinite loop)
+	while ($timestampStart <= $timestampEnd && ($i < 50000))		// Loop end when equals (Test on i is a security loop to avoid infinite loop)
 	{
 		$ferie=false;
 		$countryfound=0;
@@ -614,17 +614,18 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 			if($jour_ascension == $jour && $mois_ascension == $mois) $ferie=true;
 			//Ascension
 
-			// Calcul de Pentecote (11 jours apres Paques)
+			// Calcul de Lundi Pentecote (12 jours apres Paques)
             $date_pentecote = mktime(
                 date("H", $date_ascension),
                 date("i", $date_ascension),
                 date("s", $date_ascension),
                 date("m", $date_ascension),
-                date("d", $date_ascension) + 11,
+                date("d", $date_ascension) + 12,
                 date("Y", $date_ascension)
             );
 			$jour_pentecote = date("d", $date_pentecote);
 			$mois_pentecote = date("m", $date_pentecote);
+
 			if($jour_pentecote == $jour && $mois_pentecote == $mois) $ferie=true;
 			//Pentecote
 

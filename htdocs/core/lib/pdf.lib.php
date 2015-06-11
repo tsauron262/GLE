@@ -334,8 +334,8 @@ function pdf_build_address($outputlangs,$sourcecompany,$targetcompany='',$target
 	{
 		if ($usecontact)
 		{
-                        if($targetcompany->nom != $targetcontact->getFullName($outputlangs,1, 0))
-			$stringaddress .= ($stringaddress ? "\n" : '' ).$outputlangs->convToOutputCharset($targetcontact->getFullName($outputlangs,1, 0));
+                        if(1||$targetcompany->nom != $targetcontact->getFullName($outputlangs,1, 1))
+			$stringaddress .= ($stringaddress ? "\n" : '' ).$outputlangs->convToOutputCharset($targetcontact->getFullName($outputlangs,1, 1));
 
 			if (!empty($targetcontact->address)) {
 				$stringaddress .= ($stringaddress ? "\n" : '' ).$outputlangs->convToOutputCharset(dol_format_address($targetcontact))."\n";

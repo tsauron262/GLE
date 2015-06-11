@@ -283,8 +283,9 @@ foreach ($tabDiff as $val) {
 //            echo $dateT.day;
 //        }
     }
-    $duree = sec2time($duree);
-    print "<td>" . $val['Titre'] . "</td><td>" . $i . " (" . $duree . ")</td>";
+    $dureeStr = sec2time($duree, 1, 0);
+    $valor = 50;
+    print "<td>" . $val['Titre'] . "</td><td>" . $i . " (" . $dureeStr . ") soit ".price($duree/3600*50)." €</td>";
 }
 
 print "</tr>";
@@ -556,10 +557,16 @@ jQuery('#list2').jqGrid({
 EOF;
 llxFooter('$Date: 2008/03/01 01:26:47 $ - $Revision: 1.16 $');
 
-function sec2time($sec) {
+function sec2time($sec, $heure = true, $jour = true) {
     $returnstring = " ";
+    if($jour)
     $days = intval($sec / 86400);
+    else
+        $days = 0;
+    if($heure)
     $hours = intval(($sec / 3600) - ($days * 24));
+    else
+        $hours = 0;
     $minutes = intval(($sec - (($days * 86400) + ($hours * 3600))) / 60);
     $seconds = $sec - ( ($days * 86400) + ($hours * 3600) + ($minutes * 60));
 

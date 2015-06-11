@@ -1875,7 +1875,7 @@ function printSearchForm($urlaction,$urlobject,$title,$htmlmodesearch,$htmlinput
     }
 
     $ret='';
-    $ret.='<form action="'.$urlaction.'" method="post">';
+    $ret.='<form action="'.$urlaction.'" method="'./*modrsi*/'get'./*fmoddrsi*/'">';
 	$ret.='<div class="menu_titre menu_titre_search">';
 	$ret.='<label for="'.$htmlinputname.'">';
 	$ret.='<a class="vsmenu" href="'.$urlobject.'">';

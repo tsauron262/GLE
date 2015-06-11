@@ -38,8 +38,15 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisholiday/common.inc.php';
 $myparam = GETPOST("myparam");
 $action = GETPOST('action', 'alpha');
 $id = GETPOST('id', 'int');
-$userid = GETPOST('userid') ? GETPOST('userid') : $user->id;
 
+$isGroup = GETPOST('usersGroup');
+if (isset($isGroup) && $isGroup) {
+    $userid = GETPOST('groupUsers');
+    if (!isset($userid) || empty($userid))
+        $userid = array();
+} else {
+    $userid = GETPOST('userid') ? GETPOST('userid') : $user->id;
+}
 
 // Protection if external user
 if ($user->societe_id > 0)
@@ -51,6 +58,8 @@ $now = dol_now();
  * Actions
  */
 
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 $droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) ||
         (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
@@ -59,13 +68,22 @@ $droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holida
 // Si création de la demande:
 if ($action == 'create') {
     $cp = new SynopsisHoliday($db);
+    $isDrh = ($user->id == $cp->getConfCP('drhUserId'));
 
     // Si pas le droit de créer une demande
-    if (($userid == $user->id && empty($user->rights->holiday->write)) ||
-            ($userid != $user->id && !$droitAll)) {
-        $error++;
-        setEventMessage($langs->trans('CantCreateCP'));
-        $action = 'request';
+    if (!$isDrh) {
+        if (is_numeric($userid)) {
+            if (($userid == $user->id && empty($user->rights->holiday->write)) ||
+                    ($userid != $user->id && !$droitAll)) {
+                $error++;
+                setEventMessage($langs->trans('CantCreateCP'));
+                $action = 'request';
+            }
+        } else if (!$droitAll) {
+            $error++;
+            setEventMessage($langs->trans('CantCreateCP'));
+            $action = 'request';
+        }
     }
 
     if (!$error) {
@@ -85,10 +103,12 @@ if ($action == 'create') {
 
         $valideur = GETPOST('valideur');
         $description = trim(GETPOST('description'));
-        $userID = GETPOST('userID');
-        
+//        $userID = GETPOST('userID'); // ?? (non utilisé)
+
         $is_rtt = GETPOST('is_rtt') ? true : false;
         $is_exception = GETPOST('is_exception') ? true : false;
+        if ($isGroup)
+            $groupId = GETPOST('group_id');
 
         // Si pas de date de début
         if (empty($date_debut)) {
@@ -109,13 +129,34 @@ if ($action == 'create') {
         }
 
         // Check if there is already holiday for this period
-        $verifCP = $cp->verifDateHolidayCP($userid, $date_debut, $date_fin, $halfday);
-        if (!$verifCP) {
-            header('Location: card.php?action=request&error=alreadyCP');
-            exit;
-        } else if ($verifCP < 0) {
-            header('Location: card.php?action=request&error=substituteCP');
-            exit;
+        if (is_numeric($userid)) {
+            $verifCP = $cp->verifDateHolidayCP($userid, $date_debut, $date_fin, $halfday);
+            if (!$verifCP) {
+                header('Location: card.php?action=request&error=alreadyCP');
+                exit;
+            } else if ($verifCP < 0) {
+                header('Location: card.php?action=request&error=substituteCP');
+                exit;
+            }
+        } else {
+            if ($groupId < 0) {
+                header('Location: card.php?action=request&error=noGroup');
+                exit;
+            }
+
+            if (is_array($userid) && !count($userid)) {
+                header('Location: card.php?action=request&error=noUserSelectedInGroup');
+                exit;
+            }
+            // Vérif des conflits avec des congés collectifs existant:
+            $verifGroupCP = $cp->verifDateHolidayForGroup($groupId, $date_debut, $date_fin, $halfday);
+            if ($verifGroupCP < 0) {
+                header('Location: card.php?action=request&error=checkDatesErrorForGroup');
+                exit;
+            } else if ($verifGroupCP == 0) {
+                header('Location: card.php?action=request&error=alreadyGroupCp');
+                exit;
+            }
         }
 
         // Si aucun jours ouvrés dans la demande
@@ -127,15 +168,19 @@ if ($action == 'create') {
             if ($nb_ferie)
                 $nbopenedday = 0;
         }
-        if ($nbopenedday < 1) {
+        if ($nbopenedday < 0.5) {
             header('Location: card.php?action=request&error=DureeHoliday');
             exit;
         }
 
         // Si pas de validateur choisi
         if ($valideur < 1) {
-            header('Location: card.php?action=request&error=Valideur');
-            exit;
+            if ($isDrh) {
+                $valideur = $user->id;
+            } else {
+                header('Location: card.php?action=request&error=Valideur');
+                exit;
+            }
         }
 
         // Si congés exceptionnels et rtt sélectionnés en même temps:
@@ -152,7 +197,8 @@ if ($action == 'create') {
         $cp->fk_validator = $valideur;
         $cp->halfday = $halfday;
         $cp->type_conges = $is_exception ? 1 : ($is_rtt ? 2 : 0);
-
+        if ($isGroup)
+            $cp->fk_group = $groupId;
         $verif = $cp->create($userid);
 
         // Si pas d'erreur SQL on redirige vers la fiche de la demande
@@ -194,8 +240,13 @@ if ($action == 'update') {
 
     $cp = new SynopsisHoliday($db);
     $cp->fetch($_POST['holiday_id']);
-
-    $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user && ($droitAll)));
+    $isDrh = ($user->id === $cp->getConfCP('drhUserId'));
+    $canedit = false;
+    if ($isDrh || $droitAll) {
+        $canedit = true;
+    } else if (is_numeric($cp->fk_user)) {
+        $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write));
+    }
 
     // Si en attente de validation
     if ($cp->statut == 1) {
@@ -224,8 +275,12 @@ if ($action == 'update') {
 
             // Si pas de valideur choisi
             if ($valideur < 1) {
-                header('Location: card.php?id=' . $_POST['holiday_id'] . '&action=edit&error=Valideur');
-                exit;
+                if ($isDrh) {
+                    $valideur = $user->id;
+                } else {
+                    header('Location: card.php?id=' . $_POST['holiday_id'] . '&action=edit&error=Valideur');
+                    exit;
+                }
             }
 
             // Si pas de jours ouvrés dans la demande
@@ -236,7 +291,7 @@ if ($action == 'update') {
                 if ($nb_ferie)
                     $nbopenedday = 0;
             }
-            if ($nbopenedday < 1) {
+            if ($nbopenedday < 0.5) {
                 header('Location: card.php?id=' . $_POST['holiday_id'] . '&action=edit&error=DureeHoliday');
                 exit;
             }
@@ -244,8 +299,51 @@ if ($action == 'update') {
             // Si congés exceptionnels et rtt sélectionnés en même temps:
             // (même si théoriquement pas possible depuis le formulaire) 
             if ($is_rtt && $is_exception) {
-                header('Location: card.php?action=request&error=BothExceptionAndRtt');
+                header('Location: card.php?id=' . $_POST['holiday_id'] . '&action=edit&error=BothExceptionAndRtt');
                 exit;
+            }
+
+            // Si aucun user sélectionné dans le groupe:
+            if (is_array($cp->fk_user)) {
+                $groupUsers = GETPOST('groupUsers');
+                if (!isset($groupUsers) || empty($groupUsers) || !count($groupUsers)) {
+                    header('Location: card.php?id=' . $_POST['holiday_id'] . '&action=edit&error=noUserSelectedInGroup');
+                    exit;
+                }
+                $cp->fk_user = $groupUsers;
+            }
+
+            if ($isGroup)
+                $groupId = GETPOST('group_id');
+
+            if (is_numeric($userid)) {
+                $verifCP = $cp->verifDateHolidayCP($userid, $date_debut, $date_fin, $halfday);
+                if (!$verifCP) {
+                    header('Location: card.php?action=edit&error=alreadyCP');
+                    exit;
+                } else if ($verifCP < 0) {
+                    header('Location: card.php?action=edit&error=substituteCP');
+                    exit;
+                }
+            } else {
+                if ($groupId < 0) {
+                    header('Location: card.php?action=edit&error=noGroup');
+                    exit;
+                }
+
+                if (is_array($userid) && !count($userid)) {
+                    header('Location: card.php?action=edit&error=noUserSelectedInGroup');
+                    exit;
+                }
+                // Vérif des conflits avec des congés collectifs existant:
+                $verifGroupCP = $cp->verifDateHolidayForGroup($groupId, $date_debut, $date_fin, $halfday);
+                if ($verifGroupCP < 0) {
+                    header('Location: card.php?action=edit&error=checkDatesErrorForGroup');
+                    exit;
+                } else if ($verifGroupCP == 0) {
+                    header('Location: card.php?action=edit&error=alreadyGroupCp');
+                    exit;
+                }
             }
 
             $cp->description = $description;
@@ -282,19 +380,13 @@ if ($action == 'confirm_delete' && GETPOST('confirm') == 'yes') {
     if ((($user->id == $cp->fk_user) || $user->rights->holiday->delete || $droitAll) &&
             ($cp->statut == 1)) {
         $error = 0;
-
-        $db->begin();
-        $result = $cp->delete($id);
-
+        $result = $cp->delete($db);
         if ($result > 0) {
-            $db->commit();
             header('Location: index.php');
             exit;
-        } else {
-            $db->rollback();
         }
-    } else
-        $error = $langs->trans('ErrorCantDeleteCP');
+    }
+    $error = $langs->trans('ErrorCantDeleteCP');
 }
 
 // Si envoi de la demande:
@@ -303,7 +395,10 @@ if ($action == 'confirm_send') {
     $cp->fetch($id);
     $drhUserId = $cp->getConfCP('drhUserId');
     // Si brouillon et créateur
-    if ($cp->statut == 1 && ($user->id == $cp->fk_user || $droitAll)) {
+    if ($cp->statut <= 3 && $user->id == $drhUserId) {
+        // confirmation directe par le drh:
+        $action = 'drh_confirm_valid';
+    } else if ($cp->statut == 1 && ($user->id == $cp->fk_user || $droitAll)) {
         $cp->statut = 2;
         $agendaCheck = $cp->onStatusUpdate($user);
         $verif = $cp->update($user->id);
@@ -355,8 +450,8 @@ if ($action == 'confirm_send') {
                 if (empty($cp->type_conges) || !$cp->type_conges) {
                     $soldes = $cp->getCPforUser($cp->fk_user, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
                     if (!isset($soldes['error'])) {
-                        if ($soldes['nb_holiday_current'] < $soldes['nbOpenDayCurrent'] ||
-                                $soldes['nb_holiday_next'] < $soldes['nbOpenDayNext']) {
+                        if (($soldes['nbOpenDayCurrent'] > 0 && $soldes['nb_holiday_current'] < $soldes['nbOpenDayCurrent']) ||
+                                ($soldes['nbOpenDayNext'] > 0 && $soldes['nb_holiday_next'] < $soldes['nbOpenDayNext'])) {
                             $message.= "\n";
                             $message.= $langs->transnoentities("HolidaysToValidateAlertSolde") . "\n";
                         }
@@ -395,7 +490,7 @@ if ($action == 'confirm_send') {
 if ($action == 'confirm_valid') {
     $cp = new SynopsisHoliday($db);
     $cp->fetch($id);
-
+    $drhUserId = $cp->getConfCP('drhUserId');
     // Si statut en attente de validation et valideur = utilisateur
     if ($cp->statut == 2 && $user->id == $cp->fk_validator) {
         $cp->date_valid = dol_now();
@@ -474,6 +569,9 @@ if ($action == 'confirm_valid') {
             header('Location: card.php?id=' . $_GET['id'] . '&error=SQL_Create&msg=' . $cp->error);
             exit;
         }
+    } else if ($cp->statut < 3 && $user->id == $drhUserId) {
+        // confirmation directe par le drh:
+        $action = 'drh_confirm_valid';
     }
 }
 
@@ -484,10 +582,10 @@ if ($action == 'drh_confirm_valid') {
     $drhUserId = $cp->getConfCP('drhUserId');
 
     // Si statut en attente de validation et utilisateur = drh
-    if (($cp->statut == 2 || $cp->statut == 3) && $user->id == $drhUserId) {
+    if (($cp->statut == 1 || $cp->statut == 2 || $cp->statut == 3) && $user->id == $drhUserId) {
         $cp->date_drh_valid = dol_now();
         $cp->fk_user_drh_valid = $user->id;
-        if ($cp->statut == 2) {
+        if ($cp->statut < 3) {
             $cp->fk_user_valid = $user->id;
             $cp->date_valid = dol_now();
         }
@@ -578,6 +676,193 @@ if ($action == 'drh_confirm_valid') {
             }
             if (!$result) {
                 header('Location: card.php?id=' . $_GET['id'] . '&error=mail&error_content=' . $mail->error);
+                exit;
+            }
+            header('Location: card.php?id=' . $_GET['id'] . ($agendaCheck ? '' : '&error=agenda&agenda_error_type=update'));
+            exit;
+        } else {
+            // Sinon on affiche le formulaire de demande avec le message d'erreur SQL
+            header('Location: card.php?id=' . $_GET['id'] . '&error=SQL_Create&msg=' . $cp->error);
+            exit;
+        }
+    }
+}
+
+// Si validation d'un congé collectif par le DRH:
+if ($action == 'drh_group_valid') {
+    echo 'Début<br/>';
+    $cp = new SynopsisHoliday($db);
+    $cp->fetch($id);
+    $drhUserId = $cp->getConfCP('drhUserId');
+
+    // Si statut en attente de validation et utilisateur = drh
+    if (($cp->statut <= 3) && $user->id == $drhUserId) {
+        $cp->date_drh_valid = dol_now();
+        $cp->fk_user_drh_valid = $user->id;
+        if ($cp->statut < 3) {
+            $cp->fk_user_valid = $user->id;
+            $cp->date_valid = dol_now();
+        }
+
+        $cp->statut = 6;
+        $agendaCheck = $cp->onStatusUpdate($user);
+        $verif = $cp->update($user->id);
+        $mailErrors = 0;
+//        $verif = 1;
+        // Si pas d'erreur SQL on redirige vers la fiche de la demande
+        if ($verif > 0) {
+            $soldeUpdateError = '';
+            if (!is_array($cp->fk_user))
+                $cp->fk_user = array($cp->fk_user);
+
+            $expediteur = new User($db);
+            $expediteur->fetch($drhUserId);
+            $emailFrom = $expediteur->email;
+
+            $destinataire = new User($db);
+
+            $dateBegin = dol_print_date($cp->date_debut, 'day');
+            $dateEnd = dol_print_date($cp->date_fin, 'day');
+            $typeCp = $cp->getTypeLabel(true);
+            $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
+            if (!empty($conf->global->MAIN_APPLICATION_TITLE))
+                $societeName = $conf->global->MAIN_APPLICATION_TITLE;
+
+            $subject = $societeName . " - Notification de " . str_replace('é', 'e', $typeCp);
+            $message = 'Des ' . $typeCp . ' vous ont été atttribuées pour la période du ' . $dateBegin . ' au ' . $dateEnd . ' par votre Directeur des Ressouces Humaines.' . "\n\n";
+            $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+            $message.= "\n";
+
+            $nErrors = 0;
+            $nbHolidayDeducted = $cp->getConfCP('nbHolidayDeducted');
+            $nbRttDeducted = $cp->getConfCP('nbRTTDeducted');
+            $nbOpenDays = $cp->getCPforUser($user->id, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
+            
+            foreach ($cp->fk_user as $user_id) {
+//                echo 'User: '.$user_id.'<br/>';
+                $infos = $cp->verifUserConflictsForGroupHoliday($user, $user_id);
+//                echo 'Résult: <pre>';
+//                print_r($infos);
+//                echo '</pre>';
+                
+                if (count($infos) == 1) {
+                    $message .= "Un de vos congé existant a été modifié car il entrait en conflit avec ce nouveau congé. \n\n";
+                } else if (count($infos) > 1) {
+                    $message .= "Certains de vos congés ont été modifiés car ils entraient en conflit avec ce nouveau congé. \n\n";
+                }
+                foreach ($infos as $info) {
+                    $curCp = new SynopsisHoliday($db);
+                    $curCp->fetch($info['id']);
+                    $initBegin = new DateTime();
+                    $initBegin->setTimestamp($info['initial_date_begin']);
+                    $initEnd = new DateTime();
+                    $initEnd->setTimestamp($info['initial_date_end']);
+                    $message .= "\t- Congé du " . $initBegin->format('d / m / Y') . " au " . $initEnd->format('d / m / Y') . " (Dates initiales):\n";
+                    $message .= "\t\tModification faite: ";
+                    switch ($info['operation']) {
+                        case 'cancel':
+                            $message .= "congé annulé";
+                            break;
+
+                        case 'begin_update':
+                            $newBegin = new DateTime();
+                            $newBegin->setTimestamp((int)$curCp->date_debut);
+                            $message .= "date de début reculée au " . $newBegin->format('d / m / Y');
+                            if ($curCp->halfday < 0 || $curCp->halfday == 2)
+                                $message .= " après-midi";
+                            unset($newBegin);
+                            break;
+
+                        case 'end_update':
+                            $newEnd = new DateTime();
+                            $newEnd->setTimestamp((int)$curCp->date_fin);
+                            $message .= "date de fin avancée au " . $newEnd->format('d / m / Y');
+                            if ($curCp->halfday > 0 || $curCp->halfday == 2)
+                                $message .= " matin";
+                            unset($newEnd);
+                            break;
+
+                        case 'create':
+                            $message .= "Congé séparé en deux périodes. Cette modification n\'affecte pas la durée totale de votre congé";
+                            break;
+                    }
+                    $message .= ".\n\n";
+
+                    if (count($info['errors'])) {
+                        foreach ($info['errors'] as $errorMess) {
+                            dol_syslog("Mise à jour du congé " . $info['rowid'] . " pour l'utilisateur " . $user_id . ": " . $errorMess, LOG_ERR);
+                            $nErrors++;
+                        }
+                    }
+                    unset($curCp);
+                    unset($initBegin);
+                    unset($initEnd);
+                }
+
+                $soldeUpdateError = '';
+                switch ($cp->type_conges) {
+                    case 0: // congés payés ordinaires
+                        // solde année en cours:
+                        $solde = $cp->getCurrentYearCPforUser($user_id);
+                        $newSolde = $solde - ($nbOpenDays['nbOpenDayCurrent'] * $nbHolidayDeducted);
+                        $cp->addLogCP($user->id, $user_id, $langs->transnoentitiesnoconv("Holidays") . ' (année en cours)', $newSolde, false, true);
+                        $res = $cp->updateSoldeCP($user_id, $newSolde, true);
+                        if ($res <= 0)
+                            $soldeUpdateError = '.';
+                        if ($res <= 0) {
+                            dol_syslog('Echec de la mise à jour du solde des congés payés pour l\'année en cours. Utilisateur: ' . $user_id . '. Nouveau solde: ' . $newSolde, LOG_ERR);
+                            $nErrors++;
+                        }
+
+                        // solde année n+1
+                        if ($nbOpenDays['nbOpenDayNext'] > 0) {
+                            $solde = $cp->getNextYearCPforUser($user_id);
+                            $newSolde = $solde - ($nbOpenDays['nbOpenDayNext'] * $nbHolidayDeducted);
+                            $cp->addLogCP($user->id, $user_id, $langs->transnoentitiesnoconv("Holidays") . ' (année suivante)', $newSolde, false, false);
+                            $res = $cp->updateSoldeCP($user_id, $newSolde, false);
+                            if ($res <= 0) {
+                                dol_syslog('Echec de la mise à jour du solde des congés payés pour l\'année n+1. Utilisateur: ' . $user_id . '. Nouveau solde: ' . $newSolde, LOG_ERR);
+                                $nErrors++;
+                            }
+                        }
+                        break;
+
+                    case 1: // congés exceptionnels, pas de mise à jour du solde des CP
+                        break;
+
+                    case 2: // RTT
+                        // Calcule du nombre de jours consommés:
+                        $solde = $cp->getRTTforUser($user_id);
+                        $newSolde = $solde - ($nbOpenDays['nbOpenDayTotal'] * $nbRttDeducted);
+                        $cp->addLogCP($user->id, $user_id, 'RTT', $newSolde, true);
+                        $res = $cp->updateSoldeRTT($user_id, $newSolde);
+                        if ($res <= 0) {
+                            dol_syslog('Echec de la mise à jour du solde des RTT. Utilisateur: ' . $user_id . '. Nouveau solde: ' . $newSolde, LOG_ERR);
+                            $nErrors++;
+                        }
+                        break;
+                }
+
+                $destinataire->fetch($user_id);
+                $emailTo = $destinataire->email;
+
+                if ($emailTo) {
+                    $messageHead = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
+                    $mail = new CMailFile($subject, $emailTo, $emailFrom, $messageHead . $message);
+                    if (!$mail->sendfile())
+                        $mailErrors++;
+                }
+            }
+            echo 'Fin<b>';
+//            exit;
+            if ($nErrors) {
+                $mess = $nErrors . " erreur(s). Veuillez consulter le LOG.";
+                header('Location: card.php?id=' . $_GET['id'] . '&error=soldeCPUpdate&error_content=' . $mess);
+                exit;
+            }
+            if ($mailErrors) {
+                header('Location: card.php?id=' . $_GET['id'] . '&error=mail&error_content=' . "Echec de l&apos;envoi de " . $mailErrors . " mail(s)");
                 exit;
             }
             header('Location: card.php?id=' . $_GET['id'] . ($agendaCheck ? '' : '&error=agenda&agenda_error_type=update'));
@@ -825,6 +1110,89 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
     }
 }
 
+// Si annulation d'un congé collectif
+if ($action == 'confirm_group_cancel' && GETPOST('confirm') == 'yes') {
+    $cp = new SynopsisHoliday($db);
+    $cp->fetch($_GET['id']);
+    $drhUserId = $cp->getConfCP('drhUserId');
+
+    // Si statut en attente de validation et valideur ou drh = utilisateur
+    if (($cp->statut == 2 || $cp->statut == 3 || $cp->statut == 6) &&
+            ($user->id == $drhUserId || $user->admin)) {
+        $oldstatus = $cp->statut;
+        $cp->date_cancel = dol_now();
+        $cp->fk_user_cancel = $user->id;
+        $cp->statut = 4;
+        $agendaCheck = $cp->onStatusUpdate($user);
+        $verif = $cp->update($user->id);
+
+        // Si pas d'erreur SQL on redirige vers la fiche de la demande
+        if ($verif > 0) {
+            if (!is_array($cp->fk_user))
+                $cp->fk_user = array($cp->fk_user);
+
+            $mailErrors = 0;
+            $soldeUpdateErrors = 0;
+
+            $expediteur = new User($db);
+            $expediteur->fetch($drhUserId);
+            $emailFrom = $expediteur->email;
+
+            $destinataire = new User($db);
+
+            $dateBegin = dol_print_date($cp->date_debut, 'day');
+            $dateEnd = dol_print_date($cp->date_fin, 'day');
+            $typeCp = $cp->getTypeLabel(true);
+            $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
+            if (!empty($conf->global->MAIN_APPLICATION_TITLE))
+                $societeName = $conf->global->MAIN_APPLICATION_TITLE;
+
+            $subject = $societeName . " - Annulation de " . str_replace('é', 'e', $typeCp);
+            $message.= 'Vos ' . $typeCp . ' pour la période du ' . $dateBegin . ' au ' . $dateEnd . ' ont été annulé(es) par votre Directeur des Ressouces Humaines.' . "\n\n";
+            $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+
+            foreach ($cp->fk_user as $user_id) {
+//                switch ($cp->type_conges) {
+//                    case 0: // congés payés ordinaires
+//                        break;
+//
+//                    case 1: // congés exceptionnels, pas de mise à jour du solde des CP
+//                        break;
+//
+//                    case 2: // RTT
+//                        // Calcule du nombre de jours consommés: 
+//                        break;
+//                }
+
+                $destinataire->fetch($user_id);
+                $emailTo = $destinataire->email;
+
+                if ($emailTo) {
+                    $messageHead = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
+                    $mail = new CMailFile($subject, $emailTo, $emailFrom, $messageHead . $message);
+                    if (!$mail->sendfile())
+                        $mailErrors++;
+                }
+            }
+//            if ($soldeUpdateError) {
+//                header('Location: card.php?id=' . $_GET['id'] . '&error=soldeCPUpdate&error_content=' . $soldeUpdateError);
+//                exit;
+//            }
+            if ($mailErrors) {
+                header('Location: card.php?id=' . $_GET['id'] . '&error=mail&error_content=' . "Echec de l&apos;envoi de " . $mailErrors . " mail(s)");
+                exit;
+            }
+            header('Location: card.php?id=' . $_GET['id'] . ($agendaCheck ? '' : '&error=agenda&agenda_error_type=update'));
+            exit;
+        } else {
+            // Sinon on affiche le formulaire de demande avec le message d'erreur SQL
+            header('Location: card.php?id=' . $_GET['id'] . '&error=SQL_Create&msg=' . $cp->error);
+            exit;
+        }
+    }
+}
+
 // Si enregistrement du remplaçant par le DRH:
 if ($action == 'save_substitute') {
     $substitute_id = GETPOST('substitute_user_id', 'int');
@@ -957,6 +1325,8 @@ $listhalfday = array('morning' => $langs->trans("Morning"), "afternoon" => $lang
 
 llxHeader(array(), $langs->trans('CPTitreMenu'));
 
+$isDrh = ($user->id === $cp->getConfCP('drhUserId'));
+
 if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create') {
     // Si l'utilisateur n'a pas le droit de faire une demande
     if (($userid == $user->id && empty($user->rights->holiday->write)) ||
@@ -1001,7 +1371,19 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     $errors[] = 'Vous ne pouvez pas déposer de congés sur cette période car vous avez été désigné comme remplaçant.';
                     break;
                 case 'BothExceptionAndRtt':
-                    $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Congés exceptionnels / RTT"';
+                    $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Congés exceptionnels / RTT".';
+                    break;
+                case 'noGroup':
+                    $errors[] = 'Veuillez sélectionner un groupe d\'utilisateurs.';
+                    break;
+                case 'noUserSelectedInGroup':
+                    $errors[] = 'Veuillez sélectionner au moins un utilisateur dans le groupe.';
+                    break;
+                case 'checkDatesErrorForGroup':
+                    $errors[] = 'Une erreur est survenue: les conflits avec des congés collectifs existants n\'ont pas pu être vérifiés.';
+                    break;
+                case 'alreadyGroupCp':
+                    $errors[] = 'Un congé collectif pour le groupe choisi existe déjà sur cette période.';
                     break;
             }
 
@@ -1018,18 +1400,18 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 	    {
     	    if(document.demandeCP.date_debut_.value != "")
     	    {
-	           	if(document.demandeCP.date_fin_.value != "")
-	           	{
-	               if(document.demandeCP.valideur.value != "-1") {
-	                 return true;
-	               }
-	               else {
-	                 alert("' . dol_escape_js($langs->transnoentities('InvalidValidatorCP')) . '");
-	                 return false;
-	               }
-	            }
-	            else
-	            {
+	           	if(document.demandeCP.date_fin_.value == "")';
+//	           	{
+//	               if(document.demandeCP.valideur.value != "-1") {
+//	                 return true;
+//	               }
+//	               else {
+//	                 alert("' . dol_escape_js($langs->transnoentities('InvalidValidatorCP')) . '");
+//	                 return false;
+//	               }
+//	               }
+//	            else
+        print '{
 	              alert("' . dol_escape_js($langs->transnoentities('NoDateFin')) . '");
 	              return false;
 	            }
@@ -1053,7 +1435,18 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<tbody>';
         print '<tr>';
         print '<td class="fieldrequired">' . $langs->trans("User") . '</td>';
-        print '<td><div style="display: inline-block; vertical-align: top; margin-right: 15px;">';
+        print '<td>';
+        if ($isDrh) {
+            print '<div style="margin-bottom: 15px">';
+            print '<input type="radio" name="usersGroup" value="0" id="userGroup_no" checked/>';
+            print '<label for="userGroup_no" style="margin-right: 15px">Congés individuels</label>';
+            print '<input type="radio" name="usersGroup" value="1" id="userGroup_yes"/>';
+            print '<label for="userGroup_no">Congés collectifs</label>';
+            print '</div>';
+            print '<script type="text/javascript" src="' . $dolibarr_main_url_root . '/synopsisholiday/js/card.js"></script>';
+        }
+        print '<div id="singleUserBlock">';
+        print '<div style="display: inline-block; vertical-align: top; margin-right: 15px;">';
         if (!$droitAll) {
             print $form->select_users($userid, 'useridbis', 0, '', 1);
             print '<input type="hidden" name="userid" value="' . $userid . '">';
@@ -1074,7 +1467,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         $nb_holiday_next = $nbaquis_next / $nbdeduced;
         $nextCPYearDate = $cp->getCPNextYearDate(true, false);
         $nextCPYearDateAfter = $cp->getCPNextYearDate(true, true);
-        $nbRtt = $cp->getRTTforUser($user->id)/ $cp->getConfCP('nbRTTDeducted');
+        $nbRtt = $cp->getRTTforUser($user->id) / $cp->getConfCP('nbRTTDeducted');
         print '<b>Année en cours : </b>';
         print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
         print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
@@ -1085,7 +1478,23 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<br/>';
         print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
 
-        print '</div></td>';
+        print '</div></div>';
+
+        if ($isDrh) {
+            print '<div id="userGroupBlock" style="display: none">';
+            print '<label>Groupe: </label>';
+            print $form->select_dolgroups(0, 'group_id', 1);
+            print '<input class="button" type="button" id="showGroupUsers" value="Sélectionner les utilisateurs" style="margin-left: 15px; display: none"/>';
+
+            print '<div id="groupUsersCheckboxes" style="position: absolute; display: none; background: #fff; padding: 10px; margin: 10px; border: 1px solid #969696">';
+            print '<div style="text-align: right; margin: 10px"><input type="button" class="button" id="closeGroupUsers" value="Fermer"/></div>';
+            print '<div class="loading" style="display: none">Chargement de la liste des utilisateurs en cours...</div>';
+            print '<div id="groupUsersList" style="display: none"></div>';
+            print '</div>';
+            print '</div>';
+        }
+
+        print '</td>';
         print '</tr>';
         print '<tr>';
         print '<td class="fieldrequired">' . $langs->trans("DateDebCP") . ' (' . $langs->trans("FirstDayOfHoliday") . ')</td>';
@@ -1145,7 +1554,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<td>';
         print '<span>';
         print '<input type="checkbox" name="is_exception" id="is_exception" style="margin-right: 10px"/>';
-        print '<label for="is_exception">Il s\'agit d\'une demande de congés exceptionnels</label>';
+        print '<label for="is_exception">Il s\'agit d\'une demande de congés exceptionnels (Ne décompte pas le solde)</label>';
         print '</span><br/>';
         print '<span>';
         print '<input type="checkbox" name="is_rtt" id="is_rtt" style="margin-right: 10px"/>';
@@ -1192,15 +1601,23 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             $cp->fetch($id);
 
             $drhUserId = $cp->getConfCP('drhUserId');
-            $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                    ($user->id != $cp->fk_user && ($droitAll)) ||
-                    ($user->id == $drhUserId));
+            $canedit = false;
+            if ($isDrh || $droitAll)
+                $canedit = true;
+            else if (is_numeric($cp->fk_user)) {
+                $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
+                        ($user->id != $cp->fk_user && ($droitAll)));
+            }
 
             $valideur = new User($db);
             $valideur->fetch($cp->fk_validator);
 
-            $userRequest = new User($db);
-            $userRequest->fetch($cp->fk_user);
+            if (is_numeric($cp->fk_user)) {
+                $userRequest = new User($db);
+                $userRequest->fetch($cp->fk_user);
+            } else {
+                $userRequest = null;
+            }
 
             //print_fiche_titre($langs->trans('TitreRequestCP'));
             // Si il y a une erreur
@@ -1248,13 +1665,17 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                                 break;
                         }
                         break;
-
                     case 'substitute_update':
                         $errors[] = 'Echec de l\'enregistrement du remplaçant (Erreur: ' . $_GET['msg'] . ')';
                         break;
-
                     case 'soldeCPUpdate':
                         $errors[] = $_GET['error_content'];
+                        break;
+                    case 'noUserSelectedInGroup':
+                        $errors[] = 'Veuillez sélectionner au moins un utilisateur dans le groupe.';
+                        break;
+                    case 'BothExceptionAndRtt':
+                        $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Congés exceptionnels / RTT".';
                         break;
                 }
 
@@ -1264,13 +1685,13 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             // On vérifie si l'utilisateur à le droit de lire cette demande
             if ($canedit) {
                 if ($action == 'delete') {
-                    if ($user->rights->holiday->delete || $user->id == $cp->fk_user) {
+                    if ($user->rights->holiday->delete || (is_numeric($cp->fk_user) && $user->id == $cp->fk_user)) {
                         print $form->formconfirm("card.php?id=" . $id, $langs->trans("TitleDeleteCP"), $langs->trans("ConfirmDeleteCP"), "confirm_delete", '', 0, 1);
                     }
                 }
 
                 // Si envoi en validation
-                if ($action == 'sendToValidate' && $cp->statut == 1 && (($user->id == $cp->fk_user) || $droitAll)) {
+                if ($action == 'sendToValidate' && $cp->statut == 1 && ((is_numeric($cp->fk_user) && $user->id == $cp->fk_user) || $droitAll)) {
                     print $form->formconfirm("card.php?id=" . $id, $langs->trans("TitleToValidCP"), $langs->trans("ConfirmToValidCP"), "confirm_send", '', 1, 1);
                 }
 
@@ -1282,6 +1703,13 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 // Si validation de la demande par le DRH:
                 if ($action == 'drhValid') {
                     print $form->formconfirm("card.php?id=" . $id, $langs->trans("TitleValidCP"), $langs->trans("ConfirmValidCP"), "drh_confirm_valid", '', 1, 1);
+                }
+
+                // Si validation d'un congé collectif par le DRH:
+                if ($action == 'groupCPValidate') {
+                    $confirmMess = 'Etes-vous sûr de vouloir valider cette demande de congés collectifs?<br/>';
+                    $confirmMess .= 'Celle-ci passera automatiquement à l\'état "Approuvé par le DRH"';
+                    print $form->formconfirm("card.php?id=" . $id, $langs->trans("TitleValidCP"), $confirmMess, "drh_group_valid", '', 1, 1);
                 }
 
                 // Si refus de la demande
@@ -1301,10 +1729,16 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     print $form->formconfirm("card.php?id=" . $id, $langs->trans("TitleCancelCP"), $langs->trans("ConfirmCancelCP"), "confirm_cancel", '', 1, 1);
                 }
 
+                // Si annulation d'un congé collectif:
+                if ($action == 'group_cancel') {
+                    $confirmMess = 'Etes-vous sûr de vouloir annuler ces congés collectifs?';
+                    print $form->formconfirm("card.php?id=" . $id, $langs->trans("TitleCancelCP"), $confirmMess, "confirm_group_cancel", '', 1, 1);
+                }
+
                 $head = synopsisholiday_prepare_head($cp);
 
                 dol_fiche_head($head, 'card', $langs->trans("CPTitreMenu"), 0, 'holiday');
-
+                $edit = false;
                 if ($action == 'edit' && $cp->statut == 1) {
                     $edit = true;
                     print '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $_GET['id'] . '">' . "\n";
@@ -1324,9 +1758,49 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 print '</td>';
                 print '</tr>';
 
+                print '<tr>';
                 print '<td>' . $langs->trans("User") . '</td>';
                 print '<td>';
-                print $userRequest->getNomUrl(1);
+                if (isset($userRequest))
+                    print $userRequest->getNomUrl(1);
+                else if (is_array($cp->fk_user)) {
+                    $users = array();
+                    print '<input type="hidden" name="usersGroup" id="usersGroup" value="1"/>';
+                    if (isset($cp->fk_group) && !empty($cp->fk_group)) {
+                        $group = new UserGroup($db);
+                        $group->fetch($cp->fk_group);
+                        print 'Groupe: <b>' . $group->name . '</b> ';
+                        $users = $group->listUsersForGroup();
+                        print '<input type="hidden" name="group_id" id="group_id" value="' . $cp->fk_group . '"/>';
+                    } else {
+                        foreach ($cp->fk_user as $user_id) {
+                            $curUser = new User($db);
+                            $curUser->fetch($user_id);
+                            $users[] = $curUser;
+                        }
+                        print 'Congés collectifs ';
+                        print '<input type="hidden" name="group_id" id="group_id" value="-1"/>';
+                    }
+                    print '<input class="button" id="showUsersList" type="button" value="Afficher la liste des utilisateurs"/>';
+                    print '<div id="usersListContainer" style="display: none; background:#fff; padding: 15px; position: absolute; border: 1px solid #787878">';
+                    print '<div style="margin-bottom: 10px; text-align: right">';
+                    print '<input type="button" class="button" id="closeUsersList" value="Fermer"/>';
+                    print '</div>';
+                    foreach ($users as $curUser) {
+                        if ($edit) {
+                            print '<input type="checkbox" name="groupUsers[]" id="groupUser_' . $curUser->id . '" value="' . $curUser->id . '" style="margin-right: 10px"';
+                            if (in_array($curUser->id, $cp->fk_user))
+                                print ' checked';
+                            print '/>';
+                            print $curUser->lastname . ' ' . $curUser->firstname;
+                            print '<br/>';
+                        } else if (in_array($curUser->id, $cp->fk_user)) {
+                            print $curUser->getNomUrl(1) . '<br/>';
+                        }
+                    }
+                    print '</div>';
+                    print '<script type="text/javascript" src="' . DOL_MAIN_URL_ROOT . '/synopsisholiday/js/card.js"></script>';
+                }
                 print '</td></tr>';
 
                 $starthalfday = ($cp->halfday == -1 || $cp->halfday == 2) ? 'afternoon' : 'morning';
@@ -1524,31 +1998,8 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 print '</tbody>';
                 print '</table>';
 
-                if ($cp->statut != 4 && $cp->statut != 5 &&
-                        ($user->id == $drhUserId || $user->id == $cp->fk_validator || $user->id == $userRequest->fk_user)) {
-                    // Choix du remplaçant (DRH, responsable ou valideur seulement):
-                    print '<br><br>';
-                    print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $_GET['id'] . '&action=save_substitute">';
-                    print '<table class="border" width="50%">' . "\n";
-                    print '<tbody>';
-                    print '<tr class="liste_titre">';
-                    print '<td colspan="3">Options réservées aux responsables hiérarchiques</td>';
-                    print '</tr>';
-                    print '<tr>';
-                    print '<td width="50%">Remplaçant</td>';
-                    print '<td>';
-                    $form->select_users(isset($cp->fk_substitute) ? $cp->fk_substitute : -1, 'substitute_user_id', 1, array($cp->fk_user));
-                    print '</td>';
-                    print '<td><input type="submit" value="Enregistrer" class="button"></td>';
-                    print '</tr>';
-                    print '</tbody>';
-                    print '</table>';
-                    print '</form>';
-                }
-
-
                 if ($action == 'edit' && $cp->statut == 1) {
-                    print '<br><div align="center">';
+                    print '<br/><div align="center">';
                     if ($canedit && $cp->statut == 1) {
                         print '<input type="submit" value="' . $langs->trans("UpdateButtonCP") . '" class="button">';
                     }
@@ -1557,41 +2008,67 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     print '</form>';
                 }
 
+                if (is_numeric($cp->fk_user)) {
+                    if ($cp->statut != 4 && $cp->statut != 5 &&
+                            ($user->id == $drhUserId || $user->id == $cp->fk_validator || $user->id == $userRequest->fk_user)) {
+                        // Choix du remplaçant (DRH, responsable ou valideur seulement):
+                        print '<br/><br/>' . "\n\n";
+                        print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $_GET['id'] . '&action=save_substitute">';
+                        print '<table class="border" width="50%">' . "\n";
+                        print '<tbody>' . "\n";
+                        print '<tr class="liste_titre">';
+                        print '<td colspan="3">Options réservées aux responsables hiérarchiques</td>';
+                        print '</tr>' . "\n";
+                        print '<tr>';
+                        print '<td width="50%">Remplaçant</td>' . "\n";
+                        print '<td>' . "\n";
+                        $form->select_users((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, array($cp->fk_user));
+                        print '</td>' . "\n";
+                        print '<td><input type="submit" value="Enregistrer" class="button"></td>';
+                        print '</tr>' . "\n";
+                        print '</tbody>';
+                        print '</table>';
+                        print '</form>';
+                    }
+                }
+
                 dol_fiche_end();
 
                 if (!$edit) {
                     print '<div class="tabsAction">';
 
                     // Boutons d'actions
-                    if ($canedit && $cp->statut == 1) {
-                        print '<a href="card.php?id=' . $_GET['id'] . '&action=edit" class="butAction">' . $langs->trans("EditCP") . '</a>';
+                    if ($cp->statut == 1) {
+                        if ($canedit)
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=edit" class="butAction">' . $langs->trans("EditCP") . '</a>';
+                        if (($user->id == $drhUserId) && is_array($cp->fk_user)) {
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=groupCPValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
+                        } else if (($canedit && ($user->id == $cp->fk_user)) || $user->id == $drhUserId) {
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
+                        }
+                        if ($user->id == $drhUserId || $droitAll || $user->rights->holiday->delete || $user->id == $cp->fk_user)
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=delete" class="butActionDelete">' . $langs->trans("DeleteCP") . '</a>';
+                    } else if ($cp->statut == 2) {
+                        if ($user->id != $drhUserId && $user->id == $cp->fk_validator) {
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=valid" class="butAction">' . $langs->trans("Approve") . '</a>';
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=refuse" class="butAction">' . $langs->trans("ActionRefuseCP") . '</a>';
+                        }
                     }
-                    if ($canedit && $cp->statut == 1 && ($user->id == $cp->fk_user || $droitAll)) {
-                        print '<a href="card.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
-                    }
-                    if (($user->rights->holiday->delete || $user->id == $cp->fk_user) && $cp->statut == 1) { // If draft
-                        print '<a href="card.php?id=' . $_GET['id'] . '&action=delete" class="butActionDelete">' . $langs->trans("DeleteCP") . '</a>';
-                    }
-
-                    if ($user->id == $cp->fk_validator && $cp->statut == 2) {
-                        print '<a href="card.php?id=' . $_GET['id'] . '&action=valid" class="butAction">' . $langs->trans("Approve") . '</a>';
-                        print '<a href="card.php?id=' . $_GET['id'] . '&action=refuse" class="butAction">' . $langs->trans("ActionRefuseCP") . '</a>';
-                    }
-
                     if (($user->id == $drhUserId) &&
                             (($cp->statut == 2) || ($cp->statut == 3))) {
                         print '<a href="card.php?id=' . $_GET['id'] . '&action=drhValid" class="butAction">' . $langs->trans("Approve") . '</a>';
                         print '<a href="card.php?id=' . $_GET['id'] . '&action=drhRefuse" class="butAction">' . $langs->trans("ActionRefuseCP") . '</a>';
                     }
-
                     if (($user->id == $cp->fk_validator || $user->id == $cp->fk_user || $user->id == $drhUserId) &&
                             ($cp->statut == 2 || $cp->statut == 3 || $cp->statut == 6)) { // Status validated or approved
-                        if (($cp->date_debut > dol_now()) || $user->admin)
-                            print '<a href="card.php?id=' . $_GET['id'] . '&action=cancel" class="butAction">' . $langs->trans("ActionCancelCP") . '</a>';
-                        else
-                            print '<a href="#" class="butActionRefused" title="' . $langs->trans("HolidayStarted") . '">' . $langs->trans("ActionCancelCP") . '</a>';
+                        if (($cp->date_debut > dol_now()) || $user->admin) {
+                            if (is_array($cp->fk_user) && ($user->id == $drhUserId || $user->admin))
+                                print '<a href="card.php?id=' . $_GET['id'] . '&action=group_cancel" class="butAction"" class="butActionRefused">' . $langs->trans("ActionCancelCP") . '</a>';
+                            else
+                                print '<a href="card.php?id=' . $_GET['id'] . '&action=cancel" class="butAction">' . $langs->trans("ActionCancelCP") . '</a>';
+                        }
+//                        else print '<a href="#" class="butActionRefused" title="' . $langs->trans("HolidayStarted") . '">' . $langs->trans("ActionCancelCP") . '</a>'; // lien inutile
                     }
-
                     print '</div>';
                 }
             } else {

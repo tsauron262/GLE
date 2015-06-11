@@ -3453,6 +3453,7 @@ if ($action == 'create')
 		if (! empty($conf->commande->enabled))
 		{
 			$linktoelem.=($linktoelem?' &nbsp; ':'').'<a href="#" id="linktoorder">' . $langs->trans('LinkedOrder') . '</a>';
+			$linktoelem.= '<br><a href="#" id="linktopropal">' . $langs->trans('Lier à une propal') . '</a>';
 
 			print '
 				<script type="text/javascript" language="javascript">
@@ -3460,6 +3461,9 @@ if ($action == 'create')
 					jQuery("#linktoorder").click(function() {
 						jQuery("#orderlist").toggle();
 						jQuery("#linktoorder").toggle();
+					});
+					jQuery("#linktopropal").click(function() {
+						jQuery("#propal").toggle();
 					});
 				});
 				</script>

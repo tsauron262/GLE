@@ -13,7 +13,7 @@ class ActionsSynopsisTools {
 //            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';
             $return .= '<div class="menu_titre menu_titre_search"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/list.php?leftmenu=contracts">
                     ' . img_object("Contrat", "contract") . ' Contrats</a><br></div>';
-            $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/list.php">';
+            $return .= '<form method="get" action="' . DOL_URL_ROOT . '/contrat/list.php">';
             $return .= '<input type="text" class="flat" name="search_contract" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
             $return .= '</form>';
@@ -30,7 +30,7 @@ class ActionsSynopsisTools {
 //            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';
             $return .= '<div class="menu_titre menu_titre_search"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/list.php?leftmenu=contracts">
                     ' . img_object("Contrat", "contract") . ' Contrats</a><br></div>';
-            $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/list.php">';
+            $return .= '<form method="get" action="' . DOL_URL_ROOT . '/contrat/list.php">';
             $return .= '<input type="text" class="flat" name="search_contract" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
             $return .= '</form>';

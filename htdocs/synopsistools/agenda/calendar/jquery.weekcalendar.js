@@ -66,7 +66,7 @@
         switchDisplay: {},
         scrollToHourMillis: 500,
         allowEventDelete: false,
-        allowCalEventOverlap: false,
+        allowCalEventOverlap: true,
         overlapEventsSeparate: false,
         totalEventsWidthPercentInOneColumn: 100,
         readonly: false,
@@ -1084,6 +1084,7 @@
                 var clickYRounded = (clickY - (clickY % options.timeslotHeight)) / options.timeslotHeight;
                 var topPosition = clickYRounded * options.timeslotHeight;
                 $newEvent.css({top: topPosition});
+                $newEvent.css({position: "absolute"});
 
                 if (!options.preventDragOnEventCreation) {
                   $target.bind('mousemove.newevent', function(event) {
@@ -1133,8 +1134,11 @@
                 }
 
                 var freeBusyManager = self.getFreeBusyManagerForEvent(newCalEvent);
+                
+                
 
                 var $renderedCalEvent = self._renderEvent(newCalEvent, $weekDay);
+                $renderedCalEvent.css({position: "absolute"});
 
                 if (!options.allowCalEventOverlap) {
                   self._adjustForEventCollisions($weekDay, $renderedCalEvent, newCalEvent, newCalEvent);
@@ -1142,6 +1146,7 @@
                 } else {
                   self._adjustOverlappingEvents($weekDay);
                 }
+                
 
                 var proceed = self._trigger('beforeEventNew', event, {
                   'calEvent': newCalEvent,
@@ -1568,6 +1573,7 @@
                             $elem.css({'z-index': '3'});
                         });
                       }
+                      newLeft = 1;
                       $(this).css({width: newWidth + '%', left: newLeft + '%', right: 0});
                   });
                 });
@@ -1725,7 +1731,7 @@
         */
       _adjustForEventCollisions: function($weekDay, $calEvent, newCalEvent, oldCalEvent, maintainEventDuration) {
           var options = this.options;
-
+//return;
           if (options.allowCalEventOverlap) {
             return;
           }

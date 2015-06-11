@@ -252,7 +252,10 @@ if ($searchOn == 'true') {
                 $wh .= ' AND ' . $searchField . " LIKE  '%" . $searchString . "%'";
             } else if ($_REQUEST['searchOper'] == 'nc') {
                 $wh .= ' AND ' . $searchField . " NOT LIKE  '%" . $searchString . "%'";
-            } else {
+            } elseif(is_numeric($searchString)) {
+                $oper = '=';
+                $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+            }else {
                 $oper = 'LIKE';
                 $wh .= " AND " . $searchField . " " . $oper . " '%" . $searchString . "%'";
             }

@@ -262,7 +262,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                             $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
                                         }
                                         $req = "SELECT N__Serie 
-FROM  `llx_element_element`, llx_synopsischrono_chrono_101 v 
+FROM  `".MAIN_DB_PREFIX."element_element`, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 v 
 WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."
 AND  `targettype` LIKE  'productCli'";
                                         $result2 = $this->db->query($req);
@@ -270,10 +270,25 @@ AND  `targettype` LIKE  'productCli'";
                                             $ligne2 = $this->db->fetch_object($result2);
 //                                        $pdf->SetXY(12,64);
 //                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
-                                        $pdf->SetXY(30,20);
-                                        $pdf->SetFont('','', $default_font_size + 5);
-                                        $pdf->SetTextColor(234,119,2);
-                                        $pdf->MultiCell(157, 10, $ligne->ref."\n".$ligne2->N__Serie, 0, 'C', 0);
+                                            $pdf->SetXY(30,20);
+                                            $pdf->SetFont('','', $default_font_size + 5);
+                                            $pdf->SetTextColor(234,119,2);
+                                            $pdf->MultiCell(157, 10, $ligne->ref."\n".$ligne2->N__Serie, 0, 'C', 0);
+                                        }
+                                        
+                                        
+                                        $req = "SELECT * 
+FROM  `".MAIN_DB_PREFIX."synopsis_apple_repair` 
+WHERE  `chronoId` = ".$ligne->id;
+                                        $result2 = $this->db->query($req);
+                                        if($this->db->num_rows($result2) > 0){
+                                            $ligne2 = $this->db->fetch_object($result2);
+//                                        $pdf->SetXY(12,64);
+//                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
+                                            $pdf->SetXY(10,83);
+                                            $pdf->SetFont('','', $default_font_size - 3);
+                                            $pdf->SetTextColor(234,119,2);
+                                            $pdf->MultiCell(150, 10, "Soucieux de la qualité de service apporté à notre clientèle, nous vous invitons à remplir le questionnaire qualité \nque vous êtes susceptible de recevoir à l’adresse mail que vous nous nous avez indiquez.", 0, 'L', 0);
                                         }
                                     }
                                 }
@@ -410,6 +425,8 @@ AND  `targettype` LIKE  'productCli'";
 
 					$pdf->SetFont('','', $default_font_size - 1);   // On repositionne la police par defaut
 
+                                        
+                                        /*mod drsi*/if($object->lines[$i]->product_type < 100){
 					// VAT Rate
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
 					{
@@ -484,6 +501,7 @@ AND  `targettype` LIKE  'productCli'";
 						$pdf->line($this->marge_gauche, $nexY+1, $this->page_largeur - $this->marge_droite, $nexY+1);
 						$pdf->SetLineStyle(array('dash'=>0));
 					}
+                                        }/*f mod drsi*/
 
 					$nexY+=2;    // Passe espace entre les lignes
 
@@ -1496,7 +1514,7 @@ AND  `targettype` LIKE  'productCli'";
 			if (! empty($usecontact))
 			{
 				// On peut utiliser le nom de la societe du contact
-				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = "";
+				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = "";//$object->contact->socname;
 				else $socname = $object->client->nom;
 				$carac_client_name=$outputlangs->convToOutputCharset($socname);
 			}

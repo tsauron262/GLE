@@ -118,7 +118,7 @@ AND  `targettype` LIKE  'shipping')";
                 if ($obj->fk_soc) {
                     $soc = new Societe($db);
                     $soc->fetch($obj->fk_soc);
-                    $socStr = $soc->getNomUrl(1, '', 25);
+                    $socStr = $soc->getNomUrl(1, '', 20);
                 }
                 if ($i < 10) {
                     //$table .= "<tr $bc[$var]><td nowrap=\"nowrap\"><a href=\"card.php?id=".$obj->rowid."\">".$obj->ref."</a></td>";

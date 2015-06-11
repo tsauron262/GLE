@@ -257,6 +257,7 @@ class Propal extends CommonObject
 
             // TODO deprecated
             $line->price=-$remise->amount_ht;
+            $line->pa_ht=-$remise->amount_ht;
 
             $line->total_ht  = -$remise->amount_ht;
             $line->total_tva = -$remise->amount_tva;

@@ -420,7 +420,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                             if (isset($tabCentre[$ligne->Centre][3]) && $tabCentre[$ligne->Centre][3] > 0)
                                 $valeur = $tabCentre[$ligne->Centre][3];
                             else{
-                                dol_syslog("Pas d'id tech, pas de tech referent DANS centre pour export facture " . print_r($ligne, 1), 3);
+                                dol_syslog("Pas d'id tech, pas de tech referent DANS centre pour export facture " . print_r($ligne, 1)." \n\n   |    \n\n ".print_r($tabCentre[$ligne->Centre],1), 3);
                                 $this->annulExport = true;
                             }
                         } else{

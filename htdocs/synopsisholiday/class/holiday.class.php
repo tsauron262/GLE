@@ -1203,6 +1203,7 @@ class SynopsisHoliday extends Holiday {
                 $userStr = " - " . $userT->getFullName($langs);
             } else if (is_array($this->fk_user)) {
                 if (isset($this->fk_group) && !empty($this->fk_group)) {
+                    require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
                     $userGroup = new UserGroup($this->db);
                     if ($userGroup->fetch($this->fk_group) > 0)
                         $userStr = ' - Groupe: <b>' . $userGroup->name . '</b>';

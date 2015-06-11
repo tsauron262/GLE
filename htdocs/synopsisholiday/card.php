@@ -58,8 +58,8 @@ $now = dol_now();
  * Actions
  */
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 $droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) ||
         (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
@@ -706,9 +706,9 @@ if ($action == 'drh_group_valid') {
 
         $cp->statut = 6;
         $agendaCheck = $cp->onStatusUpdate($user);
-//        $verif = $cp->update($user->id);
+        $verif = $cp->update($user->id);
         $mailErrors = 0;
-        $verif = 1;
+//        $verif = 1;
         // Si pas d'erreur SQL on redirige vers la fiche de la demande
         if ($verif > 0) {
             $soldeUpdateError = '';
@@ -740,11 +740,11 @@ if ($action == 'drh_group_valid') {
             $nbOpenDays = $cp->getCPforUser($user->id, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
             
             foreach ($cp->fk_user as $user_id) {
-                echo 'User: '.$user_id.'<br/>';
+//                echo 'User: '.$user_id.'<br/>';
                 $infos = $cp->verifUserConflictsForGroupHoliday($user, $user_id);
-                echo 'Résult: <pre>';
-                print_r($infos);
-                echo '</pre>';
+//                echo 'Résult: <pre>';
+//                print_r($infos);
+//                echo '</pre>';
                 
                 if (count($infos) == 1) {
                     $message .= "Un de vos congé existant a été modifié car il entrait en conflit avec ce nouveau congé. \n\n";
@@ -855,7 +855,7 @@ if ($action == 'drh_group_valid') {
                 }
             }
             echo 'Fin<b>';
-            exit;
+//            exit;
             if ($nErrors) {
                 $mess = $nErrors . " erreur(s). Veuillez consulter le LOG.";
                 header('Location: card.php?id=' . $_GET['id'] . '&error=soldeCPUpdate&error_content=' . $mess);

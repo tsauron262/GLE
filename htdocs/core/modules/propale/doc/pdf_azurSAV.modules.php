@@ -1387,7 +1387,7 @@ AND  `targettype` LIKE  'productCli'";
 			if (! empty($usecontact))
 			{
 				// On peut utiliser le nom de la societe du contact
-				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = $object->contact->socname;
+				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = "";//$object->contact->socname;
 				else $socname = $object->client->nom;
 				$carac_client_name=$outputlangs->convToOutputCharset($socname);
 			}

@@ -409,6 +409,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                 if ($nom == "id8Sens") {
                     if ($valeur <= 1) {
                         if (isset($ligne->Centre) && $ligne->Centre != "") {
+                            require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
                             global $tabCentre;
                             if (isset($tabCentre[$ligne->Centre][3]) && $tabCentre[$ligne->Centre][3] > 0)
                                 $valeur = $tabCentre[$ligne->Centre][3];

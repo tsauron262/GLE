@@ -424,6 +424,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                                 $this->annulExport = true;
                             }
                         } else{
+                            mailSyn("jc.cannet@bimp.fr", "Facture sans Centre", "Bonjour, la facture ".$ligne->facnumber." na pas de centre, elle ne peut donc pas étre exporté vers 8Sens. Cordialement.");
                             dol_syslog("Pas d'id tech, pas de centre pour export facture " . print_r($ligne, 1), 3);
                             $this->annulExport =true;
                         }

@@ -222,6 +222,7 @@ class synopsisHook {
 //                . 'alert("Test en cours !!! Nombreuses errerurs de chargement possible.");'
                 . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/js/global.js"></script>';
+        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/js/responsive.js"></script>';
 //        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/jquerymobile/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>';
 
         $jsSoc = "/synopsistools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";

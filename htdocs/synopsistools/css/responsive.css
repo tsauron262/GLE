@@ -1,0 +1,282 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 2 juin 2015, 11:06:52
+    Author     : victor
+*/
+
+@media (max-width:1150px){
+    div.fichetwothirdright,div.fichethirdleft{
+        float: none;
+        width: 100%;
+
+    }
+
+    div.fichetwothirdright{
+        margin-top: 15px;
+    }
+
+    div.ficheaddleft{
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 940px) ,(max-device-width: 940px)
+{
+    #but-menu/*.vmenu,#tmenu_tooltip*/{
+        display: block;
+        width: 42px;
+        height: 42px;
+        background-image: url(../img/menu.png);
+        /*background-size: 25px 25px;*/
+        background-size: 42px 42px;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        position:fixed;
+        z-index: 101;
+        top:2.5px;
+        left:5px;
+    }
+
+    #id-left, .tmenudiv ul.tmenu{/*conteneur 1 et 2*/
+        top:48px;
+        position: fixed;
+        padding-top: 0;
+        bottom: 0;
+        /*height: 100%;*/
+        background-color: silver;
+        border: black solid 1px;
+        overflow: scroll;
+    }
+
+    #id-left{/*conteneur de menu 2*/
+        left: -300px;
+        width: 300px;
+    }
+
+
+    .tmenudiv ul.tmenu{/*conteneur du menu 1*/
+        width: 200px;
+        z-index: 105;
+    }
+
+
+    div.vmenu{
+        width: 95%;
+        top:0;
+        bottom: 15px;
+    }
+
+    .tmenu li div, .vmenu a, .vmenu div, .vmenu span, label, form, div, tbody, .vmenu span{
+
+        font-size: 15px!important;
+    }
+
+    a img, td img{
+        height: 15px!important;
+    }
+
+    /*    .topmenuimage, .mainmenu.tmenudisabled{
+            display: none!important;
+        }*/
+
+    .login_table{
+        width: 100%;
+        height: 100%;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        max-width: 100%;
+    }
+
+    input[type=image]{
+        width: auto;
+    }
+
+    div#login_left,div#login_right{
+        min-width: 0;
+    }
+
+    .tmenudiv ul.tmenu li{/*element du menu 1*/
+        width: 100%;
+        height: 100px;
+        padding-top: 24px;
+    }
+    
+    div#responsive_titre{
+        font-size: 20px!important;
+        position: relative;
+        text-align: center;
+        top: 12px;
+    }
+
+    .bodylogin div.login_vertical_align{
+        bottom: 0;
+        padding: 0;
+        top: 0;
+        left: 0;
+        right: 0;
+        position: absolute;
+    }
+    
+    td.loginfield strong label,#username, #password{
+        font-size: 200%!important;
+    }
+    
+    div#login_right img#img_logo{
+        width: 250px;
+        height: 200px;
+        max-width: 400px;
+        max-height: 400px;
+    }
+    
+    #login_line2 input{
+        width: 45%;
+        height: 45%
+    }
+    
+    #username, #password{
+        height: 60px;
+    }
+
+    #login{
+        height: 100%
+    }
+
+    div.tmenudiv{
+        left:-450px;
+        position: fixed;
+        top:48px;
+    }
+
+    #login_right{
+        float :center;
+        background-position: left;
+        position: relative;
+        margin: auto;
+    }
+
+    #login_line2, #login_line2 a{
+        text-align: center;
+        display: block;
+    }
+
+    #login_line2 div{
+        text-align: left;
+    }
+
+    #login_line1 div{
+        display: block;
+
+    }
+
+    .left{
+        margin: auto;
+    }
+
+    #id-right{
+        z-index: 4;
+        top:50px;
+        position: absolute;
+        left: 0;
+    }
+
+    div.login_block{
+        max-width: 150px;
+    }
+
+    div.login_block_user, div.login_block_other{
+        float: left;
+        clear: none;
+    }
+
+    div.login_block_other img{
+        height: 35px!important;
+    }
+
+    div#tmenu_tooltip{
+        position: absolute;
+        width: 100%;
+        top:0;
+        padding-right: 0;
+    }
+
+
+
+    .fichehalfright{
+        float: none!important;
+    }
+
+    /*    #tmenu_tooltip{
+            position: ;
+            z-index: 12;
+        }
+        #id-container{
+    
+        }*/
+
+    #id_cach{
+        width:100%;
+        height:100%;
+        z-index:50; 
+        position:fixed;
+        top:48px;
+        background: black;
+        opacity: 0;
+        display: none
+    }
+}
+
+
+@media (max-device-width: 940px)
+{
+    .tmenu li div, .vmenu a, .vmenu div, .vmenu span, label, form, div, tbody, .vmenu span, input{
+
+        font-size: 25px!important;
+    }
+
+    a img, td img{
+        height: 25px!important;
+    }
+
+    input, select{
+        height: 30px;
+        width: 75%;
+        margin: 5px;
+        /*font-size:28px!important;*/
+    }
+
+    input.rad{
+        width: 20px!important;
+        display: inline-block;
+    }
+}
+
+
+@media(min-width: 941px) and (min-device-width: 941px){
+    .vmenu, .vmenu a, .vmenu div , div#tmenu_tooltip div.tmenudiv{
+        font-size: 1em!important;
+        left: 0px!important;
+
+    }
+
+
+    #id-right{
+        display: table-cell!important;
+    }
+
+
+    .vmenu{
+        height: auto;
+    }
+    
+    div#responsive_titre{
+        display: none;
+    }
+}

@@ -230,7 +230,11 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $this->pdf = $pdf;
                 if (class_exists('TCPDF')) {
                     if (get_class($pdf) == "FPDI") {
-                        $pdf = getNewPdf($this->format);
+                        if($valfinance->banque!="Grenke")
+                            $logo_B="finapro";
+                        else
+                            $logo_B="lease";
+                        $pdf = getNewPdf($this->format,$logo_B);
                         $this->pdf = $pdf;
                     }
                     $pdf->setPrintHeader(true);
@@ -310,21 +314,23 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
                 //print_r($this->emetteur);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital > 0) ? " au capital de " . price($this->emetteur->capital) . " €" : "" ) . " dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
+                //$pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société " . $this->emetteur->name . ", " . getFormeJuridiqueLabel($this->emetteur->forme_juridique_code) . (($this->emetteur->capital > 0) ? " au capital de " . price($this->emetteur->capital) . " €" : "" ) . " dont le siège social est situé à " . $this->emetteur->town . " (" . $this->emetteur->zip . "), " . $this->emetteur->address . ", enregistrée sous le numéro RCS: " . $this->emetteur->idprof4 . ",", 0, 'L'); //print_r($this->emetteur);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "La Société FINAPRO, SARL au capital de 50 000€ dont le siège social est situé à Jouques (13490), Parc du Deffend - 23 boulevard du Deffend, enregistrée sous le n° 443 247 978 au RCS d'Aix en Provence,", 0, 'L'); //print_r($this->emetteur);
                 $contact = $contrat->Liste_Contact(-1, "internal");
                 $nomC = "";
-                foreach ($contact as $key => $value) {
-                    if ($value["fk_c_type_contact"] == 10) {
-                        $idcontact = $value["id"];
-                        $cont = new User($this->db);
-                        $cont->fetch($idcontact);
-                        $nomC = "Représentée par " . $cont->getFullName($langs);
-                        $grade = $cont->job;
-                        if ($grade != "") {
-                            $nomC.=" intervenant en qualité de " . $grade . ".";
-                        }
-                    }
-                }
+//                foreach ($contact as $key => $value) {
+//                    if ($value["fk_c_type_contact"] == 10) {
+//                        $idcontact = $value["id"];
+//                        $cont = new User($this->db);
+//                        $cont->fetch($idcontact);
+//                        $nomC = "Représentée par " . $cont->getFullName($langs);
+//                        $grade = $cont->job;
+//                        if ($grade != "") {
+//                            $nomC.=" intervenant en qualité de " . $grade . ".";
+//                        }
+//                    }
+//                }
+                $nomC = "Représentée par Madame Patricia RODDIER, intervenant en qualité de Gérante";
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, $nomC, 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l'accepte, aux Conditions Générales ci-annexées composées de deux pages recto et aux Conditions Particulières suivantes :", 0, 'L');
 
@@ -536,7 +542,8 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 3;
                 //locataire
                 $pdf->SetAutoPageBreak(1, 0);
-                $pdf->MultiCell($W, 6, "Pour le Locataire" . "\n" . "Signature et cachet(lu et approuvé)" . "\n" . "Qualité" . "\n" . "NOM", 0, 'L', false, 0);
+                if($valfinance->banque== "Grenke" || $valfinance->banque=="BNP"){
+                    $pdf->MultiCell($W, 6, "Pour le Locataire" . "\n" . "Signature et cachet(lu et approuvé)" . "\n" . "Qualité" . "\n" . "NOM", 0, 'L', false, 0);
 
 
                 //loueur
@@ -548,6 +555,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $X = $X + $W;
                 $pdf->SetX($X);
                 $pdf->MultiCell($W, 6, "Pour le Cessionnaire" . "\n" . "Signature et cachet", 0, 'C', false, 0);
+            }
                 $pdf->SetAutoPageBreak(1, $this->margin_bottom);
 
                 $X = $this->marge_gauche;
@@ -561,9 +569,9 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 if ($valfinance->banque != "") {
                     if (file_exists(DOL_DATA_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt')) {
                         $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt', false);
-                    } else {
+                    }/* else {
                         $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
-                    }
+                    }*/
                 } else {
                     $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
                 }
@@ -573,6 +581,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $X = $this->marge_gauche + 10;
                 $pdf->SetXY($X, $this->page_hauteur - 50);
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 3;
+                if($valfinance->banque== "Grenke" || $valfinance->banque=="BNP"){
                 $pdf->MultiCell($W, 6, "Pour le locataire" . "\n" . "Signature et cachet(lu et approuver)" . "\n" . "\n" . "Qualité" . "\n" . "\n" . "Nom", 0, 'L');
                 $X = $X + $W;
                 $pdf->SetXY($X, $this->page_hauteur - 50);
@@ -580,9 +589,10 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $X = $X + $W;
                 $pdf->SetXY($X, $this->page_hauteur - 50);
                 $pdf->MultiCell($W, 6, "Pour le Cessionnaire", 0, 'C');
+                }
                 $pdf->SetAutoPageBreak(1, 55);
 
-//                $this->_pagefoot($pdf, $outputlangs);
+//                $this->_pagefoot($pdf,Pour le loueur $outputlangs);
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
@@ -607,7 +617,11 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                         $this->pdf = $pdf;
                         if (class_exists('TCPDF')) {
                             if (get_class($pdf) == "FPDI") {
-                                $pdf = getNewPdf($this->format);
+                                if($valfinance->banque!="Grenke")
+                            $logo_B="finapro";
+                        else
+                            $logo_B="lease";
+                        $pdf = getNewPdf($this->format,$logo_B);
                                 $this->pdf = $pdf;
                             }
                             $pdf->setPrintHeader(true);
@@ -666,7 +680,8 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $y = $pdf->GetY();
                     $pdf->SetXY($x, $y);
                     $pdf->setFont('', '', 8);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "     " . $this->emetteur->name . "\n     " . $this->emetteur->address . "\n\n     " . $this->emetteur->zip . "     " . $this->emetteur->town . "\n     " . "N° RCS: " . $this->emetteur->idprof4, 1, 'L', false, 1);
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "     " . $this->emetteur->name . "\n     " . $this->emetteur->address . "\n\n     " . $this->emetteur->zip . "     " . $this->emetteur->town . "\n     " . "N° RCS: " . $this->emetteur->idprof4, 1, 'L', false, 1);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "     " . "FINAPRO" . "\n     " . "PARC DU DEFFEND" . "\n\n     " . "23, Boulevard du Deffend" . "     " . "13490 JOUQUES" . "\n     " . "N° RCS: " . "443 247 978", 1, 'L', false, 1);
 
                     $pdf->setFont('', '', 6.5);
                     $y = $pdf->GetY() + 6;
@@ -680,16 +695,16 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $y = $pdf->GetY() + 2;
                     $pdf->SetXY($x, $y);
                     //die("test functuon".$this->ConvNumberLetter($valfinance->duree,0,0));
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 3 – A l’issue d’une période irrévocable, sauf accord écrit entre les deux parties, de " . $this->ConvNumberLetter($valfinance->duree, 0, 0) . " mois et au plus tard au " . $this->ConvNumberLetter($valfinance->duree, 0, 0) . "-ième mois de location, la société " . $this->emetteur->name . " offrira la possibilité au locataire de faire évoluer l’ensemble des équipements informatiques objet du présent contrat.\nCette modification se matérialisera par la mise en place d’un nouveau contrat dont la durée et le loyer seront identiques au présent contrat, si toutefois le périmètre informatique et/ou financier reste(nt) constant(s).\nSi le nombre de matériel augmente ou si le locataire décide le changement d’architecture de son informatique, le loyer ne pourra être maintenu constant, et sera calculé proportionnellement aux adjonctions rendues nécessaires.\nLa modification s’effectuera soit par remplacement du matériel soit par adjonction de nouveau matériel quand cela est possible.\nLe choix du constructeur du nouveau matériel sera laissé au locataire il devra toutefois faire partie des constructeurs validés par le loueur.\n", 0, 'J');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 3 – A l’issue d’une période irrévocable, sauf accord écrit entre les deux parties, de " . $this->ConvNumberLetter($valfinance->duree, 0, 0) . " mois et au plus tard au " . $this->ConvNumberLetter($valfinance->duree, 0, 0) . "-ième mois de location, la société " . "FINAPRO" . " offrira la possibilité au locataire de faire évoluer l’ensemble des équipements informatiques objet du présent contrat.\nCette modification se matérialisera par la mise en place d’un nouveau contrat dont la durée et le loyer seront identiques au présent contrat, si toutefois le périmètre informatique et/ou financier reste(nt) constant(s).\nSi le nombre de matériel augmente ou si le locataire décide le changement d’architecture de son informatique, le loyer ne pourra être maintenu constant, et sera calculé proportionnellement aux adjonctions rendues nécessaires.\nLa modification s’effectuera soit par remplacement du matériel soit par adjonction de nouveau matériel quand cela est possible.\nLe choix du constructeur du nouveau matériel sera laissé au locataire il devra toutefois faire partie des constructeurs validés par le loueur.\n", 0, 'J');
                     $pdf->setFont('', 'UI', 6.5);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "Il est expressément entendu entre les parties que le fruit de la revente du matériel « sortant » du contrat effacera les loyers restant à régler.\n", 0, 'L');
                     $y = $pdf->GetY() + 2;
                     $pdf->SetXY($x, $y);
                     $pdf->setFont('', '', 6.5);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 4 – La modification du matériel devra toutefois avoir reçue préalablement l’accord du comité des engagements financiers.\nAprès acceptation du comité, " . $this->emetteur->name . " adressera par écrit une proposition d’évolution des équipements informatiques objet du présent contrat. A compter de la réception de cette proposition le locataire disposera d’un délai de deux mois pour donner son accord à ÉPHÉSUS FINANCES"/* <- se renseigner auprès de patricia sur ce nom */ . ", passé ce délai si le locataire refuse les évolutions, le présent contrat se poursuivra jusqu'à son terme sans que le locataire ne puisse se prévaloir de l’absence d’évolution pour ne pas respecter ses obligations contractuelles.\n", 0, 'J');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 4 – La modification du matériel devra toutefois avoir reçue préalablement l’accord du comité des engagements financiers.\nAprès acceptation du comité, " . "FINAPRO" . " adressera par écrit une proposition d’évolution des équipements informatiques objet du présent contrat. A compter de la réception de cette proposition le locataire disposera d’un délai de deux mois pour donner son accord à ÉPHÉSUS FINANCES"/* <- se renseigner auprès de patricia sur ce nom */ . ", passé ce délai si le locataire refuse les évolutions, le présent contrat se poursuivra jusqu'à son terme sans que le locataire ne puisse se prévaloir de l’absence d’évolution pour ne pas respecter ses obligations contractuelles.\n", 0, 'J');
                     $y = $pdf->GetY() + 2;
                     $pdf->SetXY($x, $y);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 5 – A tous moments le locataire peut mettre fin au présent contrat suivant les conditions générales et l’article 11 du présent contrat. Toutefois si celle-ci intervient après une période irrévocable de " . $valfinance->duree . " mois " . $this->emetteur->name . " s’engage à reverser le fruit de la vente du matériel informatique déduction faite des frais de re-commercialisation s’élevant à 10% du montant du prix d’origine du matériel. Le locataire s’engage quant à lui à respecter ses obligations contractuelles.\n", 0, 'J');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "ARTICLE 5 – A tous moments le locataire peut mettre fin au présent contrat suivant les conditions générales et l’article 11 du présent contrat. Toutefois si celle-ci intervient après une période irrévocable de " . $valfinance->duree . " mois " . "FINAPRO" . " s’engage à reverser le fruit de la vente du matériel informatique déduction faite des frais de re-commercialisation s’élevant à 10% du montant du prix d’origine du matériel. Le locataire s’engage quant à lui à respecter ses obligations contractuelles.\n", 0, 'J');
                     $pdf->setFont('', 'UI', 6.5);
                     $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "Si le locataire décide de ne pas bénéficier de sa possibilité d’évolution et mène son contrat au terme, le montant de rachat du dit matériel sera de 15,00 (quinze euros) au profit du partenaire informatique du locataire.\n", 0, 'J');
                     $pdf->setFont('', '', 6.5);
@@ -719,7 +734,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-                $file = $dir . "/Proces_verbale.pdf";
+                $file = $dir . "/Proces_verbal.pdf";
 
                 if (file_exists($dir)) {
                     $pdf = "";
@@ -729,7 +744,11 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                     $this->pdf = $pdf;
                     if (class_exists('TCPDF')) {
                         if (get_class($pdf) == "FPDI") {
-                            $pdf = getNewPdf($this->format);
+                            if($valfinance->banque!="Grenke")
+                            $logo_B="finapro";
+                        else
+                            $logo_B="lease";
+                        $pdf = getNewPdf($this->format,$logo_B);
                             $this->pdf = $pdf;
                         }
                         $pdf->setPrintHeader(true);
@@ -865,7 +884,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetXY($x, $y);
                 $pdf->MultiCell($w, 6, "Le locataire a choisi librement et sous sa responsabilité les équipements, objets du présent contrat, en s’assurant auprès de ses fournisseurs de leur compatibilité y compris dans le cas où ils sont incorporés dans un système informatique préexistant.", 0, 'L');
                 $pdf->SetX($x);
-                $pdf->MultiCell($w, 6, "Le vendeur déclare que le matériel, ci-dessus désigné, a bien été mis en service selon les normes du constructeur, et le locataire déclare avoir, ce jour, réceptionné ce matériel sans aucune réserve, en bon état de marche, sans vice ni défaut apparent et conforme à la commande passée au fournisseur. En conséquence, le locataire déclare accepter ledit matériel sans restriction, ni réserve, compte tenu du mandat qui lui a été fait par " . $this->emetteur->name, 0, 'L');
+                $pdf->MultiCell($w, 6, "Le vendeur déclare que le matériel, ci-dessus désigné, a bien été mis en service selon les normes du constructeur, et le locataire déclare avoir, ce jour, réceptionné ce matériel sans aucune réserve, en bon état de marche, sans vice ni défaut apparent et conforme à la commande passée au fournisseur. En conséquence, le locataire déclare accepter ledit matériel sans restriction, ni réserve, compte tenu du mandat qui lui a été fait par " . "FINAPRO", 0, 'L');
                 $pdf->SetX($x);
                 $pdf->MultiCell($w, 6, "FAIT EN DOUBLE EXEMPLAIRE, UN POUR CHACUNE DES PARTIES", 0, 'L');
                 $pdf->SetX($x);
@@ -875,9 +894,11 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $y+=6;
                 $pdf->SetXY($x, $y);
                 $pdf->setfont('', 'B', 8);
+                if($valfinance->banque== "Grenke" || $valfinance->banque=="BNP")
                 $pdf->MultiCell($W, 6, "Pour le locataire" . "\n" . "Signature et cachet (lu et approuvé)" . "\n" . "Qualité" . "\n" . "NOM", 0, 'L', false, 0);
                 $x+=$W;
                 $pdf->SetXY($x, $y);
+                if($valfinance->banque== "Grenke" || $valfinance->banque=="BNP")
                 $pdf->MultiCell($W, 6, "Pour le Vendeur" . "\n" . "Signature et cachet", 0, 'L');
 
                 if (method_exists($pdf, 'AliasNbPages'))
@@ -1220,21 +1241,23 @@ function int2str($a) {
     }
 }
 
-function getNewPdf($format) {
+function getNewPdf($format,$logo_B) {
     if (!class_exists("FPDI222")) {
-
+        
         class FPDI222 extends FPDI {
-
+            
+            public $logoB;
+            
             function setHeader() {
                 global $conf, $langs, $mysoc;
                 $logo = false;
-                if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo . "noalpha.png")) {
-                    $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo . "noalpha.png";
+                if (is_file(DOL_DOCUMENT_ROOT.'/synopsisfinanc/img/'. $this->logoB.".png")) {
+                    $logo = DOL_DOCUMENT_ROOT.'/synopsisfinanc/img/'.$this->logoB . ".png";
                 } else {
                     $logo = $conf->mycompany->dir_output . '/logos' . '/' . $mysoc->logo;
                 }
                 if (is_readable($logo)) {
-                    $this->Image($logo, 90, 5, 0, 25);
+                    $this->Image($logo, 0, 5, 0, 25,'','','',false,300,'C');
                 }
             }
 
@@ -1249,5 +1272,7 @@ function getNewPdf($format) {
         }
 
     }
-    return new FPDI222('P', 'mm', $format);
+    $return =new FPDI222('P', 'mm', $format);
+    $return->logoB=$logo_B;
+    return $return;
 }

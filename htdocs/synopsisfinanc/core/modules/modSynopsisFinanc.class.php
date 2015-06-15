@@ -220,6 +220,7 @@ class modSynopsisFinanc extends DolibarrModules
   `commC` float DEFAULT NULL,
   `commF` float DEFAULT NULL,
   `taux` float DEFAULT NULL,
+  `coef` float DEFAULT NULL,
   `banque` varchar(25) DEFAULT NULL,
   `duree_degr` int(11) NOT NULL,
   `pourcent_degr` int(11) NOT NULL,

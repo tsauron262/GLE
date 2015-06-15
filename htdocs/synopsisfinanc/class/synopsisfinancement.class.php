@@ -39,6 +39,9 @@ class Synopsisfinancement extends CommonObject {
     var $loyer1;
     var $loyer2;
     var $nb_periode;
+    var $coef;
+    //mode du module
+    var $mode3;
     //tableau static pour l'affichage de donnée variable
     static $TPeriode = array(1 => "Mensuel", 3 => "Trimestriel", 4 => "Quadrimestriel", 6 => "Semestriel");
     static $tabM = array(1 => "Mois", 3 => "Trimestres", 4 => "Quadrimestres", 6 => "Semestres");
@@ -50,7 +53,10 @@ class Synopsisfinancement extends CommonObject {
     }
 
     function calculLoyer($montant, $montantPre, $duree) {
-        if ($this->taux > 0) {//si il y a un taux
+        if($this->coef!=0){
+            $montant=$montant*$this->coef;
+        }
+        if ($this->taux > 0 && $this->taux!="") {//si il y a un taux
             $mensualite = ($montant) * ($this->interet / (1 - pow((1 + $this->interet), -($duree)))); //calcul de la mensualité de remboursement
         } else {
             $mensualite = ($montant) / $duree; //calcul de la mensualité de remboursement sans taux
@@ -63,19 +69,21 @@ class Synopsisfinancement extends CommonObject {
 
     function calcul() {
 
-        $mode = TRUE;//default true - calculer la comm financière sans la comm commerciale quand désactiver
-        $mode_comm = true;//default false - calcule les commission sur le pret si activé .. peut etre couplé avec le mode du dessus
+        $mode = false; //default true - calculer la comm financière sans la comm commerciale quand désactiver
+        $mode_comm = true; //default false - calcule les commission sur le pret si activé .. peut etre couplé avec le mode ci-dessus
+        $this->mode3=true;//default false calcule le second loyer indépendament du premier
 
         $this->nb_periode = $this->duree / $this->periode;
         $this->nb_periode2 = $this->duree_degr / $this->periode; //nombre de période de remboursement durant toute la durée du financement
         $this->interet = $this->taux / 100 / 12; //calcul des interets par mois en fonction du taux
-
+        $this->ratioperiode=$this->duree_degr/$this->duree;
 
 
         $this->p_degr = $this->pourcent_degr / 100;
 
-        $this->montantAF1 = $this->montantAF * (1 - $this->p_degr);
+//        $this->montantAF1 = $this->montantAF * (1 - $this->p_degr);
         $this->montantAF2 = $this->montantAF * ($this->p_degr);
+        $this->montantAF1=$this->montantAF;
 
         $this->commCM1 = $this->montantAF1 * (($this->commC) / 100);
         if ($mode) {
@@ -94,12 +102,17 @@ class Synopsisfinancement extends CommonObject {
 
         $this->emprunt1 = $this->montantAF1 + $this->commCM1 + $this->commFM1;
         $this->emprunt2 = $this->montantAF2 + $this->commCM2 + $this->commFM2;
+        
+//        if($this->coef!=0 && $this->coef!=1){
+//            $this->emprunt1=$this->emprunt1*$this->coef;
+//            $this->emprunt2=$this->emprunt2*$this->coef;
+//        }
 
         $this->emprunt_total = $this->emprunt1 + $this->emprunt2;
 
 
 
-        $this->pret1 = $this->pret * (1 - $this->p_degr);
+        $this->pret1 = $this->pret;
         $this->pret2 = $this->pret * ($this->p_degr);
 
         if ($mode_comm) {
@@ -127,6 +140,9 @@ class Synopsisfinancement extends CommonObject {
         } else {
             $this->loyer2 = 0;
         }
+        if($this->mode3){
+            $this->loyer2=$this->pret/$this->duree;
+        }
 
 
         //
@@ -140,6 +156,17 @@ class Synopsisfinancement extends CommonObject {
         $this->prix_final = $this->prix_final1 + $this->prix_final2; //prix final que le financé aura payer au total
     }
 
+    function parse_champs(){
+        $this->montantAF=  str_replace(",",".",$this->montantAF);
+        $this->pourcent_degr=  str_replace(",", ".", $this->pourcent_degr);
+        $this->VR=  str_replace(",", ".", $this->VR);
+        $this->pret=  str_replace(",", ".", $this->pret);
+        $this->commC=  str_replace(",", ".", $this->commC);
+        $this->commF=  str_replace(",", ".", $this->commF);
+        $this->taux=str_replace(",", ".", $this->taux);
+        $this->coef=str_replace(",", ".", $this->coef);
+    }
+    
     function verif_integer($user) {
         $erreurs = array();
         if (is_numeric($this->montantAF) == false || $this->montantAF < 0) {
@@ -161,7 +188,7 @@ class Synopsisfinancement extends CommonObject {
         }
 
         if (is_numeric($this->taux) == false || $this->taux < 0) {
-            $erreurs[] = 'Le champs "Taux" a besoin d\'un nombre';
+            $erreurs[] = 'Le champs "Taux" a besoin d\'un nombre positif ou nul';
         }
 
         if ($this->pret == "" || is_numeric($this->pret) == false || $this->pret < 0) {
@@ -172,9 +199,9 @@ class Synopsisfinancement extends CommonObject {
             $erreurs[] = 'Le champs "VR" a besoin d\'un nombre';
         }
 
-        if ($this->duree_degr != 0 || $this->pourcent_degr != 0) {
-            if ($this->duree_degr == 0 xor $this->pourcent_degr == "") {
-                $erreurs[] = 'Les 2 champs du tarif dégréssif doivent tout deux etre remplit';
+        if ($this->duree_degr != 0 && ($this->pourcent_degr != 0 || $this->pourcent_degr =="")) {
+            if ( $this->pourcent_degr == "") {
+                $erreurs[] = 'Le champs du pourcentage dégréssif doit etre remplit';
             }
 
             if ($this->duree_degr <= 0) {
@@ -186,6 +213,16 @@ class Synopsisfinancement extends CommonObject {
             }
         }
 
+        if ((is_numeric($this->coef) == false || $this->coef < 0) && $this->coef!="") {
+            $erreurs[] = 'Le coeffeicient a besoin d\'un nombre positif ou nul';
+        }
+
+        if ($this->coef == "" && $this->taux == "") {
+            $erreurs[] = "L'un des 2 champs (taux et coefficient) doit etre renseigner";
+        }
+
+        
+
         if (isset($erreurs[0])) {
             dol_htmloutput_mesg("", $erreurs, "error");
             return false;
@@ -195,19 +232,26 @@ class Synopsisfinancement extends CommonObject {
     }
 
     function insert($user) {
-        $req = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsisfinancement`(`user_create`, `fk_propal`, `montantAF`, `periode`, `duree`, `commC`, `commF`, `taux`, `banque`, preter, VR, type_location,duree_degr,pourcent_degr) VALUES (' . $user->id . ',' . $this->propal_id . ',' . $this->montantAF . ',' . $this->periode . ',' . $this->duree . ',' . $this->commC . ',' . $this->commF . ',' . $this->taux . ',"' . $this->banque . '",' . $this->pret . ',' . $this->VR . ',"' . $this->location . '",' . $this->duree_degr . ',' . $this->pourcent_degr . ');';
+        $this->parse_champs();
+        $req = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsisfinancement`(`user_create`, `fk_propal`, `montantAF`, `periode`, `duree`, `commC`, `commF`, `taux`, `banque`, preter, VR, type_location,duree_degr,pourcent_degr, coef) VALUES (' . $user->id . ',' . $this->propal_id . ',' . $this->montantAF . ',' . $this->periode . ',' . $this->duree . ',' . $this->commC . ',' . $this->commF . ',' . $this->taux . ',"' . $this->banque . '",' . $this->pret . ',' . $this->VR . ',"' . $this->location . '",' . $this->duree_degr . ',' . $this->pourcent_degr . ',"' . $this->coef . '");';
         if ($this->verif_integer($user) == true) {
-            $this->db->query($req);
+            if(!$this->db->query($req)){
+                $erreurs="insertion SQL impossible";
+                dol_htmloutput_mesg("", $erreurs, "error");
+            }
             $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'synopsisfinancement');
         }
     }
 
     function update($user) {
-        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="' . $this->contrat_id . '", duree_degr=' . $this->duree_degr . ', pourcent_degr=' . $this->pourcent_degr . ', fk_facture="' . $this->facture_id . '" WHERE rowid=' . $this->id . ';';
+        $this->parse_champs();
+        $req = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisfinancement SET user_modify=' . $user->id . ',montantAF=' . $this->montantAF . ',periode=' . $this->periode . ',duree=' . $this->duree . ',commC=' . $this->commC . ',commF=' . $this->commF . ',taux=' . $this->taux . ',banque="' . $this->banque . '",preter=' . $this->pret . ', VR=' . $this->VR . ', type_location="' . $this->location . '", fk_contrat="' . $this->contrat_id . '", duree_degr=' . $this->duree_degr . ', pourcent_degr="' . $this->pourcent_degr . '", fk_facture="' . $this->facture_id . '", coef="'.$this->coef.'" WHERE rowid=' . $this->id . ';';
         //echo $req;
         if ($this->verif_integer($user) == true) {
-
-            $this->db->query($req);
+            if(!$this->db->query($req)){
+                $erreurs="mise à jour SQL impossible";
+                dol_htmloutput_mesg("", $erreurs, "error");
+            }
         }
     }
 
@@ -251,6 +295,7 @@ class Synopsisfinancement extends CommonObject {
             $this->location = $row->type_location;
             $this->duree_degr = $row->duree_degr;
             $this->pourcent_degr = $row->pourcent_degr;
+            $this->coef=$row->coef;
 
 //            $this->calcul();
         } else {

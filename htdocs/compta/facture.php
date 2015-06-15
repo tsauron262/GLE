@@ -1560,6 +1560,13 @@ if (empty($reshook))
 		$result = $object->add_object_linked('commande', GETPOST('linkedOrder'));
 	}
 
+        
+        // Link invoice to propal
+        if (GETPOST('linkedPropal')) {
+                $object->fetch($id);
+                $object->fetch_thirdparty();
+                $result = $object->add_object_linked('propal', GETPOST('linkedPropal'));
+        }
 
 	/*
 	 * Send mail

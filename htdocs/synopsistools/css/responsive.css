@@ -91,7 +91,14 @@ and open the template in the editor.
         overflow: scroll;
         height: 100%;
     }
+    
+    span.timePage{
+        display: none;
+    }
 
+    li#mainmenutd_{
+        display: none;
+    }
 
     div.vmenu{
         width: 95%;
@@ -180,8 +187,9 @@ and open the template in the editor.
     
     
     #login_line2 input{
-        width: 45%;
-        height: 45px;
+        width: 415px;
+        height: 70px;
+        font-size: 58px!important;
     }
     
     #username, #password, #securitycode{
@@ -201,7 +209,7 @@ and open the template in the editor.
     }
 
     #login_right{
-        float :center;
+        float : center;
         background-position: left;
         position: relative;
         margin: auto;
@@ -286,6 +294,10 @@ and open the template in the editor.
 
     a img, td img{
         height: 25px!important;
+    }
+    
+    input[type=checkbox]{
+        width: auto;
     }
 
     input, select{

@@ -21,13 +21,13 @@ $(window).load(function () {
 
     if (responsive) {
 
-        $('head').append('<link rel="stylesheet" type="text/css" href="' + DOL_URL_ROOT + '/synopsistools/css/responsive.css">');
+        
 
         $('#id-container').append("<div id='but-menu'></div>");
 
         $('#id-right').parent().append("<div id='id_cach' ></div>");
         
-        $('#tmenu_tooltip').append("<div id='responsive_titre'>GLE</div>");
+        $('#tmenu_tooltip').append("<div id='responsive_titre'><a href='"+DOL_URL_ROOT+"/index.php?mainmenu=home'>GLE</a></div>");
 
         $('#but-menu').click(function (e) {
             if (is_open == false) {
@@ -111,8 +111,8 @@ function move_menu(te) {
     }
     $('#id-left').css("left", ti - maxmenu + 200);
     $('.tmenudiv').css("left", ti - maxmenu);
-    $('#id-left').css("z-index", "102");
-    $('.tmenudiv').css("z-index", "102");
+    $('#id-left').css("z-index", "60");
+    $('.tmenudiv').css("z-index", "60");
     $('#id_cach').show();
     $('#id_cach').css("opacity", ti / maxmenu * opac);
 //    is_open = true;
@@ -141,10 +141,10 @@ function move_menu(te) {
 
 function push_menu(posX) {//posX -> sert à savoir si le menu doit etre pousser à guche ou à droite
     if (posX == true) {//pousser à droite
-        $('#id-left').css("z-index", "102");
-        $('.tmenudiv').css("z-index", "102");
+        $('#id-left').css("z-index", "60");
+        $('.tmenudiv').css("z-index", "60");
         $('#id_cach').show();
-        $('#id_cach').css("opacity", opac);
+        $('#id_cach').clearQueue().animate({"opacity": opac});
         $('#id-left').clearQueue().animate({"left": '200'});
         $('.tmenudiv').clearQueue().animate({"left": '0'});
         $('body').css('overflow', 'hidden');
@@ -152,7 +152,8 @@ function push_menu(posX) {//posX -> sert à savoir si le menu doit etre pousser 
     } else {
         $('#id-left').clearQueue().animate({"left": -maxmenu});
         $('.tmenudiv').clearQueue().animate({"left": -maxmenu});
-        $('#id_cach').fadeOut();
+        $('#id_cach').clearQueue().animate({"opacity": 0},null,null,function(){$('#id_cach').hide();});
+        
         $('body').css('overflow', 'scroll');
         is_open = false;
     }

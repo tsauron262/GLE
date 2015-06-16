@@ -14,9 +14,9 @@ class ActionsSynopsischrono {
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
 //            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';
+            $return .= '<form method="get" action="' . DOL_URL_ROOT . '/synopsischrono/liste.php?mainmenu=Process">';
             $return .= '<div class="menu_titre menu_titre_search"><a class="vsmenu" href="' . DOL_URL_ROOT . '/synopsischrono/listDetail.php?mainmenu=Process">
                      ' . img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono") . '</a><br></div>';
-            $return .= '<form method="get" action="' . DOL_URL_ROOT . '/synopsischrono/liste.php?mainmenu=Process">';
             $return .= '<input type="text" class="flat" name="filtre" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
             $return .= '</form>';

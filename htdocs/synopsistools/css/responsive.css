@@ -41,7 +41,7 @@ and open the template in the editor.
         left:5px;
     }
 
-    #id-left, .tmenudiv ul.tmenu{/*conteneur 1 et 2*/
+    #id-left, div.tmenudiv{/*conteneur 1 et 2*/
         top:48px;
         position: fixed;
         padding-top: 0;
@@ -49,18 +49,45 @@ and open the template in the editor.
         /*height: 100%;*/
         background-color: silver;
         border: black solid 1px;
-        overflow: scroll;
+        overflow-y: scroll;
     }
 
     #id-left{/*conteneur de menu 2*/
         left: -300px;
         width: 300px;
     }
+    
 
+    div.mainmenu.topmenuimage{
+        height: 100px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        background-position-y: 20px;
+        background-repeat: no-repeat;
+    }
+    
+    div.tmenucenter{
+        position: relative;
+    }
+    
+    a.tmenusel, a.tmenu{
+        position: absolute;
+        top: 48px;
+        left: 0;
+        right: 0;
+    }
+    
+    li.tmenusel, li.tmenu{
+        /*padding: 0;*/
+    }
 
     .tmenudiv ul.tmenu{/*conteneur du menu 1*/
         width: 200px;
-        z-index: 105;
+        z-index: 60;
+        overflow: scroll;
+        height: 100%;
     }
 
 
@@ -106,7 +133,10 @@ and open the template in the editor.
     .tmenudiv ul.tmenu li{/*element du menu 1*/
         width: 100%;
         height: 100px;
-        padding-top: 24px;
+        /*padding-top: 24px;*/
+        float: left;
+        background: #8c8c8c;
+        border: solid 1px #c0c0c0;
     }
     
     div#responsive_titre{
@@ -125,8 +155,17 @@ and open the template in the editor.
         position: absolute;
     }
     
-    td.loginfield strong label,#username, #password{
+    td.loginfield strong label,#username, #password, td.loginfield label, #securitycode{
         font-size: 200%!important;
+    }
+    
+    td a img#captcha_refresh_img{
+        height: 35px!important;
+    }
+    
+    #img_securitycode{
+        width: 250px;
+        height: 60px!important;
     }
     
     div#login_right img#img_logo{
@@ -136,12 +175,14 @@ and open the template in the editor.
         max-height: 400px;
     }
     
+    
+    
     #login_line2 input{
         width: 45%;
-        height: 45%
+        height: 45px;
     }
     
-    #username, #password{
+    #username, #password, #securitycode{
         height: 60px;
     }
 
@@ -153,6 +194,8 @@ and open the template in the editor.
         left:-450px;
         position: fixed;
         top:48px;
+        height: 100%;
+        overflow: hidden;
     }
 
     #login_right{
@@ -199,6 +242,7 @@ and open the template in the editor.
     div.login_block_other img{
         height: 35px!important;
     }
+    
 
     div#tmenu_tooltip{
         position: absolute;

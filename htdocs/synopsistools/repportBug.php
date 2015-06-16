@@ -95,10 +95,10 @@ function getBug($user) {
     echo "<br/><br/>";
     print_titre($langs->trans("Vos ancien ticket de bug"));
     echo "<br/>";
-    $html .= '<table class="noborder"><tr class="liste_titre">';
+    $html .= '<table class="noborder fullTable"><tr class="liste_titre">';
     if ($user->rights->SynopsisTools->Global->adminBug)
         $html .= "<th>Utilisateur</th>";
-    $html .= "<th>Message</th><th>Résolu</th></tr>";
+    $html .= "<th>Résolu</th><th>Message</th></tr>";
     $pair = false;
     while ($data = $db->fetch_object($sql)) {
         if ($pair)
@@ -114,7 +114,6 @@ function getBug($user) {
             $html .= "<td>" . $userT->getNomUrl() . "</td>";
         }
 
-        $html .= "<td>" . str_replace("\n", "<br/>", $data->text) . "</td>";
 
         $html .= "<td>";
         
@@ -137,6 +136,9 @@ function getBug($user) {
         if ($user->rights->SynopsisTools->Global->adminBug && $data->resolu < 1)
             $html .= ' <a href="?action=setInfo&id=' . $data->rowid . '"> ' . $pictoI . ' </a>';
         $html .= "</td>";
+        
+        $html .= "<td>" . str_replace("\n", "<br/>", $data->text) . "</td>";
+        
         $html .= "</tr>";
     }
     $html .= "</tabel>";

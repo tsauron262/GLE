@@ -415,3 +415,11 @@ table.espace th, table.espace td{
 }
 
 
+
+.fullTable{
+    width: 100%;
+    overflow-x: scroll;
+    display: block;
+}
+
+

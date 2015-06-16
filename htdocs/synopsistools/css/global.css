@@ -416,10 +416,16 @@ table.espace th, table.espace td{
 
 
 
-.fullTable{
-    width: 100%;
+
+
+
+table.fullTable {
+    width: 100%!important;
     overflow-x: scroll;
     display: block;
+}
+table.fullTable tr td.resize{/*correction bug dans repport Bug*/
+                             font-size:11px!important;
 }
 
 

@@ -137,11 +137,11 @@ function getBug($user) {
             $html .= ' <a href="?action=setInfo&id=' . $data->rowid . '"> ' . $pictoI . ' </a>';
         $html .= "</td>";
         
-        $html .= "<td>" . str_replace("\n", "<br/>", $data->text) . "</td>";
+        $html .= "<td class='resize'>" . str_replace("\n", "<br/>", $data->text) . "</td>";
         
         $html .= "</tr>";
     }
-    $html .= "</tabel>";
+    $html .= "</table>";
     }
     return $html;
 }

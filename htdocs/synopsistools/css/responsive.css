@@ -322,4 +322,9 @@ and open the template in the editor.
     div#responsive_titre{
         display: none;
     }
+    
+    
+    .fiche{
+        /*width: 100%;*/
+    }
 }

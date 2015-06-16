@@ -201,8 +201,8 @@ if ($searchOn == 'true') {
 
             $sql1 = $db->query($requete);
             $res1 = $db->fetch_object($sql1);
-            if ($res1->cssClass == 'datetimepicker' || $res1->cssClass == 'datepicker')
-                $sidx = "STR_TO_DATE(`" . $nom . "`, '%d/%m/%Y %H:%i')";
+//            if ($res1->cssClass == 'datetimepicker' || $res1->cssClass == 'datepicker')
+//                $sidx = "STR_TO_DATE(`" . $nom . "`, '%d/%m/%Y %H:%i')";
         }
 //    }
 //    if ($searchField == "c.date_create")

@@ -63,8 +63,8 @@ if ($action == 'update' && isset($_POST['update_cp'])) {
     $userID = array_keys($_POST['update_cp']);
     $userID = $userID[0];
 
-    $userValueCurrent = (int) $_POST['nb_holiday_current'][$userID];
-    $userValueNext = (int) $_POST['nb_holiday_next'][$userID];
+    $userValueCurrent = (float) $_POST['nb_holiday_current'][$userID];
+    $userValueNext = (float) $_POST['nb_holiday_next'][$userID];
 
     $nowValueCurrent = null;
     $nowValueNext = null;
@@ -74,8 +74,8 @@ if ($action == 'update' && isset($_POST['update_cp'])) {
     if ($result) {
         if ($db->num_rows($result)) {
             $obj = $db->fetch_object($result);
-            $nowValueCurrent = (int) $obj->current;
-            $nowValueNext = (int) $obj->next;
+            $nowValueCurrent = (float) $obj->current;
+            $nowValueNext = (float) $obj->next;
         }
     }
     $db->free($result);

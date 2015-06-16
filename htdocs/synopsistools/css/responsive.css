@@ -247,25 +247,22 @@ and open the template in the editor.
     
 
     div#tmenu_tooltip{
-        position: absolute;
+        position: fixed;
         width: 100%;
         top:0;
         padding-right: 0;
+        z-index: 100;
+        background-color: silver;
     }
 
-
+    div.login_block{
+        z-index: 101;
+        position: fixed;
+    }
 
     .fichehalfright{
         float: none!important;
     }
-
-    /*    #tmenu_tooltip{
-            position: ;
-            z-index: 12;
-        }
-        #id-container{
-    
-        }*/
 
     #id_cach{
         width:100%;

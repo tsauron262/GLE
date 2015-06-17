@@ -386,7 +386,9 @@ class PDO extends AbstractBackend {
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
         $filename = '-id' . $row['id'] . ".ics";
+                date_default_timezone_set("Europe/Paris");
         $action->build_exportfile('ical', 'event', 0, $filename, array('id' => $row['id']));
+                date_default_timezone_set("Europe/Paris");
         $outputfile = $conf->agenda->dir_temp . '/' . $filename;
         
         
@@ -426,7 +428,7 @@ class PDO extends AbstractBackend {
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-
+//        dol_syslog("retour".print_r($return,1),3);
 
         return $return;
     }
@@ -448,6 +450,7 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
+//        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //
 //        $stmt = $this->pdo->prepare('INSERT INTO '.$this->calendarObjectTableName.' (calendarid, uri, calendardata, lastmodified, etag, size, componenttype, firstoccurence, lastoccurence) VALUES (?,?,?,?,?,?,?,?,?)');
@@ -468,11 +471,23 @@ class PDO extends AbstractBackend {
 //        return '"' . $extraData['etag'] . '"';
 
         $extraData = $this->getDenormalizedData($calendarData);
+//        dol_syslog(print_r($extraData,1),3);
         $calendarData2 = $this->traiteTabIcs($calendarData, array());
+//        dol_syslog("iciciciciicic".print_r($calendarData2,1),3);
+        
+        
 
         global $db;
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
+        
+        if(isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false){
+                date_default_timezone_set("GMT");
+                $action->fulldayevent = true;
+                $extraData['lastOccurence'] -= 60;
+        }
+        else
+                date_default_timezone_set("Europe/Paris");
 
         $action->datep = $extraData['firstOccurence'];
         $action->datef = $extraData['lastOccurence'];
@@ -584,6 +599,18 @@ WHERE  `email` LIKE  '".$mail."'");
             require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
             $action = new \ActionComm($db);
             $action->fetch($ligne->fk_object);
+            
+            
+            if(isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false){
+                    date_default_timezone_set("GMT");
+                    $action->fulldayevent = true;
+                    $extraData['lastOccurence'] -= 60;
+            }
+            else{
+                    date_default_timezone_set("Europe/Paris");
+                    $action->fulldayevent = false;
+            }
+            
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
@@ -654,7 +681,7 @@ WHERE  `email` LIKE  '".$mail."'");
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             if (!is_integer($clef)) {
-                if (stripos($ligne, "=") !== false)
+                if (stripos($ligne, "=") !== false && $clef != "URL")
                     $tab2[] = $clef . ";" . $ligne;
                 else
                     $tab2[] = $clef . ":" . $ligne;

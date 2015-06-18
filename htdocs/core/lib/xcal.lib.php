@@ -218,7 +218,7 @@ function build_calfile($format,$title,$desc,$events_array,$outputfile)
                         //$en$fulldayeventddatef .= dol_print_date($enddate+1,'dayhourxcard',false);   // Local time
                     }
                     fwrite($calfileh, "DTEND" . $prefix . ":" . $enddatef . "\n");
-                    dol_syslog("Date : " . "DTSTART" . $prefix . ":" . $startdatef . " | " . "DTEND" . $prefix . ":" . $enddatef, 3);
+//                    dol_syslog("Date : " . "DTSTART" . $prefix . ":" . $startdatef . " | " . "DTEND" . $prefix . ":" . $enddatef, 3);
                     fwrite($calfileh, 'STATUS:CONFIRMED' . "\n");
                     if (!empty($transparency))
                         fwrite($calfileh, "TRANSP:" . $transparency . "\n");

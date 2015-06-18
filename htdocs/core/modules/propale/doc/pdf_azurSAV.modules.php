@@ -1324,7 +1324,7 @@ class pdf_azurSAV extends ModelePDFPropales
                                 }
                                 
                                 $pdf->SetXY(12,64);
-                                $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
+                                $pdf->MultiCell(80, 10, "Centre SAV : ".$centre[2]."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
                                 $req = "SELECT N__Serie 
 FROM  `llx_element_element`, llx_synopsischrono_chrono_101 v 
 WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."

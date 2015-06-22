@@ -90,8 +90,8 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
         $echo .= "Renseignez les Sympomes";
     elseif (!isset($_REQUEST['socid']) || $_REQUEST['socid'] < 1)
         $echo .= "Renseignez le Client";
-    elseif (!isset($_REQUEST['contactid']) || $_REQUEST['contactid'] == "")
-        $echo .= "Renseignez le Contact";
+//    elseif (!isset($_REQUEST['contactid']) || $_REQUEST['contactid'] == "")
+//        $echo .= "Renseignez le Contact";
     elseif (!isset($_POST['Machine']) || $_POST['Machine'] == "")
         $echo .= "Renseignez la Machine";
     elseif (!isset($_POST['NoMachine']) || $_POST['NoMachine'] == "")
@@ -287,7 +287,7 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>Contact.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
-    echo  $form->selectcontacts($socid, $_REQUEST['contactid']);
+    echo  $form->selectcontacts($socid, $_REQUEST['contactid'], 'contactid', 1);
     echo "<br />";
     echo "</td>";
     echo "</tr>";

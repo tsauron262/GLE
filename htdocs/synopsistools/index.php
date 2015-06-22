@@ -26,8 +26,8 @@ llxHeader();
 print "<div class='titre'>Outil GLE</div>";
 print "<br/>";
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCALDAV)) {
-    print"Lien CalDav Non Apple : ".(isset($_SERVER["https"]) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].DOL_URL_ROOT."/synopsiscaldav/html/cal.php/calendars/".$user->login."/Calendar";
-    print"<br/>Lien CalDav pour Apple : ".(isset($_SERVER["https"]) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].DOL_URL_ROOT."/synopsiscaldav/html/cal.php/principals/".$user->login."";
+    print"Lien CalDav Non Apple : ".((isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']  == 443) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].DOL_URL_ROOT."/synopsiscaldav/html/cal.php/calendars/".$user->login."/Calendar";
+    print"<br/>Lien CalDav pour Apple : ".((isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']  == 443) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].DOL_URL_ROOT."/synopsiscaldav/html/cal.php/principals/".$user->login."";
 }
 if (isset($user->rights->SynopsisTools->Global->phpMyAdmin)) {
     print" <br/><br/><a href='myAdmin.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin</span></a>";

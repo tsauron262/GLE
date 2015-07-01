@@ -664,6 +664,8 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null, $ordre = tr
     }
     if (!isset($typeS) && !isset($typeD))
         die("Suppr tout probleme pas de type");
+    if (!isset($typeS) || !isset($typeD))
+        dol_syslog("Suppr element_elemnt un seul type ".$typeS."|".$typeD."|".$idS."|".$idD, 3);
     $req = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE 1";
     if (isset($typeS))
         $req .= " AND sourcetype = '" . $typeS . "'";

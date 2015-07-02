@@ -26,82 +26,10 @@ $(document).ready(function () {
         }
     });
     $("#banque").change(function (e) {
-        banqueT = $("#banque option:selected").html();
-        if ($("#banque").val() != "") {
-            var tc = $("#banque").val().split(":");
-            tauxT = tc[0];
-            coefT = tc[1];
-
-            typePeriode = $("#mensuel").val();
-            montant = $("#montant").val();
-            duree = $("#duree").val();
-
-
-            if (banqueT.toUpperCase() == "GRENKE") {
-                tauxT = 0;
-                if (montant <= 12500 && montant > 500) {
-                    if (typePeriode == 3) {
-                        if(duree == 36)
-                            coefT = 9.21;
-                        if(duree == 48)
-                            coefT = 7.17;
-                        if(duree == 60)
-                            coefT = 5.94;
-                    }
-                    if (typePeriode == 1) {
-                        if(duree == 36)
-                            coefT = 3.11;
-                        if(duree == 48)
-                            coefT = 2.42;
-                        if(duree == 60)
-                            coefT = 2;
-                    }
-                }
-                if (montant <= 25000 && montant > 12500) {
-                    if (typePeriode == 3) {
-                        if(duree == 36)
-                            coefT = 9.09;
-                        if(duree == 48)
-                            coefT = 7.05;
-                        if(duree == 60)
-                            coefT = 5.82;
-                    }
-                    if (typePeriode == 1) {
-                        if(duree == 36)
-                            coefT = 3.07;
-                        if(duree == 48)
-                            coefT = 2.38;
-                        if(duree == 60)
-                            coefT = 1.97;
-                    }
-                }
-                if (montant > 25000) {
-                    if (typePeriode == 3) {
-                        if(duree == 36)
-                            coefT = 9.06;
-                        if(duree == 48)
-                            coefT = 7.02;
-                        if(duree == 60)
-                            coefT = 5.79;
-                    }
-                    if (typePeriode == 1) {
-                        if(duree == 36)
-                            coefT = 3.06;
-                        if(duree == 48)
-                            coefT = 2.35;
-                        if(duree == 60)
-                            coefT = 1.96;
-                    }
-                }
-            }
-
-
-        }
-
-        $("#taux").val(tauxT);
-        $("#coef").val(coefT);
-
-        $("#Bcache").val(banqueT);
+        calculeAfterBanque();
+    });
+    $("#reCalcBanque").click(function (e) {
+        calculeAfterBanque();
     });
     $("#but_deg").click(function (e) {
         e.preventDefault();
@@ -207,4 +135,84 @@ function calc() {
 }
 function calc_P() {
     $("#po_degr").val((parseFloat($("#matos").html().replace(" ", "").replace(",", ".")) / parseFloat($("#tot").html().replace(" ", "").replace(",", "."))) * 100 / ($("#duree").val() / $(".degr select").val()));
+}
+
+
+function calculeAfterBanque(){
+    banqueT = $("#banque option:selected").html();
+        if ($("#banque").val() != "") {
+            var tc = $("#banque").val().split(":");
+            tauxT = tc[0];
+            coefT = tc[1];
+
+            typePeriode = $("#mensuel").val();
+            montant = $("#montant").val();
+            duree = $("#duree").val();
+
+
+            if (banqueT.toUpperCase() == "GRENKE") {
+                tauxT = 0;
+                if (montant <= 12500 && montant > 500) {
+                    if (typePeriode == 3) {
+                        if(duree == 36)
+                            coefT = 9.21;
+                        if(duree == 48)
+                            coefT = 7.17;
+                        if(duree == 60)
+                            coefT = 5.94;
+                    }
+                    if (typePeriode == 1) {
+                        if(duree == 36)
+                            coefT = 3.11;
+                        if(duree == 48)
+                            coefT = 2.42;
+                        if(duree == 60)
+                            coefT = 2;
+                    }
+                }
+                if (montant <= 25000 && montant > 12500) {
+                    if (typePeriode == 3) {
+                        if(duree == 36)
+                            coefT = 9.09;
+                        if(duree == 48)
+                            coefT = 7.05;
+                        if(duree == 60)
+                            coefT = 5.82;
+                    }
+                    if (typePeriode == 1) {
+                        if(duree == 36)
+                            coefT = 3.07;
+                        if(duree == 48)
+                            coefT = 2.38;
+                        if(duree == 60)
+                            coefT = 1.97;
+                    }
+                }
+                if (montant > 25000) {
+                    if (typePeriode == 3) {
+                        if(duree == 36)
+                            coefT = 9.06;
+                        if(duree == 48)
+                            coefT = 7.02;
+                        if(duree == 60)
+                            coefT = 5.79;
+                    }
+                    if (typePeriode == 1) {
+                        if(duree == 36)
+                            coefT = 3.06;
+                        if(duree == 48)
+                            coefT = 2.35;
+                        if(duree == 60)
+                            coefT = 1.96;
+                    }
+                }
+            }
+
+
+        }
+
+        $("#taux").val(tauxT);
+        $("#coef").val(coefT);
+
+        $("#Bcache").val(banqueT);
 }

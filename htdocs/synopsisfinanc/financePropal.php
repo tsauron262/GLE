@@ -459,7 +459,11 @@ if ($user->rights->synopsisFinanc->write) {
         foreach ($tabB as $nomB => $tabT) {
             echo '<option value="' . $tabT[0] . ":" . $tabT[1] . '"' . (($nomB == $banque) ? 'selected="selected"' : "" ) . '>' . $nomB . '</option>';
         }
-        echo '</select><hr/>';
+        echo '</select>';
+        
+        echo '<input type="button" id="reCalcBanque" value="Calcule"/>';
+        
+        echo '<hr/>';
 
         echo "<input id='taux' type='text' name='taux' value='" . $tauxInteret . "' ". (($contrat_exist) ? "disabled='disabled'" : "") ." />%<hr/>";
         echo '<input id="coef" type="text" name="coef" placeholder="1.2, 1.45" ' . (($coef == 0) ? "" : 'value="' . $coef ) . '" '. (($contrat_exist) ? "disabled='disabled'" : "") .' /></td>';

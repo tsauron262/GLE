@@ -53,9 +53,6 @@ class Synopsisfinancement extends CommonObject {
     }
 
     function calculLoyer($montant, $montantPre, $duree) {
-        if($this->coef!=0){
-            $montant=$montant*$this->coef;
-        }
         if ($this->taux > 0 && $this->taux!="") {//si il y a un taux
             $mensualite = ($montant) * ($this->interet / (1 - pow((1 + $this->interet), -($duree)))); //calcul de la mensualité de remboursement
         } else {
@@ -64,7 +61,15 @@ class Synopsisfinancement extends CommonObject {
 
         $mensualite0 = $montantPre / $duree; //calcul des mensualité de remboursement à taux 0 (evol+) sur le materiel
 
-        return ($mensualite + $mensualite0) * $this->periode; //calcul du monant des mensualités en fonction du nombre de periode
+        
+        
+        $loyer =  ($mensualite + $mensualite0) * $this->periode; //calcul du monant des mensualités en fonction du nombre de periode
+        
+        if($this->coef!=0){
+            $loyer=$loyer*(100+$this->coef)/100;
+        }
+        
+        return $loyer;
     }
 
     function calcul() {

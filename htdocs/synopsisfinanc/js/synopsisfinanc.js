@@ -38,6 +38,7 @@ $(document).ready(function () {
 
 
             if (banqueT.toUpperCase() == "GRENKE") {
+                tauxT = 0;
                 if (montant <= 12500 && montant > 500) {
                     if (typePeriode == 3) {
                         if(duree == 36)

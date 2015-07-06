@@ -271,6 +271,7 @@ if (isset($warning[0])) {
     dol_htmloutput_mesg("", $warning, "warning");
 }
 
+
 if (isset($_POST["form2"]) && $_POST["datesign"]!="") {
 
     $contrat_facture_exist = false;
@@ -393,7 +394,7 @@ if ($user->rights->synopsisFinanc->write) {
     }
     echo '</th></tr>';
     echo'<tr>';
-    echo "<td><div class='pr'>Somme préter au client: <hr/></div><div class='vr'>VR: <hr/></div>Somme financée au client: <hr/>Pré-loyer: </td>";
+    echo "<td><div class='pr'>Somme préter au client: <hr/></div><div class='vr'>VR: <hr/></div>Somme financée au client: <hr/>Loyer maxi souhaité par le client : </td>";
     echo "<td>"
     . "<div class='pr'><input type='text' id='preter' name='preter' value='" . $pret . "' ". (($contrat_exist) ? "disabled='disabled'" : "") ." /><hr/></div>"
     . "<div class='vr'><input type='text' id='VR' name='VR' value='" . $VR . "' ". (($contrat_exist) ? "disabled='disabled'" : "") ." /><hr/></div>";

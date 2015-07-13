@@ -167,7 +167,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $partReq5 .= " LEFT JOIN  llx_propal propal on  propal.rowid = el.fk_source ";
             $partReq5 .= " LEFT JOIN  llx_synopsischrono chrono1 ON chrono1.propalId = el.fk_source ";
             $partReq5 .= " LEFT JOIN llx_synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
-            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL) AND ";
+            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
             $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
 //            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";

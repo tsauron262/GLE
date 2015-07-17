@@ -63,6 +63,8 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
                 if ($print)
                     echo "<br/>Facture : " . $ligne->facnumber . " exporté.<br/>";
             }
+            else 
+                echo "Export de " . $ligne->facnumber . " annule.</br>";
         }
         echo "Fin export : <br/>";
     }
@@ -165,7 +167,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $partReq5 = " FROM llx_societe soc, llx_facturedet det, llx_facture fact ";
             $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
             $partReq5 .= " LEFT JOIN  llx_propal propal on  propal.rowid = el.fk_source ";
-            $partReq5 .= " LEFT JOIN  llx_synopsischrono chrono1 ON chrono1.propalId = el.fk_source ";
+            $partReq5 .= " LEFT JOIN  llx_synopsischrono chrono1 ON chrono1.revisionNext < 1 AND chrono1.propalId = el.fk_source ";
             $partReq5 .= " LEFT JOIN llx_synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
             $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
             $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";
@@ -461,7 +463,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                 if ($nom == "refSav" && $this->sortie == "html")
                     $valeur = "<a href='" . DOL_URL_ROOT . "/synopsischrono/card.php?ref=" . $valeur . "'>" . $valeur . "</a>";
 
-                if ((stripos($nom, "_ht") !== false || stripos($nom, "_ttc") !== false || stripos($nom, "Total") !== false
+                if ((stripos($nom, "subprice") !== false || stripos($nom, "_ht") !== false || stripos($nom, "_ttc") !== false || stripos($nom, "Total") !== false
                         ) && is_numeric($valeur)) {
                     $this->tabTot[$nom] += $valeur;
                     $valeur = str_replace(" ", "", price($valeur));

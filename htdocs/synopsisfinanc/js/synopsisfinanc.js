@@ -147,6 +147,7 @@ function calculeAfterBanque() {
 
         typePeriode = $("#mensuel").val();
         montant = parseFloat($("#montant").val()) + parseFloat($("#VR").val()) + parseFloat($("#preter").val());
+        montantLog = parseFloat($("#log").html().replace(" ", ""));
         duree = $("#duree").val();
 
 
@@ -415,7 +416,7 @@ function calculeAfterBanque() {
             if (montant <= 1500 && montant > 300) {
                 if (typePeriode == 3) {
                     if (duree == 24)
-                        coefT = 14,451;
+                        coefT = 14, 451;
                     if (duree == 36)
                         coefT = 10.432;
                     if (duree == 48)
@@ -429,7 +430,7 @@ function calculeAfterBanque() {
                 }
                 if (typePeriode == 1) {
                     if (duree == 13)
-                        coefT = 8,398;
+                        coefT = 8, 398;
                     if (duree == 24)
                         coefT = 4.897;
                     if (duree == 36)
@@ -461,7 +462,7 @@ function calculeAfterBanque() {
                 }
                 if (typePeriode == 1) {
                     if (duree == 13)
-                        coefT = 8,279;
+                        coefT = 8, 279;
                     if (duree == 24)
                         coefT = 4.867;
                     if (duree == 36)
@@ -493,7 +494,7 @@ function calculeAfterBanque() {
                 }
                 if (typePeriode == 1) {
                     if (duree == 13)
-                        coefT = 8,199;
+                        coefT = 8, 199;
                     if (duree == 24)
                         coefT = 4.682;
                     if (duree == 36)
@@ -525,7 +526,7 @@ function calculeAfterBanque() {
                 }
                 if (typePeriode == 1) {
                     if (duree == 13)
-                        coefT = 8,140;
+                        coefT = 8, 140;
                     if (duree == 24)
                         coefT = 4.618;
                     if (duree == 36)
@@ -557,7 +558,7 @@ function calculeAfterBanque() {
                 }
                 if (typePeriode == 1) {
                     if (duree == 13)
-                        coefT = 8,079;
+                        coefT = 8, 079;
                     if (duree == 24)
                         coefT = 4.555;
                     if (duree == 36)
@@ -571,6 +572,46 @@ function calculeAfterBanque() {
                     if (duree == 72)
                         coefT = 1.813;
                 }
+            }
+        }
+
+
+
+        else if (banqueT.toUpperCase() == "BNP") {
+            if (montant >= 2000 && montant < 5000)
+                coefT = 12.45;
+            else if (montant >= 5000 && montant < 7500)
+                coefT = 10.25;
+            else if (montant >= 7500 && montant < 15000)
+                coefT = 8.55;
+            else if (montant >= 15000 && montant < 30000)
+                coefT = 6.45;
+            else if (montant >= 30000 && montant < 50000)
+                coefT = 5.40;
+            else if (montant >= 50000 && montant < 75000)
+                coefT = 5.10;
+            else if (montant >= 75000 && montant < 150000)
+                coefT = 4.65;
+            else if (montant >= 150000 && montant < 300000)
+                coefT = 4.55;
+            else if (montant >= 300000 && montant < 500000)
+                coefT = 4.45;
+            
+            alert(montantLog / montant);
+            if(coefT > 0){
+                if (duree < 24)
+                    coefT = 0;
+                else if (duree < 29)
+                    coefT += 0.40;
+                else if (duree < 42)
+                    coefT = 0;
+                else if (duree < 54)
+                    coefT += 0.20;
+                else
+                    coefT += 0.30;
+                
+                if(montantLog > 0 && (montantLog / montant) > 0.5)
+                    coefT += 0.40;
             }
         }
 

@@ -405,6 +405,8 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
     global $db;
     $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
 
+    $signature = '<div id="signature_Bimp"><div style="font-family: Arial, sans-serif; font-size: 13px;"><div style="margin: 0 0 8px 0;"><table border="0"><tbody><tr valign="middle"><td><a href="http://www.bimp.fr/" target="_blank"><img alt="" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/bimpcomputer.png"></a></td><td style="text-align: left;"><span style="font-size: large;"><span style="color: #181818;"><strong class="text-color theme-font">BIMP SAV</strong><span style="color: #181818;"> </span></span></span><br><div style="margin-bottom: 0px; margin-top: 8px;"><span style="font-size: medium;"><span style="color: #cb6c09;"></span></span></div><div style="margin-bottom: 0px; margin-top: 0px;"><span style="font-size: medium;"><span style="color: #808080;">Centre de Services Agrées Apple</span></span></div><div style="color: #828282; font: 13px Arial; margin-top: 10px; text-transform: none;"><a href="https://plus.google.com/+BimpFr/posts" style="text-decoration: underline;"><img alt="Google Plus Page" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/googlepluspage.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="https://twitter.com/BimpComputer" style="text-decoration: underline;"><img alt="Twitter" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/twitter.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="https://www.linkedin.com/company/bimp" style="text-decoration: underline;"><img alt="LinkedIn" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/linkedin.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="http://www.viadeo.com/fr/company/bimp" style="text-decoration: underline;"><img alt="Viadeo" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/viadeo.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="https://www.facebook.com/bimpcomputer" style="text-decoration: underline;"><img alt="Facebook" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/facebook.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a><br></div></td></tr></tbody></table><table border="0"><tbody><tr valign="middle"><td><a href="http://bit.ly/1MsmSB8"><img moz-do-not-send="true" src="http://www.bimp.fr/emailing/signatures/evenementiel2.png" alt=""></td></tr></tbody></table><table border="0"><tbody><tr valign="middle"><td><img alt="" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/pictoarbre.png"></td><td style="text-align: left;"><span style="font-size: small;"><span style="color: #009933;"> Merci de n\'imprimer cet e-mail que si nécessaire</span></span></td></tr></tbody></table><table border="0"><tbody><tr valign="middle"><td style="text-align: justify;"><span style="font-size: small;"><span style="color: #888888;"><small>Ce message et éventuellement les pièces jointes, sont exclusivement transmis à l\'usage de leur destinataire et leur contenu est strictement confidentiel. Une quelconque copie, retransmission, diffusion ou autre usage, ainsi que toute utilisation par des personnes physiques ou morales ou entités autres que le destinataire sont formellement interdits. Si vous recevez ce message par erreur, merci de le détruire et d\'en avertir immédiatement l\'expéditeur. L\'Internet ne permettant pas d\'assurer l\'intégrité de ce message, l\'expéditeur décline toute responsabilité au cas où il aurait été intercepté ou modifié par quiconque.<br> This electronic message and possibly any attachment are transmitted for the exclusive use of their addressee; their content is strictly confidential. Any copy, forward, release or any other use, is prohibited, as well as any use by any unauthorized individual or legal entity. Should you receive this message by mistake, please delete it and notify the sender at once. Because of the nature of the Internet the sender is not in a position to ensure the integrity of this message, therefore the sender disclaims any liability whatsoever, in the event of this message having been intercepted and/or altered.</small></span> </span></td></tr></tbody></table></div></div></div>';
+    
     $tabFilePc = $tabFilePc2 = $tabFilePc3 = array();
     $fileProp = DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/PC-" . $chrono->ref . ".pdf";
     if (is_file($fileProp)) {
@@ -452,7 +454,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
         mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Bimp pour votre '" . $nomMachine . "'.
 \nDans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d'APPLE, votre retour est important afin d'améliorer la qualité de notre Centre de Services.
 \nCordialement.
-\nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);
+\nL'équipe BIMP.".$signature, $tabFileFact, $tabFileFact2, $tabFileFact3);
     } elseif ($type == "Devis" && is_object($chrono->propal)) {
         $text = "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
 \nVeuillez nous communiquer votre accord ou votre refus par retour de ce Mail.
@@ -462,34 +464,34 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
             $text .= "\nTechnicien en charge de la réparation : " . $tech . ". \n";
 
         $text .= "\n\nCordialement.
-\nL'équipe BIMP";
+\nL'équipe BIMP".$signature;
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
     } elseif($type == "debut"){
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n\n Cordialement."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+        .$signature        , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     } elseif ($type == "debDiago") {
-        mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Nous avons commencé le diagnostic de votre produit, vous aurez rapidement des nouvelles de notre part. \nVotre centre de services Apple."
+        mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Nous avons commencé le diagnostic de votre produit, vous aurez rapidement des nouvelles de notre part. \nVotre centre de services Apple.".$signature
                 , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
         sendSms($chrono, "Nous avons commencé le diagnostic de votre produit, vous aurez rapidement des nouvelles de notre part.  Votre centre de services Apple.");
     } elseif ($type == "commOk") {
         mailSyn2("Commande piece(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
 \nNous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au " . $tel . ".
 \nCordialement.
-\nL'équipe BIMP", $tabFilePc, $tabFilePc2, $tabFilePc3);
+\nL'équipe BIMP".$signature, $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     } elseif ($type == "repOk") {
-        mailSyn2($chrono->ref . " Reparation  terminee", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est finie. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
+        mailSyn2($chrono->ref . " Reparation  terminee", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est finie. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP.".$signature
                 , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est finie. Vous pouvez le récupérer à ".$nomCentre." " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "revPropFerm") {
-        mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
+        mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP.".$signature
                 , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
         sendSms($chrono, "Bonjour, la réparation de votre produit  est refusé. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "pieceOk") {
         mailSyn2("Pieces recues " . $chrono->ref, $toMail, $fromMail, "La pièce/le produit que nous avions commandé pour votre Machine est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil. Vous serez prévenu dès que l'appareil sera prêt.
 \nCordialement.
-\nL'équipe BIMP", array(), array(), array());
+\nL'équipe BIMP".$signature, array(), array(), array());
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
     }
 }

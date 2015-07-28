@@ -413,7 +413,7 @@ class GSX {
                 return $this->wsdlUrl = 'https://gsxws2.apple.com/wsdl/emeaIPhone/gsx-emeaIPhone.wsdl';
             }
             else
-                return $this->wsdlUrl = 'https://gsxwsut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
+                return $this->wsdlUrl = 'https://gsxapiut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         } else {
             if ($this->isIphone)
                 return $this->wsdlUrl = 'https://gsxws2.apple.com/wsdl/emeaIPhone/gsx-emeaIPhone.wsdl';

@@ -231,7 +231,7 @@ class GSX {
      *
      */
     protected $gsxDetails = array(
-        'apiMode' => 'ut',
+        'apiMode' => 'production',
         'regionCode' => 'apac',
         'userId' => '',
         'password' => '',

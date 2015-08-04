@@ -495,7 +495,7 @@ class GSX {
         try {
             $authentication = $this->soapClient->Authenticate($authentication_array);
         } catch (SoapFault $fault) {
-dol_syslog( print_r($authentication, true),3);
+dol_syslog( print_r($authentication, true). print_r($authentication_array, true),3);
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }
 

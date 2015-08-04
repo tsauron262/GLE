@@ -485,7 +485,7 @@ class GSX {
         $authentication_array = array(
             'AuthenticateRequest' => array(
                 'userId' => $this->gsxDetails['userId'],
-//                'password' => $this->gsxDetails['password'],
+                'password' => $this->gsxDetails['password'],
                 'serviceAccountNo' => $this->gsxDetails['serviceAccountNo'],
                 'languageCode' => $this->gsxDetails['languageCode'],
                 'userTimeZone' => $this->gsxDetails['userTimeZone']

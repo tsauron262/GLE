@@ -338,11 +338,11 @@ class GSX {
             $this->gsxDetails['userId'] = $_gsxDetailsArray['userId'];
         }
 
-        if ($_gsxDetailsArray['password'] == '') {
-            $this->errors['init'][] = 'Password is blank';
-        } else {
-            $this->gsxDetails['password'] = $_gsxDetailsArray['password'];
-        }
+//        if ($_gsxDetailsArray['password'] == '') {
+//            $this->errors['init'][] = 'Password is blank';
+//        } else {
+//            $this->gsxDetails['password'] = $_gsxDetailsArray['password'];
+//        }
 
         if ($_gsxDetailsArray['serviceAccountNo'] == '') {
             $this->errors['init'][] = 'Service Account Number is blank';

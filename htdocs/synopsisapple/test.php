@@ -28,3 +28,8 @@ llxHeader();
     });
 </script>
 
+
+<?php
+ echo file_get_contents("https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl");
+?>
+

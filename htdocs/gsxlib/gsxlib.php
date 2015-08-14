@@ -83,8 +83,12 @@ class GsxLib
             }
         }
         
-        $this->cert_path = '/etc/apache2/ssl/certUt.pem';
-        $this->cert_pass = 'freeparty';
+//        $this->cert_path = '/etc/apache2/ssl/certUt.pem';
+//        $this->cert_pass = 'freeparty';
+        
+        
+        $this->cert_path = $_ENV['GSX_CERT'];
+        $this->cert_pass = $_ENV['GSX_KEYPASS'];
 
         if (!is_readable($this->cert_path)) {
             throw new GsxException("Cannot read SSL certificate");

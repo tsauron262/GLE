@@ -4,6 +4,16 @@
 	 * This example mimics the iOS device activation details in GSX
 	 */
 require '../../main.inc.php';
+
+
+//        $this->cert_path = '/etc/apache2/ssl/certUt.pem';
+//        $this->cert_pass = 'freeparty';
+        
+        
+        $_ENV['GSX_CERT'] = '/etc/apache2/ssl/certUt.pem';
+        $_ENV['GSX_KEYPASS'] = 'freeparty';
+
+
 	require '../gsxlib.php';
 
 	$sold_to = '';

@@ -449,8 +449,8 @@ class GSX {
 // Set the timeout to 10 seconds.
         $connectionOptions = array(
             'connection_timeout' => '5'
-            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Test.apple.com.chain.pem'
-            ,'passphrase' => 'freeparty9294'
+//            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Test.apple.com.chain.pem'
+//            ,'passphrase' => 'freeparty9294'
 //            ,'trace'      => TRUE
 //            ,'exceptions' => TRUE
 //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'

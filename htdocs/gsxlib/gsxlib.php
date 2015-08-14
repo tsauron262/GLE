@@ -115,7 +115,7 @@ class GsxLib
             'AuthenticateRequest' => array(
                 'userId'            => $username,
                 'serviceAccountNo'  => $sold_to,
-                'languageCode'      => 'en',
+                'languageCode'      => 'fr',
                 'userTimeZone'      => $tz,
             )
         );

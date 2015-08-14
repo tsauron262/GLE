@@ -127,6 +127,7 @@ class GsxLib
                 ->userSessionId;
         } catch(SoapFault $e) {
             syslog(LOG_ERR, $e);
+            print_r($e);
 
             if($environment == '') $environment = 'production';
 

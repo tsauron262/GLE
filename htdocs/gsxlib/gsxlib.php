@@ -83,7 +83,7 @@ class GsxLib
             }
         }
         
-        $this->cert_path = '/etc/apache2/ssl/Applecare-APP157-0000897316.Test.apple.com.chain.pem';
+        $this->cert_path = '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem';
         $this->cert_pass = 'freeparty';
 
         if (!is_readable($this->cert_path)) {

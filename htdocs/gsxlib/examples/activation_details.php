@@ -10,7 +10,7 @@ require '../../main.inc.php';
 //        $this->cert_pass = 'freeparty';
         
         
-        $_ENV['GSX_CERT'] = '/etc/apache2/ssl/certUt.pem';
+        $_ENV['GSX_CERT'] = '/etc/apache2/ssl/Applecare-APP157-0000897316.Test.apple.com.chain.pem';
         $_ENV['GSX_KEYPASS'] = 'freeparty';
 
 

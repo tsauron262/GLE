@@ -48,7 +48,7 @@ class gsxDatas {
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
                 'userId' => $user->array_options['options_apple_id'],
-                'password' => $user->array_options['options_apple_mdp'],
+//                'password' => $user->array_options['options_apple_mdp'],
                 'serviceAccountNo' => $user->array_options['options_apple_service'],
                 'languageCode' => 'fr',
                 'userTimeZone' => 'CEST',

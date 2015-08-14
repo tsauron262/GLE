@@ -84,7 +84,7 @@ class GsxLib
         }
         
         $this->cert_path = '/etc/apache2/ssl/Applecare-APP157-0000897316.Test.apple.com.chain.pem';
-        $this->cert_pass = 'admin@synopsis';
+        $this->cert_pass = '';
 
         if (!is_readable($this->cert_path)) {
             throw new GsxException("Cannot read SSL certificate");

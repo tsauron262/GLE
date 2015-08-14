@@ -83,7 +83,7 @@ class GsxLib
             }
         }
         
-        $this->cert_path = '/etc/apache2/ssl/certUt.pem';
+        $this->cert_path = '/etc/apache2/ssl/certUtp.pem';
         $this->cert_pass = 'freeparty';
 
         if (!is_readable($this->cert_path)) {

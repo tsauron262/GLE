@@ -1,6 +1,11 @@
 <?php
 
-include 'gsxlib/gsxlib.php';
+error_reporting(E_ALL);
+
+ini_set('display_errors', '1');
+
+
+include 'gsxlib.php';
 //  $_ENV['GSX_CERT'] = '/path/to/gsx/client/cert.pem';
 //  $_ENV['GSX_KEYPASS'] = 'MySuperSecretPrivateKeyPassPhrase';
 

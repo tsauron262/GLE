@@ -10,7 +10,7 @@ require '../../main.inc.php';
 	$username = '';
 	$password = '';
 	$serialnumber = '';
-	$gsx = GsxLib::getInstance('0000897316', 'contact@drsi.fr', 'ut');
+	$gsx = GsxLib::getInstance('0000897316', 'contact@drsi.fr', 'Production');
 echo "lllll";
 	$info = $gsx->fetchiOsActivation($serialnumber);
 

@@ -543,7 +543,7 @@ class gsxDatas {
     public function getRequestFormHtml($requestType, $prodId) {
         global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
-        $symptomesCodes = $this->getSymptomesCodesArray($this->serial);
+        $symptomesCodes = $this->getSymptomesCodesArray($this->serial, 'PD19');
         $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail') ? $comptiaCodes : null, $symptomesCodes);
 
         $chronoId = null;

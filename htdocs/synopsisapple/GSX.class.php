@@ -579,6 +579,7 @@ class GSX {
                     $clientLookup = 'IPhoneWarrantyStatus';
                     $wrapperName = 'iphoneUnitDetail';
                     $details = array(
+                        'serialNumber' => '',
                         'imeiNumber' => $serial
                     );
                     $responseName = 'iphoneWarrantyDetailInfo';

@@ -11,7 +11,7 @@ class gsxDatas {
     protected $errors = array();
     protected $repairs = array();
     public $partsPending = null;
-    public static $apiMode = 'production';
+    public static $apiMode = 'ut';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -70,7 +70,7 @@ class gsxDatas {
             return 0;
         }
         $this->setSerial($serial);
-        $this->gsx = new GSX($details, $this->isIphone);
+        $this->gsx = new GSX($details, $this->isIphone, self::$apiMode);
         if (count($this->gsx->errors['init']) || count($this->gsx->errors['soap'])) {
             $this->errors[] = 'GSX_init_error';
         } else {

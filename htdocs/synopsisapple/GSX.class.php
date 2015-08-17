@@ -311,9 +311,10 @@ class GSX {
      */
     public $isIphone = false;
 
-    public function __construct($_gsxDetailsArray = array(), $isIphone = false) {
+    public function __construct($_gsxDetailsArray = array(), $isIphone = false, $apiMode) {
 // We default to using production mode for GSX
         $this->isIphone = $isIphone;
+        $this->apiMode = $apiMode;
         if (!isset($_gsxDetailsArray['apiMode'])) {
             $_gsxDetailsArray['apiMode'] = 'production';
         }
@@ -447,16 +448,27 @@ class GSX {
         }
 
 // Set the timeout to 10 seconds.
-        $connectionOptions = array(
-            'connection_timeout' => '5'
-//            ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
-//            ,'passphrase' => 'freepartyUt'
-            ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdSi.pem'
-            ,'passphrase' => 'freepartyProd'
-            ,'trace'      => TRUE
-            ,'exceptions' => TRUE
-//            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
-        );
+        if($this->apiMode == 'ut'){
+            $connectionOptions = array(
+                'connection_timeout' => '5'
+                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
+                ,'passphrase' => 'freepartyUt'
+                ,'trace'      => TRUE
+                ,'exceptions' => TRUE
+    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
+            );
+        }
+        else{
+            
+            $connectionOptions = array(
+                'connection_timeout' => '5'
+                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdSi.pem'
+                ,'passphrase' => 'freepartyProd'
+                ,'trace'      => TRUE
+                ,'exceptions' => TRUE
+    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
+            );
+        }
 
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);

@@ -329,10 +329,6 @@
             <val val="3705">3705</val>
         </values>
     </def>
-    <def name="reportedIssueCode" type="select">
-        <label>Issue Code</label>
-        <values>
-            <val val="10153">10153</val>
-        </values>
+    <def name="reportedIssueCode" type="reportedSymptomCode">
     </def>
 </root>

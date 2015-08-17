@@ -481,10 +481,14 @@ class gsxDatas {
 //        return '';
     }
     
-    public function getSymptomesCodesArray($serial){
-        $datas = $this->gsx->obtainSymtomes($serial);
+    public function getSymptomesCodesArray($serial, $symCode){
+        $datas = $this->gsx->obtainSymtomes($serial, $symCode);
+        
         
         $newArray = array('sym' => array(), 'issue' => array());
+        
+        if(!is_null($symCode))
+            $newArray['sym'] = array($symCode => $symCode);
         
         foreach($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms'] as $tab){
             $newArray['sym'][$tab['reportedSymptomCode']] = $tab['reportedSymptomDesc'];

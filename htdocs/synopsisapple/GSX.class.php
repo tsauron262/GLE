@@ -746,7 +746,7 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
 //    }
     
     
-    public function obtainSymtomes($serials){
+    public function obtainSymtomes($serials = null, $sympCode = null){
         
         if (!$this->userSessionId) {
             $this->authenticate();
@@ -758,11 +758,15 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
                 'userSession' => array(
                     'userSessionId' => $this->userSessionId),
                 'requestData' => array(
-//                    'serialNumber' => $serials,
-                    'reportedSymptomCode' => 'PD17A'
+                    
                 ),
             ),
         );
+        
+        if(!is_null($serials))
+            $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
+        if(!is_null($sympCode))
+            $compTIARequest['ReportedSymptomIssueRequest']['requestData']['reportedSymptomCode'] = $sympCode;
 
         try {
             $compTIAAnswer = $this->soapClient->ReportedSymptomIssue($compTIARequest);

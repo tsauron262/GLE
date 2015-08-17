@@ -506,6 +506,7 @@ class GSX_Request {
                         if (isset($this->symptomesCodes['sym'])) {
                             $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
                             $html .= '<option value="0">Symtomes</option>' . "\n";
+                            if(count())
                             foreach ($this->symptomesCodes['sym'] as $mod => $desc) {
                                 $html .= '<option value="' . $mod . '"';
                                 if (isset($values[$valuesName])) {

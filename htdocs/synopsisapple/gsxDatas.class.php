@@ -483,7 +483,14 @@ class gsxDatas {
     
     public function getSymptomesCodesArray($serial){
         $datas = $this->gsx->obtainSymtomes($serial);
-        return $datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms'];
+        
+        $newArray = array('sym' => array());
+        
+        foreach($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms'] as $tab){
+            $newArray['sym'][$tab['reportedSymptomCode']] = $tab['reportedSymptomDesc'];
+        }
+        
+        return $newArray;
     }
 
     public function getCompTIACodesArray() {

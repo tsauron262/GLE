@@ -770,6 +770,7 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
 
         $compTIAAnswer = $this->_objToArr($compTIAAnswer);
 print_r($compTIAAnswer);
+dol_syslog("icicicici".print_r($compTIAAnswer,true),3);
         return $compTIAAnswer;
     }
 

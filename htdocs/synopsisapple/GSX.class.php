@@ -564,7 +564,7 @@ class GSX {
                 }
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-dol_syslog(print_r($requestData."icicicici",3),3);
+
                 $modelData = $this->request($requestData, $clientLookup);
 
 //                $errorMessage = $this->_obtainErrorMessage($modelData);
@@ -594,6 +594,8 @@ dol_syslog(print_r($requestData."icicicici",3),3);
                 $requestName = $clientLookup . 'Request';
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
                 $warrantyDetails = $this->request($requestData, $clientLookup);
+                dol_syslog(print_r($requestData."icicicici",3),3);
+                print_r($requestData."icicicici");
                 $errorMessage = $this->_obtainErrorMessage($warrantyDetails);
                 return $this->outputFormat($warrantyDetails[$clientLookup . 'Response'][$responseName], $errorMessage, $returnFormat);
 

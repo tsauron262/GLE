@@ -338,11 +338,11 @@ class GSX {
             $this->gsxDetails['userId'] = $_gsxDetailsArray['userId'];
         }
 
-//        if ($_gsxDetailsArray['password'] == '') {
-//            $this->errors['init'][] = 'Password is blank';
-//        } else {
-//            $this->gsxDetails['password'] = $_gsxDetailsArray['password'];
-//        }
+        if ($_gsxDetailsArray['password'] == '') {
+            $this->errors['init'][] = 'Password is blank';
+        } else {
+            $this->gsxDetails['password'] = $_gsxDetailsArray['password'];
+        }
 
         if ($_gsxDetailsArray['serviceAccountNo'] == '') {
             $this->errors['init'][] = 'Service Account Number is blank';
@@ -401,7 +401,7 @@ class GSX {
 //        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iph="http://gsxws.apple.com/elements/iphone">
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
-        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
+//        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         
         
         $type = "Asp";
@@ -492,7 +492,7 @@ class GSX {
         $authentication_array = array(
             'AuthenticateRequest' => array(
                 'userId' => $this->gsxDetails['userId'],
-//                'password' => $this->gsxDetails['password'],
+                'password' => $this->gsxDetails['password'],
                 'serviceAccountNo' => $this->gsxDetails['serviceAccountNo'],
                 'languageCode' => $this->gsxDetails['languageCode'],
                 'userTimeZone' => $this->gsxDetails['userTimeZone']

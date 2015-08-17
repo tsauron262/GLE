@@ -564,7 +564,7 @@ class GSX {
                 }
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-print_r($requestData);
+print_r($requestData."icicicici");
                 $modelData = $this->request($requestData, $clientLookup);
 
 //                $errorMessage = $this->_obtainErrorMessage($modelData);

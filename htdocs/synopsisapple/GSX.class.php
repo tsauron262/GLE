@@ -754,9 +754,10 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
 
 // Manually build the request...
         $compTIARequest = array(
-            'ComptiaCodeLookupRequest' => array(
+            'ReportedSymptomIssueRequest' => array(
                 'userSession' => array(
-                    'userSessionId' => $this->userSessionId,
+                    'userSessionId' => $this->userSessionId),
+                'requestData' => array(
                     'serialNumber' => $serials
                 ),
             ),

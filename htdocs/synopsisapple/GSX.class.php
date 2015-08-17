@@ -402,7 +402,9 @@ class GSX {
 //        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iph="http://gsxws.apple.com/elements/iphone">
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
-        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
+        $opt = ($this->isIphone)? "IPhone" : "Asp";
+        
+        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
         
         
         $type = "Asp";

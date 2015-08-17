@@ -26,7 +26,6 @@ class GSX_Request {
         $this->comptiaCodes = $comptiaCodes;
         $this->symptomesCodes = $symptomesCodes;
         
-        print_r($symptomesCodes);
 
         // Chargement des définitions:
         $fileName = dirname(__FILE__) . '/datas_definitions.xml';
@@ -505,8 +504,8 @@ class GSX_Request {
                         $html .= '<div class="reportedSymptomCodeContainer">' . "\n";
                         if (isset($this->symptomesCodes['sym'])) {
                             $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                            $html .= '<option value="0">Symtomes</option>' . "\n";
-                            if(count())
+//                            $html .= '<option value="0">Symtomes</option>' . "\n";
+                 
                             foreach ($this->symptomesCodes['sym'] as $mod => $desc) {
                                 $html .= '<option value="' . $mod . '"';
                                 if (isset($values[$valuesName])) {

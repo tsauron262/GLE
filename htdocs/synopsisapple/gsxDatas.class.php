@@ -346,7 +346,7 @@ class gsxDatas {
         $html .= '</select>';
 //        $html .= '</div>'."\n";
         
-        $symptomesCodes = $this->getSymptomesCodesArray($this->serial);
+        $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode'])? $_REQUEST['symCode'] : null));
         $inputName = "symptomesCodes";
         
         $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";

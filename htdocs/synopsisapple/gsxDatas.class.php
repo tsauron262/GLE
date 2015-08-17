@@ -483,6 +483,7 @@ class gsxDatas {
     
     public function getSymptomesCodesArray($serial){
         $datas = $this->gsx->obtainSymtomes($serial);
+        return $datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms'];
     }
 
     public function getCompTIACodesArray() {
@@ -528,7 +529,7 @@ class gsxDatas {
         global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
         $symptomesCodes = $this->getSymptomesCodesArray($this->serial);
-        $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail') ? $comptiaCodes : null);
+        $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail') ? $comptiaCodes : null, $symptomesCodes);
 
         $chronoId = null;
         if (isset($_REQUEST['chronoId'])) {

@@ -20,10 +20,13 @@ class GSX_Request {
     protected $requestOk = false;
     protected $comptiaCodes = null;
 
-    public function __construct($gsx, $requestName, $comptiaCodes = null) {
+    public function __construct($gsx, $requestName, $comptiaCodes = null, $symptomesCodes = null) {
         $this->gsx = $gsx;
         $this->requestName = $requestName;
         $this->comptiaCodes = $comptiaCodes;
+        $this->symptomesCodes = $symptomesCodes;
+        
+        print_r($symptomesCodes);
 
         // Chargement des définitions:
         $fileName = dirname(__FILE__) . '/datas_definitions.xml';
@@ -496,6 +499,24 @@ class GSX_Request {
                             $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
                             $html .= $values[$valuesName] . '"' . ($required ? ' required' : '') . '/>' . "\n";
                         }
+                        $html .= '</div>';
+                        break;
+                    case 'reportedSymptomCode':
+                        $html .= '<div class="reportedSymptomCodeContainer">' . "\n";
+
+                        if (isset($this->symtomesCodes['sym'])) {
+                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+                            $html .= '<option value="0">Symtomes</option>' . "\n";
+                            foreach ($this->comptiaCodes['sym'] as $mod => $desc) {
+                                $html .= '<option value="' . $mod . '"';
+                                if (isset($values[$valuesName])) {
+                                    if ($values[$valuesName] == $mod)
+                                        $html.= ' selected';
+                                }
+                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
+                            }
+                            $html .= '</select>' . "\n";
+                        } 
                         $html .= '</div>';
                         break;
 

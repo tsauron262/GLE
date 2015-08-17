@@ -449,7 +449,8 @@ class GSX {
 // Set the timeout to 10 seconds.
         $connectionOptions = array(
             'connection_timeout' => '5'
-            ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
+//            ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
+            ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdSi.pem'
             ,'passphrase' => 'freepartyUt'
             ,'trace'      => TRUE
             ,'exceptions' => TRUE

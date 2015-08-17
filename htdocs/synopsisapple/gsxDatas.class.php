@@ -489,7 +489,7 @@ class gsxDatas {
         foreach($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms'] as $tab){
             $newArray['sym'][$tab['reportedSymptomCode']] = $tab['reportedSymptomDesc'];
         }
-        print_r($datas);
+        
         foreach($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues'] as $tab){
             $newArray['issue'][$tab['reportedIssueCode']] = $tab['reportedIssueDesc'];
         }

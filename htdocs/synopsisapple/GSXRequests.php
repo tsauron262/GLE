@@ -518,6 +518,23 @@ class GSX_Request {
                         } 
                         $html .= '</div>';
                         break;
+                    case 'reportedIssueCode':
+                        $html .= '<div class="reportedSymptomCodeContainer">' . "\n";
+                        if (isset($this->symptomesCodes['issue'])) {
+                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+                            $html .= '<option value="0">Symtomes</option>' . "\n";
+                            foreach ($this->symptomesCodes['issue'] as $mod => $desc) {
+                                $html .= '<option value="' . $mod . '"';
+                                if (isset($values[$valuesName])) {
+                                    if ($values[$valuesName] == $mod)
+                                        $html.= ' selected';
+                                }
+                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
+                            }
+                            $html .= '</select>' . "\n";
+                        } 
+                        $html .= '</div>';
+                        break;
 
                     default:
                         $html .= '<p class="alert">Type inéxistant pour la donnée "' . $name . '"</p>';

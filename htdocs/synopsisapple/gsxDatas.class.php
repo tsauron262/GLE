@@ -346,7 +346,7 @@ class gsxDatas {
         $html .= '</select>';
 //        $html .= '</div>'."\n";
         
-        $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode'])? $_REQUEST['symCode'] : null));
+        $symptomesCodes = $this->getSymptomesCodesArray($this->serial);
         $inputName = "symptomesCodes";
         
         $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
@@ -561,7 +561,7 @@ class gsxDatas {
     public function getRequestFormHtml($requestType, $prodId) {
         global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
-        $symptomesCodes = $this->getSymptomesCodesArray($this->serial, 'PD19');
+        $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode'])? $_REQUEST['symCode'] : null));
         $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail') ? $comptiaCodes : null, $symptomesCodes);
 
         $chronoId = null;

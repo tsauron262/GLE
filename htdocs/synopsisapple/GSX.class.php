@@ -464,7 +464,7 @@ class GSX {
             
             $connectionOptions = array(
                 'connection_timeout' => '5'
-                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdFinal.pem'
+                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
                 ,'passphrase' => 'freepartyProd'
                 ,'trace'      => TRUE
                 ,'exceptions' => TRUE

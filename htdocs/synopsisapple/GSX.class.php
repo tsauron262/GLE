@@ -744,6 +744,34 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
 //        $response = $this->request($requestData, $clientLookup);
 //        return $this->outputFormat($response['CreateSRFOrderResponse']);
 //    }
+    
+    
+    public function obtainSymtomes($serials){
+        
+        if (!$this->userSessionId) {
+            $this->authenticate();
+        }
+
+// Manually build the request...
+        $compTIARequest = array(
+            'ComptiaCodeLookupRequest' => array(
+                'userSession' => array(
+                    'userSessionId' => $this->userSessionId,
+                    'serialNumber' => $serials
+                ),
+            ),
+        );
+
+        try {
+            $compTIAAnswer = $this->soapClient->CompTIACodes($compTIARequest);
+        } catch (SoapFault $fault) {
+            return $this->soap_error($fault->faultcode, $fault->faultstring);
+        }
+
+        $compTIAAnswer = $this->_objToArr($compTIAAnswer);
+print_r($compTIAAnswer);
+        return $compTIAAnswer;
+    }
 
     /**
      *

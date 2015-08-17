@@ -764,7 +764,7 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
         );
 
         try {
-            $compTIAAnswer = $this->soapClient->CompTIACodes($compTIARequest);
+            $compTIAAnswer = $this->soapClient->ReportedSymptomIssue($compTIARequest);
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }

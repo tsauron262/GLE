@@ -451,7 +451,7 @@ class GSX {
             'connection_timeout' => '5'
 //            ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
             ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdSi.pem'
-            ,'passphrase' => 'freepartyUt'
+            ,'passphrase' => 'freepartyProd'
             ,'trace'      => TRUE
             ,'exceptions' => TRUE
 //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'

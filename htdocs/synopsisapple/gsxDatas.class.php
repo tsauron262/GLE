@@ -345,6 +345,24 @@ class gsxDatas {
         }
         $html .= '</select>';
 //        $html .= '</div>'."\n";
+        
+        $symptomesCodes = $this->getSymptomesCodesArray($this->serial);
+        $inputName = "symptomesCodes";
+        
+        $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+//                            $html .= '<option value="0">Symtomes</option>' . "\n";
+                 
+                            foreach ($symptomesCodes['sym'] as $mod => $desc) {
+                                $html .= '<option value="' . $mod . '"';
+                                if (isset($values[$valuesName])) {
+                                    if ($values[$valuesName] == $mod)
+                                        $html.= ' selected';
+                                }
+                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
+                            }
+                            $html .= '</select>' . "\n";
+        
+        
         $html .= '<p style="text-align: right">' . "\n";
         $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Valider</span>' . "\n";
         $html .= '</p>' . "\n";

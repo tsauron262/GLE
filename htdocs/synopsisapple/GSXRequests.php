@@ -503,12 +503,10 @@ class GSX_Request {
                         break;
                     case 'reportedSymptomCode':
                         $html .= '<div class="reportedSymptomCodeContainer">' . "\n";
-echo "icicici1";
                         if (isset($this->symptomesCodes['sym'])) {
-                            echo "icicici2";
                             $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
                             $html .= '<option value="0">Symtomes</option>' . "\n";
-                            foreach ($this->comptiaCodes['sym'] as $mod => $desc) {
+                            foreach ($this->symptomesCodes['sym'] as $mod => $desc) {
                                 $html .= '<option value="' . $mod . '"';
                                 if (isset($values[$valuesName])) {
                                     if ($values[$valuesName] == $mod)

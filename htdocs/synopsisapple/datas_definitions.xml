@@ -323,4 +323,16 @@
             <val val="XYMT">YAMATO</val>
         </values>
     </def>
+    <def name="reportedSymptomCode" type="select">
+        <label>Symptom Code</label>
+        <values>
+            <val val="3705">3705</val>
+        </values>
+    </def>
+    <def name="reportedIssueCode" type="select">
+        <label>Issue Code</label>
+        <values>
+            <val val="10153">10153</val>
+        </values>
+    </def>
 </root>

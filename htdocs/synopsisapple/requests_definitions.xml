@@ -117,6 +117,8 @@
             <data name="fileData" required="0" donotprocess="1"></data>
             <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
             <data name="checkIfOutOfWarrantyCoverage" required="0" default="Y"></data>
+            <data name="reportedSymptomCode" required="1"></data>
+            <data name="reportedIssueCode" required="1"></data>
         </datas>
     </request>
 

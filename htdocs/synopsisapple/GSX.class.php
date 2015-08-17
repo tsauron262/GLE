@@ -516,7 +516,6 @@ class GSX {
         try {
             $authentication = $this->soapClient->Authenticate($authentication_array);
         } catch (SoapFault $fault) {
-dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true)."|<br/>Envoyé : ". print_r($authentication_array, true)."|<br/>Retour : ".print_r($authentication,true),3);
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }
 
@@ -565,7 +564,7 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
                 }
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-
+print_r($requestData);
                 $modelData = $this->request($requestData, $clientLookup);
 
 //                $errorMessage = $this->_obtainErrorMessage($modelData);

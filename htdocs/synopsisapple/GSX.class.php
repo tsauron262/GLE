@@ -758,7 +758,8 @@ dol_syslog("Adresse : ".$this->wsdlUrl."|<br/>Erreur : ". print_r($fault, true).
                 'userSession' => array(
                     'userSessionId' => $this->userSessionId),
                 'requestData' => array(
-                    'serialNumber' => $serials
+//                    'serialNumber' => $serials,
+                    'reportedSymptomCode' => 'PD17A'
                 ),
             ),
         );

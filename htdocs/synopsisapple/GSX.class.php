@@ -464,8 +464,8 @@ class GSX {
             
             $connectionOptions = array(
                 'connection_timeout' => '5'
-                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdFinal.pem'
-                ,'passphrase' => 'freepartyProd'
+                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certificatefor897316prod.pfx'
+//                ,'passphrase' => 'freepartyProd'
                 ,'trace'      => TRUE
                 ,'exceptions' => TRUE
     //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'

@@ -398,11 +398,11 @@ class GSX {
      *
      */
     protected function assign_wsdl() {
-//        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
-//
-//        $opt = ($this->isIphone)? "IPhone" : "Asp";
-//        
-//        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
+        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
+
+        $opt = ($this->isIphone)? "IPhone" : "Asp";
+        
+        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
         
         
         $type = "Asp";

@@ -899,7 +899,7 @@ class GSX {
             }
             else{
             $this->soap_error($f->faultcode, $f->faultstring." <pre> ".print_r($SOAPRequest, true));
-            dol_syslog("<pre>".print_r($requestData,true)."<br/><br/>".print_r($SOAPRequest, true)."</pre>",3);
+            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."",3);
             return array();
             }
         }

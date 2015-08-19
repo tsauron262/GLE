@@ -398,13 +398,11 @@ class GSX {
      *
      */
     protected function assign_wsdl() {
-//        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:glob="http://gsxws.apple.com/elements/global">
-//        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iph="http://gsxws.apple.com/elements/iphone">
-        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
-
-        $opt = ($this->isIphone)? "IPhone" : "Asp";
-        
-        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
+//        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
+//
+//        $opt = ($this->isIphone)? "IPhone" : "Asp";
+//        
+//        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
         
         
         $type = "Asp";
@@ -594,8 +592,8 @@ class GSX {
                 $requestName = $clientLookup . 'Request';
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
                 $warrantyDetails = $this->request($requestData, $clientLookup);
-                dol_syslog(print_r($requestData,3),3);
-                print_r($requestData);
+//                dol_syslog(print_r($requestData,3),3);
+//                print_r($requestData);
                 $errorMessage = $this->_obtainErrorMessage($warrantyDetails);
                 return $this->outputFormat($warrantyDetails[$clientLookup . 'Response'][$responseName], $errorMessage, $returnFormat);
 

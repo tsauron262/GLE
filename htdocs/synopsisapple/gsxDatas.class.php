@@ -11,8 +11,8 @@ class gsxDatas {
     protected $errors = array();
     protected $repairs = array();
     public $partsPending = null;
-    public static $apiMode = 'ut';
-//    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -60,7 +60,7 @@ class gsxDatas {
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
                 'userId' => $userId,
-//                'password' => $password,
+                'password' => $password,
                 'serviceAccountNo' => $serviceAccountNo,
                 'languageCode' => 'fr',
                 'userTimeZone' => 'CEST',

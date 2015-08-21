@@ -335,7 +335,7 @@ class Repair {
 
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData'];
         if(is_array($this->repairLookUp) && !isset($this->repairLookUp['repairConfirmationNumber']))
-            $this->repairLookUp = $this->repairLookUp[count($this->repairLookUp)-1];
+            $this->repairLookUp = $this->repairLookUp[0];
         if (isset($this->repairLookUp['repairNumber']) && ($this->repairLookUp['repairNumber'] != ''))
             $this->repairNumber = $this->repairLookUp['repairNumber'];
         if (isset($this->repairLookUp['repairConfirmationNumber']) && ($this->repairLookUp['repairConfirmationNumber'] != ''))

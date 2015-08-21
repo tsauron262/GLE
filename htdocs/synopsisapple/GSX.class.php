@@ -398,11 +398,11 @@ class GSX {
      *
      */
     protected function assign_wsdl() {
-        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
-
-        $opt = ($this->isIphone)? "IPhone" : "Asp";
-        
-        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
+//        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
+//
+//        $opt = ($this->isIphone)? "IPhone" : "Asp";
+//        
+//        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
         
         
         $type = "Asp";
@@ -777,12 +777,12 @@ class GSX {
                 ),
             ),
         );
-        
-        if(!is_null($serials))
-            $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
         if(!is_null($sympCode))
             $compTIARequest['ReportedSymptomIssueRequest']['requestData']['reportedSymptomCode'] = $sympCode;
 
+        elseif(!is_null($serials))
+            $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
+        
         try {
             $compTIAAnswer = $this->soapClient->ReportedSymptomIssue($compTIARequest);
         } catch (SoapFault $fault) {

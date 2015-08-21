@@ -11,8 +11,8 @@ class gsxDatas {
     protected $errors = array();
     protected $repairs = array();
     public $partsPending = null;
-    public static $apiMode = 'ut';
-//    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -192,6 +192,8 @@ class gsxDatas {
                     $html .= '<td>' . "\n";
                     $html .= '<table><thead></thead><tbody>' . "\n";
 //echo "<pre>"; print_r($datas);die;
+                    $this->serial2 = $datas['serialNumber'];
+                    
                     if (isset($datas['serialNumber']) && $datas['serialNumber'] !== '')
                         $html .= '<tr class="oddRow"><td class="rowTitle">Numéro de série</td><td>' . $datas['serialNumber'] . '</td></tr>' . "\n";
 
@@ -347,7 +349,7 @@ class gsxDatas {
         $html .= '</select>';
 //        $html .= '</div>'."\n";
         
-        $symptomesCodes = $this->getSymptomesCodesArray($this->serial);
+        $symptomesCodes = $this->getSymptomesCodesArray($this->serial2);
         $inputName = "symptomesCodes";
         
         $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
@@ -500,7 +502,8 @@ class gsxDatas {
 //        return '';
     }
     
-    public function getSymptomesCodesArray($serial, $symCode){
+    public function getSymptomesCodesArray($serial, $symCode = null){
+        $this->setSerial($serial);
         $datas = $this->gsx->obtainSymtomes($serial, $symCode);
         
         

@@ -326,7 +326,7 @@ class Repair {
         $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $datas);
         $response = $this->gsx->request($request, $client);
 
-            echo "<pre>";print_r($response);
+//            echo "<pre>";print_r($response);
         if (count($this->gsx->errors['soap']) > $n)
             return false;
 

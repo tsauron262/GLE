@@ -791,7 +791,7 @@ class gsxDatas {
                 dol_syslog("erreur GSX : " . $this->getGSXErrorsHtml() . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
             } else {
                 if ($requestType == "CreateMailInRepair" || $requestType == "KGBSerialNumberUpdate")
-                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
+//                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
                 $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $confirmNumber = null;

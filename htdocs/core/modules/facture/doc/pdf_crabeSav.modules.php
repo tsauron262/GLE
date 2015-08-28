@@ -288,7 +288,7 @@ WHERE  `chronoId` = ".$ligne->id;
                                             $pdf->SetXY(10,83);
                                             $pdf->SetFont('','', $default_font_size - 3);
                                             $pdf->SetTextColor(234,119,2);
-                                            $pdf->MultiCell(150, 10, "Soucieux de la qualité de service apporté à notre clientèle, nous vous invitons à remplir le questionnaire qualité \nque vous êtes susceptible de recevoir à l’adresse mail que vous nous nous avez indiquez.", 0, 'L', 0);
+                                            $pdf->MultiCell(150, 10, "Soucieux de la qualité de service apporté à notre clientèle, nous vous invitons à remplir le questionnaire qualité \nque vous êtes susceptible de recevoir à l’adresse mail que vous nous nous avez indiqué.", 0, 'L', 0);
                                         }
                                     }
                                 }
@@ -576,6 +576,11 @@ WHERE  `chronoId` = ".$ligne->id;
                                 $pdf->MultiCell("40", "25", "", 1);
                                 
                                 /*fmoddrsi*/
+                                
+                                $pdf->SetXY("95", "265");
+                                $pdf->SetFont('','', $default_font_size - 3);
+                                $pdf->MultiCell(100, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'J', 0);
+	
                                 
                                 
 

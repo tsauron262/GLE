@@ -297,7 +297,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1055]->valueStr, 0, 'L');
 
                 $cgv = "";
-                $cgv.= "-La société BIMP ne peut pas être tenue responsable de la parte éventuelle de données, quelque soit le support.\n\n";
+                $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
                 if (stripos($chrono2->description, "Iphone") !== false) {
                     $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";

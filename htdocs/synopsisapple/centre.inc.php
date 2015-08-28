@@ -8,4 +8,5 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "GB" => array("04 76 23 05 18", "sav38@bimp.fr", "Grenoble boutique", 52), "GA" => array("04 76 23 05 18", "sav38@bimp.fr", "Grenoble (Arts et Métiers)", 52),
     "B" => array("09 70 72 12 33", "sav250@bimp.fr", "Besançon", 83),
     "MO" => array("03 81 95 19 20", "sav252@bimp.fr", "Montbeliard", 84),
-    "C" => array("03 44 200 200", "sav60@bimp.fr", "Compiegne", 106));
+    "C" => array("03 44 200 200", "sav60@bimp.fr", "Compiegne", 106),
+    "MA" => array("04 96 11 29 40", "sav13@bimp.fr", "Marseille", 116));

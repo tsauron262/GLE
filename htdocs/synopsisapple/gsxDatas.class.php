@@ -516,10 +516,16 @@ class gsxDatas {
                 $newArray['sym'][$tab['reportedSymptomCode']] = $tab['reportedSymptomDesc'];
             }
 
-        if (isset($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues']))
-            foreach ($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues'] as $tab) {
-                $newArray['issue'][$tab['reportedIssueCode']] = $tab['reportedIssueDesc'];
+        if (isset($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues'])) {
+            $tabTemp = $datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues'];
+            if (isset($tabTemp[0]))
+                foreach ($tabTemp as $tab) {
+                    $newArray['issue'][$tab['reportedIssueCode']] = $tab['reportedIssueDesc'];
+                } 
+            else {
+                $newArray['issue'][$tabTemp['reportedIssueCode']] = $tabTemp['reportedIssueDesc'];
             }
+        }
 
         return $newArray;
     }

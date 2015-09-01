@@ -788,7 +788,7 @@ class GSX {
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }
-
+dol_syslog(print_r($compTIAAnswer, true)."|".print_r($compTIARequest, true), 3);
         $compTIAAnswer = $this->_objToArr($compTIAAnswer);
         return $compTIAAnswer;
     }

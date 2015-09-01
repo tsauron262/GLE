@@ -193,7 +193,7 @@ class gsxDatas {
                     $html .= '<table><thead></thead><tbody>' . "\n";
 //echo "<pre>"; print_r($datas);die;
                     $this->serial2 = $datas['serialNumber'];
-                    
+
                     if (isset($datas['serialNumber']) && $datas['serialNumber'] !== '')
                         $html .= '<tr class="oddRow"><td class="rowTitle">Numéro de série</td><td>' . $datas['serialNumber'] . '</td></tr>' . "\n";
 
@@ -348,24 +348,24 @@ class gsxDatas {
         }
         $html .= '</select>';
 //        $html .= '</div>'."\n";
-        
+
         $symptomesCodes = $this->getSymptomesCodesArray($this->serial2);
         $inputName = "symptomesCodes";
-        
+
         $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
 //                            $html .= '<option value="0">Symtomes</option>' . "\n";
-                 
-                            foreach ($symptomesCodes['sym'] as $mod => $desc) {
-                                $html .= '<option value="' . $mod . '"';
-                                if (isset($values[$valuesName])) {
-                                    if ($values[$valuesName] == $mod)
-                                        $html.= ' selected';
-                                }
-                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
-                            }
-                            $html .= '</select>' . "\n";
-        
-        
+
+        foreach ($symptomesCodes['sym'] as $mod => $desc) {
+            $html .= '<option value="' . $mod . '"';
+            if (isset($values[$valuesName])) {
+                if ($values[$valuesName] == $mod)
+                    $html.= ' selected';
+            }
+            $html .= '>' . $mod . ' - ' . $desc . '</option>';
+        }
+        $html .= '</select>' . "\n";
+
+
         $html .= '<p style="text-align: right">' . "\n";
         $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Valider</span>' . "\n";
         $html .= '</p>' . "\n";
@@ -501,25 +501,26 @@ class gsxDatas {
 //        echo '</pre>';
 //        return '';
     }
-    
-    public function getSymptomesCodesArray($serial, $symCode = null){
+
+    public function getSymptomesCodesArray($serial, $symCode = null) {
         $this->setSerial($serial);
         $datas = $this->gsx->obtainSymtomes($serial, $symCode);
-        
-        
+
+
         $newArray = array('sym' => array(), 'issue' => array());
-        
-        if(!is_null($symCode))
+
+        if (!is_null($symCode))
             $newArray['sym'] = array($symCode => $symCode);
-        
-        foreach($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms'] as $tab){
-            $newArray['sym'][$tab['reportedSymptomCode']] = $tab['reportedSymptomDesc'];
-        }
-        
-        foreach($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues'] as $tab){
-            $newArray['issue'][$tab['reportedIssueCode']] = $tab['reportedIssueDesc'];
-        }
-        
+        if (isset($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms']))
+            foreach ($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['symptoms'] as $tab) {
+                $newArray['sym'][$tab['reportedSymptomCode']] = $tab['reportedSymptomDesc'];
+            }
+
+        if (isset($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues']))
+            foreach ($datas['ReportedSymptomIssueResponse']['reportedSymptomIssueResponse']['issues'] as $tab) {
+                $newArray['issue'][$tab['reportedIssueCode']] = $tab['reportedIssueDesc'];
+            }
+
         return $newArray;
     }
 
@@ -565,7 +566,7 @@ class gsxDatas {
     public function getRequestFormHtml($requestType, $prodId) {
         global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
-        $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode'])? $_REQUEST['symCode'] : null));
+        $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode']) ? $_REQUEST['symCode'] : null));
         $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail') ? $comptiaCodes : null, $symptomesCodes);
 
         $chronoId = null;
@@ -615,26 +616,26 @@ class gsxDatas {
 //                        $valDef['componentCheckDetails']['componentSerialNumber'] = $this->serial;
 //                    }
                     $valDef['customerAddress']['companyName'] = $chrono->societe->name;
-                    
-                    
-                    
-                    
-                            $valDef['customerAddress']['city'] = $chrono->societe->town;
-                            $valDef['customerAddress']['primaryPhone'] = $chrono->societe->phone;
-                            $valDef['customerAddress']['secondaryPhone'] = $chrono->societe->phone;
-                            $valDef['customerAddress']['zipCode'] = $chrono->societe->zip;
-                            $valDef['customerAddress']['state'] = substr($chrono->societe->zip, 0, 2);
-                            $valDef['customerAddress']['emailAddress'] = $chrono->societe->email;
-                        $valDef['customerAddress']['street'] = $chrono->societe->address;
-                        $valDef['customerAddress']['addressLine1'] = $chrono->societe->address;
-                    
-                    
-                    
+
+
+
+
+                    $valDef['customerAddress']['city'] = $chrono->societe->town;
+                    $valDef['customerAddress']['primaryPhone'] = $chrono->societe->phone;
+                    $valDef['customerAddress']['secondaryPhone'] = $chrono->societe->phone;
+                    $valDef['customerAddress']['zipCode'] = $chrono->societe->zip;
+                    $valDef['customerAddress']['state'] = substr($chrono->societe->zip, 0, 2);
+                    $valDef['customerAddress']['emailAddress'] = $chrono->societe->email;
+                    $valDef['customerAddress']['street'] = $chrono->societe->address;
+                    $valDef['customerAddress']['addressLine1'] = $chrono->societe->address;
+
+
+
                     if (isset($chrono->contact->id)) {
                         if ($chrono->contact->address != "")
-                        $valDef['customerAddress']['street'] = $chrono->contact->address;
+                            $valDef['customerAddress']['street'] = $chrono->contact->address;
                         if ($chrono->contact->address != "")
-                        $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
+                            $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
 //            $valDef['addressLine4'] = $chrono->contact->;
@@ -792,7 +793,7 @@ class gsxDatas {
             } else {
                 if ($requestType == "CreateMailInRepair" || $requestType == "KGBSerialNumberUpdate")
 //                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
-                $ok = false;
+                    $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $confirmNumber = null;
                 $responseName = $requestType . "Response";

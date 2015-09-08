@@ -395,7 +395,7 @@ class PDO extends AbstractBackend {
 
 
         $calData = file_get_contents($outputfile);
-
+dol_syslog(print_r($calData,true), 3);
         $calendarData2 = array(); //$this->traiteTabIcs($row['agendaplus'], array());
         
         /* Participant */
@@ -476,6 +476,7 @@ class PDO extends AbstractBackend {
 //        dol_syslog("iciciciciicic".print_r($calendarData2,1),3);
         
         
+//        $this->getRappel($calendarData2);
 
         global $db;
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
@@ -570,8 +571,19 @@ WHERE  `email` LIKE  '".$mail."'");
      * @param string $calendarData
      * @return string|null
      */
+    
+    public function getRappel($data){
+        global $objectRappel;
+        
+        
+        dol_syslog(print_r($data,1),3);
+        if(isset($data["TRIGGER"]) && stripos($data["TRIGGER"], "VALUE=DURATION"))
+                $objectRappel = 15;
+        return 0;
+    }
+    
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-
+//dol_syslog("Update : ".print_r($calendarData,1),3);
         $extraData = $this->getDenormalizedData($calendarData);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
@@ -582,6 +594,8 @@ WHERE  `email` LIKE  '".$mail."'");
 
         global $objectEtagTemp;
         $objectEtagTemp = $extraData['etag'];
+        
+//        $this->getRappel($extraData);
 
 //        $this->userIdCaldavPlus($calendarId);
 
@@ -672,7 +686,10 @@ WHERE  `email` LIKE  '".$mail."'");
 //        $tabHead["TZOFFSETFROM"] = "+0200";
 //        $tabHead["TZOFFSETTO"] = "+0100";
 
-        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, array("BEGIN:VEVENT"), $tabCore, array("END:VEVENT", "END:VCALENDAR"));
+        $tabAlarm = array();
+        
+//        $tabAlarm = array("BEGIN:VALARM", "DESCRIPTION:Alame chiante","ACTION:DISPLAY","TRIGGER;VALUE=DURATION:-PT15M","X-KDE-KCALCORE-ENABLED:TRUE","END:VALARM");
+        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, array("BEGIN:VEVENT"), $tabCore, $tabAlarm, array("END:VEVENT", "END:VCALENDAR"));
 
         return $tabResult;
     }

@@ -247,7 +247,11 @@ function build_calfile($format,$title,$desc,$events_array,$outputfile)
 					}
 					if (! empty($url))
 					{
-						fwrite($calfileh,"URL:".(isset($_SERVER["https"]) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].$url."\n");
+                                            /*mod drsi*/
+                                            if(stripos($url, "http") !== 0)
+                                                    $url = (isset($_SERVER["https"]) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].$url;
+						fwrite($calfileh,"URL:".$url."\n");
+                                                /*fmoddrsi*/
 					};
 
                     if ($created)  fwrite($calfileh,"CREATED:".dol_print_date($created,'dayhourxcard',true)."\n");

@@ -179,6 +179,7 @@ if ($_REQUEST["id"] > 0) {
             if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editDepot' . $i) {
                 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "entrepot ORDER BY lieu";
                 print "<select name='newDepot' id='newDepot'>";
+                print "<option value=''></option>";
                 $sql6 = $db->query($requete);
                 while ($res6 = $db->fetch_object($sql6)) {
                     print "<option value='" . $res6->rowid . "'" . (($res6->rowid == $idEntr) ? " selected='selected'" : '') . ">" . traite_str($res6->lieu) . "</option>";

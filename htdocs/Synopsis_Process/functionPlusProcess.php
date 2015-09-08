@@ -117,7 +117,7 @@ function bouttonEtatSav($idChrono) {
         $return .= $form->select_types_paiements("SAV");
         $return .= ob_get_clean();
         $return .= "</br>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(\"#selectpaiementtype\").attr(\"value\");' >Restitué (Payer)</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(this).parent().find(\"#selectpaiementtype\").attr(\"value\");' >Restitué (Payer)</a>";
     }
     
     $return .= "<a class='butCache' id='butCacheReMail'>Recontacter</a>";

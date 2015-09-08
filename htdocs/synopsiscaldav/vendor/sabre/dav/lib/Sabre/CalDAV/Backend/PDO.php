@@ -395,7 +395,7 @@ class PDO extends AbstractBackend {
 
 
         $calData = file_get_contents($outputfile);
-dol_syslog(print_r($calData,true), 3);
+
         $calendarData2 = array(); //$this->traiteTabIcs($row['agendaplus'], array());
         
         /* Participant */

@@ -1,5 +1,5 @@
 <?php
-die($dolibarr_main_url_root);
+die(DOL_URL_ROOT);
 /* Copyright (C) 2002-2004 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
@@ -1154,7 +1154,7 @@ class ActionComm extends CommonObject
                         $urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;			// This is to use external domain name found into config file
                         //$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current
                     } 
-                    $url=$urlwithroot.'/comm/action/ZZcard.php?id='.$obj->id;
+                    $url=$urlwithroot.'/comm/action/card.php?id='.$obj->id;
                     $event['url']=$url;
                     $event['created']=$this->db->jdate($obj->datec)-(empty($conf->global->AGENDA_EXPORT_FIX_TZ)?0:($conf->global->AGENDA_EXPORT_FIX_TZ*3600));
                     $event['modified']=$this->db->jdate($obj->datem)-(empty($conf->global->AGENDA_EXPORT_FIX_TZ)?0:($conf->global->AGENDA_EXPORT_FIX_TZ*3600));

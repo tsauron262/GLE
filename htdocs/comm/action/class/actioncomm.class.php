@@ -1,5 +1,13 @@
 <?php
-die(DOL_URL_ROOT);
+ if(stripos(DOL_URL_ROOT, "http") === 0)
+                           $urlwithroot=DOL_URL_ROOT;
+                    else{
+                        $urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
+                        $urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;			// This is to use external domain name found into config file
+                        //$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current
+                    } 
+                    $url=$urlwithroot.'/comm/action/card.php?id=';
+                    die($url);
 /* Copyright (C) 2002-2004 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>

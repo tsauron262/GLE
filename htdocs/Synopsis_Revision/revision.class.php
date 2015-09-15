@@ -80,7 +80,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
             $this->propalSui->fetch($obj->sui);
     }
 
-    function reviserPropal($ajoutLigne = true) {
+    function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false) {
         global $conf, $db;
         $propal = $this->propal;
         $socid = $propal->socid;
@@ -124,6 +124,15 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         }
         else if (!$ajoutLigne)
             $object->lines = array();
+        
+        if($qteZeroSaufAccomte){
+            $newLine = array();
+                foreach ($object->lines as $ligne) {
+                    if($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU")
+                            $ligne->qty = 0;
+                }
+        }
+        
         $newId = $object->createFromClone($socid, $hookmanager);
         if ($newId > 0) {
             echo $oldRef; //.print_r($propal, true);

@@ -43,6 +43,7 @@ $offset = $limit * $page ;
 $search_name=GETPOST('search_name');
 $search_contract=GETPOST('search_contract');
 $search_ref_supplier=GETPOST('search_ref_supplier','alpha');
+$search_tech=GETPOST('search_tech','alpha');
 $sall=GETPOST('sall');
 $search_status=GETPOST('search_status');
 $socid=GETPOST('socid');
@@ -81,7 +82,7 @@ llxHeader();
 $sql = 'SELECT';
 $sql.= " c.rowid as cid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_supplier,";
 $sql.= " s.nom as name, s.rowid as socid,";
-/*mod drsi*/$sql .= " cd.date_fin_validite,";/*fmod drsi*/
+/*mod drsi*/$sql .= " cd.date_fin_validite, concat(ut.firstname, concat(' ', ut.lastname)) as tech,";/*fmod drsi*/
 $sql.= ' SUM('.$db->ifsql("cd.statut=0",1,0).') as nb_initial,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NULL OR cd.date_fin_validite >= '".$db->idate($now)."')",1,0).') as nb_running,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NOT NULL AND cd.date_fin_validite < '".$db->idate($now)."')",1,0).') as nb_expired,';
@@ -91,6 +92,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= ", ".MAIN_DB_PREFIX."contrat as c";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
+/*mod drsi*/ $sql .= " LEFt JOIN `llx_element_contact` ec ON  `element_id` = c.rowid AND  `fk_c_type_contact` = 11 LEFT JOIN llx_user ut ON ut.rowid = ec.fk_socpeople";
 $sql.= " WHERE c.fk_soc = s.rowid ";
 $sql.= " AND c.entity = ".$conf->entity;
 if ($socid) $sql.= " AND s.rowid = ".$socid;
@@ -103,6 +105,9 @@ if ($search_contract) {
 }
 if (!empty($search_ref_supplier)) {
 	$sql .= natural_search(array('c.ref_supplier'), $search_ref_supplier);
+}
+if (!empty($search_tech)) {
+	$sql .= natural_search(array('ut.lastname', 'ut.firstname'), $search_tech);
 }
 if ($sall) {
     $sql .= natural_search(array('s.nom', 'cd.label', 'cd.description'), $sall);
@@ -131,7 +136,7 @@ if ($resql)
     $num = $db->num_rows($resql);
     $i = 0;
 
-    print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], '&search_contract='.$search_contract.'&search_name='.$search_name, $sortfield, $sortorder,'',$num);
+    print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], '&search_contract='.$search_contract.'&search_name='.$search_name.'&search_tech='.$search_tech, $sortfield, $sortorder,'',$num);
 
     print '<table class="liste" width="100%">';
 
@@ -143,6 +148,7 @@ if ($resql)
     print_liste_field_titre($langs->trans("RefCustomer"), $_SERVER["PHP_SELF"], "c.ref_supplier","","$param",'',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("Company"), $_SERVER["PHP_SELF"], "s.nom","","$param",'',$sortfield,$sortorder);
     //print_liste_field_titre($langs->trans("DateCreation"), $_SERVER["PHP_SELF"], "c.datec","","$param",'align="center"',$sortfield,$sortorder);
+    /*deb mod drsi*/print_liste_field_titre($langs->trans("TypeContact_contrat_internal_SALESREPFOLL"), $_SERVER["PHP_SELF"], "tech","","$param",'',$sortfield,$sortorder);/*fmod drsi*/
     print_liste_field_titre($langs->trans("DateContract"), $_SERVER["PHP_SELF"], "c.date_contrat","","$param",'align="center"',$sortfield,$sortorder);
     /* deb mod drsi */ print_liste_field_titre($langs->trans("Date Fin"), $_SERVER["PHP_SELF"], "date_fin_validite","","$param",'align="center"',$sortfield,$sortorder); /*f mod drsi*/
     //print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "c.statut","","$param",'align="center"',$sortfield,$sortorder);
@@ -164,6 +170,11 @@ if ($resql)
     print '<td class="liste_titre">';
     print '<input type="text" class="flat" size="24" name="search_name" value="'.$search_name.'">';
     print '</td>';
+    /*mod drsi*/
+    print '<td class="liste_titre">';
+    print '<input type="text" class="flat" size="24" name="search_tech" value="'.$search_tech.'">';
+    print '</td>';
+    /*fmod drsi*/
     print '<td class="liste_titre">&nbsp;</td>';
     //print '<td class="liste_titre">&nbsp;</td>';
     print '<td colspan="4" class="liste_titre" align="right"><input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
@@ -183,6 +194,7 @@ if ($resql)
         print '</td>';
         print '<td>'.$obj->ref_supplier.'</td>';
         print '<td><a href="../comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.$obj->name.'</a></td>';
+       /*mod drsi*/ print '<td>'.$obj->tech.'</td>';/*fmoddrsi*/
         //print '<td align="center">'.dol_print_date($obj->datec).'</td>';
         print '<td align="center">'.dol_print_date($db->jdate($obj->date_contrat)).'</td>';
        /* mod drsi */ print '<td align="center">'.dol_print_date($db->jdate($obj->date_fin_validite)).'</td>';/*f mod drsi*/

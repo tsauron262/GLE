@@ -2090,7 +2090,7 @@ EOF;
         }
 
         if ($synopsisdemandeinterv->statut > 1 && $synopsisdemandeinterv->statut < 3 && $user->rights->synopsisdemandeinterv->prisencharge) {
-            print '<button class="butAction" ';
+            print '<button class="butAction disableadOnClick" ';
             print 'onClick="location.href=\'' . $_SERVER["PHP_SELF"] . '?id=' . $synopsisdemandeinterv->id . '&amp;action=createFI\'"';
             print '>' . $langs->trans('createFI') . '</button>';
         }

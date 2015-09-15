@@ -178,10 +178,12 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
 
 function htmlToAgenda($str) {
     $tag = "a";
+    $nomLong = (isset($_SERVER['HTTPS'])? "https://" : "http://") . $_SERVER['HTTP_HOST'];
     $str = preg_replace("%(<$tag.*?<img)(.*?)(<\/$tag.*?>)%is", "", $str);
-    $str = str_replace("<a href=\"", "http://" . $_SERVER['HTTP_HOST'], $str);
+    $str = str_replace("<a href=\"", $nomLong, $str);
     $str = str_replace("\">", "\n", $str);
     $str = str_replace("</a>", "", $str);
+    $str = str_replace($nomLong.$nomLong, $nomLong, $str);
     return $str;
 }
 

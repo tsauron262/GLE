@@ -137,6 +137,11 @@ $(window).load(function () {
     /*responsive victor*/
 
 
+
+
+    $(".disableadOnClick").click(function(){
+        $(this).attr("disabled", "disabled");
+    });
 });
 
 function ajoutNotification(id, titre, msg) {
@@ -873,6 +878,6 @@ function autoSave(actionSave) {
         else
             timeMax = new Date().getTime() + 30000;
     }
+    
+    
 }
-
-

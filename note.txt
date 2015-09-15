@@ -1414,3 +1414,18 @@ Quantite directment bon stock
 
 
 Liste user
+
+
+
+INSERT INTO llx_element_element (`sourcetype`, `targettype`, `fk_source`, `fk_target`)
+  (
+SELECT 'propal', 'facture', p2.rowid, f.rowid FROM `llx_facture` f, llx_propal p2 WHERE p2.fk_soc = f.fk_soc AND p2.fk_statut != 3 AND f.rowid not in (SELECT `fk_target` FROM llx_element_element, llx_propal p3 WHERe `sourcetype` = 'propal' AND `targettype` = 'facture' AND fk_source = p3.rowid AND p3.fk_statut != 3)
+)
+
+
+
+SELECT 'propal', 'facture', p.rowid, f.rowid FROM `llx_facture` f WHERE rowid not in (SELECT `fk_target` FROM llx_element_element WHERe `sourcetype` = 'propal' AND `targettype` = 'facture') AND 1 = (SELECT COUNT(rowid) FROM llx_propal p WHERE p.fk_soc = f.fk_soc))
+
+
+
+log suprression sav

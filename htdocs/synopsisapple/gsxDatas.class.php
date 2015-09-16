@@ -795,6 +795,10 @@ class gsxDatas {
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
+                foreach($requestData as $nomReq => $tabT){
+                    if(isset($tabT['repairData']) && isset($tabT['repairData']['fileData']))
+                        $requestData[$nomReq]['repairData']['fileData'] = "Fichier joint exclue du log";
+                }
                 dol_syslog("erreur GSX : " . $this->getGSXErrorsHtml() . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
             } else {
                 if ($requestType == "CreateMailInRepair" || $requestType == "KGBSerialNumberUpdate")

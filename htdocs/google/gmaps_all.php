@@ -293,10 +293,13 @@ if ($resql)
 
 		$geoencodingtosearch=false;
 		if ($obj->gaddress != $addresstosearch) $geoencodingtosearch=true;
-		else if ((empty($object->latitude) || empty($object->longitude)) && (empty($obj->result_code) || in_array($obj->result_code, array('OK','OVER_QUERY_LIMIT')))) $geoencodingtosearch=true;
+		else if ((empty($object->latitude) || empty($object->longitude)) && (empty($obj->result_code) || $obj->result_code != 'ZERO_RESULTS')) $geoencodingtosearch=true;
+		else if ((empty($obj->result_code) || in_array($obj->result_code, array('OVER_QUERY_LIMIT', 'ERROR')))) $geoencodingtosearch=true;
 
 		if ($geoencodingtosearch && (empty($MAXADDRESS) || $countgeoencoding < $MAXADDRESS))
 		{
+//                    $i++;continue;
+                    echo $obj->result_code."<br/><br/>";
 			if ($countgeoencoding && ($countgeoencoding % 10 == 0))
 			{
 				dol_syslog("Add a delay of 1");
@@ -377,6 +380,8 @@ if ($resql)
 
 				$countgeoencodedall++;
 			}
+                        if($MAXADDRESS == $countgeoencoding)
+                            break;
 		}
 		else
 		{
@@ -457,17 +462,17 @@ if (count($addresses) == 0 && count($adderrors) == 0) print $langs->trans("NoAdd
 // Show error
 if (count($adderrors))
 {
-	if (empty($mode) || $mode=='thirdparty') $objectstatic=new Societe($db);
-	else if ($mode=='contact') $objectstatic=new Contact($db);
-	else if ($mode=='member') $objectstatic=new Adherent($db);
-	else if ($mode=='patient') $objectstatic=new Patient($db);
+//	if (empty($mode) || $mode=='thirdparty') $objectstatic=new Societe($db);
+//	else if ($mode=='contact') $objectstatic=new Contact($db);
+//	else if ($mode=='member') $objectstatic=new Adherent($db);
+//	else if ($mode=='patient') $objectstatic=new Patient($db);
 
 	print $langs->trans("FollowingAddressCantBeLocalized",($countgeoencodedall-$countgeoencodedok)).':<br>'."\n";
 	foreach($adderrors as $object)
 	{
-		$objectstatic->id=$object->id;
-		$objectstatic->name=$object->name;
-		print $langs->trans("Name").": ".$objectstatic->getNomUrl(1).", ".$langs->trans("Address").": ".$object->address." -> ".$object->error."<br>\n";
+//		$objectstatic->id=$object->id;
+//		$objectstatic->name=$object->name;
+		print $langs->trans("Name").": ".$object->name.", ".$langs->trans("Address").": ".$object->address." -> ".$object->error."<br>\n";
 	}
 }
 

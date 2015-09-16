@@ -150,7 +150,7 @@ if (isset($_REQUEST['actionEtat'])) {
 //                    $totPa += $ligne->pa_ht;
 //                }
 //            }
-            $chrono->propal->addline("Devis refusé", -($totHt)/(100-$chrono->societe->remise_percent)*100, 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
+            $chrono->propal->addline("Devis refusé", -($totHt)/(100-$chrono->societe->remise_percent)*100, 1, /*(($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100)*/20, 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
             
         if ($_REQUEST['ligne'] == 0) {//Création de la facture de frais de prise en charge.
             $propal->addline(/*"Prise en charge :  : " . $chrono->ref .*/

@@ -298,8 +298,6 @@ if ($resql)
 
 		if ($geoencodingtosearch && (empty($MAXADDRESS) || $countgeoencoding < $MAXADDRESS))
 		{
-//                    $i++;continue;
-                    echo $obj->result_code."<br/><br/>";
 			if ($countgeoencoding && ($countgeoencoding % 10 == 0))
 			{
 				dol_syslog("Add a delay of 1");

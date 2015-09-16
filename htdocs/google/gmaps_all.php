@@ -16,6 +16,9 @@ ini_set('max_execution_time', 40000);
 ini_set("memory_limit","1200M");
 
 
+global $logLongTime;
+$logLongTime = false;
+
 $res=0;
 if (! $res && file_exists("../main.inc.php")) $res=@include("../main.inc.php");
 if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");

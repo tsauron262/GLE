@@ -124,10 +124,12 @@ class InterfaceCaldav {
             $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET etag = '".random(15)."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
         }
         if ($action == "ACTION_CREATE"){
-            global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
+            global $objectUriTemp, $objectEtagTemp, $objectDataTemp, $objectRappel;
             $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : "-".$object->id.".ics";
             $objectEtag2 = (isset($objectEtagTemp) && $objectEtagTemp != "") ? $objectEtagTemp : random(15);
             $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? addslashes($objectDataTemp) : "";
+            $objectRappel = (isset($objectRappel) && $objectRappel != "") ? addslashes($objectRappel) : 0;
+//            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
             $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."')");
         }
         if ($action == "ACTION_DELETE"){

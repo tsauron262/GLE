@@ -204,6 +204,7 @@ ClickHereToGoTo=Kliknite tu pre prechod na %s
 YouMustClickToChange=Musíte však najprv kliknúť na nasledujúci odkaz pre potvrdenie tejto zmeny hesla
 ForgetIfNothing=Ak ste o túto zmenu, stačí zabudnúť na tento e-mail. Vaše prihlasovacie údaje sú v bezpečí.
 IfAmountHigherThan=If amount higher than <strong>%s</strong>
+SourcesRepository=Repository for sources
 
 ##### Calendar common #####
 AddCalendarEntry=Pridať záznam do kalendára %s

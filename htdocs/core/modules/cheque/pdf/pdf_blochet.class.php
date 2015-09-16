@@ -1,6 +1,6 @@
 <?php
-/* Copyright (C) 2006 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2009 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2006      Rodolphe Quiedeville <rodolphe@quiedeville.org>
+ * Copyright (C) 2009-2015 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,14 +76,15 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 	}
 
 	/**
-	 *	Fonction generant le rapport sur le disque
+	 *	Fonction to generate document on disk
 	 *
-	 *	@param	string		$_dir			Directory
-	 *	@param	string		$number			Number
-	 *	@param	Translate	$outputlangs	Lang output object
-     *	@return	int     					1=ok, 0=ko
+	 *	@param	RemiseCheque	$object			Object RemiseCheque			
+	 *	@param	string			$_dir			Directory
+	 *	@param	string			$number			Number
+	 *	@param	Translate		$outputlangs	Lang output object
+     *	@return	int     						1=ok, 0=ko
 	 */
-	function write_file($_dir, $number, $outputlangs)
+	function write_file($object, $_dir, $number, $outputlangs)
 	{
 		global $user,$conf,$langs,$hookmanager;
 
@@ -98,7 +99,7 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 		$outputlangs->load("products");
         $outputlangs->load("compta");
 
-		$dir = $_dir . "/".get_exdir($number,2,1).$number;
+		$dir = $_dir . "/".get_exdir($number,0,1,0,$object,'cheque').$number;
 
 		if (! is_dir($dir))
 		{
@@ -111,7 +112,7 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 			}
 		}
 
-		$_file = $dir . "/bordereau-".$number.".pdf";
+		$file = $dir . "/bordereau-".$number.".pdf";
 
 		// Add pdfgeneration hook
 		if (! is_object($hookmanager))
@@ -120,7 +121,7 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 			$hookmanager=new HookManager($this->db);
 		}
 		$hookmanager->initHooks(array('pdfgeneration'));
-		$parameters=array('file'=>$file,'object'=>$object,'outputlangs'=>$outputlangs);
+		$parameters=array('file'=>$file, 'outputlangs'=>$outputlangs);
 		global $action;
 		$reshook=$hookmanager->executeHooks('beforePDFCreation',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 
@@ -177,7 +178,7 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 
 		$pdf->Close();
 
-		$pdf->Output($_file,'F');
+		$pdf->Output($file,'F');
 
 		// Add pdfgeneration hook
 		if (! is_object($hookmanager))
@@ -191,7 +192,7 @@ class BordereauChequeBlochet extends ModeleChequeReceipts
 		$reshook=$hookmanager->executeHooks('afterPDFCreation',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
 
 		if (! empty($conf->global->MAIN_UMASK))
-			@chmod($_file, octdec($conf->global->MAIN_UMASK));
+			@chmod($file, octdec($conf->global->MAIN_UMASK));
 
         $outputlangs->charset_output=$sav_charset_output;
 	    return 1;   // Pas d'erreur

@@ -24,23 +24,25 @@
 
 
 /**
-*    Show header of a VAT report
+*	Show header of a VAT report
 *
-*    @param		string				$nom            Name of report
-*    @param 	string				$variante       Link for alternate report
-*    @param 	string				$period         Period of report
-*    @param 	string				$periodlink     Link to switch period
-*    @param 	string				$description    Description
-*    @param 	timestamp|integer	$builddate      Date generation
-*    @param 	string				$exportlink     Link for export or ''
-*    @param		array				$moreparam		Array with list of params to add into form
-*    @param		string				$calcmode		Calculation mode
-*    @return	void
+*	@param		string				$nom            Name of report
+*	@param 	string				$variante       Link for alternate report
+*	@param 	string				$period         Period of report
+*	@param 	string				$periodlink     Link to switch period
+*	@param 	string				$description    Description
+*	@param 	timestamp|integer	$builddate      Date generation
+*	@param 	string				$exportlink     Link for export or ''
+*	@param		array				$moreparam		Array with list of params to add into form
+*	@param		string				$calcmode		Calculation mode
+*	@return	void
 */
 function report_header($nom,$variante,$period,$periodlink,$description,$builddate,$exportlink='',$moreparam=array(),$calcmode='')
 {
-	global $langs, $hselected;
+	global $langs;
 
+	if (empty($hselected)) $hselected='report';
+	
 	print "\n\n<!-- debut cartouche rapport -->\n";
 
 	$h=0;
@@ -48,18 +50,18 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 	$head[$h][1] = $langs->trans("Report");
 	$head[$h][2] = 'report';
 
-	dol_fiche_head($head, $hselected);
+	dol_fiche_head($head, 'report');
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	foreach($moreparam as $key => $value)
 	{
-	     print '<input type="hidden" name="'.$key.'" value="'.$value.'">';
+		 print '<input type="hidden" name="'.$key.'" value="'.$value.'">';
 	}
 	print '<table width="100%" class="border">';
 
 	// Ligne de titre
 	print '<tr>';
-	print '<td valign="top" width="110">'.$langs->trans("ReportName").'</td>';
+	print '<td width="110">'.$langs->trans("ReportName").'</td>';
 	if (! $variantexxx) print '<td colspan="3">';
 	else print '<td>';
 	print $nom;
@@ -71,7 +73,7 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 	if ($calcmode)
 	{
 		print '<tr>';
-		print '<td valign="top" width="110">'.$langs->trans("CalculationMode").'</td>';
+		print '<td width="110">'.$langs->trans("CalculationMode").'</td>';
 		if (! $variante) print '<td colspan="3">';
 		else print '<td>';
 		print $calcmode;
@@ -92,7 +94,7 @@ function report_header($nom,$variante,$period,$periodlink,$description,$builddat
 
 	// Ligne de description
 	print '<tr>';
-	print '<td valign="top">'.$langs->trans("ReportDescription").'</td>';
+	print '<td>'.$langs->trans("ReportDescription").'</td>';
 	print '<td colspan="3">'.$description.'</td>';
 	print '</tr>';
 

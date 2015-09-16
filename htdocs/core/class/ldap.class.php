@@ -2,7 +2,7 @@
 /* Copyright (C) 2004		Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004		Benoit Mortier       <benoit.mortier@opensides.be>
  * Copyright (C) 2005-2011	Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2006-2011	Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2006-2015	Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,12 @@
  */
 
 /**
- *      \class      Ldap
- *      \brief      Class to manage LDAP features
+ *	Class to manage LDAP features
  */
 class Ldap
 {
+	var $error;
+
 	/**
 	 * Tableau des serveurs (IP addresses ou nom d'hotes)
 	 */
@@ -78,7 +79,7 @@ class Ldap
 	var $name;
 	var $firstname;
 	var $login;
-  var $phone;
+	var $phone;
 	var $skype;
 	var $fax;
 	var $mail;
@@ -155,10 +156,17 @@ class Ldap
 		if (count($this->server) == 0 || empty($this->server[0]))
 		{
 			$this->error='LDAP setup (file conf.php) is not complete';
-			$return=-1;
 			dol_syslog(get_class($this)."::connect_bind ".$this->error, LOG_WARNING);
+			return -1;
 		}
 
+		if (! function_exists('ldap_connect'))
+		{
+			$this->error='Your PHP need extension ldap';
+			dol_syslog(get_class($this)."::connect_bind ".$this->error, LOG_WARNING);
+		    return -1;
+		}
+		
 		// Loop on each ldap server
 		foreach ($this->server as $key => $host)
 		{
@@ -348,7 +356,7 @@ class Ldap
 	/**
 	 * Change ldap protocol version to use.
 	 *
-	 * @return	string					version
+	 * @return	boolean					version
 	 */
 	function setVersion() {
 		// LDAP_OPT_PROTOCOL_VERSION est une constante qui vaut 17
@@ -359,7 +367,7 @@ class Ldap
 	/**
 	 * changement du referrals.
 	 *
-	 * @return	string					referrals
+	 * @return	boolean					referrals
 	 */
 	function setReferrals() {
 		// LDAP_OPT_REFERRALS est une constante qui vaut ?
@@ -414,9 +422,10 @@ class Ldap
 		}
 		else
 		{
-			$this->error=@ldap_error($this->connection);
-			$this->errno=@ldap_errno($this->connection);
-			dol_syslog(get_class($this)."::add failed: ".$this->errno." ".$this->error, LOG_ERR);
+			$this->ldapErrorCode = @ldap_errno($this->connection);
+			$this->ldapErrorText = @ldap_error($this->connection);
+			$this->error=$this->ldapErrorCode." ".$this->ldapErrorText;
+			dol_syslog(get_class($this)."::add failed: ".$this->error, LOG_ERR);
 			return -1;
 		}
 	}
@@ -1312,7 +1321,7 @@ class Ldap
 	 *	Convertit le temps ActiveDirectory en Unix timestamp
 	 *
 	 *	@param	string	$value		AD time to convert
-	 *	@return	string				Unix timestamp
+	 *	@return	integer				Unix timestamp
 	 */
 	function convert_time($value)
 	{

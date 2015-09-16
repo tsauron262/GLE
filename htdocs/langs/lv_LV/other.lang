@@ -189,7 +189,7 @@ YouReceiveMailBecauseOfNotification=Jūs saņemat šo ziņojumu, jo jūsu e-past
 YouReceiveMailBecauseOfNotification2=Šis notikums ir šādi:
 ThisIsListOfModules=Šis ir saraksts ar moduļu izraudzītās Šajā demo profilu (tikai Visbiežāk moduļi ir redzamas šajā demo). Labot tas, lai būtu vairāk personalizētu demo un noklikšķiniet uz &quot;Start&quot;.
 ClickHere=Noklikšķiniet šeit
-UseAdvancedPerms=Izmantojiet papildu atļaujas dažu moduļu
+UseAdvancedPerms=Izmantojiet papildu atļaujas dažiem moduļiem
 FileFormat=Faila formāts
 SelectAColor=Izvēliieties krāsu
 AddFiles=Pievienot failus
@@ -204,6 +204,7 @@ ClickHereToGoTo=Klikšķiniet šeit, lai dotos uz %s
 YouMustClickToChange=Jums ir Taču vispirms noklikšķiniet uz šīs saites, lai apstiprinātu šo paroles maiņa
 ForgetIfNothing=Ja Jums nav lūgt šīs izmaiņas, vienkārši aizmirst šo e-pastu. Jūsu akreditācijas dati tiek glabāti drošībā.
 IfAmountHigherThan=If amount higher than <strong>%s</strong>
+SourcesRepository=Repository for sources
 
 ##### Calendar common #####
 AddCalendarEntry=Pievienot ierakstu kalendārā %s

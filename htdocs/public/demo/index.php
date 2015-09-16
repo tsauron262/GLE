@@ -41,7 +41,7 @@ $conf->dol_use_jmobile=GETPOST('dol_use_jmobile','int');
 
 // Security check
 global $dolibarr_main_demo;
-if (empty($dolibarr_main_demo)) accessforbidden('Parameter dolibarr_main_demo must be defined in conf file with value "default login,default pass" to enable the demo entry page',1,1,1);
+if (empty($dolibarr_main_demo)) accessforbidden('Parameter dolibarr_main_demo must be defined in conf file with value "default login,default pass" to enable the demo entry page',0,0,1);
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $res=$hookmanager->initHooks(array('demo'));
@@ -305,7 +305,7 @@ print "\n";
 print '<table style="font-size:14px;" class="centpercent" summary="Main table for Dolibarr demos">';
 
 print '<tr><td>';
-print '<center><img src="'.DOL_URL_ROOT.'/theme/gle_logo.png" alt="Dolibarr logo"></center><br>';
+print '<div class="center"><img src="'.DOL_URL_ROOT.'/theme/dolibarr_logo.png" alt="Dolibarr logo"></div><br>';
 print '<br>';
 
 print $langs->trans("DemoDesc").'<br>';
@@ -383,8 +383,8 @@ foreach ($demoprofiles as $profilearray)
                     $modulo=($j % $nbcolsmod);
         		    if ($modulo == 0) print '<tr>';
                     print '<td><input type="checkbox" class="checkbox" name="'.$modulekeyname.'" value="1"';
-                    if (in_array($modulekeyname,$alwaysuncheckedmodules)) print ' disabled="disabled"';
-                    if (! in_array($modulekeyname,$alwaysuncheckedmodules)  && (! in_array($modulekeyname,$listofdisabledmodules) || in_array($modulekeyname,$alwayscheckedmodules))) print ' checked="checked"';
+                    if (in_array($modulekeyname,$alwaysuncheckedmodules)) print ' disabled';
+                    if (! in_array($modulekeyname,$alwaysuncheckedmodules)  && (! in_array($modulekeyname,$listofdisabledmodules) || in_array($modulekeyname,$alwayscheckedmodules))) print ' checked';
                     print '> '.$val->getName().' &nbsp;';
                     print '<!-- id='.$val->numero.' -->';
                     print '</td>';

@@ -41,8 +41,8 @@ class modContrat extends DolibarrModules
 	 */
 	function __construct($db)
 	{
-		global $conf;
-		
+		global $conf, $langs;
+
 		$this->db = $db;
 		$this->numero = 54;
 
@@ -85,60 +85,76 @@ class modContrat extends DolibarrModules
 		// Permissions
 		$this->rights = array();
 		$this->rights_class = 'contrat';
+		$r=0;
+		
+		$r++;
+		$this->rights[$r][0] = 161;
+		$this->rights[$r][1] = 'Lire les contrats';
+		$this->rights[$r][2] = 'r';
+		$this->rights[$r][3] = 1;
+		$this->rights[$r][4] = 'lire';
 
-		$this->rights[1][0] = 161;
-		$this->rights[1][1] = 'Lire les contrats';
-		$this->rights[1][2] = 'r';
-		$this->rights[1][3] = 1;
-		$this->rights[1][4] = 'lire';
+		$r++;
+		$this->rights[$r][0] = 162;
+		$this->rights[$r][1] = 'Creer / modifier les contrats';
+		$this->rights[$r][2] = 'w';
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'creer';
 
-		$this->rights[2][0] = 162;
-		$this->rights[2][1] = 'Creer / modifier les contrats';
-		$this->rights[2][2] = 'w';
-		$this->rights[2][3] = 0;
-		$this->rights[2][4] = 'creer';
+		$r++;
+		$this->rights[$r][0] = 163;
+		$this->rights[$r][1] = 'Activer un service d\'un contrat';
+		$this->rights[$r][2] = 'w';
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'activer';
 
-		$this->rights[3][0] = 163;
-		$this->rights[3][1] = 'Activer un service d\'un contrat';
-		$this->rights[3][2] = 'w';
-		$this->rights[3][3] = 0;
-		$this->rights[3][4] = 'activer';
+		$r++;
+		$this->rights[$r][0] = 164;
+		$this->rights[$r][1] = 'Desactiver un service d\'un contrat';
+		$this->rights[$r][2] = 'w';
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'desactiver';
 
-		$this->rights[4][0] = 164;
-		$this->rights[4][1] = 'Desactiver un service d\'un contrat';
-		$this->rights[4][2] = 'w';
-		$this->rights[4][3] = 0;
-		$this->rights[4][4] = 'desactiver';
+		$r++;
+		$this->rights[$r][0] = 165;
+		$this->rights[$r][1] = 'Supprimer un contrat';
+		$this->rights[$r][2] = 'd';
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'supprimer';
 
-		$this->rights[5][0] = 165;
-		$this->rights[5][1] = 'Supprimer un contrat';
-		$this->rights[5][2] = 'd';
-		$this->rights[5][3] = 0;
-		$this->rights[5][4] = 'supprimer';
+		$r++;
+		$this->rights[$r][0] = 167;
+		$this->rights[$r][1] = 'Export contracts';
+		$this->rights[$r][2] = 'r';
+		$this->rights[$r][3] = 0;
+		$this->rights[$r][4] = 'export';
 
+		
 		// Exports
 		//--------
+		$langs->load("contracts");
+
 		$r=1;
 
 		$this->export_code[$r]=$this->rights_class.'_'.$r;
-		$this->export_label[$r]='ContractAndServices';	// Translation key (used only if key ExportDataset_xxx_z not found)
+		$this->export_label[$r]='ContractsAndLine';	// Translation key (used only if key ExportDataset_xxx_z not found)
 		$this->export_icon[$r]='contract';
 		$this->export_permission[$r]=array(array("contrat","export"));
 		$this->export_fields_array[$r]=array('s.rowid'=>"IdCompany",'s.nom'=>'CompanyName','s.address'=>'Address','s.zip'=>'Zip','s.town'=>'Town','c.code'=>'CountryCode',
 		's.phone'=>'Phone','s.siren'=>'ProfId1','s.siret'=>'ProfId2','s.ape'=>'ProfId3','s.idprof4'=>'ProfId4','s.code_compta'=>'CustomerAccountancyCode',
 		's.code_compta_fournisseur'=>'SupplierAccountancyCode','s.tva_intra'=>'VATIntra',
-		'co.rowid'=>"contractId",'co.ref'=>"contactRef",'co.datec'=>"contractDateCreation",'co.date_contrat'=>"DateContract",'co.mise_en_service'=>"DateMiseService",
-		'co.fin_validite'=>"EndValidity",'co.date_cloture'=>"Cloture",'co.note_private'=>"NotePrivate",'co.note_public'=>"NotePublic",
+		'co.rowid'=>"Id",'co.ref'=>"Ref",'co.datec'=>"DateCreation",'co.date_contrat'=>"DateContract",'co.mise_en_service'=>"ContractStartDate",
+		'co.fin_validite'=>"ContractEndDate",'co.date_cloture'=>"Closing",'co.note_private'=>"NotePrivate",'co.note_public'=>"NotePublic",
 		'cod.rowid'=>'LineId','cod.label'=>"LineLabel",'cod.description'=>"LineDescription",'cod.price_ht'=>"LineUnitPrice",'cod.tva_tx'=>"LineVATRate",
 		'cod.qty'=>"LineQty",'cod.total_ht'=>"LineTotalHT",'cod.total_tva'=>"LineTotalVAT",'cod.total_ttc'=>"LineTotalTTC",
-		'cod.date_ouverture'=>"DateStart",'cod.date_ouverture_prevue'=>"DateStartPrevis",'cod.date_fin_validite'=>"EndValidity",'cod.date_cloture'=>"DateEnd",
+		'cod.date_ouverture'=>"DateStart",'cod.date_ouverture_prevue'=>"DateStartPlanned",'cod.date_fin_validite'=>"DateEndPlanned",'cod.date_cloture'=>"DateEnd",
 		'p.rowid'=>'ProductId','p.ref'=>'ProductRef','p.label'=>'ProductLabel');
 
 		$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>'company','s.address'=>'company','s.zip'=>'company',
 		's.town'=>'company','c.code'=>'company','s.phone'=>'company','s.siren'=>'company','s.siret'=>'company','s.ape'=>'company',
 		's.idprof4'=>'company','s.code_compta'=>'company','s.code_compta_fournisseur'=>'company','s.tva_intra'=>'company',
-		'co.rowid'=>"Contract",'co.ref'=>"Contract",'co.datec'=>"Contract",'co.date_contrat'=>"Contract",'co.mise_en_service'=>"Contract",
-		'co.fin_validite'=>"Contract",'co.date_cloture'=>"Contract",'co.note_private'=>"Contract",'co.note_public'=>"Contract",
+		'co.rowid'=>"contract",'co.ref'=>"contract",'co.datec'=>"contract",'co.date_contrat'=>"contract",'co.mise_en_service'=>"contract",
+		'co.fin_validite'=>"contract",'co.date_cloture'=>"contract",'co.note_private'=>"contract",'co.note_public'=>"contract",
 		'cod.rowid'=>'contract_line','cod.label'=>"contract_line",'cod.description'=>"contract_line",'cod.price_ht'=>"contract_line",'cod.tva_tx'=>"contract_line",
 		'cod.qty'=>"contract_line",'cod.total_ht'=>"contract_line",'cod.total_tva'=>"contract_line",'cod.total_ttc'=>"contract_line",
 		'cod.date_ouverture'=>"contract_line",'cod.date_ouverture_prevue'=>"contract_line",'cod.date_fin_validite'=>"contract_line",'cod.date_cloture'=>"contract_line",
@@ -152,7 +168,7 @@ class modContrat extends DolibarrModules
 		'cod.label'=>"Text",'cod.description'=>"Text",'cod.price_ht'=>"Numeric",'cod.tva_tx'=>"Numeric",
 		'cod.qty'=>"Numeric",'cod.total_ht'=>"Numeric",'cod.total_tva'=>"Numeric",'cod.total_ttc'=>"Numeric",
 		'cod.date_ouverture'=>"Date",'cod.date_ouverture_prevue'=>"Date",'cod.date_fin_validite'=>"Date",'cod.date_cloture'=>"Date",
-		'p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
+		'p.rowid'=>'List:product:label','p.ref'=>'Text','p.label'=>'Text');
 
 
 		$this->export_sql_start[$r]='SELECT DISTINCT ';
@@ -160,9 +176,9 @@ class modContrat extends DolibarrModules
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'c_country as c on s.fk_pays = c.rowid,';
 		$this->export_sql_end[$r] .=' '.MAIN_DB_PREFIX.'contrat as co,';
 		$this->export_sql_end[$r] .=' '.MAIN_DB_PREFIX.'contratdet as cod';
-		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'product as p on (cod.fk_product = p.rowid)';	
+		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'product as p on (cod.fk_product = p.rowid)';
 		$this->export_sql_end[$r] .=' WHERE co.fk_soc = s.rowid and co.rowid = cod.fk_contrat';
-		$this->export_sql_end[$r] .=' AND co.entity = '.$conf->entity;
+		$this->export_sql_end[$r] .=' AND co.entity IN ('.getEntity('contract',1).')';
 	}
 
 
@@ -185,20 +201,4 @@ class modContrat extends DolibarrModules
 
 		return $this->_init($sql,$options);
 	}
-
-    /**
-	 *		Function called when module is disabled.
-	 *      Remove from database constants, boxes and permissions from Dolibarr database.
-	 *		Data directories are not deleted
-	 *
-     *      @param      string	$options    Options when enabling module ('', 'noboxes')
-	 *      @return     int             	1 if OK, 0 if KO
-     */
-    function remove($options='')
-    {
-		$sql = array();
-
-		return $this->_remove($sql,$options);
-    }
-
 }

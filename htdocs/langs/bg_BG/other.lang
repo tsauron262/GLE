@@ -204,6 +204,7 @@ ClickHereToGoTo=Click here to go to %s
 YouMustClickToChange=Необходимо е да щтракнете върху следния линк за да потвърдите промяната на паролата
 ForgetIfNothing=Ако не сте заявили промяната, просто забравете за този имейл. Вашите идентификационни данни се съхраняват на сигурно място.
 IfAmountHigherThan=If amount higher than <strong>%s</strong>
+SourcesRepository=Repository for sources
 
 ##### Calendar common #####
 AddCalendarEntry=Добави запис в календара %s

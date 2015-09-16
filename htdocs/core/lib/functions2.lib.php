@@ -4,6 +4,7 @@
  * Copyright (C) 2008-2012	Regis Houssin				<regis.houssin@capnetworks.com>
  * Copyright (C) 2008		Raphael Bertrand (Resultic)	<raphael.bertrand@resultic.fr>
  * Copyright (C) 2014       Marcos García               <marcosgdf@gmail.com>
+ * Copyright (C) 2015       Ferran Marcet               <fmarcet@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +28,26 @@
  */
 // Enable this line to trace path when function is called.
 //print xdebug_print_function_stack('Functions2.lib was called');exit;
+
+/**
+ * Return first line of text. Cut will depends if content is HTML or not.
+ *
+ * @param 	string	$text		Input text
+ * @return	string				Output text
+ * @see dol_nboflines_bis
+ */
+function dolGetFirstLineOfText($text)
+{
+	if (dol_textishtml($text))
+	{
+		$firstline=preg_replace('/<br[^>]*>.*$/s','',$text);		// The s pattern modifier means the . can match newline characters
+	}
+	else
+	{
+    	$firstline=preg_replace('/[\n\r].*/','',$text);
+	}
+    return $firstline.((strlen($firstline) != strlen($text))?'...':'');
+}
 
 /**
  * Same function than javascript unescape() function but in PHP.
@@ -370,11 +391,26 @@ function dol_print_object_info($object) {
     }
 }
 
+
+/**
+ *	Return an email formatted to include a tracking id
+ *  For example  myemail@example.com becom myemail+trackingid@example.com
+ *
+ *	@param	string	$email       	Email address (Ex: "toto@example.com", "John Do <johndo@example.com>")
+ *	@param	string	$trackingid    	Tracking id (Ex: thi123 for thirdparty with id 123)
+ *	@return boolean     			True if domain email is OK, False if KO
+ */
+function dolAddEmailTrackId($email, $trackingid)
+{
+	$tmp=explode('@',$email);
+	return $tmp[0].'+'.$trackingid.'@'.(isset($tmp[1])?$tmp[1]:'');
+}
+
 /**
  * 	Return true if email has a domain name that can't be resolved
  *
- * 	@param	string	$mail       Email address (Ex: "toto@titi.com", "John Do <johndo@titi.com>")
- * 	@return boolean     		True if domain email is OK, False if KO
+ *	@param	string	$mail       Email address (Ex: "toto@example.com", "John Do <johndo@example.com>")
+ *	@return boolean     		True if domain email is OK, False if KO
  */
 function isValidMailDomain($mail) {
     list($user, $domain) = explode("@", $mail, 2);
@@ -577,10 +613,9 @@ function array2table($data, $tableMarkup = 1, $tableoptions = '', $troptions = '
 function get_next_value($db, $mask, $table, $field, $where = '', $objsoc = '', $date = '', $mode = 'next', $bentityon = true) {
     global $conf;
 
-    if (!is_object($objsoc))
-        $valueforccc = $objsoc;
-    else
-        $valueforccc = $objsoc->code_client;
+    if (! is_object($objsoc)) $valueforccc=$objsoc;
+    else if($table == "commande_fournisseur" || $table == "facture_fourn" ) $valueforccc=$objsoc->code_fournisseur;
+    else $valueforccc=$objsoc->code_client;
 
     // Clean parameters
     if ($date == '')
@@ -592,30 +627,46 @@ function get_next_value($db, $mask, $table, $field, $where = '', $objsoc = '', $
     //$mask='FA{yy}{mm}-{0000@99}';
     //$date=dol_mktime(12, 0, 0, 1, 1, 1900);
     //$date=dol_stringtotime('20130101');
+
+    $hasglobalcounter=false;
     // Extract value for mask counter, mask raz and mask offset
-    if (!preg_match('/\{(0+)([@\+][0-9\-\+\=]+)?([@\+][0-9\-\+\=]+)?\}/i', $mask, $reg))
-        return 'ErrorBadMask';
-    $masktri = $reg[1] . (!empty($reg[2]) ? $reg[2] : '') . (!empty($reg[3]) ? $reg[3] : '');
-    $maskcounter = $reg[1];
-    $maskraz = -1;
-    $maskoffset = 0;
-    $resetEveryMonth = false;
-    if (dol_strlen($maskcounter) < 3 && empty($conf->global->MAIN_COUNTER_WITH_LESS_3_DIGITS))
-        return 'CounterMustHaveMoreThan3Digits';
+    if (preg_match('/\{(0+)([@\+][0-9\-\+\=]+)?([@\+][0-9\-\+\=]+)?\}/i',$mask,$reg))
+    {
+        $masktri=$reg[1].(! empty($reg[2])?$reg[2]:'').(! empty($reg[3])?$reg[3]:'');
+        $maskcounter=$reg[1];
+        $hasglobalcounter=true;
+    }
+    else
+    {
+        // setting some defaults so the rest of the code won't fail if there is a third party counter
+        $masktri='00000';
+        $maskcounter='00000';
+    }
+
+    $maskraz=-1;
+    $maskoffset=0;
+    $resetEveryMonth=false;
+    if (dol_strlen($maskcounter) < 3 && empty($conf->global->MAIN_COUNTER_WITH_LESS_3_DIGITS)) return 'ErrorCounterMustHaveMoreThan3Digits';
 
     // Extract value for third party mask counter
-    if (preg_match('/\{(c+)(0*)\}/i', $mask, $regClientRef)) {
-        $maskrefclient = $regClientRef[1] . $regClientRef[2];
-        $maskrefclient_maskclientcode = $regClientRef[1];
-        $maskrefclient_maskcounter = $regClientRef[2];
-        $maskrefclient_maskoffset = 0; //default value of maskrefclient_counter offset
-        $maskrefclient_clientcode = substr($valueforccc, 0, dol_strlen($maskrefclient_maskclientcode)); //get n first characters of client code where n is length in mask
-        $maskrefclient_clientcode = str_pad($maskrefclient_clientcode, dol_strlen($maskrefclient_maskclientcode), "#", STR_PAD_RIGHT); //padding maskrefclient_clientcode for having exactly n characters in maskrefclient_clientcode
-        $maskrefclient_clientcode = dol_string_nospecial($maskrefclient_clientcode); //sanitize maskrefclient_clientcode for sql insert and sql select like
-        if (dol_strlen($maskrefclient_maskcounter) > 0 && dol_strlen($maskrefclient_maskcounter) < 3)
-            return 'CounterMustHaveMoreThan3Digits';
-    } else
-        $maskrefclient = '';
+    if (preg_match('/\{(c+)(0*)\}/i',$mask,$regClientRef))
+    {
+        $maskrefclient=$regClientRef[1].$regClientRef[2];
+        $maskrefclient_maskclientcode=$regClientRef[1];
+        $maskrefclient_maskcounter=$regClientRef[2];
+        $maskrefclient_maskoffset=0; //default value of maskrefclient_counter offset
+        $maskrefclient_clientcode=substr($valueforccc,0,dol_strlen($maskrefclient_maskclientcode));//get n first characters of client code where n is length in mask
+        $maskrefclient_clientcode=str_pad($maskrefclient_clientcode,dol_strlen($maskrefclient_maskclientcode),"#",STR_PAD_RIGHT);//padding maskrefclient_clientcode for having exactly n characters in maskrefclient_clientcode
+        $maskrefclient_clientcode=dol_string_nospecial($maskrefclient_clientcode);//sanitize maskrefclient_clientcode for sql insert and sql select like
+        if (dol_strlen($maskrefclient_maskcounter) > 0 && dol_strlen($maskrefclient_maskcounter) < 3) return 'ErrorCounterMustHaveMoreThan3Digits';
+    }
+    else $maskrefclient='';
+
+    // fail if there is neither a global nor a third party counter
+    if (! $hasglobalcounter && ($maskrefclient_maskcounter == ''))
+    {
+        return 'ErrorBadMask';
+    }
 
     // Extract value for third party type
     if (preg_match('/\{(t+)\}/i', $mask, $regType)) {
@@ -641,6 +692,7 @@ function get_next_value($db, $mask, $table, $field, $where = '', $objsoc = '', $
     // and maskcounter    = 0000 for example
     //print "maskwithonlyymcode=".$maskwithonlyymcode." maskwithnocode=".$maskwithnocode."\n<br>";
     //var_dump($reg);
+
     // If an offset is asked
     if (!empty($reg[2]) && preg_match('/^\+/', $reg[2]))
         $maskoffset = preg_replace('/^\+/', '', $reg[2]);
@@ -659,18 +711,17 @@ function get_next_value($db, $mask, $table, $field, $where = '', $objsoc = '', $
 
     //print "yearoffset=".$yearoffset." yearoffsettype=".$yearoffsettype;
     if (is_numeric($yearoffsettype) && $yearoffsettype >= 1)
-        $maskraz = $yearoffsettype; // For backward compatibility
-    else if ($yearoffsettype === '0' || (!empty($yearoffsettype) && !is_numeric($yearoffsettype) && $conf->global->SOCIETE_FISCAL_MONTH_START > 1))
+        $maskraz=$yearoffsettype; // For backward compatibility
+    else if ($yearoffsettype === '0' || (! empty($yearoffsettype) && ! is_numeric($yearoffsettype) && $conf->global->SOCIETE_FISCAL_MONTH_START > 1))
         $maskraz = $conf->global->SOCIETE_FISCAL_MONTH_START;
     //print "maskraz=".$maskraz;	// -1=no reset
 
-    if ($maskraz > 0) {    // A reset is required
+    if ($maskraz > 0) {   // A reset is required
         if ($maskraz == 99) {
             $maskraz = date('m', $date);
             $resetEveryMonth = true;
         }
-        if ($maskraz > 12)
-            return 'ErrorBadMaskBadRazMonth';
+        if ($maskraz > 12) return 'ErrorBadMaskBadRazMonth';
 
         // Define posy, posm and reg
         if ($maskraz > 1) { // if reset is not first month, we need month and year into mask
@@ -792,11 +843,10 @@ function get_next_value($db, $mask, $table, $field, $where = '', $objsoc = '', $
     $sql.= " WHERE " . $field . " LIKE '" . $maskLike . "'";
     $sql.= " AND " . $field . " NOT LIKE '(PROV%)'";
     if ($bentityon) // only if entity enable
-        $sql.= " AND entity IN (" . getEntity($table, 1) . ")";
-    if ($where)
-        $sql.=$where;
-    if ($sqlwhere)
-        $sql.=' AND ' . $sqlwhere;
+    	$sql.= " AND entity IN (".getEntity($table, 1).")";
+
+    if ($where) $sql.=$where;
+    if ($sqlwhere) $sql.=' AND '.$sqlwhere;
 
     //print $sql.'<br>';
     dol_syslog("functions2::get_next_value mode=" . $mode . "", LOG_DEBUG);
@@ -985,29 +1035,44 @@ function get_next_value($db, $mask, $table, $field, $where = '', $objsoc = '', $
 function check_value($mask, $value) {
     $result = 0;
 
+    $hasglobalcounter=false;
     // Extract value for mask counter, mask raz and mask offset
-    if (!preg_match('/\{(0+)([@\+][0-9]+)?([@\+][0-9]+)?\}/i', $mask, $reg))
-        return 'ErrorBadMask';
-    $masktri = $reg[1] . (isset($reg[2]) ? $reg[2] : '') . (isset($reg[3]) ? $reg[3] : '');
-    $maskcounter = $reg[1];
-    $maskraz = -1;
-    $maskoffset = 0;
-    if (dol_strlen($maskcounter) < 3)
-        return 'CounterMustHaveMoreThan3Digits';
+    if (preg_match('/\{(0+)([@\+][0-9]+)?([@\+][0-9]+)?\}/i',$mask,$reg))
+    {
+        $masktri=$reg[1].(isset($reg[2])?$reg[2]:'').(isset($reg[3])?$reg[3]:'');
+        $maskcounter=$reg[1];
+        $hasglobalcounter=true;
+    }
+    else
+    {
+        // setting some defaults so the rest of the code won't fail if there is a third party counter
+        $masktri='00000';
+        $maskcounter='00000';
+    }
+
+    $maskraz=-1;
+    $maskoffset=0;
+    if (dol_strlen($maskcounter) < 3) return 'ErrorCounterMustHaveMoreThan3Digits';
 
     // Extract value for third party mask counter
-    if (preg_match('/\{(c+)(0*)\}/i', $mask, $regClientRef)) {
-        $maskrefclient = $regClientRef[1] . $regClientRef[2];
-        $maskrefclient_maskclientcode = $regClientRef[1];
-        $maskrefclient_maskcounter = $regClientRef[2];
-        $maskrefclient_maskoffset = 0; //default value of maskrefclient_counter offset
-        $maskrefclient_clientcode = substr('', 0, dol_strlen($maskrefclient_maskclientcode)); //get n first characters of client code to form maskrefclient_clientcode
-        $maskrefclient_clientcode = str_pad($maskrefclient_clientcode, dol_strlen($maskrefclient_maskclientcode), "#", STR_PAD_RIGHT); //padding maskrefclient_clientcode for having exactly n characters in maskrefclient_clientcode
-        $maskrefclient_clientcode = dol_string_nospecial($maskrefclient_clientcode); //sanitize maskrefclient_clientcode for sql insert and sql select like
-        if (dol_strlen($maskrefclient_maskcounter) > 0 && dol_strlen($maskrefclient_maskcounter) < 3)
-            return 'CounterMustHaveMoreThan3Digits';
-    } else
-        $maskrefclient = '';
+    if (preg_match('/\{(c+)(0*)\}/i',$mask,$regClientRef))
+    {
+        $maskrefclient=$regClientRef[1].$regClientRef[2];
+        $maskrefclient_maskclientcode=$regClientRef[1];
+        $maskrefclient_maskcounter=$regClientRef[2];
+        $maskrefclient_maskoffset=0; //default value of maskrefclient_counter offset
+        $maskrefclient_clientcode=substr('',0,dol_strlen($maskrefclient_maskclientcode));//get n first characters of client code to form maskrefclient_clientcode
+        $maskrefclient_clientcode=str_pad($maskrefclient_clientcode,dol_strlen($maskrefclient_maskclientcode),"#",STR_PAD_RIGHT);//padding maskrefclient_clientcode for having exactly n characters in maskrefclient_clientcode
+        $maskrefclient_clientcode=dol_string_nospecial($maskrefclient_clientcode);//sanitize maskrefclient_clientcode for sql insert and sql select like
+        if (dol_strlen($maskrefclient_maskcounter) > 0 && dol_strlen($maskrefclient_maskcounter) < 3) return 'ErrorCounterMustHaveMoreThan3Digits';
+    }
+    else $maskrefclient='';
+
+    // fail if there is neither a global nor a third party counter
+    if (! $hasglobalcounter && ($maskrefclient_maskcounter == ''))
+    {
+        return 'ErrorBadMask';
+    }
 
     $maskwithonlyymcode = $mask;
     $maskwithonlyymcode = preg_replace('/\{(0+)([@\+][0-9]+)?([@\+][0-9]+)?\}/i', $maskcounter, $maskwithonlyymcode);
@@ -1293,8 +1358,7 @@ function dol_print_reduction($reduction, $langs) {
 
 /**
  * 	Return OS version.
- *  Note that PHP_OS returns only OS (not version) and OS PHP was built on, not
- *  necessarly OS PHP runs on.
+ *  Note that PHP_OS returns only OS (not version) and OS PHP was built on, not necessarly OS PHP runs on.
  *
  * 	@return		string			OS version
  */
@@ -1307,6 +1371,7 @@ function version_os() {
  * 	Return PHP version
  *
  * 	@return		string			PHP version
+ *  @see		versionphparray
  */
 function version_php() {
     return phpversion();
@@ -1316,6 +1381,7 @@ function version_php() {
  * 	Return Dolibarr version
  *
  * 	@return		string			Dolibarr version
+ *  @see		versiondolibarrarray
  */
 function version_dolibarr() {
     return DOL_VERSION;
@@ -1513,50 +1579,53 @@ function dolGetElementUrl($objectid, $objecttype, $withpicto = 0, $option = '') 
 
     $classpath = $element . '/class';
 
-    // To work with non standard path
-    if ($objecttype == 'facture' || $objecttype == 'invoice') {
-        $classpath = 'compta/facture/class';
-        $module = 'facture';
-        $subelement = 'facture';
-    }
-    if ($objecttype == 'commande' || $objecttype == 'order') {
-        $classpath = 'commande/class';
-        $module = 'commande';
-        $subelement = 'commande';
-    }
-    if ($objecttype == 'propal') {
-        $classpath = 'comm/propal/class';
-    }
-    if ($objecttype == 'shipping') {
-        $classpath = 'expedition/class';
-        $subelement = 'expedition';
-        $module = 'expedition_bon';
-    }
-    if ($objecttype == 'delivery') {
-        $classpath = 'livraison/class';
-        $subelement = 'livraison';
-        $module = 'livraison_bon';
-    }
-    if ($objecttype == 'contract') {
-        $classpath = 'contrat/class';
-        $module = 'contrat';
-        $subelement = 'contrat';
-    }
-    if ($objecttype == 'member') {
-        $classpath = 'adherents/class';
-        $module = 'adherent';
-        $subelement = 'adherent';
-    }
-    if ($objecttype == 'cabinetmed_cons') {
-        $classpath = 'cabinetmed/class';
-        $module = 'cabinetmed';
-        $subelement = 'cabinetmedcons';
-    }
-    if ($objecttype == 'fichinter') {
-        $classpath = 'fichinter/class';
-        $module = 'ficheinter';
-        $subelement = 'fichinter';
-    }
+	// To work with non standard path
+	if ($objecttype == 'facture' || $objecttype == 'invoice') {
+		$classpath = 'compta/facture/class';
+		$module='facture';
+		$subelement='facture';
+	}
+	if ($objecttype == 'commande' || $objecttype == 'order') {
+		$classpath = 'commande/class';
+		$module='commande';
+		$subelement='commande';
+	}
+	if ($objecttype == 'propal')  {
+		$classpath = 'comm/propal/class';
+	}
+	if ($objecttype == 'askpricesupplier')  {
+		$classpath = 'comm/askpricesupplier/class';
+	}
+	if ($objecttype == 'shipping') {
+		$classpath = 'expedition/class';
+		$subelement = 'expedition';
+		$module = 'expedition_bon';
+	}
+	if ($objecttype == 'delivery') {
+		$classpath = 'livraison/class';
+		$subelement = 'livraison';
+		$module = 'livraison_bon';
+	}
+	if ($objecttype == 'contract') {
+		$classpath = 'contrat/class';
+		$module='contrat';
+		$subelement='contrat';
+	}
+	if ($objecttype == 'member') {
+		$classpath = 'adherents/class';
+		$module='adherent';
+		$subelement='adherent';
+	}
+	if ($objecttype == 'cabinetmed_cons') {
+		$classpath = 'cabinetmed/class';
+		$module='cabinetmed';
+		$subelement='cabinetmedcons';
+	}
+	if ($objecttype == 'fichinter') {
+		$classpath = 'fichinter/class';
+		$module='ficheinter';
+		$subelement='fichinter';
+	}
 
     //print "objecttype=".$objecttype." module=".$module." subelement=".$subelement;
 
@@ -1695,12 +1764,13 @@ function cleanCorruptedTree($db, $tabletocleantree, $fieldfkparent) {
 }
 
 /**
- * 	Get an array with properties of an element
+ *	Get an array with properties of an element
  *
- * @param string $element_type Element type. ex : project_task or object@modulext or object_under@module
- * @return array (module, classpath, element, subelement, classfile, classname)
+ * @param 	string 	$element_type 	Element type: 'action', 'facture', 'project_task' or 'object@modulext'...
+ * @return 	array					(module, classpath, element, subelement, classfile, classname)
  */
-function getElementProperties($element_type) {
+function getElementProperties($element_type)
+{
     // Parse element/subelement (ex: project_task)
     $module = $element = $subelement = $element_type;
 
@@ -1740,6 +1810,9 @@ function getElementProperties($element_type) {
     }
     if ($element_type == 'propal') {
         $classpath = 'comm/propal/class';
+    }
+    if ($element_type == 'askpricesupplier')  {
+        $classpath = 'comm/askpricesupplier/class';
     }
     if ($element_type == 'shipping') {
         $classpath = 'expedition/class';
@@ -1786,15 +1859,15 @@ function getElementProperties($element_type) {
 }
 
 /**
- * Fetch an object with element_type and its id
+ * Fetch an object from its id and element_type
  * Inclusion classes is automatic
  *
- * @param	int     $element_id Element id
- * @param	string  $element_type Element type
- * @return 	object || 0 || -1 if error
+ * @param	int     	$element_id 	Element id
+ * @param	string  	$element_type 	Element type
+ * @return 	int|object 					object || 0 || -1 if error
  */
-function fetchObjectByElement($element_id, $element_type) {
-
+function fetchObjectByElement($element_id, $element_type)
+{
     global $conf;
     global $db, $conf;
 
@@ -1812,36 +1885,40 @@ function fetchObjectByElement($element_id, $element_type) {
 }
 
 /**
- * 	Convert an array with RGB value into hex RGB value
+ *	Convert an array with RGB value into hex RGB value.
+ *  This is the opposite function of colorStringToArray
  *
  *  @param	array	$arraycolor			Array
- *  @param	string	$colorifnotfound	Color code to return if entry not defined
- *  @return	string						RGB hex value (without # before). For example: FF00FF
- *  @see	Make the opposite of colorStringToArray
+ *  @param	string	$colorifnotfound	Color code to return if entry not defined or not a RGB format
+ *  @return	string						RGB hex value (without # before). For example: 'FF00FF', '01FF02'
+ *  @see	colorStringToArray
  */
-function colorArrayToHex($arraycolor, $colorifnotfound = '888888') {
-    if (!is_array($arraycolor))
-        return $colorifnotfound;
-    return dechex($arraycolor[0]) . dechex($arraycolor[1]) . dechex($arraycolor[2]);
+function colorArrayToHex($arraycolor,$colorifnotfound='888888')
+{
+	if (! is_array($arraycolor)) return $colorifnotfound;
+	if (empty($arraycolor)) return $colorifnotfound;
+	return sprintf("%02s",dechex($arraycolor[0])).sprintf("%02s",dechex($arraycolor[1])).sprintf("%02s",dechex($arraycolor[2]));
 }
 
 /**
- * 	Convert a string RGB value ('FFFFFF', '255,255,255') into an array RGB array(255,255,255)
+ *	Convert a string RGB value ('FFFFFF', '255,255,255') into an array RGB array(255,255,255).
+ *  This is the opposite function of colorArrayToHex.
+ *  If entry is already an array, return it.
  *
  *  @param	string	$stringcolor		String with hex (FFFFFF) or comma RGB ('255,255,255')
- *  @param	string	$colorifnotfound	Color code to return if entry not defined
+ *  @param	array	$colorifnotfound	Color code array to return if entry not defined
  *  @return	string						RGB hex value (without # before). For example: FF00FF
- *  @see	Make the opposite of colorArrayToHex
+ *  @see	colorArrayToHex
  */
-function colorStringToArray($stringcolor, $colorifnotfound = array(88, 88, 88)) {
-    if (is_array($stringcolor))
-        return $stringcolor; // If already into correct output format, we return as is
-    $tmp = preg_match('/^([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])$/', $stringcolor, $reg);
-    if (!$tmp) {
-        $tmp = explode(',', $stringcolor);
-        if (count($tmp) < 3)
-            return $colorifnotfound;
-        return $tmp;
-    }
-    return array(hexdec($reg[1]), hexdec($reg[2]), hexdec($reg[3]));
+function colorStringToArray($stringcolor,$colorifnotfound=array(88,88,88))
+{
+	if (is_array($stringcolor)) return $stringcolor;	// If already into correct output format, we return as is
+	$tmp=preg_match('/^#?([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F])$/',$stringcolor,$reg);
+	if (! $tmp)
+	{
+		$tmp=explode(',',$stringcolor);
+		if (count($tmp) < 3) return $colorifnotfound;
+		return $tmp;
+	}
+	return array(hexdec($reg[1]),hexdec($reg[2]),hexdec($reg[3]));
 }

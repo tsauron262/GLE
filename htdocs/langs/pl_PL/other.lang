@@ -204,6 +204,7 @@ ClickHereToGoTo=Kliknij tutaj, aby przejść do% s
 YouMustClickToChange=Trzeba jednak najpierw kliknąć na poniższy link, aby potwierdzić tę zmianę hasła
 ForgetIfNothing=Jeśli nie zwrócić tę zmianę, po prostu zapomnieć ten e-mail. Twoje dane są przechowywane w sposób bezpieczny.
 IfAmountHigherThan=Jeśli kwota wyższa niż <strong>%s</strong>
+SourcesRepository=Repository for sources
 
 ##### Calendar common #####
 AddCalendarEntry=Dodaj wpis w kalendarzu %s

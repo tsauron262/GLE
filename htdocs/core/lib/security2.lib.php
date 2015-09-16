@@ -212,7 +212,7 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	// Execute hook getLoginPageOptions
 	// Should be an array with differents options in $hookmanager->resArray
 	$parameters=array('entity' => GETPOST('entity','int'));
-	$hookmanager->executeHooks('getLoginPageOptions',$parameters);    // Note that $action and $object may have been modified by some hooks
+	$reshook = $hookmanager->executeHooks('getLoginPageOptions',$parameters);    // Note that $action and $object may have been modified by some hooks. resArray is filled by hook.
 
 	// Login
 	$login = (! empty($hookmanager->resArray['username']) ? $hookmanager->resArray['username'] : (GETPOST("username","alpha") ? GETPOST("username","alpha") : $demologin));
@@ -237,8 +237,7 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	}
 	elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/gle_logo.png'))
 	{
-		$urllogo=DOL_URL_ROOT.'/theme/gle_logo.png';
-
+		$urllogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
 	}
 
 	// Security graphical code
@@ -440,7 +439,7 @@ function encodedecode_dbpassconf($level=0)
 /**
  * Return a generated password using default module
  *
- * @param		boolean		$generic		true=Create generic password (use default crypt function), false=Use the configured password generation module
+ * @param		boolean		$generic		true=Create generic password (use md5, sha1 depending on setup), false=Use the configured password generation module
  * @return		string						New value for password
  */
 function getRandomPassword($generic=false)

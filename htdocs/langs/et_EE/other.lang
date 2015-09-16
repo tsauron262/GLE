@@ -204,6 +204,7 @@ ClickHereToGoTo=Klõpsa siia, et minna %s
 YouMustClickToChange=Esmalt pead klõpsa järgneval lingil, et kinnitada salasõna muutmine
 ForgetIfNothing=Kui Sina ei palunud seda muudatust, siis ignoreeri antud kirja ja mingeid muudatusi ei toimu.
 IfAmountHigherThan=If amount higher than <strong>%s</strong>
+SourcesRepository=Repository for sources
 
 ##### Calendar common #####
 AddCalendarEntry=Lisa kirje kalendrisse %s

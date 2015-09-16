@@ -51,11 +51,13 @@ class mod_syslog_chromephp extends LogHandler implements LogHandlerInterface
 		global $conf;
 		try
 		{
-			if (empty($conf->global->SYSLOG_CHROMEPHP_INCLUDEPATH)) $conf->global->SYSLOG_CHROMEPHP_INCLUDEPATH='/usr/share/php';
+			if (empty($conf->global->SYSLOG_CHROMEPHP_INCLUDEPATH)) {
+				$conf->global->SYSLOG_CHROMEPHP_INCLUDEPATH=DOL_DOCUMENT_ROOT . '/includes/chromephp/';
+			}
 			set_include_path($conf->global->SYSLOG_CHROMEPHP_INCLUDEPATH);
 
 			//print 'rrrrr'.get_include_path();
-		    $res = include_once('ChromePhp.php');
+		    $res = @include_once('ChromePhp.php');
 		    if (! $res) $res=@include_once('ChromePhp.class.php');
 
 		    restore_include_path();
@@ -86,9 +88,9 @@ class mod_syslog_chromephp extends LogHandler implements LogHandlerInterface
 			array(
 				'name' => $langs->trans('IncludePath','SYSLOG_CHROMEPHP_INCLUDEPATH'),
 				'constant' => 'SYSLOG_CHROMEPHP_INCLUDEPATH',
-				'default' => '/usr/share/php',
+				'default' => DOL_DOCUMENT_ROOT . '/includes/chromephp/',
 				'attr' => 'size="60"',
-			    'example' => DOL_DOCUMENT_ROOT.'/includes/chromephp'
+			    'example' =>'/usr/share/php'
 			)
 		);
 	}
@@ -116,7 +118,7 @@ class mod_syslog_chromephp extends LogHandler implements LogHandlerInterface
 	 * 	Output log content. We also start output buffering at first log write.
 	 *
 	 *	@param	array	$content	Content to log
-	 * 	@return	void
+	 * 	@return	null|false
 	 */
 	public function export($content)
 	{

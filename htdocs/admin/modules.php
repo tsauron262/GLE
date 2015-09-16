@@ -5,6 +5,7 @@
  * Copyright (C) 2004      Eric Seigne          <eric.seigne@ryxeo.com>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2011	   Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2015      Jean-François Ferry	<jfefe@aternatik.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,7 +211,7 @@ asort($orders);
 $nbofactivatedmodules=count($conf->modules);
 $moreinfo=$langs->trans("TotalNumberOfActivatedModules",($nbofactivatedmodules-1));
 if ($nbofactivatedmodules <= 1) $moreinfo .= ' '.img_warning($langs->trans("YouMustEnableOneModule"));
-print load_fiche_titre($langs->trans("ModulesSetup"),$moreinfo,'setup');
+print load_fiche_titre($langs->trans("ModulesSetup"),$moreinfo,'title_setup');
 
 // Start to show page
 if (empty($mode)) $mode='common';
@@ -469,11 +470,11 @@ if ($mode != 'marketplace')
         		}
         		else if (preg_match('/^([^@]+)@([^@]+)$/i',$objMod->config_page_url,$regs))
         		{
-        			print '<td align="right" valign="top"><a href="'.dol_buildpath('/'.$regs[2].'/admin/'.$regs[1],1).'" title="'.$langs->trans("Setup").'">'.img_picto($langs->trans("Setup"),"setup").'</a></td>';
+        			print '<td align="right" valign="middle"><a href="'.dol_buildpath('/'.$regs[2].'/admin/'.$regs[1],1).'" title="'.$langs->trans("Setup").'">'.img_picto($langs->trans("Setup"),"setup").'</a></td>';
         		}
         		else
         		{
-        			print '<td align="right" valign="top"><a href="'.$objMod->config_page_url.'" title="'.$langs->trans("Setup").'">'.img_picto($langs->trans("Setup"),"setup").'</a></td>';
+        			print '<td align="right" valign="middle"><a href="'.$objMod->config_page_url.'" title="'.$langs->trans("Setup").'">'.img_picto($langs->trans("Setup"),"setup").'</a></td>';
         		}
         	}
         	else
@@ -500,7 +501,8 @@ if ($mode != 'marketplace')
 	        	print img_picto($langs->trans("Disabled"),'switch_off');
 	        	print "</a>\n";
         	}
-        	print "</td>\n  <td>&nbsp;</td>";
+        	print "</td>\n";
+        	print "<td>&nbsp;</td>";
         }
 
         print "</tr>\n";

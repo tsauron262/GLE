@@ -204,6 +204,7 @@ ClickHereToGoTo=%s e gitmek için buraya tıkla
 YouMustClickToChange=Ancak önce bu şifre değiştirmeyi doğrulamak için aşağıdaki linke tıklamanız gerekir
 ForgetIfNothing=Bu değiştirmeyi istemediyseniz, bu epostayı unutun. Kimlik bilgilerinizi güvenli tutulur.
 IfAmountHigherThan=Eğer tutar <strong>%s</strong> den büyükse
+SourcesRepository=Kaynaklar için havuz
 
 ##### Calendar common #####
 AddCalendarEntry=% Takvimine giriş ekleyin

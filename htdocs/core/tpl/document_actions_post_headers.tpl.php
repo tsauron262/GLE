@@ -20,6 +20,7 @@
 $langs->load("link");
 if (empty($relativepathwithnofile)) $relativepathwithnofile='';
 
+
 /*
  * Confirm form to delete
  */
@@ -46,9 +47,9 @@ $savingdocmask='';
 if (empty($conf->global->MAIN_DISABLE_SUGGEST_REF_AS_PREFIX))
 {
 	//var_dump($modulepart);
-	if (in_array($modulepart,array('facture_fournisseur','commande_fournisseur','facture','commande','propal','ficheinter','contract','project','project_task')))
+	if (in_array($modulepart,array('facture_fournisseur','commande_fournisseur','facture','commande','propal','askpricesupplier','ficheinter','contract','project','project_task','expensereport')))
 	{
-		$savingdocmask=$object->ref.'___file__';
+		$savingdocmask=$object->ref.'-__file__';
 	}
 	/*if (in_array($modulepart,array('member')))
 	{

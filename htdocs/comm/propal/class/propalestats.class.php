@@ -66,10 +66,10 @@ class PropaleStats extends Stats
 
 		$this->field='total_ht';
 		$this->field_line='total_ht';
-		
+
 		$this->where.= " p.fk_statut > 0";
 		//$this->where.= " AND p.fk_soc = s.rowid AND p.entity = ".$conf->entity;
-		$this->where.= " AND p.entity = ".$conf->entity;
+		$this->where.= " AND p.entity IN (".getEntity('propal', 1).")";
 		if (!$user->rights->societe->client->voir && !$this->socid) $this->where .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
 		if($this->socid)
                     
@@ -184,7 +184,7 @@ class PropaleStats extends Stats
 		return $this->_getAllByYear($sql);
 	}
 
-	
+
 
 	/**
 	 *	Return nb, amount of predefined product for year

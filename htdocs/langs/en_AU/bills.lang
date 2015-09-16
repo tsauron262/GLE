@@ -1,2 +1,5 @@
 # Dolibarr language file - Source file is en_US - bills
-BankCode=Bank code or BSB
+PaymentTypeTIP=Deposit
+PaymentTypeShortTIP=Deposit
+PaymentTypeTRA=Bill payment
+PaymentTypeShortTRA=Bill

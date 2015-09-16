@@ -1,2 +1,5 @@
 # Dolibarr language file - Source file is en_US - banks
-InputReceiptNumber=Choose the bank statement related with the conciliation. Use a sortable numeric value: YYYYMM or YYYYMMDD
+RejectCheck=Check rejection
+RejectCheckDate=Check rejection date
+CheckRejected=Check rejected
+CheckRejectedAndInvoicesReopened=Check rejected and invoices reopened

@@ -97,6 +97,12 @@ $modules=array(
 						'img' => 'user'
 				)
 		),
+		'expensereport' => array(
+				array(
+						'code' => 'MAIN_DELAY_EXPENSEREPORTS',
+						'img' => 'trip'
+				)
+		),
 );
 
 if ($action == 'update')
@@ -127,7 +133,7 @@ $form = new Form($db);
 
 llxHeader();
 
-print_fiche_titre($langs->trans("DelaysOfToleranceBeforeWarning"),'','setup');
+print_fiche_titre($langs->trans("DelaysOfToleranceBeforeWarning"),'','title_setup');
 
 print $langs->transnoentities("DelaysOfToleranceDesc",img_warning());
 print " ".$langs->trans("OnlyActiveElementsAreShown",DOL_URL_ROOT.'/admin/modules.php')."<br>\n";
@@ -177,7 +183,7 @@ if ($action == 'edit')
 
 	print '<br>';
 
-    print '<br><center><input type="submit" class="button" value="'.$langs->trans("Save").'"></center>';
+    print '<br><div class="center"><input type="submit" class="button" value="'.$langs->trans("Save").'"></div>';
     print '<br>';
 
     print '</form>';

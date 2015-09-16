@@ -1,5 +1,12 @@
 # Dolibarr language file - en_US - Accounting Expert
 CHARSET=UTF-8
+ACCOUNTING_EXPORT_SEPARATORCSV=Column separator for export file
+ACCOUNTING_EXPORT_DATE=Date format for export file
+ACCOUNTING_EXPORT_PIECE=Export the number of piece ?
+ACCOUNTING_EXPORT_GLOBAL_ACCOUNT=Export with global account ?
+ACCOUNTING_EXPORT_LABEL=Export the label ?
+ACCOUNTING_EXPORT_AMOUNT=Export the amount ?
+ACCOUNTING_EXPORT_DEVISE=Export the devise ?
 
 Accounting=Contabilità avanzata
 Globalparameters=Parametri globali
@@ -13,9 +20,9 @@ ConfigAccountingExpert=Configurazione del modulo contabilità esperta
 Journaux=Giornali
 JournalFinancial=Giornali finanziari
 Exports=Esportazioni
-Export=Export
+Export=Esportazioni
 Modelcsv=Modello di esportazione
-OptionsDeactivatedForThisExportModel=For this export model, options are deactivated
+OptionsDeactivatedForThisExportModel=Per questo modello di esportazione, le opzioni sono disattivate
 Selectmodelcsv=Seleziona un modello di esportazione
 Modelcsv_normal=Esportazione classica
 Modelcsv_CEGID=Esporta tramite CEGID Esperto
@@ -41,11 +48,12 @@ NewAccount=Nuovo account di contabilità
 Update=Aggiorna
 List=Elenco
 Create=Crea
+CreateMvts=Create movement
 UpdateAccount=Modifica di un account di contabilità
 UpdateMvts=Modifica di un movimento
 WriteBookKeeping=Record accounts in general ledger
 Bookkeeping=Contabilità generale
-AccountBalanceByMonth=Account balance by month
+AccountBalanceByMonth=Salso del conto per mese
 
 AccountingVentilation=Breakdown accounting
 AccountingVentilationSupplier=Breakdown accounting supplier
@@ -60,8 +68,8 @@ IntoAccount=In the accounting account
 Ventilate=Ventilate
 VentilationAuto=Automatic breakdown
 
-Processing=Processing
-EndProcessing=The end of processing
+Processing=In elaborazione
+EndProcessing=Fine del processo
 AnyLineVentilate=Any lines to ventilate
 SelectedLines=Righe selezionate
 Lineofinvoice=Riga fattura
@@ -76,14 +84,15 @@ ACCOUNTING_LIST_SORT_VENTILATION_DONE=Begin the sorting of the breakdown pages "
 
 AccountLength=Length of the accounting accounts shown in Dolibarr
 AccountLengthDesc=Function allowing to feign a length of accounting account by replacing spaces by the zero figure. This function touches only the display, it does not modify the accounting accounts registered in Dolibarr. For the export, this function is necessary to be compatible with certain software.
+ACCOUNTING_LENGTH_DESCRIPTION=Length for displaying product & services description in listings (Best = 50)
+ACCOUNTING_LENGTH_DESCRIPTION_ACCOUNT=Length for displaying product & services account description form in listings (Best = 50)
 ACCOUNTING_LENGTH_GACCOUNT=Length of the general accounts
 ACCOUNTING_LENGTH_AACCOUNT=Length of the third party accounts
 
 ACCOUNTING_SELL_JOURNAL=Sell journal
 ACCOUNTING_PURCHASE_JOURNAL=Purchase journal
-ACCOUNTING_BANK_JOURNAL=Bank journal
-ACCOUNTING_CASH_JOURNAL=Cash journal
 ACCOUNTING_MISCELLANEOUS_JOURNAL=Miscellaneous journal
+ACCOUNTING_EXPENSEREPORT_JOURNAL=Expense report journal
 ACCOUNTING_SOCIAL_JOURNAL=Social journal
 
 ACCOUNTING_ACCOUNT_TRANSFER_CASH=Account of transfer

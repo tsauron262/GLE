@@ -1,5 +1,12 @@
 # Dolibarr language file - en_US - Accounting Expert
 CHARSET=UTF-8
+ACCOUNTING_EXPORT_SEPARATORCSV=Dışaaktarma dosyası için sütun ayırıcısı
+ACCOUNTING_EXPORT_DATE=Dışaaktarma dosyası için tarih biçimi
+ACCOUNTING_EXPORT_PIECE=Dışaaktarılacak parça sayısı ?
+ACCOUNTING_EXPORT_GLOBAL_ACCOUNT=Genel hesapla mı dışaaktarılsın?
+ACCOUNTING_EXPORT_LABEL=Etiket dışaaktarılsın mı?
+ACCOUNTING_EXPORT_AMOUNT=Tutar dışaaktarılsın mı?
+ACCOUNTING_EXPORT_DEVISE=Aygıt dışaaktarılsın mı?
 
 Accounting=Muhasebe
 Globalparameters=Genel parametreler
@@ -33,7 +40,7 @@ Dispatched=Gönderilmiş
 
 CustomersVentilation=Müşteri analizi
 SuppliersVentilation=Tedarikç analizi
-TradeMargin=Ticaret oranı
+TradeMargin=Ticaret kar oranı
 Reports=Raporlar
 ByCustomerInvoice=Müşteri faturalarına göre
 ByMonth=Aya göre
@@ -41,6 +48,7 @@ NewAccount=Yeni muhasebe hesabı
 Update=Güncelle
 List=Liste
 Create=Oluştur
+CreateMvts=Hareket oluştur
 UpdateAccount=Bir muhasebe hesabının değiştirilmesi
 UpdateMvts=Bir hareketin değiştirilmesi
 WriteBookKeeping=Büyük defter hesap kayıtları
@@ -76,14 +84,15 @@ ACCOUNTING_LIST_SORT_VENTILATION_DONE=Analiz sayfalarında "Analiz edilmişlerin
 
 AccountLength=Dolibarr'da gösterilen muhasebe hesapları uzunluğu
 AccountLengthDesc=Boşlukların sıfır figürü ile değiştirilmesiyle muhasebe hesap uzunluğunun uydurulmasını sağlayan işlevdir. Bu işlev yalnızca görüntüyü değiştirir, Dolibarr'da kayıtlı muhasebe hesaplarını değiştirmez. Dışaaktarma için bu fonksiyonun belirli yazılımla uyumlu olması gerekir.
+ACCOUNTING_LENGTH_DESCRIPTION=Listelemede ürün & hizmet tanımlaması için yer uzunluğu (En iyi = 50)
+ACCOUNTING_LENGTH_DESCRIPTION_ACCOUNT=Listelemede ürün & hizmet hesap tanımlama formu için yer uzunluğu (En iyi = 50)
 ACCOUNTING_LENGTH_GACCOUNT=Genel hesapların uzunluğu
 ACCOUNTING_LENGTH_AACCOUNT=Üçüncü parti hesaplarının uzunluğu
 
 ACCOUNTING_SELL_JOURNAL=Satış günlüğü
 ACCOUNTING_PURCHASE_JOURNAL=Alış günlüğü
-ACCOUNTING_BANK_JOURNAL=Banka günlüğü
-ACCOUNTING_CASH_JOURNAL=Kasa günlüğü
 ACCOUNTING_MISCELLANEOUS_JOURNAL=Çeşitli günlük
+ACCOUNTING_EXPENSEREPORT_JOURNAL=Rapor günlüğü dışaaktarılsın mı?
 ACCOUNTING_SOCIAL_JOURNAL=Sosyal günlük
 
 ACCOUNTING_ACCOUNT_TRANSFER_CASH=Transfer hesabı
@@ -144,7 +153,7 @@ NewFiscalYear=Yeni mali yıl
 
 DescVentilCustomer=Müşteri faturalarınızın yıllık hesap analizi için buraya danışın
 TotalVente=Toplam ciro HT
-TotalMarge=Toplam satışlar oranı
+TotalMarge=Toplam satışlar kar oranı
 DescVentilDoneCustomer=Burada müşteri faturaları satırlarına ve onların muhasebe hesaplarının listesine bakın.
 DescVentilTodoCustomer=Bir muhasebe hesabıyla müşteri faturanızın kalemlerini analiz edin
 ChangeAccount=Muhasebe hesabını, hesap tarafından seçilen satırlar için değiştirin:

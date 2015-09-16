@@ -1,7 +1,7 @@
 <?php
-/* Copyright (C) 2005-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2005-2015 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2009 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2012 Christophe Battarel  		<christophe.battarel@altairis.fr>
+ * Copyright (C) 2012      Christophe Battarel	<christophe.battarel@altairis.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -889,9 +889,10 @@ if ($step == 4 && $datatoimport)
 				if ($objimport->array_import_convertvalue[0][$code]['rule']=='fetchidfromcodeid') $htmltext.=$langs->trans("DataComeFromIdFoundFromCodeId",$filecolumn,$langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$code]['dict'])).'<br>';
 			}
 		}
+		// Source required
 		$htmltext.=$langs->trans("SourceRequired").': <b>'.yn(preg_match('/\*$/',$label)).'</b><br>';
 		$example=$objimport->array_import_examplevalues[0][$code];
-
+		// Example
 		if (empty($objimport->array_import_convertvalue[0][$code]))	// If source file does not need convertion
 		{
 		    if ($example) $htmltext.=$langs->trans("SourceExample").': <b>'.$example.'</b><br>';
@@ -900,6 +901,11 @@ if ($step == 4 && $datatoimport)
 		{
 		    if ($objimport->array_import_convertvalue[0][$code]['rule']=='fetchidfromref')    $htmltext.=$langs->trans("SourceExample").': <b>'.$langs->transnoentitiesnoconv("ExampleAnyRefFoundIntoElement",$entitylang).($example?' ('.$langs->transnoentitiesnoconv("Example").': '.$example.')':'').'</b><br>';
 		    if ($objimport->array_import_convertvalue[0][$code]['rule']=='fetchidfromcodeid') $htmltext.=$langs->trans("SourceExample").': <b>'.$langs->trans("ExampleAnyCodeOrIdFoundIntoDictionary",$langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$code]['dict'])).($example?' ('.$langs->transnoentitiesnoconv("Example").': '.$example.')':'').'</b><br>';
+		}
+		// Format control rule
+		if (! empty($objimport->array_import_regex[0][$code]))
+		{
+			$htmltext.=$langs->trans("FormatControlRule").': <b>'.$objimport->array_import_regex[0][$code].'</b><br>';
 		}
 		$htmltext.='<br>';
 		// Target field info
@@ -1197,7 +1203,7 @@ if ($step == 5 && $datatoimport)
 	print $langs->trans("Option");
 	print '</td><td>';
 	print '<input type="checkbox" name="excludefirstline" value="1"';
-	print ($excludefirstline?' checked="checked"':'');
+	print ($excludefirstline?' checked':'');
 	print ' onClick="javascript: window.location=\''.$_SERVER["PHP_SELF"].'?step=5&excludefirstline='.($excludefirstline?'0':'1').$param2.'\';">';
 	print ' '.$langs->trans("DoNotImportFirstLine");
 	print '</td></tr>';
@@ -1282,7 +1288,7 @@ if ($step == 5 && $datatoimport)
         print '<br>';
 
         // Actions
-        print '<center>';
+        print '<div class="center">';
         if ($user->rights->import->run)
         {
             print '<a class="butAction" href="'.DOL_URL_ROOT.'/imports/import.php?leftmenu=import&step=5&action=launchsimu'.$param.'">'.$langs->trans("RunSimulateImportFile").'</a>';
@@ -1291,7 +1297,7 @@ if ($step == 5 && $datatoimport)
         {
             print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("RunSimulateImportFile").'</a>';
         }
-        print '</center>';
+        print '</div>';
     }
     else
     {
@@ -1332,12 +1338,10 @@ if ($step == 5 && $datatoimport)
                 	continue;
                 }
                 if ($excludefirstline && $sourcelinenb == 1) continue;
-                if ($excludefirstline >= 2 && $sourcelinenb == 2) continue;
-                if ($excludefirstline == 3 && $sourcelinenb == 3) continue;
-
+                
                 //
                 $result=$obj->import_insert($arrayrecord,$array_match_file_to_database,$objimport,count($fieldssource),$importid);
-
+                
                 if (count($obj->errors))   $arrayoferrors[$sourcelinenb]=$obj->errors;
                 if (count($obj->warnings)) $arrayofwarnings[$sourcelinenb]=$obj->warnings;
                 if (! count($obj->errors) && ! count($obj->warnings)) $nbok++;
@@ -1407,15 +1411,15 @@ if ($step == 5 && $datatoimport)
         // Show import id
         $importid=dol_print_date(dol_now(),'%Y%m%d%H%M%S');
 
-        print '<center>';
+        print '<div class="center">';
         print $langs->trans("NowClickToRunTheImport",$langs->transnoentitiesnoconv("RunImportFile")).'<br>';
         print $langs->trans("DataLoadedWithId",$importid).'<br>';
-        print '</center>';
+        print '</div>';
 
         print '<br>';
 
         // Actions
-        print '<center>';
+        print '<div class="center">';
         if ($user->rights->import->run)
         {
             if (empty($nboferrors))
@@ -1435,7 +1439,7 @@ if ($step == 5 && $datatoimport)
 
             print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("RunImportFile").'</a>';
         }
-        print '</center>';
+        print '</div>';
     }
 }
 
@@ -1541,8 +1545,8 @@ if ($step == 6 && $datatoimport)
 	print '<tr><td>';
 	print $langs->trans("Option");
 	print '</td><td>';
-	print '<input type="checkbox" name="excludefirstline" value="1" disabled="disabled"';
-	print ($excludefirstline?' checked="checked"':'');
+	print '<input type="checkbox" name="excludefirstline" value="1" disabled';
+	print ($excludefirstline?' checked':'');
 	print '>';
 	print ' '.$langs->trans("DoNotImportFirstLine");
 	print '</td></tr>';
@@ -1670,12 +1674,12 @@ if ($step == 6 && $datatoimport)
 
 
 	// Show result
-	print '<center>';
 	print '<br>';
+	print '<div class="center">';
 	print $langs->trans("NbOfLinesImported",$nbok).'</b><br><br>';
 	print $langs->trans("FileWasImported",$importid).'<br>';
 	print $langs->trans("YouCanUseImportIdToFindRecord",$importid).'<br>';
-	print '</center>';
+	print '</div>';
 }
 
 
@@ -1759,7 +1763,7 @@ function show_elem($fieldssource,$pos,$key,$var,$nostyle='')
  *
  * @param 	array	$fieldssource	Array of field source
  * @param	array	$listofkey		Array of keys
- * @return	void
+ * @return	integer
  */
 function getnewkey(&$fieldssource,&$listofkey)
 {

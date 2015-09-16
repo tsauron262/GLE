@@ -1,6 +1,6 @@
 <?php
-/* Copyright (C) 2012	Regis Houssin       <regis.houssin@capnetworks.com>
- * Copyright (C) 2013   Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2012	   Regis Houssin       <regis.houssin@capnetworks.com>
+ * Copyright (C) 2013-2015 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -246,7 +246,7 @@ $title = $langs->trans('ModulesSystemTools');
 
 llxHeader('',$title);
 
-print_fiche_titre($title,'','setup');
+print_fiche_titre($title,'','title_setup');
 
 print $langs->trans("ProductVatMassChangeDesc").'<br><br>';
 
@@ -292,13 +292,15 @@ else
 	print '<tr '.$bc[$var].'>'."\n";
 	print '<td>'.$langs->trans("PriceBaseTypeToChange").'</td>'."\n";
 	print '<td width="60" align="right">'."\n";
-	print $form->load_PriceBaseType($price_base_type);
+	print $form->selectPriceBaseType($price_base_type);
 	print '</td>'."\n";
 	print '</tr>'."\n";
 	*/
 
 	print '</table>';
 
+	print '<br>';
+	
 	// Boutons actions
 	print '<div class="center">';
 	print '<input type="submit" id="convert_vatrate" name="convert_vatrate" value="'.$langs->trans("MassConvert").'" class="button" />';

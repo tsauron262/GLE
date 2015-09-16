@@ -63,15 +63,15 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
  * Search form
  */
 $var=false;
-print '<table class="noborder nohover" width="100%">';
 print '<form method="post" action="'.DOL_URL_ROOT.'/comm/propal/list.php">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<table class="noborder nohover" width="100%">';
 print '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchPropal").'</td></tr>';
 print '<tr '.$bc[$var].'><td>';
 print $langs->trans("Ref").':</td><td><input type="text" class="flat" name="sref" size=18></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
 print '<tr '.$bc[$var].'><td class="nowrap">'.$langs->trans("Other").':</td><td><input type="text" class="flat" name="sall" size="18"></td>';
 print '</tr>';
-print "</form></table><br>\n";
+print "</table></form><br>\n";
 
 
 /*
@@ -83,7 +83,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 $sql.= ", ".MAIN_DB_PREFIX."propal as p";
 if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE p.fk_soc = s.rowid";
-$sql.= " AND p.entity = ".$conf->entity;
+$sql.= " AND p.entity IN (".getEntity('propal', 1).")";
 if ($user->societe_id) $sql.=' AND p.fk_soc = '.$user->societe_id;
 if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 $sql.= " AND p.fk_statut IN (0,1,2,3,4)";
@@ -115,7 +115,7 @@ if ($resql)
     }
     $db->free($resql);
 
-    print '<table class="noborder" width="100%">';
+    print '<table class="noborder nohover" width="100%">';
     print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("Statistics").' - '.$langs->trans("Proposals").'</td></tr>'."\n";
     $var=true;
     $listofstatus=array(0,1,2,3,4);
@@ -133,7 +133,7 @@ if ($resql)
     }
     if ($conf->use_javascript_ajax)
     {
-        print '<tr><td align="center" colspan="2">';
+        print '<tr class="impair"><td align="center" colspan="2">';
         $data=array('series'=>$dataseries);
         dol_print_graph('stats',300,180,$data,1,'pie',1);
         print '</td></tr>';
@@ -159,7 +159,7 @@ if (! empty($conf->propal->enabled))
 	$sql.= ", ".MAIN_DB_PREFIX."societe as s";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE c.fk_soc = s.rowid";
-	$sql.= " AND c.entity = ".$conf->entity;
+	$sql.= " AND c.entity IN (".getEntity('propal', 1).")";
 	$sql.= " AND c.fk_statut = 0";
 	if ($socid) $sql.= " AND c.fk_soc = ".$socid;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -217,7 +217,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX."propal as c";
 $sql.= ", ".MAIN_DB_PREFIX."societe as s";
 if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE c.fk_soc = s.rowid";
-$sql.= " AND c.entity = ".$conf->entity;
+$sql.= " AND c.entity IN (".getEntity('propal', 1).")";
 //$sql.= " AND c.fk_statut > 2";
 if ($socid) $sql .= " AND c.fk_soc = ".$socid;
 if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -296,7 +296,7 @@ if (! empty($conf->propal->enabled) && $user->rights->propale->lire)
 	$sql.= ", ".MAIN_DB_PREFIX."propal as p";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE p.fk_soc = s.rowid";
-	$sql.= " AND p.entity = ".$conf->entity;
+	$sql.= " AND p.entity IN (".getEntity('propal', 1).")";
 	$sql.= " AND p.fk_statut = 1";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid) $sql.= " AND s.rowid = ".$socid;
@@ -313,7 +313,7 @@ if (! empty($conf->propal->enabled) && $user->rights->propale->lire)
 			$var=true;
 
 			print '<table class="noborder" width="100%">';
-			print '<tr class="liste_titre"><td colspan="5">'.$langs->trans("ProposalsOpened").' <a href="'.DOL_URL_ROOT.'/comm/propal/list.php?viewstatut=1">('.$num.')</a></td></tr>';
+			print '<tr class="liste_titre"><td colspan="5">'.$langs->trans("ProposalsOpened").' <a href="'.DOL_URL_ROOT.'/comm/propal/list.php?viewstatut=1"><span class="badge">'.$num.'</span></a></td></tr>';
 
 			$nbofloop=min($num, (empty($conf->global->MAIN_MAXLIST_OVERLOAD)?500:$conf->global->MAIN_MAXLIST_OVERLOAD));
 			while ($i < $nbofloop)
@@ -405,7 +405,7 @@ if (! empty($conf->propal->enabled))
 
 		print '<table class="noborder" width="100%">';
 		print '<tr class="liste_titre">';
-		print '<td colspan="3">'.$langs->trans("ProposalsToProcess").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=1">('.$num.')</a></td></tr>';
+		print '<td colspan="3">'.$langs->trans("ProposalsToProcess").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=1"><span class="badge">'.$num.'</span></a></td></tr>';
 
 		if ($num)
 		{
@@ -477,7 +477,7 @@ if (! empty($conf->propal->enabled))
 
 		print '<table class="noborder" width="100%">';
 		print '<tr class="liste_titre">';
-		print '<td colspan="3">'.$langs->trans("OnProcessOrders").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=2">('.$num.')</a></td></tr>';
+		print '<td colspan="3">'.$langs->trans("OnProcessOrders").' <a href="'.DOL_URL_ROOT.'/commande/list.php?viewstatut=2"><span class="badge">'.$num.'</span></a></td></tr>';
 
 		if ($num)
 		{

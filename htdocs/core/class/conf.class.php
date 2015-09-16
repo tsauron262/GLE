@@ -76,8 +76,6 @@ class Conf
 
 	/**
 	 * Constructor
-	 *
-	 * @return Conf
 	 */
 	function __construct()
 	{
@@ -112,6 +110,7 @@ class Conf
 		$this->bank				= new stdClass();
 		$this->notification		= new stdClass();
 		$this->mailing			= new stdClass();
+		$this->expensereport    = new stdClass();
 	}
 
 
@@ -368,6 +367,7 @@ class Conf
 			unset($this->global->PRODUIT_USE_SEARCH_TO_SELECT);
 			unset($this->global->COMPANY_USE_SEARCH_TO_SELECT);
 			unset($this->global->CONTACT_USE_SEARCH_TO_SELECT);
+			unset($this->global->PROJECT_USE_SEARCH_TO_SELECT);
 		}
 
 		if (! empty($conf->productbatch->enabled))
@@ -387,7 +387,7 @@ class Conf
 		// conf->global->ACCOUNTING_MODE = Option des modules Comptabilites (simple ou expert). Defini le mode de calcul des etats comptables (CA,...)
         if (empty($this->global->ACCOUNTING_MODE)) $this->global->ACCOUNTING_MODE='RECETTES-DEPENSES';  // By default. Can be 'RECETTES-DEPENSES' ou 'CREANCES-DETTES'
 
-        // By default, suppliers objects can be linked to all projects
+        // By default, suppliers ojbects can be linked to all projects
         $conf->global->PROJECT_CAN_ALWAYS_LINK_TO_ALL_SUPPLIERS = 1;
 
 		// conf->liste_limit = constante de taille maximale des listes
@@ -405,7 +405,7 @@ class Conf
 		$this->css  = "/theme/".$this->theme."/style.css.php";
 
 		// conf->email_from = email pour envoi par dolibarr des mails automatiques
-		$this->email_from = "robot@domain.com";
+		$this->email_from = "robot@example.com";
 		if (! empty($this->global->MAIN_MAIL_EMAIL_FROM)) $this->email_from = $this->global->MAIN_MAIL_EMAIL_FROM;
 
 		// conf->notification->email_from = email pour envoi par Dolibarr des notifications
@@ -439,11 +439,17 @@ class Conf
 		// Default pdf use dash between lines
 		if (! isset($this->global->MAIN_PDF_DASH_BETWEEN_LINES)) $this->global->MAIN_PDF_DASH_BETWEEN_LINES=1;
 
+		// Set default value to MAIN_SHOW_LOGO
+		if (! isset($this->global->MAIN_SHOW_LOGO)) $this->global->MAIN_SHOW_LOGO=1;
+
 		// Default max file size for upload
 		$this->maxfilesize = (empty($this->global->MAIN_UPLOAD_DOC) ? 0 : $this->global->MAIN_UPLOAD_DOC * 1024);
 
 		// Define list of limited modules
-		if (! isset($this->global->MAIN_MODULES_FOR_EXTERNAL)) $this->global->MAIN_MODULES_FOR_EXTERNAL='user,facture,categorie,commande,fournisseur,contact,propal,projet,contrat,societe,ficheinter,expedition,agenda,adherent';	// '' means 'all'. Note that contact is added here as it should be a module later.
+		if (! isset($this->global->MAIN_MODULES_FOR_EXTERNAL)) $this->global->MAIN_MODULES_FOR_EXTERNAL='user,askpricesupplier,facture,categorie,commande,fournisseur,contact,propal,projet,contrat,societe,ficheinter,expedition,agenda,adherent';	// '' means 'all'. Note that contact is added here as it should be a module later.
+
+		// Enable select2
+		if (empty($this->global->MAIN_USE_JQUERY_MULTISELECT)) $this->global->MAIN_USE_JQUERY_MULTISELECT='select2';
 
 		// Timeouts
         if (empty($this->global->MAIN_USE_CONNECT_TIMEOUT)) $this->global->MAIN_USE_CONNECT_TIMEOUT=10;
@@ -469,6 +475,7 @@ class Conf
 		$this->adherent->cotisation			= new stdClass();
 		$this->bank->rappro					= new stdClass();
 		$this->bank->cheque					= new stdClass();
+		$this->expensereport->payment		= new stdClass();
 		$this->actions->warning_delay=(isset($this->global->MAIN_DELAY_ACTIONS_TODO)?$this->global->MAIN_DELAY_ACTIONS_TODO:7)*24*60*60;
 		$this->commande->client->warning_delay=(isset($this->global->MAIN_DELAY_ORDERS_TO_PROCESS)?$this->global->MAIN_DELAY_ORDERS_TO_PROCESS:2)*24*60*60;
 		$this->commande->fournisseur->warning_delay=(isset($this->global->MAIN_DELAY_SUPPLIER_ORDERS_TO_PROCESS)?$this->global->MAIN_DELAY_SUPPLIER_ORDERS_TO_PROCESS:7)*24*60*60;
@@ -481,6 +488,7 @@ class Conf
 		$this->adherent->cotisation->warning_delay=(isset($this->global->MAIN_DELAY_MEMBERS)?$this->global->MAIN_DELAY_MEMBERS:0)*24*60*60;
 		$this->bank->rappro->warning_delay=(isset($this->global->MAIN_DELAY_TRANSACTIONS_TO_CONCILIATE)?$this->global->MAIN_DELAY_TRANSACTIONS_TO_CONCILIATE:0)*24*60*60;
 		$this->bank->cheque->warning_delay=(isset($this->global->MAIN_DELAY_CHEQUES_TO_DEPOSIT)?$this->global->MAIN_DELAY_CHEQUES_TO_DEPOSIT:0)*24*60*60;
+		$this->expensereport->payment->warning_delay=(isset($this->global->MAIN_DELAY_EXPENSEREPORTS_TO_PAY)?$this->global->MAIN_DELAY_EXPENSEREPORTS_TO_PAY:0)*24*60*60;
 
 		// For modules that want to disable top or left menu
 		if (! empty($this->global->MAIN_HIDE_TOP_MENU)) $this->dol_hide_topmenu=$this->global->MAIN_HIDE_TOP_MENU;

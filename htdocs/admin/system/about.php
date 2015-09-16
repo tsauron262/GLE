@@ -38,7 +38,7 @@ $langs->load("members");
 llxHeader();
 
 
-print_fiche_titre("Dolibarr",'','setup');
+print_fiche_titre("Dolibarr",'','title_setup');
 
 print '<div style="padding-left: 30px;">'.img_picto_common('', 'dolibarr_box.png','height="120"').'</div>';
 
@@ -51,8 +51,8 @@ print '</ul>';
 
 print $langs->trans("Developpers").':';
 print '<ul>';
+print '<li>'.$langs->trans("SourcesRepository").': <a href="http://www.github.com/Dolibarr/dolibarr" target="_blank" rel="external">http://www.github.com/Dolibarr/dolibarr</a></li>';
 print '<li>'.$langs->trans("SeeWikiForAllTeam").': <a href="http://wiki.dolibarr.org/index.php/Dolibarr_Project" target="_blank" rel="external">http://wiki.dolibarr.org/index.php/Dolibarr_Project</a></li>';
-print '<li>'.$langs->trans("DoliForge").': <a href="http://www.doliforge.org" target="_blank" rel="external">http://wwww.doliforge.org</a></li>';
 print '</ul>';
 
 //print "<br>\n";
@@ -63,11 +63,35 @@ print '<ul>';
 print '<li>';
 print '<a target="_blank" href="http://www.dolibarr.org/" rel="external">'.$langs->trans("OfficialWebSite").'</a>';
 print '</li>';
-// If the French language, it displays French website
+// Show local site
 if (preg_match('/^fr_/i',$langs->getDefaultLang()))
 {
 	print '<li>';
-	print '<a target="_blank" href="http://www.dolibarr.fr/" rel="external">'.$langs->trans("OfficialWebSiteFr").'</a>';
+	print '<a target="_blank" href="http://www.dolibarr.fr/" rel="external">'.$langs->trans("OfficialWebSiteLocal", $langs->transnoentitiesnoconv("France")).'</a>';
+	print '</li>';
+}
+if (preg_match('/^el_/i',$langs->getDefaultLang()))
+{
+	print '<li>';
+	print '<a target="_blank" href="http://www.dolibarr.gr/" rel="external">'.$langs->trans("OfficialWebSiteLocal", $langs->transnoentitiesnoconv("Greece")).'</a>';
+	print '</li>';
+}
+if (preg_match('/^es_/i',$langs->getDefaultLang()))
+{
+	print '<li>';
+	print '<a target="_blank" href="http://www.dolibarr.es/" rel="external">'.$langs->trans("OfficialWebSiteLocal", $langs->transnoentitiesnoconv("Spain")).'</a>';
+	print '</li>';
+}
+if (preg_match('/^it_/i',$langs->getDefaultLang()))
+{
+	print '<li>';
+	print '<a target="_blank" href="http://www.dolibarr.it/" rel="external">'.$langs->trans("OfficialWebSiteLocal", $langs->transnoentitiesnoconv("Italy")).'</a>';
+	print '</li>';
+}
+if (preg_match('/^de_/i',$langs->getDefaultLang()))
+{
+	print '<li>';
+	print '<a target="_blank" href="http://www.dolibarr.de/" rel="external">'.$langs->trans("OfficialWebSiteLocal", $langs->transnoentitiesnoconv("Germany")).'</a>';
 	print '</li>';
 }
 print '<li>';

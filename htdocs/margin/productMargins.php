@@ -72,9 +72,9 @@ $pagenext = $page + 1;
 $startdate=$enddate='';
 
 if (!empty($_POST['startdatemonth']))
-  $startdate  = dol_mktime(12, 0, 0, $_POST['startdatemonth'], $_POST['startdateday'], $_POST['startdateyear']);
+  $startdate  = dol_mktime(0, 0, 0, $_POST['startdatemonth'], $_POST['startdateday'], $_POST['startdateyear']);
 if (!empty($_POST['enddatemonth']))
-  $enddate  = dol_mktime(12, 0, 0, $_POST['enddatemonth'], $_POST['enddateday'], $_POST['enddateyear']);
+  $enddate  = dol_mktime(23, 59, 59, $_POST['enddatemonth'], $_POST['enddateday'], $_POST['enddateyear']);
 
 
 /*
@@ -263,7 +263,7 @@ if ($result)
 				$product_static->type=$objp->fk_product_type;
 				$product_static->id=$objp->rowid;
 				$product_static->ref=$objp->ref;
-				$product_static->libelle=$objp->label;
+				$product_static->label=$objp->label;
 				$text=$product_static->getNomUrl(1);
 				print $text.= ' - '.$objp->label;
 				print "</td>\n";

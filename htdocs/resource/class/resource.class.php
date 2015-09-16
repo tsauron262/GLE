@@ -84,7 +84,7 @@ class Resource extends CommonObject
 
 
     	// Insert request
-    	$sql = "INSERT INTO ".MAIN_DB_PREFIX."resource(";
+    	$sql = "INSERT INTO ".MAIN_DB_PREFIX.$this->table_element."(";
 
     	$sql.= " entity,";
     	$sql.= "ref,";
@@ -114,7 +114,7 @@ class Resource extends CommonObject
 
     	if (! $error)
     	{
-    		$this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."place");
+    		$this->id = $this->db->last_insert_id(MAIN_DB_PREFIX.$this->table_element);
 
     		if (! $notrigger)
     		{
@@ -164,7 +164,7 @@ class Resource extends CommonObject
     	$sql.= " t.note_private,";
     	$sql.= " t.tms,";
     	$sql.= " ty.label as type_label";
-    	$sql.= " FROM ".MAIN_DB_PREFIX."resource as t";
+    	$sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_type_resource as ty ON ty.code=t.fk_code_type_resource";
     	$sql.= " WHERE t.rowid = ".$this->db->escape($id);
 
@@ -216,7 +216,7 @@ class Resource extends CommonObject
     	if (isset($this->description)) $this->description=trim($this->description);
 
     	// Update request
-    	$sql = "UPDATE ".MAIN_DB_PREFIX."resource SET";
+    	$sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
     	$sql.= " ref=".(isset($this->ref)?"'".$this->db->escape($this->ref)."'":"null").",";
     	$sql.= " description=".(isset($this->description)?"'".$this->db->escape($this->description)."'":"null").",";
     	$sql.= " fk_code_type_resource=".(isset($this->fk_code_type_resource)?"'".$this->db->escape($this->fk_code_type_resource)."'":"null").",";
@@ -340,7 +340,7 @@ class Resource extends CommonObject
             // End call triggers
         }
 
-        $sql = "DELETE FROM ".MAIN_DB_PREFIX."resource";
+        $sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
         $sql.= " WHERE rowid =".$rowid;
 
         dol_syslog(get_class($this)."::delete", LOG_DEBUG);
@@ -386,7 +386,7 @@ class Resource extends CommonObject
     	$sql.= " t.fk_code_type_resource,";
     	$sql.= " t.tms,";
     	$sql.= " ty.label as type_label";
-    	$sql.= " FROM ".MAIN_DB_PREFIX."resource as t";
+    	$sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_type_resource as ty ON ty.code=t.fk_code_type_resource";
     	$sql.= " WHERE t.entity IN (".getEntity('resource',1).")";
 
@@ -606,9 +606,9 @@ class Resource extends CommonObject
      * Fetch all resources available, declared by modules
      * Load available resource in array $this->available_resources
      *
-     * note : deprecated, remplaced by hook getElementResources
-     *
      * @return int 	number of available resources declared by modules
+     * @deprecated, remplaced by hook getElementResources
+     * @see getElementResources()
      */
     function fetch_all_available() {
     	global $conf;
@@ -798,16 +798,20 @@ class Resource extends CommonObject
 	    return $resources;
     }
 
+    /*
+     *  Return an int number of resources linked to the element
+     *
+     *  @return     int
+     */
     function fetchElementResources($element,$element_id)
     {
-    	$resources = $this->getElementResources($element,$element_id);
-    	$i=0;
-    	foreach($resources as $nb => $resource)
-    	{
-    		$this->lines[$i] = fetchObjectByElement($resource['resource_id'],$resource['resource_type']);
-    		$i++;
-    	}
-    	return $i;
+        $resources = $this->getElementResources($element,$element_id);
+        $i=0;
+        foreach($resources as $nb => $resource) {
+            $this->lines[$i] = fetchObjectByElement($resource['resource_id'],$resource['resource_type']);
+            $i++;
+        }
+        return $i;
 
     }
 
@@ -865,22 +869,22 @@ class Resource extends CommonObject
         global $langs;
 
         $result='';
+        $label=$langs->trans("ShowResource").': '.$this->ref;
 
         if ($option == '')
         {
-            $lien = '<a href="'.dol_buildpath('/resource/card.php',1).'?id='.$this->id. $get_params .'">';
+            $link = '<a href="'.dol_buildpath('/resource/card.php',1).'?id='.$this->id. $get_params .'" title="'.dol_escape_htmltag($label, 1).'" class="classfortooltip">';
             $picto='resource@resource';
             $label=$langs->trans("ShowResource").': '.$this->ref;
 
         }
 
-        $lienfin='</a>';
+        $linkend='</a>';
 
-        $label=$langs->trans("ShowResource").': '.$this->ref;
 
-        if ($withpicto) $result.=($lien.img_object($label,$picto).$lienfin);
+        if ($withpicto) $result.=($link.img_object($label, $picto, 'class="classfortooltip"').$linkend);
         if ($withpicto && $withpicto != 2) $result.=' ';
-        $result.=$lien.$this->ref.$lienfin;
+        $result.=$link.$this->ref.$linkend;
         return $result;
     }
 }

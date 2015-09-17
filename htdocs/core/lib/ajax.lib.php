@@ -104,6 +104,7 @@ function ajax_autocompleter($selected, $htmlname, $url, $urloption='', $minLengt
 										if (autoselect == 1 && data.length == 1) {
 											$("#search_'.$htmlname.'").val(item.value);
 											$("#'.$htmlname.'").val(item.key).trigger("change");
+											$("#search_'.$htmlname.'").val(item.label);
 										}
 										var label = item.label.toString();
 										var update = {};
@@ -129,6 +130,7 @@ function ajax_autocompleter($selected, $htmlname, $url, $urloption='', $minLengt
     					select: function( event, ui ) {		// Function ran when new value is selected into javascript combo
 							//console.log(\'set value of id with \'+ui.item.id);
     						$("#'.$htmlname.'").val(ui.item.id).trigger("change");	// Select new value
+                                                    
     						// Disable an element
     						if (options.option_disabled) {
     							if (ui.item.disabled) {
@@ -172,6 +174,7 @@ function ajax_autocompleter($selected, $htmlname, $url, $urloption='', $minLengt
     							});
     						}
     						$("#search_'.$htmlname.'").trigger("change");	// To tell that input text field was modified
+                                                    setTimeout(function(){ $("#search_'.$htmlname.'").val(ui.item.label); },100);
     					}
     					,delay: 500
 					}).data("ui-autocomplete")._renderItem = function( ul, item ) {

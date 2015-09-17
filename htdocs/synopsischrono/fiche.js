@@ -12,9 +12,8 @@ function ajax_updater_postFct2(socid, valueSelected)
         socid = $("#socid").val();
     if (socid > 0)
     {
-        majDoubleSoc(socid, false);
         jQuery.ajax({
-            url: "ajax/contactSoc-xml_response.php",
+            url: DOL_URL_ROOT+"/synopsischrono/ajax/contactSoc-xml_response.php",
             type: "POST",
             datatype: "xml",
             data: "socid=" + socid,
@@ -35,6 +34,7 @@ function ajax_updater_postFct2(socid, valueSelected)
                 }
             }
         });
+        majDoubleSoc(socid, false);
     } else {
         jQuery('#contactSociete').replaceWith("<div id='contactSociete'></div>")
     }
@@ -181,7 +181,7 @@ jQuery(document).ready(function () {
             setTimeout(function () {
                 socid = jQuery(this).find(':selected').val();
                 ajax_updater_postFct2(socid);
-            }, 200);
+            }, 300);
         });
 
         $("#inputautocompletesocid").focusout(function () {
@@ -190,7 +190,7 @@ jQuery(document).ready(function () {
                 socid = $("#socid").val();
             ajax_updater_postFct2(socid);
         });
-    }, 200);
+    }, 300);
 
     $(".addContact").click(function () {
         socid = $("select#socid").val();

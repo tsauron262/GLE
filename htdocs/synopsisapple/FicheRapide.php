@@ -18,7 +18,7 @@ $js.= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/f
 $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContact2").click(function() {
         socid = $("#socid").val();
         dispatchePopObject(socid, "newContact", function() {
-        $("#form").append(\'<input type="hidden" name="action2" value="Modify"/><input type="hidden" name="contactid" value="max"/>\');
+        $("#form").append(\'<input type="hidden" name="action2" value="Modify"/><input type="hidden" name="contactSociete" value="max"/>\');
         $(".required").removeClass("required");
         $("#form").submit();
         }, "Contact", 1)
@@ -40,11 +40,11 @@ if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
     }
 }
 
-if (isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0 && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] == "max") {
+if (isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0 && isset($_REQUEST['contactSociete']) && $_REQUEST['contactSociete'] == "max") {
     $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "socpeople WHERE fk_soc=" . $_REQUEST["socid"]." AND fk_user_creat = ".$user->id);
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);
-        $_REQUEST['contactid'] = $result->max;
+        $_REQUEST['contactSociete'] = $result->max;
     }
 }
 
@@ -129,7 +129,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chrono->model_refid = 105;
             $chrono->description = ($descr != "" ? addslashes($descr) : "");
             $chrono->socid = $socid;
-            $chrono->contactid = $_REQUEST["contactid"];
+            $chrono->contactid = $_REQUEST["contactSociete"];
             $chronoid = $chrono->create();
             if ($chronoid > 0) {
                 $dataArr = array(1045 => date("Y/m/d H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1));
@@ -287,7 +287,7 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>Contact.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
-    echo  $form->selectcontacts($socid, $_REQUEST['contactid'], 'contactid', 1);
+    echo  $form->selectcontacts($socid, $_REQUEST['contactSociete'], 'contactSociete', 1, null,null,null,null,null,null,1);
     echo "<br />";
     echo "</td>";
     echo "</tr>";

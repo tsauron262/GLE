@@ -49,6 +49,7 @@
             $("#"+name1).change(function(){
                 // REMOVE OLD ELEMENT, ADD NEW SELECT, BIND CHANGE EVENT AND TRIGGER IT
                 $("#"+name2).remove();
+                if($(this).val()+"x" != " x"){
                 if(o.el2_dest){
                     o.el2_dest.append("<select class='"+className+"' id='"+name2+"' name='"+name2opt+"' >"+el.find("optgroup[label="+$(this).val()+"]").html()+"</select>");
                 } else {
@@ -60,9 +61,10 @@
                 if(typeof(o.el1_change) === 'function'){
                     o.el1_change();
                 }
+            }
             });
 
-            $("#"+name2).live("change", function(){
+            $("#"+name2).change(function(){
                 // THIS IS VERY VERY SLOW IN FIREFOX
                 //el.val($(this).val());
                 el.attr("value", $(this).val());

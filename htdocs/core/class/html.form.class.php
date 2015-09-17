@@ -810,7 +810,45 @@ class Form
      */
     function select_thirdparty($selected='', $htmlname='socid', $filter='', $limit=20, $ajaxoptions=array(), $forcecombo=0)
     {
-   		return $this->select_thirdparty_list($selected,$htmlname,$filter,1,0,$forcecombo,array(),'',0,$limit);
+   	global $langs,$conf;
+
+    	$out=''; $hidelabel = 3;
+
+  //  	/* TODO Use ajax_autocompleter like for products (not finished)
+    	if (! empty($conf->use_javascript_ajax) && ! empty($conf->global->COMPANY_USE_SEARCH_TO_SELECT) && ! $forcecombo)
+    	{
+    		$placeholder='';
+
+    		if ($selected && empty($selected_input_value))
+    		{
+//                    $_POST['socid'] = $selected;
+//    			require_once DOL_DOCUMENT_ROOT.'/societe/ajaxcompanies.php';
+    			$societe = new Societe($this->db);
+    			$societe->fetch($selected);
+    			$selected_input_value=$societe->name;
+    		}
+    		// mode=1 means customers products
+    		$urloption='htmlname='.$htmlname.'&outjson=1&price_level='.$price_level.'&type='.$filtertype.'&mode=1&status='.$status.'&finished='.$finished;
+    		$out.= ajax_autocompleter($selected, $htmlname, DOL_URL_ROOT.'/societe/ajax/company.php', $urloption, $conf->global->COMPANY_USE_SEARCH_TO_SELECT, 0, $ajaxoptions);
+    		if (empty($hidelabel)) $out.= $langs->trans("RefOrLabel").' : ';
+    		else if ($hidelabel > 1) {
+    			if (! empty($conf->global->MAIN_HTML5_PLACEHOLDER)) $placeholder=' placeholder="'.$langs->trans("RefOrLabel").'"';
+    			else $placeholder=' title="'.$langs->trans("RefOrLabel").'"';
+    			if ($hidelabel == 2) {
+    				$out.= img_picto($langs->trans("Search"), 'search');
+    			}
+    		}
+    		$out.= '<input type="text" size="20" name="search_'.$htmlname.'" id="search_'.$htmlname.'" value="'.$selected_input_value.'"'.$placeholder.' />';
+    		if ($hidelabel == 3) {
+    			$out.= img_picto($langs->trans("Search"), 'search');
+    		}
+    	}
+    	else
+    	{//*/
+    		$out.=$this->select_thirdparty_list($selected,$htmlname,$filter,1,0,$forcecombo,array(),'',0,$limit);
+    	}
+
+    	return $out;
     }
 
     /**
@@ -829,6 +867,7 @@ class Form
      */
     function select_company($selected='', $htmlname='socid', $filter='', $showempty=0, $showtype=0, $forcecombo=0, $events=array(), $limit=0, $morecss='minwidth100')
     {
+        return $this->select_thirdparty($selected, $htmlname, $filter, $limit, $events, $forcecombo);
     	$out='';
 
   //  	/* TODO Use ajax_autocompleter like for products (not finished)
@@ -3023,7 +3062,7 @@ class Form
         global $langs;
         $langs->load("categories");
 
-		include_once DOL_DOCUMENT_ROOT.'/categories/class.categorie.class.php';
+		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
         
         $cat = new Categorie($this->db);
         $cate_arbo = $cat->get_full_arbo($type,$excludeafterid);
@@ -4683,7 +4722,7 @@ class Form
 	{
 		global $db;
 
-		include_once DOL_DOCUMENT_ROOT.'/categories/class.categorie.class.php';
+		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 
 		$cat = new Categorie($db);
 		$categories = $cat->containing($id, $type);

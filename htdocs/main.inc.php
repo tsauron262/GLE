@@ -1641,7 +1641,7 @@ function left_menu($menu_array_before, $helppagename='', $moresearchform='', $me
             global $synopsisHook;
             print $synopsisHook->getMenu();
             $reshook=$hookmanager->executeHooks('printMenuAfter',$parameters);
-            print $reshook;
+            print $hookmanager->resPrint;
             /*FMod drsi*/
 
 	    // Show other forms

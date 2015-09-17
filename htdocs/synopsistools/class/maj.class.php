@@ -199,7 +199,7 @@ class maj {
                     $val = 4;
                 if ($tableSrc == "llx_societe_adresse_livraison" && $tableDest == "llx_socpeople" && $cle == "rowid") {
                     $oldId = $val;
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE rowid = " . $ligne['fk_societe'];
+                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE rowid = " . $ligne['fk_soc'];
                     $result = $this->queryD($requete);
                     $ligneT = $this->dbD->fetch_array($result);
                     if ($ligne['label'] . "x" == "x" && $ligne['adress'] == $ligneT['address'] && $ligne['cp'] == $ligneT['zip'] && $ligne['ville'] == $ligneT['town'] && $ligne['fk_pays'] == $ligneT['fk_pays'] && (is_null($ligne['tel']) || $ligne['tel'] == $ligneT['phone']) && (is_null($ligne['fax']) || $ligne['fax'] == $ligneT['fax'])) {//L'adresse est la meme que celle de la societe

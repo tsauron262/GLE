@@ -861,9 +861,9 @@ class Form
     		}
     	}
     	else
-    	{*/
+    	{
     		$out.=$this->select_thirdparty_list($selected, $htmlname, $filter, $showempty, $showtype, $forcecombo, $events, '', 0, $limit, $morecss);
-    	//}
+    	}
 
     	return $out;
     }

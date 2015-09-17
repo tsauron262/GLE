@@ -92,7 +92,7 @@ if ($searchOn == 'true') {
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
     if ($_REQUEST['soc'] != "") {
-        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_societe = p.rowid AND (p.nom LIKE \"%" . $_REQUEST['soc'] . "%\"))";
+        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_soc = p.rowid AND (p.nom LIKE \"%" . $_REQUEST['soc'] . "%\"))";
         $searchFieldT = 'id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
@@ -245,8 +245,8 @@ switch ($action) {
                        AND chrono_conf_id = " . $id;
 //                       AND key_id IN (".join(",",$arrPre).")";
             $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono as c WHERE model_refid = " . $id . " ";
-            if ($_REQUEST['fk_societe'] > 0)
-                $requete1 .= searchint('fk_societe');
+            if ($_REQUEST['fk_soc'] > 0)
+                $requete1 .= searchint('fk_soc');
             if (!$withRev) {
                 $requete .= " AND revision is NULL ";
                 $requete1 .= " AND revision is NULL ";

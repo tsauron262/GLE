@@ -51,7 +51,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_
     $id2 = $_REQUEST['id2'];
     if($id2 > 0){
     $db->query("UPDATE " . MAIN_DB_PREFIX . "propal SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
-    $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_societe = " . $id2 . " WHERe fk_societe = " . $id);
+    $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
     $db->query("UPDATE " . MAIN_DB_PREFIX . "commande SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
     $db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
     $db->query("UPDATE " . MAIN_DB_PREFIX . "contrat SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);

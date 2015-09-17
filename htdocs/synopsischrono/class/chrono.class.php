@@ -54,7 +54,7 @@ class Chrono extends CommonObject {
                     $this->id = $id;
                     $this->date = strtotime($res->date_create);
                     $this->date_modif = strtotime($res->tms);
-                    $this->socid = $res->fk_societe;
+                    $this->socid = $res->fk_soc;
                     $this->statut = $res->fk_statut;
                     $this->note = $res->note;
                     $this->validation_number = $res->validation_number;
@@ -324,7 +324,7 @@ class Chrono extends CommonObject {
 
         $result = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $id);
         $ligne = $this->db->fetch_object($result);
-        if ($socid && $ligne->fk_societe != $socid) {
+        if ($socid && $ligne->fk_soc != $socid) {
             if ($ligne->propalid) {
                 $tabModif = array(array("propal", "fk_soc", $ligne->propalid, $socid));
 //            $db->query("UPDATE ");
@@ -346,9 +346,9 @@ class Chrono extends CommonObject {
 
         $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET description = '" . addslashes($description) . "'";
         if ($socid)
-            $requete .= ", fk_societe =  " . $socid;
+            $requete .= ", fk_soc =  " . $socid;
         else
-            $requete .= ", fk_societe = NULL ";
+            $requete .= ", fk_soc = NULL ";
         if ($contactid)
             $requete .= ", fk_socpeople =  " . $contactid;
         else
@@ -491,7 +491,9 @@ class Chrono extends CommonObject {
         }
     }
 
-    public function getRights($userObj) {
+    public function getRights() {
+        global $user;
+        $userObj = $user;
         $requete = "SELECT concat('chrono'," . $this->model_refid . ") as p,
                            d.code,
                            'chrono_user' as pr,
@@ -708,7 +710,7 @@ class Chrono extends CommonObject {
         $ref = $this->getNextNumRef();
         //$propid = $this->prop;
         //$propal = "SELECT rowid FROM ".MAIN_DB_PREFIX."propal WHERE ref=".$this->propalid;
-        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono (date_create,ref,model_refid,description,fk_societe,fk_socpeople,propalid,projetid,fk_user_author)
+        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono (date_create,ref,model_refid,description,fk_soc,fk_socpeople,propalid,projetid,fk_user_author)
                           VALUES (now(),'" . $ref . "','" . $this->model_refid . "','" . $this->description . "'," . ($this->socid > 0 ? $this->socid : 'NULL') . "," . ($this->contactid > 0 ? $this->contactid : 'NULL') . ",'" . $this->propalid . "','" . $this->projetid . "', " . $user->id . ")";
         $sql = $this->db->query($requete);
         if ($sql) {
@@ -730,7 +732,7 @@ class Chrono extends CommonObject {
                                   ref,
                                   model_refid,
                                   description,
-                                  fk_societe,
+                                  fk_soc,
                                   fk_socpeople,
 				  propalid,
 				  projetid,

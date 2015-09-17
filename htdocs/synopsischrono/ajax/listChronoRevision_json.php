@@ -128,7 +128,7 @@ switch ($action)
 
         $sql = "SELECT count(*) as cnt";
         $sql .= " FROM ".MAIN_DB_PREFIX."synopsischrono as st";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = st.fk_societe";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = st.fk_soc";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as p ON p.rowid = st.fk_socpeople";
         $sql.= " WHERE 1=1 ";
 
@@ -151,7 +151,7 @@ switch ($action)
 
         $sql = "SELECT c.id, c.tms as date_modify, c.date_create";
         $sql .= " FROM ".MAIN_DB_PREFIX."synopsischrono as c ";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_societe";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as p ON p.rowid = c.fk_socpeople";
         $sql.= " WHERE 2 = 2";
 

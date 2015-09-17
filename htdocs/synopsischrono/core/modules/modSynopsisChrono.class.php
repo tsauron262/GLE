@@ -264,7 +264,7 @@ class modSynopsisChrono extends DolibarrModules {
   `ref` varchar(500) DEFAULT NULL,
   `model_refid` int(11) DEFAULT NULL,
   `description` longtext,
-  `fk_societe` int(11) DEFAULT NULL,
+  `fk_soc` int(11) DEFAULT NULL,
   `fk_user_author` int(11) DEFAULT NULL,
   `fk_socpeople` int(11) DEFAULT NULL,
   `fk_user_modif` int(11) DEFAULT NULL,
@@ -280,7 +280,7 @@ class modSynopsisChrono extends DolibarrModules {
   KEY `model_refid` (`model_refid`),
   KEY `fk_user_author` (`fk_user_author`),
   KEY `fk_socpeople` (`fk_socpeople`),
-  KEY `fk_societe` (`fk_societe`)
+  KEY `fk_soc` (`fk_soc`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_conf` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -521,7 +521,7 @@ class modSynopsisChrono extends DolibarrModules {
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
             "DROP TABLE IF EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view`;",
             "DROP VIEW IF EXISTS `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view`;",
-            "CREATE VIEW `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_societe` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`" . MAIN_DB_PREFIX . "synopsischrono` `c` left join (`" . MAIN_DB_PREFIX . "synopsischrono_key` `k` left join `" . MAIN_DB_PREFIX . "synopsischrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)));
+            "CREATE VIEW `" . MAIN_DB_PREFIX . "synopsischrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_soc` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`" . MAIN_DB_PREFIX . "synopsischrono` `c` left join (`" . MAIN_DB_PREFIX . "synopsischrono_key` `k` left join `" . MAIN_DB_PREFIX . "synopsischrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)));
 "*/);
 //    $this->dirs[0] = $conf->chrono->dir_output;
 

@@ -36,7 +36,7 @@ if (isset($_REQUEST['obj'])) {
         $soc = new Societe($db);
         $soc->fetch($_REQUEST['id']);
         $obj = $soc;
-        $filtre = "fk_societe=" . urlencode($_REQUEST['id']);
+        $filtre = "fk_soc=" . urlencode($_REQUEST['id']);
         $head = societe_prepare_head($soc);
         $socid = $_REQUEST['id'];
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1 AND `hasSociete` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
@@ -188,11 +188,12 @@ jQuery(document).ready(function(){
         cache: true,
         spinner: 'Chargement ...',
         fx: {opacity: 'toggle' },
-        select: function(event, ui) {                   
-            window.location.hash = ui.tab.hash;
-            $.cookie("currentTab", ui.tab.hash, { expires: 7 });
+        activate: function(event, ui) {
+            hash = ui.newTab.find("a").attr("href");
+            window.location.hash = hash;
+            $.cookie("currentTab", hash, { expires: 7 });
             
-            eval("init"+ui.tab.hash.replace("#", "")+"();");
+            eval("init"+hash.replace("#", "")+"();");
         }
     });
     id = 0;

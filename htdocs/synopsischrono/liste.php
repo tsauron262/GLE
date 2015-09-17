@@ -71,7 +71,7 @@ while ($res = $db->fetch_object($sql)) {
 $js = preg_replace('/;$/', '', $js);
 $js .= '";';
 
-$requete = "SELECT " . MAIN_DB_PREFIX . "societe.rowid, " . MAIN_DB_PREFIX . "societe.nom FROM " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "synopsischrono WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "synopsischrono.fk_societe GROUP BY " . MAIN_DB_PREFIX . "societe.rowid";
+$requete = "SELECT " . MAIN_DB_PREFIX . "societe.rowid, " . MAIN_DB_PREFIX . "societe.nom FROM " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "synopsischrono WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "synopsischrono.fk_soc GROUP BY " . MAIN_DB_PREFIX . "societe.rowid";
 $sql = $db->query($requete);
 $js .= 'var socRess = "';
 $js .= "-1:" . html_entity_decode("S&eacute;lection ->") . ";";

@@ -1166,7 +1166,7 @@ abstract class CommonObject
         if (! empty($filter)) $sql.=" AND ".$filter;
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
             if($this->table_element == "user")
-            $sql.= ' AND te.fk_societe = s.rowid';
+            $sql.= ' AND te.fk_soc = s.rowid';
             else
             $sql.= ' AND te.fk_soc = s.rowid';// If we need to link to societe to limit select to entity
         }/*fmoddrsi*/
@@ -1192,7 +1192,7 @@ abstract class CommonObject
         if (! empty($filter)) $sql.=" AND ".$filter;
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
             if($this->table_element == "user")
-            $sql.= ' AND te.fk_societe = s.rowid';
+            $sql.= ' AND te.fk_soc = s.rowid';
             else
             $sql.= ' AND te.fk_soc = s.rowid';// If we need to link to societe to limit select to entity
         }/*fmoddrsi*/

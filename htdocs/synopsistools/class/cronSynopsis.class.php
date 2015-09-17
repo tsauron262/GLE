@@ -227,8 +227,8 @@ class CronSynopsis {
 //            foreach ($tabIdFaible as $idFaible) {
 //                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $idFaible);
 //                $chrono_faible = $this->db->fetch_object($sql);
-//                if ($chrono_maitre->fk_societe != $chrono_faible->fk_societe) {
-//                    $this->erreur("<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc " . $chrono_maitre->fk_societe . "|" . $chrono_faible->fk_societe);
+//                if ($chrono_maitre->fk_soc != $chrono_faible->fk_soc) {
+//                    $this->erreur("<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc " . $chrono_maitre->fk_soc . "|" . $chrono_faible->fk_soc);
 //                    $this->titre($this->lienFusion($idMettre, $idFaible));
 //                } elseif ($idMettre == $idFaible)
 //                    $this->erreur("<br/><br/>Meme id " . $idMettre);
@@ -268,7 +268,7 @@ class CronSynopsis {
                 $champId = $result2->champId;
                 $sqlChrono = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE model_refid = " . $result->model_refid);
                 while ($resultChrono = $this->db->fetch_object($sqlChrono)) {
-                    $idSoc = $resultChrono->fk_societe;
+                    $idSoc = $resultChrono->fk_soc;
 //                if (!$idSoc > 0)
 //                    die("kkkk");
                     if (!isset($tabSoc[$idSoc]) && $idSoc > 0)

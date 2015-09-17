@@ -124,7 +124,7 @@ if ($socid > 0) {
 
 //        $sql = "SELECT count(rowid) as nb";
 //        $sql.= " FROM ".MAIN_DB_PREFIX."societe_adresse_livraison";
-//        $sql.= " WHERE fk_societe =".$objsoc->id;
+//        $sql.= " WHERE fk_soc =".$objsoc->id;
 
         print getAdresseLivraisonComm($_REQUEST['id']);
 

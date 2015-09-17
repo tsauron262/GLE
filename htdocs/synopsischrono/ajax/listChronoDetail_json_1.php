@@ -128,14 +128,14 @@ if ($searchOn == 'true') {
         $operT = '=';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
-    if ($_REQUEST['fk_societe'] != "") {
-        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_societe = p.rowid AND (p.rowid = " . $_REQUEST['fk_societe'] . "))";
+    if ($_REQUEST['fk_soc'] != "") {
+        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_soc = p.rowid AND (p.rowid = " . $_REQUEST['fk_soc'] . "))";
         $searchFieldT = 'chr.id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
     if ($_REQUEST['soc'] != "") {
-        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_societe = p.rowid AND (p.nom LIKE \"%" . $_REQUEST['soc'] . "%\"))";
+        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_soc = p.rowid AND (p.nom LIKE \"%" . $_REQUEST['soc'] . "%\"))";
         $searchFieldT = 'chr.id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
@@ -286,7 +286,7 @@ if (!$withRev) {
 }
 
 
-$requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid FROM llx_synopsischrono_chrono_" . $id . " tview, llx_synopsischrono chr LEFT JOIN llx_societe soc ON soc.rowid = fk_societe WHERE tview.id = chr.id " . $wh;
+$requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid FROM llx_synopsischrono_chrono_" . $id . " tview, llx_synopsischrono chr LEFT JOIN llx_societe soc ON soc.rowid = fk_soc WHERE tview.id = chr.id " . $wh;
 
 $requete .= $wh1;
 if($sidx == "id")

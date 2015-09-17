@@ -361,7 +361,7 @@ echo "</div>";
 echo "<div class='floatL'>";
 echo '<input type="text" class="datePicker" id="dateChange"/>';
 echo "<button class='butAction' onclick='"
-. "dateTab = $(\"#dateChange\").attr(\"value\").split(\"/\");"
+. "dateTab = $(\"#dateChange\").val().split(\"/\");"
 . "dateStr = dateTab[2] +\"-\"+ dateTab[1] +\"-\"+ dateTab[0];"
 . "$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date(dateStr));"
         . "' >Ok</button>";

@@ -148,7 +148,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '4M' WHERE `2SLA` = '4 heures ouvrées pour prise en main'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '4' WHERE `2SLA` = '4 heures ouvrées'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '16' WHERE `2SLA` = '16 heures ouvrées'");
-    $maj->req("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_societe = (SELECT `fk_soc` FROM " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cd WHERE c.rowid = cd.fk_contrat AND cd.rowid = id)");
+    $maj->req("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_soc = (SELECT `fk_soc` FROM " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cd WHERE c.rowid = cd.fk_contrat AND cd.rowid = id)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id NOT IN (SELECT `chrono_refid` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `key_id` = 1011) AND id IN (SELECT `chrono_refid` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `key_id` = 1010 AND value IS NULL)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "synopsischrono`)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "synopsischrono`) AND targettype = 'productCli'");
@@ -202,8 +202,8 @@ llxFooter();
         global $oldPref;
         return array(
             array($oldPref . "user", MAIN_DB_PREFIX . "user",
-                array("rowid", "external_id", "datec", "tms", "login", "pass", "pass_crypted", "pass_temp", "name", "firstname", "office_phone", "office_fax", "user_mobile", "email", "admin", /* "local_admin",  "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", "statut", "lang", /* "CV_ndf", "Propal_seuilWarn", "PropalWarnValidator", "Propal_seuilValidResp", "Propal_validatorResp", "empnumber", "IM_user_name" */),
-                array("rowid", /* "entity", */ "ref_ext"/* , "ref_int" */, "datec", "tms", "login", "pass", "pass_crypted", "pass_temp"/* , "civility" */, "lastname", "firstname", "office_phone", "office_fax", "user_mobile", "email"/* , "signature" */, "admin", /* "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", /* "openid", */ "statut", /* "photo", */ "lang")
+                array("rowid", "external_id", "datec", "tms", "login", "pass", "pass_crypted", "pass_temp", "name", "firstname", "office_phone", "office_fax", "user_mobile", "email", "admin", /* "local_admin",  "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_soc", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", "statut", "lang", /* "CV_ndf", "Propal_seuilWarn", "PropalWarnValidator", "Propal_seuilValidResp", "Propal_validatorResp", "empnumber", "IM_user_name" */),
+                array("rowid", /* "entity", */ "ref_ext"/* , "ref_int" */, "datec", "tms", "login", "pass", "pass_crypted", "pass_temp"/* , "civility" */, "lastname", "firstname", "office_phone", "office_fax", "user_mobile", "email"/* , "signature" */, "admin", /* "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_soc", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", /* "openid", */ "statut", /* "photo", */ "lang")
             ),
 //        array($oldPref . "user_rights", MAIN_DB_PREFIX . "user_rights",
 //            array(),
@@ -234,7 +234,7 @@ llxFooter();
                 array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', */ 'civility', 'lastname', 'firstname', 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note_private', /* 'default_lang', 'canvas', */ 'import_key')
             ),
             array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "socpeople",
-                array('rowid+100000', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
+                array('rowid+100000', 'datec', 'tms', 'fk_soc', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
                 array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', 'civility', */ 'lastname', /* 'firstname', */ 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */ 'fax', /* 'email', 'jabberid', 'priv', */ 'fk_user_creat', 'fk_user_modif', 'note_private'/* , 'default_lang', 'canvas' */, 'import_key')
             ),
             array($oldPref . "element_contact", MAIN_DB_PREFIX . "element_contact",

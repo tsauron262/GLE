@@ -99,7 +99,7 @@ $sql.= " s.ape as idprof3, s.idprof4, MAX(c.datecons) as lastcons, COUNT(c.rowid
 // We'll need these fields in order to filter by sale (including the case where the user can only see his prospects)
 if ($search_sale) $sql .= ", sc.fk_soc, sc.fk_user";
 // We'll need these fields in order to filter by categ
-if ($search_categ) $sql .= ", cs.fk_categorie, cs.fk_societe";
+if ($search_categ) $sql .= ", cs.fk_categorie, cs.fk_soc";
 $sql.= " FROM (".MAIN_DB_PREFIX."c_stcomm as st";
 // We'll need this table joined to the select in order to filter by sale
 if ($search_sale || !$user->rights->societe->client->voir) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
@@ -120,7 +120,7 @@ if ($search_diagles)
 if (!$user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if ($socid) $sql.= " AND s.rowid = ".$socid;
 if ($search_sale) $sql.= " AND s.rowid = sc.fk_soc";		// Join for the needed table to filter by sale
-if ($search_categ) $sql.= " AND s.rowid = cs.fk_societe";	// Join for the needed table to filter by categ
+if ($search_categ) $sql.= " AND s.rowid = cs.fk_soc";	// Join for the needed table to filter by categ
 if ($search_nom)   $sql.= " AND s.nom like '%".$db->escape($search_nom)."%'";
 if ($search_ville) $sql.= " AND s.town like '%".$db->escape($search_ville)."%'";
 if ($search_code)  $sql.= " AND s.code_client like '%".$db->escape($search_code)."%'";
@@ -142,7 +142,7 @@ if ($socname)
 }
 $sql.= " GROUP BY s.rowid, s.nom, s.client, s.town, st.libelle, s.prefix_comm, s.code_client, s.datec, s.canvas, s.ape, s.idprof4";
 if ($search_sale) $sql .= ", sc.fk_soc, sc.fk_user";
-if ($search_categ) $sql .= ", cs.fk_categorie, cs.fk_societe";
+if ($search_categ) $sql .= ", cs.fk_categorie, cs.fk_soc";
 
 // Count total nb of records
 $nbtotalofrecords = 0;

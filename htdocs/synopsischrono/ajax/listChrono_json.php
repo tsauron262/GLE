@@ -190,7 +190,7 @@ switch ($action)
 
         $sql = "SELECT count(*) as cnt";
         $sql .= " FROM ".MAIN_DB_PREFIX."synopsischrono as c";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_societe";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as p ON p.rowid = c.fk_socpeople";
         $sql.= " WHERE 1=1 ";
 
@@ -211,9 +211,9 @@ switch ($action)
 
 
 
-        $sql = "SELECT c.id, c.fk_societe, c.fk_socpeople, c.date_create, c.tms";
+        $sql = "SELECT c.id, c.fk_soc, c.fk_socpeople, c.date_create, c.tms";
         $sql .= " FROM ".MAIN_DB_PREFIX."synopsischrono as c ";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_societe";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as p ON p.rowid = c.fk_socpeople";
         $sql.= " WHERE 2 = 2";
 
@@ -237,8 +237,8 @@ switch ($action)
         while($obj = $db->fetch_object($result))
         {
             $chrono->fetch($obj->id);
-            if ($obj->fk_societe > 0)
-                $tmpSoc->fetch($obj->fk_societe);
+            if ($obj->fk_soc > 0)
+                $tmpSoc->fetch($obj->fk_soc);
             if ($obj->fk_socpeople > 0)
                 $contact->fetch($obj->fk_socpeople);
             $hasRev = false;
@@ -253,7 +253,7 @@ switch ($action)
                                                   ($hasRev?'<div class="hasRev">1</div>':'<div class="hasRev">0</div>'),
                                                   utf8_encodeRien($chrono->getNomUrl(1)),
                                                   htmlspecialchars($chrono->model->titre),
-                                                  utf8_encodeRien(($obj->fk_societe > 0?$tmpSoc->getNomUrl(1):'')),
+                                                  utf8_encodeRien(($obj->fk_soc > 0?$tmpSoc->getNomUrl(1):'')),
                                                   utf8_encodeRien(($obj->fk_socpeople > 0?$contact->getNomUrl(1):'')),
                                                   $obj->date_create,
                                                   $obj->tms,

@@ -347,7 +347,9 @@ class process extends CommonObject {
         }
     }
 
-    public function getRights($userObj) {
+    public function getRights() {
+        global $user;
+        $userObj = $user;
         $requete = "SELECT concat('process'," . $this->id . ") as p,
                            d.code,
                            'process_user' as pr,

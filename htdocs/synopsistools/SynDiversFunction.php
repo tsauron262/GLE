@@ -896,7 +896,7 @@ function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 
     if ($group != '')
         $sql.= " AND ug2.fk_usergroup =" . $group;
     if (!empty($user->societe_id))
-        $sql.= " AND u.fk_societe = " . $user->societe_id;
+        $sql.= " AND u.fk_soc = " . $user->societe_id;
     if (is_array($exclude) && $excludeUsers)
         $sql.= " AND u.rowid NOT IN ('" . $excludeUsers . "')";
     if (is_array($include) && $includeUsers)

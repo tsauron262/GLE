@@ -1429,3 +1429,13 @@ SELECT 'propal', 'facture', p.rowid, f.rowid FROM `llx_facture` f WHERE rowid no
 
 
 log suprression sav
+
+
+
+
+
+
+Sarda
+BDD:
+performaxrgle
+bddSynopsis1

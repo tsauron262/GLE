@@ -2,6 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/repair.class.php';
 
+
 class gsxDatas {
 
     private $userExchangePrice = true;
@@ -11,8 +12,8 @@ class gsxDatas {
     protected $errors = array();
     protected $repairs = array();
     public $partsPending = null;
-//    public static $apiMode = 'ut';
-    public static $apiMode = 'production';
+    public static $apiMode = 'ut';
+//    public static $apiMode = 'production';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -33,7 +34,9 @@ class gsxDatas {
 
     public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null) {
         global $user;
-
+        
+        if(defined('PRODUCTION_APPLE') && PRODUCTION_APPLE)
+            self::$apiMode = 'production';
 //
 //        $userId = 'sav@bimp.fr';
 //        $password = '@Savbimp2014#';

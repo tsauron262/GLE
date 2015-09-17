@@ -1387,12 +1387,6 @@ div.divButAction { margin-bottom: 1.4em; }
 }
 <?php } ?>
 
-<?php if (! empty($conf->global->MAIN_BUTTON_HIDE_UNAUTHORIZED)) { ?>
-.butActionRefused {
-	display: none;
-}
-<?php } ?>
-
 span.butAction, span.butActionDelete {
 	cursor: pointer;
 }

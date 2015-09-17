@@ -37,10 +37,12 @@ class synopsisHook {//FA1506-0369
         $viewDoc = (stripos($_SERVER['REQUEST_URI'], 'document'));
         $modDev = defined('MOD_DEV_SYN') ? MOD_DEV_SYN : 0;
 
-        if (($modDev == 2 && !$builddoc && !$viewDoc) || ($modDev == 1))
+        if (($modDev == 1 && !$builddoc && !$viewDoc) || ($modDev == 1))
             error_reporting(E_ALL);
-        else
+        elseif (modDev == 2)
             error_reporting(E_ALL ^ (E_NOTICE));
+        else
+            error_reporting(E_ALL ^ (E_NOTICE | E_STRICT));
 
         ini_set('upload_max_filesize', 10000);
         ini_set('post_max_size', 10000);

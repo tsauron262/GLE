@@ -81,7 +81,7 @@ function widget_listPropaleFerme() {
                           $filename=sanitize_string($res->ref);
                           $filedir=$conf->propal->dir_output . '/' . sanitize_string($res->ref);
                           $urlsource=$_SERVER['PHP_SELF'].'?propalid='.$res->propalid;
-                          $table .= $formfile->showdocuments('propal',$filename,$filedir,$urlsource,'','','','','',1,28,false);
+                          $table .= $formfile->getDocumentsLink('propal',$filename,$filedir);
                           $table .= $formfile->html;
 
                         $table .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->rowid.'">'.dol_trunc($res->nom,18).'</a></td>';
@@ -95,7 +95,7 @@ function widget_listPropaleFerme() {
                   $filename=sanitize_string($res->ref);
                   $filedir=$conf->propal->dir_output . '/' . sanitize_string($res->ref);
                   $urlsource=$_SERVER['PHP_SELF'].'?propalid='.$res->propalid;
-                  $table2 .= $formfile->showdocuments('propal',$filename,$filedir,$urlsource,'','','','','',1,28,false);
+                  $table2 .= $formfile->getDocumentsLink('propal',$filename,$filedir);
                   $table2 .= $formfile->html;
 
                 $table2 .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->rowid.'">'.dol_trunc($res->nom,18).'</a></td>';

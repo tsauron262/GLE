@@ -1224,7 +1224,7 @@ function print_left_eldy_menu($db,$menu_array_before,$menu_array_after,&$tabMenu
 		if ($mainmenu == 'hrm')
 		{
 			// Leave/Holiday/Vacation module
-			if (! empty($conf->holiday->enabled))
+			if (! empty($conf->holiday->enabled) /*mod drsi*/&& empty($conf->synopsisholiday->enabled)/*fmoddrsi*/)
 			{
 				$langs->load("holiday");
 				$langs->load("trips");

@@ -93,7 +93,7 @@ function widget_listCommandeAFacturer() {
                     $filename = sanitize_string($res->ref);
                     $filedir = $conf->commande->dir_output . '/' . sanitize_string($res->ref);
                     $urlsource = $_SERVER['PHP_SELF'] . '?id=' . $res->rowid;
-                    $table .= $formfile->showdocuments('commande', $filename, $filedir, $urlsource, '', '', '', '', '', 1, 18, false);
+                    $table .= $formfile->getDocumentsLink('commande', $filename, $filedir);
 
 //                    $table .= $formfile->html;
 

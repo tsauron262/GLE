@@ -97,7 +97,7 @@ function widget_listFactureImpayee() {
                             $filedir=$conf->facture->dir_output . '/' . sanitize_string($res->facnumber);
                             $urlsource=$_SERVER['PHP_SELF'].'?facid='.$res->rowid;
                             if ($res->datelimite < (time() - $conf->facture->client->warning_delay)) $table .= img_warning($langs->trans("Late"));
-                            $table .= $formfile->showdocuments('facture',$filename,$filedir,$urlsource,'','','','','',1,28,false);
+                            $table .= $formfile->getDocumentsLink('facture',$filename,$filedir);
 
                             $table .= $formfile->html;
 
@@ -116,7 +116,7 @@ function widget_listFactureImpayee() {
                     $filedir=$conf->facture->dir_output . '/' . sanitize_string($res->facnumber);
                     $urlsource=$_SERVER['PHP_SELF'].'?facid='.$res->rowid;
                     if ($res->datelimite < (time() - $conf->facture->client->warning_delay)) $table2 .= img_warning($langs->trans("Late"));
-                    $table2 .= $formfile->showdocuments('facture',$filename,$filedir,$urlsource,'','','','','',1,42,false);
+                    $table2 .= $formfile->getDocumentsLink('facture',$filename,$filedir);
                     $table2 .= $formfile->html;
 
                     $table2 .=  '<td nowrap="nowrap"><a href="card.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';

@@ -92,7 +92,7 @@ function widget_listCommandeATraiter() {
                     $filedir = $conf->commande->dir_output . '/' . sanitize_string($res->ref);
                     $urlsource = $_SERVER['PHP_SELF'] . '?id=' . $res->rowid;
                     $table .= '<td nowrap="nowrap">';
-                    $table .= $formfile->showdocuments('commande', $filename, $filedir, $urlsource, '', '', '', '', '', 1, 18, false);
+                    $table .= $formfile->getDocumentsLink('commande', $filename, $filedir);
 
 //                    $table .= $formfile->html . "&nbsp;";
 

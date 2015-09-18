@@ -47,7 +47,7 @@ class gsxDatas {
 
 
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_service']) &&
-                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_mdp'] != "" && $user->array_options['options_apple_service'] != "")
+                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != "")
             $details = array(
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',

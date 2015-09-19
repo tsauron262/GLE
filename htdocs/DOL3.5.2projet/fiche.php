@@ -419,7 +419,7 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     /*
      * Create
      */
-    print_titre($langs->trans("NewProject"));
+    load_fiche_titre($langs->trans("NewProject"));
 
     if (isset($mesg))
         print $mesg;

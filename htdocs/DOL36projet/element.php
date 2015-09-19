@@ -296,7 +296,7 @@ foreach ($listofreferent as $key => $value)
 
 		print '<br>';
 
-		print_titre($langs->trans($title));
+		load_fiche_titre($langs->trans($title));
 
 		$selectList=$formproject->select_element($tablename,$project->thirdparty->id);
 

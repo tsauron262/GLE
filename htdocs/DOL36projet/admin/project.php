@@ -307,7 +307,7 @@ dol_fiche_head($head, 'project', $langs->trans("Projects"), 0, 'project');
  * Projects Numbering model
  */
 
-print_titre($langs->trans("ProjectsNumberingModules"));
+load_fiche_titre($langs->trans("ProjectsNumberingModules"));
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -408,7 +408,7 @@ foreach ($dirmodels as $reldir)
 print '</table><br>';
 
 // Task numbering module
-print_titre($langs->trans("TasksNumberingModules"));
+load_fiche_titre($langs->trans("TasksNumberingModules"));
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -512,7 +512,7 @@ print '</table><br>';
  * Document templates generators
 */
 
-print_titre($langs->trans("ProjectsModelModule"));
+load_fiche_titre($langs->trans("ProjectsModelModule"));
 
 // Defini tableau def de modele
 $type='project';
@@ -667,7 +667,7 @@ print '</table><br/>';
  * Modeles documents for Task
 */
 
-print_titre($langs->trans("TaskModelModule"));
+load_fiche_titre($langs->trans("TaskModelModule"));
 
 // Defini tableau def de modele
 $type='project_task';

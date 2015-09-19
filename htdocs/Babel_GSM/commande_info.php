@@ -245,7 +245,7 @@ if ($_GET["commande_id"] > 0)
      *  Lignes de commandes avec quantite livrees et reste e livrer
      *  Les quantites livrees sont stockees dans $commande->expeditions[fk_product]
      */
-    print_titre($langs->trans("Sending"));
+    load_fiche_titre($langs->trans("Sending"));
     print '<table class="liste" width="100%">';
 
     $sql = "SELECT cd.fk_product, cd.description, cd.price, cd.qty, cd.rowid, cd.tva_tx, cd.subprice";
@@ -391,7 +391,7 @@ if ($_GET["commande_id"] > 0)
             {
                 //if ($somethingshown) { print '<br>'; $somethingshown=1; }
                 print '<BR>';
-                print_titre($langs->trans('RelatedCommercialProposals'));
+                load_fiche_titre($langs->trans('RelatedCommercialProposals'));
                 print '<table class="border" style="width:98%; max-width: 98%;min-width: 98%;">';
                 print '<tr class="liste_titre">';
                 print '<td>'.$langs->trans("Ref").'</td>';
@@ -436,7 +436,7 @@ if ($_GET["commande_id"] > 0)
                     {
                         //if ($somethingshown) { print '<br>'; $somethingshown=1; }
                         print '<BR>';
-                        print_titre($langs->trans('RelatedBills'));
+                        load_fiche_titre($langs->trans('RelatedBills'));
                         print '<table class="border" style="width:98%; max-width: 98%;min-width: 98%;">';
                         print '<tr class="liste_titre">';
                         print '<td>'.$langs->trans("Ref").'</td>';
@@ -636,7 +636,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
             print '<form style="width:100%; max-width:100%; min-width:100%" action="'.$urlsource.'#builddoc" method="post">';
             print '<input type="hidden" name="action" value="builddoc"/>';
 print '<BR>';
-            print_titre($langs->trans("Documents"));
+            load_fiche_titre($langs->trans("Documents"));
             print '<table class="border"  style="width:100%; max-width:100%; min-width:100%">';
             print "<tbody style='width:100%; max-width:100%; min-width:100%'>";
             print '<tr '.$bc[$var].'>';

@@ -366,7 +366,7 @@ function activatePdf(str){
             $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsis_process/";
             $html = new Form($db);
             print "<br>";
-            print_titre($langs->trans("Mod&egrave;le de num&eacute;rotation de ce process"));
+            load_fiche_titre($langs->trans("Mod&egrave;le de num&eacute;rotation de ce process"));
 
             print '<table class="noborder" width="100%">';
             print '<tr class="liste_titre">';
@@ -424,7 +424,7 @@ function activatePdf(str){
              * Modeles de documents
              */
 
-            print_titre($langs->trans("PDFModules"));
+            load_fiche_titre($langs->trans("PDFModules"));
 
             // Defini tableau def de modele propal
             $def = array();
@@ -688,7 +688,7 @@ function activatePdf(str){
             $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsis_process/";
             $html = new Form($db);
             print "<br>";
-            print_titre($langs->trans("Mod&egrave;le de num&eacute;rotation de ce process"));
+            load_fiche_titre($langs->trans("Mod&egrave;le de num&eacute;rotation de ce process"));
 
             print '<table class="noborder" width="100%">';
             print '<tr class="liste_titre">';
@@ -760,7 +760,7 @@ function activatePdf(str){
              * Modeles de documents
              */
 
-            print_titre($langs->trans("PDFModules"));
+            load_fiche_titre($langs->trans("PDFModules"));
 
             // Defini tableau def de modele propal
             $def = array();

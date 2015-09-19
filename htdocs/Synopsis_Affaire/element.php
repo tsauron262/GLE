@@ -120,7 +120,7 @@ foreach ($listofreferent as $key => $value)
         {
             print '<h3><a href="#">'.$langs->trans($title.'short')." (". sizeof($elementarray) . ')</a></h3>';
             print "<div>";
-            print_titre($langs->trans($title));
+            load_fiche_titre($langs->trans($title));
             print '<table class="noborder" width="100%">';
 
             print '<tr class="liste_titre">';

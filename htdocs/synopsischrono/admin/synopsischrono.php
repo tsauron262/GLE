@@ -116,7 +116,7 @@ if ($msg . "x" != "x") {
     print "<div class='ui-error ui-state-error' style='width:100%; padding:3px;'><span style='float: left;' class='ui-icon ui-icon-info'></span>" . $msg . "</div>";
 }
 
-//print_titre($langs->trans("GEOBI"));
+//load_fiche_titre($langs->trans("GEOBI"));
 print '<br>';
 
 $h = 0;

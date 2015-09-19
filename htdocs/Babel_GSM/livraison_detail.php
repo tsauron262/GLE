@@ -311,7 +311,7 @@ if ($_GET["livraison_id"] > 0)
                 {
                     print '<br>';
 
-                    print_titre($langs->trans("OtherSendingsForSameOrder"));
+                    load_fiche_titre($langs->trans("OtherSendingsForSameOrder"));
                     print '<table class="liste" width="100%">';
                     print '<tr class="liste_titre">';
                     print '<td align="left">'.$langs->trans("Sending").'</td>';

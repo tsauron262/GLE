@@ -85,7 +85,7 @@ if ($user->rights->Cron->Global->Modifier||$user->admin || $user->local_admin)
 llxHeader();
 
     print "<br>";
-    print_titre("Ordonnanceur");
+    load_fiche_titre("Ordonnanceur");
     print "<br>";
 
 print "<table cellpadding=5 width=100%>";

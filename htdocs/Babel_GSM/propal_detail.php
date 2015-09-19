@@ -250,7 +250,7 @@ print "</TABLE>\n";
             {
                 //if ($somethingshown) { print '<br>'; $somethingshown=1; }
                 print '<BR>';
-                print_titre($langs->trans('RelatedOrders'));
+                load_fiche_titre($langs->trans('RelatedOrders'));
                 print '<table class="border" style="width:98%; max-width: 98%;min-width: 98%;">';
                 print '<tr class="liste_titre">';
                 print '<td>'.$langs->trans("Ref").'</td>';
@@ -297,7 +297,7 @@ print "</TABLE>\n";
                     {
                         //if ($somethingshown) { print '<br>'; $somethingshown=1; }
                         print '<BR>';
-                        print_titre($langs->trans('RelatedBills'));
+                        load_fiche_titre($langs->trans('RelatedBills'));
                         print '<table class="border" style="width:98%; max-width: 98%;min-width: 98%;">';
                         print '<tr class="liste_titre">';
                         print '<td>'.$langs->trans("Ref").'</td>';
@@ -495,7 +495,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
             print '<form style="width:100%; max-width:100%; min-width:100%" action="'.$urlsource.'" method="post">';
             print '<input type="hidden" name="action" value="builddoc"/>';
 print '<BR>';
-            print_titre($langs->trans("Documents"));
+            load_fiche_titre($langs->trans("Documents"));
             print '<table class="border"  style="width:100%; max-width:100%; min-width:100%">';
             print "<tbody style='width:100%; max-width:100%; min-width:100%'>";
             print '<tr '.$bc[$var].'>';

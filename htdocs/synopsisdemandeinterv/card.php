@@ -714,7 +714,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         $societe->fetch($_REQUEST["socid"]);
     }
 
-    print_titre($langs->trans("AddDI"));
+    load_fiche_titre($langs->trans("AddDI"));
 
     if ($mesg)
         print $mesg . '<br>';

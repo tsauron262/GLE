@@ -279,7 +279,7 @@ print "</TABLE>\n";
             {
                 //if ($somethingshown) { print '<br>'; $somethingshown=1; }
                 print '<BR>';
-                print_titre($langs->trans('RelatedCommercialProposals'));
+                load_fiche_titre($langs->trans('RelatedCommercialProposals'));
                 print '<table class="border" style="width:98%; max-width: 98%;min-width: 98%;">';
                 print '<tr class="liste_titre">';
                 print '<td>'.$langs->trans("Ref").'</td>';
@@ -324,7 +324,7 @@ print "</TABLE>\n";
                     {
                         //if ($somethingshown) { print '<br>'; $somethingshown=1; }
                         print '<BR>';
-                        print_titre($langs->trans('RelatedBills'));
+                        load_fiche_titre($langs->trans('RelatedBills'));
                         print '<table class="border" style="width:98%; max-width: 98%;min-width: 98%;">';
                         print '<tr class="liste_titre">';
                         print '<td>'.$langs->trans("Ref").'</td>';
@@ -369,7 +369,7 @@ print "</TABLE>\n";
      *  Les quantites livrees sont stockees dans $commande->expeditions[fk_product]
      */
 
-    print_titre($langs->trans("ProduitsCommande"));
+    load_fiche_titre($langs->trans("ProduitsCommande"));
 
     print '<table class="liste" width="100%">';
 
@@ -474,7 +474,7 @@ print "</TABLE>\n";
 
     if ($conf->stock->enabled && $reste_a_livrer_total > 0 && $commande->statut > 0 && $commande->statut < 3 && $user->rights->expedition->creer)
     {
-        print_titre($langs->trans("NewSending"));
+        load_fiche_titre($langs->trans("NewSending"));
 
         print '<form method="GET" action="'.DOL_URL_ROOT.'/expedition/card.php">';
         print '<input type="hidden" name="action" value="create">';
@@ -695,7 +695,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
             print '<form style="width:100%; max-width:100%; min-width:100%" action="'.$urlsource.'" method="post">';
             print '<input type="hidden" name="action" value="builddoc"/>';
 print '<BR>';
-            print_titre($langs->trans("Documents"));
+            load_fiche_titre($langs->trans("Documents"));
             print '<table class="border"  style="width:100%; max-width:100%; min-width:100%">';
             print "<tbody style='width:100%; max-width:100%; min-width:100%'>";
             print '<tr '.$bc[$var].'>';

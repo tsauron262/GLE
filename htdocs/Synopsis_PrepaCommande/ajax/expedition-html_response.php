@@ -426,7 +426,7 @@ EOF;
                 if ($conf->stock->enabled && isset($reste_a_livrer_total) && $reste_a_livrer_total > 0 && $commande->statut > 0 && $commande->statut < 3 && $user->rights->expedition->creer) {
                     print '<tr><td width="50%" colspan="2" valign="top">';
                     $langs->load("orders");
-                    print_titre($langs->trans("NewSending") . " " . $langs->trans("Order") . " " . $commande->getNomUrl(1));
+                    load_fiche_titre($langs->trans("NewSending") . " " . $langs->trans("Order") . " " . $commande->getNomUrl(1));
 
                     print '<form method="GET" action="' . DOL_URL_ROOT . '/expedition/card.php">';
                     print '<input type="hidden" name="action" value="create">';

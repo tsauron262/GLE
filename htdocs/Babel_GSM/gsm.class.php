@@ -219,8 +219,8 @@ class gsm
             {
                 print '<br>';
 
-                if ($filter) print_titre($langs->trans("OtherSendingsForSameOrder"));
-                else print_titre($langs->trans("SendingsAndReceivingForSameOrder"));
+                if ($filter) load_fiche_titre($langs->trans("OtherSendingsForSameOrder"));
+                else load_fiche_titre($langs->trans("SendingsAndReceivingForSameOrder"));
 
                 print '<table class="liste" width="100%">';
                 print '<tr class="liste_titre">';
@@ -461,7 +461,7 @@ class gsm
             print '<form style="width:100%; max-width:100%; min-width:100%" action="'.$urlsource.'" method="post">';
             print '<input type="hidden" name="action" value="builddoc"/>';
 print '<BR>';
-            print_titre($langs->trans("Documents"));
+            load_fiche_titre($langs->trans("Documents"));
             print '<table class="border"  style="width:100%; max-width:100%; min-width:100%">';
             print "<tbody style='width:100%; max-width:100%; min-width:100%'>";
             print '<tr '.$bc[$var].'>';
@@ -590,7 +590,7 @@ print '<BR>';
     $contactstatic = new Contact($db);
 
 
-    print_titre($langs->trans("ContactsForCompany"));
+    load_fiche_titre($langs->trans("ContactsForCompany"));
     print '<table class="noborder" width="100%">';
 
     print '<tr class="liste_titre"><td>'.$langs->trans("Name").'</td>';

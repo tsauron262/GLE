@@ -582,7 +582,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         $societe->fetch($_REQUEST["socid"]);
     }
 
-    print_titre($langs->trans("AddIntervention"));
+    load_fiche_titre($langs->trans("AddIntervention"));
 
     if ($mesg)
         print $mesg . '<br>';

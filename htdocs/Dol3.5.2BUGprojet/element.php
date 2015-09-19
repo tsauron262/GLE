@@ -217,7 +217,7 @@ foreach ($listofreferent as $key => $value) {
     if ($qualified) {
         print '<br>';
 
-        print_titre($langs->trans($title));
+        load_fiche_titre($langs->trans($title));
         print '<table class="noborder" width="100%">';
 
         print '<tr class="liste_titre">';
@@ -375,7 +375,7 @@ foreach ($listofreferent as $key => $value)
 	{
 		print '<br>';
 
-		print_titre($langs->trans($title));
+		load_fiche_titre($langs->trans($title));
 
 		$selectList=$formproject->select_element($tablename);
 		if ($selectList)

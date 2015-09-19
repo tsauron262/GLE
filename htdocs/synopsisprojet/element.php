@@ -244,7 +244,7 @@ foreach ($listofreferent as $key => $value) {
     if ($qualified) {
         print '<br>';
 
-        print_titre($langs->trans($title));
+        load_fiche_titre($langs->trans($title));
         print '<table class="noborder" width="100%">';
 
         print '<tr class="liste_titre">';
@@ -406,7 +406,7 @@ foreach ($listofreferent as $key => $value)
 	{
 		print '<br>';
 
-		print_titre($langs->trans($title));
+		load_fiche_titre($langs->trans($title));
 
 		$selectList=$formproject->select_element($tablename,$project->societe->id);
 
@@ -575,7 +575,7 @@ foreach ($listofreferent as $key => $value)
 //}
 
 // Margin display of the project
-print_titre("Margin");
+load_fiche_titre("Margin");
 print '<table class="noborder">';
 print '<tr class="liste_titre">';
 print '<td align="left" width="200">'.$langs->trans("Element").'</td>';

@@ -1075,7 +1075,7 @@ EOF;
                  * Produits
                  */
                 print '<br>';
-                print_titre($langs->trans("Products"));
+                load_fiche_titre($langs->trans("Products"));
 
                 print '<table class="noborder" width="100%">';
                 print '<tr class="liste_titre"><td>'.$langs->trans("Ref").'</td><td>'.$langs->trans("Product").'</td>';

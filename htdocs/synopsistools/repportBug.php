@@ -93,7 +93,7 @@ function getBug($user) {
 
     if($db->num_rows($sql) > 0){
     echo "<br/><br/>";
-    print_titre($langs->trans("Vos ancien ticket de bug"));
+    load_fiche_titre($langs->trans("Vos ancien ticket de bug"));
     echo "<br/>";
     $html .= '<table class="noborder fullTable"><tr class="liste_titre">';
     if ($user->rights->SynopsisTools->Global->adminBug)

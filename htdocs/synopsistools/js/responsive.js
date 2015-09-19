@@ -9,8 +9,10 @@ var responsive = true;
 var is_open = false;
 var moving = false;
 var clickmenu = false;
-var maxmenu = 450;
 var opac = 0.7;
+var tailleMenu1 = 150;
+var tailleMenu2 = 200;
+var maxmenu = tailleMenu1 + tailleMenu2;
 
 
 $(window).load(function () {
@@ -98,7 +100,11 @@ $(window).load(function () {
     }
 });
 
+memoireTe = 0;
 function move_menu(te) {
+    diff = memoireTe - te;
+    if(diff > 10 || diff < -10){//Pour ne bouger que tous les 10px
+    memoireTe = te;
 //    console.log(te);
     if (is_open) {
         te += maxmenu;
@@ -109,12 +115,13 @@ function move_menu(te) {
     if (ti > maxmenu) {
         ti = maxmenu;
     }
-    $('#id-left').css("left", ti - maxmenu + 200);
+    $('#id-left').css("left", ti - maxmenu + tailleMenu1);
     $('.tmenudiv').css("left", ti - maxmenu);
     $('#id-left').css("z-index", "60");
     $('.tmenudiv').css("z-index", "60");
     $('#id_cach').show();
     $('#id_cach').css("opacity", ti / maxmenu * opac);
+}
 //    is_open = true;
 }
 
@@ -145,7 +152,7 @@ function push_menu(posX) {//posX -> sert à savoir si le menu doit etre pousser 
         $('.tmenudiv').css("z-index", "60");
         $('#id_cach').show();
         $('#id_cach').clearQueue().animate({"opacity": opac});
-        $('#id-left').clearQueue().animate({"left": '200'});
+        $('#id-left').clearQueue().animate({"left": tailleMenu1});
         $('.tmenudiv').clearQueue().animate({"left": '0'});
         $('body').css('overflow', 'hidden');
         is_open = true;

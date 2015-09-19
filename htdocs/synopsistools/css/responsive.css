@@ -8,6 +8,8 @@ and open the template in the editor.
     Author     : victor
 */
 
+
+/*Moyen ordi*/
 @media (max-width:1150px){
     div.fichetwothirdright,div.fichethirdleft{
         float: none;
@@ -24,8 +26,15 @@ and open the template in the editor.
     }
 }
 
+
+/*Petit telephone + ordi*/
 @media (max-width: 940px) ,(max-device-width: 940px)
 {
+    
+    span.tmenuimage{
+        display: block;
+    }
+    
     #but-menu/*.vmenu,#tmenu_tooltip*/{
         display: block;
         width: 42px;
@@ -40,6 +49,8 @@ and open the template in the editor.
         top:2.5px;
         left:5px;
     }
+    
+    
 
     #id-left, div.tmenudiv{/*conteneur 1 et 2*/
         top:48px;
@@ -53,8 +64,8 @@ and open the template in the editor.
     }
 
     #id-left{/*conteneur de menu 2*/
-        left: -300px;
-        width: 300px;
+        left: -200px;
+        width: 200px;
     }
     
 
@@ -86,7 +97,7 @@ and open the template in the editor.
     }
 
     .tmenudiv ul.tmenu{/*conteneur du menu 1*/
-        width: 200px;
+        width: 150px;
         z-index: 60;
         overflow: scroll;
         height: 100%;
@@ -108,7 +119,7 @@ and open the template in the editor.
 
     .tmenu li div, .vmenu a, .vmenu div, .vmenu span, label, form, div, tbody, .vmenu span{
 
-        font-size: 15px!important;
+        /*font-size: 15px!important;*/
     }
 
     a img, td img{
@@ -276,7 +287,7 @@ and open the template in the editor.
     }
 
     div.login_block{
-        max-width: 150px;
+        max-width: 280px;
     }
 
     div.login_block_user, div.login_block_other{
@@ -296,6 +307,7 @@ and open the template in the editor.
         padding-right: 0;
         z-index: 100;
         background-color: silver;
+        height: 50px;
     }
 
     div.login_block{
@@ -319,16 +331,21 @@ and open the template in the editor.
     }
 }
 
-
+/*Petit Telephone */
 @media (max-device-width: 940px)
 {
     .tmenu li div, .vmenu a, .vmenu div, .vmenu span, label, form, div, tbody, .vmenu span, input, select{
 
-        font-size: 25px!important;
+        /*font-size: 22px!important;*/
+    }
+    
+    
+    body{
+        min-height: 100%;
     }
 
     a img, td img{
-        height: 25px!important;
+        /*height: 25px!important;*/
     }
     
     input[type=checkbox], input[type=radio]{
@@ -344,8 +361,8 @@ and open the template in the editor.
     }
 
     input, select{
-        height: 45px;
-        min-width: 200px;
+        height: 40px;
+        min-width: 150px;
         /*width: auto;*/
         margin: 5px;
         /*font-size:28px!important;*/
@@ -357,13 +374,14 @@ and open the template in the editor.
     }
 }
 
-
+/*Mode normal*/
 @media(min-width: 941px) and (min-device-width: 941px){
     .vmenu, .vmenu a, .vmenu div , div#tmenu_tooltip div.tmenudiv{
         font-size: 1em!important;
         left: 0px!important;
 
     }
+    
 
 
     #id-right{

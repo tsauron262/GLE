@@ -162,9 +162,9 @@ div.fiche table.titreHG > tbody > tr > td:first-child{
 div.fiche table.border{
     margin-left: 0;
 }
-body{
+/*body{
     font-size: 13px;
-}
+}*/
 div.mainmenu.Synopsis_Projet {
     background-image: url(../../theme/eldy/img/menus/project.png);
 }

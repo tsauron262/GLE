@@ -13,7 +13,7 @@
 
 
 ini_set('max_execution_time', 40000);
-ini_set("memory_limit","1200M");
+ini_set("memory_limit","3200M");
 
 
 global $logLongTime;
@@ -43,6 +43,9 @@ $mode=GETPOST('mode');
 $id = GETPOST('id','int');
 $MAXADDRESS=GETPOST('max','int')?GETPOST('max','int'):'25';	// Set packet size to 25 if no forced from url
 $address='';
+$limit = 200000;
+$page = GETPOST('page');
+$forceReLoadErr = GETPOST('forceReLoadErr');
 
 // Load third party
 if (empty($mode) || $mode=='thirdparty')
@@ -181,12 +184,15 @@ $htmlother=new FormOther($db);
         /*mod drsi*/ if($search_categ)
             $sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cat";
 	$sql.= " WHERE s.status = 1";
+//        $sql.= " AND s.rowid > 135195 ";// 135179 ";//152697";
         /*mod drsi*/ if($search_categ)
             $sql .= " AND cat.fk_societe = s.rowid AND cat.fk_categorie = '".$search_categ."'";
 	$sql.= " AND s.entity IN (".getEntity('societe', 1).")";
 	if ($search_sale || (! $user->rights->societe->client->voir && ! $socid))	$sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid) $sql.= " AND s.rowid = ".$socid;	// protect for external user
-	$sql.= " ORDER BY s.rowid";
+        
+	$sql.= " ORDER BY longitude";
+        $sql.=" LIMIT ".($page*$limit).",".$limit;
 }
 else if ($mode=='contact')
 {
@@ -293,19 +299,20 @@ if ($resql)
 		$object->longitude = $obj->longitude;
 		$object->address = $address;
 		$object->url = $obj->url;
+                
 
 		$geoencodingtosearch=false;
 		if ($obj->gaddress != $addresstosearch) $geoencodingtosearch=true;
-		else if ((empty($object->latitude) || empty($object->longitude)) && (empty($obj->result_code) || $obj->result_code != 'ZERO_RESULTS')) $geoencodingtosearch=true;
+		else if ((empty($object->latitude) || empty($object->longitude)) && (empty($obj->result_code) || $obj->result_code != 'ZERO_RESULTS' || $forceReLoadErr)) $geoencodingtosearch=true;
 		else if ((empty($obj->result_code) || in_array($obj->result_code, array('OVER_QUERY_LIMIT', 'ERROR')))) $geoencodingtosearch=true;
 
 		if ($geoencodingtosearch && (empty($MAXADDRESS) || $countgeoencoding < $MAXADDRESS))
 		{
-			if ($countgeoencoding && ($countgeoencoding % 10 == 0))
-			{
-				dol_syslog("Add a delay of 1");
-				sleep(1);
-			}
+//			if ($countgeoencoding && ($countgeoencoding % 100 == 0))
+//			{
+//				dol_syslog("Add a delay of 1");
+//				sleep(1);
+//			}
 
 			$countgeoencoding++;
 
@@ -381,8 +388,8 @@ if ($resql)
 
 				$countgeoencodedall++;
 			}
-                        if($MAXADDRESS == $countgeoencoding)
-                            break;
+//                        if($MAXADDRESS == $countgeoencoding)
+//                            break;
 		}
 		else
 		{

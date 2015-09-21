@@ -615,7 +615,7 @@ class GoogleMapAPI
 		// Google map JS
 		$jsgmapapi='http://maps.google.com/maps/api/js';
 		if ($sforhttps) $jsgmapapi = 'https://maps-api-ssl.google.com/maps/api/js';
-                // $jsgmapapi=preg_replace('/^http:/','https:',$jsgmapapi);
+                //if ($sforhttps)  $jsgmapapi=preg_replace('/^http:/','https:',$jsgmapapi);
 		$this->content .= '<script type="text/javascript" src="'.$jsgmapapi.'?sensor=false&language=' . $this->lang . '">';
 		$this->content .= '</script>' . "\n";
 

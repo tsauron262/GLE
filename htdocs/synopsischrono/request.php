@@ -272,7 +272,10 @@ if (isset($_REQUEST['actionEtat'])) {
                     $totPa += $ligne->pa_ht;
                 }
             }
-
+            
+            if($chrono->propal->statut == 1)
+                $chrono->propal->statut = 0;
+            
             $chrono->propal->addline("Garantie", -($totHt)/(100-$chrono->societe->remise_percent)*100, 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));

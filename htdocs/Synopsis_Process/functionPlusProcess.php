@@ -104,7 +104,6 @@ function bouttonEtatSav($idChrono) {
     if ($propId && $propStatut == 0) {
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient1" . $sms . "'>Envoyer Devis</a>";
         $return .= "</br>";
-//        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
     }
 
     if ($propId && $propStatut > 1 && ($etatSav == 4)) {
@@ -118,6 +117,11 @@ function bouttonEtatSav($idChrono) {
         $return .= ob_get_clean();
         $return .= "</br>";
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(this).parent().find(\"#selectpaiementtype\").attr(\"value\");' >Restitué (Payer)</a>";
+    }
+    
+    if($propStatut == 0 || $propStatut == 1){
+        
+        $return .= "<br/><a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
     }
     
     $return .= "<a class='butCache' id='butCacheReMail'>Recontacter</a>";

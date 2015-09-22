@@ -590,6 +590,7 @@ class Synopsisdemandeinterv extends CommonObject {
             $soc = new Societe($this->db);
             $soc->fetch($this->socid);
             $action->societe = $soc;
+            $action->socid = $this->socid;
             $action->label = $this->description . " DI : " . $this->ref;
             $action->note = $this->description;
             $action->userownerid = $this->user_prisencharge->id;

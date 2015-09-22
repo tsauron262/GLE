@@ -59,7 +59,7 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
 
         $sql = "SELECT a.id, a.label,";
         $sql.= " a.datep as dp,";
-        $sql.= " a.datea as da,";
+//        $sql.= " a.datea as da,";
         $sql.= " a.percent,";
         $sql.= " a.fk_user_author, a.fk_contact,";
         $sql.= " a.fk_element, a.elementtype,";

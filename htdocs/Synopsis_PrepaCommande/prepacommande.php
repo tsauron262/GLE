@@ -148,7 +148,7 @@ jQuery(document).ready(function(){
             }
         });
     });
-    jQuery('.accordion').accordion('activate',0);
+    jQuery('.accordion').accordion();
 
     hash = window.location.hash.replace("#pp", "");
     if(hash != ''){

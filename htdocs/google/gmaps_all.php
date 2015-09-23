@@ -137,11 +137,17 @@ $htmlother=new FormOther($db);
 	// Filter on categories
 	$moreforfilter='';
         $search_categ = $_REQUEST['search_categ'];
+        $search_categ2 = $_REQUEST['search_categ2'];
 	if (! empty($conf->categorie->enabled))
 	{
 		$moreforfilter.='<form action="?'.$para.'" method="post">';
-		$moreforfilter.=$langs->trans('Categories'). ': ';
-		$moreforfilter.=$htmlother->select_categories(1,$search_categ,'search_categ',1);
+		$moreforfilter.=$langs->trans('Categories')." ".$langs->trans("Customer"). ': ';
+		$moreforfilter.=$htmlother->select_categories(2,$search_categ,'search_categ',1);
+		$moreforfilter.=' &nbsp; &nbsp; &nbsp; ';
+		$moreforfilter.='<input type="submit" value="Valider"/></form>';
+		$moreforfilter.='<form action="?'.$para.'" method="post">';
+		$moreforfilter.=$langs->trans('Categories')." ".$langs->trans("Supplier"). ': ';
+		$moreforfilter.=$htmlother->select_categories(1,$search_categ2,'search_categ2',1);
 		$moreforfilter.=' &nbsp; &nbsp; &nbsp; ';
 		$moreforfilter.='<input type="submit" value="Valider"/></form>';
 	}
@@ -151,9 +157,7 @@ $htmlother=new FormOther($db);
 		print $moreforfilter;
 		print '</div>';
 	}
-        $search_categ = ($search_categ > 0)? $search_categ : 0;
     /*f mod drsi*/
-    
     
     
     
@@ -181,12 +185,22 @@ $htmlother=new FormOther($db);
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c ON s.fk_pays = c.rowid";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."google_maps as g ON s.rowid = g.fk_object and g.type_object='".$type."'";
 	if ($search_sale || (!$user->rights->societe->client->voir && !$socid)) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-        /*mod drsi*/ if($search_categ)
-            $sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cat";
+        /*mod drsi*/ 
+        if($search_categ > 0)
+            $sql .= ", ".MAIN_DB_PREFIX."categorie_societe as cat";
+        if($search_categ2 > 0)
+            $sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cat2";
 	$sql.= " WHERE s.status = 1";
 //        $sql.= " AND s.rowid > 135195 ";// 135179 ";//152697";
-        /*mod drsi*/ if($search_categ)
-            $sql .= " AND cat.fk_societe = s.rowid AND cat.fk_categorie = '".$search_categ."'";
+        /*mod drsi*/ 
+        if($search_categ > 0)
+            $sql .= " AND cat.fk_soc = s.rowid AND cat.fk_categorie = '".$search_categ."'";
+        elseif($search_categ == -2)
+            $sql .= " AND s.rowid NOT IN (SELECT  `fk_soc` FROM  `".MAIN_DB_PREFIX."categorie_societe` )";
+        if($search_categ2 > 0)
+            $sql .= " AND cat2.fk_soc = s.rowid AND cat2.fk_categorie = '".$search_categ2."'";
+        elseif($search_categ2 == -2)
+            $sql .= " AND s.rowid NOT IN (SELECT  `fk_soc` FROM  `".MAIN_DB_PREFIX."categorie_fournisseur` )";
 	$sql.= " AND s.entity IN (".getEntity('societe', 1).")";
 	if ($search_sale || (! $user->rights->societe->client->voir && ! $socid))	$sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid) $sql.= " AND s.rowid = ".$socid;	// protect for external user
@@ -266,6 +280,7 @@ $countgeoencodedok=0;
 $countgeoencodedall=0;
 
 // Loop
+if($search_categ || $search_categ2){
 dol_syslog("Search addresses sql=".$sql);
 $resql=$db->query($sql);
 if ($resql)
@@ -458,7 +473,7 @@ $gmap->addArrayMarker($addresses, $langs, $mode);
 
 $gmap->generate();
 echo $gmap->getGoogleMap();
-
+}
 
 dol_fiche_end();
 

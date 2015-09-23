@@ -763,7 +763,7 @@ class Chrono extends CommonObject {
         $this->keysListId = array();
         $this->keysList = array();
         if ($this->model_refid > 0) {
-            $requete = "SELECT *
+            $requete = "SELECT *, type_valeur as type
                       FROM " . MAIN_DB_PREFIX . "synopsischrono_key
                      WHERE model_refid = " . $this->model_refid;
             $sql = $this->db->query($requete);

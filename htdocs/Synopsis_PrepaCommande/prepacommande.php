@@ -151,9 +151,10 @@ jQuery(document).ready(function(){
     jQuery('.accordion').accordion();
 
     hash = window.location.hash.replace("#pp", "");
-    if(hash != ''){
-        traiteHash(hash);
-    }
+    if(hash == '')
+        hash = "part1a";
+    traiteHash(hash);
+    
      
     $(window).on('hashchange', function() {
         hash = window.location.hash.replace("#pp", "");

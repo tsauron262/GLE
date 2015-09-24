@@ -491,8 +491,14 @@ if (count($adderrors))
 //	else if ($mode=='patient') $objectstatic=new Patient($db);
 
 	print $langs->trans("FollowingAddressCantBeLocalized",($countgeoencodedall-$countgeoencodedok)).':<br>'."\n";
+        $i=0;
 	foreach($adderrors as $object)
 	{
+            $i++;
+            if($i > 25){
+                echo "...";
+                break;
+            }
 //		$objectstatic->id=$object->id;
 //		$objectstatic->name=$object->name;
 		print $langs->trans("Name").": ".$object->name.", ".$langs->trans("Address").": ".$object->address." -> ".$object->error."<br>\n";

@@ -90,7 +90,7 @@ if ($projetid == '')
 // Security check
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_view');
 
 
 if ($_REQUEST['action'] == "addElement") {

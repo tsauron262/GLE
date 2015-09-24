@@ -22,7 +22,7 @@ require_once('../../master.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/Synopsis_Zimbra/ZimbraSoap.class.php");
 
 $tmp = $_GET["q"];
-$q = strtolower(utf8_decode($tmp));
+$q = strtolower(($tmp));
 //print $q . '<br/>';
 $limit = 10;
 if($_REQUEST['limit'].'x' != 'x')

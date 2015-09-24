@@ -122,8 +122,8 @@ function old_dol_print_object_info($object)
     if (isset($object->user_cloture) && $object->user_cloture->getFullName($langs) )
     print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("ClosedBy")."<td class='ui-widget-content'>" . $object->user_cloture->getFullName($langs);
 
-    if (isset($object->date_cloture))
-    print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("DateClosing")."<td class='ui-widget-content'>" . traiteDate($object->date_cloture,"dayhour");
+    if (isset($object->date_close))
+    print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("DateClosing")."<td class='ui-widget-content'>" . traiteDate($object->date_close,"dayhour");
 
     if (isset($object->user_rappro) && $object->user_rappro->getFullName($langs) )
     print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("ConciliatedBy")."<td class='ui-widget-content'>" . $object->user_rappro->getFullName($langs);
@@ -131,8 +131,8 @@ function old_dol_print_object_info($object)
     if (isset($object->date_rappro))
     print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("DateConciliating")."<td class='ui-widget-content'>" . traiteDate($object->date_rappro,"dayhour");
 
-    if (isset($object->date_create))
-    print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("DateCreation")."<td class='ui-widget-content'>" . traiteDate($object->date_create,"dayhour");
+    if (isset($object->datec))
+    print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("DateCreation")."<td class='ui-widget-content'>" . traiteDate($object->datec,"dayhour");
 
     if (isset($object->dateo))
     print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("Date ouverture")."<td class='ui-widget-content'>" . traiteDate($object->dateo,"dayhour");
@@ -143,8 +143,8 @@ function old_dol_print_object_info($object)
     if (isset($object->date_launch))
     print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("Date lancement")."<td class='ui-widget-content'>" . traiteDate($object->date_launch,"dayhour");
 
-    if (isset($object->date_cloture))
-    print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("Date cl&ocirc;ture")."<td class='ui-widget-content'>" . traiteDate($object->date_cloture,"dayhour");
+    if (isset($object->date_close))
+    print "<tr><th class='ui-widget-header ui-state-default'>". $langs->trans("Date cl&ocirc;ture")."<td class='ui-widget-content'>" . traiteDate($object->date_close,"dayhour");
 
 
 

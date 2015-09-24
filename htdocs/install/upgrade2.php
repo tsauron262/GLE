@@ -2668,7 +2668,7 @@ function migrate_project_user_resp($db,$langs,$conf)
 }
 
 /**
- * Migration de la table llx_projet_task_actors vers llx_element_contact
+ * Migration de la table llx_Synopsis_projet_task_actors vers llx_element_contact
  *
  * @param	DoliDB		$db		Database handler
  * @param	Translate	$langs	Object langs
@@ -2684,13 +2684,13 @@ function migrate_project_task_actors($db,$langs,$conf)
     print '<br>';
     print '<b>'.$langs->trans('MigrationProjectTaskActors')."</b><br>\n";
 
-    if ($db->DDLInfoTable(MAIN_DB_PREFIX."projet_task_actors"))
+    if ($db->DDLInfoTable(MAIN_DB_PREFIX."Synopsis_projet_task_actors"))
     {
         $error = 0;
 
         $db->begin();
 
-        $sql = "SELECT fk_projet_task, fk_user FROM ".MAIN_DB_PREFIX."projet_task_actors";
+        $sql = "SELECT fk_projet_task, fk_user FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors";
         $resql = $db->query($sql);
         if ($resql)
         {
@@ -2731,7 +2731,7 @@ function migrate_project_task_actors($db,$langs,$conf)
 
             if ($error == 0)
             {
-                $sqlDrop = "DROP TABLE ".MAIN_DB_PREFIX."projet_task_actors";
+                $sqlDrop = "DROP TABLE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors";
                 if ($db->query($sqlDrop))
                 {
                     $db->commit();

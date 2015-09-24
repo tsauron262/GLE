@@ -37,13 +37,13 @@ switch ($action)
                            t.rowid,
                            t.description,
                            t.dateDeb as task_date ,
-                           ifnull(t.fk_task_type,3) as type,
+                           ifnull(t.priority,3) as type,
                            ifnull(t.fk_task_parent,0) as fk_task_parent,
                            t.progress,
                            t.statut,
                            t.shortDesc,
                            t.url
-                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_task as t
+                      FROM ".MAIN_DB_PREFIX."projet_task as t
                      WHERE t.rowid = ".$taskId;
         $sql = $db->query($requete);
         //$cnt = 0;
@@ -108,7 +108,7 @@ switch ($action)
                 $description = html_entity_decode(addslashes(('x'.$taskName != 'x' ?$taskName." ":"").($secTaskName."x"!="x"?$secTaskName." ":"").$taskDesc));
                 $parentId="NULL";
                 $progress = 0;
-                $fk_task_type=2;
+                $priority=2;
                 $datedeb = date("Y-m-d H:i");
                 $statut="open";
                 $db->begin();
@@ -126,9 +126,9 @@ switch ($action)
 
                 $duration = floatval($res->qty) * floatval($product->duration_value) * ($arrDuration[$product->duration_unit] > 0 ? intval($arrDuration[$product->duration_unit]):1);
                 $duration = preg_replace('/,/','.',$duration);
-                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_projet_task
-                                        (fk_projet, fk_task_parent, title, dateDeb, fk_user_creat,statut,note,progress,description,color,url,fk_task_type , shortDesc, level)
-                                 VALUES ($project_id,$parentId, '$fullTaskName', '$datedeb', ".$user->id.",'$statut','$note', $progress,'$description', '$color', '$url', $fk_task_type,'$shortDescription',$level)";
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."projet_task
+                                        (fk_projet, fk_task_parent, title, dateDeb, fk_user_creat,statut,note,progress,description,color,url,priority , shortDesc, level)
+                                 VALUES ($project_id,$parentId, '$fullTaskName', '$datedeb', ".$user->id.",'$statut','$note', $progress,'$description', '$color', '$url', $priority,'$shortDescription',$level)";
                 $sql1 = $db->query($requete);
                 if ($sql1)
                 {
@@ -190,7 +190,7 @@ switch ($action)
                 $role = $_REQUEST['role'.$id];
                 $dur = $_REQUEST['dur'.$id];
 
-                $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$id;
+                $requete = "DELETE FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$id;
                 $sql = $db->query($requete);
                 $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors WHERE fk_projet_task = ".$id;
                 $sql1 = $db->query($requete);
@@ -198,7 +198,7 @@ switch ($action)
                 if ($sql && $sql1)
                 {
                     $bool=true;
-                    $requete= "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_projet_task_time
+                    $requete= "INSERT INTO ".MAIN_DB_PREFIX."projet_task_time
                                            (fk_task,task_date,task_duration,fk_user)
                                     VALUES (".$id.",'".$debdateUS."',".intval($dur * 3600).",".$userId.")";
                     $sql = $db->query($requete);
@@ -211,11 +211,11 @@ switch ($action)
                     if (!$sql) $bool = false;
                 }
 
-                $requete = "SELECT sum(task_duration) as dur FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$id;
+                $requete = "SELECT sum(task_duration) as dur FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$id;
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
                 $tot = $res->dur;
-                $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_projet_task SET duration = ".$tot . " WHERE rowid = ".$id;
+                $requete = "UPDATE ".MAIN_DB_PREFIX."projet_task SET duration = ".$tot . " WHERE rowid = ".$id;
                 $sql = $db->query($requete);
 
 
@@ -245,7 +245,7 @@ switch ($action)
             $url = 'http://'.$url;
         }
 
-        $fk_task_type= $_REQUEST['type'];
+        $priority= $_REQUEST['type'];
 
         $statut = $_REQUEST['statut']; //closed or opened
 
@@ -268,7 +268,7 @@ switch ($action)
         {
             //Get parent Level
             $requete = "SELECT level
-                          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+                          FROM ".MAIN_DB_PREFIX."projet_task
                          WHERE rowid = ".$parentId;
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
@@ -279,9 +279,9 @@ switch ($action)
 
 
         $db->begin();
-        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_projet_task
-                                (fk_projet, fk_task_parent, title, dateDeb, fk_user_creat,statut,note,progress,description,color,url,fk_task_type , shortDesc, level)
-                         VALUES ($project_id,$parentId, '$name', '$debdateUS', $userid,'$statut','$note', $progress,'$description', '$color', '$url', $fk_task_type,'$shortDescription',$level)";
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."projet_task
+                                (fk_projet, fk_task_parent, title, dateDeb, fk_user_creat,statut,note,progress,description,color,url,priority , shortDesc, level)
+                         VALUES ($project_id,$parentId, '$name', '$debdateUS', $userid,'$statut','$note', $progress,'$description', '$color', '$url', $priority,'$shortDescription',$level)";
         $sql = $db->query($requete);
         if ($sql)
         {
@@ -330,7 +330,7 @@ switch ($action)
         {
             $url = 'http://'.$url;
         }
-        $fk_task_type = $_REQUEST['type'];
+        $priority = $_REQUEST['type'];
 
         $datedeb = $_REQUEST['datedeb'];
         $debdateUS="";
@@ -348,7 +348,7 @@ switch ($action)
         //Get parent Level
         if ($parentId . "x" != "x")
         {
-            $requete = "SELECT level FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE rowid = ".$parentId;
+            $requete = "SELECT level FROM ".MAIN_DB_PREFIX."projet_task WHERE rowid = ".$parentId;
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $level = $res->level + 1;
@@ -364,7 +364,7 @@ switch ($action)
             $parentId = "NULL";
         }
 
-        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_projet_task
+        $requete = "UPDATE ".MAIN_DB_PREFIX."projet_task
                        SET fk_task_parent = $parentId,
                            title = '".utf8_decode($name)."',
                            dateDeb = '$debdateUS',
@@ -374,7 +374,7 @@ switch ($action)
                            shortDesc = '".utf8_decode($shortDescription)."',
                            url = '$url',
                            statut = '$statut',
-                           fk_task_type = $fk_task_type,
+                           priority = $priority,
                            level = $level
                      WHERE rowid = ".$taskId;
 
@@ -409,14 +409,14 @@ switch ($action)
     case "listUser":
     {
         $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user,
-                           (".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_duration / 3600) as dur,
-                           ".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_date,
+                           (".MAIN_DB_PREFIX."projet_task_time.task_duration / 3600) as dur,
+                           ".MAIN_DB_PREFIX."projet_task_time.task_date,
                            ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.role
-                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time, ".MAIN_DB_PREFIX."Synopsis_projet_task_actors
-                     WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
-                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_user
+                      FROM ".MAIN_DB_PREFIX."projet_task_time, ".MAIN_DB_PREFIX."Synopsis_projet_task_actors
+                     WHERE ".MAIN_DB_PREFIX."projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".MAIN_DB_PREFIX."projet_task_time.fk_user
                        AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.type = 'user'
-                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".$taskId;
+                       AND ".MAIN_DB_PREFIX."projet_task_time.fk_task = ".$taskId;
         $sql = $db->query($requete);
 
         while($res = $db->fetch_object($sql)){
@@ -433,12 +433,12 @@ switch ($action)
     {
         $db->begin();
 
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE rowid = ".$taskId;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."projet_task WHERE rowid = ".$taskId;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         $dateDeb = $res->dateDeb;
 
-        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$taskId;
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$taskId;
         $sql = $db->query($requete);
         $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors WHERE fk_projet_task = ".$taskId;
         $sql1 = $db->query($requete);
@@ -461,7 +461,7 @@ switch ($action)
                             $debdateUS = $arr[3]."-".$arr[2]."-".$arr[1]." ".$arr[4].":".$arr[5];
                         }
                         if ($debdateUS) $dateDeb = $debdateUS;
-                        $requete= "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_projet_task_time
+                        $requete= "INSERT INTO ".MAIN_DB_PREFIX."projet_task_time
                                                (fk_task,task_date,task_duration,fk_user)
                                         VALUES (".$taskId.",'".$dateDeb."',".intval($dur * 3600).",".$userId.")";
                         $sql = $db->query($requete);
@@ -477,11 +477,11 @@ switch ($action)
                 }
             }
             if ($bool) $db->commit();
-            $requete = "SELECT sum(task_duration) as dur FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$taskId;
+            $requete = "SELECT sum(task_duration) as dur FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$taskId;
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $tot = $res->dur;
-            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_projet_task SET duration = ".$tot . " WHERE rowid = ".$taskId;
+            $requete = "UPDATE ".MAIN_DB_PREFIX."projet_task SET duration = ".$tot . " WHERE rowid = ".$taskId;
             $sql = $db->query($requete);
 
         } else {
@@ -502,7 +502,7 @@ switch ($action)
         if ($result < 0) { $error++; $errors=$interface->errors; }
          //Fin appel triggers
 
-        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."projet_task
                      WHERE rowid = ".$taskId;
         $sql = $db->query($requete);
         if ($sql)

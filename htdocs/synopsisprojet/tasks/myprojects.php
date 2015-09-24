@@ -52,8 +52,8 @@ $imgPath = DOL_URL_ROOT."/Synopsis_Common/images";
 
 $js  = '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
 $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 $js .= "<style type='text/css'>body { position: static; }</style>";
 $js .= "<style type='text/css'>.ui-progressbar{ height: 13px; background-color: #ffffff; margin: 0px; float: left; width: 100%;}</style>";
 $js .= "<style type='text/css'>.ui-progressbar-value{ border:1px solid #000000;float: left; width: 100%; }</style>";
@@ -79,7 +79,7 @@ $(document).ready(function(){
             url: "ajax/listProj_json.php?userId="+userId+get,
             colNames:['id', 'D&eacute;signation','Date de d&eacute;but', 'Statut','Client','Taille &eacute;quipe',"Responsable"],
             colModel:[  {name:'id',index:'id', width:55, hidden:true,key:true,hidedlg:true},
-                        {name:'title',index:'title', width:90},
+                        {name:'label',index:'label', width:90},
                         {name:'dateo',index:'dateo', width:90, },
                         {name:'statut',index:'statut', width:80, align:"right"},
                         {name:'socname',index:'socname', width:80, align:"center"},
@@ -133,7 +133,7 @@ $(document).ready(function(){
                         colModel: [ {name:'id',index:'id', width:55, hidden:true,key:true,hidedlg:true,search:false},
                                     {name:'acto',index:'acto', width:80, align:"center"},
                                     {name:'role',index:'role', width:80, align:"center"},
-                                    {name:'title',index:'title', width:90},
+                                    {name:'label',index:'label', width:90},
                                     {name:'statut',index:'statut', width:80, align:"center",editoptions:{value:"0:Selection;1:Brouillon;2:Valider;3:Cloturer"}},
                                     {name:'progress',index:'progress', width:80, align:"center"},
                                     {name:'task_date',index:'task_date', width:90, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},

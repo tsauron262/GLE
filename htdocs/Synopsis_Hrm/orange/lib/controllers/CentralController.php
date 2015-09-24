@@ -1794,7 +1794,7 @@ switch ($moduletype) {
                                                                                             $taskdate = date("Y-m-d H:i:s",$debts);
                                                                                         }
 
-                                                                                        $requete = "INSERT INTO babel_projet_task_time_effective
+                                                                                        $requete = "INSERT INTO babel_Synopsis_projet_task_time_effective
                                                                                                                 (fk_task,task_date_effective,task_duration_effective,fk_user,note)
                                                                                                          VALUES ($GleTaskId, '$taskdate', $taskDuration, $GleUserId,'$taskNote')";
                                                                                         $db->query($requete);

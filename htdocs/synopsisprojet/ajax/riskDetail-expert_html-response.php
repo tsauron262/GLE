@@ -980,12 +980,12 @@ function editInPlaceRet(obj)
             <ul id="gallery" class="gallery ui-helper-reset ui-helper-clearfix" style="width: 150px; z-index: 10000">
 
 <?php
-$requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.title,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
-         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_risk ON ".MAIN_DB_PREFIX."Synopsis_projet_risk.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+$requete = "SELECT ".MAIN_DB_PREFIX."projet_task.label,
+                   ".MAIN_DB_PREFIX."projet_task.rowid
+              FROM ".MAIN_DB_PREFIX."projet_task
+         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_risk ON ".MAIN_DB_PREFIX."Synopsis_projet_risk.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
              WHERE ".MAIN_DB_PREFIX."Synopsis_projet_risk.fk_risk_group IS NULL
-               AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$project_id;
+               AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$project_id;
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql))
 {

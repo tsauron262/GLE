@@ -45,11 +45,11 @@ require_once(DOL_DOCUMENT_ROOT."/synopsisprojet/class/task.class.php");
 $langs->load("synopsisproject@synopsisprojet");
 $langs->load("companies");
 
-/*function llxHeader($head = "", $title="", $help_url='')
+/*function llxHeader($head = "", $label="", $help_url='')
 {
   global $langs;
 
-  top_menu($head, $title,"",1);
+  top_menu($head, $label,"",1);
 
   $menu = new Menu();
 

@@ -155,11 +155,11 @@ switch ($action)
                        montantHT as cout,
 			".MAIN_DB_PREFIX."Synopsis_global_ressources.nom as factureRef,
 			".MAIN_DB_PREFIX."Synopsis_global_resatype.name as commandRef,
-			".MAIN_DB_PREFIX."Synopsis_projet_task.title as tache
+			".MAIN_DB_PREFIX."projet_task.title as tache
                   FROM ".MAIN_DB_PREFIX."user,
-                       ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2, ".MAIN_DB_PREFIX."Synopsis_projet_task,".MAIN_DB_PREFIX."Synopsis_global_resatype,".MAIN_DB_PREFIX."Synopsis_global_ressources
+                       ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2, ".MAIN_DB_PREFIX."projet_task,".MAIN_DB_PREFIX."Synopsis_global_resatype,".MAIN_DB_PREFIX."Synopsis_global_ressources
                  WHERE ".MAIN_DB_PREFIX."user.rowid = ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2.acheteur_id 
-			AND ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2.fk_task
+			AND ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2.fk_task
 			AND ".MAIN_DB_PREFIX."Synopsis_global_ressources.id = ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2.fk_facture_fourn
 			AND ".MAIN_DB_PREFIX."Synopsis_global_resatype.id = ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2.fk_commande_fourn
                    AND ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa2.fk_projet = ".$projId;

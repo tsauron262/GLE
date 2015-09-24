@@ -42,7 +42,7 @@ if ($projetid == '')
 $socid = 0;
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_view');
 
 
 $jspath = DOL_URL_ROOT . "/Synopsis_Common/jquery";
@@ -50,17 +50,18 @@ $jqueryuipath = DOL_URL_ROOT . "/Synopsis_Common/jquery/ui";
 $css = DOL_URL_ROOT . "/Synopsis_Common/css";
 $imgPath = DOL_URL_ROOT . "/Synopsis_Common/images";
 
-$js = '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/ui.jqgrid.css" />';
-$js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/jquery.searchFilter.css" />';
-$js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-$js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+$js = '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-4.5/css/ui.jqgrid.css" />';
+//$js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-4.5/css/jquery.searchFilter.css" />';
+//$js .= ' <script src="' . $jspath . '/jqGrid-4.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+$js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+$js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 $js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.selectmenu.js" type="text/javascript"></script>';
 $js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.datetimepicker.js" type="text/javascript"></script>';
 
 
 //$js .= ' <script src="'.$jqueryuipath.'/ui.slider.js" type="text/javascript"></script>';
 
-$js .= ' <script src="' . $jspath . '/jqGrid-3.5/plugins/jquery.contextmenu.js" type="text/javascript"></script>';
+$js .= ' <script src="' . $jspath . '/jqGrid-4.5/plugins/jquery.contextmenu.js" type="text/javascript"></script>';
 
 
 
@@ -138,7 +139,7 @@ jQuery(document).ready(function(){
             url: "ajax/listTask_json.php?lightMode=1&projId="+projetId+get,
             colNames: ['id', 'D&eacute;signation','Date de d&eacute;but pr&eacute;vue','Avt Q.', 'Dur&eacute;e pr&eacute;vue','Temps pass&eacute;','Statut'],
             colModel: [ {name:'id',index:'rowid', width:5, hidden:true,key:true,hidedlg:true},
-                        {name:'title',index:'title', width:100, align: "center"},
+                        {name:'label',index:'label', width:100, align: "center"},
                         {name:'task_date',index:'task_date', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
                         {name:'progress',index:'progress', width:75, align:"center"},
                         {name:'task_duration',index:'task_duration', width:75, align:"center"},
@@ -198,7 +199,7 @@ jQuery(document).ready(function(){
                             align:"center",
                             width: 150,
                         },
-                        {name:'dateDeb',index:'dateDeb', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
+                        {name:'dateo',index:'dateo', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
                         {name:'dateFin',index:'dateFin', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
                         {
                             name:"duration",
@@ -206,7 +207,7 @@ jQuery(document).ready(function(){
                             width:80,
                             align:"center",
                         },
-                        {name:'dateDebEff',index:'dateDebEff', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
+                        {name:'dateoEff',index:'dateoEff', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
                         {name:'dateFinEff',index:'dateFinEff', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
                         {
                             name:"duration_effective",
@@ -293,7 +294,7 @@ EOF;
         autoOpen: false,
         modal: true ,
         show: 'slide',
-        title: 'Ajustement d\'une t&acirc;che',
+        label: 'Ajustement d\'une t&acirc;che',
         width: 740,
         position: "center",
         bgiframe: true,
@@ -367,7 +368,7 @@ EOF;
         autoOpen: false,
         modal: true ,
         show: 'slide',
-        title: 'Importation d\'une proposition',
+        label: 'Importation d\'une proposition',
         width: 820,
         position: "center",
         bgiframe: true,
@@ -422,12 +423,12 @@ EOF;
                                 var id = jQuery(this).find('id').text();
                                 var name = jQuery(this).find('name').text();
                                 var desc = jQuery(this).find('desc').text();
-                                var dateDeb = jQuery(this).find('dateDeb').text();
+                                var dateo = jQuery(this).find('dateo').text();
                                 var userList = jQuery(this).find('userList').text();
                                 var role = jQuery(this).find('role').text();
                                 var duration = jQuery(this).find('duration').text();
-                                longHtml += "<tr><td class='ui-widget-content' title='"+desc+"'><input class='required' name='name"+id+"' value='"+name+"'>"
-                                longHtml += "    <td class='ui-widget-content' align=center><input class='required FRDate' style='text-align:center' class='datepicker' name='dateDeb"+id+"' value='"+dateDeb+"'>";
+                                longHtml += "<tr><td class='ui-widget-content' label='"+desc+"'><input class='required' name='name"+id+"' value='"+name+"'>"
+                                longHtml += "    <td class='ui-widget-content' align=center><input class='required FRDate' style='text-align:center' class='datepicker' name='dateo"+id+"' value='"+dateo+"'>";
                                 longHtml += "    <td class='ui-widget-content' align=center>"+userList;
                                 longHtml += "    <td class='ui-widget-content' align=center>"+role;
                                 longHtml += "    <td class='ui-widget-content' align=center><input class='required sup0 durationTot' style='width:4em; text-align:center' name='dur"+id+"' value='"+duration+"' >" ;
@@ -469,7 +470,7 @@ step2c = false;
         autoOpen: false,
         modal: true ,
         show: 'slide',
-        title: 'Importation d\'une commande',
+        label: 'Importation d\'une commande',
         width: 820,
         position: "center",
         bgiframe: true,
@@ -524,12 +525,12 @@ step2c = false;
                                 var id = jQuery(this).find('id').text();
                                 var name = jQuery(this).find('name').text();
                                 var desc = jQuery(this).find('desc').text();
-                                var dateDeb = jQuery(this).find('dateDeb').text();
+                                var dateo = jQuery(this).find('dateo').text();
                                 var userList = jQuery(this).find('userList').text();
                                 var role = jQuery(this).find('role').text();
                                 var duration = jQuery(this).find('duration').text();
-                                longHtml += "<tr><td class='ui-widget-content' title='"+desc+"'><input class='required' name='name"+id+"' value='"+name+"'>"
-                                longHtml += "    <td class='ui-widget-content' align=center><input class='required FRDate' style='text-align:center' class='datepicker' name='dateDeb"+id+"' value='"+dateDeb+"'>";
+                                longHtml += "<tr><td class='ui-widget-content' label='"+desc+"'><input class='required' name='name"+id+"' value='"+name+"'>"
+                                longHtml += "    <td class='ui-widget-content' align=center><input class='required FRDate' style='text-align:center' class='datepicker' name='dateo"+id+"' value='"+dateo+"'>";
                                 longHtml += "    <td class='ui-widget-content' align=center>"+userList;
                                 longHtml += "    <td class='ui-widget-content' align=center>"+role;
                                 longHtml += "    <td class='ui-widget-content' align=center><input class='required sup0 durationTot' style='width:4em; text-align:center' name='dur"+id+"' value='"+duration+"' >" ;
@@ -571,7 +572,7 @@ step2c = false;
         autoOpen: false,
         modal: true ,
         show: 'slide',
-        title: 'Suppression d\'une t&acirc;che',
+        label: 'Suppression d\'une t&acirc;che',
         width: 740,
         position: "center",
         bgiframe: true,
@@ -600,7 +601,7 @@ step2c = false;
         autoOpen: false,
         modal: true ,
         show: 'slide',
-        title: 'Modification d\'une t&acirc;che',
+        label: 'Modification d\'une t&acirc;che',
         width: 830,
         position: "center",
         bgiframe: true,
@@ -619,10 +620,10 @@ step2c = false;
 
                     var parentId = jQuery(msg).find('pParent').text();
                     var ModtypeId = jQuery(msg).find('pType').text();
-                    /*jQuery("#Modparent").selectmenu('valueById',parentId);
-                    jQuery("#Modtype").selectmenu('valueById',ModtypeId);*/
+                    jQuery("#Modparent").val(parentId);
+                    jQuery("#Modtype").val(ModtypeId);
                     var statut = jQuery(msg).find('pStatut').text();
-                    /*jQuery('#Modstatut').selectmenu('valueById',statut);*/
+                    jQuery('#Modstatut').val(statut);
                     var comp = jQuery(msg).find('pComp').text();
                     comp = parseFloat(comp);
                     jQuery("#Modslider").slider('value',(comp > 0?comp:0));
@@ -703,7 +704,7 @@ step2c = false;
         autoOpen: false,
         modal: true ,
         show: 'slide',
-        title: 'Ajouter une t&acirc;che',
+        label: 'Ajouter une t&acirc;che',
         width: 830,
         bgiframe: true,
         open: function(){
@@ -871,7 +872,7 @@ EOF;
 }
 
 
-llxHeader($js, $langs->trans("Tasks"), "Tasks", "", '', '', array('/Synopsis_Common/jquery/jquery.validate.min.js', '/includes/jquery/js/jquery-ui-latest.custom.min.js'));
+llxHeader($js, $langs->trans("Tasks"), "Tasks", "", '', '', array('/Synopsis_Common/jquery/jquery.validate.min.js'/*, '/includes/jquery/js/jquery-ui-latest.custom.min.js'*/));
 
 $projet = new SynopsisProject($db);
 $projet->fetch($_GET["id"]);
@@ -915,26 +916,26 @@ print '</div>';
 
 //Importer depuis la proposition
 //Nouvelle tache
-// fk_projet   fk_task_parent  title   duration_effective  fk_user_creat   statut  note    progress    description color   url fk_task_type    shortDesc   level   tms
+// fk_projet   fk_task_parent  label   duration_effective  fk_user_creat   statut  note    progress    description color   url priority    shortDesc   level   tms
 $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
+              FROM " . MAIN_DB_PREFIX . "projet_task
              WHERE fk_projet = " . $projetid;
 $sql = $db->query($requete);
 
 $optDependStr = "";
 $optGrpStr = "";
 while ($res = $db->fetch_object($sql)) {
-    $optDependStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
+    $optDependStr .= "<option value='" . $res->rowid . "'>" . $res->label . "</option>";
     //si c'est un group
-    if ($res->fk_task_type == 3) {
-        $optGrpStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
+    if ($res->priority == 3) {
+        $optGrpStr .= "<option value='" . $res->rowid . "'>" . $res->label . "</option>";
     }
 }
 foreach (array("0" => array("id" => 'Moddialog', "legend" => 'Modifier une t&acirc;che', "mode" => "Mod"),
  "1" => array("id" => 'adddialog', "legend" => 'Ajouter une t&acirc;che', "mode" => "add")
 )
 as $key => $val) {
-    print '<div style="display:none;" id="' . $val["id"] . '" title="' . $val['legend'] . '" style="background-color:#FFFFFF;   width: 870px; border: 1px Solid #CCCCCC;">';
+    print '<div style="display:none;" id="' . $val["id"] . '" label="' . $val['legend'] . '" style="background-color:#FFFFFF;   width: 870px; border: 1px Solid #CCCCCC;">';
     print ' <div><form onSubmit="return false" id="' . $val['mode'] . 'Form">';
     print '    <fieldset style="padding :10px; margin: 10px;">';
     print '        <legend>' . $val['legend'] . '</legend>';
@@ -1154,7 +1155,7 @@ if ($user->rights->synopsisprojet->attribution) {
 }
 
 print "<div id='Assocdialog'>";
-$requete = "SELECT p.* FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_projet p2 WHERE p.fk_soc = p2.fk_soc AND p2.rowid = " . $projetid;
+$requete = "SELECT p.* FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_projet_view p2 WHERE p.fk_soc = p2.fk_soc AND p2.rowid = " . $projetid;
 print "<form id='Assocform'>";
 print "<table width=100% cellpadding=10>";
 print "<tr><th class='ui-widget-header ui-state-default'>Proposition du projet";

@@ -95,8 +95,8 @@ print "<td style='min-width:60%;vertical-align:top;'>";
 //table dependance
 $requete = "SELECT *
               FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_depends,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task
-             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_depends.fk_depends = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+                   ".MAIN_DB_PREFIX."projet_task
+             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_depends.fk_depends = ".MAIN_DB_PREFIX."projet_task.rowid
                AND fk_task = ".$taskId;
 $sql = $db->query($requete);
 if ($db->num_rows($sql) > 0)
@@ -227,13 +227,13 @@ print "<br/>";
 //    if ("x".$val['GLEId'] != "x")
 //    {
 //        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user,
-//                           ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as tid,
-//                           ".MAIN_DB_PREFIX."Synopsis_projet_task.title as title
+//                           ".MAIN_DB_PREFIX."projet_task.rowid as tid,
+//                           ".MAIN_DB_PREFIX."projet_task.title as title
 //                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-//                           ".MAIN_DB_PREFIX."Synopsis_projet_task
-//                     WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+//                           ".MAIN_DB_PREFIX."projet_task
+//                     WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
 //                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".$val['GLEId']."
-//                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$project_id;
+//                       AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$project_id;
 //        $sql=$db->query($requete);
 //        while ($res=$db->fetch_object($sql))
 //        {
@@ -241,7 +241,7 @@ print "<br/>";
 //            {
 //                //liste la quantité de jour par tache
 //                $requete = "SELECT sum(task_duration) as totDur
-//                              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time
+//                              FROM ".MAIN_DB_PREFIX."projet_task_time
 //                             WHERE fk_task = ".$res->tid. "
 //                               AND fk_user=".$res->fk_user;
 //                $sql1= $db->query($requete);

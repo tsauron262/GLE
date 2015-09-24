@@ -46,22 +46,22 @@ if($searchOn='true')
     $searchString = $_REQUEST['searchString'];
     if ($searchField == "avanc")
     {
-         $searchField = ' (SELECT avg(progress) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet = p.rowid) ';
+         $searchField = ' (SELECT avg(progress) FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_projet = p.rowid) ';
     }
     if ($searchField == "cntMyTask")
     {
          $searchField = ' (SELECT count(*)
                              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                                  ".MAIN_DB_PREFIX."Synopsis_projet_task
+                                  ".MAIN_DB_PREFIX."projet_task
                             WHERE fk_user = '.$user_id.'
-                              AND ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                              AND ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
                               AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.type = "user"
-                              AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type <> 3
+                              AND ".MAIN_DB_PREFIX."projet_task.priority <> 3
                               AND fk_projet = p.rowid ) ';
     }
-    if ($searchField == "nom" || $_REQUEST['title']){
+    if ($searchField == "nom" || $_REQUEST['label']){
         $searchField = "p.title";
-        $searchString = $_REQUEST['title'];
+        $searchString = $_REQUEST['label'];
     }
     if ($searchField == "socname" || $_REQUEST['socname']){
         $searchField = "s.nom";
@@ -136,7 +136,7 @@ if($searchOn='true')
 
 
 $SQL = "SELECT count(*) as cnt
-          FROM ".MAIN_DB_PREFIX."Synopsis_projet as p
+          FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p
      LEFT JOIN ".MAIN_DB_PREFIX."societe as s on s.rowid = p.fk_soc";
     if (!$user->rights->societe->client->voir && !$socid) $SQL .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $SQL .= "
@@ -175,7 +175,7 @@ $SQL = "SELECT p.rowid as id,
                p.title as nom, 
                p.ref as ref,
                date_format(p.dateo,'%d/%m/%Y') as dateo,
-               (SELECT avg(progress) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+               (SELECT avg(progress) FROM ".MAIN_DB_PREFIX."projet_task
                                     WHERE fk_projet = p.rowid) as avanc, p.fk_statut as statut,
                s.rowid as socid,
                s.nom as socname";
@@ -184,16 +184,16 @@ if (!$user->rights->societe->client->voir && !$socid) $SQL .= ", sc.fk_soc, sc.f
 $SQL .= "
                , (SELECT count(*)
                   FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                       ".MAIN_DB_PREFIX."Synopsis_projet_task
+                       ".MAIN_DB_PREFIX."projet_task
                  WHERE fk_user = $user_id
-                   AND ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
-                   AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type <> 3
+                   AND ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                   AND ".MAIN_DB_PREFIX."projet_task.priority <> 3
                    AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.type = 'user'
                    AND fk_projet = p.rowid ) as cntMyTask,
                p.fk_user_resp
           FROM ";
     if (!$user->rights->societe->client->voir && !$socid) $SQL .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
-$SQL .= " ".MAIN_DB_PREFIX."Synopsis_projet as p ";
+$SQL .= " ".MAIN_DB_PREFIX."Synopsis_projet_view as p ";
 $SQL .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on s.rowid = p.fk_soc";
 $SQL .= "
          WHERE 1 = 1";
@@ -227,6 +227,7 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     $soc->fetch($row['socid']);
     $responce->rows[$i]['id']=$row['id'];
     $localUser = new User($db);
+    if($row['fk_user_resp'] > 0)
     $localUser->fetch($row['fk_user_resp']);
     require_once DOL_DOCUMENT_ROOT . '/synopsisprojet/class/synopsisproject.class.php';
     $proj = new Projet($db);

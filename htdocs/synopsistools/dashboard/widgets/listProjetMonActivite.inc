@@ -44,9 +44,9 @@ function widget_listProjetMonActivite() {
     {
         /* Affichage de la liste des projets de la semaine */
         $sql = "SELECT p.title, p.rowid, sum(tt.task_duration) as total";
-        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet as p";
-        $sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task as t";
-        $sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt";
+        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
+        $sql .= " , ".MAIN_DB_PREFIX."projet_task as t";
+        $sql .= " , ".MAIN_DB_PREFIX."projet_task_time as tt";
         $sql .= " WHERE t.fk_projet = p.rowid";
         $sql .= " AND tt.fk_task = t.rowid";
         $sql .= " AND tt.fk_user = ".$user->id;
@@ -82,9 +82,9 @@ function widget_listProjetMonActivite() {
         $table .= "</tr>\n";
 
         $sql = "SELECT p.title, p.rowid, sum(tt.task_duration) as total";
-        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet as p";
-        $sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task as t";
-        $sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt";
+        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
+        $sql .= " , ".MAIN_DB_PREFIX."projet_task as t";
+        $sql .= " , ".MAIN_DB_PREFIX."projet_task_time as tt";
         $sql .= " WHERE t.fk_projet = p.rowid";
         $sql .= " AND tt.fk_task = t.rowid";
         $sql .= " AND tt.fk_user = ".$user->id;
@@ -125,9 +125,9 @@ function widget_listProjetMonActivite() {
         $table .= "</tr>\n";
 
         $sql = "SELECT p.title, p.rowid, sum(tt.task_duration) as total";
-        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet as p";
-        $sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task as t";
-        $sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt";
+        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
+        $sql .= " , ".MAIN_DB_PREFIX."projet_task as t";
+        $sql .= " , ".MAIN_DB_PREFIX."projet_task_time as tt";
         $sql .= " WHERE t.fk_projet = p.rowid";
         $sql .= " AND tt.fk_task = t.rowid";
         $sql .= " AND tt.fk_user = ".$user->id;

@@ -75,15 +75,15 @@ class maj {
             $this->netoyerTables($tab);
 
 //            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
-//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
+//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet_view (rowid) 
 //                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
 //            $this->queryD($requete);
 //            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "propal DROP FOREIGN KEY fk_propal_fk_projet ,
-//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
+//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet_view (rowid) 
 //                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
 //            $this->queryD($requete);
 //            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "facture DROP FOREIGN KEY fk_facture_fk_projet ,
-//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
+//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet_view (rowid) 
 //                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
 //            $this->queryD($requete);
 //            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "categorie DROP KEY uk_categorie_ref;";

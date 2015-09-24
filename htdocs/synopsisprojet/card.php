@@ -66,7 +66,7 @@ if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add"
 // SecuritrestrictedAreay check
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_view');
 
 
 /*
@@ -135,7 +135,7 @@ if ($_REQUEST['action'] == 'add' && $user->rights->synopsisprojet->creer) {
 
 if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
     if (!$_POST["cancel"]) {
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE rowid=" . $_POST['id'];
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_view WHERE rowid=" . $_POST['id'];
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         $_POST["ref"] = $res->ref;
@@ -153,7 +153,7 @@ if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
         }
         if (!$error) {
             $projet = new SynopsisProject($db);
-            $projet->id = $_POST["id"];
+            $projet->fetch($_POST["id"]);
             $projet->ref = $_POST["ref"];
             $projet->title = $_POST["title"];
             $projet->socid = $_POST["socid"];
@@ -189,8 +189,8 @@ if ($_REQUEST['action'] != 'create') {
     $jspath = DOL_URL_ROOT . '/Synopsis_Common/jquery/';
     $jqueryuipath = DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/';
 
-    $header = '<script language="javascript" src="' . $jspath . 'jquery.dimensions.js"></script>' . "\n";
-    $header .= '<script language="javascript" src="' . $jspath . 'jquery.tooltip.js"></script>' . "\n";
+//    $header = '<script language="javascript" src="' . $jspath . 'jquery.dimensions.js"></script>' . "\n";
+//    $header .= '<script language="javascript" src="' . $jspath . 'jquery.tooltip.js"></script>' . "\n";
     $header .= "<style type='text/css'>.ui-progressbar{ height: 13px; background-color: #ffffff; margin: 0px;}</style>";
     $header .= "<style type='text/css'>.ui-progressbar-value{ border:1px solid #000000; }</style>";
 
@@ -387,7 +387,7 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
         //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("ProjectBegin").'</th>
         //         <td class="ui-widget-content">'.date('d/m/Y',strtotime($projet->date_valid)).'</td>';
         //print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("ProjectEnd").'</th>
-        //           <td class="ui-widget-content">'.date('d/m/Y',strtotime($projet->date_cloture)).'</td></tr>';
+        //           <td class="ui-widget-content">'.date('d/m/Y',strtotime($projet->date_close)).'</td></tr>';
         print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("ProjectActors") . '</th>
                    <td class="ui-widget-content" id="actoTooltip" colspan=3>';
         $arr = array();
@@ -403,11 +403,11 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
                                 //Tooltip
                                 print "<div class='jqtooltip'><div style='display:none;' class='jqtoolTipInfo'>";
                                 print $val['userobj']->getNomUrl(1);
-                                $requete2 = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.title , ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.role
+                                $requete2 = "SELECT ".MAIN_DB_PREFIX."projet_task.label , ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.role
                                            FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                                                ".MAIN_DB_PREFIX."Synopsis_projet_task
-                                          WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
-                                            AND fk_user = " . $val['userid'] . " AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = " . $_REQUEST['id'] . " ORDER BY role ASC";
+                                                ".MAIN_DB_PREFIX."projet_task
+                                          WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                                            AND fk_user = " . $val['userid'] . " AND ".MAIN_DB_PREFIX."projet_task.fk_projet = " . $_REQUEST['id'] . " ORDER BY role ASC";
                                 $sql2 = $db->query($requete2);
                                 print "<table width=100% border=1 style='border-collapse: collapse; min-width:300px '>";
                                 print "<tr class='ui-widget-header ui-state-default'><th align='center' style='width: 200px'>T&acirc;che</th><th align='center'>R&ocirc;le</th></tr>";

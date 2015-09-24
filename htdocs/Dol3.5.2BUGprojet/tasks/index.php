@@ -188,8 +188,8 @@ llxFooter('$Date: 2008/06/19 08:50:59 $ - $Revision: 1.60 $');
 //
 //$sql = "SELECT p.title, p.rowid, count(t.rowid)";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-//$sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet as p";
-//$sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task as t";
+//$sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
+//$sql .= " , ".MAIN_DB_PREFIX."projet_task as t";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llxsociete_commerciaux as sc";
 //$sql .= " WHERE t.fk_projet = p.rowid";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -243,10 +243,10 @@ llxFooter('$Date: 2008/06/19 08:50:59 $ - $Revision: 1.60 $');
 //
 //$sql = "SELECT p.title, p.rowid, sum(tt.task_duration), ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.task_duration_effective),0)";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-//$sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet as p";
-//$sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task as t";
+//$sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
+//$sql .= " , ".MAIN_DB_PREFIX."projet_task as t";
 //$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_task = t.rowid";
-//$sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt";
+//$sql .= " , ".MAIN_DB_PREFIX."projet_task_time as tt";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llxsociete_commerciaux as sc";
 //$sql .= " WHERE t.fk_projet = p.rowid";
 //$sql .= " AND tt.fk_task = t.rowid";
@@ -285,7 +285,7 @@ llxFooter('$Date: 2008/06/19 08:50:59 $ - $Revision: 1.60 $');
 ////$projet = new Project($db);
 //
 //$requete = "SELECT *
-//              FROM ".MAIN_DB_PREFIX."Synopsis_projet
+//              FROM ".MAIN_DB_PREFIX."Synopsis_projet_view
 //             WHERE fk_statut = 0";
 //$sql = $db->query($requete);
 //print "<table border = 1 style='border-collapse: collapse; text-align: center; width: 100%;'>";
@@ -298,9 +298,9 @@ llxFooter('$Date: 2008/06/19 08:50:59 $ - $Revision: 1.60 $');
 //    $projet->fetch($res->rowid);
 //    $requete1 = "SELECT t.title,
 //                        ifnull((SELECT SUM(task_duration_effective) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective WHERE fk_task = t.rowid),0) as sduration_effective,
-//                        ifnull((SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = t.rowid),0) as sduration,
+//                        ifnull((SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = t.rowid),0) as sduration,
 //                        t.progress, t.rowid
-//                   FROM ".MAIN_DB_PREFIX."Synopsis_projet_task as t
+//                   FROM ".MAIN_DB_PREFIX."projet_task as t
 //                  WHERE t.fk_projet = ".$res->rowid;
 ////1 affiche les taches warning :> débordement , diff % avancement et % de temps important
 //    $sql1 = $db->query($requete1);

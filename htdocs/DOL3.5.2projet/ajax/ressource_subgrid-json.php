@@ -126,7 +126,7 @@ switch ($action)
         $SQL = " SELECT count(*) as cnt
                    FROM ".MAIN_DB_PREFIX."Synopsis_global_ressources,
                         ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa
-              LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task ON ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+              LEFT JOIN ".MAIN_DB_PREFIX."projet_task ON ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_projet_task = ".MAIN_DB_PREFIX."projet_task.rowid
                   WHERE ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_ressource =   ".MAIN_DB_PREFIX."Synopsis_global_ressources.id
                     AND ".MAIN_DB_PREFIX."Synopsis_global_ressources.isGroup = 0
                     AND ".MAIN_DB_PREFIX."Synopsis_global_ressources.id = ".$ressource_id."
@@ -163,12 +163,12 @@ switch ($action)
                         unix_timestamp(".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.datefin) as datefinF,
                         ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_user_imputation,
                         ifnull(".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_projet_task,-1) as taskId,
-                        ".MAIN_DB_PREFIX."Synopsis_projet_task.title as taskTitle,
+                        ".MAIN_DB_PREFIX."projet_task.title as taskTitle,
                         ".MAIN_DB_PREFIX."Synopsis_global_ressources.fk_resa_type,
                         ".MAIN_DB_PREFIX."Synopsis_global_ressources.cout
                    FROM ".MAIN_DB_PREFIX."Synopsis_global_ressources,
                         ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa
-              LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task ON ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+              LEFT JOIN ".MAIN_DB_PREFIX."projet_task ON ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_projet_task = ".MAIN_DB_PREFIX."projet_task.rowid
                   WHERE ".MAIN_DB_PREFIX."Synopsis_global_ressources_resa.fk_ressource =   ".MAIN_DB_PREFIX."Synopsis_global_ressources.id
                     AND ".MAIN_DB_PREFIX."Synopsis_global_ressources.isGroup = 0
                     AND ".MAIN_DB_PREFIX."Synopsis_global_ressources.id = ".$ressource_id."

@@ -403,9 +403,9 @@ EOF;
 print "\n";
 $requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
                        FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                            ".MAIN_DB_PREFIX."Synopsis_projet_task,
+                            ".MAIN_DB_PREFIX."projet_task,
                             ".MAIN_DB_PREFIX."user
-                      WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                      WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
                         AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".MAIN_DB_PREFIX."user.rowid
                         AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.type = 'user'
                         AND fk_projet = ".$projetid."
@@ -854,7 +854,7 @@ if ($projetid > 0)
         print '     <div style="float : left; width: 630px; height: 475px;" class="ui-corner-top ui-widget ui-widget-content " >';
         print '     <div class="ui-widget-header ui-state-default ui-corner-top" style="padding: 2px 0px 4px 4px;">Groupe</div>';
 
-        $requete = "SELECT rowid, title FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet = ".$projet->id;
+        $requete = "SELECT rowid, title FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_projet = ".$projet->id;
             $sql = $db->query($requete);
             $taskSel = "";
             while ($res=$db->fetch_object($sql))

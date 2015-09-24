@@ -45,7 +45,7 @@ $requete = "SELECT
     ".MAIN_DB_PREFIX."projet.note,
     ".MAIN_DB_PREFIX."projet_task.rowid,
     ".MAIN_DB_PREFIX."projet_task.title,
-    ".MAIN_DB_PREFIX."projet_task.statut,
+    ".MAIN_DB_PREFIX."projet_task.fk_statut,
     ".MAIN_DB_PREFIX."projet_task.note,
     ".MAIN_DB_PREFIX."projet_task_time.task_date,
     ".MAIN_DB_PREFIX."projet_task_time.task_duration,

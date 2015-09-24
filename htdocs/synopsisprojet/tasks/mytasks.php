@@ -97,8 +97,8 @@ $imgPath = DOL_URL_ROOT."/Synopsis_Common/images";
 //$js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$css.'/jquery-ui.css" />';
 $js  = '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
 $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 $js .= "<style type='text/css'>body { position: static; }</style>";
 $js .= "<style type='text/css'>.ui-progressbar{ height: 16px; background-color: #ffffff; margin: 0px; float: left; width: 100%;}</style>";
 $js .= "<style type='text/css'>.ui-progressbar-value{ border:1px solid #000000;float: left; width: 100%; }</style>";
@@ -168,7 +168,7 @@ jQuery(document).ready(function(){
                         datatype: "json",
                         colNames: ['id', 'D&eacute;signation','R&ocirc;le','Date de d&eacute;but pr&eacute;vu', 'Dur&eacute;e pr&eacute;vue','Temps Pass&eacute;'],
                         colModel: [ {name:'id',index:'id', width:5, hidden:true,key:true,hidedlg:true,search:false},
-                                    {name:'title',index:'title', width:100, align: "center"},
+                                    {name:'label',index:'label', width:100, align: "center"},
                                     {name:'role',index:'role', width:80, align:"center"},
                                     {name:'task_date',index:'task_date', width:100, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
                                     {name:'task_duration',index:'task_duration', width:75, align:"center"},
@@ -227,20 +227,20 @@ dol_fiche_head($head,  $hselected, $langs->trans("Mytasks"));
 
 
 
-//$sql = "SELECT t.rowid, t.title,
+//$sql = "SELECT t.rowid, t.label,
 //               t.fk_task_parent,
 //               t.duration_effective,
 //               tt.task_duration as duration_prevu";
 //$sql .= " ,    p.rowid as prowid,
-//               p.title as ptitle";
-//$sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_task as t";
+//               p.label as plabel";
+//$sql .= " FROM ".MAIN_DB_PREFIX."projet_task as t";
 //$sql .= " ,    ".MAIN_DB_PREFIX."Synopsis_projet_task_actors as a";
-//$sql .= " ,    ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt";
-//$sql .= " ,    ".MAIN_DB_PREFIX."Synopsis_projet as p";
+//$sql .= " ,    ".MAIN_DB_PREFIX."projet_task_time as tt";
+//$sql .= " ,    ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
 //$sql .= " WHERE p.rowid = t.fk_projet";
 //$sql .= "  AND a.fk_projet_task = t.rowid";
 //$sql .= "  AND tt.fk_task = t.rowid";
-//$sql .= "  AND t.fk_task_type <> 3";
+//$sql .= "  AND t.priority <> 3";
 //$sql .= "  AND a.fk_user = ".$user->id;
 //$sql .= " ORDER BY p.rowid, t.fk_task_parent";
 //
@@ -253,11 +253,11 @@ dol_fiche_head($head,  $hselected, $langs->trans("Mytasks"));
 //  while ($i < $num)
 //    {
 //      $obj = $db->fetch_object($resql);
-//      $tasks[$i][0] = $obj->title;
+//      $tasks[$i][0] = $obj->label;
 //      $tasks[$i][1] = $obj->fk_task_parent;
 //      $tasks[$i][2] = $obj->rowid;
 //      $tasks[$i][3] = $obj->duration_effective / 3600;
-//      $tasks[$i][4] = $obj->ptitle;
+//      $tasks[$i][4] = $obj->plabel;
 //      $tasks[$i][5] = $obj->prowid;
 //      $i++;
 //    }

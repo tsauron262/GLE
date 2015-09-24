@@ -64,7 +64,7 @@ if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add"
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_view');
 
 // Get parameters
 $page=$_GET["page"];
@@ -499,9 +499,9 @@ EOF;
 print "\n";
 $requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
                        FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                            ".MAIN_DB_PREFIX."Synopsis_projet_task,
+                            ".MAIN_DB_PREFIX."projet_task,
                             ".MAIN_DB_PREFIX."user
-                      WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                      WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
                         AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".MAIN_DB_PREFIX."user.rowid
                         AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.type = 'user'
                         AND fk_projet = ".$projetid."
@@ -699,10 +699,10 @@ function getDocs()
                     });
 
 	// Company
-	print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
-	if (! empty($object->societe->id)) print $object->societe->getNomUrl(1);
-	else print '&nbsp;';
-	print '</td></tr>';
+//	print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
+//	if (! empty($object->societe->id)) print $object->societe->getNomUrl(1);
+//	else print '&nbsp;';
+//	print '</td></tr>';
 
                     var item = jQuery('<div style=" width: 100px; height: 36px;  " class="droppabledraggable ui-widget-header ui-state-default" id='+id+'><h5 style="margin-bottom:0px; margin-top: 4px;">'+recycle_icon+text+'</h5></div>');
                         item.appendTo(list).fadeIn(function() {
@@ -710,7 +710,7 @@ function getDocs()
                         });
                     jQuery('#treeDocs').find('#'+id).removeClass('draggable').removeClass('ui-draggable').removeClass('ui-droppable');
                     jQuery('#treeDocs').find('#'+id).addClass('notdraggable');
-                });
+//                });
                 initDnD();
             }
         });
@@ -1036,7 +1036,7 @@ if ($projetid > 0)
         print '     <div style="float : left; width: 630px; height: 475px;" class="ui-corner-top ui-widget ui-widget-content " >';
         print '     <div class="ui-widget-header ui-state-default ui-corner-top" style="padding: 2px 0px 4px 4px;">Groupe</div>';
 
-        $requete = "SELECT rowid, title FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet = ".$projet->id;
+        $requete = "SELECT rowid, label as title FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_projet = ".$projet->id;
             $sql = $db->query($requete);
             $taskSel = "";
             while ($res=$db->fetch_object($sql))

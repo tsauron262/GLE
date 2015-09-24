@@ -39,7 +39,7 @@ if($searchOn=='true')
 }
 
 
-$result = $db->query("SELECT COUNT(*) AS count FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE 1=1 ".$wh);
+$result = $db->query("SELECT COUNT(*) AS count FROM ".MAIN_DB_PREFIX."Synopsis_projet_view WHERE 1=1 ".$wh);
 $row = $db->fetch_array($result,MYSQL_ASSOC);
 $count = $row['count'];
 if( $count >0 )
@@ -58,21 +58,21 @@ if ($start<0) $start = 0;
 //date fin,
 //role
 
-$SQL = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet.rowid as id,
-               ".MAIN_DB_PREFIX."Synopsis_projet.title as nom,
-               ".MAIN_DB_PREFIX."Synopsis_projet.dateo,
-               ".MAIN_DB_PREFIX."Synopsis_projet.fk_statut,
+$SQL = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid as id,
+               ".MAIN_DB_PREFIX."Synopsis_projet_view.title as nom,
+               ".MAIN_DB_PREFIX."Synopsis_projet_view.dateo,
+               ".MAIN_DB_PREFIX."Synopsis_projet_view.fk_statut,
                ".MAIN_DB_PREFIX."societe.nom as socname,
                (SELECT count(*)
                   FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                       ".MAIN_DB_PREFIX."Synopsis_projet_task
-                 WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
-                   AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type <> 3
-                   AND fk_projet = ".MAIN_DB_PREFIX."Synopsis_projet.rowid ) as cntPeople
-          FROM ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."Synopsis_projet
+                       ".MAIN_DB_PREFIX."projet_task
+                 WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                   AND ".MAIN_DB_PREFIX."projet_task.priority <> 3
+                   AND fk_projet = ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid ) as cntPeople
+          FROM ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."Synopsis_projet_view
          WHERE 1 = 1
-           AND ".MAIN_DB_PREFIX."Synopsis_projet.fk_user_resp = $user_id
-           AND ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."Synopsis_projet.fk_soc
+           AND ".MAIN_DB_PREFIX."Synopsis_projet_view.fk_user_resp = $user_id
+           AND ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_view.fk_soc
            ".$wh."
       ORDER BY $sidx $sord
          LIMIT $start , $limit";

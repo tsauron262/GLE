@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -24,7 +26,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  *
  * $Id: pre.inc.php,v 1.3 2008/01/29 19:03:40 eldy Exp $
  * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsisprojet/activity/pre.inc.php,v $
@@ -45,14 +48,14 @@ require_once(DOL_DOCUMENT_ROOT."/synopsisprojet/class/task.class.php");
 $langs->load("synopsisproject@synopsisprojet");
 $langs->load("companies");
 
-function llxHeader($head = "", $title="", $help_url='')
-{
-  global $langs;
-
-  top_menu($head, $title,"",1);
-
-  $menu = new Menu();
-  left_menu($menu->liste, $help_url);
-}
+//function llxHeader($head = "", $title="", $help_url='')
+//{
+//  global $langs;
+//
+//  top_menu($head, $title,"",1);
+//
+//  $menu = new Menu();
+//  left_menu($menu->liste, $help_url);
+//}
 
 ?>

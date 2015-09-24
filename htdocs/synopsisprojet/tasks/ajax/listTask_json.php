@@ -81,15 +81,15 @@ if ($searchOn == 'true') {
 
 
 $SQL = "SELECT count(*) as count
-          FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-     LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-     LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
+          FROM " . MAIN_DB_PREFIX . "projet_task
+     LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
+     LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "projet_task.rowid
          WHERE 1 = 1";
 if ("x" . $lightMode != "x") {
-    $SQL = "SELECT count(DISTINCT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid) as count
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-         LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-         LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid AND " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.type = 'user'
+    $SQL = "SELECT count(DISTINCT " . MAIN_DB_PREFIX . "projet_task.rowid) as count
+              FROM " . MAIN_DB_PREFIX . "projet_task
+         LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
+         LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "projet_task.rowid AND " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.type = 'user'
 
              WHERE 1 = 1";
 }
@@ -126,24 +126,24 @@ if ($start < 0)
 
 
 $SQL = "SELECT t.rowid,
-               t.title,
-               ifnull(date_format(t.dateDeb,'%d/%m/%Y'),(SELECT date_format(MIN(task_date),'%d/%m/%Y') FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time as tt WHERE tt.fk_task = t.rowid )) as task_date,
+               t.label,
+               ifnull(date_format(t.dateo,'%d/%m/%Y'),(SELECT date_format(MIN(task_date),'%d/%m/%Y') FROM " . MAIN_DB_PREFIX . "projet_task_time as tt WHERE tt.fk_task = t.rowid )) as task_date,
                a.fk_user,
                a.role,
-               (SELECT SUM(task_duration) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time as tt WHERE t.rowid = tt.fk_task) as task_duration,
+               (SELECT SUM(task_duration) FROM " . MAIN_DB_PREFIX . "projet_task_time as tt WHERE t.rowid = tt.fk_task) as task_duration,
                (SELECT SUM(task_duration_effective) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as te WHERE t.rowid = te.fk_task) as task_duration_effective
-          FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task as t
+          FROM " . MAIN_DB_PREFIX . "projet_task as t
      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors as a ON a.fk_projet_task = t.rowid
          WHERE 1 = 1";
 if ("x" . $lightMode != "x") {
     $SQL = "SELECT DISTINCT t.rowid,
-               t.title,
+               t.label,
                t.progress,
                a.fk_user,
-               ifnull(date_format(t.dateDeb,'%d/%m/%Y'),(SELECT date_format(MIN(task_date),'%d/%m/%Y') FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time as tt WHERE tt.fk_task = t.rowid )) as task_date,
-               (SELECT SUM(task_duration) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time as tt WHERE t.rowid = tt.fk_task) as task_duration,
+               ifnull(date_format(t.dateo,'%d/%m/%Y'),(SELECT date_format(MIN(task_date),'%d/%m/%Y') FROM " . MAIN_DB_PREFIX . "projet_task_time as tt WHERE tt.fk_task = t.rowid )) as task_date,
+               (SELECT SUM(task_duration) FROM " . MAIN_DB_PREFIX . "projet_task_time as tt WHERE t.rowid = tt.fk_task) as task_duration,
                (SELECT SUM(task_duration_effective) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as te WHERE t.rowid = te.fk_task) as task_duration_effective
-          FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task as t
+          FROM " . MAIN_DB_PREFIX . "projet_task as t
      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors as a ON a.fk_projet_task = t.rowid AND a.type = 'user'
 
          WHERE 1 = 1";
@@ -174,7 +174,7 @@ while ($row = $db->fetch_array($result, MYSQL_ASSOC)) {
         $task = new SynopsisProjectTask($db);
         $task->fetch($row['rowid']);
         $responce->rows[$i]['cell'] = array($row['rowid'],
-            traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['title'] . "</a>"),
+            traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['label'] . "</a>"),
             $row['task_date'],
             $row['progress'] . "%",
             sec2hour(abs($row['task_duration'])),
@@ -186,28 +186,28 @@ while ($row = $db->fetch_array($result, MYSQL_ASSOC)) {
         $responce->rows[$i]['id'] = $row['rowid'];
         $tmpuser = new User($db);
         $tmpuser->fetch($row['fk_user']);
-        $responce->rows[$i]['cell'] = array($row['rowid'], traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['title'] . "</a>"), traiteStr($row['role']), ($tmpuser->id > 0 ? $tmpuser->getNomUrl(1) : ""), $row['task_date'], sec2hour(abs($row['task_duration'])), sec2hour(abs($row['task_duration_effective'])));
+        $responce->rows[$i]['cell'] = array($row['rowid'], traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['label'] . "</a>"), traiteStr($row['role']), ($tmpuser->id > 0 ? $tmpuser->getNomUrl(1) : ""), $row['task_date'], sec2hour(abs($row['task_duration'])), sec2hour(abs($row['task_duration_effective'])));
         $i++;
     } else if ('x' . $project_id != "x") {
         $responce->rows[$i]['id'] = $row['rowid'];
         $tmpuser = new User($db);
         $tmpuser->fetch($row['fk_user']);
-        $responce->rows[$i]['cell'] = array($row['rowid'], traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['title'] . "</a>"), traiteStr($row['role']), $row['task_date'], sec2hour(abs($row['task_duration'])), sec2hour(abs($row['task_duration_effective'])));
+        $responce->rows[$i]['cell'] = array($row['rowid'], traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['label'] . "</a>"), traiteStr($row['role']), $row['task_date'], sec2hour(abs($row['task_duration'])), sec2hour(abs($row['task_duration_effective'])));
         $i++;
     } else {
         $responce->rows[$i]['id'] = $row['rowid'];
         $tmpuser = new User($db);
         $tmpuser->fetch($row['fk_user']);
-        $responce->rows[$i]['cell'] = array($row['rowid'], traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['title'] . "</a>"), $row['task_date'], sec2hour(abs($row['task_duration'])), sec2hour(abs($row['task_duration_effective'])), traiteStr(($tmpuser->id > 0 ? $tmpuser->getNomUrl(1) : "")));
+        $responce->rows[$i]['cell'] = array($row['rowid'], traiteStr("<a href='task.php?id=" . $row['rowid'] . "'>" . $row['label'] . "</a>"), $row['task_date'], sec2hour(abs($row['task_duration'])), sec2hour(abs($row['task_duration_effective'])), traiteStr(($tmpuser->id > 0 ? $tmpuser->getNomUrl(1) : "")));
         $i++;
     }
 }
 
 
 
-$responce->page = $page;
-$responce->total = $total_pages;
-$responce->records = $count;
+@$responce->page = $page;
+@$responce->total = $total_pages;
+@$responce->records = $count;
 
 
 echo json_encode($responce);

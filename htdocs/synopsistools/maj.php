@@ -245,7 +245,7 @@ llxFooter();
                 array('rowid', 'code', 'sortorder', 'active', 'libelle', 'libelle_facture', 'fdm', 'nbjour', 'decalage'),
                 array('rowid', 'code', 'sortorder', 'active', 'libelle', 'libelle_facture', 'fdm', 'nbjour', 'decalage')
             ),
-//        array("babel_projet", MAIN_DB_PREFIX."Synopsis_projet",
+//        array("babel_projet", MAIN_DB_PREFIX."Synopsis_projet_view",
 //            array(),
 //            array()
 //        ),
@@ -257,23 +257,23 @@ llxFooter();
 //            array(),
 //            array()
 //        ),
-//        array("babel_projet_task", MAIN_DB_PREFIX."Synopsis_projet_task",
+//        array("babel_projet_task", MAIN_DB_PREFIX."projet_task",
 //            array(),
 //            array()
 //        ),
-//        array("babel_projet_task_actors", MAIN_DB_PREFIX."Synopsis_projet_task_actors",
+//        array("babel_Synopsis_projet_task_actors", MAIN_DB_PREFIX."Synopsis_projet_task_actors",
 //            array(),
 //            array()
 //        ),
-//        array("babel_projet_task_time", MAIN_DB_PREFIX."Synopsis_projet_task_time",
+//        array("babel_projet_task_time", MAIN_DB_PREFIX."projet_task_time",
 //            array(),
 //            array()
 //        ),
-//        array("babel_projet_task_time_effective", MAIN_DB_PREFIX."Synopsis_projet_task_time_effective",
+//        array("babel_Synopsis_projet_task_time_effective", MAIN_DB_PREFIX."Synopsis_projet_task_time_effective",
 //            array(),
 //            array()
 //        ),
-//        array("babel_projet_task_time_special", MAIN_DB_PREFIX."Synopsis_projet_task_time_special",
+//        array("babel_Synopsis_projet_task_time_special", MAIN_DB_PREFIX."Synopsis_projet_task_time_special",
 //            array(),
 //            array()
 //        ),

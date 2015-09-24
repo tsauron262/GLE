@@ -61,8 +61,8 @@ class SynopsisProject extends CommonObject {
     public $CostRHByTaskByUser = array();
     public $CostRHByUserByTask = array();
     public $element = 'synopsisprojet';
-    public $table_element = 'Synopsis_projet';  //!< Name of table without prefix where object is stored
-    public $table_element_line = 'Synopsis_projet_task';
+    public $table_element = 'Synopsis_projet_view';  //!< Name of table without prefix where object is stored
+    public $table_element_line = 'projet_task';
     public $fk_element = 'fk_projet';
     protected $ismultientitymanaged = 1;  // 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
 
@@ -178,16 +178,31 @@ class SynopsisProject extends CommonObject {
             return -1;
         }
 
-        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet (ref, title, fk_soc, fk_user_creat, fk_user_resp, dateo, fk_statut,fk_type_projet,date_create)";
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "projet (ref, title, fk_soc, fk_user_creat, dateo, fk_statut,datec)";
         $sql.= " VALUES ('" . addslashes($this->ref) . "', '" . addslashes($this->title) . "',";
         $sql.= " " . ($this->socid > 0 ? $this->socid : "null") . ",";
         $sql.= " " . $user->id . ",";
-        $sql.= " " . $this->user_resp_id . ", " . $this->db->idate(time()) . ", 0," . ($this->type_id ? $this->type_id : "NULL") . ",now())";
+        $sql.= " " . $this->db->idate(time()) . ", 0,now())";
 
+        
+        
         dol_syslog("Project::create sql=" . $sql, LOG_DEBUG);
         $resql = $this->db->query($sql);
+        
         if ($resql) {
-            $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "Synopsis_projet");
+            $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "Synopsis_projet_view");
+            
+            
+            
+            
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_sup (rowid, fk_user_resp,fk_type_projet)";
+        $sql.= " VALUES (" . $this->id. ",";
+        $sql.= " '" . $this->user_resp_id . "'," . ($this->type_id ? $this->type_id : "NULL") . " )";
+
+        $resql = $this->db->query($sql);
+            
+            
+            
             $result = $this->id;
             if ($result > 0) {
                 // Appel des triggers
@@ -228,15 +243,23 @@ class SynopsisProject extends CommonObject {
     public function update($user) {
         global $langs, $conf;
         if (strlen(trim($this->ref)) > 0) {
-            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet";
-            $sql.= " SET ref='" . $this->ref . "'";
-            $sql.= ", title = '" . $this->title . "'";
-            $sql.= ", fk_soc = " . ($this->socid > 0 ? $this->socid : "null");
-            $sql.= ", fk_user_resp = " . $this->user_resp_id;
-            $sql.= " WHERE rowid = " . $this->id;
-
+            $sql1 = "UPDATE " . MAIN_DB_PREFIX . "projet SET";
+            $sql1.= "  ref='" . $this->ref . "'";
+            $sql1.= ", title = '" . $this->title . "'";
+            $sql1.= ", fk_soc = " . ($this->socid > 0 ? $this->socid : "null");
+            $sql1 .= " WHERE rowid = " . $this->id;
+            
+            if(!$this->tab2Ok){
+                $sql2 = "insert INTO " . MAIN_DB_PREFIX . "Synopsis_projet_sup ";
+                $sql2.= " (rowid, fk_user_resp) VALUES (".$this->id."," . $this->user_resp_id.")";
+            }
+            else{
+                $sql2 = "update " . MAIN_DB_PREFIX . "Synopsis_projet_sup SET ";
+                $sql2.= " fk_user_resp = " . $this->user_resp_id." WHERE rowid = " . $this->id;
+            }
+//die($sql2);
             dol_syslog("Project::update sql=" . $sql, LOG_DEBUG);
-            if ($this->db->query($sql)) {
+            if ($this->db->query($sql1) && $this->db->query($sql2)) {
                 $result = 0;
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -277,9 +300,11 @@ class SynopsisProject extends CommonObject {
     public $dateo = '';
 
     public function valid() {
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet SET date_valid=now(), fk_statut = 5 WHERE rowid = " . $this->id;
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_view SET fk_statut = 5 WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
-        if ($sql)
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_view SET date_valid=now() WHERE rowid = " . $this->id;
+        $sql2 = $this->db->query($requete);
+        if ($sql && $sql2)
             return(1);
         else {
             $this->error = $db->lastqueryerror . '<br/>' . $this->db->lasterror;
@@ -288,9 +313,11 @@ class SynopsisProject extends CommonObject {
     }
 
     public function launch() {
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet SET date_launch=now(), fk_statut = 10 WHERE rowid = " . $this->id;
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_view SET fk_statut = 10 WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
-        if ($sql)
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_view SET date_launch=now()  WHERE rowid = " . $this->id;
+        $sql2 = $this->db->query($requete);
+        if ($sql && $sql2)
             return(1);
         else {
             $this->error = $db->lastqueryerror . '<br/>' . $this->db->lasterror;
@@ -299,14 +326,14 @@ class SynopsisProject extends CommonObject {
     }
 
     public function info() {
-        $requete = "SELECT *  FROM " . MAIN_DB_PREFIX . "Synopsis_projet WHERE rowid = " . $this->id;
+        $requete = "SELECT *  FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $this->dateo = $res->dateo;
-        $this->date_create = $res->date_create;
+        $this->datec = $res->datec;
         $this->date_valid = $res->date_valid;
         $this->date_launch = $res->date_launch;
-        $this->date_cloture = $res->date_cloture;
+        $this->date_close = $res->date_close;
         $this->fk_user_resp = $res->fk_user_resp;
         $this->fk_user_creat = $res->fk_user_creat;
         $tmpUser = new User($this->db);
@@ -317,7 +344,7 @@ class SynopsisProject extends CommonObject {
     }
 
     public function cloture() {
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet SET date_cloture=now(),  fk_statut = 50 WHERE rowid = " . $this->id;
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_view SET date_close=now(),  fk_statut = 50 WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
         if ($sql)
             return(1);
@@ -353,15 +380,16 @@ class SynopsisProject extends CommonObject {
                        hasReferent,
                        hasTache,
                        hasTacheLight
-                  FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                       " . MAIN_DB_PREFIX . "Synopsis_projet_type";
-        $sql.= " WHERE rowid=" . $rowid . "
-                   AND " . MAIN_DB_PREFIX . "Synopsis_projet_type.id = " . MAIN_DB_PREFIX . "Synopsis_projet.fk_type_projet";
+                  FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view LEFT JOIN 
+                       " . MAIN_DB_PREFIX . "Synopsis_projet_type ON " . MAIN_DB_PREFIX . "Synopsis_projet_type.id = " . MAIN_DB_PREFIX . "Synopsis_projet_view.fk_type_projet";
+        $sql.= " WHERE rowid=" . $rowid . "";
+//        die($sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             if ($this->db->num_rows($resql)) {
                 $obj = $this->db->fetch_object($resql);
 
+                $this->tab2Ok = isset($obj->fk_user_resp);
                 $this->id = $rowid;
                 $this->ref = $obj->ref;
                 $this->title = ($obj->title != '' ? $obj->title : $obj->ref);
@@ -396,15 +424,15 @@ class SynopsisProject extends CommonObject {
 
                 $this->tasks = array();
 
-                $requete1 = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid as tid,
-                                    task_date as dateDeb,
-                                    " . MAIN_DB_PREFIX . "Synopsis_projet_task.statut as tstatut,
-                                    " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as title,
+                $requete1 = "SELECT " . MAIN_DB_PREFIX . "projet_task.rowid as tid,
+                                    task_date as dateo,
+                                    " . MAIN_DB_PREFIX . "projet_task.fk_statut as tstatut,
+                                    " . MAIN_DB_PREFIX . "projet_task.label as title,
                                     date_add(task_date , INTERVAL task_duration second) as dateFin
-                               FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                          LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
+                               FROM " . MAIN_DB_PREFIX . "projet_task
+                          LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
                               WHERE fk_projet = " . $this->id . "
-                           ORDER BY " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_date DESC, title ASC";
+                           ORDER BY " . MAIN_DB_PREFIX . "projet_task_time.task_date DESC, title ASC";
                 $resql1 = $this->db->query($requete1);
                 if ($resql1) {
                     if ($this->db->num_rows($resql1)) {
@@ -412,11 +440,11 @@ class SynopsisProject extends CommonObject {
                         while ($res1 = $this->db->fetch_object($resql1)) {
                             if ($iter == 0) {
                                 $this->first_task = $res1->tid;
-                                $this->first_task_begin = $res1->dateDeb;
+                                $this->first_task_begin = $res1->dateo;
                                 $this->first_task_end = $res1->dateFin;
                             }
                             $this->tasks[$res1->tid]['id'] = $res1->tid;
-                            $this->tasks[$res1->tid]['dateDeb'] = $res1->dateDeb;
+                            $this->tasks[$res1->tid]['dateo'] = $res1->dateo;
                             $this->tasks[$res1->tid]['dateFin'] = $res1->dateFin;
                             $this->tasks[$res1->tid]['statut'] = $res1->tstatut;
                             $this->tasks[$res1->tid]['title'] = $res1->title;
@@ -427,12 +455,12 @@ class SynopsisProject extends CommonObject {
                     }
                 }
                 //last Task
-                $requete2 = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid as tid,
-                                    task_date as dateDeb,
-                                    " . MAIN_DB_PREFIX . "Synopsis_projet_task.statut as tstatut,
+                $requete2 = "SELECT " . MAIN_DB_PREFIX . "projet_task.rowid as tid,
+                                    task_date as dateo,
+                                    " . MAIN_DB_PREFIX . "projet_task.fk_statut as tstatut,
                                     date_add(task_date , INTERVAL task_duration second) as dateFin
-                               FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                          LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
+                               FROM " . MAIN_DB_PREFIX . "projet_task
+                          LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
                               WHERE fk_projet = " . $this->id . "
                            ORDER BY date_add(task_date , INTERVAL task_duration second) DESC LIMIT 1";
                 ;
@@ -441,16 +469,16 @@ class SynopsisProject extends CommonObject {
                     if ($this->db->num_rows($resql2)) {
                         $res2 = $this->db->fetch_object($resql2);
                         $this->last_task = $res2->tid;
-                        $this->last_task_begin = $res2->dateDeb;
+                        $this->last_task_begin = $res2->dateo;
                         $this->last_task_end = $res2->dateFin;
                     }
                 }
                 //Actors
-                $requete3 = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid as tid,
+                $requete3 = "SELECT " . MAIN_DB_PREFIX . "projet_task.rowid as tid,
                                     " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user as userid,
                                     role
-                               FROM " . MAIN_DB_PREFIX . "user, " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                          LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
+                               FROM " . MAIN_DB_PREFIX . "user, " . MAIN_DB_PREFIX . "projet_task
+                          LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "projet_task.rowid
                               WHERE fk_projet = " . $this->id . "
                                 AND " . MAIN_DB_PREFIX . "user.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user
                            ORDER BY role";
@@ -490,7 +518,7 @@ class SynopsisProject extends CommonObject {
     public function liste_array($id_societe = '') {
         $projets = array();
 
-        $sql = "SELECT rowid, title FROM " . MAIN_DB_PREFIX . "Synopsis_projet";
+        $sql = "SELECT rowid, label as title FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view";
 
         if (isset($id_societe)) {
             $sql .= " WHERE fk_soc = $id_societe";
@@ -569,7 +597,7 @@ class SynopsisProject extends CommonObject {
      */
     public function delete($user) {
         global $langs, $conf;
-        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_projet";
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view";
         $sql .= " WHERE rowid=" . $this->id;
 
         $resql = $this->db->query($sql);
@@ -599,12 +627,12 @@ class SynopsisProject extends CommonObject {
         global $langs, $conf;
         $result = 0;
         if (trim($title)) {
-            $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task (fk_projet, title, fk_user_creat, fk_task_parent, duration_effective)";
+            $sql = "INSERT INTO " . MAIN_DB_PREFIX . "projet_task (fk_projet, title, fk_user_creat, fk_task_parent, duration_effective)";
             $sql.= " VALUES (" . $this->id . ",'$title', " . $user->id . "," . $parent . ", 0)";
 
             dol_syslog("Project::CreateTask sql=" . $sql, LOG_DEBUG);
             if ($this->db->query($sql)) {
-                $task_id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "Synopsis_projet_task");
+                $task_id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "projet_task");
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);
@@ -660,7 +688,7 @@ class SynopsisProject extends CommonObject {
         $result = 0;
         global $langs, $conf;
 
-        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_time (fk_task, task_date, task_duration, fk_user)";
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "projet_task_time (fk_task, task_date, task_duration, fk_user)";
         $sql .= " VALUES (" . $task . ",'" . $this->db->idate($date) . "'," . $time . ", " . $user->id . ") ;";
 
         if ($this->db->query($sql)) {
@@ -673,7 +701,7 @@ class SynopsisProject extends CommonObject {
                 $this->errors = $interface->errors;
             }
             // Fin appel triggers
-            $task_id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "Synopsis_projet_task");
+            $task_id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "projet_task");
             $result = 0;
         } else {
             dol_syslog("Project::TaskAddTime error -2", LOG_ERR);
@@ -682,7 +710,7 @@ class SynopsisProject extends CommonObject {
         }
 
         if ($result == 0) {
-            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task";
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "projet_task";
             $sql .= " SET duration_effective = duration_effective + '" . preg_replace("/,/", ".", $time) . "'";
             $sql .= " WHERE rowid = '" . $task . "';";
 
@@ -795,8 +823,8 @@ class SynopsisProject extends CommonObject {
 
         /* Liste des taches dans $tasks */
 
-        $sql = "SELECT t.rowid, t.title, t.fk_task_parent, t.duration_effective";
-        $sql .= " FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task as t";
+        $sql = "SELECT t.rowid, t.label as title, t.fk_task_parent, t.duration_effective";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "projet_task as t";
         $sql .= " WHERE t.fk_projet =" . $this->id;
         $sql .= " ORDER BY t.fk_task_parent";
 
@@ -841,20 +869,20 @@ class SynopsisProject extends CommonObject {
 
     public function aggregateProgressProject() {
         //chope tous les groupes
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE fk_task_type=3 AND fk_projet = " . $this->id . " ORDER BY level DESC";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "projet_task WHERE priority=3 AND fk_projet = " . $this->id . " ORDER BY rang DESC";
         $sql = $this->db->query($requete);
         $arr = array();
         $arrParent = array();
         while ($res = $this->db->fetch_object($sql)) {
-            $requete1 = "SELECT avg(progress) as prog FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE fk_projet =" . $this->id . "  AND fk_task_parent = " . $res->rowid;
+            $requete1 = "SELECT avg(progress) as prog FROM " . MAIN_DB_PREFIX . "projet_task WHERE fk_projet =" . $this->id . "  AND fk_task_parent = " . $res->rowid;
             $sql1 = $this->db->query($requete1);
             $res1 = $this->db->fetch_object($sql1);
             $avg = $res1->prog;
             $this->statAvgProgByGroup[$res->rowid] = $avg;
-            $requete2 = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET progress = $avg WHERE rowid = " . $res->rowid;
+            $requete2 = "UPDATE " . MAIN_DB_PREFIX . "projet_task SET progress = $avg WHERE rowid = " . $res->rowid;
             $this->db->query($requete2);
         }
-        $requeteAvg = "SELECT avg(progress) as AVGGlobal FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE fk_projet = " . $this->id . " AND (fk_task_parent = 0 OR fk_task_parent IS NULL)";
+        $requeteAvg = "SELECT avg(progress) as AVGGlobal FROM " . MAIN_DB_PREFIX . "projet_task WHERE fk_projet = " . $this->id . " AND (fk_task_parent = 0 OR fk_task_parent IS NULL)";
         $sqlAvg = $this->db->query($requeteAvg);
         $resAvg = $this->db->fetch_object($sqlAvg);
         if ($resAvg->AVGGlobal < 5) {
@@ -875,11 +903,11 @@ class SynopsisProject extends CommonObject {
     public function getStatsDuration() {
         //chope tous les temps pour toutes les taches par type (milestone / tache) en secondes
         $requete = "SELECT SUM(task_duration) as duree_prevue
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . $this->id . "
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type <> 3";
+                      FROM " . MAIN_DB_PREFIX . "projet_task_time,
+                           " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.fk_projet = " . $this->id . "
+                       AND " . MAIN_DB_PREFIX . "projet_task.rowid = " . MAIN_DB_PREFIX . "projet_task_time.fk_task
+                       AND " . MAIN_DB_PREFIX . "projet_task.priority <> 3";
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $this->totDuration = $res->duree_prevue;
@@ -892,10 +920,10 @@ class SynopsisProject extends CommonObject {
         //chope tous les temps pour toutes les taches par type (milestone / tache) en secondes
         $requete = "SELECT SUM(task_duration_effective) as duree_conso
                       FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . $this->id . "
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective.fk_task
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type <> 3";
+                           " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.fk_projet = " . $this->id . "
+                       AND " . MAIN_DB_PREFIX . "projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective.fk_task
+                       AND " . MAIN_DB_PREFIX . "projet_task.priority <> 3";
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $this->workedDuration = $res->duree_conso;
@@ -947,12 +975,12 @@ class SynopsisProject extends CommonObject {
     }
 
     public function showTreeTask($js, $width = 150, $height = 300, $opacity = '1', $display = 'block') {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.title, " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
-                       AND fk_task_parent is null
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet.rowid = " . $this->id;
+        $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.label, " . MAIN_DB_PREFIX . "projet_task.rowid
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view,
+                           " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid
+                       AND fk_task_parent < 1
+                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid = " . $this->id;
         $sql = $this->db->query($requete);
 
         print '<div id="projetTreeDiv" style="width: ' . $width . 'px;  z-index: 2; float: left; opacity:' . $opacity . ';display:' . $display . '; overflow: auto; max-height: ' . $height . 'px; height: ' . $height . 'px;">';
@@ -964,9 +992,9 @@ class SynopsisProject extends CommonObject {
             $i++;
             print '      <ul>';
             $requete1 = "SELECT count(*) as cnt
-                             FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                                  " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                            WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
+                             FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view,
+                                  " . MAIN_DB_PREFIX . "projet_task
+                            WHERE " . MAIN_DB_PREFIX . "projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid
                               AND fk_task_parent = $res->rowid";
             $sql1 = $this->db->query($requete1);
             $res1 = $this->db->fetch_object($sql1);
@@ -1001,10 +1029,10 @@ class SynopsisProject extends CommonObject {
     }
 
     private function recursTask($parentId, $js) {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.title, " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
+        $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.label, " . MAIN_DB_PREFIX . "projet_task.rowid
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view,
+                           " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid
                        AND fk_task_parent = " . $parentId;
         $sql = $this->db->query($requete);
         $i = 0;
@@ -1012,9 +1040,9 @@ class SynopsisProject extends CommonObject {
         while ($res = $this->db->fetch_object($sql)) {
             $i++;
             print '      <ul>';
-            $requete1 = "SELECT count(*) as cnt FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                              " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                        WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
+            $requete1 = "SELECT count(*) as cnt FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view,
+                              " . MAIN_DB_PREFIX . "projet_task
+                        WHERE " . MAIN_DB_PREFIX . "projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid
                           AND fk_task_parent = $res->rowid";
             $sql1 = $this->db->query($requete1);
             $res1 = $this->db->fetch_object($sql1);
@@ -1124,14 +1152,14 @@ class SynopsisProject extends CommonObject {
 //            if ("x".$val['GLEId'] != "x")
 //            {
         $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid as tid,
+                                   " . MAIN_DB_PREFIX . "projet_task.rowid as tid,
                                    " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.percent as occupation,
                                    " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.type as userType,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as title
+                                   " . MAIN_DB_PREFIX . "projet_task.label as title
                               FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                             WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task
-                               AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . $taskId;
+                                   " . MAIN_DB_PREFIX . "projet_task
+                             WHERE " . MAIN_DB_PREFIX . "projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task
+                               AND " . MAIN_DB_PREFIX . "projet_task.rowid = " . $taskId;
         $sql = $db->query($requete);
         $iter = 0;
         while ($res = $db->fetch_object($sql)) {
@@ -1142,7 +1170,7 @@ class SynopsisProject extends CommonObject {
                 $requete = "SELECT task_duration as Dur,
                                            unix_timestamp(task_date) as task_dateF,
                                            fk_user
-                                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
+                                      FROM " . MAIN_DB_PREFIX . "projet_task_time
                                      WHERE fk_task = " . $res->tid . "
                                        AND fk_user=" . $res->fk_user;
                 $sql1 = $db->query($requete);
@@ -1290,14 +1318,14 @@ class SynopsisProject extends CommonObject {
         $arr['totalDur'] = 0;
         $arrayByDay = array();
         $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid as tid,
+                           " . MAIN_DB_PREFIX . "projet_task.rowid as tid,
                            " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.percent as occupation,
                            " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.type as userType,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as title
+                           " . MAIN_DB_PREFIX . "projet_task.label as title
                       FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . $taskId;
+                           " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task
+                       AND " . MAIN_DB_PREFIX . "projet_task.rowid = " . $taskId;
         $sql = $db->query($requete);
         $iter = 0;
         while ($res = $db->fetch_object($sql)) {
@@ -1571,13 +1599,13 @@ class SynopsisProject extends CommonObject {
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources.nom,
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources.fk_resa_type,
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as ttitle
+                           " . MAIN_DB_PREFIX . "projet_task.label as ttitle
                       FROM " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa,
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
+                           " . MAIN_DB_PREFIX . "projet_task
                      WHERE " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_ressource = " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id
                        AND fk_projet_task = " . $taskId . "
-                       AND fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid";
+                       AND fk_projet_task = " . MAIN_DB_PREFIX . "projet_task.rowid";
         $sql = $db->query($requete);
         $arrayByDay = array();
         $totalDur = 0;
@@ -1746,13 +1774,13 @@ class SynopsisProject extends CommonObject {
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources.nom,
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources.fk_resa_type,
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as ttitle
+                           " . MAIN_DB_PREFIX . "projet_task.label as ttitle
                       FROM " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa,
                            " . MAIN_DB_PREFIX . "Synopsis_global_ressources,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
+                           " . MAIN_DB_PREFIX . "projet_task
                      WHERE " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_ressource = " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id
                        AND fk_projet_task = " . $taskId . "
-                       AND fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
+                       AND fk_projet_task = " . MAIN_DB_PREFIX . "projet_task.rowid
                        AND " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datefin< now()";
         $sql = $db->query($requete);
         $array = array();
@@ -2051,7 +2079,7 @@ class SynopsisProject extends CommonObject {
     public function costProject() {
         //c'est le cout de toutes les taches + le cout du projet
         //tache
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE fk_projet = " . $this->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "projet_task WHERE fk_projet = " . $this->id;
         $sql = $this->db->query($requete);
         $somme = 0;
         if ($sql) {
@@ -2254,12 +2282,12 @@ class SynopsisProjectTask extends commonObject {
     public $task_type;
     public $color;
     public $url;
-    public $fk_task_type;
+    public $priority;
     public $shortDesc;
     public $level;
-    public $dateDeb;
-    public $dateDebFR;
-    public $dateDebFRFull;
+    public $dateo;
+    public $dateoFR;
+    public $dateoFRFull;
     public $projet_id;
     public $labelstatut = array();
     public $labelstatut_short = array();
@@ -2276,27 +2304,25 @@ class SynopsisProjectTask extends commonObject {
 
     public function fetch($id) {
         $this->id = $id;
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.duration_effective,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.duration,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_user_creat,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.statut,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.note,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.progress,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.description,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.color,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.url,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.shortDesc,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.level,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.dateDeb,
-                           " . MAIN_DB_PREFIX . "Synopsis_task_type.label
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task,
-                           " . MAIN_DB_PREFIX . "Synopsis_task_type
+        $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.fk_projet,
+                           " . MAIN_DB_PREFIX . "projet_task.fk_task_parent,
+                           " . MAIN_DB_PREFIX . "projet_task.label as title,
+                           " . MAIN_DB_PREFIX . "projet_task.duration_effective,
+                           " . MAIN_DB_PREFIX . "projet_task.planned_workload as duration,
+                           " . MAIN_DB_PREFIX . "projet_task.fk_user_creat,
+                           " . MAIN_DB_PREFIX . "projet_task.fk_statut,
+                           " . MAIN_DB_PREFIX . "projet_task.note_public as note,
+                           " . MAIN_DB_PREFIX . "projet_task.progress,
+                           " . MAIN_DB_PREFIX . "projet_task.description,
+                           " . MAIN_DB_PREFIX . "projet_task.priority,
+                           " . MAIN_DB_PREFIX . "projet_task.note_private as shortDesc,
+                           " . MAIN_DB_PREFIX . "projet_task.rang as level,
+                           " . MAIN_DB_PREFIX . "projet_task.dateo,
+                           " . MAIN_DB_PREFIX . "Synopsis_projet_task_type.label
+                      FROM " . MAIN_DB_PREFIX . "projet_task,
+                           " . MAIN_DB_PREFIX . "Synopsis_projet_task_type
                      WHERE rowid = " . $id . "
-                       AND " . MAIN_DB_PREFIX . "Synopsis_task_type.id = " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type";
+                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task_type.id = " . MAIN_DB_PREFIX . "projet_task.priority";
         $sql = $this->db->query($requete);
         if ($sql) {
             $res = $this->db->fetch_object($sql);
@@ -2306,9 +2332,9 @@ class SynopsisProjectTask extends commonObject {
             $tmpProj = new SynopsisProject($this->db);
             $tmpProj->fetch($res->fk_projet);
             $res->project = $tmpProj;
-            $this->dateDeb = strtotime($res->dateDeb);
-            $this->dateDebFR = date('d/m/Y', strtotime($res->dateDeb));
-            $this->dateDebFRFull = date('d/m/Y H:i', strtotime($res->dateDeb));
+            $this->dateo = strtotime($res->dateo);
+            $this->dateoFR = date('d/m/Y', strtotime($res->dateo));
+            $this->dateoFRFull = date('d/m/Y H:i', strtotime($res->dateo));
             $this->fk_task_parent = $res->fk_task_parent;
             $this->title = $res->title;
             $this->duration_effective = $res->duration_effective;
@@ -2317,13 +2343,14 @@ class SynopsisProjectTask extends commonObject {
             $tmpUser = new User($this->db);
             $tmpUser->fetch($res->fk_user_creat);
             $this->user_creat = $tmpUser;
-            $this->statut = $res->statut;
+            $this->fk_statut = $res->fk_statut;
+            $this->statut = ($res->fk_statut == 0)? "open" : "closed";
             $this->note = $res->note;
             $this->progress = $res->progress;
             $this->description = $res->description;
-            $this->color = $res->color;
-            $this->url = $res->url;
-            $this->fk_task_type = $res->fk_task_type;
+            $this->color = "";
+            $this->url = "";
+            $this->priority = $res->priority;
             $this->task_type = $res->label;
             $this->shortDesc = $res->shortDesc;
             $this->level = $res->level;
@@ -2336,9 +2363,9 @@ class SynopsisProjectTask extends commonObject {
     public $childArray = array();
 
     public function getChildsTree() {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent = " . $this->id;
+        $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.rowid
+                      FROM " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.fk_task_parent = " . $this->id;
         $sql = $this->db->query($requete);
         $count = $this->db->num_rows($sql);
         while ($res = $this->db->fetch_object($sql)) {
@@ -2350,9 +2377,9 @@ class SynopsisProjectTask extends commonObject {
     public $directChildArray = array();
 
     public function getDirectChildsTree() {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent = " . $this->id;
+        $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.rowid
+                      FROM " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.fk_task_parent = " . $this->id;
         $sql = $this->db->query($requete);
         $count = $this->db->num_rows($sql);
         while ($res = $this->db->fetch_object($sql)) {
@@ -2361,9 +2388,9 @@ class SynopsisProjectTask extends commonObject {
     }
 
     private function recursTask($parentId, $js) {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent = " . $parentId;
+        $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.rowid
+                      FROM " . MAIN_DB_PREFIX . "projet_task
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.fk_task_parent = " . $parentId;
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)) {
             array_push($this->childArray, $res->rowid);
@@ -2385,10 +2412,12 @@ class SynopsisProjectTask extends commonObject {
         $lien = "";
         $lien = '<a href="' . DOL_URL_ROOT . '/synopsisprojet/tasks/task.php?id=' . $this->id . '">';
         $lienfin = '</a>';
+        
+        $titre = $this->title;
 
         if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowProject") . ': ' . $this->title, 'task') . $lienfin . ' ');
-        $result.=$lien . ($maxlen ? dol_trunc($this->title, $maxlen) : $this->title) . $lienfin;
+            $result.=($lien . img_object($langs->trans("ShowProject") . ': ' .$titre , 'task') . $lienfin . ' ');
+        $result.=$lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
         return $result;
     }
 

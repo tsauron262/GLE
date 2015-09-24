@@ -52,8 +52,8 @@ $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/
 $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$css.'/jquery.rating.css" />';
 $js .= '<link rel="stylesheet" type="text/css" media="screen" href="css/afficheProspection.css" />';
 
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 
 $js .= ' <script src="js/afficheprospect.js" type="text/javascript"></script>';
 $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmenu({style: 'dropdown', maxHeight: 300 }); });  </script>\n";

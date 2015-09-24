@@ -395,7 +395,7 @@ function dol_buildpath($path, $type=0)
  */
 function dol_clone($object)
 {
-	dol_syslog(__FUNCTION__ . " is deprecated", LOG_WARNING);
+//	dol_syslog(__FUNCTION__ . " is deprecated", LOG_WARNING);
 
 	$myclone=clone($object);
 	return $myclone;
@@ -2745,7 +2745,7 @@ function getTitleFieldOfList($name, $thead=0, $file="", $field="", $begin="", $m
  */
 function print_titre($title)
 {
-	dol_syslog(__FUNCTION__ . " is deprecated", LOG_WARNING);
+//	dol_syslog(__FUNCTION__ . " is deprecated", LOG_WARNING);
 
 	print '<div class="titre">'.$title.'</div>';
 }

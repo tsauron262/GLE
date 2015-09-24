@@ -65,8 +65,8 @@ $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmen
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
     $js .= ' <script src="'.$jspath.'/ajaxfileupload.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 
 
 
@@ -85,10 +85,10 @@ $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmen
               ORDER BY firstname, lastname";
     $sql = $db->query($requete);
     $jsEditopts["userincomp"]="";
-     $jsEditopts["userincomp"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->"))))  . ";";
+     $jsEditopts["userincomp"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("S&eacute;lection ->"))))  . ";";
     while ($res = $db->fetch_object($sql))
     {
-        $jsEditopts["userincomp"].= $res->rowid . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->firstname . " ".$res->name)))  . ";";
+        $jsEditopts["userincomp"].= $res->rowid . ":" . preg_replace("/'/","\\'",(($res->firstname . " ".$res->name)))  . ";";
     }
 
     $requete = "SELECT *
@@ -96,10 +96,10 @@ $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmen
                  WHERE isGroup = 1";
     $sql = $db->query($requete);
     $jsEditopts["catRess"]="";
-     $jsEditopts["catRess"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->"))))  . ";";
+     $jsEditopts["catRess"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("S&eacute;lection ->"))))  . ";";
     while ($res = $db->fetch_object($sql))
     {
-        $jsEditopts["catRess"].= $res->id . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->nom)))  . ";";
+        $jsEditopts["catRess"].= $res->id . ":" . preg_replace("/'/","\\'",(($res->nom)))  . ";";
     }
 
     $jsEditopts["userincomp"] = preg_replace('/;$/','',$jsEditopts["userincomp"]);
@@ -325,8 +325,8 @@ $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmen
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
     $js .= ' <script src="'.$jspath.'/ajaxfileupload.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 
 
 
@@ -342,19 +342,19 @@ $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmen
     $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user WHERE statut = 1 ORDER BY firstname, lastname";
                 $sql = $db->query($requete);
                 $jsEditopts["userincomp"]="";
-                 $jsEditopts["userincomp"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->"))))  . ";";
+                 $jsEditopts["userincomp"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("S&eacute;lection ->"))))  . ";";
                 while ($res = $db->fetch_object($sql))
                 {
-                    $jsEditopts["userincomp"].= $res->rowid . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->firstname . " ".$res->name)))  . ";";
+                    $jsEditopts["userincomp"].= $res->rowid . ":" . preg_replace("/'/","\\'",(($res->firstname . " ".$res->name)))  . ";";
                 }
 
     $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_global_ressources WHERE isGroup = 1";
                 $sql = $db->query($requete);
                 $jsEditopts["catRess"]="";
-                 $jsEditopts["catRess"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->"))))  . ";";
+                 $jsEditopts["catRess"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("S&eacute;lection ->"))))  . ";";
                 while ($res = $db->fetch_object($sql))
                 {
-                    $jsEditopts["catRess"].= $res->id . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->nom)))  . ";";
+                    $jsEditopts["catRess"].= $res->id . ":" . preg_replace("/'/","\\'",(($res->nom)))  . ";";
                 }
 
                 $jsEditopts["userincomp"] = preg_replace('/;$/','',$jsEditopts["userincomp"]);

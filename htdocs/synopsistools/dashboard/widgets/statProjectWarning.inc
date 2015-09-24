@@ -39,7 +39,7 @@ function widget_statProjectWarning() {
         $table = '<p>';
 
         $requete = "SELECT *
-                      FROM ".MAIN_DB_PREFIX."Synopsis_projet
+                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_view
                      WHERE fk_statut = 0";
         $sql = $db->query($requete);
         $table .= "<table border = 1 style='border-collapse: collapse; text-align: center; width: 100%;'>";
@@ -52,9 +52,9 @@ function widget_statProjectWarning() {
             $projet->fetch($res->rowid);
             $requete1 = "SELECT t.title,
                                 ifnull((SELECT SUM(task_duration_effective) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective WHERE fk_task = t.rowid),0) as sduration_effective,
-                                ifnull((SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = t.rowid),0) as sduration,
+                                ifnull((SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = t.rowid),0) as sduration,
                                 t.progress, t.rowid
-                           FROM ".MAIN_DB_PREFIX."Synopsis_projet_task as t
+                           FROM ".MAIN_DB_PREFIX."projet_task as t
                           WHERE t.fk_projet = ".$res->rowid;
         //1 affiche les taches warning :> débordement , diff % avancement et % de temps important
             $sql1 = $db->query($requete1);

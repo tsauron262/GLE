@@ -78,10 +78,10 @@ $form=new Form($db);
 $projectstatic = new SynopsisProject($db);
 $taskstatic = new Task($db);
 
-$title=$langs->trans("Activities");
-if ($mine) $title=$langs->trans("MyActivities");
+$label=$langs->trans("Activities");
+if ($mine) $label=$langs->trans("MyActivities");
 
-llxHeader("",$title,"Projet");
+llxHeader("",$label,"Projet");
 
 if ($id)
 {
@@ -89,7 +89,7 @@ if ($id)
   $socid = $user->societe_id;
 }
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], "", $sortfield, $sortorder, "", $num);
+print_barre_liste($label, $page, $_SERVER["PHP_SELF"], "", $sortfield, $sortorder, "", $num);
 
 // Show description of content
 if ($mine) print $langs->trans("MyProjectsDesc").'<br><br>';
@@ -140,7 +140,7 @@ print '</td>';
 print '<td class="liste_titre" colspan="7">';
 print '&nbsp;';
 print '</td>';
-print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
+print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" label="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
 print "</tr>\n";
 
 if (count($tasksarray) > (empty($conf->global->PROJECT_LIMIT_TASK_PROJECT_AREA)?1000:$conf->global->PROJECT_LIMIT_TASK_PROJECT_AREA))

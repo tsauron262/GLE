@@ -104,6 +104,6 @@ MigrationReopeningContractsNothingToUpdate=Нет закрытых контра�
 MigrationBankTransfertsUpdate=Обновление связей между сделки банком и банковским переводом
 MigrationMenusDetail=Обновление динамические таблицы меню
 MigrationDeliveryAddress=Обновление адрес доставки в грузах
-MigrationProjectTaskActors=Миграция данных для таблицы llx_projet_task_actors
+MigrationProjectTaskActors=Миграция данных для таблицы llx_Synopsis_projet_task_actors
 MigrationProjectUserResp=Миграция данных из полей fk_user_resp llx_projet к llx_element_contact
 MigrationProjectTaskTime=Обновление времени в секундах

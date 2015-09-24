@@ -66,7 +66,7 @@ if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add"
 // SecuritrestrictedAreay check
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_view');
 
 
 /*
@@ -135,7 +135,7 @@ if ($_REQUEST['action'] == 'add' && $user->rights->synopsisprojet->creer) {
 
 if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
     if (!$_POST["cancel"]) {
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE rowid=" . $_POST['id'];
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_view WHERE rowid=" . $_POST['id'];
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         $_POST["ref"] = $res->ref;
@@ -610,11 +610,11 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
                                 //Tooltip
                                 print "<div class='jqtooltip'><div style='display:none;' class='jqtoolTipInfo'>";
                                 print $val['userobj']->getNomUrl(1);
-                                $requete2 = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.title , ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.role
+                                $requete2 = "SELECT ".MAIN_DB_PREFIX."projet_task.title , ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.role
                                            FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                                                ".MAIN_DB_PREFIX."Synopsis_projet_task
-                                          WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
-                                            AND fk_user = " . $val['userid'] . " AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = " . $_REQUEST['id'] . " ORDER BY role ASC";
+                                                ".MAIN_DB_PREFIX."projet_task
+                                          WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                                            AND fk_user = " . $val['userid'] . " AND ".MAIN_DB_PREFIX."projet_task.fk_projet = " . $_REQUEST['id'] . " ORDER BY role ASC";
                                 $sql2 = $db->query($requete2);
                                 print "<table width=100% border=1 style='border-collapse: collapse; min-width:300px '>";
                                 print "<tr class='ui-widget-header ui-state-default'><th align='center' style='width: 200px'>T&acirc;che</th><th align='center'>R&ocirc;le</th></tr>";

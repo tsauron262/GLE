@@ -328,7 +328,7 @@ if ($_REQUEST["action"] == 'deleteline' && $user->rights->affaire->creer)
     $arr['livraison']['OBJ']='Livraison';
     $arr['livraison']['RIGHT']='livraison';
 
-    $arr['projet']['SQL']=MAIN_DB_PREFIX.'Synopsis_projet';
+    $arr['projet']['SQL']=MAIN_DB_PREFIX.'Synopsis_projet_view';
     $arr['projet']['OBJ']='Project';
     $arr['projet']['RIGHT']='projet';
 

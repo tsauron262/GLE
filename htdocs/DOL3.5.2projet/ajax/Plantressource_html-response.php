@@ -82,11 +82,11 @@ $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmen
 
   $requete = "SELECT unix_timestamp(min(task_date)) as minDate,
                      unix_timestamp(max(task_date)) as maxDate
-                FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time,
-                     ".MAIN_DB_PREFIX."Synopsis_projet_task
+                FROM ".MAIN_DB_PREFIX."projet_task_time,
+                     ".MAIN_DB_PREFIX."projet_task
                WHERE task_date is not null
-                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$project_id. "
-                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid";
+                 AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$project_id. "
+                 AND ".MAIN_DB_PREFIX."projet_task_time.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid";
   $sql = $db->query($requete);
   $res = $db->fetch_object($sql);
   $startDate = $res->minDate;
@@ -103,11 +103,11 @@ foreach($hrm->allRessource as $key=>$val)
     {
         $requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
                       FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                           ".MAIN_DB_PREFIX."Synopsis_projet_task,
+                           ".MAIN_DB_PREFIX."projet_task,
                            ".MAIN_DB_PREFIX."Synopsis_hrm_user
-                     WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                     WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
                        AND ".MAIN_DB_PREFIX."Synopsis_hrm_user .user_id =  ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
-                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$project_id."
+                       AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$project_id."
                        AND ".MAIN_DB_PREFIX."Synopsis_hrm_user.user_id = ".$val['GLEId']."";
         $sql = $db->query($requete);
         if ($sql)

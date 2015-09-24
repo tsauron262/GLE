@@ -56,8 +56,8 @@ print '<html><head></head><body>';
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
 
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 
     $js .= "<style type='text/css'>body { position: static; }</style>";
 
@@ -69,20 +69,20 @@ print '<html><head></head><body>';
               ORDER BY firstname, lastname";
     $sql = $db->query($requete);
     $jsEditopts["userincomp"]="";
-     $jsEditopts["userincomp"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("Sélection ->"))))  . ";";
+     $jsEditopts["userincomp"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("Sélection ->"))))  . ";";
     while ($res = $db->fetch_object($sql))
     {
-        $jsEditopts["userincomp"].= $res->rowid . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->firstname . " ".$res->name)))  . ";";
+        $jsEditopts["userincomp"].= $res->rowid . ":" . preg_replace("/'/","\\'",(($res->firstname . " ".$res->name)))  . ";";
     }
     $requete = "SELECT *
                   FROM ".MAIN_DB_PREFIX."Synopsis_global_ressources
               ORDER BY nom";
     $sql = $db->query($requete);
     $jsEditopts["factFourn"]="";
-    $jsEditopts["factFourn"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("Sélection ->"))))  . ";";
+    $jsEditopts["factFourn"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("Sélection ->"))))  . ";";
     while ($res = $db->fetch_object($sql))
     {
-        $jsEditopts["factFourn"].= $res->id . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->nom)))  . ";";
+        $jsEditopts["factFourn"].= $res->id . ":" . preg_replace("/'/","\\'",(($res->nom)))  . ";";
     }
 
     $requete = "SELECT distinct *
@@ -90,23 +90,23 @@ print '<html><head></head><body>';
 			ORDER BY name";
     $sql = $db->query($requete);
     $jsEditopts["cmdFourn"]="";
-    $jsEditopts["cmdFourn"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("Sélection ->"))))  . ";";
+    $jsEditopts["cmdFourn"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("Sélection ->"))))  . ";";
     while ($res = $db->fetch_object($sql))
     {
-        $jsEditopts["cmdFourn"].= $res->id . ":" . preg_replace("/'/","\\'",utf8_encode(html_entity_decode($res->name)))  . ";";
+        $jsEditopts["cmdFourn"].= $res->id . ":" . preg_replace("/'/","\\'",(html_entity_decode($res->name)))  . ";";
     }
 
 
     $requete = "SELECT *
-                  FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+                  FROM ".MAIN_DB_PREFIX."projet_task
                  WHERE fk_projet = ".$projId."
-              ORDER BY title";
+              ORDER BY label";
     $sql = $db->query($requete);
     $jsEditopts["taskRess"]="";
-    $jsEditopts["taskRess"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("Sélection ->"))))  . ";";
+    $jsEditopts["taskRess"].=  "-1:" . preg_replace("/'/","\\'",((html_entity_decode("Sélection ->"))))  . ";";
     while ($res = $db->fetch_object($sql))
     {
-        $jsEditopts["taskRess"].= $res->rowid . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->title)))  . ";";
+        $jsEditopts["taskRess"].= $res->rowid . ":" . preg_replace("/'/","\\'",(($res->title)))  . ";";
     }
 
 

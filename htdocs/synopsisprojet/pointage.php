@@ -301,9 +301,9 @@ print '</div>';//fin de tabs
 //1 lister toutes les teams et tous les users lié au projets Prob pas de groupe dans project 1
 $requete = "SELECT *
               FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task
+                   ".MAIN_DB_PREFIX."projet_task
              WHERE fk_projet=".$projId . '
-               AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid';
+               AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."projet_task.rowid';
 //2 affiche les users par team
 //3 affiche les case pour le pointage, 2 cases 1 horaires majoré é horaire standard
 //4 possibilité de mettr la meme valeur dans toutes les cases

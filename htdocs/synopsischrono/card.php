@@ -586,9 +586,9 @@ if ($chr->id > 0) {
         /* 	print '<tr><th class="ui-widget-header ui-state-default">Projet';
           $requete = "SELECT *
           FROM ".MAIN_DB_PREFIX."synopsischrono,
-          ".MAIN_DB_PREFIX."propal, ".MAIN_DB_PREFIX."Synopsis_projet
+          ".MAIN_DB_PREFIX."propal, ".MAIN_DB_PREFIX."Synopsis_projet_view
           WHERE ".MAIN_DB_PREFIX."synopsischrono.propalid = ".MAIN_DB_PREFIX."propal.rowid
-          AND ".MAIN_DB_PREFIX."propal.fk_projet = ".MAIN_DB_PREFIX."Synopsis_projet.rowid
+          AND ".MAIN_DB_PREFIX."propal.fk_projet = ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid
           AND ".MAIN_DB_PREFIX."synopsischrono.id = ".$chr->id;
           if ($resql = $db->query($requete))
           {
@@ -614,12 +614,12 @@ if ($chr->id > 0) {
 		<td class=\'ui-widget-content\'>';
             $requete = "SELECT *
                   FROM " . MAIN_DB_PREFIX . "synopsischrono,
-                       " . MAIN_DB_PREFIX . "Synopsis_projet
-                 WHERE " . MAIN_DB_PREFIX . "synopsischrono.projetid = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
+                       " . MAIN_DB_PREFIX . "Synopsis_projet_view
+                 WHERE " . MAIN_DB_PREFIX . "synopsischrono.projetid = " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid
                    AND " . MAIN_DB_PREFIX . "synopsischrono.id = " . $chr->id;
             // print "<table class='nobordernopadding' width=100%>";
             if ($_REQUEST['action'] == 'editprojet') {
-                $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet ORDER BY `rowid` DESC";
+                $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view ORDER BY `rowid` DESC";
                 $sql3 = $db->query($requete3);
                 print '<form name="editprojet" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '" method="post">';
                 print '<input type="hidden" name="action" value="setprojet">';

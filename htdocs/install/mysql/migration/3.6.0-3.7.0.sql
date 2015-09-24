@@ -1099,9 +1099,9 @@ ALTER TABLE llx_c_type_fees ADD COLUMN accountancy_code varchar(32) DEFAULT NULL
 
 ALTER TABLE llx_actioncomm ADD INDEX idx_actioncomm_fk_element (fk_element);
 
-ALTER TABLE llx_projet_task_time ADD INDEX idx_projet_task_time_task (fk_task);
-ALTER TABLE llx_projet_task_time ADD INDEX idx_projet_task_time_date (task_date);
-ALTER TABLE llx_projet_task_time ADD INDEX idx_projet_task_time_datehour (task_datehour);
+ALTER TABLE llx_projet_task_time ADD INDEX idx_Synopsis_projet_task_time_task (fk_task);
+ALTER TABLE llx_projet_task_time ADD INDEX idx_Synopsis_projet_task_time_date (task_date);
+ALTER TABLE llx_projet_task_time ADD INDEX idx_Synopsis_projet_task_time_datehour (task_datehour);
 
 ALTER TABLE llx_projet_task MODIFY COLUMN duration_effective real DEFAULT 0 NULL;
 ALTER TABLE llx_projet_task MODIFY COLUMN planned_workload real DEFAULT 0 NULL;

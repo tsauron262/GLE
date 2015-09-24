@@ -138,12 +138,13 @@ class synopsisHook {//FA1506-0369
                 $conf->global->MAIN_SHOW_LOGO = false;
         }
 
-//        if (isset($conf->global->MAIN_MODULE_SYNOPSISPROCESS)) {
-//            $tab = getTypeAndId();
-//            if ($tab[0] == "projet")
-//                $tab[0] = "project";
-//            launchRunningProcess($db, $tab[0], $tab[1]);
-//        }
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISPROCESS)) {
+            require_once(DOL_DOCUMENT_ROOT."/synopsisres/extractObjTypeId.php");
+            $tab = getTypeAndId();
+            if ($tab[0] == "projet")
+                $tab[0] = "project";
+            launchRunningProcess($db, $tab[0], $tab[1]);
+        }
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
             @$conf->projet = $conf->synopsisprojet;

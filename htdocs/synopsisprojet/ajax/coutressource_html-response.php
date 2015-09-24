@@ -37,7 +37,7 @@ $project = new SynopsisProject($db);
 $project->id = $project_id;
 $project->costProjetRessource($conf);
 
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet = ".$project_id;
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_projet = ".$project_id;
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql))
 {
@@ -64,7 +64,7 @@ foreach($project->CostByRessource as $key=>$val)
     if ($pairimpair == "impaire") { $pairimpair = "pair";}
 
     print "<tr class='".$pairimpair."' style='border-left: 1px Solid #68ACCF;border-right: 1px Solid #68ACCF;'>";
-    print "    <td align='left'  style='border-right:1px Solid #68ACCF; width: 230px;padding-left: 16px;'>".utf8_encode($val['nom'])."</td>";
+    print "    <td align='left'  style='border-right:1px Solid #68ACCF; width: 230px;padding-left: 16px;'>".($val['nom'])."</td>";
     print "    <td align='right' style='border-width:0 0 0 0;  padding-right: 17px; border-right:1px Solid #68ACCF;'>". ($val['duration'] / 3600)." h</td>" ;
     $totaLDur += ($val['duration'] / 3600);
     print "    <td align='right' style='border-width:0 0 0 0; padding-right: 17px;'>". price($val['totalCostForRessources'])." &euro;</td>" ;
@@ -99,7 +99,7 @@ foreach($project->CostRessourceByTask as $taskId => $valArr)
         if ($idx==0)
         {
             $idx=1;
-            print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".utf8_encode($DescArr['title']);
+            print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".($DescArr['title']);
         }
         if ($pairimpair == "pair") { $pairimpair = "impaire";} else
         if ($pairimpair == "impaire") { $pairimpair = "pair";}
@@ -107,7 +107,7 @@ foreach($project->CostRessourceByTask as $taskId => $valArr)
         $fuser->id = $userId;
         $fuser->fetch($fuser->id);
         print "<tr class='".$pairimpair."'>";
-        print "<td>".utf8_encode($fuser->getNomUrl(1));
+        print "<td>".($fuser->getNomUrl(1));
         print "</td>";
         print "<td align='right'>".$DescArr['duration'] / 3600 . "h";
         print "</td>";
@@ -156,12 +156,12 @@ foreach($project->CostRessourceByUser as $userId=>$valArr)
         if ($idx==0)
         {
             $idx=1;
-            print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".utf8_encode($fuser->getNomUrl(1));
+            print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".($fuser->getNomUrl(1));
         }
         if ($pairimpair == "pair") { $pairimpair = "impaire";} else
         if ($pairimpair == "impaire") { $pairimpair = "pair";}
         print "<tr class='".$pairimpair."'>";
-        print "<td>".utf8_encode($DescArr['title']);
+        print "<td>".($DescArr['title']);
         print "</td>";
         print "<td align='right'>".$DescArr['duration'] / 3600 . "h";
         print "</td>";

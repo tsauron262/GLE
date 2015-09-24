@@ -584,7 +584,7 @@ if ($socid > 0)
         print '<table class="noborder" width=100%>';
 
         $sql  = "SELECT p.rowid,p.title,p.ref, p.dateo as do";
-        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet as p";
+        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
         $sql .= " WHERE p.fk_soc = $objsoc->id";
         $sql .= " ORDER BY p.dateo DESC";
 

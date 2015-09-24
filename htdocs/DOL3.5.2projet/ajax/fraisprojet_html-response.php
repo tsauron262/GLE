@@ -56,8 +56,8 @@ print '<html><head></head><body>';
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
 
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 
     $js .= "<style type='text/css'>body { position: static; }</style>";
 
@@ -106,7 +106,7 @@ print '<html><head></head><body>';
 
 
     $requete = "SELECT *
-                  FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+                  FROM ".MAIN_DB_PREFIX."projet_task
                  WHERE fk_projet = ".$projId."
               ORDER BY title";
     $sql = $db->query($requete);

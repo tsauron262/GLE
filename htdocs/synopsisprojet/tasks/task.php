@@ -48,7 +48,7 @@ if (!$user->rights->synopsisprojet->lire) accessforbidden();
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_view');
 
 
 if(isset($_REQUEST['action']) && $_REQUEST['action'] == "modtask")
@@ -70,9 +70,9 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == "modtask")
         {
             $url = 'http://'.$url;
         }
-        $fk_task_type = $_REQUEST['type'];
+        $priority = $_REQUEST['type'];
 
-        $datedeb = $_REQUEST['dateDeb'];
+        $datedeb = $_REQUEST['dateo'];
         $debdateUS="";
         $debts="0";
         $finddateUS="";
@@ -88,7 +88,7 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == "modtask")
         //Get parent Level
         if ($parentId . "x" != "x")
         {
-            $requete = "SELECT level FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE rowid = ".$parentId;
+            $requete = "SELECT level FROM ".MAIN_DB_PREFIX."projet_task WHERE rowid = ".$parentId;
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $level = $res->level + 1;
@@ -104,9 +104,9 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == "modtask")
             $parentId = "NULL";
         }
 
-        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_projet_task
+        $requete = "UPDATE ".MAIN_DB_PREFIX."projet_task
                        SET fk_task_parent = $parentId,
-                           title = '$name',
+                           label = '$name',
                            duration = $dur,
                            statut = '$statut',
                            
@@ -115,10 +115,10 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == "modtask")
                            description = '$description',
                            shortDesc = '$shortDescription',
                            url = '$url',
-                           fk_task_type = $fk_task_type,
+                           priority = $priority,
                            level = $level
                      WHERE rowid = ".$taskId;
-                     //dateDeb = '$debdateUS',
+                     //dateo = '$debdateUS',
         $sql = $db->query($requete);
         if ($sql)
         {
@@ -222,23 +222,23 @@ if ($_REQUEST["id"] > 0)
             print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Ref").'</th><td class="ui-widget-content">'.$projet->ref.'</td>';
             print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Label").'</th><td class="ui-widget-content">'.$projet->getNomUrl(1).'</td></tr>';
 
-            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Task").'</th><td class="ui-widget-content" colspan="1"><input name="label" value="'.$task->title.'"></td>';
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Task").'</th><td class="ui-widget-content" colspan="1"><input name="label" value="'.$task->label.'"></td>';
             print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Company").'</th><td class="ui-widget-content">'.$projet->societe->getNomUrl(1).'</td></tr>';
             $requete = "SELECT *
-                          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+                          FROM ".MAIN_DB_PREFIX."projet_task
                          WHERE fk_projet = " .$_REQUEST['id'];
             $sql = $db->query($requete);
             $optDependStr = "";
             $optGrpStr = "";
             while ($res = $db->fetch_object($sql))
             {
-                $optDependStr .= "<option value='".$res->rowid."'>".$res->title."</option>";
+                $optDependStr .= "<option value='".$res->rowid."'>".$res->label."</option>";
                 //si c'est un group
-                if ($res->fk_task_type == 3 && $res->rowid == $task->fk_task_parent)
+                if ($res->priority == 3 && $res->rowid == $task->fk_task_parent)
                 {
-                    $optGrpStr .= "<option value='".$res->rowid."'>".$res->title."</option>";
-                } else if ($res->fk_task_type == 3){
-                    $optGrpStr .= "<option value='".$res->rowid."'>".$res->title."</option>";
+                    $optGrpStr .= "<option value='".$res->rowid."'>".$res->label."</option>";
+                } else if ($res->priority == 3){
+                    $optGrpStr .= "<option value='".$res->rowid."'>".$res->label."</option>";
                 }
             }
             print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Parent").'</th><td class="ui-widget-content" colspan="1">';
@@ -255,15 +255,15 @@ if ($_REQUEST["id"] > 0)
 
             print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Type de t&acirc;che").'</th><td class="ui-widget-content" colspan="1">';
             print '        <SELECT id="type"  name="type">';
-            if ($res->fk_task_type == 1)
+            if ($res->priority == 1)
                 print '          <option SELECTED value="1">Etape</option>';
             else
                 print '          <option value="1">Etape</option>';
-            if ($res->fk_task_type == 2)
+            if ($res->priority == 2)
                 print '          <option SELECTED value="2">T&acirc;che</option>';
             else
                 print '          <option value="2">T&acirc;che</option>';
-            if ($res->fk_task_type == 3)
+            if ($res->priority == 3)
                 print '          <option SELECTED value="3">Groupe</option>';
             else
                 print '          <option value="3">Groupe</option>';
@@ -271,17 +271,17 @@ if ($_REQUEST["id"] > 0)
 
             print '</td></tr>';
 
-            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$task->dateDebFRFull.'</td>';
-            $requete ="SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$task->id;
+            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$task->dateoFRFull.'</td>';
+            $requete ="SELECT * FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$task->id;
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$res->task_date.'</td>';
             $totCompute = 0;
-            $requete ="SELECT SUM(task_duration) / 36 as dur FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$task->id;
+            $requete ="SELECT SUM(task_duration) / 36 as dur FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$task->id;
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $totCompute = round($res->dur)/100;
-            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Pr&eacute;v totale (h)").'</th><td class="ui-widget-content" colspan="1"><input name="dur" id="dur" value="'.round($task->duration*100/3600) /100 .'">&nbsp;<span onClick="jQuery(\'input#dur\').val('.$totCompute.');" title="Reajuster selon les attributions" style="cursor: pointer; display:inline-block;" class="ui-icon ui-icon-refresh"></span></td>';
+            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Pr&eacute;v totale (h)").'</th><td class="ui-widget-content" colspan="1"><input name="dur" id="dur" value="'.round($task->duration*100/3600) /100 .'">&nbsp;<span onClick="jQuery(\'input#dur\').val('.$totCompute.');" label="Reajuster selon les attributions" style="cursor: pointer; display:inline-block;" class="ui-icon ui-icon-refresh"></span></td>';
 			print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Pr&eacute;v totale").'</th><td class="ui-widget-content" colspan="1">'.$projet->sec2hour($task->duration).'</td>';
             print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Eff. totale (h)").'</th><td class="ui-widget-content" colspan="1">'.$projet->sec2hour($task->duration_effective).'</td>';
 
@@ -344,8 +344,8 @@ $task->user_creat->fetch($task->user_creat->id);
             print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Parent").'</th><td class="ui-widget-content" colspan="1">'.($parent?$parent->getNomUrl(1):"").'</td>';
             print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Type t&acirc;che").'</th><td class="ui-widget-content" colspan="1">'.$langs->trans($task->task_type).'</td></tr>';
 
-            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$task->dateDebFRFull.'</td>';
-            $requete ="SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$task->id;
+            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$task->dateoFRFull.'</td>';
+            $requete ="SELECT * FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$task->id;
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$res->task_date.'</td>';
@@ -379,7 +379,7 @@ $task->user_creat->fetch($task->user_creat->id);
             $sql = " SELECT t.task_date,
                             sum(t.task_duration) as task_duration,
                             t.fk_user
-                       FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time as t, ".MAIN_DB_PREFIX."user as u
+                       FROM ".MAIN_DB_PREFIX."projet_task_time as t, ".MAIN_DB_PREFIX."user as u
                       WHERE t.fk_task =".$task->id. " AND u.rowid = t.fk_user
                    GROUP BY t.task_date,  t.fk_user
                    ORDER BY u.firstname ASC ,t.task_date ASC";

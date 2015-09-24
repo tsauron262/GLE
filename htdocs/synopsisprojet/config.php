@@ -82,7 +82,7 @@ if ($_REQUEST['action'] == "updtEmailProj")
     if ("x".$_REQUEST['mailTemplate'] != "x")
     {
         require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-        dolibarr_set_const($db, "PROJECT_TEMPLATE_EMAIL",utf8_encode($_REQUEST["mailTemplate"]));
+        dolibarr_set_const($db, "PROJECT_TEMPLATE_EMAIL",($_REQUEST["mailTemplate"]));
     }
 }
 

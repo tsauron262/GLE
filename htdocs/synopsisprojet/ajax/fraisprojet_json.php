@@ -124,10 +124,10 @@ switch ($action)
         $SQL = "SELECT count(*) as cnt
                   FROM ".MAIN_DB_PREFIX."user,
                        ".MAIN_DB_PREFIX."Synopsis_projet_frais
-             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task ON  ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_task
-             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet ON  ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_projet
-             LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn ON  ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."facture_fourn.fk_projet
-             LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur ON  ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."commande_fournisseur.fk_projet
+             LEFT JOIN ".MAIN_DB_PREFIX."projet_task ON  ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_task
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_view ON  ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_projet
+             LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn ON  ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."facture_fourn.fk_projet
+             LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur ON  ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."commande_fournisseur.fk_projet
                  WHERE ".MAIN_DB_PREFIX."user.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.acheteur_id
                    AND ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_projet = ".$projId;
 
@@ -155,7 +155,7 @@ switch ($action)
 
         $SQL = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_frais.id as id,
                        ".MAIN_DB_PREFIX."Synopsis_projet_frais.designation as nom,
-                       ifnull(".MAIN_DB_PREFIX."Synopsis_projet_task.title,'-') as tache,
+                       ifnull(".MAIN_DB_PREFIX."projet_task.label,'-') as tache,
                        concat(".MAIN_DB_PREFIX."user.firstname,' ',".MAIN_DB_PREFIX."user.lastname) as acheteur,
                        ".MAIN_DB_PREFIX."user.rowid as acheteurId,
                        dateAchat,
@@ -166,10 +166,10 @@ switch ($action)
                        ".MAIN_DB_PREFIX."commande_fournisseur.rowid as commandId
                   FROM ".MAIN_DB_PREFIX."user,
                        ".MAIN_DB_PREFIX."Synopsis_projet_frais
-             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task ON  ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_task
-             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet ON  ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_projet
-             LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn ON  ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."facture_fourn.fk_projet AND fk_facture_fourn = ".MAIN_DB_PREFIX."facture_fourn.rowid
-             LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur ON  ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."commande_fournisseur.fk_projet AND fk_commande_fourn = ".MAIN_DB_PREFIX."commande_fournisseur.rowid
+             LEFT JOIN ".MAIN_DB_PREFIX."projet_task ON  ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_task
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_view ON  ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_projet
+             LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn ON  ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."facture_fourn.fk_projet AND fk_facture_fourn = ".MAIN_DB_PREFIX."facture_fourn.rowid
+             LEFT JOIN ".MAIN_DB_PREFIX."commande_fournisseur ON  ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."commande_fournisseur.fk_projet AND fk_commande_fourn = ".MAIN_DB_PREFIX."commande_fournisseur.rowid
                  WHERE ".MAIN_DB_PREFIX."user.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_frais.acheteur_id
                    AND ".MAIN_DB_PREFIX."Synopsis_projet_frais.fk_projet = ".$projId;
 

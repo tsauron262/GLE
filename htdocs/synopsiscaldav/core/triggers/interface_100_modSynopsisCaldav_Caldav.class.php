@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT."/synopsistools/manipElementElement.php";
+require_once DOL_DOCUMENT_ROOT."/synopsisres/manipElementElement.php";
 
 /* Copyright (C) 2006-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2011      Regis Houssin        <regis.houssin@capnetworks.com>

@@ -206,7 +206,7 @@ if ($object->id) {
         array('synopsisdemandeinterv', 'synopsisdemandeinterv', 'synopsisdemandeinterv', 'Demande Inter'),
         'fichinter',
         array('ficheinter', 'fichinter', 'ficheinter', 'Fiche Inter'),
-        array('synopsisprojet', 'Synopsis_projet', 'synopsisprojet', 'au Projet'),
+        array('synopsisprojet', 'Synopsis_projet_view', 'synopsisprojet', 'au Projet'),
         array('propal', 'propal', 'propale'),
         array('expedition', 'expedition', 'expedition/sending', 'à l\'expedition')
     );

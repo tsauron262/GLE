@@ -266,7 +266,7 @@ case 'ressource':
         require_once( DOL_DOCUMENT_ROOT.'/Synopsis_Common/open-flash-chart/php-ofc-library/open-flash-chart.php' );
         require_once( DOL_DOCUMENT_ROOT.'/Synopsis_Common/open-flash-chart/php-ofc-library/ofc_line_dot.php' );
 
-        $dateDeb = mktime(0, 0, 0, 4, 1, date('Y')); //TODO fin last monday
+        $dateo = mktime(0, 0, 0, 4, 1, date('Y')); //TODO fin last monday
         $dateFin = mktime(0, 0, 0, 12, 31, date('Y'));
 
         $data3 = array(); // total
@@ -275,7 +275,7 @@ case 'ressource':
         $remArr = array();
         $CompArr = array();
 
-        $dot = new scatter_value($dateDeb,0);
+        $dot = new scatter_value($dateo,0);
         $data1[]=$dot;
         $data2[]=$dot;
         $data3[]=$dot;
@@ -325,7 +325,7 @@ case 'ressource':
         }
         $sum=0;
         $rem = false;
-        for ($i=$dateDeb;$i<$dateFin;$i+=86400)
+        for ($i=$dateo;$i<$dateFin;$i+=86400)
         {
             $sum += $CompArr[$i];
             if ($sum > $max) $max = $sum;
@@ -384,7 +384,7 @@ case 'ressource':
         $x = new x_axis();
         // grid line and tick every 10
         $x->set_range(
-            $dateDeb ,    // <-- min == 1st Jan, this year
+            $dateo ,    // <-- min == 1st Jan, this year
             $dateFin,    // <-- max == 31st dec, this year
            86400 );
          //show ticks and grid lines for every day:

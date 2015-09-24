@@ -32,10 +32,10 @@ $jqueryuipath = DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/';
 //
 $header = '<link rel="stylesheet" type="text/css" href="css/jsgantt.css" />' . "\n";
 $header .= '<link rel="stylesheet" type="text/css" href="css/GLEgantt.css" />' . "\n";
-$header .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/css/smoothness/jquery-ui-latest.custom.css" />' . "\n";
+//$header .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/css/smoothness/jquery-ui-latest.custom.css" />' . "\n";
 //
-$header .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-latest.min.js"></script>' . "\n";
-$header .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-ui-latest.custom.min.js"></script>' . "\n";
+//$header .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery.min.js"></script>' . "\n";
+//$header .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-ui-latest.custom.min.js"></script>' . "\n";
 $header .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.min.js"></script>' . "\n";
 $header .= '<script language="javascript"  src="' . $jspath . 'farbtastic.js"></script>' . "\n";
 $header .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.datetimepicker.js" type="text/javascript"></script>';
@@ -51,12 +51,12 @@ $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/includes/jqu
 //$header .= '<script language="javascript"  src="'.$jspath.'jquery.dimensions.js"></script>'."\n";
 $header .= '<script language="javascript"  src="' . $jspath . 'jquery.cookie.js"></script>' . "\n";
 $header .= '<script language="javascript"  src="' . $jspath . 'jquery.iutil.pack.js"></script>' . "\n";
-$header .= '<script language="javascript"  src="' . $jspath . 'jquery.idrag.js"/>' . "\n";
+//$header .= '<script language="javascript"  src="' . $jspath . 'jquery.idrag.js"/>' . "\n";
 $header .= '<script language="javascript"  src="' . $jspath . 'jquery.grid.columnSizing.pack.js"></script>' . "\n";
 
-$header .= '<script language="javascript"  src="' . $jspath . 'jquery.tooltip.js"></script>' . "\n";
+//$header .= '<script language="javascript"  src="' . $jspath . 'jquery.tooltip.js"></script>' . "\n";
 
-$header .= '<script language="javascript" src="' . $jspath . 'jquery.context-Menu.js"></script>' . "\n";
+$header .= '<script language="javascript" src="' . $jspath . 'jqGrid-4.5/plugins/jquery.contextmenu.js"></script>' . "\n";
 $header .= '<link rel="stylesheet" href="' . $csspath . 'jquery.contextMenu.css" type="text/css" />' . "\n";
 
 $header .= "<style>body { min-width: 1200px; position: static; } .fiche { min-width:1100px;  }</style>";
@@ -137,7 +137,7 @@ print "</center>";
 //print $header;
 
 $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
+              FROM " . MAIN_DB_PREFIX . "projet_task
              WHERE fk_projet = " . $project_id;
 $sql = $db->query($requete);
 $optDependStr = "";
@@ -145,7 +145,7 @@ $optGrpStr = "";
 while ($res = $db->fetch_object($sql)) {
     $optDependStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
     //si c'est un group
-    if ($res->fk_task_type == 3) {
+    if ($res->priority == 3) {
         $optGrpStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
     }
 }

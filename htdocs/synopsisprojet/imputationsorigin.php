@@ -130,7 +130,7 @@
 	    $sql = $db->query( $requete ) ;
 	    $res = $db->fetch_object( $sql ) ;
 	    $tot = $res->durEff ;
-	    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_projet_task SET duration_effective = " . $tot . " WHERE rowid = " . $taskId ;
+	    $requete = "UPDATE ".MAIN_DB_PREFIX."projet_task SET duration_effective = " . $tot . " WHERE rowid = " . $taskId ;
 	    $sql = $db->query( $requete ) ;
 	}
 	header( 'location: imputations.php?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST[ 'id' ] . '&' : '') . 'userid=' . $userId . "&format=" . $format . "&date=" . $date ) ;
@@ -280,14 +280,14 @@ EOF;
     $requete = "SELECT DISTINCT t.rowid as tid,
                   p.rowid as pid,
                   p.ref as pref,
-                  t.title
+                  t.label as title
              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors AS a,
-                  ".MAIN_DB_PREFIX."Synopsis_projet AS p,
-                  ".MAIN_DB_PREFIX."Synopsis_projet_task AS t
+                  ".MAIN_DB_PREFIX."Synopsis_projet_view AS p,
+                  ".MAIN_DB_PREFIX."projet_task AS t
             WHERE p.rowid = t.fk_projet
               AND t.rowid = a.fk_projet_task
               AND a.type = 'user'
-              AND t.statut = 'open'
+              AND t.fk_statut as statut = 'open'
 		AND a.fk_user = $userId 
 	    ORDER BY p.dateo";
     /*
@@ -335,7 +335,7 @@ EOF;
 	print '     </td>' ;
 
 	$requete1 = "SELECT sum(task_duration) as sumTps
-                  FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time
+                  FROM ".MAIN_DB_PREFIX."projet_task_time
                  WHERE fk_user = " . $userId . "
                    AND fk_task = " . $res->tid ;
 	$sql1 = $db->query( $requete1 ) ;

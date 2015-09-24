@@ -182,8 +182,8 @@ switch ($action)
 
             $js = '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
             $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
             $js .= '<script language="javascript" src="'.$jspath.'/jquery.FCKEditor.js"></script>'."\n";
 
             $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_secteur WHERE active = 1";
@@ -383,8 +383,8 @@ print cartouche_campagne_edit($db,$id,'Configuration de la campagne',1,$campagne
 //            $js .= ' <script src="'.$jspath.'/jqGrid-3.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
             $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
             $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
             $js .= ' <script src="js/jqueryProspect.js" type="text/javascript"></script>';
             $js .= '<script language="javascript" src="'.$jspath.'/jquery.FCKEditor.js"></script>'."\n";
             $js .= ' <script src="'.$jqueryuipath.'/ui.tabs.js" type="text/javascript"></script>';
@@ -569,8 +569,8 @@ print cartouche_campagne_edit($db,$id,'Configuration de la campagne',1,$campagne
 
 //            $js .= ' <script src="'.$jspath.'/jqGrid-3.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
             $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
             $js .= ' <script src="js/jqueryProspect.js" type="text/javascript"></script>';
             $js .= '<script language="javascript" src="'.$jspath.'/jquery.FCKEditor.js"></script>'."\n";
             $js .= "<script type='text/javascript'>\n";

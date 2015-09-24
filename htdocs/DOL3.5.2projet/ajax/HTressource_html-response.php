@@ -47,8 +47,8 @@ $result = restrictedArea($user, 'societe', $socid);
 
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
     $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+    $js .= ' <script src="'.$jspath.'/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 
     $js .= ' <script src="'.$jqueryuipath.'/ui.selectmenu.js" type="text/javascript"></script>';
     $js .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmenu(); });  </script>\n";
@@ -84,11 +84,11 @@ foreach($hrm->allRessource as $key=>$val)
     {
         $requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
                       FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                           ".MAIN_DB_PREFIX."Synopsis_projet_task,
+                           ".MAIN_DB_PREFIX."projet_task,
                            ".MAIN_DB_PREFIX."Synopsis_hrm_user
-                     WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                     WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
                        AND ".MAIN_DB_PREFIX."Synopsis_hrm_user.user_id =  ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
-                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$project_id."
+                       AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$project_id."
                        AND ".MAIN_DB_PREFIX."Synopsis_hrm_user.user_id = ".$val['GLEId']."";
         echo $requete;
         $sql = $db->query($requete);

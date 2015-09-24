@@ -35,13 +35,13 @@
   $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user,
                      ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.role,
                      ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.percent,
-                     ".MAIN_DB_PREFIX."Synopsis_projet_task.title,
-                     ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as taskId
+                     ".MAIN_DB_PREFIX."projet_task.label,
+                     ".MAIN_DB_PREFIX."projet_task.rowid as taskId
                 FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                     ".MAIN_DB_PREFIX."Synopsis_projet_task
+                     ".MAIN_DB_PREFIX."projet_task
                WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".$user_id. "
-                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$projet_id. "
-                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid ORDER BY ".MAIN_DB_PREFIX."Synopsis_projet_task.title ";
+                 AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$projet_id. "
+                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."projet_task.rowid ORDER BY ".MAIN_DB_PREFIX."projet_task.label ";
   $sql = $db->query($requete);
   $xml .= "<actors>\n";
   while ($res = $db->fetch_object($sql))
@@ -78,15 +78,15 @@
 
 
    //planning de l utilisateur pour la tache
-   $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as taskId,
-                      ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_user,
-                      unix_timestamp(".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_date) as FtaskDate,
-                      ".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_duration
-                 FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time,
-                      ".MAIN_DB_PREFIX."Synopsis_projet_task
-                WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$projet_id. "
-                  AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-                  AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_user =".$user_id;
+   $requete = "SELECT ".MAIN_DB_PREFIX."projet_task.rowid as taskId,
+                      ".MAIN_DB_PREFIX."projet_task_time.fk_user,
+                      unix_timestamp(".MAIN_DB_PREFIX."projet_task_time.task_date) as FtaskDate,
+                      ".MAIN_DB_PREFIX."projet_task_time.task_duration
+                 FROM ".MAIN_DB_PREFIX."projet_task_time,
+                      ".MAIN_DB_PREFIX."projet_task
+                WHERE ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$projet_id. "
+                  AND ".MAIN_DB_PREFIX."projet_task_time.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
+                  AND ".MAIN_DB_PREFIX."projet_task_time.fk_user =".$user_id;
   $sql = $db->query($requete);
   $xml .= "<planning>\n";
   while ($res = $db->fetch_object($sql))
@@ -94,20 +94,20 @@
         $xml .= "\t<time>\n";
         $xml .=   "\t\t<taskId><![CDATA[".$res->taskId."]]></taskId>\n";
         $xml .=   "\t\t<id><![CDATA[".$res->fk_user."]]></id>\n";
-        $xml .=   "\t\t<dateDeb><![CDATA[".$res->FtaskDate."]]></dateDeb>\n";
+        $xml .=   "\t\t<dateo><![CDATA[".$res->FtaskDate."]]></dateo>\n";
         $xml .=   "\t\t<duration><![CDATA[".$res->task_duration."]]></duration>\n";
         $xml .= "\t</time>\n";
   }
 
    //  et le temps passé
-   $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as taskId,
+   $requete = "SELECT ".MAIN_DB_PREFIX."projet_task.rowid as taskId,
                       ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_user,
                       unix_timestamp(".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.task_date_effective) as FtaskDate,
                       ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.task_duration_effective
                  FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective,
-                      ".MAIN_DB_PREFIX."Synopsis_projet_task
-                WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$projet_id. "
-                  AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+                      ".MAIN_DB_PREFIX."projet_task
+                WHERE ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$projet_id. "
+                  AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
                   AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_user =".$user_id;
   $sql = $db->query($requete);
 
@@ -141,7 +141,7 @@
   $xml .= "\t<vacation>\n";
   while ($res = $hrm->hrmdb->fetch_object($sql))
   {
-      $xml .= "\t\t<date><dateDeb><![CDATA[".$res->Fleave_date."]]></dateDeb>\n";
+      $xml .= "\t\t<date><dateo><![CDATA[".$res->Fleave_date."]]></dateo>\n";
       $xml .= "\t\t<duration><![CDATA[".$res->leave_length_days * 3600 * $conf->global->PROJECT_HOUR_PER_DAY ."]]></duration>\n";
       $xml .= "\t\t<status><![CDATA[".$res->leave_status."]]></status></date>\n";
   }
@@ -155,7 +155,7 @@
   $sql = $hrm->hrmdb->query($requeteHrm);
   while ($res = $hrm->hrmdb->fetch_object($sql))
   {
-      $xml .= "\t\t<date><dateDeb><![CDATA[".$res->Fdate."]]></dateDeb>\n";
+      $xml .= "\t\t<date><dateo><![CDATA[".$res->Fdate."]]></dateo>\n";
       $xml .= "\t\t<duration><![CDATA[". 3600 * $conf->global->PROJECT_HOUR_PER_DAY ."]]></duration></date>\n";
   }
   $xml .= "\t</dayOff>\n";
@@ -163,12 +163,12 @@
   $xml .="\t<configuration>\n";
   $requete = "SELECT unix_timestamp(min(task_date)) as minDate,
                      unix_timestamp(max(task_date)) as maxDate
-                FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time,
-                     ".MAIN_DB_PREFIX."Synopsis_projet_task
+                FROM ".MAIN_DB_PREFIX."projet_task_time,
+                     ".MAIN_DB_PREFIX."projet_task
                WHERE task_date is not null
-                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$projet_id. "
-                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-                 AND ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_user =".$user_id;
+                 AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$projet_id. "
+                 AND ".MAIN_DB_PREFIX."projet_task_time.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
+                 AND ".MAIN_DB_PREFIX."projet_task_time.fk_user =".$user_id;
   $sql = $db->query($requete);
   $res = $db->fetch_object($sql);
   $xml .= "\t\t<ProjStart>".$res->minDate."</ProjStart>\n";

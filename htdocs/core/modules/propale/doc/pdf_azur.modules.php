@@ -132,6 +132,8 @@ class pdf_azur extends ModelePDFPropales
 		}
 
 		$this->tva=array();
+		$this->localtax1=array();
+		$this->localtax2=array();
 		$this->atleastoneratenotnull=0;
 		$this->atleastonediscount=0;
 	}
@@ -172,7 +174,7 @@ class pdf_azur extends ModelePDFPropales
 
 			for ($i = 0 ; $i < $nblignes ; $i++)
 			{
-                            	if (empty($object->lines[$i]->fk_product)) continue;
+				if (empty($object->lines[$i]->fk_product)) continue;
 
 				$objphoto->fetch($object->lines[$i]->fk_product);
 
@@ -227,7 +229,7 @@ class pdf_azur extends ModelePDFPropales
 		if ($conf->propal->dir_output)
 		{
 			$object->fetch_thirdparty();
-			
+
 			// $deja_regle = 0;
 
 			// Definition of $dir and $file
@@ -298,11 +300,11 @@ class pdf_azur extends ModelePDFPropales
 				if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
 
 				$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                                
+
 				// Positionne $this->atleastonediscount si on a au moins une remise
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
-                                    if ($object->lines[$i]->remise_percent)
+					if ($object->lines[$i]->remise_percent)
 					{
 						$this->atleastonediscount++;
 					}
@@ -391,32 +393,10 @@ class pdf_azur extends ModelePDFPropales
 				$iniY = $tab_top + 7;
 				$curY = $tab_top + 7;
 				$nexY = $tab_top + 7;
-                                
-                                
-                                
-                                
-                                
-                                /*mod drsi*/
-                                global $accTht, $accTtva;
-                                $accTht = $accTtva = 0;
-                                /*fmoddrsi*/
 
 				// Loop on each lines
 				for ($i = 0 ; $i < $nblignes ; $i++)
 				{
-                                    
-                                    
-                                        /*mod drsi*/
-                                        if($object->lines[$i]->desc == "Acompte"){
-                                            $accTht = $object->lines[$i]->total_ht;
-                                            $accTtva = $object->lines[$i]->total_tva;
-                                            continue;
-                                        }
-                                        /*fmoddrsi*/
-                                        
-                                        
-			
-                                    
 					$curY = $nexY;
 					$pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
 					$pdf->SetTextColor(0,0,0);
@@ -507,8 +487,6 @@ class pdf_azur extends ModelePDFPropales
 
 					$pdf->SetFont('','', $default_font_size - 1);   // On repositionne la police par defaut
 
-                                        
-                                        /*mod drsi*/if($object->lines[$i]->product_type < 100){
 					// VAT Rate
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
 					{
@@ -602,7 +580,6 @@ class pdf_azur extends ModelePDFPropales
 						$pdf->line($this->marge_gauche, $nexY+1, $this->page_largeur - $this->marge_droite, $nexY+1);
 						$pdf->SetLineStyle(array('dash'=>0));
 					}
-                                        }/*fmoddrsi*/
 
 					$nexY+=2;    // Passe espace entre les lignes
 
@@ -993,11 +970,10 @@ class pdf_azur extends ModelePDFPropales
 		// Total HT
 		$pdf->SetFillColor(255,255,255);
 		$pdf->SetXY($col1x, $tab2_top + 0);
-                /*mod drsi*/global $accTht, $accTtva;/*fmod drsi*/
 		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
 
 		$pdf->SetXY($col2x, $tab2_top + 0);
-		$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ht + (! empty($object->remise)?$object->remise:0)/*mod drsi*/-$accTht/*fmod drsi*/, 0, $outputlangs), 0, 'R', 1);
+		$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ht + (! empty($object->remise)?$object->remise:0), 0, $outputlangs), 0, 'R', 1);
 
 		// Show VAT by rates and total
 		$pdf->SetFillColor(248,248,248);
@@ -1179,18 +1155,7 @@ class pdf_azur extends ModelePDFPropales
 				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc/*mod drsi*/-$accTht -$accTtva/*fmod drsi*/, 0, $outputlangs), $useborder, 'R', 1);
-                                
-                                 /*mod drsi*/
-                                if(-$accTht > 0){
-                                        $pdf->SetFillColor(248,248,248);
-                                        $index++;
-                                        $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-                                        $pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("Acompte"), 0, 'L', 0);
-                                        $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-                                        $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
-                                }
-                                /*fmod drsi*/
+				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc, 0, $outputlangs), $useborder, 'R', 1);
 			}
 		}
 
@@ -1609,4 +1574,3 @@ class pdf_azur extends ModelePDFPropales
 		return ($tab_hl*7);
 	}
 }
-

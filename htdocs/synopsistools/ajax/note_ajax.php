@@ -93,6 +93,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $return = ($droit2 ? "[1]" : "") . $return;
     }
 } elseif ($_POST['type'] == 'consigne') {
+require_once(DOL_DOCUMENT_ROOT."/synopsisres/extractObjTypeId.php");
     $url = $_POST['url'];
     $tabElem = getTypeAndId($url);
 

@@ -14,8 +14,8 @@ class toto
         $requete = "SELECT rowid,
                            title,duration_effective,
                            ifnull(fk_task_parent,0) as fk_task_parent
-                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
-                     WHERE fk_task_type = 3
+                      FROM ".MAIN_DB_PREFIX."projet_task
+                     WHERE priority = 3
                        AND fk_task_parent";
         $requete .= " ='$parent' ";
         $res=$this->db->query($requete) or die ("Fail recursive");
@@ -48,7 +48,7 @@ print_r ($toto->recursive_function($parent));
 
 
 
-//        $requete1 = "SELECT avg(".MAIN_DB_PREFIX."Synopsis_projet_task.progress) as moyenne FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_task_parent =  ".$row['fk_task_parent'] ;
+//        $requete1 = "SELECT avg(".MAIN_DB_PREFIX."projet_task.progress) as moyenne FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_task_parent =  ".$row['fk_task_parent'] ;
 //        print $requete1 . "<br>";
 //        $sql1 = $db->query($requete1);
 //        $res1 = $db->fetch_object($sql1);

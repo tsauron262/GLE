@@ -63,8 +63,8 @@
     $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/tiptip/jquery.tipTip.min.js" type="text/javascript"></script>' ;
     $js .= ' <script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.min.js" type="text/javascript"></script>' ;
     $js .= ' <script src="' . $jspath . '/ajaxfileupload.js" type="text/javascript"></script>' ;
-    $js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>' ;
-    $js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>' ;
+    $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>' ;
+    $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>' ;
 
 
 
@@ -884,7 +884,7 @@ EOF;
     print "<table>" ;
     print "<tbody>" ;
     print "<tr><td>Projet</td><td><SELECT>" ;
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE fk_statut < 3" ;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_view WHERE fk_statut < 3" ;
     $sql = $db->query( $requete ) ;
     print "<option value='-1'>Selection -></option>" ;
 

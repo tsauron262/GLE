@@ -137,7 +137,7 @@ print "</center>";
 //print $header;
 
 $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
+              FROM " . MAIN_DB_PREFIX . "projet_task
              WHERE fk_projet = " . $project_id;
 $sql = $db->query($requete);
 $optDependStr = "";
@@ -145,7 +145,7 @@ $optGrpStr = "";
 while ($res = $db->fetch_object($sql)) {
     $optDependStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
     //si c'est un group
-    if ($res->fk_task_type == 3) {
+    if ($res->priority == 3) {
         $optGrpStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
     }
 }

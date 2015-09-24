@@ -24,8 +24,8 @@ class fileInfo {
             if ($_REQUEST['appli'] == "Oui")
                 $this->appliFile($_REQUEST['file']);
             else
-                $this->marquFileVue($nom);
-
+                $this->marquFileVue($_REQUEST['file']);
+unset($_REQUEST['appli']);
             echo "<h3>Process</h3>";
         }
 

@@ -26,9 +26,9 @@ $requete = "SELECT ifnull(sum(tt.task_duration".(($_REQUEST['dur']=="effective")
                    t.fk_projet,
                    p.title
               FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors as a,
-                   ".MAIN_DB_PREFIX."Synopsis_projet as p,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task as t
-         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time".(($_REQUEST['dur']=="effective")? "_effective" : "")." as tt ON tt.fk_task = t.rowid
+                   ".MAIN_DB_PREFIX."Synopsis_projet_view as p,
+                   ".MAIN_DB_PREFIX."projet_task as t
+         LEFT JOIN ".MAIN_DB_PREFIX."projet_task_time".(($_REQUEST['dur']=="effective")? "_effective" : "")." as tt ON tt.fk_task = t.rowid
              WHERE a.fk_projet_task = t.rowid
                AND a.fk_user = ".$userid."
                AND p.rowid = t.fk_projet

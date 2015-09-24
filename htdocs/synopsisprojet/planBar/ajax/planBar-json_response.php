@@ -36,12 +36,12 @@ require_once('../../../main.inc.php');
 //        ]
 //    },
 
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet =  44";
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_projet =  44";
 $sql = $db->query($requete);
 while ($res=$db->fetch_object($sql))
 {
     $arrSerie = array();
-    $requete1 = "SELECT min(task_date) as ddate, max(date_add(task_date,interval (SELECT sum(task_duration) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task=".$res->rowid.") second)) as dend  FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$res->rowid. " GROUP BY fk_task ";
+    $requete1 = "SELECT min(task_date) as ddate, max(date_add(task_date,interval (SELECT sum(task_duration) FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task=".$res->rowid.") second)) as dend  FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = ".$res->rowid. " GROUP BY fk_task ";
     $sql1 = $db->query($requete1);
     $res1 = $db->fetch_object($sql1);
     $startDate = date('r',strtotime($res1->ddate));
@@ -57,7 +57,7 @@ while ($res=$db->fetch_object($sql))
     $typeProj="Réal.";
     $arrSerie[]=array('name' => $typeProj, 'start' => $startDate , 'end' => $endDate);
 
-    $name = utf8_encode($res->title);
+    $name = ($res->title);
     $id = $res->rowid;
 
 

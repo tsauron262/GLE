@@ -143,7 +143,7 @@ if (isset($conf->global->MAIN_MODULE_PROPALE)) {
 if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
     print "     <td class='ui-widget-content'><select name='projet'>";
     print "<OPTION value=''>S&eacute;lectionner-></OPTION>";
-    $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet ";
+    $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view ";
     $sql3 = $db->query($requete3);
     while ($res = $db->fetch_object($sql3)) {
         $selected = (isset($_GET['projetid']) && $_GET['projetid'] == $res->rowid) ? " selected=\"selected\"" : "";

@@ -41,12 +41,12 @@ if($searchOn=='true')
 
 
 $SQL = "SELECT count(*) as count
-          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task t 
+          FROM ".MAIN_DB_PREFIX."projet_task t 
      LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_actors ON fk_projet_task = t.rowid
      LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_depends ON ".MAIN_DB_PREFIX."Synopsis_projet_task_depends .fk_task = t.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."projet_task_time ON ".MAIN_DB_PREFIX."projet_task_time.fk_task = t.rowid
      LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective .fk_task = t.rowid
-         WHERE 1 = 1 AND t.fk_task_type <> 3";
+         WHERE 1 = 1 AND t.priority <> 3";
 if ('x'.$project_id != "x")
 {
     $SQL .= " AND t.fk_projet = ".$project_id . " ";
@@ -71,8 +71,8 @@ if ($start<0) $start = 0;
 
 
 $SQL = "SELECT t.rowid as id,
-               title,
-               statut,
+               label,
+               fk_statut as statut,
                progress,
                role,
                ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user as acto,
@@ -82,12 +82,12 @@ $SQL = "SELECT t.rowid as id,
                duration_effective,
                task_duration_effective,
                task_date_effective
-          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task t
+          FROM ".MAIN_DB_PREFIX."projet_task t
      LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_actors ON fk_projet_task = t.rowid
      LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_depends ON ".MAIN_DB_PREFIX."Synopsis_projet_task_depends .fk_task = t.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."projet_task_time ON ".MAIN_DB_PREFIX."projet_task_time.fk_task = t.rowid
      LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective .fk_task = t.rowid
-         WHERE 1 = 1 AND t.fk_task_type <> 3";
+         WHERE 1 = 1 AND t.priority <> 3";
 if ('x'.$project_id != "x")
 {
     $SQL .= " AND t.fk_projet = ".$project_id . " ";
@@ -110,7 +110,7 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     $responce->rows[$i]['cell']=array($row[id],
                                       $acto->getNomUrl(1),
                                       $row[role],
-                                      $row['title'],
+                                      $row['label'],
                                       $row[statut],
                                       $row[progress],
                                       $row[task_date],

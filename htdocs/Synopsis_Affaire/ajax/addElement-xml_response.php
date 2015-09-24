@@ -82,7 +82,7 @@
     //    }
     //
     //    //Projet
-    //    $requete = "SELECT rowid, ref, title, fk_statut FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE fk_soc = ".$id;
+    //    $requete = "SELECT rowid, ref, title, fk_statut FROM ".MAIN_DB_PREFIX."Synopsis_projet_view WHERE fk_soc = ".$id;
     //    $sql = $db->query($requete);
     //    if ($sql)
     //    {

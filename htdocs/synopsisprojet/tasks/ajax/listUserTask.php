@@ -92,7 +92,7 @@ if ($searchOn == 'true') {
 
 
 $SQL = "SELECT count(*) as count
-          FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task as t
+          FROM " . MAIN_DB_PREFIX . "projet_task as t
      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors as a ON a.fk_projet_task = t.rowid AND a.type = 'user'
 
      LEFT JOIN " . MAIN_DB_PREFIX . "user as u ON a.fk_user = u.rowid
@@ -120,13 +120,13 @@ if ($start < 0)
 $SQL = "SELECT a.fk_user,
                 a.role,
                 t.rowid,
-               (SELECT SUM(task_duration) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time as tt WHERE t.rowid = tt.fk_task AND tt.fk_user = a.fk_user) as task_duration,
-               (SELECT min(task_date) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time as tt WHERE t.rowid = tt.fk_task AND tt.fk_user = a.fk_user) as dateDeb,
-               (SELECT max(date_add(task_date , interval task_duration second )) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time as tt WHERE t.rowid = tt.fk_task AND tt.fk_user = a.fk_user) as dateFin,
+               (SELECT SUM(task_duration) FROM " . MAIN_DB_PREFIX . "projet_task_time as tt WHERE t.rowid = tt.fk_task AND tt.fk_user = a.fk_user) as task_duration,
+               (SELECT min(task_date) FROM " . MAIN_DB_PREFIX . "projet_task_time as tt WHERE t.rowid = tt.fk_task AND tt.fk_user = a.fk_user) as dateo,
+               (SELECT max(date_add(task_date , interval task_duration second )) FROM " . MAIN_DB_PREFIX . "projet_task_time as tt WHERE t.rowid = tt.fk_task AND tt.fk_user = a.fk_user) as dateFin,
                (SELECT SUM(task_duration_effective) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as te WHERE t.rowid = te.fk_task AND te.fk_user = a.fk_user) as task_duration_effective,
-               (SELECT min(task_date_effective) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as te WHERE t.rowid = te.fk_task AND te.fk_user = a.fk_user) as dateDebEff,
+               (SELECT min(task_date_effective) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as te WHERE t.rowid = te.fk_task AND te.fk_user = a.fk_user) as dateoEff,
                (SELECT max(date_add(task_date_effective , interval task_duration_effective second)) FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as te WHERE t.rowid = te.fk_task AND te.fk_user = a.fk_user) as dateFinPrevEff
-          FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task as t
+          FROM " . MAIN_DB_PREFIX . "projet_task as t
      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors as a ON a.fk_projet_task = t.rowid  AND a.type = 'user'
      LEFT JOIN " . MAIN_DB_PREFIX . "user as u ON a.fk_user = u.rowid
          WHERE 1 = 1
@@ -151,11 +151,11 @@ while ($row = $db->fetch_object($result)) {
 
         $responce->rows[$i]['cell'] = array($row->fk_user,
             ($tmpuser->id > 0 ? traite_str($tmpuser->getNomUrl(1)) : ""),
-            utf8_encode($langs->trans($row->role)),
-            ($row->dateDeb . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateDeb)) : ""),
+            ($langs->trans($row->role)),
+            ($row->dateo . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateo)) : ""),
             ($row->dateFin . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateFin)) : ""),
             $projet->sec2hour(abs($row->task_duration)),
-            ($row->dateDebEff . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateDebEff)) : ""),
+            ($row->dateoEff . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateoEff)) : ""),
             ($row->dateFinPrevEff . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateFinPrevEff)) : ""),
             $projet->sec2hour(abs($row->task_duration_effective)),
         );

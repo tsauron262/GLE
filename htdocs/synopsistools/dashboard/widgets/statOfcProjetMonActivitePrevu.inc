@@ -50,18 +50,18 @@ function widget_statOfcProjetMonActivitePrevu() {
         $table2 .= '       <td valign=top class="ui-widget-content"><table width=100%>';
         $table2 .= '       <tr><th style="padding: 15px; font-size: 16px;" colspan=4 class="ui-widget-header ui-state-default">Les 50 derni&egrave;res t&acirc;ches modifi&eacute;es';
 
-        $sql = "SELECT ifnull(sum(" . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_duration),0) as td,
-                   " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet,
-                   " . MAIN_DB_PREFIX . "Synopsis_projet.title,
-                   " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
+        $sql = "SELECT ifnull(sum(" . MAIN_DB_PREFIX . "projet_task_time.task_duration),0) as td,
+                   " . MAIN_DB_PREFIX . "projet_task.fk_projet,
+                   " . MAIN_DB_PREFIX . "Synopsis_projet_view.title,
+                   " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid
               FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors,
-                   " . MAIN_DB_PREFIX . "Synopsis_projet,
-                   " . MAIN_DB_PREFIX . "Synopsis_projet_task
-         LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-             WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
+                   " . MAIN_DB_PREFIX . "Synopsis_projet_view,
+                   " . MAIN_DB_PREFIX . "projet_task
+         LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
+             WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task = " . MAIN_DB_PREFIX . "projet_task.rowid
                AND " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user = " . $user->id . "
-               AND " . MAIN_DB_PREFIX . "Synopsis_projet.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet
-          GROUP BY " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet";
+               AND " . MAIN_DB_PREFIX . "Synopsis_projet_view.rowid = " . MAIN_DB_PREFIX . "projet_task.fk_projet
+          GROUP BY " . MAIN_DB_PREFIX . "projet_task.fk_projet";
 //    $table.= $sql;
         $sql .= $db->plimit(50);
 

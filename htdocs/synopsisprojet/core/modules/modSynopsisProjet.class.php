@@ -343,7 +343,26 @@ class modSynopsisProjet extends DolibarrModules {
 //    if (! $ModuleMenu->level) $ModuleMenu->level=0;
 //    $ModuleMenu->create($user);
 
-        $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (
+        $sql = array(
+            "CREATE TABLE IF NOT EXISTS `llx_Synopsis_projet_sup` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_user_resp` int(11) DEFAULT NULL,
+  `fk_type_projet` int(11) DEFAULT '1',
+  `date_valid` datetime DEFAULT NULL,
+  `date_launch` datetime DEFAULT NULL,
+  PRIMARY KEY (`rowid`)
+)",
+            
+            
+            
+             "CREATE VIEW IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM " . MAIN_DB_PREFIX . "projet p1 LEFT join " . MAIN_DB_PREFIX . "Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)",
+            
+            
+            
+            
+            
+            
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tms` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `nom` varchar(50) DEFAULT NULL,
@@ -393,27 +412,31 @@ class modSynopsisProjet extends DolibarrModules {
 (10, 'PROJRUNNING', 'En cours', 1),
 (50, 'PROJCLOSE', 'Cloturé', 1),
 (999, 'PROJWAITVAL', 'Attente de validation', 1),
-(9999, 'PROJABANDON', 'Abandonné', 1);", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet` (
-  `rowid` int(11) NOT NULL AUTO_INCREMENT,
-  `fk_soc` int(11) DEFAULT NULL,
-  `fk_statut` smallint(6) NOT NULL,
-  `tms` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `dateo` date DEFAULT NULL,
-  `date_create` datetime DEFAULT NULL,
-  `ref` varchar(50) DEFAULT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `fk_user_resp` int(11) DEFAULT NULL,
-  `fk_user_creat` int(11) DEFAULT NULL,
-  `note` text,
-  `fk_type_projet` int(11) DEFAULT '1',
-  `date_valid` datetime DEFAULT NULL,
-  `date_launch` datetime DEFAULT NULL,
-  `date_cloture` datetime DEFAULT NULL,
-  `entity` int(11) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`rowid`),
-  UNIQUE KEY `ref` (`ref`),
-  KEY `fk_statut` (`fk_statut`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=545 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_document_group` (
+(9999, 'PROJABANDON', 'Abandonné', 1);", 
+            
+//            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_view` (
+//  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+//  `fk_soc` int(11) DEFAULT NULL,
+//  `fk_statut` smallint(6) NOT NULL,
+//  `tms` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+//  `dateo` date DEFAULT NULL,
+//  `datec` datetime DEFAULT NULL,
+//  `ref` varchar(50) DEFAULT NULL,
+//  `title` varchar(255) DEFAULT NULL,
+//  `fk_user_resp` int(11) DEFAULT NULL,
+//  `fk_user_creat` int(11) DEFAULT NULL,
+//  `note` text,
+//  `fk_type_projet` int(11) DEFAULT '1',
+//  `date_valid` datetime DEFAULT NULL,
+//  `date_launch` datetime DEFAULT NULL,
+//  `date_close` datetime DEFAULT NULL,
+//  `entity` int(11) NOT NULL DEFAULT '1',
+//  PRIMARY KEY (`rowid`),
+//  UNIQUE KEY `ref` (`ref`),
+//  KEY `fk_statut` (`fk_statut`)
+//) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=545 ;", 
+            
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_document_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) DEFAULT NULL,
   `fk_projet` int(11) DEFAULT NULL,
@@ -492,12 +515,12 @@ class modSynopsisProjet extends DolibarrModules {
   `group_name` varchar(150) NOT NULL,
   `fk_projet` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "projet_task` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_projet` int(11) NOT NULL,
   `fk_task_parent` int(11) DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL,
-  `dateDeb` datetime DEFAULT NULL,
+  `dateo` datetime DEFAULT NULL,
   `duration_effective` double NOT NULL,
   `duration` double DEFAULT NULL,
   `fk_user_creat` int(11) DEFAULT NULL,
@@ -507,7 +530,7 @@ class modSynopsisProjet extends DolibarrModules {
   `description` longtext,
   `color` varchar(7) DEFAULT NULL,
   `url` longtext,
-  `fk_task_type` tinyint(1) DEFAULT NULL,
+  `priority` tinyint(1) DEFAULT NULL,
   `shortDesc` text,
   `level` int(11) DEFAULT NULL,
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -532,17 +555,19 @@ class modSynopsisProjet extends DolibarrModules {
   PRIMARY KEY (`id`),
   UNIQUE KEY `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends` (`fk_task`,`fk_depends`),
   KEY `fk_parent_task_depends_2_sql` (`fk_depends`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time` (
-  `rowid` int(11) NOT NULL AUTO_INCREMENT,
-  `fk_task` int(11) NOT NULL,
-  `task_date` datetime DEFAULT NULL,
-  `task_duration` double DEFAULT NULL,
-  `fk_user` int(11) DEFAULT NULL,
-  `note` text,
-  PRIMARY KEY (`rowid`),
-  KEY `fk_task` (`fk_task`),
-  KEY `fk_user` (`fk_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=653 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", 
+//            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "projet_task_time` (
+//  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+//  `fk_task` int(11) NOT NULL,
+//  `task_date` datetime DEFAULT NULL,
+//  `task_duration` double DEFAULT NULL,
+//  `fk_user` int(11) DEFAULT NULL,
+//  `note` text,
+//  PRIMARY KEY (`rowid`),
+//  KEY `fk_task` (`fk_task`),
+//  KEY `fk_user` (`fk_user`)
+//) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=653 ;", 
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_task` int(11) NOT NULL,
   `task_date_effective` datetime DEFAULT NULL,
@@ -594,12 +619,12 @@ class modSynopsisProjet extends DolibarrModules {
 (2, 'Imputations', 1, 1, '6', 1, 1, 1, 1, 1, 1, NULL, 1, NULL, NULL, 1, 1, 1),
 (3, 'R&D', 1, NULL, '5', 1, 1, 1, 1, 1, 1, NULL, NULL, NULL, NULL, 1, 1, 1),
 (4, 'Interne', 1, NULL, '1', 1, 1, 1, 1, 1, 1, NULL, NULL, NULL, NULL, 1, 1, 1);",
-            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_task_type` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_type` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;",
-            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_task_type` (`id`, `label`) VALUES
+            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_projet_task_type` (`id`, `label`) VALUES
 (1, 'milestone'),
 (2, 'task'),
 (3, 'group');",
@@ -709,7 +734,7 @@ class modSynopsisProjet extends DolibarrModules {
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;","SET foreign_key_checks = 0;",
             "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."projet;",
             "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."projet;",
-            "CREATE VIEW ". MAIN_DB_PREFIX ."projet as (SELECT rowid, fk_soc, date_create as datec, tms, dateo, date_cloture as datee, ref, entity, title, note as description, fk_user_creat, '' as public, fk_statut, '' as note_private, '' as note_public, '' as model_pdf FROM ". MAIN_DB_PREFIX ."Synopsis_projet);",
+            "CREATE VIEW ". MAIN_DB_PREFIX ."projet as (SELECT rowid, fk_soc, datec as datec, tms, dateo, date_close as datee, ref, entity, title, note as description, fk_user_creat, '' as public, fk_statut, '' as note_private, '' as note_public, '' as model_pdf FROM ". MAIN_DB_PREFIX ."Synopsis_projet_view);",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_task` int(11) NOT NULL,
@@ -730,7 +755,7 @@ class modSynopsisProjet extends DolibarrModules {
   ADD CONSTRAINT `resa_ressource_key ` FOREIGN KEY (`fk_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE NO ACTION,
   ADD CONSTRAINT `user_author_resa_ressource_key` FOREIGN KEY (`fk_user_author`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_imputation_resa_ressource_key ` FOREIGN KEY (`fk_user_imputation`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", 
-            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_view`
   ADD CONSTRAINT `" . MAIN_DB_PREFIX . "Synopsis_projet_ibfk_1` FOREIGN KEY (`fk_statut`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;",
             "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_Hressources`
   ADD CONSTRAINT `fk_global_ressource_key` FOREIGN KEY (`fk_global_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE,
@@ -739,18 +764,22 @@ class modSynopsisProjet extends DolibarrModules {
   ADD CONSTRAINT `fk_projessource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION,
   ADD CONSTRAINT `fk_projparent_ressource_key` FOREIGN KEY (`fk_parent_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE;",
             "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_risk`
-  ADD CONSTRAINT `fk_projet_risk` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_projet_task_risk` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task`
-  ADD CONSTRAINT `fk_parent_task_sql` FOREIGN KEY (`fk_task_parent`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_projet_task` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE;",
+  ADD CONSTRAINT `fk_projet_risk` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_view` (`rowid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_Synopsis_projet_task_risk` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "projet_task` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "projet_task`
+  ADD CONSTRAINT `fk_parent_task_sql` FOREIGN KEY (`fk_task_parent`) REFERENCES `" . MAIN_DB_PREFIX . "projet_task` (`rowid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_projet_task` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_view` (`rowid`) ON DELETE CASCADE;",
             "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_actors`
-  ADD CONSTRAINT `fk_parent_task_actor_sql` FOREIGN KEY (`fk_projet_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
+  ADD CONSTRAINT `fk_parent_task_actor_sql` FOREIGN KEY (`fk_projet_task`) REFERENCES `" . MAIN_DB_PREFIX . "projet_task` (`rowid`) ON DELETE CASCADE;",
             "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends`
-  ADD CONSTRAINT `fk_parent_task_depends_1_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_parent_task_depends_2_sql` FOREIGN KEY (`fk_depends`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time`
-  ADD CONSTRAINT `fk_parent_task_time_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;"
+  ADD CONSTRAINT `fk_parent_task_depends_1_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "projet_task` (`rowid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_parent_task_depends_2_sql` FOREIGN KEY (`fk_depends`) REFERENCES `" . MAIN_DB_PREFIX . "projet_task` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "projet_task_time`
+  ADD CONSTRAINT `fk_parent_task_time_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "projet_task` (`rowid`) ON DELETE CASCADE;"
+           
+                
+            
+            
             );
 
         return $this->_init($sql);

@@ -556,8 +556,8 @@ EOF;
         $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/ui.jqgrid.css" />';
         $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/jquery.searchFilter.css" />';
         $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/css/ui.multiselect.css" />';
-        $js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-        $js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+        $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+        $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
         $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/js/ui.multiselect.js" type="text/javascript"></script>';
          $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
     }

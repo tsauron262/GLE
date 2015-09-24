@@ -129,7 +129,7 @@ class mod_projet_tourmaline extends ModeleNumRefProjet
             $where = " AND fk_type_projet = ".($projet->type_id>0?$projet->type_id:1);
             $mask = preg_replace('/\{tt\}/',($projet->type_id > 0?$projet->type_inRef:"ex"),$mask);
         }
-        $numFinal=get_next_value($db,$mask,'Synopsis_projet','ref',$where,$objsoc->code_client,$projet->dateo);
+        $numFinal=get_next_value($db,$mask,'Synopsis_projet_view','ref',$where,$objsoc->code_client,$projet->dateo);
         return  $numFinal;
     }
     function getVersion()

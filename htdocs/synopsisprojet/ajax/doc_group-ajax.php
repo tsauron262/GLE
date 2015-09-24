@@ -31,7 +31,7 @@ switch($action)
 {
     case "add":
     {
-        $nom = preg_replace('/\'/','\\\'',htmlentities(utf8_decode($_REQUEST["name"])));
+        $nom = preg_replace('/\'/','\\\'',htmlentities(($_REQUEST["name"])));
         $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_projet_document_group
                                 (nom, fk_projet)
                          VALUES ('".$nom."',".$project_id.")";
@@ -46,7 +46,7 @@ switch($action)
     break;
     case "mod":
     {
-        $nom = preg_replace('/\'/','\\\'',htmlentities(utf8_decode($_REQUEST["name"])));
+        $nom = preg_replace('/\'/','\\\'',htmlentities(($_REQUEST["name"])));
         $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_projet_document_group
                        SET nom='".$nom."'
                      WHERE id=".$docGroupId;
@@ -191,7 +191,7 @@ switch($action)
         $groupid = $_REQUEST['groupId'];
         $occurence = intval($_REQUEST['occurence']);
         $importance = intval($_REQUEST['importance']);
-        $description = preg_replace('/\'/','\\\'',htmlentities(utf8_decode($_REQUEST['description'])));
+        $description = preg_replace('/\'/','\\\'',htmlentities(($_REQUEST['description'])));
 
         $requete = "SELECT *
                       FROM ".MAIN_DB_PREFIX."Synopsis_projet_risk

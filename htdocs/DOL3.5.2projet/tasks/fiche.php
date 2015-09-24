@@ -42,7 +42,7 @@ if ($projetid == '')
 $socid = 0;
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_view');
 
 
 $jspath = DOL_URL_ROOT . "/Synopsis_Common/jquery";
@@ -52,8 +52,8 @@ $imgPath = DOL_URL_ROOT . "/Synopsis_Common/images";
 
 $js = '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/ui.jqgrid.css" />';
 $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/jquery.searchFilter.css" />';
-$js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-$js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+$js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+$js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
 $js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.selectmenu.js" type="text/javascript"></script>';
 $js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.datetimepicker.js" type="text/javascript"></script>';
 
@@ -915,9 +915,9 @@ print '</div>';
 
 //Importer depuis la proposition
 //Nouvelle tache
-// fk_projet   fk_task_parent  title   duration_effective  fk_user_creat   statut  note    progress    description color   url fk_task_type    shortDesc   level   tms
+// fk_projet   fk_task_parent  title   duration_effective  fk_user_creat   statut  note    progress    description color   url priority    shortDesc   level   tms
 $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
+              FROM " . MAIN_DB_PREFIX . "projet_task
              WHERE fk_projet = " . $projetid;
 $sql = $db->query($requete);
 
@@ -926,7 +926,7 @@ $optGrpStr = "";
 while ($res = $db->fetch_object($sql)) {
     $optDependStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
     //si c'est un group
-    if ($res->fk_task_type == 3) {
+    if ($res->priority == 3) {
         $optGrpStr .= "<option value='" . $res->rowid . "'>" . $res->title . "</option>";
     }
 }
@@ -1154,7 +1154,7 @@ if ($user->rights->synopsisprojet->attribution) {
 }
 
 print "<div id='Assocdialog'>";
-$requete = "SELECT p.* FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_projet p2 WHERE p.fk_soc = p2.fk_soc AND p2.rowid = " . $projetid;
+$requete = "SELECT p.* FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_projet_view p2 WHERE p.fk_soc = p2.fk_soc AND p2.rowid = " . $projetid;
 print "<form id='Assocform'>";
 print "<table width=100% cellpadding=10>";
 print "<tr><th class='ui-widget-header ui-state-default'>Proposition du projet";

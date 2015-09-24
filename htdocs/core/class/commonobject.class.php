@@ -1014,6 +1014,7 @@ abstract class CommonObject
     function fetch_user($userid)
     {
         $user = new User($this->db);
+        if($userid > 0)
         $result=$user->fetch($userid);
         $this->user = $user;
         return $result;

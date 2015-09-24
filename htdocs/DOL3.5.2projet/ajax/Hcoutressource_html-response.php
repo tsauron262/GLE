@@ -40,7 +40,7 @@ require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 
 $project = new Project($db);
 $project->id = $project_id;
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet = ".$project_id;
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_projet = ".$project_id;
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql))
 {

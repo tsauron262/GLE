@@ -40,7 +40,7 @@ require_once(DOL_DOCUMENT_ROOT."/synopsisprojet/class/synopsisproject.class.php"
 
 $project = new SynopsisProject($db);
 $project->id = $project_id;
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet = ".$project_id;
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."projet_task WHERE fk_projet = ".$project_id;
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql))
 {
@@ -70,7 +70,7 @@ foreach($project->CostRHByUser as $key=>$val)
     $fuser->id = $key;
     $fuser->fetch($fuser->id);
     print "<tr class='".$pairimpair."' style='border-left: 1px Solid #68ACCF;border-right: 1px Solid #68ACCF;'>";
-    print "    <td align='left'  style='border-right:1px Solid #68ACCF; width: 230px;'>".utf8_encode($fuser->getNomUrl(1))."</td>";
+    print "    <td align='left'  style='border-right:1px Solid #68ACCF; width: 230px;'>".($fuser->getNomUrl(1))."</td>";
     print "    <td align='right' style='border-width:0 0 0 0;  padding-right: 17px; border-right:1px Solid #68ACCF;'>". round($val['totalDur'] / 3600)." h</td>" ;
     $totaLDur += ($val['totalDur'] / 3600);
     print "    <td align='right' style='border-width:0 0 0 0; padding-right: 17px;'>". price(round($val['totalCostForUser']*100/100),0)." &euro;</td>" ;
@@ -112,7 +112,7 @@ foreach($project->CostRHByTaskByUser as $key=>$val)
             if ($idx==0)
             {
                 $idx=1;
-                print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".utf8_encode($DescArr['title']);
+                print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".($DescArr['title']);
             }
             if ($pairimpair == "pair") { $pairimpair = "impaire";} else
             if ($pairimpair == "impaire") { $pairimpair = "pair";}
@@ -120,7 +120,7 @@ foreach($project->CostRHByTaskByUser as $key=>$val)
             $fuser->id = $userId;
             $fuser->fetch($fuser->id);
             print "<tr class='".$pairimpair."'>";
-            print "<td>".utf8_encode($fuser->getNomUrl(1));
+            print "<td>".($fuser->getNomUrl(1));
             print "</td>";
             print "<td align='right'>".round($DescArr['duration'] / 3600 ). "h";
             print "</td>";
@@ -172,12 +172,12 @@ foreach($project->CostRHByUserByTask as $userId=>$val)
             if ($idx==0)
             {
                 $idx=1;
-                print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".utf8_encode($fuser->getNomUrl(1));
+                print "<tr><th colspan='3' style='border: 1px Solid #68ACCF;'>".($fuser->getNomUrl(1));
             }
             if ($pairimpair == "pair") { $pairimpair = "impaire";} else
             if ($pairimpair == "impaire") { $pairimpair = "pair";}
             print "<tr class='".$pairimpair."'>";
-            print "<td>".utf8_encode($DescArr['title']);
+            print "<td>".($DescArr['title']);
             print "</td>";
             print "<td align='right'>".round($DescArr['duration'] / 3600) . "h";
             print "</td>";

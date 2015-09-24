@@ -43,6 +43,7 @@
 */
 
 require("./pre.inc.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
 $langs->load("synopsisproject@synopsisprojet");
 
 if (!$user->rights->synopsisprojet->lire) accessforbidden();
@@ -106,8 +107,8 @@ $js = '
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
 //$sql.= " FROM";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
-//$sql.= " ".MAIN_DB_PREFIX."Synopsis_projet as p";
-//$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task as t ON p.rowid = t.fk_projet";
+//$sql.= " ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
+//$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."projet_task as t ON p.rowid = t.fk_projet";
 //$sql.= " WHERE 1 = 1";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
 //if ($socid)
@@ -163,7 +164,7 @@ $js = '
 //
 //$sql = "SELECT s.nom, s.rowid as socid, count(p.rowid)";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-//$sql .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_projet as p";
+//$sql .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 //$sql .= " WHERE p.fk_soc = s.rowid";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -257,7 +258,7 @@ function sec2hour($sec){
 print '<div class="fichecenter"><div class="fichethirdleft">';
 
 
-print_projecttasks_array($db,$socid,$projectsListId);
+print_projecttasks_array($db, $form,$socid,$projectsListId);
 
 
 print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';

@@ -21,29 +21,29 @@ require_once('../../main.inc.php');
 
 //$userid=59;
 
-$requete = "SELECT ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_duration),0) as td,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet.title
+$requete = "SELECT ifnull(sum(".MAIN_DB_PREFIX."projet_task_time.task_duration),0) as td,
+                   ".MAIN_DB_PREFIX."projet_task.fk_projet,
+                   ".MAIN_DB_PREFIX."Synopsis_projet_view.title
               FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                   ".MAIN_DB_PREFIX."Synopsis_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task
-         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-               AND ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet
-          GROUP BY ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet";
+                   ".MAIN_DB_PREFIX."Synopsis_projet_view,
+                   ".MAIN_DB_PREFIX."projet_task
+         LEFT JOIN ".MAIN_DB_PREFIX."projet_task_time ON ".MAIN_DB_PREFIX."projet_task_time.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
+             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."projet_task.rowid
+               AND ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."projet_task.fk_projet
+          GROUP BY ".MAIN_DB_PREFIX."projet_task.fk_projet";
 
 if ($_REQUEST['dur']=="effective")
 {
 $requete = "SELECT ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.task_duration_effective),0) as td,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet.title
+                   ".MAIN_DB_PREFIX."projet_task.fk_projet,
+                   ".MAIN_DB_PREFIX."Synopsis_projet_view.title
               FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                   ".MAIN_DB_PREFIX."Synopsis_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task
-         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-               AND ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet
-          GROUP BY ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet";
+                   ".MAIN_DB_PREFIX."Synopsis_projet_view,
+                   ".MAIN_DB_PREFIX."projet_task
+         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
+             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."projet_task.rowid
+               AND ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid = ".MAIN_DB_PREFIX."projet_task.fk_projet
+          GROUP BY ".MAIN_DB_PREFIX."projet_task.fk_projet";
 
 }
 

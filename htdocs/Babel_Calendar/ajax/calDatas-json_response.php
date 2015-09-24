@@ -447,7 +447,7 @@ if ($type == 'Affaire' && $id > 0)
                                        UNIX_TIMESTAMP(f.date_valid) as dv,
                                        UNIX_TIMESTAMP(f.date_launch) as dl,
                                        UNIX_TIMESTAMP(f.date_cloture) as dcl
-                                  FROM ".MAIN_DB_PREFIX."Synopsis_projet as f
+                                  FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as f
                                  WHERE rowid = ".$res1->element_id;
                     $sql2 = $db->query($requete);
                     while($res2 = $db->fetch_object($sql2))

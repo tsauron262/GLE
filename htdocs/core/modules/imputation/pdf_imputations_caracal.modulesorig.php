@@ -218,11 +218,11 @@ class pdf_imputations_caracal extends ModelePDFImputations
 
 
                 $requete = "SELECT p.title, p.ref, t.title as ttitle,
-                                   (SELECT SUM(tt.task_duration) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt WHERE tt.fk_task = t.rowid AND tt.fk_user = a.fk_user ) as dur,
+                                   (SELECT SUM(tt.task_duration) FROM ".MAIN_DB_PREFIX."projet_task_time as tt WHERE tt.fk_task = t.rowid AND tt.fk_user = a.fk_user ) as dur,
                                    (SELECT SUM(te.task_duration_effective) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective as te WHERE te.fk_task = t.rowid AND te.fk_user = a.fk_user ) as durEff
-                              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task as t,
+                              FROM ".MAIN_DB_PREFIX."projet_task as t,
                                    ".MAIN_DB_PREFIX."Synopsis_projet_task_actors as a,
-                                   ".MAIN_DB_PREFIX."Synopsis_projet as p
+                                   ".MAIN_DB_PREFIX."Synopsis_projet_view as p
                              WHERE a.fk_projet_task = t.rowid
                                AND t.fk_projet = p.rowid
                                AND a.type='user'
@@ -373,9 +373,9 @@ class pdf_imputations_caracal extends ModelePDFImputations
 
                 $iter = 1;
                 $requete = "SELECT DISTINCT p.rowid, p.title, p.ref
-                              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task as t,
+                              FROM ".MAIN_DB_PREFIX."projet_task as t,
                                    ".MAIN_DB_PREFIX."Synopsis_projet_task_actors as a,
-                                   ".MAIN_DB_PREFIX."Synopsis_projet as p
+                                   ".MAIN_DB_PREFIX."Synopsis_projet_view as p
                              WHERE a.fk_projet_task = t.rowid
                                AND t.fk_projet = p.rowid
                                AND a.type='user'
@@ -555,10 +555,10 @@ class pdf_imputations_caracal extends ModelePDFImputations
                                         t.dateDeb,
                                         t.statut,
                                         t.note,
-                                        (SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt WHERE tt.fk_task=t.rowid AND tt.fk_user = a.fk_user ) as task_duration,
+                                        (SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."projet_task_time as tt WHERE tt.fk_task=t.rowid AND tt.fk_user = a.fk_user ) as task_duration,
                                         (SELECT SUM(task_duration_effective) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective as te WHERE te.fk_task=t.rowid AND te.fk_user = a.fk_user ) as task_duration_effective
                                    FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors as a,
-                                        ".MAIN_DB_PREFIX."Synopsis_projet_task as t
+                                        ".MAIN_DB_PREFIX."projet_task as t
                                   WHERE t.fk_projet = ".$res->rowid."
                                     AND t.rowid = a.fk_projet_task
                                     ANd a.fk_user = ".$fuser->id;

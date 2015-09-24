@@ -28,22 +28,22 @@ $sql = $db->query($requete);
 $res = $db->fetch_object($sql);
 $occurence = $res->occurence;
 $importance = $res->gravite;
-$description = utf8_encode(html_entity_decode($res->description)) ." ";
+$description = (html_entity_decode($res->description)) ." ";
 
 switch($action)
 {
     case "in":
-      $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.title,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.note,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_parent,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.level,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as tid,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type as fk_task_type
-                    FROM ".MAIN_DB_PREFIX."Synopsis_projet_task,
+      $requete = "SELECT ".MAIN_DB_PREFIX."projet_task.label,
+                         ".MAIN_DB_PREFIX."projet_task.note,
+                         ".MAIN_DB_PREFIX."projet_task.fk_task_parent,
+                         ".MAIN_DB_PREFIX."projet_task.level,
+                         ".MAIN_DB_PREFIX."projet_task.rowid as tid,
+                         ".MAIN_DB_PREFIX."projet_task.priority as priority
+                    FROM ".MAIN_DB_PREFIX."projet_task,
                          ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group,
                          ".MAIN_DB_PREFIX."Synopsis_projet_risk_group
                    WHERE ".MAIN_DB_PREFIX."Synopsis_projet_risk_group.id = ".$curGrp ."
-                     AND ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+                     AND ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
                      AND ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_group_risk = ".MAIN_DB_PREFIX."Synopsis_projet_risk_group.id ";
       $sql = $db->query($requete);
       $responce;
@@ -56,7 +56,7 @@ switch($action)
       {
          $total += $projet->costTask($res->tid);
          $responce->rows[$count]['id']=$res->tid;
-         $responce->rows[$count]['groupDet']=array('name' => utf8_encode(html_entity_decode($res->title)), "desc" => utf8_encode(html_entity_decode($res->note)), "fk_task_parent" => $res->fk_task_parent, "level" => $res->level,'type' => $res->fk_task_type);
+         $responce->rows[$count]['groupDet']=array('name' => (html_entity_decode($res->title)), "desc" => (html_entity_decode($res->note)), "fk_task_parent" => $res->fk_task_parent, "level" => $res->level,'type' => $res->priority);
          $count ++;
       }
       $totalRisk = $total * ($occurence + $importance) / 200;
@@ -71,16 +71,16 @@ switch($action)
     break;
     default:
     case "notin":
-      $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.title,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.note,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_parent,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.level,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as tid,
-                         ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type as fk_task_type
-                    FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
-               LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group ON ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+      $requete = "SELECT ".MAIN_DB_PREFIX."projet_task.label,
+                         ".MAIN_DB_PREFIX."projet_task.note,
+                         ".MAIN_DB_PREFIX."projet_task.fk_task_parent,
+                         ".MAIN_DB_PREFIX."projet_task.level,
+                         ".MAIN_DB_PREFIX."projet_task.rowid as tid,
+                         ".MAIN_DB_PREFIX."projet_task.priority as priority
+                    FROM ".MAIN_DB_PREFIX."projet_task
+               LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group ON ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_task = ".MAIN_DB_PREFIX."projet_task.rowid
                                                    AND ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_group_risk = ".$curGrp."
-                   WHERE ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_task is null OR ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type = 3" ;
+                   WHERE ".MAIN_DB_PREFIX."Synopsis_projet_li_task_group.fk_task is null OR ".MAIN_DB_PREFIX."projet_task.priority = 3" ;
       $sql = $db->query($requete);
       $responce;
       $count =0;
@@ -91,7 +91,7 @@ switch($action)
       {
          $total += $projet->costTask($res->tid);
          $responce->rows[$count]['id']=$res->tid;
-         $responce->rows[$count]['groupDet']=array('name' => utf8_encode(html_entity_decode($res->title)), "desc" => utf8_encode(html_entity_decode($res->note)), "fk_task_parent" => $res->fk_task_parent, "level" => $res->level, "type" => $res->fk_task_type );
+         $responce->rows[$count]['groupDet']=array('name' => (html_entity_decode($res->title)), "desc" => (html_entity_decode($res->note)), "fk_task_parent" => $res->fk_task_parent, "level" => $res->level, "type" => $res->priority );
          $count ++;
       }
       $totalRisk = $total * ($occurence + $importance) / 200;

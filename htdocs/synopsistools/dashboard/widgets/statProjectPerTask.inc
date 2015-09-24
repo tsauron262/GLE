@@ -45,8 +45,8 @@ function widget_statProjectPerTask() {
 
         $sql = "SELECT p.title, p.rowid, count(t.rowid)";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet as p";
-        $sql .= " , ".MAIN_DB_PREFIX."Synopsis_projet_task as t";
+        $sql .= " FROM ".MAIN_DB_PREFIX."Synopsis_projet_view as p";
+        $sql .= " , ".MAIN_DB_PREFIX."projet_task as t";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llxsociete_commerciaux as sc";
         $sql .= " WHERE t.fk_projet = p.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;

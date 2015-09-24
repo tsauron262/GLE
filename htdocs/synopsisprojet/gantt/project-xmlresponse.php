@@ -36,19 +36,19 @@ switch ($action) {
         }
         break;
     case "descTask": {
-            $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.title,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid,
-                           date_format(" . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_date,'%d/%m/%Y %H:%i') as task_date ,
-                           date_format(DATE_ADD(" . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_date,INTERVAL " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_duration second),'%d/%m/%Y %H:%i' )as task_end,
-                           ifnull(" . MAIN_DB_PREFIX . "Synopsis_projet_task.color, '0000FF') as color,
-                           ifnull(fk_task_type,3) as type,
+            $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.label,
+                           " . MAIN_DB_PREFIX . "projet_task.rowid,
+                           date_format(" . MAIN_DB_PREFIX . "projet_task_time.task_date,'%d/%m/%Y %H:%i') as task_date ,
+                           date_format(DATE_ADD(" . MAIN_DB_PREFIX . "projet_task_time.task_date,INTERVAL " . MAIN_DB_PREFIX . "projet_task_time.task_duration second),'%d/%m/%Y %H:%i' )as task_end,
+                           '0000FF' as color,
+                           ifnull(priority,3) as type,
                            ifnull(fk_task_parent,0) as fk_task_parent,
                            progress,
                            shortDesc,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.url
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                 LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . $taskId;
+                           " . MAIN_DB_PREFIX . "projet_task.url
+                      FROM " . MAIN_DB_PREFIX . "projet_task
+                 LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
+                     WHERE " . MAIN_DB_PREFIX . "projet_task.rowid = " . $taskId;
             $sql = $db->query($requete);
             //Open all by default
             $pOpen = 1;
@@ -72,7 +72,7 @@ switch ($action) {
                 }
                 $xml .= "<task>\n";
                 $xml .= "  <pID>" . $taskId . "</pID>\n";
-                $xml .= "  <pName><![CDATA[" . utf8_decode($res->title) . "]]></pName>\n";
+                $xml .= "  <pName><![CDATA[" . ($res->title) . "]]></pName>\n";
                 $xml .= "  <pStart>" . $res->task_date . "</pStart>\n";
                 $xml .= "  <pEnd>" . $res->task_end . "</pEnd>\n";
                 $xml .= "  <pColor>" . $res->color . "</pColor>\n";
@@ -192,8 +192,8 @@ switch ($action) {
                 $xml .= "  <pOpen>" . $pOpen . "</pOpen>\n";
                 $requete1 = "SELECT *
                            FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_depends,
-                                " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                          WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_depends.fk_depends AND fk_task =" . $taskId;
+                                " . MAIN_DB_PREFIX . "projet_task
+                          WHERE " . MAIN_DB_PREFIX . "projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_depends.fk_depends AND fk_task =" . $taskId;
                 $sql1 = $db->query($requete1);
                 $dependsArr = array();
                 $xml .= "<Depends>";
@@ -254,7 +254,7 @@ switch ($action) {
                 $url = 'http://' . $url;
             }
 
-            $fk_task_type = $_REQUEST['type'];
+            $priority = $_REQUEST['type'];
 
             $statut = isset($_REQUEST['statut']) ? $_REQUEST['statut'] : "open"; //closed or opened
 
@@ -284,7 +284,7 @@ switch ($action) {
             if ($parentId . "x" != "x") {
                 //Get parent Level
                 $requete = "SELECT level
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
+                          FROM " . MAIN_DB_PREFIX . "projet_task
                          WHERE rowid = " . $parentId;
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
@@ -295,9 +295,9 @@ switch ($action) {
 
 
             $db->begin();
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                                (fk_projet, fk_task_parent, title, duration_effective, fk_user_creat,statut,note,progress,description,color,url,fk_task_type , shortDesc, level,dateDeb)
-                         VALUES ($project_id,$parentId, '$name', $duration_effective, $userid,'$statut','$note', $progress,'$description', '$color', '$url', $fk_task_type,'$shortDescription',$level,'$debdateUS')";
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "projet_task
+                                (fk_projet, fk_task_parent, title, duration_effective, fk_user_creat,statut,note,progress,description,color,url,priority , shortDesc, level,dateo)
+                         VALUES ($project_id,$parentId, '$name', $duration_effective, $userid,'$statut','$note', $progress,'$description', '$color', '$url', $priority,'$shortDescription',$level,'$debdateUS')";
             $sql = $db->query($requete);
             if ($sql) {
                 $taskId = $db->last_insert_id($sql);
@@ -324,7 +324,7 @@ switch ($action) {
                     }
                 }
 
-                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
+                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "projet_task_time
                                     (fk_task, task_date,task_duration, fk_user )
                              VALUES ($taskId, '$debdateUS', $duration_effective, $userid )";
                 $sqltime = $db->query($requete);
@@ -398,7 +398,7 @@ switch ($action) {
             if (!preg_match('/^[http:\/\/]/', $url)) {
                 $url = 'http://' . $url;
             }
-            $fk_task_type = $_REQUEST['type'];
+            $priority = $_REQUEST['type'];
             //$statut = isset($_REQUEST['statut']) ? $_REQUEST['statut'] : "open"; //closed or opened
 
 
@@ -427,7 +427,7 @@ switch ($action) {
             $level = 1;
             //Get parent Level
             if ($parentId . "x" != "x") {
-                $requete = "SELECT level FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE rowid = " . $parentId;
+                $requete = "SELECT level FROM " . MAIN_DB_PREFIX . "projet_task WHERE rowid = " . $parentId;
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
                 $level = $res->level + 1;
@@ -441,20 +441,17 @@ switch ($action) {
                 $parentId = "NULL";
             }
 
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "projet_task
                        SET fk_task_parent = $parentId,
-                           title = '$name',
+                           label = '$name',
                            duration_effective = $duration_effective,
                            fk_user_creat = $userid,
                            note = '$shortDescription',
                            progress = $progress,
                            description = '$description',
-                           shortDesc = '$shortDescription',
-                           color = '$color',
-                           url = '$url',
-                           fk_task_type = $fk_task_type,
-                           level = $level,
-			   dateDeb = '$debdateUS'
+                           note_private = '$shortDescription',
+                           rang = $priority,
+			   dateo = '$debdateUS'
                      WHERE rowid = " . $taskId;
 
             $sql = $db->query($requete);
@@ -490,11 +487,11 @@ switch ($action) {
                         }
                     }
                 }
-                $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
+                $requete = "DELETE FROM " . MAIN_DB_PREFIX . "projet_task_time
                               WHERE fk_task = " . $taskId;
 //print "del tasktime ".$requete."\n";
                 $db->query($requete);
-                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
+                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "projet_task_time
                                     (fk_task, task_date,task_duration, fk_user )
                              VALUES ($taskId, '" . $debdateUS . "', $duration_effective, $userid )";
                 $sqltime = $db->query($requete);
@@ -550,7 +547,7 @@ switch ($action) {
         }
         break;
     case "delete": {
-            $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
+            $requete = "DELETE FROM " . MAIN_DB_PREFIX . "projet_task
                      WHERE rowid = " . $taskId;
             $sql = $db->query($requete);
             if ($sql) {
@@ -586,7 +583,7 @@ print $result;
 function do_select($db, $project_id) {
 
     $requete = "SELECT *
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view
                      WHERE rowid = " . $project_id;
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);
@@ -596,7 +593,7 @@ function do_select($db, $project_id) {
     $xml = "<project>\n";
     $xml .= "<task>\n";
     $xml .= "  <pID>-1</pID>\n";
-    $xml .= "  <pName><![CDATA[" . utf8_decode($res->title) . "]]></pName>\n";
+    $xml .= "  <pName><![CDATA[" . ($res->title) . "]]></pName>\n";
     $xml .= "  <pStart>" . $res->dateo . "</pStart>\n";
     $xml .= "  <pEnd></pEnd>\n";
     $xml .= "  <pColor>$res->color</pColor>\n";
@@ -611,19 +608,19 @@ function do_select($db, $project_id) {
     $xml .= "</task>\n";
 
 
-    $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.title,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid,
-                           date_format(" . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_date,'%Y-%m-%d') as task_date,
-                           date_format(DATE_ADD(" . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_date,INTERVAL " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_duration second),'%Y-%m-%d') as task_end,
-                           ifnull(" . MAIN_DB_PREFIX . "Synopsis_projet_task.color, '0000FF') as color,
-                           ifnull(fk_task_type,3) as type,
+    $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.label,
+                           " . MAIN_DB_PREFIX . "projet_task.rowid,
+                           date_format(" . MAIN_DB_PREFIX . "projet_task_time.task_date,'%Y-%m-%d') as task_date,
+                           date_format(DATE_ADD(" . MAIN_DB_PREFIX . "projet_task_time.task_date,INTERVAL " . MAIN_DB_PREFIX . "projet_task_time.task_duration second),'%Y-%m-%d') as task_end,
+                           '0000FF' as color,
+                           ifnull(priority,3) as type,
                            ifnull(fk_task_parent,0) as fk_task_parent,
                            progress,
-                           url,
-                           shortDesc
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                 LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                     WHERE fk_projet = " . $project_id . " AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent is null";
+                           '' as url,
+                           note_private as shortDesc
+                      FROM " . MAIN_DB_PREFIX . "projet_task
+                 LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
+                     WHERE fk_projet = " . $project_id . " AND " . MAIN_DB_PREFIX . "projet_task.fk_task_parent < 1";
     $sql = $db->query($requete);
 
     //Open all by default
@@ -641,7 +638,7 @@ function do_select($db, $project_id) {
         }
         $xml .= "<task>\n";
         $xml .= "  <pID>" . $res->rowid . "</pID>\n";
-        $xml .= "  <pName><![CDATA[" . utf8_decode($res->title) . "]]></pName>\n";
+        $xml .= "  <pName><![CDATA[" . ($res->title) . "]]></pName>\n";
         $xml .= "  <pStart>" . $res->task_date . "</pStart>\n";
         $xml .= "  <pEnd>" . $res->task_end . "</pEnd>\n";
         $xml .= "  <pColor>" . $res->color . "</pColor>\n";
@@ -684,8 +681,8 @@ function do_select($db, $project_id) {
         $xml .= "  <pOpen>" . $pOpen . "</pOpen>\n";
         $requete1 = "SELECT *
                            FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_depends,
-                                " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                          WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = fk_task AND fk_task =" . $res->rowid;
+                                " . MAIN_DB_PREFIX . "projet_task
+                          WHERE " . MAIN_DB_PREFIX . "projet_task.rowid = fk_task AND fk_task =" . $res->rowid;
         $sql1 = $db->query($requete1);
         $dependsArr = array();
         while ($res1 = $db->fetch_object($sql1)) {
@@ -707,19 +704,19 @@ function do_select($db, $project_id) {
 
 function recursList($taskId, $db) {
     $xml = "";
-    $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.title,
-                   " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid,
-                   date_format(" . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_date,'%Y-%m-%d') as task_date,
-                   date_format(DATE_ADD(" . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_date,INTERVAL " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.task_duration second),'%Y-%m-%d') as task_end,
-                   ifnull(" . MAIN_DB_PREFIX . "Synopsis_projet_task.color, '0000FF') as color,
-                   ifnull(fk_task_type,3) as type,
+    $requete = "SELECT " . MAIN_DB_PREFIX . "projet_task.label,
+                   " . MAIN_DB_PREFIX . "projet_task.rowid,
+                   date_format(" . MAIN_DB_PREFIX . "projet_task_time.task_date,'%Y-%m-%d') as task_date,
+                   date_format(DATE_ADD(" . MAIN_DB_PREFIX . "projet_task_time.task_date,INTERVAL " . MAIN_DB_PREFIX . "projet_task_time.task_duration second),'%Y-%m-%d') as task_end,
+                   '0000FF' as color,
+                   ifnull(priority,3) as type,
                    ifnull(fk_task_parent,0) as fk_task_parent,
                    progress,
-                   url,
-                   shortDesc
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-         LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_projet_task_time ON " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-             WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . $taskId;
+                   '' as url,
+                   note_private as shortDesc
+              FROM " . MAIN_DB_PREFIX . "projet_task
+         LEFT JOIN " . MAIN_DB_PREFIX . "projet_task_time ON " . MAIN_DB_PREFIX . "projet_task_time.fk_task = " . MAIN_DB_PREFIX . "projet_task.rowid
+             WHERE " . MAIN_DB_PREFIX . "projet_task.rowid = " . $taskId;
     $sql = $db->query($requete);
     //TODO :> afficher par groupe
 //recursList($taskId, $db,$xml)
@@ -738,7 +735,7 @@ function recursList($taskId, $db) {
         }
         $xml .= "<task>\n";
         $xml .= "  <pID>" . $res->rowid . "</pID>\n";
-        $xml .= "  <pName><![CDATA[" . utf8_decode($res->title) . "]]></pName>\n";
+        $xml .= "  <pName><![CDATA[" . ($res->title) . "]]></pName>\n";
         $xml .= "  <pStart>" . $res->task_date . "</pStart>\n";
         $xml .= "  <pEnd>" . $res->task_end . "</pEnd>\n";
         $xml .= "  <pColor>" . $res->color . "</pColor>\n";

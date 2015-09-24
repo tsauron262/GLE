@@ -48,11 +48,11 @@ foreach($hrm->allRessource as $key=>$val)
     {
         $requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
                       FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                           ".MAIN_DB_PREFIX."Synopsis_projet_task,
+                           ".MAIN_DB_PREFIX."projet_task,
                            ".MAIN_DB_PREFIX."Synopsis_hrm_user
-                     WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
+                     WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
                        AND ".MAIN_DB_PREFIX."Synopsis_hrm_user.user_id =  ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
-                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet =  ".$projet_id."
+                       AND ".MAIN_DB_PREFIX."projet_task.fk_projet =  ".$projet_id."
                        AND ".MAIN_DB_PREFIX."Synopsis_hrm_user.user_id = ".$val['GLEId']."";
         $db->query($requete);
         $res=$db->fetch_object($requete);
@@ -79,7 +79,7 @@ if (count($inProjetArr) > 0)
         $fuser = new User($db);
         $fuser->fetch($key);
         print "<TR class='$pairimpair'><TD>";
-        print utf8_encode($fuser->getNomUrl(1));
+        print ($fuser->getNomUrl(1));
         print "</TD><TD>";
         print "<A href='mailto:".$fuser->email."'>".img_picto("mail_send.png","mail_send.png","style='vertical-align:text-top'")."&nbsp;&nbsp;".$fuser->email."</a>";
         print "</TD><TD>";

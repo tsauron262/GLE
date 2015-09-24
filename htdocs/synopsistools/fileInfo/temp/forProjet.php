@@ -1,0 +1,3 @@
+<?php
+
+$tabSql[] = "insert into llx_projet (`rowid`, `fk_soc`, `datec`, `tms`, `dateo`, `datee`, `ref`, `entity`, `title`, `description`, `fk_user_creat`, `public`, `fk_statut`, `note_private`, `note_public`, `model_pdf`) SELECT p.rowid, fk_soc, p.date_create as datec, p.tms, p.dateo, p.date_cloture as datee, p.ref, p.entity, p.title, p.note as description, p.fk_user_creat, '' as public, p.fk_statut, '' as note_private, '' as note_public, '' as model_pdf FROM llx_Synopsis_projet_view p, llx_societe s WHERE p.fk_soc = s.rowid;";

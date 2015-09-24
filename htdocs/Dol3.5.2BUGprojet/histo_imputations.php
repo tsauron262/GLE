@@ -237,9 +237,9 @@ if ($_REQUEST['action'] == 'save') {
             $tot = $res->durEff;
             if ($tot <= 0)
                 $tot = "0";
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET duration_effective = " . $tot . " WHERE rowid = " . $taskId;
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "projet_task SET duration_effective = " . $tot . " WHERE rowid = " . $taskId;
             $sql = $db->query($requete);
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET progress = 100-((duration - duration_effective) *100)/duration WHERE rowid = " . $taskId;
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "projet_task SET progress = 100-((duration - duration_effective) *100)/duration WHERE rowid = " . $taskId;
             $sql = $db->query($requete);
         }
     }
@@ -498,8 +498,8 @@ $requete = "SELECT DISTINCT t.rowid as tid,
                   t.statut,
                   p.fk_statut
              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors AS a,
-                  " . MAIN_DB_PREFIX . "Synopsis_projet AS p,
-                  " . MAIN_DB_PREFIX . "Synopsis_projet_task AS t
+                  " . MAIN_DB_PREFIX . "Synopsis_projet_view AS p,
+                  " . MAIN_DB_PREFIX . "projet_task AS t
             WHERE p.rowid = t.fk_projet
               AND t.rowid = a.fk_projet_task
               AND a.type = 'user'
@@ -534,7 +534,7 @@ while ($res = $db->fetch_object($sql)) {
     $html .= '     </td>';
 
     $requete1 = "SELECT sum(task_duration) as sumTps
-                  FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
+                  FROM " . MAIN_DB_PREFIX . "projet_task_time
                  WHERE fk_task = " . $res->tid
             . (($userId != -2 && ($grandType == 1 || _IMPUT_POURC_MULTI_USER_)) ? " AND fk_user = $userId " : "");
 
@@ -576,7 +576,7 @@ while ($res = $db->fetch_object($sql)) {
       $totalLigneT = 0;
       while ($result = $db->fetch_object($sql2)) {
       $requete100 = "SELECT sum(task_duration) as sumTps
-      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
+      FROM " . MAIN_DB_PREFIX . "projet_task_time
       WHERE fk_task = " . $res->tid . "
       AND fk_user = " . $result->fk_user;
       $sql100 = $db->query($requete100);
@@ -881,7 +881,7 @@ function getMoyPourc($fk_task, $prevue, $userId = -2, $tmpDate = null, $tmpDate2
     $total = 0;
     while ($result = $db->fetch_object($sql)) {
         $requete100 = "SELECT sum(task_duration) as sumTps
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
+                      FROM " . MAIN_DB_PREFIX . "projet_task_time
                      WHERE fk_task = " . $fk_task . "
                      AND fk_user = " . $result->fk_user;
         ;

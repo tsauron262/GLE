@@ -18,7 +18,7 @@
   */
 require_once('../../master.inc.php');
 $tmp = $_GET["q"];
-$q = strtolower(utf8_decode($tmp));
+$q = strtolower(($tmp));
 //print $q . '<br/>';
 $limit = 10;
 if($_REQUEST['limit'].'x' != 'x')
@@ -55,7 +55,7 @@ LIMIT ".$limit;
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql))
 {
-    echo $res->id.'|'.($res->firstname.'x' != 'x'?utf8_encode($res->firstname)." ":"") . utf8_encode($res->nom) .'|'.$res->email."\n";
+    echo $res->id.'|'.($res->firstname.'x' != 'x'?($res->firstname)." ":"") . ($res->nom) .'|'.$res->email."\n";
 }
 
 //$items = array(

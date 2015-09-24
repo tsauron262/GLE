@@ -341,13 +341,13 @@ function setTask(pTaskId,obj){
 //    print "<input class='imputation' name='imputation' style='width: 250px'></input>";
         print "<SELECT class='imputationProj' name='imputationProj' id='imputationProj' style='width: 250px'>";
         print "<option>S&eacute;lection -></option>";
-        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet.title,
-                           ".MAIN_DB_PREFIX."Synopsis_projet.rowid,
+        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_view.title,
+                           ".MAIN_DB_PREFIX."Synopsis_projet_view.rowid,
                            ".MAIN_DB_PREFIX."societe.nom
-                      FROM ".MAIN_DB_PREFIX."Synopsis_projet,
+                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_view,
                            ".MAIN_DB_PREFIX."societe
                      WHERE fk_statut = 0
-                       AND ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."Synopsis_projet.fk_soc
+                       AND ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_view.fk_soc
                   ORDER BY ".MAIN_DB_PREFIX."societe.nom";
         $sql = $db->query($requete);
         $rem ="";

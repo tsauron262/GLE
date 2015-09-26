@@ -152,12 +152,12 @@ EOF;
                 }
                 $html .= "<td><div id='destChrono" . $res->id . "'></div>";
                 $html .= "</table>";
-                echo ajax_combobox("Chrono" . $res->id . "_jDS", "", 0);
+                echo ajax_combobox("Chrono" . $res->id . "_jDS", array(), 0);
             } else {
                 foreach ($obj->valuesArr as $key => $val) {
                     $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key ? "SELECTED" : "") . " value='" . $key . "'>" . $val . "</OPTION>";
                 }
-                echo ajax_combobox("Chrono" . $res->id . "", "", 0);
+                echo ajax_combobox("Chrono" . $res->id . "", array(), 0);
             }
             if ($res->endNeeded == 1)
                 $html .= $res->htmlEndTag;

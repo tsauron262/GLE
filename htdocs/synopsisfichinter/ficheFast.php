@@ -119,18 +119,18 @@ if ($_REQUEST["id"] > 0) {
 
     if (isset($_POST['update']))
         saveForm();
-    
-    
+
+
     $prestations = prestations();
-    
-    
+
+
 
     $genererDoc = (extra(17) == 1 || extra(18) != null || extra(19) != '');
-    if($genererDoc)
+    if ($genererDoc)
         foreach ($prestations as $prestation)
-            if($prestation->duree == 0){
+            if ($prestation->duree == 0) {
                 $genererDoc = false;
-                echo "<h3 style='color:red;'>Pas de durée : Ligne ".$prestation->rowid."</h3>";
+                echo "<h3 style='color:red;'>Pas de durée : Ligne " . $prestation->rowid . "</h3>";
             }
     if ($genererDoc) {
         genererDoc($db);
@@ -263,7 +263,7 @@ if ($_REQUEST["id"] > 0) {
         $nbPrest++;
         $prefId = "presta" . $nbPrest . "_";
         $selectHtml = "<SELECT name='" . $prefId . "fk_typeinterv' class='fk_typeinterv'>";
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE active = 1 "./*AND id != 17*/" ORDER BY rang";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE active = 1 " . /* AND id != 17 */" ORDER BY rang";
         $sql3 = $db->query($requete);
         $selectHtml .= "<OPTION value='-1'>Selectionner-></OPTION>";
         $dfltPrice = 0;
@@ -371,8 +371,8 @@ if ($_REQUEST["id"] > 0) {
     }
     echo '<tr id="ajPrestaZone">';
     echo '</table><tr><th><td>';
-    if($fichinter->statut == 0)
-    echo '<tr><td colspan="4"><input type="button" class="butAction" id="ajPresta" value="Ajouter ligne"/><input type="hidden" id="supprPresta" name="supprPresta" value=""/></td></tr>';
+    if ($fichinter->statut == 0)
+        echo '<tr><td colspan="4"><input type="button" class="butAction" id="ajPresta" value="Ajouter ligne"/><input type="hidden" id="supprPresta" name="supprPresta" value=""/></td></tr>';
     $checked = (extra(17) == 1) ? ' checked="checked"' : '';
 
     echo '<tr>
@@ -543,6 +543,8 @@ function genererDoc($db) {
     if ($_REQUEST['lang_id']) {
         $outputlangs = new Translate("", $conf);
         $outputlangs->setDefaultLang($_REQUEST['lang_id']);
+    } else {
+        $outputlangs = $langs;
     }
 
     $result = fichinter_create($db, $fichinter, "BIMP", $outputlangs);
@@ -587,7 +589,7 @@ function saveForm() {
     $_POST = addslashes_r($_POST);
 
     for ($i = 1; $i < 5; $i++) {
-        $_POST['date' . $i] = traiteHeure($_POST['date' . $i]);  
+        $_POST['date' . $i] = traiteHeure($_POST['date' . $i]);
     }
 //    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);
@@ -651,8 +653,8 @@ function saveForm() {
                 $fichinterline->fk_contratdet = (isset($_POST['presta' . $i . "_contradet"]) ? $_POST['presta' . $i . "_contradet"] : 0);
                 $fichinterline->typeIntervProd = $_POST['presta' . $i . "_fk_prod"];
                 $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on");
-                if($pu_ht > 0)
-                $fichinterline->pu_ht = $pu_ht;
+                if ($pu_ht > 0)
+                    $fichinterline->pu_ht = $pu_ht;
                 $result = $fichinterline->update($user);
             } else
                 $fichinterline->delete_line();
@@ -666,7 +668,7 @@ function saveForm() {
     $res = $db->fetch_object($sql);
     if (isset($res->rowid))
         $fichinter->delete_contact($res->rowid);
-    if(isset($_POST["contactid"]) && $_POST["contactid"] > 0)
+    if (isset($_POST["contactid"]) && $_POST["contactid"] > 0)
         $result = $fichinter->add_contact($_POST["contactid"], 131, 'external');
     //prestations($_POST['presta' . $i . "_rowid"], $_POST['presta' . $i . "_descPrest"], $_POST['presta' . $i . "_fk_typeinterv"], $_POST['presta' . $i . "_duree"]);
 
@@ -732,8 +734,6 @@ function mysqlToArray($data, $db) {
     } else
         return false;
 }
-
-
 
 llxfooter();
 ?>

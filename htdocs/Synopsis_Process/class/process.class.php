@@ -2563,7 +2563,7 @@ EOF;
         
         $sup = $return = "";
         $i = 0;
-        $sql = $this->db->query($this->reqValues);
+        $sql = $this->db->query($this->reqValues. " LIMIT 0,1000");
         while ($result = $this->db->fetch_object($sql)) {
             $result->nom = dol_trunc($result->nom, 70);
             $this->valuesArr[$result->id] = $result->nom;

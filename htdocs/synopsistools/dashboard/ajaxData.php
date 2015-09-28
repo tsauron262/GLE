@@ -18,9 +18,7 @@ function execute() {
 
     // Call this operation's handler.
     if ($op and $ret = call_function_if_exists("execute_op_$op")) {
-        dol_syslog(print_r($ret,1),3);
-        dol_syslog(to_js($ret),3);
-        print utf8_encode(to_js($ret));
+        print to_js($ret);
     }
 }
 
@@ -36,7 +34,7 @@ function call_function_if_exists($func) {
 // Taken from http://api.drupal.org/api/function/drupal_to_js/7 (GPL 2)
 function to_js($var) {
     // json_encode() does not escape <, > and &, so we do it with str_replace()
-    return json_encode($var);
+    return @json_encode($var);
 }
 
 // Finds the id parameter and includes the respective widget file.

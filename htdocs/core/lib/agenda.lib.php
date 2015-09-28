@@ -199,7 +199,7 @@ function show_array_actions_to_do($max=5)
 	if ($socid) $sql.= " AND s.rowid = ".$socid;
 	$sql.= " ORDER BY a.datep DESC, a.id DESC";
 	$sql.= $db->plimit($max, 0);
-
+dol_syslog($sql,3);
 	$resql=$db->query($sql);
 	if ($resql)
 	{

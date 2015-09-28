@@ -36,11 +36,11 @@ function widget_listActionTODO() {
         
           return array(
             'title' => 'Action Com. &agrave; faire - 10 derni&egrave;res actions',
-            'content' => utf8_encode($table),
+            'content' => $table,
             'initScript' => "",
             'classes' => 'ui-state-default ui-widget-header',
             'settings' => false,
-            'fullscreen' => utf8_encode($table2),
+            'fullscreen' => $table2,
             'fullscreenScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/fullscreen.js',
             'fullscreenInitScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/initFullscreen.js',
           );

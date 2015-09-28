@@ -29,8 +29,8 @@ function widget_listActionTODO() {
         
         ob_start();
         $table2 = "<p>";
-        $table2 .= show_array_actions_to_do(50, false);
-        $table2 .= ob_get_contents();
+//        $table2 .= show_array_actions_to_do(50, false);
+//        $table2 .= ob_get_contents();
         $table2 .= "</p>";
         ob_clean();
         
@@ -40,7 +40,7 @@ function widget_listActionTODO() {
             'initScript' => "",
             'classes' => 'ui-state-default ui-widget-header',
             'settings' => false,
-            'fullscreen' => "",
+            'fullscreen' => $table2,
             'fullscreenScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/fullscreen.js',
             'fullscreenInitScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/initFullscreen.js',
           );

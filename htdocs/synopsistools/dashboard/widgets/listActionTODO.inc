@@ -35,7 +35,7 @@ function widget_listActionTODO() {
         $table2 .= "</p>";
         ob_clean();
         echo "b";
-          return array(
+          echo array(
             'title' => 'Action Com. &agrave; faire - 10 derni&egrave;res actions',
             'content' => $table,
             'initScript' => "",

@@ -21,6 +21,9 @@ $upload_dir = $conf->synopsischrono->dir_output . "/" . $id;
 
 $js = "";
 
+if (function_exists('mb_substr'))
+    die("existe");
+
 $langs->load("chrono@synopsischrono");
 $msg = "";
 

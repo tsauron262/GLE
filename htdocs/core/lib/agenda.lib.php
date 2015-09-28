@@ -226,7 +226,7 @@ function show_array_actions_to_do($max=5)
             $staticaction->type_code=$obj->code;
             $staticaction->label=($obj->label?$obj->label:$obj->type_label);
             $staticaction->id=$obj->id;
-            print '<td>'.$staticaction->getNomUrl(1,35).'</td>';
+            print '<td>'.$staticaction->getNomUrl(1,34).'</td>';
 
            // print '<td>'.dol_trunc($obj->label,22).'</td>';
 

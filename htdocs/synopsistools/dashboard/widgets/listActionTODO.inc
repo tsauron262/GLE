@@ -22,7 +22,7 @@ function widget_listActionTODO() {
     {
         ob_start();
         $table = "<p>";
-        $table .= show_array_actions_to_do(2, false);
+        $table .= show_array_actions_to_do(4, false);
         $table .= ob_get_contents();
         $table .= "</p>";
         ob_clean();

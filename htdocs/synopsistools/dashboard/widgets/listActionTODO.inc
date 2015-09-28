@@ -36,7 +36,7 @@ function widget_listActionTODO() {
         
           return array(
             'title' => 'Action Com. &agrave; faire - 10 derni&egrave;res actions',
-            'content' => "",
+            'content' => $table,
             'initScript' => "",
             'classes' => 'ui-state-default ui-widget-header',
             'settings' => false,

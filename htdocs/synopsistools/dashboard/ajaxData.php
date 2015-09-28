@@ -18,6 +18,7 @@ function execute() {
 
     // Call this operation's handler.
     if ($op and $ret = call_function_if_exists("execute_op_$op")) {
+        print_r($ret);
         print to_js($ret);
     }
 }

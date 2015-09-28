@@ -34,7 +34,7 @@ function call_function_if_exists($func) {
 // Taken from http://api.drupal.org/api/function/drupal_to_js/7 (GPL 2)
 function to_js($var) {
     // json_encode() does not escape <, > and &, so we do it with str_replace()
-    return @json_encode($var);
+    return json_encode($var);
 }
 
 // Finds the id parameter and includes the respective widget file.

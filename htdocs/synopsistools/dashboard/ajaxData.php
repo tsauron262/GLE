@@ -18,7 +18,7 @@ function execute() {
 
     // Call this operation's handler.
     if ($op and $ret = call_function_if_exists("execute_op_$op")) {
-        print_r($ret);
+        dol_syslog(print_r($ret,1),3);
         print to_js($ret);
     }
 }

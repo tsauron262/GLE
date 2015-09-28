@@ -34,7 +34,7 @@ function widget_listActionTODO() {
         $table2 .= "</p>";
         ob_clean();
         
-          print_r( array(
+          return array(
             'title' => 'Action Com. &agrave; faire - 10 derni&egrave;res actions',
             'content' => $table,
             'initScript' => "",
@@ -43,7 +43,7 @@ function widget_listActionTODO() {
             'fullscreen' => $table2,
             'fullscreenScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/fullscreen.js',
             'fullscreenInitScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/initFullscreen.js',
-          ));
+          );
 
     }else {
           return array(

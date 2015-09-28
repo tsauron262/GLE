@@ -40,7 +40,7 @@ function widget_listActionTODO() {
             'initScript' => "",
             'classes' => 'ui-state-default ui-widget-header',
             'settings' => false,
-            'fullscreen' => $table2,
+            'fullscreen' => "",
             'fullscreenScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/fullscreen.js',
             'fullscreenInitScript' => DOL_URL_ROOT.'/synopsistools/dashboard/widgets/scripts/initFullscreen.js',
           );

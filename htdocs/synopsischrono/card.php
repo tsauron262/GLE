@@ -165,9 +165,9 @@ if ($action == 'AskValider') {
     }
 }
 
-if ($action == 'ModifyAfterValid') {
+if ($action == 'ModifyAfterValid' || $action == 'ModifyAfterValid2') {
     //Si chrono revisable
-    if ($chr->model->hasRevision) {
+    if ($chr->model->hasRevision && $action == 'ModifyAfterValid') {
         if ($chr->model->revision_model_refid > 0) {
             $res = $chr->revised();
             if ($res > 0) {
@@ -179,8 +179,9 @@ if ($action == 'ModifyAfterValid') {
     } else {
         //Sinon mode normal
         $res = $chr->unvalidate();
-        $action = 'Modify';
-        $_REQUEST['action'] = 'Modifier';
+        $chr->fetch($chr->id);
+//        $action = 'Modify';
+//        $_REQUEST['action'] = 'Modifier';
     }
 }
 
@@ -716,7 +717,7 @@ if ($chr->id > 0) {
                 }
             }
             if ($chr->statut != 3 && $chr->statut > 0)//Dévalider
-                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>Dévalider</button>";
+                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid2\"'>Dévalider</button>";
         }
         $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_rights_def WHERE active=1 AND isValidationForAll = 1";
         $sql2 = $db->query($requete2);

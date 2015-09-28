@@ -10,6 +10,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/agenda.lib.php");
 
 // The get widget handler.
 function widget_listActionTODO() {
+    echo "a";
   // A widget object as per jquery.dashboard.js.
     global $db, $conf,$langs, $user;
     $socid = 0; if ($user->societe_id > 0)
@@ -33,7 +34,7 @@ function widget_listActionTODO() {
         $table2 .= ob_get_contents();
         $table2 .= "</p>";
         ob_clean();
-        
+        echo "b";
           return array(
             'title' => 'Action Com. &agrave; faire - 10 derni&egrave;res actions',
             'content' => $table,

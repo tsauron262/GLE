@@ -337,7 +337,7 @@ if ($sql) {
         $chrono->fetch($res->id);
         $model = $chrono->model;
 
-        $arr[] = $chrono->getNomUrl(1);
+        $arr[] = $chrono->getNomUrl(1, "nodesc");
 
         //hasRev => 1 si oui, rien sinon
         if (!$withRev) {

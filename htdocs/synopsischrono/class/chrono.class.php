@@ -265,6 +265,11 @@ class Chrono extends CommonObject {
         //$this->ref = substr($this->ref,0,7);
         $newRef = $this->ref . "-" . $revision;
         if ($this->orig_ref . "x" != "x") {
+            if(stripos($this->orig_ref, "-")){
+                $tabT = explode("-", $this->orig_ref);
+                $newRef = $tabT[0]. "-" . $revision;
+            }
+            else
             $newRef = $this->orig_ref . "-" . $revision;
         }
         //Nouvelle revision
@@ -358,6 +363,7 @@ class Chrono extends CommonObject {
 
         $requete .= ", orig_ref = '" . $this->orig_ref . "'";
         $requete .= ", revision = '" . $this->revision . "'";
+        $requete .= ", ref = '" . $this->ref . "'";
 
         $requete .= ", fk_user_modif = " . $user->id;
         $requete .= " WHERE id = " . $id;
@@ -623,7 +629,7 @@ class Chrono extends CommonObject {
 
         if ($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
             $titre = dol_trunc($this->description, 40);
-        else if ($this->model->id != 105)
+        else if ($this->model->id != 105 && stripos($option, "nodesc") === false)
             $titre = $this->ref . " : " . dol_trunc($this->description, 25);
         else
             $titre = $this->ref;
@@ -1075,6 +1081,7 @@ class ChronoRef {
         if($conf->global->MAIN_INFO_SOCIETE_NOM == "CAPSIM"){
         $this->propInList = 1;
         $this->descInList = 1;
+        $this->maxForNbDoc = 20;
         }
         else{
         $this->propInList = 0;

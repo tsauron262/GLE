@@ -1070,9 +1070,16 @@ class ChronoRef {
     public $maxForNbDoc = 8;
 
     public function ChronoRef($DB) {
+        global $conf;
         $this->db = $DB;
+        if($conf->global->MAIN_INFO_SOCIETE_NOM == "CAPSIM"){
+        $this->propInList = 1;
+        $this->descInList = 1;
+        }
+        else{
         $this->propInList = 0;
         $this->descInList = 0;
+        }
     }
 
     public function fetch($id) {

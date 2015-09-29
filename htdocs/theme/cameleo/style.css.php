@@ -601,7 +601,12 @@ foreach($mainmenuusedarray as $val)
 	$url='';
 	foreach($conf->file->dol_document_root as $dirroot)
 	{
-		if (file_exists($dirroot."/".$val."/img/".$val.".png"))
+		if (file_exists($dirroot."/".$val."/img/".$val."_".$theme.".png"))
+		{
+			$url=dol_buildpath('/'.$val.'/img/'.$val."_".$theme.'.png', 1);
+			break;
+		}
+		elseif (file_exists($dirroot."/".$val."/img/".$val.".png"))
 		{
 			$url=dol_buildpath('/'.$val.'/img/'.$val.'.png', 1);
 			break;

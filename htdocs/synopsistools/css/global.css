@@ -174,9 +174,6 @@ div.mainmenu.Ressources {
 div.mainmenu.zimbra {
     background-image: url(../../Synopsis_Zimbra/e-mail.png);
 }      
-div.mainmenu.synopsisprojet {
-    background-image: url(../../theme/eldy/img/menus/project.png);
-}   
 div.mainmenu.Process {
     background-image: url(../../Synopsis_Process/process.png);
 }

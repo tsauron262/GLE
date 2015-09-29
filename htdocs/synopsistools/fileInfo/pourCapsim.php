@@ -3,7 +3,7 @@
 $text = "Que pour Capsim";
 
 
-$tabSql[] = "CREATE TABLE IF NOT EXISTS `llx_projet` (
+$tabSql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "projet` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_soc` int(11) DEFAULT NULL,
   `datec` date DEFAULT NULL,
@@ -30,23 +30,23 @@ $tabSql[] = "CREATE TABLE IF NOT EXISTS `llx_projet` (
   KEY `idx_projet_fk_soc` (`fk_soc`)
 )";
 
-$tabSql[] = "INSERT INTO `llx_projet`(`rowid`, `fk_soc`, 
+$tabSql[] = "INSERT INTO `" . MAIN_DB_PREFIX . "projet`(`rowid`, `fk_soc`, 
 `datec`, `tms`, `dateo`, `datee`, `ref`, `entity`, `title`, 
 `description`, `fk_user_creat`, `public`, `fk_statut`, 
  `date_close`) 
 SELECT `rowid`, `fk_soc`, 
 `date_create`, `tms`, `dateo`, `date_valid`, `ref`, `entity`, `title`, 
 `note`, `fk_user_creat`, `fk_type_projet`, `fk_statut`, 
-`date_cloture` FROM llx_Synopsis_projet;
+`date_cloture` FROM " . MAIN_DB_PREFIX . "Synopsis_projet;
 ";
 
-$tabSql[] = "DROP table `llx_Synopsis_projet_sup`;
+$tabSql[] = "DROP table `" . MAIN_DB_PREFIX . "Synopsis_projet_sup`;
 ";
 
-$tabSql[] = "RENAME TABLE  `llx_Synopsis_projet` TO  `llx_Synopsis_projet_sup` ;
+$tabSql[] = "RENAME TABLE  `" . MAIN_DB_PREFIX . "Synopsis_projet` TO  `" . MAIN_DB_PREFIX . "Synopsis_projet_sup` ;
 ";
 
-$tabSql[] = "ALTER TABLE `llx_Synopsis_projet_sup`
+$tabSql[] = "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_sup`
   DROP `fk_soc`,
   DROP `fk_statut`,
   DROP `tms`,
@@ -60,10 +60,10 @@ $tabSql[] = "ALTER TABLE `llx_Synopsis_projet_sup`
   DROP `entity`;
 ";
 
-$tabSql[] = "CREATE VIEW `llx_Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM llx_projet p1 LEFT join llx_Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)
+$tabSql[] = "CREATE VIEW `" . MAIN_DB_PREFIX . "Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM " . MAIN_DB_PREFIX . "projet p1 LEFT join " . MAIN_DB_PREFIX . "Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)
 ";
 
-$tabSql[] = "INSERT INTO `llx_projet_task`(`rowid`, `ref`, `entity`, `fk_projet`, `fk_task_parent`, 
+$tabSql[] = "INSERT INTO `" . MAIN_DB_PREFIX . "projet_task`(`rowid`, `ref`, `entity`, `fk_projet`, `fk_task_parent`, 
 `datec`, `tms`, `dateo`, `datee`, `datev`, 
 `label`, `description`, `duration_effective`, `planned_workload`, 
 `progress`, `priority`, `fk_user_creat`, `fk_user_valid`, 
@@ -74,16 +74,16 @@ null, `tms`,  `dateDeb`, null, null,
 `title`,`description`, `duration_effective`, `duration`, 
 `progress`, `fk_task_type`, `fk_user_creat`, null,
 if(`statut` = 'open', 0,1), `shortDesc`, `note`,  
- `level` FROM llx_Synopsis_projet_task
+ `level` FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
 ";
 
-$tabSql[] = "RENAME table llx_Synopsis_projet_task to SAUVllx_Synopsis_projet_task
+$tabSql[] = "RENAME table " . MAIN_DB_PREFIX . "Synopsis_projet_task to SAUV" . MAIN_DB_PREFIX . "Synopsis_projet_task
 ";
 
-$tabSql[] = "RENAME table llx_Synopsis_task_type to llx_Synopsis_projet_task_type
+$tabSql[] = "RENAME table " . MAIN_DB_PREFIX . "Synopsis_task_type to " . MAIN_DB_PREFIX . "Synopsis_projet_task_type
 ";
 
-$tabSql[] = "INSERT INTO `llx_projet_task_time`(`rowid`, `fk_task`, `task_date`, `task_duration`, `fk_user`, `note`) SELECT `rowid`, `fk_task`, DATE(task_date), `task_duration`, `fk_user`, `note` FROM `llx_Synopsis_projet_task_time` WHERE 1
+$tabSql[] = "INSERT INTO `" . MAIN_DB_PREFIX . "projet_task_time`(`rowid`, `fk_task`, `task_date`, `task_duration`, `fk_user`, `note`) SELECT `rowid`, `fk_task`, DATE(task_date), `task_duration`, `fk_user`, `note` FROM `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time` WHERE 1
 ";
 
-$tabSql[] = "DROP table llx_Synopsis_projet_task_time;";
+$tabSql[] = "DROP table " . MAIN_DB_PREFIX . "Synopsis_projet_task_time;";

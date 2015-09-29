@@ -18,17 +18,17 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "deblockComm" && isset(
 }
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majCommerciaux") {
-    $result = $db->query("SELECT * FROM llx_societe WHERE idprof4 is not null && idprof4 != ''");
-    $db->query("UPDATE llx_societe SET fk_pays = '1' WHERE fk_pays = '0';");
+    $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE idprof4 is not null && idprof4 != ''");
+    $db->query("UPDATE " . MAIN_DB_PREFIX . "societe SET fk_pays = '1' WHERE fk_pays = '0';");
     while ($ligne = $db->fetch_object($result)) {
-        $result2 = $db->query("SELECT fk_object FROM llx_user_extrafields WHERE id8sens = '" . $ligne->idprof4 . "'");
+        $result2 = $db->query("SELECT fk_object FROM " . MAIN_DB_PREFIX . "user_extrafields WHERE id8sens = '" . $ligne->idprof4 . "'");
         if ($db->num_rows($result2) > 0) {
             while ($ligne2 = $db->fetch_object($result2)) {
                 setIdComm($ligne->rowid, $ligne2->fk_object);
                 echo "Ajout grace a la fiche" . $ligne->rowid . "<br/>";
             }
         } else {
-            $result2 = $db->query("SELECT * FROM  `llx_element_element`  WHERE  `fk_source` = '" . $ligne->idprof4 . "' AND  `sourcetype` LIKE  'idUser8Sens' AND  `targettype` LIKE  'idUserGle'");
+            $result2 = $db->query("SELECT * FROM  `" . MAIN_DB_PREFIX . "element_element`  WHERE  `fk_source` = '" . $ligne->idprof4 . "' AND  `sourcetype` LIKE  'idUser8Sens' AND  `targettype` LIKE  'idUserGle'");
             if ($db->num_rows($result2) > 0) {
                 while ($ligne2 = $db->fetch_object($result2)) {
                     setIdComm($ligne->rowid, $ligne2->fk_target);
@@ -41,9 +41,9 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majCommerciaux") {
 
 function setIdComm($soc, $idComm) {
     global $db;
-    $db->query("DELETE FROM `llx_societe_commerciaux` WHERE fk_soc = '" . $soc . "';");
-    $db->query("INSERT INTO `llx_societe_commerciaux` (`rowid`, `fk_soc`, `fk_user`) VALUES (NULL, '" . $soc . "', '" . $idComm . "');");
-    $db->query("UPDATE llx_societe SET idprof4 = '' WHERE rowid = '" . $soc . "';");
+    $db->query("DELETE FROM `" . MAIN_DB_PREFIX . "societe_commerciaux` WHERE fk_soc = '" . $soc . "';");
+    $db->query("INSERT INTO `" . MAIN_DB_PREFIX . "societe_commerciaux` (`rowid`, `fk_soc`, `fk_user`) VALUES (NULL, '" . $soc . "', '" . $idComm . "');");
+    $db->query("UPDATE " . MAIN_DB_PREFIX . "societe SET idprof4 = '' WHERE rowid = '" . $soc . "';");
 }
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_REQUEST['id']) && $_REQUEST['id'] > 0 && isset($_REQUEST['id2'])) {
@@ -65,13 +65,13 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_
 }
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majRevision") {
-    $sql = $db->query("SELECT * FROM llx_synopsischrono WHERE orig_ref is not null AND revision > 0");
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE orig_ref is not null AND revision > 0");
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->revision == 1)
             $where = "ref = '" . $ligne->orig_ref . "'";
         else
             $where = "orig_ref = '" . $ligne->orig_ref . "' AND revision = " . ($ligne->revision - 1);
-        $db->query("Update llx_synopsischrono SET revisionNext = " . $ligne->id . " WHERE " . $where) . "<br/>";
+        $db->query("Update " . MAIN_DB_PREFIX . "synopsischrono SET revisionNext = " . $ligne->id . " WHERE " . $where) . "<br/>";
     }
 }
 

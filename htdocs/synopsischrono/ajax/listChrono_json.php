@@ -176,7 +176,7 @@ $wh .= " AND (revision is NULL || revision = 0) ";
 
 //if(isset($_REQUEST['filtre']))
 //    $wh .= "AND (id IN (SELECT chrono_refid 
-//FROM  `llx_synopsischrono_value` 
+//FROM  `" . MAIN_DB_PREFIX . "synopsischrono_value` 
 //WHERE  `value` LIKE  '%".$_REQUEST['filtre']."%') OR ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%' OR nom LIKE  '%".$_REQUEST['filtre']."%') ";
 
 

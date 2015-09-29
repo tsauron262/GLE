@@ -22,22 +22,22 @@ class synopsisexport {
     public function exportFactureSav($print = true) {
         echo "Debut export : <br/>";
 //        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-//, email , total, total_ttc, id8Sens FROM  `llx_facture` fact, llx_societe soc
-//LEFT JOIN llx_element_element el, llx_user_extrafields ue, llx_synopsischrono_view_105 chrono 
+//, email , total, total_ttc, id8Sens FROM  `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "societe soc
+//LEFT JOIN " . MAIN_DB_PREFIX . "element_element el, " . MAIN_DB_PREFIX . "user_extrafields ue, " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono 
 // WHERE `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author) AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND el.fk_source = chrono.propalid AND fk_target = fact.rowid
 //  AND  fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null GROUP BY fact.rowid");
 
 
         $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `llx_facture` fact
+, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `" . MAIN_DB_PREFIX . "facture` fact
 
 
-LEFT JOIN llx_element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid
-LEFT JOIN llx_synopsischrono chrono ON el.fk_source = chrono.propalid
-LEFT JOIN llx_synopsischrono_chrono_105 chronoT ON chronoT.id = chrono.id
-LEFt JOIN llx_user_extrafields ue ON `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author)
+LEFT JOIN " . MAIN_DB_PREFIX . "element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid
+LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono chrono ON el.fk_source = chrono.propalid
+LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT ON chronoT.id = chrono.id
+LEFt JOIN " . MAIN_DB_PREFIX . "user_extrafields ue ON `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author)
 
-, llx_societe soc
+, " . MAIN_DB_PREFIX . "societe soc
 WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
 
 
@@ -46,7 +46,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $return1 = $return2 = "";
             $return1 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', true);
             $return2 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', false);
-            $result2 = $this->db->query("SELECT ref, if(fd.description = 'Acompte', -100, fd.product_type) as product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht, fd.tva_tx, fd.remise_percent FROM  `llx_facturedet` fd left join llx_product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne->factid);
+            $result2 = $this->db->query("SELECT ref, if(fd.description = 'Acompte', -100, fd.product_type) as product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht, fd.tva_tx, fd.remise_percent FROM  `" . MAIN_DB_PREFIX . "facturedet` fd left join " . MAIN_DB_PREFIX . "product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne->factid);
 
             $i = 0;
             while ($ligne2 = $this->db->fetch_object($result2)) {
@@ -115,15 +115,15 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 //
 //        $partReq1 = "SELECT prod.ref as ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat";
 //        $partReqFin = " Group BY factdet.fk_product LIMIT 0,1000";
-//        $partReq5 = " FROM  `llx_facture` fact, llx_propal prop, llx_element_element el1, llx_synopsischrono_view_105 chrono, " .
-////                "llx_synopsischrono_view_101 chrono2, llx_element_element el2, ".
-////                "llx_synopsischrono_view_101 chrono2, ".
-//                "llx_facturedet factdet left join llx_product prod on factdet.fk_product = prod.rowid 
+//        $partReq5 = " FROM  `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "element_element el1, " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono, " .
+////                "" . MAIN_DB_PREFIX . "synopsischrono_view_101 chrono2, " . MAIN_DB_PREFIX . "element_element el2, ".
+////                "" . MAIN_DB_PREFIX . "synopsischrono_view_101 chrono2, ".
+//                "" . MAIN_DB_PREFIX . "facturedet factdet left join " . MAIN_DB_PREFIX . "product prod on factdet.fk_product = prod.rowid 
 //WHERE fact.rowid = el1.fk_target AND prop.rowid = el1.fk_source AND el1.sourcetype='propal' AND el1.targettype='facture'
 //AND chrono.propalid = prop.rowid AND factdet.fk_facture = fact.Rowid
 //AND  fact.close_code is null " .
 ////"AND chrono.id = el2.fk_source AND chrono2.id = el2.fk_target AND el2.sourcetype = 'SAV' AND el2.targettype='productCli' ".
-////"AND chrono2.id = (SELECT FIRST(fk_target) FROM llx_element_element WHERE sourcetype = 'SAV' AND chrono.id = fk_source  AND targettype='productCli') ".
+////"AND chrono2.id = (SELECT FIRST(fk_target) FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = 'SAV' AND chrono.id = fk_source  AND targettype='productCli') ".
 //                "AND factdet.total_ht != 0 AND ";
 
         $tableSus = "";
@@ -131,12 +131,12 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         if ($typeAff2 == "ca") {
             $partReq1 = "SELECT IF(prod.ref is null, factdet.description, prod.ref) as ref, concat(prod.label,concat(' ',factdet.description)) as label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht*factdet.qty) as Total_Achat, SUM(factdet.total_ht - (factdet.buy_price_ht*factdet.qty)) as Total_Marge";
             $partReqFin = " Group BY factdet.fk_product, factdet.description LIMIT 0,10000";
-            $tableSus = "left join llx_product prod on factdet.fk_product = prod.rowid";
+            $tableSus = "left join " . MAIN_DB_PREFIX . "product prod on factdet.fk_product = prod.rowid";
         } elseif ($typeAff2 == "nb") {
             $partReq1 = "SELECT COUNT(DISTINCT(chrono.id)) as NB_PC";
             $partReqFin = " LIMIT 0,10000";
             $chargeAccompte = false;
-//            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
+//            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         } else {
             $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
             $totalVendu = "SUM(factdet.total_ht)";
@@ -149,13 +149,13 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 
         if ($typeAff2 != "fact")
             $where .= " AND chronoT.id = chrono.id ";
-        $partReq5 = " FROM  llx_synopsischrono_chrono_105 chronoT, llx_synopsischrono chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
-        $partReq5 .= " LEFT JOIN  llx_societe soc on  soc.rowid = propal.fk_soc ";
-//        $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
-        $partReq5 .= " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
-        $partReq5 .= " LEFT JOIN llx_facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%' || fact2.facnumber LIKE 'AV%')";
-        $partReq5 .= " LEFT JOIN llx_facture fact ON fact.close_code is null AND fact.rowid = el2.fk_target AND fact.facnumber LIKE 'FA%' ";
-        $partReq5 .= " LEFT JOIN llx_facturedet factdet ON factdet.fk_facture = fact2.rowid  AND (factdet.subprice != 0 || factdet.buy_price_ht != 0) " . $tableSus . " WHERE ";
+        $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
+        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "societe soc on  soc.rowid = propal.fk_soc ";
+//        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
+        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
+        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%' || fact2.facnumber LIKE 'AV%')";
+        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.close_code is null AND fact.rowid = el2.fk_target AND fact.facnumber LIKE 'FA%' ";
+        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facturedet factdet ON factdet.fk_facture = fact2.rowid  AND (factdet.subprice != 0 || factdet.buy_price_ht != 0) " . $tableSus . " WHERE ";
 
 
         if ($typeAff2 == "fact") {
@@ -164,15 +164,15 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
                     . "fact.total,"
                     . "SUM(det.total_ht - (det.buy_price_ht * det.qty)) as total_marge, "
                     . "fact.fk_statut";
-            $partReq5 = " FROM llx_societe soc, llx_facturedet det, llx_facture fact ";
-            $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
-            $partReq5 .= " LEFT JOIN  llx_propal propal on  propal.rowid = el.fk_source ";
-            $partReq5 .= " LEFT JOIN  llx_synopsischrono chrono1 ON chrono1.revisionNext < 1 AND chrono1.propalId = el.fk_source ";
-            $partReq5 .= " LEFT JOIN llx_synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
+            $partReq5 = " FROM " . MAIN_DB_PREFIX . "societe soc, " . MAIN_DB_PREFIX . "facturedet det, " . MAIN_DB_PREFIX . "facture fact ";
+            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
+            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "propal propal on  propal.rowid = el.fk_source ";
+            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON chrono1.revisionNext < 1 AND chrono1.propalId = el.fk_source ";
+            $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
             $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
             $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
-//            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
+//            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         }
 
 
@@ -239,7 +239,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 FROM  `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` ls, " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 ct , " . MAIN_DB_PREFIX . "synopsischrono chrono
 WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 //            $req = "SELECT label, valeur, propalid
-//FROM  llx_synopsischrono_view_105 chrono LEFT JOIN `llx_Synopsis_Process_form_list_members` ls ON `list_refid` =11 AND chrono.CentreVal = ls.valeur WHERE 1";
+//FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` ls ON `list_refid` =11 AND chrono.CentreVal = ls.valeur WHERE 1";
             if ($centre) {
                 $req .= " AND centre = '" . $centre . "'";
                 $blockCentre = true;

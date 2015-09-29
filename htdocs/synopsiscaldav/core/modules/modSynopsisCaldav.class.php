@@ -122,7 +122,7 @@ $this->menus = array();			// List of menus to add
     */
   function init()
   {
-    $sql = array("CREATE TABLE IF NOT EXISTS `llx_synopsiscaldav_event` (
+    $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsiscaldav_event` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_object` int(11) NOT NULL,
   `etag` varchar(100) NOT NULL,
@@ -134,15 +134,15 @@ $this->menus = array();			// List of menus to add
 "CREATE OR REPLACE VIEW calendars as (SELECT u.`rowid` as id, CONCAT('principals/', `login`) as principaluri, CONCAT(`lastname`, CONCAT('_', `firstname`)) as displayname, 'Calendar' as uri, 
 IF(fk_target, fk_target, '0') as ctag, 'Calendrier GLE' as description, 0 as calendarorder, '' as calendarcolor, 
 '' as timezone, 'VEVENT,VTODO' as components, 
-0 as transparent FROM llx_user u LEFT JOIN llx_element_element ON sourcetype = 'user' AND targettype = 'idCaldav' AND fk_source = u.rowid)",
+0 as transparent FROM " . MAIN_DB_PREFIX . "user u LEFT JOIN " . MAIN_DB_PREFIX . "element_element ON sourcetype = 'user' AND targettype = 'idCaldav' AND fk_source = u.rowid)",
         
-        "CREATE OR REPLACE VIEW users AS (SELECT `rowid` as id, `login` as username, `pass` as digesta1 FROM llx_user);",
+        "CREATE OR REPLACE VIEW users AS (SELECT `rowid` as id, `login` as username, `pass` as digesta1 FROM " . MAIN_DB_PREFIX . "user);",
 
-        " CREATE OR REPLACE VIEW principals AS (SELECT `rowid` as id, CONCAT('principals/', `login`) as uri, `email`, `login` as displayname, 'null' as vcardurl FROM `llx_user`);",
+        " CREATE OR REPLACE VIEW principals AS (SELECT `rowid` as id, CONCAT('principals/', `login`) as uri, `email`, `login` as displayname, 'null' as vcardurl FROM `" . MAIN_DB_PREFIX . "user`);",
 
         " "
-//        . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, e.`fk_user_action` as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `llx_actioncomm` e, llx_synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now());");
-          . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, IF(ar.fk_element, ar.fk_element, e.`fk_user_action`) as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `llx_actioncomm` e LEFT JOIN llx_actioncomm_resources ar ON ar.fk_actioncomm = e.id AND ar.element_type = 'user', llx_synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now()  AND fk_action NOT IN (3,8,9,10,30,31,40));");
+//        . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, e.`fk_user_action` as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `" . MAIN_DB_PREFIX . "actioncomm` e, " . MAIN_DB_PREFIX . "synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now());");
+          . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, IF(ar.fk_element, ar.fk_element, e.`fk_user_action`) as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `" . MAIN_DB_PREFIX . "actioncomm` e LEFT JOIN " . MAIN_DB_PREFIX . "actioncomm_resources ar ON ar.fk_actioncomm = e.id AND ar.element_type = 'user', " . MAIN_DB_PREFIX . "synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now()  AND fk_action NOT IN (3,8,9,10,30,31,40));");
     
     global $db;
     $sql2 = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."actioncomm");

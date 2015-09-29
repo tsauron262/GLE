@@ -100,13 +100,13 @@ echo "<br/><input class='butAction' type='submit' value='Valider'/></form><br/><
 
 
 if (isset($_REQUEST['reinitGarantiePa'])) {
-    $result = $db->query("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `llx_facture` fact, llx_facturedet factdet WHERE factdet.fk_facture = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total > -0.1 AND fact.total < 0.1 GROUP BY fact.rowid");
+    $result = $db->query("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "facturedet factdet WHERE factdet.fk_facture = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total > -0.1 AND fact.total < 0.1 GROUP BY fact.rowid");
     while ($ligne = $db->fetch_object($result)) {
 //    if($ligne->nbGar == 1){
-        $result2 = $db->query("SELECt SUM(buy_price_ht) as tot FROM llx_facturedet WHERE description not like 'Garantie' AND fk_facture = " . $ligne->rowid);
+        $result2 = $db->query("SELECt SUM(buy_price_ht) as tot FROM " . MAIN_DB_PREFIX . "facturedet WHERE description not like 'Garantie' AND fk_facture = " . $ligne->rowid);
         $ligne2 = $db->fetch_object($result2);
 
-        $db->query("UPDATe llx_facturedet SET buy_price_ht = -" . ($ligne2->tot / $ligne->nbGar) . " WHERE fk_facture = " . $ligne->rowid . " AND description LIKE 'Garantie'");
+        $db->query("UPDATe " . MAIN_DB_PREFIX . "facturedet SET buy_price_ht = -" . ($ligne2->tot / $ligne->nbGar) . " WHERE fk_facture = " . $ligne->rowid . " AND description LIKE 'Garantie'");
 //    }
 //    else
 //        echo "Plusieurs Garantie (".$ligne->nbGar.") facture ".$ligne->rowid;
@@ -114,13 +114,13 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
     
     
     
-    $result = $db->query("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `llx_propal` fact, llx_propaldet factdet WHERE factdet.fk_propal = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total > -0.1 AND fact.total < 0.1 GROUP BY fact.rowid");
+    $result = $db->query("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `" . MAIN_DB_PREFIX . "propal` fact, " . MAIN_DB_PREFIX . "propaldet factdet WHERE factdet.fk_propal = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total > -0.1 AND fact.total < 0.1 GROUP BY fact.rowid");
     while ($ligne = $db->fetch_object($result)) {
 //    if($ligne->nbGar == 1){
-        $result2 = $db->query("SELECt SUM(buy_price_ht) as tot FROM llx_propaldet WHERE description not like 'Garantie' AND fk_propal = " . $ligne->rowid);
+        $result2 = $db->query("SELECt SUM(buy_price_ht) as tot FROM " . MAIN_DB_PREFIX . "propaldet WHERE description not like 'Garantie' AND fk_propal = " . $ligne->rowid);
         $ligne2 = $db->fetch_object($result2);
 
-        $db->query("UPDATe llx_propaldet SET buy_price_ht = -" . ($ligne2->tot / $ligne->nbGar) . " WHERE fk_propal = " . $ligne->rowid . " AND description LIKE 'Garantie'");
+        $db->query("UPDATe " . MAIN_DB_PREFIX . "propaldet SET buy_price_ht = -" . ($ligne2->tot / $ligne->nbGar) . " WHERE fk_propal = " . $ligne->rowid . " AND description LIKE 'Garantie'");
 //    }
 //    else
 //        echo "Plusieurs Garantie (".$ligne->nbGar.") facture ".$ligne->rowid;

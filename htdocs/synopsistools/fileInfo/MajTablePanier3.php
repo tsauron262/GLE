@@ -1,7 +1,7 @@
 <?php
 
 $tabSql = array(
-    "ALTER TABLE `llx_synopsis_apple_parts_cart_detail` ADD `componentCode` TEXT NOT NULL ,
+    "ALTER TABLE `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart_detail` ADD `componentCode` TEXT NOT NULL ,
         ADD `partDescription` TEXT NOT NULL , ADD `stockPrice` TEXT NOT NULL"
 );
 

@@ -187,16 +187,16 @@ class modSynopsisHoliday extends DolibarrModules {
      */
     function init() {
         $this->remove();
-        $sql = array("ALTER TABLE `llx_holiday` ADD `type_conges` INT( 1 ) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0: ordinaires. 1 : congés exceptionnels. 2: rtt';",
-            "ALTER TABLE `llx_holiday` ADD `date_drh_valid` DATETIME NULL DEFAULT NULL AFTER `date_valid`;",
-            "ALTER TABLE `llx_holiday` ADD `fk_user_drh_valid` INT( 11 ) NULL DEFAULT NULL AFTER `fk_user_valid` ;",
-            "ALTER TABLE `llx_holiday_users` ADD `nb_rtt` DOUBLE NOT NULL DEFAULT '0';",
-            "ALTER TABLE `llx_holiday` ADD `fk_actioncomm` INT( 11 ) NULL DEFAULT NULL;",
-            "ALTER TABLE `llx_holiday` ADD `fk_substitute` INT( 11 ) NULL DEFAULT NULL;",
-            "ALTER TABLE `llx_holiday_users` ADD `nb_holiday_next` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année n+1';",
-//            "ALTER TABLE `llx_holiday_users` CHANGE `nb_holiday` `nb_holiday_next` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année n+1';",
-//            "ALTER TABLE `llx_holiday_users` ADD `nb_holiday_current` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année en cours' AFTER `nb_holiday_next`;",
-            "INSERT INTO `llx_holiday_config` (
+        $sql = array("ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `type_conges` INT( 1 ) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0: ordinaires. 1 : congés exceptionnels. 2: rtt';",
+            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `date_drh_valid` DATETIME NULL DEFAULT NULL AFTER `date_valid`;",
+            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `fk_user_drh_valid` INT( 11 ) NULL DEFAULT NULL AFTER `fk_user_valid` ;",
+            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday_users` ADD `nb_rtt` DOUBLE NOT NULL DEFAULT '0';",
+            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `fk_actioncomm` INT( 11 ) NULL DEFAULT NULL;",
+            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `fk_substitute` INT( 11 ) NULL DEFAULT NULL;",
+            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday_users` ADD `nb_holiday_next` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année n+1';",
+//            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday_users` CHANGE `nb_holiday` `nb_holiday_next` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année n+1';",
+//            "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday_users` ADD `nb_holiday_current` DOUBLE NOT NULL DEFAULT '0' COMMENT 'Année en cours' AFTER `nb_holiday_next`;",
+            "INSERT INTO `" . MAIN_DB_PREFIX . "holiday_config` (
                 `name` ,
                 `value`
                 ) VALUES (

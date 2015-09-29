@@ -1,2 +1,2 @@
-ALTER TABLE  `llx_synopsischrono_conf` ADD  `hasPropal` TINYINT NOT NULL AFTER  `hasSociete` ,
+ALTER TABLE  `" . MAIN_DB_PREFIX . "synopsischrono_conf` ADD  `hasPropal` TINYINT NOT NULL AFTER  `hasSociete` ,
 ADD  `hasProjet` TINYINT NOT NULL AFTER  `hasPropal`

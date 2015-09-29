@@ -16,7 +16,7 @@ foreach ($tabTableSuppr as $table)
 
 $tabSql[] = "DROP view " . MAIN_DB_PREFIX . "fichinter";
 
-$tabSql[] = "CREATE TABLE IF NOT EXISTS `llx_fichinter` (
+$tabSql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "fichinter` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_soc` int(11) NOT NULL,
   `fk_projet` int(11) DEFAULT '0',
@@ -42,7 +42,7 @@ $tabSql[] = "CREATE TABLE IF NOT EXISTS `llx_fichinter` (
 )";
 
 
-$tabSql[] = "CREATE TABLE IF NOT EXISTS `llx_fichinterdet` (
+$tabSql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "fichinterdet` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_fichinter` int(11) DEFAULT NULL,
   `fk_parent_line` int(11) DEFAULT NULL,

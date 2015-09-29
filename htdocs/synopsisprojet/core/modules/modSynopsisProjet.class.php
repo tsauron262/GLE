@@ -344,7 +344,7 @@ class modSynopsisProjet extends DolibarrModules {
 //    $ModuleMenu->create($user);
 
         $sql = array(
-            "CREATE TABLE IF NOT EXISTS `llx_Synopsis_projet_sup` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_sup` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_user_resp` int(11) DEFAULT NULL,
   `fk_type_projet` int(11) DEFAULT '1',

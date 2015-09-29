@@ -569,7 +569,7 @@ function afficheParType($tabIdFi) {
     
     
 //hotline
-    $req = "SELECT COUNT(c.id) as nb, SUM(TO_SECONDS(`Date_H_Fin`) - TO_SECONDS(`Date_H_Debut`))/3600 as sum FROM `llx_synopsischrono_chrono_100` ct, llx_synopsischrono c WHERE ct.id = c.id AND Date_H_Debut > 0 AND Date_H_Fin > 0 ";
+    $req = "SELECT COUNT(c.id) as nb, SUM(TO_SECONDS(`Date_H_Fin`) - TO_SECONDS(`Date_H_Debut`))/3600 as sum FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_100` ct, " . MAIN_DB_PREFIX . "synopsischrono c WHERE ct.id = c.id AND Date_H_Debut > 0 AND Date_H_Fin > 0 ";
     
     if($_REQUEST['filterUser'] > 0)
         $req .= " AND `Tech` = ".$_REQUEST['filterUser'];
@@ -720,7 +720,7 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
 //    }
 
 
-    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `llx_element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
+    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `" . MAIN_DB_PREFIX . "element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
     $resultPasDeDI = $db->query($requetePasDeDI);
     if ($db->num_rows($resultPasDeDI) > 0) {
         echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevu due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les 30 premières sont listées ci dessous<br/>";

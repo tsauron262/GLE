@@ -34,7 +34,7 @@ function widget_listExpeditionAValider() {
         $sql.= " FROM " . MAIN_DB_PREFIX . "commande comm, " . MAIN_DB_PREFIX . "element_element el, " . MAIN_DB_PREFIX . "Synopsis_commande comm2 ";
         $sql.= $clause . " el.fk_target > 0 AND el.fk_target != 17 AND comm.rowid = el.fk_source AND comm.rowid = comm2.rowid AND el.sourcetype = 'commande' AND el.targettype LIKE 'entrepot%'";
         $sql.= " AND fk_statut IN (1) AND comm.rowid NOT IN (SELECT fk_source 
-FROM  `llx_element_element` 
+FROM  `" . MAIN_DB_PREFIX . "element_element` 
 WHERE  `sourcetype` LIKE  'commande'
 AND  `targettype` LIKE  'shipping')";
         //$sql .= " AND fk_soc = ".$socid;

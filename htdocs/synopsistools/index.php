@@ -62,11 +62,11 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 
 
 //if (isset($_REQUEST['propalMail'])) {
-//    $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `llx_propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918 AND total_ht != 382.78");
+//    $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `" . MAIN_DB_PREFIX . "propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918 AND total_ht != 382.78");
 //    $text = array();
 //    while ($ligne = $db->fetch_object($sql)) {
 //        $user = 0;
-//        $sql2 = $db->query("SELECT * FROM `llx_synopsischrono_view_105` WHERE propalid = " . $ligne->fk_propal);
+//        $sql2 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE propalid = " . $ligne->fk_propal);
 //        if ($db->num_rows($sql2) > 0) {
 //            $ligne2 = $db->fetch_object($sql2);
 //            $user = $ligne2->Technicien;
@@ -99,10 +99,10 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 //}
 
 if(isset($_REQUEST['lienFactProp'])){
-    $sql = $db->query("SELECT f.* FROM llx_facture f LEFT JOIN llx_element_element e ON `sourcetype` LIKE  'propal'
+    $sql = $db->query("SELECT f.* FROM " . MAIN_DB_PREFIX . "facture f LEFT JOIN " . MAIN_DB_PREFIX . "element_element e ON `sourcetype` LIKE  'propal'
 AND  `targettype` LIKE  'facture' AND fk_target = f.rowid WHERE fk_source is null");
     while($ligne = $db->fetch_object($sql)){
-        $sql2 = $db->query("SELECT * FROM llx_propal WHERE fk_statut != 3 AND fk_soc = ".$ligne->fk_soc);
+        $sql2 = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "propal WHERE fk_statut != 3 AND fk_soc = ".$ligne->fk_soc);
         $nb = $db->num_rows($sql2);
         echo $nb."|".$ligne->fk_soc. "<br/>";
         if($nb == 1){

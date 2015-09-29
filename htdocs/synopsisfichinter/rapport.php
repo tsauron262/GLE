@@ -611,7 +611,7 @@ include("./rapport2.php");die();
 //    }
 //
 //
-//    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `llx_element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
+//    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `" . MAIN_DB_PREFIX . "element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
 //    $resultPasDeDI = $db->query($requetePasDeDI);
 //    if ($db->num_rows($resultPasDeDI) > 0) {
 //        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les dix premières sont listées ci dessous<br/>";

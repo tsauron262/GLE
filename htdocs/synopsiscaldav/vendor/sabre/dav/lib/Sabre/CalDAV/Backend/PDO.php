@@ -538,7 +538,7 @@ class PDO extends AbstractBackend {
             $mail = str_replace ("\n", "", $mail);
             $mail = str_replace ("\r", "", $mail);
             $sql = $db->query("SELECT rowid 
-FROM  `llx_user` 
+FROM  `" . MAIN_DB_PREFIX . "user` 
 WHERE  `email` LIKE  '".$mail."'");
             if($db->num_rows($sql) > 0){
                 $ligne = $db->fetch_object($sql);

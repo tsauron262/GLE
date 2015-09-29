@@ -104,11 +104,11 @@ class CronSynopsis {
         global $totalFact, $tabTech;
         $totalFact = $tabTech = array();
 
-        $this->verifOBj("Propal", "Propal avec deux Facture FAxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  AND close_code is null group by p.rowid having nb > 1");
-        $this->verifOBj("Propal", "Propal avec deux accompte ACxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  AND close_code is null group by p.rowid having nb > 1");
-        $this->verifOBj("Propal", "Propal avec trois facture", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND close_code is null group by p.rowid having nb > 2");
-        $this->verifOBj("Propal", "Propal sans Sav", "SELECT rowid from llx_propal where rowid not in (select propalid from llx_synopsischrono) AND extraparams is null AND ref LIKE 'PR%'", 'ligneSav');
-        $this->verifOBj("Facture", "Facture sans propal", "select rowid from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture') AND close_code is null ", "ligneSav");
+        $this->verifOBj("Propal", "Propal avec deux Facture FAxx", "SELECT p.rowid, count(f.rowid) as nb from " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "element_element ee, " . MAIN_DB_PREFIX . "propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  AND close_code is null group by p.rowid having nb > 1");
+        $this->verifOBj("Propal", "Propal avec deux accompte ACxx", "SELECT p.rowid, count(f.rowid) as nb from " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "element_element ee, " . MAIN_DB_PREFIX . "propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  AND close_code is null group by p.rowid having nb > 1");
+        $this->verifOBj("Propal", "Propal avec trois facture", "SELECT p.rowid, count(f.rowid) as nb from " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "element_element ee, " . MAIN_DB_PREFIX . "propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND close_code is null group by p.rowid having nb > 2");
+        $this->verifOBj("Propal", "Propal sans Sav", "SELECT rowid from " . MAIN_DB_PREFIX . "propal where rowid not in (select propalid from " . MAIN_DB_PREFIX . "synopsischrono) AND extraparams is null AND ref LIKE 'PR%'", 'ligneSav');
+        $this->verifOBj("Facture", "Facture sans propal", "select rowid from " . MAIN_DB_PREFIX . "facture where rowid not in (SELECT f.rowid from " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "element_element ee, " . MAIN_DB_PREFIX . "propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture') AND close_code is null ", "ligneSav");
 //    $this->verifOBj("Propal", "", );
 //    $this->verifOBj("Propal", "", );
 //    $this->verifOBj("Propal", "", );
@@ -242,9 +242,9 @@ class CronSynopsis {
         global $user;
         $str = "";
         if (array_key_exists('options_date_s', $user->array_options)) {
-            $sql = $this->db->query("SELECT *  FROM `llx_user_extrafields`, llx_user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
+            $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
-                $sql2 = $this->db->query("UPDATE llx_user SET statut = 0 WHERE rowid = " . $result->fk_object);
+                $sql2 = $this->db->query("UPDATE " . MAIN_DB_PREFIX . "user SET statut = 0 WHERE rowid = " . $result->fk_object);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
                 mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr", null, $str2);

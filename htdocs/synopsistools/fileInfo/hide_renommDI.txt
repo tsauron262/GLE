@@ -16,7 +16,7 @@ dashboard
 process
 
 
-CREATE TABLE IF NOT EXISTS `llx_fichinter` (
+CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "fichinter` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_soc` int(11) NOT NULL,
   `fk_projet` int(11) DEFAULT '0',
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `llx_fichinter` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
-CREATE TABLE IF NOT EXISTS `llx_fichinterdet` (
+CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "fichinterdet` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_fichinter` int(11) DEFAULT NULL,
   `fk_parent_line` int(11) DEFAULT NULL,

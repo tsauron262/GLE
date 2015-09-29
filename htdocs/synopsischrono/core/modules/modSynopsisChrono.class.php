@@ -444,7 +444,7 @@ class modSynopsisChrono extends DolibarrModules {
 (7, 'Constante', 1, '" . MAIN_DB_PREFIX . "Synopsis_Process_form_global', 'id', 'label', 'globalvar', '<input type=''hidden''>', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (8, 'Liste', 1, '" . MAIN_DB_PREFIX . "Synopsis_Process_form_list', 'id', 'label', 'listform', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1),
 (9, 'Description', 0, NULL, NULL, NULL, NULL, '<textarea>', '</textarea>', 1, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL),
-(10, 'Lien', 1, 'llx_Synopsis_Process_lien', 'rowid', 'label', 'lien', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1);",
+(10, 'Lien', 1, '" . MAIN_DB_PREFIX . "Synopsis_Process_lien', 'rowid', 'label', 'lien', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1);",
             /* "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsischrono_key_value_view` (
               `id` int(11)
               ,`nom` varchar(50)

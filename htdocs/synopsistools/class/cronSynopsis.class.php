@@ -242,12 +242,12 @@ class CronSynopsis {
         global $user;
         $str = "";
         if (array_key_exists('options_date_s', $user->array_options)) {
-            $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
+            $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` <= now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
                 $sql2 = $this->db->query("UPDATE " . MAIN_DB_PREFIX . "user SET statut = 0 WHERE rowid = " . $result->fk_object);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
-                mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr", null, $str2);
+                mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr, f.poirier@bimp.fr, f.olagnon@bimp.fr", null, $str2);
             }
         echo $str." Comptes fermés";
         }

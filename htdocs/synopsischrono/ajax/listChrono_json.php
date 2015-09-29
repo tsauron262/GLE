@@ -32,16 +32,18 @@ $langs->load("chrono@synopsischrono");
 $user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
-$limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
+$limit = (isset($_REQUEST['rows'])? $_REQUEST['rows'] : 25); // get how many rows we want to have into the grid
 $sidx = $_REQUEST['sidx']; // get index row - i.e. user click to sort
 $sord = $_REQUEST['sord']; // get the direction
 
 if(!$sidx) $sidx =1; // connect to the database
 
 
+$filtre = addslashes($_REQUEST['filtre']);
 
-//if(!isset($_REQUEST['filtre']) && isset($_REQUEST['filtre2']))
-//  $_REQUEST['filtre'] = $_REQUEST['filtre2'];
+
+//if(!isset($filtre) && isset($_REQUEST['filtre2']))
+//  $filtre = $_REQUEST['filtre2'];
 
 
 $wh = "";
@@ -174,14 +176,14 @@ if ($_REQUEST['type'] > 0)
 $wh .= " AND (revision is NULL || revision = 0) ";
 
 
-//if(isset($_REQUEST['filtre']))
+//if(isset($filtre))
 //    $wh .= "AND (id IN (SELECT chrono_refid 
 //FROM  `" . MAIN_DB_PREFIX . "synopsischrono_value` 
-//WHERE  `value` LIKE  '%".$_REQUEST['filtre']."%') OR ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%' OR nom LIKE  '%".$_REQUEST['filtre']."%') ";
+//WHERE  `value` LIKE  '%".$filtre."%') OR ref LIKE  '%".$filtre."%' OR description LIKE  '%".$filtre."%' OR nom LIKE  '%".$filtre."%') ";
 
 
-if(isset($_REQUEST['filtre']))
-    $wh .= "AND (ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%' OR nom LIKE  '%".$_REQUEST['filtre']."%') ";
+if(isset($filtre))
+    $wh .= "AND (ref LIKE  '%".$filtre."%' OR description LIKE  '%".$filtre."%' OR nom LIKE  '%".$filtre."%') ";
 
 switch ($action)
 {

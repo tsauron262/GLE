@@ -24,6 +24,8 @@ $result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
  * Actions
  */
 
+$_REQUEST['filtre'] = addslashes($_REQUEST['filtre']);
+
 $arrModel = array();
 
 $jspath = DOL_URL_ROOT . "/Synopsis_Common/jquery";

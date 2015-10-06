@@ -800,8 +800,8 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                     $pdf->MultiCell($col + 15, $hauteur_ligne2, utf8_encodeRien($desc), 0, 'L', 1);
                     $pdf->SetXY($init + $col + 15, $nextY);
-                    $pdf->MultiCell($col - 5, $hauteur_ligne, $val->getInfoProductCli("SN", 30), 0, 'C', 1);
-                    $pdf->SetXY($init + $col + $col + 10, $nextY);
+//                    $pdf->MultiCell($col - 5, $hauteur_ligne, $val->getInfoProductCli("SN", 30), 0, 'C', 1);
+//                    $pdf->SetXY($init + $col + $col + 10, $nextY);
                     $pdf->MultiCell($col - $decal_type - 5, $hauteur_ligne, utf8_encodeRien($type), 0, 'C', 1);
                     $pdf->SetXY($init + $col + $col + $col + 5 - $decal_type, $nextY);
                     $pdf->MultiCell($col - 5, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date($val->date_ouverture) . "

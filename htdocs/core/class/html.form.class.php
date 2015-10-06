@@ -4160,7 +4160,7 @@ class Form
 
         $usecalendar='combo';
         if (! empty($conf->use_javascript_ajax) && (empty($conf->global->MAIN_POPUP_CALENDAR) || $conf->global->MAIN_POPUP_CALENDAR != "none")) $usecalendar=empty($conf->global->MAIN_POPUP_CALENDAR)?'eldy':$conf->global->MAIN_POPUP_CALENDAR;
-		if ($conf->browser->phone) $usecalendar='combo';
+//moddrsi pour calendar stendar sur ipade		if ($conf->browser->phone) $usecalendar='combo';
 
         if ($d)
         {

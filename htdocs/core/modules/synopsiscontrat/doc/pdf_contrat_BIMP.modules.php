@@ -32,6 +32,7 @@ ini_set('max_execution_time', 600);
 class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
     public $emetteur;    // Objet societe qui emet
+    public $db;
 
     /**
       \brief      Constructeur
@@ -47,7 +48,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
         $this->debug = "";
         $this->db = $db;
         $this->name = "babel";
-        $this->description = $langs->trans('PDFContratbabelDescription');
+        $this->desc = $langs->trans('PDFContratbabelDescription');
 
         // Dimension page pour format A4
         $this->type = 'pdf';
@@ -385,10 +386,10 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     //$pdf->SetFont('', '', 7);
 
                     $pdf->MultiCell($col2, $hauteur_ligne * 2, "", 0, 'L', 1);
-                    $pdf->setXY($this->marge_gauche + $col1, $nextY);
+                    $pdf->setXY($this->marge_gauche + $colss1, $nextY);
 
                     $productCli = str_replace("\n\n", "\n", $val->getInfoProductCli("", 100));
-                    $pdf->MultiCell($col2 - 1, $hauteur_ligne, max_size($val->description, 70) . max_size($productCli, 270), 0, 'L', 1);
+                    $pdf->MultiCell($col2 - 1, $hauteur_ligne, max_size($val->descritpion, 70) . max_size($productCli, 270), 0, 'L', 1);
                     $nextY = $nextY + $hauteur_ligne * 2;
                     $pdf->SetFont('', '', 8);
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
@@ -767,7 +768,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $pdf->SetXY($this->marge_gauche - 1, $nextY);
                     }
 
-                    $desc = couperChaine(utf8_encodeRien($libelleContrat . " " . $val->desc), 60);
+                    $desc = couperChaine(utf8_encodeRien($libelleContrat . " " . $val->description), 60);
 
                     $pdf->SetFont('', '', 6.5);
                     $pdf1->SetFont('Helvetica', '', 6.5);

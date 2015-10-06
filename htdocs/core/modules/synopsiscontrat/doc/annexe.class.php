@@ -204,6 +204,7 @@ Tél. : Contact-external-CUSTOMER-tel
 AND  el.`sourcetype` LIKE  'di'
 AND  el.`targettype` LIKE  'fi' LEFT JOIN ".MAIN_DB_PREFIX."fichinter fi ON fi.rowid = el.fk_target  WHERE di.fk_contrat = ".$contrat->id. " GROUP BY di.rowid ORDER BY di.datei ASC");
         $strDi = "";
+        $tabTemp = array();
         while($result = $this->db->fetch_object($sql)){
             $motClef = "";
             if(stripos($result->description, "Visite") !== false)

@@ -116,6 +116,22 @@ if (GETPOST('removedassigned') || GETPOST('removedassigned') == '0')
 	if ($action == 'update') $action = 'edit';
 }
 
+/*mod drsi*/
+if(isset($_REQUEST['addGroupMember'])){
+    require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
+    $tabT = json_decode($_SESSION['assignedtouser'], true);
+    $group = new UserGroup($db);
+    $group->fetch($_REQUEST['groupsAdd']);
+    foreach ($group->listUsersForGroup('', 1) as $userT){
+        $tabT[$userT] = array('id'=>$userT, 'transparency'=>1,'mandatory'=>1);
+    }
+    $_SESSION['assignedtouser']=json_encode($tabT);
+    $donotclearsession=1;
+    if ($action == 'add') $action = 'create';
+    if ($action == 'update') $action = 'edit';
+}
+/*fmoddrsi*/
+
 // Add user to assigned list
 if (GETPOST('addassignedtouser') || GETPOST('updateassignedtouser'))
 {
@@ -716,6 +732,14 @@ if ($action == 'create')
 			$listofuserid=json_decode($_SESSION['assignedtouser'], true);
 		}
 	}
+        
+        
+                /*moddrsi*/
+		print $form->select_dolgroups('', 'groupsAdd',1);
+                print '<input type="submit" name="addGroupMember" class="butAction" value="Ajouter"/><br/>';
+                /*fmoddrsi*/
+                
+                
 	print $form->select_dolusers_forevent(($action=='create'?'add':'update'), 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
 	if (in_array($user->id,array_keys($listofuserid))) print $langs->trans("MyAvailability").': <input id="transparency" type="checkbox" name="transparency"'.(((! isset($_GET['transparency']) && ! isset($_POST['transparency'])) || GETPOST('transparency'))?' checked':'').'> '.$langs->trans("Busy");
 	print '</td></tr>';
@@ -1027,8 +1051,14 @@ if ($id > 0)
 				$listofuserid=json_decode($_SESSION['assignedtouser'], true);
 			}
 		}
+                
+                /*moddrsi*/
+		print $form->select_dolgroups('', 'groupsAdd',1);
+                print '<input type="submit" name="addGroupMember" class="butAction" value="Ajouter"/><br/>';
+                /*fmoddrsi*/
+		
 		print $form->select_dolusers_forevent(($action=='create'?'add':'update'), 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
-		if (in_array($user->id,array_keys($listofuserid))) print $langs->trans("MyAvailability").':  <input id="transparency" type="checkbox" name="transparency"'.($listofuserid[$user->id]['transparency']?' checked':'').'>'.$langs->trans("Busy");
+                if (in_array($user->id,array_keys($listofuserid))) print $langs->trans("MyAvailability").':  <input id="transparency" type="checkbox" name="transparency"'.($listofuserid[$user->id]['transparency']?' checked':'').'>'.$langs->trans("Busy");
 		print '</td></tr>';
 
 		// Realised by
@@ -1206,6 +1236,14 @@ if ($id > 0)
 				$listofuserid=json_decode($_SESSION['assignedtouser'], true);
 			}
 		}
+                
+                
+                /*moddrsi*/
+		print $form->select_dolgroups('', 'groupsAdd',1);
+                print '<input type="submit" name="addGroupMember" class="butAction" value="Ajouter"/><br/>';
+                /*fmoddrsi*/
+                
+                
 		print $form->select_dolusers_forevent('view','assignedtouser',1);
 		if (in_array($user->id,array_keys($listofuserid))) print $langs->trans("MyAvailability").': '.(($object->userassigned[$user->id]['transparency'] > 0)?$langs->trans("Busy"):$langs->trans("Available"));	// We show nothing if event is assigned to nobody
 		print '	</td></tr>';

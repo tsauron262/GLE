@@ -735,7 +735,7 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
             nbLoad = 1;
         });
 
-        $(this).contents().find("input[name='updateassignedtouser'], input[name='addassignedtouser']").click(function () {
+        $(this).contents().find("input[name='updateassignedtouser'], input[name='addassignedtouser'], input[name='addGroupMember']").click(function () {
             nbLoad = 100;
         });
         i++;

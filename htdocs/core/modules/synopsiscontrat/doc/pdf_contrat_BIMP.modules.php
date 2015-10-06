@@ -823,7 +823,6 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 require_once DOL_DOCUMENT_ROOT . '/core/modules/synopsiscontrat/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs);
                 $classAnnexe->getAnnexeContrat($contrat);
-                die("mmmm");
 
 
 

@@ -112,7 +112,8 @@ class annexe {
             }
 
             $this->pdf->SetFont('', $style, 8);
-            $this->pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($ligne)), 0, 'L');
+            if($ligne != "")
+                $this->pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($ligne)), 0, 'L');
         }
     }
 

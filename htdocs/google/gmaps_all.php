@@ -138,6 +138,8 @@ $htmlother=new FormOther($db);
 	$moreforfilter='';
         $search_categ = $_REQUEST['search_categ'];
         $search_categ2 = $_REQUEST['search_categ2'];
+        $plusUrl = "&search_categ=".$search_categ."&search_categ2=".$search_categ2;
+        
 	if (! empty($conf->categorie->enabled))
 	{
 		$moreforfilter.='<form action="?'.$para.'" method="post">';
@@ -441,10 +443,10 @@ if ($resql)
 	if ($num > $countgeoencodedall)
 	{
 		print $langs->trans("ClickHereToIncludeXMore").': &nbsp;';
-		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=25">'.$langs->trans("By25").'</a> &nbsp;';
-		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=50">'.$langs->trans("By50").'</a> &nbsp;';
-		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=100">'.$langs->trans("By100").'</a> &nbsp;';
-		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=1000">'.$langs->trans("By100").'0</a> &nbsp;';
+		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.$plusUrl.'&max=25">'.$langs->trans("By25").'</a> &nbsp;';
+		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.$plusUrl.'&max=50">'.$langs->trans("By50").'</a> &nbsp;';
+		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.$plusUrl.'&max=100">'.$langs->trans("By100").'</a> &nbsp;';
+		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.$plusUrl.'&max=1000">'.$langs->trans("By100").'0</a> &nbsp;';
 		//,min($num-$countgeoencodedall,$MAXADDRESS)).'</a>';
 		print '<br>';
 	}

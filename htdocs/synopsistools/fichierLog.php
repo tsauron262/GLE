@@ -53,7 +53,7 @@ if ($inverser) {
     $text = implode("\n", $textT);
 }
 
-$tabPrefixe = array("" => "Général", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_time" => "Pages lentes", "_sauv" => "Sauv");
+$tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_time" => "Pages lentes", "_sauv" => "Sauv");
 
 foreach ($tabPrefixe as $prefV => $pref) {
     echo "<a style='margin:2px 8px;' href='?prefixe=" . $prefV . "'>" . $pref . "</a>";

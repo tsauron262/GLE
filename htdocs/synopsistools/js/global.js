@@ -298,6 +298,7 @@ function traiteScroll(heightDif) {
 //    grandeTaille = parseInt($("body").innerHeight());
     grandeTaille = parseInt($("body").innerHeight());
     minimuAGagne = grandeTaille - height;
+    alert(grandeTaille);
     appli = false;
     newTaille = 0;
     elem = null;

@@ -219,9 +219,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                     synopsischrono_pdf_create($db, $chrono, "pc");
                     $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/";
+                    if(!is_dir($repDest))
                     mkdir($repDest);
                     link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
-                    link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
+                    if ($acompte > 0)
+                        link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
 //                $echo .= DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
 
 

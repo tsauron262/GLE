@@ -590,6 +590,7 @@ class GSX {
                     $responseName = 'warrantyDetailInfo';
                 }
                 $requestName = $clientLookup . 'Request';
+                dol_syslog(print_r($requestName,3),3);
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
                 $warrantyDetails = $this->request($requestData, $clientLookup);
                 dol_syslog(print_r($requestData,3),3);

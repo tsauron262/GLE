@@ -545,6 +545,7 @@ class GSX {
             $this->error(__METHOD__, __LINE__, 'Numéro de série invalide.');
             return false;
         }
+        dol_syslog("deb", 3);
 
         switch ($lookupType) {
             case 'model' :

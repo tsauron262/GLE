@@ -543,9 +543,9 @@ class GSX {
     public function lookup($serial, $lookupType, $returnFormat = false) {
         if (!preg_match($this->_regex('serialNumber'), $serial)) {
             $this->error(__METHOD__, __LINE__, 'Numéro de série invalide.');
+            echo 'Numéro de série invalide.';
             return false;
         }
-        dol_syslog("deb", 3);
 
         switch ($lookupType) {
             case 'model' :
@@ -591,10 +591,9 @@ class GSX {
                     $responseName = 'warrantyDetailInfo';
                 }
                 $requestName = $clientLookup . 'Request';
-                dol_syslog(print_r($requestName,3),3);
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
                 $warrantyDetails = $this->request($requestData, $clientLookup);
-                dol_syslog(print_r($requestData,3),3);
+//                dol_syslog(print_r($requestData,3),3);
 //                print_r($requestData);
                 $errorMessage = $this->_obtainErrorMessage($warrantyDetails);
                 return $this->outputFormat($warrantyDetails[$clientLookup . 'Response'][$responseName], $errorMessage, $returnFormat);

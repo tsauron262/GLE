@@ -111,7 +111,7 @@ $(window).load(function() {
             input.parent().append("<div id='reponse'></div>");
         }
             zoneRep = $("#reponse");
-        NoSerie = input.attr('value');
+        NoSerie = input.val();
         datas = "serial=" + NoSerie;
         roue = $("#patientez");
         reponse = valeurM = valeurG = valeurTG = valeurD = "";

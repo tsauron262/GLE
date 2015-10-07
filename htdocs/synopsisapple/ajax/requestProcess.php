@@ -263,6 +263,7 @@ if (isset($_GET['action'])) {
                     } else {
                         echo "Pas de retour2";
                         print_r($response);
+                        echo "fin";
                     }
                 } else {
                     echo "Pas de retour";

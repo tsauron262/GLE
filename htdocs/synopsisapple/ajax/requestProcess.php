@@ -189,7 +189,7 @@ if (isset($_GET['action'])) {
                     $propal->fetch($propalId);
 
                     $cart->addThisToPropal($propal);
-                    
+
                     echo 'ok<ok>Reload</ok>';
 //                    } else {
 //                        echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
@@ -225,10 +225,9 @@ if (isset($_GET['action'])) {
                     if (isset($_GET['prodId'])) {
                         $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
                         $return = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
-                        
-                        
+
+
                         echo $return;
-                        
                     } else {
                         echo '<p class="error">Une erreur est survenue (prodId absent)</p>' . "\n";
                     }
@@ -255,10 +254,17 @@ if (isset($_GET['action'])) {
                             $dateAchat = dateAppleToDate($datas['estimatedPurchaseDate']);
                             $infoPlus = "";
                             if (isset($datas['activationLockStatus']) && $datas['activationLockStatus'] !== '')
-                            $infoPlus = "<p style=\"color:red;\">".addslashes ($datas['activationLockStatus'])."</p>";
-                            echo "tabResult = Array('" . $machineinfo . "', '" . $typeGarantie . "', '" . $garantie . "', '" . $dateAchat . "', '".$infoPlus."');";
+                                $infoPlus = "<p style=\"color:red;\">" . addslashes($datas['activationLockStatus']) . "</p>";
+                            echo "tabResult = Array('" . $machineinfo . "', '" . $typeGarantie . "', '" . $garantie . "', '" . $dateAchat . "', '" . $infoPlus . "');";
                         }
+                        else {
+                            echo "Pas de retour3";
+                        }
+                    } else {
+                        echo "Pas de retour2";
                     }
+                } else {
+                    echo "Pas de retour";
                 }
             } else
                 echo $GSXdatas->getGSXErrorsHtml();

@@ -402,7 +402,7 @@ class GSX {
 
         $opt = ($this->isIphone)? "IPhone" : "Asp";
         
-        return $this->wsdlUrl = 'https://localhost/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
+         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
         
         
         $type = "Asp";

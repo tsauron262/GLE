@@ -1070,7 +1070,7 @@ class Propal extends CommonObject
     {
         global $db, $user,$langs,$conf,$hookmanager;
 
-		dol_include_once('/projet/class.project.class.php');
+		dol_include_once('/projet/class/project.class.php');
 
         $this->context['createfromclone']='createfromclone';
 
@@ -2132,12 +2132,12 @@ class Propal extends CommonObject
         foreach($this->linkedObjectsIds as $objecttype => $objectid)
         {
             $numi=count($objectid);
-            for ($i=0;$i<$numi;$i++)
+            foreach($objectid as $idT)
             {
                 // Cas des factures liees directement
                 if ($objecttype == 'facture')
                 {
-                    $linkedInvoices[] = $objectid[$i];
+                    $linkedInvoices[] = $idT;
                 }
                 // Cas des factures liees par un autre objet (ex: commande)
                 else
@@ -2146,11 +2146,11 @@ class Propal extends CommonObject
                     foreach($this->linkedObjectsIds as $subobjecttype => $subobjectid)
                     {
                         $numj=count($subobjectid);
-                        for ($j=0;$j<$numj;$j++)
+                        foreach($objectid as $idT)
                         {
                         	if ($subobjecttype == 'facture')
                         	{
-                            	$linkedInvoices[] = $subobjectid[$j];
+                            	$linkedInvoices[] = $idT;
                         	}
                         }
                     }

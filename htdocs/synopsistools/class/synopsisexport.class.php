@@ -38,7 +38,7 @@ LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT ON chronoT.id 
 LEFt JOIN " . MAIN_DB_PREFIX . "user_extrafields ue ON `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author)
 
 , " . MAIN_DB_PREFIX . "societe soc
-WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
+WHERE   fact.fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
 
 
         while ($ligne = $this->db->fetch_object($result)) {

@@ -613,7 +613,7 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
         
         
         
-        if(stripos($message, "is deprecated") !== false)
+        if(stripos($message, "deprecated") !== false)
                 $suffixinfilename = "_deprecated";
 
 	// If syslog module enabled

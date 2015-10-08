@@ -172,7 +172,8 @@ jQuery(document).ready(function(){
     
     jQuery(".ui-accordion-header").click(function(){
     actu = $(this).attr("id")+"a";
-        window.location.hash = "pp"+$(this).attr("id")+"a";  
+        window.location.hash = "pp"+actu;  
+        $("#"+actu).click();
     });
 
     jQuery('.submenu').click(function(){

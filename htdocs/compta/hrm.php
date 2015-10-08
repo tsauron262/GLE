@@ -24,6 +24,8 @@
  *		\brief      Home page for HRM area.
  */
 
+require("../synopsisholiday/index.php");die;
+
 require('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';

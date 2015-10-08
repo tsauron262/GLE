@@ -19,7 +19,7 @@
 /**
  *  Displays the log of actions performed in the module.
  *
- *  \file       htdocs/holiday/view_log.php
+ *  \file       htdocs/holiday/read_all.php
  *  \ingroup    holiday
  */
 
@@ -32,7 +32,7 @@ require_once DOL_DOCUMENT_ROOT.'/synopsisholiday/common.inc.php';
 if ($user->societe_id > 0) accessforbidden();
 
 // Si l'utilisateur n'a pas le droit de lire cette page
-if(!$user->rights->holiday->view_log) accessforbidden();
+if(!$user->rights->holiday->read_all) accessforbidden();
 
 
 

@@ -137,7 +137,7 @@ if ($mode == 'search')
 		{
 			$obj = $db->fetch_object($result);
 			$socid = $obj->rowid;
-			header("Location: ".DOL_URL_ROOT."/societe/soc.php?socid=".$socid);
+			header("Location: ".DOL_URL_ROOT."/comm/card.php?socid=".$socid);
 			exit;
 		}
 		$db->free($result);

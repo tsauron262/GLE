@@ -78,7 +78,7 @@ function bouttonEtatSav($idChrono) {
     if (/* $etatSav == 2 && */$propId && $etatSav == 6) {
         $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='0'/> TTC";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&frais=\"+$(\"#frais\").attr(\"value\")+\"&nbJours=\"+$(\"#nbJours\").attr(\"value\")+\"&actionEtat=revProp&ligne=0\"'>Fermé</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&frais=\"+$(\"#frais\").val()+\"&nbJours=\"+$(\"#nbJours\").val()+\"&actionEtat=revProp&ligne=0\"'>Fermé</a>";
         $return .= "<br/>";
         $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=revProp&ligne=1'>Réviser devis</a>";
         $return .= "<br/>";

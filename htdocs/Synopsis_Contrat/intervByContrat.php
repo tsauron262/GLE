@@ -298,6 +298,7 @@ $reqTropLong = $db->query("SELECT * FROM `llx_synopsischrono_chrono_100` WHERE (
 if ($db->num_rows($reqTropLong) > 0)
     echo "Appel pouvant posé problème.<br/>";
 while ($result = $db->fetch_object($reqTropLong)){
+    require_once (DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php");
     $chr = new Chrono($db);
     $chr->fetch($result->id);
     echo $chr->getNomUrl(1);

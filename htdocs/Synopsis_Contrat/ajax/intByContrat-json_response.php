@@ -19,6 +19,7 @@
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php');
         require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
+        require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 
 $id= isset($_REQUEST["id"])? $_REQUEST["id"] : '';
 $action = isset($_REQUEST["action"])? $_REQUEST["action"] : '';
@@ -34,7 +35,6 @@ if($typeObj == "FI"){
         $table = "Synopsis_fichinter";
 }
 else{
-        require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
         $fi = new Synopsisdemandeinterv($db);
         $table = "synopsisdemandeinterv";
 }
@@ -100,7 +100,19 @@ else{
                 $tabT = getElementElement("DI", "FI", $fi->id);
                 foreach($tabT as $val){
                     $fi2->fetch($val["d"]);
-                    $resultT .= $fi2->getNomUrl(1);
+                    if($fi2->id > 0)
+                        $resultT .= $fi2->getNomUrl(1);
+                }
+                $responce->rows[$i]['cell'][] = $resultT;
+            }
+            else{
+                $fi2 = new Synopsisdemandeinterv($db);
+                $resultT = '';
+                $tabT = getElementElement("DI", "FI", null, $fi->id);
+                foreach($tabT as $val){
+                    $fi2->fetch($val["s"]);
+                    if($fi2->id > 0)
+                        $resultT .= $fi2->getNomUrl(1);
                 }
                 $responce->rows[$i]['cell'][] = $resultT;
             }

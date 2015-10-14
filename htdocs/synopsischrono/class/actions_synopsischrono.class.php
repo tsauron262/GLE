@@ -77,8 +77,9 @@ class ActionsSynopsischrono {
 
 
 
-            $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
             $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
+            if($db->num_rows($result3) > 1)
+                $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
             while ($ligne3 = $db->fetch_object($result3)) {
                 $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
             }
@@ -86,11 +87,12 @@ class ActionsSynopsischrono {
             $result2 = $db->query("SELECT COUNT(chr.id) as nb, Centre as CentreVal, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_105` chrP, `" . MAIN_DB_PREFIX . "synopsischrono` chr WHERE chr.id = chrP.id AND " . ($centre ? "Centre IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY Centre, Etat");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
-                if (!isset($tabResult[$centre][$ligne2->EtatVal]))
-                    $tabResult[$centre][$ligne2->EtatVal] = 0;
-                $tabResult[$centre][$ligne2->EtatVal] += $ligne2->nb;
+                if($centre != $ligne2->CentreVal){
+                    if (!isset($tabResult[$centre][$ligne2->EtatVal]))
+                        $tabResult[$centre][$ligne2->EtatVal] = 0;
+                    $tabResult[$centre][$ligne2->EtatVal] += $ligne2->nb;
+                }
             }
-            
             
             $tabStatut = array();
             $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7" . " ORDER BY id ASC");

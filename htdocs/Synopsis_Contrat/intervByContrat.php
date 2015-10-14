@@ -290,7 +290,21 @@ foreach ($tabDiff as $val) {
 
 print "</tr>";
 
-print "</table><br/><br/>";
+print "</table><br/>";
+
+
+
+$reqTropLong = $db->query("SELECT * FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 7200 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) AND Contrat = ".$contrat->id);
+if ($db->num_rows($reqTropLong) > 0)
+    echo "Appel pouvant posé problème.<br/>";
+while ($result = $db->fetch_object($reqTropLong)){
+    $chr = new Chrono($db);
+    $chr->fetch($result->id);
+    echo $chr->getNomUrl(1);
+    echo "<br/>";
+}
+
+echo "<br/>";
 
 
 
@@ -341,7 +355,7 @@ jQuery(document).ready(function(){
     jQuery('#list1').jqGrid({
         url:'ajax/intByContrat-json_response.php?type=FI&id='+contratId,
         datatype: 'json',
-        colNames:['rowid','Description','Date intervention', 'total_ht','Dur&eacute;e totale', 'Fiche intervention', 'Tech',"statut"],
+        colNames:['rowid','Description','Date intervention', 'total_ht','Dur&eacute;e totale', 'Fiche intervention', 'Demande intervention', 'Tech',"statut"],
         colModel:[ {name:'rowid',index:'rowid', width:55, hidden: true,hidedlg: true, search: false},
                    {name:'description',index:'description', align: 'left'},
                    {name:'datei',index:'datei', width:60,
@@ -369,6 +383,7 @@ jQuery(document).ready(function(){
                     },
                    {name:'total_ht',index:'total_ht', width:80, align: 'right'},
                    {name:'duree',index:'duree', width:80, align: 'center'},
+                   {name:'rowid',index:'rowid', width:80, align: 'center'},
                    {name:'rowid',index:'rowid', width:80, align: 'center'},
                    {name:'rowid',index:'rowid', width:80, align: 'center'},
                    {name:'fk_statut',index:'fk_statut', width:80, align: 'center'},

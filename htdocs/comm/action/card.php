@@ -45,6 +45,7 @@ if (! empty($conf->projet->enabled))
 }
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
+print_r ($user->rights->holiday);die;
 $langs->load("companies");
 $langs->load("commercial");
 $langs->load("other");

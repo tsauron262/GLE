@@ -31,9 +31,25 @@ class autoDi {
 
     function verif() {
         $this->display = true;
-        if ($this->processDet->statut != 3)
-            $this->getTabSecteur();
-        else {
+        if ($this->processDet->statut != 3) {
+
+            if (isset($_REQUEST['creerDiPrev']))
+                $this->getTabSecteur();
+            elseif (isset($_REQUEST['creerDiCur']))
+                $this->getTabSecteur(1, "Cur");
+            elseif (isset($_REQUEST['validContrat'])) {
+                $this->processDet->validate("1");
+                $this->processDet->fetch($this->processDet->id);
+                $this->contrat->activeAllLigne();
+                echo "Contrat activé.";
+            } else {
+                echo "<form action='' method='post'>";
+                echo "<input type='submit' class='butAction' name='creerDiPrev' value='Di Préventive'><br/><br/>";
+                echo "<input type='submit' class='butAction' name='creerDiCur' value='Di Curative'><br/><br/>";
+                echo "<input type='submit' class='butAction' name='validContrat' value='Activer le contrat'><br/><br/>";
+                echo "</form>";
+            }
+        } else {
             $sql = $this->db->query("SELECT rowid FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE fk_contrat =" . $this->idContrat);
             while ($ligne = $this->db->fetch_object($sql)) {
                 $di = new Synopsisdemandeinterv($this->db);
@@ -43,7 +59,7 @@ class autoDi {
         }
     }
 
-    function getTabSecteur($affiche = true) {
+    function getTabSecteur($affiche = true, $typeDi = "") {
         $this->tabType = array('visite', 'tele');
         $tabDatePrise = array();
         $tabSite = array();
@@ -52,17 +68,23 @@ class autoDi {
         foreach ($this->contrat->lines as $lignes) {
             foreach ($this->tabType as $type) {
                 $nbVisite = 0;
+//                print_r($lignes->GMAO_Mixte);
                 if ($type == 'visite')
-                    $nbVisite = $lignes->GMAO_Mixte['nbVisiteAn'] * $lignes->qty;
-                if ($type == 'tele' && $lignes->GMAO_Mixte['telemaintenance'] && $lignes->qty > 1)
+                    $nbVisite = $lignes->GMAO_Mixte['nbVisiteAn' . $typeDi] * $lignes->qty;
+                if ($type == 'tele' && $lignes->GMAO_Mixte['telemaintenance' . $typeDi] && $lignes->qty > 1)
                     $nbVisite = $lignes->qty;
                 if ($nbVisite > 0) {
-                    if (count($lignes->tabProdCli) == 0){
-                        if($affiche)
-                        echo("Attention !!!!!!! Finalisation sans site : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a><br/><br/>");
+                    $lien = "ligne contrat ID : " . $lignes->id . " Nom : ".$lignes->description." .<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a><br/><br/>";
+                    if (count($lignes->tabProdCli) == 0) {
+                        if ($affiche)
+                            echo("Pas de produit client en lien avec ".$lien);
+
                         $lignes->tabProdCli = array(0);
                     }
-                        
+                        if ($lignes->qty != count($lignes->tabProdCli))
+                            echo "La quantité n'est pas egale au nombres de produits sous contrat. ".$lignes->qty."|". count($lignes->tabProdCli) . $lien . "<br/>";
+//                    print_r($lignes);
+
                     foreach ($lignes->tabProdCli as $prod) {
                         $site = 0;
                         $tabT = getElementElement("site", "productCli", null, $prod);
@@ -71,6 +93,9 @@ class autoDi {
                         if (!isset($tabSite[$site]))
                             $tabSite[$site] = array('visite' => array('prod' => array(), 'visiteMax' => 0, 'tabVisite' => array()), 'tele' => array('prod' => array(), 'visiteMax' => 0, 'tabVisite' => array()));
                         $tabSite[$site][$type]['prod'][] = array('idProd' => $prod, 'nbVisite' => $nbVisite, 'fkProdContrat' => $lignes->fk_product);
+                        if ($typeDi == "Cur")
+                            $tabSite[$site][$type]['visiteMax'] += $nbVisite;
+                        else
                         if ($tabSite[$site][$type]['visiteMax'] < $nbVisite)
                             $tabSite[$site][$type]['visiteMax'] = $nbVisite;
                     }
@@ -80,9 +105,6 @@ class autoDi {
 
         if (count($tabSite) == 0) { //Aucune visite.
             if ($this->processDet) {
-                $this->processDet->validate("1");
-                $this->processDet->fetch($this->processDet->id);
-                $this->contrat->activeAllLigne();
                 echo "Contrat activé.";
             }
         } else {
@@ -199,15 +221,15 @@ class autoDi {
                 }
             }
             foreach ($this->tabType as $type) {
-                    $tabTech = $this->idTech;
-                    $sql = $this->db->query("SELECT Technicien as value FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_104 WHERE id =" . $numSite . "");
-                    if ($this->db->num_rows($sql) > 0) {
-                        $tabTech = array();
-                        $result = $this->db->fetch_object($sql);
-                        if ($result->value > 0) {
-                            $tabTech[] = $result->value;
-                        }
+                $tabTech = $this->idTech;
+                $sql = $this->db->query("SELECT Technicien as value FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_104 WHERE id =" . $numSite . "");
+                if ($this->db->num_rows($sql) > 0) {
+                    $tabTech = array();
+                    $result = $this->db->fetch_object($sql);
+                    if ($result->value > 0) {
+                        $tabTech[] = $result->value;
                     }
+                }
                 foreach ($tabTech as $idTech) {
                     foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                         $di = new Synopsisdemandeinterv($this->db);
@@ -234,9 +256,9 @@ class autoDi {
                         else {
                             $idType = 21;
                         }
-                        
+
                         $nbProd = count($visite['prod']);
-                        if($nbProd < 3)
+                        if ($nbProd < 3)
                             $dureeInt = 4 / $nbProd;
                         else
                             $dureeInt = 8 / $nbProd;

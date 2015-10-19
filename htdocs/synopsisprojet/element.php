@@ -413,7 +413,7 @@ foreach ($listofreferent as $key => $value)
 		if (!$selectList || ($selectList<0)) {
 			setEventMessage($formproject->error,'errors');
 		} else {
-			print '<form action="'.$_SERVER["PHP_SELF"].'?id='.$projectid.'" method="post">';
+			print '<form action="'.$_SERVER["PHP_SELF"].'?id='.$project->id.'" method="post">';
 			print '<input type="hidden" name="tablename" value="'.$tablename.'">';
 			print '<input type="hidden" name="action" value="addelement">';
 			print '<table><tr><td>'.$langs->trans("SelectElement").'</td>';

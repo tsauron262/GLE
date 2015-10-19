@@ -136,7 +136,7 @@ if ($searchOn == 'true') {
     }
     if ($_REQUEST['soc'] != "") {
         $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "synopsischrono WHERE fk_soc = p.rowid AND (p.nom LIKE \"%" . $_REQUEST['soc'] . "%\"))";
-        $searchFieldT = 'chr.id';
+        $searchFieldT = 'tview.id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }

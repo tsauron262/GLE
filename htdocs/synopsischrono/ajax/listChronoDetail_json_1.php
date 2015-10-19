@@ -290,7 +290,7 @@ $requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid FROM "
 
 $requete .= $wh1;
 if($sidx == "id")
-    $sidx = "chr.id";
+    $sidx = "tview.id";
 $requete .= " ORDER BY " . $sidx . " " . $sord . "";
 
 //echo($requete);die;

@@ -17,6 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+header("Location:".str_replace("/projet/", "/synopsisprojet/", $_SERVER['REQUEST_URI']));
+
 /**
  *	\file       htdocs/projet/card.php
  *	\ingroup    projet

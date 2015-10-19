@@ -223,7 +223,7 @@ switch ($action)
                 ORDER BY $sidx $sord
                 LIMIT $start , $limit";
 
-        $result = $db->query( $sql ) or die("Couldn t execute query : ".$sql.".".mysql_error());
+        $result = $db->query( $sql ) ; die("Couldn t execute query : ".$sql.".".mysql_error());
         class general{}
         $responce = new general();
         $responce->page = $page;

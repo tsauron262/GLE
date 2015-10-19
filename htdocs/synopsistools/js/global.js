@@ -23,8 +23,15 @@ $(window).load(function () {
 
 
     if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/card.php") > -1) {
+        desactEntrer = false;
+        $("textarea").focusin(function(){
+            desactEntrer = true;
+        });
+        $("textarea").focusout(function(){
+            desactEntrer = false;
+        });
         $("body").keypress(function (e) {
-            if (e.which == 13)
+            if (e.which == 13 && !desactEntrer)
                 return false
         });
     }

@@ -362,7 +362,7 @@ if ($user->rights->synopsisprojet->voirImputations) {
     $html = new Form($db);
     print "<td><form action='?" . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . "format=" . $format . "&date=" . $date . "' method=GET>";
     print "<table><tr><td>";
-    $html->select_users($userId, 'userid', 1, '', 0, $display = true);
+    $html->select_users($userId, 'userid', 1, '', 0);
     print "<td><button class='butAction'>OK</button>";
     print "<td><button class='butAction tousUser'>Tous</button>";
     print "</table>";

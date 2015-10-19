@@ -597,11 +597,17 @@ class SynopsisProject extends CommonObject {
      */
     public function delete($user) {
         global $langs, $conf;
-        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view";
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_projet_sup";
         $sql .= " WHERE rowid=" . $this->id;
 
         $resql = $this->db->query($sql);
-        if ($resql) {
+        
+        
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet";
+        $sql .= " WHERE rowid=" . $this->id;
+
+        $resql2 = $this->db->query($sql);
+        if ($resql && $resql2) {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);

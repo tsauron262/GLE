@@ -171,7 +171,7 @@ if ($_REQUEST['action'] == 'confirm_delete' && $_POST["confirm"] == "yes" && $us
     $projet = new SynopsisProject($db);
     $projet->id = $_GET["id"];
     if ($projet->delete($user) == 0) {
-        Header("Location: index.php");
+        Header("Location: liste.php");
         exit;
     } else {
         Header("Location: card.php?id=" . $projet->id);

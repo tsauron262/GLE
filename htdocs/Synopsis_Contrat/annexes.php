@@ -66,8 +66,8 @@ $js = <<<EOF
            },
            receive: function(event, ui) {
                 id = $(ui.item).attr("id");
-                jQuery('ul#sortable').find('.ui-draggable').attr("id", id);
-                jQuery('ul#sortable').find('.ui-draggable').removeClass("ui-draggable");
+                jQuery('ul#sortable').find('.ui-widget-header').attr("id", id);
+                jQuery('ul#sortable').find('.ui-widget-header').removeClass("ui-widget-header");
                 jQuery(ui.item).remove();
                 saveAnnexe();
            }

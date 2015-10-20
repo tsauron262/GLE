@@ -2061,7 +2061,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     }
                     if (($user->id == $cp->fk_validator || $user->id == $cp->fk_user || $user->id == $drhUserId) &&
                             ($cp->statut == 2 || $cp->statut == 3 || $cp->statut == 6)) { // Status validated or approved
-                        if (($cp->date_debut > dol_now()) || $user->admin) {
+                        if (($cp->date_debut > dol_now()) || $user->admin || $user->id == $drhUserId) {
                             if (is_array($cp->fk_user) && ($user->id == $drhUserId || $user->admin))
                                 print '<a href="card.php?id=' . $_GET['id'] . '&action=group_cancel" class="butAction"" class="butActionRefused">' . $langs->trans("ActionCancelCP") . '</a>';
                             else

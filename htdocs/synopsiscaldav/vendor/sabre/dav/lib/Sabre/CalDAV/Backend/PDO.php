@@ -523,12 +523,12 @@ class PDO extends AbstractBackend {
         foreach($calendarData2 as $ligne){
             if(stripos($ligne, "ATTENDEE") !== false){
                 $tabT = explode("mailto:", $ligne);
-                if(isset($tabT[0]))
+                if(isset($tabT[1]))
                         $tabMail[] = $tabT[1];
             }
             if(stripos($ligne, "CUTYPE") != false){
                 $tabT = explode("mailto:", $ligne);
-                if(isset($tabT[0]))
+                if(isset($tabT[1]))
                         $tabMail[] = $tabT[1];
             }
         }

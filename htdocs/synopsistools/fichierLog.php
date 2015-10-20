@@ -44,8 +44,13 @@ $filename = str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $pre
 if (isset($textSave))
     file_put_contents($filename, $textSave);
 
-if (is_file($filename))
-    $text = file_get_contents($filename);
+if (is_file($filename)){
+    $size = filesize($filename)/1024/1024;
+    if($size > 10)
+        $text = "Fichier trop gros ".$size." Mo";
+    else
+        $text = file_get_contents($filename);
+}
 
 if ($inverser) {
     $textT = explode("\n", $text);

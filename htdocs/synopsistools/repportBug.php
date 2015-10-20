@@ -137,7 +137,7 @@ function getBug($user) {
                 $html .= ' <a href="?action=setInfo&id=' . $data->rowid . '"> ' . $pictoI . ' </a>';
             $html .= "</td>";
 
-            $html .= "<td class='resize'>" . dol_trunc(str_replace("\n", "<br/>", strip_tags($data->text)),1000) . "</td>";
+            $html .= "<td class='resize'>" . str_replace("\n", "<br/>", strip_tags($data->text)) . "</td>";
 
             $html .= "</tr>";
         }

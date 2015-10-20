@@ -1439,3 +1439,62 @@ Sarda
 BDD:
 performaxrgle
 bddSynopsis1
+
+
+
+
+
+
+
+
+
+Ajout cat bimp
+//pour les sav en regle general
+INSERT IGNORE INTO `llx_categorie_societe` (SELECT "641" as `fk_categorie`, fk_soc as `fk_soc`, "" as `import_key` FROM  `llx_synopsischrono`, llx_societe s WHERE  `model_refid` =105 AND s.rowid = fk_soc GROUP BY fk_soc )
+
+
+//Pour les diferent chrono
+INSERT IGNORE INTO `llx_categorie_societe` (SELECT c.rowid as `fk_categorie`, ch.fk_soc as `fk_soc`, "" as `import_key` FROM  `llx_synopsischrono` ch, llx_synopsischrono_chrono_105 ch105, llx_societe s, llx_categorie c WHERE  `model_refid` =105 AND s.rowid = ch.fk_soc AND c.type = 2 AND c.label = concat("SAV", Centre) AND ch105.id = ch.id AND Centre != "" GROUP BY ch.fk_soc )
+
+//Pour les contrat
+INSERT IGNORE INTO `llx_categorie_societe` (SELECT "656" as `fk_categorie`, fk_soc as `fk_soc`, "" as `import_key` FROM  `llx_contrat`, llx_societe s WHERE  s.rowid = fk_soc GROUP BY fk_soc )
+
+
+//Pour les inter
+INSERT IGNORE INTO `llx_categorie_societe` (SELECT "655" as `fk_categorie`, fk_soc as `fk_soc`, "" as `import_key` FROM  `llx_fichinter`, llx_societe s WHERE s.rowid = fk_soc GROUP BY fk_soc )
+
+
+//Capsim maj
+//1 modifier les tables
+
+DROP VIEW llx_projet
+
+//2 install
+
+//3 desinstall reinsrtall synopsis_chrono modules
+
+
+//4 requetes
+
+RENAME TABLE  `llx_Synopsis_Tools_fileInfo` TO  `llx_synopsistools_fileInfo` ;
+
+//5 corige crono
+
+Desactiver FI et DI
+
+
+
+//Normallement inutille :
+
+CREATE VIEW `llx_Synopsis_projet` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM llx_projet p1 LEFT join llx_Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)
+
+
+CREATE VIEW `llx_Synopsis_projet` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM llx_projet p1 ,llx_Synopsis_projet_spe p2 WHERE p1.rowid = p2.rowid)
+
+
+
+
+//Pour bimp
+
+- maj
+- agenda arrivé direct sur equipe    UPDATE `llx_menu` SET `url` = '/synopsistools/agenda/vue.php' WHERE `module` LIKE 'agenda' AND type = 'top' AND url = '/comm/action/index.php'

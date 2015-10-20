@@ -961,7 +961,9 @@ class Form
         	}
         	$sql.=")";
         }
-        $sql.=$this->db->order("nom","ASC");
+//        $sql.=$this->db->order("nom","ASC");
+        $sql .= " ORDER BY CHAR_LENGTH(nom), nom ASC";
+        
 		if ($limit > 0) $sql.=$this->db->plimit($limit);
 
         dol_syslog(get_class($this)."::select_thirdparty_list", LOG_DEBUG);

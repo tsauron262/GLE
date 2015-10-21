@@ -389,7 +389,7 @@ if ($_REQUEST["id"] > 0) {
 
 
     echo '<tr>
-            <th class="ui-widget-header ui-state-default" width="25%">Intervention termin&eacute;</th>
+            <th class="ui-widget-header ui-state-default" width="25%">Intervention termin&eacute;e</th>
             <td class="ui-widget-content" colspan="1"><input type="checkbox"' . $checked . ' name="terminer" class="interTerm"/></td>
             <th class="ui-widget-header ui-state-default" width="25%" class="zoneDatePREDV">Date prochain RDV</th>
             <td class="ui-widget-content zoneDatePREDV" colspan="1"><input type="text" class="datePicker" value="' . str_replace("-", "/", convertirDate(extra(18))) . '" name="datePRDV"/> Non définit : <input type="checkbox" id="for0"/></td>

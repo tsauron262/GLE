@@ -143,7 +143,7 @@ class modSynopsisHoliday extends DolibarrModules {
             'url' => '/synopsisholiday/view_log.php?&action=request',
             'langs' => 'holiday@synopsisholiday',
             'position' => 1,
-            'perms' => '$user->rights->holiday->read_all',
+            'perms' => '$user->rights->holiday->define_holiday',
             'target' => '',
             'user' => 0);
 
@@ -157,7 +157,7 @@ class modSynopsisHoliday extends DolibarrModules {
             'url' => '/synopsisholiday/month_report.php?&action=request',
             'langs' => 'holiday@synopsisholiday',
             'position' => 5,
-            'perms' => '$user->rights->holiday->read_all',
+            'perms' => '$user->rights->holiday->define_holiday',
             'target' => '',
             'user' => 0);
 

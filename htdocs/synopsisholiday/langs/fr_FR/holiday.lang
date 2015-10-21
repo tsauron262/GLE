@@ -144,10 +144,13 @@ HolidaysRefused=Congés payés refusée
 HolidaysRefusedBody=Votre demande de congés payés %s à %s vient d'être refusée pour le motif suivant :
 HolidaysCanceled=Congés payés annulée
 HolidaysCanceledBody=Votre demande de congés %s à %s va été annulée.
+
+
+
 Permission20001=Lire ses propres congès
 Permission20002=Créer/modifier ses propres congès
-Permission20003=Créer/modifier les congès pour tout le monde
 Permission20003=Supprimer les demandes de congés
-Permission20004=Définir les congés des utilisateurs
-Permission20005=Voir les logs de modification des congés payés
-Permission20006=Accéder au rapport mensuel des congés
+Permission20004=Lire les congès de tout le monde
+Permission20005=Créer/modifier les congès pour tout le monde
+Permission20006=Définir les congés des utilisateurs
+

@@ -69,6 +69,8 @@ foreach ($tabPrefixe as $prefV => $pref) {
 echo "<form action='./fichierLog.php?action=save' method='post'>";
 echo "<input type='hidden' name='prefixe' value='" . $prefixe . "'/>";
 echo "<textarea name='text' style='width:100%; height:400px;'>" . $text . "</textarea>";
+if($size)
+echo "Taille : ".$size." Mo";
 echo "<br/><div class='divButAction'><input type='submit' class='butAction' value='Enregistrer'/></div></form>";
 
 //include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/fileInfo.class.php");

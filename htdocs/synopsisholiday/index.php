@@ -73,7 +73,7 @@ $search_valideur = GETPOST('search_valideur');
 $search_statut = GETPOST('select_statut');
 
 $droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) ||
-        (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
+        (!empty($user->rights->holiday->read_all) && $user->rights->holiday->read_all));
 $isDrh = ($user->id == $holidaystatic->getConfCP('drhUserId'));
 if ($isDrh || $droitAll) {
     $search_group = GETPOST('search_group');

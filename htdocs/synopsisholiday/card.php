@@ -62,7 +62,7 @@ $now = dol_now();
 //ini_set('display_errors', 1);
 
 $droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) ||
-        (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
+        (!empty($user->rights->holiday->read_all) && $user->rights->holiday->read_all));
 
 
 // Si création de la demande:
@@ -2043,7 +2043,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=edit" class="butAction">' . $langs->trans("EditCP") . '</a>';
                         if (($user->id == $drhUserId) && is_array($cp->fk_user)) {
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=groupCPValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
-                        } else if (($canedit && ($user->id == $cp->fk_user)) || $user->id == $drhUserId) {
+                        } else if (($canedit && ($user->id == $cp->fk_user)) || $user->id == $drhUserId || $user->rights->holiday->write_all) {
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
                         }
                         if ($user->id == $drhUserId || $droitAll || $user->rights->holiday->delete || $user->id == $cp->fk_user)

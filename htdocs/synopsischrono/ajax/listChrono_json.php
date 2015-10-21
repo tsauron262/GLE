@@ -183,7 +183,7 @@ $wh .= " AND (revision is NULL || revision = 0) ";
 
 
 if(isset($filtre))
-    $wh .= "AND (ref LIKE  '%".$filtre."%' OR description LIKE  '%".$filtre."%' OR nom LIKE  '%".$filtre."%') ";
+    $wh .= "AND (ref LIKE  '%".$filtre."%' OR description LIKE  '%".$filtre."%' OR nom LIKE  '%".$filtre."%' OR id LIKE  '%".$filtre."%') ";
 
 switch ($action)
 {

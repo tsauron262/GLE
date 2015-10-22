@@ -665,7 +665,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         $msg = "OrigineCc = " . $addr_cc . "\n\n" . $msg;
         $addr_cc = '';
         $to = MOD_DEV_SYN_MAIL;
-    } elseif ($cc != '')
+    } elseif ($ccAdmin != '' && $addr_cc != '')
         $addr_cc = $ccAdmin . ", " . $addr_cc;
     if (!isset($to) || $to == '') {
         $msg = "Pas de mail destinataire définit." . "\n\n" . $msg;

@@ -173,7 +173,9 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf1->Open();
                 $pdf->AddPage();
                 $pdf1->AddPage();
-                $pdf1->SetFont('', '', 8);
+                $pdf1->AddFont(pdf_getPDFFont($outputlangs));
+                $pdf->AddFont(pdf_getPDFFont($outputlangs));
+                $pdf1->SetFont(pdf_getPDFFont($outputlangs), '', 8);
 
                 // $pdf->SetDrawColor(128, 128, 128);
 
@@ -206,14 +208,14 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
                 $pdf->SetXY('50', '37');
-                $pdf->SetFont('', '', 14);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 14);
                 $pdf->MultiCell(100, 6, $chrono->ref, 0, 'L');
 
 
 
 
                 //centre
-                $pdf->SetFont('', '', 12);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->SetXY('147', '32.5');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1060]->valueStr, 0, 'L');
                 $pdf->SetXY('147', '38.5');
@@ -241,14 +243,14 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $address .= "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
 
                 $pdf->SetXY('20', '71');
-                $pdf->SetFont('', '', 12);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
 
 
 
 
                 $pdf->SetXY('16', '53.5');
-                $pdf->SetFont('', '', 9);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(50, 6, dol_print_date($chrono->date), 0, 'L');
 
                 if ($chrono->fk_user_author > 0) {
@@ -264,7 +266,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 //le prod
                 $pdf->SetXY('121', '71.4');
-                $pdf->SetFont('', '', 9);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $chrono2->description, 0, 'L');
 
                 $pdf->SetXY('137', '75.1');
@@ -287,7 +289,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 //symptom et sauv
                 $pdf->SetXY('15', '138.5');
-                $pdf->SetFont('', '', 12);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
 
                 if ($chrono->valuesPlus[1055]->value == 2)
@@ -314,7 +316,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 if ($chrono->valuesPlus[1068]->value == 1) {
                     $pdf->SetXY('62', '115');
-                    $pdf->SetFont('', '', 20);
+                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
                     $pdf->SetTextColor(255, 102, 0);
                     $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
                     $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
@@ -323,12 +325,12 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 $pdf->SetTextColor("black");
 //                $pdf->SetXY('6', '245');
-                $pdf->SetFont('', '', 8);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
                 $pdf->SetXY('7', '197');
                 $pdf->MultiCell(145, 6, $cgv, 0, 'L');
 
 //                //info pour prise en charge
-//                $pdf->SetFont('', '', 9);
+//                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
 //                $pdf->SetTextColor(0,0,0);
 //                $pdf->SetXY(25, 257);
 //                $pdf->MultiCell(90, 6, "Login : ".$chrono2->valuesPlus[1063]->valueStr, 0, '');
@@ -338,12 +340,12 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 //                $pdf->MultiCell(90, 6, "Systéme : ".$chrono2->valuesPlus[1067]->valueStr, 0, '');
                 //etiquette ref
                 for ($i = 0; $i < 5; $i++) {
-                    $pdf->SetFont('', '', 11);
+                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 11);
                     $pdf->SetTextColor(256, 0, 0);
                     $x = ('8' + ($i * 38.8));
                     $pdf->SetXY($x, '269.9');
                     $pdf->MultiCell(38, 6, $chrono->ref, 0, 'C');
-                    $pdf->SetFont('', '', 10);
+                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                     $pdf->SetTextColor("black");
                     $pdf->SetXY($x, '278');
                     $pdf->MultiCell(38, 6, $chrono->societe->nom, 0, 'C');
@@ -400,7 +402,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
         $outputlangs->load("companies");
 
         $pdf->SetTextColor(0, 0, 60);
-        $pdf->SetFont('', 'B', 13);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 13);
 
         $posy = $this->marge_haute;
 
@@ -420,7 +422,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->Image($logo, 5, 13, 0, 24);
             } else {
                 $pdf->SetTextColor(200, 0, 0);
-                $pdf->SetFont('', 'B', 8);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 8);
                 $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound", $logo), 0, 'L');
                 $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToModuleSetup"), 0, 'L');
                 $pdf->SetTextColor(0, 0, 0);
@@ -436,7 +438,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
 
-        $pdf->SetFont('', 'B', $default_font_size);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
 
         $posx = 100;
         $posy = 10;
@@ -447,7 +449,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
         $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
 
         $posy+=1;
-        $pdf->SetFont('', '', $default_font_size - 2);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
         $pdf->SetTextColor(0, 0, 60);
 
 
@@ -477,7 +479,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
             // Show sender frame
             $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('', '', $default_font_size - 2);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
             $pdf->SetXY($posx, $posy - 5);
             $pdf->MultiCell(66, 5, $outputlangs->transnoentities("BillFrom") . ":", 0, 'L');
             $pdf->SetXY($posx, $posy);
@@ -487,13 +489,13 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
             // Show sender name
             $pdf->SetXY($posx + 2, $posy + 3);
-            $pdf->SetFont('', 'B', $default_font_size);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
             $pdf->MultiCell(80, 4, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
             $posy = $pdf->getY();
 
             // Show sender information
             $pdf->SetXY($posx + 2, $posy);
-            $pdf->SetFont('', '', $default_font_size - 1);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 1);
             $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
 
@@ -525,18 +527,18 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
             // Show recipient frame
             $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('', '', $default_font_size - 2);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
             $pdf->SetXY($posx + 2, $posy - 5);
             $pdf->MultiCell($widthrecbox, 5, $outputlangs->transnoentities("BillTo") . ":", 0, 'L');
             $pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
 
             // Show recipient name
             $pdf->SetXY($posx + 2, $posy + 3);
-            $pdf->SetFont('', 'B', $default_font_size);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
             $pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
 
             // Show recipient information
-            $pdf->SetFont('', '', $default_font_size - 1);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 1);
             $pdf->SetXY($posx + 2, $posy + 4 + (dol_nboflines_bis($carac_client_name, 50) * 4));
             $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
 
@@ -546,7 +548,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
             $pdf->SetXY($this->marge_gauche, 92);
         }
         else {
-            $pdf->SetFont('', 'B', 10);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 10);
             //Société
             if ($this->marge_gauche > 45) {
                 $pdf->SetXY(3.5, 63);
@@ -561,7 +563,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
 
-        $pdf->SetFont('', 'B', 12);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 12);
     }
 
     /*
@@ -572,7 +574,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
     function _pagefoot(&$pdf, $chrono, $outputlangs) {
 
 
-        $pdf->SetFont('', 'B', 9);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 9);
         $pdf->SetTextColor(255, 63, 50);
         $pdf->SetDrawColor(0, 0, 0);
         //Société
@@ -593,7 +595,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
         }
 
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetFont('', '', 7);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 7);
         $ligne = $mysoc->name;
         if (defined('MAIN_INFO_CAPITAL'))
             $ligne .= " au capital de " . MAIN_INFO_CAPITAL;
@@ -614,7 +616,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
         $pdf->MultiCell(200 - $this->marge_gauche, 3, $ligne, 0, "C");
         $pdf->line($this->marge_gauche - 4, $Y + 44, 203, $Y + 44);
 
-        $pdf->SetFont('', 'B', 8);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 8);
         $pdf->SetTextColor(255, 63, 50);
         $pdf->SetXY(192, $Y + 55);
         $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);

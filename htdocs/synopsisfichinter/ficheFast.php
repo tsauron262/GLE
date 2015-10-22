@@ -625,7 +625,7 @@ function saveForm() {
             if ($res->prix_ht > 0) {
                 $pu_ht = $res->prix_ht;
             }
-        } else {
+        } elseif($fk_typeinterv > 0) {
             $requete = "SELECT prix_ht
                           FROM " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixTypeInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "

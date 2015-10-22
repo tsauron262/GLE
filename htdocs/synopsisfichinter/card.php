@@ -62,6 +62,8 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
 
+$outputlangs = $langs;
+
 if (isset($conf->projet->enabled)) {
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
@@ -437,7 +439,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
         //toujours 1
         $fichinterline->qte = 1;
         $fichinterline->isForfait = 1;
-    } else {
+    } elseif($fichinterline->fk_typeinterv > 0) {
         $requete = "SELECT prix_ht
                       FROM " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixTypeInterv
                      WHERE user_refid = " . $fichinter->user_creation->id . "

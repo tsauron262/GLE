@@ -43,7 +43,8 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 $enJour = false;
 
 
-if (! $user->rights->synopsisficheinter->rapportTous) accessforbidden();
+if (!$user->rights->synopsisficheinter->rapportTous)
+    accessforbidden();
 
 
 $tabIdFi = array();
@@ -67,9 +68,8 @@ llxHeader();
 $filterUser = $user->id;
 if ($user->rights->synopsisficheinter->rapportTous) {
     $filterUser = false;
-}
-    else
-        $_REQUEST['filterUser'] = $filterUser;
+} else
+    $_REQUEST['filterUser'] = $filterUser;
 
 
 if (isset($_REQUEST['filterUser']) && $_REQUEST['filterUser'] > 0) {
@@ -237,10 +237,10 @@ if ($resql) {
 //    $num = 10;
     $title = "Rapport d'activit&eacute; de " . strftime("%B %Y", strtotime($start));
     $param = "";
-    foreach($_GET as $valT => $valT2)
-        if($valT != "page")
-        $param .= "&".$valT."=".$valT2;
-    print_barre_liste($title, $page, "rapport.php", "&".$param, $sortfield, $sortorder, '', $offset + $limit + 1, $num);
+    foreach ($_GET as $valT => $valT2)
+        if ($valT != "page")
+            $param .= "&" . $valT . "=" . $valT2;
+    print_barre_liste($title, $page, "rapport.php", "&" . $param, $sortfield, $sortorder, '', $offset + $limit + 1, $num);
     print "<br/><br/>";
 
     echo "<div style='float: left;  margin-top:-18px; padding: 10px;' class='noprint ui-widget-content ui-state-default'>";
@@ -557,7 +557,7 @@ function afficheParType($tabIdFi) {
             $newId = -1001;
         else
             $newId = -1000;
-        foreach ($tabResult[$idType] as $idT => $valT){
+        foreach ($tabResult[$idType] as $idT => $valT) {
             $tabResult[-1111][$idT] += $valT;
             $tabResult[$newId][$idT] += $valT;
         }
@@ -565,36 +565,50 @@ function afficheParType($tabIdFi) {
     $tabType[-1111] = "TOTAL";
     $tabType[-1000] = "TOTAL Vendu";
     $tabType[-1001] = "TOTAL Non-Vendu";
-    
-    
-    
+
+
+
 //hotline
     $req = "SELECT COUNT(c.id) as nb, SUM(TO_SECONDS(`Date_H_Fin`) - TO_SECONDS(`Date_H_Debut`))/3600 as sum FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_100` ct, " . MAIN_DB_PREFIX . "synopsischrono c WHERE ct.id = c.id AND Date_H_Debut > 0 AND Date_H_Fin > 0 ";
-    
-    if($_REQUEST['filterUser'] > 0)
-        $req .= " AND `Tech` = ".$_REQUEST['filterUser'];
+
+    $reqF = "";
+    if ($_REQUEST['filterUser'] > 0)
+        $reqF .= " AND `Tech` = " . $_REQUEST['filterUser'];
     if (isset($_GET['dateDeb']) && isset($_GET['dateFin']) && $_GET['dateDeb'] != '' && $_GET['dateFin'] != '')
-        $req .= " AND `Date_H_Debut` < STR_TO_DATE('".$_GET['dateFin']."', '%d/%m/%Y') AND `Date_H_Debut` > STR_TO_DATE('".$_GET['dateDeb']."', '%d/%m/%Y')";
+        $reqF .= " AND `Date_H_Debut` < STR_TO_DATE('" . $_GET['dateFin'] . "', '%d/%m/%Y') AND `Date_H_Debut` > STR_TO_DATE('" . $_GET['dateDeb'] . "', '%d/%m/%Y')";
+    $req .= $reqF;
 //    die($req);
-    $sql = $db->query($req." AND (Contrat IS NULL || Contrat = 0)");
+    $sql = $db->query($req . " AND (Contrat IS NULL || Contrat = 0)");
     $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".price($result->sum)." h soit ".($result->sum*50)." € hors contrat<br/>";
-    
-    
-    
-    $sql = $db->query($req." AND Contrat > 0");
+    echo "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € hors contrat<br/>";
+
+
+
+    $sql = $db->query($req . " AND Contrat > 0");
 //    die($req." AND Contrat is not NULL");
     $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".price($result->sum)." h soit ".($result->sum*50)." € sous contrat<br/>";
-    
-    
-    
-    $sql = $db->query($req." AND Contrat is not NULL");
+    echo "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € sous contrat<br/>";
+
+
+
+    $sql = $db->query($req . " AND Contrat is not NULL");
     $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".price($result->sum)." h soit ".($result->sum*50)." € au Total<br/>";
-    
-    $tabResult[-1001][2] += ($result->sum*50);
-    
+    echo "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € au Total<br/>";
+
+    $tabResult[-1001][2] += ($result->sum * 50);
+
+
+    $reqTropLong = $db->query("SELECT * FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 7200 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) ".$reqF);
+    if ($db->num_rows($reqTropLong) > 0)
+        echo "<br/>Appel pouvant posé problème.<br/>";
+    while ($result = $db->fetch_object($reqTropLong)) {
+        require_once (DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
+        $chr = new Chrono($db);
+        $chr->fetch($result->id);
+        echo $chr->getNomUrl(1);
+        echo "<br/>";
+    }
+
 
 
 
@@ -603,17 +617,17 @@ function afficheParType($tabIdFi) {
     $result = $tabResult[-1000][3] * $coef1 + ($tabResult[-1000][3] - $tabResult[-1000][2]) * $coef2;
     echo "<br/>Vendue<table><tr><td>Prévue</td><td>* " . $coef1 . "</td><td>+ Bonus</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr>";
     echo "<tr><td>" . price($tabResult[-1000][3]) . " €</td><td>* " . $coef1 . "</td><td>+ " . price($tabResult[-1000][3] - $tabResult[-1000][2]) . " €</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr></table>";
-    
+
     echo "<br/>";
-    
-    
+
+
     echo "<br/>Non Vendue<table><tr><td>Réalisé</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr>";
     echo "<tr><td>" . price($tabResult[-1001][2]) . " €</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
-    
+
     echo "<br/>";
-    
+
     echo "<br/>Total<table><tr><td>" . price($result) . " €</td><td>+ " . price($coef1 * $tabResult[-1001][2]) . "</td><td>= " . price($result + $coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
-    
+
     echo "<br/>";
 
 
@@ -658,10 +672,10 @@ function afficheParType($tabIdFi) {
 
 function testFi($tabIdFi, $tabResult, $alert = true) {
     global $total_ht, $additionP, $db;
-    
-    if(count($tabIdFi) == 0)
+
+    if (count($tabIdFi) == 0)
         return array();
-    
+
     /*  test */
     $additionPT = price($total_ht - $additionP - $tabResult[0][2]);
     if ($additionPT != 0 && $alert)

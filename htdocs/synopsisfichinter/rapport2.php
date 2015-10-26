@@ -598,14 +598,14 @@ function afficheParType($tabIdFi) {
     $tabResult[-1001][2] += ($result->sum * 50);
 
 
-    $reqTropLong = $db->query("SELECT * FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 7200 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) ".$reqF);
+    $reqTropLong = $db->query("SELECT *, TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as duree FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 7200 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) ".$reqF);
     if ($db->num_rows($reqTropLong) > 0)
         echo "<br/>Appel pouvant posé problème.<br/>";
     while ($result = $db->fetch_object($reqTropLong)) {
         require_once (DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
         $chr = new Chrono($db);
         $chr->fetch($result->id);
-        echo $chr->getNomUrl(1);
+        echo $chr->getNomUrl(1)."   |    ".($result->duree / 60)." m";
         echo "<br/>";
     }
 

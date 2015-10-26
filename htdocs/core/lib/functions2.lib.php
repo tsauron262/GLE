@@ -858,7 +858,7 @@ function get_next_value($db, $mask, $table, $field, $where = '', $objsoc = '', $
         dol_print_error($db);
 
     /* mod drsi */
-    if ($mode == 'next' && $table != "facture" && $table != "projet") {
+    if ($mode == 'next' && $table == "societe") {
         $tabResa = getElementElement("resa", $table . $maskLike);
         for ($i = 1; $i < 100; $i++) {
             $numTemp = $counter + 1;

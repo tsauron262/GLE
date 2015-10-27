@@ -117,7 +117,7 @@ if ($searchOn == 'true') {
     }
 
     if ($_REQUEST['propal'] != "") {
-        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "synopsischrono WHERE propalid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['propal'] . "%\"))";
+        $searchStringT = "(SELECT rowid FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "synopsischrono WHERE propalid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['propal'] . "%\"))";
         $searchFieldT = 'propalid';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";

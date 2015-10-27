@@ -107,7 +107,7 @@ function bouttonEtatSav($idChrono) {
     }
 
     if ($propId && $propStatut > 1 && ($etatSav == 4)) {
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&nbJours=\"+$(\"#nbJours\").attr(\"value\")+\"&actionEtat=repOk" . $sms . "'>Terminé</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&nbJours=\"+$(\"#nbJours\").val()+\"&actionEtat=repOk" . $sms . "'>Terminé</a>";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
     }
 

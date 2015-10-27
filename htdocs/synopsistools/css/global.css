@@ -425,4 +425,12 @@ table.fullTable tr td.resize{/*correction bug dans repport Bug*/
                              font-size:11px!important;
 }
 
+table.tabBorder100{
+    width: 100%;
+    border: double grey 4px;
+}
 
+table.tabBorder100 td{
+    border: solid grey 1px;
+    padding: 3px;
+}

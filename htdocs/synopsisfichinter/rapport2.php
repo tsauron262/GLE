@@ -43,7 +43,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 $enJour = false;
 
 
-if (!$user->rights->synopsisficheinter->rapportTous)
+if (!$user->rights->synopsisficheinter->lire)
     accessforbidden();
 
 
@@ -429,7 +429,7 @@ if (count($tabIdFi) > 0) {
         echo "<br/><br/>Ce qui donne sans comptabiliser ces interventions : <br/><br/>";
 
         if (count($newTabIdFi) > 0) {
-            $tabResult = afficheParType($newTabIdFi);
+            $tabResult = afficheParType($newTabIdFi, true);
             $tabIdErreur = testFi($newTabIdFi, $tabResult, false);
         }
     }
@@ -439,8 +439,8 @@ $db->close();
 
 llxFooter("<em>Derni&egrave;re modification: 2007/06/22 08:44:46 $ r&eacute;vision: 1.12 $</em>");
 
-function afficheParType($tabIdFi) {
-    global $db, $additionP;
+function afficheParType($tabIdFi, $secondFois = false) {
+    global $db, $additionP, $user;
     $requeteType2 = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(fdet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv` ;";
     $result2 = $db->query($requeteType2);
     $tabResult = array();
@@ -539,18 +539,20 @@ function afficheParType($tabIdFi) {
         }
     }
 
-    foreach ($tabType as $idT => $valT) {
-        if (in_array($idT, $tabTypeNonVendue))
-            $str2 .= $valT . ", ";
-        else
-            $str1 .= $valT . ", ";
+    if(!$secondFois){
+        foreach ($tabType as $idT => $valT) {
+            if (in_array($idT, $tabTypeNonVendue))
+                $str2 .= $valT . ", ";
+            else
+                $str1 .= $valT . ", ";
+        }
+
+        echo "<br/>Rappel types considérés comme vendu : <br/>";
+        echo $str1 . "<br/>";
+
+        echo "<br/>Rappel types considérés comme non-vendu : <br/>";
+        echo $str2 . "<br/>";
     }
-
-    echo "<br/>Rappel types considérés comme vendu : <br/>";
-    echo $str1 . "<br/>";
-
-    echo "<br/>Rappel types considérés comme non-vendu : <br/>";
-    echo $str2 . "<br/>";
 
     foreach ($tabType as $idType => $labelType) {
         if (in_array($idType, $tabTypeNonVendue))
@@ -578,57 +580,71 @@ function afficheParType($tabIdFi) {
         $reqF .= " AND `Date_H_Debut` < STR_TO_DATE('" . $_GET['dateFin'] . "', '%d/%m/%Y') AND `Date_H_Debut` > STR_TO_DATE('" . $_GET['dateDeb'] . "', '%d/%m/%Y')";
     $req .= $reqF;
 //    die($req);
-    $sql = $db->query($req . " AND (Contrat IS NULL || Contrat = 0)");
-    $result = $db->fetch_object($sql);
-    echo "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € hors contrat<br/>";
+    
+    
+    $strStat = "<div style='clear: both;'>";
+    $strStat .= "<table class='tabBorder100'><tr><td>";
+    if ($user->rights->synopsisficheinter->rapportTous){
+        $sql = $db->query($req . " AND (Contrat IS NULL || Contrat = 0)");
+        $result = $db->fetch_object($sql);
+        $strStat .= "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € hors contrat<br/>";
 
 
 
-    $sql = $db->query($req . " AND Contrat > 0");
-//    die($req." AND Contrat is not NULL");
-    $result = $db->fetch_object($sql);
-    echo "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € sous contrat<br/>";
+        $sql = $db->query($req . " AND Contrat > 0");
+    //    die($req." AND Contrat is not NULL");
+        $result = $db->fetch_object($sql);
+        $strStat .= "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € sous contrat<br/>";
 
 
 
-    $sql = $db->query($req . " AND Contrat is not NULL");
-    $result = $db->fetch_object($sql);
-    echo "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € au Total<br/>";
-
+        $sql = $db->query($req . " AND Contrat is not NULL");
+        $result = $db->fetch_object($sql);
+        $strStat .= "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € au Total<br/>";
+    }
+    $strStat .= "</td><td>";
+    
     $tabResult[-1001][2] += ($result->sum * 50);
 
 
     $reqTropLong = $db->query("SELECT *, TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as duree FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 7200 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) ".$reqF);
+    $probAppel = "";
     if ($db->num_rows($reqTropLong) > 0)
-        echo "<br/>Appel pouvant posé problème.<br/>";
+        $probAppel = "Attention ".$db->num_rows($reqTropLong)." appels pouvant posé problème dont les 30 premières sont listées ci dessous.<br/><br/>";
+    $i=0;
     while ($result = $db->fetch_object($reqTropLong)) {
+        $i++;
         require_once (DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
         $chr = new Chrono($db);
         $chr->fetch($result->id);
-        echo $chr->getNomUrl(1)."   |    ".($result->duree / 60)." m";
-        echo "<br/>";
+        $probAppel .= $chr->getNomUrl(1)."   |    ".  round($result->duree / 60,2)." m";
+        $probAppel .= "<br/>";
+        if($i > 29)
+            break;
     }
 
 
 
+    if ($user->rights->synopsisficheinter->rapportTous){
+        $coef1 = 0.025;
+        $coef2 = 0.10;
+        $result = $tabResult[-1000][3] * $coef1 + ($tabResult[-1000][3] - $tabResult[-1000][2]) * $coef2;
+        $strStat .= "<br/>Vendue<table><tr><td>Prévue</td><td>* " . $coef1 . "</td><td>+ Bonus</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr>";
+        $strStat .= "<tr><td>" . price($tabResult[-1000][3]) . " €</td><td>* " . $coef1 . "</td><td>+ " . price($tabResult[-1000][3] - $tabResult[-1000][2]) . " €</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr></table>";
 
-    $coef1 = 0.025;
-    $coef2 = 0.10;
-    $result = $tabResult[-1000][3] * $coef1 + ($tabResult[-1000][3] - $tabResult[-1000][2]) * $coef2;
-    echo "<br/>Vendue<table><tr><td>Prévue</td><td>* " . $coef1 . "</td><td>+ Bonus</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr>";
-    echo "<tr><td>" . price($tabResult[-1000][3]) . " €</td><td>* " . $coef1 . "</td><td>+ " . price($tabResult[-1000][3] - $tabResult[-1000][2]) . " €</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr></table>";
-
-    echo "<br/>";
+        $strStat .= "<br/>";
 
 
-    echo "<br/>Non Vendue<table><tr><td>Réalisé</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr>";
-    echo "<tr><td>" . price($tabResult[-1001][2]) . " €</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
+        $strStat .= "<br/>Non Vendue<table><tr><td>Réalisé</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr>";
+        $strStat .= "<tr><td>" . price($tabResult[-1001][2]) . " €</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
 
-    echo "<br/>";
+        $strStat .= "</td><td>  ";
 
-    echo "<br/>Total<table><tr><td>" . price($result) . " €</td><td>+ " . price($coef1 * $tabResult[-1001][2]) . "</td><td>= " . price($result + $coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
+        $strStat .= "<br/>Total<table><tr><td>" . price($result) . " €</td><td>+ " . price($coef1 * $tabResult[-1001][2]) . "</td><td>= " . price($result + $coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
 
-    echo "<br/>";
+        $strStat .= "<br/>";
+    }
+    $strStat .= "</td></tr></table>";
 
 
     ksort($tabType);
@@ -667,6 +683,8 @@ function afficheParType($tabIdFi) {
             $additionP = $additionP + $tabResult[$idType][2];
         echo $texte;
     }
+        echo $strStat;
+        echo "<br/><table class='tabBorder100'><tr><td style='    min-width: 380px;'>".$probAppel;
     return $tabResult;
 }
 
@@ -685,7 +703,7 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
     if ($tabResult[0][2] != 0) {
         $requeteType7 = "SELECT fk_fichinter FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
         $result7 = $db->query($requeteType7);
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][2]) . "€ (" . price($tabResult[0][0] / 3600) . "h ) sur le réalisé due aux " . $db->num_rows($result7) . " interventions réalisées sans type dont les 30 premières sont listées ci dessous<br/>";
+        echo "</td><td><div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][2]) . "€ (" . price($tabResult[0][0] / 3600) . "h ) sur le réalisé due aux " . $db->num_rows($result7) . " interventions réalisées sans type dont les 30 premières sont listées ci dessous<br/><br/>";
         $i = 0;
         while ($ligne = $db->fetch_object($result7)) {
             if ($i < 30) {
@@ -702,7 +720,7 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
     if ($tabResult[0][3] != 0) {
         $requeteType7 = "SELECT fk_synopsisdemandeinterv FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet fdet WHERE fdet.fk_synopsisdemandeinterv IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_synopsisdemandeinterv";
         $result7 = $db->query($requeteType7);
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][3]) . "€ (" . price($tabResult[0][1] / 3600) . "h ) sur le prévue due aux " . $db->num_rows($result7) . " demande d'interventions réalisées sans type dont les 30 premières sont listées ci dessous<br/>";
+        echo "</td><td><div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][3]) . "€ (" . price($tabResult[0][1] / 3600) . "h ) sur le prévue due aux " . $db->num_rows($result7) . " demande d'interventions réalisées sans type dont les 30 premières sont listées ci dessous<br/><br/>";
         $i = 0;
         while ($ligne = $db->fetch_object($result7)) {
             if ($i < 30) {
@@ -737,7 +755,7 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
     $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `" . MAIN_DB_PREFIX . "element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
     $resultPasDeDI = $db->query($requetePasDeDI);
     if ($db->num_rows($resultPasDeDI) > 0) {
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevu due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les 30 premières sont listées ci dessous<br/>";
+        echo "</td><td><div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevu due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les 30 premières sont listées ci dessous<br/><br/>";
         $i = 0;
         while ($ligne = $db->fetch_object($resultPasDeDI)) {
             if ($i < 30) {
@@ -749,6 +767,8 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
             $i ++;
         }
     }
+    
+    echo "</td></tr></table>";
     return $tabIdErreur;
 }
 

@@ -276,11 +276,11 @@ class Chrono extends CommonObject {
         $oldId = $this->id;
 
 
+        $this->getValues();
         $newId = $this->create();
         $this->ref = $newRef;
         $this->revision = ($this->revision ? $this->revision + 1 : 1);
         $this->update($this->id);
-        $this->getValues();
         $this->setDatas($this->id, $this->values);
 
 //        $newId = $this->create_revision_from($newRef, ($this->revision ? $this->revision + 1 : 1));
@@ -1007,6 +1007,7 @@ class Chrono extends CommonObject {
             if (is_numeric($keyId))
                 $keyId = $this->idChampToNom($keyId);
 
+            if($keyId != "id")
             $tabUpdate[] = $keyId . " = '" . addslashes($value) . "'";
 
 

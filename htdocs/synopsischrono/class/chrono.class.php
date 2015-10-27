@@ -360,6 +360,10 @@ class Chrono extends CommonObject {
             $requete .= ", fk_socpeople = NULL ";
         if ($this->note != "")
             $requete .= ", note = '" . addslashes($this->note) . "'";
+        if ($this->projetid != "")
+            $requete .= ", projetid = '" . ($this->projetid) . "'";
+        if ($this->propalid != "")
+            $requete .= ", propalid = '" . ($this->propalid) . "'";
 
         $requete .= ", orig_ref = '" . $this->orig_ref . "'";
         $requete .= ", revision = '" . $this->revision . "'";
@@ -1001,11 +1005,12 @@ class Chrono extends CommonObject {
 
         $tabUpdate = array();
         foreach ($dataArr as $keyId => $value) {
-            $value = convertirDate($value, false, true);
-            echo $value;
-
             if (is_numeric($keyId))
                 $keyId = $this->idChampToNom($keyId);
+            echo $keyId;
+            $value = convertirDate($value, false, ($keyId == "Date_H_Fin"));
+            echo $value;
+
 
             if($keyId != "id")
             $tabUpdate[] = $keyId . " = '" . addslashes($value) . "'";

@@ -36,7 +36,7 @@ if (!$id > 0 && isset($_REQUEST['ref'])) {
 if ($id > 0) {
     $chr = new Chrono($db);
     $chr->fetch($id);
-    if (!$chr->id > 0){
+    if (!$chr->id > 0) {
         header('Location: ' . DOL_URL_ROOT . '/synopsischrono/listByObjet.php');
         die;
     }
@@ -73,7 +73,7 @@ if ($action == "cancel") {
     if ($chr->socid == 0 && $chr->description == '') {
 //        $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE `value` is not null AND `chrono_refid` =" . $chr->id);
 //        if ($db->num_rows($result) == 0)
-        if($chr->fk_user_modif < 1 && $chr->socid < 1)
+        if ($chr->fk_user_modif < 1 && $chr->socid < 1)
             $action = 'supprimer';
     }
 }
@@ -191,8 +191,8 @@ if ($action == 'modifier') {
     $chr->description = addslashes($_REQUEST['description']);
     $chr->socid = addslashes($_REQUEST['socid']);
     $chr->contactid = addslashes($_REQUEST['contactid']);
-    $chr->propalid = addslashes($_REQUEST['Proposition comm.']);
-    $chr->projetid = addslashes($_REQUEST['Projet']);
+    $chr->propalid = addslashes($_REQUEST['prop']);
+    $chr->projetid = addslashes($_REQUEST['projet']);
 
     if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
         $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "societe");
@@ -250,8 +250,8 @@ if ($action == 'modifier') {
     /* special bimp appel */
     if (isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on") {
         $chr->fetch($chr->id);
-        if(is_object($chr->societe))
-        $socStr = $chr->societe->getNomUrl(1);
+        if (is_object($chr->societe))
+            $socStr = $chr->societe->getNomUrl(1);
         else
             $socStr = "n/c";
         if (isset($_REQUEST["Chrono1071"]) && $_REQUEST["Chrono1071"] > 0) {
@@ -315,16 +315,16 @@ if ($chr->id > 0) {
         top_htmlhead($js, 'Fiche ' . $chr->model->titre);
     } else
         llxHeader($js, 'Fiche ' . $chr->model->titre);
-    
-    
-    
-    if(isset($_SESSION['error'])){
-        foreach($_SESSION['error'] as $error => $type){
-            dol_htmloutput_mesg($error, array(), ($type == 1)? "error" : "ok");
+
+
+
+    if (isset($_SESSION['error'])) {
+        foreach ($_SESSION['error'] as $error => $type) {
+            dol_htmloutput_mesg($error, array(), ($type == 1) ? "error" : "ok");
         }
         $_SESSION['error'] = array();
     }
-    
+
 
 //print "<div class='titre'>Fiche chrono</div><br/>";
 
@@ -397,6 +397,36 @@ if ($chr->id > 0) {
             print '    <td  class="ui-widget-content" colspan="' . (($chr->model->hasSociete == 1) ? 1 : 3) . '"><span class="addContact editable" style="float: left; padding : 3px 15px 0 0;">' . img_picto($langs->trans("Create"), 'filenew') . '</span><div id="contactSociete">' . $tmpContact . '</div></td>';
         }
 
+        if ($chr->model->hasPropal) {
+            print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Propal') . '</th>';
+            print "<td><select name='prop'><OPTION value='0'>S&eacute;lectionner-></OPTION>";
+            $idT = $chr->propalid;
+            $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "propal ";
+            if ($hasSoc)
+                $requete2 .= " WHERE fk_soc = " . $chr->socid;
+            $requete2 .= " ORDER BY `rowid` DESC";
+            $sql2 = $db->query($requete2);
+            while ($res = $db->fetch_object($sql2)) {
+                print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . "</option>";
+            }
+            print '</select>';
+        }
+
+
+
+        if ($chr->model->hasProjet) {
+            $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet_view ORDER BY `rowid` DESC";
+            $sql3 = $db->query($requete3);
+            print ' <th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Project') . '</th>';
+            print "<td>     <select name='projet'>";
+            print "<OPTION value='0'>S&eacute;lectionner-></OPTION>";
+            $idT = $chr->projetid;
+            while ($res = $db->fetch_object($sql3)) {
+                print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . " : " . $res->title . "</option>";
+            }
+            print '</select>';
+        }
+
         if ($chr->model->hasDescription) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
             print '<td  class="ui-widget-content" colspan="3">';
@@ -426,14 +456,14 @@ if ($chr->id > 0) {
 //        print '<tr><th align=right class="ui-state-default ui-widget-header" nowrap colspan=4  class="ui-state-default">';
         print '</table></div><div class="divButAction">';
         print '<input type="hidden" id="forAction2" name="action2" value="nc"/>';
-        
+
         print "<button onClick='location.href=\"?action=cancel&id=" . $chr->id . "\"; return(false);' class='butAction'>Annuler</button>";
         print "<button id='forValid' class='butAction'>Modifier</button>";
         print '</div></form>';
 
         echo '<script>'
         . '$( document ).ready(function() {'
-               . 'autoSave(function(){
+        . 'autoSave(function(){
                    $("#forAction2").attr("value", "Modify");
                    $("#forValid").click();
                 });'

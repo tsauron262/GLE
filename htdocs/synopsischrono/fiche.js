@@ -224,9 +224,12 @@ jQuery(document).ready(function () {
             date = new Date();
             $(this).datetimepicker({showTime: true}).datepicker("setDate", date);
         }
-        else{
+        else if($(this).val() != ""){
             date = new Date($(this).val());
              $(this).datetimepicker({showTime: true}).datepicker("setDate", date);
+        }
+        else{
+            $(this).datetimepicker({showTime: true}).datepicker("setDate", "");
         }
     });
 

@@ -962,11 +962,11 @@ function convertirDate($date, $enFr = true, $nowSiNull = false, $delimiteur = "-
         }
     }
     else {
-        if ($nowSiNull)
+        if ($nowSiNull && $date == "")
             if ($enFr)
-                $return = date("d".$delimiteur."m".$delimiteur."Y");
+                $return = date("d".$delimiteur."m".$delimiteur."Y H:i:s");
             else
-                $return = date("Y-m-d");
+                $return = date("Y-m-d H:i:s");
         else
             $return = $date;
     }

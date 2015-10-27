@@ -1001,7 +1001,7 @@ class Chrono extends CommonObject {
 
         $tabUpdate = array();
         foreach ($dataArr as $keyId => $value) {
-            $value = convertirDate($value, false);
+            $value = convertirDate($value, false, true);
             echo $value;
 
             if (is_numeric($keyId))

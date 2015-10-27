@@ -10,7 +10,7 @@ function addElementElement($typeS, $typeD, $idS, $idD, $ordre = 1) {
         $typeS = $typeST;
         $idS = $idST;
     }
-    $req = "INSERT INTO " . MAIN_DB_PREFIX . "element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
+    $req = "INSERT IGNORE INTO " . MAIN_DB_PREFIX . "element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
     return $db->query($req);
 }
 
@@ -38,7 +38,7 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null, $ordre = tr
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
         $req .= " AND fk_target = " . $idD;
-    $db->query($req);
+    return $db->query($req);
 }
 
 function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = null, $ordre = true) {

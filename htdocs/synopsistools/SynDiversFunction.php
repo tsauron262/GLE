@@ -659,7 +659,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", MAIN_INFO_SOCIETE_NOM)) . '.fr>';
 
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
-    $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
+    $ccAdmin = $toReplay;
     if (defined('MOD_DEV_SYN_MAIL')) {
         $msg = "OrigineTo = " . $to . "\n\n" . $msg;
         $msg = "OrigineCc = " . $addr_cc . "\n\n" . $msg;

@@ -860,10 +860,11 @@ if ($id > 0)
 {
 	$result1=$object->fetch($id);
         /*mod drsi*/
-        if(!$object->id > 0)
+        if(!$object->id > 0){
             echo "Elément inexistant.";
-        llxFooter();
-        die;
+            llxFooter();
+            die;
+        }
         /*fmoddrsi*/
 	$result2=$object->fetch_thirdparty();
 	$result3=$object->fetch_contact();

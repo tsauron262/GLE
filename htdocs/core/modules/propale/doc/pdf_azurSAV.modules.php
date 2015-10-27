@@ -580,6 +580,17 @@ class pdf_azurSAV extends ModelePDFPropales
 					$posy=$this->_tableau_versements($pdf, $object, $posy, $outputlangs);
 				}
 				*/
+                                
+                                
+                                /*mod drsi ajout signature*/
+                                    $pdf->SetFont('','', $default_font_size);
+                                    $pdf->SetXY("159", "243");
+                                    $pdf->MultiCell("50", "10", "Bon pour Accord\nLe : ", 0, 'L');
+                                    $pdf->SetXY("160", "253");
+                                    $pdf->MultiCell("40", "25", "", 1);
+                                
+                                /*fmoddrsi*/
+                                
 
 				// Pied de page
 				$this->_pagefoot($pdf,$object,$outputlangs);
@@ -1039,8 +1050,8 @@ class pdf_azurSAV extends ModelePDFPropales
                                 
                                 
                                 $pdf->SetFont('','', $default_font_size - 3);
-                                $pdf->MultiCell(190, 20, "\n\nLes informations personnelles requises suivantes (nom, adresse, numéro de téléphone et adresse e-mail) sont nécessaires pour poursuivre la demande de réparation. Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront transférées au tiers pour vérification et des objectifs de qualité, notamment la confirmation de la transaction de réparation et la soumission d’une enquéte client. En signant ci-dessous, vous acceptez ce transfert ainsi que l’utilisation de ces informations par un tiers.", 0, 'L', 0);
-                                $pdf->MultiCell(190, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
+                                $pdf->MultiCell(140, 20, "\n\nLes informations personnelles requises suivantes (nom, adresse, numéro de téléphone et adresse e-mail) sont nécessaires pour poursuivre la demande de réparation. Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront transférées au tiers pour vérification et des objectifs de qualité, notamment la confirmation de la transaction de réparation et la soumission d’une enquéte client. En signant ci-dessous, vous acceptez ce transfert ainsi que l’utilisation de ces informations par un tiers.", 0, 'L', 0);
+                                $pdf->MultiCell(140, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
 			}
 		}
 

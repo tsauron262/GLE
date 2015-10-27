@@ -247,52 +247,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                 
                                 
                                 
-                                $tabT = getElementElement("propal", "facture", null, $object->id);
-                                if(count($tabT) > 0){
-                                $result = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_chrono_105 ct, ".MAIN_DB_PREFIX."synopsischrono c WHERE ct.id = c.id AND propalid = ".$tabT[0]['s']);
-                                if($this->db->num_rows($result) > 0 ){
-                                    $ligne = $this->db->fetch_object($result);
-                                    if(isset($ligne->Centre)){
-                                        global $tabCentre;
-//                                        $centre = $tabCentre[$ligne->CentreVal];
-                                        $tech = "";
-                                        if (isset($ligne->Technicien) && $ligne->Technicien > 0) {
-                                            $userT = new User($this->db);
-                                            $userT->fetch($ligne->Technicien);
-                                            $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
-                                        }
-                                        $req = "SELECT N__Serie 
-FROM  `".MAIN_DB_PREFIX."element_element`, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 v 
-WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."
-AND  `targettype` LIKE  'productCli'";
-                                        $result2 = $this->db->query($req);
-                                        if($this->db->num_rows($result2) > 0){
-                                            $ligne2 = $this->db->fetch_object($result2);
-//                                        $pdf->SetXY(12,64);
-//                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
-                                            $pdf->SetXY(30,20);
-                                            $pdf->SetFont('','', $default_font_size + 5);
-                                            $pdf->SetTextColor(234,119,2);
-                                            $pdf->MultiCell(157, 10, $ligne->ref."\n".$ligne2->N__Serie, 0, 'C', 0);
-                                        }
-                                        
-                                        
-                                        $req = "SELECT * 
-FROM  `".MAIN_DB_PREFIX."synopsis_apple_repair` 
-WHERE  `chronoId` = ".$ligne->id;
-                                        $result2 = $this->db->query($req);
-                                        if($this->db->num_rows($result2) > 0){
-                                            $ligne2 = $this->db->fetch_object($result2);
-//                                        $pdf->SetXY(12,64);
-//                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
-                                            $pdf->SetXY(10,83);
-                                            $pdf->SetFont('','', $default_font_size - 3);
-                                            $pdf->SetTextColor(234,119,2);
-                                            $pdf->MultiCell(150, 10, "Soucieux de la qualité de service apporté à notre clientèle, nous vous invitons à remplir le questionnaire qualité \nque vous êtes susceptible de recevoir à l’adresse mail que vous nous nous avez indiqué.", 0, 'L', 0);
-                                        }
-                                    }
-                                }
-                                }
+                                
                                 
                                 
                                 
@@ -569,17 +524,19 @@ WHERE  `chronoId` = ".$ligne->id;
                                 
                                                
                                 /*mod drsi ajout signature*/
-                                $pdf->SetFont('','', $default_font_size);
-                                $pdf->SetXY("39", "239");
-                                $pdf->MultiCell("50", "10", "Matériel récupéré\nLe : ", 0, 'L');
-                                $pdf->SetXY("40", "249");
-                                $pdf->MultiCell("40", "25", "", 1);
+                                if(stripos($object->ref, "FA") !== false){
+                                    $pdf->SetFont('','', $default_font_size);
+                                    $pdf->SetXY("39", "239");
+                                    $pdf->MultiCell("50", "10", "Matériel récupéré\nLe : ", 0, 'L');
+                                    $pdf->SetXY("40", "249");
+                                    $pdf->MultiCell("40", "25", "", 1);
+                                }
                                 
                                 /*fmoddrsi*/
                                 
                                 $pdf->SetXY("95", "265");
                                 $pdf->SetFont('','', $default_font_size - 3);
-                                $pdf->MultiCell(100, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'J', 0);
+                                $pdf->MultiCell(100, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
 	
                                 
                                 
@@ -1475,7 +1432,58 @@ WHERE  `chronoId` = ".$ligne->id;
 		if ($showaddress)
 		{
 			// Sender properties
+                        $conf->global->MAIN_PDF_DISABLESOURCEDETAILS = true;
 			$carac_emetteur = pdf_build_address($outputlangs,$this->emetteur);
+                        
+                        $tabT = getElementElement("propal", "facture", null, $object->id);
+                                if(count($tabT) > 0){
+                                $result = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_chrono_105 ct, ".MAIN_DB_PREFIX."synopsischrono c WHERE ct.id = c.id AND propalid = ".$tabT[0]['s']);
+                                if($this->db->num_rows($result) > 0 ){
+                                    $ligne = $this->db->fetch_object($result);
+                                    if(isset($ligne->Centre)){
+                                        global $tabCentre;
+                                        $centre = $tabCentre[$ligne->Centre];
+                                        $tech = "";
+                                        if (isset($ligne->Technicien) && $ligne->Technicien > 0) {
+                                            $userT = new User($this->db);
+                                            $userT->fetch($ligne->Technicien);
+                                            $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
+                                        }
+                                        
+                                $pdf->SetXY(12,64);
+                                $pdf->MultiCell(80, 10, "Centre SAV : ".$centre[2]."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
+                                        $req = "SELECT N__Serie 
+FROM  `".MAIN_DB_PREFIX."element_element`, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 v 
+WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."
+AND  `targettype` LIKE  'productCli'";
+                                        $result2 = $this->db->query($req);
+                                        if($this->db->num_rows($result2) > 0){
+                                            $ligne2 = $this->db->fetch_object($result2);
+//                                        $pdf->SetXY(12,64);
+//                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
+                                            $pdf->SetXY(30,20);
+                                            $pdf->SetFont('','', $default_font_size + 5);
+                                            $pdf->SetTextColor(234,119,2);
+                                            $pdf->MultiCell(157, 10, $ligne->ref."\n".$ligne2->N__Serie, 0, 'C', 0);
+                                        }
+                                        
+                                        
+                                        $req = "SELECT * 
+FROM  `".MAIN_DB_PREFIX."synopsis_apple_repair` 
+WHERE  `chronoId` = ".$ligne->id;
+                                        $result2 = $this->db->query($req);
+                                        if($this->db->num_rows($result2) > 0){
+                                            $ligne2 = $this->db->fetch_object($result2);
+//                                        $pdf->SetXY(12,64);
+//                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
+                                            $pdf->SetXY(10,83);
+                                            $pdf->SetFont('','', $default_font_size - 3);
+                                            $pdf->SetTextColor(234,119,2);
+                                            $pdf->MultiCell(150, 10, "Soucieux de la qualité de service apporté à notre clientèle, nous vous invitons à remplir le questionnaire qualité \nque vous êtes susceptible de recevoir à l’adresse mail que vous nous nous avez indiqué.", 0, 'L', 0);
+                                        }
+                                    }
+                                }
+                                }
 
 			// Show sender
 			$posy=42;

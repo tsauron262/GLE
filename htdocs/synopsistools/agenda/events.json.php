@@ -81,11 +81,11 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
 
 
 
-        $tabColor = array(50 => "#BBCCFF", 70 => "#BBCCFF", 5 => "purple", 2 => "red",
+        $tabColor = array(50 => "#BBCCFF", 70 => "#BBCCFF", 2 => "red",
             51 => "red", 54 => "red", 55 => "red", 58 => "red", 66 => "red", 69 => "red",
 //            52 => "blue", 53 => "blue", 56 => "blue", 57 => "blue", 63 => "blue", "blue" => 67, "blue" => 68,
             60 => "orange", 63 => "green",
-            61 => 'purple',
+            61 => '#F5A9F2', 5 => "#F5A9F2",
             64 => "gray", 65 => "gray",
             999 => "black");
         $colorStr = '';

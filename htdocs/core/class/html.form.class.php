@@ -691,6 +691,16 @@ class Form
             print '<option value="1"';
             if (1 == $selected) print ' selected';
             print '>'.$langs->trans("Service");
+            
+            /*mod drsi*/
+            global $tabTypeLigne;
+            foreach ($tabTypeLigne as $id => $type) {
+                print '<option value="' . $id . '"';
+                if ($id == $selected)
+                    print ' selected="selected"';
+                print '>' . $langs->trans($type);
+            }
+            /*fmod drsi*/
 
             print '</select>';
             //if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"),1);

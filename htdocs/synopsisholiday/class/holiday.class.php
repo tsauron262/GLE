@@ -322,11 +322,11 @@ class SynopsisHoliday extends Holiday {
                 $this->type_conges = $obj->type_conges;
                 $this->fk_actioncomm = $obj->fk_actioncomm;
                 $this->fk_substitute = $obj->fk_substitute;
+                if (empty($this->fk_user))
+                    $this->fk_user = $this->fetchGroupUsers($this->id);
             }
             $this->db->free($resql);
 
-            if (empty($this->fk_user))
-                $this->fk_user = $this->fetchGroupUsers($this->id);
             return 1;
         } else {
             $this->error = "Error " . $this->db->lasterror();

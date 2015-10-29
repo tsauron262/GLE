@@ -3399,7 +3399,7 @@ abstract class CommonObject
 	{
 		global $conf, $langs;
 
-                if(is_object($outputlangs))
+                if(!is_object($outputlangs))
                     dol_syslog("Pas de langue pour création pdf ".$modele, LOG_ERR);
 		$srctemplatepath='';
 

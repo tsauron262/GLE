@@ -936,12 +936,17 @@ function select_type_of_lines2($selected = '', $htmlname = 'type', $showempty = 
 }
 
 function convertirDate($date, $enFr = true, $nowSiNull = false, $delimiteur = "-") {
+//    echo "ici".$date;
     $tab0 = explode(" ", $date);
 
     $tabDate = explode('-', $tab0[0]);
     if (!isset($tabDate[1]))
         $tabDate = explode('/', $tab0[0]);
-    if (isset($tabDate[2]) && $tab0[0] != "0000-00-00") {
+    
+    
+    if($tab0[0] == "0000-00-00")
+        return "";
+    elseif (isset($tabDate[2])) {
         if (($tabDate[0] > 32 && $enFr) || ($tabDate[2] > 32 && !$enFr))
             $return = $tabDate[2] . $delimiteur . $tabDate[1] . $delimiteur . $tabDate[0];
         else
@@ -971,7 +976,7 @@ function convertirDate($date, $enFr = true, $nowSiNull = false, $delimiteur = "-
             $return = $date;
     }
 
-
+//echo "la".$return;
     return $return;
 }
 

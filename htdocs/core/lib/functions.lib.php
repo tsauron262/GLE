@@ -984,6 +984,11 @@ function dol_strftime($fmt, $ts=false, $is_gmt=false)
  */
 function dol_print_date($time,$format='',$tzoutput='tzserver',$outputlangs='',$encodetooutput=false)
 {
+    
+        /*mod drsi*/
+        if($time == "0000-00-00 00:00:00" || $time == "0000-00-00")
+            return "";
+        /*fmoddrsi*/
 	global $conf,$langs;
 
 	// Clean parameters

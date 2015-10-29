@@ -29,7 +29,7 @@ if (!defined('EURO'))
 
 ini_set('max_execution_time', 600);
 
-class pdf_synopsischrono_ extends ModeleSynopsischrono {
+class pdf_synopsischrono_destruction extends ModeleSynopsischrono {
 
     public $emetteur;    // Objet societe qui emet
 
@@ -88,6 +88,9 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
 
 
+
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -106,8 +109,8 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
      */
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
-//        $this->marge_gauche = 55;
-        $afficherPrix = false;
+
+        global $tabCentre;
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -126,7 +129,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
             } else {
                 $propref = sanitize_string($chrono->ref);
                 $dir = $conf->synopsischrono->dir_output . "/" . $chrono->id;
-                $file = $dir . "/" . $propref . ".pdf";
+                $file = $dir . "/Destruction-" . $propref . ".pdf";
             }
             $this->chrono = $chrono;
 
@@ -161,11 +164,18 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 //                }
 //
 //
+
+                $chrono->getValuesPlus();
+
+
+
                 $pdf->Open();
                 $pdf1->Open();
                 $pdf->AddPage();
                 $pdf1->AddPage();
-                $pdf1->SetFont('', '', 8);
+                $pdf1->AddFont(pdf_getPDFFont($outputlangs));
+                $pdf->AddFont(pdf_getPDFFont($outputlangs));
+                $pdf1->SetFont(pdf_getPDFFont($outputlangs), '', 8);
 
                 // $pdf->SetDrawColor(128, 128, 128);
 
@@ -182,35 +192,171 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 // 
 //                
 
-                $this->_pagehead($pdf, $chrono, 1, $outputlangs);
 
-                //Titre Page 1
-//                $pdf->MultiCell(155, 6, 'Panier de ' . $chrono->societe->getFullName($outputlangs), 0, 'C');
 
-                $pdf->MultiCell(155, 6, $chrono->model->nomDescription . ' : ' . $chrono->description . "\n\n", 0, 'L');
+                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsischrono/core/modules/synopsischrono/doc/destruction.pdf');
+                $tplidx = $pdf->importPage(1, "/MediaBox");
+                $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
-                if ($chrono->model->hasPropal) {
-                    $pdf->MultiCell(155, 6, 'Propal : ' . $chrono->propal->ref . "\n\n", 0, 'L');
+
+                $chrono2 = new Chrono($this->db);
+                $chrono2->fetch($chrono->valuesPlus[1039]->value);
+                $chrono2->getValuesPlus();
+
+
+//                echo "<pre>";print_r($chrono->valuesPlus);die;
+
+
+                $pdf->SetXY('61', '35.6');
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 14);
+                $pdf->MultiCell(100, 6, $chrono->ref, 0, 'L');
+
+
+
+
+                //centre
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
+                $pdf->SetXY('142', '40');
+                $pdf->MultiCell(100, 6, $chrono->valuesPlus[1060]->valueStr, 0, 'L');
+                $pdf->SetXY('142', '45.5');
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][0], 0, 'L');
+                $pdf->SetXY('142', '51');
+                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][1], 0, 'L');
+//                $tabCentre
+                //client
+                $contact = "";
+                if ($chrono->contactid > 0) {
+                    $addr = $chrono->contact;
+                    $contact = $addr->getFullName($langs, 0, 0);
+                    $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
+                    $mail = $addr->mail;
+                } else {
+                    $addr = $chrono->societe;
+                    $tel = $addr->phone;
+                    $mail = $addr->email;
+                }
+                $address = $chrono->societe->name;
+
+                if ($contact != "" && $contact != $chrono->societe->name)
+                    $address .= "\n" . $contact;
+
+                $address .= "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
+
+                $pdf->SetXY('20', '71');
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
+                $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
+
+
+
+
+                $pdf->SetXY('12', '48');
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
+                $pdf->MultiCell(50, 6, dol_print_date($chrono->date), 0, 'L');
+
+                if ($chrono->fk_user_author > 0) {
+                    $pdf->SetXY('36', '48');
+                    $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
                 }
 
-                if ($chrono->model->hasProjet) {
-                    $pdf->MultiCell(155, 6, 'Projet : ' . $chrono->projet->ref . " - " . $chrono->projet->titre . "\n\n", 0, 'L');
-                }
-
-                $chrono->getValuesPlus();
-                foreach ($chrono->valuesPlus as $id => $tabKey) {
-                    if (intval($pdf->GetY()) > 250) {
-                        $this->_pagefoot($pdf, $chrono, $outputlangs);
-                        $pdf->AddPage();
-                        $this->_pagehead($pdf, $chrono, 0, $outputlangs);
-                    }
-                    $pdf->MultiCell(155, 6, $tabKey->nom . " : " . $tabKey->valueStr . "\n\n", 0, 'L');
-                }
+//                if ($chrono->valuesPlus[1066]->value != "") {
+//                    $pdf->SetXY(12, 45);
+//                    $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $chrono->valuesPlus[1066]->value, 0, 'L');
+//                }
 
 
+//                //le prod
+                $pdf->SetXY('115', '88');
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
+                $pdf->MultiCell(100, 6, $chrono2->description, 0, 'L');
+//
+                $pdf->SetXY('125', '95');
+                $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1011]->value, 0, 'L');
+                
+                
+                
+                $pdf->SetXY('32', '148.3');
+                $pdf->MultiCell(100, 6, $contact, 0, 'L');
+                    
+                    
+//
+//                $pdf->SetXY('137', '79.4');
+//                $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1064]->value, 0, 'L');
+//
+//                $pdf->SetXY('145', '84');
+//                $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1015]->value, 0, 'L');
+//
+//                $pdf->SetXY('131.5', '88.2');
+//                $pdf->MultiCell(100, 6, $chrono->valuesPlus[1040]->valueStr . "    " . $chrono->description, 0, 'L');
+//
+//                $pdf->SetXY('143', '104.5');
+//                $pdf->MultiCell(100, 6, $chrono->valuesPlus[1041]->valueStr, 0, 'L');
+//
+//                $pdf->SetXY(130, 109);
+//                $pdf->MultiCell(80, 6, $chrono2->valuesPlus[1067]->valueStr, 0, '');
+//
+//                //symptom et sauv
+//                $pdf->SetXY('15', '138.5');
+//                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
+//                $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
+//
+//                if ($chrono->valuesPlus[1055]->value == 2)
+//                    $pdf->SetTextColor(256, 0, 0);
+//
+//                $pdf->SetXY('28.5', '160.3');
+//                $pdf->MultiCell(100, 6, $chrono->valuesPlus[1055]->valueStr, 0, 'L');
+//
+//                $cgv = "";
+//                $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+//
+//                if (stripos($chrono2->description, "Iphone") !== false) {
+//                    $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+//                    $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
+//                    $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
+//                } else {
+//                    $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
+//                    $cgv.="-Les frais de prise en charge diagnostic de 45€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+//                }
+////                $pdf->SetX(6);
+////                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
+////                $pdf->SetX(6);
+//                $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 0.75€ par jour.\n\n";
+//
+//                if ($chrono->valuesPlus[1068]->value == 1) {
+//                    $pdf->SetXY('62', '115');
+//                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
+//                    $pdf->SetTextColor(255, 102, 0);
+//                    $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
+//                    $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
+//                }
+//
+//
+//                $pdf->SetTextColor("black");
+////                $pdf->SetXY('6', '245');
+//                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
+//                $pdf->SetXY('7', '197');
+//                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
+
+//                //info pour prise en charge
+//                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
+//                $pdf->SetTextColor(0,0,0);
+//                $pdf->SetXY(25, 257);
+//                $pdf->MultiCell(90, 6, "Login : ".$chrono2->valuesPlus[1063]->valueStr, 0, '');
+//                $pdf->SetXY(25, 262);
+//                $pdf->MultiCell(90, 6, "Mdp : ".$chrono2->valuesPlus[1057]->valueStr, 0, '');
+//                $pdf->SetXY(100, 260);
+//                $pdf->MultiCell(90, 6, "Systéme : ".$chrono2->valuesPlus[1067]->valueStr, 0, '');
+                
+//                $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
+//                for($i=0;$i<1000;$i = $i+5){
+//                $pdf->SetXY($i,$i);
+//                $pdf->MultiCell(155, 6, $i, 0, 'L');
+//                
+//                }
 
 
-                $this->_pagefoot($pdf, $chrono, $outputlangs);
+
+
+
 
 
                 if (method_exists($pdf, 'AliasNbPages'))
@@ -252,7 +398,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         $outputlangs->load("companies");
 
         $pdf->SetTextColor(0, 0, 60);
-        $pdf->SetFont('', 'B', 13);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 13);
 
         $posy = $this->marge_haute;
 
@@ -272,7 +418,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
                 $pdf->Image($logo, 5, 13, 0, 24);
             } else {
                 $pdf->SetTextColor(200, 0, 0);
-                $pdf->SetFont('', 'B', 8);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 8);
                 $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound", $logo), 0, 'L');
                 $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToModuleSetup"), 0, 'L');
                 $pdf->SetTextColor(0, 0, 0);
@@ -282,13 +428,13 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid >0);
+        $usecontact = ($object->model->hasContact && $object->contactid > 0);
         $object->client = $object->societe;
         $default_font_size = 12;
 
 
 
-        $pdf->SetFont('', 'B', $default_font_size);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
 
         $posx = 100;
         $posy = 10;
@@ -299,7 +445,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
 
         $posy+=1;
-        $pdf->SetFont('', '', $default_font_size - 2);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
         $pdf->SetTextColor(0, 0, 60);
 
 
@@ -329,7 +475,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
             // Show sender frame
             $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('', '', $default_font_size - 2);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
             $pdf->SetXY($posx, $posy - 5);
             $pdf->MultiCell(66, 5, $outputlangs->transnoentities("BillFrom") . ":", 0, 'L');
             $pdf->SetXY($posx, $posy);
@@ -339,13 +485,13 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
             // Show sender name
             $pdf->SetXY($posx + 2, $posy + 3);
-            $pdf->SetFont('', 'B', $default_font_size);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
             $pdf->MultiCell(80, 4, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
             $posy = $pdf->getY();
 
             // Show sender information
             $pdf->SetXY($posx + 2, $posy);
-            $pdf->SetFont('', '', $default_font_size - 1);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 1);
             $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
 
@@ -377,18 +523,18 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
             // Show recipient frame
             $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('', '', $default_font_size - 2);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
             $pdf->SetXY($posx + 2, $posy - 5);
             $pdf->MultiCell($widthrecbox, 5, $outputlangs->transnoentities("BillTo") . ":", 0, 'L');
             $pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
 
             // Show recipient name
             $pdf->SetXY($posx + 2, $posy + 3);
-            $pdf->SetFont('', 'B', $default_font_size);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
             $pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
 
             // Show recipient information
-            $pdf->SetFont('', '', $default_font_size - 1);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 1);
             $pdf->SetXY($posx + 2, $posy + 4 + (dol_nboflines_bis($carac_client_name, 50) * 4));
             $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
 
@@ -398,7 +544,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
             $pdf->SetXY($this->marge_gauche, 92);
         }
         else {
-            $pdf->SetFont('', 'B', 10);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 10);
             //Société
             if ($this->marge_gauche > 45) {
                 $pdf->SetXY(3.5, 63);
@@ -413,7 +559,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
 
 
-        $pdf->SetFont('', 'B', 12);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 12);
     }
 
     /*
@@ -424,7 +570,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
     function _pagefoot(&$pdf, $chrono, $outputlangs) {
 
 
-        $pdf->SetFont('', 'B', 9);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 9);
         $pdf->SetTextColor(255, 63, 50);
         $pdf->SetDrawColor(0, 0, 0);
         //Société
@@ -445,7 +591,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         }
 
         $pdf->SetTextColor(0, 0, 0);
-        $pdf->SetFont('', '', 7);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 7);
         $ligne = $mysoc->name;
         if (defined('MAIN_INFO_CAPITAL'))
             $ligne .= " au capital de " . MAIN_INFO_CAPITAL;
@@ -466,7 +612,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         $pdf->MultiCell(200 - $this->marge_gauche, 3, $ligne, 0, "C");
         $pdf->line($this->marge_gauche - 4, $Y + 44, 203, $Y + 44);
 
-        $pdf->SetFont('', 'B', 8);
+        $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 8);
         $pdf->SetTextColor(255, 63, 50);
         $pdf->SetXY(192, $Y + 55);
         $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);

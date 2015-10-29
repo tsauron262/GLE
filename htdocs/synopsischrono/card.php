@@ -686,14 +686,14 @@ if ($chr->id > 0) {
 
 //Ajoute les extra key/Values
         $chr->getValuesPlus();
-        print '<td colspan="2" rowspan="100" class="zonePlus">';
+        print '<tr><td><td><td colspan="2" rowspan="100" class="zonePlus">';
         foreach ($chr->valuesPlus as $res) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $res->nom;
             print '    <td  class="ui-widget-content ' . $res->extraCss . '" colspan="1">';
             print str_replace("\n", "<br/>", $res->valueHtml);
             print '</td>';
         }
-
+print "</tr>";
 
         print '</table></div><div class="divButAction">';
         print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';

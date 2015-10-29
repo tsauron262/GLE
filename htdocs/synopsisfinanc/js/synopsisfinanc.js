@@ -10,7 +10,7 @@ $(document).ready(function () {
         var send = $("#socid").val();
         if (send > 0) {
             $.ajax({
-                url: "' . DOL_URL_ROOT . '/synopsischrono/ajax/contactSoc-xml_response.php",
+                url:  DOL_URL_ROOT + "/synopsischrono/ajax/contactSoc-xml_response.php",
                 method: "POST",
                 data: {"socid": send},
                 dataType: "HTML",

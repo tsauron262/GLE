@@ -23,7 +23,7 @@
     $xml ="";
     $socid = $_REQUEST['socid'];
     ob_start();
-    $html->select_contacts($socid,'','contactid',1,'',false);
+    $html->select_contacts($socid,'','contactid',1,'',false, null, "", 0, 1);
     $formContact = ob_get_clean();
 //    $formContact = $html->tmpReturn;
     $xml .= "<contactsList><![CDATA[ $formContact ]]></contactsList>";

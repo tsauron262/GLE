@@ -251,7 +251,7 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     }
 
     require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
-    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $outputlangs, $hidedetails, $hidedesc, $hideref); //génération auto
+    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $langs, $hidedetails, $hidedesc, $hideref); //génération auto
 }
 //    $valfinance->calcul();
 $message = array();

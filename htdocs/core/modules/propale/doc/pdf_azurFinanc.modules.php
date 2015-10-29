@@ -196,7 +196,7 @@ class pdf_azurFinanc extends ModelePDFPropales
 			{
 				$objectref = dol_sanitizeFileName($object->ref);
 				$dir = $conf->propal->dir_output . "/" . $objectref;
-				$file = $dir . "/" . $objectref . ".pdf";
+				$file = $dir . "/" . $objectref . "-fin.pdf";
 			}
 
 			if (! file_exists($dir))
@@ -478,7 +478,7 @@ class pdf_azurFinanc extends ModelePDFPropales
 					if ((! isset($localtax1_type) || $localtax1_type=='' || ! isset($localtax2_type) || $localtax2_type=='') // if tax type not defined
 					&& (! empty($localtax1_rate) || ! empty($localtax2_rate))) // and there is local tax
 					{
-						$localtaxtmp_array=getLocalTaxesFromRate($vatrate,0,$mysoc);
+						$localtaxtmp_array=getLocalTaxesFromRate($vatrate,0,$object->thirdparty,$mysoc);
 						$localtax1_type = $localtaxtmp_array[0];
 						$localtax2_type = $localtaxtmp_array[2];
 					}
@@ -701,14 +701,14 @@ class pdf_azurFinanc extends ModelePDFPropales
                         $valfinance->fetch(null, $object->id);
                         if($valfinance->id>0){
                             $valfinance->calcul();
-                            $lib_condition_paiement="Proposition de financement: ".price($valfinance->loyer1+0.005) . " € HT   X   " . $valfinance->nb_periode ." ". $valfinance::$tabM[$valfinance->periode];
+                            $lib_condition_paiement="PROPOSITION DE FINANCEMENT: \nSolution de location sur " . $valfinance->nb_periode ." ". $valfinance::$tabM[$valfinance->periode] .": à partir de ".price($valfinance->loyer1+0.005) . " € HT \ mois";
                             if($valfinance->duree_degr>0 && $valfinance->pourcent_degr>0){
                                 $lib_condition_paiement.=" puis ".price($valfinance->loyer2+0.005)." € HT   X   ".$valfinance->nb_periode2." ". $valfinance::$tabM[$valfinance->periode];
                             }
                             if($valfinance->VR>0){
                                 $lib_condition_paiement.=" avec un VR de: ".price($valfinance->VR)." €";
                             }
-                            $lib_condition_paiement.="\n\nSous réserve d'acceptation bla bla bla...";
+                            $lib_condition_paiement.="\n\nConditions sous réserves de l'acceptation de votre dossier par nos partenaire financiers";
                         }else{
                             $lib_condition_paiement="Vous n'avez pas configurer le financement.";
                         }

@@ -240,6 +240,10 @@ if ($action == 'update') {
 
     $cp = new SynopsisHoliday($db);
     $cp->fetch($_POST['holiday_id']);
+    if (!$cp->id > 0) {
+        header('Location: ' . DOL_URL_ROOT . '/compta/hrm.php');
+        die;
+    }
     $isDrh = ($user->id === $cp->getConfCP('drhUserId'));
     $canedit = false;
     if ($isDrh || $droitAll) {
@@ -1600,6 +1604,10 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         if ($id > 0) {
             $cp->fetch($id);
 
+            if (!$cp->id > 0) {
+                header('Location: ' . DOL_URL_ROOT . '/compta/hrm.php');
+                die;
+            }
             $drhUserId = $cp->getConfCP('drhUserId');
             $canedit = false;
             if ($isDrh || $droitAll)

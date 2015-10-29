@@ -241,7 +241,8 @@ if ($action == 'update') {
     $cp = new SynopsisHoliday($db);
     $cp->fetch($_POST['holiday_id']);
     if (!$cp->id > 0) {
-        header('Location: ' . DOL_URL_ROOT . '/compta/hrm.php');
+        echo "Elément inexistant.";
+        llxFooter();
         die;
     }
     $isDrh = ($user->id === $cp->getConfCP('drhUserId'));
@@ -1605,7 +1606,8 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             $cp->fetch($id);
 
             if (!$cp->id > 0) {
-                header('Location: ' . DOL_URL_ROOT . '/compta/hrm.php');
+                echo "Elément inexistant.";
+                llxFooter();
                 die;
             }
             $drhUserId = $cp->getConfCP('drhUserId');

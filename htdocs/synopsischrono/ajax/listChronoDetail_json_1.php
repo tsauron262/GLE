@@ -296,7 +296,7 @@ $requete .= " ORDER BY " . $sidx . " " . $sord . "";
 //echo($requete);die;
 $result = $db->query($requete);
 if (!$result) {
-
+    $_REQUEST['idModel'] = $id;
     require(DOL_DOCUMENT_ROOT . "/synopsischrono/ajax/testCreateView.php");
     $result = $db->query($requete);
     if (!$result)

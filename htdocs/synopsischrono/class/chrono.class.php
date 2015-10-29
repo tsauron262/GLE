@@ -837,6 +837,7 @@ class Chrono extends CommonObject {
     }
 
     public function getValuesPlus() {
+        $this->valuesPlus = array();
         $requete = "SELECT k.nom,
                            k.id,
                            k.extraCss,

@@ -1,20 +1,23 @@
 <?php
 
 global $conf, $db;
-if (!isset($_REQUEST['createTableSur']))
-    die("Attention");
+if (!isset($_REQUEST['createTableSur']) && !isset($_REQUEST['idModel']))
+    die("Attention creation de vue global");
 
 
-if (isset($_REQUEST['appli']) && $_REQUEST['appli'] == "Oui") {
+if (isset($_REQUEST['idModel']) || (isset($_REQUEST['appli']) && $_REQUEST['appli'] == "Oui")) {
     if (!isset($conf))
         require_once('../../main.inc.php');
     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
     require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
     require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 
+    $req = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_conf";
+    
+    if(isset($_REQUEST['idModel']) && $_REQUEST['idModel'] > 0)
+        $req .= " WHERE id = ".$_REQUEST['idModel'];
 
-
-    $resultModel = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_conf");
+    $resultModel = $db->query($req);
     while ($ligneModel = $db->fetch_object($resultModel)) {
         $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE model_refid =  " . $ligneModel->id;
         $arrPre = array();
@@ -69,6 +72,7 @@ if (isset($_REQUEST['appli']) && $_REQUEST['appli'] == "Oui") {
 
 
         $view = "" . MAIN_DB_PREFIX . "synopsischrono_chrono_" . traiteCarac($ligneModel->id, "") . "";
+        dol_syslog("Creation de la vue : ".$view, LOG_ERR);
         if ($view == "" . MAIN_DB_PREFIX . "synopsischrono_view_105")
             $nbVue = 2;
         for ($cont = 1; $cont <= $nbVue; $cont++) {

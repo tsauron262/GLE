@@ -108,21 +108,23 @@ class InterfaceAgenda {
                     require_once (DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
                     $di = new Synopsisdemandeinterv($this->db);
                     $di->fetch($object->fk_element);
-                    $di->set_date_delivery($user, $object->datep, true);
-//                    $di->getExtra();
-                    if (!isset($object->userownerid) || !$object->userownerid > 0) {
-                        $object->fetch_userassigned();
-                        foreach ($object->userassigned as $userT) {
-                            @$object->userownerid = $userT['id'];
+                    if($di->id > 0){
+                        $di->set_date_delivery($user, $object->datep, true);
+    //                    $di->getExtra();
+                        if (!isset($object->userownerid) || !$object->userownerid > 0) {
+                            $object->fetch_userassigned();
+                            foreach ($object->userassigned as $userT) {
+                                @$object->userownerid = $userT['id'];
+                            }
                         }
+
+                        $userTodo = new User($this->db);
+                        $userTodo->fetch($object->userownerid);
+
+                        if ($di->fk_user_prisencharge != $object->userownerid)
+                            $di->preparePrisencharge($userTodo);
+                        $di->update();
                     }
-
-                    $userTodo = new User($this->db);
-                    $userTodo->fetch($object->userownerid);
-
-                    if ($di->fk_user_prisencharge != $object->userownerid)
-                        $di->preparePrisencharge($userTodo);
-                    $di->update();
                     return false;
                 }
             }

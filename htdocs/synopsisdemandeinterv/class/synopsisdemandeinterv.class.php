@@ -237,7 +237,7 @@ class Synopsisdemandeinterv extends CommonObject {
      *        \return        int            <0 si ko, >0 si ok
      */
     function fetch($rowid) {
-        $sql = "SELECT ref, description, fk_soc, fk_statut,fk_user_prisencharge, fk_user_author, fk_contrat, fk_commande, total_ht, total_tva, total_ttc, ";
+        $sql = "SELECT rowid, ref, description, fk_soc, fk_statut,fk_user_prisencharge, fk_user_author, fk_contrat, fk_commande, total_ht, total_tva, total_ttc, ";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf";
         $sql.= " FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " WHERE rowid=" . $rowid;
@@ -248,7 +248,7 @@ class Synopsisdemandeinterv extends CommonObject {
             if ($this->db->num_rows($resql) > 0) {
                 $obj = $this->db->fetch_object($resql);
 
-                $this->id = $rowid;
+                $this->id = $obj->rowid;
                 $this->ref = $obj->ref;
                 $this->description = $obj->description;
                 $this->socid = $obj->fk_soc;

@@ -31,6 +31,9 @@
     <def name="abused" type="YesNo">
         <label>Pièce endommagée non-retournable (abus)</label>
     </def>
+    <def name="consignmentFlag" type="YesNo">
+        <label>Retour pièce</label>
+    </def>
     <def name="returnableDamage" type="YesNo">
         <label>Pièce endommagée (retournable)</label>
     </def>

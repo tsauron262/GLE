@@ -78,6 +78,7 @@
                     <data name="abused" required="0" default="N"></data>
                     <data name="returnableDamage" required="0" default="N"></data>
                     <data name="coveredByACPlus" required="0" default="N"></data>
+                    <data name="consignmentFlag" required="0" default="N"></data>
                 </datas>
             </data>
             <data name="componentCheckDetails" required="0" multiple="1">

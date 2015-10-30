@@ -44,6 +44,7 @@ $sord = $_REQUEST['sord']; // get the direction
 
 $taskId = $_REQUEST['taskId'];
 
+$responce = new stdClass();
 
 if (!$sidx)
     $sidx = 1; // connect to the database

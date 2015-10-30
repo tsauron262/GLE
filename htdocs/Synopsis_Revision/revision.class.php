@@ -81,7 +81,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
     }
 
     function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false) {
-        global $conf, $db;
+        global $langs, $db;
         $propal = $this->propal;
         $socid = $propal->socid;
         $parameters = array('socid' => $socid);
@@ -141,7 +141,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
             if ($db->num_rows($result) > 0) {
                 $ligne = $db->fetch_object($result);
                 $object->fetch($newId);
-                propale_pdf_create($db, $object, null, $outputlangs);
+                propale_pdf_create($db, $object, null, $langs);
                 $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $ligne->id . "/";
                 if(!is_dir($repDest))
                     mkdir($repDest); //die(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf". $repDest . $propal->ref . ".pdf");

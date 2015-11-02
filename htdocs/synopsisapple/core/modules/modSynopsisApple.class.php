@@ -126,7 +126,7 @@ $this->menus = array();			// List of menus to add
 					'leftmenu'=>'apple',
 					'url'=>'/synopsisapple/test.php',
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-					'position'=>201,
+					'position'=>202,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
@@ -139,7 +139,20 @@ $this->menus = array();			// List of menus to add
 					'leftmenu'=>'apple',
 					'url'=>'/synopsisapple/exportSav.php',
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-					'position'=>201,
+					'position'=>203,
+					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'target'=>'',
+					'user'=>0);			// 0=Menu for internal users,1=external users, 2=both
+		$r++;
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=apple',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
+					'type'=>'left',			// This is a Left menu entry
+					'titre'=>'Suvie SAV',
+					'mainmenu'=>'apple',
+					'leftmenu'=>'apple',
+					'url'=>'/synopsisapple/statChronoSuivie.php',
+					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+					'position'=>204,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',

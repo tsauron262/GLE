@@ -33,6 +33,14 @@ function getSNChrono($idChrono, $source) {
             $returnStr .= $result->N__Serie."\n";
             $returnStr .= "Login : ".$result->Login_Admin."\n";
             $returnStr .= "Mdp : ".$result->Mdp_Admin."\n";
+        }  
+    }
+    
+    $req = "SELECT `repairConfirmNumber` FROM `".MAIN_DB_PREFIX."synopsis_apple_repair` WHERE `chronoId` = ".$idChrono;
+    $sql = $db->query($req);
+    if($db->num_rows($sql) > 0){
+        while ($result = $db->fetch_object($sql)){
+            $returnStr .= "Commande Apple : ".$result->repairConfirmNumber."\n";
         }
     }
 

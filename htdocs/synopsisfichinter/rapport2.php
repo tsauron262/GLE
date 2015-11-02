@@ -607,7 +607,7 @@ function afficheParType($tabIdFi, $secondFois = false) {
     $tabResult[-1001][2] += ($result->sum * 50);
 
 
-    $reqTropLong = $db->query("SELECT *, TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as duree FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 7200 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) ".$reqF);
+    $reqTropLong = $db->query("SELECT *, TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as duree FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 9000 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) ".$reqF);
     $probAppel = "";
     if ($db->num_rows($reqTropLong) > 0)
         $probAppel = "Attention ".$db->num_rows($reqTropLong)." appels pouvant posé problème dont les 30 premières sont listées ci dessous.<br/><br/>";

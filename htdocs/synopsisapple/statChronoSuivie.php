@@ -14,6 +14,9 @@ $sql = $db->query("SELECT c.id, c.ref FROM `" . MAIN_DB_PREFIX . "synopsischrono
 
 require_once (DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 $chr = new Chrono($db);
+
+echo $db->num_rows($sql)." SAV a suivre : <br/><br/>";
+
 while ($result = $db->fetch_object($sql)) {
     if (!$chr->id > 0) {
         $chr->fetch($result->id);

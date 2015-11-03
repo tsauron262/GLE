@@ -41,8 +41,7 @@
         \brief      Page d'accueil du module projet
         \version    $Revision: 1.41 $
 */
-
-require("./pre.inc.php");
+header("Location:./liste.php");die;
 require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
 $langs->load("synopsisproject@synopsisprojet");
 

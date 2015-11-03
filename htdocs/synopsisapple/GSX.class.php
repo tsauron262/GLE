@@ -400,14 +400,14 @@ class GSX {
     protected function assign_wsdl() {
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
-        $opt = ($this->isIphone)? "IPhone" : "Asp";
-        
-         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']).$opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']).$opt . '.wsdl';
-        
-        
+        $opt = ($this->isIphone) ? "IPhone" : "Asp";
+
+        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
+
+
         $type = "Asp";
 //        $type = "IPhone";
-        
+
         if ($this->gsxDetails['gsxWsdl'] != '') {
             return $this->wsdlUrl = $this->gsxDetails['gsxWsdl'];
         } elseif ($api_mode == 'it') {
@@ -415,8 +415,7 @@ class GSX {
         } elseif ($api_mode == 'ut') {
             if ($this->isIphone) {
                 return $this->wsdlUrl = 'https://gsxws2.apple.com/wsdl/emeaIPhone/gsx-emeaIPhone.wsdl';
-            }
-            else
+            } else
                 return $this->wsdlUrl = 'https://gsxapiut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         } else {
             if ($this->isIphone)
@@ -448,25 +447,24 @@ class GSX {
         }
 
 // Set the timeout to 10 seconds.
-        if($this->apiMode == 'ut'){
+        if ($this->apiMode == 'ut') {
             $connectionOptions = array(
                 'connection_timeout' => '5'
-                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
-                ,'passphrase' => 'freepartyUt'
-                ,'trace'      => TRUE
-                ,'exceptions' => TRUE
-    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
+                , 'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
+                , 'passphrase' => 'freepartyUt'
+                , 'trace' => TRUE
+                , 'exceptions' => TRUE
+                    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
             );
-        }
-        else{
-            
+        } else {
+
             $connectionOptions = array(
                 'connection_timeout' => '5'
-                ,'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdFinal.pem'
-                ,'passphrase' => 'freepartyProd'
-                ,'trace'      => TRUE
-                ,'exceptions' => TRUE
-    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
+                , 'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdFinal.pem'
+                , 'passphrase' => 'freepartyProd'
+                , 'trace' => TRUE
+                , 'exceptions' => TRUE
+                    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
             );
         }
 
@@ -760,10 +758,10 @@ class GSX {
 //        $response = $this->request($requestData, $clientLookup);
 //        return $this->outputFormat($response['CreateSRFOrderResponse']);
 //    }
-    
-    
-    public function obtainSymtomes($serials = null, $sympCode = null){
-        
+
+
+    public function obtainSymtomes($serials = null, $sympCode = null) {
+
         if (!$this->userSessionId) {
             $this->authenticate();
         }
@@ -774,22 +772,21 @@ class GSX {
                 'userSession' => array(
                     'userSessionId' => $this->userSessionId),
                 'requestData' => array(
-                    
                 ),
             ),
         );
-        if(!is_null($sympCode))
+        if (!is_null($sympCode))
             $compTIARequest['ReportedSymptomIssueRequest']['requestData']['reportedSymptomCode'] = $sympCode;
 
-        elseif(!is_null($serials))
+        elseif (!is_null($serials))
             $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
-        
+
         try {
             $compTIAAnswer = $this->soapClient->ReportedSymptomIssue($compTIARequest);
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }
-        
+
         $compTIAAnswer = $this->_objToArr($compTIAAnswer);
         return $compTIAAnswer;
     }
@@ -870,38 +867,37 @@ class GSX {
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {
-            if(stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false){
+            if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
-                echo '<formSus>OK</formSus>'.$f->faultstring.'<fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
+                echo '<formSus>OK</formSus>' . $f->faultstring . '<fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
                     <div class="inputsList">
 <div class="subInputsList">
 <div class="dataBlock">';
-                foreach($tabTmp as $i => $nom){   
+                foreach ($tabTmp as $i => $nom) {
                     $i++;
-                   echo '
-                   <label class="dataTitle" for="component_'.$i.'">Composant</label><br><input type="text" id="component_'.$i.'" name="component_'.$i.'" value="'.$nom.'" maxlength="20" onchange="checkInput($(this), \'text\')">
+                    echo '
+                   <label class="dataTitle" for="component_' . $i . '">Composant</label><br><input type="text" id="component_' . $i . '" name="component_' . $i . '" value="' . $nom . '" maxlength="20" onchange="checkInput($(this), \'text\')">
                    <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">
-                   <label class="dataTitle" for="componentSerialNumber_'.$i.'">Numéro de série du composant</label><br>
-                   <input type="text" id="componentSerialNumber_'.$i.'" name="componentSerialNumber_'.$i.'" maxlength="20" onchange="checkInput($(this), \'text\')">
+                   <label class="dataTitle" for="componentSerialNumber_' . $i . '">Numéro de série du composant</label><br>
+                   <input type="text" id="componentSerialNumber_' . $i . '" name="componentSerialNumber_' . $i . '" maxlength="20" onchange="checkInput($(this), \'text\')">
                    <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
                 }
-                echo "<input type='hidden' name='componentCheckDetails_nextIdx' value='".($i+1)."'/>";
+                echo "<input type='hidden' name='componentCheckDetails_nextIdx' value='" . ($i + 1) . "'/>";
                 echo '</div></div></div></fieldset>';
                 die;
                 return array();
             }
-            if(stripos($f->faultstring, "La réparation est hors garantie") !== false){
+            if (stripos($f->faultstring, "La réparation est hors garantie") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
                 echo '<horsgarantie>OK</horsgarantie>';
                 die;
                 return array();
-            }
-            else{
-            $this->soap_error($f->faultcode, $f->faultstring." <pre> ".print_r($SOAPRequest, true));
+            } else {
+                $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . print_r($SOAPRequest, true));
 //            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
-            return array();
+                return array();
             }
         }
 
@@ -1081,9 +1077,14 @@ class GSX {
         $string = (utf8_decode($string));
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
-        dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR,0,"_apple");
+
+        $codeIgnore = array("RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010");
+
+        if (!in_array($code, $codeIgnore)) {
+            dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR, 0, "_apple");
 //        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
-        $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
+            $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
+        }
     }
 
     public function resetSoapErrors() {

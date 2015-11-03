@@ -166,7 +166,8 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
             $propal->fetch($chrono->propal->id);
-            propale_pdf_create($db, $propal, "azurSAV", $langs);
+            $propal->generateDocument("azurSAV", $langs);
+//            propale_pdf_create($db, $propal, "azurSAV", $langs);
 
 
 
@@ -282,11 +283,13 @@ if (isset($_REQUEST['actionEtat'])) {
             $chrono->propal->valid($user);
             $chrono->propal->cloture($user, 2, "Auto via SAV sous garentie");
             $chrono->propal->fetch($chrono->propal->id);
-            propale_pdf_create($db, $chrono->propal, "azurSAV", $langs);
+            $chrono->propal->generateDocument("azurSAV", $langs);
+//            propale_pdf_create($db, $chrono->propal, "azurSAV", $langs);
         } else {
             $chrono->propal->fetch($chrono->propal->id);
             $chrono->propal->valid($user);
-            propale_pdf_create($db, $chrono->propal, "azurSAV", $langs);
+            $chrono->propal->generateDocument("azurSAV", $langs);
+//            propale_pdf_create($db, $chrono->propal, "azurSAV", $langs);
             if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
                 envoieMail("Devis", $chrono, $propal, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
             $chrono->setDatas($chrono->id, array($idEtat => 2));

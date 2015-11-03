@@ -54,7 +54,8 @@ if ($action == 'addLnProp' && $chr->propalid && isset($_REQUEST['idprod']) && $_
     $chr->propal->addline($prod->description, $prod->price, 1, $prod->tva_tx, 0, 0, $prod->id, $chr->societe->remise_percent, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
     $chr->propal->fetch($chr->propal->id);
     require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-    propale_pdf_create($db, $chr->propal, null, $langs);
+    $chr->propal->generateDocument("azurSAV", $langs);
+//    propale_pdf_create($db, $chr->propal, null, $langs);
 }
 
 if ($action == 'setprojet') {

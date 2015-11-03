@@ -107,8 +107,8 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == "modtask")
         $requete = "UPDATE ".MAIN_DB_PREFIX."projet_task
                        SET fk_task_parent = $parentId,
                            label = '$name',
-                           duration = $dur,
-                           statut = '$statut',
+                           "//duration = $dur,
+                           ."statut = '$statut',
                            
                            note = '$note',
                            progress = $progress,

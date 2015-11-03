@@ -29,7 +29,7 @@
 <!-- BEGIN PHP TEMPLATE objectline_edit.tpl.php -->
 <form action="<?php echo $_SERVER["PHP_SELF"].'?id='.$this->id.'#'.$line->id; ?>" method="POST">
 <input type="hidden" name="token" value="<?php  echo $_SESSION['newtoken']; ?>">
-<input type="hidden" name="action" value="updateligne">
+<input type="hidden" name="action" value="updateline">
 <input type="hidden" name="usenewupdatelineform" value="1" />
 <input type="hidden" name="id" value="<?php echo $this->id; ?>">
 <input type="hidden" name="lineid" value="<?php echo $line->id; ?>">
@@ -144,9 +144,9 @@
 	<td colspan="11"><?php echo $langs->trans('ServiceLimitedDuration').' '.$langs->trans('From').' '; ?>
 	<?php
 	$hourmin=(isset($conf->global->MAIN_USE_HOURMIN_IN_DATE_RANGE)?$conf->global->MAIN_USE_HOURMIN_IN_DATE_RANGE:'');
-	echo $form->select_date($line->date_start,'date_start',$hourmin,$hourmin,$line->date_start?0:1,"updateligne");
+	echo $form->select_date($line->date_start,'date_start',$hourmin,$hourmin,$line->date_start?0:1,"updateline");
 	echo ' '.$langs->trans('to').' ';
-	echo $form->select_date($line->date_end,'date_end',$hourmin,$hourmin,$line->date_end?0:1,"updateligne");
+	echo $form->select_date($line->date_end,'date_end',$hourmin,$hourmin,$line->date_end?0:1,"updateline");
 	?>
 	</td>
 </tr>

@@ -24,7 +24,7 @@ function widget_treeCategoriesProduits() {
         $title=$langs->trans("ProductsCategoriesArea");
         $c = new Categorie($db);
         $html = new Form($db);
-        $type=0;
+        $type='customer';
 
         $cate_arbo = $c->get_full_arbo($type);
         $table = "<p>";

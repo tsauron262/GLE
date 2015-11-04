@@ -24,7 +24,7 @@ function widget_treeCategoriesSocietes() {
         $title=$langs->trans("ProductsCategoriesArea");
         $c = new Categorie($db);
         $html = new Form($db);
-        $type=2;
+        $type='contact';
 
         $cate_arbo = $c->get_full_arbo($type);
         $table = "<p>";

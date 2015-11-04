@@ -24,7 +24,7 @@ function widget_treeCategoriesFourn() {
         $title=$langs->trans("ProductsCategoriesArea");
         $c = new Categorie($db);
         $html = new Form($db);
-        $type=1;
+        $type="supplier";
 
         $cate_arbo = $c->get_full_arbo($type);
         $table = "<p>";

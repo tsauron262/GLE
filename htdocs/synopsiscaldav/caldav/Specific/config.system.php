@@ -62,7 +62,7 @@ define("NOLOGIN",1);		// This means this output page does not require to be logg
 
 global $db, $conf, $synopsisHook, $langs, $hookmanager, $mysoc;
 
-require(PROJECT_PATH_SPECIFIC."../../main.inc.php");
+require(PROJECT_PATH_SPECIFIC."../../../main.inc.php");
 
 
 # MySQL > Use MySQL instead of SQLite ?

@@ -31,12 +31,14 @@ ini_set("log_errors", 1);
 define("BAIKAL_CONTEXT", TRUE);
 define("PROJECT_CONTEXT_BASEURI", "/");
 
-if(file_exists(getcwd() . "/Core")) {
+$prePath = "/caldav";
+
+if(file_exists(getcwd() .$prePath. "/Core")) {
 	# Flat FTP mode
-	define("PROJECT_PATH_ROOT", getcwd() . "/");	#./
+	define("PROJECT_PATH_ROOT", getcwd() .$prePath. "/");	#./
 } else {
 	# Dedicated server mode
-	define("PROJECT_PATH_ROOT", dirname(getcwd()) . "/");	#../
+	define("PROJECT_PATH_ROOT", dirname(getcwd()) .$prePath. "/");	#../
 }
 
 if(!file_exists(PROJECT_PATH_ROOT . 'vendor/')) {

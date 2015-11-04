@@ -141,7 +141,8 @@ class SynopsisRevisionPropal extends SynopsisRevision {
             if ($db->num_rows($result) > 0) {
                 $ligne = $db->fetch_object($result);
                 $object->fetch($newId);
-                propale_pdf_create($db, $object, null, $langs);
+//                propale_pdf_create($db, $object, null, $langs);
+                $object->generateDocument("azurSAV", $langs);
                 $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $ligne->id . "/";
                 if(!is_dir($repDest))
                     mkdir($repDest); //die(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf". $repDest . $propal->ref . ".pdf");

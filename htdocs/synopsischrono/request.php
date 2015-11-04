@@ -345,7 +345,9 @@ AND  `fk_c_type_contact` =40");
 
         //Generation
         $facture->fetch($facture->id);
-        facture_pdf_create($db, $facture, "crabeSav", $langs);
+        $facture->generateDocument("crabeSav", $langs);
+//        facture_pdf_create($db, $facture, "crabeSav", $langs);
+        
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
         link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
 

@@ -1078,7 +1078,7 @@ class GSX {
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
 
-        $codeIgnore = array("RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010");
+        $codeIgnore = array("RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010", "RPR.LKP.01", "RPR.RTN.005");
 
         if (!in_array($code, $codeIgnore)) {
             dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR, 0, "_apple");

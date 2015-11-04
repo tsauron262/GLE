@@ -64,7 +64,8 @@ class partsCart {
 
         $propal->fetch($propal->id);
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-        propale_pdf_create($db, $propal, null, $langs);
+        $propal->generateDocument("azurSAV", $langs);
+//        propale_pdf_create($db, $propal, null, $langs);
     }
 
     private function convertPrix($prix, $ref, $desc) {

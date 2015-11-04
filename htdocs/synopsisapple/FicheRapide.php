@@ -185,7 +185,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $factureA->set_paid($user);
 
                         include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
-                        facture_pdf_create($db, $factureA, "crabeSav", $langs);
+                        $factureA->generateDocument("crabeSav", $langs);
+//                        facture_pdf_create($db, $factureA, "crabeSav", $langs);
 
                         require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
                         $discount = new DiscountAbsolute($db);
@@ -213,7 +214,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     $propal->fetch($propal->id);
 
                     require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-                    propale_pdf_create($db, $propal, "azurSAV", $langs);
+                    $propal->generateDocument("azurSAV", $langs);
+//                    propale_pdf_create($db, $propal, "azurSAV", $langs);
 
                     require_once DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php";
 

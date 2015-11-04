@@ -1737,7 +1737,7 @@ function dol_substr($string,$start,$length,$stringencoding='')
  */
 function dol_print_graph($htmlid,$width,$height,$data,$showlegend=0,$type='pie',$showpercent=0,$url='',$combineother=0.05)
 {
-	dol_syslog(__FUNCTION__ . " is deprecated", LOG_WARNING);
+//	dol_syslog(__FUNCTION__ . " is deprecated", LOG_WARNING);
 
 	global $conf,$langs;
 	global $theme_datacolor;    // To have var kept when function is called several times

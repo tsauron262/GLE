@@ -681,7 +681,8 @@ class ActionComm extends CommonObject
         
         if(!isset($user->rights->agenda->myactions->create))
             $user->getrights();
-        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->userownerid)) return 0; /*fmod drsi*/
+//        echo "<pre>"; print_r($user->rights->agenda);
+        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || ((!isset($user->rights->agenda->allactions->create) || !$user->rights->agenda->allactions->create) && $user->id != $this->userownerid)) return 0; /*fmod drsi*/
         if(in_array($this->type_id, array(64,65)) && !$user->admin)
             return 0;
         

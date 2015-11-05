@@ -286,7 +286,9 @@ if (!$withRev) {
 }
 
 
-$requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $id . " tview, " . MAIN_DB_PREFIX . "synopsischrono chr LEFT JOIN " . MAIN_DB_PREFIX . "societe soc ON soc.rowid = fk_soc WHERE tview.id = chr.id " . $wh;
+$requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $id . " tview, " . MAIN_DB_PREFIX . "synopsischrono chr "
+        . "LEFT JOIN " . MAIN_DB_PREFIX . "societe soc ON soc.rowid = fk_soc "
+        . "WHERE model_refid = '" . $id . "' AND tview.id = chr.id " . $wh;
 
 $requete .= $wh1;
 if($sidx == "id")

@@ -1245,7 +1245,7 @@ class Categorie extends CommonObject
 		// For backward compatibility
 		if (is_numeric($type))
 		{
-			dol_syslog(__METHOD__ . ': using numeric value for parameter type is deprecated. Use string code instead.', LOG_WARNING);
+//			dol_syslog(__METHOD__ . ': using numeric value for parameter type is deprecated. Use string code instead.', LOG_WARNING);
 			// We want to reverse lookup
 			$map_type = array_flip($this->MAP_ID);
 			$type = $map_type[$type];

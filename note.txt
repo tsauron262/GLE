@@ -1498,3 +1498,10 @@ CREATE VIEW `llx_Synopsis_projet` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_pr
 
 - maj
 - agenda arrivé direct sur equipe    UPDATE `llx_menu` SET `url` = '/synopsistools/agenda/vue.php' WHERE `module` LIKE 'agenda' AND type = 'top' AND url = '/comm/action/index.php'
+
+
+
+ls -R -1 | awk '
+/:$/&&f{s=$0;f=0}
+/:$/&&!f{sub(/:$/,"");s=$0;f=1;next}
+NF&&f{ print s"/"$0 }' > /home/megajean/Bureau/list.txt

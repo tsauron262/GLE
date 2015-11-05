@@ -41,6 +41,10 @@ $prefixe = (isset($_REQUEST['prefixe']) ? $_REQUEST['prefixe'] : "");
 
 $filename = str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $prefixe . ".log", SYSLOG_FILE));
 
+$fileLongQuery = "/var/log/mysql/mysql-slow.log";
+if($prefixe == "_mysqllong")
+        $filename = $fileLongQuery;
+
 if (isset($textSave))
     file_put_contents($filename, $textSave);
 
@@ -51,6 +55,9 @@ if (is_file($filename)){
     else
         $text = file_get_contents($filename);
 }
+else {
+    $text = "Fichier : ".$filename." introuvable";
+}
 
 if ($inverser) {
     $textT = explode("\n", $text);
@@ -59,6 +66,9 @@ if ($inverser) {
 }
 
 $tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_time" => "Pages lentes", "_sauv" => "Sauv");
+
+if(is_file($fileLongQuery))
+    $tabPrefixe["_mysqllong"] = "Longue query";
 
 foreach ($tabPrefixe as $prefV => $pref) {
     echo "<a style='margin:2px 8px;' href='?prefixe=" . $prefV . "'>" . $pref . "</a>";

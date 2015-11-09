@@ -127,7 +127,7 @@ if (isset($_REQUEST['idModel']) || (isset($_REQUEST['appli']) && $_REQUEST['appl
             }
             $requeteView = "Create table If not exists " . $view . " (" . implode(",", $tabChamp) . ");";
             $requeteView2 = "INSERT INTO " . $view . " (SELECT chrono.id " . $createView2 . " FROM " . MAIN_DB_PREFIX . "synopsischrono chrono" . $createView3 . " WHERE model_refid = " . $ligneModel->id . " GROUP BY chrono.id);";
-            $db->query($requeteView0);
+//            $db->query($requeteView0);
             $db->query($requeteView);
             $db->query($requeteView2);
             echo $requeteView0 . $requeteView . $requeteView2;

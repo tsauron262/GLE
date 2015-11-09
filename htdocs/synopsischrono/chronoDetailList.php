@@ -184,7 +184,7 @@ function tabChronoDetail($id, $nomDiv, $optionSearch = "") {
         $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jstree/jquery.cookie.js" type="text/javascript"></script>';
         $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
         $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
-        $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
+//        $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
     }
 
     $js .= "<script>";

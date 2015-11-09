@@ -169,7 +169,8 @@ if ($searchOn == 'true') {
                 }
             }
             if ($res1->cssClass == 'datetimepicker') {
-                $searchField = "date_format(STR_TO_DATE(`" . $nom . "`, '%d/%m/%Y %H:%i'),'%d/%m/%Y') ";
+//                $searchField = "date_format(STR_TO_DATE(`" . $nom . "`, '%d/%m/%Y %H:%i'),'%d/%m/%Y') ";
+                $searchField = "date_format(`" . $nom . "`,'%d/%m/%Y') ";
                 if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})[\W]([0-9]{2})[\W]([0-9]{2})/', $searchString, $arr)) {
                     $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1];
 //                    $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];

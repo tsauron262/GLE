@@ -559,7 +559,7 @@ EOF;
         $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/i18n/grid.locale-fr.js" type="text/javascript"></script>';
         $js .= ' <script src="' . $jspath . '/jqGrid-4.5/js/jquery.jqGrid.js" type="text/javascript"></script>';
         $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/js/ui.multiselect.js" type="text/javascript"></script>';
-         $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
+//         $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
     }
 
     return $js;
@@ -585,7 +585,7 @@ EOF;
     <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/jquery.jqGrid-4.3.0/plugin/ui.multiselect.js"></script>
     <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/jquery.jqGrid-4.3.0/js/i18n/grid.locale-en.js"></script>
     <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/jquery.jqGrid-4.3.0/js/jquery.jqGrid.src-multiselect.js"></script>
-    <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>
+    <!--<script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>-->
 
     <script type="text/javascript">
     //<![CDATA[

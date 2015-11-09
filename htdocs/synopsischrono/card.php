@@ -74,7 +74,7 @@ if ($action == "cancel") {
     if ($chr->socid == 0 && $chr->description == '') {
 //        $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE `value` is not null AND `chrono_refid` =" . $chr->id);
 //        if ($db->num_rows($result) == 0)
-        if ($chr->fk_user_modif < 1 && $chr->socid < 1)
+        if ($chr->user_modif_id < 1 && $chr->socid < 1)
             $action = 'supprimer';
     }
 }

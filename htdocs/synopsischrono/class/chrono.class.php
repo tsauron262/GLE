@@ -650,13 +650,13 @@ class Chrono extends CommonObject {
         if ($this->model_refid == 106 && isset($this->values["Fin_Pret"]) && new DateTime($this->values["Fin_Pret"]) < new DateTime('today'))//vert sur pret en retard
             $color = "red";
         
-        if($color)
-            $titre = "<span style='color:".$color."'>" . $titre . "</span>";
 
 
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $this->id . '">';
         $lienfin = '</a>';
         
+        if($color)
+            $titre = "<span style='color:".$color."'>" . $titre . "</span>";
 
 //        if (stripos($this->picto, '[KEY|')) {
 //            $tabT = explode('[KEY|', $this->picto);

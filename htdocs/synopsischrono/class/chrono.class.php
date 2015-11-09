@@ -640,9 +640,18 @@ class Chrono extends CommonObject {
 
 
         $this->getValues();
-
-        if (isset($this->extraValueById[$this->id][1068]['value']) && $this->extraValueById[$this->id][1068]['value'] == 1)
-            $titre = "<span style='color:red'>" . $titre . "</span>";
+        
+        $color = false;
+        if ($this->model_refid == 105 && isset($this->values["Prioritaire"]) && $this->values["Prioritaire"] == 1)//rouge sur sav urgent
+            $color = "red";
+        
+        if ($this->model_refid == 106 && isset($this->values["Restitue"]) && $this->values["Restitue"] == 1)//vert sur pret erminé
+            $color = "green";
+        if ($this->model_refid == 106 && isset($this->values["Fin_Pret"]) && new DateTime($this->values["Fin_Pret"]) < new DateTime('today'))//vert sur pret en retard
+            $color = "red";
+        
+        if($color)
+            $titre = "<span style='color:".$color."'>" . $titre . "</span>";
 
 
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $this->id . '">';
@@ -1008,13 +1017,17 @@ class Chrono extends CommonObject {
         foreach ($dataArr as $keyId => $value) {
             if (is_numeric($keyId))
                 $keyId = $this->idChampToNom($keyId);
-            echo $keyId;
+//            echo $keyId;
             $value = convertirDate($value, false, ($keyId == "Date_H_Fin"));
-            echo $value;
+//            echo $value;
 
 
-            if($keyId != "id")
-            $tabUpdate[] = $keyId . " = '" . addslashes($value) . "'";
+            if($keyId != "id"){
+                if($value != "now()")
+                    $tabUpdate[] = $keyId . " = '" . addslashes($value) . "'";
+                else
+                    $tabUpdate[] = $keyId . " = " . addslashes($value) . "";
+            }
 
 
 

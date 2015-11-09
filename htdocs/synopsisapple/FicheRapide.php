@@ -33,7 +33,7 @@ $("form#form").submit(function(){
 $echo = "";
 
 if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
-    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "societe WHERE fk_user_creat = ".$user->id);
+    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "societe WHERE fk_user_creat = " . $user->id);
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);
         $_REQUEST['socid'] = $result->max;
@@ -41,7 +41,7 @@ if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
 }
 
 if (isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0 && isset($_REQUEST['contactSociete']) && $_REQUEST['contactSociete'] == "max") {
-    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "socpeople WHERE fk_soc=" . $_REQUEST["socid"]." AND fk_user_creat = ".$user->id);
+    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "socpeople WHERE fk_soc=" . $_REQUEST["socid"] . " AND fk_user_creat = " . $user->id);
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);
         $_REQUEST['contactSociete'] = $result->max;
@@ -221,16 +221,15 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                     synopsischrono_pdf_create($db, $chrono, "pc");
                     $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/";
-                    if(!is_dir($repDest))
-                    mkdir($repDest);
+                    if (!is_dir($repDest))
+                        mkdir($repDest);
                     link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
                     if ($acompte > 0)
                         link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
 //                $echo .= DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
 
 
-                    
-                    unset($_REQUEST['action2']);
+
                     header('Status: 301 Moved Permanently', false, 301);
                     header("Location: ./FicheRapide.php?idChrono=" . $chrono->id);
                     die;
@@ -246,6 +245,32 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     }
 }
 
+if (isset($_REQUEST['iphone']) && isset($_REQUEST['idChrono'])) {
+    $chrono = new Chrono($db);
+    $chrono->fetch($_REQUEST['idChrono']);
+    $chrono3 = new Chrono($db);
+    $chrono3->fetch($_REQUEST['iphone']);
+
+    $chrono4 = new Chrono($db);
+    $chrono4->model_refid = 106;
+    $chrono4->socid = $chrono->socid;
+    $dataArrProd = array(1076 => "now()", 1077 => date('Y/m/d', strtotime('+' . $_REQUEST['nbJours'] . ' day')));
+    $chrono4newId = $chrono4->create();
+    $chrono4->setDatas($chrono4newId, $dataArrProd);
+    addElementElement("iphone", "pret", $chrono3->id, $chrono4->id);
+    addElementElement("sav", "pret", $chrono->id, $chrono4->id);
+    $chrono4->fetch($chrono4newId);
+    require_once DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php";
+    synopsischrono_pdf_create($db, $chrono4, "pret");
+    $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/";
+    if (!is_dir($repDest))
+        mkdir($repDest);
+    link(DOL_DATA_ROOT . "/synopsischrono/" . $chrono4->id . "/" . $chrono4->ref . ".pdf", $repDest . $chrono4->ref . ".pdf");
+    header('Status: 301 Moved Permanently', false, 301);
+    header("Location: ./FicheRapide.php?idChrono=" . $chrono->id);
+    die;
+}
+
 llxHeader($js);
 echo $echo;
 
@@ -256,6 +281,14 @@ if (isset($_REQUEST['idChrono'])) {
     echo "<h3>Enregistrement effecué avec succés. </h3>"
     . "SAV : " . $chrono->getNomUrl(1) . " <br/>";
 //                    . "Produit : " . $chronoProd->getNomUrl(1);
+    $tabPret = getElementElement("sav", "pret", $chrono->id);
+    foreach ($tabPret as $ligne) {
+        $chrono4 = new Chrono($db);
+        $chrono4->fetch($ligne['d']);
+        echo "Prêt : " . $chrono4->getNomUrl(1) . " <br/>";
+    }
+
+
     // List of document
     echo "<br/><br/>";
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
@@ -263,7 +296,20 @@ if (isset($_REQUEST['idChrono'])) {
     $formfile = new FormFile($db);
     $filearray = dol_dir_list(DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id);
     $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 1, $chrono->id . "/");
-    echo "<h3>Nouvelle prise en charge</h3>";
+
+
+    if (count($tabPret) == 0) {
+        echo "<h3>Prêt d'iPhone</h3>";
+        $sql = $db->query('SELECT * FROM `' . MAIN_DB_PREFIX . 'synopsischrono_chrono_107` WHERE id NOT IN (SELECT `fk_source` FROM `' . MAIN_DB_PREFIX . 'synopsischrono_chrono_106` ch106, ' . MAIN_DB_PREFIX . 'element_element WHERE `sourcetype` = "iphone" AND `targettype` = "pret" AND `fk_target` = ch106.id AND ch106.Restitue = 0) AND Centre = "' . $chrono->values['Centre'] . '"');
+        echo "<form><input type='hidden' name='idChrono' value='" . $_REQUEST['idChrono'] . "'/><select name='iphone'>";
+        while ($ligne = $db->fetch_object($sql))
+            echo "<option value='" . $ligne->id . "'>" . $ligne->S_N . "</option>";
+        echo "</select>";
+        echo "<input type='text' name='nbJours' value='7'/>";
+        echo '<input type="submit" value="Ok" class="butAction"/>';
+    }
+
+    echo "<br/><br/><h3>Nouvelle prise en charge</h3>";
 }
 
 
@@ -291,7 +337,7 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>Contact.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
-    echo  $form->selectcontacts($socid, $_REQUEST['contactSociete'], 'contactSociete', 1, null,null,null,null,null,null,1);
+    echo $form->selectcontacts($socid, $_REQUEST['contactSociete'], 'contactSociete', 1, null, null, null, null, null, null, 1);
     echo "<br />";
     echo "</td>";
     echo "</tr>";
@@ -536,11 +582,6 @@ if ($socid != "") {
     echo "</p>";
     echo "</form>";
 }
-
-
-
-
-
 
 function existProd($nomachine) {
     global $db;

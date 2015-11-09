@@ -359,6 +359,14 @@ AND  `fk_c_type_contact` =40");
         envoieMail($_REQUEST['mailType'], $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
         $ok = true;
     }
+    
+    
+    if ($action == "restPret" && isset($_REQUEST['pret'])) {
+        $chronoPret = new Chrono($db);
+        $chronoPret->fetch($_REQUEST['pret']);
+        $chronoPret->setDatas($_REQUEST['pret'], array(1081 =>1));
+        $ok = true;
+    }
 }
 
 if ($ok){

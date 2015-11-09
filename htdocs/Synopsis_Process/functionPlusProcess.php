@@ -132,7 +132,27 @@ function bouttonEtatSav($idChrono) {
         $return .= "<br/><a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
     }
     
-    $return .= "<a class='butCache' id='butCacheReMail'>Recontacter</a>";
+    
+    $tabT = getElementElement("sav", "pret", $idChrono);
+    foreach($tabT as $pret){
+        $tabT2 = getElementElement("iphone", "pret", null, $pret['d']);
+        $chronoPret = new Chrono($db);
+        $chronoPret->fetch($pret['d']);
+        $chronoPret->getValues($pret['d']);
+        if($chronoPret->values["Restitue"] != 1){
+            $sns = array();
+            foreach($tabT2 as $iphone){
+                $chronoIphone = new Chrono($db);
+                $chronoIphone->fetch($iphone['s']);
+                $chronoIphone->getValues($iphone['s']);
+                 $sns[] =  $chronoIphone->values["S_N"];
+            }
+            $text = implode(" | ", $sns)." réstitué";
+            $return .= "<br/><a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restPret&pret=" . $chronoPret->id . "\"'>".$text."</a>";
+        }
+    }
+    
+    $return .= "<br/><a class='butCache' id='butCacheReMail'>Recontacter</a>";
     $return .= "<div class='panCache' id='panCacheReMail'><select id='mailType'>";
     foreach (array("Facture" => "Facture", "Devis" => "Devis", "debut" => "PC", "debDiago" => "Diagnostique", "commOk" => "Piéce commandé", "repOk" => "Réparation OK", "revPropFerm" => "Devis refusé", "pieceOk"=>"Piéce reçue") as $val => $nom)
         $return .= "<option value='".$val."'>".$nom."</option>";

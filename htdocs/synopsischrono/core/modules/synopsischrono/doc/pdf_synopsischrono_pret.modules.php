@@ -91,6 +91,7 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -198,41 +199,43 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
-                
-                
-                
+
+
+
                 $totalTtc = 0;
                 $y = 98;
                 $tabT = getElementElement("iphone", "pret", null, $chrono->id);
-                foreach($tabT as $iphone){
-                    if($iphone['s'] < 1)
+                foreach ($tabT as $iphone) {
+                    if ($iphone['s'] < 1)
                         die("Attention pas d'iphone lié");
 
                     $chrono2 = new Chrono($this->db);
                     $chrono2->fetch($iphone['s']);
-                    $chrono2->getValuesPlus();   
-                   $idProd = $chrono2->valuesPlus[1083]->value;
+                    if ($chrono2->id > 0) {
+                        $chrono2->getValuesPlus();
+                        $idProd = $chrono2->valuesPlus[1083]->value;
 
-                   if($idProd > 0){
-                       $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                       $prod = new Product($this->db);
-                       $prod->fetch($idProd);
-                       $pdf->SetXY(5, $y);
-                       $pdf->MultiCell(28, 6, $prod->ref, 0, 'C');
-                       $pdf->SetXY(35, $y);
-                       $pdf->MultiCell(60, 6, $prod->description." (".$chrono2->valuesPlus[1073]->value.")", 0, 'C');
-                       $pdf->SetXY(97, $y);
-                       $pdf->MultiCell(33, 6, price($prod->price), 0, 'C');
-                       $pdf->SetXY(127, $y);
-                       $pdf->MultiCell(15, 6, 1, 0, 'C');
-                       $pdf->SetXY(143, $y);
-                       $pdf->MultiCell(25, 6, price($prod->price), 0, 'C');
-                       $pdf->SetXY(169, $y);
-                       $pdf->MultiCell(35, 6, price($prod->price_ttc), 0, 'C');
-                       $totalTtc += $prod->price_ttc;
-                       $y += 8;
-                   }
-               }
+                        if ($idProd > 0) {
+                            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
+                            $prod = new Product($this->db);
+                            $prod->fetch($idProd);
+                            $pdf->SetXY(5, $y);
+                            $pdf->MultiCell(28, 6, $prod->ref, 0, 'C');
+                            $pdf->SetXY(35, $y);
+                            $pdf->MultiCell(60, 6, $prod->description . " (" . $chrono2->valuesPlus[1073]->value . ")", 0, 'C');
+                            $pdf->SetXY(97, $y);
+                            $pdf->MultiCell(33, 6, price($prod->price), 0, 'C');
+                            $pdf->SetXY(127, $y);
+                            $pdf->MultiCell(15, 6, 1, 0, 'C');
+                            $pdf->SetXY(143, $y);
+                            $pdf->MultiCell(25, 6, price($prod->price), 0, 'C');
+                            $pdf->SetXY(169, $y);
+                            $pdf->MultiCell(35, 6, price($prod->price_ttc), 0, 'C');
+                            $totalTtc += $prod->price_ttc;
+                            $y += 8;
+                        }
+                    }
+                }
 
 
 //                echo "<pre>";print_r($chrono->valuesPlus);die;
@@ -279,24 +282,24 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
 
 
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $tabT= explode(" ", $chrono->valuesPlus[1076]->value);
+                $tabT = explode(" ", $chrono->valuesPlus[1076]->value);
                 $datetime1 = new DateTime($tabT[0]);
                 $datetime2 = new DateTime($chrono->valuesPlus[1077]->value);
                 $interval = $datetime1->diff($datetime2);
-                
+
                 $pdf->SetXY('32', '42.6');
-                $pdf->MultiCell(50, 6, $interval->format('%a')." jours", 0, 'L');
+                $pdf->MultiCell(50, 6, $interval->format('%a') . " jours", 0, 'L');
 
                 $pdf->SetXY('32', '46.7');
                 $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1076]->value), 0, 'L');
-                
+
                 $pdf->SetXY('32', '50.4');
                 $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1077]->value), 0, 'L');
 
                 if ($chrono->fk_user_author > 0) {
                     $pdf->SetXY('57', '55.7');
                     $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
-                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
+                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                     $pdf->SetXY('168', '64');
                     $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
                 }
@@ -305,15 +308,15 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
                     $pdf->SetXY(12, 45);
                     $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $chrono->valuesPlus[1066]->value, 0, 'L');
                 }
-                
-                
-                
+
+
+
                 $pdf->SetXY(69, 230);
-                $pdf->MultiCell(35, 6, price($totalTtc)."", 0, 'C');
-                
-                if(is_object($chrono->societe)){
-                $pdf->SetXY(25, 188.8);
-                $pdf->MultiCell(45, 4, $chrono->societe->getFullName($outputlangs), 0, 'C');
+                $pdf->MultiCell(35, 6, price($totalTtc) . "", 0, 'C');
+
+                if (is_object($chrono->societe)) {
+                    $pdf->SetXY(25, 188.8);
+                    $pdf->MultiCell(45, 4, $chrono->societe->getFullName($outputlangs), 0, 'C');
                 }
 
 

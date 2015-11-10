@@ -213,6 +213,11 @@ jQuery(document).ready(function () {
     jQuery.validator.addMethod(
             'required',
             function (value, element) {
+                $("select.required").each(function(){
+                    $(this).show();
+//                    if($(this).val()+"x" == "x")
+//                        return false;
+                });
                 return (value + "x" != "x");
             },
             '<br/>Ce champs est requis'

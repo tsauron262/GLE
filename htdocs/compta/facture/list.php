@@ -261,6 +261,7 @@ if ($resql)
     }
 
     $param='&socid='.$socid;
+    /*moddrsi*/if ($search_status)              $param.='&search_status='.$search_status;/*fmoddrsi*/
     if ($month)              $param.='&month='.$month;
     if ($year)               $param.='&year=' .$year;
     if ($search_ref)         $param.='&search_ref=' .$search_ref;

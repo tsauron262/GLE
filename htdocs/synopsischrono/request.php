@@ -489,14 +489,14 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
 
         $text .= "\n\nCordialement.
 \nL'équipe BIMP".$signature;
-        mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
+        mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3);
     } elseif($type == "debut"){
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n\n Cordialement."
-        .$signature        , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+        .$signature        , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     } elseif ($type == "debDiago") {
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Nous avons commencé le diagnostic de votre produit, vous aurez rapidement des nouvelles de notre part. \nVotre centre de services Apple.".$signature
-                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+                , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Nous avons commencé le diagnostic de votre produit, vous aurez rapidement des nouvelles de notre part.  Votre centre de services Apple.");
     } elseif ($type == "commOk") {
         mailSyn2("Commande piece(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
@@ -506,11 +506,11 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     } elseif ($type == "repOk") {
         mailSyn2($chrono->ref . " Reparation  terminee", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est finie. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP.".$signature
-                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+                , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à ".$nomCentre." " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "revPropFerm") {
         mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP.".$signature
-                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+                , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, la réparation de votre produit  est refusé. Vous pouvez récupérer votre matériel à ".$nomCentre." " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "pieceOk") {
         mailSyn2("Pieces recues " . $chrono->ref, $toMail, $fromMail, "La pièce/le produit que nous avions commandé pour votre Machine est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil. Vous serez prévenu dès que l'appareil sera prêt.

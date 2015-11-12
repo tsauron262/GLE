@@ -451,7 +451,7 @@ class Repair {
                     $labelResponse = $this->gsx->request($request, $client2);
                     if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
                         $direName = '/synopsischrono/' . $_REQUEST['chronoId'] . '';
-                        $fileNamePure = $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'];
+                        $fileNamePure = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
                         if (!is_dir(DOL_DATA_ROOT . $direName))
                             mkdir(DOL_DATA_ROOT . $direName);
                         $fileName = $direName . "/" . $fileNamePure;

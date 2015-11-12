@@ -108,7 +108,7 @@ if ($_POST["action"] == 'add' && $user->rights->produit->creer) {
         }
 
         $product->ref = $_POST["ref"];
-        $product->libelle = $_POST["libelle"];
+        $product->label = $_POST["libelle"];
         $product->price_base_type = $_POST["price_base_type"];
         if ($product->price_base_type == 'TTC')
             $product->price_ttc = $_POST["price"];
@@ -210,7 +210,7 @@ if ($_POST["action"] == 'update' &&
     $product = new Product($db);
     if ($product->fetch($_POST["id"])) {
         $product->ref = $_POST["ref"];
-        $product->libelle = $_POST["libelle"];
+        $product->label = $_POST["libelle"];
         $product->description = $_POST["desc"];
         $product->note = $_POST["note"];
         $product->status = $_POST["statut"];
@@ -517,7 +517,7 @@ if ($_GET["action"] == 'cloneToLocation' && $user->rights->produit->creer) {
     $originalId = $_GET["id"];
     if ($product->fetch($_GET["id"]) > 0) {
         $product->ref = "Loc " . $product->ref;
-        $product->libelle = "Location - " . $product->libelle;
+        $product->label = "Location - " . $product->label;
         $product->status = 0;
         $product->id = null;
         $product->type = 4;
@@ -837,7 +837,7 @@ if ($_GET["action"] == 'create' && $user->rights->produit->creer) {
 
         // Label
         print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Label") . '</th>
-                   <td class="ui-widget-content" ><input name="libelle" size="40" value="' . (is_object($product) ? $product->libelle : "") . '"></td></tr>';
+                   <td class="ui-widget-content" ><input name="libelle" size="40" value="' . (is_object($product) ? $product->label : "") . '"></td></tr>';
 
         // Status
         print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Status") . '</th>
@@ -1088,19 +1088,19 @@ EOF;
         if ($_GET['type'] == 4) {
             print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Price") . '</th>';
             print '<td class="ui-widget-content"><input style="float:left; margin:3px 10px;" name="Locprice" size="10" value="' . $product->price_loc . '">';
-            print $html->select_PriceBaseType($product->price_base_type, "price_base_type");
+            print $html->selectPriceBaseType($product->price_base_type, "price_base_type");
             print '</td></tr>';
         } else {
 
             if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES == 1) {
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("SellingPrice") . ' 1</th>';
                 print '<td class="ui-widget-content"><input name="price" size="10" value="' . $product->price . '">';
-                print $html->select_PriceBaseType($product->price_base_type, "price_base_type");
+                print $html->selectPriceBaseType($product->price_base_type, "price_base_type");
                 print '</td></tr>';
                 for ($i = 2; $i <= $conf->global->PRODUIT_MULTIPRICES_LIMIT; $i++) {
                     print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("SellingPrice") . ' ' . $i . '</th>';
                     print '<td class="ui-widget-content"><input name="price_' . $i . '" size="10" value="' . $product->multiprices["$i"] . '">';
-                    print $html->select_PriceBaseType($product->multiprices_base_type["$i"], "multiprices_base_type_" . $i);
+                    print $html->selectPriceBaseType($product->multiprices_base_type["$i"], "multiprices_base_type_" . $i);
                     print '</td></tr>';
                 }
             }
@@ -1108,7 +1108,7 @@ EOF;
             else {
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("SellingPrice") . '</th>';
                 print '<td class="ui-widget-content"><input style="float:left; margin:3px 10px;" name="price" size="10" value="' . $product->price . '">';
-                print $html->select_PriceBaseType($product->price_base_type, "price_base_type");
+                print $html->selectPriceBaseType($product->price_base_type, "price_base_type");
                 print '</td></tr>';
             }
         }
@@ -1380,7 +1380,7 @@ EOF;
             print '</tr>';
 
             // Libelle
-            print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans("Label") . '</td><td class="ui-widget-content">' . $product->libelle . '</td></tr>';
+            print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans("Label") . '</td><td class="ui-widget-content">' . $product->label . '</td></tr>';
 
             if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                 $sql = "SELECT id, modeleName FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf WHERE id='" . $product->array_options['options_2annexe'] . "'";
@@ -1776,7 +1776,7 @@ EOF;
             print '<tr><th class="ui-widget-header ui-state-default" width="15%">' . $langs->trans("Ref") . '</th>
                        <td class="ui-widget-content" colspan="2"><input name="ref" size="40" maxlength="32" value="' . $product->ref . '"></td></tr>';
             print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>';
-            $libelle = preg_replace("/'/", "&apos;", $product->libelle);
+            $libelle = preg_replace("/'/", "&apos;", $product->label);
             print "<td class='ui-widget-content'><input name='libelle' size='40' value='" . $libelle . "'></td></tr>";
 
             // Status

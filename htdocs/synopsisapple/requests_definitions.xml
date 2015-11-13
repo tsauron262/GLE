@@ -197,6 +197,8 @@
             <data name="fileName" required="0" donotprocess="1"></data>
             <data name="fileData" required="0" donotprocess="1"></data>
             <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
+            <data name="reportedSymptomCode" required="1"></data>
+            <data name="reportedIssueCode" required="1"></data>
         </datas>
     </request>
 

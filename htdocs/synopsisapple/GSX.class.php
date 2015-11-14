@@ -895,7 +895,6 @@ dol_syslog("requete : ".$requestName, 3);
                 die;
                 return array();
             } else {
-                print_r($f);
                 $add = "";
                 if(isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error,1);

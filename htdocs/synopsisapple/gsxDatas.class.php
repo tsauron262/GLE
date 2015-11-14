@@ -796,6 +796,7 @@ class gsxDatas {
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
 //            echo "<pre>";print_r($requestData);die;
             $response = $this->gsx->request($requestData, $client);
+                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();

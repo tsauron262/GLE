@@ -590,6 +590,7 @@ class gsxDatas {
             case 'CreateCarryInRepair':
             case 'CreateMailInRepair':
             case 'CreateIndirectOnsiteRepair':
+            case 'CreateIPhoneRepairOrReplace':
             case 'CreateWholeUnitExchange':
                 if (isset($chronoId)) {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");

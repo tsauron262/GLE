@@ -895,6 +895,7 @@ class GSX {
                 die;
                 return array();
             } else {
+                dol_syslog("iciiciiciici".print_r($f,1),3);
                 $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . print_r($SOAPRequest, true));
 //            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
                 return array();

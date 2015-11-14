@@ -900,7 +900,7 @@ dol_syslog("requete : ".$requestName, 3);
                     $add = print_r($f->detail->errors->error,1);
                 $this->soap_error($f->faultcode, $f->faultstring . " <pre> ".$add . print_r($SOAPRequest, true));
 //            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
-                return array($f->faultstring);
+                return array();
             }
         }
 
@@ -1087,9 +1087,9 @@ dol_syslog("requete : ".$requestName, 3);
         if (!in_array($code, $codeIgnore)) {
             dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR, 0, "_apple");
 //        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
-            if (!in_array($code, $codeIgnore2))
-                $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
         }
+        if (!in_array($code, $codeIgnore2))
+            $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
     }
 
     public function resetSoapErrors() {

@@ -201,6 +201,93 @@
             <data name="reportedIssueCode" required="1"></data>
         </datas>
     </request>
+    
+    
+    
+    <request name="CreateIPhoneRepairOrReplace" type="repair" request="CreateIPhoneRepairOrReplaceRequest" wrapper="repairData">
+        <label>Création d'une réparation ou remplacement d'Iphone</label>
+        <datas>
+            <data name="serialNumber" required="1"></data>
+            <!--            <data name="referenceNumber" required="0"></data>-->
+            <data name="diagnosedByTechId" required="1"></data>
+            <data name="shipTo" required="1"></data>
+            <data name="purchaseOrderNumber" required="1"></data>
+            <data name="soldToContact" required="1"></data>
+            <data name="soldToContactPhone" required="1"></data>
+
+            <data name="trackingNumber" required="1"></data>
+            <data name="unitReceivedDate" required="1"></data>
+            <data name="unitReceivedTime" required="1"></data>
+
+            <data name="hardwareDiagnosisCode" required="0"></data>
+            <data name="machinePassword" required="0"></data>
+            <data name="osVersion" required="0"></data>
+            <data name="ram" required="0"></data>
+            <data name="hardDrive" required="0"></data>
+
+
+            <data name="diagnosis" required="1"></data>
+            <data name="symptom" required="1"></data>
+            <data name="notes" required="0"></data>
+
+            <data name="comptia" required="1">
+                <datas>
+                    <data name="comptiaGroup" required="1"></data>
+                    <data name="comptiaCode" required="1" allComptia="1"></data>
+                    <data name="comptiaModifier" required="1"></data>
+                    <data name="technicianNote" required="0"></data>
+                </datas>
+            </data>
+
+            <data name="orderLines" required="1">
+                <datas>
+                    <data name="partNumber" required="1"></data>
+                </datas>
+            </data>
+
+            <data name="customerAddress" required="1">
+                <datas>
+                    <data name="addressLine1" required="1"></data>
+                    <data name="addressLine2" required="0"></data>
+                    <data name="addressLine3" required="0"></data>
+                    <data name="addressLine4" required="0"></data>
+                    <data name="street" required="1"></data>
+                    <data name="city" required="1"></data>
+                    <data name="companyName" required="1"></data>
+                    <data name="country" required="1"></data>
+                    <data name="firstName" required="1"></data>
+                    <data name="lastName" required="1"></data>
+                    <data name="primaryPhone" required="1"></data>
+                    <data name="secondaryPhone" required="0"></data>
+                    <data name="regionCode" required="1" default="004"></data>
+                    <data name="state" required="1"></data>
+                    <data name="zipCode" required="1"></data>
+                    <data name="emailAddress" required="1"></data>
+                </datas>
+            </data>
+            <!--<data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>-->
+
+            <data name="shipper" required="1"></data>
+            <data name="shipBox" required="0" default="N"></data>
+            <data name="shipUnitToCustomer" required="1" default="N"></data>
+            <data name="dataTransferRequired" required="0" default="N"></data>
+            <data name="accidentalDamage" required="0" default="N"></data>
+            <data name="addressCosmeticDamage" required="1" default="N"></data>
+            <data name="coveredByACPlus" required="0" default="N"></data>
+            <data name="requestReviewByApple" required="0" default="N"></data>
+            <data name="fileName" required="0" donotprocess="1"></data>
+            <data name="fileData" required="0" donotprocess="1"></data>
+            <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
+            <data name="reportedSymptomCode" required="1"></data>
+            <data name="reportedIssueCode" required="1"></data>
+        </datas>
+    </request>
+    
+    
+    
+    
+    
+    
 
     <request name="CreateWholeUnitExchange" type="repair" request="CreateWholeUnitExchangeRequest" wrapper="repairData">
         <label>Création d'une réparation par courrier (mail-in repair)2</label>

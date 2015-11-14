@@ -232,7 +232,7 @@
             <data name="notes" required="0"></data>
 
 
-            <data name="orderLines" required="1">
+            <data name="repairOrderLines" required="1">
                 <datas>
                     <data name="partNumber" required="1"></data>
                     <data name="comptiaGroup" required="1"></data>
@@ -243,6 +243,12 @@
             </data>
             
             
+
+            <data name="loanerOrderLines" required="0">
+                <datas>
+                    <data name="partNumber" required="0"></data>
+                </datas>
+            </data>
 
             <data name="customerAddress" required="1">
                 <datas>

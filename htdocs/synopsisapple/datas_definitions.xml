@@ -136,6 +136,9 @@
     <def name="orderLines" type="partsList" useCart="1">
         <label>Composants</label>
     </def>
+    <def name="repairOrderLines" type="partsList" useCart="1">
+        <label>Composants</label>
+    </def>
     <def name="loanerOrderLines" type="datasGroup">
         <label>Composants de prêt</label>
     </def>

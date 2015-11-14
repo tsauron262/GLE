@@ -138,7 +138,6 @@
             <data name="unitReceivedDate" required="1"></data>
             <data name="unitReceivedTime" required="1"></data>
 
-            <data name="hardDrive" required="0"></data>
             <data name="hardwareDiagnosisCode" required="0"></data>
             <data name="machinePassword" required="0"></data>
             <data name="osVersion" required="0"></data>

@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/repair.class.php';
 
 class gsxDatas {
 
+    private $tabReqForceApple = array("CreateIPhoneRepairOrReplace");
     private $userExchangePrice = true;
     public $gsx = null;
     public $connect = false;
@@ -678,7 +679,8 @@ class gsxDatas {
     }
 
     public function processRequestForm($prodId, $requestType) {
-//        if($requestType )
+        if(in_array($requestType, $this->tabReqForceApple))
+                $this->isIphone = true;
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
 

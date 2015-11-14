@@ -304,6 +304,7 @@
     <def name="shipper" type="select">
         <label>Expéditeur</label>
         <values>
+            <val val="XUPSN">UPS</val>
             <val val="XAER">Aero 2000</val>
             <val val="XAIRBEC">Airborne</val>
             <val val="XARM">Aramex</val>
@@ -327,7 +328,6 @@
             <val val="XSNO">Seino Transportation Co.,Ltd.</val>
             <val val="XSTE">Star Track Express</val>
             <val val="XTNT">TNT</val>
-            <val val="XUPSN">UPS</val>
             <val val="XUTI">UTi (Japan) K.K.</val>
             <val val="XYMT">YAMATO</val>
         </values>

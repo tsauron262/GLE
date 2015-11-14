@@ -232,7 +232,7 @@
             <data name="notes" required="0"></data>
 
 
-            <data name="repairOrderLines" required="1">
+            <data name="orderLines" required="1">
                 <datas>
                     <data name="partNumber" required="1"></data>
                     <data name="comptiaGroup" required="1"></data>

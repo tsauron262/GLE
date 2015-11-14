@@ -683,7 +683,7 @@ class GSX {
 
                 $requestName = $clientLookup . 'Request';
                 $wrapperName = 'lookupRequestData';
-
+dol_syslog("requete : ".$requestName, 3);
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
 

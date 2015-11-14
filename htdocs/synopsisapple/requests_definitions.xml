@@ -244,9 +244,9 @@
             
             
 
-            <data name="loanerOrderLines" required="1">
+            <data name="loanerOrderLines" required="0">
                 <datas>
-                    <data name="partNumber" required="1"></data>
+                    <data name="partNumber" required="0"></data>
                 </datas>
             </data>
 

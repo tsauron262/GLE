@@ -84,10 +84,10 @@ class gsxDatas {
     }
 
     public function setSerial($serial) {
-        if (preg_match('/^[0-9]{15,16}$/', $serial)) {
+//        if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $this->isIphone = true;
-        } else
-            $this->isIphone = false;
+//        } else
+//            $this->isIphone = false;
         $this->serial = $serial;
     }
 
@@ -679,8 +679,10 @@ class gsxDatas {
     }
 
     public function processRequestForm($prodId, $requestType) {
-        if(in_array($requestType, $this->tabReqForceApple))
+        if(in_array($requestType, $this->tabReqForceApple)){
                 $this->isIphone = true;
+            
+        }
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
 

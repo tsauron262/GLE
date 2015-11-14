@@ -740,6 +740,13 @@ class gsxDatas {
 
                         break;
 
+                    case 'CreateIPhoneRepairOrReplace':
+                        if (isset($result['serialNumber']))
+                            $result['serialNumber'] = '';
+                        $result['imeiNumber'] = $this->serial;
+
+                        break;
+
                     case 'UpdateSerialNumber':
                         $responseName = 'IPhoneUpdateSerialNumberResponse';
                         $client = 'IPhoneUpdateSerialNumber';

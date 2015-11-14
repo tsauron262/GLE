@@ -332,4 +332,16 @@
     <def name="reportedIssueCode" type="reportedIssueCode">
         <label>Issue Code</label>
     </def>
+    <def name="coverageOptions" type="select">
+        <label>Couverture</label>
+        <values>
+            <val val="N">Default. Indicates No Damage</val>
+            <val val="A1">Indicates Battery Service</val>
+            <val val="A2">Indicates Returnable Damage</val>
+            <val val="A3">Indicates Non-returnable Damage</val>
+            <val val="X">Indicates Non-returnable damage covered by AppleCare+</val>
+            <val val="RPL">Indicates Replace</val>
+            <val val="CL">Indicates Valid Consumer Law Claim</val>
+        </values>
+    </def>
 </root>

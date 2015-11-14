@@ -207,6 +207,7 @@
     <request name="CreateIPhoneRepairOrReplace" type="repair" request="CreateIPhoneRepairOrReplaceRequest" wrapper="repairData">
         <label>Création d'une réparation ou remplacement d'Iphone</label>
         <datas>
+            <data name="coverageOptions" required="1"></data>
             <data name="serialNumber" required="1"></data>
             <!--            <data name="referenceNumber" required="0"></data>-->
             <data name="diagnosedByTechId" required="1"></data>

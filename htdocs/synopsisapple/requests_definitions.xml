@@ -238,6 +238,7 @@
                     <data name="comptiaGroup" required="1"></data>
                     <data name="comptiaCode" required="1" allComptia="1"></data>
                     <data name="comptiaModifier" required="1"></data>
+                    <data name="consignmentFlag" required="0" default="N"></data>
                 </datas>
             </data>
             

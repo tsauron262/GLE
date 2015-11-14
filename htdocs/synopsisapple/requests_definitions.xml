@@ -244,6 +244,9 @@
             
 
             <data name="loanerOrderLines" required="0">
+                <datas>
+                    <data name="partNumber" required="0"></data>
+                </datas>
             </data>
 
             <data name="customerAddress" required="1">

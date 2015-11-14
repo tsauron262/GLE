@@ -839,7 +839,9 @@ class gsxDatas {
                                 $html .= '<p class="error">Une erreur est survenue (chronoId manquant).</p>';
                             }
                         } else {
-                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple. Requete : ' . $client . '</p>';
+                            $msg = '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple. Requete : ' . $client . '</p>';
+                            $html .= $msg;
+                            dol_syslog($msg." | ".print_r($response),3,"_apple");
                         }
                         break;
 

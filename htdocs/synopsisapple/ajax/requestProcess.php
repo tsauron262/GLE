@@ -223,6 +223,7 @@ if (isset($_GET['action'])) {
             if (isset($_GET['serial'])) {
                 if (isset($_GET['request'])) {
                     if (isset($_GET['prodId'])) {
+                        echo "send requete";
                         $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
                         $return = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
 

@@ -277,6 +277,9 @@
     <def name="ram" type="text" max="25" jsCheck="text">
         <label>RAM</label>
     </def>
+    <def name="hardDrive" type="text" max="25" jsCheck="text">
+        <label>Disque dur</label>
+    </def>
     <def name="shipBox" type="YesNo">
         <label>Boîte d'envoi</label>
     </def>

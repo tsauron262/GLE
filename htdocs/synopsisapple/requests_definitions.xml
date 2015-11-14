@@ -143,6 +143,7 @@
             <data name="machinePassword" required="0"></data>
             <data name="osVersion" required="0"></data>
             <data name="ram" required="0"></data>
+            <data name="hardDrive" required="0"></data>
 
 
             <data name="diagnosis" required="1"></data>

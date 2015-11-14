@@ -829,10 +829,7 @@ class gsxDatas {
                     }
                 }
                 switch ($requestType) {
-                    case 'CreateCarryInRepair':
-                    case 'CreateMailInRepair':
-                    case 'CreateIndirectOnsiteRepair':
-                    case 'CreateWholeUnitExchange':
+                    default:
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
                             $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);

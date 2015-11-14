@@ -638,7 +638,7 @@ class gsxDatas {
                     $valDef['customerAddress']['emailAddress'] = $chrono->societe->email;
                     $valDef['customerAddress']['street'] = $chrono->societe->address;
                     $valDef['customerAddress']['addressLine1'] = $chrono->societe->address;
-                        $valDef['customerAddress']['country'] = "FRANCE";
+                    $valDef['customerAddress']['country'] = "FRANCE";
                         
                     $tabName = explode(" ", $chrono->societe->name);
                     $valDef['customerAddress']['firstName'] = $tabName[0];

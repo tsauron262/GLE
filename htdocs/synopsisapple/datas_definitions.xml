@@ -259,9 +259,6 @@
     <def name="technicianNote" type="textarea" max="4000" jsCheck="text">
         <label>Notes du technicien AASP</label>
     </def>
-    <def name="hardDrive" type="text" max="25" jsCheck="text">
-        <label>Notes du technicien AASP</label>
-    </def>
     <def name="hardwareDiagnosisCode" type="text" max="30" jsCheck="text">
         <label>Code diagnostique du Hardware</label>
     </def>

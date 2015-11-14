@@ -678,6 +678,7 @@ class gsxDatas {
     }
 
     public function processRequestForm($prodId, $requestType) {
+//        if($requestType )
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
 
@@ -724,6 +725,12 @@ class gsxDatas {
 
 
             if ($this->isIphone) {
+                if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13) {
+                    $result['imeiNumber'] = $result['serialNumber'];
+                    $result['serialNumber'] = '';
+                } else {
+                    $result['imeiNumber'] = "";
+                }
                 switch ($requestType) {
                     case 'CreateWholeUnitExchange':
                         $responseNames = array("CreateIPhoneWholeUnitExchangeResponse");
@@ -738,18 +745,9 @@ class gsxDatas {
                         );
                         $client = 'IPhoneCreateCarryInRepair';
                         $request = 'CreateIPhoneCarryInRepairRequest';
-                        if (isset($result['serialNumber']))
-                            $result['serialNumber'] = '';
-                        $result['imeiNumber'] = $this->serial;
 
                         break;
 
-                    case 'CreateIPhoneRepairOrReplace':
-                        if (isset($result['serialNumber']))
-                            $result['serialNumber'] = '';
-                        $result['imeiNumber'] = $this->serial;
-
-                        break;
 
                     case 'UpdateSerialNumber':
                         $responseName = 'IPhoneUpdateSerialNumberResponse';
@@ -770,12 +768,6 @@ class gsxDatas {
                         );
                         $client = 'IPhoneKGBSerialNumberUpdate';
                         $request = 'UpdateIPhoneKGBSerialNumberRequest';
-                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13) {
-                            $result['imeiNumber'] = $result['serialNumber'];
-                            $result['serialNumber'] = '';
-                        } else {
-                            $result['imeiNumber'] = "";
-                        }
                         break;
                 }
             } else {

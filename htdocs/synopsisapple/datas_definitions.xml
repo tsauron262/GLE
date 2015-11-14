@@ -136,7 +136,7 @@
     <def name="orderLines" type="partsList" useCart="1">
         <label>Composants</label>
     </def>
-    <def name="loanerOrderLines" type="partsList">
+    <def name="loanerOrderLines" type="partsList2">
         <label>Composants de prêt</label>
     </def>
     <def name="overrideDiagnosticCodeCheck" type="YesNo">

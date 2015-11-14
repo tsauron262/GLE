@@ -223,7 +223,8 @@ if (isset($_GET['action'])) {
             if (isset($_GET['serial'])) {
                 if (isset($_GET['request'])) {
                     if (isset($_GET['prodId'])) {
-                        $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                        $isIphone = 
+                        $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo, $_GET['request']);
                         $return = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
 
 

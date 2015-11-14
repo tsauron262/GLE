@@ -33,8 +33,12 @@ class gsxDatas {
     );
     protected $isIphone = false;
 
-    public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null) {
+    public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null, $requestType = false) {
         global $user;
+        
+        if(in_array($requestType, $this->tabReqForceApple)){
+                $this->isIphone = true;
+        }
         
         if(defined('PRODUCTION_APPLE') && PRODUCTION_APPLE)
             self::$apiMode = 'production';
@@ -84,10 +88,10 @@ class gsxDatas {
     }
 
     public function setSerial($serial) {
-//        if (preg_match('/^[0-9]{15,16}$/', $serial)) {
+        if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $this->isIphone = true;
-//        } else
-//            $this->isIphone = false;
+        } /*else
+            $this->isIphone = false;*/
         $this->serial = $serial;
     }
 
@@ -679,10 +683,6 @@ class gsxDatas {
     }
 
     public function processRequestForm($prodId, $requestType) {
-        if(in_array($requestType, $this->tabReqForceApple)){
-                $this->isIphone = true;
-            
-        }
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
 

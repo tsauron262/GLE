@@ -898,7 +898,7 @@ class GSX {
                 $add = "";
                 if(isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error,1);
-                $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . print_r($SOAPRequest, true));
+                $this->soap_error($f->faultcode, $f->faultstring . " <pre> ".$add . print_r($SOAPRequest, true));
 //            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
                 return array();
             }

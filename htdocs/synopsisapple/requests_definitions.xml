@@ -241,6 +241,14 @@
                     <data name="technicianNote" required="0"></data>
                 </datas>
             </data>
+            
+            
+
+            <data name="loanerOrderLines" required="1">
+                <datas>
+                    <data name="partNumber" required="1"></data>
+                </datas>
+            </data>
 
             <data name="customerAddress" required="1">
                 <datas>

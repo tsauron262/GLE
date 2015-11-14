@@ -831,8 +831,9 @@ class gsxDatas {
                 switch ($requestType) {
                     default:
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
-                            $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
-                            $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);
+                            $tabConfirm = $response[$responseName]['repairConfirmation'];
+                            $confirmNumber = $tabConfirm['confirmationNumber'];
+                            $prixTot = str_replace(array("EUR ", "EUR"), "", $tabConfirm['totalFromOrder']);
                             if (isset($_REQUEST['requestReviewByApple']) && $_REQUEST['requestReviewByApple'] == "Y")
                                 $prixTot = 0;
                             $html .= "<prix>" . $prixTot . "</prix>";

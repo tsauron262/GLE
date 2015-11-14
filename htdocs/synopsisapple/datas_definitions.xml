@@ -136,6 +136,9 @@
     <def name="orderLines" type="partsList" useCart="1">
         <label>Composants</label>
     </def>
+    <def name="loanerOrderLines" type="partsList" useCart="1">
+        <label>Composants de prêt</label>
+    </def>
     <def name="overrideDiagnosticCodeCheck" type="YesNo">
         <label>Ne pas effectuer la vérification du code du diagnostic</label>
         <infos>Si Oui, le code de diagnostic n'est pas vérifié lors la création de la réparation et aucun message n'est affiché.</infos>

@@ -748,7 +748,7 @@ class gsxDatas {
                     case 'CreateMailInRepair':
                         $responseName = 'IPhoneCreateMailInRepairResponse';
                         $client = 'IPhoneCreateMailInRepair';
-                        $request = 'IPhoneCreateMailInRepairRequest';die;
+                        $request = 'IPhoneCreateMailInRepairRequest';
                         break;
 
                     case 'KGBSerialNumberUpdate':

@@ -867,6 +867,7 @@ dol_syslog("requete : ".$requestName, 3);
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {
+            print_r($f);
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);

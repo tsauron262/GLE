@@ -562,7 +562,7 @@ class GSX_Request {
                 $html .= '<span class="dataCheck"></span>';
             
             if($inputName == "trackingNumber"){//Ajout lien création UPS
-                $html .= '<a class="button" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS</a>';
+                $html .= '<br/><a class="button" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS</a>';
             }
             
             $html .= '</div>';

@@ -798,7 +798,7 @@ class gsxDatas {
             
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
             $response = $this->gsx->request($requestData, $client);
-                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
+            
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
@@ -807,7 +807,7 @@ class gsxDatas {
                         $requestData[$nomReq]['repairData']['fileData'] = "Fichier joint exclue du log";
                 }
                 dol_syslog("erreur GSX : " . $this->getGSXErrorsHtml() . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
-            } else {
+            } else {//pas d'erreur, on analyse le résultat
                 if ($requestType == "CreateMailInRepair" || $requestType == "KGBSerialNumberUpdate")
 //                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
                     $ok = false;

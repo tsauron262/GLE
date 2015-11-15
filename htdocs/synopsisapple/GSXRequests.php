@@ -560,6 +560,11 @@ class GSX_Request {
             }
             if (isset($defs['jsCheck']))
                 $html .= '<span class="dataCheck"></span>';
+            
+            if($inputName == "trackingNumber"){//Ajout lien création UPS
+                $html .= '<a class="button" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS</a>';
+            }
+            
             $html .= '</div>';
         }
         return $html;

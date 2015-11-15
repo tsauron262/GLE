@@ -375,8 +375,8 @@ class gsxDatas {
 
 
         $html .= '<p style="text-align: right">' . "\n";
+        $html .= '<a class="button" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS</a>';
         $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Valider</span>' . "\n";
-        $html .= '<a class="butAction" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS<a/>';
         $html .= '</p>' . "\n";
         $html .= '<div class="repairFormContainer"></div>' . "\n";
         $html .= '<div class="repairFormResults"></div>' . "\n";

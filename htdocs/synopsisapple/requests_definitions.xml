@@ -205,7 +205,7 @@
     
     
     <request name="CreateIPhoneRepairOrReplace" type="repair" request="CreateIPhoneRepairOrReplaceRequest" wrapper="repairData">
-        <label>Création d'une réparation ou d'un remplacement d'iPhone</label>
+        <label>Création d'une réparation ou d'un remplacement d'iPhone (IPhone Repair Or Replace)</label>
         <datas>
             <data name="coverageOptions" required="1"></data>
             <data name="serialNumber" required="1"></data>
@@ -288,14 +288,9 @@
         </datas>
     </request>
     
-    
-    
-    
-    
-    
 
     <request name="CreateWholeUnitExchange" type="repair" request="CreateWholeUnitExchangeRequest" wrapper="repairData">
-        <label>Création d'une réparation par courrier (mail-in repair)2</label>
+        <label>Création d'un échange complet (Create Whole Unit Exchange)</label>
         <datas>
             <data name="billTo" required="0"></data>
             <data name="serialNumber" required="1"></data>
@@ -452,6 +447,8 @@
             <data name="closeRepair" required="0" donotprocess="1" default="N"></data>
         </datas>
     </request>
+
+
 
     <request name="KGBSerialNumberUpdate" type="kgbSerialUpdate" request="UpdateKGBSerialNumberRequest" wrapper="">
         <label>Mise à jour du numéro de série de l'unité</label>

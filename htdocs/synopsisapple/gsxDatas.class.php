@@ -729,12 +729,13 @@ class gsxDatas {
 
 
             if ($this->isIphone) {
-                if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13) {
+                if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13) {//Si num imei echange des champ
                     $result['imeiNumber'] = $result['serialNumber'];
                     $result['serialNumber'] = '';
                 } else {
                     $result['imeiNumber'] = "";
                 }
+                
                 switch ($requestType) {
                     case 'CreateWholeUnitExchange':
                         $responseNames = array("CreateIPhoneWholeUnitExchangeResponse");
@@ -745,7 +746,8 @@ class gsxDatas {
                         $responseNames = array(
                             'IPhoneCreateCarryInResponse',
                             'IPhoneCreateCarryInRepairResponse',
-                            'CreateIPhoneCarryInRepairResponse'
+                            'CreateIPhoneCarryInRepairResponse',
+                            'CreateIPhoneCarryInResponse'
                         );
                         $client = 'IPhoneCreateCarryInRepair';
                         $request = 'CreateIPhoneCarryInRepairRequest';
@@ -793,15 +795,8 @@ class gsxDatas {
                         break;
                 }
             }
-//if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
-//    echo '<prix>0.00</prix><ok>Reload commande ok</ok><p class="confirmation">Requête envoyé avec succès.</p>';
-//    die();
-//}
-//            echo '<pre>';
-//            print_r($result);
-//            echo '</pre>';
+            
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
-//            echo "<pre>";print_r($requestData);die;
             $response = $this->gsx->request($requestData, $client);
                     dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
             if (count($this->gsx->errors['soap'])) {

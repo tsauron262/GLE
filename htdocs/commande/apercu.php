@@ -47,6 +47,8 @@ $result=restrictedArea($user,'commande',$id,'');
  * View Mode
  */
 
+$form = new Form($db);
+
 llxHeader('',$langs->trans('Order'),'EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes');
 
 if ($id > 0 || ! empty($ref))
@@ -64,23 +66,12 @@ if ($id > 0 || ! empty($ref))
 
         print '<table class="border" width="100%">';
 
-        // Ref
-        print '<tr><td width="18%">'.$langs->trans("Ref")."</td>";
-        print '<td colspan="2">'.$object->ref.'</td>';
-        print '<td width="50%">'.$langs->trans("Source").' : '.$object->getLabelSource();
-        if ($object->source == 0)
-        {
-            // Propale
-            /*Mod drsi */
-            $tabT = getElementElement("propal", "commande", Null, $object->id);
-            if(isset($tabT[0])){
-            $propal = new Propal($db);
-            $propal->fetch($tabT[0]['s']);
-            print ' -> <a href="'.DOL_URL_ROOT.'/comm/propal.php?id='.$propal->id.'">'.$propal->ref.'</a>';
-            }
-            /*f mod drsi */
-        }
-        print "</td></tr>";
+    	//$linkback = '<a href="' . DOL_URL_ROOT . '/comm/propal/list.php' . (! empty($socid) ? '?socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
+    
+    	// Ref
+    	print '<tr><td>' . $langs->trans('Ref') . '</td><td colspan="5">';
+    	print $form->showrefnav($object, 'ref', $linkback, 1, 'ref', 'ref', '');
+    	print '</td></tr>';
 
         // Ref cde client
         print '<tr><td>'.$langs->trans('RefCustomer').'</td>';
@@ -156,7 +147,7 @@ if ($id > 0 || ! empty($ref))
 			print "</table>\n";
 
 			// Conversion du PDF en image png si fichier png non existant
-			if (! file_exists($fileimage) && ! file_exists($fileimagebis))
+			if ((! file_exists($fileimage) && ! file_exists($fileimagebis)) || (filemtime($fileimage) < filemtime($file)))
 			{
 				if (class_exists("Imagick"))
 				{

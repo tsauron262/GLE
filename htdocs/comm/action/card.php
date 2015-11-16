@@ -97,7 +97,7 @@ $hookmanager->initHooks(array('actioncard','globalcard'));
 /*
  * Actions
  */
-
+$listUserAssignedUpdated = false;
 // Remove user to assigned list
 if (GETPOST('removedassigned') || GETPOST('removedassigned') == '0')
 {
@@ -115,6 +115,8 @@ if (GETPOST('removedassigned') || GETPOST('removedassigned') == '0')
 	$donotclearsession=1;
 	if ($action == 'add') $action = 'create';
 	if ($action == 'update') $action = 'edit';
+	
+	$listUserAssignedUpdated = true;
 }
 
 /*mod drsi*/
@@ -150,6 +152,8 @@ if (GETPOST('addassignedtouser') || GETPOST('updateassignedtouser'))
 	$donotclearsession=1;
 	if ($action == 'add') $action = 'create';
 	if ($action == 'update') $action = 'edit';
+
+	$listUserAssignedUpdated = true;
 }
 
 // Action clone object
@@ -340,7 +344,7 @@ if ($action == 'add')
 				unset($_SESSION['assignedtouser']);
 
 				$moreparam='';
-				if ($user->id != $object->ownerid) $moreparam="usertodo=-1";	// We force to remove filter so created record is visible when going back to per user view.
+				if ($user->id != $object->userownerid) $moreparam="usertodo=-1";	// We force to remove filter so created record is visible when going back to per user view.
 
 				$db->commit();
 				if (! empty($backtopage))
@@ -871,6 +875,28 @@ if ($id > 0)
 	$result4=$object->fetch_userassigned();
 	$result5=$object->fetch_optionals($id,$extralabels);
 
+	if($listUserAssignedUpdated || $donotclearsession) {
+		
+		$datep=dol_mktime($fulldayevent?'00':$aphour, $fulldayevent?'00':$apmin, 0, $_POST["apmonth"], $_POST["apday"], $_POST["apyear"]);
+		$datef=dol_mktime($fulldayevent?'23':$p2hour, $fulldayevent?'59':$p2min, $fulldayevent?'59':'0', $_POST["p2month"], $_POST["p2day"], $_POST["p2year"]);
+
+		$object->fk_action   = dol_getIdFromCode($db, GETPOST("actioncode"), 'c_actioncomm');
+		$object->label       = GETPOST("label");
+		$object->datep       = $datep;
+		$object->datef       = $datef;
+		$object->percentage  = $percentage;
+		$object->priority    = GETPOST("priority");
+        $object->fulldayevent= GETPOST("fullday")?1:0;
+		$object->location    = GETPOST('location');
+		$object->socid       = GETPOST("socid");
+		$object->contactid   = GETPOST("contactid",'int');
+		//$object->societe->id = $_POST["socid"];			// deprecated
+		//$object->contact->id = $_POST["contactid"];		// deprecated
+		$object->fk_project  = GETPOST("projectid",'int');
+		
+		$object->note = GETPOST("note");
+	}
+
 	if ($result1 < 0 || $result2 < 0 || $result3 < 0 || $result4 < 0 || $result5 < 0)
 	{
 		dol_print_error($db,$object->error);
@@ -1186,7 +1212,7 @@ if ($id > 0)
 		}
 
 		// Title
-		print '<tr><td>'.$langs->trans("Title").'</td><td colspan="3">'.$object->label.'</td></tr>';
+		print '<tr><td>'.$langs->trans("Title").'</td><td colspan="3">'.dol_htmlentities($object->label).'</td></tr>';
 
         // Full day event
         print '<tr><td>'.$langs->trans("EventOnFullDay").'</td><td colspan="3">'.yn($object->fulldayevent, 3).'</td></tr>';
@@ -1350,7 +1376,16 @@ if ($id > 0)
 			print '<br><br><table class="border" width="100%">';
 			foreach($extrafields->attribute_label as $key=>$label)
 			{
-				$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:(isset($object->array_options['options_'.$key])?$object->array_options['options_'.$key]:''));
+				if (isset($_POST["options_" . $key])) {
+					if (is_array($_POST["options_" . $key])) {
+						// $_POST["options"] is an array but following code expects a comma separated string
+						$value = implode(",", $_POST["options_" . $key]);
+					} else {
+						$value = $_POST["options_" . $key];
+					}
+				} else {
+					$value = $object->array_options["options_" . $key];
+				}
 				print '<tr><td width="30%">'.$label.'</td><td>';
 				print $extrafields->showOutputField($key,$value);
 				print "</td></tr>\n";

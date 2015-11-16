@@ -285,7 +285,7 @@ if ($resql)
 	 	$moreforfilter.='</div>';
 	}
 	// If the user can view prospects other than his'
-	if ($conf->categorie->enabled && $user->rights->produit->lire)
+	if ($conf->categorie->enabled && ($user->rights->produit->lire || $user->rights->service->lire))
 	{
 		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 		$moreforfilter.='<div class="divsearchfield">';
@@ -342,7 +342,7 @@ if ($resql)
 	print '</td>';
 	print '<td align="right">';
 	$liststatus=array('0'=>$langs->trans("StatusOrderDraftShort"), '1'=>$langs->trans("StatusOrderValidated"), '2'=>$langs->trans("StatusOrderSentShort"), '3'=>$langs->trans("StatusOrderToBill"), '4'=>$langs->trans("StatusOrderProcessed"), '-1'=>$langs->trans("StatusOrderCanceledShort"));
-	print $form->selectarray('viewstatut', $liststatus, $viewstatut, 1);
+	print $form->selectarray('viewstatut', $liststatus, $viewstatut, -4);
 	print '</td>';
 	print '<td class="liste_titre" align="right"><input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
 	print '<input type="image" class="liste_titre" name="button_removefilter" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';

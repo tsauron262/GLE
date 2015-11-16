@@ -287,7 +287,7 @@ if (!$withRev) {
 }
 
 
-$requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $id . " tview, " . MAIN_DB_PREFIX . "synopsischrono chr "
+$requete = " FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $id . " tview, " . MAIN_DB_PREFIX . "synopsischrono chr "
         . "LEFT JOIN " . MAIN_DB_PREFIX . "societe soc ON soc.rowid = fk_soc "
         . "WHERE model_refid = '" . $id . "' AND tview.id = chr.id " . $wh;
 
@@ -297,7 +297,7 @@ if($sidx == "id")
 $requete .= " ORDER BY " . $sidx . " " . $sord . "";
 
 //echo($requete);die;
-$result = $db->query($requete);
+$result = $db->query("SELECT COUNT(chr.id) as nb" . $requete);
 if (!$result) {
     $_REQUEST['idModel'] = $id;
     require(DOL_DOCUMENT_ROOT . "/synopsischrono/ajax/testCreateView.php");
@@ -310,7 +310,8 @@ class general {
     
 }
 
-$count = $db->num_rows($result);
+$ligneT = $db->fetch_object($result);
+$count = $ligneT->nb;
 
 $responce = new general();
 $responce->page = $page;
@@ -319,7 +320,7 @@ $responce->total = round(($count / $limit) + 0.49);
 //            $requete .= "      ORDER BY $sidx $sord";
 //            if ($sidx != "chrono_id" || $searchField) {
 //                $responce->records = $i;
-$requete .= "         LIMIT $start , $limit";
+$requete = "SELECT tview.*, chr.*, soc.nom as socname, soc.rowid as socid" .$requete. "         LIMIT $start , $limit";
 //            } else
 $responce->records = $count;
 

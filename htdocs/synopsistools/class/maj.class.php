@@ -28,7 +28,8 @@ class maj {
         if (!is_dir($dir))
             mkdir($dir);
         $backup = $dir . $date . "_" .($table != "" ? $table."_":"").$dolibarr_main_db_name . ".sql";
-        $command = "mysqldump --host=" . $dolibarr_main_db_host . " -P ".$dolibarr_main_db_port." --user=" . $dolibarr_main_db_user . " --password=".$dolibarr_main_db_pass." "."$dolibarr_main_db_name".($table != "" ? " ".$table : "")."| gzip > ".$backup.".gz";
+        $sortieFile = "| gzip > ".$backup.".gz";
+        $command = "mysqldump --host=" . $dolibarr_main_db_host . " -P ".$dolibarr_main_db_port." --user=" . $dolibarr_main_db_user . " --password=".$dolibarr_main_db_pass." "."$dolibarr_main_db_name".($table != "" ? " ".$table : "").$sortieFile;
 //        echo "Votre base est en cours de sauvegarde.......<br/>";
         $result = "inc";
         $retour = system($command, $result);

@@ -1090,7 +1090,7 @@ class GSX {
         if (!in_array($code, $codeIgnore)) {
             dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR, 0, "_apple");
             if (!in_array($code, $codeIgnore2))
-                $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
+                $this->errors['log']['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
 //        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
         }
     }

@@ -110,8 +110,8 @@ class PDO extends AbstractBackend {
 
         // Making fields a comma-delimited list
         $fields = implode(', ', $fields);
-        $stmt = $this->pdo->prepare("SELECT " . $fields . " FROM " . $this->calendarTableName . " WHERE principaluri = ? ORDER BY calendarorder ASC");
-        $stmt->execute(array($principalUri));
+        $stmt = $this->pdo->prepare("SELECT " . $fields . " FROM " . $this->calendarTableName . " WHERE login = ? ORDER BY calendarorder ASC");
+        $stmt->execute(array(str_replace("principals/","",$principalUri)));
 
         $calendars = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {

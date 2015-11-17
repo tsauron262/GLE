@@ -292,16 +292,13 @@ $requete = " FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $id . " tview,
         . "WHERE model_refid = '" . $id . "' AND tview.id = chr.id " . $wh;
 
 $requete .= $wh1;
-if($sidx == "id")
-    $sidx = "tview.id";
-$requete .= " ORDER BY " . $sidx . " " . $sord . "";
 
 //echo($requete);die;
 $result = $db->query("SELECT COUNT(chr.id) as nb" . $requete);
 if (!$result) {
     $_REQUEST['idModel'] = $id;
     require(DOL_DOCUMENT_ROOT . "/synopsischrono/ajax/testCreateView.php");
-    $result = $db->query($requete);
+    $result = $db->query("SELECT COUNT(chr.id) as nb" . $requete);
     if (!$result)
         die("Impossible de construire les vue");
 }
@@ -309,6 +306,10 @@ if (!$result) {
 class general {
     
 }
+
+if($sidx == "id")
+    $sidx = "tview.id";
+$requete .= " ORDER BY " . $sidx . " " . $sord . "";
 
 $ligneT = $db->fetch_object($result);
 $count = $ligneT->nb;

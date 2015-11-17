@@ -409,10 +409,12 @@ if (! defined('NOLOGIN'))
         
         /*mod drsi*/ //verif si captcha doit étre vérifié.
         $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
-        if(isset($tabT[0]))
-            $nbErr = intval($tabT[0]['d'])+1;
+        if(isset($tabT[0])){
+            $nbErr = intval($tabT[0]['d']);
+            $nbErrTot = intval($tabT[0]['s']);
+        }
         else
-            $nbErr = 0;
+            $nbErr = $nbErrTot = 0;
         if($nbErr > 2)
             $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
         /*f mod drsi*/
@@ -506,7 +508,9 @@ if (! defined('NOLOGIN'))
                 
                 /*mod drsi*/ //On est en erreur, on ajoute erreur est si plus de 2 on affiche captcha
                 $nbErr++;
-                setElementElement("userErr", GETPOST("username","alpha",2), "1", $nbErr);
+                $nbErrTot++;
+                delElementElement("userErr", GETPOST("username","alpha",2));
+                setElementElement("userErr", GETPOST("username","alpha",2), $nbErrTot, $nbErr);
                 if($nbErr > 2)
                     $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
                 /*f mod drsi*/
@@ -659,7 +663,8 @@ if (! defined('NOLOGIN'))
         
         
         /*mod drsi*/ //So log ok on efface les erreur
-        setElementElement("userErr", GETPOST("username","alpha",2), 1,0);
+        delElementElement("userErr", GETPOST("username","alpha",2));
+        addElementElement("userErr", GETPOST("username","alpha",2), $nbErrTot,0);
         /*f mod drsi*/
                 
                 

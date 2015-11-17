@@ -157,8 +157,8 @@ class PDO extends AbstractBackend {
         foreach($this->fieldMap as $key=>$value) {
             $fields[] = $value['dbField'];
         }
-        $stmt = $this->pdo->prepare('SELECT '.implode(',', $fields).'  FROM '. $this->tableName . ' WHERE uri = ?');
-        $stmt->execute(array($path));
+        $stmt = $this->pdo->prepare('SELECT '.implode(',', $fields).'  FROM '. $this->tableName . ' WHERE login = ?');
+        $stmt->execute(array(str_replace("principals/","",$path)));
 
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         if (!$row) return;

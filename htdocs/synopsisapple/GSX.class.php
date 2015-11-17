@@ -683,7 +683,7 @@ class GSX {
 
                 $requestName = $clientLookup . 'Request';
                 $wrapperName = 'lookupRequestData';
-dol_syslog("requete : ".$requestName, 3);
+                dol_syslog("requete : " . $requestName, 3);
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
 
@@ -896,9 +896,9 @@ dol_syslog("requete : ".$requestName, 3);
                 return array();
             } else {
                 $add = "";
-                if(isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
-                    $add = print_r($f->detail->errors->error,1);
-                $this->soap_error($f->faultcode, $f->faultstring . " <pre> ".$add . print_r($SOAPRequest, true));
+                if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
+                    $add = print_r($f->detail->errors->error, 1);
+                $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true));
 //            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
                 return array();
             }
@@ -1081,15 +1081,18 @@ dol_syslog("requete : ".$requestName, 3);
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
 
-        $codeIgnore = array("RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010", "RPR.LKP.01", "RPR.RTN.005");
-        $codeIgnore2 = array("RPR.CIN.025");
+        $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
+
+
+        $codeIgnore = array("RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010", "RPR.LKP.01", "RPR.RTN.005", "RPR.CIN.025", "RPR.COM.502", "RPR.COM.623", "RPR.COM.108");
+        $codeIgnore2 = array();
 
         if (!in_array($code, $codeIgnore)) {
             dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR, 0, "_apple");
+            if (!in_array($code, $codeIgnore2))
+                $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
 //        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
         }
-        if (!in_array($code, $codeIgnore2))
-            $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
     }
 
     public function resetSoapErrors() {
@@ -1097,21 +1100,22 @@ dol_syslog("requete : ".$requestName, 3);
         $this->errors['soap'] = array();
     }
 
-    public function getGSXErrorsHtml() {
+    public function getGSXErrorsHtml($log = false) {
         $html = '';
-        if (count($this->errors['init'])) {
+        $tab = ($log) ? $this->errors['log'] : $this->errors;
+        if (count($tab['init'])) {
             $html .= '<p class="error">Erreur(s) de connection: <br/>';
             $i = 1;
-            foreach ($this->errors['init'] as $errorMsg) {
+            foreach ($tab['init'] as $errorMsg) {
                 $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
                 $i++;
             }
             $html .= '</p>';
         }
-        if (count($this->errors['soap'])) {
+        if (count($tab['soap'])) {
             $html .= '<p class="error">Erreur(s) SOAP: <br/>';
             $i = 1;
-            foreach ($this->errors['soap'] as $errorMsg) {
+            foreach ($tab['soap'] as $errorMsg) {
                 $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
                 $i++;
             }

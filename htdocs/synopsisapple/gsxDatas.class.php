@@ -806,7 +806,8 @@ class gsxDatas {
                     if(isset($tabT['repairData']) && isset($tabT['repairData']['fileData']))
                         $requestData[$nomReq]['repairData']['fileData'] = "Fichier joint exclue du log";
                 }
-                dol_syslog("erreur GSX : " . $this->getGSXErrorsHtml() . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
+                if(count($this->gsx->errors['log']['soap']))
+                    dol_syslog("erreur GSX : " . $this->getGSXErrorsHtml() . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
             } else {//pas d'erreur, on analyse le résultat
                 if ($requestType == "CreateMailInRepair" || $requestType == "KGBSerialNumberUpdate")
 //                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
@@ -944,9 +945,9 @@ class gsxDatas {
         return $html;
     }
 
-    public function getGSXErrorsHtml() {
+    public function getGSXErrorsHtml($log = false) {
         if (is_object($this->gsx))
-            return $this->gsx->getGSXErrorsHtml();
+            return $this->gsx->getGSXErrorsHtml($log);
         else
             return '';
     }

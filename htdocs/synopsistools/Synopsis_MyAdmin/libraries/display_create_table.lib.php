@@ -32,32 +32,18 @@ if (! defined('PHPMYADMIN')) {
  *
  */
 require_once './libraries/check_user_privileges.lib.php';
+require_once 'libraries/Template.class.php';
 
-$is_create_table_priv = true;
-
-?>
-    <form id="create_table_form_minimal" method="post" action="tbl_create.php"<?php echo ($GLOBALS['cfg']['AjaxEnable'] ? ' class="ajax"' : ''); ?>>
-<fieldset>
-    <legend>
-<?php
-if ($GLOBALS['cfg']['PropertiesIconic']) {
-    echo PMA_getImage('b_newtbl.png');
+/**
+ * Returns the html for create table.
+ *
+ * @param string $db database name
+ *
+ * @return string
+ */
+function PMA_getHtmlForCreateTable($db)
+{
+    return PMA\Template::get('database/create_table')->render(
+        array('db' => $db)
+    );
 }
-echo __('Create table');
-?>
-    </legend>
-    <?php echo PMA_generate_common_hidden_inputs($db); ?>
-    <div class="formelement">
-        <?php echo __('Name'); ?>:
-        <input type="text" name="table" maxlength="64" size="30" />
-    </div>
-    <div class="formelement">
-        <?php echo __('Number of columns'); ?>:
-        <input type="text" name="num_fields" size="2" />
-    </div>
-    <div class="clearfloat"></div>
-</fieldset>
-<fieldset class="tblFooters">
-    <input type="submit" value="<?php echo __('Go'); ?>" />
-</fieldset>
-</form>

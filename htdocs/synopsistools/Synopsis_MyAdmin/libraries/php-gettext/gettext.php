@@ -7,7 +7,7 @@
 
    PHP-gettext is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
    PHP-gettext is distributed in the hope that it will be useful,
@@ -98,7 +98,7 @@ class gettext_reader {
    * @param object Reader the StreamReader object
    * @param boolean enable_cache Enable or disable caching of strings (default on)
    */
-  function gettext_reader($Reader, $enable_cache = true) {
+  public function __construct($Reader, $enable_cache = true) {
     // If there isn't a StreamReader, turn on short circuit mode.
     if (! $Reader || isset($Reader->error) ) {
       $this->short_circuit = true;
@@ -429,4 +429,3 @@ class gettext_reader {
   }
 }
 
-?>

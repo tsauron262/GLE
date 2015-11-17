@@ -6,7 +6,7 @@
 
    PHP-gettext is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
    PHP-gettext is distributed in the hope that it will be useful,
@@ -49,7 +49,7 @@ class StringReader {
   var $_pos;
   var $_str;
 
-  function StringReader($str='') {
+  public function __construct($str='') {
     $this->_str = $str;
     $this->_pos = 0;
   }
@@ -86,7 +86,7 @@ class FileReader {
   var $_fd;
   var $_length;
 
-  function FileReader($filename) {
+  public function __construct($filename) {
     if (file_exists($filename)) {
 
       $this->_length=filesize($filename);
@@ -143,7 +143,7 @@ class FileReader {
 // Preloads entire file in memory first, then creates a StringReader
 // over it (it assumes knowledge of StringReader internals)
 class CachedFileReader extends StringReader {
-  function CachedFileReader($filename) {
+  public function __construct($filename) {
     if (file_exists($filename)) {
 
       $length=filesize($filename);
@@ -164,4 +164,3 @@ class CachedFileReader extends StringReader {
 };
 
 
-?>

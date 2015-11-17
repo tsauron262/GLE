@@ -17,6 +17,15 @@ header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
 define('PMA_MINIMUM_COMMON', true);
 require_once './libraries/common.inc.php';
 
+require_once './libraries/OutputBuffering.class.php';
+$buffer = PMA_OutputBuffering::getInstance();
+$buffer->start();
+register_shutdown_function(
+    function () {
+        echo PMA_OutputBuffering::getInstance()->getContents();
+    }
+);
+
 // Get the data for the sprites, if it's available
 if (is_readable($_SESSION['PMA_Theme']->getPath() . '/sprites.lib.php')) {
     include $_SESSION['PMA_Theme']->getPath() . '/sprites.lib.php';
@@ -52,7 +61,7 @@ foreach ($sprites as $key => $value) {
  */
 function PMA_getImage(image, alternate, attributes) {
     var in_array = function (needle, haystack) {
-        for (i in haystack) {
+        for (var i in haystack) {
             if (haystack[i] == needle) {
                 return true;
             }
@@ -68,7 +77,8 @@ function PMA_getImage(image, alternate, attributes) {
             // this is private
             alt: '',
             title: '',
-            src: 'themes/dot.gif'
+            src: (typeof PMA_TEST_THEME == 'undefined' ? '' : '../')
+                + 'themes/dot.gif'
         },
         isSprite: true,
         attr: function (name, value) {
@@ -118,14 +128,19 @@ function PMA_getImage(image, alternate, attributes) {
     } else {
         // it's an image file
         retval.isSprite = false;
-        retval.attr('src', "<?php echo $_SESSION['PMA_Theme']->getImgPath(); ?>" + image);
+        retval.attr(
+            'src',
+            "<?php echo $_SESSION['PMA_Theme']->getImgPath(); ?>" + image
+        );
     }
     // set all other attrubutes
     for (var i in attributes) {
         if (i == 'src') {
             // do not allow to override the 'src' attribute
             continue;
-        } else if (i == 'class') {
+        }
+
+        if (i == 'class') {
             retval.attr(i, retval.attr('class') + ' ' + attributes[i]);
         } else {
             retval.attr(i, attributes[i]);
@@ -133,4 +148,5 @@ function PMA_getImage(image, alternate, attributes) {
     }
 
     return retval;
-};
+}
+//

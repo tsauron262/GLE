@@ -9,7 +9,7 @@
 
    PHP-gettext is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
 
    PHP-gettext is distributed in the hope that it will be useful,
@@ -174,13 +174,14 @@ function _get_codeset($domain=null) {
  * Convert the given string to the encoding set by bind_textdomain_codeset.
  */
 function _encode($text) {
-  $target_encoding = _get_codeset();
-  if (function_exists("mb_detect_encoding")) {
     $source_encoding = mb_detect_encoding($text);
-    if ($source_encoding != $target_encoding)
-      $text = mb_convert_encoding($text, $target_encoding, $source_encoding);
-  }
-  return $text;
+    $target_encoding = _get_codeset();
+    if ($source_encoding != $target_encoding) {
+        return mb_convert_encoding($text, $target_encoding, $source_encoding);
+    }
+    else {
+        return $text;
+    }
 }
 
 

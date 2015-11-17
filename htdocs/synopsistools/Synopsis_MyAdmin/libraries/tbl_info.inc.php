@@ -12,27 +12,21 @@ if (! defined('PHPMYADMIN')) {
     exit;
 }
 
-/**
- * requirements
- */
-require_once './libraries/common.inc.php';
-
 // Check parameters
-PMA_checkParameters(array('db', 'table'));
+PMA_Util::checkParameters(array('db', 'table'));
 
 /**
  * Defining global variables, in case this script is included by a function.
- * This is necessary because this script can be included by libraries/header.inc.php.
  */
-global $showtable, $tbl_is_view, $tbl_type, $show_comment, $tbl_collation,
+global $showtable, $tbl_is_view, $tbl_storage_engine, $show_comment, $tbl_collation,
        $table_info_num_rows, $auto_increment;
 
 /**
- * Gets table informations
+ * Gets table information
  */
 // Seems we need to do this in MySQL 5.0.2,
 // otherwise error #1046, no database selected
-PMA_DBI_select_db($GLOBALS['db']);
+$GLOBALS['dbi']->selectDb($GLOBALS['db']);
 
 
 /**
@@ -44,34 +38,38 @@ PMA_DBI_select_db($GLOBALS['db']);
  */
 $GLOBALS['showtable'] = array();
 
-// PMA_Table::sGetStatusInfo() does caching by default, but here
+// PMA_Table::getStatusInfo() does caching by default, but here
 // we force reading of the current table status
 // if $reread_info is true (for example, coming from tbl_operations.php
 // and we just changed the table's storage engine)
-$GLOBALS['showtable'] = PMA_Table::sGetStatusInfo($GLOBALS['db'], $GLOBALS['table'], null, (isset($reread_info) && $reread_info ? true : false));
+$GLOBALS['showtable'] = $GLOBALS['dbi']->getTable(
+    $GLOBALS['db'],
+    $GLOBALS['table']
+)->getStatusInfo(
+    null,
+    (isset($reread_info) && $reread_info ? true : false)
+);
 
 // need this test because when we are creating a table, we get 0 rows
 // from the SHOW TABLE query
-// and we don't want to mess up the $tbl_type coming from the form
+// and we don't want to mess up the $tbl_storage_engine coming from the form
 
 if ($showtable) {
-    if (PMA_Table::isView($GLOBALS['db'], $GLOBALS['table'])) {
+    /** @var PMA_String $pmaString */
+    $pmaString = $GLOBALS['PMA_String'];
+
+    if ($GLOBALS['dbi']->getTable($GLOBALS['db'], $GLOBALS['table'])->isView()) {
         $tbl_is_view     = true;
-        $tbl_type        = __('View');
+        $tbl_storage_engine = __('View');
         $show_comment    = null;
     } else {
         $tbl_is_view     = false;
-        $tbl_type        = isset($showtable['Engine'])
-            ? strtoupper($showtable['Engine'])
+        $tbl_storage_engine = isset($showtable['Engine'])
+            ? /*overload*/mb_strtoupper($showtable['Engine'])
             : '';
-        // a new comment could be coming from tbl_operations.php
-        // and we want to show it in the header
-        if (isset($submitcomment) && isset($comment)) {
-            $show_comment = $comment;
-        } else {
-            $show_comment    = isset($showtable['Comment'])
-                ? $showtable['Comment']
-                : '';
+        $show_comment = '';
+        if (isset($showtable['Comment'])) {
+            $show_comment = $showtable['Comment'];
         }
     }
     $tbl_collation       = empty($showtable['Collation'])
@@ -79,8 +77,9 @@ if ($showtable) {
         : $showtable['Collation'];
 
     if (null === $showtable['Rows']) {
-        $showtable['Rows']   = PMA_Table::countRecords($GLOBALS['db'],
-            $showtable['Name'], true);
+        $showtable['Rows']   = $GLOBALS['dbi']
+            ->getTable($GLOBALS['db'], $showtable['Name'])
+            ->countRecords(true);
     }
     $table_info_num_rows = isset($showtable['Rows']) ? $showtable['Rows'] : 0;
     $row_format = isset($showtable['Row_format']) ? $showtable['Row_format'] : '';
@@ -98,11 +97,13 @@ if ($showtable) {
     foreach ($create_options as $each_create_option) {
         $each_create_option = explode('=', $each_create_option);
         if (isset($each_create_option[1])) {
-            $$each_create_option[0]    = $each_create_option[1];
+            // ensure there is no ambiguity for PHP 5 and 7
+            ${$each_create_option[0]} = $each_create_option[1];
         }
     }
     // we need explicit DEFAULT value here (different from '0')
-    $pack_keys = (! isset($pack_keys) || strlen($pack_keys) == 0) ? 'DEFAULT' : $pack_keys;
+    $pack_keys = (! isset($pack_keys) || /*overload*/mb_strlen($pack_keys) == 0)
+        ? 'DEFAULT'
+        : $pack_keys;
     unset($create_options, $each_create_option);
 } // end if
-?>

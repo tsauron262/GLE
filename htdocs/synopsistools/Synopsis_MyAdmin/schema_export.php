@@ -1,6 +1,7 @@
 <?php
 /* vim: set expandtab sw=4 ts=4 sts=4: */
 /**
+ * Schema export handler
  *
  * @package PhpMyAdmin
  */
@@ -8,35 +9,58 @@
 /**
  * Gets some core libraries
  */
-require_once './libraries/common.inc.php';
-require './libraries/StorageEngine.class.php';
+require_once 'libraries/common.inc.php';
+require 'libraries/StorageEngine.class.php';
 
 /**
- * Include settings for relation stuff
  * get all variables needed for exporting relational schema
  * in $cfgRelation
  */
-require_once './libraries/relation.lib.php';
 $cfgRelation = PMA_getRelationsParam();
 
-require_once './libraries/transformations.lib.php';
-require_once './libraries/Index.class.php';
-require_once "./libraries/schema/Export_Relation_Schema.class.php";
+require_once 'libraries/Index.class.php';
+require_once 'libraries/pmd_common.php';
+require_once 'libraries/plugin_interface.lib.php';
+
+/**
+ * Include the appropriate Schema Class depending on $export_type
+ * default is PDF
+ */
+PMA_processExportSchema($_REQUEST['export_type']);
 
 /**
  * get all the export options and verify
  * call and include the appropriate Schema Class depending on $export_type
- * default is PDF
+ *
+ * @param string $export_type format of the export
+ *
+ * @return void
  */
-global  $db, $export_type;
-if (!isset($export_type) || !preg_match('/^[a-zA-Z]+$/', $export_type)) {
-    $export_type = 'pdf';
-}
-PMA_DBI_select_db($db);
+function PMA_processExportSchema($export_type)
+{
+    /**
+     * default is PDF, otherwise validate it's only letters a-z
+     */
+    if (! isset($export_type) || ! preg_match('/^[a-zA-Z]+$/', $export_type)) {
+        $export_type = 'pdf';
+    }
 
-$path = PMA_securePath(ucfirst($export_type));
-if (!file_exists('./libraries/schema/' . $path . '_Relation_Schema.class.php')) {
-    PMA_Export_Relation_Schema::dieSchema($_POST['chpage'], $export_type, __('File doesn\'t exist'));
+    // sanitize this parameter which will be used below in a file inclusion
+    $export_type = PMA_securePath($export_type);
+
+    // get the specific plugin
+    /* @var $export_plugin SchemaPlugin */
+    $export_plugin = PMA_getPlugin(
+        "schema",
+        $export_type,
+        'libraries/plugins/schema/'
+    );
+
+    // Check schema export type
+    if (! isset($export_plugin)) {
+        PMA_fatalError(__('Bad type!'));
+    }
+
+    $GLOBALS['dbi']->selectDb($GLOBALS['db']);
+    $export_plugin->exportSchema($GLOBALS['db']);
 }
-require "./libraries/schema/".$path."_Relation_Schema.class.php";
-$obj_schema = eval("new PMA_".$path."_Relation_Schema();");

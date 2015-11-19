@@ -863,6 +863,23 @@ if ($action == 'create')
 if ($id > 0)
 {
 	$result1=$object->fetch($id);
+        
+        
+        $fulldayevent=GETPOST('fullday');
+        $aphour=GETPOST('aphour');
+        $apmin=GETPOST('apmin');
+        $p2hour=GETPOST('p2hour');
+        $p2min=GETPOST('p2min');
+        $percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
+                if(GETPOST("complete") == -2)
+                    $percentage = -2;
+	    // Clean parameters
+		if ($aphour == -1) $aphour='0';
+		if ($apmin == -1) $apmin='0';
+		if ($p2hour == -1) $p2hour='0';
+		if ($p2min == -1) $p2min='0';
+                
+                
         /*mod drsi*/
         if(!$object->id > 0){
             echo "Elément inexistant.";

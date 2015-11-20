@@ -16,8 +16,8 @@ class GsxUps {
             'production' => 'https://onlinetools.ups.com/webservices/Ship'
         )
     );
-    public static $apiMode = 'ut';
-    //    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
+        public static $apiMode = 'production';
     public static $upsCarrierCode = 'UPSWW065';
     public $upsConfig = array(
         'access' => "5CFD6AC514872584",

@@ -169,7 +169,22 @@ $this->menus = array();			// List of menus to add
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
-					'user'=>0);	
+					'user'=>0);
+                
+                
+		$r++;
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=apple',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
+					'type'=>'left',			// This is a Left menu entry
+					'titre'=>'Retour groupés',
+					'mainmenu'=>'apple',
+					'leftmenu'=>'apple',
+					'url'=>'/synopsisapple/ups/retour.php',
+					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+					'position'=>204,
+					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'target'=>'',
+					'user'=>0);
         
 //        $this->tabs = array('contract:+prelevAuto:Prélèvement:synopsisGene@synopsistools:/synopsisprelevauto/prelev.php?id=__ID__&type=contrat');
     }
@@ -180,6 +195,38 @@ $this->menus = array();			// List of menus to add
   function init()
   {
     $sql = array();
+    $sql[] = "CREATE TABLE IF NOT EXISTS `llx_synopsisapple_shipment` (
+  `rowid` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ship_to` text NOT NULL,
+  `length` int(11) NOT NULL DEFAULT '0',
+  `width` int(11) NOT NULL DEFAULT '0',
+  `height` int(11) NOT NULL DEFAULT '0',
+  `weight` int(11) NOT NULL DEFAULT '0',
+  `transportation_charges` decimal(10,0) NOT NULL DEFAULT '0',
+  `options_charges` decimal(10,0) NOT NULL DEFAULT '0',
+  `total_charges` decimal(10,0) NOT NULL DEFAULT '0',
+  `billing_weight` decimal(10,0) NOT NULL DEFAULT '0',
+  `tracking_number` text,
+  `identification_number` text,
+  `gsx_confirmation` text,
+  `gsx_return_id` text,
+  `gsx_pdf_name` text,
+  `gsx_tracking_url` text,
+  PRIMARY KEY (`rowid`)
+)";
+    
+    $sql[] = "CREATE TABLE IF NOT EXISTS `llx_synopsisapple_shipment_parts` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `shipment_id` int(11) NOT NULL,
+  `name` text NOT NULL,
+  `part_number` text NOT NULL,
+  `part_new_number` text,
+  `part_po_number` text NOT NULL,
+  `repair_number` text NOT NULL,
+  `serial` text NOT NULL,
+  `return_order_number` text NOT NULL,
+  PRIMARY KEY (`rowid`)
+)";
     return $this->_init($sql);
   }
 

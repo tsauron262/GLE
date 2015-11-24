@@ -31,6 +31,14 @@
  * @package PhpMyAdmin
  */
 
+
+require_once("../verifLog.php");
+
+
+
+
+
+
 /**
  * block attempts to directly run this script
  */

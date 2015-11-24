@@ -75,7 +75,7 @@ class favoriCli {
 //print '<a href="#" class="vsmenu">'..'</a>';
             $ret = self::histoUser($res);
             if ($ret)
-                $return .= "<div class='menu_contenu'>  " . $ret . "</div>";
+                $return .= "<div class='menu_contenu'>  " . $ret . "<input type='button' class='supprFav' value='X'/></div>";
         }
         $return .= "<div class=\"menu_end\">";
         $return .= '<form method="post"><input type="submit" name="saveFav" class="butAction" value="Ajouter au favori"/></form>';

@@ -121,14 +121,16 @@ if (GETPOST('removedassigned') || GETPOST('removedassigned') == '0')
 
 /*mod drsi*/
 if(isset($_REQUEST['addGroupMember'])){
-    require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
-    $tabT = json_decode($_SESSION['assignedtouser'], true);
-    $group = new UserGroup($db);
-    $group->fetch($_REQUEST['groupsAdd']);
-    foreach ($group->listUsersForGroup('', 1) as $userT){
-        $tabT[$userT] = array('id'=>$userT, 'transparency'=>1,'mandatory'=>1);
+    if($_REQUEST['groupsAdd'] > 0){
+        require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
+        $tabT = json_decode($_SESSION['assignedtouser'], true);
+        $group = new UserGroup($db);
+        $group->fetch($_REQUEST['groupsAdd']);
+        foreach ($group->listUsersForGroup('', 1) as $userT){
+            $tabT[$userT] = array('id'=>$userT, 'transparency'=>1,'mandatory'=>1);
+        }
+        $_SESSION['assignedtouser']=json_encode($tabT);
     }
-    $_SESSION['assignedtouser']=json_encode($tabT);
     $donotclearsession=1;
     if ($action == 'add') $action = 'create';
     if ($action == 'update') $action = 'edit';

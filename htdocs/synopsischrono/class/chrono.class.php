@@ -645,10 +645,10 @@ class Chrono extends CommonObject {
         if ($this->model_refid == 105 && isset($this->values["Prioritaire"]) && $this->values["Prioritaire"] == 1)//rouge sur sav urgent
             $color = "red";
         
-        if ($this->model_refid == 106 && isset($this->values["Restitue"]) && $this->values["Restitue"] == 1)//vert sur pret erminé
-            $color = "green";
         if ($this->model_refid == 106 && isset($this->values["Fin_Pret"]) && new DateTime($this->values["Fin_Pret"]) < new DateTime('today'))//vert sur pret en retard
             $color = "red";
+        if ($this->model_refid == 106 && isset($this->values["Restitue"]) && $this->values["Restitue"] == 1)//vert sur pret erminé
+            $color = "green";
         
 
 

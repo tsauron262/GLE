@@ -222,7 +222,7 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
                             $pdf->SetXY(5, $y);
                             $pdf->MultiCell(28, 6, $prod->ref, 0, 'C');
                             $pdf->SetXY(35, $y);
-                            $pdf->MultiCell(60, 6, $prod->libelle . " (" . $chrono2->valuesPlus[1073]->value . ")", 0, 'C');
+                            $pdf->MultiCell(60, 6, $prod->label . " (" . $chrono2->valuesPlus[1073]->value . ")", 0, 'C');
                             $pdf->SetXY(97, $y);
                             $pdf->MultiCell(33, 6, price($prod->price), 0, 'C');
                             $pdf->SetXY(127, $y);

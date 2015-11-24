@@ -59,6 +59,8 @@ class CSMSFile
 	{
 		global $conf;
 
+                $to = traiteNumMobile($to);
+                
 		// On definit fin de ligne
 		$this->eol="\n";
 		if (preg_match('/^win/i',PHP_OS)) $this->eol="\r\n";
@@ -129,7 +131,7 @@ class CSMSFile
 				{
 					dol_syslog("CSMSFile::sendfile: sms send success with id=".$res, LOG_DEBUG);
 					//var_dump($res);        // 1973128
-					$this->dump_sms_result($res." Phone : ".$sms->dest);
+					$this->dump_sms_result($res." Phone : ".$sms->dest." Mess : ".$this->message);
 				}
 			}
 		    else if (! empty($conf->global->MAIN_SMS_SENDMODE))    // $conf->global->MAIN_SMS_SENDMODE looks like a value 'class@module'
@@ -158,7 +160,7 @@ class CSMSFile
     				{
     					dol_syslog("CSMSFile::sendfile: sms send success with id=".$res, LOG_DEBUG);
     					//var_dump($res);        // 1973128
-    					$this->dump_sms_result($res." Phone : ".$sms->dest);
+    					$this->dump_sms_result($res." Phone : ".$sms->dest." Mess : ".$this->message);
     				}
 		        }
 		        catch(Exception $e)
@@ -240,3 +242,13 @@ class CSMSFile
 
 }
 
+
+
+
+
+function traiteNumMobile($str){
+        $to = str_replace(" ", "", $to);
+        if (stripos($to, "+") === false)
+            $to = "+33" . substr($to, 1, 10);
+        return $to;
+}

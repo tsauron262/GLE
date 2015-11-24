@@ -386,8 +386,10 @@ function testNumSms($to){
         return 1;
 }
 
+
 function sendSms($chrono, $text) {
     if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms']) {
+        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         if (is_object($chrono->contact) && testNumSms($chrono->contact->phone_mobile))
             $to = $chrono->contact->phone_mobile;
         elseif (is_object($chrono->contact) && testNumSms($chrono->contact->phone_pro))
@@ -398,18 +400,14 @@ function sendSms($chrono, $text) {
             $to = $chrono->societe->phone;
         $fromsms = urlencode('SAV BIMP');
 
-        $to = str_replace(" ", "", $to);
-
+        $to = traiteNumMobile($to);
         if ($to == "" || stripos($to, "6") === false)
             return 0;
 
 
 //    echo $to . "   |   " . $text;
 //    die;
-        if (stripos($to, "+") === false)
-            $to = "+33" . substr($to, 1, 10);
 
-        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         $smsfile = new CSMSFile($to, $fromsms, $text);
         $return = $smsfile->sendfile();
         

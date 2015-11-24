@@ -2,7 +2,9 @@
 
 require_once('../main.inc.php');
 
-llxHeader("", "Signaler un bug");
+require_once DOL_DOCUMENT_ROOT.'/synopsischrono/class/chrono.class.php';
+
+llxHeader("", "Suivie des prêt SAV");
 
 
 print load_fiche_titre("Suivie des prêt SAV en cours");

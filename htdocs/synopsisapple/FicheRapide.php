@@ -585,7 +585,7 @@ if ($socid != "") {
 
 function existProd($nomachine) {
     global $db;
-    $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 WHERE N__Serie = '" . $nomachine . "';";
+    $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 WHERE N__Serie = '" . addslashes($nomachine) . "';";
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0) {
         $obj = $db->fetch_object($sql);

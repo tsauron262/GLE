@@ -498,7 +498,7 @@ class shipment {
             $html .= $this->getFilesList();
         } 
         
-        if (isset($this->gsxInfos['bulkReturnId']) &&  !$this->checkPartsLabels()) {
+        if (isset($this->gsxInfos['bulkReturnId'])  &&  !$this->checkPartsLabels()) {
             $html .= '<div id="partsLabelRequestInfos" style="text-align: center">';
             $html .= '<p class="alert">les étiquettes de retour des composants n\'ont pas été téléchargées</p>';
             $html .= '<span class="button" onclick="loadPartsReturnLabels('.$this->rowid.')">Télécharger les étiquettes de retour des composants</span>';

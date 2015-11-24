@@ -226,6 +226,10 @@ $this->menus = array();			// List of menus to add
   `return_order_number` text NOT NULL,
   PRIMARY KEY (`rowid`)
 )";
+        
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES
+(null, 'appleretour', 1, 'synopsisapple', 'Doc retour', NULL);
+";
     return $this->_init($sql);
   }
 

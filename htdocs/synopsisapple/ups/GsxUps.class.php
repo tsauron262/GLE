@@ -555,6 +555,10 @@ class GsxUps {
                 'html' => $html
             );
         }
+        
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/core/modules/synopsisapple/modules_synopsisapple.php");
+        synopsisapple_pdf_create($db, $ship, 'appleretour');
+        
         return array(
             'ok' => 1,
             'html' => ''

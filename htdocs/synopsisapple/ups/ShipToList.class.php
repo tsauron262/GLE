@@ -15,6 +15,9 @@ self::$list[$centre['4']] =  array(
                 'StateProvinceCode' => substr($centre['5'],0,2),
                 'PostalCode' => $centre['5'],
                 'CountryCode' => 'FR',
+            ),
+            'Phone' => array(
+                'Number' => $centre['0']
             ));/*echo "<pre>";
 print_r(self::$list);*/
 	}

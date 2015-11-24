@@ -31,10 +31,10 @@ EOF;
 llxHeader($js, "Fichier de log");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Export Sav"));
 
-if(!isset($user->rights->synopsisApple->read) || $user->rights->synopsisApple->read != 1)
+if(!isset($user->rights->synopsisapple->read) || $user->rights->synopsisapple->read != 1)
      accessforbidden("", 0,0);
 
-$blockCentre = (!$user->rights->synopsisApple->stat ? explode(" ", trim($user->array_options['options_apple_centre'])) : null);
+$blockCentre = (!$user->rights->synopsisapple->stat ? explode(" ", trim($user->array_options['options_apple_centre'])) : null);
 
 
 

@@ -68,7 +68,7 @@ class modSynopsisApple extends DolibarrModules
 
         // Permissions
         $this->rights = array();
-        $this->rights_class = 'synopsisApple';
+        $this->rights_class = 'synopsisapple';
 
         $r = 1;
 

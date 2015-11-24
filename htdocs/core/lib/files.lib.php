@@ -1951,6 +1951,7 @@ function dol_check_secure_access_document($modulepart,$original_file,$entity,$fu
 				$original_file=$conf->$modulepart->dir_output.'/'.$original_file;
 			}
 		}
+                
 		if (preg_match('/^specimen/i',$original_file))	$accessallowed=1;    // If link to a specimen
 		if ($fuser->admin) $accessallowed=1;    // If user is admin
 
@@ -1964,7 +1965,9 @@ function dol_check_secure_access_document($modulepart,$original_file,$entity,$fu
 				$accessallowed=1;
 			}
 		}
-
+                if((isset($fuser->rights->$modulepart->lire) && $fuser->rights->$modulepart->lire)
+                        ||(isset($fuser->rights->$modulepart->read) && $fuser->rights->$modulepart->read))
+                        $accessallowed=1;
 		// Define $sqlprotectagainstexternals for modules who want to protect access using a SQL query.
 		$sqlProtectConstName = strtoupper($modulepart).'_SQLPROTECTAGAINSTEXTERNALS_FOR_DOCUMENTS';
 		if (! empty($conf->global->$sqlProtectConstName))	// If module want to define its own $sqlprotectagainstexternals

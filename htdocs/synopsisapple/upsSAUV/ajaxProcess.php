@@ -5,19 +5,19 @@ if (!isset($_POST['action']))
 
 require_once('../../main.inc.php');
 
-//error_reporting(E_ALL);
+error_reporting(E_ALL);
 //error_reporting(E_ERROR);
-//ini_set('display_errors', 1);
+ini_set('display_errors', 1);
 
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/ups/GsxUps.class.php';
 
-if (isset($_REQUEST['shipTo']))
-    $shipTo = $_REQUEST['shipTo'];
+if (isset($_POST['shipTo']))
+    $shipTo = $_POST['shipTo'];
 else
     $shipTo = null;
 $GU = new GsxUps($shipTo);
 
-switch ($_REQUEST['action']) {
+switch ($_POST['action']) {
     case 'loadShippingForm':
         $html = $GU->getShippingForm();
         die(json_encode(array(
@@ -52,30 +52,6 @@ switch ($_REQUEST['action']) {
         die(json_encode(array(
             'ok' => 1,
             'html' => $ship->getInfosHtml()
-        )));
-        break;
-
-    case 'loadPartsReturnLabels':
-        if (!isset($_REQUEST['shipId']) || empty($_REQUEST['shipId'])) {
-            die(json_encode(array(
-                'ok' => 0,
-                'html' => '<p class="error">Erreur: ID absent</p>'
-            )));
-        }
-        die(json_encode($GU->loadPartsReturnLabels($_REQUEST['shipId'])));
-        break;
-
-    case 'generateReturnPDF':
-    case 'builddoc':
-        if (!isset($_REQUEST['shipId']) || empty($_REQUEST['shipId'])) {
-            die(json_encode(array(
-                'ok' => 0,
-                'html' => '<p class="error">Erreur: ID absent</p>'
-            )));
-        }
-        $ok = $GU->generateReturnPDF($_REQUEST['shipId']);
-        die(json_encode(array(
-            'ok' => $ok
         )));
         break;
 }

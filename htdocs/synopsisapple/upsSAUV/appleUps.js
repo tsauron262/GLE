@@ -140,9 +140,7 @@ function registerGsxShipment() {
                 var html = '<div class="tabBar container">';
                 html += data.result.html + '</div>';
                 $('#ajaxRequestResults').slideUp(250, function () {
-                    $(this).html(html).slideDown(250, function() {
-                        loadPartsReturnLabels(shipId);
-                    });
+                    $(this).html(html).slideDown(250);
                 });
             } else {
                 $div.slideUp(250, function () {
@@ -155,6 +153,7 @@ function registerGsxShipment() {
         }
     });
 }
+
 function displayCurrentShipment(shipId) {
     $('#ajaxRequestResults').html('');
 
@@ -183,14 +182,6 @@ function displayCurrentShipment(shipId) {
             }
 
             $('#ajaxRequestResults').html(data.html);
-
-            if ($('#builddoc_generatebutton').length) {
-                $('#builddoc_generatebutton').click(function (e) {
-                    e.preventDefault();
-
-                    generateReturnPDF(shipId);
-                });
-            }
         },
         error: function () {
             if ($('#shipTo').length)
@@ -201,54 +192,7 @@ function displayCurrentShipment(shipId) {
         }
     });
 }
-function loadPartsReturnLabels(shipId) {
-    if ($('#partsLabelRequestInfos').length) {
-        $('#partsLabelRequestInfos').slideUp(250, function () {
-            var html = '<p class="requestProcess">Téléchargement en cours...</p>';
-            $(this).html(html).slideDown(250);
-        });
-    }
 
-    $.ajax({
-        type: "POST",
-        url: './ajaxProcess.php',
-        dataType: 'json',
-        data: {action: 'loadPartsReturnLabels', shipId: shipId},
-        success: function (data) {
-            if (data.ok) {
-                displayCurrentShipment(shipId);
-            } else if (data.html) {
-                $('#partsLabelRequestInfos').slideUp(250, function () {
-                    $(this).html(data.html).slideDown(250);
-                });
-            }
-        },
-        error: function () {
-            $('#partsLabelRequestInfos').slideUp(250, function () {
-                var html = '<p class="error">Une erreur inconnue est survenue</p>';
-                $(this).html(html).slideDown(250);
-            });
-        }
-    });
-}
-function generateReturnPDF(shipId) {
-    $.ajax({
-        type: "POST",
-        url: './ajaxProcess.php',
-        dataType: 'json',
-        data: {action: 'generateReturnPDF', shipId: shipId},
-        success: function (data) {
-            if (data.ok) {
-                displayCurrentShipment(shipId);
-            } else {
-                alert('Une erreur est survenue.');
-            }
-        },
-        error: function () {
-            alert('Une erreur est survenue.');
-        }
-    });
-}
 function onCaptionClick($caption) {
     if (!$caption.length)
         return;
@@ -331,7 +275,8 @@ function checkShippingform() {
 }
 function searchPartList() {
     var foundRows = [];
-    var str = $('#partSearch').val().toLowerCase();
+    var str = $('#partSearch').val();
+
     var $trs = $('#partsPending').find('tbody').find('tr');
     if (str === '') {
         $trs.each(function () {
@@ -348,10 +293,10 @@ function searchPartList() {
     });
 
     $trs.each(function () {
-        if ((str == $(this).find('td.partRef').text().toLowerCase()) ||
-                (str == $(this).find('td.partNewRef').text().toLowerCase()) ||
-                (str == $(this).find('td.partPONumber').text().toLowerCase()) || 
-                (str == $(this).find('td.partSerial').text().toLowerCase())) {
+        if ((str == $(this).find('td.partRef').text()) ||
+                (str == $(this).find('td.partNewRef').text()) ||
+                (str == $(this).find('td.partPONumber').text()) || 
+                (str == $(this).find('td.partSerial').text())) {
             foundRows.push($(this));
         }
     });
@@ -406,7 +351,6 @@ function reinitPage() {
     $('#shipTo').show();
     $('#currentShipmentList').show();
 }
-
 $(document).ready(function () {
     $('#shipToSubmit').click(function () {
         loadShippingForm();

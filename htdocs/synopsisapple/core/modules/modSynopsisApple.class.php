@@ -194,8 +194,8 @@ $this->menus = array();			// List of menus to add
     */
   function init()
   {
-    $sql = array();
-    $sql[] = "CREATE TABLE IF NOT EXISTS `llx_synopsisapple_shipment` (
+        $sql = array();
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisapple_shipment` (
   `rowid` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ship_to` text NOT NULL,
   `length` int(11) NOT NULL DEFAULT '0',
@@ -210,12 +210,11 @@ $this->menus = array();			// List of menus to add
   `identification_number` text,
   `gsx_confirmation` text,
   `gsx_return_id` text,
-  `gsx_pdf_name` text,
   `gsx_tracking_url` text,
   PRIMARY KEY (`rowid`)
-)";
-    
-    $sql[] = "CREATE TABLE IF NOT EXISTS `llx_synopsisapple_shipment_parts` (
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=28;";
+
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisapple_shipment_parts` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `shipment_id` int(11) NOT NULL,
   `name` text NOT NULL,

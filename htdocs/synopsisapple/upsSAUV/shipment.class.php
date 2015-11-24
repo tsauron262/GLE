@@ -1,11 +1,8 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/synopsisapple/ups/ShipToList.class.php';
-
 class shipment {
 
     public $rowid = null;
-    public $ref = null;
     public $db = null;
     public $shipTo = 0;
     public $infos = array(
@@ -27,11 +24,11 @@ class shipment {
     );
     public $gsxInfos = array(
         'confirmation' => '',
+        'pdfFileName' => '',
         'bulkReturnId' => null,
         'trackingURL' => ''
     );
     public $errors = array();
-    public $partsLabelsOk = false;
 
     public function __construct($db, $rowid = null) {
         $this->db = $db;
@@ -55,11 +52,11 @@ class shipment {
         $this->upsInfos['billingWeight'] = $billingWeight;
         $this->upsInfos['trackingNumber'] = $trackingNbr;
         $this->upsInfos['identificationNumber'] = $identificationNbr;
-        $this->ref = $trackingNbr;
     }
 
-    public function setGsxInfos($confirmation, $bulkReturnId, $trackingURL) {
+    public function setGsxInfos($confirmation, $bulkReturnId, $pdfFileName, $trackingURL) {
         $this->gsxInfos['confirmation'] = $confirmation;
+        $this->gsxInfos['pdfFileName'] = $pdfFileName;
         $this->gsxInfos['bulkReturnId'] = $bulkReturnId;
         $this->gsxInfos['trackingURL'] = $trackingURL;
     }
@@ -83,8 +80,6 @@ class shipment {
             }
         }
         $this->parts[] = $part;
-
-        $this->checkPartsLabels();
     }
 
     public function create() {
@@ -105,6 +100,7 @@ class shipment {
         $sql .= '`identification_number`, ';
         $sql .= '`gsx_confirmation`, ';
         $sql .= '`gsx_return_id`, ';
+        $sql .= '`gsx_pdf_name`, ';
         $sql .= '`gsx_tracking_url`';
         $sql .= ') ';
 
@@ -122,6 +118,7 @@ class shipment {
         $sql .= (isset($this->upsInfos['identificationNumber']) ? "'" . $this->upsInfos['identificationNumber'] . "'" : 'NULL') . ', ';
         $sql .= (isset($this->gsxInfos['confirmation']) ? "'" . $this->gsxInfos['confirmation'] . "'" : 'NULL') . ', ';
         $sql .= (isset($this->gsxInfos['bulkReturnId']) ? "'" . $this->gsxInfos['bulkReturnId'] . "'" : 'NULL') . ', ';
+        $sql .= (isset($this->gsxInfos['pdfFileName']) ? "'" . $this->gsxInfos['pdfFileName'] . "'" : 'NULL') . ', ';
         $sql .= (isset($this->gsxInfos['trackingURL']) ? "'" . $this->gsxInfos['trackingURL'] . "'" : 'NULL');
         $sql .= ');';
 
@@ -146,7 +143,6 @@ class shipment {
                     $check = false;
             }
         }
-        $this->checkPartsLabels();
         return $check;
     }
 
@@ -202,6 +198,7 @@ class shipment {
         $sql .= '`identification_number` = ' . (isset($this->upsInfos['identificationNumber']) ? "'" . $this->upsInfos['identificationNumber'] . "'" : 'NULL') . ', ';
         $sql .= '`gsx_confirmation` = ' . (isset($this->gsxInfos['confirmation']) ? "'" . $this->gsxInfos['confirmation'] . "'" : 'NULL') . ', ';
         $sql .= '`gsx_return_id` = ' . (isset($this->gsxInfos['bulkReturnId']) ? "'" . $this->gsxInfos['bulkReturnId'] . "'" : 'NULL') . ', ';
+        $sql .= '`gsx_pdf_name` = ' . (isset($this->gsxInfos['pdfFileName']) ? "'" . $this->gsxInfos['pdfFileName'] . "'" : 'NULL') . ', ';
         $sql .= '`gsx_tracking_url` = ' . (isset($this->gsxInfos['trackingURL']) ? "'" . $this->gsxInfos['trackingURL'] . "'" : 'NULL');
         $sql .= ' WHERE `rowid` = ' . $this->rowid . ';';
 
@@ -227,8 +224,6 @@ class shipment {
             $datas = $this->db->fetch_object($result);
 
             $this->shipTo = $datas->ship_to;
-            $this->ref = $datas->tracking_number;
-
             $this->infos['length'] = $datas->length;
             $this->infos['width'] = $datas->width;
             $this->infos['height'] = $datas->height;
@@ -240,10 +235,12 @@ class shipment {
 
             $this->upsInfos['billingWeight'] = $datas->billing_weight;
             $this->upsInfos['trackingNumber'] = $datas->tracking_number;
+            $this->ref = $datas->tracking_number;
             $this->upsInfos['identificationNumber'] = $datas->identification_number;
 
             $this->gsxInfos['confirmation'] = $datas->gsx_confirmation;
             $this->gsxInfos['bulkReturnId'] = $datas->gsx_return_id;
+            $this->gsxInfos['pdfFileName'] = $datas->gsx_pdf_name;
             $this->gsxInfos['trackingURL'] = $datas->gsx_tracking_url;
         } else {
             $this->errors[] = 'Aucune entrée trouvée pour l\'ID ' . $this->rowid . '<br/>Requête: ' . $sql;
@@ -270,41 +267,7 @@ class shipment {
             $this->errors[] = 'Aucun composant trouvé pour l\'ID ' . $this->rowid . '<br/>Requête: ' . $sql;
             return false;
         }
-
-        $this->checkPartsLabels();
-
         return true;
-    }
-
-    public function checkPartsLabels() {
-        $this->partsLabelsOk = false;
-        if (count($this->parts)) {
-            $fileDir = $this->getFilesDir() . '/labels/';
-            $this->partsLabelsOk = true;
-            foreach ($this->parts as $part) {
-                $partNumber = (isset($part['new_number']) && !empty($part['new_number'])) ? $part['new_number'] : $part['number'];
-                $fileName = 'label_' . $part['returnOrderNumber'] . '_' . $partNumber . '.pdf';
-                if (!file_exists($fileDir . $fileName)) {
-                    $this->partsLabelsOk = false;
-                    break;
-                }
-            }
-        }
-        return $this->partsLabelsOk;
-    }
-
-    public function getFilesDir() {
-        if (isset($this->ref) && !empty($this->ref)) {
-            global $conf;
-            $filesDir = $conf->synopsisapple->dir_output . "/" . $this->ref;
-
-            if (!file_exists($filesDir)) {
-                if (!mkdir($filesDir))
-                    return 0;
-            }
-            return $filesDir;
-        }
-        return 0;
     }
 
     public function delete() {
@@ -487,32 +450,42 @@ class shipment {
 
         $html .= '</tbody></table>';
 
+        $html .= '<p id="shipmentButtons" style="text-align: right">';
+
+        // à modif:
+        $filesDir = dirname(__FILE__) . '/labels/';
+
         if (isset($this->gsxInfos['trackingURL']) && !empty($this->gsxInfos['trackingURL'])) {
-            $html .= '<p id="shipmentButtons" style="text-align: right">';
-            $html .= '<a class="button" href="' . $this->gsxInfos['trackingURL'] . '" target="_blank">';
+            $html .= '<a class="button" href="'.$this->gsxInfos['trackingURL'].'" target="_blank">';
             $html .= 'Page de suivi</a>';
-            $html .= '</p>';
         }
-
-        if ($this->checkPartsLabels()) {
-            $html .= $this->getFilesList();
-        } 
-        
-        if (!$this->checkPartsLabels()) {
-            $html .= '<div id="partsLabelRequestInfos" style="text-align: center">';
-            $html .= '<p class="alert">les étiquettes de retour des composants n\'ont pas été téléchargées</p>';
-            $html .= '<span class="button" onclick="loadPartsReturnLabels('.$this->rowid.')">Télécharger les étiquettes de retour des composants</span>';
-            $html .= '</div>';
-        } else {
-            $html .= $this->getGsxRegistrationForm();
+        if (isset($this->upsInfos['trackingNumber']) && !empty($this->upsInfos['trackingNumber'])) {
+            // à modif: 
+            if (file_exists($filesDir . '/ups/label' . $this->upsInfos['trackingNumber'] . '.gif') &&
+                    file_exists($filesDir . '/ups/label' . $this->upsInfos['trackingNumber'] . '.html')) {
+                $html .= '<a class="button" href="./labels/ups/label' . $this->upsInfos['trackingNumber'] . '.html' . '" target="_blank">';
+                $html .= 'Etiquette d\'expédition</a>';
+            } else {
+                $html .= '<span class="error">Etiquette d\'expédition absente</span><br/>';
+            }
         }
-
-        
+        if (isset($this->gsxInfos['pdfFileName']) && !empty($this->gsxInfos['pdfFileName'])) {
+            if (file_exists($filesDir . '/gsx/' . $this->gsxInfos['pdfFileName'])) {
+                // à modif: 
+                $html .= '<a class="button" href="./labels/gsx/' . $this->gsxInfos['pdfFileName'] . '" target="_blank">';
+                $html .= 'PDF de la liste des composants</a>';
+            } else {
+                // à modif:
+                if (isset($this->gsxInfos['bulkReturnId']) && !empty($this->gsxInfos['bulkReturnId'])) {
+                    $html .= '<span class="error">PDF de la liste des composants absent</span><br/>';
+                }
+            }
+        }
+        $html .= '</p>';
+        $html .= '<p style="text-align: center"><button class="button" onclick="reinitPage()">Retour</button></p>';
         $html .= '</div>';
 
-        $html .= '<div class="container" style="text-align: center"><button class="button" onclick="reinitPage()">Retour</button></div>';
-
-
+        $html .= $this->getGsxRegistrationForm();
         return $html;
     }
 
@@ -527,32 +500,6 @@ class shipment {
         $html .= '<span class="button" onclick="registerGsxShipment()">Enregistrer l\'envoi sur GSX</span></p>';
         $html .= '</div>';
         $html .= '<div id="gsxRequestResults"></div>';
-        return $html;
-    }
-
-    public function getFilesList() {
-        global $conf;
-
-        if (!isset($this->upsInfos['trackingNumber']) || empty($this->upsInfos['trackingNumber']) ||
-                !isset($this->gsxInfos['bulkReturnId']) || empty($this->gsxInfos['bulkReturnId'])) {
-            return '<p class="error">L\'expédition ' . $this->rowid . ' semble ne pas avoir été finalisée</p>';
-        }
-
-        $upload_dir = $this->getFilesDir();
-
-        if (!file_exists($upload_dir)) {
-            return '<p class="error">Le dossier "' . $upload_dir . '" n\'existe pas.</p>';
-        }
-
-        $filename = sanitize_string($this->ref);
-        $urlsource = $_SERVER["PHP_SELF"] . "?";
-        $genallowed = 1; //$user->rights->synopsischrono->Global->read;
-        require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
-        $form = new Form($this->db);
-        $formfile = new FormFile($this->db);
-        $html = '<div id="fileListContainer">';
-        $html .= $formfile->showdocuments('synopsisapple', $filename, $upload_dir, $urlsource, $genallowed, $genallowed, "Chrono", 0); //, $object->modelPdf);
-        $html .= '</div>';
         return $html;
     }
 

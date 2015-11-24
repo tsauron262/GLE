@@ -1,4 +1,5 @@
 
+
 --
 -- Structure de la table `llx_synopsisapple_shipment`
 --
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS `llx_synopsisapple_shipment` (
   `identification_number` text,
   `gsx_confirmation` text,
   `gsx_return_id` text,
+  `gsx_pdf_name` text,
   `gsx_tracking_url` text,
   PRIMARY KEY (`rowid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=28 ;
@@ -38,6 +40,3 @@ CREATE TABLE IF NOT EXISTS `llx_synopsisapple_shipment_parts` (
   `return_order_number` text NOT NULL,
   PRIMARY KEY (`rowid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=31 ;
-
-
-INSERT INTO `llx_document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES (NULL, 'appleretour', '1', 'synopsisapple', 'Doc retour', NULL);

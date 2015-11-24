@@ -16,9 +16,8 @@ class GsxUps {
             'production' => 'https://onlinetools.ups.com/webservices/Ship'
         )
     );
-    public static $upsMode = 'production';
-    public static $apiMode = 'ut';
-    //    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
+        public static $apiMode = 'production';
     public static $upsCarrierCode = 'UPSWW065';
     public $upsConfig = array(
         'access' => "5CFD6AC514872584",
@@ -118,60 +117,38 @@ class GsxUps {
     }
 
     public function createUpsShipment() {
-        $errors = array();
-
         if (!isset($this->shiptTo) || empty($this->shiptTo)) {
-            $errors[] = 'numéro shipt-to absent';
+            return array(
+                'status' => 0,
+                'html' => '<p class="error">Erreur: numéro shipt-to absent</p>'
+            );
         }
-
         $parts = isset($_POST['parts']) ? $_POST['parts'] : 0;
         $infos = isset($_POST['shipInfos']) ? $_POST['shipInfos'] : 0;
 
-        if (!$parts)
-            $errors[] = 'Aucun composant associé à cette expédition';
-        if (!$infos)
-            $errors[] = 'Aucune informartion sur les dimensions et le poids du colis reçut';
-
-        if (!array_key_exists($this->shiptTo, shipToList::$list))
-            $errors[] = 'Numéro ship-to invalide';
-
-        if (count($errors)) {
-            $html = '<p class="error">Des erreurs ont été détectées: <br/>';
-            foreach ($errors as $error) {
-                $html .= '- ' . $error . '.<br/>';
-            }
-            $html .= '</p>';
-            return array(
-                'ok' => 0,
-                'html' => $html
-            );
-        }
-
-        $shipToInfos = shipToList::$list[$this->shiptTo];
-        
         $request = array(
             'Request' => array(
                 'RequestOption' => 'nonvalidate'
             ),
             'Shipment' => array(
                 'Shipper' => array(
-                    'Name' => $shipToInfos['Name'],
-                    'AttentionName' => $shipToInfos['AttentionName'],
-                    'ShipperNumber' => $shipToInfos['ShipperNumber'],
+                    'Name' => 'BIMP',
+                    'AttentionName' => 'SAV',
+                    'ShipperNumber' => 'R8X411',
                     'Address' => array(
-                        'AddressLine' => $shipToInfos['Address']['AddressLine'],
-                        'City' => $shipToInfos['Address']['City'],
-                        'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
-                        'PostalCode' => $shipToInfos['Address']['PostalCode'],
-                        'CountryCode' => $shipToInfos['Address']['CountryCode'],
+                        'AddressLine' => '3 Rue du Vieux Moulin',
+                        'City' => 'BREDA',
+                        'StateProvinceCode' => '74',
+                        'PostalCode' => '74960',
+                        'CountryCode' => 'FR',
                     ),
                     'Phone' => array(
-                        'Number' => $shipToInfos['Phone']['Number']
+                        'Number' => '0450227597'
                     )
                 ),
                 'ShipTo' => array(
-                    'Name' => 'Apple Distribution international',
-                    'AttentionName' => 'Apple Distribution international',
+                    'Name' => 'Apple',
+                    'AttentionName' => 'Distribution international',
                     'Address' => array(
                         'AddressLine' => 'Hekven 6',
                         'City' => 'BREDA',
@@ -183,18 +160,17 @@ class GsxUps {
                     )
                 ),
                 'ShipFrom' => array(
-                    'Name' => $shipToInfos['Name'],
-                    'AttentionName' => $shipToInfos['AttentionName'],
-                    'ShipperNumber' => $shipToInfos['ShipperNumber'],
+                    'Name' => 'BIMP',
+                    'AttentionName' => 'SAV',
                     'Address' => array(
-                        'AddressLine' => $shipToInfos['Address']['AddressLine'],
-                        'City' => $shipToInfos['Address']['City'],
-                        'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
-                        'PostalCode' => $shipToInfos['Address']['PostalCode'],
-                        'CountryCode' => $shipToInfos['Address']['CountryCode'],
+                        'AddressLine' => '3 Rue du Vieux Moulin',
+                        'City' => 'BREDA',
+                        'StateProvinceCode' => '74',
+                        'PostalCode' => '74960',
+                        'CountryCode' => 'FR',
                     ),
                     'Phone' => array(
-                        'Number' => $shipToInfos['Phone']['Number']
+                        'Number' => '0450227597',
                     )
                 ),
                 'PaymentInformation' => array(
@@ -245,10 +221,10 @@ class GsxUps {
         );
 
         $wsdl = dirname(__FILE__) . '/wsdl/Ship.wsdl';
-        if (self::$upsMode == 'test')
-            $endPointUrl = self::$upsEndpointUrls['shipment']['test'];
-        else
-            $endPointUrl = self::$upsEndpointUrls['shipment']['production'];
+//        if (self::$apiMode == 'ut')
+        $endPointUrl = self::$upsEndpointUrls['shipment']['test'];
+//        else
+//            $endPointUrl = self::$upsEndpointUrls['shipment']['production'];
         $result = $this->UPSRequest('ProcessShipment', $wsdl, $endPointUrl, array($request));
         if (!$result) {
             return $this->displaySoapErrors();
@@ -285,24 +261,19 @@ class GsxUps {
             }
 
             if (isset($result->PackageResults->ShippingLabel->GraphicImage)) {
-                $filesDir = $ship->getFilesDir();
-
-                if ($filesDir) {
-                    if (!file_put_contents($filesDir . '/ups.gif', base64_decode($result->PackageResults->ShippingLabel->GraphicImage))) {
-                        $return['html'] .= '<p class="error">Echec de la création du fichier image de l\'étiquette de livraison<br/>';
-                        $return['html'] .= '(Fichier: ' . $filesDir . '/ups.gif' . ')</p>';
+                // à modif: 
+                $fileName = dirname(__FILE__) . '/labels/ups/label' . $ship->upsInfos['trackingNumber'] . '.gif';
+                if (!file_put_contents($fileName, base64_decode($result->PackageResults->ShippingLabel->GraphicImage))) {
+                    $return['html'] .= '<p class="error">Echec de la création du fichier image de l\'étiquette de livraison<br/>';
+                    $return['html'] .= '(nom du fichier: ' . $fileName . ')</p>';
+                } else {
+                    // à modif: 
+                    $htmlFileName = dirname(__FILE__) . '/labels/ups/label' . $ship->upsInfos['trackingNumber'] . '.html';
+                    if (!file_put_contents($htmlFileName, base64_decode($result->PackageResults->ShippingLabel->HTMLImage))) {
+                        $return['html'] .= '<p class="error">Echec de la création du fichier html de l\'étiquette de livraison<br/>';
+                        $return['html'] .= '(nom du fichier: ' . $htmlFileName . ')</p>';
                     }
                 }
-
-                // to remove:
-//                $fileName = dirname(__FILE__) . '/labels/' . $ship->upsInfos['trackingNumber'] . '/ups.gif';
-//                if (!file_exists(dirname(__FILE__) . '/labels/' . $ship->upsInfos['trackingNumber']))
-//                    mkdir(dirname(__FILE__) . '/labels/' . $ship->upsInfos['trackingNumber']);
-//                if (!file_put_contents($fileName, base64_decode($result->PackageResults->ShippingLabel->GraphicImage))) {
-//                    $return['html'] .= '<p class="error">Echec de la création du fichier image de l\'étiquette de livraison<br/>';
-//                    $return['html'] .= '(chemin du fichier: ' . $fileName . ')</p>';
-//                }
-                // ---------
             }
             $return['html'] .= '</div>';
             $return['status'] = 1;
@@ -384,34 +355,46 @@ class GsxUps {
 
         $request = $this->gsx->_requestBuilder($requestName, 'bulkPartsRegistrationRequest', $datas);
         $response = $this->gsx->request($request, $soapClient);
-        
-        if (isset($response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'])) {
-            $html = '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès</p>';
-            $response = $response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'];
-            if (isset($response['packingList']) && !empty($response['packingList'])) {
-                $fileDir = $ship->getFilesDir();
+
+//        $response = array(
+//            'RegisterPartsForBulkReturnResponse' => array(
+//                'bulkPartsRegistrationResponse' => array(
+//                    'packingListFileName' => 'temp.pdf',
+//                    'packingList' => 'file',
+//                    'bulkReturnId' => 'B01111',
+//                    'trackingURL' => 'http://some_carrier.com/tracking',
+//                    'confirmationMessage' => 'confirmed'
+//                )
+//            )
+//        );
+        if (isset($response)) {
+            echo 'Requete ok<br/>';
+            echo '<pre>';
+            print_r($response);
+            exit;
+
+            if (isset($response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationResponse'])) {
+                $html = '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès</p>';
+                $response = $response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationResponse'];
                 $fileCheck = false;
-                if ($fileDir) {
-                    if (file_put_contents($fileDir . '/PackingList.pdf', $response['packingList']))
+                if (isset($response['packingList']) && !empty($response['packingList']) &&
+                        isset($response['packingListFileName']) && !empty($response['packingListFileName'])) {
+                    $filePath = dirname(__FILE__) . '/label/gsx/packingList_' . $ship->rowid . '.pdf';
+                    if (file_put_contents($filePath, $response['packingList'])) {
+                        $ship->gsxInfos['pdfFileName'] = 'packingList_' . $ship->rowid . '.pdf';
                         $fileCheck = true;
+                    }
                 }
-                if (!$fileCheck)
+                if (!$fileCheck) {
                     $html .= '<p class="error">Echec de la création du fichier PDF pour la liste de composants</p>';
-
-                // to remove:
-//                if (!file_exists(dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber']))
-//                    mkdir(dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber']);
-//                $filePath = dirname(__FILE__) . "/labels/" . $ship->upsInfos['trackingNumber'] . '/packinglist.pdf';
-//                file_put_contents($filePath, $response['packingList']);
-                // ---------
+                }
+                if (isset($response['bulkReturnId']) && !empty($response['bulkReturnId']))
+                    $ship->gsxInfos['bulkReturnId'] = $response['bulkReturnId'];
+                if (isset($response['trackingURL']) && !empty($response['trackingURL']))
+                    $ship->gsxInfos['trackingURL'] = $response['trackingURL'];
+                if (isset($response['confirmationMessage']) && !empty($response['confirmationMessage']))
+                    $ship->gsxInfos['confirmation'] = $response['confirmationMessage'];
             }
-            if (isset($response['bulkReturnId']) && !empty($response['bulkReturnId']))
-                $ship->gsxInfos['bulkReturnId'] = $response['bulkReturnId'];
-            if (isset($response['trackingURL']) && !empty($response['trackingURL']))
-                $ship->gsxInfos['trackingURL'] = $response['trackingURL'];
-            if (isset($response['confirmationMessage']) && !empty($response['confirmationMessage']))
-                $ship->gsxInfos['confirmation'] = $response['confirmationMessage'];
-
             if (!$ship->update()) {
                 $html .= '<p class="error">Echec de l\'enregistrement des informations retournées par GSX</p>';
                 if (count($ship->errors)) {
@@ -442,8 +425,8 @@ class GsxUps {
             'html' => '<p class="error">Pas de réponse</p>'
         );
     }
-
-    public function loadPartsReturnLabels($shipId) {
+    
+    public function loadBulkReturnProforma($shipId) {
         if (!$this->connect) {
             if (!$this->gsxInit())
                 return array(
@@ -451,122 +434,39 @@ class GsxUps {
                     'html' => '<p class="error">Echec de la connexion au service GSX</p>' . $this->gsx->getGSXErrorsHtml()
                 );
         }
-
-        global $db, $conf;
+        
+        global $db;
         $ship = new shipment($db, $shipId);
-        if (!isset($ship->ref) || empty($ship->ref)) {
-            return array(
-                'ok' => 0,
-                'html' => '<p class="error">Erreur: numéro de suivi UPS absent</p>'
-            );
-        }
         if (!isset($ship->gsxInfos['bulkReturnId']) || empty($ship->gsxInfos['bulkReturnId'])) {
             return array(
                 'ok' => 0,
-                'html' => '<p class="error">Erreur: numéro de retour GSX absent</p>'
+                'html' => '<p class="error">Echec: numéro de retour non trouvé</p>'
             );
         }
+        
+        $soapClient = 'ViewBulkReturnProforma';
+        $requestName = 'ViewBulkReturnProformaRequest';
 
-        if (!count($ship->parts)) {
-            return array(
-                'ok' => 0,
-                'html' => '<p class="error">Aucun composant enregistré pour cette expédition.</p>'
-            );
-        }
-
-        $errors = array();
-        $filesDir = $ship->getFilesDir();
-
-        if (!$filesDir) {
-            return array(
-                'ok' => 0,
-                'html' => '<p class="error">Echec de la création du dossier "' . $filesDir . '"</p>'
-            );
-        }
-
-        $filesDir .= '/labels';
-
-        if (!file_exists($filesDir))
-            if (!mkdir($filesDir)) {
-                return array(
-                    'ok' => 0,
-                    'html' => '<p class="error">Echec de la création du dossier "' . $filesDir . '"</p>'
-                );
-            }
-
-        $filesDir .= '/';
-
-        // to remove:
-//        $filesDir2 = dirname(__FILE__) . '/labels/' . $ship->ref;
-//        if (!file_exists($filesDir2))
-//            mkdir($filesDir2);
-//        $filesDir2 .= '/';
-        // ---------
-
-        $soapClient = 'ReturnLabel';
-        $requestName = 'ReturnLabelRequest';
-
-        foreach ($ship->parts as $partRowId => $part) {
-            if ((!isset($part['number']) || empty($part['number'])) && (!isset($part['new_number']) || empty($part['new_number']))) {
-                $errors[] = 'Pas de partNumber enregistré pour le composant d\'ID ' . $partRowId;
-                continue;
-            }
-            if (!isset($part['returnOrderNumber']) || empty($part['returnOrderNumber'])) {
-                $errors[] = 'Pas de numéro de retour enregistré pour le composant d\'ID ' . $partRowId;
-                continue;
-            }
-            $partNumber = (isset($part['new_number']) && !empty($part['new_number'])) ? $part['new_number'] : $part['number'];
-            $fileName = 'label_' . $part['returnOrderNumber'] . '_' . $partNumber . '.pdf';
-
-            if (file_exists($filesDir . $fileName))
-                continue;
-
-            $datas = array(
-                'partNumber' => $partNumber,
-                'returnOrderNumber' => $part['returnOrderNumber']
-            );
-
-            $request = $this->gsx->_requestBuilder($requestName, '', $datas);
-            $response = $this->gsx->request($request, $soapClient);
-
-            if (isset($response['ReturnLabelResponse']['returnLabelData'])) {
-                $response = $response['ReturnLabelResponse']['returnLabelData'];
-                if (isset($response['returnLabelFileData']) && !empty($response['returnLabelFileData'])) {
-
-                    // to remove:
-//                    file_put_contents($filesDir2 . $fileName, $response['returnLabelFileData']);
-                    // ---------
-
-                    if (file_put_contents($filesDir . $fileName, $response['returnLabelFileData']))
-                        continue;
+        $request = $this->gsx->_requestBuilder($requestName, 'bulkReturnId', $ship->gsxInfos['bulkReturnId']);
+        $response = $this->gsx->request($request, $soapClient);
+        
+        if (isset($response['ViewBulkReturnProformaResponse']['bulkReturnProformaInfo'])) {
+            $response = $response['ViewBulkReturnProformaResponse']['bulkReturnProformaInfo'];
+            if (isset($response['proformaFileData']) && !empty($response['proformaFileData'])) {
+                // à modif:
+                $fileName = dirname(__FILE__).'/labels/gsx/proforma_'.$ship->upsInfos['trackingNumber'].'.pdf';
+                if (file_put_contents($fileName, $response['proformaFileData'])) {
+                    return array(
+                        'ok' => 1,
+                        'html' => '<p class="confirmation">Fichier récupéré avec succès</p>'
+                    );
                 }
             }
-            $errors[] = 'Echec de la création du fichier "' . $fileName . '" pour le composant d\'ID ' . $partRowId;
-        }
-
-        if (count($errors)) {
-            $html = '<p class="error">des erreurs sont survenues: <br/>';
-            foreach ($errors as $e) {
-                $html .= '- ' . $e . '.<br/>';
-            }
-            $html .= '</p>';
-            return array(
-                'ok' => 0,
-                'html' => $html
-            );
         }
         return array(
             'ok' => 1,
-            'html' => ''
+            'html' => '<p class="error">Echec de la récupération du fichier</p>'
         );
-    }
-
-    public function generateReturnPDF($shipId) {
-        global $db;
-        $ship = new shipment($db, $shipId);
-        require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/core/modules/synopsisapple/modules_synopsisapple.php");
-        $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : 'appleretour');
-        return synopsisapple_pdf_create($db, $ship, $model);
     }
 
     public function getShipToForm() {
@@ -577,16 +477,8 @@ class GsxUps {
         $html .= '<tbody>';
         $html .= '<tr>';
         $html .= '<td>Numéro shipt-to:</td>';
-//        $html .= '<td><input type="text" id="shipToNumber" name="shipToNumber" width="350px" value="0000494685"/>&nbsp;&nbsp;';
-//        $html .= '<input type="button" id="shipToSubmit" value="&nbsp;&nbsp;Ok&nbsp;&nbsp;"/></td>';
-
-        $html .= '<td><select id="shipToNumber" name="shipToNumber" style="width: 350px">';
-        foreach (shipToList::$list as $shipTo => $datas) {
-            $html .= '<option value="' . $shipTo . '">' . $shipTo . ': ' . $datas['Name'] . ' - ' . $datas['Address']['PostalCode'] . ' ' . $datas['Address']['City'] . '</option>';
-        }
-        $html .= '</select>';
+        $html .= '<td><input type="text" id="shipToNumber" name="shipToNumber" width="350px" value="0000462140"/>&nbsp;&nbsp;';
         $html .= '<input type="button" id="shipToSubmit" value="&nbsp;&nbsp;Ok&nbsp;&nbsp;"/></td>';
-
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
@@ -788,9 +680,9 @@ class GsxUps {
     public function getCurrentShipmentsHtml() {
         $html = '';
         global $db;
-
-        $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsisapple_shipment';
-
+        
+        $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'synopsisapple_shipment';
+        
         $result = $db->query($sql);
         if ($db->num_rows($result) > 0) {
             $html .= $this->starBloc('Liste des expéditions en cours', 'currentShipmentList');
@@ -806,37 +698,37 @@ class GsxUps {
             $html .= '</thead></tbody>';
             while ($datas = $db->fetch_object($result)) {
                 $html .= '<tr>';
-                $html .= '<td>' . $datas->rowid . '</td>';
-
+                $html .= '<td>'.$datas->rowid.'</td>';
+                
                 $html .= '<td>';
-                if (isset($datas->tracking_number) && !empty($datas->tracking_number))
+                if (isset($datas->tracking_number) && !empty($datas->tracking_number)) 
                     $html .= $datas->tracking_number;
                 $html .= '</td>';
-
+                
                 $html .= '<td>';
-                if (isset($datas->gsx_return_id) && !empty($datas->gsx_return_id))
+                if (isset($datas->gsx_return_id) && !empty($datas->gsx_return_id)) 
                     $html .= $datas->gsx_return_id;
                 $html .= '</td>';
-
+                
                 $html .= '<td>';
-                if (isset($datas->gsx_tracking_url) && !empty($datas->gsx_tracking_url))
-                    $html .= '<a class="button" href="' . $datas->gsx_tracking_url . '" target="_blank">Page de suivi</a>';
+                if (isset($datas->gsx_tracking_url) && !empty($datas->gsx_tracking_url)) 
+                    $html .= '<a class="button" href="'.$datas->gsx_tracking_url.'" target="_blank">Page de suivi</a>';
                 $html .= '</td>';
-
+                
                 $html .= '<td>';
-                $html .= '<span class="button" onclick="displayCurrentShipment(' . $datas->rowid . ')">Afficher les détails</span>';
+                    $html .= '<span class="button" onclick="displayCurrentShipment('.$datas->rowid.')">Afficher les détails</span>';
                 $html .= '</td>';
-
+                
                 $html .= '</tr>';
             }
             $html .= '</tbody></table>';
             $html .= '</div>';
             $html .= $this->endBloc();
         }
-
+        
         return $html;
     }
-
+    
     protected function starBloc($title, $containerId, $open = false) {
         $html = '<div id="' . $containerId . '" class="container">' . "\n";
         $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";

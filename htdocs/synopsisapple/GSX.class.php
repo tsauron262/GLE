@@ -864,6 +864,7 @@ class GSX {
             $this->error(__METHOD__, __LINE__, 'Invalid data passed: ' . $clientLookup);
         }
 //echo "<pre>"; print_r($requestData);
+        $SOAPRequest = array();
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {

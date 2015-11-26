@@ -350,4 +350,16 @@
             <val val="CL">Indicates Valid Consumer Law Claim</val>
         </values>
     </def>
+    <def name="availableRepairStrategies" type="select" hidden="1">
+        <label>Type de réparation</label>
+        <values>
+            <val val="Carry-in">Carry-in Repair</val>
+            <val val="Onsite">Onsite Repair</val>
+            <val val="Return Before Replace">Carry InReturn Before Replace</val>
+            <val val="Whole Unit Repair">Whole Unit Exchange Repair</val>
+            <val val="Mail-in">Mail-in Repair</val>
+            <val val="Whole Unit Mail-In Repair">Whole Unit Mail-In Repair / Repair Or Replace</val>
+        </values>
+    </def>
+    
 </root>

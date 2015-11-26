@@ -367,6 +367,7 @@
             <data name="fileData" required="0" donotprocess="1"></data>
             <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
             <data name="popFaxed" required="0" default="N"></data>
+            <data name="availableRepairStrategies" required="0" default="N"></data>
         </datas>
     </request>
 

@@ -1439,8 +1439,11 @@ function traiteCommandeRetour(html, $resultContainer) {
         }
         if (html.indexOf('<formSus>OK</formSus>') !== -1) {
             htmlFormSus = html.replace("<formSus>OK</formSus>", "");
-            $("#formSus_CreateCarryInRepair").append(htmlFormSus);
+            $(".formSus").append(htmlFormSus);
             $resultContainer.html("Renseignez les Composants");
+        }
+        if (html.indexOf('<showavailableRepairStrategies>OK</showavailableRepairStrategies>') !== -1) {
+            $(".showavailableRepairStrategies").show();
         }
         if (html.indexOf('<horsgarantie>OK</horsgarantie>') !== -1) {
             $resultContainer.html("La réparation est hors garantie. Veuillez vérifier.");

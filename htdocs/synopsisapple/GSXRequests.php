@@ -603,7 +603,7 @@ class GSX_Request {
             $html .= $this->getDataInput($dataNode, $serial, $values);
         }
         $html .= '</div>' . "\n";
-        $html .= '<div id="formSus_'.$this->requestName.'"></div>';
+        $html .= '<div class="formSus" id="formSus_'.$this->requestName.'"></div>';
         $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover"';
         $html .= 'onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\'' . (isset($repairRowId) ? ', \'' . $repairRowId . '\'' : '') . ')">';
         $html .= 'Envoyer</span></div>';

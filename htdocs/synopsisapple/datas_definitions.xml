@@ -350,7 +350,7 @@
             <val val="CL">Indicates Valid Consumer Law Claim</val>
         </values>
     </def>
-    <def name="availableRepairStrategies" type="select" hidden="1">
+    <def name="availableRepairStrategies" type="select" hidden="0">
         <label>Type de réparation</label>
         <values>
             <val val="Carry-in">Carry-in Repair</val>

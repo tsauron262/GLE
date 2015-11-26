@@ -246,7 +246,7 @@ class CSMSFile
 
 
 
-function traiteNumMobile($str){
+function traiteNumMobile($to){
         $to = str_replace(" ", "", $to);
         if (stripos($to, "+") === false)
             $to = "+33" . substr($to, 1, 10);

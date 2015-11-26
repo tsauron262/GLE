@@ -285,7 +285,7 @@
             <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
             <data name="reportedSymptomCode" required="1"></data>
             <data name="reportedIssueCode" required="1"></data>
-            <data name="availableRepairStrategies" required="0" default="N"></data>
+            <data name="repairStrategy" required="0" default="N"></data>
         </datas>
     </request>
     

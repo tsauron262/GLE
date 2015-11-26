@@ -889,7 +889,7 @@ class GSX {
                 die;
                 return array();
             }
-//            if (stripos($f->faultstring, "Plusieurs pièces de niveau trouvées. Veuillez indiquer la pièce de niveau requise.") !== false) {
+            if (stripos($f->faultstring, "Plusieurs pièces de niveau trouvées. Veuillez indiquer la pièce de niveau requise.") !== false) {
 //                echo '<formSus>OK</formSus>' . $f->faultstring . '<fieldset id="availableRepairStrategies"><legend>Type de réparation</legend>
 //                    <div class="inputsList">
 //<div class="subInputsList">
@@ -908,7 +908,9 @@ class GSX {
 //                echo '</div></div></div></fieldset>';
 //                die;
 //                return array();
-//            }
+                
+                    $add = print_r($f, 1);
+            }
             
             
             
@@ -920,7 +922,6 @@ class GSX {
                 return array();
             } else {
                 $add = "";
-                    $add = print_r($f, 1);
                 if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error, 1);
                 $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true));

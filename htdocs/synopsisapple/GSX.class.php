@@ -920,6 +920,7 @@ class GSX {
                 return array();
             } else {
                 $add = "";
+                    $add = print_r($f, 1);
                 if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error, 1);
                 $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true));

@@ -627,7 +627,7 @@ class GSX_Request {
             }
             $i = 2;
 
-            $html .= "<div class='partDatasBlock'>";
+            $html .= "<div class='partDatasBlock hidden'>";
             $html .= "<input type='hidden' value=''  name='comptiaGroup_".$i."'>";
             $html .= "<input type='hidden' value=''  name='comptiaCode_".$i."'>";
             $html .= "<input type='hidden' value=''  name='comptiaModifier_".$i."'>";

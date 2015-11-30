@@ -615,12 +615,12 @@ class GSX_Request {
 
             global $db;
             $tab3 = array();
-            echo("SELECT `description` as nom FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '".$serial."'");
+            $sql = $db->query("SELECT `description` as nom FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '".$serial."'");
             if($db->num_rows($sql) > 0){
                 $result = $db->fetch_object($sql);
                 $tab3 = $tab2[$result->nom];
             }
-            if (count($tab3 == 0)){
+            if (count($tab3) == 0){
                 foreach ($tab2 as $tabT)
                     foreach($tabT as $tabT2)
                         $tab3[] =$tabT2;

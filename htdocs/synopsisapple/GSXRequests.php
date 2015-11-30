@@ -606,7 +606,7 @@ class GSX_Request {
 
 
         if ($this->requestName == "CreateIPhoneRepairOrReplace") {
-            $contFile = file_get_contents("./TierParts.csv");
+            $contFile = file_get_contents(DOL_DATA_ROOT."/synopsisapple/TierParts.csv");
             $tab1 = explode("\n", $contFile);
             foreach ($tab1 as $ligne) {
                 $champ = explode(";", $ligne);

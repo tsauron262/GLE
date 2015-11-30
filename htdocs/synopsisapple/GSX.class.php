@@ -686,7 +686,7 @@ class GSX {
                 dol_syslog("requete : " . $requestName, 3);
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-if($_GET['request'] == "CreateIPhoneRepairOrReplace"){ print_r($requestData);die;}
+
                 $repairLookup = $this->request($requestData, $clientLookup);
 
 //$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
@@ -1110,7 +1110,7 @@ if($_GET['request'] == "CreateIPhoneRepairOrReplace"){ print_r($requestData);die
         $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
 
 
-        $codeIgnore = array("RPR.COM.039", "RPR.COM.021", "RPR.CIN.094","RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010", "RPR.LKP.01", "RPR.RTN.005", "RPR.CIN.025", "RPR.COM.502", "RPR.COM.623", "RPR.COM.108");
+        $codeIgnore = array("RPR.COM.039", "RPR.COM.021", "RPR.CIN.094","RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010", "RPR.LKP.01", "RPR.RTN.005", "RPR.CIN.025", "RPR.COM.502", "RPR.COM.108");
         $codeIgnore2 = array();
 
         if (!in_array($code, $codeIgnore)) {

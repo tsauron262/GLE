@@ -617,10 +617,10 @@ class GSX_Request {
             $tab3 = $tab2['iPhone 5s'];
 
 
-            $html .= "<select name='partNumber_2'>";
+            $html .= "<div class='partDatasBlock'><select name='partNumber_2'>";
             foreach ($tab3 as $ligne)
                 $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
-            $html .= "</select>";
+            $html .= "</select></div>";
         }
 
 

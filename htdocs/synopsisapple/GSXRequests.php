@@ -25,7 +25,7 @@ class GSX_Request {
         $this->requestName = $requestName;
         $this->comptiaCodes = $comptiaCodes;
         $this->symptomesCodes = $symptomesCodes;
-        
+
 
         // Chargement des définitions:
         $fileName = dirname(__FILE__) . '/datas_definitions.xml';
@@ -295,8 +295,7 @@ class GSX_Request {
                             else if (isset($default))
                                 $html .= $default;
                             $html .= '</textarea>' . "\n";
-                        }
-                        else
+                        } else
                             $html .= '/>' . "\n";
                         break;
 
@@ -505,7 +504,7 @@ class GSX_Request {
                         if (isset($this->symptomesCodes['sym'])) {
                             $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
 //                            $html .= '<option value="0">Symtomes</option>' . "\n";
-                 
+
                             foreach ($this->symptomesCodes['sym'] as $mod => $desc) {
                                 $html .= '<option value="' . $mod . '"';
                                 if (isset($values[$valuesName])) {
@@ -515,7 +514,7 @@ class GSX_Request {
                                 $html .= '>' . $mod . ' - ' . $desc . '</option>';
                             }
                             $html .= '</select>' . "\n";
-                        } 
+                        }
                         $html .= '</div>';
                         break;
                     case 'reportedIssueCode':
@@ -532,7 +531,7 @@ class GSX_Request {
                                 $html .= '>' . $mod . ' - ' . $desc . '</option>';
                             }
                             $html .= '</select>' . "\n";
-                        } 
+                        }
                         $html .= '</div>';
                         break;
 
@@ -560,11 +559,11 @@ class GSX_Request {
             }
             if (isset($defs['jsCheck']))
                 $html .= '<span class="dataCheck"></span>';
-            
-            if($inputName == "trackingNumber"){//Ajout lien création UPS
+
+            if ($inputName == "trackingNumber") {//Ajout lien création UPS
                 $html .= '<p><a class="button" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS</a></p>';
             }
-            
+
             $html .= '</div>';
         }
         return $html;
@@ -603,7 +602,32 @@ class GSX_Request {
             $html .= $this->getDataInput($dataNode, $serial, $values);
         }
         $html .= '</div>' . "\n";
-        $html .= '<div class="formSus" id="formSus_'.$this->requestName.'"></div>';
+        $html .= '<div class="formSus" id="formSus_' . $this->requestName . '"></div>';
+
+
+        if ($this->requestName == "CreateIPhoneRepairOrReplace") {
+            $contFile = file_get_contents("./TierParts.csv");
+            $tab1 = explode("\n", $contFile);
+            foreach ($tab1 as $ligne) {
+                $champ = explode(";", $ligne);
+                $tab2[$champ[0]][] = $champ;
+            }
+
+            echo "<pre>";
+
+            $tab3 = $tab2['iPhone 5s'];
+
+
+            echo "<select>";
+            foreach ($tab3 as $ligne)
+                echo "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
+            echo "</select>";
+        }
+
+
+
+
+
         $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover"';
         $html .= 'onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\'' . (isset($repairRowId) ? ', \'' . $repairRowId . '\'' : '') . ')">';
         $html .= 'Envoyer</span></div>';
@@ -678,7 +702,7 @@ class GSX_Request {
                                     if ($multiple) {
                                         if (!isset($_POST[$dataName . '_nextIdx']))
                                             $_POST[$dataName . '_nextIdx'] = 0;
-                                        if (isset($_POST[$dataName . '_nextIdx'])){
+                                        if (isset($_POST[$dataName . '_nextIdx'])) {
                                             $datas[$dataName] = array();
                                             for ($i = 1; $i < (int) $_POST[$dataName . '_nextIdx']; $i++) {
                                                 $datas[$dataName][] = $this->processRequestDatas($subDatasNodes, $i);
@@ -740,8 +764,8 @@ class GSX_Request {
             }
         }
         $newData = array();
-        foreach($datas as $key => $val)
-            $newData[str_replace("componentSerialNumber","serialNumber",$key)] = $val;
+        foreach ($datas as $key => $val)
+            $newData[str_replace("componentSerialNumber", "serialNumber", $key)] = $val;
         return $newData;
     }
 

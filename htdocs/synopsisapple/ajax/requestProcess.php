@@ -225,11 +225,7 @@ if (isset($_GET['action'])) {
                     if (isset($_GET['prodId'])) {
                         $isIphone = 
                         $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo, $_GET['request']);
-                        if($_GET['request'] != "CreateIPhoneRepairOrReplace")
                         $return = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
-                    else {
-                        
-                    print_r($datas);}
 
 
                         echo $return;

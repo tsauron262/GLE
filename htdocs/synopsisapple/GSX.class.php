@@ -686,7 +686,7 @@ class GSX {
                 dol_syslog("requete : " . $requestName, 3);
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-
+if($_GET['request'] == "CreateIPhoneRepairOrReplace"){ print_r($datas);die;}
                 $repairLookup = $this->request($requestData, $clientLookup);
 
 //$errorMessage = $this->_obtainErrorMessage ( $repairLookup );

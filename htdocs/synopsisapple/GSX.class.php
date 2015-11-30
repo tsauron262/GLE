@@ -868,7 +868,7 @@ class GSX {
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {
-                echo "<tierPart>Ok</tierPart>";
+                echo "<tierPart>OK</tierPart>";
                 die;
                 return array();
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
@@ -912,7 +912,8 @@ class GSX {
 //                die;
 //                return array();
                 
-                echo "<tierPart>Ok</tierPart>";
+                echo "<tierPart>OK</tierPart>";
+                die;
                 return array();
             }
             

@@ -1442,6 +1442,12 @@ function traiteCommandeRetour(html, $resultContainer) {
             $(".formSus").append(htmlFormSus);
             $resultContainer.html("Renseignez les Composants");
         }
+        if (html.indexOf('<tierPart>OK</tierPart>') !== -1) {
+            block = $(".partDatasBlockHide");
+            block.addClass("partDatasBlock");
+            block.show();
+            $resultContainer.html("Renseignez le tier Part");
+        }
         if (html.indexOf('<showavailableRepairStrategies>OK</showavailableRepairStrategies>') !== -1) {
             $(".showavailableRepairStrategies").show();
         }

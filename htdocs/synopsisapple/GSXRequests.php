@@ -615,7 +615,7 @@ class GSX_Request {
 
             global $db;
             $tab3 = array();
-            $sql = $db->query("SELECT `description` as nom FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '".$serial."'");
+            echo("SELECT `description` as nom FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '".$serial."'");
             if($db->num_rows($sql) > 0){
                 $result = $db->fetch_object($sql);
                 $tab3 = $tab2[$result->nom];

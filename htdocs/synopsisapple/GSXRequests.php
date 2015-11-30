@@ -618,9 +618,9 @@ class GSX_Request {
             $i = 2;
 
             $html .= "<div class='partDatasBlock'>";
-            $html .= "<input type='hidden'  name='comptiaGroup_".$i."'>";
-            $html .= "<input type='hidden'  name='comptiaCode_".$i."'>";
-            $html .= "<input type='hidden'  name='comptiaModifier_".$i."'>";
+            $html .= "<input type='hidden' value=''  name='comptiaGroup_".$i."'>";
+            $html .= "<input type='hidden' value=''  name='comptiaCode_".$i."'>";
+            $html .= "<input type='hidden' value=''  name='comptiaModifier_".$i."'>";
             $html .= "<select name='partNumber_".$i."'>";
             foreach ($tab3 as $ligne)
                 $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";

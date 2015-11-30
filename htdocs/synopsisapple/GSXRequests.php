@@ -615,9 +615,13 @@ class GSX_Request {
 
 
             $tab3 = $tab2['iPhone 5s'];
+            $i = 2;
 
-
-            $html .= "<div class='partDatasBlock'><select name='partNumber_2'>";
+            $html .= "<div class='partDatasBlock'>";
+            $html .= "<input type='hidden'  name='comptiaGroup_".$i."'>";
+            $html .= "<input type='hidden'  name='comptiaCode_".$i."'>";
+            $html .= "<input type='hidden'  name='comptiaModifier_".$i."'>";
+            $html .= "<select name='partNumber_".$i."'>";
             foreach ($tab3 as $ligne)
                 $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
             $html .= "</select></div>";

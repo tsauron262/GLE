@@ -869,6 +869,7 @@ class GSX {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {
                 echo "<tierPart>Ok</tierPart>";
+                die;
                 return array();
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);

@@ -756,7 +756,7 @@ class GSX_Request {
 //                                        $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
                                     }
                                         else
-                                            $valuesArray[] = "";
+                                            $datas[$dataName] = "";
                                 }
                             }
                         } else {

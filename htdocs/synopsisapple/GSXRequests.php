@@ -738,9 +738,11 @@ class GSX_Request {
                                         $default = $dataNode->getAttribute('default');
                                         if (isset($default) && ($default !== '')) {
                                             $valuesArray[] = $default;
-                                        } else if ($required) {
+//                                        } else if ($required) {
 //                                            $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
                                         }
+                                        else
+                                            $valuesArray[] = "";
                                     }
                                     $datas[$dataName] = $valuesArray;
                                 } else if (isset($_POST[$inputName]) && ($_POST[$inputName] != '')) {
@@ -750,9 +752,11 @@ class GSX_Request {
                                     $default = $dataNode->getAttribute('default');
                                     if (isset($default) && ($default !== '')) {
                                         $datas[$dataName] = $default;
-                                    } else if ($required) {
+//                                    } else if ($required) {
 //                                        $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
                                     }
+                                        else
+                                            $valuesArray[] = "";
                                 }
                             }
                         } else {

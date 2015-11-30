@@ -606,7 +606,7 @@ class GSX_Request {
 
 
         if ($this->requestName == "CreateIPhoneRepairOrReplace") {
-            $contFile = file_get_contents(DOL_DATA_ROOT."/synopsisapple/TierParts.csv");
+            $contFile = file_get_contents(DOL_DOCUMENT_ROOT."/synopsisapple/TierParts.csv");
             $tab1 = explode("\n", $contFile);
             foreach ($tab1 as $ligne) {
                 $champ = explode(";", $ligne);
@@ -617,7 +617,7 @@ class GSX_Request {
             $tab3 = $tab2['iPhone 5s'];
 
 
-            $html .= "<select>";
+            $html .= "<select name='partNumber_2'>";
             foreach ($tab3 as $ligne)
                 $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
             $html .= "</select>";

@@ -613,15 +613,14 @@ class GSX_Request {
                 $tab2[$champ[0]][] = $champ;
             }
 
-            echo "<pre>";
 
             $tab3 = $tab2['iPhone 5s'];
 
 
-            echo "<select>";
+            $html .= "<select>";
             foreach ($tab3 as $ligne)
-                echo "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
-            echo "</select>";
+                $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
+            $html .= "</select>";
         }
 
 

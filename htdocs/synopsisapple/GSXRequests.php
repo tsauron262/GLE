@@ -739,7 +739,7 @@ class GSX_Request {
                                         if (isset($default) && ($default !== '')) {
                                             $valuesArray[] = $default;
                                         } else if ($required) {
-                                            $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
+//                                            $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
                                         }
                                     }
                                     $datas[$dataName] = $valuesArray;
@@ -751,7 +751,7 @@ class GSX_Request {
                                     if (isset($default) && ($default !== '')) {
                                         $datas[$dataName] = $default;
                                     } else if ($required) {
-                                        $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
+//                                        $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
                                     }
                                 }
                             }

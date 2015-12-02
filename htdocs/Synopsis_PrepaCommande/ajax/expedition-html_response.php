@@ -462,7 +462,7 @@ EOF;
                      */
 
                     print '<tr><td align="center" colspan="2"  class="ui-wiget-header ui-state-default">';
-                    print '<button style="padding: 5px 10px; width: 200px;"  class="butAction ui-corner-all ui-state-default ui-widget-header" named="save" value="' . $langs->trans("NewSending") . '">' . $langs->trans("NewSending") . '</button>';
+                    print '<button style="padding: 5px 10px; width: 200px;"  class="butAction ui-corner-all ui-state-default ui-widget-header" named="save" value="' . $langs->trans("NewSending") . '">' . $langs->trans("NewSending") . ' '.$commande->getNomUrl(1).'</button>';
                     print '</td></tr>';
 
                     print "</table>";

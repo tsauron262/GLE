@@ -78,7 +78,7 @@ function createShipping() {
         var name = $(this).find('.partName').text();
         var ref = $(this).find('.partRef').text();
         var newRef = $(this).find('.partNewRef').text();
-        var poNumber = $(this).find('partPONumber').text();
+        var poNumber = $(this).find('.partPONumber').text();
         var serial = $(this).find('.partSerial').text();
         var sroNumber = $(this).find('.partSroNumber').text();
         var returnNbr = $(this).find('input.partReturnNbr').val();
@@ -411,4 +411,10 @@ $(document).ready(function () {
     $('#shipToSubmit').click(function () {
         loadShippingForm();
     });
+    
+    if ($('#shipmentToLoad').length) {
+        var shipToLoadId = parseInt($('#shipmentToLoad').val());
+        if (shipToLoadId)
+            displayCurrentShipment(shipToLoadId);
+    }
 });

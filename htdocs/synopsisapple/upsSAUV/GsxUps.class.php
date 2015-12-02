@@ -490,11 +490,11 @@ class GsxUps {
     }
 
     public function getShippingForm() {
-        $html = $this->starBloc('Choix des composants à expédier', 'partsList');
+        $html = $this->starBloc('Choix des composants à expédier', 'partsList', true);
         $html .= $this->getPartsListHtml();
         $html .= $this->endBloc();
 
-        $html .= $this->starBloc('Informations expédition', 'shippingInfos');
+        $html .= $this->starBloc('Informations expédition', 'shippingInfos', true);
         $html .= $this->getShippingInfosForm();
         $html .= $this->endBloc();
 
@@ -677,15 +677,21 @@ class GsxUps {
         return $html;
     }
 
-    public function getCurrentShipmentsHtml() {
+    public function getCurrentShipmentsHtml($n = 0) {
         $html = '';
         global $db;
-        
-        $sql = 'SELECT * FROM '.MAIN_DB_PREFIX.'synopsisapple_shipment';
-        
+
+        if (isset($_REQUEST['n']) && !empty($_REQUEST['n'])) {
+            $n = $_REQUEST['n'];
+        }
+        $n += 15;
+        $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsisapple_shipment ORDER BY `rowid` DESC LIMIT 0, ' . $n;
+
         $result = $db->query($sql);
+        $displayMore = true;
+
         if ($db->num_rows($result) > 0) {
-            $html .= $this->starBloc('Liste des expéditions en cours', 'currentShipmentList');
+            $html .= $this->starBloc('Liste des expéditions en cours', 'currentShipmentList', isset($_REQUEST['n']));
             $html .= '<div class="tabBar">';
             $html .= '<table id="currentShipmentList"><thead>';
             $html .= '<tr>';
@@ -698,34 +704,43 @@ class GsxUps {
             $html .= '</thead></tbody>';
             while ($datas = $db->fetch_object($result)) {
                 $html .= '<tr>';
-                $html .= '<td>'.$datas->rowid.'</td>';
-                
+                $html .= '<td>' . $datas->rowid . '</td>';
+
                 $html .= '<td>';
-                if (isset($datas->tracking_number) && !empty($datas->tracking_number)) 
+                if (isset($datas->tracking_number) && !empty($datas->tracking_number))
                     $html .= $datas->tracking_number;
                 $html .= '</td>';
-                
+
                 $html .= '<td>';
-                if (isset($datas->gsx_return_id) && !empty($datas->gsx_return_id)) 
+                if (isset($datas->gsx_return_id) && !empty($datas->gsx_return_id))
                     $html .= $datas->gsx_return_id;
                 $html .= '</td>';
-                
+
                 $html .= '<td>';
-                if (isset($datas->gsx_tracking_url) && !empty($datas->gsx_tracking_url)) 
-                    $html .= '<a class="button" href="'.$datas->gsx_tracking_url.'" target="_blank">Page de suivi</a>';
+                if (isset($datas->gsx_tracking_url) && !empty($datas->gsx_tracking_url))
+                    $html .= '<a class="button" href="' . $datas->gsx_tracking_url . '" target="_blank">Page de suivi</a>';
                 $html .= '</td>';
-                
+
                 $html .= '<td>';
-                    $html .= '<span class="button" onclick="displayCurrentShipment('.$datas->rowid.')">Afficher les détails</span>';
+                $html .= '<span class="button" onclick="window.location = \'./retour.php?shipId=' . $datas->rowid . '\'">Afficher les détails</span>';
                 $html .= '</td>';
-                
+
                 $html .= '</tr>';
+                if ($datas->rowid <= 1) {
+                    $displayMore = false;
+                }
             }
             $html .= '</tbody></table>';
+
+            if ($displayMore) {
+                $html .= '<p style="text-align: center"><button class="button"';
+                $html .= ' onclick="window.location = \'./retour.php?n=' . $n . '\'"';
+                $html .= '>Afficher plus</button></p>';
+            }
             $html .= '</div>';
             $html .= $this->endBloc();
         }
-        
+
         return $html;
     }
     

@@ -45,4 +45,10 @@ echo $GU->getCurrentShipmentsHtml();
 //global $db;
 //$ship = new shipment($db, 1);
 //echo $ship->getInfosHtml();
+
+
+
+if (isset($_REQUEST['shipId']) && !empty($_REQUEST['shipId'])) {
+    echo '<input id="shipmentToLoad" type="hidden" value="' . $_REQUEST['shipId'] . '">';
+}
 ?>

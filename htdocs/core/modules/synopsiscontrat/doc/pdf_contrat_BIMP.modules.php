@@ -131,7 +131,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
-                $file = $dir . "/" . $propref . ".pdf";
+                $file = $dir . "/" . $propref."_".date("d-m-y") . ".pdf";
             }
             $this->contrat = $contrat;
 

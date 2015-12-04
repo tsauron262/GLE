@@ -640,6 +640,7 @@ class GsxUps {
             $html .= '<th>N° de commande</th>';
             $html .= '<th>N° de réparation</th>' . "\n";
             $html .= '<th>N° de série du produit</th>' . "\n";
+            $html .= '<th>Type de retour</th>';
             $html .= '</tr></thead><tbody>' . "\n";
             $odd = false;
             $i = 1;
@@ -653,6 +654,7 @@ class GsxUps {
                     $html .= '<td class="partPONumber">' . $p['poNumber'] . '</td>';
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
+                    $html .= '<td class="partExpectedReturn">'.$p['expectedReturn'].'</td>';
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
                     $html .= '</tr>' . "\n";
                     $i++;
@@ -724,7 +726,8 @@ class GsxUps {
                     'newRef' => $newRef ? $part['partNumber'] : '',
                     'serial' => $part['serialNumber'],
                     'returnOrderNumber' => $part['returnOrderNumber'],
-                    'poNumber' => $part['purchaseOrderNumber']
+                    'poNumber' => $part['purchaseOrderNumber'],
+                    'expectedReturn' => $part['expectedReturn']
                 );
             }
         }

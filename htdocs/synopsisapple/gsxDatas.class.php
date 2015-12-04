@@ -915,6 +915,10 @@ class gsxDatas {
                     }
                 } else {
                     $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
+                    
+                    if($requestType == "CreateIPhoneRepairOrReplace")
+                        dol_syslog("requete GSX sans erreur : " . $html . "  |   " . $this->getGSXErrorsHtml() . print_r($response, true), 4, 0, "_apple");
+                    
                     if (($requestType == 'UpdateSerialNumber') ||
                             ($requestType == 'KGBSerialNumberUpdate')) {
                         if (isset($_POST['closeRepair'])) {

@@ -140,6 +140,12 @@ if ($searchOn == 'true') {
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
+    if ($_REQUEST['description'] != "") {
+        $searchStringT = "'%".addslashes($_REQUEST['description'])."%'";
+        $searchFieldT = 'description';
+        $operT = 'LIKE';
+        $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
+    }
 
 
     if (isset($_REQUEST['ref']))

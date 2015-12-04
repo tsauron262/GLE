@@ -265,12 +265,11 @@ class Chrono extends CommonObject {
         //$this->ref = substr($this->ref,0,7);
         $newRef = $this->ref . "-" . $revision;
         if ($this->orig_ref . "x" != "x") {
-            if(stripos($this->orig_ref, "-")){
+            if (stripos($this->orig_ref, "-")) {
                 $tabT = explode("-", $this->orig_ref);
-                $newRef = $tabT[0]. "-" . $revision;
-            }
-            else
-            $newRef = $this->orig_ref . "-" . $revision;
+                $newRef = $tabT[0] . "-" . $revision;
+            } else
+                $newRef = $this->orig_ref . "-" . $revision;
         }
         //Nouvelle revision
         $oldId = $this->id;
@@ -278,13 +277,14 @@ class Chrono extends CommonObject {
 
         $this->getValues();
         $newId = $this->create();
-        $this->ref = $newRef;
-        $this->revision = ($this->revision ? $this->revision + 1 : 1);
-        $this->update($this->id);
-        $this->setDatas($this->id, $this->values);
+        if ($newId > 0) {
+            $this->ref = $newRef;
+            $this->revision = ($this->revision ? $this->revision + 1 : 1);
+            $this->update($this->id);
+            $this->setDatas($this->id, $this->values);
 
 //        $newId = $this->create_revision_from($newRef, ($this->revision ? $this->revision + 1 : 1));
-        //Copie extra value
+            //Copie extra value
 //        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $_REQUEST['id'];
 //        $sql = $this->db->query($requete);
 //        while ($res = $this->db->fetch_object($sql)) {
@@ -298,24 +298,25 @@ class Chrono extends CommonObject {
 //            $sql1 = $this->db->query($requete);
 //        }
 
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_statut = 3, revisionNext = " . $newId . " WHERE id = " . $oldId;
-        $sqlA = $this->db->query($requete);
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_statut = 3, revisionNext = " . $newId . " WHERE id = " . $oldId;
+            $sqlA = $this->db->query($requete);
 
-        if ($sqlA && $newId > 0) {
-            global $user, $langs, $conf;
-            // Appel des triggers
-            include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-            $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('CHRONO_REVISED', $this, $user, $langs, $conf);
-            if ($result < 0) {
-                $this->error = $interface->errors;
+            if ($sqlA && $newId > 0) {
+                global $user, $langs, $conf;
+                // Appel des triggers
+                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('CHRONO_REVISED', $this, $user, $langs, $conf);
+                if ($result < 0) {
+                    $this->error = $interface->errors;
+                }
+                // Fin appel triggers
+                $this->db->commit();
+                return $newId;
+            } else {
+                $this->db->rollback();
+                return(-1);
             }
-            // Fin appel triggers
-            $this->db->commit();
-            return $newId;
-        } else {
-            $this->db->rollback();
-            return(-1);
         }
     }
 
@@ -526,7 +527,7 @@ class Chrono extends CommonObject {
 //        $groups = $userObj->listGroupIn();
         require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
         $usergroup = new UserGroup($this->db);
-        $groups = $usergroup->listGroupsForUser($userObj->id,0);
+        $groups = $usergroup->listGroupsForUser($userObj->id, 0);
         //  var_dump($groups);
         foreach ($groups as $group) {
             $group = $this->getGrpRights($group);
@@ -640,23 +641,23 @@ class Chrono extends CommonObject {
 
 
         $this->getValues();
-        
+
         $color = false;
         if ($this->model_refid == 105 && isset($this->values["Prioritaire"]) && $this->values["Prioritaire"] == 1)//rouge sur sav urgent
             $color = "red";
-        
+
         if ($this->model_refid == 106 && isset($this->values["Fin_Pret"]) && new DateTime($this->values["Fin_Pret"]) < new DateTime('today'))//vert sur pret en retard
             $color = "red";
         if ($this->model_refid == 106 && isset($this->values["Restitue"]) && $this->values["Restitue"] == 1)//vert sur pret erminé
             $color = "green";
-        
+
 
 
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $this->id . '">';
         $lienfin = '</a>';
-        
-        if($color)
-            $titre = "<span style='color:".$color."'>" . $titre . "</span>";
+
+        if ($color)
+            $titre = "<span style='color:" . $color . "'>" . $titre . "</span>";
 
 //        if (stripos($this->picto, '[KEY|')) {
 //            $tabT = explode('[KEY|', $this->picto);
@@ -674,9 +675,9 @@ class Chrono extends CommonObject {
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {
-            $result.=($lien . lien::traitePicto($this->picto,$this->id,$langs->trans("Chrono") . ': ' . $titre) . $lienfin . ' ');
+            $result.=($lien . lien::traitePicto($this->picto, $this->id, $langs->trans("Chrono") . ': ' . $titre) . $lienfin . ' ');
         } else if ($withpicto)
-            $result.=($lien . lien::traitePicto($this->picto,$this->id,$langs->trans("ShowChrono") . ': ' . $titre) . $lienfin . ' ');
+            $result.=($lien . lien::traitePicto($this->picto, $this->id, $langs->trans("ShowChrono") . ': ' . $titre) . $lienfin . ' ');
 
         $result.=$lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
         return $result;
@@ -730,7 +731,7 @@ class Chrono extends CommonObject {
         //$propid = $this->prop;
         //$propal = "SELECT rowid FROM ".MAIN_DB_PREFIX."propal WHERE ref=".$this->propalid;
         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono (date_create,ref,model_refid,description,fk_soc,fk_socpeople,propalid,projetid,fk_user_author)
-                          VALUES (now(),'" . $ref . "','" . $this->model_refid . "','" . $this->description . "'," . ($this->socid > 0 ? $this->socid : 'NULL') . "," . ($this->contactid > 0 ? $this->contactid : 'NULL') . ",'" . $this->propalid . "','" . $this->projetid . "', " . $user->id . ")";
+                          VALUES (now(),'" . $ref . "','" . $this->model_refid . "','" . addslashes($this->description) . "'," . ($this->socid > 0 ? $this->socid : 'NULL') . "," . ($this->contactid > 0 ? $this->contactid : 'NULL') . ",'" . $this->propalid . "','" . $this->projetid . "', " . $user->id . ")";
         $sql = $this->db->query($requete);
         if ($sql) {
             $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "synopsischrono");
@@ -1022,8 +1023,8 @@ class Chrono extends CommonObject {
 //            echo $value;
 
 
-            if($keyId != "id"){
-                if($value != "now()")
+            if ($keyId != "id") {
+                if ($value != "now()")
                     $tabUpdate[] = $keyId . " = '" . addslashes($value) . "'";
                 else
                     $tabUpdate[] = $keyId . " = " . addslashes($value) . "";
@@ -1098,14 +1099,13 @@ class ChronoRef {
     public function ChronoRef($DB) {
         global $conf;
         $this->db = $DB;
-        if($conf->global->MAIN_INFO_SOCIETE_NOM == "CAPSIM"){
-        $this->propInList = 1;
-        $this->descInList = 1;
-        $this->maxForNbDoc = 20;
-        }
-        else{
-        $this->propInList = 0;
-        $this->descInList = 0;
+        if ($conf->global->MAIN_INFO_SOCIETE_NOM == "CAPSIM") {
+            $this->propInList = 1;
+            $this->descInList = 1;
+            $this->maxForNbDoc = 20;
+        } else {
+            $this->propInList = 0;
+            $this->descInList = 0;
         }
     }
 

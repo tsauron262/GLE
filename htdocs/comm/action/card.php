@@ -741,13 +741,19 @@ if ($action == 'create')
 	}
         
         
-                /*moddrsi*/
+                
+        /*moddrsi*/if(isset($_REQUEST['addGroupMember']) || isset($_REQUEST['addassignedtouser'])){
 		print $form->select_dolgroups('', 'groupsAdd',1);
                 print '<input type="submit" name="addGroupMember" class="butAction" value="Ajouter"/><br/>';
                 /*fmoddrsi*/
                 
                 
 	print $form->select_dolusers_forevent(($action=='create'?'add':'update'), 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
+        /*mod drsi*/}
+        else{
+            print $form->select_dolusers_forevent('view', 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
+            print '<input type="submit" name="addGroupMember" class="butAction" value="Ajouter"/><br/>';
+        }/*fmod drs*/
 	if (in_array($user->id,array_keys($listofuserid))) print $langs->trans("MyAvailability").': <input id="transparency" type="checkbox" name="transparency"'.(((! isset($_GET['transparency']) && ! isset($_POST['transparency'])) || GETPOST('transparency'))?' checked':'').'> '.$langs->trans("Busy");
 	print '</td></tr>';
 
@@ -1105,12 +1111,17 @@ if ($id > 0)
 			}
 		}
                 
-                /*moddrsi*/
+        /*moddrsi*/if(isset($_REQUEST['addGroupMember']) || isset($_REQUEST['addassignedtouser']) || isset($_REQUEST['updateassignedtouser'])){
 		print $form->select_dolgroups('', 'groupsAdd',1);
                 print '<input type="submit" name="addGroupMember" class="butAction" value="Ajouter"/><br/>';
                 /*fmoddrsi*/
 		
 		print $form->select_dolusers_forevent(($action=='create'?'add':'update'), 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
+                /*mod drsi*/}
+        else{
+            print $form->select_dolusers_forevent('view', 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
+            print '<input type="submit" name="addGroupMember" class="butAction" value="Ajouter"/><br/>';
+        }/*fmod drs*/
                 if (in_array($user->id,array_keys($listofuserid))) print $langs->trans("MyAvailability").':  <input id="transparency" type="checkbox" name="transparency"'.($listofuserid[$user->id]['transparency']?' checked':'').'>'.$langs->trans("Busy");
 		print '</td></tr>';
 

@@ -29,6 +29,7 @@ print load_fiche_titre($text);
 if (isset($user->rights->SynopsisTools->Global->phpMyAdmin)) {
     print" <br/><br/><a href='myAdmin.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin</span></a>";
     print" <br/><br/><a href='./Synopsis_MyAdmin/index.php'  target='_blank'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin (Nouvelle onglet)</span></a>";
+    print" <br/><br/><a href='./Synopsis_MyAdmin3/index.php'  target='_blank'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin (Nouvelle onglet) old version</span></a>";
 }
 if (isset($user->rights->SynopsisTools->Global->fileInfo)) {
     print" <br/><br/><a href='./fichierLog.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Fichier de log</span></a>";

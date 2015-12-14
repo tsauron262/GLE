@@ -174,7 +174,7 @@ $(window).load(function() {
 
 
     elem = "#Chrono1034, #inputautocompleteChrono1034";
-    $(elem).focusout(function() {
+    $(elem).change(function() {
         initTrans(elem);
     });
     initTrans(elem);

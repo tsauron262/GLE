@@ -506,6 +506,8 @@ $requete = "SELECT DISTINCT t.rowid as tid,
 		" . $contraiteUser . "
 	    ORDER BY p.rowid";
 
+dol_syslog($requete,3);
+
 $sql = $db->query($requete);
 $remProjId = false;
 $bool = true;

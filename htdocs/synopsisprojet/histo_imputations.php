@@ -740,7 +740,7 @@ if ($modVal != 2) {
 
     print "</tr>";
 }
-
+dol_syslog(join(',', $arrTaskId),3);
 if ($modVal == 1 && count($arrTaskId) > 0) {
     $colspan = $arrNbJour[$format] - 5; // -5 -5 + 5
 //Total Mois

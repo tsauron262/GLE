@@ -47,6 +47,7 @@ $search_name=GETPOST('search_name');
 $search_contract=GETPOST('search_contract');
 $search_ref_supplier=GETPOST('search_ref_supplier','alpha');
 $search_tech=GETPOST('search_tech','alpha');
+$search_tech2=GETPOST('search_tech2','alpha');
 $sall=GETPOST('sall');
 $search_status=GETPOST('search_status');
 $socid=GETPOST('socid');
@@ -120,9 +121,6 @@ if ($search_sale > 0)
 {
 	$sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$search_sale;
 }
-if (!empty($search_tech)) {
-	$sql .= natural_search(array('ut.lastname', 'ut.firstname'), $search_tech);
-}
 
 if ($sall) {
     $sql .= natural_search(array('s.nom', 'cd.label', 'cd.description'), $sall);
@@ -130,6 +128,12 @@ if ($sall) {
 
 
 /*mod drsi */
+if (!empty($search_tech)) {
+	$sql .= " AND c.`fk_soc` IN (SELECT sc.`fk_soc` FROM llx_societe_commerciaux sc, llx_user uc WHERE sc.`fk_user` = uc.rowid ".natural_search(array('uc.lastname', 'uc.firstname'), $search_tech).")";
+}
+if (!empty($search_tech2)) {
+	$sql .= natural_search(array('ut.lastname', 'ut.firstname'), $search_tech2);
+}
 if($expirer)
 $sql.= " AND cd.statut < 5";
 /*f mod drsi */
@@ -150,8 +154,17 @@ if ($resql)
 {
     $num = $db->num_rows($resql);
     $i = 0;
+    
+    
+    $param='&search_contract='.$search_contract;
+    $param.='&search_name='.$search_name;
+    $param.='&search_ref_supplier='.$search_ref_supplier;
+    $param.='&search_sale=' .$search_sale;
+    /*moddrsi*/
+    $param.='&search_tech=' .$search_tech;
+    $param.='&search_tech2=' .$search_tech2;
 
-    print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], '&search_contract='.$search_contract.'&search_name='.$search_name, $sortfield, $sortorder,'',$num,$totalnboflines,'title_commercial.png');
+    print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], '&'.$param, $sortfield, $sortorder,'',$num,$totalnboflines,'title_commercial.png');
 
     print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
     print '<table class="liste" width="100%">';
@@ -176,10 +189,6 @@ if ($resql)
 
     print '<tr class="liste_titre">';
 
-    $param='&search_contract='.$search_contract;
-    $param.='&search_name='.$search_name;
-    $param.='&search_ref_supplier='.$search_ref_supplier;
-    $param.='&search_sale=' .$search_sale;
 
     print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "c.rowid","","$param",'',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("RefCustomer"), $_SERVER["PHP_SELF"], "c.ref_supplier","","$param",'',$sortfield,$sortorder);
@@ -211,8 +220,11 @@ if ($resql)
     print '<td class="liste_titre">';
     print '<input type="text" class="flat" size="24" name="search_tech" value="'.$search_tech.'">';
     print '</td>';
+    print '<td class="liste_titre">';
+    print '<input type="text" class="flat" size="24" name="search_tech2" value="'.$search_tech2.'">';
+    print '</td>';
+//    print '<td class="liste_titre">&nbsp;</td>';
     /*fmod drsi*/
-    print '<td class="liste_titre">&nbsp;</td>';
     //print '<td class="liste_titre">&nbsp;</td>';
     print '<td colspan="5" class="liste_titre" align="right"><input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
 	print '<input type="image" class="liste_titre" name="button_removefilter" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
@@ -230,7 +242,6 @@ if ($resql)
         print '</td>';
         print '<td>'.$obj->ref_supplier.'</td>';
         print '<td><a href="../comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.$obj->name.'</a></td>';
-       /*mod drsi*/ print '<td>'.$obj->tech.'</td>';/*fmoddrsi*/
         //print '<td align="center">'.dol_print_date($obj->datec).'</td>';
 
         // Sales Rapresentatives
@@ -269,6 +280,8 @@ if ($resql)
         print '</td>';
 
 
+       /*mod drsi*/ print '<td>'.$obj->tech.'</td>';/*fmoddrsi*/
+       
         print '<td align="center">'.dol_print_date($db->jdate($obj->date_contrat)).'</td>';
        /* mod drsi */ print '<td align="center">'.dol_print_date($db->jdate($obj->date_fin_validite)).'</td>';/*f mod drsi*/
         //print '<td align="center">'.$staticcontrat->LibStatut($obj->statut,3).'</td>';

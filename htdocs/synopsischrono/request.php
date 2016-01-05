@@ -55,10 +55,10 @@ if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCent
     if($lettreCentre == "GB")
         $lettreCentre = "GA";
     //a virer
-    if($lettreCentre == "CB")
-        $lettreCentre = "A";
-    if($lettreCentre == "AB")
-        $lettreCentre = "M";
+//    if($lettreCentre == "CB")
+//        $lettreCentre = "A";
+//    if($lettreCentre == "AB")
+//        $lettreCentre = "M";
     //f a virer
     if($lettreCentre == "M" || $lettreCentre == "AB" || $lettreCentre == "CB")
         $lettreCentre = "A";

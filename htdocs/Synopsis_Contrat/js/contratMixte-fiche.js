@@ -429,7 +429,7 @@ jQuery(function() {
                 } else {
                     jQuery('#modrecondAuto').attr('checked',false);
                 }
-                jQuery('input[name=typemod]').attr('checked',false);
+//                jQuery('input[name=typemod]').attr('checked',false);
                 jQuery('#DurValMntmod').val("");
                 jQuery('#DurValTktmod').val("");
 

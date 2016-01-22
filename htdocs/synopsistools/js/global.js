@@ -137,17 +137,13 @@ $(window).load(function () {
 
 
 
-
-    /*rsponsive victor*/
-
-    /*responsive victor*/
-
-
-
-
     $(".disableadOnClick").click(function () {
         $(this).attr("disabled", "disabled");
     });
+
+
+
+    traiteLien();
 });
 
 function ajoutNotification(id, titre, msg) {
@@ -768,10 +764,9 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
         $("iframe.fullScreen").fadeOut();
 //            cacherSuppr($(this));
     });
-    
-    
-    
-    traiteLien();
+
+
+
 
 }
 function fermerIframe(elem, callBack) {
@@ -893,11 +888,16 @@ function autoSave(actionSave) {
 
 function traiteLien() {
     $("td").each(function () {
-        if ($(this).html() == "Viadeo") {alert("ok");
-            elem = $(this).first("td");
-            var reg = new RegExp("((http://)[a-zA-Z0-9/.]+)+", "gi");
-            var chaine = elem.html();
-            elem.html(chaine.replace(reg, "<a href='$1' target=_blank>$1</a>"));
+        var Titre = ["Viadeo", "Facebook", "LinkedIn"];
+        if (Titre.indexOf($(this).html()) > -1) {
+            elem = $(this).next("td");
+            if (elem.length) {
+                var chaine = elem.html();
+                if (chaine.indexOf("input") < 0) {
+                    var reg = new RegExp("((http://)[a-zA-Z0-9_\?=&;\\-/.]+)+", "gi");
+                    elem.html(chaine.replace(reg, "<a href='$1' target=_blank>$1</a>"));
+                }
+            }
         }
     });
 }

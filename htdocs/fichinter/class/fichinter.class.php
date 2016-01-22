@@ -160,7 +160,7 @@ class Fichinter extends CommonObject
 		$sql.= ", ".($this->note_private?"'".$this->db->escape($this->note_private)."'":"null");
 		$sql.= ", ".($this->note_public?"'".$this->db->escape($this->note_public)."'":"null");
 		$sql.= ")";
-die($sql);
+
 		dol_syslog(get_class($this)."::create", LOG_DEBUG);
 		$result=$this->db->query($sql);
 		if ($result)
@@ -171,7 +171,7 @@ die($sql);
 			$result=$interface->run_triggers('FICHEINTER_CREATE',$this,$user,$langs,$conf);
 			if ($result < 0) {
 				$error++; $this->errors=$interface->errors;
-			}
+			}die("fin");
 			// Fin appel triggers
 			
 			$this->id=$this->db->last_insert_id(MAIN_DB_PREFIX."fichinter");

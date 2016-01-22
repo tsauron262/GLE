@@ -110,7 +110,7 @@ class Interfaces
                             continue;
                         }
                         else
-                        {
+                        {echo $newdir.'/'.$file;
                             include_once $newdir.'/'.$file;
                         }
 

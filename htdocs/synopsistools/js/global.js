@@ -893,7 +893,7 @@ function autoSave(actionSave) {
 
 function traiteLien() {
     $("td").each(function () {
-        if ($(this).html() == "Viadeo") {
+        if ($(this).html() == "Viadeo") {alert("ok");
             elem = $(this).first("td");
             var reg = new RegExp("((http://)[a-zA-Z0-9/.]+)+", "gi");
             var chaine = elem.html();

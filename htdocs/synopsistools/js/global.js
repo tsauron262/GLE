@@ -24,10 +24,10 @@ $(window).load(function () {
 
     if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/card.php") > -1) {
         desactEntrer = false;
-        $("textarea").focusin(function(){
+        $("textarea").focusin(function () {
             desactEntrer = true;
         });
-        $("textarea").focusout(function(){
+        $("textarea").focusout(function () {
             desactEntrer = false;
         });
         $("body").keypress(function (e) {
@@ -96,8 +96,7 @@ $(window).load(function () {
         if ($(this).val() >= 100) {
             $("input[name|='price_ht']").val("0");
             elems.hide();
-        }
-        else
+        } else
             elems.show();
     });
 
@@ -140,13 +139,13 @@ $(window).load(function () {
 
 
     /*rsponsive victor*/
-    
+
     /*responsive victor*/
 
 
 
 
-    $(".disableadOnClick").click(function(){
+    $(".disableadOnClick").click(function () {
         $(this).attr("disabled", "disabled");
     });
 });
@@ -305,7 +304,7 @@ function traiteScroll(heightDif) {
 //    grandeTaille = parseInt($("body").innerHeight());
     grandeTaille = parseInt($("body").innerHeight());
     minimuAGagne = grandeTaille - height;
-    
+
     appli = false;
     newTaille = 0;
     elem = null;
@@ -788,8 +787,7 @@ function iFramePrinc(createIfNotExist) {
             src = document.location.href + "?inut";
         $("iframe.fullScreen").attr("src", src);
         $("div.fullScreen").fadeOut();
-    }
-    else
+    } else
         $("iframe.fullScreen").fadeIn();
 }
 
@@ -882,10 +880,20 @@ function autoSave(actionSave) {
         if (timeMax == null) {
             timeMax = new Date().getTime() + 30000;
             boucleSave();
-        }
-        else
+        } else
             timeMax = new Date().getTime() + 30000;
     }
-    
-    
+
+
+}
+
+function traiteLien() {
+    $("td").each(function () {
+        if ($(this).html() == "Viadeo") {
+            elem = $(this).first("td");
+            var reg = new RegExp("((http://)[a-zA-Z0-9/.]+)+", "gi");
+            var chaine = elem.html();
+            elem.html(chaine.replace(reg, "<a href='$1' target=_blank>$1</a>"));
+        }
+    });
 }

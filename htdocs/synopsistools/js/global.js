@@ -768,6 +768,10 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
         $("iframe.fullScreen").fadeOut();
 //            cacherSuppr($(this));
     });
+    
+    
+    
+    traiteLien();
 
 }
 function fermerIframe(elem, callBack) {

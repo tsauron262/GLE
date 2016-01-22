@@ -860,7 +860,10 @@ if ($id > 0)
                 $fichinter_static->statut=$objp->fk_statut;
 
 				print "<tr ".$bc[$var].">";
-				print '<td class="nowrap"><a href="'.DOL_URL_ROOT.'/synopsisfichinter/card.php?id='.$objp->id.'">'.img_object($langs->trans("ShowPropal"),"propal").' '.$objp->ref.'</a></td>'."\n";
+				print '<td class="nowrap"><a href="'.DOL_URL_ROOT."/";
+                                if(isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER))
+                                    print 'synopsis';
+                                print 'fichinter/card.php?id='.$objp->id.'">'.img_object($langs->trans("ShowIntervention"),"intervention").' '.$objp->ref.'</a></td>'."\n";
                 /*MODDRS*/print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->startdate)).'</td>'."\n";/*fmoddrsi*/
 				print '<td align="right" width="120">'.convertSecondToTime($objp->duration).'</td>'."\n";
 				print '<td align="right" width="100">'.$fichinter_static->getLibStatut(5).'</td>'."\n";

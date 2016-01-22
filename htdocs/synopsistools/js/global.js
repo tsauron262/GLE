@@ -894,7 +894,7 @@ function traiteLien() {
             if (elem.length) {
                 var chaine = elem.html();
                 if (chaine.indexOf("input") < 0) {
-                    var reg = new RegExp("((http://)[a-zA-Z0-9_\?=&;\\-/.]+)+", "gi");
+                    var reg = new RegExp("((https?://)[a-zA-Z0-9_\?=&;\\-/.]+)+", "gi");
                     elem.html(chaine.replace(reg, "<a href='$1' target=_blank>$1</a>"));
                 }
             }

@@ -171,7 +171,7 @@ class Fichinter extends CommonObject
 			$result=$interface->run_triggers('FICHEINTER_CREATE',$this,$user,$langs,$conf);
 			if ($result < 0) {
 				$error++; $this->errors=$interface->errors;
-			}die("fin");
+			}echo("fin".$error);
 			// Fin appel triggers
 			
 			$this->id=$this->db->last_insert_id(MAIN_DB_PREFIX."fichinter");
@@ -184,7 +184,7 @@ class Fichinter extends CommonObject
 				dol_syslog(get_class($this)."::create", LOG_DEBUG);
 				$resql=$this->db->query($sql);
 				if (! $resql) $error++;
-			}
+			}echo("apref");
 
 			if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
             {
@@ -194,7 +194,7 @@ class Fichinter extends CommonObject
             	{
             		$error++;
             	}
-            }
+            }echo("apextra");
 
 			// Add linked object
 			if (! $error && $this->origin && $this->origin_id)
@@ -202,7 +202,7 @@ class Fichinter extends CommonObject
 				$ret = $this->add_object_linked();
 				if (! $ret)	dol_print_error($this->db);
 			}
-
+echo("aptesterror");
 
             if (! $notrigger)
             {
@@ -211,13 +211,13 @@ class Fichinter extends CommonObject
                 if ($result < 0) { $error++; }
                 // End call triggers
             }
-
+die("aptrig");
 			return $this->id;
 		}
 		else
 		{
 			$this->error=$this->db->error();
-			$this->db->rollback();
+			$this->db->rollback();die("aprerror");
 			return -1;
 		}
 

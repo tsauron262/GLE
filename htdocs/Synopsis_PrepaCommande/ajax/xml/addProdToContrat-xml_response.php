@@ -39,16 +39,16 @@ if (isset($_REQUEST['contratId']) && $_REQUEST['contratId'] > 0) {
     $commande = new Commande($db);
     $commande->fetch($commId);
     $contrat->socid = $commande->socid;
-    $contrat->commercial_signature_id = 1;
-    $contrat->commercial_suivi_id = 1;
+    $contrat->commercial_signature_id = 2;
+    $contrat->commercial_suivi_id = 5;
     $contrat->date_contrat = dol_now();
     $contrat->create($user);
     $contrat->setExtraParametersSimple(7);
 }
 
-if(isset($_REQUEST['tabElem']))
-$tabLigne = explode("-", $_REQUEST['tabElem']);
-elseif(isset($_REQUEST['comLigneId']))
+if (isset($_REQUEST['tabElem']))
+    $tabLigne = explode("-", $_REQUEST['tabElem']);
+elseif (isset($_REQUEST['comLigneId']))
     $tabLigne = array($_REQUEST['comLigneId']);
 else
     die("Rien a ajouter !!! ");
@@ -59,9 +59,9 @@ foreach ($tabLigne as $comLigneId)
 
 if ($_REQUEST['renouveler'])
     $contrat->renouvellementPart2();
-elseif (!isset($_REQUEST['contratId']) || $_REQUEST['contratId'] == 0){
+elseif (!isset($_REQUEST['contratId']) || $_REQUEST['contratId'] == 0) {
     $contrat->initRefPlus();
-        addElementElement("commande", "contrat", $commId, $contrat->id);
+    addElementElement("commande", "contrat", $commId, $contrat->id);
 }
 
 

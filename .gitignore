@@ -19,3 +19,4 @@ doxygen_warnings.log
 Thumbs.db
 # Vagrant generated files
 .vagrant
+/htdocs/timesheet/

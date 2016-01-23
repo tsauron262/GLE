@@ -385,9 +385,13 @@ else {
 
 function testNumSms($to){
         $to = str_replace(" ", "", $to);
-        if ($to == "" || (stripos($to, "06") !== 0 && stripos($to, "+336") !== 0))
+        if ($to == "")
             return 0;
-        return 1;
+        if(stripos($to, "06") === 0 && strlen($to) == 10)
+            return 1;
+        if(stripos($to, "+336") === 0 && strlen($to) == 12)
+            return 1;
+        return 0;
 }
 
 

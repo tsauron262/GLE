@@ -38,7 +38,6 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
       \brief      Constructeur
       \param        db        Handler acces base de donnee
      */
-
     function pdf_contrat_BIMP($db) {
 
         global $conf, $langs, $mysoc;
@@ -65,6 +64,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
+
 
 
 
@@ -131,7 +131,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
-                $file = $dir . "/" . $propref."_".date("d-m-y") . ".pdf";
+                $file = $dir . "/" . $propref . "_" . date("d-m-y") . ".pdf";
             }
             $this->contrat = $contrat;
 
@@ -157,15 +157,13 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 //                    $pdf = new FPDI('P', 'mm', $this->format);
 //                }
                 $pdf = pdf_getInstance($this->format);
-                if (class_exists('TCPDF'))
-                {
+                if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
 
                 $pdf1 = pdf_getInstance($this->format);
-                if (class_exists('TCPDF'))
-                {
+                if (class_exists('TCPDF')) {
                     $pdf1->setPrintHeader(false);
                     $pdf1->setPrintFooter(false);
                 }
@@ -440,8 +438,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                             if ($val->GMAO_Mixte['clause'] != '')
                                 $condition .= utf8_encodeRien($val->GMAO_Mixte['clause']) . "\n";
                             $condition .= "Cf Annexe " . $result->rang;
-                        }
-                        else
+                        } else
                             $condition .= utf8_encodeRien($val->GMAO_Mixte['clause']);
                     }
                     $pdf1->SetX(0);
@@ -612,78 +609,15 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                 $nextY = $pdf->getY();
                 foreach ($contrat->lines as $key => $val) {
-                    $libelleContrat = $val->prodContrat->libelle;
+                    if ($val->total_ttc > 0) {
+                        $libelleContrat = $val->prodContrat->libelle;
 //                    if ($val->statut == 0 || $val->statut == 5)
 //                        continue;
-                    $pdf->SetDrawColor(255, 255, 255);
-                    $pdf->setfillcolor(255, 255, 255);
-                    $type = "Libre";
-
-
-                    if ($val->type == 3) {
-                        $pdf->SetDrawColor(255, 231, 227);
-                        $pdf->setfillcolor(255, 231, 227);
-                        $type = "Maintenance";
-                    } else if ($val->type == 4) {
-                        $pdf->SetDrawColor(223, 255, 232);
-                        $pdf->setfillcolor(223, 255, 232);
-                        $type = "SAV";
-                        continue;
-                    } else if ($val->type == 2) {
-                        $pdf->setfillcolor(209, 221, 255);
-                        $pdf->SetDrawColor(209, 221, 255);
-                        $type = "Tickets";
-                    }
-                    if ($val->prodContrat->extra_Type_PDF) {
-                        $type = $val->prodContrat->extra_Type_PDF;
-                    }
-                    if ($val->prodContrat->extra_Designation_PDF) {
-                        $libelleContrat = $val->prodContrat->extra_Designation_PDF;
-                    }
-                    if ($val->prodContrat->extra_Couleur_PDF) {
-                        $color = $this->hex2RGB($val->prodContrat->extra_Couleur_PDF, false);
-                        $pdf->setfillcolor($color['red'], $color['green'], $color['blue']);
-                        $pdf->SetDrawColor($color['red'], $color['green'], $color['blue']);
-                    }
-
-
-                    if ($nextY > 274) {
-                        $this->_pagefoot($pdf, $contrat, $outputlangs);
-
-                        $pdf->AddPage();
-                        $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-
-                        $pdf->SetFont('', 'B', 12);
-
-                        //Titre Page 1
-                        $pdf->SetXY(49, 42);
-                        $pdf->MultiCell(157, 6, utf8_encodeRien('Résumé des services(Suite)'), 0, 'C');
-
-                        $pdf->SetFont('', 'B', 8);
-
-
-                        $pdf->SetXY($init, $nextY);
-                        $col = 32;
-                        $pdf->setfillcolor(220, 130, 40);
-                        $pdf->SetDrawColor(220, 130, 40);
-                        $pdf->SetTextColor(255, 255, 255);
-                        $decal_type = 3;
-
-                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Produits"), 0, 'C', 1);
-                        $pdf->SetXY($init + $col, $nextY);
-                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("SN"), 0, 'C', 1);
-                        $pdf->SetXY($init + $col + $col, $nextY);
-                        $pdf->MultiCell($col - $decal_type, $hauteur_ligne, utf8_encodeRien("Type"), 0, 'C', 1);
-                        $pdf->SetXY($init + $col + $col + $col - $decal_type, $nextY);
-                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Dates"), 0, 'C', 1);
-                        $pdf->SetXY($init + $col + $col + $col - $decal_type + $col, $nextY);
-                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Tarif"), 0, 'C', 1);
-                        $pdf->SetFont('', '', 8);
-
-                        $pdf->SetTextColor(0, 0, 60);
                         $pdf->SetDrawColor(255, 255, 255);
                         $pdf->setfillcolor(255, 255, 255);
                         $type = "Libre";
+
+
                         if ($val->type == 3) {
                             $pdf->SetDrawColor(255, 231, 227);
                             $pdf->setfillcolor(255, 231, 227);
@@ -710,72 +644,136 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                             $pdf->SetDrawColor($color['red'], $color['green'], $color['blue']);
                         }
 
-                        $nextY = $pdf->getY();
-                    }
-                    $pdf->SetXY($init, $nextY);
-                    $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
 
-                    if ($avenant != $val->avenant) {
-                        $avenantTxt = "";
-                        $pdf->SetTextColor(0, 0, 60);
-                        $pdf->SetDrawColor(0, 0, 60);
-                        $pdf->setfillcolor(255, 255, 255);
+                        if ($nextY > 274) {
+                            $this->_pagefoot($pdf, $contrat, $outputlangs);
 
-                        if ($val->avenant != 9999999999) {
-                            $requete = "SELECT unix_timestamp(date_avenant)  as da
+                            $pdf->AddPage();
+                            $this->_pagehead($pdf, $contrat, 1, $outputlangs);
+
+                            $pdf->SetFont('', 'B', 12);
+
+                            //Titre Page 1
+                            $pdf->SetXY(49, 42);
+                            $pdf->MultiCell(157, 6, utf8_encodeRien('Résumé des services(Suite)'), 0, 'C');
+
+                            $pdf->SetFont('', 'B', 8);
+
+
+                            $pdf->SetXY($init, $nextY);
+                            $col = 32;
+                            $pdf->setfillcolor(220, 130, 40);
+                            $pdf->SetDrawColor(220, 130, 40);
+                            $pdf->SetTextColor(255, 255, 255);
+                            $decal_type = 3;
+
+                            $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Produits"), 0, 'C', 1);
+                            $pdf->SetXY($init + $col, $nextY);
+                            $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("SN"), 0, 'C', 1);
+                            $pdf->SetXY($init + $col + $col, $nextY);
+                            $pdf->MultiCell($col - $decal_type, $hauteur_ligne, utf8_encodeRien("Type"), 0, 'C', 1);
+                            $pdf->SetXY($init + $col + $col + $col - $decal_type, $nextY);
+                            $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Dates"), 0, 'C', 1);
+                            $pdf->SetXY($init + $col + $col + $col - $decal_type + $col, $nextY);
+                            $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Tarif"), 0, 'C', 1);
+                            $pdf->SetFont('', '', 8);
+
+                            $pdf->SetTextColor(0, 0, 60);
+                            $pdf->SetDrawColor(255, 255, 255);
+                            $pdf->setfillcolor(255, 255, 255);
+                            $type = "Libre";
+                            if ($val->type == 3) {
+                                $pdf->SetDrawColor(255, 231, 227);
+                                $pdf->setfillcolor(255, 231, 227);
+                                $type = "Maintenance";
+                            } else if ($val->type == 4) {
+                                $pdf->SetDrawColor(223, 255, 232);
+                                $pdf->setfillcolor(223, 255, 232);
+                                $type = "SAV";
+                                continue;
+                            } else if ($val->type == 2) {
+                                $pdf->setfillcolor(209, 221, 255);
+                                $pdf->SetDrawColor(209, 221, 255);
+                                $type = "Tickets";
+                            }
+                            if ($val->prodContrat->extra_Type_PDF) {
+                                $type = $val->prodContrat->extra_Type_PDF;
+                            }
+                            if ($val->prodContrat->extra_Designation_PDF) {
+                                $libelleContrat = $val->prodContrat->extra_Designation_PDF;
+                            }
+                            if ($val->prodContrat->extra_Couleur_PDF) {
+                                $color = $this->hex2RGB($val->prodContrat->extra_Couleur_PDF, false);
+                                $pdf->setfillcolor($color['red'], $color['green'], $color['blue']);
+                                $pdf->SetDrawColor($color['red'], $color['green'], $color['blue']);
+                            }
+
+                            $nextY = $pdf->getY();
+                        }
+                        $pdf->SetXY($init, $nextY);
+                        $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
+
+                        if ($avenant != $val->avenant) {
+                            $avenantTxt = "";
+                            $pdf->SetTextColor(0, 0, 60);
+                            $pdf->SetDrawColor(0, 0, 60);
+                            $pdf->setfillcolor(255, 255, 255);
+
+                            if ($val->avenant != 9999999999) {
+                                $requete = "SELECT unix_timestamp(date_avenant)  as da
                                           FROM Babel_contrat_avenant
                                          WHERE id = " . $val->avenant;
-                            $sql = $this->db->query($requete);
-                            $res = $this->db->fetch_object($sql);
-                            $avenantTxt = " du " . date('d/m/Y', $res->da);
+                                $sql = $this->db->query($requete);
+                                $res = $this->db->fetch_object($sql);
+                                $avenantTxt = " du " . date('d/m/Y', $res->da);
+                            }
+                            $pdf->SetFont('', 'B', 8);
+                            $pdf->MultiCell(157, 6, utf8_encodeRien('Avenant ' . $avenantTxt), 1, 'C', 0);
+                            $pdf->SetFont('', '', 6.5);
+                            $avenant = $val->avenant;
+
+                            $pdf->SetTextColor(0, 0, 60);
+                            $pdf->SetDrawColor(255, 255, 255);
+                            $pdf->setfillcolor(255, 255, 255);
+                            $type = "Libre";
+                            if ($val->type == 3) {
+                                $pdf->SetDrawColor(255, 231, 227);
+                                $pdf->setfillcolor(255, 231, 227);
+                                $type = "Maintenance";
+                            } else if ($val->type == 4) {
+                                $pdf->SetDrawColor(223, 255, 232);
+                                $pdf->setfillcolor(223, 255, 232);
+                                $type = "SAV";
+                                continue;
+                            } else if ($val->type == 2) {
+                                $pdf->setfillcolor(209, 221, 255);
+                                $pdf->SetDrawColor(209, 221, 255);
+                                $type = "Tickets";
+                            }
+                            if ($val->prodContrat->extra_Type_PDF) {
+                                $type = $val->prodContrat->extra_Type_PDF;
+                            }
+                            if ($val->prodContrat->extra_Designation_PDF) {
+                                $libelleContrat = $val->prodContrat->extra_Designation_PDF;
+                            }
+                            if ($val->prodContrat->extra_Couleur_PDF) {
+                                $color = $this->hex2RGB($val->prodContrat->extra_Couleur_PDF, false);
+                                $pdf->setfillcolor($color['red'], $color['green'], $color['blue']);
+                                $pdf->SetDrawColor($color['red'], $color['green'], $color['blue']);
+                            }
+
+                            $nextY = $pdf->GetY() + 0.1;
+                            $pdf->SetXY($this->marge_gauche - 1, $nextY);
                         }
-                        $pdf->SetFont('', 'B', 8);
-                        $pdf->MultiCell(157, 6, utf8_encodeRien('Avenant ' . $avenantTxt), 1, 'C', 0);
+
+                        $desc = couperChaine(utf8_encodeRien($libelleContrat . " " . $val->description), 60);
+
                         $pdf->SetFont('', '', 6.5);
-                        $avenant = $val->avenant;
-
-                        $pdf->SetTextColor(0, 0, 60);
-                        $pdf->SetDrawColor(255, 255, 255);
-                        $pdf->setfillcolor(255, 255, 255);
-                        $type = "Libre";
-                        if ($val->type == 3) {
-                            $pdf->SetDrawColor(255, 231, 227);
-                            $pdf->setfillcolor(255, 231, 227);
-                            $type = "Maintenance";
-                        } else if ($val->type == 4) {
-                            $pdf->SetDrawColor(223, 255, 232);
-                            $pdf->setfillcolor(223, 255, 232);
-                            $type = "SAV";
-                            continue;
-                        } else if ($val->type == 2) {
-                            $pdf->setfillcolor(209, 221, 255);
-                            $pdf->SetDrawColor(209, 221, 255);
-                            $type = "Tickets";
-                        }
-                        if ($val->prodContrat->extra_Type_PDF) {
-                            $type = $val->prodContrat->extra_Type_PDF;
-                        }
-                        if ($val->prodContrat->extra_Designation_PDF) {
-                            $libelleContrat = $val->prodContrat->extra_Designation_PDF;
-                        }
-                        if ($val->prodContrat->extra_Couleur_PDF) {
-                            $color = $this->hex2RGB($val->prodContrat->extra_Couleur_PDF, false);
-                            $pdf->setfillcolor($color['red'], $color['green'], $color['blue']);
-                            $pdf->SetDrawColor($color['red'], $color['green'], $color['blue']);
-                        }
-
-                        $nextY = $pdf->GetY() + 0.1;
-                        $pdf->SetXY($this->marge_gauche - 1, $nextY);
-                    }
-
-                    $desc = couperChaine(utf8_encodeRien($libelleContrat . " " . $val->description), 60);
-
-                    $pdf->SetFont('', '', 6.5);
-                    $pdf1->SetFont('Helvetica', '', 6.5);
-                    $pdf1->SetXY(0, 0);
-                    $pdf1->MultiCell($col, $hauteur_ligne, utf8_encodeRien($desc), 0, 'L', 1);
-                    $newY = $pdf1->GetY();
-                    $hauteur_ligne2 = $hauteur_ligne;
+                        $pdf1->SetFont('Helvetica', '', 6.5);
+                        $pdf1->SetXY(0, 0);
+                        $pdf1->MultiCell($col, $hauteur_ligne, utf8_encodeRien($desc), 0, 'L', 1);
+                        $newY = $pdf1->GetY();
+                        $hauteur_ligne2 = $hauteur_ligne;
 //                    die($newY . "|" . $hauteur_ligne);
 //                    if ($newY > 2 * $hauteur_ligne) {
 //                        $hauteur_ligne2 = $hauteur_ligne / 2;
@@ -798,24 +796,25 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 //                        $hauteur_ligne2 = $hauteur_ligne / 2;
 //                    }
 
-                    $pdf->MultiCell($col + 15, $hauteur_ligne2, utf8_encodeRien($desc), 0, 'L', 1);
-                    $pdf->SetXY($init + $col + 15, $nextY);
-                    $pdf->MultiCell($col - 5, $hauteur_ligne, $val->getInfoProductCli("SN", 30), 0, 'C', 1);
-                    $pdf->SetXY($init + $col + $col + 10, $nextY);
-                    $pdf->MultiCell($col - $decal_type - 5, $hauteur_ligne, utf8_encodeRien($type), 0, 'C', 1);
-                    $pdf->SetXY($init + $col + $col + $col + 5 - $decal_type, $nextY);
-                    $pdf->MultiCell($col - 5, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date($val->date_ouverture) . "
+                        $pdf->MultiCell($col + 15, $hauteur_ligne2, utf8_encodeRien($desc), 0, 'L', 1);
+                        $pdf->SetXY($init + $col + 15, $nextY);
+                        $pdf->MultiCell($col - 5, $hauteur_ligne, $val->getInfoProductCli("SN", 30), 0, 'C', 1);
+                        $pdf->SetXY($init + $col + $col + 10, $nextY);
+                        $pdf->MultiCell($col - $decal_type - 5, $hauteur_ligne, utf8_encodeRien($type), 0, 'C', 1);
+                        $pdf->SetXY($init + $col + $col + $col + 5 - $decal_type, $nextY);
+                        $pdf->MultiCell($col - 5, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date($val->date_ouverture) . "
 Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
-                    $pdf->SetXY($init + $col + $col + $col - $decal_type + $col, $nextY);
+                        $pdf->SetXY($init + $col + $col + $col - $decal_type + $col, $nextY);
 
 //                    $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien(price($val->total_ht) . EURO . " pour " . $val->GMAO_Mixte['durVal'] . " mois"), 0, 'C', 1);                    $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien(price($val->total_ht) . EURO . " pour " . $val->GMAO_Mixte['durVal'] . " mois"), 0, 'C', 1);
-                    $slaT = utf8_encodeRien(utf8_encodeRien($val->SLA));
-                    $hauteurSla = (strlen($slaT) < 25) ? $hauteur_ligne : $hauteur_ligne / 2;
-                    $pdf->MultiCell($col, $hauteur_ligne, $slaT, 0, 'C', 1);
-                    $pdf1->SetFont('Helvetica', '', 6.5);
+                        $slaT = utf8_encodeRien(utf8_encodeRien($val->SLA));
+                        $hauteurSla = (strlen($slaT) < 25) ? $hauteur_ligne : $hauteur_ligne / 2;
+                        $pdf->MultiCell($col, $hauteur_ligne, $slaT, 0, 'C', 1);
+                        $pdf1->SetFont('Helvetica', '', 6.5);
 
 
-                    $nextY = $pdf->getY();
+                        $nextY = $pdf->getY();
+                    }
                 }
                 $this->_pagefoot($pdf, $contrat, $outputlangs);
 
@@ -826,7 +825,8 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
 
 
 
-                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
+                if (method_exists($pdf, 'AliasNbPages'))
+                    $pdf->AliasNbPages();
                 $pdf->Close();
 
                 $this->file = $file;
@@ -857,14 +857,14 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
         $langs->load('dict');
         $requete = "
         SELECT *
-          FROM ".MAIN_DB_PREFIX."c_type_contact,
-               ".MAIN_DB_PREFIX."element_contact,
-               ".MAIN_DB_PREFIX."socpeople
+          FROM " . MAIN_DB_PREFIX . "c_type_contact,
+               " . MAIN_DB_PREFIX . "element_contact,
+               " . MAIN_DB_PREFIX . "socpeople
          WHERE `code` = 'SALESREPSIGN'
            AND source = 'external'
            AND element = 'contrat'
-           AND ".MAIN_DB_PREFIX."element_contact.fk_c_type_contact = ".MAIN_DB_PREFIX."c_type_contact.rowid
-           AND ".MAIN_DB_PREFIX."socpeople.rowid = ".MAIN_DB_PREFIX."element_contact.fk_socpeople
+           AND " . MAIN_DB_PREFIX . "element_contact.fk_c_type_contact = " . MAIN_DB_PREFIX . "c_type_contact.rowid
+           AND " . MAIN_DB_PREFIX . "socpeople.rowid = " . MAIN_DB_PREFIX . "element_contact.fk_socpeople
            AND element_id = " . $this->contrat->id;
         $sql = $this->db->query($requete);
         $to = "";
@@ -1076,7 +1076,7 @@ Signature et cachet
         $pdf->SetXY(4, 54.5);
         $pdf->MultiCell(39, 4, "Code Client \n" . $object->societe->code_client, 0, "C");
         $pdf->SetXY(4, 68);
-        $pdf->MultiCell(39, 4, "Ref Contrat \n".$object->ref, 0, "C");
+        $pdf->MultiCell(39, 4, "Ref Contrat \n" . $object->ref, 0, "C");
         $pdf->Rect(48, 39, 157, 235);
         $pdf->SetFont('', 'B', 7);
     }

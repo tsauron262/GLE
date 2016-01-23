@@ -450,6 +450,15 @@ if ($action == 'confirm_send') {
                     $message.= "\n";
                 }
             }
+
+            // Si rdv durant la période et pas de remplacent
+            $nbRdv = count($cp->fetchRDV());
+                if ($nbRdv > 0) {
+                    $message.= "\n";
+                    $message .= '' . $nbRdv . ' rdv sont prévus sur la période';
+                    $message.= "\n";
+                }
+            
             // Si l'option pour avertir le valideur en cas de solde inférieur à la demande
             if ($cp->getConfCP('AlertValidatorSolde')) {
                 if (empty($cp->type_conges) || !$cp->type_conges) {
@@ -474,7 +483,7 @@ if ($action == 'confirm_send') {
             $message.= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
             $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
             $message.= "\n";
-
+die($message);
             $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
             $result = $mail->sendfile();
             if (!$result) {
@@ -1026,45 +1035,7 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
         $result = $cp->update($user->id);
 
         if ($result >= 0 && $oldstatus == 6 && $cp->type_conges != 1) { // holiday was already validated, status 6, so we must increase back sold
-            $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
-            if ($cp->type_conges == 0) {
-                $soldes = $cp->getCpforUser($cp->fk_user, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
-                if (isset($solde['error'])) {
-                    $error = $solde['error'];
-                } else {
-                    $nbHolidayDeducted = $cp->getConfCP('nbHolidayDeducted');
-                    // solde année en cours:
-                    if ($soldes['nbOpenDayCurrent'] > 0) {
-                        $newSolde = $soldes['nb_holiday_current'] + ($soldes['nbOpenDayCurrent'] * $nbHolidayDeducted);
-                        $result1 = $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("HolidaysCancelation") . ' (année en cours)', $newSolde, false, true);
-                        $result2 = $cp->updateSoldeCP($cp->fk_user, $newSolde, true);
-                    } else {
-                        $result1 = 1;
-                        $result2 = 1;
-                    }
-                    // solde année n+1
-                    if ($soldes['nbOpenDayNext'] > 0) {
-                        $newSolde = $soldes['nb_holiday_next'] + ($soldes['nbOpenDayNext'] * $nbHolidayDeducted);
-                        $result3 = $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("HolidaysCancelation") . ' (année suivante)', $newSolde, false, false);
-                        $result4 = $cp->updateSoldeCP($cp->fk_user, $newSolde, false);
-                    } else {
-                        $result3 = 1;
-                        $result4 = 1;
-                    }
-
-                    if ($result1 < 0 || $result2 < 0 || $result3 < 0 || $result4 < 0) {
-                        $error = $langs->trans('ErrorCantDeleteCP');
-                    }
-                }
-            } else if ($cp->type_conges == 2) {
-                $soldeActuel = $cp->getRTTforUser($cp->fk_user);
-                $newSolde = $soldeActuel + ($nbopenedday * $cp->getConfCP('nbRTTDeducted'));
-                $result1 = $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("RTTCancelation"), $newSolde, true);
-                $result2 = $cp->updateSoldeRTT($cp->fk_user, $newSolde);
-                if ($result1 < 0 || $result2 < 0) {
-                    $error = $langs->trans('ErrorCantDeleteCP');
-                }
-            }
+            $cp->recrediteSold();
         }
         if (!$error) {
             $db->commit();
@@ -1130,6 +1101,10 @@ if ($action == 'confirm_group_cancel' && GETPOST('confirm') == 'yes') {
         $cp->statut = 4;
         $agendaCheck = $cp->onStatusUpdate($user);
         $verif = $cp->update($user->id);
+        
+        if ($result >= 0 && $oldstatus == 6 && $cp->type_conges != 1) { // holiday was already validated, status 6, so we must increase back sold
+            $cp->recrediteSold();
+        }
 
         // Si pas d'erreur SQL on redirige vers la fiche de la demande
         if ($verif > 0) {
@@ -1905,6 +1880,11 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     print '</span>';
                     print '</td>';
                 }
+                print '</tr>';
+                print '<tr>';
+                print '<td>Nombre de rdv sur la période</td>';
+                $nb = count($cp->fetchRDV());
+                print '<td'.($nb > 0 ? ' class="redT"' : '').'>'.$nb.'</td>';
                 print '</tr>';
 
                 print '</tbody>';

@@ -821,6 +821,9 @@ class SynopsisHoliday extends Holiday {
 
 
 
+
+
+
                 
 //            if ($dateDebut >= $infos_CP['date_debut'] && $dateDebut <= $infos_CP['date_fin'] || // Test invalide : ne prend pas en compte début1 < début2 ET fin1 > fin2
 //                    $dateFin <= $infos_CP['date_fin'] && $dateFin >= $infos_CP['date_debut']) {
@@ -1101,7 +1104,7 @@ class SynopsisHoliday extends Holiday {
                         $upCp->halfday = $newHd;
                         if ($upCp->update($user)) {
                             $DateTime->setTimestamp($datas['initial_date_begin']);
-                            dol_syslog('Mise à jour de la date de début du congé ' . $cp['rowid'].'. Ancienne date: '.$DateTime->format('d / m / Y'));
+                            dol_syslog('Mise à jour de la date de début du congé ' . $cp['rowid'] . '. Ancienne date: ' . $DateTime->format('d / m / Y'));
                             $upCp->onStatusUpdate($user);
                             if ($cp['statut'] == 6) {
                                 $hd = 0;
@@ -1203,7 +1206,7 @@ class SynopsisHoliday extends Holiday {
                 $userStr = " - " . $userT->getFullName($langs);
             } else if (is_array($this->fk_user)) {
                 if (isset($this->fk_group) && !empty($this->fk_group)) {
-                    require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
                     $userGroup = new UserGroup($this->db);
                     if ($userGroup->fetch($this->fk_group) > 0)
                         $userStr = ' - Groupe: <b>' . $userGroup->name . '</b>';
@@ -2676,6 +2679,8 @@ class SynopsisHoliday extends Holiday {
             }
         } else if ($this->statut == 2 || $this->statut == 3 || $this->statut == 6) {
             // Création
+            if ($this->statut == 6)
+                $ac->percentage = -1;
             $ac->type_id = 50;
             $ac->label = $this->getTypeLabel();
             $ac->transparency = 1;
@@ -2795,6 +2800,56 @@ class SynopsisHoliday extends Holiday {
             return $list;
         }
         return 0;
+    }
+
+    function recrediteSold() {
+        global $langs;
+        if (!is_array($this->fk_user)) {
+            $tabUser = array($this->fk_user);
+        } else {
+            $tabUser = $this->fk_user;
+        }
+        $nbopenedday = num_open_day($this->date_debut_gmt, $this->date_fin_gmt, 0, 1, $this->halfday);
+        foreach ($tabUser as $fk_user) {
+            if ($this->type_conges == 0) {
+                $soldes = $this->getCpforUser($fk_user, $this->date_debut, $this->date_fin, $this->halfday, true);
+                if (isset($solde['error'])) {
+                    $error = $solde['error'];
+                } else {
+                    $nbHolidayDeducted = $this->getConfCP('nbHolidayDeducted');
+                    // solde année en cours:
+                    if ($soldes['nbOpenDayCurrent'] > 0) {
+                        $newSolde = $soldes['nb_holiday_current'] + ($soldes['nbOpenDayCurrent'] * $nbHolidayDeducted);
+                        $result1 = $this->addLogCP($user->id, $fk_user, $langs->transnoentitiesnoconv("HolidaysCancelation") . ' (année en cours)', $newSolde, false, true);
+                        $result2 = $this->updateSoldeCP($fk_user, $newSolde, true);
+                    } else {
+                        $result1 = 1;
+                        $result2 = 1;
+                    }
+                    // solde année n+1
+                    if ($soldes['nbOpenDayNext'] > 0) {
+                        $newSolde = $soldes['nb_holiday_next'] + ($soldes['nbOpenDayNext'] * $nbHolidayDeducted);
+                        $result3 = $this->addLogCP($user->id, $fk_user, $langs->transnoentitiesnoconv("HolidaysCancelation") . ' (année suivante)', $newSolde, false, false);
+                        $result4 = $this->updateSoldeCP($fk_user, $newSolde, false);
+                    } else {
+                        $result3 = 1;
+                        $result4 = 1;
+                    }
+
+                    if ($result1 < 0 || $result2 < 0 || $result3 < 0 || $result4 < 0) {
+                        $error = $langs->trans('ErrorCantDeleteCP');
+                    }
+                }
+            } else if ($this->type_conges == 2) {
+                $soldeActuel = $this->getRTTforUser($fk_user);
+                $newSolde = $soldeActuel + ($nbopenedday * $this->getConfCP('nbRTTDeducted'));
+                $result1 = $this->addLogCP($user->id, $fk_user, $langs->transnoentitiesnoconv("RTTCancelation"), $newSolde, true);
+                $result2 = $this->updateSoldeRTT($fk_user, $newSolde);
+                if ($result1 < 0 || $result2 < 0) {
+                    $error = $langs->trans('ErrorCantDeleteCP');
+                }
+            }
+        }
     }
 
 }

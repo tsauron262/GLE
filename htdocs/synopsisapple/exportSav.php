@@ -28,7 +28,7 @@ EOF;
 
 
 
-llxHeader($js, "Fichier de log");
+llxHeader($js, "Export Sav");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Export Sav"));
 
 if(!isset($user->rights->synopsisapple->read) || $user->rights->synopsisapple->read != 1)

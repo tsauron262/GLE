@@ -24,3 +24,7 @@ $tabCentre["CB"]['2'] = "Chambery boutique";
 
 $tabCentre["VB"] = $tabCentre["V"];
 $tabCentre["VB"]['2'] = "Valence Boutique";
+
+
+
+$tabCentre["M"] = $tabCentre["AB"];

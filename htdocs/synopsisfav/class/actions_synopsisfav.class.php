@@ -71,15 +71,21 @@ class favoriCli {
                 (isset($conf->global->SYNOPSIS_FAV_LENGTH) && $conf->global->SYNOPSIS_FAV_LENGTH > 0 ? " LIMIT 0," . $conf->global->SYNOPSIS_FAV_LENGTH : " LIMIT 0,5");
 //die($requete);
         $sql = $db->query($requete);
+        $return .= "<form method='post'>";
         while ($res = $db->fetch_object($sql)) {
+            if (isset($_REQUEST['supprFav' . $res->id]))
+                $db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Fav_User WHERE id =" . $res->id);
+            else {
 //print '<a href="#" class="vsmenu">'..'</a>';
-            $ret = self::histoUser($res);
-            if ($ret)
-                $return .= "<div class='menu_contenu'>  " . $ret . "<input type='button' class='supprFav' value='X'/></div>";
+                $ret = self::histoUser($res);
+                if ($ret)
+                    $return .= "<div class='menu_contenu'>  " . $ret . "<input type='submit' name='supprFav" . $res->id . "' class='supprFav' value='X'/></div>";
+            }
         }
+        $return .= "</form>";
         $return .= "<div class=\"menu_end\">";
         $return .= '<form method="post"><input type="submit" name="saveFav" class="butAction" value="Ajouter au favori"/></form>';
-        $return  .= "</div></div>";
+        $return .= "</div></div>";
         return $return;
     }
 

@@ -130,7 +130,7 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
 }
 //$centre = "CB";
 
-if(1||isset($_REQUEST['typeAff'])){
+if(isset($_REQUEST['typeAff'])){
     require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
     $export = new synopsisexport($db, $sortie);
     $export->exportChronoSav($centre, $typeAff, $typeAff2, $paye, $dateDeb, $dateFin, $blockCentre);

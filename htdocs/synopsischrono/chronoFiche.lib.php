@@ -143,6 +143,7 @@ EOF;
                     $val['label'] = str_replace(" ", "_", $val['label']);
                     $val['label'] = str_replace("'", "_", $val['label']);
                     $val['label'] = str_replace("/", "_", $val['label']);
+                    $val['label'] = str_replace(".", "_", $val['label']);
                     $html .= "<OPTGROUP label='" . $val['label'] . "'>";
                     $html .= "<OPTION value='0'></OPTION>";
                     foreach ($val['data'] as $key1 => $val1) {

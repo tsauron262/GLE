@@ -483,7 +483,7 @@ if ($action == 'confirm_send') {
             $message.= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
             $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
             $message.= "\n";
-die($message);
+//die($message);
             $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
             $result = $mail->sendfile();
             if (!$result) {

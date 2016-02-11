@@ -59,16 +59,27 @@ $garantie = (isset($_POST['Garantie']) ? $_POST['Garantie'] : "");
 $preuve = (isset($_POST['Preuve']) && ($_POST['Preuve'] == 1 || $_POST['Preuve'] == "on") ? 'checked' : "");
 $prio = (isset($_POST['Prio']) && ($_POST['Prio'] == 1 || $_POST['Prio'] == 'on') ? 'checked' : "");
 $DateAchat = (isset($_POST['DateAchat']) ? $_POST['DateAchat'] : "");
-$etat1 = (isset($_POST['Etat']) && $_POST['Etat'] == 1 ? 'selected' : "");
-$etat2 = (isset($_POST['Etat']) && $_POST['Etat'] == 2 ? 'selected' : "");
-$etat3 = (isset($_POST['Etat']) && $_POST['Etat'] == 3 ? 'selected' : "");
-$etat4 = (isset($_POST['Etat']) && $_POST['Etat'] == 4 ? 'selected' : "");
-$etat5 = (isset($_POST['Etat']) && $_POST['Etat'] == 5 ? 'selected' : "");
+
+
+
+$etat = (isset($_POST['Etat']) ? $_POST['Etat'] : "");
+//$etat1 = (isset($_POST['Etat']) && $_POST['Etat'] == 1 ? 'selected' : "");
+//$etat2 = (isset($_POST['Etat']) && $_POST['Etat'] == 2 ? 'selected' : "");
+//$etat3 = (isset($_POST['Etat']) && $_POST['Etat'] == 3 ? 'selected' : "");
+//$etat4 = (isset($_POST['Etat']) && $_POST['Etat'] == 4 ? 'selected' : "");
+//$etat5 = (isset($_POST['Etat']) && $_POST['Etat'] == 5 ? 'selected' : "");
+
+
+
 $accessoire = (isset($_POST['Chrono-1041']) ? $_POST['Chrono-1041'] : "");
-$sauv0 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 0 ? 'selected' : "");
-$sauv1 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 1 ? 'selected' : "");
-$sauv2 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 2 ? 'selected' : "");
-$sauv3 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 3 ? 'selected' : "");
+
+$sauv = (isset($_POST['Sauv']) ? $_POST['Sauv'] : "");
+//$sauv0 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 0 ? 'selected' : "");
+//$sauv1 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 1 ? 'selected' : "");
+//$sauv2 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 2 ? 'selected' : "");
+//$sauv3 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 3 ? 'selected' : "");
+
+
 $pass = (isset($_POST['pass']) ? $_POST['pass'] : "");
 $loginA = (isset($_POST['loginA']) ? $_POST['loginA'] : "");
 $devis1 = (isset($_POST['Devis']) && $_POST['Devis'] == 1 ? 'selected' : "");
@@ -280,6 +291,14 @@ if (isset($_REQUEST['idChrono'])) {
     $chrono->fetch($_REQUEST['idChrono']);
     echo "<h3>Enregistrement effecué avec succés. </h3>"
     . "SAV : " . $chrono->getNomUrl(1) . " <br/>";
+    
+    $req = $db->query("SELECT * FROM `llx_contrat` WHERE `date_cloture` IS NULL AND fk_soc = ".$chrono->societe->id." ORDER BY rowid DESC");
+    while($ligne = $db->fetch_object($req)){
+        echo "CONTRAT ". $ligne->ref . " : " .$ligne->note_public . "<br/>";
+    }
+    
+    
+    
 //                    . "Produit : " . $chronoProd->getNomUrl(1);
     $tabPret = getElementElement("sav", "pret", $chrono->id);
     foreach ($tabPret as $ligne) {
@@ -437,21 +456,40 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
+    
+//    echo "<p>";
+//    echo "<tr>";
+//    echo "<th class='ui-state-default ui-widget-header'>Etat de la machine.</th>";
+//    echo "<td class='ui-widget-content' colspan='1'>";
+//    echo " <select name='Etat' id='Etat' class='required'>";
+//    echo "<option value=''></option> ";
+//    echo "<option value='1'" . $etat1 . ">Neuf</option> ";
+//    echo "<option value='2'" . $etat2 . ">Très bon état </option>";
+//    echo "<option value='3'" . $etat3 . ">Usagé</option> ";
+////    echo "<option value='4'" . $etat4 . ">Rayures</option> ";
+////    echo "<option value='5'" . $etat5 . ">Ecran cassé</option> ";
+//    echo " </select>";
+//    echo "</td>";
+//    echo "</tr>";
+//    echo "</p>";
+    
+    
     echo "<p>";
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Etat de la machine.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Etat de la machine</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <select name='Etat' id='Etat' class='required'>";
-    echo "<option value=''></option> ";
-    echo "<option value='1'" . $etat1 . ">Neuf</option> ";
-    echo "<option value='2'" . $etat2 . ">Très bon état </option>";
-    echo "<option value='3'" . $etat3 . ">Usagé</option> ";
-//    echo "<option value='4'" . $etat4 . ">Rayures</option> ";
-//    echo "<option value='5'" . $etat5 . ">Ecran cassé</option> ";
-    echo " </select>";
+    echo "<select name='Etat' class='required'>";
+    $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 6 ");
+    while ($ligne = $db->fetch_object($result))
+        echo "<option value='" . $ligne->valeur . "' " . ($ligne->valeur == $etat ? "selected='selected'" : "") . ">" . $ligne->label . "</option>";
+    echo "</select>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
+    
+    
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Description état machine.</th>";
@@ -468,17 +506,34 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
+    
+//    echo "<p>";
+//    echo "<tr>";
+//    echo "<th class='ui-state-default ui-widget-header'>Sauvegarde.</th>";
+//    echo "<td class='ui-widget-content' colspan='1'>";
+//    echo " <select name='Sauv' id='Sauv' class='required'>";
+//    echo "<option value=''></option> ";
+//    echo "<option value='3'" . $sauv3 . ">Dispose d'une sauvegarde Time machine</option> ";
+//    echo "<option value='2'" . $sauv2 . ">Désire une sauvegarde si necessaire</option> ";
+//    echo "<option value='1'" . $sauv1 . ">Dispose d'une sauvegarde </option>";
+//    echo "<option value='0'" . $sauv0 . ">Non Applicable</option> ";
+//    echo " </select>";
+//    echo "</td>";
+//    echo "</tr>";
+//    echo "</p>";
+    
+    
+    
     echo "<p>";
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Sauvegarde.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Sauvegarde</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <select name='Sauv' id='Sauv' class='required'>";
-    echo "<option value=''></option> ";
-    echo "<option value='3'" . $sauv3 . ">Dispose d'une sauvegarde Time machine</option> ";
-    echo "<option value='2'" . $sauv2 . ">Désire une sauvegarde si necessaire</option> ";
-    echo "<option value='1'" . $sauv1 . ">Dispose d'une sauvegarde </option>";
-    echo "<option value='0'" . $sauv0 . ">Non Applicable</option> ";
-    echo " </select>";
+    echo "<select name='Sauv' class='required'>";
+    $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 8 ");
+    while ($ligne = $db->fetch_object($result))
+        echo "<option value='" . $ligne->valeur . "' " . ($ligne->valeur == $sauv ? "selected='selected'" : "") . ">" . $ligne->label . "</option>";
+    echo "</select>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";

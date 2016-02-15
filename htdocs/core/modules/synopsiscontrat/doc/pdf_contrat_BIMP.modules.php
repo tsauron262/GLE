@@ -822,6 +822,24 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 require_once DOL_DOCUMENT_ROOT . '/core/modules/synopsiscontrat/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs);
                 $classAnnexe->getAnnexeContrat($contrat);
+                
+                
+                $pdf10 = pdf_getInstance($this->format);
+                if (class_exists('TCPDF')) {
+                    $pdf10->setPrintHeader(false);
+                    $pdf10->setPrintFooter(false);
+                }
+                $pdf10->Open();
+                $pdf10->SetAutoPageBreak(1, 0);
+                $pdf10->AddPage();
+                $pdf->SetXY(49, 42);
+                $pdf10->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
+                $classAnnexe2 = new annexe($pdf10, $this, $outputlangs);
+                $classAnnexe2->getAnnexeContrat($contrat, "PLANNING");
+        $this->_pagefoot($pdf10, $contrat, $outputlangs);
+                $pdf10->Close();
+
+                $pdf10->Output(str_replace($propref."_", "calendrier_", $file), 'F');
 
 
 

@@ -288,9 +288,13 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->MultiCell(80, 6, $chrono2->valuesPlus[1067]->valueStr, 0, '');
 
                 //symptom et sauv
-                $pdf->SetXY('15', '138.5');
+                $pdf->SetXY('15', '136');
+                $taille = strlen($chrono->valuesPlus[1047]->valueStr);
+                $taille2 = count (explode ("\n", $chrono->valuesPlus[1047]->valueStr));
+                $tailleP = ($taille2 > 4 || $taille > 100)? 8 : 12;
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $tailleP);
+                $pdf->MultiCell(170, 6, $taille2 . $chrono->valuesPlus[1047]->valueStr, 0, 'L');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
 
                 if ($chrono->valuesPlus[1055]->value == 2)
                     $pdf->SetTextColor(256, 0, 0);

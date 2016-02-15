@@ -143,7 +143,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chrono->contactid = $_REQUEST["contactSociete"];
             $chronoid = $chrono->create();
             if ($chronoid > 0) {
-                $dataArr = array(1045 => date("Y/m/d H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1));
+                $dataArr = array(1051 => $_POST['contrat'], 1045 => date("Y/m/d H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1));
                 $test = $chrono->setDatas($chronoid, $dataArr);
                 if ($test) {
                     $socid = "";
@@ -353,6 +353,29 @@ if ($socid != "") {
     echo "</tr>";
     echo "</p>";
     echo "<p>";
+    
+    echo "<p>";
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>Contrat</th>";
+    echo "<td class='ui-widget-content' colspan='1'>";
+    echo "<select name='contrat'>";
+    $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "contrat` WHERE `fk_soc` = ".$socid." ORDER BY rowid DESC");
+//    $centres = array("G" => "Grenoble", "L" => "Lyon", "M" => "Meythet");
+//    foreach ($centres as $val => $centre) {
+    while ($ligne = $db->fetch_object($result)) {
+        $val = $ligne->rowid;
+        $centre = $ligne->ref. " " .$ligne->note_public;
+        $tabT = explode(" ", trim($user->array_options['options_apple_centre']));
+        $myCentre = (isset($tabT[0]) ? $tabT[0] : 'false');
+        echo "<option value='" . $val . "' " . ($val == $myCentre ? "selected='selected'" : "") . ">" . $centre . "</option>";
+    }
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</p>";
+    
+    
+    
     echo "<th class='ui-state-default ui-widget-header'>Contact.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';

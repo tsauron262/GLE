@@ -441,33 +441,33 @@ class GSX {
      *
      */
     private function initiate_soap_client() {
-
         if (empty($this->wsdlUrl)) {
             $this->assign_wsdl();
         }
-
-// Set the timeout to 10 seconds.
-        if ($this->apiMode == 'ut') {
-            $connectionOptions = array(
-                'connection_timeout' => '5'
-                , 'local_cert' => '/etc/apache2/ssl/new/privatekey/certUtSi.pem'
-                , 'passphrase' => 'freepartyUt'
-                , 'trace' => TRUE
-                , 'exceptions' => TRUE
-                    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
+        
+        $tabCert = array(897316 => array(0 => array('certUtSi.pem', 'freepartyUt'),
+                                        1 => array('certProdFinal.pem', 'freepartyProd')),
+                        128630 => array(0 => array('Applecare-APP157-0000128630.Test.apple.com.chain.pem', 'passPhraseTest'),
+                                        1 => array('Applecare-APP157-0000128630.Prod.apple.com.chain.pem', 'passPhraseProd'))
             );
-        } else {
-
-            $connectionOptions = array(
-                'connection_timeout' => '5'
-                , 'local_cert' => '/etc/apache2/ssl/new/privatekey/certProdFinal.pem'
-                , 'passphrase' => 'freepartyProd'
-                , 'trace' => TRUE
-                , 'exceptions' => TRUE
-                    //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
-            );
+        $soldTo = (int)$this->gsxDetails['serviceAccountNo'];
+        if(!isset($tabCert[$soldTo])){
+            echo "Pas de certif pour se soldTo ".$soldTo;
+                    return 0;
         }
+        $typeCertif = ($this->apiMode == 'ut')? 0 : 1;
+        $certif = $tabCert[$soldTo][$typeCertif];
+        
 
+        $connectionOptions = array(
+            'connection_timeout' => '5'
+            , 'local_cert' => DOL_DOCUMENT_ROOT."/synopsisapple/certif/".$certif[0]
+            , 'passphrase' => $certif[1]
+            , 'trace' => TRUE
+            , 'exceptions' => TRUE
+                //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
+        );
+print_r($connectionOptions);die;
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
         } catch (SoapFault $fault) {

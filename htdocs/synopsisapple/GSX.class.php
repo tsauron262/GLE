@@ -448,7 +448,7 @@ class GSX {
         $tabCert = array(897316 => array(0 => array('certUtSi.pem', 'freepartyUt'),
                                         1 => array('certProdFinal.pem', 'freepartyProd')),
                         128630 => array(0 => array('Applecare-APP157-0000128630.Test.apple.com.chain.pem', 'passPhraseTest'),
-                                        1 => array('certProdFinalCl.p12', 'passPhraseProd'))
+                                        1 => array('certifFinalProdClermont.pem', 'passPhraseProd'))
             );
         $soldTo = (int)$this->gsxDetails['serviceAccountNo'];
         if(!isset($tabCert[$soldTo])){

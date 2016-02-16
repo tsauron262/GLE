@@ -293,7 +293,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $taille2 = count (explode ("\n", $chrono->valuesPlus[1047]->valueStr));
                 $tailleP = ($taille2 > 4 || $taille > 100)? 8 : 12;
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $tailleP);
-                $pdf->MultiCell(170, 6, $taille2 . $chrono->valuesPlus[1047]->valueStr, 0, 'L');
+                $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 
                 if ($chrono->valuesPlus[1055]->value == 2)

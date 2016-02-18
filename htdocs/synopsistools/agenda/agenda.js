@@ -13,7 +13,7 @@ $(window).load(function () {
         id = $(this).find("option:selected").val();
         $(".userCheck").removeAttr("checked");
         for (var idUser in tabGroup[id]) {
-            $(".userCheck#user" + tabGroup[id][idUser]).attr("checked", "checked");
+            $(".userCheck#user" + tabGroup[id][idUser]).prop("checked", true);
         }
         initNbUser();
     });

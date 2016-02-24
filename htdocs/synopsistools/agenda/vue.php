@@ -380,17 +380,21 @@ function printMenu($tabUser) {
     $js = "var tabGroup = new Array();";
     $js .= "tabGroup[-1] = new Array();";
     $js .= "tabGroup[-1].push(".$user->id.");";
-    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup_user");
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup_user ");
+//    $tabGroup = array();
     while ($result = $db->fetch_object($sql)) {
         $js .= "if(!tabGroup[" . $result->fk_usergroup . "]) tabGroup[" . $result->fk_usergroup . "] = new Array();";
         $js .= "tabGroup[" . $result->fk_usergroup . "].push(" . $result->fk_user . ");";
+//        $tabGroup[$result->fk_usergroup][$result->fk_user] = $result->fk_user;
     }
     echo "<script>" . $js . "</script>";
 
 
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup ORDER BY nom");
     while ($result = $db->fetch_object($sql)) {
-        $select .= "<option value='" . $result->rowid . "'>" . $result->nom . "</option>";
+        $select .= "<option value='" . $result->rowid . "'>" . $result->nom;
+//        $select .= "   [".count($tabGroup[$result->rowid])."]";
+        $select .= "</option>";
     }
     echo "<form action='' method='post'>";
     echo "<select id='group'><option value='0'>Groupes</option><option value='-1'>Moi</option>" . $select . "</select>";
@@ -420,6 +424,9 @@ function printMenu($tabUser) {
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
     echo "<div class='listUser'><br/><br/></div>";
+    
+    //que pour 2016
+    echo "<br/>ATTENTION sur l'année 2016 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";
 }
 
 ?>

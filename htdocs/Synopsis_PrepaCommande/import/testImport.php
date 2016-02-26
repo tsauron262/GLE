@@ -938,6 +938,10 @@ if (is_dir($dir)) {
                                         $sqlUpt2[] = " 2dureeSav = " . ($val['ArtDureeGar'] > 0 ? $val['ArtDureeGar'] : 0) . "";
                                     if ($res->tva_tx != $val['TaxTaux'])
                                         $sqlUpt[] = " tva_tx = '" . $val['TaxTaux'] . "'";
+                                    if ($res->ref != $val['PlvCode']){
+                                        $sqlUpt[] = " ref = '" . $val['PlvCode'] . "'";
+                                        echo "Changement de ref de ".$res->ref." en ".$val['PlvCode'];
+                                    }
 
                                     if (count($sqlUpt) > 0 || count($sqlUpt2) > 0) {
                                         $ok = true;

@@ -746,7 +746,7 @@ function pdf_pagefoot(&$pdf,$outputlangs,$paramfreetext,$fromcompany,$marge_bass
 		);
 		complete_substitutions_array($substitutionarray,$outputlangs,$object);
 		$newfreetext=make_substitutions($conf->global->$paramfreetext,$substitutionarray);
-		$line.=$outputlangs->convToOutputCharset($newfreetext);
+		$line.=$outputlangs->convToOutputCharset($newfreetext)."\n"."\n";
 	}
 
 	// First line of company infos
@@ -884,6 +884,7 @@ function pdf_pagefoot(&$pdf,$outputlangs,$paramfreetext,$fromcompany,$marge_bass
 	}
 
 	$pdf->SetY(-$posy);
+        /*mod drsi*/if($fromcompany != "")
 	$pdf->line($dims['lm'], $dims['hk']-$posy, $dims['wk']-$dims['rm'], $dims['hk']-$posy);
 	$posy--;
 

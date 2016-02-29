@@ -693,6 +693,6 @@ class ImportCsv extends ModeleImports
 function cleansep($value)
 {
 	return str_replace(array(',',';'),'/',$value);
-};
-
+}
+}
 

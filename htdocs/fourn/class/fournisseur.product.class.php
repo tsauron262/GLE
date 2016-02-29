@@ -246,6 +246,7 @@ class ProductFournisseur extends Product
 	        	$sql = "DELETE FROM  ".MAIN_DB_PREFIX."product_fournisseur_price";
           		$sql.= " WHERE fk_soc = ".$fourn->id." AND ref_fourn = '".$this->db->escape($ref_fourn)."' AND quantity = ".$qty." AND entity = ".$conf->entity;
 				dol_syslog(get_class($this).'::update_buyprice', LOG_DEBUG);
+		            dol_syslog(get_class($this)."::update_buyprice".$sql, LOG_ERR);
 	        	$resql=$this->db->query($sql);
 				if ($resql)
 		  		{

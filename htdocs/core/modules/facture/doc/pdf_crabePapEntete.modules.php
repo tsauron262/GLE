@@ -39,7 +39,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 /**
  *	Class to manage PDF invoice template Crabe
  */
-class pdf_crabe extends ModelePDFFactures
+class pdf_crabePapEntete extends ModelePDFFactures
 {
     var $db;
     var $name;

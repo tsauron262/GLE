@@ -746,7 +746,7 @@ function pdf_pagefoot(&$pdf,$outputlangs,$paramfreetext,$fromcompany,$marge_bass
 		);
 		complete_substitutions_array($substitutionarray,$outputlangs,$object);
 		$newfreetext=make_substitutions($conf->global->$paramfreetext,$substitutionarray);
-		$line.=$outputlangs->convToOutputCharset($newfreetext)."\n"."\n";
+		$line.=$outputlangs->convToOutputCharset($newfreetext);
 	}
 
 	// First line of company infos

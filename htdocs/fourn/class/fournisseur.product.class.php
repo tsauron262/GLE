@@ -271,7 +271,7 @@ class ProductFournisseur extends Product
 		            $sql.= $delivery_time_days;
 		            $sql.=")";
 
-		            dol_syslog(get_class($this)."::update_buyprice", LOG_DEBUG);
+		            dol_syslog(get_class($this)."::update_buyprice".$sql, LOG_ERR);
 		            if (! $this->db->query($sql))
 		            {
 		                $error++;

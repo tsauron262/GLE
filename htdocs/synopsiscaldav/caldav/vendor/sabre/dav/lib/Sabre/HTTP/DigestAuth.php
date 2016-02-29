@@ -95,7 +95,7 @@ class DigestAuth extends AbstractAuth {
      * @return bool
      */
     public function validateA1($A1) {
-dol_syslog("Validation : ".$this->A1." | ".$A1,3);
+
         $this->A1 = $A1;
         return $this->validate();
 

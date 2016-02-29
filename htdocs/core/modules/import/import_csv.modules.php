@@ -683,6 +683,7 @@ class ImportCsv extends ModeleImports
 	}
 
 }
+}
 
 /**
  *	Clean a string from separator
@@ -693,6 +694,5 @@ class ImportCsv extends ModeleImports
 function cleansep($value)
 {
 	return str_replace(array(',',';'),'/',$value);
-}
 }
 

@@ -212,7 +212,7 @@ class ProductFournisseur extends Product
 			$sql.= " WHERE rowid = ".$this->product_fourn_price_id;
 			// TODO Add price_base_type and price_ttc
 
-			dol_syslog(get_class($this).'::update_buyprice', LOG_DEBUG);
+			dol_syslog(get_class($this).'::update_buyprice', LOG_ERR);
 			$resql = $this->db->query($sql);
 			if ($resql)
 			{

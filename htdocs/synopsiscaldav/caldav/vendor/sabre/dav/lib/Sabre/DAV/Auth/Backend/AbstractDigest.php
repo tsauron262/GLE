@@ -77,10 +77,10 @@ abstract class AbstractDigest implements BackendInterface {
         }
 
         // If this was false, the password or part of the hash was incorrect.
-//        if (!$digest->validateA1($hash)) {
-//            $digest->requireLogin();
-//            throw new DAV\Exception\NotAuthenticated('Incorrect username');
-//        }
+        if (!$digest->validateA1($hash)) {
+            $digest->requireLogin();
+            throw new DAV\Exception\NotAuthenticated('Incorrect username');
+        }
 
         $this->currentUser = $username;
         return true;

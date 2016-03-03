@@ -574,7 +574,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 
 			// Calcul du jour de paques
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques);
+			$jour_paques = date("d", $date_paques)+1;
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -585,7 +585,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
                 date("i", $date_paques),
                 date("s", $date_paques),
                 date("m", $date_paques),
-                date("d", $date_paques) + 38,
+                date("d", $date_paques) + 39,
                 date("Y", $date_paques)
             );
 			$jour_ascension = date("d", $date_ascension);
@@ -599,7 +599,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
                 date("i", $date_ascension),
                 date("s", $date_ascension),
                 date("m", $date_ascension),
-                date("d", $date_ascension) + 12,
+                date("d", $date_ascension) + 11,
                 date("Y", $date_ascension)
             );
 			$jour_pentecote = date("d", $date_pentecote);
@@ -635,7 +635,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 
 			// Calcul du jour de paques
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques);
+			$jour_paques = date("d", $date_paques)+1;
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -664,7 +664,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 
 			// Calcul día de Pascua
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques);
+			$jour_paques = date("d", $date_paques)+1;
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques

@@ -585,8 +585,8 @@ class Synopsisdemandeinterv extends CommonObject {
             $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureArr . ":00");
             $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureDep . ":00");
             $action->elementtype = "synopsisdemandeinterv";
-            $action->fk_element = $this->id;
-            $action->percentage = -1;
+            $action->fk_element = $this->id;echo $this->tabExtraV[38];
+            $action->percentage = ($this->tabExtraV[38])? -1 : 0;
             $soc = new Societe($this->db);
             $soc->fetch($this->socid);
             $action->societe = $soc;

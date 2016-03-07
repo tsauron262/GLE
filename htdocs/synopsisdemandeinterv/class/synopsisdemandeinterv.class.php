@@ -356,7 +356,8 @@ class Synopsisdemandeinterv extends CommonObject {
 
                     $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
                     $from = $conf->global->BIMP_MAIL_FROM;
-                    $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
+//                    $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
+                    $addr_cc = "";
 
                     mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, $msgishtml = 1, $from);
                 }
@@ -511,7 +512,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $from = $conf->global->BIMP_MAIL_FROM;
                     $addr_cc = $this->user_prisencharge->email;
 
-                    mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
+//                    mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
                 }
 
                 return 1;

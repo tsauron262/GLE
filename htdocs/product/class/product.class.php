@@ -1360,6 +1360,12 @@ class Product extends CommonObject
 		global $conf,$langs;
 
 		$id=$this->id;
+                
+                if(isset($this->price_min))
+                {
+                        $price_min=$this->price_min;
+                        $price_min_ttc=$this->price_min_ttc;
+                }
 
 		dol_syslog(get_class($this)."::update_price id=".$id." newprice=".$newprice." newpricebase=".$newpricebase." newminprice=".$newminprice." level=".$level." npr=".$newnpr);
 
@@ -1383,7 +1389,7 @@ class Product extends CommonObject
 				$price = price2num($newprice) / (1 + ($newvat / 100));
 				$price = price2num($price,'MU');
 
-				if ($newminprice!='' || $newminprice==0)
+				if ($newminprice!='' || $newminprice > 0)
 				{
 					$price_min_ttc = price2num($newminprice,'MU');
 					$price_min = price2num($newminprice) / (1 + ($newvat / 100));
@@ -1391,8 +1397,8 @@ class Product extends CommonObject
 				}
 				else
 				{
-					$price_min=0;
-					$price_min_ttc=0;
+//					$price_min=0;
+//					$price_min_ttc=0;
 				}
 			}
 			else
@@ -1401,7 +1407,7 @@ class Product extends CommonObject
 				$price_ttc = ( $newnpr != 1 ) ? price2num($newprice) * (1 + ($newvat / 100)) : $price;
 				$price_ttc = price2num($price_ttc,'MU');
 
-				if ($newminprice!='' || $newminprice==0)
+				if ($newminprice!='' || $newminprice > 0)
 				{
 					$price_min = price2num($newminprice,'MU');
 					$price_min_ttc = price2num($newminprice) * (1 + ($newvat / 100));
@@ -1410,8 +1416,8 @@ class Product extends CommonObject
 				}
 				else
 				{
-					$price_min=0;
-					$price_min_ttc=0;
+//					$price_min=0;
+//					$price_min_ttc=0;
 				}
 			}
 			//print 'x'.$id.'-'.$newprice.'-'.$newpricebase.'-'.$price.'-'.$price_ttc.'-'.$price_min.'-'.$price_min_ttc;

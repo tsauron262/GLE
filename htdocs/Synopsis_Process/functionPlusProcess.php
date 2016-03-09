@@ -18,11 +18,15 @@ function getSNChrono($idChrono, $source) {
             $chronoTab[] = $chrono['d'];
         $result2 = getElementElement($source, $dest, null, $chronoTab);
         $chrono2 = new Chrono($db);
+        $i = 0;
         foreach($result2 as $ligne2){
             if((is_array($idChrono) && !in_array($ligne2['s'],$idChrono)) || (!is_array($idChrono) && $idChrono != $ligne2['s'])){
                 $chrono2->fetch($ligne2['s']);
                 $returnStr .= $chrono2->getNomUrl(1)."</br>";
             }
+            $i++;
+            if($i>3)
+                break;
         }
         
 //        $req = "SELECT `value`, key_id  FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` IN (" . implode(",", $key) . ") Order BY chrono_refid";

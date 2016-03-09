@@ -23,8 +23,8 @@ function getSNChrono($idChrono, $source) {
             if((is_array($idChrono) && !in_array($ligne2['s'],$idChrono)) || (!is_array($idChrono) && $idChrono != $ligne2['s'])){
                 $chrono2->fetch($ligne2['s']);
                 $returnStr .= $chrono2->getNomUrl(1)."</br>";
+                $i++;
             }
-            $i++;
             if($i>3)
                 break;
         }

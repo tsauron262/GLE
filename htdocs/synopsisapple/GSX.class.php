@@ -447,9 +447,8 @@ class GSX {
         
         $tabCert = array(897316 => array(0 => array('certUtSi.pem', 'freepartyUt'),
                                         1 => array('certProdFinal.pem', 'freepartyProd')),
-                        128630 => array(0 => array('certifTestTest.pem', 'niggeang'),
-//                                        1 => array('certifFinalProdClermont.pem', 'passPhraseProd'))
-                                        1 => array('certifFinalProdTestClermont.pem', 'niggeang'))
+                        128630 => array(0 => array('clermont/certifTestProdClermont.pem', 'passPhraseTest'),
+                                        1 => array('clermont/certifFinalProdClermont.pem', 'passPhraseProd'))
             );
         $soldTo = (int)$this->gsxDetails['serviceAccountNo'];
         if(!isset($tabCert[$soldTo])){

@@ -1179,7 +1179,7 @@ class Form
         if ($socid > 0) $sql.= " AND sp.fk_soc=".$socid;
         if (! empty($conf->global->CONTACT_HIDE_INACTIVE_IN_COMBOBOX)) $sql.= " AND sp.statut <> 0";
         $sql.= " ORDER BY sp.lastname ASC";
-        $sql.= " LIMIT 0,10";
+        $sql.= " LIMIT 0,100";
 
         dol_syslog(get_class($this)."::select_contacts", LOG_DEBUG);
         $resql=$this->db->query($sql);

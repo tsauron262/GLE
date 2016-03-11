@@ -25,7 +25,7 @@ function getSNChrono($idChrono, $source) {
                 $returnStr .= $chrono2->getNomUrl(1)."</br>";
                 $i++;
             }
-            if($i>3)
+            if($i>=3)
                 break;
         }
         

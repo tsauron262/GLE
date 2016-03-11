@@ -455,7 +455,7 @@ if ($user->rights->synopsisFinanc->write) {
 
     if ($user->rights->synopsisFinanc->super_write) {
         echo '<tr>';
-        $tabB = array("" => "", "Grenke" => array(2, 1.02), "LOCAM" => array(3, ""), "BNP" => array(4, ""), "GE capital" => array(5, ""));
+        $tabB = array("" => "", "Grenke" => array(2, 1.02), "LOCAM" => array(3, ""), "BNP" => array(4, ""), "GE capital" => array(5, ""), "Banque postal" => array(0, 1.4), "BNC" => array(0, 1.4), "SGEF" => array(0, 1.4));
         echo '<td>Banque:<hr/>Taux d\'interet:<hr/>Coefficient:</td><td><select id="banque" '. (($contrat_exist) ? "disabled='disabled'" : "") .' >';
         foreach ($tabB as $nomB => $tabT) {
             echo '<option value="' . $tabT[0] . ":" . $tabT[1] . '"' . (($nomB == $banque) ? 'selected="selected"' : "" ) . '>' . $nomB . '</option>';

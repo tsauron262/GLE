@@ -542,7 +542,7 @@ function dol_get_first_day_week($day,$month,$year,$gm=false)
  *  @param      string		$countrycode        Country code
  *	@return   	int								Nombre de jours feries
  */
-function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
+function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $user = null)
 {
 	$nbFerie = 0;
 
@@ -611,7 +611,24 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 			// Calul des samedis et dimanches
 			$jour_julien = unixtojd($timestampStart);
 			$jour_semaine = jddayofweek($jour_julien, 0);
-			if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;
+                        /*MOD DRSI*/
+                        global $userHoliday, $db;
+                        if(isset($userHoliday)){
+                            $userH = new User($db);
+                            $userH->fetch($userHoliday);
+                            $tabJ = array(1=>"lundi", 2=>"mardi", 3=>"mercredi", 4=>"jeudi", 5=>"vendredi", 6=>"samedi");
+                            if(isset($userH->array_options) && array_key_exists('options_'.$tabJ[$jour_semaine], $userH->array_options)){
+                                    if($userH->array_options['options_'.$tabJ[$jour_semaine]])
+                                        $nnnnnnn=false;
+                                    else
+                                        $ferie=true;
+                            }
+                            else if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true; 
+                        }
+                        else {
+                            if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;                            
+                        }
+                            /*F MOD DRSI*/
 			//Samedi (6) et dimanche (0)
 		}
 
@@ -710,7 +727,6 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
                 $timestampStart += (60*60*24);
                 /*mod drsi*/
 	}
-
 	return $nbFerie;
 }
 

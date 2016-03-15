@@ -10,7 +10,6 @@ Synopsis_Tools/mailRequest.php?action=fusionCli&id="AVIDER"&id2=
 
 
 
-
 Contrat en tete + ligne plus
 
 connect precedent
@@ -1505,3 +1504,32 @@ ls -R -1 | awk '
 /:$/&&f{s=$0;f=0}
 /:$/&&!f{sub(/:$/,"");s=$0;f=1;next}
 NF&&f{ print s"/"$0 }' > /home/megajean/Bureau/list.txt
+
+
+
+new certif
+passPhraseTest
+Applecare-APP157-128630.Test.apple.com
+
+
+passPhraseProd
+Applecare-APP157-128630.Prod.apple.com
+
+
+
+
+ACTIVEr SSL
+sudo a2enmod ssl
+dans
+sudo nano /etc/apache2/sites-available/000-default.conf
+virer
+Listen 443 et replacer 443 par 444
+sudo service apache2 restart
+
+DESACTIVER SSL
+sudo a2dismod ssl
+dans
+sudo nano /etc/apache2/sites-available/000-default.conf
+ajouter
+Listen 443  et replacer 444 par 443
+sudo service apache2 restart

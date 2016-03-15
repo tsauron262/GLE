@@ -1707,6 +1707,8 @@ class SynopsisHoliday extends Holiday {
      *  @return        		Retourne le détail des soldes de congés payés
      */
     function getCPforUser($user_id, $beginDate = '', $endDate = '', $halfday = 0, $timestamp = false) {
+        global $userHoliday;
+        $userHoliday = $user_id;
         $solde = array(
             'nb_holiday_next' => $this->getNextYearCPforUser($user_id),
             'nb_holiday_current' => $this->getcurrentYearCPforUser($user_id)
@@ -2811,6 +2813,8 @@ class SynopsisHoliday extends Holiday {
         }
         $nbopenedday = num_open_day($this->date_debut_gmt, $this->date_fin_gmt, 0, 1, $this->halfday);
         foreach ($tabUser as $fk_user) {
+            global $userHoliday;
+        $userHoliday = $fk_user;
             if ($this->type_conges == 0) {
                 $soldes = $this->getCpforUser($fk_user, $this->date_debut, $this->date_fin, $this->halfday, true);
                 if (isset($solde['error'])) {

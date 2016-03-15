@@ -47,6 +47,8 @@ if (isset($isGroup) && $isGroup) {
 } else {
     $userid = GETPOST('userid') ? GETPOST('userid') : $user->id;
 }
+global $userHoliday;
+$userHoliday = $userid;
 
 // Protection if external user
 if ($user->societe_id > 0)
@@ -292,6 +294,8 @@ if ($action == 'update') {
             $nbopenedday = num_open_day($date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
             // hack (si 1 seul jour : num_open_day() ne vérifie pas s'il s'agit d'un jour férié)
             if ($date_debut_gmt == $date_fin_gmt && $nbopenedday == 1) {
+            global $userHoliday;
+        $userHoliday = $userid;
                 $nb_ferie = num_public_holiday($date_debut_gmt, $date_fin_gmt);
                 if ($nb_ferie)
                     $nbopenedday = 0;

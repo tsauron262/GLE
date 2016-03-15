@@ -140,7 +140,7 @@ WHERE   fact.fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0
         } else {
             $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
             $totalVendu = "SUM(factdet.total_ht)";
-            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Etat as Statut, chrono.tms as Date_Modif, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye";
+            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Etat as Statut, chrono.tms as Date_Modif, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye, Technicien as Tech";
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else
@@ -462,6 +462,19 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 
                 if ($nom == "refSav" && $this->sortie == "html")
                     $valeur = "<a href='" . DOL_URL_ROOT . "/synopsischrono/card.php?ref=" . $valeur . "'>" . $valeur . "</a>";
+                if ($nom == "Tech" && $valeur > 0){
+                    global $langs;
+                    if(!isset($tabTech[$valeur])){
+                        $techT = new User($this->db);
+                        $techT->fetch($valeur);
+                        $tabTech[$valeur] = $techT;
+                    }
+                    if($this->sortie == "html")
+                        $valeur = $tabTech[$valeur]->getNomUrl(1);
+                    else
+                        $valeur =  $tabTech[$valeur]->getFullName($langs);
+                }
+                        
                 
                 if ($nom == "Paye")
                     $valeur = ($valeur > 0 ? "Oui" : "Non");

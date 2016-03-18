@@ -654,6 +654,8 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     global $dolibarr_main_url_root;
     $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
     $msg = str_replace(DOL_URL_ROOT."/", $dolibarr_main_url_root."/", $msg);
+    
+    $mailOk = true;
 
     if ($from == '')
         $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", MAIN_INFO_SOCIETE_NOM)) . '.fr>';
@@ -670,6 +672,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     if (!isset($to) || $to == '') {
         $msg = "Pas de mail destinataire définit." . "\n\n" . $msg;
         $to = $toReplay;
+        $mailOk = false;
     }
 //    if (!$headers) {
 //        $headers = 'MIME-Version: 1.0' . "\r\n";
@@ -684,11 +687,11 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
         $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
         $return = $mailfile->sendfile();
-        if (!$return)
+        if (!$return || !$mailOk)
             $_SESSION['error']["Mail non envoyé"] = 1;
         else
             $_SESSION['error']["Mail envoyé"] = 0;
-        return $return;
+        return ($return && $mailOk);
     }
 }
 

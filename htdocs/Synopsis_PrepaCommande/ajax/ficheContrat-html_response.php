@@ -163,7 +163,7 @@ if ($id > 0) {
         print '<tr><td colspan="3">';
         $requete = "SELECT *
                                   FROM " . MAIN_DB_PREFIX . "contrat
-                                 WHERE fk_soc = " . $commande->socid;
+                                 WHERE fk_soc = " . $commande->socid ." ORDER BY rowid DESC";
         $sql2 = $db->query($requete);
         if ($db->num_rows($sql2) > 0) {
             print "<select name='fk_contratT' id='fk_contratT'>";

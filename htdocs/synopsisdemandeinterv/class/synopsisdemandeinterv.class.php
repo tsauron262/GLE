@@ -356,7 +356,8 @@ class Synopsisdemandeinterv extends CommonObject {
 
                     $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
                     $from = $conf->global->BIMP_MAIL_FROM;
-                    $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
+//                    $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
+                    $addr_cc = "";
 
                     mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, $msgishtml = 1, $from);
                 }
@@ -511,7 +512,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $from = $conf->global->BIMP_MAIL_FROM;
                     $addr_cc = $this->user_prisencharge->email;
 
-                    mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
+//                    mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
                 }
 
                 return 1;
@@ -586,7 +587,7 @@ class Synopsisdemandeinterv extends CommonObject {
             $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureDep . ":00");
             $action->elementtype = "synopsisdemandeinterv";
             $action->fk_element = $this->id;
-            $action->percentage = -1;
+            $action->percentage = ($this->tabExtraV[38])? -1 : 0;
             $soc = new Societe($this->db);
             $soc->fetch($this->socid);
             $action->societe = $soc;

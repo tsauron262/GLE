@@ -28,7 +28,7 @@ EOF;
 
 
 
-llxHeader($js, "Fichier de log");
+llxHeader($js, "Export Sav");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Export Sav"));
 
 if(!isset($user->rights->synopsisapple->read) || $user->rights->synopsisapple->read != 1)
@@ -91,7 +91,7 @@ echo "<label for='paye'>Paye</label><input type='checkbox' name='paye' id='paye'
 echo "Debut <input name='dateDeb' type='text' class='datePicker' value='" . $dateDeb . "'/>";
 echo "Fin <input name='dateFin' type='text' class='datePicker' value='" . $dateFin . "'/>";
 
-echo "<br/><input class='butAction' type='submit' value='Valider'/></form><br/><br/>";
+echo "<br/><input class='butAction' name='export' type='submit' value='Valider'/></form><br/><br/>";
 
 
 
@@ -130,11 +130,11 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
 }
 //$centre = "CB";
 
-
-require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
-$export = new synopsisexport($db, $sortie);
-$export->exportChronoSav($centre, $typeAff, $typeAff2, $paye, $dateDeb, $dateFin, $blockCentre);
-
+if(isset($_REQUEST['typeAff'])){
+    require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
+    $export = new synopsisexport($db, $sortie);
+    $export->exportChronoSav($centre, $typeAff, $typeAff2, $paye, $dateDeb, $dateFin, $blockCentre);
+}
 
 global $logLongTime;
 $logLongTime = false;

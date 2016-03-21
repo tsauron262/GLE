@@ -518,6 +518,8 @@ class GsxUps {
             $partNumber = (isset($part['new_number']) && !empty($part['new_number'])) ? $part['new_number'] : $part['number'];
             $fileName = 'label_' . $part['returnOrderNumber'] . '_' . $partNumber . '.pdf';
 
+            $fileName = str_replace("/","_", $fileName);
+            
             if (file_exists($filesDir . $fileName))
                 continue;
 

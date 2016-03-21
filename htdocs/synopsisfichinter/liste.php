@@ -113,6 +113,8 @@ if ($result) {
     $urlparam = "&amp;socid=$socid";
 if(isset($_REQUEST['ref']))
     $urlparam .= "&ref=".$_REQUEST['ref'];
+    if ($filtreUser)
+        $urlparam .= "&filtreUser=true";
     
     if ($filtreUser)
         print_barre_liste($langs->trans("ListOfMyInterventions"), $page, "liste.php", $urlparam, $sortfield, $sortorder, '', $num);

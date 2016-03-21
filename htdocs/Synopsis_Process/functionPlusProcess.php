@@ -18,11 +18,15 @@ function getSNChrono($idChrono, $source) {
             $chronoTab[] = $chrono['d'];
         $result2 = getElementElement($source, $dest, null, $chronoTab);
         $chrono2 = new Chrono($db);
+        $i = 0;
         foreach($result2 as $ligne2){
             if((is_array($idChrono) && !in_array($ligne2['s'],$idChrono)) || (!is_array($idChrono) && $idChrono != $ligne2['s'])){
                 $chrono2->fetch($ligne2['s']);
                 $returnStr .= $chrono2->getNomUrl(1)."</br>";
+                $i++;
             }
+            if($i>=3)
+                break;
         }
         
 //        $req = "SELECT `value`, key_id  FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` IN (" . implode(",", $key) . ") Order BY chrono_refid";
@@ -72,9 +76,9 @@ function bouttonEtatSav($idChrono) {
     $form = new Form($db);
 
     if ($chrono->values[1059] == 3)
-        $sms = "&sendSms=\"+confirm(\"Envoyer mail + sms ?\");";
+        $sms = "&sendSms=\"+confirm(\"Envoyer mail + sms ?\")+\"";
     else
-        $sms = "&sendSms=\"+confirm(\"Envoyer mail ?\");";
+        $sms = "&sendSms=\"+confirm(\"Envoyer mail ?\")+\"";
 
 
     if (/* $etatSav == 2 && */$propId && $propStatut == 1) {
@@ -86,7 +90,7 @@ function bouttonEtatSav($idChrono) {
     if (/* $etatSav == 2 && */$propId && $etatSav == 6) {
         $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='0'/> TTC";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&frais=\"+$(\"#frais\").val()+\"&nbJours=\"+$(\"#nbJours\").val()+\"&actionEtat=revProp&ligne=0\"'>Fermé</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&frais=\"+$(\"#frais\").val()+\"&nbJours=\"+$(\"#nbJours\").val()+\"&actionEtat=revProp&ligne=0" . $sms . "\"'>Fermé</a>"; 
         $return .= "<br/>";
         $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=revProp&ligne=1'>Réviser devis</a>";
         $return .= "<br/>";
@@ -101,21 +105,21 @@ function bouttonEtatSav($idChrono) {
     }
 
     if ($etatSav == 1) {
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=pieceOk" . $sms . "'>Pièce reçue</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=pieceOk" . $sms . "\"'>Pièce reçue</a>";
         $return .= "<br/>";
     }
 
     if ($etatSav == 0) {
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=debDiago" . $sms . "'>Commencer diagnostic</a><br/>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=debDiago" . $sms . "\"'>Commencer diagnostic</a><br/>";
     }
 
     if ($propId && $propStatut == 0) {
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient1" . $sms . "'>Envoyer Devis</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient1" . $sms . "\"'>Envoyer Devis</a>";
         $return .= "</br>";
     }
 
     if ($propId && $propStatut > 1 && ($etatSav == 4)) {
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&nbJours=\"+$(\"#nbJours\").val()+\"&actionEtat=repOk" . $sms . "'>Terminé</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&nbJours=\"+$(\"#nbJours\").val()+\"&actionEtat=repOk" . $sms . "\"'>Terminé</a>";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
     }
 
@@ -129,7 +133,7 @@ function bouttonEtatSav($idChrono) {
     
     if($propStatut == 0 || $propStatut == 1){
         
-        $return .= "<br/><a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
+        $return .= "<br/><a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "\"'>Devis Garantie</a>";
     }
     
     
@@ -154,9 +158,9 @@ function bouttonEtatSav($idChrono) {
     
     $return .= "<br/><a class='butCache' id='butCacheReMail'>Recontacter</a>";
     $return .= "<div class='panCache' id='panCacheReMail'><select id='mailType'>";
-    foreach (array("Facture" => "Facture", "Devis" => "Devis", "debut" => "PC", "debDiago" => "Diagnostique", "commOk" => "Piéce commandé", "repOk" => "Réparation OK", "revPropFerm" => "Devis refusé", "pieceOk"=>"Piéce reçue") as $val => $nom)
+    foreach (array("Facture" => "Facture", "Devis" => "Devis", "debut" => "PC", "debDiago" => "Diagnostique", "commOk" => "Piéce commandé", "repOk" => "Réparation OK", "revPropRefu" => "Devis refusé", "pieceOk"=>"Piéce reçue") as $val => $nom)
         $return .= "<option value='".$val."'>".$nom."</option>";
-    $return .= "</select><a class='butAction' style='display: inline;' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=mailSeul&mailType=\"+$(\"#mailType\").attr(\"value\")'>Réenvoyer</a>";
+    $return .= "</select><a class='butAction' style='display: inline;' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=mailSeul&mailType=\"+$(\"#mailType\").val()'>Réenvoyer</a>";
 
     return $return;
 }

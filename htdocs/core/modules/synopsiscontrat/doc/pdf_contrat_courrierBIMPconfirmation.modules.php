@@ -238,7 +238,7 @@ exemplaire signé."),0,'L');
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Votre numéro de contrat est ".$contrat->ref."."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Bimp reste à votre disposition pour tout renseignement complémentaire.
 Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+18);

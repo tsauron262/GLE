@@ -49,15 +49,15 @@ class partsCart {
             $propal->addline($part['partNumber'] . " - " . $part['partDescription'], round($prix, 2), $part['qty'], "20", 0, 0, 0, $remise, 'HT', 0, 0, 0, 0, 0, 0, 0, round($part['stockPrice'],2));
         }
 
-        if ($this->fraisP > 0) {
-            $qte = $this->fraisP;
-            $prod = new Product($db);
-            $prod->fetch(3436);
-            require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
-            $prodF = new ProductFournisseur($db);
-            $prodF->find_min_price_product_fournisseur($prod->id, $qte);
-            $propal->addline($prod->description, round($prod->price,2), $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, $remise, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, round($prodF->fourn_price, 2));
-        }
+//        if ($this->fraisP > 0) {
+//            $qte = $this->fraisP;
+//            $prod = new Product($db);
+//            $prod->fetch(3436);
+//            require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
+//            $prodF = new ProductFournisseur($db);
+//            $prodF->find_min_price_product_fournisseur($prod->id, $qte);
+//            $propal->addline($prod->description, round($prod->price,2), $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, $remise, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, round($prodF->fourn_price, 2));
+//        }
 
 
 

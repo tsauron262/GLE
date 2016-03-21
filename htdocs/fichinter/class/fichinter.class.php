@@ -211,7 +211,7 @@ class Fichinter extends CommonObject
                 if ($result < 0) { $error++; }
                 // End call triggers
             }
-
+			$this->db->commit();
 			return $this->id;
 		}
 		else

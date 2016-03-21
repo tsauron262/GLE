@@ -24,10 +24,10 @@ $(window).load(function () {
 
     if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/card.php") > -1) {
         desactEntrer = false;
-        $("textarea").focusin(function(){
+        $("textarea").focusin(function () {
             desactEntrer = true;
         });
-        $("textarea").focusout(function(){
+        $("textarea").focusout(function () {
             desactEntrer = false;
         });
         $("body").keypress(function (e) {
@@ -96,8 +96,7 @@ $(window).load(function () {
         if ($(this).val() >= 100) {
             $("input[name|='price_ht']").val("0");
             elems.hide();
-        }
-        else
+        } else
             elems.show();
     });
 
@@ -138,17 +137,13 @@ $(window).load(function () {
 
 
 
-
-    /*rsponsive victor*/
-    
-    /*responsive victor*/
-
-
-
-
-    $(".disableadOnClick").click(function(){
+    $(".disableadOnClick").click(function () {
         $(this).attr("disabled", "disabled");
     });
+
+
+
+    traiteLien();
 });
 
 function ajoutNotification(id, titre, msg) {
@@ -305,7 +300,7 @@ function traiteScroll(heightDif) {
 //    grandeTaille = parseInt($("body").innerHeight());
     grandeTaille = parseInt($("body").innerHeight());
     minimuAGagne = grandeTaille - height;
-    
+
     appli = false;
     newTaille = 0;
     elem = null;
@@ -770,6 +765,9 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
 //            cacherSuppr($(this));
     });
 
+
+
+
 }
 function fermerIframe(elem, callBack) {
     id = $(elem).attr("id").replace("iFrame", "");
@@ -788,8 +786,7 @@ function iFramePrinc(createIfNotExist) {
             src = document.location.href + "?inut";
         $("iframe.fullScreen").attr("src", src);
         $("div.fullScreen").fadeOut();
-    }
-    else
+    } else
         $("iframe.fullScreen").fadeIn();
 }
 
@@ -882,10 +879,25 @@ function autoSave(actionSave) {
         if (timeMax == null) {
             timeMax = new Date().getTime() + 30000;
             boucleSave();
-        }
-        else
+        } else
             timeMax = new Date().getTime() + 30000;
     }
-    
-    
+
+
+}
+
+function traiteLien() {
+    $("td").each(function () {
+        var Titre = ["Viadeo", "Facebook", "LinkedIn"];
+        if (Titre.indexOf($(this).html()) > -1) {
+            elem = $(this).next("td");
+            if (elem.length) {
+                var chaine = elem.html();
+                if (chaine.indexOf("input") < 0) {
+                    var reg = new RegExp("((https?://)[a-zA-Z0-9_\?=&;\\-/.]+)+", "gi");
+                    elem.html(chaine.replace(reg, "<a href='$1' target=_blank>$1</a>"));
+                }
+            }
+        }
+    });
 }

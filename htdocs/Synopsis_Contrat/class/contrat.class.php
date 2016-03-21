@@ -100,7 +100,7 @@ class Synopsis_Contrat extends Contrat {
     public function renouvellementPart2() {
         global $user;
         $tabOldIdOk = array();
-        $oldContrat = new Contrat($this->db);
+        $oldContrat = new Synopsis_Contrat($this->db);
         $oldContrat->fetch($this->oldId);
         $oldContrat->fetch_lines();
         $this->fetch_lines();
@@ -127,6 +127,14 @@ class Synopsis_Contrat extends Contrat {
 //        $this->activeAllLigne();
         if ($this->commId > 0)
             addElementElement("commande", "contrat", $this->commId, $this->id);
+        
+        
+        //gestion des contact
+        $this->delete_linked_contact();
+        $this->copy_linked_contact($oldContrat);
+        $this->copy_linked_contact($oldContrat, "external");
+        
+        $this->db->query("INSERT INTO ".MAIN_DB_PREFIX . "Synopsis_contrat_GMAO (condReg_refid , modeReg_refid, contrat_refid)  VALUES ('".$oldContrat->condReg_refid."','".$oldContrat->modeReg_refid."'," . $this->id.")");
     }
 
     public function setExtraParametersSimple($extra = "") {
@@ -282,11 +290,6 @@ class Synopsis_Contrat extends Contrat {
 //        $this->ref = str_replace($oldPref, $pref ."-". $oldPref, $this->ref);
         $this->majRef();
         
-        
-        //Add contact
-        $this->delete_linked_contact();
-        $this->add_contact(2, 10, "internal");
-        $this->add_contact(5, 11, "internal");
     }
 
     public function fetch($id, $ref = '') {
@@ -1563,12 +1566,12 @@ class Synopsis_Contrat extends Contrat {
                 $dureeMax = $duree;
             $query = "UPDATE " . MAIN_DB_PREFIX . "contratdet SET date_ouverture_prevue = '" . $dateDeb . "'";
             if ($ligne->date_ouverture)
-                $query .= ", date_ouverture = '" . $dateDeb . "', date_fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $duree . " MONTH)";
+                $query .= ", date_ouverture = '" . $dateDeb . "', date_fin_validite = date_add(date_add('" . $dateProlongation . "',INTERVAL " . $duree . " MONTH), INTERVAL -1 DAY)";
 //die($query . " WHERE rowid = " . $ligne->id);
             $sql = $this->db->query($query . " WHERE rowid = " . $ligne->id);
             $query = "UPDATE " . MAIN_DB_PREFIX . "contrat SET date_contrat = '" . $dateDeb . "'";
             if ($this->mise_en_service)
-                $query .= ", mise_en_service = '" . $dateDeb . "', fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $dureeMax . " MONTH)";
+                $query .= ", mise_en_service = '" . $dateDeb . "', fin_validite = date_add(date_add('" . $dateProlongation . "',INTERVAL " . $dureeMax . " MONTH), INTERVAL -1 DAY)";
             $sql = $this->db->query($query . " WHERE rowid = " . $this->id);
         }
     }
@@ -1667,7 +1670,7 @@ class Synopsis_Contrat extends Contrat {
                      VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
                              20," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
                              " . $total_ht . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
-                             " . /* $lineO.",".$comLigneId.",".$avenant. */",'" . $date . "','" . $date . "', date_add('" . $date . "',INTERVAL " . $duree . " MONTH))";
+                             " . /* $lineO.",".$comLigneId.",".$avenant. */",'" . $date . "','" . $date . "', date_add(date_add('" . $date . "',INTERVAL " . $duree . " MONTH), INTERVAL - 1 DAY))";
         $sql = $db->query($requete);
 //    die($requete);
         $cdid = $db->last_insert_id(MAIN_DB_PREFIX . "contratdet");
@@ -2729,7 +2732,7 @@ class Synopsis_ContratLigne extends ContratLigne {
 //            $html .= "(" . $result->value . ") ";
 //        }
 
-        $sql = $this->db->query("SELECT S_N as value FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 WHERE id =" . $idProdCli . "");
+        $sql = $this->db->query("SELECT N__Serie as value FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 WHERE id =" . $idProdCli . "");
         if ($this->db->num_rows($sql) > 0) {
             $result = $this->db->fetch_object($sql);
             $html .= ($result->value != "" && $opt != "SN") ? " [SN : " : "";

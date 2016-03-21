@@ -211,12 +211,12 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 //require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 //$usergroup = new UserGroup($db);
 //$groups = $usergroup->listGroupsForUser($user->id,1);
-$accesGrTech = userInGroupe(11, $user->id);
+$accesGrTech = userInGroupe(64, $user->id);
 if (!($user->admin || $accesGrTech) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
     if (isset($_REQUEST['id']) && stripos($_SERVER['REQUEST_URI'], "?") === false)
-        header('Location: ' . str_replace("card.php", "ficheFast.php?id=" . $_REQUEST['id'], "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        header('Location: ' . str_replace("card.php", "ficheFast.php?id=" . $_REQUEST['id'], "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
     else
-        header('Location: ' . str_replace("card.php", "ficheFast.php", "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        header('Location: ' . str_replace("card.php", "ficheFast.php", "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
 
 
 if (isset($_POST["action"]) && $_POST["action"] == 'update') {

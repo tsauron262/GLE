@@ -70,7 +70,7 @@ function majDoubleSoc(socid, ifVide) {
         else if (jQuery("#search_socid").size() > 0)
             valueStr = jQuery("#search_socid").val();
         if (typeof valueStr !== 'undefined' && valueStr + "x" != "x") {
-            valueStr = valueStr.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
+            valueStr = valueStr.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_").replace(".", "_");
             $("select.double").each(function () {
                 val = jQuery(this).find(':selected').val();
                 if (!(ifVide && val > 1)) {

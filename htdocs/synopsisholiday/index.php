@@ -356,7 +356,7 @@ if ($droitAll) {
     print '<td class="liste_titre" align="left">';
 
     $validator = new UserGroup($db);
-    $excludefilter = $user->admin ? '' : 'u.rowid <> ' . $user->id;
+//    $excludefilter = $user->admin ? '' : 'u.rowid <> ' . $user->id;
     $valideurobjects = $validator->listUsersForGroup($excludefilter);
     $valideurarray = array();
     foreach ($valideurobjects as $val)

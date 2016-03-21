@@ -615,7 +615,7 @@ class ImportCsv extends ModeleImports
                                                     if($valeur == "s.code_client" ){
                                                         $where = $valeur ." = '".$arrayrecord[($id-1)]['val']."'";
                                                         $result = $this->db->query("SELECT * FROM ".$tablename." s WHERE ".$where);
-                                                        die("SELECT * FROM ".$tablename." s WHERE ".$where);
+//                                                        die("SELECT * FROM ".$tablename." s WHERE ".$where);
                                                         if($this->db->num_rows($result) > 0)
                                                         $update = true;
                                                     }
@@ -683,6 +683,7 @@ class ImportCsv extends ModeleImports
 	}
 
 }
+}
 
 /**
  *	Clean a string from separator
@@ -693,6 +694,5 @@ class ImportCsv extends ModeleImports
 function cleansep($value)
 {
 	return str_replace(array(',',';'),'/',$value);
-};
-
+}
 

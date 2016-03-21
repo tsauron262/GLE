@@ -85,6 +85,9 @@
         }
 
         $msg .= "Un nouveau message a &eacute;t&eacute; post&eacute; concernant la commande ".$commande->getNomUrl(1,6).".";
+        $soc = new Societe($db);
+        $soc->fetch($commande->socid);
+        $msg .= "<br/>Société ".$soc->getNomUrl(1).".";
         $msg .= "<br/><div><table border=1 width=100%><tr><td>De</td><td>
 ".$tmpUser->getNomUrl(1,"",true)."\n</td></tr><tr><td colspan=2>".nl2br($message)."</td></tr></table>\n</div>";
 

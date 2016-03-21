@@ -107,7 +107,8 @@ if ($sql) {
 
         $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
         $from = $conf->global->BIMP_MAIL_FROM;
-        $addr_cc = $conf->global->BIMP_MAIL_GESTFINANCIER . ", " . $conf->global->BIMP_MAIL_GESTPROD;
+//        $addr_cc = $conf->global->BIMP_MAIL_GESTFINANCIER . ", " . $conf->global->BIMP_MAIL_GESTPROD;
+        $addr_cc = "";
 
 
 //        require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');

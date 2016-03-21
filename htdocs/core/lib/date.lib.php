@@ -542,7 +542,7 @@ function dol_get_first_day_week($day,$month,$year,$gm=false)
  *  @param      string		$countrycode        Country code
  *	@return   	int								Nombre de jours feries
  */
-function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
+function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $user = null)
 {
 	$nbFerie = 0;
 
@@ -574,7 +574,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 
 			// Calcul du jour de paques
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques);
+			$jour_paques = date("d", $date_paques)+1;
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -585,7 +585,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
                 date("i", $date_paques),
                 date("s", $date_paques),
                 date("m", $date_paques),
-                date("d", $date_paques) + 38,
+                date("d", $date_paques) + 39,
                 date("Y", $date_paques)
             );
 			$jour_ascension = date("d", $date_ascension);
@@ -599,7 +599,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
                 date("i", $date_ascension),
                 date("s", $date_ascension),
                 date("m", $date_ascension),
-                date("d", $date_ascension) + 12,
+                date("d", $date_ascension) + 11,
                 date("Y", $date_ascension)
             );
 			$jour_pentecote = date("d", $date_pentecote);
@@ -611,7 +611,24 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 			// Calul des samedis et dimanches
 			$jour_julien = unixtojd($timestampStart);
 			$jour_semaine = jddayofweek($jour_julien, 0);
-			if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;
+                        /*MOD DRSI*/
+                        global $userHoliday, $db;
+                        if(isset($userHoliday)){
+                            $userH = new User($db);
+                            $userH->fetch($userHoliday);
+                            $tabJ = array(1=>"lundi", 2=>"mardi", 3=>"mercredi", 4=>"jeudi", 5=>"vendredi", 6=>"samedi");
+                            if(isset($userH->array_options) && array_key_exists('options_'.$tabJ[$jour_semaine], $userH->array_options)){
+                                    if($userH->array_options['options_'.$tabJ[$jour_semaine]])
+                                        $nnnnnnn=false;
+                                    else
+                                        $ferie=true;
+                            }
+                            else if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true; 
+                        }
+                        else {
+                            if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;                            
+                        }
+                            /*F MOD DRSI*/
 			//Samedi (6) et dimanche (0)
 		}
 
@@ -635,7 +652,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 
 			// Calcul du jour de paques
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques);
+			$jour_paques = date("d", $date_paques)+1;
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -664,7 +681,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 
 			// Calcul día de Pascua
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques);
+			$jour_paques = date("d", $date_paques)+1;
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -710,7 +727,6 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
                 $timestampStart += (60*60*24);
                 /*mod drsi*/
 	}
-
 	return $nbFerie;
 }
 

@@ -34,27 +34,33 @@ class annexe {
         $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
     }
 
-    function getAnnexeContrat($contrat) {
+    function getAnnexeContrat($contrat, $filtre = "") {
         $this->element = $contrat;
         $requete = "SELECT *, IF(a.annexe != '', a.annexe, p.annexe) as annexeP
                               FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p,
                                    " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid AND type = 1
-                               AND a.contrat_refid = " . $contrat->id . "
-                          ORDER BY a.rang";
+                               AND a.contrat_refid = " . $contrat->id;
+        if($filtre != "")
+            $requete .= " AND modeleName LIKE '%".$filtre."%'";
+        $requete .= " ORDER BY a.rang";
 //                die($requete);
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)) {
-            $this->getOneAnnexe($res);
+            if($filtre != "")
+                $res->afficheTitre = 0;
+            $this->getOneAnnexe($res, $filtre);
         }
 
-        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
+//        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
     }
 
     function getOneAnnexe($res) {
 //        if (!$this->i == 0)
-        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
-        $this->pdf->AddPage();
+        if($res->afficheTitre == 1){
+            $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
+            $this->pdf->AddPage();
+        }
         $this->model->_pagehead($this->pdf, $this->element, 0, $this->outputlangs);
         $this->i++;
         if ($arrAnnexe[$res->ref]['lnk'] > 0) {

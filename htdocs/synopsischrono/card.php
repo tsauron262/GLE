@@ -399,6 +399,7 @@ if ($chr->id > 0) {
         }
 
         if ($chr->model->hasPropal) {
+        $hasSoc = $chr->socid && $chr->model->hasSociete == 1;
             print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Propal') . '</th>';
             print "<td><select name='prop'><OPTION value='0'>S&eacute;lectionner-></OPTION>";
             $idT = $chr->propalid;

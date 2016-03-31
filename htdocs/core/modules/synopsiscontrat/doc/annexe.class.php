@@ -171,7 +171,7 @@ Tél. : Contact-external-CUSTOMER-tel
 
 
 //                $serialNum = ($ligneContrat->serial_number != '') ? " \n SN : " . $ligneContrat->serial_number . "" : "";
-                $desc .= /*$ligneContrat->description . $sla .*/ $serialNum . str_replace("\n\n", "\n", $ligneContrat->getInfoProductCli("", 1000)) . "";
+                $desc .= /*$ligneContrat->description . $sla .*/ $serialNum . str_replace("\n\n", "\n", $ligneContrat->getInfoProductCli("", 10000)) . "";
                 $dateFin = date('d/m/Y', $ligneContrat->date_fin_validite);
                 $qte += $ligneContrat->qty;
                 $qte2 += $ligneContrat->qte2;

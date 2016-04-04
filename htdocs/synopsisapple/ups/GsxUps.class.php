@@ -148,7 +148,7 @@ class GsxUps {
         }
 
         $shipToInfos = shipToList::$list[$this->shiptTo];
-        
+
         $request = array(
             'Request' => array(
                 'RequestOption' => 'nonvalidate'
@@ -384,7 +384,7 @@ class GsxUps {
 
         $request = $this->gsx->_requestBuilder($requestName, 'bulkPartsRegistrationRequest', $datas);
         $response = $this->gsx->request($request, $soapClient);
-        
+
         if (isset($response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'])) {
             $html = '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès</p>';
             $response = $response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'];
@@ -613,6 +613,8 @@ class GsxUps {
     protected function getPartsListHtml() {
         $parts = $this->getPartsPendingArray();
 
+
+
         $html = '<input type="hidden" id="shipToUsed" name="shiptToUsed" value="' . $this->shiptTo . '"/>';
         if ($parts === false) {
             $html .= $this->gsx->getGSXErrorsHtml();
@@ -636,11 +638,13 @@ class GsxUps {
             $html .= '<th>N° de commande</th>';
             $html .= '<th>N° de réparation</th>' . "\n";
             $html .= '<th>N° de série du produit</th>' . "\n";
+            $html .= '<th>Date de retour attendue</th>';
             $html .= '</tr></thead><tbody>' . "\n";
             $odd = false;
             $i = 1;
             foreach ($parts as $sro => $repairParts) {
                 foreach ($repairParts as $p) {
+                    $date = new DateTime($p['expectedReturnDate']);
                     $html .= '<tr id="part_' . $i . '" ' . ($odd ? ' class="odd"' : '') . '>' . "\n";
                     $html .= '<td><input class="partCheck" type="checkbox" name="parts[]"/></td>' . "\n";
                     $html .= '<td class="partName">' . $p['nom'] . '</td>' . "\n";
@@ -649,7 +653,9 @@ class GsxUps {
                     $html .= '<td class="partPONumber">' . $p['poNumber'] . '</td>';
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
+                    $html .= '<td class="partReturnDate">' . $date->format('d / m / Y') . '</td>' . "\n";
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
+                    $html .= '<input type="hidden" class="partDateValue" value="'.$date->format('Ymd').'" />'."\n";
                     $html .= '</tr>' . "\n";
                     $i++;
                     $odd = !$odd;
@@ -720,7 +726,8 @@ class GsxUps {
                     'newRef' => $newRef ? $part['partNumber'] : '',
                     'serial' => $part['serialNumber'],
                     'returnOrderNumber' => $part['returnOrderNumber'],
-                    'poNumber' => $part['purchaseOrderNumber']
+                    'poNumber' => $part['purchaseOrderNumber'],
+                    'expectedReturnDate' => $part['expectedReturnDate']
                 );
             }
         }

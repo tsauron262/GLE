@@ -613,8 +613,6 @@ class GsxUps {
     protected function getPartsListHtml() {
         $parts = $this->getPartsPendingArray();
 
-
-
         $html = '<input type="hidden" id="shipToUsed" name="shiptToUsed" value="' . $this->shiptTo . '"/>';
         if ($parts === false) {
             $html .= $this->gsx->getGSXErrorsHtml();
@@ -632,13 +630,13 @@ class GsxUps {
 
             $html .= '<table id="partsPending"><thead><tr>' . "\n";
             $html .= '<th></th>' . "\n";
-            $html .= '<th>Nom</th>' . "\n";
-            $html .= '<th>Ref.</th>' . "\n";
-            $html .= '<th>Nouvelle Ref.</th>' . "\n";
-            $html .= '<th>N° de commande</th>';
-            $html .= '<th>N° de réparation</th>' . "\n";
-            $html .= '<th>N° de série du produit</th>' . "\n";
-            $html .= '<th>Date de retour attendue</th>';
+            $html .= '<th id="partName_title" class="sortable desc" onclick="onSortableClick($(this))"><span>Nom</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partRef_title" class="sortable desc" onclick="onSortableClick($(this))"><span>Ref.</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partNewRef_title" class="sortable desc" onclick="onSortableClick($(this))"><span>Nouvelle Ref.</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partPONumber_title" class="sortable desc" onclick="onSortableClick($(this))"><span>N° de commande</span><span class="arrow"></span></th>';
+            $html .= '<th id="partSroNumber_title" class="sortable desc numeric" onclick="onSortableClick($(this))"><span>N° de réparation</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partSerial_title" class="sortable desc" onclick="onSortableClick($(this))"><span>N° de série du produit</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partDateValue_title" class="sortable desc useInput" onclick="onSortableClick($(this))"><span>Date de retour attendue</span><span class="arrow"></span></th>';
             $html .= '</tr></thead><tbody>' . "\n";
             $odd = false;
             $i = 1;

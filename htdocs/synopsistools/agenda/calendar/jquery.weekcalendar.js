@@ -1574,7 +1574,7 @@
                         });
                       }
                       newLeft = 1;
-                      $(this).css({width: newWidth + '%', left: newLeft + '%', right: 0});
+//                      $(this).css({width: newWidth + '%', left: newLeft + '%', right: 0});
                   });
                 });
             });

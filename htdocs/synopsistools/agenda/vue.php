@@ -12,6 +12,8 @@ $tabUserId = array();
 $tabUser = getTabUser();
 if(isset($_REQUEST['timeTranche']))
     $_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on')? 'true' : 'false';
+if(isset($_REQUEST['timeTranche']))
+    $_REQUEST['chevauche'] = (isset($_REQUEST['chevauche']) && $_REQUEST['chevauche'] == 'on')? 'true' : 'false';
 $tabPara = getPara();
 $i = 0;
 $tabJsIdUser = 'tabUserId = Array();';
@@ -353,6 +355,7 @@ foreach(array(5,10,15,20,30) as $time)
     echo '<option value="'.(60/$time).'" '.((60/$time) == $_SESSION['paraAgenda']['timeTranche'] ? 'selected="selected"' : "") .'>'.$time.'</option>';
 echo '</select>';
 echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><input type='checkbox' id='workHour' name='workHour' ".("true" == $_SESSION['paraAgenda']['workHour'] ? 'checked="checked"' : "") .'/>';
+echo "<label style='margin-left:11px' for='chevauche'>Chevaucher rdv : </label><input type='checkbox' id='chevauche' name='chevauche' ".("true" == $_SESSION['paraAgenda']['chevauche'] ? 'checked="checked"' : "") .'/>';
 echo "<input type='submit' value='Ok' class='butAction'/></form>";
 echo "</div>";
 

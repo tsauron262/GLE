@@ -148,7 +148,7 @@ class GsxUps {
         }
 
         $shipToInfos = shipToList::$list[$this->shiptTo];
-        
+
         $request = array(
             'Request' => array(
                 'RequestOption' => 'nonvalidate'
@@ -384,7 +384,7 @@ class GsxUps {
 
         $request = $this->gsx->_requestBuilder($requestName, 'bulkPartsRegistrationRequest', $datas);
         $response = $this->gsx->request($request, $soapClient);
-        
+
         if (isset($response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'])) {
             $html = '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès</p>';
             $response = $response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'];
@@ -636,18 +636,19 @@ class GsxUps {
 
             $html .= '<table id="partsPending"><thead><tr>' . "\n";
             $html .= '<th></th>' . "\n";
-            $html .= '<th>Nom</th>' . "\n";
-            $html .= '<th>Ref.</th>' . "\n";
-            $html .= '<th>Nouvelle Ref.</th>' . "\n";
-            $html .= '<th>N° de commande</th>';
-            $html .= '<th>N° de réparation</th>' . "\n";
-            $html .= '<th>N° de série du produit</th>' . "\n";
-            $html .= '<th>Type de retour</th>';
+            $html .= '<th id="partName_title" class="sortable desc" onclick="onSortableClick($(this))"><span>Nom</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partRef_title" class="sortable desc" onclick="onSortableClick($(this))"><span>Ref.</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partNewRef_title" class="sortable desc" onclick="onSortableClick($(this))"><span>Nouvelle Ref.</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partPONumber_title" class="sortable desc" onclick="onSortableClick($(this))"><span>N° de commande</span><span class="arrow"></span></th>';
+            $html .= '<th id="partSroNumber_title" class="sortable desc numeric" onclick="onSortableClick($(this))"><span>N° de réparation</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partSerial_title" class="sortable desc" onclick="onSortableClick($(this))"><span>N° de série du produit</span><span class="arrow"></span></th>' . "\n";
+            $html .= '<th id="partDateValue_title" class="sortable desc useInput" onclick="onSortableClick($(this))"><span>Date de retour attendue</span><span class="arrow"></span></th>';
             $html .= '</tr></thead><tbody>' . "\n";
             $odd = false;
             $i = 1;
             foreach ($parts as $sro => $repairParts) {
                 foreach ($repairParts as $p) {
+                    $date = new DateTime($p['expectedReturnDate']);
                     $html .= '<tr id="part_' . $i . '" ' . ($odd ? ' class="odd"' : '') . '>' . "\n";
                     $html .= '<td><input class="partCheck" type="checkbox" name="parts[]"/></td>' . "\n";
                     $html .= '<td class="partName">' . $p['nom'] . '</td>' . "\n";
@@ -656,8 +657,9 @@ class GsxUps {
                     $html .= '<td class="partPONumber">' . $p['poNumber'] . '</td>';
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
-                    $html .= '<td class="partExpectedReturn">'.$p['expectedReturn'].'</td>';
+                    $html .= '<td class="partReturnDate">' . $date->format('d / m / Y') . '</td>' . "\n";
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
+                    $html .= '<input type="hidden" class="partDateValue" value="'.$date->format('Ymd').'" />'."\n";
                     $html .= '</tr>' . "\n";
                     $i++;
                     $odd = !$odd;
@@ -729,7 +731,7 @@ class GsxUps {
                     'serial' => $part['serialNumber'],
                     'returnOrderNumber' => $part['returnOrderNumber'],
                     'poNumber' => $part['purchaseOrderNumber'],
-                    'expectedReturn' => $part['expectedReturn']
+                    'expectedReturnDate' => $part['expectedReturnDate']
                 );
             }
         }

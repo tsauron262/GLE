@@ -11,6 +11,8 @@ foreach($tabUser as $idUser => $nomUser){
 }
 
 function getPara(){
+    if(isset($_REQUEST['chevauche']))
+        $_SESSION['paraAgenda']['chevauche'] = $_REQUEST['chevauche'];
     if(isset($_REQUEST['workHour']))
         $_SESSION['paraAgenda']['workHour'] = $_REQUEST['workHour'];
     if(isset($_REQUEST['timeTranche']))
@@ -21,6 +23,8 @@ function getPara(){
         $_SESSION['paraAgenda']['workHour'] = 'true';
     if(!isset($_SESSION['paraAgenda']['timeTranche']))
         $_SESSION['paraAgenda']['timeTranche'] = '2';
+    if(!isset($_SESSION['paraAgenda']['chevauche']))
+        $_SESSION['paraAgenda']['chevauche'] = 'true';
     return $_SESSION['paraAgenda'];
 }
 

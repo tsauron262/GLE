@@ -54,13 +54,13 @@ $(window).load(function () {
     $('#calendar').on("touchstart", function (e) {
         ts = e.originalEvent.touches[0].clientX;
     });
-    
+
     $('#calendar').on("touchend", function (e) {
         var te = e.originalEvent.changedTouches[0].clientX;
-        if(te-ts>150){
+        if (te - ts > 150) {
             $('.wc-prev').click();
         }
-        if(te-ts<-150){
+        if (te - ts < -150) {
             $('.wc-next').click();
         }
     });
@@ -76,18 +76,22 @@ function initNbUser() {
 
 
 function initSimult() {
-//    $(".wc-cal-event").each(function () {
-////        alert($(this).css("top") + "|"+$(this).position().top);
-//        if ($(this).css("top").replace("px", "") < $(this).position().top)
-//            $(this).parent().find(".wc-cal-event").css("width", (100 / $(this).parent().find(".wc-cal-event").size()) - 1 + "%");
-//    });
-//
-//    $("div.wc-title a").click(function () {
-//        id = $(this).parent().find(".idAction").attr("value");
-//        titre = $(this).html();
-//        dispatchePopIFrame(DOL_URL_ROOT + "/comm/action/card.php?id=" + id + "&action=edit&optioncss=print", function () {
-//            $('#calendar').weekCalendar('refresh');
-//        }, titre, 100);
-//        return false;
-//    });
+    $(".wc-cal-event").each(function () {
+//        alert($(this).css("top") + "|"+$(this).position().top);
+        if (chevauche) {
+            if ($(this).css("top").replace("px", "") < $(this).position().top)
+                $(this).parent().find(".wc-cal-event").css("width", (100 / $(this).parent().find(".wc-cal-event").size()) - 1 + "%");
+        } else {
+            $(this).css("position", "absolute");
+        }
+    });
+
+    $("div.wc-title a").click(function () {
+        id = $(this).parent().find(".idAction").attr("value");
+        titre = $(this).html();
+        dispatchePopIFrame(DOL_URL_ROOT + "/comm/action/card.php?id=" + id + "&action=edit&optioncss=print", function () {
+            $('#calendar').weekCalendar('refresh');
+        }, titre, 100);
+        return false;
+    });
 }

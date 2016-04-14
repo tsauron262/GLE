@@ -16,7 +16,8 @@ if(isset($_REQUEST['timeTranche']))
     $_REQUEST['chevauche'] = (isset($_REQUEST['chevauche']) && $_REQUEST['chevauche'] == 'on')? 'true' : 'false';
 $tabPara = getPara();
 $i = 0;
-$tabJsIdUser = 'tabUserId = Array();';
+$tabJsIdUser = 'chevauche = '.$_SESSION['paraAgenda']['chevauche'].';';
+$tabJsIdUser .= 'tabUserId = Array();';
 foreach ($tabUser as $userId => $nom) {
     $i++;
 //    $tabUserId[] = "'".$userId.":".$nom."'";

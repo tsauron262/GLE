@@ -19,6 +19,8 @@ function getPara(){
         $_SESSION['paraAgenda']['timeTranche'] = $_REQUEST['timeTranche'];
 //    echo $_SESSION['paraAgenda']['timeTranche'];die;
 //    print_r($_SESSION['paraAgenda']);die;
+    
+    /*val default*/
     if(!isset($_SESSION['paraAgenda']['workHour']))
         $_SESSION['paraAgenda']['workHour'] = 'true';
     if(!isset($_SESSION['paraAgenda']['timeTranche']))

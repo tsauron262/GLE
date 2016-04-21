@@ -613,8 +613,6 @@ class GsxUps {
     protected function getPartsListHtml() {
         $parts = $this->getPartsPendingArray();
 
-
-
         $html = '<input type="hidden" id="shipToUsed" name="shiptToUsed" value="' . $this->shiptTo . '"/>';
         if ($parts === false) {
             $html .= $this->gsx->getGSXErrorsHtml();

@@ -75,7 +75,7 @@
     border-collapse: collapse;
 }
 #partsPending thead th {
-     padding: 4px 8px;
+    padding: 4px 8px;
     color: #fff;
     font-weight: normal;
     font-size: 12px;
@@ -90,6 +90,64 @@
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a2a9b2', endColorstr='#28343b',GradientType=0 ); /* IE6-9 */
 
 }
+#partsPending thead th.sortable {
+    cursor: pointer;
+    padding-right: 15px;
+}
+
+#partsPending thead th.sortable:hover,
+#partsPending thead th.sortable.active
+{
+    color: #373C3B;
+
+    background: #f2f2f2; /* Old browsers */
+    background: -moz-linear-gradient(top, #f2f2f2 0%, #dfe5d7 40%, #b3bead 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #f2f2f2 0%,#dfe5d7 40%,#b3bead 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #f2f2f2 0%,#dfe5d7 40%,#b3bead 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f2f2', endColorstr='#b3bead',GradientType=0 ); /* IE6-9 */
+}
+
+#partsPending thead th span {
+    display: block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+#partsPending thead th.sortable span.arrow {
+    margin: 5px;
+    line-height: 17px;
+}
+
+#partsPending thead th.sortable span.arrow:before {
+    font-family: 'FA';
+    padding: 10px;
+    color: #373C3B;
+    content: '\f077';
+    visibility: hidden;
+}
+
+#partsPending thead th.sortable.asc span.arrow:before {
+    content: '\f077';
+}
+#partsPending thead th.sortable.asc:hover span.arrow:before {
+    content: '\f078';    
+    color: #0080DC;
+    font-size: 14px;
+}
+#partsPending thead th.sortable.desc span.arrow:before{
+    content: '\f078';
+}
+#partsPending thead th.sortable.desc:hover span.arrow:before {
+    content: '\f077';
+    color: #0080DC;
+    font-size: 14px;
+}
+
+#partsPending thead th.sortable:hover span.arrow:before,
+#partsPending thead th.sortable.active span.arrow:before {
+    visibility: visible;
+}
+
 #partsPending tbody tr {
     cursor: pointer;
     background-color: #E6E6E6;
@@ -98,7 +156,7 @@
     background-color: #fff;
 }
 #partsPending tbody tr.odd {
-     background-color: #D4D4DC;
+    background-color: #D4D4DC;
 }
 #partsPending tbody tr.odd:hover {
     background-color: #E8E8F0;

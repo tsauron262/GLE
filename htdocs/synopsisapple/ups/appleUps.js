@@ -1,3 +1,30 @@
+function setShippingFormEvents() {
+    if ($('#partsPending').length) {
+        $('.partCheck').change(function () {
+            var $row = $(this).parent('td').parent('tr');
+            if ($(this).prop('checked')) {
+                onPartSelect($row);
+            } else {
+                onPartUnselect($row);
+            }
+        });
+        $('.partCheck').click(function (e) {
+            e.stopPropagation();
+        });
+        $('#createShipping').click(function () {
+            createShipping();
+        });
+        $('#partsPending').find('tbody').find('tr').click(function () {
+            if ($(this).find('input.partCheck').prop('checked')) {
+                $(this).find('input.partCheck').removeProp('checked');
+                onPartUnselect($(this));
+            } else {
+                $(this).find('input.partCheck').prop('checked', 'checked');
+                onPartSelect($(this));
+            }
+        });
+    }
+}
 function loadShippingForm() {
     var shipTo = $('#shipToNumber').val();
     var $div = $('#ajaxRequestResults');
@@ -12,29 +39,11 @@ function loadShippingForm() {
             $div.slideUp(250, function () {
                 if (data.html) {
                     $div.html(data.html).slideDown(250, function () {
-                        $('.partCheck').change(function () {
-                            var $row = $(this).parent('td').parent('tr');
-                            if ($(this).prop('checked')) {
-                                onPartSelect($row);
-                            } else {
-                                onPartUnselect($row);
-                            }
-                        });
-                        $('.partCheck').click(function (e) {
-                            e.stopPropagation();
-                        });
-                        $('#createShipping').click(function () {
-                            createShipping();
-                        });
-                        $('#partsPending').find('tbody').find('tr').click(function () {
-                            if ($(this).find('input.partCheck').prop('checked')) {
-                                $(this).find('input.partCheck').removeProp('checked');
-                                onPartUnselect($(this));
-                            } else {
-                                $(this).find('input.partCheck').prop('checked', 'checked');
-                                onPartSelect($(this));
-                            }
-                        });
+                        setShippingFormEvents();
+                        onCaptionClick($('#partsList').find('div.captionContainer'));
+                        var $th = $('#partDateValue_title');
+                        if ($th.length)
+                            onSortableClick($th);
                     });
                 } else {
                     $div.html('<p class="error">Une erreur est survenue.</p>').slideDown(250);
@@ -140,7 +149,7 @@ function registerGsxShipment() {
                 var html = '<div class="tabBar container">';
                 html += data.result.html + '</div>';
                 $('#ajaxRequestResults').slideUp(250, function () {
-                    $(this).html(html).slideDown(250, function() {
+                    $(this).html(html).slideDown(250, function () {
                         loadPartsReturnLabels(shipId);
                     });
                 });
@@ -406,7 +415,75 @@ function reinitPage() {
     $('#shipTo').show();
     $('#currentShipmentList').show();
 }
+function sortTableElements($table, $elems, asc, isNumeric) {
+    if (!$table.length || !$elems.length)
+        return;
 
+    var rows = [];
+
+    $elems.each(function () {
+        var $tr = $(this).parent('tr');
+        var value;
+        if ($(this).attr('value'))
+            value = $(this).val();
+        else
+            value = $(this).text();
+        rows.push({'tr': $tr, 'value': value});
+    });
+
+    rows.sort(function (a, b) {
+        if (asc) {
+//            if (isNumeric)
+//                return b.value - a.value;
+//            else
+            return b.value < a.value ? 1 : -1;
+        } else {
+//            if (isNumeric)
+//                return a.value - b.value;
+//            else
+            return a.value < b.value ? 1 : -1;
+        }
+    });
+
+    var html = '';
+    var odd = false;
+    for (i in rows) {
+        html += '<tr id="' + rows[i].tr.attr('id') + '"';
+        if (odd)
+            html += ' class="odd"';
+        html += '>';
+        html += rows[i].tr.html();
+        html += '</tr>';
+        odd = !odd;
+    }
+    $table.find('tbody').html(html);
+}
+function onSortableClick($th) {
+    var asc;
+    if ($th.hasClass('desc'))
+        asc = true;
+    else
+        asc = false;
+    $('th.sortable').removeClass('active');
+    $th.addClass('active');
+
+    if (asc)
+        $th.removeClass('desc').addClass('asc');
+    else
+        $th.removeClass('asc').addClass('desc');
+
+    var className = $th.attr('id').replace(/^(.*)_title$/, '$1');
+
+    var $table = $th.parent('tr').parent('thead').parent('table');
+    var $elements;
+    if ($th.hasClass('useInput'))
+        $elements = $table.find('input.' + className);
+    else
+        $elements = $table.find('td.' + className);
+
+    sortTableElements($table, $elements, asc, $th.hasClass('numeric'));
+    setShippingFormEvents();
+}
 $(document).ready(function () {
     $('#shipToSubmit').click(function () {
         loadShippingForm();

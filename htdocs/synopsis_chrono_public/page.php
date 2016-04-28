@@ -18,32 +18,48 @@ $chronos = array();
 $chronoStr = '';
 
 if (isset($_POST['serial'])) {
-    if (preg_match('/^[a-zA-Z0-9]$/', $_POST['serial'])) {
-        $serial = $_POST['serial'];
-    } else {
+    if (empty($_POST['serial'])) {
+        $errors[] = 'Veuillez indiquer un numéro de série.';
+    } else if (!preg_match('/^[a-zA-Z0-9]+$/', $_POST['serial'])) {
         $errors[] = 'Le numéro de série indiqué ne respecte pas le bon format.';
+    } else {
+        $serial = $_POST['serial'];
+    }
+} else if (isset($_GET['back_serial'])) {
+    if (empty($_GET['back_serial'])) {
+        $errors[] = 'Numéro de série absent.';
+    } else if (!preg_match('/^[a-zA-Z0-9]+$/', $_GET['back_serial'])) {
+        $errors[] = 'Une erreur est survenue. Numéro de série invalide.';
+    } else {
+        $serial = $_GET['back_serial'];
     }
 }
 if (isset($_POST['user_name'])) {
-    if (preg_match('/^[a-zA-Z \-]$/', $_POST['user_name'])) {
-        $userName = $_POST['user_name'];
-    } else {
+    if (empty($_POST['user_name'])) {
+        $errors[] = 'Veuillez saisir les trois premières lettres de votre nom.';
+    } else if (!preg_match('/^[a-zA-Z \-]+$/', $_POST['user_name'])) {
         $errors[] = 'Veuillez ne saisir que des lettre, un espace ou un "-" pour les trois permières lettres de votre nom.';
+    } else {
+        $userName = $_POST['user_name'];
     }
 }
 if (isset($_GET['id_chrono'])) {
-    if (preg_match('/^[0-9]$/', $_GET['id_chrono'])) {
+    if (preg_match('/^[0-9]+$/', $_GET['id_chrono'])) {
         $id_chrono = (int) $_GET['id_chrono'];
     } else {
-        $errors[] = 'ID SAV invalide';
+        $errors[] = 'ID SAV invalide.';
     }
 }
 if (isset($_GET['chronos'])) {
     $ids = explode('-', $_GET['chronos']);
     foreach ($ids as $id) {
-        if (preg_match('/^[0-9]$/', $id)) {
-            $chrono[] = (int) $id;
+        if (preg_match('/^[0-9]+$/', $id)) {
+            $chronos[] = (int) $id;
         }
+    }
+} else if (isset($_GET['chronos_str'])) {
+    if (preg_match('/^[0-9]+(\-[0-9]+)*$/', $_GET['chronos_str'])) {
+        $chronoStr = $_GET['chronos_str'];
     }
 }
 
@@ -68,7 +84,7 @@ function getChronosBySerial($serial) {
 if ($serial && $userName) {
     $chronos = getChronosBySerial($serial);
     if (!count($chronos)) {
-        $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série';
+        $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série.';
     } else if (count($chronos) == 1) {
         $id_chrono = $chronos[0];
         $chronos = array();
@@ -78,14 +94,17 @@ if ($serial && $userName) {
 if (count($chronos)) {
     $first = true;
     foreach ($chronos as $idChrono) {
-        if (!$first) {
-            $chronoStr .= '-';
-        } else
-            $chronoStr = false;
-        $chronoStr .= $idChrono;
-        
+        if (count($chronos) > 1) {
+            if (!$first) {
+                $chronoStr .= '-';
+            } else
+                $first = false;
+            $chronoStr .= $idChrono;
+        }
+
         $chrono = new Chrono($db);
         $chrono->fetch($idChrono);
+        
         $chrono->getValuesPlus();
         $chrono->getValues();
         $chronosList[] = array(
@@ -103,7 +122,7 @@ if ($id_chrono) {
     $chrono->fetch((int) $id_chrono);
     $chronoRows = $chrono->getPublicValues();
     if (!count($chronoRows)) {
-        $errors[] = 'Numéro SAV absent ou invalide';
+        $errors[] = 'Numéro SAV absent ou invalide.';
     }
 }
 ?>
@@ -136,14 +155,12 @@ if ($id_chrono) {
                         echo '<div class="row">';
                     }
 
-                    if (isset($backSerial)) {
+                    if (count($chronosList)) {
                         echo '<div class="pull-right">';
-                        echo '<a class="butAction" href="./' . $page . '?serial=' . $backSerial . '><i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Retour à la liste des suivis SAV</a>';
+                        echo '<a class="butAction" href="./' . $page . '"><i class="fa fa-search left"></i>Nouvelle recheche</a>';
                         echo '</div></div>';
                         echo '<div class="row">';
-                    }
 
-                    if (count($chronosList)) {
                         echo '<p class="infos">Vous avez ' . count($chronosList) . ' suivis SAV enregistrés pour le n° de série <strong>"' . $serial . '"</strong></p>';
                         echo '<table><thead><tr>';
                         echo '<th>Référence</th>';
@@ -157,17 +174,24 @@ if ($id_chrono) {
                             echo '<td>' . $chronoInfos['date_create'] . '</td>';
                             echo '<td>' . $chronoInfos['symptom'] . '</td>';
                             echo '<td><a class="butAction" href="./' . $page . '?id_chrono=' . $chronoInfos['id_chrono'];
-                            if (!empty($serial)) {
-                                echo '&backchronos=' . $serial;
+                            if (!empty($chronoStr) && $serial) {
+                                echo '&chronos_str=' . $chronoStr . '&back_serial=' . $serial;
                             }
-                            echo '">Afficher</a></td>';
+                            echo '"><i class="fa fa-bars left"></i>Afficher</a></td>';
                             echo '</tr>';
                         }
                         echo '</tbody></table></div>';
                         echo '<div class="row">';
-                    }
-
-                    if (count($chronoRows)) {
+                    } else if (count($chronoRows)) {
+                        echo '<div class="pull-right">';
+                        if ($chronoStr && $serial) {
+                            echo '<a class="butAction" href="./' . $page . '?chronos=' . $chronoStr . '&back_serial=' . $serial . '">';
+                            echo '<i class="fa fa-arrow-circle-left left"></i>Retour à la liste des suivis SAV</a>';
+                        }
+                        echo '<a class="butAction" href="./' . $page . '">';
+                        echo '<i class="fa fa-search left"></i>Nouvelle recherche</a>';
+                        echo '</div></div>';
+                        echo '<div class="row">';
                         echo '<table><thead></thead><tbody>';
                         $firstLoop = true;
                         foreach ($chronoRows as $r) {
@@ -189,18 +213,20 @@ if ($id_chrono) {
                     }
 
                     if (!count($chronoRows) && !count($chronosList)) {
-                        echo '<div class="col-lg-8">';
+                        echo '<div class="col-lg-9">';
                         echo '<form method="POST" action="./' . $page . '" class="well">';
                         echo '<div class="form-group row">';
-                        echo '<label class="col-lg-5" for="serial">Numéro de série du matériel: </label>';
-                        echo '<input class="col-lg-8" id="serial" name="serial" type="text" value="' . $serial . '"/>';
+                        echo '<label class="col-lg-10 col-lg-offset-1" for="serial">Numéro de série du matériel: </label>';
+                        echo '<input class="col-lg-10 col-lg-offset-1" id="serial" name="serial" type="text" value="' . $serial . '"/>';
                         echo '</div>';
                         echo '<div class="form-group row">';
-                        echo '<label class="col-lg-5" for="user_name">Les trois premières lettres de votre nom: </label>';
-                        echo '<input class="col-lg-8" id="user_name" name="user_name" type="text" value="' . $userName . '" max="3"/>';
+                        echo '<label class="col-lg-10 col-lg-offset-1" for="user_name">Les trois premières lettres de votre nom: </label>';
+                        echo '<input class="col-lg-10 col-lg-offset-1" id="user_name" name="user_name" type="text" value="' . $userName . '" max="3"/>';
                         echo '</div>';
                         echo '<div class="row">';
+                        echo '<div class="col-lg-10 col-lg-offset-1">';
                         echo '<input type="submit" value="Rechercher" class="butAction pull-right"/>';
+                        echo '</div>';
                         echo '</div>';
                         echo '</form>';
                         echo '</div>';

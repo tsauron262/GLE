@@ -44,7 +44,6 @@ function loadShippingForm() {
                         var $th = $('#partDateValue_title');
                         if ($th.length)
                             onSortableClick($th);
-                        onSortableClick($('#partDateValue_title'));
                     });
                 } else {
                     $div.html('<p class="error">Une erreur est survenue.</p>').slideDown(250);

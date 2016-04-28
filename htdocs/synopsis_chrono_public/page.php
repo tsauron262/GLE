@@ -1,4 +1,5 @@
 <?php
+define("NOLOGIN", 1);
 require_once('../main.inc.php');
 require_once('../synopsischrono/class/chrono.class.php');
 
@@ -37,10 +38,10 @@ if (isset($_POST['serial'])) {
 if (isset($_POST['user_name'])) {
     if (empty($_POST['user_name'])) {
         $errors[] = 'Veuillez saisir les trois premières lettres de votre nom.';
-    } else if (!preg_match('/^[a-zA-Z \-]+$/', $_POST['user_name'])) {
-        $errors[] = 'Veuillez ne saisir que des lettre, un espace ou un "-" pour les trois permières lettres de votre nom.';
+    } else if (!preg_match('/^[0-9A-Za-z \-]+$/', $_POST['user_name'])) {
+        $errors[] = 'Veuillez ne saisir que des lettres, des chiffres, un espace ou un "-" pour les trois permières lettres de votre nom.';
     } else {
-        $userName = $_POST['user_name'];
+        $userName = strtolower(substr($_POST['user_name'], 0, 3));
     }
 }
 if (isset($_GET['id_chrono'])) {
@@ -75,7 +76,6 @@ function getChronosBySerial($serial) {
     if ($db->num_rows($result) > 0) {
         while ($r = $db->fetch_object($result)) {
             $chronos[] = $r->id_chrono;
-            $chronos[] = $r->id_chrono;
         }
     }
     return $chronos;
@@ -94,25 +94,46 @@ if ($serial && $userName) {
 if (count($chronos)) {
     $first = true;
     foreach ($chronos as $idChrono) {
-        if (count($chronos) > 1) {
-            if (!$first) {
-                $chronoStr .= '-';
-            } else
-                $first = false;
-            $chronoStr .= $idChrono;
-        }
-
         $chrono = new Chrono($db);
         $chrono->fetch($idChrono);
-        
-        $chrono->getValuesPlus();
-        $chrono->getValues();
-        $chronosList[] = array(
-            'id_chrono' => $idChrono,
-            'ref' => ((isset($chrono->ref) && !empty($chrono->ref)) ? $chrono->ref : 'inconnu'),
-            'date_create' => ((isset($chrono->date) && !empty($chrono->date)) ? dol_print_date($chrono->date) : 'inconnue'),
-            'symptom' => ((isset($chrono->values['Symptomes']) && !empty($chrono->values['Symptomes'])) ? $chrono->values['Symptomes'] : 'Non spécifié')
-        );
+
+        $check = true;
+        if (isset($_POST['user_name'])) {
+            $check = false;
+            if ($userName) {
+                $names = explode(' ', $chrono->societe->nom);
+                foreach ($names as &$n) {
+                    $n = strtolower(substr(utf8_decode($n), 0, 3));
+                    if ($n === $userName) {
+                        $check = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if ($check) {
+            if (count($chronos) > 1) {
+                if (!$first) {
+                    $chronoStr .= '-';
+                } else
+                    $first = false;
+                $chronoStr .= $idChrono;
+            }
+
+            $chrono->getValues();
+            $chronosList[] = array(
+                'id_chrono' => $idChrono,
+                'ref' => ((isset($chrono->ref) && !empty($chrono->ref)) ? $chrono->ref : 'inconnu'),
+                'date_create' => ((isset($chrono->date) && !empty($chrono->date)) ? dol_print_date($chrono->date) : 'inconnue'),
+                'symptom' => ((isset($chrono->values['Symptomes']) && !empty($chrono->values['Symptomes'])) ? $chrono->values['Symptomes'] : 'Non spécifié')
+            );
+        }
+    }
+    
+    if ($userName && !count($chronosList)) {
+        $msg = 'Il semblerait que les 3 premières lettres indiquées pour votre nom ne correspondent à aucun enregistrement.<br/>';
+        $msg .= 'Veuillez saisir les 3 premières lettres du nom, du prénom ou du nom de société que vous avez indiqué lors de votre enregistrement auprès de nos services.';
+        $errors[] = $msg;
     }
 }
 

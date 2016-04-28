@@ -18,6 +18,8 @@ $backSerial = '';
 $chronos = array();
 $chronoStr = '';
 
+global $db;
+
 if (isset($_POST['serial'])) {
     if (empty($_POST['serial'])) {
         $errors[] = 'Veuillez indiquer un numéro de série.';
@@ -86,7 +88,21 @@ if ($serial && $userName) {
     if (!count($chronos)) {
         $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série.';
     } else if (count($chronos) == 1) {
-        $id_chrono = $chronos[0];
+        $chrono = new Chrono($db);
+        $chrono->fetch($chronos[0]);
+        $names = explode(' ', $chrono->societe->nom);
+        foreach ($names as &$n) {
+            $n = strtolower(substr(utf8_decode($n), 0, 3));
+            if ($n === $userName) {
+                $id_chrono = $chronos[0];
+                break;
+            }
+        }
+        if (!$id_chrono) {
+            $msg = 'Un suivi SAV existe bien pour le numéro de série indiqué mais il semblerait que les 3 premières lettres indiquées pour votre nom ne correspondent pas.<br/>';
+            $msg .= 'Veuillez saisir les 3 premières lettres du nom, du prénom ou du nom de société que vous avez indiqué lors de votre enregistrement auprès de nos services.';
+            $errors[] = $msg;
+        }
         $chronos = array();
     }
 }
@@ -94,6 +110,7 @@ if ($serial && $userName) {
 if (count($chronos)) {
     $first = true;
     foreach ($chronos as $idChrono) {
+
         $chrono = new Chrono($db);
         $chrono->fetch($idChrono);
 
@@ -129,7 +146,7 @@ if (count($chronos)) {
             );
         }
     }
-    
+
     if ($userName && !count($chronosList)) {
         $msg = 'Il semblerait que les 3 premières lettres indiquées pour votre nom ne correspondent à aucun enregistrement.<br/>';
         $msg .= 'Veuillez saisir les 3 premières lettres du nom, du prénom ou du nom de société que vous avez indiqué lors de votre enregistrement auprès de nos services.';
@@ -138,7 +155,6 @@ if (count($chronos)) {
 }
 
 if ($id_chrono) {
-    global $db;
     $chrono = new Chrono($db);
     $chrono->fetch((int) $id_chrono);
     $chronoRows = $chrono->getPublicValues();

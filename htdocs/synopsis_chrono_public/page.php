@@ -38,8 +38,8 @@ if (isset($_POST['serial'])) {
 if (isset($_POST['user_name'])) {
     if (empty($_POST['user_name'])) {
         $errors[] = 'Veuillez saisir les trois premières lettres de votre nom.';
-    } else if (!preg_match('/^[0-9A-Za-z \-]+$/', $_POST['user_name'])) {
-        $errors[] = 'Veuillez ne saisir que des lettres, des chiffres, un espace ou un "-" pour les trois permières lettres de votre nom.';
+    } else if (preg_match('/[<>]/', $_POST['user_name'])) {
+        $errors[] = 'Caractères interdits : "<" et ">"';
     } else {
         $userName = strtolower(substr($_POST['user_name'], 0, 3));
     }

@@ -648,7 +648,9 @@ class GsxUps {
             $i = 1;
             foreach ($parts as $sro => $repairParts) {
                 foreach ($repairParts as $p) {
-                    $date = new DateTime($p['expectedReturnDate']);
+                    $date = null;
+                    if (!empty($p['expectedReturnDate']))
+                        $date = new DateTime($p['expectedReturnDate']);
                     $html .= '<tr id="part_' . $i . '" ' . ($odd ? ' class="odd"' : '') . '>' . "\n";
                     $html .= '<td><input class="partCheck" type="checkbox" name="parts[]"/></td>' . "\n";
                     $html .= '<td class="partName">' . $p['nom'] . '</td>' . "\n";
@@ -657,9 +659,9 @@ class GsxUps {
                     $html .= '<td class="partPONumber">' . $p['poNumber'] . '</td>';
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
-                    $html .= '<td class="partReturnDate">' . $date->format('d / m / Y') . '</td>' . "\n";
+                    $html .= '<td class="partReturnDate">' . (isset($date) ? $date->format('d / m / Y') : 'non spécifiée') . '</td>' . "\n";
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
-                    $html .= '<input type="hidden" class="partDateValue" value="'.$date->format('Ymd').'" />'."\n";
+                    $html .= '<input type="hidden" class="partDateValue" value="' . (isset($date) ? $date->format('Ymd') : '00000000') . '" />' . "\n";
                     $html .= '</tr>' . "\n";
                     $i++;
                     $odd = !$odd;

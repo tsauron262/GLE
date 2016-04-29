@@ -1,27 +1,29 @@
 function setShippingFormEvents() {
-    $('.partCheck').change(function () {
-        var $row = $(this).parent('td').parent('tr');
-        if ($(this).prop('checked')) {
-            onPartSelect($row);
-        } else {
-            onPartUnselect($row);
-        }
-    });
-    $('.partCheck').click(function (e) {
-        e.stopPropagation();
-    });
-    $('#createShipping').click(function () {
-        createShipping();
-    });
-    $('#partsPending').find('tbody').find('tr').click(function () {
-        if ($(this).find('input.partCheck').prop('checked')) {
-            $(this).find('input.partCheck').removeProp('checked');
-            onPartUnselect($(this));
-        } else {
-            $(this).find('input.partCheck').prop('checked', 'checked');
-            onPartSelect($(this));
-        }
-    });
+    if ($('#partsPending').length) {
+        $('.partCheck').change(function () {
+            var $row = $(this).parent('td').parent('tr');
+            if ($(this).prop('checked')) {
+                onPartSelect($row);
+            } else {
+                onPartUnselect($row);
+            }
+        });
+        $('.partCheck').click(function (e) {
+            e.stopPropagation();
+        });
+        $('#createShipping').click(function () {
+            createShipping();
+        });
+        $('#partsPending').find('tbody').find('tr').click(function () {
+            if ($(this).find('input.partCheck').prop('checked')) {
+                $(this).find('input.partCheck').removeProp('checked');
+                onPartUnselect($(this));
+            } else {
+                $(this).find('input.partCheck').prop('checked', 'checked');
+                onPartSelect($(this));
+            }
+        });
+    }
 }
 function loadShippingForm() {
     var shipTo = $('#shipToNumber').val();
@@ -39,7 +41,9 @@ function loadShippingForm() {
                     $div.html(data.html).slideDown(250, function () {
                         setShippingFormEvents();
                         onCaptionClick($('#partsList').find('div.captionContainer'));
-                        onSortableClick($('#partDateValue_title'));
+                        var $th = $('#partDateValue_title');
+                        if ($th.length)
+                            onSortableClick($th);
                     });
                 } else {
                     $div.html('<p class="error">Une erreur est survenue.</p>').slideDown(250);
@@ -429,15 +433,15 @@ function sortTableElements($table, $elems, asc, isNumeric) {
 
     rows.sort(function (a, b) {
         if (asc) {
-            if (isNumeric)
-                return b.value - a.value;
-            else
-                return b.value < a.value;
+//            if (isNumeric)
+//                return b.value - a.value;
+//            else
+            return b.value < a.value ? 1 : -1;
         } else {
-            if (isNumeric)
-                return a.value - b.value;
-            else
-                return a.value < b.value;
+//            if (isNumeric)
+//                return a.value - b.value;
+//            else
+            return a.value < b.value ? 1 : -1;
         }
     });
 

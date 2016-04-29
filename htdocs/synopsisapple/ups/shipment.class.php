@@ -64,7 +64,7 @@ class shipment {
         $this->gsxInfos['trackingURL'] = $trackingURL;
     }
 
-    public function addPart($name, $partNumber, $newNumber, $poNumber, $repairNumber, $serial, $returnNbr) {
+    public function addPart($name, $partNumber, $newNumber, $poNumber, $repairNumber, $serial, $returnNbr, $expectedReturn) {
         $part = array(
             'name' => $name,
             'number' => $partNumber,
@@ -72,7 +72,8 @@ class shipment {
             'poNumber' => $poNumber,
             'repairNumber' => $repairNumber,
             'serial' => $serial,
-            'returnOrderNumber' => $returnNbr
+            'returnOrderNumber' => $returnNbr,
+            'expectedReturn' => $expectedReturn
         );
 
         if (!is_null($this->rowid)) {
@@ -162,7 +163,8 @@ class shipment {
         $sql .= '`part_po_number`, ';
         $sql .= '`repair_number`, ';
         $sql .= '`serial`, ';
-        $sql .= '`return_order_number`';
+        $sql .= '`return_order_number`, ';
+        $sql .= '`expected_return`';
         $sql .= ') ';
         $sql .= 'VALUES (';
         $sql .= $this->rowid . ', ';
@@ -172,7 +174,8 @@ class shipment {
         $sql .= "'" . (isset($datas['poNumber']) ? $datas['poNumber'] : '') . '\', ';
         $sql .= "'" . (isset($datas['repairNumber']) ? $datas['repairNumber'] : '') . '\', ';
         $sql .= "'" . (isset($datas['serial']) ? $datas['serial'] : '') . '\', ';
-        $sql .= "'" . (isset($datas['returnOrderNumber']) ? $datas['returnOrderNumber'] : '') . "'";
+        $sql .= "'" . (isset($datas['returnOrderNumber']) ? $datas['returnOrderNumber'] : '') . '\', ';
+        $sql .= "'" . (isset($datas['expectedReturn']) ? $datas['expectedReturn'] : '') . "'";
         $sql .= ');';
 
         if (!$this->db->query($sql)) {
@@ -262,7 +265,8 @@ class shipment {
                     'poNumber' => $p->part_po_number,
                     'repairNumber' => $p->repair_number,
                     'serial' => $p->serial,
-                    'returnOrderNumber' => $p->return_order_number
+                    'returnOrderNumber' => $p->return_order_number,
+                    'expectedReturn' => $p->expected_return
                 );
                 $this->parts[$p->rowid] = $part;
             }
@@ -341,6 +345,7 @@ class shipment {
             $html .= '<th>N° de série</th>';
             $html .= '<th>Réparation</th>';
             $html .= '<th>N° de retour</th>';
+            $html .= '<th>Type de retour</th>';
             $html .= '</tr></thead><tbody>';
 
             foreach ($this->parts as $part) {
@@ -352,6 +357,7 @@ class shipment {
                 $html .= '<td>' . $part['serial'] . '</td>';
                 $html .= '<td>' . $part['repairNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
+                $html .= '<td>' . $part['expectedReturn'] . '</td>';
                 $html .= '</tr>';
             }
 
@@ -502,13 +508,11 @@ class shipment {
         if (isset($this->gsxInfos['bulkReturnId'])  &&  !$this->checkPartsLabels()) {
             $html .= '<div id="partsLabelRequestInfos" style="text-align: center">';
             $html .= '<p class="alert">les étiquettes de retour des composants n\'ont pas été téléchargées</p>';
-            $html .= '<span class="button" onclick="loadPartsReturnLabels('.$this->rowid.')">Télécharger les étiquettes de retour des composants</span>';
+            $html .= '<span class="button" onclick="loadPartsReturnLabels(' . $this->rowid . ')">Télécharger les étiquettes de retour des composants</span>';
             $html .= '</div>';
-        } else {
-            $html .= $this->getGsxRegistrationForm();
         }
+        $html .= $this->getGsxRegistrationForm();
 
-        
         $html .= '</div>';
 
         $html .= '<div class="container" style="text-align: center"><button class="button" onclick="reinitPage()">Retour</button></div>';

@@ -309,8 +309,9 @@ if ($_REQUEST["id"] > 0) {
         $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default" style="color:black;">Type <input type="hidden" name="' . $prefId . 'rowid" value="' . $prestation->rowid . '"/></th>
             <td class="ui-widget-content" colspan="1">' . $selectHtml . '</td>
-            <td class="ui-widget-content" colspan="1">' . $htmlSelect2 . '</td>
-            <td class="ui-widget-content" colspan="1"><input type="button" class="supprPrestaButton butAction" id="suppr_' . $prefId . '" value="Supprimer"/></td>';
+            <td class="ui-widget-content" colspan="1">' . $htmlSelect2 . '</td>';
+    if ($fichinter->statut == 0)
+            $htmlStr .= '<td class="ui-widget-content" colspan="1"><input type="button" class="supprPrestaButton butAction" id="suppr_' . $prefId . '" value="Supprimer"/></td>';
         $htmlStr .= '</tr><tr>';
         $htmlStr .= '<th width="25%" class="ui-widget-header ui-state-default">Dur&eacute;e</th>
             <td class="ui-widget-content" colspan="1"><input type="text" class="heures" name="' . $prefId . 'duree" value="' . $prestation->duree . '"/></td>

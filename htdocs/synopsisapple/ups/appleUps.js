@@ -11,9 +11,6 @@ function setShippingFormEvents() {
         $('.partCheck').click(function (e) {
             e.stopPropagation();
         });
-        $('#createShipping').click(function () {
-            createShipping();
-        });
         $('#partsPending').find('tbody').find('tr').click(function () {
             if ($(this).find('input.partCheck').prop('checked')) {
                 $(this).find('input.partCheck').removeProp('checked');
@@ -62,11 +59,13 @@ function createShipping() {
         return;
     }
 
+    alert($('#shipmentShipTo').val());
     var shipInfos = {
         'length': $('#length').val(),
         'width': $('#width').val(),
         'height': $('#height').val(),
-        'weight': $('#weight').val()
+        'weight': $('#weight').val(),
+        'shipToKey': $('#shipmentShipTo').val()
     };
 
     if (!$('tr.recapPartRow').length) {

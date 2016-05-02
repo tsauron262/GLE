@@ -37,7 +37,7 @@ function loadShippingForm() {
                 if (data.html) {
                     $div.html(data.html).slideDown(250, function () {
                         setShippingFormEvents();
-                        onCaptionClick($('#partsList').find('div.captionContainer'));
+//                        onCaptionClick($('#partsList').find('div.captionContainer'));
                         var $th = $('#partDateValue_title');
                         if ($th.length)
                             onSortableClick($th);

@@ -28,8 +28,8 @@ class GsxUps {
         ),
         3 => array(
             'label' => 'LITHIUM BATTERIES',
-            'Name' => 'LITHIUM BATTERIES',
-            'Attention' => 'B&W',
+            'Name' => 'DB Schenker',
+            'Attention' => 'LITHIUM BATTERIES',
             'AddressLine' => 'Hekven 6',
             'City' => 'Breda',
             'PostalCode' => '4824 AE',
@@ -267,7 +267,7 @@ class GsxUps {
                     )
                 ),
                 'Service' => array(
-                    'Code' => '11',
+                    'Code' => ($infos['shipToKey'] == 3)? '11' : '86',
                     'Description' => 'Standard'
                 ),
                 'Package' => array(

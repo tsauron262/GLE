@@ -181,6 +181,10 @@ if ($id_chrono) {
             <div class="row">
                 <h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>
                     <?php
+                    if(isset($chrono->societe))
+                        echo "<h2>".$chrono->societe->getFullName($langs) . "</h2>";
+                    echo "<h2>".$chrono->ref . "</h2>";
+                    
                     if (count($errors)) {
                         echo '<div class="col-lg-9">';
                         echo '<p class="error">';
@@ -229,6 +233,14 @@ if ($id_chrono) {
                         echo '<i class="fa fa-search left"></i>Nouvelle recherche</a>';
                         echo '</div></div>';
                         echo '<div class="row">';
+                        
+                        if(isset($chrono->publicValues[1056]) && isset($chrono->publicValues[1056]['value'])){
+                            $etat = $chrono->publicValues[1056]['value'];
+                            $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostique de votre machine.");
+                            if(isset($tabTextEtat[$etat]))
+                                echo "<h3>ETAT d'avancement : ".$tabTextEtat[$etat] . " </h3><br/><br/>";
+                        }
+                        
                         echo '<table><thead></thead><tbody>';
                         $firstLoop = true;
                         foreach ($chronoRows as $r) {

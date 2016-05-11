@@ -328,10 +328,8 @@ class GsxUps {
             );
 
             foreach ($parts as $part) {
-                $ship->addPart($part['name'], $part['ref'], $part['newRef'], $part['poNumber'], $part['sroNumber'], $part['serial'], $part['returnNbr']);
+                $ship->addPart($part['name'], $part['ref'], $part['newRef'], $part['poNumber'], $part['sroNumber'], $part['serial'], $part['returnNbr'], $part['expectedReturn']);
             }
-            
-            // test 
             
             $return['html'] .= '<div class="container tabBar">';
             $return['html'] .= '<p class="confirmation">Création de l\'expédition effectuée avec succès.</p>';

@@ -65,6 +65,8 @@ class shipment {
     }
 
     public function addPart($name, $partNumber, $newNumber, $poNumber, $repairNumber, $serial, $returnNbr, $expectedReturn) {
+        if (preg_match('/^(\d{4})(\d{2})(\d{2})$/', $expectedReturn, $matches))
+            $expectedReturn = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
         $part = array(
             'name' => $name,
             'number' => $partNumber,
@@ -288,7 +290,7 @@ class shipment {
             foreach ($this->parts as $part) {
                 $partNumber = (isset($part['new_number']) && !empty($part['new_number'])) ? $part['new_number'] : $part['number'];
                 $fileName = 'label_' . $part['returnOrderNumber'] . '_' . $partNumber . '.pdf';
-                $fileName = str_replace("/","_", $fileName);
+                $fileName = str_replace("/", "_", $fileName);
                 if (!file_exists($fileDir . $fileName)) {
                     $this->partsLabelsOk = false;
                     break;
@@ -345,10 +347,14 @@ class shipment {
             $html .= '<th>N° de série</th>';
             $html .= '<th>Réparation</th>';
             $html .= '<th>N° de retour</th>';
-            $html .= '<th>Type de retour</th>';
+            $html .= '<th>date de retour attendue</th>';
             $html .= '</tr></thead><tbody>';
 
             foreach ($this->parts as $part) {
+                if ($part['expectedReturn'] == '0000-00-00')
+                    $date = 'Non spécifiée';
+                else
+                    $date = new DateTime($part['expectedReturn']);
                 $html .= '<tr>';
                 $html .= '<td>' . $part['name'] . '</td>';
                 $html .= '<td>' . $part['number'] . '</td>';
@@ -357,7 +363,7 @@ class shipment {
                 $html .= '<td>' . $part['serial'] . '</td>';
                 $html .= '<td>' . $part['repairNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
-                $html .= '<td>' . $part['expectedReturn'] . '</td>';
+                $html .= '<td style="text-align: center">' . (is_string($date) ? $date : $date->format('d / m / Y')) . '</td>';
                 $html .= '</tr>';
             }
 
@@ -503,9 +509,9 @@ class shipment {
 
         if ($this->checkPartsLabels()) {
             $html .= $this->getFilesList();
-        } 
-        
-        if (isset($this->gsxInfos['bulkReturnId'])  &&  !$this->checkPartsLabels()) {
+        }
+
+        if (isset($this->gsxInfos['bulkReturnId']) && !$this->checkPartsLabels()) {
             $html .= '<div id="partsLabelRequestInfos" style="text-align: center">';
             $html .= '<p class="alert">les étiquettes de retour des composants n\'ont pas été téléchargées</p>';
             $html .= '<span class="button" onclick="loadPartsReturnLabels(' . $this->rowid . ')">Télécharger les étiquettes de retour des composants</span>';

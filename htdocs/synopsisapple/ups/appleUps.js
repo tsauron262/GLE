@@ -59,7 +59,6 @@ function createShipping() {
         return;
     }
 
-    alert($('#shipmentShipTo').val());
     var shipInfos = {
         'length': $('#length').val(),
         'width': $('#width').val(),
@@ -90,6 +89,7 @@ function createShipping() {
         var serial = $(this).find('.partSerial').text();
         var sroNumber = $(this).find('.partSroNumber').text();
         var returnNbr = $(this).find('input.partReturnNbr').val();
+        var expectedReturn = $(this).find('input.expectedReturn').val();
         parts.push({
             id: id,
             name: name,
@@ -98,7 +98,8 @@ function createShipping() {
             poNumber: poNumber,
             serial: serial,
             sroNumber: sroNumber,
-            returnNbr: returnNbr
+            returnNbr: returnNbr,
+            expectedReturn: expectedReturn
         });
     });
 
@@ -296,6 +297,7 @@ function onPartSelect($row) {
     var serial = $row.find('td.partSerial').text();
     var repair = $row.find('td.partSroNumber').text();
     var returnNbr = $row.find('input.partReturnOrderNumber').val();
+    var expectedReturn = $row.find('input.partDateValue').val();
     var rowId = parseInt($row.attr('id').replace(/^part_(\d+)$/, '$1'));
     var html = '<tr id="recapPart_' + rowId + '" class="recapPartRow">';
     html += '<td class="partName">' + name + '</td>';
@@ -305,6 +307,7 @@ function onPartSelect($row) {
     html += '<td class="partSerial">' + serial + '</td>';
     html += '<td class="partSroNumber">' + repair + '</td>';
     html += '<td><input type="button" class="button" value="Retirer" onclick="removePart(' + rowId + ')"/></td>';
+    html += '<input type="hidden" class="expectedReturn" value="' + expectedReturn + '"/>'
     html += '<input type="hidden" class="partReturnNbr" value="' + returnNbr + '"/>';
     html += '</tr>';
     $('#partsListRecapContainer').find('table').show().find('tbody').append(html);

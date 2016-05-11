@@ -267,8 +267,8 @@ class GsxUps {
                     )
                 ),
                 'Service' => array(
-                    'Code' => ($infos['shipToKey'] == 3)? '11' : '86',
-                    'Description' => 'Standard'
+                    'Code' => ($infos['shipToKey'] == 3)? '11' : '07',
+                    'Description' => ($infos['shipToKey'] == 3)? 'Standard' : 'Express'
                 ),
                 'Package' => array(
                     'Description' => '',

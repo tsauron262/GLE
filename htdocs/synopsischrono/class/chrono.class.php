@@ -788,10 +788,10 @@ class Chrono extends CommonObject {
                      WHERE model_refid = " . $this->model_refid;
             $sql = $this->db->query($requete);
             while ($res = $this->db->fetch_object($sql)) {
-                $this->keysList[$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
+                $this->keysList[$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList, "rang" => $res->rang, "rangPublic" => $res->rangPublic);
                 $this->keysListId[] = $res->id;
 
-                $this->keysListByModel[$this->model_refid][$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
+                $this->keysListByModel[$this->model_refid][$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList, "rang" => $res->rang, "rangPublic" => $res->rangPublic);
                 $this->keysListIdByModel[$this->model_refid][] = $res->id;
             }
         }
@@ -846,7 +846,11 @@ class Chrono extends CommonObject {
         }
     }
 
-    public function getValuesPlus() {
+    public function getValuesPlus($orderBy = 'rang') {
+        $validOrderBy = array('rang', 'rangPublic');
+        if (!in_array($orderBy, $validOrderBy))
+            $orderBy = 'rang';
+
         $this->valuesPlus = array();
         $requete = "SELECT k.nom,
                            k.id,
@@ -876,7 +880,8 @@ class Chrono extends CommonObject {
                       " . /* LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $this->id . */"
                      WHERE t.id = k.type_valeur
                        AND k.model_refid = " . $this->model->id
-                . " ORDER BY k.rang";
+                . (($orderBy == 'rangPublic')?' AND k.rangPublic > 0':'')
+                . " ORDER BY k." . $orderBy;
 
         $sql2 = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $this->model->id . " WHERE id = " . $this->id);
         if ($this->db->num_rows($sql2) < 1)
@@ -1071,6 +1076,21 @@ class Chrono extends CommonObject {
     //retourne l'id et le template_id de la clef
     public function getKeyId($nom, $template_id) {
         return ($template_id);
+    }
+
+    // Ajout Flo : retourne valeures chrono publiques ('nom' => 'valeure').
+    public function getPublicValues() {
+        $this->getValuesPlus('rangPublic');
+        
+        $this->publicValues = array();
+        foreach ($this->valuesPlus as $key_id => $datas) {
+            $this->publicValues[$key_id] = array(
+                'label' => $datas->nom,
+                'value' => $datas->valueStr
+            ); 
+        }
+
+        return $this->publicValues;
     }
 
 }

@@ -1,0 +1,123 @@
+@import "_mixins.scss";
+@import "_variables.scss";
+
+
+.row {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+h1 {
+    color: $primary;
+    padding-bottom: 20px;
+    margin: 30px 0;
+    border-bottom: 1px solid $primary;
+
+}
+
+.butAction {
+    display: inline-block;
+    padding: 10px 18px;
+    margin: 6px 2px;
+    background-color: #E6DBD4;
+    cursor: pointer;
+
+    color: $textColor;
+    font-weight: bold;
+
+    @include transition(all 0.3s ease);
+
+    &:hover {
+        text-decoration: none;
+        background-color: $primary;
+        color: #fff;
+    }
+    
+    i.left {
+        margin-right: 12px;
+    }
+    i.right {
+        margin-left: 12px;
+    }
+}
+
+.error {
+    background-color: $primary;
+    padding: 20px 20px 20px 80px;
+    font-weight: bold;
+    color: #fff;
+    font-size: 15px;
+
+    &:before {
+        font-family: 'FontAwesome';
+        content: '\f06a';
+        font-size: 28px;
+        margin-left: -50px;
+        margin-right: 30px;
+        position: absolute;
+        top: 10px;
+    }
+}
+#butCacheReMail {
+    color: $secondary;
+    font-weight: bold;
+    padding: 10px 18px;
+    margin: 6px 2px;
+    cursor: pointer;
+
+    @include transition(all 0.3s ease);
+
+    &:before {
+        font-family: 'FontAwesome';
+        margin-right: 12px;
+        content: '\f021';
+    }
+
+    &:hover {
+        text-decoration: none;
+        background-color: $secondary;
+        color: #fff;
+    }
+}
+
+#panCacheReMail {
+    padding: 10px 18px;
+    margin: 6px 0;
+
+    select {
+        margin-right: 12px;
+        display: inline-block;
+    }
+}
+
+body {
+    color: $textColor;
+}
+table {
+    width: 100%;
+
+    background-color: lighten($primary, 45%);
+    tr {
+        border-bottom: 1px dotted #FFA369;
+    }
+    th, td {
+        padding: 12px 20px;
+    }
+
+    th {
+        background-color: $primary;
+        color: #fff;
+        font-weight: bold;
+    }
+}
+
+form {
+    input {
+        padding: 8px 12px;
+        border-radius: none;
+        border: 1px solid #DCDCDC;
+
+        &[type=submit] {
+            border: none;
+        }
+    }
+}

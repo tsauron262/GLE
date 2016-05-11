@@ -14,11 +14,14 @@ $GU = new GsxUps('');
 echo $GU->getShipToForm();
 echo $GU->getCurrentShipmentsHtml();
 
+if (isset($_REQUEST['shipId']) && !empty($_REQUEST['shipId'])) {
+    echo '<input id="shipmentToLoad" type="hidden" value="' . $_REQUEST['shipId'] . '">';
+}
+
 //$_REQUEST['shipId'] = 1;
 //$_REQUEST['action'] = 'generatePdf';
 //
 //$GU->getPDFGenerationForm();
-
 //$r = $GU->loadBulkReturnProforma(1);
 //echo '<pre>';
 //print_r($r);

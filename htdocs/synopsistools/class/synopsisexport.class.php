@@ -140,7 +140,7 @@ WHERE   fact.fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0
         } else {
             $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
             $totalVendu = "SUM(factdet.total_ht)";
-            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Etat as Statut, chrono.tms as Date_Modif, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye, Technicien as Tech";
+            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Etat as Statut, chrono.tms as Date_Modif, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye, Technicien as Tech, repairConfirmNumber";
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else
@@ -150,6 +150,7 @@ WHERE   fact.fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0
         if ($typeAff2 != "fact")
             $where .= " AND chronoT.id = chrono.id ";
         $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
+        $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsis_apple_repair repair on chrono.id = repair.chronoId ";
         $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "societe soc on  soc.rowid = propal.fk_soc ";
 //        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
         $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";

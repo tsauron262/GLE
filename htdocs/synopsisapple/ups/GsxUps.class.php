@@ -5,9 +5,63 @@ require_once dirname(__FILE__) . '/shipment.class.php';
 
 class GsxUps {
 
+    public static $shipToAdresses = array(
+        1 => array(
+            'label' => 'B&W (Purple Label)',
+            'Name' => 'DB Schenker',
+            'Attention' => 'B&W',
+            'AddressLine' => 'Hekven 6',
+            'City' => 'Breda',
+            'PostalCode' => '4824 AE',
+            'CountryCode' => 'NL',
+            'PhoneNumber' => '31-076572-2415'
+        ),
+        2 => array(
+            'label' => 'KBB (Brown Label)',
+            'Name' => 'DB Schenker',
+            'Attention' => 'KBB',
+            'AddressLine' => 'Hekven 6',
+            'City' => 'Breda',
+            'PostalCode' => '4824 AE',
+            'CountryCode' => 'NL',
+            'PhoneNumber' => '31-076572-2415'
+        ),
+        3 => array(
+            'label' => 'LITHIUM BATTERIES',
+            'Name' => 'DB Schenker',
+            'Attention' => 'LITHIUM BATTERIES',
+            'AddressLine' => 'Hekven 6',
+            'City' => 'Breda',
+            'PostalCode' => '4824 AE',
+            'CountryCode' => 'NL',
+            'PhoneNumber' => '31-076572-2415'
+        ),
+        4 => array(
+            'label' => 'RC (Yellow Label)',
+            'Name' => 'Pegatron Czech',
+            'Attention' => 'RC',
+            'AddressLine' => 'Na Rovince 862',
+            'City' => 'Ostrava',
+            'PostalCode' => '720 00',
+            'CountryCode' => 'CZ',
+            'PhoneNumber' => ''
+        ),
+        5 => array(
+            'label' => 'ROR (Red Label)',
+            'Name' => 'DB Schenker',
+            'Attention' => 'RoR',
+            'AddressLine' => 'Hekven 6',
+            'City' => 'Breda',
+            'PostalCode' => '4824 AE',
+            'CountryCode' => 'NL',
+            'PhoneNumber' => '31-076572-2415'
+        ),
+    );
+    
     public $gsx = null;
     public $connect = false;
     public $shiptTo = null;
+    public $shipmentShipToKey = 0;
     public $upsSoapErrors = array();
     public static $upsSoapLocation = 'http://www.ups.com/XMLSchema/XOLTWS/UPSS/v1.0';
     public static $upsEndpointUrls = array(
@@ -123,7 +177,7 @@ class GsxUps {
         if (!isset($this->shiptTo) || empty($this->shiptTo)) {
             $errors[] = 'numéro shipt-to absent';
         }
-
+        
         $parts = isset($_POST['parts']) ? $_POST['parts'] : 0;
         $infos = isset($_POST['shipInfos']) ? $_POST['shipInfos'] : 0;
 
@@ -131,7 +185,9 @@ class GsxUps {
             $errors[] = 'Aucun composant associé à cette expédition';
         if (!$infos)
             $errors[] = 'Aucune informartion sur les dimensions et le poids du colis reçut';
-
+        if (!$infos['shipToKey'])
+            $errors[] = 'destinataire non sélectionné';
+        
         if (!array_key_exists($this->shiptTo, shipToList::$list))
             $errors[] = 'Numéro ship-to invalide';
 
@@ -146,7 +202,9 @@ class GsxUps {
                 'html' => $html
             );
         }
-
+        
+        $shipToAdress = self::$shipToAdresses[$infos['shipToKey']];
+        
         $shipToInfos = shipToList::$list[$this->shiptTo];
 
         $request = array(
@@ -170,16 +228,16 @@ class GsxUps {
                     )
                 ),
                 'ShipTo' => array(
-                    'Name' => 'Apple Distribution international',
-                    'AttentionName' => 'Apple Distribution international',
+                    'Name' => $shipToAdress['Name'],
+                    'AttentionName' => $shipToAdress['Attention'],
                     'Address' => array(
-                        'AddressLine' => 'Hekven 6',
-                        'City' => 'BREDA',
-                        'PostalCode' => '4824AE',
-                        'CountryCode' => 'NL',
+                        'AddressLine' => $shipToAdress['AddressLine'],
+                        'City' => $shipToAdress['City'],
+                        'PostalCode' => $shipToAdress['PostalCode'],
+                        'CountryCode' => $shipToAdress['CountryCode'],
                     ),
                     'Phone' => array(
-                        'Number' => '31-076572-2415',
+                        'Number' => $shipToAdress['PhoneNumber'],
                     )
                 ),
                 'ShipFrom' => array(
@@ -209,8 +267,8 @@ class GsxUps {
                     )
                 ),
                 'Service' => array(
-                    'Code' => '11',
-                    'Description' => 'Standard'
+                    'Code' => ($infos['shipToKey'] == 3)? '11' : '07',
+                    'Description' => ($infos['shipToKey'] == 3)? 'Standard' : 'Express'
                 ),
                 'Package' => array(
                     'Description' => '',
@@ -650,7 +708,9 @@ class GsxUps {
             $i = 1;
             foreach ($parts as $sro => $repairParts) {
                 foreach ($repairParts as $p) {
-                    $date = new DateTime($p['expectedReturnDate']);
+                    $date = null;
+                    if (!empty($p['expectedReturnDate']))
+                        $date = new DateTime($p['expectedReturnDate']);
                     $html .= '<tr id="part_' . $i . '" ' . ($odd ? ' class="odd"' : '') . '>' . "\n";
                     $html .= '<td><input class="partCheck" type="checkbox" name="parts[]"/></td>' . "\n";
                     $html .= '<td class="partName">' . $p['nom'] . '</td>' . "\n";
@@ -659,9 +719,9 @@ class GsxUps {
                     $html .= '<td class="partPONumber">' . $p['poNumber'] . '</td>';
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
-                    $html .= '<td class="partReturnDate">' . $date->format('d / m / Y') . '</td>' . "\n";
+                    $html .= '<td class="partReturnDate">' . (isset($date) ? $date->format('d / m / Y') : 'non spécifiée') . '</td>' . "\n";
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
-                    $html .= '<input type="hidden" class="partDateValue" value="'.$date->format('Ymd').'" />'."\n";
+                    $html .= '<input type="hidden" class="partDateValue" value="' . (isset($date) ? $date->format('Ymd') : '00000000') . '" />' . "\n";
                     $html .= '</tr>' . "\n";
                     $i++;
                     $odd = !$odd;
@@ -789,10 +849,22 @@ class GsxUps {
         $html .= '<td><input type="text" id="weight" name="weight" class="shipInfo" width="250px"/>&nbsp;kg';
         $html .= '<span class="inputCheckInfos"></span>';
         $html .= '</td></tr>';
+        
+        $html .= '<tr>';
+        $html .= '<td>Destination</td>';
+        $html .= '<td>';
+        $html .= '<select id="shipmentShipTo" name="shipmentShipTo">';
+        $html .= '<option value="0">Sélectionnez un destinataire</option>';
+        foreach (self::$shipToAdresses as $key => $adress) {
+            $html .= '<option value="'.$key.'">'.$adress['label'].'</option>';
+        }
+        $html .= '</select>';
+        $html .= '<span class="inputCheckInfos"></span>';
+        $html .= '</td></tr>';
 
         $html .= '</tbody></table>' . "\n";
         $html .= '<p style="text-align: center">';
-        $html .= '<input type="button" class="button" id="createShipping" value="Créer une nouvelle expédition"/>';
+        $html .= '<input type="button" class="button" id="createShipping" onclick="createShipping()" value="Créer une nouvelle expédition"/>';
         $html .= '</p>';
         $html .= '</div>' . "\n";
         return $html;

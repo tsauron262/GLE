@@ -236,7 +236,13 @@ if ($id_chrono) {
                         
                         if(isset($chrono->publicValues[1056]) && isset($chrono->publicValues[1056]['value'])){
                             $etat = $chrono->publicValues[1056]['value'];
-                            $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostique de votre machine.");
+                            $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostique de votre machine.",
+                                "Examen en cours" => "Nous avons commencé le diagnostic de votre produit",
+                                "Attente client" => "Nous attendons une information de votre part. Merci de nous contacter",
+                                "Attente Pièce" => "Nous avons commandé une pièce ou un produit et nous l’attendons",
+                                "Pièce reçu" => "Nous avons reçu la pièce commandée et elle est en cous de remontage",
+                                "Terminé" => "Votre produit est terminé et à votre disposition",
+                                "Fermé" => "Ce dossier est pour nous clôturé");
                             if(isset($tabTextEtat[$etat]))
                                 echo "<h3>ETAT d'avancement : ".$tabTextEtat[$etat] . " </h3><br/><br/>";
                         }

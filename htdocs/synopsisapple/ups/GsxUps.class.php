@@ -301,6 +301,7 @@ class GsxUps {
                 )
             )
         );
+        dol_syslog(print_r($request, true),3);
 
         $wsdl = dirname(__FILE__) . '/wsdl/Ship.wsdl';
         if (self::$upsMode == 'test')

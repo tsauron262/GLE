@@ -52,18 +52,14 @@ class gsxDatas {
 
 
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_service']) &&
-                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != "")
-            $details = array(
-                'apiMode' => self::$apiMode,
-                'regionCode' => 'emea',
-                'userId' => $user->array_options['options_apple_id'],
-//                'password' => $user->array_options['options_apple_mdp'],
-                'serviceAccountNo' => $user->array_options['options_apple_service'],
-                'languageCode' => 'fr',
-                'userTimeZone' => 'CEST',
-                'returnFormat' => 'php',
-            );
-        else if (isset($userId) && isset($password) && isset($serviceAccountNo)) {
+                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != ""){
+            $userId = $user->array_options['options_apple_id'];
+            $serviceAccountNo = $user->array_options['options_apple_service'];
+        }
+        
+        
+        
+        if (isset($userId) && isset($serviceAccountNo)) {
             $details = array(
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
@@ -74,10 +70,15 @@ class gsxDatas {
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
-        } else {
+            $this->shipTo = $serviceAccountNo;
+            
+        }
+        else {
             echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
             return 0;
         }
+        
+        
         $this->setSerial($serial);
         $this->gsx = new GSX($details, $this->isIphone, self::$apiMode);
         if (count($this->gsx->errors['init']) || count($this->gsx->errors['soap'])) {

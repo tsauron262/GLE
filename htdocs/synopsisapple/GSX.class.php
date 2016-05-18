@@ -588,7 +588,7 @@ class GSX {
                     );
                     $responseName = 'warrantyDetailInfo';
                 }
-                $data = new gsxDatas();
+                $data = new gsxDatas("");
                 
                 
                 $details['shipTo'] = $data->shipTo;

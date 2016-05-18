@@ -212,10 +212,8 @@ class GsxUps {
                 'RequestOption' => 'nonvalidate'
             ),
             'Shipment' => array(
-                'ReturnService' => array(
-                    'Code' => 3,
-                    'Desciption' => 'Service de retour UPS 1 Tentative (RS1)'
-                ),
+                'Description' => "Retour de piéces"
+                ,
                 'Shipper' => array(
                     'Name' => $shipToInfos['Name'],
                     'AttentionName' => $shipToInfos['AttentionName'],

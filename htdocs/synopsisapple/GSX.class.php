@@ -577,7 +577,7 @@ class GSX {
                     $wrapperName = 'iphoneUnitDetail';
                     $details = array(
                         'serialNumber' => '',
-                        'alternateDeviceId' => $serial
+                        'imeiNumber' => $serial
                     );
                     $responseName = 'iphoneWarrantyDetailInfo';
                 } else {

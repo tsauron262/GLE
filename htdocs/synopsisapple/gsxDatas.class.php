@@ -731,10 +731,10 @@ class gsxDatas {
 
             if ($this->isIphone) {
                 if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13) {//Si num imei echange des champ
-                    $result['imeiNumber'] = $result['serialNumber'];
+                    $result['alternateDeviceId'] = $result['serialNumber'];
                     $result['serialNumber'] = '';
                 } else {
-                    $result['imeiNumber'] = "";
+                    $result['alternateDeviceId'] = "";
                 }
                 
                 switch ($requestType) {

@@ -212,7 +212,7 @@ class GsxUps {
                 'RequestOption' => 'nonvalidate'
             ),
             'Shipment' => array(
-                'Description' => "Retour de piéces"
+                'Description' => "Retour de pièces"
                 ,
                 'Shipper' => array(
                     'Name' => $shipToInfos['Name'],

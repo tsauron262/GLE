@@ -2080,7 +2080,22 @@ class User extends CommonObject
 			if ($this->email) $info["rfc822Mailbox"] = $this->email;
 			if ($this->phone_mobile) $info["phpgwCellTelephoneNumber"] = $this->phone_mobile;
 		}
-
+                
+                /*mod drsi*/
+                $info ['accountstatus'] = "active";
+                $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
+                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
+                if(isset($info['uid']) && isset($info["mail"])){
+                    $temp = explode("@", $info["mail"]);
+                    if(isset($temp[1])){
+                    $domain = $temp[1];
+                    $date = '2016.01.01.01.01.01';
+                    $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$info['uid'].'-'.$date.'/';
+                    $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$info['uid'].'-'.$date.'/';
+                    }
+                }
+                
+                /*fmoddrsi*/
 		return $info;
 	}
 

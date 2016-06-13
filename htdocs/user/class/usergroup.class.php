@@ -793,11 +793,19 @@ class UserGroup extends CommonObject
                 if ($conf->global->LDAP_KEY_USERS == 'cn') $ldapuserid=$muser->getFullName($langs);
                 elseif ($conf->global->LDAP_KEY_USERS == 'sn') $ldapuserid=$muser->lastname;
                 elseif ($conf->global->LDAP_KEY_USERS == 'uid') $ldapuserid=$muser->login;
+                elseif ($conf->global->LDAP_KEY_USERS == 'mail') $ldapuserid=$muser->email;
 
 				$valueofldapfield[] = $conf->global->LDAP_KEY_USERS.'='.$ldapuserid.','.$conf->global->LDAP_USER_DN;
+                                
+                                /*mod drsi*/
+                                
+                                /*fmod drsi*/
 			}
 			$info[$conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS] = (!empty($valueofldapfield)?$valueofldapfield:'');
 		}
+                
+                $info ['accountstatus'] = "active";
+                $info ['enabledservice'] = array("mail","deliver","displayedInGlobalAddressBook");
 		return $info;
 	}
 

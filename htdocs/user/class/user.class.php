@@ -2082,7 +2082,7 @@ class User extends CommonObject
 		}
                 
                 /*mod drsi*/
-                $info ['accountstatus'] = "active";
+                $info ['accountstatus'] = ($this->statut == 1)? "active" : "disablaed";
                 $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
                 $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
                 if(isset($info['uid']) && isset($info["mail"])){

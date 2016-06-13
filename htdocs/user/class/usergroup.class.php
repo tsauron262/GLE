@@ -793,7 +793,7 @@ class UserGroup extends CommonObject
                 if ($conf->global->LDAP_KEY_USERS == 'cn') $ldapuserid=$muser->getFullName($langs);
                 elseif ($conf->global->LDAP_KEY_USERS == 'sn') $ldapuserid=$muser->lastname;
                 elseif ($conf->global->LDAP_KEY_USERS == 'uid') $ldapuserid=$muser->login;
-                elseif ($conf->global->LDAP_KEY_USERS == 'mail') $ldapuserid=$muser->email;
+                elseif ($conf->global->LDAP_KEY_USERS == 'mail') $ldapuserid=str_replace("@bimp.fr", "@synopsis-erp.com", $muser->email);
 
 				$valueofldapfield[] = $conf->global->LDAP_KEY_USERS.'='.$ldapuserid.','.$conf->global->LDAP_USER_DN;
                                 
@@ -806,7 +806,6 @@ class UserGroup extends CommonObject
                 
                 $info ['accountstatus'] = "active";
                 $info ['enabledservice'] = array("mail","deliver","displayedInGlobalAddressBook");
-                print_r($info);
 		return $info;
 	}
 

@@ -806,6 +806,7 @@ class UserGroup extends CommonObject
                 
                 $info ['accountstatus'] = "active";
                 $info ['enabledservice'] = array("mail","deliver","displayedInGlobalAddressBook");
+                print_r($info);
 		return $info;
 	}
 

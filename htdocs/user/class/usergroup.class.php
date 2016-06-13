@@ -780,7 +780,7 @@ class UserGroup extends CommonObject
 		$info["objectclass"]=explode(',',$conf->global->LDAP_GROUP_OBJECT_CLASS);
 
 		// Champs
-		if ($this->name && ! empty($conf->global->LDAP_GROUP_FIELD_FULLNAME)) $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = $this->name;
+		if ($this->name && ! empty($conf->global->LDAP_GROUP_FIELD_FULLNAME)) $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$this->name);
 		//if ($this->name && ! empty($conf->global->LDAP_GROUP_FIELD_NAME)) $info[$conf->global->LDAP_GROUP_FIELD_NAME] = $this->name;
 		if ($this->note && ! empty($conf->global->LDAP_GROUP_FIELD_DESCRIPTION)) $info[$conf->global->LDAP_GROUP_FIELD_DESCRIPTION] = $this->note;
 		if (! empty($conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS))

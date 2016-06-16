@@ -815,7 +815,7 @@ class UserGroup extends CommonObject
                 $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
                 if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
                     require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
-                    $info ['mail'] = traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID];
+                    $info ['mail'] = str_replace(",", "", traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
                 }
                 /*fmod drsi*/
 		return $info;

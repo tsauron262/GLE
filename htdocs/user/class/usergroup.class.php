@@ -807,7 +807,7 @@ class UserGroup extends CommonObject
                 /*mod drsi*/
                 $info ['accountstatus'] = "active";
                 $info ['enabledservice'] = array("mail","deliver","displayedInGlobalAddressBook");
-                if(!defined(LIST_DOMAINE_VALID))
+                if(!defined("LIST_DOMAINE_VALID"))
                     die("Constante LIST_DOMAINE_VALID non definie");
                 else{
                     $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);

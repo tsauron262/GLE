@@ -2012,7 +2012,7 @@ class User extends CommonObject
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS];
                 
                 /*mod drsi*/
-                if(!defined(LIST_DOMAINE_VALID))
+                if(!defined("LIST_DOMAINE_VALID"))
                     die("Constante LIST_DOMAINE_VALID non definie");
                 else{
                     $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
@@ -2116,7 +2116,7 @@ class User extends CommonObject
                 
                 
                 $domain = false;
-                if(!defined(LIST_DOMAINE_VALID))
+                if(!defined("LIST_DOMAINE_VALID"))
                     die("Constante LIST_DOMAINE_VALID non definie");
                 else{
                     $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);

@@ -2117,10 +2117,7 @@ class User extends CommonObject
                 
                 if($domain){
                     $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
-                    if($this->admin){
-                        $info['enabledservice'][] = "domainadmin";
-                        $info["domainGlobalAdmin"] = "yes";
-                    }
+                    
                     if(isset($info['uid']) && isset($info["mail"])){
                         $info['uid'] = $info['uid']."_".$domain;
                         $temp = explode("@", $info["mail"]);
@@ -2130,6 +2127,10 @@ class User extends CommonObject
                         $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         $info ['mailQuota'] = "104857600";
                     }
+                }
+                if($this->admin){
+                    $info['enabledservice'][] = "domainadmin";
+                    $info["domainGlobalAdmin"] = "yes";
                 }
                 /*fmoddrsi*/
 		return $info;

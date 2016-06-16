@@ -2129,7 +2129,7 @@ class User extends CommonObject
                     $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
                     
                     if(isset($info['uid']) && isset($info["mail"])){
-                        $info['uid'] = $info['uid']."_".$domain;
+//                        $info['uid'] = $info['uid']."_".$domain;
                         $temp = explode("@", $info["mail"]);
                         $date = '2016.01.01.01.01.01';
                         $ident = $this->id.$info['mail'];

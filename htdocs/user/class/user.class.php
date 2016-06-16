@@ -1993,6 +1993,7 @@ class User extends CommonObject
 	}
 
 
+        private static $listDomaine = array("synopsis-erp.com", "bimp.fr");
 	/**
 	 *	Retourne chaine DN complete dans l'annuaire LDAP pour l'objet
 	 *
@@ -2005,10 +2006,20 @@ class User extends CommonObject
 	function _load_ldap_dn($info,$mode=0)
 	{
 		global $conf;
+                
 		$dn='';
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS].",".$conf->global->LDAP_USER_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_USER_DN;
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS];
+                
+                /*mod drsi*/
+                $domain = false;
+                foreach(self::$listDomaine as $domaine)
+                    if(stripos($info['mail'], "@".$domaine) > 0)
+                            $domain = $domaine;
+                $dn = str_replace(self::$listDomaine[0], $domain, $dn);
+                /*f mod drsi*/
+                
 		return $dn;
 	}
 
@@ -2082,34 +2093,42 @@ class User extends CommonObject
 		}
                 
                 /*mod drsi*/
-                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
-                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
-                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
+//                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
+//                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
+//                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
+                
+                if( function_exists( 'mhash' ) && function_exists( 'mhash_keygen_s2k' ) ) {
+                    $password_clear = $this->pass_indatabase;
+                    mt_srand( (double) microtime() * 1000000 );
+                    $salt = mhash_keygen_s2k( MHASH_SHA1, $password_clear, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
+                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
+                }
                 
                 
                 $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
                 $info ['accountstatus'] = ($this->statut == 1)? "active" : "disablaed";
                 $info ['enabledservice'] = array("");
                 
-                $listDomaine = array("synopsis-erp.com");
                 
-                $domaineConnue = false;
-                foreach($listDomaine as $domaine)
+                $domain = false;
+                foreach(self::$listDomaine as $domaine)
                     if(stripos($info['mail'], "@".$domaine) > 0)
-                            $domaineConnue = $domaine;
+                            $domain = $domaine;
                 
-                if($domaineConnue){
-                
+                if($domain){
                     $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
+                    if($this->admin){
+                        $info['enabledservice'][] = "domainadmin";
+                        $info["domainGlobalAdmin"] = "yes";
+                    }
                     if(isset($info['uid']) && isset($info["mail"])){
+                        $info['uid'] = $info['uid']."_".$domain;
                         $temp = explode("@", $info["mail"]);
-                        if(isset($temp[1])){
-                        $domain = $temp[1];
                         $date = '2016.01.01.01.01.01';
                         $ident = $this->id.$info['mail'];
                         $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
-                        }
+                        $info ['mailQuota'] = "104857600";
                     }
                 }
                 /*fmoddrsi*/

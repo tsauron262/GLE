@@ -813,8 +813,9 @@ class UserGroup extends CommonObject
                     die("Constante DOMAINE_GROUP_ID non definie");
                 
                 $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
-                if(!isset($info['mail']) || stripos($info['mail'], "@") === false)
-                    $info ['mail'] = str_replace(" ", " ", $info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID];
+                if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
+                    $info ['mail'] = traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID];
+                }
                 /*fmod drsi*/
 		return $info;
 	}

@@ -809,11 +809,12 @@ class UserGroup extends CommonObject
                 $info ['enabledservice'] = array("mail","deliver","displayedInGlobalAddressBook");
                 if(!defined("LIST_DOMAINE_VALID"))
                     die("Constante LIST_DOMAINE_VALID non definie");
-                else{
-                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
-                    if(!isset($info['mail']) || stripos($info['mail'], "@") === false)
-                        $info ['mail'] = str_replace(" ", " ", $info['cn'])."@". $LIST_DOMAINE_VALID[0];
-                }
+                if(!defined("DOMAINE_GROUP_ID"))
+                    die("Constante DOMAINE_GROUP_ID non definie");
+                
+                $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                if(!isset($info['mail']) || stripos($info['mail'], "@") === false)
+                    $info ['mail'] = str_replace(" ", " ", $info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID];
                 /*fmod drsi*/
 		return $info;
 	}

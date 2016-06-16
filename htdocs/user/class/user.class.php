@@ -1993,7 +1993,7 @@ class User extends CommonObject
 	}
 
 
-        private static $listDomaine = array("synopsis-erp.com", "bimp.fr");
+        private static $listDomaine = array("divers_bimp.fr", "synopsis-erp.com", "bimp.fr");
 	/**
 	 *	Retourne chaine DN complete dans l'annuaire LDAP pour l'objet
 	 *

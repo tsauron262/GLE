@@ -1533,3 +1533,26 @@ sudo nano /etc/apache2/sites-available/000-default.conf
 ajouter
 Listen 443  et replacer 444 par 443
 sudo service apache2 restart
+
+
+
+
+
+1129,11€   bene   96,48 +   1029,11 €    -   38  €
+
+
+
+
+
+MAIL : postfix
+https://mailhost.synopsis-erp.com/iredadmin/
+telnet mailhost.synopsis-erp.com 465
+
+ip externe mail : 51.254.188.165
+10.192.20.20
+
+cn=vmailadmin,dc=bimp,dc=fr
+TpHZZZz89oqLi9Pja1YsnZB7t4w8Et
+
+cn=Manager,dc=bimp,dc=fr
+BrWgg5Amw3k7BbuUWZeY48GybjCn6H

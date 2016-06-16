@@ -2106,8 +2106,9 @@ class User extends CommonObject
                         if(isset($temp[1])){
                         $domain = $temp[1];
                         $date = '2016.01.01.01.01.01';
-                        $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$info['mail'].'-'.$date.'/';
-                        $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$info['mail'].'-'.$date.'/';
+                        $ident = $this->id.$info['mail'];
+                        $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
+                        $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         }
                     }
                 }

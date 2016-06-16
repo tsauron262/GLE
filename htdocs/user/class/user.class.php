@@ -2116,7 +2116,7 @@ class User extends CommonObject
                     if(stripos($info['mail'], "@".$domaine) > 0)
                             $domain = $domaine;
                 
-                if($domain && 0){
+                if($domain){
                     $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
                     
                     if(isset($info['uid']) && isset($info["mail"])){

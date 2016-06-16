@@ -2125,8 +2125,10 @@ class User extends CommonObject
                                 $domain = $domaine;
                 }
                 
+                $info['enabledservice'] = array("internal");
+                
                 if($domain){
-                    $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
+                    $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
                     
                     if(isset($info['uid']) && isset($info["mail"])){
 //                        $info['uid'] = $info['uid']."_".$domain;

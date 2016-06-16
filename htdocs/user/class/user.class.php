@@ -2100,7 +2100,7 @@ class User extends CommonObject
                 /*mod drsi*/
 //                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
 //                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
-//                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
+                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
                 
                 if( function_exists( 'mhash' ) && function_exists( 'mhash_keygen_s2k' ) ) {
                     $password_clear = $this->pass_indatabase;

@@ -1993,7 +1993,6 @@ class User extends CommonObject
 	}
 
 
-        private static $listDomaine = array("divers_bimp.fr", "synopsis-erp.com", "bimp.fr");
 	/**
 	 *	Retourne chaine DN complete dans l'annuaire LDAP pour l'objet
 	 *
@@ -2013,12 +2012,17 @@ class User extends CommonObject
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS];
                 
                 /*mod drsi*/
-                $domain = false;
-                foreach(self::$listDomaine as $domaine)
-                    if(stripos($info['mail'], "@".$domaine) > 0)
-                            $domain = $domaine;
-                if($domain)
-                    $dn = str_replace(self::$listDomaine[0], $domain, $dn);
+                if(!defined(LIST_DOMAINE_VALID))
+                    die("Constante LIST_DOMAINE_VALID non definie");
+                else{
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    $domain = false;
+                    foreach($LIST_DOMAINE_VALID as $domaine)
+                        if(stripos($info['mail'], "@".$domaine) > 0)
+                                $domain = $domaine;
+                    if($domain)
+                        $dn = str_replace($LIST_DOMAINE_VALID[0], $domain, $dn);
+                }
                 /*f mod drsi*/
                 
 		return $dn;
@@ -2112,9 +2116,14 @@ class User extends CommonObject
                 
                 
                 $domain = false;
-                foreach(self::$listDomaine as $domaine)
-                    if(stripos($info['mail'], "@".$domaine) > 0)
-                            $domain = $domaine;
+                if(!defined(LIST_DOMAINE_VALID))
+                    die("Constante LIST_DOMAINE_VALID non definie");
+                else{
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    foreach($LIST_DOMAINE_VALID as $domaine)
+                        if(stripos($info['mail'], "@".$domaine) > 0)
+                                $domain = $domaine;
+                }
                 
                 if($domain){
                     $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");

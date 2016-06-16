@@ -804,8 +804,17 @@ class UserGroup extends CommonObject
 			$info[$conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS] = (!empty($valueofldapfield)?$valueofldapfield:'');
 		}
                 
+                /*mod drsi*/
                 $info ['accountstatus'] = "active";
                 $info ['enabledservice'] = array("mail","deliver","displayedInGlobalAddressBook");
+                if(!defined(LIST_DOMAINE_VALID))
+                    die("Constante LIST_DOMAINE_VALID non definie");
+                else{
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    if(!isset($info['mail']) || stripos($info['mail'], "@") === false)
+                        $info ['mail'] = str_replace(" ", " ", $info['cn'])."@". $LIST_DOMAINE_VALID[0];
+                }
+                /*fmod drsi*/
 		return $info;
 	}
 

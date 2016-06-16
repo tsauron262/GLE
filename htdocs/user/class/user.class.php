@@ -2107,7 +2107,7 @@ class User extends CommonObject
                 
                 $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
                 $info ['accountstatus'] = ($this->statut == 1)? "active" : "disablaed";
-                $info ['enabledservice'] = array("");
+                $info ['enabledservice'] = array();
                 
                 
                 $domain = false;
@@ -2115,7 +2115,7 @@ class User extends CommonObject
                     if(stripos($info['mail'], "@".$domaine) > 0)
                             $domain = $domaine;
                 
-                if($domain){
+                if($domain || $this->admin){
                     $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
                     
                     if(isset($info['uid']) && isset($info["mail"])){

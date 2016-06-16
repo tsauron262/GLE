@@ -2017,7 +2017,8 @@ class User extends CommonObject
                 foreach(self::$listDomaine as $domaine)
                     if(stripos($info['mail'], "@".$domaine) > 0)
                             $domain = $domaine;
-                $dn = str_replace(self::$listDomaine[0], $domain, $dn);
+                if($domain)
+                    $dn = str_replace(self::$listDomaine[0], $domain, $dn);
                 /*f mod drsi*/
                 
 		return $dn;

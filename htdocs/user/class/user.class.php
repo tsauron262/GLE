@@ -2082,19 +2082,35 @@ class User extends CommonObject
 		}
                 
                 /*mod drsi*/
-                $info ['accountstatus'] = ($this->statut == 1)? "active" : "disablaed";
-                $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
+                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
+                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
                 $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
-                if(isset($info['uid']) && isset($info["mail"])){
-                    $temp = explode("@", $info["mail"]);
-                    if(isset($temp[1])){
-                    $domain = $temp[1];
-                    $date = '2016.01.01.01.01.01';
-                    $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$info['uid'].'-'.$date.'/';
-                    $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$info['uid'].'-'.$date.'/';
+                
+                
+                $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
+                $info ['accountstatus'] = ($this->statut == 1)? "active" : "disablaed";
+                $info ['enabledservice'] = array("");
+                
+                $listDomaine = array("synopsis-erp.com");
+                
+                $domaineConnue = false;
+                foreach($listDomaine as $domaine)
+                    if(stripos($info['mail'], "@".$domaine) > 0)
+                            $domaineConnue = $domaine;
+                
+                if($domaineConnue){
+                
+                    $info ['enabledservice'] = array("mail","internal","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync");
+                    if(isset($info['uid']) && isset($info["mail"])){
+                        $temp = explode("@", $info["mail"]);
+                        if(isset($temp[1])){
+                        $domain = $temp[1];
+                        $date = '2016.01.01.01.01.01';
+                        $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$info['mail'].'-'.$date.'/';
+                        $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$info['mail'].'-'.$date.'/';
+                        }
                     }
                 }
-                
                 /*fmoddrsi*/
 		return $info;
 	}

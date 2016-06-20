@@ -187,6 +187,11 @@ class Ldap
 				// Execute the ldap_set_option here (after connect and before bind)
 				$this->setVersion();
 				ldap_set_option($this->connection, LDAP_OPT_SIZELIMIT, 0); // no limit here. should return true.
+                                
+                                /*mod drsi*/
+				ldap_set_option($this->connection, LDAP_OPT_TIMELIMIT, 0500);
+				ldap_set_option($this->connection, LDAP_OPT_NETWORK_TIMEOUT, 0500);
+                                /*fmod drsi*/
 
 
 				if ($this->serverType == "activedirectory")

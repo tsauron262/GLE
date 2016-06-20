@@ -189,8 +189,9 @@ class Ldap
 				ldap_set_option($this->connection, LDAP_OPT_SIZELIMIT, 0); // no limit here. should return true.
                                 
                                 /*mod drsi*/
-				ldap_set_option($this->connection, LDAP_OPT_TIMELIMIT, 0500);
-				ldap_set_option($this->connection, LDAP_OPT_NETWORK_TIMEOUT, 0500);
+				ldap_set_option($this->connection, LDAP_OPT_SIZELIMIT, 0500000);
+				ldap_set_option($this->connection, LDAP_OPT_TIMELIMIT, 0500000);
+				ldap_set_option($this->connection, LDAP_OPT_NETWORK_TIMEOUT, 0500000);
                                 /*fmod drsi*/
 
 

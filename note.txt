@@ -1556,3 +1556,6 @@ TpHZZZz89oqLi9Pja1YsnZB7t4w8Et
 
 cn=Manager,dc=bimp,dc=fr
 BrWgg5Amw3k7BbuUWZeY48GybjCn6H
+
+postmaster@bimp.fr
+ResMaiL/940

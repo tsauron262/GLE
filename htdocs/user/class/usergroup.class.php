@@ -819,7 +819,7 @@ class UserGroup extends CommonObject
                     require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
                     $info ['mail'] = str_replace(",", "", traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
                 }
-				$info['description'] = $info['mail'];
+				$info['uid'] = $info['mail'];
                 /*fmod drsi*/
 		return $info;
 	}

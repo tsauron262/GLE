@@ -28,18 +28,22 @@ class synopsisexport {
 //  AND  fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null GROUP BY fact.rowid");
 
 
-        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `" . MAIN_DB_PREFIX . "facture` fact
+//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
+//, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `" . MAIN_DB_PREFIX . "facture` fact
+//
+//
+//LEFT JOIN " . MAIN_DB_PREFIX . "element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid
+//LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono chrono ON el.fk_source = chrono.propalid
+//LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT ON chronoT.id = chrono.id
+//LEFt JOIN " . MAIN_DB_PREFIX . "user_extrafields ue ON `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author)
+//
+//, " . MAIN_DB_PREFIX . "societe soc
+//WHERE   fact.fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
 
-
-LEFT JOIN " . MAIN_DB_PREFIX . "element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid
-LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono chrono ON el.fk_source = chrono.propalid
-LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT ON chronoT.id = chrono.id
-LEFt JOIN " . MAIN_DB_PREFIX . "user_extrafields ue ON `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author)
-
-, " . MAIN_DB_PREFIX . "societe soc
-WHERE   fact.fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
-
+        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid , email , fact.total, fact.total_ttc, idtech8sens as id8Sens, chronoT.Centre "
+                . "FROM `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "synopsischrono chrono , " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT , " . MAIN_DB_PREFIX . "user_extrafields ue , " . MAIN_DB_PREFIX . "societe soc "
+                . "WHERE fact.fk_soc = soc.rowid AND fact.fk_statut > 0 AND close_code is null AND fact.extraparams is null AND fact.total != 0 AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut < 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) "
+                . "GROUP BY fact.rowid");
 
         while ($ligne = $this->db->fetch_object($result)) {
             $this->annulExport = false;

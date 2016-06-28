@@ -510,7 +510,7 @@ class Ldap
 			return -3;
 		}
 
-		if (! $olddn || $olddn != $dn)
+		if (! $olddn || strtolower($olddn) != strtolower($dn))
 		{
 			// If change we make is rename the key of LDAP record, we create new one and if ok, we delete old one.
 			$result = $this->add($dn, $info, $user);

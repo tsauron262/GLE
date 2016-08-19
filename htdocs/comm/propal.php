@@ -857,7 +857,7 @@ if (empty($reshook))
 			}
 
 			// Margin
-			$fournprice = (GETPOST('fournprice' . $predef) ? GETPOST('fournprice' . $predef) : '');
+			$fournprice = (GETPOST('fournprice_predef' . $predef) ? GETPOST('fournprice_predef' . $predef) : '');
 			$buyingprice = (GETPOST('buying_price' . $predef) ? GETPOST('buying_price' . $predef) : '');
 
 			$date_start = dol_mktime(0, 0, 0, GETPOST('date_start' . $predef . 'month'), GETPOST('date_start' . $predef . 'day'), GETPOST('date_start' . $predef . 'year'));

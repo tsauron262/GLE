@@ -148,7 +148,7 @@ if ($action == 'dispatch' && $user->rights->fournisseur->commande->receptionner)
 				{
 					dol_syslog('No dispatch for line '.$key.' as no warehouse choosed');
 					$text = $langs->transnoentities('Warehouse').', '.$langs->transnoentities('Line').' ' .($numline);
-					setEventMessage($langs->trans('ErrorFieldRequired',$text), 'errors');
+					setEventMessages($langs->trans('ErrorFieldRequired',$text), null, 'errors');
 					$error++;
 				}
 
@@ -187,7 +187,7 @@ if ($action == 'dispatch' && $user->rights->fournisseur->commande->receptionner)
 				{
 					dol_syslog('No dispatch for line '.$key.' as no warehouse choosed');
 					$text = $langs->transnoentities('Warehouse').', '.$langs->transnoentities('Line').' ' .($numline).'-'.($reg[1]+1);
-					setEventMessage($langs->trans('ErrorFieldRequired',$text), 'errors');
+					setEventMessages($langs->trans('ErrorFieldRequired',$text), null, 'errors');
 					$error++;
 				}
 
@@ -195,7 +195,7 @@ if ($action == 'dispatch' && $user->rights->fournisseur->commande->receptionner)
 				{
 					dol_syslog('No dispatch for line '.$key.' as serial/eat-by/sellby date are not set');
 					$text = $langs->transnoentities('atleast1batchfield').', '.$langs->transnoentities('Line').' ' .($numline).'-'.($reg[1]+1);
-					setEventMessage($langs->trans('ErrorFieldRequired',$text), 'errors');
+					setEventMessages($langs->trans('ErrorFieldRequired',$text), null, 'errors');
 					$error++;
 				}
 
@@ -386,6 +386,7 @@ if ($id > 0 || ! empty($ref))
 			$sql.= " FROM ".MAIN_DB_PREFIX."commande_fournisseurdet as l";
 			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON l.fk_product=p.rowid";
 			$sql.= " WHERE l.fk_commande = ".$commande->id;
+			if(empty($conf->global->STOCK_SUPPORTS_SERVICES)) $sql.= " AND l.product_type = 0";
 			$sql.= " GROUP BY p.ref, p.label, p.tobatch, l.rowid, l.fk_product, l.subprice, l.remise_percent";	// Calculation of amount dispatched is done per fk_product so we must group by fk_product
 			$sql.= " ORDER BY p.ref, p.label";
 
@@ -617,7 +618,7 @@ if ($id > 0 || ! empty($ref))
 			{
 				print "<br/>\n";
 
-				print_titre($langs->trans("ReceivingForSameOrder"));
+				print load_fiche_titre($langs->trans("ReceivingForSameOrder"));
 
 				print '<table class="noborder" width="100%">';
 

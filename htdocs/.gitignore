@@ -1,5 +1,8 @@
+/allscreens*
 /ancot*
 /bootstrap*
+/dolimed*
+/ecommerce*
 /extensions*
 /multicompany*
 /ndf*
@@ -15,3 +18,5 @@
 /allscreens*
 /ecommerce/
 /cabinetmed*
+/conf/conf.php
+/webmail*

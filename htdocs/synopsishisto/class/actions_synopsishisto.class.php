@@ -55,7 +55,7 @@ class histoNavigation {
         global $db, $user, $conf, $langs;
         $langs->load("histo@synopsishisto");
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
-        $return = '<div class="blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
+        $return = '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
         $return .= '<div class="menu_titre">';
         $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTONAV") . '</a>';
         $return .= "</div>";
@@ -72,7 +72,7 @@ class histoNavigation {
             if ($ret)
                 $return .= "<div class='menu_contenu'>  " . $ret . "</div>";
         }
-        $return .= "<div class=\"menu_end\"></div></div>";
+        $return .= "</div><div class=\"blockvmenuend\"></div>";
         return $return;
     }
 

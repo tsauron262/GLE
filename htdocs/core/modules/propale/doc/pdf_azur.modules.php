@@ -177,7 +177,7 @@ class pdf_azur extends ModelePDFPropales
 				if (empty($object->lines[$i]->fk_product)) continue;
 
 				$objphoto->fetch($object->lines[$i]->fk_product);
-
+                //var_dump($objphoto->ref);exit;
 				if (! empty($conf->global->PRODUCT_USE_OLD_PATH_FOR_PHOTO))
 				{
 					$pdir[0] = get_exdir($objphoto->id,2,0,0,$objphoto,'product') . $objphoto->id ."/photos/";
@@ -395,7 +395,7 @@ class pdf_azur extends ModelePDFPropales
 				$nexY = $tab_top + 7;
 
 				// Loop on each lines
-				for ($i = 0 ; $i < $nblignes ; $i++)
+				for ($i = 0; $i < $nblignes; $i++)
 				{
 					$curY = $nexY;
 					$pdf->SetFont('','', $default_font_size - 1);   // Into loop to work with multipage
@@ -572,10 +572,10 @@ class pdf_azur extends ModelePDFPropales
 					if ($posYAfterImage > $posYAfterDescription) $nexY=$posYAfterImage;
 
 					// Add line
-					if (! empty($conf->global->MAIN_PDF_DASH_BETWEEN_LINES) && $i < ($nblignes - 1))
+					if ($conf->global->MAIN_PDF_DASH_BETWEEN_LINES && $i < ($nblignes - 1))
 					{
 						$pdf->setPage($pageposafter);
-						$pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(210,210,210)));
+						$pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(80,80,80)));
 						//$pdf->SetDrawColor(190,190,200);
 						$pdf->line($this->marge_gauche, $nexY+1, $this->page_largeur - $this->marge_droite, $nexY+1);
 						$pdf->SetLineStyle(array('dash'=>0));
@@ -647,8 +647,11 @@ class pdf_azur extends ModelePDFPropales
 				*/
 
 				// Customer signature area
-				$posy=$this->_signature_area($pdf, $object, $posy, $outputlangs);
-
+				if (empty($conf->global->PROPAL_DISABLE_SIGNATURE))
+				{
+				    $posy=$this->_signature_area($pdf, $object, $posy, $outputlangs);
+				}
+				
 				// Pied de page
 				$this->_pagefoot($pdf,$object,$outputlangs);
 				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
@@ -685,21 +688,39 @@ class pdf_azur extends ModelePDFPropales
 							if (count($filetomerge->lines) > 0) {
 								foreach ( $filetomerge->lines as $linefile ) {
 									if (! empty($linefile->id) && ! empty($linefile->file_name)) {
-										if (! empty($conf->product->enabled))
-											$filetomerge_dir = $conf->product->multidir_output[$entity_product_file] . '/' . dol_sanitizeFileName($line->product_ref);
-										elseif (! empty($conf->service->enabled))
-											$filetomerge_dir = $conf->service->multidir_output[$entity_product_file] . '/' . dol_sanitizeFileName($line->product_ref);
+
+
+										if (! empty($conf->global->PRODUCT_USE_OLD_PATH_FOR_PHOTO))
+										{
+											if (! empty($conf->product->enabled)) {
+												$filetomerge_dir = $conf->product->multidir_output[$entity_product_file] . '/' . get_exdir($product->id,2,0,0,$product,'product') . $product->id ."/photos";
+											} elseif (! empty($conf->service->enabled)) {
+												$filetomerge_dir = $conf->service->multidir_output[$entity_product_file] . '/' . get_exdir($product->id,2,0,0,$product,'product') . $product->id ."/photos";
+											}
+										}
+										else
+										{
+											if (! empty($conf->product->enabled)) {
+												$filetomerge_dir = $conf->product->multidir_output[$entity_product_file] . '/' . get_exdir(0,0,0,0,$product,'product') . dol_sanitizeFileName($product->ref);
+											} elseif (! empty($conf->service->enabled)) {
+												$filetomerge_dir = $conf->service->multidir_output[$entity_product_file] . '/' . get_exdir(0,0,0,0,$product,'product') . dol_sanitizeFileName($product->ref);
+											}
+										}
 
 										dol_syslog(get_class($this) . ':: upload_dir=' . $filetomerge_dir, LOG_DEBUG);
 
 										$infile = $filetomerge_dir . '/' . $linefile->file_name;
-										if (is_file($infile)) {
+										if (file_exists($infile) && is_readable($infile)) {
 											$pagecount = $pdf->setSourceFile($infile);
 											for($i = 1; $i <= $pagecount; $i ++) {
-												$tplidx = $pdf->ImportPage($i);
-												$s = $pdf->getTemplatesize($tplidx);
-												$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
-												$pdf->useTemplate($tplidx);
+												$tplIdx = $pdf->importPage($i);
+												if ($tplIdx!==false) {
+													$s = $pdf->getTemplatesize($tplIdx);
+													$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
+													$pdf->useTemplate($tplIdx);
+												} else {
+													setEventMessages(null, array($infile.' cannot be added, probably protected PDF'),'warnings');
+												}
 											}
 										}
 									}
@@ -708,10 +729,6 @@ class pdf_azur extends ModelePDFPropales
 						}
 					}
 				}
-
-				//exit;
-
-
 
 				$pdf->Close();
 
@@ -1059,7 +1076,7 @@ class pdf_azur extends ModelePDFPropales
 				// VAT
 				foreach($this->tva as $tvakey => $tvaval)
 				{
-					if ($tvakey > 0)    // On affiche pas taux 0
+					if ($tvakey != 0)    // On affiche pas taux 0
 					{
 						$this->atleastoneratenotnull++;
 
@@ -1184,7 +1201,7 @@ class pdf_azur extends ModelePDFPropales
 				$pdf->SetFillColor(255,255,255);
 
 				$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("EscompteOffered"), $useborder, 'L', 1);
+				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("EscompteOfferedShort"), $useborder, 'L', 1);
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc - $deja_regle, 0, $outputlangs), $useborder, 'R', 1);
@@ -1541,7 +1558,7 @@ class pdf_azur extends ModelePDFPropales
 	function _pagefoot(&$pdf,$object,$outputlangs,$hidefreetext=0)
 	{
 		$showdetails=0;
-		return pdf_pagefoot($pdf,$outputlangs,'PROPALE_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
+		return pdf_pagefoot($pdf,$outputlangs,'PROPOSAL_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
 	}
 
 	/**
@@ -1567,6 +1584,7 @@ class pdf_azur extends ModelePDFPropales
 		// Total HT
 		$pdf->SetFillColor(255,255,255);
 		$pdf->SetXY($posx, $tab_top + 0);
+		$pdf->SetFont('','', $default_font_size - 2);
 		$pdf->MultiCell($largcol, $tab_hl, $outputlangs->transnoentities("ProposalCustomerSignature"), 0, 'L', 1);
 
 		$pdf->SetXY($posx, $tab_top + $tab_hl);

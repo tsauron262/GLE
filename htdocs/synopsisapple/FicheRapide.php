@@ -674,4 +674,7 @@ function existProd($nomachine) {
     }
 }
 
+
+llxFooter();
+
 ?>

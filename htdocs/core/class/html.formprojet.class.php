@@ -55,13 +55,13 @@ class FormProjets
 	 *  @param	int		$discard_closed Discard closed projects (0=Keep,1=hide completely,2=Disable)
 	 *  @param	int		$forcefocus		Force focus on field (works with javascript only)
 	 *  @param	int		$disabled		Disabled
-	 *  @param int  $mode               0 for HTML mode and 1 for JSON mode
-	 * @param string $filterkey         Key to filter
+	 *  @param  int     $mode           0 for HTML mode and 1 for JSON mode
+	 *  @param  string  $filterkey      Key to filter
 	 *	@return int         			Nber of project if OK, <0 if KO
 	 */
 	function select_projects($socid=-1, $selected='', $htmlname='projectid', $maxlength=16, $option_only=0, $show_empty=1, $discard_closed=0, $forcefocus=0, $disabled=0, $mode = 0, $filterkey = '')
 	{
-		global $langs,$conf;
+		global $langs,$conf,$form;
 
 		if (! empty($conf->use_javascript_ajax) && ! empty($conf->global->PROJECT_USE_SEARCH_TO_SELECT))
 		{
@@ -86,6 +86,14 @@ class FormProjets
 		else
 		{
 			print $this->select_projects_list($socid, $selected, $htmlname, $maxlength, $option_only, $show_empty, $discard_closed, $forcefocus, $disabled, 0, $filterkey);
+			if ($discard_closed) 
+			{
+			    if (class_exists('Form'))
+			    {
+    			    if (empty($form)) $form=new Form($this->db);
+                    print $form->textwithpicto('', $langs->trans("ClosedProjectsAreHidden"));
+			    }
+			}
 		}
 	}
 
@@ -132,8 +140,8 @@ class FormProjets
 		if ($socid == 0) $sql.= " AND (p.fk_soc=0 OR p.fk_soc IS NULL)";
 		if ($socid > 0)  $sql.= " AND (p.fk_soc=".$socid." OR p.fk_soc IS NULL)";
 		if (!empty($filterkey)) {
-			$sql .= ' AND p.title LIKE "%'.$this->db->escape($filterkey).'%"';
-			$sql .= ' OR p.ref LIKE "%'.$this->db->escape($filterkey).'%"';
+			$sql .= " AND p.title LIKE '%".$this->db->escape($filterkey)."%'";
+			$sql .= " OR p.ref LIKE '%".$this->db->escape($filterkey)."%'";
 		}
 		$sql.= " ORDER BY p.ref ASC";
 
@@ -148,7 +156,7 @@ class FormProjets
 			if (! empty($conf->use_javascript_ajax))
 			{
 				include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
-	           	$comboenhancement = ajax_combobox($htmlname, '', 0, $forcefocus);
+	           	$comboenhancement = ajax_combobox($htmlname, array(), 0, $forcefocus);
             	$out.=$comboenhancement;
             	$nodatarole=($comboenhancement?' data-role="none"':'');
             	$minmax='minwidth100 maxwidth300';
@@ -174,13 +182,13 @@ class FormProjets
 					}
 					else
 					{
-						if ($discard_closed == 1 && $obj->fk_statut == 2)
+						if ($discard_closed == 1 && $obj->fk_statut == 2 && $obj->rowid != $selected) // We discard closed except if selected
 						{
 							$i++;
 							continue;
 						}
 
-						$labeltoshow=dol_trunc($obj->ref,18).' - '.$obj->title;
+						$labeltoshow=dol_trunc($obj->ref,18);
 						//if ($obj->public) $labeltoshow.=' ('.$langs->trans("SharedProject").')';
 						//else $labeltoshow.=' ('.$langs->trans("Private").')';
 						$labeltoshow.=' '.dol_trunc($obj->title,$maxlength);
@@ -269,7 +277,7 @@ class FormProjets
 	 *  @param	int		$discard_closed Discard closed projects (0=Keep,1=hide completely,2=Disable)
      *  @param	int		$forcefocus		Force focus on field (works with javascript only)
      *  @param	int		$disabled		Disabled
-	 *	@return int         			Nber of project if OK, <0 if KO
+	 *	@return int         			Nbr of project if OK, <0 if KO
 	 */
 	function selectTasks($socid=-1, $selected='', $htmlname='taskid', $maxlength=24, $option_only=0, $show_empty=1, $discard_closed=0, $forcefocus=0, $disabled=0)
 	{
@@ -422,9 +430,10 @@ class FormProjets
 	 *    @param	string		$table_element		Table of the element to update
 	 *    @param	int			$socid				If of thirdparty to use as filter
 	 *    @param	string		$morecss			More CSS
+	 *    @param    int         $limitonstatus      Add filters to limit length of list to opened status (for example to avoid ERR_RESPONSE_HEADERS_TOO_BIG on project/element.php page). TODO To implement
 	 *    @return	int|string						The HTML select list of element or '' if nothing or -1 if KO
 	 */
-	function select_element($table_element, $socid=0, $morecss='')
+	function select_element($table_element, $socid=0, $morecss='', $limitonstatus=-2)
 	{
 		global $conf, $langs;
 
@@ -433,7 +442,9 @@ class FormProjets
 		$linkedtothirdparty=false;
 		if (! in_array($table_element, array('don','expensereport_det','expensereport'))) $linkedtothirdparty=true;
 
+		$sqlfilter='';
 		$projectkey="fk_projet";
+		//print $table_element;
 		switch ($table_element)
 		{
 			case "facture":
@@ -443,7 +454,8 @@ class FormProjets
 				$sql = "SELECT t.rowid, t.ref, t.ref_supplier";
 				break;
 			case "commande_fourn":
-				$sql = "SELECT t.rowid, t.ref, t.ref_supplier";
+			case "commande_fournisseur":
+			    $sql = "SELECT t.rowid, t.ref, t.ref_supplier";
 				break;
 			case "facture_rec":
 				$sql = "SELECT t.rowid, t.titre as ref";
@@ -457,6 +469,11 @@ class FormProjets
 				/*$sql = "SELECT rowid, '' as ref";	// table is llx_expensereport_det
 				$projectkey="fk_projet";
 				break;*/
+		    case "commande":
+		    case "contrat":
+			case "fichinter":
+			    $sql = "SELECT t.rowid, t.ref";
+			    break;
 			default:
 				$sql = "SELECT t.rowid, t.ref";
 				break;
@@ -468,6 +485,7 @@ class FormProjets
 		if (! empty($socid) && $linkedtothirdparty) $sql.= " AND t.fk_soc=".$socid;
 		if (! in_array($table_element, array('expensereport_det'))) $sql.= ' AND t.entity='.getEntity('project');
 		if ($linkedtothirdparty) $sql.=" AND s.rowid = t.fk_soc";
+		if ($sqlfilter) $sql.= " AND ".$sqlfilter;
 		$sql.= " ORDER BY ref DESC";
 
 		dol_syslog(get_class($this).'::select_element', LOG_DEBUG);
@@ -517,13 +535,13 @@ class FormProjets
 	 *    Build a HTML select list of element of same thirdparty to suggest to link them to project
 	 *
 	 *    @param   string      $htmlname           HTML name
-	 *    @param   int         $preselected        Preselected
+	 *    @param   string      $preselected        Preselected (int or 'all' or 'none')
 	 *    @param   int         $showempty          Add an empty line
 	 *    @param   int         $useshortlabel      Use short label
 	 *    @param   int         $showallnone        Add choice "All" and "None"
 	 *    @return  int|string                      The HTML select list of element or '' if nothing or -1 if KO
 	 */
-	function selectOpportunityStatus($htmlname, $preselected=0, $showempty=1, $useshortlabel=0, $showallnone=0)
+	function selectOpportunityStatus($htmlname, $preselected='-1', $showempty=1, $useshortlabel=0, $showallnone=0)
 	{
 		global $conf, $langs;
 
@@ -541,8 +559,9 @@ class FormProjets
 			{
 				$sellist = '<select class="flat oppstatus" name="'.$htmlname.'">';
 				if ($showempty) $sellist.= '<option value="-1"></option>';
-				if ($showallnone) $sellist.= '<option value="all">--'.$langs->trans("Alls").'--</option>';
-				if ($showallnone) $sellist.= '<option value="none">--'.$langs->trans("None").'--</option>';
+				if ($showallnone) $sellist.= '<option value="all"'.($preselected == 'all'?' selected="selected"':'').'>--'.$langs->trans("OnlyOpportunitiesShort").'--</option>';
+				if ($showallnone) $sellist.= '<option value="openedopp"'.($preselected == 'openedopp'?' selected="selected"':'').'>--'.$langs->trans("OpenedOpportunitiesShort").'--</option>';
+				if ($showallnone) $sellist.= '<option value="none"'.($preselected == 'none'?' selected="selected"':'').'>--'.$langs->trans("NotAnOpportunityShort").'--</option>';
 				while ($i < $num)
 				{
 					$obj = $this->db->fetch_object($resql);

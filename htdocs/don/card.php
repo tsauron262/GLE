@@ -81,14 +81,14 @@ if ($action == 'update')
 
     if (empty($donation_date))
     {
-	    setEventMessage($langs->trans("ErrorFieldRequired",$langs->trans("Date")), 'errors');
+	    setEventMessages($langs->trans("ErrorFieldRequired", $langs->trans("Date")), null, 'errors');
         $action = "create";
         $error++;
     }
 
 	if (empty($amount))
 	{
-		setEventMessage($langs->trans("ErrorFieldRequired",$langs->trans("Amount")), 'errors');
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->trans("Amount")), null, 'errors');
 		$action = "create";
 		$error++;
 	}
@@ -136,14 +136,14 @@ if ($action == 'add')
 
     if (empty($donation_date))
     {
-	    setEventMessage($langs->trans("ErrorFieldRequired",$langs->trans("Date")), 'errors');
+	    setEventMessages($langs->trans("ErrorFieldRequired", $langs->trans("Date")), null, 'errors');
         $action = "create";
         $error++;
     }
 
 	if (empty($amount))
 	{
-		setEventMessage($langs->trans("ErrorFieldRequired",$langs->trans("Amount")), 'errors');
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->trans("Amount")), null, 'errors');
 		$action = "create";
 		$error++;
 	}
@@ -192,8 +192,7 @@ if ($action == 'confirm_delete' && GETPOST("confirm") == "yes" && $user->rights-
     else
     {
         dol_syslog($object->error,LOG_DEBUG);
-        setEventMessage($object->error,'errors');
-        setEventMessage($object->errors,'errors');
+        setEventMessages($object->error, $object->errors, 'errors');
     }
 }
 if ($action == 'valid_promesse')
@@ -204,7 +203,7 @@ if ($action == 'valid_promesse')
 		exit;
 	}
     else {
-	    setEventMessage($object->error, 'errors');
+	    setEventMessages($object->error, $object->errors, 'errors');
     }
 }
 if ($action == 'set_cancel')
@@ -215,7 +214,7 @@ if ($action == 'set_cancel')
         exit;
     }
     else {
-	    setEventMessage($object->error, 'errors');
+	    setEventMessages($object->error, $object->errors, 'errors');
     }
 }
 if ($action == 'set_paid')
@@ -226,7 +225,7 @@ if ($action == 'set_paid')
 		exit;
 	}
     else {
-	    setEventMessage($object->error, 'errors');
+	    setEventMessages($object->error, $object->errors, 'errors');
     }
 }
 // Remove file in doc form
@@ -243,8 +242,8 @@ if ($action == 'remove_file')
 		$upload_dir = $conf->don->dir_output;
 		$file = $upload_dir . '/' . GETPOST('file');
 		$ret=dol_delete_file($file,0,0,0,$object);
-		if ($ret) setEventMessage($langs->trans("FileWasRemoved", GETPOST('urlfile')));
-		else setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), 'errors');
+		if ($ret) setEventMessages($langs->trans("FileWasRemoved", GETPOST('urlfile')), null, 'mesgs');
+		else setEventMessages($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), null, 'errors');
 		$action='';
 	}
 }
@@ -293,7 +292,7 @@ $formcompany = new FormCompany($db);
 
 if ($action == 'create')
 {
-	print_fiche_titre($langs->trans("AddDonation"));
+	print load_fiche_titre($langs->trans("AddDonation"));
 
 	print '<form name="add" action="' . $_SERVER["PHP_SELF"] . '" method="POST">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -713,7 +712,7 @@ if (! empty($id) && $action != 'edit')
 		print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?rowid='.$object->id.'&action=valid_promesse">'.$langs->trans("ValidPromess").'</a></div>';
 	}
 
-    if (($object->statut == 0 || $object->statut == 1) && $remaintopay == 0 && $object->paye == 0)
+    if (($object->statut == 0 || $object->statut == 1) && $remaintopay == 0 && $object->paid == 0)
     {
         print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?rowid='.$object->id.'&action=set_cancel">'.$langs->trans("ClassifyCanceled")."</a></div>";
     }
@@ -740,9 +739,9 @@ if (! empty($id) && $action != 'edit')
 	// Delete
 	if ($user->rights->don->supprimer)
 	{
-		if ($don->statut == -1 || $don->statut == 0)
+		if ($object->statut == -1 || $object->statut == 0)
 		{
-			print '<div class="inline-block divButAction"><a class="butActionDelete" href="card.php?rowid='.$don->id.'&action=delete">'.$langs->trans("Delete")."</a></div>";
+			print '<div class="inline-block divButAction"><a class="butActionDelete" href="card.php?rowid='.$object->id.'&action=delete">'.$langs->trans("Delete")."</a></div>";
 		}
 		else
 		{

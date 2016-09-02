@@ -102,7 +102,7 @@ $this->menus = array();			// List of menus to add
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>200,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'synopsisapple@read    ',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'$user->rights->synopsisapple->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);						// 0=Menu for internal users,1=external users, 2=both
 		$r++;
@@ -115,7 +115,7 @@ $this->menus = array();			// List of menus to add
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>201,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'$user->rights->synopsisapple->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);							// 0=Menu for internal users,1=external users, 2=both
 		$r++;
@@ -128,7 +128,7 @@ $this->menus = array();			// List of menus to add
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>202,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'$user->rights->synopsisapple->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);			// 0=Menu for internal users,1=external users, 2=both
 		$r++;
@@ -141,7 +141,7 @@ $this->menus = array();			// List of menus to add
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>203,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'$user->rights->synopsisapple->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);			// 0=Menu for internal users,1=external users, 2=both
 		$r++;
@@ -154,7 +154,7 @@ $this->menus = array();			// List of menus to add
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>204,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'$user->rights->synopsisapple->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);		// 0=Menu for internal users,1=external users, 2=both
 		$r++;
@@ -167,7 +167,7 @@ $this->menus = array();			// List of menus to add
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>204,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'$user->rights->synopsisapple->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);
                 
@@ -182,7 +182,7 @@ $this->menus = array();			// List of menus to add
 					'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 					'position'=>204,
 					'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-					'perms'=>'synopsisapple@read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+					'perms'=>'$user->rights->synopsisapple->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 					'target'=>'',
 					'user'=>0);
         

@@ -28,3 +28,9 @@ llxHeader();
     });
 </script>
 
+
+<?php
+
+
+llxFooter();
+

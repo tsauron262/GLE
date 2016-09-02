@@ -375,7 +375,7 @@ class CMailFile
 
 		if (empty($conf->global->MAIN_DISABLE_ALL_MAILS))
 		{
-            dol_include_once('/core/class/hookmanager.class.php');
+            require_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
             $hookmanager = new HookManager($db);
             $hookmanager->initHooks(array(
                 'maildao'
@@ -708,8 +708,10 @@ class CMailFile
 		$trackid = $this->trackid;
 		if ($trackid)
 		{
-			$out.= 'Message-ID: <' . time() . '.phpmail-'.$trackid.'@' . $host . ">" . $this->eol2;
-			$out.= 'references: <' . time() . '.phpmail-'.$trackid.'@' . $host . ">" . $this->eol2;
+			// References is kept in response and Message-ID is returned into In-Reply-To:
+			$out.= 'Message-ID: <' . time() . '.phpmail-dolibarr-'.$trackid.'@' . $host . ">" . $this->eol2;	// Uppercase seems replaced by phpmail
+			$out.= 'References: <' . time() . '.phpmail-dolibarr-'.$trackid.'@' . $host . ">" . $this->eol2;
+			$out.= 'X-Dolibarr-TRACKID: '.$trackid. $this->eol2;
 		}
 		else
 		{

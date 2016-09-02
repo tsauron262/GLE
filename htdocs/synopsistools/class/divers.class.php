@@ -42,7 +42,7 @@ class synopsisHook {//FA1506-0369
         elseif (modDev == 2)
             error_reporting(E_ALL ^ (E_NOTICE));
         else
-            error_reporting(E_ALL ^ (E_NOTICE | E_STRICT));
+            error_reporting(E_ALL ^ (E_NOTICE | E_STRICT | E_WARNING | E_DEPRECATED));
 
         ini_set('upload_max_filesize', 10000);
         ini_set('post_max_size', 10000);

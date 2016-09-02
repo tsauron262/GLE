@@ -5,25 +5,33 @@ class ActionsSynopsischrono {
     var $menuOk = false;
 
     function doActions($parameters, &$object, &$action, $hookmanager) {
-        
     }
 
-    function printSearchForm($parameters, &$object, &$action, $hookmanager) {
-        global $conf, $langs;
-        $return = '';
+//    function printSearchForm($parameters, &$object, &$action, $hookmanager) {
+//        global $conf, $langs;
+//        $return = '';
+//
+//        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
+////            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';
+//            $return .= '<form method="get" action="' . DOL_URL_ROOT . '/synopsischrono/liste.php?mainmenu=Process">';
+//            $return .= '<div class="menu_titre menu_titre_search"><a class="vsmenu" href="' . DOL_URL_ROOT . '/synopsischrono/listDetail.php?mainmenu=Process">
+//                     ' . img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono") . '</a><br></div>';
+//            $return .= '<input type="text" class="flat" name="filtre" size="10">';
+//            $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
+//            $return .= '</form>';
+//        }
+//        $this->resprints = $return;
+//        return 0;
+//    }
+    
+    
 
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
-//            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';
-            $return .= '<form method="get" action="' . DOL_URL_ROOT . '/synopsischrono/liste.php?mainmenu=Process">';
-            $return .= '<div class="menu_titre menu_titre_search"><a class="vsmenu" href="' . DOL_URL_ROOT . '/synopsischrono/listDetail.php?mainmenu=Process">
-                     ' . img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono") . '</a><br></div>';
-            $return .= '<input type="text" class="flat" name="filtre" size="10">';
-            $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
-            $return .= '</form>';
-        }
-        $this->resprints = $return;
+    function addSearchEntry($parameters, &$object, &$action, $hookmanager) {
+        global $langs;
+	$hookmanager->resArray['searchintochrono']=array('text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono"), 'url'=>DOL_URL_ROOT.'/synopsischrono/liste.php?mainmenu=Process&filtre='.GETPOST('q'));
         return 0;
     }
+    
 
     function printMenuAfter($parameters, &$object, &$action, $hookmanager) {
         if (!$this->menuOk) {
@@ -47,7 +55,7 @@ class ActionsSynopsischrono {
 
         //consigne commande
         if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
-            $return .= '<div class="blockvmenupair rouge'.($context==1 ? ' vmenu':'').'">';
+            $return .= '<div class="blockvmenufirst blockvmenupair rouge'.($context==1 ? ' vmenu':'').'">';
             $return .= '<div class="menu_titre">';
             $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
             $return .= "</div>";
@@ -56,7 +64,7 @@ class ActionsSynopsischrono {
             $consigne = new consigneCommande($db);
             $consigne->fetch($element_type, $element_id);
             $return .= $consigne->note;
-            $return .= '</div><div class="menu_end"></div>';
+            $return .= '</div></div><div class="blockvmenuend">';
             $return .= "</div>";
         }
 
@@ -67,7 +75,7 @@ class ActionsSynopsischrono {
 //        $groupSav->fetch('', "XX SAV");
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Sav", $user->id)) {
             $hrefFin = "#pangridChronoDet105";
-            $return .= '<div class="blockvmenupair'.($context==1 ? ' vmenu':'').'">';
+            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
             $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
             $return .= '<div class="menu_contenu">';
             $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/FicheRapide.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
@@ -132,7 +140,7 @@ class ActionsSynopsischrono {
                     . "});</script>";
             }
 
-            $return .= '<div class="menu_end"></div></div>';
+            $return .= '</div><div class="blockvmenuend"></div>';
         }
 
 
@@ -143,7 +151,7 @@ class ActionsSynopsischrono {
 //        $groupHotline->fetch('', "XX Hotline");
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Hotline", $user->id)) {
             $hrefFin = "#pangridChronoDet100";
-            $return .= '<div class="blockvmenupair'.($context==1 ? ' vmenu':'').'">';
+            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
 //            $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
 //            $tabGroupe = array(array('label'=>"Tous", 'valeur'=>0));
 //            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur='" . $centre . "'" : ""));
@@ -184,7 +192,7 @@ class ActionsSynopsischrono {
 //                $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
 //                $return .= "</span><br/>";
 //            }
-            $return .= '</div><div class="menu_end"></div>';
+            $return .= '</div></div><div class="blockvmenuend">';
 //            }
             $return .= '</div>';
         }

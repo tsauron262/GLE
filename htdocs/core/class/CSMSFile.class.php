@@ -87,9 +87,9 @@ class CSMSFile
 
 
 	/**
-	 * Send mail that was prepared by constructor
+	 * Send sms that was prepared by constructor
 	 *
-	 * @return    boolean     True if mail sent, false otherwise
+	 * @return    boolean     True if sms sent, false otherwise
 	 */
 	function sendfile()
 	{
@@ -151,10 +151,11 @@ class CSMSFile
 		            $sms->message=$this->message;
 
                     $res=$sms->SmsSend();
+                    $this->error = $sms->error;
+                    $this->errors = $sms->errors;
     				if ($res <= 0)
     				{
-    					$this->error=$sms->error;
-    					dol_syslog("CSMSFile::sendfile: sms send error3 =".$this->error." Phone : ".$sms->dest, LOG_ERR);
+    					dol_syslog("CSMSFile::sendfile: sms send error=".$this->error, LOG_ERR);
     				}
     				else
     				{
@@ -170,7 +171,7 @@ class CSMSFile
 		    }
 			else
 			{
-				// Send mail method not correctly defined
+				// Send sms method not correctly defined
 				// --------------------------------------
 
 				return 'Bad value for MAIN_SMS_SENDMODE constant';
@@ -178,7 +179,7 @@ class CSMSFile
 		}
 		else
 		{
-			$this->error='No mail sent. Feature is disabled by option MAIN_DISABLE_ALL_SMS';
+			$this->error='No sms sent. Feature is disabled by option MAIN_DISABLE_ALL_SMS';
 			dol_syslog("CSMSFile::sendfile: ".$this->error, LOG_WARNING);
 		}
 
@@ -189,7 +190,7 @@ class CSMSFile
 
 
 	/**
-	 *  Write content of a SMTP request into a dump file (mode = all)
+	 *  Write content of a SendSms request into a dump file (mode = all)
 	 *  Used for debugging.
 	 *
 	 *  @return	void
@@ -217,7 +218,7 @@ class CSMSFile
 	}
 
     /**
-     *  Write content of a SMTP request into a dump file (mode = all)
+     *  Write content of a SendSms result into a dump file (mode = all)
      *  Used for debugging.
      *
      *  @param	int		$result		Result of sms sending

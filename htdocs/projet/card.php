@@ -103,7 +103,7 @@ if (empty($reshook))
 		    else
 		    {
 		        dol_syslog($object->error,LOG_DEBUG);
-			    setEventMessage($langs->trans("CantRemoveProject"), 'errors');
+			    setEventMessages($langs->trans("CantRemoveProject"), null, 'errors');
 		    }
 		}
 		if ($backtopage)
@@ -120,12 +120,12 @@ if (empty($reshook))
 	    $error=0;
 	    if (empty($_POST["ref"]))
 	    {
-		    setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")), 'errors');
+		    setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Ref")), null, 'errors');
 	        $error++;
 	    }
 	    if (empty($_POST["title"]))
 	    {
-		    setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")), 'errors');
+		    setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Label")), null, 'errors');
 	        $error++;
 	    }
 
@@ -160,14 +160,14 @@ if (empty($reshook))
 	            if ($result < 0)
 	            {
 	                $langs->load("errors");
-		            setEventMessage($langs->trans($object->error), 'errors');
+		            setEventMessages($langs->trans($object->error), null, 'errors');
 	                $error++;
 	            }
 	        }
 	        else
 	        {
 	            $langs->load("errors");
-		        setEventMessage($langs->trans($object->error), 'errors');
+		        setEventMessages($langs->trans($object->error), null, 'errors');
 	            $error++;
 	        }
 
@@ -206,21 +206,21 @@ if (empty($reshook))
 	    if (empty($ref))
 	    {
 	        $error++;
-	        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
-		    setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")), 'errors');
+	        //$_GET["id"]=$_POST["id"]; // We return on the project card
+		    setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Ref")), null, 'errors');
 	    }
 	    if (empty($_POST["title"]))
 	    {
 	        $error++;
-	        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
-		    setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")), 'errors');
+	        //$_GET["id"]=$_POST["id"]; // We return on the project card
+		    setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentities("Label")), null, 'errors');
 	    }
 
 	    $db->begin();
 
 	    if (! $error)
 	    {
-	        $object->oldcopy = dol_clone($object);
+			$object->oldcopy = clone $object;
 
 			$old_start_date = $object->date_start;
 
@@ -243,7 +243,7 @@ if (empty($reshook))
 		if ($object->opp_amount && ($object->opp_status <= 0))
 	    {
 	       	$error++;
-	    	setEventMessage($langs->trans("ErrorOppStatusRequiredIfAmount"),'errors');
+	    	setEventMessages($langs->trans("ErrorOppStatusRequiredIfAmount"), null, 'errors');
 	    }
 	    
 	    if (! $error)
@@ -264,7 +264,7 @@ if (empty($reshook))
 	    		if ($result < 0)
 	    		{
 	    			$error++;
-				    setEventMessage($langs->trans("ErrorShiftTaskDate").':'.$object->error, 'errors');
+				    setEventMessages($langs->trans("ErrorShiftTaskDate").':'.$object->error, $langs->trans("ErrorShiftTaskDate").':'.$object->errors, 'errors');
 	    		}
 	    	}
 	    }
@@ -315,8 +315,8 @@ if (empty($reshook))
 	        $urlfile=GETPOST('urlfile','alpha');
 	        $file =	$upload_dir	. '/' .	$filetodelete;
 	        $ret=dol_delete_file($file);
-	        if ($ret) setEventMessage($langs->trans("FileWasRemoved", $urlfile));
-	        else setEventMessage($langs->trans("ErrorFailToDeleteFile", $urlfile), 'errors');
+	        if ($ret) setEventMessages($langs->trans("FileWasRemoved", $urlfile), null, 'mesgs');
+	        else setEventMessages($langs->trans("ErrorFailToDeleteFile", $urlfile), null, 'errors');
 	    }
 	}
 
@@ -354,7 +354,7 @@ if (empty($reshook))
 	    $result=$object->delete($user);
 	    if ($result > 0)
 	    {
-	        setEventMessage($langs->trans("RecordDeleted"), 'info');
+	        setEventMessages($langs->trans("RecordDeleted"), null, 'mesgs');
 	    	header("Location: index.php");
 	        exit;
 	    }
@@ -397,8 +397,8 @@ $formfile = new FormFile($db);
 $formproject = new FormProjets($db);
 $userstatic = new User($db);
 
-$title=$langs->trans("Project").' - '.$object->ref.' '.$object->name;
-if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/projectnameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->ref.' '.$object->name;
+$title=$langs->trans("Project").' - '.$object->ref.($object->thirdparty->name?' - '.$object->thirdparty->name:'').($object->title?' - '.$object->title:'');
+if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/projectnameonly/',$conf->global->MAIN_HTML_TITLE)) $title=$object->ref.($object->thirdparty->name?' - '.$object->thirdparty->name:'').($object->title?' - '.$object->title:'');
 $help_url="EN:Module_Projects|FR:Module_Projets|ES:M&oacute;dulo_Proyectos";
 
 llxHeader("",$title,$help_url);
@@ -413,7 +413,7 @@ if ($action == 'create' && $user->rights->projet->creer)
 	$thirdparty=new Societe($db);
 	if ($socid > 0) $thirdparty->fetch($socid);
 
-    print_fiche_titre($langs->trans("NewProject"), '', 'title_project');
+    print load_fiche_titre($langs->trans("NewProject"), '', 'title_project');
 
     print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -452,10 +452,13 @@ if ($action == 'create' && $user->rights->projet->creer)
     if (is_numeric($defaultref) && $defaultref <= 0) $defaultref='';
 
     // Ref
-    print '<tr><td><span class="fieldrequired">'.$langs->trans("Ref").'</span></td><td><input size="12" type="text" name="ref" value="'.($_POST["ref"]?$_POST["ref"]:$defaultref).'"></td></tr>';
+    $suggestedref=($_POST["ref"]?$_POST["ref"]:$defaultref);
+    print '<tr><td><span class="fieldrequired">'.$langs->trans("Ref").'</span></td><td><input size="12" type="text" name="ref" value="'.$suggestedref.'">';
+    print ' '.$form->textwithpicto('', $langs->trans("YouCanCompleteRef", $suggestedref));
+    print '</td></tr>';
 
     // Label
-    print '<tr><td><span class="fieldrequired">'.$langs->trans("Label").'</span></td><td><input size="40" type="text" name="title" value="'.GETPOST("title").'"></td></tr>';
+    print '<tr><td><span class="fieldrequired">'.$langs->trans("Label").'</span></td><td><input size="80" type="text" name="title" value="'.GETPOST("title").'"></td></tr>';
 
     // Thirdparty
     print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
@@ -506,13 +509,13 @@ if ($action == 'create' && $user->rights->projet->creer)
 
 	    // Opportunity amount
 	    print '<tr><td>'.$langs->trans("OpportunityAmount").'</td>';
-	    print '<td><input size="4" type="text" name="opp_amount" value="'.(GETPOST('opp_amount')!=''?price(GETPOST('opp_amount')):'').'"></td>';
+	    print '<td><input size="5" type="text" name="opp_amount" value="'.(GETPOST('opp_amount')!=''?price(GETPOST('opp_amount')):'').'"></td>';
 	    print '</tr>';
     }
 
 	// Budget
 	print '<tr><td>'.$langs->trans("Budget").'</td>';
-	print '<td><input size="6" type="text" name="budget_amount" value="'.(GETPOST('budget_amount')!=''?price(GETPOST('budget_amount')):'').'"></td>';
+	print '<td><input size="5" type="text" name="budget_amount" value="'.(GETPOST('budget_amount')!=''?price(GETPOST('budget_amount')):'').'"></td>';
 	print '</tr>';
 
     // Description
@@ -534,7 +537,7 @@ if ($action == 'create' && $user->rights->projet->creer)
     dol_fiche_end();
 
     print '<div class="center">';
-    print '<input type="submit" class="button" value="'.$langs->trans("Create").'">';
+    print '<input type="submit" class="button" value="'.$langs->trans("CreateDraft").'">';
     if (! empty($backtopage))
     {
         print ' &nbsp; &nbsp; ';
@@ -619,20 +622,27 @@ else
         print '<table class="border" width="100%">';
 
         // Ref
+        $suggestedref=$object->ref;
         print '<tr><td class="fieldrequired" width="30%">'.$langs->trans("Ref").'</td>';
-        print '<td><input size="12" name="ref" value="'.$object->ref.'"></td></tr>';
+        print '<td><input size="12" name="ref" value="'.$suggestedref.'">';
+        print ' '.$form->textwithpicto('', $langs->trans("YouCanCompleteRef", $suggestedref));
+        print '</td></tr>';
 
         // Label
         print '<tr><td class="fieldrequired">'.$langs->trans("Label").'</td>';
-        print '<td><input size="40" name="title" value="'.$object->title.'"></td></tr>';
+        print '<td><input size="80" name="title" value="'.$object->title.'"></td></tr>';
 
-        // Customer
+        // Thirdparty
         print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
 	    $filteronlist='';
 	    if (! empty($conf->global->PROJECT_FILTER_FOR_THIRDPARTY_LIST)) $filteronlist=$conf->global->PROJECT_FILTER_FOR_THIRDPARTY_LIST;
-        $text=$form->select_thirdparty_list($object->thirdparty->id,'socid',$filteronlist,1,1);
-        $texthelp=$langs->trans("IfNeedToUseOhterObjectKeepEmpty");
-        print $form->textwithtooltip($text.' '.img_help(), $texthelp, 1, 0, '', '', 2);
+        $text=$form->select_thirdparty_list($object->thirdparty->id, 'socid', $filteronlist, 1, 1);
+        if (empty($conf->global->PROJECT_CAN_ALWAYS_LINK_TO_ALL_SUPPLIERS) && empty($conf->dol_use_jmobile))
+	    {
+	    	$texthelp=$langs->trans("IfNeedToUseOhterObjectKeepEmpty");
+	    	print $form->textwithtooltip($text.' '.img_help(),$texthelp,1);
+	    }
+	    else print $text;
         print '</td></tr>';
 
         // Visibility
@@ -668,13 +678,13 @@ else
 
 		    // Opportunity amount
 		    print '<tr><td>'.$langs->trans("OpportunityAmount").'</td>';
-		    print '<td><input size="6" type="text" name="opp_amount" value="'.(isset($_POST['opp_amount'])?GETPOST('opp_amount'):(strcmp($object->opp_amount,'')?price($object->opp_amount):'')).'"></td>';
+		    print '<td><input size="5" type="text" name="opp_amount" value="'.(isset($_POST['opp_amount'])?GETPOST('opp_amount'):(strcmp($object->opp_amount,'')?price($object->opp_amount):'')).'"></td>';
 		    print '</tr>';
 	    }
 
 	    // Budget
 	    print '<tr><td>'.$langs->trans("Budget").'</td>';
-	    print '<td><input size="6" type="text" name="budget_amount" value="'.(isset($_POST['budget_amount'])?GETPOST('budget_amount'):(strcmp($object->budget_amount,'')?price($object->budget_amount):'')).'"></td>';
+	    print '<td><input size="5" type="text" name="budget_amount" value="'.(isset($_POST['budget_amount'])?GETPOST('budget_amount'):(strcmp($object->budget_amount,'')?price($object->budget_amount):'')).'"></td>';
 	    print '</tr>';
 
 	    // Description
@@ -704,7 +714,7 @@ else
         // Define a complementary filter for search of next/prev ref.
         if (! $user->rights->projet->all->lire)
         {
-            $objectsListId = $object->getProjectsAuthorizedForUser($user,$mine,0);
+            $objectsListId = $object->getProjectsAuthorizedForUser($user,0,0);
             $object->next_prev_filter=" rowid in (".(count($objectsListId)?join(',',array_keys($objectsListId)):'0').")";
         }
         print $form->showrefnav($object, 'ref', $linkback, 1, 'ref', 'ref');
@@ -715,7 +725,7 @@ else
 
         // Third party
         print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
-        if ($object->thirdparty->id > 0) print $object->thirdparty->getNomUrl(1);
+        if ($object->thirdparty->id > 0) print $object->thirdparty->getNomUrl(1, 'project');
         else print'&nbsp;';
         print '</td></tr>';
 

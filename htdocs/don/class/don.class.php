@@ -4,6 +4,7 @@
  * Copyright (C) 2009      Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2014      Florian Henry        <florian.henry@open-concept.pro>
  * Copyright (C) 2015      Alexandre Spangaro   <aspangaro.dolibarr@gmail.com>
+ * Copyright (C) 2016      Juanjo Menent        <jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,29 +40,17 @@ class Don extends CommonObject
 	public $fk_element = 'fk_donation';
 	protected $ismultientitymanaged = 1;  	// 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
 
-    var $id;
-    var $ref;
     var $date;
     var $amount;
-    var $firstname;
-    var $lastname;
     var $societe;
     var $address;
     var $zip;
     var $town;
-    var $country_id;
-    var $country_code;
-    var $country;
     var $email;
     var $public;
     var $fk_projet;
     var $fk_typepayment;
 	var $num_payment;
-    var $note_private;
-    var $note_public;
-    var $statut;
-	var $modelpdf;
-    var $projet;
 
 	/**
 	 * @deprecated
@@ -645,7 +634,7 @@ class Don extends CommonObject
                 $this->town           = $obj->town;
                 $this->zip            = $obj->zip;
                 $this->town           = $obj->town;
-                $this->country_id     = $obj->country_id;
+                $this->country_id     = $obj->fk_country;
                 $this->country_code   = $obj->country_code;
                 $this->country        = $obj->country;
                 $this->country_olddata= $obj->country_olddata;	// deprecated

@@ -82,6 +82,8 @@ and open the template in the editor.
     
     div.tmenucenter{
         position: relative;
+        max-width: 100%;
+        height: 100%;
     }
     
     a.tmenusel, a.tmenu{

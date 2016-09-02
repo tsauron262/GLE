@@ -1,11 +1,11 @@
 <?php
 /* Copyright (C) 2001-2004 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2015 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2013      Cédric Salvador      <csalvador@gpcsolutions.fr>
  * Copyright (C) 2014      Juanjo Menent        <jmenent@2byte.es>
- * Copyright (C) 2015			 Claudio Aschieri			<c.aschieri@19.coop>
- * Copyright (C) 2015      Jean-François Ferry		<jfefe@aternatik.fr>
+ * Copyright (C) 2015	   Claudio Aschieri		<c.aschieri@19.coop>
+ * Copyright (C) 2015      Jean-François Ferry	<jfefe@aternatik.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ $sortfield=GETPOST('sortfield','alpha');
 $sortorder=GETPOST('sortorder','alpha');
 $page=GETPOST('page','int');
 if ($page == -1) { $page = 0 ; }
-$limit = $conf->liste_limit;
+$limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 $offset = $limit * $page ;
 
 $search_name=GETPOST('search_name');
@@ -51,8 +51,11 @@ $search_tech2=GETPOST('search_tech2','alpha');
 $sall=GETPOST('sall');
 $search_status=GETPOST('search_status');
 $socid=GETPOST('socid');
+$search_user=GETPOST('search_user','int');
+$search_sale=GETPOST('search_sale','int');
+$search_product_category=GETPOST('search_product_category','int');
 
-$search_sale = GETPOST('search_sale','int');
+$optioncss = GETPOST('optioncss','alpha');
 
 if (! $sortfield) $sortfield="c.rowid";
 if (! $sortorder) $sortorder="DESC";
@@ -70,12 +73,25 @@ if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) // Both 
 	$search_name="";
 	$search_contract="";
 	$search_ref_supplier="";
-	$search_sale="";
+    $search_user='';
+    $search_sale='';
+    $search_product_category='';
 	$sall="";
 	$search_status="";
 }
 
 if ($search_status == '') $search_status=1;
+
+// List of fields to search into when doing a "search in all"
+$fieldstosearchall = array(
+    'c.ref'=>'Ref',
+    'c.ref_customer'=>'RefCustomer',
+    'c.ref_supplier'=>'RefSupplier',
+    's.nom'=>"ThirdParty",
+    'cd.description'=>'Description',
+    'c.note_public'=>'NotePublic',
+);
+if (empty($user->socid)) $fieldstosearchall["c.note_private"]="NotePrivate";
 
 
 /*
@@ -83,13 +99,14 @@ if ($search_status == '') $search_status=1;
  */
 
 $now=dol_now();
+$form=new Form($db);
 $formother = new FormOther($db);
 $socstatic = new Societe($db);
 
 llxHeader();
 
 $sql = 'SELECT';
-$sql.= " c.rowid as cid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_supplier,";
+$sql.= " c.rowid as cid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_customer, c.ref_supplier,";
 $sql.= " s.nom as name, s.rowid as socid,";
 /*mod drsi*/$sql .= " cd.date_fin_validite, concat(ut.firstname, concat(' ', ut.lastname)) as tech,";/*fmod drsi*/
 $sql.= ' SUM('.$db->ifsql("cd.statut=0",1,0).') as nb_initial,';
@@ -102,8 +119,15 @@ if ($search_sale > 0 || (! $user->rights->societe->client->voir && ! $socid)) $s
 $sql.= ", ".MAIN_DB_PREFIX."contrat as c";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
 /*mod drsi*/ $sql .= " LEFt JOIN `llx_element_contact` ec ON  `element_id` = c.rowid AND  `fk_c_type_contact` = 11 LEFT JOIN llx_user ut ON ut.rowid = ec.fk_socpeople";
+if ($search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON cp.fk_product=cd.fk_product';
+if ($search_user > 0)
+{
+    $sql.=", ".MAIN_DB_PREFIX."element_contact as ec";
+    $sql.=", ".MAIN_DB_PREFIX."c_type_contact as tc";
+}
 $sql.= " WHERE c.fk_soc = s.rowid ";
-$sql.= " AND c.entity = ".$conf->entity;
+$sql.= ' AND c.entity IN ('.getEntity('contract', 1).')';
+if ($search_product_category > 0) $sql.=" AND cp.fk_categorie = ".$search_product_category;
 if ($socid) $sql.= " AND s.rowid = ".$db->escape($socid);
 if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 
@@ -116,14 +140,12 @@ if ($search_contract) {
 if (!empty($search_ref_supplier)) {
 	$sql .= natural_search(array('c.ref_supplier'), $search_ref_supplier);
 }
-
 if ($search_sale > 0)
 {
 	$sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$search_sale;
 }
-
 if ($sall) {
-    $sql .= natural_search(array('s.nom', 'cd.label', 'cd.description'), $sall);
+    $sql .= natural_search(array_keys($fieldstosearchall), $sall);
 }
 
 
@@ -138,7 +160,7 @@ if($expirer)
 $sql.= " AND cd.statut < 5";
 /*f mod drsi */
 
-$sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_supplier, s.nom, s.rowid";
+$sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_supplier, s.nom, s.rowid, cd.date_fin_validite, ut.firstname, ut.lastname";
 
 /*mod drsi */
 if($expirer)
@@ -167,42 +189,77 @@ if ($resql)
     print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], '&'.$param, $sortfield, $sortorder,'',$num,$totalnboflines,'title_commercial.png');
 
     print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
-    print '<table class="liste" width="100%">';
+    if ($optioncss != '') print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';
+	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="action" value="list">';
+	print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
+	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 
+    if ($sall)
+    {
+        foreach($fieldstosearchall as $key => $val) $fieldstosearchall[$key]=$langs->trans($val);
+        print $langs->trans("FilterOnInto", $all) . join(', ',$fieldstosearchall);
+    }
+    
     // If the user can view prospects other than his'
     $moreforfilter='';
     if ($user->rights->societe->client->voir || $socid)
     {
     	$langs->load("commercial");
+    	$moreforfilter.='<div class="divsearchfield">';
     	$moreforfilter.=$langs->trans('ThirdPartiesOfSaleRepresentative'). ': ';
-    	$moreforfilter.=$formother->select_salesrepresentatives($search_sale,'search_sale',$user);
-    	$moreforfilter.=' &nbsp; &nbsp; &nbsp; ';
+    	$moreforfilter.=$formother->select_salesrepresentatives($search_sale,'search_sale',$user,0,1,'maxwidth300');
+    	$moreforfilter.='</div>';
     }
-
-    if ($moreforfilter)
+	// If the user can view other users
+	if ($user->rights->user->user->lire)
+	{
+		$moreforfilter.='<div class="divsearchfield">';
+		$moreforfilter.=$langs->trans('LinkedToSpecificUsers'). ': ';
+	    $moreforfilter.=$form->select_dolusers($search_user, 'search_user', 1, '', 0, '', '', 0, 0, 0, '', 0, '', 'maxwidth300');
+	 	$moreforfilter.='</div>';
+	}
+	// If the user can view categories of products
+	if ($conf->categorie->enabled && ($user->rights->produit->lire || $user->rights->service->lire))
+	{
+		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+		$moreforfilter.='<div class="divsearchfield">';
+		$moreforfilter.=$langs->trans('IncludingProductWithTag'). ': ';
+		$cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, null, 'parent', null, null, 1);
+		$moreforfilter.=$form->selectarray('search_product_category', $cate_arbo, $search_product_category, 1, 0, 0, '', 0, 0, 0, 0, '', 1);
+		$moreforfilter.='</div>';
+	}
+    
+    $parameters=array();
+    $reshook=$hookmanager->executeHooks('printFieldPreListTitle',$parameters);    // Note that $action and $object may have been modified by hook
+	if (empty($reshook)) $moreforfilter .= $hookmanager->resPrint;
+	else $moreforfilter = $hookmanager->resPrint;
+    if (! empty($moreforfilter))
     {
-    	print '<tr class="liste_titre">';
-    	print '<td class="liste_titre" colspan="9">';
-    	print $moreforfilter;
-    	print '</td></tr>';
+        print '<div class="liste_titre liste_titre_bydiv centpercent">';
+        print $moreforfilter;
+        print '</div>';
     }
 
+    print '<table class="tagtable liste'.($moreforfilter?" listwithfilterbefore":"").'">';
     print '<tr class="liste_titre">';
 
 
     print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "c.rowid","","$param",'',$sortfield,$sortorder);
-    print_liste_field_titre($langs->trans("RefCustomer"), $_SERVER["PHP_SELF"], "c.ref_supplier","","$param",'',$sortfield,$sortorder);
-    print_liste_field_titre($langs->trans("Company"), $_SERVER["PHP_SELF"], "s.nom","","$param",'',$sortfield,$sortorder);
+    print_liste_field_titre($langs->trans("RefCustomer"), $_SERVER["PHP_SELF"], "c.ref_customer","","$param",'',$sortfield,$sortorder);
+    print_liste_field_titre($langs->trans("RefSupplier"), $_SERVER["PHP_SELF"], "c.ref_supplier","","$param",'',$sortfield,$sortorder);
+    print_liste_field_titre($langs->trans("ThirdParty"), $_SERVER["PHP_SELF"], "s.nom","","$param",'',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("SalesRepresentative"), $_SERVER["PHP_SELF"], "","","$param",'',$sortfield,$sortorder);
     //print_liste_field_titre($langs->trans("DateCreation"), $_SERVER["PHP_SELF"], "c.datec","","$param",'align="center"',$sortfield,$sortorder);
     /*deb mod drsi*/print_liste_field_titre($langs->trans("TypeContact_contrat_internal_SALESREPFOLL"), $_SERVER["PHP_SELF"], "tech","","$param",'',$sortfield,$sortorder);/*fmod drsi*/
     print_liste_field_titre($langs->trans("DateContract"), $_SERVER["PHP_SELF"], "c.date_contrat","","$param",'align="center"',$sortfield,$sortorder);
     /* deb mod drsi */ print_liste_field_titre($langs->trans("Date Fin"), $_SERVER["PHP_SELF"], "date_fin_validite","","$param",'align="center"',$sortfield,$sortorder); /*f mod drsi*/
     //print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "c.statut","","$param",'align="center"',$sortfield,$sortorder);
-    print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(0,3).'</td>';
-    print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(4,3,0).'</td>';
-    print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(4,3,1).'</td>';
-    print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(5,3).'</td>';
+    print_liste_field_titre($staticcontratligne->LibStatut(0,3), '', '', '', '', 'width="16"');
+    print_liste_field_titre($staticcontratligne->LibStatut(4,3,0), '', '', '', '', 'width="16"');
+    print_liste_field_titre($staticcontratligne->LibStatut(4,3,1), '', '', '', '', 'width="16"');
+    print_liste_field_titre($staticcontratligne->LibStatut(5,3), '', '', '', '', 'width="16"');
+    print_liste_field_titre('',$_SERVER["PHP_SELF"],"",'','','',$sortfield,$sortorder,'maxwidthsearch ');
     print "</tr>\n";
 
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -211,10 +268,13 @@ if ($resql)
     print '<input type="text" class="flat" size="3" name="search_contract" value="'.dol_escape_htmltag($search_contract).'">';
     print '</td>';
     print '<td class="liste_titre">';
-    print '<input type="text" class="flat" size="7" name="search_ref_supplier value="'.dol_escape_htmltag($search_ref_supplier).'">';
+    print '<input type="text" class="flat" size="6" name="search_ref_customer value="'.dol_escape_htmltag($search_ref_customer).'">';
     print '</td>';
     print '<td class="liste_titre">';
-    print '<input type="text" class="flat" size="24" name="search_name" value="'.dol_escape_htmltag($search_name).'">';
+    print '<input type="text" class="flat" size="6" name="search_ref_supplier value="'.dol_escape_htmltag($search_ref_supplier).'">';
+    print '</td>';
+    print '<td class="liste_titre">';
+    print '<input type="text" class="flat" size="8" name="search_name" value="'.dol_escape_htmltag($search_name).'">';
     print '</td>';
     /*mod drsi*/
     print '<td class="liste_titre">';
@@ -226,7 +286,8 @@ if ($resql)
 //    print '<td class="liste_titre">&nbsp;</td>';
     /*fmod drsi*/
     //print '<td class="liste_titre">&nbsp;</td>';
-    print '<td colspan="5" class="liste_titre" align="right"><input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
+    print '<td class="liste_titre" colspan="5"></td>';
+    print '<td class="liste_titre" align="right"><input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
 	print '<input type="image" class="liste_titre" name="button_removefilter" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
     print "</td></tr>\n";
 
@@ -240,6 +301,7 @@ if ($resql)
         print img_object($langs->trans("ShowContract"),"contract").' '.(isset($obj->ref) ? $obj->ref : $obj->cid) .'</a>';
         if ($obj->nb_late) print img_warning($langs->trans("Late"));
         print '</td>';
+        print '<td>'.$obj->ref_customer.'</td>';
         print '<td>'.$obj->ref_supplier.'</td>';
         print '<td><a href="../comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.$obj->name.'</a></td>';
         //print '<td align="center">'.dol_print_date($obj->datec).'</td>';
@@ -266,9 +328,10 @@ if ($resql)
         			$userstatic->id=$val['id'];
         			$userstatic->lastname=$val['lastname'];
         			$userstatic->firstname=$val['firstname'];
-        			print $userstatic->getNomUrl(1);
+        			print '<div class="float">'.$userstatic->getNomUrl(1);
         			$j++;
-        			if ($j < $nbofsalesrepresentative) print '<br/>';
+        			if ($j < $nbofsalesrepresentative) print ', ';
+        			print '</div>';
         		}
         	}
         	else print $langs->trans("NoSalesRepresentativeAffected");
@@ -289,6 +352,7 @@ if ($resql)
         print '<td align="center">'.($obj->nb_running>0?$obj->nb_running:'').'</td>';
         print '<td align="center">'.($obj->nb_expired>0?$obj->nb_expired:'').'</td>';
         print '<td align="center">'.($obj->nb_closed>0 ?$obj->nb_closed:'').'</td>';
+        print '<td></td>';
         print "</tr>\n";
         $i++;
     }
@@ -305,3 +369,4 @@ else
 
 llxFooter();
 $db->close();
+

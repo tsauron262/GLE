@@ -3,7 +3,7 @@
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2010-2015 Juanjo Menent        <jmenent@2byte.es>
  * Copyright (C) 2010-2014 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2014 		Ferran Marcet       <fmarcet@2byte.es>
+ * Copyright (C) 2014-2016 Ferran Marcet       <fmarcet@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,6 @@ require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
  */
 class BonPrelevement extends CommonObject
 {
-    var $db;
-
     var $date_echeance;
     var $raison_sociale;
     var $reference_remise;
@@ -918,7 +916,10 @@ class BonPrelevement extends CommonObject
 					$row = $this->db->fetch_row($resql);
 					$ref = "T".$ref.str_pad(dol_substr("00".intval($row[0])+1,0,2),2,"0",STR_PAD_LEFT);
 
-					$this->filename = $conf->prelevement->dir_output.'/receipts/'.$ref.'.xml';
+					$dir=$conf->prelevement->dir_output.'/receipts';
+					if (! is_dir($dir)) dol_mkdir($dir);
+					
+					$this->filename = $dir.'/'.$ref.'.xml';
 
 	                // Create withdraw receipt in database
 	                $sql = "INSERT INTO ".MAIN_DB_PREFIX."prelevement_bons (";
@@ -934,10 +935,6 @@ class BonPrelevement extends CommonObject
 	                {
 	                    $prev_id = $this->db->last_insert_id(MAIN_DB_PREFIX."prelevement_bons");
 						$this->id = $prev_id;
-
-	                    $dir=$conf->prelevement->dir_output.'/receipts';
-	                    $file=$filebonprev;
-	                    if (! is_dir($dir)) dol_mkdir($dir);
 	                }
 	                else
 					{
@@ -1033,7 +1030,7 @@ class BonPrelevement extends CommonObject
                     // Generation of SEPA file
                     $this->generate();
                 }
-                dol_syslog(__METHOD__."::End withdraw receipt, file ".$filebonprev, LOG_DEBUG);
+                dol_syslog(__METHOD__."::End withdraw receipt, file ".$this->filename, LOG_DEBUG);
             }
 
             /*
@@ -1262,25 +1259,23 @@ class BonPrelevement extends CommonObject
 			$fileDebiteurSection = '';
 			$fileEmetteurSection = '';
 			$i = 0;
-			$j = 0;
 			$this->total = 0;
 
 			/*
 			 * section Debiteur (sepa Debiteurs bloc lines)
 			 */
 
+			$tmp_invoices = array();
+
 			$sql = "SELECT f.facnumber as fac FROM ".MAIN_DB_PREFIX."prelevement_lignes as pl, ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."prelevement_facture as pf, ".MAIN_DB_PREFIX."societe as soc, ".MAIN_DB_PREFIX."c_country as p, ".MAIN_DB_PREFIX."societe_rib as rib WHERE pl.fk_prelevement_bons = ".$this->id." AND pl.rowid = pf.fk_prelevement_lignes AND pf.fk_facture = f.rowid AND soc.fk_pays = p.rowid AND soc.rowid = f.fk_soc AND rib.fk_soc = f.fk_soc AND rib.default_rib = 1";
 			$resql=$this->db->query($sql);
-			if ($resql)
-			{
-				$num = $this->db->num_rows($resql);
-				while ($j < $num)
-				{
-					$objfac = $this->db->fetch_object($resql);
-					$ListOfFactures = $ListOfFactures . $objfac->fac . ",";
-					$j++;
+			if ($resql) {
+				while ($objfac = $this->db->fetch_object($resql)) {
+					$tmp_invoices[] = $objfac->fac;
 				}
 			}
+
+	        $ListOfFactures = implode($tmp_invoices);
 
 			$sql = "SELECT soc.code_client as code, soc.address, soc.zip, soc.town, c.code as country_code,";
 			$sql.= " pl.client_nom as nom, pl.code_banque as cb, pl.code_guichet as cg, pl.number as cc, pl.amount as somme,";
@@ -1678,8 +1673,9 @@ class BonPrelevement extends CommonObject
      *	@return	string					String with SEPA Sender
      */
     function EnregEmetteurSEPA($configuration, $ladate, $nombre, $total, $CrLf='\n')
-    {	// SEPA INITIALISATION
-		global $confs;
+    {	
+        // SEPA INITIALISATION
+		global $conf;
 
 		$dateTime_YMD = dol_print_date($ladate, '%Y%m%d');
 		$dateTime_ETAD = dol_print_date($ladate, '%Y-%m-%d');

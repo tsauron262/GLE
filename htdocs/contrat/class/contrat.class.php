@@ -1567,7 +1567,7 @@ class Contrat extends CommonObject
 		$sql.= ", total_localtax1='".price2num($total_localtax1)."'";
 		$sql.= ", total_localtax2='".price2num($total_localtax2)."'";
 		$sql.= ", total_ttc='".      price2num($total_ttc)."'";
-		$sql.= ", fk_product_fournisseur_price='".$fk_fournprice."'";
+		$sql.= ", fk_product_fournisseur_price=".($fk_fournprice)? $fk_fournprice : NULL."";
 		$sql.= ", buy_price_ht='".price2num($pa_ht)."'";
 		if ($date_start > 0) { $sql.= ",date_ouverture_prevue='".$this->db->idate($date_start)."'"; }
 		else { $sql.=",date_ouverture_prevue=null"; }

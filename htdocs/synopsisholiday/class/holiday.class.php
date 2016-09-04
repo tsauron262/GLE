@@ -95,6 +95,8 @@ class SynopsisHoliday extends Holiday {
         2 => 'RTT'
     );
     var $fk_actioncomm = '';
+    
+    static $decalageHeure = 2;
 
     /**
      *   Constructor
@@ -2607,17 +2609,17 @@ class SynopsisHoliday extends Holiday {
                     $ac->fk_action = $fk_action;
 
                 if (!$this->halfday) {
-                    $dateBegin->setTime(8, 0, 0);
-                    $dateEnd->setTime(19, 59, 59);
+                    $dateBegin->setTime(8-self::$decalageHeure, 0, 0);
+                    $dateEnd->setTime(19-self::$decalageHeure, 59, 59);
                 } else if ($this->halfday == 2) {
-                    $dateBegin->setTime(14, 0, 0);
-                    $dateEnd->setTime(13, 59, 59);
+                    $dateBegin->setTime(14-self::$decalageHeure, 0, 0);
+                    $dateEnd->setTime(13-self::$decalageHeure, 59, 59);
                 } else if ($this->halfday > 0) {
-                    $dateBegin->setTime(8, 0, 0);
-                    $dateEnd->setTime(13, 59, 59);
+                    $dateBegin->setTime(8-self::$decalageHeure, 0, 0);
+                    $dateEnd->setTime(13-self::$decalageHeure, 59, 59);
                 } else if ($this->halfday < 0) {
-                    $dateBegin->setTime(14, 0, 0);
-                    $dateEnd->setTime(19, 59, 59);
+                    $dateBegin->setTime(14-self::$decalageHeure, 0, 0);
+                    $dateEnd->setTime(19-self::$decalageHeure, 59, 59);
                 }
 
                 // Idem pour la liste des users: 
@@ -2703,17 +2705,17 @@ class SynopsisHoliday extends Holiday {
 
 
             if (!$this->halfday) {
-                $dateBegin->setTime(8, 0, 0);
-                $dateEnd->setTime(19, 59, 59);
+                $dateBegin->setTime(8-self::$decalageHeure, 0, 0);
+                $dateEnd->setTime(19-self::$decalageHeure, 59, 59);
             } else if ($this->halfday == 2) {
-                $dateBegin->setTime(14, 0, 0);
-                $dateEnd->setTime(13, 59, 59);
+                $dateBegin->setTime(14-self::$decalageHeure, 0, 0);
+                $dateEnd->setTime(13-self::$decalageHeure, 59, 59);
             } else if ($this->halfday > 0) {
-                $dateBegin->setTime(8, 0, 0);
-                $dateEnd->setTime(13, 59, 59);
+                $dateBegin->setTime(8-self::$decalageHeure, 0, 0);
+                $dateEnd->setTime(13-self::$decalageHeure, 59, 59);
             } else if ($this->halfday < 0) {
-                $dateBegin->setTime(14, 0, 0);
-                $dateEnd->setTime(19, 59, 59);
+                $dateBegin->setTime(14-self::$decalageHeure, 0, 0);
+                $dateEnd->setTime(19-self::$decalageHeure, 59, 59);
             }
             $ac->datep = $dateBegin->format('Y-m-d H:i:s');
             $ac->datef = $dateEnd->format('Y-m-d H:i:s');
@@ -2761,17 +2763,17 @@ class SynopsisHoliday extends Holiday {
         $dateEnd->setTimestamp($this->date_fin);
 
         if (!$this->halfday) {
-            $dateBegin->setTime(8, 0, 0);
-            $dateEnd->setTime(19, 59, 59);
+            $dateBegin->setTime(8-self::$decalageHeure, 0, 0);
+            $dateEnd->setTime(19-self::$decalageHeure, 59, 59);
         } else if ($this->halfday == 2) {
-            $dateBegin->setTime(14, 0, 0);
-            $dateEnd->setTime(13, 59, 59);
+            $dateBegin->setTime(14-self::$decalageHeure, 0, 0);
+            $dateEnd->setTime(13-self::$decalageHeure, 59, 59);
         } else if ($this->halfday > 0) {
-            $dateBegin->setTime(8, 0, 0);
-            $dateEnd->setTime(13, 59, 59);
+            $dateBegin->setTime(8-self::$decalageHeure, 0, 0);
+            $dateEnd->setTime(13-self::$decalageHeure, 59, 59);
         } else if ($this->halfday < 0) {
-            $dateBegin->setTime(14, 0, 0);
-            $dateEnd->setTime(19, 59, 59);
+            $dateBegin->setTime(14-self::$decalageHeure, 0, 0);
+            $dateEnd->setTime(19-self::$decalageHeure, 59, 59);
         }
 
 

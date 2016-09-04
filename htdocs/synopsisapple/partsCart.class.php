@@ -33,7 +33,7 @@ class partsCart {
     public function addThisToPropal($propal) {
         global $db, $langs;
 
-        $this->fraisP = -1;
+//        $this->fraisP = -1;
 
         if($propal->socid > 0){
             $soc = new Societe($db);
@@ -72,9 +72,11 @@ class partsCart {
         $coefPrix = 1;
         $constPrix = 0;
         $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "ZD661", "ZK661");
+        
         $tabCas2 = array("SVC,IPOD", "Ipod nano");
-        $tabCas3 = array("661");
-        $tabCas4 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");
+        
+        $tabCas3 = array("661", "Z661");
+        $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE", "Ipad Pro", "Ipad mini");
 
         $cas = 0;
         foreach ($tabCas1 as $val)
@@ -85,13 +87,20 @@ class partsCart {
                 $cas = 1;
         foreach ($tabCas3 as $val)
             if (stripos($ref, $val) === 0)
-                $cas = 2;
-        if ($cas == 2)
-            foreach ($tabCas4 as $val)
+                $cas = 3;
+            
+            
+        //Application double contraite    
+        if ($cas == 3)
+            foreach ($tabCas35 as $val)
                 if (stripos($desc, $val) === 0)
-                    $cas = 3;
+                    $cas = 1;
 
-        if ($cas == 0 || $cas == 2) {
+        //Application des coef est constante
+        if ($cas == 1) {
+            $constPrix = 45;
+        }
+        else {
             if ($prix > 300)
                 $coefPrix = 0.8;
             elseif ($prix > 150)
@@ -102,17 +111,16 @@ class partsCart {
                 $coefPrix = 0.6;
                 $constPrix = 10;
             }
-        } elseif ($cas == 1) {
-            $constPrix = 45;
-        } elseif ($cas == 3) {
-            $constPrix = 45;
-        }
+        } 
+        
+        
+        
         $prix = (($prix + $constPrix) / $coefPrix);
 
-        if (($cas == 1 || $cas == 3) && $this->fraisP < 1)
-            $this->fraisP = 0;
-        else
-            $this->fraisP = 1;
+//        if (($cas == 1) && $this->fraisP < 1)
+//            $this->fraisP = 0;
+//        else
+//            $this->fraisP = 1;
 
         return $prix;
     }

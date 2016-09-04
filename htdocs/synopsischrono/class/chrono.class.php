@@ -367,7 +367,7 @@ class Chrono extends CommonObject {
             $requete .= ", propalid = '" . ($this->propalid) . "'";
 
         $requete .= ", orig_ref = '" . $this->orig_ref . "'";
-        $requete .= ", revision = '" . $this->revision . "'";
+        $requete .= ", revision = " . ($this->revision > 0)? $this->revision : 'NULL' . "";
         $requete .= ", ref = '" . $this->ref . "'";
 
         $requete .= ", fk_user_modif = " . $user->id;
@@ -731,7 +731,7 @@ class Chrono extends CommonObject {
         //$propid = $this->prop;
         //$propal = "SELECT rowid FROM ".MAIN_DB_PREFIX."propal WHERE ref=".$this->propalid;
         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono (date_create,ref,model_refid,description,fk_soc,fk_socpeople,propalid,projetid,fk_user_author)
-                          VALUES (now(),'" . $ref . "','" . $this->model_refid . "','" . addslashes($this->description) . "'," . ($this->socid > 0 ? $this->socid : 'NULL') . "," . ($this->contactid > 0 ? $this->contactid : 'NULL') . ",'" . $this->propalid . "','" . $this->projetid . "', " . $user->id . ")";
+                          VALUES (now(),'" . $ref . "','" . $this->model_refid . "','" . addslashes($this->description) . "'," . ($this->socid > 0 ? $this->socid : 'NULL') . "," . ($this->contactid > 0 ? $this->contactid : 'NULL') . "," . ($this->propalid > 0 ? $this->propalid : 'NULL') . "," . ($this->projetid > 0 ? $this->projetid : 'NULL') . ", " . $user->id . ")";
         $sql = $this->db->query($requete);
         if ($sql) {
             $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "synopsischrono");
@@ -1029,10 +1029,14 @@ class Chrono extends CommonObject {
 
 
             if ($keyId != "id") {
-                if ($value != "now()")
-                    $tabUpdate[] = $keyId . " = '" . addslashes($value) . "'";
-                else
-                    $tabUpdate[] = $keyId . " = " . addslashes($value) . "";
+                if($value."x" == "x")
+                        $value = 'NULL';
+                elseif ($value != "now()" && !is_numeric($value))
+                    $value = "'".addslashes($value)."'";
+                    
+                    
+                    
+                $tabUpdate[] = $keyId . " = " . $value . "";
             }
 
 

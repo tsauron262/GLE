@@ -60,7 +60,7 @@ class favoriCli {
         $soc->fetch($socid);
         $langs->load("fav@synopsisfav");
 //        if ($conf->global->MAIN_MODULE_synopsisfav && $user->rights->MiniHisto->all->Afficher) {
-        $return = '<div class="blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
+        $return = '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
         $return .= '<div class="menu_titre">';
         $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTOFAV") . "<br/>" . $soc->getNomUrl(0) . '</a>';
         $return .= "</div>";
@@ -85,7 +85,7 @@ class favoriCli {
         $return .= "</form>";
         $return .= "<div class=\"menu_end\">";
         $return .= '<form method="post"><input type="submit" name="saveFav" class="butAction" value="Ajouter au favori"/></form>';
-        $return .= "</div></div>";
+        $return .= '</div></div><div class="blockvmenuend"></div>';
         return $return;
     }
 

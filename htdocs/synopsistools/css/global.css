@@ -5,6 +5,11 @@ div.hide{
     display: none;
 }
 
+.supprFav{
+    padding: 1px;
+    cursor: no-drop;
+}
+
 div.divButAction, div.butActionDelete{
     float: right;
 }

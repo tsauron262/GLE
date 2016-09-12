@@ -5,14 +5,14 @@
 // Take a look at conf.php.example file for an example of conf.php file
 // and explanations for all possibles parameters.
 //
-$dolibarr_main_url_root='http://localhost/gle_dev2';
-$dolibarr_main_document_root='/var/www/html/gle_dev2';
+$dolibarr_main_url_root='http://127.0.0.1/gle_dev';
+$dolibarr_main_document_root='/var/www/html/gle_dev';
 //$dolibarr_main_url_root_alt='http://localhost/gle_dev/custom';
 //$dolibarr_main_document_root_alt='/var/www/gle_dev/custom';
-$dolibarr_main_data_root='/var/www/html/documents/capsim';
+$dolibarr_main_data_root='/var/www/html/documents/gle_dev_capsim';
 $dolibarr_main_db_host='127.0.0.1';
 $dolibarr_main_db_port='3306';
-$dolibarr_main_db_name='capsim_150921';
+$dolibarr_main_db_name='DEV_CAPSIM';
 //$dolibarr_main_db_name = 'bimp_1505067';
 //$dolibarr_main_db_name='capsim_150513';
 $dolibarr_main_db_prefix='llx_';
@@ -30,8 +30,8 @@ $dolibarr_main_authentication='dolibarr';
 //define('IMPORT_BDD_NAME', 'synopsis_oldBimp2');
 
 
-define('MOD_DEV_SYN', 3);
-define('MOD_DEV_SYN_MAIL', 'teufheur@outlook.fr');
+//define('MOD_DEV_SYN', 1);
+define('MOD_DEV_SYN_MAIL', 'tommy@drsi.fr');
 
 define('PRODUCTION_APPLE', false);
 

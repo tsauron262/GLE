@@ -902,7 +902,7 @@ print '<div id="gridListTaskPager" class="scroll" style="text-align:center;"></d
 print '<div class="tabsAction">';
 
 print "<button class='butAction butAction' id='ajouter'>Ajouter une t&acirc;che</button>";
-if ($user->rights->synopsisprojet->creer) {
+if ($user->rights->projet->creer) {
     //if($projet->statut == 0 || $projet->statut == 5)
     //print "<button class='butAction' id='ajouter'>Ajouter une t&acirc;che</button>";
     //if($projet->statut == 0)
@@ -1094,7 +1094,7 @@ function displayHTMLTable_tpl($mode, $optDependStr, $optGrpStr, $optUsrStr, $db)
 
 print ' <div class="contextMenu" id="MenuJqGrid">';
 print '        <ul>';
-if ($user->rights->synopsisprojet->creer) {
+if ($user->rights->projet->creer) {
     print '            <li id="ajouter">';
     print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/synopsisprojet/img/fromCrystal/edit_add.png" />';
     print '                Ajouter</li>';
@@ -1108,7 +1108,7 @@ if ($user->rights->synopsisprojet->creer) {
     print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/synopsisprojet/img/fromCrystal/edit.png" />';
     print '                Editer</li>';
 }
-if ($user->rights->synopsisprojet->supprimer) {
+if ($user->rights->projet->supprimer) {
     print '            <li id="supprimer">';
     print '                <img src="' . DOL_URL_ROOT . '/synopsisprojet/img/fromCrystal/editdelete.png" />';
     print '                Supprimer</li>';

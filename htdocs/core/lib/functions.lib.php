@@ -4999,6 +4999,9 @@ function dol_eval($s,$returnvalue=0)
     global $soc;
 
 	//print $s."<br>\n";
+//        echo $s;
+//    echo "<pre>"
+//;        print_r($user->rights);
 	if ($returnvalue) return @eval('return '.$s.';');
 	else @eval($s);
 }

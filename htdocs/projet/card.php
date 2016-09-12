@@ -17,7 +17,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-header("Location:".str_replace("/projet/", "/synopsisprojet/", $_SERVER['REQUEST_URI']));
 
 /**
  *	\file       htdocs/projet/card.php
@@ -26,6 +25,12 @@ header("Location:".str_replace("/projet/", "/synopsisprojet/", $_SERVER['REQUEST
  */
 
 require '../main.inc.php';
+
+
+if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET))
+header("Location:".str_replace("/projet/", "/synopsisprojet/", $_SERVER['REQUEST_URI']));
+
+
 require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';

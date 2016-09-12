@@ -72,7 +72,7 @@ $result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet_vi
 /*
  * Actions
  */
-if ($_REQUEST['action'] == "valid" && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == "valid" && $user->rights->projet->creer) {
     $pro = new SynopsisProject($db);
     $pro->fetch($_REQUEST['id']);
     if ($pro->valid() > 0) {
@@ -81,7 +81,7 @@ if ($_REQUEST['action'] == "valid" && $user->rights->synopsisprojet->creer) {
         $msg = "Ne peut lancer la planification de ce projet " . $pro->error;
     }
 }
-if ($_REQUEST['action'] == "cloture" && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == "cloture" && $user->rights->projet->creer) {
     $pro = new SynopsisProject($db);
     $pro->fetch($_REQUEST['id']);
     if ($pro->cloture() > 0) {
@@ -90,7 +90,7 @@ if ($_REQUEST['action'] == "cloture" && $user->rights->synopsisprojet->creer) {
         $msg = "Ne peut cl&ocirc;turer ce projet " . $pro->error;
     }
 }
-if ($_REQUEST['action'] == "launch" && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == "launch" && $user->rights->projet->creer) {
     $pro = new SynopsisProject($db);
     $pro->fetch($_REQUEST['id']);
     if ($pro->launch() > 0) {
@@ -100,7 +100,7 @@ if ($_REQUEST['action'] == "launch" && $user->rights->synopsisprojet->creer) {
     }
 }
 
-if ($_REQUEST['action'] == 'add' && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == 'add' && $user->rights->projet->creer) {
     //print $_POST["socid"];
     $pro = new SynopsisProject($db);
 
@@ -133,7 +133,7 @@ if ($_REQUEST['action'] == 'add' && $user->rights->synopsisprojet->creer) {
     }
 }
 
-if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == 'update' && $user->rights->projet->creer) {
     if (!$_POST["cancel"]) {
         $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_view WHERE rowid=" . $_POST['id'];
         $sql = $db->query($requete);
@@ -167,7 +167,7 @@ if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
     }
 }
 
-if ($_REQUEST['action'] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user->rights->synopsisprojet->supprimer) {
+if ($_REQUEST['action'] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user->rights->projet->supprimer) {
     $projet = new SynopsisProject($db);
     $projet->id = $_GET["id"];
     if ($projet->delete($user) == 0) {
@@ -249,7 +249,7 @@ if (isset($msg) && $msg . "x" != "x") {
 
 $html = new Form($db);
 
-if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == 'create' && $user->rights->projet->creer) {
     /*
      * Create
      */
@@ -467,21 +467,21 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
 
     if ($_REQUEST['action'] != "edit" &&
             ($projet->user_resp_id == $user->id || $user->rights->synopsisprojet->modAll)) {
-        if ($user->rights->synopsisprojet->creer) {
+        if ($user->rights->projet->creer) {
             print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
         }
 
-        if ($user->rights->synopsisprojet->creer && $projet->statut == 0) {
+        if ($user->rights->projet->creer && $projet->statut == 0) {
             print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=valid">' . $langs->trans("Planifier") . '</a>';
         }
-        if ($user->rights->synopsisprojet->creer && $projet->statut == 5) {
+        if ($user->rights->projet->creer && $projet->statut == 5) {
             print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=launch">' . $langs->trans("Lancer") . '</a>';
         }
-        if ($user->rights->synopsisprojet->creer && $projet->statut == 10) {
+        if ($user->rights->projet->creer && $projet->statut == 10) {
             print '<a class="butAction" href="card.php?id=' . $projet->id . '&amp;action=cloture">' . $langs->trans("Cloturer") . '</a>';
         }
 
-        if ($user->rights->synopsisprojet->supprimer) {
+        if ($user->rights->projet->supprimer) {
             print '<a class="butActionDelete" href="card.php?id=' . $projet->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
         }
     }

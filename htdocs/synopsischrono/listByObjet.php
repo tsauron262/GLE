@@ -57,15 +57,15 @@ if (isset($_REQUEST['obj'])) {
         $ctrId = $_REQUEST['id'];
         $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono_key`, `" . MAIN_DB_PREFIX . "synopsischrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` IN (1000, 1007) AND model_refid = c.id GROUP by c.id " . (isset($modelT) ? " AND c.id=" . $modelT : ""));
     } else if ($_REQUEST['obj'] == "project") {
-        $langs->load("project@projet");
-        require_once DOL_DOCUMENT_ROOT . '/synopsisprojet/core/lib/synopsis_project.lib.php';
+        $langs->load("projects");
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/project.lib.php';
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-        $projet = new SynopsisProject($db);
+        $projet = new Project($db);
         $projet->fetch($_REQUEST['id']);
+        $head = project_prepare_head($projet);
         $obj = $projet;
         $filtre = "fk_projet=" . $projet->id;
         $champ['fk_projet'] = $projet->id;
-        $head = synopsis_project_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1 AND `hasProjet` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
     } else if ($_REQUEST['obj'] == "propal") {

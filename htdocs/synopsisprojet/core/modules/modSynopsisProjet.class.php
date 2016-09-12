@@ -1,5 +1,4 @@
-<?php
-
+<?php 
 /* Copyright (C) 2003-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2007 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2004      Sebastien Di Cintio  <sdicintio@ressource-toi.org>
@@ -57,7 +56,7 @@ class modSynopsisProjet extends DolibarrModules {
      */
     function modSynopsisProjet($DB) {
         $this->db = $DB;
-        $this->numero = 4000;
+        $this->numero = 95001;
 
         $this->family = "Synopsis";
         $this->name = "Projet +";

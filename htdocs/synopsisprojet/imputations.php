@@ -476,8 +476,8 @@ print '<a name="builddoc"></a>'; // ancre
  *
  */
 $urlsource = $_SERVER["PHP_SELF"] . (isset($_REQUEST['id']) ? '?id=' . $_REQUEST['id'] : '');
-$genallowed = $user->rights->synopsisprojet->creer;
-$delallowed = $user->rights->synopsisprojet->supprimer;
+$genallowed = $user->rights->projet->creer;
+$delallowed = $user->rights->projet->supprimer;
 
 $modelpdf = "";
 

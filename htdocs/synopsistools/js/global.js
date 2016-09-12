@@ -305,10 +305,8 @@ function traiteScroll(heightDif) {
     newTaille = 0;
     elem = null;
     if (hauteurMenu < height && (0 || minimuAGagne > 0)) {
-        $("#id-right div").each(function () {
-//                if($(this).attr("class") == "fiche")
-//                alert($(this).attr("class")+" | ");
-            if (!$(this).is(".fichehalfright, .fichehalfleft") && !$(this).is(".fichehalfleft")) {
+        $("#id-right div, #id-right .yesScroll").each(function () {
+            if (!$(this).is(".fichehalfright, .fichehalfleft, .noScroll") && !$(this).is(".fichehalfleft")) {
                 taille = $(this).innerHeight();
                 newTailleT = taille - minimuAGagne - 10;
                 reductionVisibilite = height / newTailleT;
@@ -317,6 +315,8 @@ function traiteScroll(heightDif) {
 //                alert($(this).attr("class")+" | "+newTailleT+" | "+grandeTaille);
 //            alert(hauteur_fenetre());
 //                }
+            
+            
                 if ($(this).is(":visible")
                         && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 300) {
                     newTaille = newTailleT;
@@ -362,10 +362,10 @@ function traiteScroll(heightDif) {
 //            alert("Fenetre : "+width);
 
             //Test
-            if (parseInt($("body").innerHeight()) > (height - 5) || widthBody > width) {
-                scrollY = initScroll();
-//                alert("reinit");
-            }
+//            if (parseInt($("body").innerHeight()) > (height - 5) || widthBody > width) {
+//                scrollY = initScroll();
+////                alert("reinit");
+//            }
 
 //            if(!window.chrome)
             $(elem).scrollTop(scrollY);

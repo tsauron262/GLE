@@ -97,6 +97,24 @@ class modSynopsisprojetplus extends DolibarrModules {
         $this->rights[7][2] = 'c'; // type de la permission (deprecie a ce jour)
         $this->rights[7][3] = 0; // La permission est-elle une permission par defaut
         $this->rights[7][4] = 'caImput';
+        
+        
+        
+        $r = 0;
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=project',
+            'type' => 'left',
+            'titre' => 'Imputations',
+            'mainmenu' => 'project',
+            'leftmenu' => '0',
+            'url' => '/synopsisprojetplus/histo_imputations.php',
+            'langs' => 'synopsisproject@synopsisprojet',
+            'position' => 7,
+            'perms' => '$user->rights->' . $this->rights_class . '->voirImputations',
+            'target' => '',
+            'user' => 0);
+        $s = $r;
+        $s1 = $r;
+        $r++;
   
         
         

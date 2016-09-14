@@ -36,7 +36,7 @@ class Exception extends \Exception {
     
     public function __construct($message = "", $code = 0, \Exception $previous = null) {
         if(function_exists("dol_syslog"))
-        dol_syslog($message,3,0,"_caldav");
+        dol_syslog($message."| Code : ".$code,3,0,"_caldav");
         parent::__construct($message, $code, $previous);
     }
 

@@ -33,6 +33,12 @@ class Exception extends \Exception {
         return 500;
 
     }
+    
+    public function __construct($message = "", $code = 0, \Exception $previous = null) {
+        if(function_exists("dol_syslog"))
+        dol_syslog($message,3,0,"_caldav");
+        parent::__construct($message, $code, $previous);
+    }
 
     /**
      * This method allows the exception to include additional information into the WebDAV error response

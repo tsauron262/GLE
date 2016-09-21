@@ -10,7 +10,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 class Reservations {
 
     // Active tous les echos et désactive les logs: 
-    var $display_debug = true;
+    var $display_debug = false;
     // mettre à false pour envoyer les mails aux bons destinataires:
     var $debugMails = false;
 

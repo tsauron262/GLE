@@ -131,8 +131,10 @@ function getUsersByShipTo($shipTo)
                 if (!$centre_sav) {
                     if (!empty($obj->centre_sav)) {
                         $centres = explode(' ', $obj->centre_sav);
-                        if ($centres[0])
+                        if (isset($centres[0]) && $centres[0] != "")
                             $centre_sav = $centres[0];
+                        elseif (isset($centres[1]) && $centres[1] != "")
+                            $centre_sav = $centres[1];
                     }
                 }
                 $users[] = array(

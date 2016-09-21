@@ -315,7 +315,7 @@ function processReservation($resa, $users)
             break;
         }
     }
-    $_REQUEST['Centre'] = $centre;
+    $_REQUEST['centre'] = $centre;
 
     // Création SAV:
     $chrono = new Chrono($db);

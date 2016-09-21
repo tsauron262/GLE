@@ -9,7 +9,15 @@
  * @package gsxwsapi
  *
  */
-class GSX {
+function _softErrorMessage($value, $key)
+{
+    if (isset($key) == 'communicationMessage') {
+        $softError = $value;
+    }
+}
+
+class GSX
+{
 
     /**
      *
@@ -311,7 +319,8 @@ class GSX {
      */
     public $isIphone = false;
 
-    public function __construct($_gsxDetailsArray = array(), $isIphone = false, $apiMode) {
+    public function __construct($_gsxDetailsArray = array(), $isIphone = false, $apiMode)
+    {
 // We default to using production mode for GSX
         $this->isIphone = $isIphone;
         $this->apiMode = $apiMode;
@@ -378,7 +387,8 @@ class GSX {
      * @access public
      *
      */
-    public function __destruct() {
+    public function __destruct()
+    {
 // We can destruct class settings, but I don't want to log out, purely for the reason if someone
 // uses this class with a custom AJAX environment.
         unset($this->userSessionId);
@@ -397,17 +407,16 @@ class GSX {
      * @access protected
      *
      */
-    protected function assign_wsdl() {
+    protected function assign_wsdl()
+    {
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
         $opt = ($this->isIphone) ? "IPhone" : "Asp";
 
         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
 
-
         $type = "Asp";
 //        $type = "IPhone";
-
         if ($this->gsxDetails['gsxWsdl'] != '') {
             return $this->wsdlUrl = $this->gsxDetails['gsxWsdl'];
         } elseif ($api_mode == 'it') {
@@ -440,28 +449,27 @@ class GSX {
      * @access private
      *
      */
-    private function initiate_soap_client() {
+    private function initiate_soap_client()
+    {
         if (empty($this->wsdlUrl)) {
             $this->assign_wsdl();
         }
-        
-        $tabCert = array(897316 => array(0 => array('certUtSi.pem', 'freepartyUt'),
-                                        1 => array('certProdFinal.pem', 'freepartyProd')),
-                        128630 => array(0 => array('clermont/certifTestProdClermont.pem', 'passPhraseTest'),
-                                        1 => array('clermont/certifFinalProdClermont.pem', 'passPhraseProd'))
-            );
-        $soldTo = (int)$this->gsxDetails['serviceAccountNo'];
-        if(!isset($tabCert[$soldTo])){
-            echo "Pas de certif pour se soldTo ".$soldTo;
-                    return 0;
+
+        require_once DOL_DOCUMENT_ROOT . '/synopsisapple/certifs.php';
+        global $tabCert;
+
+        $soldTo = (int) $this->gsxDetails['serviceAccountNo'];
+        if (!isset($tabCert[$soldTo])) {
+            echo "Pas de certif pour se soldTo " . $soldTo;
+            return 0;
         }
-        $typeCertif = ($this->apiMode == 'ut')? 0 : 1;
+        $typeCertif = ($this->apiMode == 'ut') ? 0 : 1;
         $certif = $tabCert[$soldTo][$typeCertif];
-        
+
 
         $connectionOptions = array(
             'connection_timeout' => '5'
-            , 'local_cert' => DOL_DOCUMENT_ROOT."/synopsisapple/certif/".$certif[0]
+            , 'local_cert' => DOL_DOCUMENT_ROOT . "/synopsisapple/certif/" . $certif[0]
             , 'passphrase' => $certif[1]
             , 'trace' => TRUE
             , 'exceptions' => TRUE
@@ -491,7 +499,8 @@ class GSX {
      * @access public
      *
      */
-    public function authenticate() {
+    public function authenticate()
+    {
 
         if (!is_object($this->soapClient)) {
             $this->initiate_soap_client();
@@ -538,7 +547,8 @@ class GSX {
      * @access public
      *
      */
-    public function lookup($serial, $lookupType, $returnFormat = false) {
+    public function lookup($serial, $lookupType, $returnFormat = false)
+    {
         if (!preg_match($this->_regex('serialNumber'), $serial)) {
             $this->error(__METHOD__, __LINE__, 'Numéro de série invalide.');
             echo 'Numéro de série invalide.';
@@ -588,10 +598,12 @@ class GSX {
                     );
                     $responseName = 'warrantyDetailInfo';
                 }
-                $data = new gsxDatas("");
-                
-                
-                $details['shipTo'] = $data->shipTo;
+
+
+//                    $data = new gsxDatas();
+//                    $details['shipTo'] = $data->shipTo;
+                $details['shipTo'] = $this->gsxDetails['serviceAccountNo'];
+
                 $requestName = $clientLookup . 'Request';
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
                 $warrantyDetails = $this->request($requestData, $clientLookup);
@@ -630,7 +642,8 @@ class GSX {
      * @access public
      *
      */
-    public function part($params, $returnFormat = false) {
+    public function part($params, $returnFormat = false)
+    {
         if (!is_array($params)) {
             if (preg_match($this->_regex('eeeCode'), $params)) {
                 $finalParams['eeeCode'] = $params;
@@ -673,7 +686,8 @@ class GSX {
         return $this->outputFormat($partsLookup[$clientLookup . 'Response']['parts'], $errorMessage, $returnFormat);
     }
 
-    public function repairs($type, $params, $returnFormat = false) {
+    public function repairs($type, $params, $returnFormat = false)
+    {
         switch ($type) {
             /* ! Repair Lookup */
             case 'lookup' :
@@ -764,7 +778,8 @@ class GSX {
 //    }
 
 
-    public function obtainSymtomes($serials = null, $sympCode = null) {
+    public function obtainSymtomes($serials = null, $sympCode = null)
+    {
 
         if (!$this->userSessionId) {
             $this->authenticate();
@@ -811,7 +826,8 @@ class GSX {
      * @access public
      *
      */
-    public function obtainCompTIA() {
+    public function obtainCompTIA()
+    {
         if (!$this->userSessionId) {
             $this->authenticate();
         }
@@ -835,7 +851,6 @@ class GSX {
 
         return $compTIAAnswer;
     }
-
 // HELPER FUNCTIONS
 
     /**
@@ -855,7 +870,8 @@ class GSX {
      * @access private
      *
      */
-    public function request($requestData, $clientLookup) {
+    public function request($requestData, $clientLookup)
+    {
         if (!$this->userSessionId) {
             $this->authenticate();
         }
@@ -912,14 +928,14 @@ class GSX {
 //                echo '</div></div></div></fieldset>';
 //                die;
 //                return array();
-                
+
                 echo "<tierPart>OK</tierPart>";
                 die;
                 return array();
             }
-            
-            
-            
+
+
+
             if (stripos($f->faultstring, "La réparation est hors garantie") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
@@ -957,7 +973,8 @@ class GSX {
      * @access private
      *
      */
-    public function _requestBuilder($requestName, $wrapperName, $details) {
+    public function _requestBuilder($requestName, $wrapperName, $details)
+    {
         $requestArray = array(
             "$requestName" => array(
                 'userSession' => array(
@@ -972,7 +989,8 @@ class GSX {
         return $requestArray;
     }
 
-    public function outputFormat($output, $errorMessage = null, $format = false) {
+    public function outputFormat($output, $errorMessage = null, $format = false)
+    {
         if (!$format) {
             $format = $this->gsxDetails['returnFormat'];
         }
@@ -989,7 +1007,8 @@ class GSX {
         return $this->_formatter($finalReturnArray, $format);
     }
 
-    public function _formatter($output, $format) {
+    public function _formatter($output, $format)
+    {
         switch ($format) {
             case 'json' :
                 return json_encode($output);
@@ -1003,14 +1022,8 @@ class GSX {
         }
     }
 
-    public function _obtainErrorMessage($output) {
-
-        function _softErrorMessage($value, $key) {
-            if (isset($key) == 'communicationMessage') {
-                $softError = $value;
-            }
-        }
-
+    public function _obtainErrorMessage($output)
+    {
         array_walk($output, '_softErrorMessage');
 
         return isset($softError) ? $softError : '';
@@ -1031,7 +1044,8 @@ class GSX {
      * @access private
      *
      */
-    private function _regex($pattern) {
+    private function _regex($pattern)
+    {
         switch ($pattern) {
             case 'imeiNumber':
                 '/^[0-9]{15,16}$/';
@@ -1092,7 +1106,8 @@ class GSX {
      * @access private
      *
      */
-    private static function _objToArr($object) {
+    private static function _objToArr($object)
+    {
         if (is_object($object)) {
             $object = get_object_vars($object);
         }
@@ -1100,7 +1115,8 @@ class GSX {
         return is_array($object) ? array_map(__METHOD__, $object) : $object;
     }
 
-    protected function error($method, $line, $message) {
+    protected function error($method, $line, $message)
+    {
         $this->errors[] = array(
             'function' => $method,
             'line' => $line,
@@ -1108,7 +1124,8 @@ class GSX {
         );
     }
 
-    protected function soap_error($code, $string) {
+    protected function soap_error($code, $string)
+    {
         $string = (utf8_decode($string));
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
@@ -1116,7 +1133,7 @@ class GSX {
         $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
 
 
-        $codeIgnore = array("RPR.COM.039", "RPR.COM.021", "RPR.CIN.094","RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010", "RPR.LKP.01", "RPR.RTN.005", "RPR.CIN.025", "RPR.COM.502", "RPR.COM.108");
+        $codeIgnore = array("RPR.COM.039", "RPR.COM.021", "RPR.CIN.094", "RPR.COM.162", "RPR.CIN.002", "RPR.COM.512", "RPR.CIN.010", "RPR.LKP.01", "RPR.RTN.005", "RPR.CIN.025", "RPR.COM.502", "RPR.COM.108");
         $codeIgnore2 = array();
 
         if (!in_array($code, $codeIgnore)) {
@@ -1127,12 +1144,14 @@ class GSX {
         }
     }
 
-    public function resetSoapErrors() {
+    public function resetSoapErrors()
+    {
         unset($this->errors['soap']);
         $this->errors['soap'] = array();
     }
 
-    public function getGSXErrorsHtml($log = false) {
+    public function getGSXErrorsHtml($log = false)
+    {
         $html = '';
         $tab = ($log) ? $this->errors['log'] : $this->errors;
         if (count($tab['init'])) {
@@ -1156,7 +1175,6 @@ class GSX {
             $html .= 'pas d\'erreurs!';
         return $html;
     }
-
 }
 
 ?>

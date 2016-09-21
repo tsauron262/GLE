@@ -1,0 +1,18 @@
+{
+    "reservations": [
+        {
+            "reservationId": "1",
+            "reservationDate": "2016-09-06",
+            "currentStatus": "RESERVED",
+            "product": {
+                "caseId": "1",
+                "issueReported": "string"
+            },
+            "customer": {
+                "firstName": "Prenom",
+                "lastName": "Nom",
+                "emailId": "email@ndd.com"
+            }
+        }
+    ]
+}

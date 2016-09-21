@@ -541,7 +541,8 @@ class Reservations {
                     foreach ($data->response->reservations as $reservation) {
                         if (isset($reservation->reservationId)) {
                             if (in_array($reservation->reservationId, $currentReservations)) {
-                                echo 'Réservation "' . $reservation->reservationId . '" déjà enregistrée.<br/>';
+                                if ($this->display_debug)
+                                    echo 'Réservation "' . $reservation->reservationId . '" déjà enregistrée.<br/>';
                                 continue;
                             }
                             $r = $CR->fetch($reservation->reservationId);

@@ -286,7 +286,7 @@ while ($resPre = $db->fetch_object($sqlPre)) {
 
 
 if (!$withRev) {
-    $wh .= " AND revisionNext < 1"; //revision is NULL ";
+    $wh .= " AND (revisionNext < 1 || revisionNext IS NULL)"; //revision is NULL ";
 } else {
     $sousReq = "(SELECT orig_ref FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
     $wh .= " AND chr.id <>" . $_REQUEST['chrono_refid'] . " AND  (orig_ref = " . $sousReq . " || ref = " . $sousReq . ")";

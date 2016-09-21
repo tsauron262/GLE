@@ -307,6 +307,15 @@ function processReservation($resa, $users)
     } else {
         $id_product = 0;
     }
+    
+    
+    foreach ($users as $u) {
+        if (!empty($u['centre'])) {
+            $centre = $u['centre'];
+            break;
+        }
+    }
+    $_REQUEST['Centre'] = $centre;
 
     // Création SAV:
     $chrono = new Chrono($db);
@@ -322,12 +331,6 @@ function processReservation($resa, $users)
 
     if ($chrono_id) {
         $centre = '';
-        foreach ($users as $u) {
-            if (!empty($u['centre'])) {
-                $centre = $u['centre'];
-                break;
-            }
-        }
 
         if ($display_debug)
             echo 'CENTRE: ' . $centre . '<br/>';
@@ -337,9 +340,9 @@ function processReservation($resa, $users)
             1047 => (isset($resa->product->issueReported) ? $resa->product->issueReported : '')
         ));
 
-        $chrono->fetch($chrono_id);
-        $chrono->ref = str_replace("{CENTRE}", $centre, $chrono->ref);
-        $chrono->update($chrono_id);
+//        $chrono->fetch($chrono_id);
+//        $chrono->ref = str_replace("{CENTRE}", $centre, $chrono->ref);
+//        $chrono->update($chrono_id);
     }
 
 

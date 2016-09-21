@@ -590,3 +590,7 @@ foreach ($numbers as $n) {
         fetchReservationSummary($n['soldTo'], $n['shipTo']);
     }
 }
+
+
+if ($display_debug)
+    llxFooter();

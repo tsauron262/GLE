@@ -131,7 +131,7 @@ if(is_array($object->lines) && (count($object->lines)>0))
 	// Loop over job
 	foreach($object->lines as $line)
 	{
-	    dol_syslog("cron_run_jobs.php cronjobid: ".$line->id, LOG_WARNING);
+//	    dol_syslog("cron_run_jobs.php cronjobid: ".$line->id, LOG_WARNING);
 	    
 		//If date_next_jobs is less of current date, execute the program, and store the execution time of the next execution in database
 		if (($line->datenextrun < $now) && (empty($line->datestart) || $line->datestart <= $now) && (empty($line->dateend) || $line->dateend >= $now))

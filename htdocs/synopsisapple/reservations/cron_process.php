@@ -340,7 +340,7 @@ function processReservation($resa, $users)
             1047 => (isset($resa->product->issueReported) ? $resa->product->issueReported : '')
         ));
 
-//        $chrono->fetch($chrono_id);
+        $chrono->fetch($chrono_id);
 //        $chrono->ref = str_replace("{CENTRE}", $centre, $chrono->ref);
 //        $chrono->update($chrono_id);
     }

@@ -505,7 +505,7 @@ function fetchReservationSummary($soldTo, $shipTo)
                         break;
                     } else if (in_array($fault->code, array('SYS.STR.002', 'SYS.STR.006'))) {
                         if ($display_debug) {
-                            echo '<red>shipTo invalide<br/>' . $fault->message . ' (code: ' . $fault->code . ').</red>';
+                            echo '<span class="red">shipTo invalide<br/>' . $fault->message . ' (code: ' . $fault->code . ').</span>';
                         }
                         $break = true;
                         break;

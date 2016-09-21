@@ -19,7 +19,7 @@ class Reservations {
     }
 
     public function get_reservations() {
-        global $tabCert, $user, $gsx, $dateBegin, $dateEnd, $productCodes, $currentReservations, $debugMails;
+        global $user, $dateBegin, $dateEnd, $productCodes;
 
 
         $date = new DateTime();
@@ -62,9 +62,11 @@ class Reservations {
 
         foreach ($numbers as $n) {
             if (!empty($n['soldTo']) && !empty($n['shipTo'])) {
-                $this->fetchReservationSummary($n['soldTo'], $n['shipTo']);
+                $this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $currentReservations);
             }
         }
+        
+        return "OK";
     }
 
     function logError($error) {
@@ -469,8 +471,8 @@ class Reservations {
         }
     }
 
-    function fetchReservationSummary($soldTo, $shipTo) {
-        global $tabCert, $dateBegin, $dateEnd, $productCodes, $currentReservations;
+    function fetchReservationSummary($soldTo, $shipTo, $currentReservations) {
+        global $tabCert, $dateBegin, $dateEnd, $productCodes;
 
         if ($this->display_debug) {
             echo '<br/><br/>FetchReservationSummary pour shipTo: ' . $shipTo . ' (soldTo: ' . $soldTo . '): <br/>';

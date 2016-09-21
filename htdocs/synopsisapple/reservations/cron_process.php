@@ -10,7 +10,7 @@ global $db, $tabCert, $user, $gsx, $dateBegin, $dateEnd, $productCodes, $display
 $display_debug = true;
 
 // mettre à false pour envoyer les mails aux bons destinataires:
-$debugMails = 'f-martinez@sonardiffusion.com';
+$debugMails = false;
 
 if ($display_debug)
     llxHeader();

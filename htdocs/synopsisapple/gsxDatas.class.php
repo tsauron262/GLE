@@ -47,7 +47,7 @@ class gsxDatas {
 //        $password = '@Savbimp2014#';
 //        $serviceAccountNo = '100520';
         $userId = 'admin.gle@bimp.fr';
-        $password = 'BIMP@gle69#';
+//        $password = 'BIMP@gle69#';
         $serviceAccountNo = '897316';
 
 
@@ -56,7 +56,6 @@ class gsxDatas {
             $userId = $user->array_options['options_apple_id'];
             $serviceAccountNo = $user->array_options['options_apple_service'];
         }
-        
         
         
         if (isset($userId) && isset($serviceAccountNo)) {
@@ -76,10 +75,10 @@ class gsxDatas {
         else {
             echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
             return 0;
-        }
-        
+        }        
         
         $this->setSerial($serial);
+        
         $this->gsx = new GSX($details, $this->isIphone, self::$apiMode);
         if (count($this->gsx->errors['init']) || count($this->gsx->errors['soap'])) {
             $this->errors[] = 'GSX_init_error';

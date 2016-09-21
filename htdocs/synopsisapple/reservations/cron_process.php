@@ -308,7 +308,8 @@ function processReservation($resa, $users)
         $id_product = 0;
     }
     
-    
+    //Selection du centre
+    $centre = '';
     foreach ($users as $u) {
         if (!empty($u['centre'])) {
             $centre = $u['centre'];
@@ -330,7 +331,6 @@ function processReservation($resa, $users)
     }
 
     if ($chrono_id) {
-        $centre = '';
 
         if ($display_debug)
             echo 'CENTRE: ' . $centre . '<br/>';

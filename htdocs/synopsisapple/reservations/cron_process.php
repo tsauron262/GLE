@@ -1,6 +1,6 @@
 <?php
 
-define("NOLOGIN", 1);
+//define("NOLOGIN", 1);
 
 require_once('../../main.inc.php');
 

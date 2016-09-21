@@ -197,7 +197,11 @@ class ActionComm extends CommonObject
         $error=0;
         $now=dol_now();
         
-        /*deb mod drsi */ if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->userownerid && $user->id != $this->author->id)) $this->userownerid = $user->id; /*fmod drsi*/
+        
+        /*deb mod drsi */ 
+        if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->userownerid && $user->id != $this->author->id)) 
+            $this->userownerid = $user->id; 
+        /*fmod drsi*/
         
         // Clean parameters
         $this->label=dol_trunc(trim($this->label),128);

@@ -906,7 +906,7 @@ if (empty($reshook))
 	}
 
 	// Update a line within proposal
-	else if ($action == 'updateligne' && $user->rights->propal->creer && GETPOST('save'))
+	else if ($action == 'updateline' && $user->rights->propal->creer && GETPOST('save'))
 	{
 		// Define info_bits
 		$info_bits = 0;

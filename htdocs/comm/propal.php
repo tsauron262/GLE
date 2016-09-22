@@ -611,7 +611,7 @@ if (empty($reshook))
 	$mode='emailfromproposal';
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 
-
+//echo $action;die;
 	// Go back to draft
 	if ($action == 'modif' && $user->rights->propal->creer)
 	{

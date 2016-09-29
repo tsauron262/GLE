@@ -473,6 +473,8 @@ class statImputations {
                 }
             }
         }
+        if($this->grandType == 4 && stripos($this->proj->ref, "6") !== 0)
+                return "";
 
 
 
@@ -516,7 +518,6 @@ class statImputations {
                 } else
                     $restant = "Pas d'imputations";
 
-                if(stripos($this->proj->ref, "6") === 0)
                 $this->totForTauxHVendue += $this->realiser - $restant;
         } else {
             $totalLigne = $this->getAvancementDeclare($res->tid, $this->userId);

@@ -23,6 +23,7 @@ td.paddingRight{
 
 table.calendar tr td{
     border-bottom: 1px dotted black;
+    border-right: 1px dotted black;
     height: 20px;
     padding: 5px 2px 5px 3px;
 }

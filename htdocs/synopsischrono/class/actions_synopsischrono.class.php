@@ -92,7 +92,7 @@ class ActionsSynopsischrono {
                 $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
             }
             $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(chr.id) as nb, Centre as CentreVal, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_105` chrP, `" . MAIN_DB_PREFIX . "synopsischrono` chr WHERE chr.id = chrP.id AND " . ($centre ? "Centre IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY Centre, Etat");
+            $result2 = $db->query("SELECT COUNT(chr.id) as nb, Centre as CentreVal, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_105` chrP, `" . MAIN_DB_PREFIX . "synopsischrono` chr WHERE chr.id = chrP.id AND " . ($centre ? "Centre IN ('" . $centre . "') AND" : "") . " revisionNext < 1 GROUP BY Centre, Etat");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                 if($centre != $ligne2->CentreVal){

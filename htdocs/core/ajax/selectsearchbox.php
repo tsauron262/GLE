@@ -132,6 +132,15 @@ if (empty($reshook))
 else $arrayresult=$hookmanager->resArray;
 
 
+/*mod drsi pour le trie*/
+if(stripos($search_boxvalue, "sav") === 0)
+	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
+if(stripos($search_boxvalue, "fa") === 0)
+	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);
+if(stripos($search_boxvalue, "pr") === 0)
+	$arrayresult=array_merge(array($arrayresult["searchintopropal"]), $arrayresult);
+/*fmod drsi*/
+
 print json_encode($arrayresult);
 
 if (is_object($db)) $db->close();

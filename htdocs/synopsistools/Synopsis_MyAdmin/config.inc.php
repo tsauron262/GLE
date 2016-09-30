@@ -148,4 +148,6 @@ $cfg['SaveDir'] = '';
  * You can find more configuration options in Documentation.html
  * or here: http://wiki.phpmyadmin.net/pma/Config
  */
+
+$cfg['MaxNavigationItems'] = 500;
 ?>

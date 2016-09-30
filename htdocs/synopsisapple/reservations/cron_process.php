@@ -5,9 +5,6 @@
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/synopsisapple/class/reservations.class.php");
 
-
-
-
     llxHeader();
 
 ini_set('display_errors', 1);

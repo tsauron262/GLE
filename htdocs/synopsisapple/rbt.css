@@ -1,0 +1,20 @@
+@font-face {
+    font-family: 'FA';
+    src: url(./fonts/fontawesome.eot),
+        url(./fonts/fontawesome.ttf);
+}
+
+.error {
+    padding: 10px;
+}
+.error:before {
+    content: '\f06a';
+    font-family: 'FA';
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.error ol li {
+    color: #550000 !important;
+    font-weight: bold;
+}

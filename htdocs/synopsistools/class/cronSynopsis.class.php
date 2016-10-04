@@ -247,7 +247,7 @@ class CronSynopsis {
                 $sql2 = $this->db->query("UPDATE " . MAIN_DB_PREFIX . "user SET statut = 0 WHERE rowid = " . $result->fk_object);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
-                mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr, f.poirier@bimp.fr, f.olagnon@bimp.fr", null, $str2);
+                mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr, f.poirier@bimp.fr, j.belhocine@bimp.fr", null, $str2);
             }
         echo $str." Comptes fermés";
         }

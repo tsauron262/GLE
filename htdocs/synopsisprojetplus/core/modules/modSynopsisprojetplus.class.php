@@ -97,6 +97,18 @@ class modSynopsisprojetplus extends DolibarrModules {
         $this->rights[7][2] = 'c'; // type de la permission (deprecie a ce jour)
         $this->rights[7][3] = 0; // La permission est-elle une permission par defaut
         $this->rights[7][4] = 'caImput';
+
+        $this->rights[8][0] = 49; // id de la permission
+        $this->rights[8][1] = 'Voir les tableaux multi-utilisateurs'; // libelle de la permission
+        $this->rights[8][2] = 'c'; // type de la permission (deprecie a ce jour)
+        $this->rights[8][3] = 0; // La permission est-elle une permission par defaut
+        $this->rights[8][4] = 'tabMultiUser';
+
+        $this->rights[9][0] = 50; // id de la permission
+        $this->rights[9][1] = 'Voir les tableaux de bord direction'; // libelle de la permission
+        $this->rights[9][2] = 'c'; // type de la permission (deprecie a ce jour)
+        $this->rights[9][3] = 0; // La permission est-elle une permission par defaut
+        $this->rights[9][4] = 'tabAdmin';
         
         
         
@@ -120,6 +132,26 @@ class modSynopsisprojetplus extends DolibarrModules {
         
         $this->tabs = array('task:+attribution:Attribution:@monmodule:$user->rights->projet->lire:/synopsisprojetplus/task/timeP.php?&withproject=1&id=__ID__',
             'project:+imputations:Imputations:@monmodule:$user->rights->' . $this->rights_class . '->attribution:/synopsisprojetplus/histo_imputations.php?id=__ID__');
+        
+        $r = 0;
+        $this->boxes[$r] = array(
+        'file' => 'box_graph_caimput@synopsisprojetplus',
+        'note' => 'CA Imputations par mois',
+        'enabledbydefaulton' => 'Home'
+    );
+            $r++;
+        $this->boxes[$r] = array(
+        'file' => 'box_graph_derive@synopsisprojetplus',
+        'note' => 'Graph derive',
+        'enabledbydefaulton' => 'Home'
+    );
+            $r++;
+        $this->boxes[$r] = array(
+        'file' => 'box_graph_tauxH@synopsisprojetplus',
+        'note' => 'Graph taux heure vendue',
+        'enabledbydefaulton' => 'Home'
+    );
+            $r++;
     }
 
     /**
@@ -129,6 +161,34 @@ class modSynopsisprojetplus extends DolibarrModules {
     function init() {
         // Permissions
         $this->remove();
+        
+        $sql = array("CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisprojet_stat` (
+  `rowid` int(11) NOT NULL,
+  `dateC` date NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `valeur` decimal(10,2) NOT NULL);",
+            "
+ALTER TABLE `".MAIN_DB_PREFIX."synopsisprojet_stat`
+  ADD PRIMARY KEY (`rowid`);",
+            "ALTER TABLE `".MAIN_DB_PREFIX."synopsisprojet_stat`
+  MODIFY `rowid` int(11) NOT NULL AUTO_INCREMENT;",
+            
+            "UPDATE ".MAIN_DB_PREFIX."projet_task t SET t.dateo = (SELECT p.dateo FROM ".MAIN_DB_PREFIX."projet p WHERE t.fk_projet = p.rowid) WHERE t.dateo < '1980-01-01' || t.dateo is NULL;",
+
+"UPDATE ".MAIN_DB_PREFIX."synopsis_projet_task_timeP t SET t.`task_date` = (SELECT p.dateo FROM ".MAIN_DB_PREFIX."projet_task p WHERE t.fk_task = p.rowid) WHERE t.`task_date` < '1980-01-01';",
+
+"UPDATE `".MAIN_DB_PREFIX."projet_task` t SET `dateo` = (SELECT MIN(ti.`task_date`) FROM `".MAIN_DB_PREFIX."projet_task_time` ti WHERE (dateo is NULL || DATE(t.`dateo`) > DATE(ti.`task_date`) ) AND ti.`fk_task` = t.rowid) WHERE t.rowid IN (SELECT ti.fk_task FROM `".MAIN_DB_PREFIX."projet_task_time` ti WHERE (dateo is NULL || DATE(t.`dateo`) > DATE(ti.`task_date`) ) AND ti.`fk_task` = t.rowid)",
+"UPDATE `".MAIN_DB_PREFIX."projet_task` t SET `dateo` = (SELECT MIN(ti.`task_date`) FROM `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` ti WHERE (dateo is NULL || DATE(t.`dateo`) > DATE(ti.`task_date`)) AND ti.`fk_task` = t.rowid) WHERE t.rowid IN (SELECT ti.fk_task FROM `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` ti WHERE (dateo is NULL || DATE(t.`dateo`) > DATE(ti.`task_date`) ) AND ti.`fk_task` = t.rowid)",
+"UPDATE `".MAIN_DB_PREFIX."projet_task` t SET `dateo` = (SELECT MIN(ti.`date`) FROM `".MAIN_DB_PREFIX."Synopsis_projet_task_AQ` ti WHERE (dateo is NULL || DATE(t.`dateo`) > DATE(ti.`date`)) AND ti.`fk_task` = t.rowid) WHERE t.rowid IN (SELECT ti.fk_task FROM `".MAIN_DB_PREFIX."Synopsis_projet_task_AQ` ti WHERE (dateo is NULL || DATE(t.`dateo`) > DATE(ti.`date`) ) AND ti.`fk_task` = t.rowid)",
+
+
+"UPDATE `".MAIN_DB_PREFIX."projet` p SET `dateo` = (SELECT MIN(t.`dateo`) FROM `".MAIN_DB_PREFIX."projet_task` t WHERE (DATE(p.`dateo`) >  DATE(t.`dateo`)  )AND t.`fk_projet` = p.rowid) WHERE p.rowid IN (SELECT t.fk_projet FROM `".MAIN_DB_PREFIX."projet_task` t WHERE (DATE(p.`dateo`) >  DATE(t.`dateo`)  )AND t.`fk_projet` = p.rowid)",
+
+"UPDATE `".MAIN_DB_PREFIX."projet` p SET `date_close` = (SELECT MAX(ti.`task_date`) FROM `".MAIN_DB_PREFIX."projet_task_time` ti, ".MAIN_DB_PREFIX."projet_task t WHERE ( DATE(p.`date_close`) < DATE(ti.`task_date`) ) AND t.`fk_projet` = p.rowid AND ti.fk_task = t.rowid) WHERE p.rowid IN (SELECT t.fk_projet FROM `".MAIN_DB_PREFIX."projet_task_time` ti, ".MAIN_DB_PREFIX."projet_task t WHERE ( DATE(p.`date_close`) < DATE(ti.`task_date`) ) AND t.`fk_projet` = p.rowid AND ti.fk_task = t.rowid)",
+
+"UPDATE `".MAIN_DB_PREFIX."projet` p SET `date_close` = (SELECT MAX(ti.`task_date`) FROM `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` ti, ".MAIN_DB_PREFIX."projet_task t WHERE ( DATE(p.`date_close`) < DATE(ti.`task_date`) ) AND t.`fk_projet` = p.rowid AND ti.fk_task = t.rowid) WHERE p.rowid IN (SELECT t.fk_projet FROM `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` ti, ".MAIN_DB_PREFIX."projet_task t WHERE ( DATE(p.`date_close`) < DATE(ti.`task_date`) ) AND t.`fk_projet` = p.rowid AND ti.fk_task = t.rowid);",
+
+"UPDATE `".MAIN_DB_PREFIX."projet` p SET `date_close` = (SELECT MAX(ti.`date`) FROM `".MAIN_DB_PREFIX."Synopsis_projet_task_AQ` ti, ".MAIN_DB_PREFIX."projet_task t WHERE ( DATE(p.`date_close`) < DATE(ti.`date`) ) AND t.`fk_projet` = p.rowid AND ti.fk_task = t.rowid) WHERE p.rowid IN (SELECT t.fk_projet FROM `".MAIN_DB_PREFIX."Synopsis_projet_task_AQ` ti, ".MAIN_DB_PREFIX."projet_task t WHERE ( DATE(p.`date_close`) < DATE(ti.`date`) ) AND t.`fk_projet` = p.rowid AND ti.fk_task = t.rowid);");
 
         return $this->_init($sql);
     }

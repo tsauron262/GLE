@@ -745,7 +745,8 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
         
         urlStr = iFrame.find("iframe").get(0).contentWindow.location.toString();
         
-        if(urlIF.indexOf("action=create") !== -1){
+        
+        if(urlIF.indexOf("action=create") !== -1 && urlIF.indexOf("societe/soc.php") !== -1){
             if(urlStr.indexOf("id", 0) !== -1)
                 fermerIframe($(this).parent(), callBack);
         }

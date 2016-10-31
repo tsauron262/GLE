@@ -58,7 +58,7 @@ class modSynopsisCaldav extends DolibarrModules
         $this->module_parts = array('triggers' => 1);
 
         // Dependences
-        $this->depends = array('');
+//        $this->depends = array('');
         $this->requiredby = array();
 
         // Constantes

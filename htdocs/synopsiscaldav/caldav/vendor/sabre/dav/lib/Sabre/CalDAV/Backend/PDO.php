@@ -512,6 +512,7 @@ class PDO extends AbstractBackend {
         $this->traiteParticipant($action, $calendarData2, $user);
         
         $action->userownerid = $user->id;
+        $action->percentage = -1;
         $action->add($user);
 
 //        $this->userIdCaldavPlus($calendarId);

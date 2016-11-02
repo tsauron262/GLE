@@ -2214,7 +2214,7 @@ class User extends CommonObject
                         $ident = $this->id.$info['mail'];
                         $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
-                        $info ['mailQuota'] = "104857600";
+                        $info ['mailQuota'] = "2147483648";
                     }
                 }
                 if($this->admin){

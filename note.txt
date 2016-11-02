@@ -1561,3 +1561,27 @@ postmaster@bimp.fr
 ResMaiL/940
 
 t
+
+
+
+Verif capsim date imput + prevue  + avc
+SELECT * FROM `llx_synopsis_projet_task_timeP` tp, llx_projet_task t WHERE DATE(`task_date`) <   DATE(`dateo`)  AND tp.fk_task = t.rowid
+
+SELECT p.rowid as pid, t.rowid as tid, p.`dateo` as dateOP, p.`date_close` as dateFP, t.`dateo` as dateT, `task_date` as dateI
+ FROM `llx_synopsis_projet_task_timeP` tp, llx_projet_task t, llx_projet p WHERE 
+(
+DATE(`task_date`) <   DATE(t.`dateo`)  
+||
+DATE(`task_date`) <   DATE(p.`dateo`)
+||
+DATE(`task_date`) > DATE(p.`date_close`)
+)
+AND tp.fk_task = t.rowid AND t.`fk_projet` = p.rowid
+
+
+
+
+PETTER
+Serveur mail depuis serveur GLE
+ssh bimproot@172.31.100.95       xx-BiMp/16
+mysql -u bimpadmin -p --host 172.31.100.95      MmmAdBi33

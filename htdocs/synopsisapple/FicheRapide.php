@@ -335,9 +335,9 @@ if (isset($_REQUEST['idChrono'])) {
 
 
 
+$socid = intval($socid);
 
-
-if ($socid != "") {
+if ($socid != "" && $socid > 0) {
     echo "<div id='reponse' >";
     echo "</div>";
     echo "<form id='form' method='POST' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "&action=semitotal'>";

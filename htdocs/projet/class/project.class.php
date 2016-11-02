@@ -129,6 +129,28 @@ class Project extends CommonObject
             dol_syslog(get_class($this)."::create error -1 ref null", LOG_ERR);
             return -1;
         }
+        
+        /*mod drsi*/
+        	//Generate next ref
+		$defaultref='';
+    	$obj = empty($conf->global->PROJECT_ADDON)?'mod_project_simple':$conf->global->PROJECT_ADDON;
+    	// Search template files
+    	$file=''; $classname=''; $filefound=0;
+    	$dirmodels=array_merge(array('/'),(array) $conf->modules_parts['models']);
+    	foreach($dirmodels as $reldir)
+    	{
+    	    $file=dol_buildpath($reldir."core/modules/project/".$obj.'.php',0);
+    	    if (file_exists($file))
+    	    {
+    	        $filefound=1;
+    	        dol_include_once($reldir."core/modules/project/".$obj.'.php');
+            	$modProject = new $obj;
+            	$this->ref = $modProject->getNextValue(is_object($this->thirdparty)?$this->thirdparty:null, $this);
+            	break;
+    	    }
+    	}
+        
+        /*fmod drsi*/
 
         $this->db->begin();
 

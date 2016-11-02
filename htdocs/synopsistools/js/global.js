@@ -741,12 +741,22 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
         $(this).contents().find("input[name='updateassignedtouser'], input[name='addassignedtouser'], input[name='addGroupMember']").click(function () {
             nbLoad = 100;
         });
-        i++;
+        
+        
         urlStr = iFrame.find("iframe").get(0).contentWindow.location.toString();
+        
+        
+        if(urlIF.indexOf("action=create") !== -1 && urlIF.indexOf("societe/soc.php") !== -1){
+            if(urlStr.indexOf("id", 0) !== -1)
+                fermerIframe($(this).parent(), callBack);
+        }
+        else{
+        i++;
         if (i > nbLoad && urlStr.indexOf("delete", 0) === -1 && urlStr.indexOf("assignedtouser", 0) === -1) {
 //        $("#id-container").show();
             fermerIframe($(this).parent(), callBack);
         }
+    }
     });
     iFrame.find("span.petit").click(function () {
 //        id = $(this).parent().attr("id").replace("iFrame", "");

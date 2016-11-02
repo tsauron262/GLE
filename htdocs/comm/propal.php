@@ -611,7 +611,7 @@ if (empty($reshook))
 	$mode='emailfromproposal';
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 
-
+//echo $action;die;
 	// Go back to draft
 	if ($action == 'modif' && $user->rights->propal->creer)
 	{
@@ -1015,7 +1015,7 @@ if (empty($reshook))
 		}
 	}
 
-	else if ($action == 'updateline' && $user->rights->propal->creer && GETPOST('cancel'))
+	else if ($action == 'updateligne' && $user->rights->propal->creer && GETPOST('cancel'))
 	{
 		header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $object->id); // Pour reaffichage de la fiche en cours d'edition
 		exit();
@@ -2031,7 +2031,7 @@ if ($action == 'create')
 
 	print '	<form name="addproduct" id="addproduct" action="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . (($action != 'editline') ? '#add' : '#line_' . GETPOST('lineid')) . '" method="POST">
 	<input type="hidden" name="token" value="' . $_SESSION ['newtoken'] . '">
-	<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline') . '">
+	<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateligne') . '">
 	<input type="hidden" name="mode" value="">
 	<input type="hidden" name="id" value="' . $object->id . '">
 	';

@@ -41,7 +41,7 @@ define("BAIKAL_CARD_ENABLED", TRUE);
 define("BAIKAL_CAL_ENABLED", TRUE);
 
 # WebDAV authentication type; default Digest
-define("BAIKAL_DAV_AUTH_TYPE", 'Digest');
+define("BAIKAL_DAV_AUTH_TYPE", 'Basic');
 
 # Baïkal Web Admin ON/OFF switch; default TRUE
 define("BAIKAL_ADMIN_ENABLED", TRUE);

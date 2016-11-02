@@ -172,7 +172,7 @@ class synopsisexport {
             $partReq5 = " FROM " . MAIN_DB_PREFIX . "societe soc, " . MAIN_DB_PREFIX . "facturedet det, " . MAIN_DB_PREFIX . "facture fact ";
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "propal propal on  propal.rowid = el.fk_source ";
-            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON chrono1.revisionNext < 1 AND chrono1.propalId = el.fk_source ";
+            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON (`revisionNext` = 0 || `revisionNext` is NULL) AND chrono1.propalId = el.fk_source ";
             $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
             $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
             $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";

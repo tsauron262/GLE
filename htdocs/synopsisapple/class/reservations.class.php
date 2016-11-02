@@ -7,20 +7,22 @@ require_once DOL_DOCUMENT_ROOT . '/societe/class/client.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 
-class Reservations {
+class Reservations
+{
 
     // Active tous les echos et désactive les logs: 
-    var $display_debug = false;
+    var $display_debug = true;
     // mettre à false pour envoyer les mails aux bons destinataires:
-    var $debugMails = false;
+    var $debugMails = true;
 
-    function __construct($db) {
+    function __construct($db)
+    {
         $this->db = $db;
     }
 
-    public function get_reservations() {
+    public function get_reservations()
+    {
         global $user, $dateBegin, $dateEnd, $productCodes;
-
 
         $date = new DateTime();
         $dateBegin = $date->format('Y-m-d');
@@ -65,11 +67,12 @@ class Reservations {
                 $this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $currentReservations);
             }
         }
-        
+
         return "OK";
     }
 
-    function logError($error) {
+    function logError($error)
+    {
 
         if (is_string($error)) {
             if ($this->display_debug) {
@@ -88,7 +91,8 @@ class Reservations {
         }
     }
 
-    function initGsx() {
+    function initGsx()
+    {
         global $gsx;
 
         if (isset($gsx))
@@ -115,7 +119,8 @@ class Reservations {
         }
     }
 
-    function getCurrentReservations() {
+    function getCurrentReservations()
+    {
 
         $date = new DateTime();
         $date->sub(new DateInterval('P2D'));
@@ -136,7 +141,8 @@ class Reservations {
         return $reservations;
     }
 
-    function getUsersByShipTo($shipTo) {
+    function getUsersByShipTo($shipTo)
+    {
         $users = array();
 
         $sql = 'SELECT u.`rowid` as id, u.email, ue.apple_techid as techid, ue.apple_centre as centre_sav FROM ' . MAIN_DB_PREFIX . 'user u';
@@ -175,7 +181,8 @@ class Reservations {
         return $users;
     }
 
-    function getOrCreateCustomer($customer) {
+    function getOrCreateCustomer($customer)
+    {
         if (!isset($customer->emailId) || empty($customer->emailId))
             return false;
 
@@ -220,13 +227,14 @@ class Reservations {
 
         $res = $client->create($user);
         if ($res < 0) {
-            $this->logError('Echec création client pour e-mail: "$customer->emailId" (Retour Client::create(): ' . $res . ')');
+            $this->logError('Echec création client pour e-mail: "' . $customer->emailId . '" (Retour Client::create(): ' . $res . ')');
             return false;
         }
         return $client;
     }
 
-    function getProductBySerial($serial) {
+    function getProductBySerial($serial)
+    {
         $sql = 'SELECT `id` FROM ' . MAIN_DB_PREFIX . 'synopsischrono_chrono_101 ';
         $sql .= 'WHERE `N__Serie` = \'' . $serial . '\'';
 
@@ -242,7 +250,8 @@ class Reservations {
         return 0;
     }
 
-    function createProduct($serial, $client_id) {
+    function createProduct($serial, $client_id)
+    {
         global $gsx;
 
         if (!isset($gsx))
@@ -296,11 +305,12 @@ class Reservations {
         return $prod_id;
     }
 
-    function processReservation($resa, $users) {
+    function processReservation($resa, $users)
+    {
         if (!count($users))
             return;
 
-        $customer = null;
+        $customer = false;
         global $user;
 
         if ($this->display_debug) {
@@ -313,7 +323,6 @@ class Reservations {
         if (isset($resa->customer) && !empty($resa->customer)) {
             $customer = $this->getOrCreateCustomer($resa->customer);
         }
-
         if (isset($resa->product->serialNumber) && !empty($resa->product->serialNumber)) {
             $id_product = $this->getProductBySerial($resa->product->serialNumber);
             if (!$id_product) {
@@ -322,7 +331,7 @@ class Reservations {
         } else {
             $id_product = 0;
         }
-
+        
         //Selection du centre
         $centre = '';
         foreach ($users as $u) {
@@ -359,8 +368,7 @@ class Reservations {
 //        $chrono->ref = str_replace("{CENTRE}", $centre, $chrono->ref);
 //        $chrono->update($chrono_id);
         }
-
-
+        
         // Liaison SAV / produit: 
         if ($id_product && $chrono_id) {
             $lien = new lien($this->db);
@@ -368,17 +376,20 @@ class Reservations {
             $lien->fetch(3);
             $lien->setValue($chrono_id, array($id_product));
         }
-
+        
         // Ajout agenda:
         $ac = new ActionComm($this->db);
         $ac->type_id = 52;
         $ac->label = 'Réservation GSX';
         $ac->transparency = 1;
 
-        $dateBegin = new DateTime($resa->reservationDate);
-        $dateEnd = new DateTime($resa->reservationDate);
+        $dateBegin = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
+        $dateEnd = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
         $dateEnd->add(new DateInterval('PT1H'));
-        $ac->datep = $dateBegin->format('Y-m-d H:i:s') . '<br/>';
+        $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
+        $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
+
+        $ac->datep = $dateBegin->format('Y-m-d H:i:s');
         $ac->datef = $dateEnd->format('Y-m-d H:i:s');
 
         $usersAssigned = array();
@@ -404,15 +415,21 @@ class Reservations {
             $ac->socid = $customer->id;
         }
 
+//        date_default_timezone_set("GMT");
         $fk_ac = $ac->add($user);
+//        date_default_timezone_set("Europe/Paris");
+
         if (!$fk_ac) {
             $this->logError('Echec de la création du RDV pour la réservation "' . $resa->reservationId . '"');
             return;
         }
-
+        
         $ac->array_options['options_resgsx'] = $resa->reservationId;
         $ac->insertExtraFields();
-
+        
+        $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
+        $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
+        
         // Envoi mails: 
         $subject = 'Nouvelle Reservation GSX le ' . $dateBegin->format('d/m/Y') . ' a ' . $dateBegin->format('H\Hi');
         $message = 'Bonjour,' . "\n\n";
@@ -451,13 +468,12 @@ class Reservations {
                 $mails .= $u['email'];
             }
         }
-
+        
         if ($mails) {
             if ($this->display_debug) {
+                if ($this->debugMails)
+                    $mails = $this->debugMails;
                 echo 'Envoi du mail à "' . $mails . '". ';
-                global $debugMails;
-                if ($debugMails)
-                    $mails = $debugMails;
             }
             if (!mailSyn2($subject, $mails, '', $message)) {
                 $this->logError('Echec de l\'envoi du mail de notification (ID réservation: ' . $resa->reservationId . ')');
@@ -467,11 +483,12 @@ class Reservations {
         }
         if ($this->display_debug) {
             echo '[OK]<br/><br/>';
-//        exit;
+            exit;
         }
     }
 
-    function fetchReservationSummary($soldTo, $shipTo, $currentReservations) {
+    function fetchReservationSummary($soldTo, $shipTo, $currentReservations)
+    {
         global $tabCert, $dateBegin, $dateEnd, $productCodes;
 
         if ($this->display_debug) {
@@ -579,5 +596,4 @@ class Reservations {
             }
         }
     }
-
 }

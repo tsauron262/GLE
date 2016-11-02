@@ -24,7 +24,8 @@ $coefPrix = 1;
 //$password = '30Amelie38';
 //$serviceAccountNo = '0000100520';
 
-function fetchPartsList() {
+function fetchPartsList()
+{
     $parts = array();
     $i = 1;
     while (true) {
@@ -45,12 +46,12 @@ function fetchPartsList() {
     return $parts;
 }
 
-function isIphone($serial) {
+function isIphone($serial)
+{
     if (preg_match('/^[0-9]{15,16}$/', $serial))
         return true;
     return false;
 }
-
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
 //        case 'addCartToPropal':
@@ -223,8 +224,7 @@ if (isset($_GET['action'])) {
             if (isset($_GET['serial'])) {
                 if (isset($_GET['request'])) {
                     if (isset($_GET['prodId'])) {
-                        $isIphone = 
-                        $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo, $_GET['request']);
+                        $isIphone = $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo, $_GET['request']);
                         $return = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
 
 
@@ -288,16 +288,25 @@ if (isset($_GET['action'])) {
                 echo '<p class="error">Une erreur est survenue (ID réparation absent)</p>' . "\n";
             }
             break;
+
+        case 'markRepairAsReimbursed':
+            if (isset($_GET['repairRowId'])) {
+                $gsxDatas = new gsxDatas(null, $userId, $password, $serviceAccountNo);
+                echo $gsxDatas->markRepairAsReimbursed($_GET['repairRowId']);
+            } else {
+                echo '<p class="error">Une erreur est survenue (ID réparation absent)</p>' . "\n";
+            }
+            break;
     }
     die('');
 }
 
-function dateAppleToDate($date) {
+function dateAppleToDate($date)
+{
     $garantieT = explode("/", $date);
     if (isset($garantieT[2]))
         return $garantieT[0] . "/" . $garantieT[1] . "/20" . $garantieT[2];
     else
         return "";
 }
-
 ?>

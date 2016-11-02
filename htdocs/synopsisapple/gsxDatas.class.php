@@ -13,8 +13,8 @@ class gsxDatas {
     protected $errors = array();
     protected $repairs = array();
     public $partsPending = null;
-    public static $apiMode = 'ut';
-//    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -107,6 +107,7 @@ class gsxDatas {
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $repair->setSerial($this->serial);
                 $repair->setDatas($row->repairNumber, $row->repairConfirmNumber, $row->serialUpdateConfirmNumber, $row->closed, $row->rowid);
+                $repair->isReimbursed = $row->is_reimbursed;
                 $this->repairs[] = $repair;
             }
         }
@@ -144,6 +145,21 @@ class gsxDatas {
         $html .= $repair->displayErrors();
         if (count($this->gsx->errors['soap']))
             $html .= $this->getGSXErrorsHtml();
+        return $html;
+    }
+    
+    public function markRepairAsReimbursed($repairRowId) {
+        global $db;
+
+        $repair = new Repair($db, $this->gsx, $this->isIphone);
+        $repair->rowId = $repairRowId;
+        if ($repair->load()) {
+            $repair->isReimbursed = 1;
+            if ($repair->update())
+                return 'ok';
+        }
+        $html = '<p class="error">Echec de la mise à jour de la réparation</p>';
+        $html .= $repair->displayErrors();
         return $html;
     }
 
@@ -188,17 +204,17 @@ class gsxDatas {
                     $html .= '<tbody>' . "\n";
                     $html .= '' . "\n";
 
-                    $html .= '<tr>' . "\n";
+//                    $html .= '<tr>' . "\n";
 
-                    $src = $datas['imageURL'];
+//                    $src = $datas['imageURL'];
 //                    if (isset($src) && $src) {
-                    $html .= '<td class="productImgContainer">' . "\n";
-                    $html .= '<img class="productImg" src="' . $src . '"/>' . "\n";
-                    $html .= '</td>' . "\n";
+//                    $html .= '<td class="productImgContainer">' . "\n";
+//                    $html .= '<img class="productImg" src="' . $src . '"/>' . "\n";
+//                    $html .= '</td>' . "\n";
 //                    }
 
-                    $html .= '<td>' . "\n";
-                    $html .= '<table><thead></thead><tbody>' . "\n";
+//                    $html .= '<td>' . "\n";
+//                    $html .= '<table><thead></thead><tbody>' . "\n";
 //echo "<pre>"; print_r($datas);die;
                     $this->serial2 = $datas['serialNumber'];
 
@@ -244,10 +260,9 @@ class gsxDatas {
                     if (isset($datas['manualURL']) && $datas['manualURL'] !== '')
                         $html .= '<tr style="height: 30px;"><td colspan="2"><a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a></td></tr>' . "\n";
 
-                    $html .= '</tbody></table>' . "\n";
-                    $html .= '</td>' . "\n";
-
-                    $html .= '</tr>' . "\n";
+//                    $html .= '</tbody></table>' . "\n";
+//                    $html .= '</td>' . "\n";
+//                    $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
                     $html .= '</div></div>' . "\n";
 

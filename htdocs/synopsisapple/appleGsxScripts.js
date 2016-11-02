@@ -37,16 +37,16 @@ function CompTIACodes() {
     this.codes = [];
     this.modifiers = [];
 
-    this.addCode = function(grp, code, desc) {
+    this.addCode = function (grp, code, desc) {
         if (!this.codes[grp]) {
             this.codes[grp] = [];
         }
         this.codes[grp][code] = desc;
     };
-    this.addModifier = function(modifier, desc) {
+    this.addModifier = function (modifier, desc) {
         this.modifiers[modifier] = desc;
     };
-    this.endInit = function() {
+    this.endInit = function () {
         if ((this.loadStatus == 'loading') || (this.loadStatus == 'newLoadingTry')) {
             for (id in GSX.products) {
                 if (GSX.products[id].cart) {
@@ -56,7 +56,7 @@ function CompTIACodes() {
             this.loadStatus = 'loaded';
         }
     };
-    this.load = function() {
+    this.load = function () {
         if (this.loadStatus != 'unloaded')
             return;
         this.loadStatus = 'loading';
@@ -67,7 +67,7 @@ function CompTIACodes() {
         }
         setRequest('GET', 'loadCompTIACodes', 0, '');
     };
-    this.appendCompTIACodesSelect = function(cart, $div, group) {
+    this.appendCompTIACodesSelect = function (cart, $div, group) {
         if (!$div.length)
             return;
 
@@ -89,7 +89,7 @@ function CompTIACodes() {
         $div.html(html);
         cart.setChangesEvents($div.parent('tr'));
     };
-    this.onLoadFail = function() {
+    this.onLoadFail = function () {
         if (this.loadStatus == 'loading') {
             this.loadStatus = 'newLoadingTry';
             setRequest('GET', 'loadCompTIACodes', 0, '');
@@ -124,7 +124,7 @@ function CartProduct(code, name, num, price) {
     this.qty = null;
     this.comptiaCode = null;
     this.comptiaModifier = null;
-    this.setValues = function($tr) {
+    this.setValues = function ($tr) {
         if (!$tr.length)
             return;
         if (this.qty) {
@@ -150,22 +150,22 @@ function Cart(prodId, serial, PM) {
     this.$prod = $('#prod_' + prodId);
     this.changes = false;
 
-    this.newProdContainer = function() {
+    this.newProdContainer = function () {
         this.$prod = $('#prod_' + prodId);
     };
-    this.setEvents = function() {
+    this.setEvents = function () {
     };
-    this.setChangesEvents = function($tr) {
+    this.setChangesEvents = function ($tr) {
         if (!$tr.length)
             return;
-        $tr.find('input').change(function() {
+        $tr.find('input').change(function () {
             ptr.displayModifMsg();
         });
-        $tr.find('select').change(function() {
+        $tr.find('select').change(function () {
             ptr.displayModifMsg();
         });
     }
-    this.onComptiaLoadingStart = function() {
+    this.onComptiaLoadingStart = function () {
         var $cart = this.$prod.find('.cartContent');
         if ($cart.length) {
             displayRequestMsg('requestProcess', 'Liste des codes compTIA en cours de chargement', $cart.find('.cartRequestResults'));
@@ -174,7 +174,7 @@ function Cart(prodId, serial, PM) {
             $cart.find('.cartProducts').hide();
         }
     };
-    this.onComptiaLoadingEnd = function() {
+    this.onComptiaLoadingEnd = function () {
         var $cart = this.$prod.find('.cartContent');
         if ($cart.length) {
             $cart.find('th.comptiaCodeTitle').show();
@@ -196,7 +196,7 @@ function Cart(prodId, serial, PM) {
             }
         }
     };
-    this.onComptiaLoadingFail = function() {
+    this.onComptiaLoadingFail = function () {
         var $cart = this.$prod.find('.cartContent');
         $cart.find('.cartRequestResults').html('').hide();
         $cart.find('.cartSubmit').attr('class', 'cartSubmit deactivated');
@@ -217,7 +217,7 @@ function Cart(prodId, serial, PM) {
         }
     };
 
-    this.add = function($span, qty, comptiaCode, comptiaModifier) {
+    this.add = function ($span, qty, comptiaCode, comptiaModifier) {
         if (($span).hasClass('deactivated'))
             return;
 
@@ -266,14 +266,14 @@ function Cart(prodId, serial, PM) {
         } else
             CTIA.load();
     };
-    this.remove = function($span) {
+    this.remove = function ($span) {
         if ($span.hasClass('deactivated'))
             return;
 
         $span.attr('class', 'removeCartProduct deactivated');
         var $tr = $span.parent('td').parent('tr');
         var id = $tr.attr('class').replace(/^cartProd_(\d+)$/, '$1');
-        $tr.fadeOut(250, function() {
+        $tr.fadeOut(250, function () {
             $(this).remove();
             if (!ptr.$prod.find('.cartProducts').find('tbody').find('tr').length) {
                 ptr.$prod.find('.cartProducts').hide();
@@ -284,7 +284,7 @@ function Cart(prodId, serial, PM) {
         this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
         var $addSpan = this.$prod.find('.partGroup_' + this.cartProds[id].code).find('tr.partRow_' + this.cartProds[id].listId).find('span.addToCart');
         if ($addSpan.length) {
-            $addSpan.attr('class', 'addToCart activated').click(function() {
+            $addSpan.attr('class', 'addToCart activated').click(function () {
                 ptr.add($(this));
             });
         }
@@ -293,7 +293,7 @@ function Cart(prodId, serial, PM) {
         this.displayModifMsg();
         this.activateSave();
     };
-    this.deleteCart = function() {
+    this.deleteCart = function () {
         this.nextCartProdId = 0;
         this.nbrProds = 0;
         for (id in this.cartProds) {
@@ -302,19 +302,19 @@ function Cart(prodId, serial, PM) {
         delete this.cartProds;
         this.cartProds = [];
         this.$prod.find('.cartProducts').find('tbody').html('');
-        this.$prod.find('span.addToCart.deactivated').each(function() {
+        this.$prod.find('span.addToCart.deactivated').each(function () {
             $(this).attr('class', 'addToCart activated');
         });
     };
-    this.activateSave = function() {
+    this.activateSave = function () {
         this.$prod.find('.cartSave').attr('class', 'button cartSave greenHover');
         this.$prod.find('.addToPropal').attr('class', 'button addToPropal');
     };
-    this.deactivateSave = function() {
+    this.deactivateSave = function () {
         this.$prod.find('.cartSave').attr('class', 'button cartSave greenHover deactivated');
         this.$prod.find('.addToPropal').attr('class', 'button addToPropal deactivated');
     };
-    this.save = function(addToPropal) {
+    this.save = function (addToPropal) {
         if (typeof (addToPropal) == 'undefined')
             addToPropal = false;
 
@@ -351,7 +351,7 @@ function Cart(prodId, serial, PM) {
         this.$prod.find('.cartRequestResults').stop().css('opacity', 1).append('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('POST', 'savePartsCart', this.prodId, params);
     };
-    this.load = function() {
+    this.load = function () {
         if (this.$prod.find('.cartLoad').hasClass('deactivated'))
             return;
 
@@ -365,7 +365,7 @@ function Cart(prodId, serial, PM) {
         this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('GET', 'loadPartsCart', this.prodId, '&serial=' + this.serial + '&prodId=' + this.prodId);
     };
-    this.onPartLoad = function(code, name, num, comptiaCode, comptiaModifier, qty, price) {
+    this.onPartLoad = function (code, name, num, comptiaCode, comptiaModifier, qty, price) {
         var curId = this.nextCartProdId;
         this.nextCartProdId++;
 
@@ -411,7 +411,7 @@ function Cart(prodId, serial, PM) {
         } else
             CTIA.load();
     };
-    this.onPartsListLoad = function() {
+    this.onPartsListLoad = function () {
         for (id in this.cartProds) {
             if (ptr.cartProds[id]) {
                 var listId = ptr.PM.getPartListId(ptr.cartProds[id].code, ptr.cartProds[id].num);
@@ -424,12 +424,12 @@ function Cart(prodId, serial, PM) {
             }
         }
     };
-    this.addToPropal = function($span) {
+    this.addToPropal = function ($span) {
         if ($span.hasClass('deactivated'))
             return;
         this.save(true);
     };
-    this.displayModifMsg = function() {
+    this.displayModifMsg = function () {
         this.changes = true;
         var $div = this.$prod.find('.cartRequestResults2');
         if ($div.length) {
@@ -439,7 +439,7 @@ function Cart(prodId, serial, PM) {
             $div.stop().css('opacity', 1).append('<p class="alert changesMsg">Votre panier a été modifié. Si vous souhaitez conserver ces modifications, pensez à sauvegarder le panier.</p>').slideDown(250);
         }
     }
-    this.removeModifMsg = function() {
+    this.removeModifMsg = function () {
         this.changes = false;
         var $div = this.$prod.find('.cartRequestResults2');
         if ($div.length) {
@@ -458,12 +458,12 @@ function PartsManager(prodId, serial) {
     this.$prod = $('#prod_' + prodId);
     this.$parts = null;
 
-    this.newProdContainer = function() {
+    this.newProdContainer = function () {
         this.$prod = $('#prod_' + prodId);
     };
 
     //Gestion de la liste des Parts:
-    this.removeParts = function() {
+    this.removeParts = function () {
         for (gpe in this.parts) {
             for (id in this.parts[gpe]) {
                 delete this.parts[gpe][id];
@@ -473,19 +473,19 @@ function PartsManager(prodId, serial) {
         delete this.parts;
         this.parts = [];
     };
-    this.addPart = function(group, name, num, type, price, eeeCode, newNum) {
+    this.addPart = function (group, name, num, type, price, eeeCode, newNum) {
         if (group === ' ')
             group = 0;
         if (!this.parts[group])
             this.parts[group] = [];
         this.parts[group].push(new Part(name, num, type, price, eeeCode, newNum));
     };
-    this.loadParts = function() {
+    this.loadParts = function () {
         displayRequestMsg('requestProcess', '', this.$prod.find('.partsRequestResult'));
         this.removeParts();
         setRequest('GET', 'loadParts', this.prodId, '&serial=' + this.serial + '&prodId=' + this.prodId);
     };
-    this.displayParts = function() {
+    this.displayParts = function () {
         this.$parts = this.$prod.find('.partsListContainer');
         var ths = '';
         ths += '<th></th>';
@@ -527,46 +527,46 @@ function PartsManager(prodId, serial) {
         }
         this.setEvents();
     };
-    this.setEvents = function() {
-        ptr.$prod.find('div.partGroupName.closed').click(function() {
+    this.setEvents = function () {
+        ptr.$prod.find('div.partGroupName.closed').click(function () {
             ptr.openPartsGroup($(this));
         });
-        ptr.$prod.find('div.partGroupName.opened').click(function() {
+        ptr.$prod.find('div.partGroupName.opened').click(function () {
             ptr.closePartsGroup($(this));
         });
-        ptr.$prod.find('tr.partRow').mouseover(function() {
+        ptr.$prod.find('tr.partRow').mouseover(function () {
             $(this).find('td').css({
                 'border-top': '1px solid #22A022',
                 'border-bottom': '1px solid #22A022',
                 'color': '#000'
             });
-        }).mouseout(function() {
+        }).mouseout(function () {
             $(this).find('td').css({
                 'border-top': 'none',
                 'border-bottom': '1px solid #A0A0A0',
                 'color': '#464646'
             });
         });
-        ptr.$prod.find('.filterTitle').click(function() {
+        ptr.$prod.find('.filterTitle').click(function () {
             ptr.showTypeFilters();
         });
-        ptr.$prod.find('.filterTitle').mouseover(function() {
+        ptr.$prod.find('.filterTitle').mouseover(function () {
 //            ptr.showTypeFilters();
-        }).mouseout(function() {
+        }).mouseout(function () {
             ptr.hideTypeFilters();
         });
-        ptr.$prod.find('.typeFiltersContent').mouseover(function() {
+        ptr.$prod.find('.typeFiltersContent').mouseover(function () {
             ptr.showTypeFilters();
-        }).mouseout(function() {
+        }).mouseout(function () {
             ptr.hideTypeFilters();
         });
-        ptr.$prod.find('.filterCheckAll').click(function() {
+        ptr.$prod.find('.filterCheckAll').click(function () {
             ptr.showAllPartsGroup();
         });
-        ptr.$prod.find('.filterHideAll').click(function() {
+        ptr.$prod.find('.filterHideAll').click(function () {
             ptr.hideAllPartsGroup();
         });
-        ptr.$prod.find('.typeFiltersContent input').change(function() {
+        ptr.$prod.find('.typeFiltersContent input').change(function () {
             var gpe = $(this).attr('id').replace(/^typeFilter_(\d+)_(.+)$/, '$2');
             if ($(this).prop('checked')) {
                 ptr.$prod.find('.partGroup_' + gpe).stop().css('display', 'none').slideDown(250);
@@ -575,7 +575,7 @@ function PartsManager(prodId, serial) {
             }
         });
     };
-    this.getPartListId = function(gpe, num) {
+    this.getPartListId = function (gpe, num) {
         if (this.parts[gpe]) {
             for (idx in this.parts[gpe]) {
                 if (this.parts[gpe][idx].num == num)
@@ -586,51 +586,51 @@ function PartsManager(prodId, serial) {
     };
 
     // Gestion de l'affichage:
-    this.showTypeFilters = function() {
+    this.showTypeFilters = function () {
         this.$prod.find('.typeFiltersContent').stop().css('display', 'none').slideDown(250);
     }
-    this.hideTypeFilters = function() {
+    this.hideTypeFilters = function () {
         this.$prod.find('.typeFiltersContent').stop().slideUp(250);
     }
-    this.openPartsGroup = function($gpe) {
+    this.openPartsGroup = function ($gpe) {
         $gpe.parent().children('div.partsList').slideDown(250);
-        $gpe.attr('class', 'partGroupName opened').off('click').click(function() {
+        $gpe.attr('class', 'partGroupName opened').off('click').click(function () {
             ptr.closePartsGroup($gpe);
         });
     };
-    this.closePartsGroup = function($gpe) {
+    this.closePartsGroup = function ($gpe) {
         $gpe.parent().children('div.partsList').slideUp(250);
-        $gpe.attr('class', 'partGroupName closed').off('click').click(function() {
+        $gpe.attr('class', 'partGroupName closed').off('click').click(function () {
             ptr.openPartsGroup($gpe);
         });
     };
-    this.showPartsGroup = function(gpe) {
+    this.showPartsGroup = function (gpe) {
         $('#typeFilter_' + ptr.prodId + '_' + gpe).attr('checked', '');
         this.$prod.find('.partGroup_' + gpe).stop().css('display', 'none').slideDown(250);
     };
-    this.hidePartsGroup = function(gpe) {
+    this.hidePartsGroup = function (gpe) {
         $('#typeFilter_' + ptr.prodId + '_' + gpe).removeAttr('checked');
         this.$prod.find('.partGroup_' + gpe).stop().hide();
     };
-    this.showAllPartsGroup = function() {
-        this.$prod.find('.typeFiltersContent').find('input').each(function() {
+    this.showAllPartsGroup = function () {
+        this.$prod.find('.typeFiltersContent').find('input').each(function () {
             $(this).attr('checked', '');
         });
-        this.$prod.find('.partGroup').each(function() {
+        this.$prod.find('.partGroup').each(function () {
             $(this).stop().show();
         });
     };
-    this.hideAllPartsGroup = function() {
-        this.$prod.find('.typeFiltersContent').find('input').each(function() {
+    this.hideAllPartsGroup = function () {
+        this.$prod.find('.typeFiltersContent').find('input').each(function () {
             $(this).removeAttr('checked');
         });
-        this.$prod.find('.partGroup').each(function() {
+        this.$prod.find('.partGroup').each(function () {
             $(this).slideUp(250);
         });
     };
-    this.resetPartsDisplay = function() {
+    this.resetPartsDisplay = function () {
         this.showAllPartsGroup();
-        this.$prod.find('tr.partRow').each(function() {
+        this.$prod.find('tr.partRow').each(function () {
             $(this).show();
         });
         for (gpe in this.parts) {
@@ -639,25 +639,25 @@ function PartsManager(prodId, serial) {
     };
 
     // Gestion des filtres et des recherches:
-    this.addKeywordFilter = function() {
+    this.addKeywordFilter = function () {
         var kw = this.$prod.find('.keywordFilter').val();
         if (!kw) {
             this.$prod.find('.curKeywords').append('<p class="error">Veuillez entrer un mot-clé</p>');
-            this.$prod.find('.curKeywords').find('p.error').fadeOut(2000, function() {
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(2000, function () {
                 $(this).remove();
             });
             return;
         }
         if (/ +/.test(kw)) {
             this.$prod.find('.curKeywords').append('<p class="error">Veuillez n\'entrer qu\'un seul mot à la fois</p>');
-            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function() {
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function () {
                 $(this).remove();
             });
             return;
         }
         if (!/^[a-zA-Z0-9\.,\-]+$/.test(kw)) {
             this.$prod.find('.curKeywords').append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques</p>');
-            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function() {
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function () {
                 $(this).remove();
             });
             return;
@@ -671,36 +671,36 @@ function PartsManager(prodId, serial) {
         this.$prod.find('.keywordFilter').val('');
         this.filterByKeywords();
     };
-    this.removeKeywordFilter = function($span) {
+    this.removeKeywordFilter = function ($span) {
         $span.parent('div').remove();
         if (this.$prod.find('.curKeywords').find('div').length)
             this.filterByKeywords('name');
         else
             this.unsetKeywordsFilter();
     };
-    this.searchPartByNum = function() {
+    this.searchPartByNum = function () {
         var $result = this.$prod.find('.searchResult');
         var search = this.$prod.find('.searchPartInput').val();
         if (!search) {
             $result.append('<p class="error">Veuillez entrer un code produit</p>');
-            $result.find('p.error').fadeOut(2000, function() {
+            $result.find('p.error').fadeOut(2000, function () {
                 $(this).remove();
             });
             return;
         }
         if (!/^[a-zA-Z0-9\-\_ ]+$/.test(search)) {
             $result.append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"</p>');
-            $result.find('p.error').fadeOut(5000, function() {
+            $result.find('p.error').fadeOut(5000, function () {
                 $(this).remove();
             });
             return;
         }
         this.unsetSearch();
         this.$prod.find('.searchResult').html('<div class="partSearchNum"><span class="searchNum">' + search + '</span><span class="removeSearch" onclick="GSX.products[' + this.prodId + '].PM.unsetSearch()"></span></div>');
-        this.$prod.find('.curKeywords').find('div').each(function() {
+        this.$prod.find('.curKeywords').find('div').each(function () {
             $(this).remove();
         });
-        $('tr.partRow').each(function() {
+        $('tr.partRow').each(function () {
             $(this).hide();
         });
         var n = 0;
@@ -727,10 +727,10 @@ function PartsManager(prodId, serial) {
             this.$prod.find('.searchResult').append('<p class="error">Aucun composant compatible ne correspond à ce numéro</p>');
         }
     };
-    this.filterByKeywords = function() {
+    this.filterByKeywords = function () {
         this.unsetSearch();
         var kw = [];
-        this.$prod.find('.curKeywords').children('div').each(function() {
+        this.$prod.find('.curKeywords').children('div').each(function () {
             var txt = $(this).find('span.keyword').text();
             var type = $(this).find('.kwType').attr('class').replace(/^kwType kwt_(.*)$/, '$1');
             kw.push({
@@ -738,7 +738,7 @@ function PartsManager(prodId, serial) {
                 'type': type
             });
         });
-        $('tr.partRow').each(function() {
+        $('tr.partRow').each(function () {
             $(this).hide();
         });
         for (gpe in ptr.parts) {
@@ -794,19 +794,19 @@ function PartsManager(prodId, serial) {
                 this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').css('color', '#960000');
         }
     };
-    this.unsetKeywordsFilter = function() {
-        this.$prod.find('.curKeywords').find('div').each(function() {
+    this.unsetKeywordsFilter = function () {
+        this.$prod.find('.curKeywords').find('div').each(function () {
             $(this).remove();
         });
         this.$prod.find('.searchResult').html('');
-        $('tr.partRow').each(function() {
+        $('tr.partRow').each(function () {
             $(this).show();
         });
         for (gpe in this.parts) {
             this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').html('(' + this.parts[gpe].length + ' produits)').css('color', '#505050');
         }
     };
-    this.unsetSearch = function() {
+    this.unsetSearch = function () {
         if (this.$prod.find('.partSearchNum').length) {
             this.$prod.find('.searchResult').html('');
             this.resetPartsDisplay();
@@ -820,14 +820,14 @@ function GSX_Product(id, serial) {
     this.PM = new PartsManager(id, serial);
     this.cart = new Cart(id, serial, this.PM);
 
-    this.loadDatas = function() {
+    this.loadDatas = function () {
         $('#requestsResponsesContainer').append('<div id="prod_' + this.id + '" class="productDatasContainer"></div>');
         this.PM.newProdContainer();
         this.cart.newProdContainer();
         setRequest('GET', 'loadProduct', this.id, '&prodId=' + this.id + '&serial=' + serial);
         displayRequestMsg('requestProcess', '');
     };
-    this.loadParts = function() {
+    this.loadParts = function () {
         this.PM.loadParts();
     };
 }
@@ -836,7 +836,7 @@ function GSX() {
     this.products = [];
     this.nextProdId = 1;
 
-    this.importPartsFromCartToRepair = function(repair) {
+    this.importPartsFromCartToRepair = function (repair) {
         var $form = $('#repairForm_' + repair);
         if ($form.length) {
             $form.find('.partsImportResults').hide().html('');
@@ -858,7 +858,7 @@ function GSX() {
                     }
                     $container.html('');
                     var i = 1;
-                    $partsRows.each(function() {
+                    $partsRows.each(function () {
                         var partName = $(this).find('td:first').text();
                         var html = '<div class="partDatasBlock">';
                         html += '<div class="partDatasBlockTitle open" onclick="togglePartDatasBlockDisplay($(this))">' + partName + '</div>';
@@ -869,7 +869,7 @@ function GSX() {
                         var $div = $container.find('div.partDatasContent_' + i + '');
                         var $partRow = $(this);
                         if ($div.length) {
-                            $div.find('div.dataBlock').each(function() {
+                            $div.find('div.dataBlock').each(function () {
                                 var dataName = $(this).find('label').attr('for');
                                 var select = null;
                                 switch (dataName) {
@@ -910,7 +910,7 @@ function GSX() {
         }
         alert('Une erreur est survenue');
     };
-    this.loadProduct = function(serial) {
+    this.loadProduct = function (serial) {
         if (!serial) {
             displayRequestMsg('error', 'Veuillez entrer un numéro de série');
             return;
@@ -931,10 +931,10 @@ function GSX() {
         this.products[this.nextProdId].loadDatas();
         this.nextProdId++;
     };
-    this.onProductLoad = function(prodId) {
+    this.onProductLoad = function (prodId) {
         this.products[prodId].cart.setEvents();
     };
-    this.loadProductParts = function($button) {
+    this.loadProductParts = function ($button) {
         var prodId = getProdId($button);
         if (!prodId) {
             alert('Erreur : ID produit absent');
@@ -947,14 +947,14 @@ function GSX() {
             displayRequestMsg('error', 'Erreur : produit non initialisé', $('#prod' + prodId).find('.partsRequestResult'));
         }
     };
-    this.addPart = function(prodId, group, name, num, type, price, eeeCode, newNum) {
+    this.addPart = function (prodId, group, name, num, type, price, eeeCode, newNum) {
         this.products[prodId].PM.addPart(group, name, num, type, price, eeeCode, newNum);
     };
-    this.displayParts = function(prodId) {
+    this.displayParts = function (prodId) {
         this.products[prodId].PM.displayParts();
         this.products[prodId].cart.onPartsListLoad();
     };
-    this.loadRepairForm = function($button) {
+    this.loadRepairForm = function ($button) {
         var prodId = getProdId($button.parent('p').parent('div.repairPopUp'));
         if (!prodId) {
             alert('Erreur : ID produit absent');
@@ -1010,11 +1010,11 @@ function displayRequestMsg(type, msg, $div) {
 }
 function displayCartRequestResult(prodId, html) {
     var $cart = $('#prod_' + prodId).find('.cartRequestResults');
-    $cart.find('p.requestProcess').first().slideUp(250, function() {
+    $cart.find('p.requestProcess').first().slideUp(250, function () {
         $(this).remove();
         $cart.append(html);
         var $p = $cart.find('p').last();
-        $p.fadeOut(5000, function() {
+        $p.fadeOut(5000, function () {
             $(this).remove();
         });
     });
@@ -1098,7 +1098,7 @@ function onComptiaGroupSelect($select) {
         var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
         var classe = 'comptiaGroup_' + val;
         var newVal = null;
-        $options.each(function() {
+        $options.each(function () {
             if ($(this).hasClass(classe)) {
                 if (newVal == null) {
                     newVal = $(this).attr('value');
@@ -1114,7 +1114,7 @@ function onComptiaGroupSelect($select) {
 function switchUpdateSerialForm($span) {
     var $container = $span.parent('div.serialUpdateFormContainer');
     var val = $container.find('select.updateFormSelect').val();
-    $container.find('.updateSerialFormBlock').each(function() {
+    $container.find('.updateSerialFormBlock').each(function () {
         if ($(this).css('display') == 'none') {
             if ($(this).hasClass(val))
                 $(this).stop().slideDown(250);
@@ -1191,6 +1191,19 @@ function closeRepairSubmit($span, repairId, checkRepair) {
         }
         alert('Une erreur est survenue, opération impossible.');
     }
+}
+function markRepairAsReimbursed($span, repairId) {
+    if ($span.hasClass('deactivated'))
+        return;
+
+    var $container = $('#repair_' + repairId).find('.repairRequestsResults');
+    if ($container.length) {
+        $span.attr('class', 'button bluehover markAsReimbursed deactivated');
+        displayRequestMsg('requestProcess', '', $container);
+        setRequest('GET', 'markRepairAsReimbursed', repairId, '&repairRowId=' + repairId);
+        return;
+    }
+    alert('Une erreur est survenue, opération impossible.');
 }
 function togglePartDatasBlockDisplay($div) {
     if ($div.hasClass('closed')) {
@@ -1388,7 +1401,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     if ($areas.length) {
         $inputs = $inputs.add($areas);
     }
-    $inputs.each(function() {
+    $inputs.each(function () {
         if ($(this).attr('onchange')) {
             var type = $(this).attr('onchange').replace(/^checkInput\(\$\(this\), '(.*)'\)$/, '$1');
             if (!checkInput($(this), type)) {
@@ -1415,10 +1428,10 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         processData: false,
         contentType: false,
         data: new FormData(formElement), // Non compatible pour les IE < 10
-        success: function(html) {
+        success: function (html) {
             traiteCommandeRetour(html, $resultContainer);
         },
-        error: function(html) {
+        error: function (html) {
             alert("passage en erreur" + html);
             traiteCommandeRetour(html, $resultContainer);
             displayRequestMsg('error', 'Une erreur technique est survenue. Ajax', $resultContainer);
@@ -1453,7 +1466,7 @@ function traiteCommandeRetour(html, $resultContainer) {
         }
         if (html.indexOf('<horsgarantie>OK</horsgarantie>') !== -1) {
             $resultContainer.html("La réparation est hors garantie. Veuillez vérifier.");
-            if(confirm("La réparation est hors garantie, voulez vous continuer ?")){
+            if (confirm("La réparation est hors garantie, voulez vous continuer ?")) {
                 $("#checkIfOutOfWarrantyCoverage_no").attr("checked", "checked");
                 $("#checkIfOutOfWarrantyCoverage_yes").removeAttr("checked");
                 submitGsxRequestForm(1, 'CreateCarryInRepair');
@@ -1537,12 +1550,12 @@ function onRequestResponse(xhr, requestType, prodId) {
         case 'loadRepairForm':
             $div = $('#prod_' + prodId).find('.repairFormContainer');
             if ($div.length) {
-                $div.slideUp(250, function() {
+                $div.slideUp(250, function () {
                     $(this).html(xhr.responseText).show();
                     if (importCart) {
                         $(this).find('span.importParts').click();
-                    }  
-                    $("#requestReviewByApple_yes").click(function(){
+                    }
+                    $("#requestReviewByApple_yes").click(function () {
                         $("#checkIfOutOfWarrantyCoverage_no").click();
                     });
                 });
@@ -1554,7 +1567,7 @@ function onRequestResponse(xhr, requestType, prodId) {
         case 'loadParts':
             $div = $('#prod_' + prodId).find('.partsRequestResult');
             if ($div.length) {
-                $div.slideUp(250, function() {
+                $div.slideUp(250, function () {
                     $(this).html(xhr.responseText);
                     GSX.displayParts(prodId);
                     $(this).slideDown(250);
@@ -1589,7 +1602,7 @@ function onRequestResponse(xhr, requestType, prodId) {
         case 'importRepair':
             var $prod = $('#prod_' + prodId);
             if ($prod.length) {
-                $('#prod_' + prodId).find('.importRepairResult').slideUp(250, function() {
+                $('#prod_' + prodId).find('.importRepairResult').slideUp(250, function () {
                     $(this).html(xhr.responseText).slideDown(250);
                 })
             } else {
@@ -1618,6 +1631,28 @@ function onRequestResponse(xhr, requestType, prodId) {
             }
             break;
 
+        case 'markRepairAsReimbursed':
+            var repairRowId = prodId;
+            var $repair = $('#repair_' + repairRowId);
+            if ($repair.length) {
+                var $repairResult = $repair.find('div.repairRequestsResults');
+                $span = $repair.find('span.markAsReimbursed');
+                if ($repairResult.length) {
+                    if (xhr.responseText == 'ok') {
+                        displayRequestMsg('confirmation', 'La réparation a bien été marquée comme remboursée', $repairResult);
+                        $span.remove();
+                        return;
+                    } else {
+                        $span.attr('class', 'button redHover closeRepair');
+                        $repairResult.show().html(xhr.responseText);
+                        return;
+                    }
+                }
+            } else {
+                alert(xhr.responseText);
+            }
+            break;
+
         case 'addCartToPropal':
             alert('kkkkkkk');
             if (xhr.responseText == 'ok') {
@@ -1633,7 +1668,7 @@ function onRequestResponse(xhr, requestType, prodId) {
 function setRequest(method, requestType, prodId, requestParams) {
     var xhr = getXMLHttpRequest();
 
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         //alert('state: ' + xhr.readyState + ', status: ' +xhr.status);
         var RT = requestType;
         var ID = prodId;
@@ -1690,7 +1725,7 @@ function scrollToAnchor() {
     count++;
     if (count < 20) {
         if (newScroll != end) {
-            setTimeout(function() {
+            setTimeout(function () {
                 scrollToAnchor();
             }, 100)
             return;

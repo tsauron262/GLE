@@ -39,11 +39,25 @@ llxHeader();
 <div class="tabBar">
    <form method="POST" action="./remboursement.php">
       <label for="periodValue">Afficher les réparations fermées depuis:</label>
-      <input type="text" width="120px" value="1" name="periodValue" id="periodValue"/>
+      <input type="text" width="120px" value="<?php echo(isset($_POST['periodValue']) ? $_POST['periodValue'] : '1') ?>" name="periodValue" id="periodValue"/>
       <select id="periodUnit" name="periodUnit">
-         <option value="day">Jour(s)</option>
-         <option value="week">Semaine(s)</option>
-         <option value="month" selected>Mois</option>
+         <option value="day"<?php
+         if (isset($_POST['periodUnit']) && ($_POST['periodUnit'] === 'day')) {
+             echo ' selected';
+         }
+         ?>>Jour(s)</option>
+         <option value="week"<?php
+         if (isset($_POST['periodUnit']) && ($_POST['periodUnit'] === 'week')) {
+             echo ' selected';
+         }
+         ?>>Semaine(s)</option>
+         <option value="month"<?php
+         if (isset($_POST['periodUnit']) && ($_POST['periodUnit'] === 'month')) {
+             echo ' selected';
+         } else if (!isset($_POST['periodUnit'])) {
+             echo ' selected';
+         }
+         ?>>Mois</option>
       </select>
       <br/><br/>
       <input type="submit" class="butAction" id="periodSubmit" name="periodSubmit" value="Rechager la liste des réparations"/>

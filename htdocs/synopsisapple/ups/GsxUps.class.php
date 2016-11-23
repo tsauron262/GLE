@@ -245,7 +245,7 @@ class GsxUps {
                 'ReturnService' => array(
                     'Code' => 3,
                 ),
-                'Shipto' => array(
+                'ShipTo' => array(
                     'Name' => $shipToInfos['Name'],
                     'AttentionName' => $shipToInfos['AttentionName'],
                     'ShipperNumber' => $shipToInfos['ShipperNumber'],

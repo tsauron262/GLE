@@ -276,7 +276,7 @@ class GsxUps {
                     'Description' => ($infos['shipToKey'] == 3)? 'Standard' : 'Express'
                 ),
                 'Package' => array(
-                    'Description' => '',
+                    'Description' => 'retour pièces',
                     'Packaging' => array(
                         'Code' => '02'
                     ),

@@ -242,6 +242,9 @@ class GsxUps {
                         'Number' => $shipToAdress['PhoneNumber'],
                     )
                 ),
+                'ReturnService' => array(
+                    'Code' => 1,
+                ),
                 'ShipFrom' => array(
                     'Name' => $shipToInfos['Name'],
                     'AttentionName' => $shipToInfos['AttentionName'],

@@ -217,12 +217,12 @@ class GsxUps {
                 'Shipper' => array(
                     'Name' => $shipToInfos['Name'],
                     'AttentionName' => $shipToInfos['AttentionName'],
-                    'ShipperNumber' => $shipToInfos['ShipperNumber'],
+                    'ShipperNumber' => '4W63V6',
                     'Address' => array(
                         'AddressLine' => $shipToInfos['Address']['AddressLine'],
                         'City' => $shipToInfos['Address']['City'],
                         'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
-                        'PostalCode' => $shipToInfos['Address']['PostalCode'],
+                        'PostalCode' => '4824BM',
                         'CountryCode' => $shipToInfos['Address']['CountryCode'],
                     ),
                     'Phone' => array(
@@ -241,6 +241,9 @@ class GsxUps {
                     'Phone' => array(
                         'Number' => $shipToAdress['PhoneNumber'],
                     )
+                ),
+                'ReturnService' => array(
+                    'Code' => 3,
                 ),
                 'ShipFrom' => array(
                     'Name' => $shipToInfos['Name'],
@@ -273,7 +276,7 @@ class GsxUps {
                     'Description' => ($infos['shipToKey'] == 3)? 'Standard' : 'Express'
                 ),
                 'Package' => array(
-                    'Description' => '',
+                    'Description' => 'retour pièces',
                     'Packaging' => array(
                         'Code' => '02'
                     ),

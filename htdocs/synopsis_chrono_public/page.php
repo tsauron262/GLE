@@ -37,6 +37,9 @@ if (isset($_POST['serial'])) {
         $serial = $_GET['back_serial'];
     }
 }
+if (isset($_GET['user_name']))
+    $_POST['user_name'] = $_GET['user_name'];
+    
 if (isset($_POST['user_name'])) {
     if (empty($_POST['user_name'])) {
         $errors[] = 'Veuillez saisir les trois premières lettres de votre nom.';
@@ -84,6 +87,9 @@ function getChronosBySerial($serial) {
 }
 
 if ($serial && $userName) {
+    if(is_numeric($serial))//C'est l'id
+        $chronos = array($serial);
+    else
     $chronos = getChronosBySerial($serial);
     if (!count($chronos)) {
         $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série.';

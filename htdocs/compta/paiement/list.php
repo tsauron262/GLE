@@ -194,6 +194,7 @@ if ($resql)
     $paramlist.=($search_ref?"&search_ref=".$search_ref:"");
     $paramlist.=($search_company?"&search_company=".$search_company:"");
     $paramlist.=($search_amount?"&search_amount=".$search_amount:"");
+    $paramlist.=($search_paymenttype?"&search_paymenttype=".$search_paymenttype:"");
 
     print_barre_liste($langs->trans("ReceivedCustomersPayments"), $page, $_SERVER["PHP_SELF"],$paramlist,$sortfield,$sortorder,'',$num,'','title_accountancy.png');
 

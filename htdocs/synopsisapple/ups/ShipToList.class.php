@@ -9,6 +9,7 @@ self::$list[$centre['4']] =  array(
             'Name' => 'BIMP',
             'AttentionName' => 'SAV',
             'ShipperNumber' => 'R8X411',
+//            'ShipperNumber' => '4W63V6VCVF8',
             'Address' => array(
                 'AddressLine' => $centre['7'],
                 'City' => $centre['6'],

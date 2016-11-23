@@ -263,7 +263,7 @@ class GsxUps {
                 'PaymentInformation' => array(
                     'ShipmentCharge' => array(
                         'Type' => '01',
-                        'BillShipper' => array(
+                        'BillReceiver' => array(
                             'AccountNumber' => '4W63V6',
                             'Address' => array(
                                 'PostalCode' => '4824BM'

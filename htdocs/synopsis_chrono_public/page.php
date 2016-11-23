@@ -87,6 +87,9 @@ function getChronosBySerial($serial) {
 }
 
 if ($serial && $userName) {
+    if(is_integer($serial))//C'est l'id
+        $chronos = array($serials);
+    else
     $chronos = getChronosBySerial($serial);
     if (!count($chronos)) {
         $errors[] = 'Aucun suivi SAV trouvé pour ce numéro de série.';

@@ -1,13 +1,13 @@
 <?php
 
 require_once '../../main.inc.php';
-require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
-
 //error_reporting(E_ALL);
 ////error_reporting(E_ERROR);
 //ini_set('display_errors', 1);
+
+require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 
 $coefPrix = 1;
 
@@ -280,6 +280,15 @@ if (isset($_GET['action'])) {
             }
             break;
 
+        case 'endRepair':
+            if (isset($_GET['repairRowId'])) {
+                $gsxDatas = new gsxDatas(null, $userId, $password, $serviceAccountNo);
+                echo $gsxDatas->endRepair($_GET['repairRowId']);
+            } else {
+                echo '<p class="error">Une erreur est survenue (ID réparation absent)</p>' . "\n";
+            }
+            break;
+        
         case 'closeRepair':
             if (isset($_GET['repairRowId'])) {
                 $gsxDatas = new gsxDatas(null, $userId, $password, $serviceAccountNo);

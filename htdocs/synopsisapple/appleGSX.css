@@ -374,7 +374,7 @@ span.closeRepair {
 span.closeRepair:before {
     font-family: 'FA';
     margin-right: 10px;
-    content: '\f057';
+    content: '\f064';
 }
 .importRepairForm {
     border: 1px solid #DCDCDC;

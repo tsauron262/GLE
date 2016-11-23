@@ -1,11 +1,13 @@
 <?php
 //ALTER TABLE `llx_synopsis_apple_repair` 
-//ADD `date_clode` DATE NOT NULL DEFAULT '0000-00-00' AFTER `closed`, 
+//ADD `date_close` DATE NOT NULL DEFAULT '0000-00-00' AFTER `closed`, 
 //ADD `is_reimbursed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `date_close`;
 
 require_once('../main.inc.php');
 llxHeader();
+
 ?>
+
 <link type="text/css" rel="stylesheet" href="rbt.css"/>
 
 <table class="notopnoleftnoright" border="0" width="100%" style="margin-bottom: 2px;">
@@ -21,6 +23,7 @@ llxHeader();
    </tbody>
 </table>
 <br/>
+
 <div class="tabBar">
    <form method="POST" action="./remboursement.php" enctype="multipart/form-data">
       <label for="csvFile">Charger un nouveau fichier CSV: </label>
@@ -38,7 +41,7 @@ llxHeader();
 
 <div class="tabBar">
    <form method="POST" action="./remboursement.php">
-      <label for="periodValue">Afficher les réparations fermées depuis:</label>
+      <label for="periodValue">Afficher les réparations fermées depuis plus de:</label>
       <input type="text" width="120px" value="<?php echo(isset($_POST['periodValue']) ? $_POST['periodValue'] : '1') ?>" name="periodValue" id="periodValue"/>
       <select id="periodUnit" name="periodUnit">
          <option value="day"<?php
@@ -152,6 +155,7 @@ function getRowsFromFile($fileName, $type = 'fileType_csv')
 
     return $rows;
 }
+
 $errors = array();
 
 $period = 'P1M';
@@ -224,13 +228,15 @@ if (isset($_POST['csvFilesubmit'])) {
 }
 
 $repairs = array();
+
 if (!count($errors)) {
     $datePeriodBegin = new DateTime();
     $datePeriodBegin->sub(new DateInterval($period));
     $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair ';
     $sql .= 'WHERE `closed` = 1 ';
-//    $sql .= 'AND (`date_close` = \'0000-00-00\' OR `date_close` >= \'' . $datePeriodBegin->format('Y-m-d') . '\') ';
-    $sql .= 'AND `date_close` >= \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
+    $sql .= 'AND `date_close` < \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
+    $sql .= 'AND `date_close` > \'0000-00-00\' ';
+    $sql .= 'AND `totalFromOrder` = 0 ';
     $sql .= 'AND `is_reimbursed` = 0';
 
 //    echo $sql; exit;
@@ -261,7 +267,7 @@ if (count($errors)) {
     displayErrors($errors);
 } else if (count($repairs)) {
     ?>
-    <h3>Liste des réparations non-remboursées fermées depuis <?php echo $periodLabel; ?></h3>
+    <h3>Liste des réparations non-remboursées fermées depuis plus de <?php echo $periodLabel; ?></h3>
     <table class="noborder"">
        <thead>
           <tr class="liste_titre">

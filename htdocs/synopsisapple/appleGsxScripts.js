@@ -1173,6 +1173,25 @@ function closeRepairImportForm(prodId) {
         return;
     $form.slideUp(250);
 }
+function endRepairSubmit($span, repairId, checkRepair) {
+    if ($span.hasClass('deactivated'))
+        return;
+
+    if (checkRepair)
+        checkRepair = 1;
+    else
+        checkRepair = 0;
+    if (confirm("Attention, La réparation va être marquée \"Ready For Pick Up\" (prête pour enlèvement) auprès du service GSX d'Apple.\nVeuillez confirmer")) {
+        var $container = $('#repair_' + repairId).find('.repairRequestsResults');
+        if ($container.length) {
+            $span.attr('class', 'button redHover endRepair deactivated');
+            displayRequestMsg('requestProcess', '', $container);
+            setRequest('GET', 'endRepair', repairId, '&repairRowId=' + repairId + '&checkRepair=' + checkRepair);
+            return;
+        }
+        alert('Une erreur est survenue, opération impossible.');
+    }
+}
 function closeRepairSubmit($span, repairId, checkRepair) {
     if ($span.hasClass('deactivated'))
         return;
@@ -1610,6 +1629,27 @@ function onRequestResponse(xhr, requestType, prodId) {
             }
             break;
 
+        case 'endRepair':
+            var repairRowId = prodId;
+            var $repair = $('#repair_' + repairRowId);
+            if ($repair.length) {
+                var $repairResult = $repair.find('div.repairRequestsResults');
+                if ($repairResult.length) {
+                    if (xhr.responseText == 'ok') {
+                        displayRequestMsg('confirmation', 'Le statut de la réparation a été mis à jour  avec succés.<ok>Reload</ok>', $repairResult);
+                        $repair.find('span.closeRepair').remove();
+                        $repair.find('div.repairToolbar').prepend('<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'' + repairRowId + '\', true)">Restituer</span>');
+                        return;
+                    }
+                    $span.attr('class', 'button redHover closeRepair');
+                    $repairResult.show().html(xhr.responseText);
+                    return;
+                }
+            } else {
+                alert(xhr.responseText);
+            }
+            break;
+            
         case 'closeRepair':
             var repairRowId = prodId;
             var $repair = $('#repair_' + repairRowId);
@@ -1693,7 +1733,7 @@ function setRequest(method, requestType, prodId, requestParams) {
 var $curAnchor = null;
 var count = 0;
 function scrollToAnchor() {
-    // Ne pas appellet directement, passer par setNewScrollToAnchor()
+    // Ne pas appeller directement, passer par setNewScrollToAnchor()
     if (!$curAnchor)
         return;
 

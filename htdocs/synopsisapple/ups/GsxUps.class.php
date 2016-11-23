@@ -260,17 +260,7 @@ class GsxUps {
                         'Number' => $shipToInfos['Phone']['Number']
                     )
                 ),
-                'PaymentInformation' => array(
-                    'ShipmentCharge' => array(
-                        'Type' => '01',
-                        'BillShipper' => array(
-                            'AccountNumber' => '4W63V6',
-                            'Address' => array(
-                                'PostalCode' => '4824BM'
-                            )
-                        )
-                    )
-                ),
+                
                 'Service' => array(
                     'Code' => ($infos['shipToKey'] == 3)? '11' : '07',
                     'Description' => ($infos['shipToKey'] == 3)? 'Standard' : 'Express'

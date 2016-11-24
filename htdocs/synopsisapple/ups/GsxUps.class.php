@@ -3,7 +3,8 @@
 require_once '../GSX.class.php';
 require_once dirname(__FILE__) . '/shipment.class.php';
 
-class GsxUps {
+class GsxUps
+{
 
     public static $shipToAdresses = array(
         1 => array(
@@ -57,7 +58,6 @@ class GsxUps {
             'PhoneNumber' => '31-076572-2415'
         ),
     );
-    
     public $gsx = null;
     public $connect = false;
     public $shiptTo = null;
@@ -80,11 +80,13 @@ class GsxUps {
         'passwd' => "Express74"
     );
 
-    public function __construct($shipTo = null) {
+    public function __construct($shipTo = null)
+    {
         $this->shiptTo = $shipTo;
     }
 
-    protected function gsxInit() {
+    protected function gsxInit()
+    {
         global $user;
 
         if (defined('PRODUCTION_APPLE') && PRODUCTION_APPLE)
@@ -137,7 +139,8 @@ class GsxUps {
         return true;
     }
 
-    protected function UPSRequest($operation, $wsdl, $endPointUrl, $datas) {
+    protected function UPSRequest($operation, $wsdl, $endPointUrl, $datas)
+    {
         try {
             $mode = array(
                 'soap_version' => 'SOAP_1_1', // use soap 1.1 client
@@ -171,23 +174,35 @@ class GsxUps {
         }
     }
 
-    public function createUpsShipment() {
+    public function createUpsShipment()
+    {
         $errors = array();
 
         if (!isset($this->shiptTo) || empty($this->shiptTo)) {
             $errors[] = 'numéro shipt-to absent';
         }
-        
+
         $parts = isset($_POST['parts']) ? $_POST['parts'] : 0;
         $infos = isset($_POST['shipInfos']) ? $_POST['shipInfos'] : 0;
 
         if (!$parts)
             $errors[] = 'Aucun composant associé à cette expédition';
+//        $parts = array(
+//            array(
+//                'name' => 'TEST',
+//                'ref' => '123456789',
+//                'newRef' => '123456789',
+//                'poNumber' => '123456789',
+//                'serial' => '123456789',
+//                'returnNbr' => '123456789',
+//                'expectedReturn' => '2016-12-01'
+//            )
+//        );
         if (!$infos)
-            $errors[] = 'Aucune informartion sur les dimensions et le poids du colis reçut';
+            $errors[] = 'Aucune informartion sur les dimensions et le poids du colis reçu';
         if (!$infos['shipToKey'])
             $errors[] = 'destinataire non sélectionné';
-        
+
         if (!array_key_exists($this->shiptTo, shipToList::$list))
             $errors[] = 'Numéro ship-to invalide';
 
@@ -202,163 +217,190 @@ class GsxUps {
                 'html' => $html
             );
         }
-        
+
         $shipToAdress = self::$shipToAdresses[$infos['shipToKey']];
-        
         $shipToInfos = shipToList::$list[$this->shiptTo];
+        global $db;
 
-        $request = array(
-            'Request' => array(
-                'RequestOption' => 'nonvalidate'
-            ),
-            'Shipment' => array(
-                'Description' => "Retour de pièces"
-                ,
-                'Shipper' => array(
-                    'Name' => $shipToInfos['Name'],
-                    'AttentionName' => $shipToInfos['AttentionName'],
-                    'ShipperNumber' => $shipToInfos['ShipperNumber'],
-                    'Address' => array(
-                        'AddressLine' => $shipToInfos['Address']['AddressLine'],
-                        'City' => $shipToInfos['Address']['City'],
-                        'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
-                        'PostalCode' => $shipToInfos['Address']['PostalCode'],
-                        'CountryCode' => $shipToInfos['Address']['CountryCode'],
-                    ),
-                    'Phone' => array(
-                        'Number' => $shipToInfos['Phone']['Number']
-                    )
-                ),
-                'ShipTo' => array(
-                    'Name' => $shipToAdress['Name'],
-                    'AttentionName' => $shipToAdress['Attention'],
-                    'Address' => array(
-                        'AddressLine' => $shipToAdress['AddressLine'],
-                        'City' => $shipToAdress['City'],
-                        'PostalCode' => $shipToAdress['PostalCode'],
-                        'CountryCode' => $shipToAdress['CountryCode'],
-                    ),
-                    'Phone' => array(
-                        'Number' => $shipToAdress['PhoneNumber'],
-                    )
-                ),
-//                'ReturnService' => array(
-//                    'Code' => 3,
-//                ),
-                'ShipFrom' => array(
-                    'Name' => $shipToInfos['Name'],
-                    'AttentionName' => $shipToInfos['AttentionName'],
-                    'ShipperNumber' => $shipToInfos['ShipperNumber'],
-                    'Address' => array(
-                        'AddressLine' => $shipToInfos['Address']['AddressLine'],
-                        'City' => $shipToInfos['Address']['City'],
-                        'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
-                        'PostalCode' => $shipToInfos['Address']['PostalCode'],
-                        'CountryCode' => $shipToInfos['Address']['CountryCode'],
-                    ),
-                    'Phone' => array(
-                        'Number' => $shipToInfos['Phone']['Number']
-                    )
-                ),
-                'PaymentInformation' => array(
-                    'ShipmentCharge' => array(
-                        'Type' => '01',
-                        'BillReceiver' => array(
-                            'AccountNumber' => '4W63V6',
-                            'Address' => array(
-                                'PostalCode' => '4824BM'
-                            )
-                        )
-                    )
-                ),
-                'Service' => array(
-                    'Code' => ($infos['shipToKey'] == 3)? '11' : '07',
-                    'Description' => ($infos['shipToKey'] == 3)? 'Standard' : 'Express'
-                ),
-                'Package' => array(
-                    'Description' => 'retour pièces',
-                    'Packaging' => array(
-                        'Code' => '02'
-                    ),
-                    'Dimensions' => array(
-                        'UnitOfMeasurement' => array(
-                            'Code' => 'CM',
-                            'Description' => 'cm'
-                        ),
-                        'Length' => $infos['length'],
-                        'Width' => $infos['width'],
-                        'Height' => $infos['height']
-                    ),
-                    'PackageWeight' => array(
-                        'UnitOfMeasurement' => array(
-                            'Code' => 'KGS',
-                            'Description' => 'kg'
-                        ),
-                        'Weight' => $infos['weight']
-                    )
-                ),
-                'LabelSpecification' => array(
-                    'HTTPUserAgent' => 'Mozilla/4.5',
-                    'LabelImageFormat' => array(
-                        'Code' => 'GIF',
-                        'Description' => 'GIF'
-                    )
-                )
-            )
-        );
-        dol_syslog(print_r($request, true),3);
-
-        $wsdl = dirname(__FILE__) . '/wsdl/Ship.wsdl';
-        if (self::$upsMode == 'test')
-            $endPointUrl = self::$upsEndpointUrls['shipment']['test'];
-        else
-            $endPointUrl = self::$upsEndpointUrls['shipment']['production'];
-        $result = $this->UPSRequest('ProcessShipment', $wsdl, $endPointUrl, array($request));
-        if (!$result) {
-            return $this->displaySoapErrors();
-        }
-        $return = array(
-            'status' => '',
-            'html' => ''
-        );
-        if (isset($result->Response->ResponseStatus->Code) && $result->Response->ResponseStatus->Code == 1) {
-            $result = $result->ShipmentResults;
-            $charges = $result->ShipmentCharges;
-
-            global $db;
+        if (isset($infos['upsTrackingNumber']) && !empty($infos['upsTrackingNumber'])) {
             $ship = new shipment($db);
             $ship->shipTo = $this->shiptTo;
             $ship->setInfos($infos['length'], $infos['width'], $infos['height'], $infos['weight']);
-            $ship->setUpsInfos(
-                    (isset($charges->TransportationCharges->MonetaryValue) ? $charges->TransportationCharges->MonetaryValue : 0), (isset($charges->ServiceOptionsCharges->MonetaryValue) ? $charges->ServiceOptionsCharges->MonetaryValue : 0), (isset($charges->TotalCharges->MonetaryValue) ? $charges->TotalCharges->MonetaryValue : 0), (isset($result->BillingWeight->Weight) ? $result->BillingWeight->Weight : 0), (isset($result->PackageResults->TrackingNumber) ? $result->PackageResults->TrackingNumber : 0), (isset($result->ShipmentIdentificationNumber) ? $result->ShipmentIdentificationNumber : 0)
-            );
-
+            $ship->upsInfos['trackingNumber'] = $infos['upsTrackingNumber'];
+            $ship->upsInfos['identificationNumber'] = $infos['upsTrackingNumber'];
             foreach ($parts as $part) {
                 $ship->addPart($part['name'], $part['ref'], $part['newRef'], $part['poNumber'], $part['sroNumber'], $part['serial'], $part['returnNbr'], $part['expectedReturn']);
             }
-            
+
             $return['html'] .= '<div class="container tabBar">';
-            $return['html'] .= '<p class="confirmation">Création de l\'expédition effectuée avec succès.</p>';
+            $return['html'] .= '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès.</p>';
             if ($ship->create()) {
                 if (count($ship->errors)) {
                     $return['html'] .= $ship->displayErrors();
+                } else {
+                    $return['html'] .= '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès.</p>';
                 }
             } else {
                 $return['html'] .= '<p class="error">Echec de l\'enregistremement des données de l\'expédition.</p>';
                 $return['html'] .= $ship->displayErrors();
             }
 
-            if (isset($result->PackageResults->ShippingLabel->GraphicImage)) {
-                $filesDir = $ship->getFilesDir();
+            $return['html'] .= '</div>';
+            $return['status'] = 1;
+            $return['html'] .= $ship->getInfosHtml();
+        } else {
+            $request = array(
+                'Request' => array(
+                    'RequestOption' => 'nonvalidate'
+                ),
+                'Shipment' => array(
+                    'Description' => "Retour de pièces"
+                    ,
+                    'Shipper' => array(
+                        'Name' => $shipToInfos['Name'],
+                        'AttentionName' => $shipToInfos['AttentionName'],
+                        'ShipperNumber' => '4W63V6',
+                        'Address' => array(
+                            'AddressLine' => $shipToInfos['Address']['AddressLine'],
+                            'City' => $shipToInfos['Address']['City'],
+                            'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
+                            'PostalCode' => '4824BM',
+                            'CountryCode' => $shipToInfos['Address']['CountryCode'],
+                        ),
+                        'Phone' => array(
+                            'Number' => $shipToInfos['Phone']['Number']
+                        )
+                    ),
+                    'ShipTo' => array(
+                        'Name' => $shipToAdress['Name'],
+                        'AttentionName' => $shipToAdress['Attention'],
+                        'Address' => array(
+                            'AddressLine' => $shipToAdress['AddressLine'],
+                            'City' => $shipToAdress['City'],
+                            'PostalCode' => $shipToAdress['PostalCode'],
+                            'CountryCode' => $shipToAdress['CountryCode'],
+                        ),
+                        'Phone' => array(
+                            'Number' => $shipToAdress['PhoneNumber'],
+                        )
+                    ),
+                    'ReturnService' => array(
+                        'Code' => 3,
+                    ),
+                    'ShipFrom' => array(
+                        'Name' => $shipToInfos['Name'],
+                        'AttentionName' => $shipToInfos['AttentionName'],
+                        'ShipperNumber' => $shipToInfos['ShipperNumber'],
+                        'Address' => array(
+                            'AddressLine' => $shipToInfos['Address']['AddressLine'],
+                            'City' => $shipToInfos['Address']['City'],
+                            'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
+                            'PostalCode' => $shipToInfos['Address']['PostalCode'],
+                            'CountryCode' => $shipToInfos['Address']['CountryCode'],
+                        ),
+                        'Phone' => array(
+                            'Number' => $shipToInfos['Phone']['Number']
+                        )
+                    ),
+                    'PaymentInformation' => array(
+                        'ShipmentCharge' => array(
+                            'Type' => '01',
+                            'BillReceiver' => array(
+                                'AccountNumber' => '4W63V6',
+                                'Address' => array(
+                                    'PostalCode' => '4824BM'
+                                )
+                            )
+                        )
+                    ),
+                    'Service' => array(
+                        'Code' => ($infos['shipToKey'] == 3) ? '11' : '07',
+                        'Description' => ($infos['shipToKey'] == 3) ? 'Standard' : 'Express'
+                    ),
+                    'Package' => array(
+                        'Description' => 'retour pièces',
+                        'Packaging' => array(
+                            'Code' => '02'
+                        ),
+                        'Dimensions' => array(
+                            'UnitOfMeasurement' => array(
+                                'Code' => 'CM',
+                                'Description' => 'cm'
+                            ),
+                            'Length' => $infos['length'],
+                            'Width' => $infos['width'],
+                            'Height' => $infos['height']
+                        ),
+                        'PackageWeight' => array(
+                            'UnitOfMeasurement' => array(
+                                'Code' => 'KGS',
+                                'Description' => 'kg'
+                            ),
+                            'Weight' => $infos['weight']
+                        )
+                    ),
+                    'LabelSpecification' => array(
+                        'HTTPUserAgent' => 'Mozilla/4.5',
+                        'LabelImageFormat' => array(
+                            'Code' => 'GIF',
+                            'Description' => 'GIF'
+                        )
+                    )
+                )
+            );
+            dol_syslog(print_r($request, true), 3);
 
-                if ($filesDir) {
-                    if (!file_put_contents($filesDir . '/ups.gif', base64_decode($result->PackageResults->ShippingLabel->GraphicImage))) {
-                        $return['html'] .= '<p class="error">Echec de la création du fichier image de l\'étiquette de livraison<br/>';
-                        $return['html'] .= '(Fichier: ' . $filesDir . '/ups.gif' . ')</p>';
-                    }
+            $wsdl = dirname(__FILE__) . '/wsdl/Ship.wsdl';
+            if (self::$upsMode == 'test')
+                $endPointUrl = self::$upsEndpointUrls['shipment']['test'];
+            else
+                $endPointUrl = self::$upsEndpointUrls['shipment']['production'];
+            $result = $this->UPSRequest('ProcessShipment', $wsdl, $endPointUrl, array($request));
+//            $result = null;
+            if (!$result) {
+                return $this->displaySoapErrors();
+            }
+            $return = array(
+                'status' => '',
+                'html' => ''
+            );
+            if (isset($result->Response->ResponseStatus->Code) && $result->Response->ResponseStatus->Code == 1) {
+                $result = $result->ShipmentResults;
+                $charges = $result->ShipmentCharges;
+                ;
+                $ship = new shipment($db);
+                $ship->shipTo = $this->shiptTo;
+                $ship->setInfos($infos['length'], $infos['width'], $infos['height'], $infos['weight']);
+                $ship->setUpsInfos(
+                        (isset($charges->TransportationCharges->MonetaryValue) ? $charges->TransportationCharges->MonetaryValue : 0), (isset($charges->ServiceOptionsCharges->MonetaryValue) ? $charges->ServiceOptionsCharges->MonetaryValue : 0), (isset($charges->TotalCharges->MonetaryValue) ? $charges->TotalCharges->MonetaryValue : 0), (isset($result->BillingWeight->Weight) ? $result->BillingWeight->Weight : 0), (isset($result->PackageResults->TrackingNumber) ? $result->PackageResults->TrackingNumber : 0), (isset($result->ShipmentIdentificationNumber) ? $result->ShipmentIdentificationNumber : 0)
+                );
+
+                foreach ($parts as $part) {
+                    $ship->addPart($part['name'], $part['ref'], $part['newRef'], $part['poNumber'], $part['sroNumber'], $part['serial'], $part['returnNbr'], $part['expectedReturn']);
                 }
 
-                // to remove:
+                $return['html'] .= '<div class="container tabBar">';
+                $return['html'] .= '<p class="confirmation">Création de l\'expédition effectuée avec succès.</p>';
+                if ($ship->create()) {
+                    if (count($ship->errors)) {
+                        $return['html'] .= $ship->displayErrors();
+                    }
+                } else {
+                    $return['html'] .= '<p class="error">Echec de l\'enregistremement des données de l\'expédition.</p>';
+                    $return['html'] .= $ship->displayErrors();
+                }
+
+                if (isset($result->PackageResults->ShippingLabel->GraphicImage)) {
+                    $filesDir = $ship->getFilesDir();
+
+                    if ($filesDir) {
+                        if (!file_put_contents($filesDir . '/ups.gif', base64_decode($result->PackageResults->ShippingLabel->GraphicImage))) {
+                            $return['html'] .= '<p class="error">Echec de la création du fichier image de l\'étiquette de livraison<br/>';
+                            $return['html'] .= '(Fichier: ' . $filesDir . '/ups.gif' . ')</p>';
+                        }
+                    }
+
+                    // to remove:
 //                $fileName = dirname(__FILE__) . '/labels/' . $ship->upsInfos['trackingNumber'] . '/ups.gif';
 //                if (!file_exists(dirname(__FILE__) . '/labels/' . $ship->upsInfos['trackingNumber']))
 //                    mkdir(dirname(__FILE__) . '/labels/' . $ship->upsInfos['trackingNumber']);
@@ -366,20 +408,22 @@ class GsxUps {
 //                    $return['html'] .= '<p class="error">Echec de la création du fichier image de l\'étiquette de livraison<br/>';
 //                    $return['html'] .= '(chemin du fichier: ' . $fileName . ')</p>';
 //                }
-                // ---------
+                    // ---------
+                }
+                $return['html'] .= '</div>';
+                $return['status'] = 1;
+                $return['html'] .= $ship->getInfosHtml();
+            } else {
+                $return['status'] = 0;
+                $return['html'] .= '<p class="error">Echec de la création de l\'expédition pour une raison inconnue (' .
+                        $result->Response->ResponseStatus->Description . ')</p>';
             }
-            $return['html'] .= '</div>';
-            $return['status'] = 1;
-            $return['html'] .= $ship->getInfosHtml();
-        } else {
-            $return['status'] = 0;
-            $return['html'] .= '<p class="error">Echec de la création de l\'expédition pour une raison inconnue (' .
-                    $result->Response->ResponseStatus->Description . ')</p>';
         }
         return $return;
     }
 
-    public function registerShipmentOnGsx() {
+    public function registerShipmentOnGsx()
+    {
         if (!$this->connect) {
             if (!$this->gsxInit())
                 return array(
@@ -507,7 +551,8 @@ class GsxUps {
         );
     }
 
-    public function loadPartsReturnLabels($shipId) {
+    public function loadPartsReturnLabels($shipId)
+    {
         if (!$this->connect) {
             if (!$this->gsxInit())
                 return array(
@@ -582,8 +627,8 @@ class GsxUps {
             $partNumber = (isset($part['new_number']) && !empty($part['new_number'])) ? $part['new_number'] : $part['number'];
             $fileName = 'label_' . $part['returnOrderNumber'] . '_' . $partNumber . '.pdf';
 
-            $fileName = str_replace("/","_", $fileName);
-            
+            $fileName = str_replace("/", "_", $fileName);
+
             if (file_exists($filesDir . $fileName))
                 continue;
 
@@ -621,17 +666,18 @@ class GsxUps {
                 'html' => $html
             );
         }
-        
+
         require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/core/modules/synopsisapple/modules_synopsisapple.php");
         synopsisapple_pdf_create($db, $ship, 'appleretour');
-        
+
         return array(
             'ok' => 1,
             'html' => ''
         );
     }
 
-    public function generateReturnPDF($shipId) {
+    public function generateReturnPDF($shipId)
+    {
         global $db;
         $ship = new shipment($db, $shipId);
         require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/core/modules/synopsisapple/modules_synopsisapple.php");
@@ -639,7 +685,8 @@ class GsxUps {
         return synopsisapple_pdf_create($db, $ship, $model);
     }
 
-    public function getShipToForm() {
+    public function getShipToForm()
+    {
         $html = $this->starBloc('Nouvelle expédition', 'shipTo', true);
 
         $html .= '<div class="tabBar">';
@@ -667,7 +714,8 @@ class GsxUps {
         return $html;
     }
 
-    public function getShippingForm() {
+    public function getShippingForm()
+    {
         $html = $this->starBloc('Choix des composants à expédier', 'partsList', true);
         $html .= $this->getPartsListHtml();
         $html .= $this->endBloc();
@@ -680,7 +728,8 @@ class GsxUps {
         return $html;
     }
 
-    protected function getPartsListHtml() {
+    protected function getPartsListHtml()
+    {
         $parts = $this->getPartsPendingArray();
 
         $html = '<input type="hidden" id="shipToUsed" name="shiptToUsed" value="' . $this->shiptTo . '"/>';
@@ -736,7 +785,8 @@ class GsxUps {
         return $html;
     }
 
-    protected function getPartsPendingArray() {
+    protected function getPartsPendingArray()
+    {
         $parts = array();
 
         if (!$this->connect) {
@@ -804,7 +854,8 @@ class GsxUps {
         return $parts;
     }
 
-    protected function getShippingInfosForm() {
+    protected function getShippingInfosForm()
+    {
         $html = '<div class="tabBar">' . "\n";
         $html .= '<table class="border">' . "\n";
         $html .= '<tbody>';
@@ -853,17 +904,24 @@ class GsxUps {
         $html .= '<td><input type="text" id="weight" name="weight" class="shipInfo" width="250px"/>&nbsp;kg';
         $html .= '<span class="inputCheckInfos"></span>';
         $html .= '</td></tr>';
-        
+
         $html .= '<tr>';
         $html .= '<td>Destination</td>';
         $html .= '<td>';
         $html .= '<select id="shipmentShipTo" name="shipmentShipTo">';
         $html .= '<option value="0">Sélectionnez un destinataire</option>';
         foreach (self::$shipToAdresses as $key => $adress) {
-            $html .= '<option value="'.$key.'">'.$adress['label'].'</option>';
+            $html .= '<option value="' . $key . '">' . $adress['label'] . '</option>';
         }
         $html .= '</select>';
         $html .= '<span class="inputCheckInfos"></span>';
+        $html .= '</td></tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>Numéro de suivi UPS</td>';
+        $html .= '<td>';
+        $html .= '<div><input type="text" id="upsTrackingNumber" name="upsTrackingNumber"/></div>';
+        $html .= '<div><p style="font-size: 9px; font-style: italic">Utiliser ce champ uniquement pour les expéditions déjà enregistrées chez UPS</p></div>';
         $html .= '</td></tr>';
 
         $html .= '</tbody></table>' . "\n";
@@ -874,7 +932,8 @@ class GsxUps {
         return $html;
     }
 
-    public function getCurrentShipmentsHtml($n = 0) {
+    public function getCurrentShipmentsHtml($n = 0)
+    {
         $html = '';
         global $db;
 
@@ -941,7 +1000,8 @@ class GsxUps {
         return $html;
     }
 
-    protected function starBloc($title, $containerId, $open = false) {
+    protected function starBloc($title, $containerId, $open = false)
+    {
         $html = '<div id="' . $containerId . '" class="container">' . "\n";
         $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";
         $html .= '<span class="captionTitle">' . $title . '</span>' . "\n";
@@ -951,11 +1011,13 @@ class GsxUps {
         return $html;
     }
 
-    protected function endBloc() {
+    protected function endBloc()
+    {
         return '</div></div>' . "\n";
     }
 
-    public function displaySoapErrors() {
+    public function displaySoapErrors()
+    {
         $html = '';
         if (count($this->upsSoapErrors)) {
             $html .= '<p class="error">Erreur(s) SOAP:<br/>';
@@ -968,5 +1030,4 @@ class GsxUps {
         }
         return $html;
     }
-
 }

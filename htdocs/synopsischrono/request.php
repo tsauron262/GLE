@@ -459,6 +459,9 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
         $userT->fetch($chrono->extraValue[$chrono->id]['Technicien']['value']);
         $tech = $userT->getFullName($langs);
     }
+    
+    
+    $textSuivie = "\n <a href='https://gle.synopsis-erp.com/bimp/synopsis_chrono_public/page.php?back_serial=".$chrono->id."&user_name=".sub_str($chrono->societe->name,0,3)."'>Vous pouvez suivre l'intervention ici.</a>";
 
 
     if ($type == "Facture") {
@@ -483,6 +486,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
 
         mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Bimp pour votre '" . $nomMachine . "'.
 \nDans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d'APPLE, votre retour est important afin d'améliorer la qualité de notre Centre de Services.
+".$textSuivie."
 \nCordialement.
 \nL'équipe BIMP.".$signature, $tabFileFact, $tabFileFact2, $tabFileFact3);
     } elseif ($type == "Devis" && is_object($chrono->propal)) {
@@ -493,7 +497,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
         if (isset($tech))
             $text .= "\nTechnicien en charge de la réparation : " . $tech . ". \n";
 
-        $text .= "\n\nCordialement.
+        $text .= $textSuivie."\n\nCordialement.
 \nL'équipe BIMP".$signature;
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3);
     } elseif($type == "debut"){

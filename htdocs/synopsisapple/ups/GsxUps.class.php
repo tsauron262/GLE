@@ -233,7 +233,7 @@ class GsxUps
             }
 
             $return['html'] .= '<div class="container tabBar">';
-            $return['html'] .= '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès.</p>';
+//            $return['html'] .= '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès.</p>';
             if ($ship->create()) {
                 if (count($ship->errors)) {
                     $return['html'] .= $ship->displayErrors();

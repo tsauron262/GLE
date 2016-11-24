@@ -466,8 +466,7 @@ class Repair
         $requestName = '';
         $wrapperName = 'repairData';
         $data = array(
-            'repairConfirmationNumber' => $this->confirmNumbers['repair'],
-            'repairStatusCode' => $status
+            'repairConfirmationNumber' => $this->confirmNumbers['repair']
         );
 
         switch ($this->repairType) {
@@ -479,6 +478,7 @@ class Repair
                     $client = 'UpdateCarryIn';
                     $requestName = 'UpdateCarryInRequest';
                 }
+                $data['statusCode'] = $status;
                 break;
 
             case 'repair_or_replace':
@@ -491,6 +491,7 @@ class Repair
                     $client = 'UpdateRepairOrReplace'; //=> A tester si fontionne pas
                     $requestName = 'UpdateRepairOrReplaceRequest';
                 }
+                $data['repairStatusCode'] = $status;
                 break;
         }
 

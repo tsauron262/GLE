@@ -466,7 +466,8 @@ class Repair
         $requestName = '';
         $wrapperName = 'repairData';
         $data = array(
-            'repairConfirmationNumber' => $this->confirmNumbers['repair']
+            'repairConfirmationNumber' => $this->confirmNumbers['repair'],
+            'statusCode' => $status
         );
 
         switch ($this->repairType) {

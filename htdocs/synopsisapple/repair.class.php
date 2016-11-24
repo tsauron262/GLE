@@ -23,9 +23,11 @@ class Repair
         'AWTR' => 'Parts allocated',
         'BEGR' => 'In Repair',
     );
+    
     public static $repairTypes = array(
         'carry_in', 'repair_or_replace'
     );
+    
     public $gsx = null;
     public $db = null;
     public $serial = null;

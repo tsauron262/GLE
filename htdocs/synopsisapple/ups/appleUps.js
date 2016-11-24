@@ -64,7 +64,8 @@ function createShipping() {
         'width': $('#width').val(),
         'height': $('#height').val(),
         'weight': $('#weight').val(),
-        'shipToKey': $('#shipmentShipTo').val()
+        'shipToKey': $('#shipmentShipTo').val(),
+        'upsTrackingNumber': $('#upsTrackingNumber').val()
     };
 
     if (!$('tr.recapPartRow').length) {

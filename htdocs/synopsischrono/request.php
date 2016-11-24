@@ -461,7 +461,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
     }
     
     
-    $textSuivie = "\n <a href='https://gle.synopsis-erp.com/bimp/synopsis_chrono_public/page.php?back_serial=".$chrono->id."&user_name=".sub_str($chrono->societe->name,0,3)."'>Vous pouvez suivre l'intervention ici.</a>";
+    $textSuivie = "\n <a href='https://gle.synopsis-erp.com/bimp/synopsis_chrono_public/page.php?back_serial=".$chrono->id."&user_name=".substr($chrono->societe->name,0,3)."'>Vous pouvez suivre l'intervention ici.</a>";
 
 
     if ($type == "Facture") {

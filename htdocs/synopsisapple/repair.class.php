@@ -493,7 +493,7 @@ class Repair
                 break;
         }
 
-        $request = $this->gsx->_requestBuilder($requestName, 'repairData ', $data);
+        $request = $this->gsx->_requestBuilder($requestName, 'repairData', $data);
         $response = $this->gsx->request($request, $client);
 
 //            echo "<pre>";print_r($response);exit;

@@ -477,7 +477,7 @@ class Repair
                     $requestName = 'IPhoneUpdateCarryInRequest';
                 } else {
                     $client = 'UpdateCarryIn';
-                    $requestName = 'UpdateCarryInRequest';
+                    $requestName = 'UpdateCarryIn';
                 }
                 break;
 
@@ -487,14 +487,14 @@ class Repair
 //                    $client = 'IPhoneUpdateRepairOrReplace'; //=> A tester si fontionne pas
                     $requestName = 'IPhoneUpdateRepairOrReplaceRequest';
                 } else {
-                    $client = 'UpdateRepairOrReplaceRequest';
-//                    $client = 'UpdateRepairOrReplace'; //=> A tester si fontionne pas
+//                    $client = 'UpdateRepairOrReplaceRequest';
+                    $client = 'UpdateRepairOrReplace'; //=> A tester si fontionne pas
                     $requestName = 'UpdateRepairOrReplaceRequest';
                 }
                 break;
         }
 
-        $request = $this->gsx->_requestBuilder($requestName, 'repairData ', $data);
+        $request = $this->gsx->_requestBuilder($requestName, 'repairData', $data);
         $response = $this->gsx->request($request, $client);
 
 //            echo "<pre>";print_r($response);exit;

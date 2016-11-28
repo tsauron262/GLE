@@ -2224,8 +2224,9 @@ class User extends CommonObject
                 
 
                 if(isset($this->array_options['options_alias'])){
-                    $info['shadowAddress'] = $this->array_options['options_alias'];
-                    $info["shadowAddress"] = str_replace("bimp.fr", "synopsis-erp.com", $info["shadowAddress"]);
+                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+                    $arrAlias = explode("\n", $this->array_options['options_alias']);
+                    $info['shadowAddress'] = $arrAlias;
                 }
                 
                 /*fmoddrsi*/

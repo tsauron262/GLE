@@ -6,6 +6,7 @@
  * Copyright (C) 2014      Juanjo Menent        <jmenent@2byte.es>
  * Copyright (C) 2015	   Claudio Aschieri		<c.aschieri@19.coop>
  * Copyright (C) 2015      Jean-François Ferry	<jfefe@aternatik.fr>
+ * Copyright (C) 2016      Ferran Marcet        <fmarcet@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,54 +21,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  *       \file       htdocs/contrat/list.php
  *       \ingroup    contrat
  *       \brief      Page liste des contrats
  */
-
 require ("../main.inc.php");
 require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
-
 $langs->load("contracts");
 $langs->load("products");
 $langs->load("companies");
 $langs->load("compta");
-
 $sortfield=GETPOST('sortfield','alpha');
 $sortorder=GETPOST('sortorder','alpha');
 $page=GETPOST('page','int');
 if ($page == -1) { $page = 0 ; }
 $limit = GETPOST('limit')?GETPOST('limit','int'):$conf->liste_limit;
 $offset = $limit * $page ;
-
 $search_name=GETPOST('search_name');
 $search_contract=GETPOST('search_contract');
 $search_ref_supplier=GETPOST('search_ref_supplier','alpha');
-$search_tech=GETPOST('search_tech','alpha');
-$search_tech2=GETPOST('search_tech2','alpha');
 $sall=GETPOST('sall');
 $search_status=GETPOST('search_status');
 $socid=GETPOST('socid');
 $search_user=GETPOST('search_user','int');
 $search_sale=GETPOST('search_sale','int');
 $search_product_category=GETPOST('search_product_category','int');
-
 $optioncss = GETPOST('optioncss','alpha');
-
 if (! $sortfield) $sortfield="c.rowid";
 if (! $sortorder) $sortorder="DESC";
-
 // Security check
 $id=GETPOST('id','int');
 if ($user->societe_id) $socid=$user->societe_id;
 $result = restrictedArea($user, 'contrat', $id);
-
 $staticcontrat=new Contrat($db);
 $staticcontratligne=new ContratLigne($db);
-
 if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) // Both test are required to be compatible with all browsers
 {
 	$search_name="";
@@ -79,9 +68,7 @@ if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) // Both 
 	$sall="";
 	$search_status="";
 }
-
 if ($search_status == '') $search_status=1;
-
 // List of fields to search into when doing a "search in all"
 $fieldstosearchall = array(
     'c.ref'=>'Ref',
@@ -92,23 +79,17 @@ $fieldstosearchall = array(
     'c.note_public'=>'NotePublic',
 );
 if (empty($user->socid)) $fieldstosearchall["c.note_private"]="NotePrivate";
-
-
 /*
  * View
  */
-
 $now=dol_now();
 $form=new Form($db);
 $formother = new FormOther($db);
 $socstatic = new Societe($db);
-
 llxHeader();
-
 $sql = 'SELECT';
 $sql.= " c.rowid as cid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_customer, c.ref_supplier,";
 $sql.= " s.nom as name, s.rowid as socid,";
-/*mod drsi*/$sql .= " cd.date_fin_validite, concat(ut.firstname, concat(' ', ut.lastname)) as tech,";/*fmod drsi*/
 $sql.= ' SUM('.$db->ifsql("cd.statut=0",1,0).') as nb_initial,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NULL OR cd.date_fin_validite >= '".$db->idate($now)."')",1,0).') as nb_running,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NOT NULL AND cd.date_fin_validite < '".$db->idate($now)."')",1,0).') as nb_expired,';
@@ -118,7 +99,6 @@ $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 if ($search_sale > 0 || (! $user->rights->societe->client->voir && ! $socid)) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= ", ".MAIN_DB_PREFIX."contrat as c";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
-/*mod drsi*/ $sql .= " LEFt JOIN `llx_element_contact` ec2 ON  `element_id` = c.rowid AND  `fk_c_type_contact` = 11 LEFT JOIN llx_user ut ON ut.rowid = ec2.fk_socpeople";
 if ($search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON cp.fk_product=cd.fk_product';
 if ($search_user > 0)
 {
@@ -130,7 +110,6 @@ $sql.= ' AND c.entity IN ('.getEntity('contract', 1).')';
 if ($search_product_category > 0) $sql.=" AND cp.fk_categorie = ".$search_product_category;
 if ($socid) $sql.= " AND s.rowid = ".$db->escape($socid);
 if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
-
 if ($search_name) {
     $sql .= natural_search('s.nom', $search_name);
 }
@@ -147,54 +126,28 @@ if ($search_sale > 0)
 if ($sall) {
     $sql .= natural_search(array_keys($fieldstosearchall), $sall);
 }
-
-
-/*mod drsi */
-if (!empty($search_tech)) {
-	$sql .= " AND c.`fk_soc` IN (SELECT sc.`fk_soc` FROM llx_societe_commerciaux sc, llx_user uc WHERE sc.`fk_user` = uc.rowid ".natural_search(array('uc.lastname', 'uc.firstname'), $search_tech).")";
+if ($search_user > 0) $sql.= " AND ec.fk_c_type_contact = tc.rowid AND tc.element='contrat' AND tc.source='internal' AND ec.element_id = c.rowid AND ec.fk_socpeople = ".$search_user;
+$sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_supplier, s.nom, s.rowid";
+$totalnboflines=0;
+$result=$db->query($sql);
+if ($result)
+{
+    $totalnboflines = $db->num_rows($result);
 }
-if (!empty($search_tech2)) {
-	$sql .= natural_search(array('ut.lastname', 'ut.firstname'), $search_tech2);
-}
-if($expirer)
-$sql.= " AND cd.statut < 5";
-/*f mod drsi */
-
-$sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut, c.ref_supplier, s.nom, s.rowid, cd.date_fin_validite, ut.firstname, ut.lastname";
-
-/*mod drsi */
-if($expirer)
-$sql.= " HAVING nb_late > 0";
-/*f mod drsi */
-
-
 $sql.= $db->order($sortfield,$sortorder);
 $sql.= $db->plimit($conf->liste_limit + 1, $offset);
-
 $resql=$db->query($sql);
 if ($resql)
 {
     $num = $db->num_rows($resql);
     $i = 0;
-    
-    
-    $param='&search_contract='.$search_contract;
-    $param.='&search_name='.$search_name;
-    $param.='&search_ref_supplier='.$search_ref_supplier;
-    $param.='&search_sale=' .$search_sale;
-    /*moddrsi*/
-    $param.='&search_tech=' .$search_tech;
-    $param.='&search_tech2=' .$search_tech2;
-
-    print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], '&'.$param, $sortfield, $sortorder,'',$num,$totalnboflines,'title_commercial.png');
-
+    print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], '&search_contract='.$search_contract.'&search_name='.$search_name, $sortfield, $sortorder,'',$num,$totalnboflines,'title_commercial.png');
     print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
     if ($optioncss != '') print '<input type="hidden" name="optioncss" value="'.$optioncss.'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="action" value="list">';
 	print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
 	print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
-
     if ($sall)
     {
         foreach($fieldstosearchall as $key => $val) $fieldstosearchall[$key]=$langs->trans($val);
@@ -240,20 +193,21 @@ if ($resql)
         print $moreforfilter;
         print '</div>';
     }
-
     print '<table class="tagtable liste'.($moreforfilter?" listwithfilterbefore":"").'">';
     print '<tr class="liste_titre">';
-
-
+    $param='&search_contract='.$search_contract;
+    $param.='&search_name='.$search_name;
+    $param.='&search_ref_supplier='.$search_ref_supplier;
+    $param.='&search_sale=' .$search_sale;
+    if ($sall != '') $param.='&sall='.$sall;
+    if ($optioncss != '') $param.='&optioncss='.$optioncss;
     print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "c.rowid","","$param",'',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("RefCustomer"), $_SERVER["PHP_SELF"], "c.ref_customer","","$param",'',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("RefSupplier"), $_SERVER["PHP_SELF"], "c.ref_supplier","","$param",'',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("ThirdParty"), $_SERVER["PHP_SELF"], "s.nom","","$param",'',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("SalesRepresentative"), $_SERVER["PHP_SELF"], "","","$param",'',$sortfield,$sortorder);
     //print_liste_field_titre($langs->trans("DateCreation"), $_SERVER["PHP_SELF"], "c.datec","","$param",'align="center"',$sortfield,$sortorder);
-    /*deb mod drsi*/print_liste_field_titre($langs->trans("TypeContact_contrat_internal_SALESREPFOLL"), $_SERVER["PHP_SELF"], "tech","","$param",'',$sortfield,$sortorder);/*fmod drsi*/
     print_liste_field_titre($langs->trans("DateContract"), $_SERVER["PHP_SELF"], "c.date_contrat","","$param",'align="center"',$sortfield,$sortorder);
-    /* deb mod drsi */ print_liste_field_titre($langs->trans("Date Fin"), $_SERVER["PHP_SELF"], "date_fin_validite","","$param",'align="center"',$sortfield,$sortorder); /*f mod drsi*/
     //print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "c.statut","","$param",'align="center"',$sortfield,$sortorder);
     print_liste_field_titre($staticcontratligne->LibStatut(0,3), '', '', '', '', 'width="16"');
     print_liste_field_titre($staticcontratligne->LibStatut(4,3,0), '', '', '', '', 'width="16"');
@@ -261,7 +215,6 @@ if ($resql)
     print_liste_field_titre($staticcontratligne->LibStatut(5,3), '', '', '', '', 'width="16"');
     print_liste_field_titre('',$_SERVER["PHP_SELF"],"",'','','',$sortfield,$sortorder,'maxwidthsearch ');
     print "</tr>\n";
-
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
     print '<tr class="liste_titre">';
     print '<td class="liste_titre">';
@@ -276,28 +229,19 @@ if ($resql)
     print '<td class="liste_titre">';
     print '<input type="text" class="flat" size="8" name="search_name" value="'.dol_escape_htmltag($search_name).'">';
     print '</td>';
-    /*mod drsi*/
-    print '<td class="liste_titre">';
-    print '<input type="text" class="flat" size="24" name="search_tech" value="'.$search_tech.'">';
-    print '</td>';
-    print '<td class="liste_titre">';
-    print '<input type="text" class="flat" size="24" name="search_tech2" value="'.$search_tech2.'">';
-    print '</td>';
-//    print '<td class="liste_titre">&nbsp;</td>';
-    /*fmod drsi*/
+    print '<td class="liste_titre">&nbsp;</td>';
     //print '<td class="liste_titre">&nbsp;</td>';
     print '<td class="liste_titre" colspan="5"></td>';
     print '<td class="liste_titre" align="right"><input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
 	print '<input type="image" class="liste_titre" name="button_removefilter" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
     print "</td></tr>\n";
-
     $var=true;
     while ($i < min($num,$limit))
     {
         $obj = $db->fetch_object($resql);
         $var=!$var;
         print '<tr '.$bc[$var].'>';
-        print '<td class="nowrap"><a href="'./*mod drsi*/ DOL_URL_ROOT.'/contrat/'./*fmoddrsi*/'card.php?id='.$obj->cid.'">';
+        print '<td class="nowrap"><a href="card.php?id='.$obj->cid.'">';
         print img_object($langs->trans("ShowContract"),"contract").' '.(isset($obj->ref) ? $obj->ref : $obj->cid) .'</a>';
         if ($obj->nb_late) print img_warning($langs->trans("Late"));
         print '</td>';
@@ -305,7 +249,6 @@ if ($resql)
         print '<td>'.$obj->ref_supplier.'</td>';
         print '<td><a href="../comm/card.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.$obj->name.'</a></td>';
         //print '<td align="center">'.dol_print_date($obj->datec).'</td>';
-
         // Sales Rapresentatives
         print '<td>';
         if($obj->socid)
@@ -341,12 +284,7 @@ if ($resql)
         	print '&nbsp';
         }
         print '</td>';
-
-
-       /*mod drsi*/ print '<td>'.$obj->tech.'</td>';/*fmoddrsi*/
-       
         print '<td align="center">'.dol_print_date($db->jdate($obj->date_contrat)).'</td>';
-       /* mod drsi */ print '<td align="center">'.dol_print_date($db->jdate($obj->date_fin_validite)).'</td>';/*f mod drsi*/
         //print '<td align="center">'.$staticcontrat->LibStatut($obj->statut,3).'</td>';
         print '<td align="center">'.($obj->nb_initial>0?$obj->nb_initial:'').'</td>';
         print '<td align="center">'.($obj->nb_running>0?$obj->nb_running:'').'</td>';
@@ -357,7 +295,6 @@ if ($resql)
         $i++;
     }
     $db->free($resql);
-
     print '</table>';
     print '</form>';
 }
@@ -365,8 +302,5 @@ else
 {
     dol_print_error($db);
 }
-
-
 llxFooter();
 $db->close();
-

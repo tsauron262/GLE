@@ -118,7 +118,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 if ($search_sale > 0 || (! $user->rights->societe->client->voir && ! $socid)) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= ", ".MAIN_DB_PREFIX."contrat as c";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
-/*mod drsi*/ $sql .= " LEFt JOIN `llx_element_contact` ec ON  `element_id` = c.rowid AND  `fk_c_type_contact` = 11 LEFT JOIN llx_user ut ON ut.rowid = ec.fk_socpeople";
+/*mod drsi*/ $sql .= " LEFt JOIN `llx_element_contact` ec ON  `element_id` = c.rowid AND  `fk_c_type_contact` = 11 LEFT JOIN llx_user ut2 ON ut2.rowid = ec.fk_socpeople";
 if ($search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON cp.fk_product=cd.fk_product';
 if ($search_user > 0)
 {
@@ -154,7 +154,7 @@ if (!empty($search_tech)) {
 	$sql .= " AND c.`fk_soc` IN (SELECT sc.`fk_soc` FROM llx_societe_commerciaux sc, llx_user uc WHERE sc.`fk_user` = uc.rowid ".natural_search(array('uc.lastname', 'uc.firstname'), $search_tech).")";
 }
 if (!empty($search_tech2)) {
-	$sql .= natural_search(array('ut.lastname', 'ut.firstname'), $search_tech2);
+	$sql .= natural_search(array('ut2.lastname', 'ut2.firstname'), $search_tech2);
 }
 if($expirer)
 $sql.= " AND cd.statut < 5";

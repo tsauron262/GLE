@@ -116,6 +116,7 @@ AND  `targettype` LIKE  'facture' AND fk_target = f.rowid WHERE fk_source is nul
 
 
 
+echo(DOL_URL_ROOT."|".DOL_MAIN_URL_ROOT);
 
 
 llxFooter();

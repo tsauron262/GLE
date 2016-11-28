@@ -2222,7 +2222,7 @@ class User extends CommonObject
                     $info["domainGlobalAdmin"] = "yes";
                 }
                 
-//                $this->fetch_optionals();
+                $this->fetch_optionals();
                 if(isset($this->array_options['options_alias'])){
                     $info['shadowAddress'] = $this->array_options['option_alias'];
                 }

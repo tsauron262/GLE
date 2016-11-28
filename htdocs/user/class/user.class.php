@@ -2222,9 +2222,10 @@ class User extends CommonObject
                     $info["domainGlobalAdmin"] = "yes";
                 }
                 
-//                $this->fetch_optionals();
+
                 if(isset($this->array_options['options_alias'])){
                     $info['shadowAddress'] = $this->array_options['options_alias'];
+                    $info["shadowAddress"] = str_replace("bimp.fr", "synopsis-erp.com", $info["shadowAddress"]);
                 }
                 
                 /*fmoddrsi*/

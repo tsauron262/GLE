@@ -2221,6 +2221,11 @@ class User extends CommonObject
                     $info['enabledservice'][] = "domainadmin";
                     $info["domainGlobalAdmin"] = "yes";
                 }
+                
+                if(!isset($this->array_options['option_alias'])){
+                    $info['shadowAddress'] = $this->array_options['option_alias'];
+                }
+                
                 /*fmoddrsi*/
 		return $info;
 	}

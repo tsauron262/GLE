@@ -220,7 +220,9 @@ define('DOL_MAIN_URL_ROOT', $tmp);											// URL absolute root (https://sss/d
 $uri=preg_replace('/^http(s?):\/\//i','',constant('DOL_MAIN_URL_ROOT'));	// $uri contains url without http*
 $suburi = strstr($uri, '/');												// $suburi contains url without domain:port
 if ($suburi == '/') $suburi = '';											// If $suburi is /, it is now ''
-define('DOL_URL_ROOT', $suburi);											// URL relative root ('', '/dolibarr', ...)
+define('DOL_URL_ROOT', $suburi);
+dol_syslog(DOL_URL_ROOT."|".DOL_MAIN_URL_ROOT,3);
+// URL relative root ('', '/dolibarr', ...)
 
 //print DOL_MAIN_URL_ROOT.'-'.DOL_URL_ROOT."\n";
 

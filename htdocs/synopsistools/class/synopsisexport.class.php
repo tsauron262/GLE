@@ -153,7 +153,7 @@ class synopsisexport {
 
         if ($typeAff2 != "fact")
             $where .= " AND chronoT.id = chrono.id ";
-        $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
+        $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid";// AND propal.extraparams is null ";
         $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsis_apple_repair repair on chrono.id = repair.chronoId ";
         $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "societe soc on  soc.rowid = propal.fk_soc ";
 //        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";

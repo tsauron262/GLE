@@ -1177,11 +1177,11 @@ class GSX
     }
     
     public function dispayLastRequestXml() {
-//        echo 'Dernière requête: <br/><br/>';
+        echo 'Dernière requête: <br/><br/>';
         echo $this->soapClient->__getLastRequest();
-//        echo '<br/><br/>';
-//        echo 'Dernière réponse: <br/><br/>';
-//        echo $this->soapClient->__getLastResponse();
+        echo '<br/><br/>';
+        echo 'Dernière réponse: <br/><br/>';
+        echo $this->soapClient->__getLastResponse();
     }
 }
 

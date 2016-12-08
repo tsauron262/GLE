@@ -410,7 +410,7 @@ class Repair
                 $this->repairComplete = 0;
         }
         if (isset($this->repairLookUp['repairType'])) {
-            if ($this->repairLookUp['repairType'] === 'CA') {
+            if ($this->repairLookUp['repairType'] === 'CA' || $this->repairLookUp['repairType'] === 'Carry-in') {
                 $this->repairType = 'carry_in';
             } else {
                 $this->repairType = 'repair_or_replace';

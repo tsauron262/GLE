@@ -464,14 +464,14 @@ class Repair
 
         $client = '';
         $requestName = '';
-        $wrapperName = 'repairData';
+        
         $data = array(
-            'repairConfirmationNumber' => $this->confirmNumbers['repair'],
-            'statusCode' => $status
+            'repairConfirmationNumber' => $this->confirmNumbers['repair']
         );
 
         switch ($this->repairType) {
             case 'carry_in':
+                $data['statusCode'] = $status;
                 if ($this->isIphone) {
                     $client = 'IPhoneUpdateCarryIn';
                     $requestName = 'IPhoneUpdateCarryInRequest';
@@ -482,6 +482,7 @@ class Repair
                 break;
 
             case 'repair_or_replace':
+                $data['repairStatusCode'] = $status;
                 if ($this->isIphone) {
                     $client = 'IPhoneUpdateRepairOrReplaceRequest';
 //                    $client = 'IPhoneUpdateRepairOrReplace'; //=> A tester si fontionne pas
@@ -498,6 +499,9 @@ class Repair
         $response = $this->gsx->request($request, $client);
 
 //            echo "<pre>";print_r($response);exit;
+        
+        $this->gsx->dispayLastRequestXml();
+        exit;
 
         if (count($this->gsx->errors['soap']) > $n) {
             return false;

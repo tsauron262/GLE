@@ -2203,6 +2203,7 @@ class User extends CommonObject
                 }
                 
                 $info['enabledservice'] = array("internal");
+//             pour redirection mail   $info['mtaTransport'] = "smtp:[mail.flytrace.com]:25;
                 
                 if($domain){
                     $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
@@ -2221,6 +2222,14 @@ class User extends CommonObject
                     $info['enabledservice'][] = "domainadmin";
                     $info["domainGlobalAdmin"] = "yes";
                 }
+                
+
+                if(isset($this->array_options['options_alias'])){
+                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+                    $arrAlias = explode(",", $this->array_options['options_alias']);
+                    $info['shadowAddress'] = $arrAlias;
+                }
+                
                 /*fmoddrsi*/
 		return $info;
 	}

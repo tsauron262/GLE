@@ -410,7 +410,7 @@ class Repair
                 $this->repairComplete = 0;
         }
         if (isset($this->repairLookUp['repairType'])) {
-            if ($this->repairLookUp['repairType'] === 'CA') {
+            if ($this->repairLookUp['repairType'] === 'CA' || $this->repairLookUp['repairType'] === 'Carry-in') {
                 $this->repairType = 'carry_in';
             } else {
                 $this->repairType = 'repair_or_replace';
@@ -476,9 +476,10 @@ class Repair
                     $client = 'IPhoneUpdateCarryIn';
                     $requestName = 'IPhoneUpdateCarryInRequest';
                 } else {
-                    $client = 'UpdateCarryInRequest';
+                    $client = 'UpdateCarryIn';
                     $requestName = 'UpdateCarryInRequest';
                 }
+                $data['statusCode'] = $status;
                 break;
 
             case 'repair_or_replace':
@@ -492,6 +493,7 @@ class Repair
                     $client = 'UpdateRepairOrReplace'; //=> A tester si fontionne pas
                     $requestName = 'UpdateRepairOrReplaceRequest';
                 }
+                $data['repairStatusCode'] = $status;
                 break;
         }
 

@@ -42,7 +42,7 @@ class synopsisexport {
 
         $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid , email , fact.total, fact.total_ttc, idtech8sens as id8Sens, chronoT.Centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "synopsischrono chrono , " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT , " . MAIN_DB_PREFIX . "user_extrafields ue , " . MAIN_DB_PREFIX . "societe soc "
-                . "WHERE fact.fk_soc = soc.rowid AND fact.fk_statut > 0 AND close_code is null AND fact.extraparams is null AND fact.total != 0 AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut < 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) "
+                . "WHERE fact.fk_soc = soc.rowid AND fact.fk_statut > 0 AND close_code is null AND fact.extraparams is null AND fact.total != 0 AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut != 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) "
                 . "GROUP BY fact.rowid");
 
         while ($ligne = $this->db->fetch_object($result)) {
@@ -153,7 +153,7 @@ class synopsisexport {
 
         if ($typeAff2 != "fact")
             $where .= " AND chronoT.id = chrono.id ";
-        $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
+        $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid";// AND propal.extraparams is null ";
         $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsis_apple_repair repair on chrono.id = repair.chronoId ";
         $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "societe soc on  soc.rowid = propal.fk_soc ";
 //        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";

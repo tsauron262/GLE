@@ -208,10 +208,11 @@ class pdf_synopsisapple_appleretour extends ModeleSynopsisapple {
                 $file1 = $dirF . "/ups.gif";
                 $file2 = $dirF . "/PackingList.pdf";
                 $dirLab = $dir . "/labels";
-                if (is_file($file1) && is_file($file2) && is_dir($dirLab)) {
+                if(is_file($file2) && is_dir($dirLab)) {
                     $pdf->MultiCell(190, 6, "\n\n Ce document contient : \n- 1 Etiquette UPS\n- 1 Fiche de colisage Apple\n- 2 Fois la fiche label pour chaque pièce détachée", 0, 'L');
                     $pdf->MultiCell(190, 6, "\n\n Créé le : " . dol_print_date(time()), 0, 'L');
 
+                    if (is_file($file1))
                     $pdf->Image($file1, 20, 150, 180, 105);
 
                     ajouteFichier($pdf, $file2);

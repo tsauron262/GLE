@@ -817,6 +817,12 @@ class UserGroup extends CommonObject
                     $info ['mail'] = str_replace(",", "", traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
                 }
 				//$info['uid'] = $info['mail'];
+                
+                if(isset($this->array_options['options_alias'])){
+                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+                    $arrAlias = explode(",", $this->array_options['options_alias']);
+                    $info['shadowAddress'] = $arrAlias;
+                }
                 /*fmod drsi*/
 		return $info;
 	}

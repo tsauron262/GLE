@@ -818,6 +818,8 @@ class gsxDatas
                         );
                         $client = 'IPhoneKGBSerialNumberUpdate';
                         $request = 'UpdateIPhoneKGBSerialNumberRequest';
+                        
+                        $result['imeiNumber'] = $result['alternateDeviceId'];
                         break;
                 }
             } else {

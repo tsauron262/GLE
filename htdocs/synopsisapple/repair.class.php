@@ -502,8 +502,8 @@ class Repair
 
 //            echo "<pre>";print_r($response);exit;
         
-        $this->gsx->dispayLastRequestXml();
-        exit;
+//        $this->gsx->dispayLastRequestXml();
+//        exit;
 
         if (count($this->gsx->errors['soap']) > $n) {
             return false;

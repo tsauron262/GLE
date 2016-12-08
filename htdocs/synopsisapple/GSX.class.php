@@ -288,7 +288,7 @@ class GSX
      * @access protected
      *
      */
-    public $soapClient;
+    protected $soapClient;
     public $errors = array(
         'init' => array(),
         'soap' => array()

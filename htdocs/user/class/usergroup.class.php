@@ -819,7 +819,7 @@ class UserGroup extends CommonObject
 				//$info['uid'] = $info['mail'];
                 
                 if(isset($this->array_options['options_alias'])){
-                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+//                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
                     $arrAlias = explode(",", $this->array_options['options_alias']);
                     $info['shadowAddress'] = $arrAlias;
                 }

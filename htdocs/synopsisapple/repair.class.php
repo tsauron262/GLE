@@ -502,7 +502,7 @@ class Repair
 
 //            echo "<pre>";print_r($response);exit;
         
-//        $this->gsx->dispayLastRequestXml();
+        $this->gsx->dispayLastRequestXml($request, $response);
 //        exit;
 
         if (count($this->gsx->errors['soap']) > $n) {

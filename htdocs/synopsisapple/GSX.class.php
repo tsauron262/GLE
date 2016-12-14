@@ -1176,12 +1176,20 @@ class GSX
         return $html;
     }
     
-    public function dispayLastRequestXml() {
-        echo 'Dernière requête: <br/><br/>';
-        echo $this->soapClient->__getLastRequest();
-        echo '<br/><br/>';
-        echo 'Dernière réponse: <br/><br/>';
-        echo $this->soapClient->__getLastResponse();
+    public function dispayLastRequestXml($request = null, $response = null) {
+        $sortie = 'Dernière requête: <br/><br/>';
+        if(isset($request))
+            $sortie .= print_r($request, 1);
+        else
+        $sortie .= $this->soapClient->__getLastRequest();
+        $sortie .= '<br/><br/>';
+        $sortie .= 'Dernière réponse: <br/><br/>';
+        
+        if(isset($response))
+            $sortie .= print_r($response, 1);
+        else
+            $sortie .= $this->soapClient->__getLastResponse();
+        dol_syslog($sortie, 3, 0, "_apple3");
     }
 }
 

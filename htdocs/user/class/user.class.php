@@ -2203,7 +2203,7 @@ class User extends CommonObject
                 }
                 
                 $info['enabledservice'] = array("internal");
-                $info['mtaTransport'] = "smtp:[mail.flytrace.com]:25";
+                $info['mtaTransport'] = "smtp:[mail.bimp.fr]:25";
                 
                 if($domain){
                     $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);

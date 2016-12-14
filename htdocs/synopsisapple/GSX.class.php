@@ -1176,7 +1176,7 @@ class GSX
         return $html;
     }
     
-    public function dispayLastRequestXml($request = null, $response = null) {
+    public function dispayLastRequestXml($request = null, $response = null, $error = null) {
         $sortie = 'Dernière requête: <br/><br/>';
         if(isset($request))
             $sortie .= print_r($request, 1);
@@ -1189,6 +1189,12 @@ class GSX
             $sortie .= print_r($response, 1);
         else
             $sortie .= $this->soapClient->__getLastResponse();
+        
+        $sortie .= 'Dernière erreur: <br/><br/>';
+        
+        if(isset($error))
+            $sortie .= print_r($error, 1);
+        
         dol_syslog($sortie, 3, 0, "_apple3");
     }
 }

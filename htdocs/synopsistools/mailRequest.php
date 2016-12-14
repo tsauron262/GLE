@@ -5,7 +5,7 @@ set_time_limit(150);
 
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "annulObj" && isset($_SERVER["HTTP_REFERER"]) && $_SERVER["HTTP_REFERER"] != '') {
-    mailSyn("tommy@drsi.fr", "Demande annulation", "Annuler Obj : " . $_SERVER["HTTP_REFERER"] . "<br/><br/><a href='" . DOL_URL_ROOT . "/synopsistools/mailRequest.php?action=deblockComm&id=" . $_REQUEST['id'] . "'>Deverouiller</a>");
+    mailSyn("tommy@drsi.fr", "Demande annulation", "Annuler Obj : " . $_SERVER["HTTP_REFERER"] . "<br/><br/><a href='" . DOL_MAIN_URL_ROOT . "/synopsistools/mailRequest.php?action=deblockComm&id=" . $_REQUEST['id'] . "'>Deverouiller</a>");
     header("Location:" . $_SERVER["HTTP_REFERER"]);
 }
 

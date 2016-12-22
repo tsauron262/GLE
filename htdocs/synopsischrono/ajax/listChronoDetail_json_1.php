@@ -200,6 +200,9 @@ if ($searchOn == 'true') {
                     $_REQUEST['searchOper'] = "in";
                 }
             }
+            if ($resPre->type_valeur == 8) {
+                    $_REQUEST['searchOper'] = "eq";
+            }
         }
 
 

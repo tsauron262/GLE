@@ -91,6 +91,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -290,8 +291,8 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 //symptom et sauv
                 $pdf->SetXY('15', '136');
                 $taille = strlen($chrono->valuesPlus[1047]->valueStr);
-                $taille2 = count (explode ("\n", $chrono->valuesPlus[1047]->valueStr));
-                $tailleP = ($taille2 > 4 || $taille > 100)? 8 : 12;
+                $taille2 = count(explode("\n", $chrono->valuesPlus[1047]->valueStr));
+                $tailleP = ($taille2 > 4 || $taille > 100) ? 8 : 12;
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $tailleP);
                 $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
@@ -362,8 +363,10 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 //                }
 
 
-
-
+                //QR suivie        
+                $data = DOL_MAIN_URL_ROOT."/synopsis_chrono_public/page.php?back_serial=".$chrono->id."&user_name=".substr($chrono->societe->name,0,3);
+                $this->getQrCode($data, $dir, "suivie.png");
+                $pdf->Image($dir. "/suivie.png", 100, 30, 0, 24);
 
 
 
@@ -564,6 +567,8 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
             $pdf->Rect($this->marge_gauche - 3, 39, $largCadre, 235);
             $pdf->SetXY($this->marge_gauche, 42);
         }
+        
+        
 
 
 
@@ -646,6 +651,15 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
 
+    function getQrCode($data, $dir, $file = "suivie.png") {
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
+        if (!is_dir($dir))
+            mkdir($dir);
+
+        QRcode::png($data
+                , $dir ."/". $file
+                , "L", 4, 2);
+    }
 }
 
 function couperChaine($chaine, $nb) {
@@ -667,5 +681,6 @@ function max_size($chaine, $lg_max) {
 
     return $chaine;
 }
+
 
 ?>

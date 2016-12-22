@@ -482,8 +482,8 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
 //                die("ok");
             }
             $html = "";
-    dol_syslog($type_valeur."ici",3);
             foreach ($obj->valuesArr as $key => $value) {
+    dol_syslog($type_valeur."ici".$value,3);
                 if ($type_valeur == 8 || ($valueIsSelected && $val == $key)) {
 //            var_dump($obj->valuesArr);
                     if ($obj->OptGroup . "x" != "x") {

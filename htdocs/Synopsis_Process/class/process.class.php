@@ -2637,7 +2637,6 @@ EOF;
     function getValue($id) {
         if ($this->reqValue != "") {
             $sql = $this->db->query($this->reqValue);
-            dol_syslog($this->reqValue,3);
 //        die("jjjj");
             if ($sql)
                 while ($result = $this->db->fetch_object($sql)) {
@@ -2647,6 +2646,7 @@ EOF;
                         $html = lien($this->urlObj . $result->id) . finLien($picto . " " . $result->nom);
                     else
                         $html = $picto . $result->nom;
+            dol_syslog($result->nom,3);
                     $this->valuesArr[$result->id] = $html;
                     $this->valuesArrStr[$result->id] = $result->nom;
                 }

@@ -2646,7 +2646,6 @@ EOF;
                         $html = lien($this->urlObj . $result->id) . finLien($picto . " " . $result->nom);
                     else
                         $html = $picto . $result->nom;
-            dol_syslog($result->nom,3);
                     $this->valuesArr[$result->id] = $html;
                     $this->valuesArrStr[$result->id] = $result->nom;
                 }

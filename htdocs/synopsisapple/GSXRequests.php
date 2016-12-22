@@ -276,7 +276,7 @@ class GSX_Request {
                             $html .= '<br/>' . "\n";
                             $html .= '<textarea cols="80" rows="10" ';
                         }
-                        $html .= 'id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
+                        $html .= ' class="'.$valuesName.'" id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
 
                         if ($defs['type'] != 'textarea') {
                             if (isset($values[$valuesName]))
@@ -301,7 +301,7 @@ class GSX_Request {
 
                     case 'select':
                         if (isset($defs['values'])) {
-                            $html .= '<select name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' );
+                            $html .= '<select class="'.$valuesName.'" name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' );
                             if ($name == 'comptiaGroup')
                                 $html .= ' onchange="onComptiaGroupSelect($(this));"';
                             $html .= '>';
@@ -339,7 +339,7 @@ class GSX_Request {
                         break;
 
                     case 'fileSelect':
-                        $html .= '<input type="file" id="' . $inputName . '" name="' . $inputName . '"/>';
+                        $html .= '<input type="file" class="'.$valuesName.'" id="' . $inputName . '" name="' . $inputName . '"/>';
                         break;
 
                     case 'partsList':

@@ -452,10 +452,10 @@ function inversDate($str) {
 }
 
 function parseValue1($idChrono, $value, $res) {
-    return parseValue($idChrono, $value, $res->extraCss, $res->type_subvaleur, $res->sourceIsOption, $res->phpClass, $res->valueIsSelected, $res->valueIsChecked);
+    return parseValue($idChrono, $value, $res->extraCss, $res->type_subvaleur, $res->sourceIsOption, $res->phpClass, $res->valueIsSelected, $res->valueIsChecked, $res->type_valeur);
 }
 
-function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIsOption = false, $phpClass = '', $valueIsSelected = false, $valueIsChecked = false) {
+function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIsOption = false, $phpClass = '', $valueIsSelected = false, $valueIsChecked = false, $type_valeur = false) {
     global $db;
     $val = stripslashes($val);
     //synopsischrono_key_type_valeur
@@ -483,7 +483,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
             }
             $html = "";
             foreach ($obj->valuesArr as $key => $value) {
-                if ($hasSubValeur == 8 || ($valueIsSelected && $val == $key)) {
+                if ($type_valeur == 8 || ($valueIsSelected && $val == $key)) {
 //            var_dump($obj->valuesArr);
                     if ($obj->OptGroup . "x" != "x") {
                         $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $value;

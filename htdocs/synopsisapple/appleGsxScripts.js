@@ -1579,7 +1579,9 @@ function onRequestResponse(xhr, requestType, prodId) {
                     });
                     
                     $(".replacementSerialNumber, .replacementIMEINumber").focusout(function(){
-                        var champ = $(this).attr("id").replace("replacementSerialNumber", "consignmentFlag");
+                        var champ = $(this).attr("id");
+                        var champ = champ.replace("replacementSerialNumber", "consignmentFlag");
+                        var champ = champ.replace("replacementIMEINumber", "consignmentFlag");
                         $("#"+champ+"_yes").click();
                     });
                     

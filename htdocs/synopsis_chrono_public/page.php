@@ -187,7 +187,7 @@ if ($id_chrono) {
             <div class="row">
                 <h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>
                     <?php
-                    if(isset($chrono->societe))
+                    if(isset($chrono->societe) && is_object($chrono->societe))
                         echo "<h2>".$chrono->societe->getFullName($langs) . "</h2>";
                     echo "<h2>".$chrono->ref . "</h2>";
                     

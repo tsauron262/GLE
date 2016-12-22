@@ -342,6 +342,7 @@ $chrono = new Chrono($db);
 $chrono->loadObject = false;
 
 //echo $requete;
+dol_syslog($requete,3);
 $sql = $db->query($requete);
 if ($sql) {
     $i = 0;

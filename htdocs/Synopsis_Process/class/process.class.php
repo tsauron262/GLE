@@ -2637,6 +2637,7 @@ EOF;
     function getValue($id) {
         if ($this->reqValue != "") {
             $sql = $this->db->query($this->reqValue);
+            dol_syslog($this->reqValue,3);
 //        die("jjjj");
             if ($sql)
                 while ($result = $this->db->fetch_object($sql)) {

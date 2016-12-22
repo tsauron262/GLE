@@ -788,6 +788,7 @@ div.repairPopUp {
     z-index: 9999;
     padding: 30px;
     background: #FFFCF5;
+    right: 0;
 }
 .loadFormResults,
 .repairFormContainer {

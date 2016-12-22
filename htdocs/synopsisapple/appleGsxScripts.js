@@ -1577,6 +1577,12 @@ function onRequestResponse(xhr, requestType, prodId) {
                     $("#requestReviewByApple_yes").click(function () {
                         $("#checkIfOutOfWarrantyCoverage_no").click();
                     });
+                    
+                    $(".replacementSerialNumber, .replacementIMEINumber").focusout(function(){
+                        var champ = $(this).id().replace("replacementSerialNumber", "consignmentFlag");
+                        $("#"+champ+"_yes").click();
+                    });
+                    
                 });
             } else {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');

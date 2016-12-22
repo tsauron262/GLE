@@ -43,6 +43,9 @@
     <def name="replacementSerialNumber" type="text">
         <label>Remplacement S/N</label>
     </def>
+    <def name="replacementIMEINumber" type="text">
+        <label>Remplacement IMEI</label>
+    </def>
     <!--Adresses-->
     <def name="addressLine1" type="text" max="60" jsCheck="text">
         <label>Adresse ligne 1</label>

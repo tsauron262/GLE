@@ -491,7 +491,6 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
                         $html .= $value;
                     }
                 }
-                if($type_valeur == 10)dol_syslog("ici".$value,3);
             }
             return $html;
 //        } else {

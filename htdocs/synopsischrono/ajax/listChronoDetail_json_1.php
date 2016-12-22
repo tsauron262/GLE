@@ -457,7 +457,6 @@ function parseValue1($idChrono, $value, $res) {
 
 function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIsOption = false, $phpClass = '', $valueIsSelected = false, $valueIsChecked = false, $type_valeur = false) {
     global $db;
-    dol_syslog($type_valeur."ici",3);
     $val = stripslashes($val);
     //synopsischrono_key_type_valeur
     if ($hasSubValeur > 0) {
@@ -483,6 +482,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
 //                die("ok");
             }
             $html = "";
+    dol_syslog($type_valeur."ici",3);
             foreach ($obj->valuesArr as $key => $value) {
                 if ($type_valeur == 8 || ($valueIsSelected && $val == $key)) {
 //            var_dump($obj->valuesArr);

@@ -483,7 +483,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
             }
             $html = "";
             foreach ($obj->valuesArr as $key => $value) {
-                if ($type_valeur == 8 || ($valueIsSelected && $val == $key)) {
+                if ($type_valeur == 10 || ($valueIsSelected && $val == $key)) {
 //            var_dump($obj->valuesArr);
                     if ($obj->OptGroup . "x" != "x") {
                         $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $value;
@@ -491,7 +491,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
                         $html .= $value;
                     }
                 }
-                if($type_valeur == 8)dol_syslog("ici".$value,3);
+                if($type_valeur == 10)dol_syslog("ici".$value,3);
             }
             return $html;
 //        } else {

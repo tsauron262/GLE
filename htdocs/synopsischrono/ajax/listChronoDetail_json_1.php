@@ -342,7 +342,7 @@ $chrono = new Chrono($db);
 $chrono->loadObject = false;
 
 //echo $requete;
-dol_syslog($requete,3);
+//dol_syslog($requete,3);
 $sql = $db->query($requete);
 if ($sql) {
     $i = 0;
@@ -483,7 +483,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
             }
             $html = "";
             foreach ($obj->valuesArr as $key => $value) {
-                if ($valueIsSelected && $val == $key) {
+                if ($hasSubValeur == 8 || ($valueIsSelected && $val == $key)) {
 //            var_dump($obj->valuesArr);
                     if ($obj->OptGroup . "x" != "x") {
                         $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $value;

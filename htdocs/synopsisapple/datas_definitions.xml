@@ -351,6 +351,7 @@
             <val val="X">Indicates Non-returnable damage covered by AppleCare+</val>
             <val val="RPL">Indicates Replace</val>
             <val val="CL">Indicates Valid Consumer Law Claim</val>
+            <val val="A7">Display Only Service</val>
         </values>
     </def>
     <def name="repairStrategy" type="select" hidden="0">

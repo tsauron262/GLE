@@ -457,6 +457,7 @@ function parseValue1($idChrono, $value, $res) {
 
 function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIsOption = false, $phpClass = '', $valueIsSelected = false, $valueIsChecked = false, $type_valeur = false) {
     global $db;
+    dol_syslog($type_valeur."ici",3);
     $val = stripslashes($val);
     //synopsischrono_key_type_valeur
     if ($hasSubValeur > 0) {

@@ -364,6 +364,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
                 //QR suivie        
+                $dir .= "/temp/";
                 $data = DOL_MAIN_URL_ROOT."/synopsis_chrono_public/page.php?back_serial=".$chrono->id."&user_name=".substr($chrono->societe->name,0,3);
                 $this->getQrCode($data, $dir, "suivie.png");
                 $pdf->Image($dir. "/suivie.png", 100, 30, 0, 24);

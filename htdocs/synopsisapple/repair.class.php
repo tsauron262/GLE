@@ -480,6 +480,7 @@ class Repair
                     $requestName = 'UpdateCarryInRequest';
                 }
                 $data['statusCode'] = $status;
+                $clientRep = 'UpdateCarryIn' . 'Response';
                 break;
 
             case 'repair_or_replace':
@@ -494,6 +495,7 @@ class Repair
                     $requestName = 'UpdateRepairOrReplaceRequest';
                 }
                 $data['repairStatusCode'] = $status;
+                $clientRep = $client . 'Response';
                 break;
         }
 
@@ -508,7 +510,7 @@ class Repair
         if (count($this->gsx->errors['soap']) > $n) {
             return false;
         }
-        if (!isset($response[$client . 'Response']['repairConfirmation'])) {
+        if (!isset($response[$clientRep]['repairConfirmation'])) {
             return false;
         }
         

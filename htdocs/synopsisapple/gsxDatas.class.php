@@ -106,10 +106,10 @@ class gsxDatas
         if ($db->num_rows($rows) > 0) {
             while ($row = $db->fetch_object($rows)) {
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
-                $repair->load();
                 $repair->setSerial($this->serial);
                 $repair->setDatas($row->repairNumber, $row->repairConfirmNumber, $row->serialUpdateConfirmNumber, $row->closed, $row->rowid);
                 $repair->isReimbursed = $row->is_reimbursed;
+                $repair->readyForPickUp = $row->ready_for_pick_up;
                 $this->repairs[] = $repair;
             }
         }

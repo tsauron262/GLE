@@ -324,44 +324,44 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
 
-//        $facture = new Facture($db);
-//        $facture->modelpdf = "crabeSav";
-//        $facture->createFromOrder($propal);
-////        $facture->create($user);
-//        $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Resolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-//        $facture->validate($user, '', $idEntrepot);
-//        $facture->fetch($facture->id);
-//
-//
-//        $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."element_contact 
-//WHERE  `element_id` =".$propal->id."
-//AND  `fk_c_type_contact` =40");
-//        while($ligne = $db->fetch_object($sql))
-//                $db->query("INSERT INTO ".MAIN_DB_PREFIX."element_contact (`statut`, `element_id`, `fk_c_type_contact`, `fk_socpeople`) VALUES ('4', '".$facture->id."', '60', '".$ligne->fk_socpeople."');");
-//
-//        if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0 && $_REQUEST['modeP'] != 56)) {
-//            require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-//            $payement = new Paiement($db);
-//            $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());
-//            $payement->datepaye = dol_now();
-//            $payement->paiementid = $_REQUEST['modeP'];
-//            $payement->create($user);
-//            $facture->set_paid($user);
-////            facture_pdf_create($db, $facture, "crabeSav", $langs);
-//        }
-//
-//
-//        $chrono->propal->cloture($user, 2, "Auto via SAV");
-//
-//
-//
-//        //Generation
-//        $facture->fetch($facture->id);
-//        $facture->generateDocument("crabeSav", $langs);
-////        facture_pdf_create($db, $facture, "crabeSav", $langs);
-//        
-////        addElementElement("propal", "facture", $propal->id, $facture->id);
-//        link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
+        $facture = new Facture($db);
+        $facture->modelpdf = "crabeSav";
+        $facture->createFromOrder($propal);
+//        $facture->create($user);
+        $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Resolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+        $facture->validate($user, '', $idEntrepot);
+        $facture->fetch($facture->id);
+
+
+        $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."element_contact 
+WHERE  `element_id` =".$propal->id."
+AND  `fk_c_type_contact` =40");
+        while($ligne = $db->fetch_object($sql))
+                $db->query("INSERT INTO ".MAIN_DB_PREFIX."element_contact (`statut`, `element_id`, `fk_c_type_contact`, `fk_socpeople`) VALUES ('4', '".$facture->id."', '60', '".$ligne->fk_socpeople."');");
+
+        if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0 && $_REQUEST['modeP'] != 56)) {
+            require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+            $payement = new Paiement($db);
+            $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());
+            $payement->datepaye = dol_now();
+            $payement->paiementid = $_REQUEST['modeP'];
+            $payement->create($user);
+            $facture->set_paid($user);
+//            facture_pdf_create($db, $facture, "crabeSav", $langs);
+        }
+
+
+        $chrono->propal->cloture($user, 2, "Auto via SAV");
+
+
+
+        //Generation
+        $facture->fetch($facture->id);
+        $facture->generateDocument("crabeSav", $langs);
+//        facture_pdf_create($db, $facture, "crabeSav", $langs);
+        
+//        addElementElement("propal", "facture", $propal->id, $facture->id);
+        link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
         
         
         

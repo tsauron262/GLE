@@ -480,6 +480,9 @@ class Repair
                     $requestName = 'UpdateCarryInRequest';
                 }
                 $data['statusCode'] = $status;
+                $data['notes'] = "";
+                $data['technicianId'] = "";
+                $data['orderLines'] = array();
                 break;
 
             case 'repair_or_replace':

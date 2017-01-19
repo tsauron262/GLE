@@ -975,7 +975,7 @@ class gsxDatas
                             if ($_POST['closeRepair'] == 'Y') {
                                 $ok = false;
                                 $this->gsx->resetSoapErrors();
-                                if ($repair->close(true, 0)) {
+                                if ($repair->updateStatus()) {
                                     $html .= '<p class="confirmation">Réparation fermée avec succès</p><ok>Reload</ok>';
                                 } else {
                                     $html .= '<p class="error">La réparation n\'a pas pu être fermée.</p>';

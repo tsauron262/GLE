@@ -238,6 +238,13 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 9));
         $ok = true;
+        
+        $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."synopsis_apple_repair` WHERE `chronoId` = ".$chrono->id." AND ready_for_pick_up = 0 ORDER BY `rowid` ASC");
+        if($db->num_rows($sql) > 0){
+            $data = $db->fetch_object($sql);
+            $gsxData = new gsxDatas("");
+            $gsxData->closeRepair($data->rowid);
+        }
 
 
 //        $propal->cloture($user, 3, '');
@@ -354,6 +361,15 @@ AND  `fk_c_type_contact` =40");
         
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
         link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
+        
+        
+        
+        $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."synopsis_apple_repair` WHERE `chronoId` = ".$chrono->id." AND ready_for_pick_up = 1 ORDER BY `rowid` ASC");
+        if($db->num_rows($sql) > 0){
+            $data = $db->fetch_object($sql);
+            $gsxData = new gsxDatas("");
+            $gsxData->endRepair($data->rowid);
+        }
 
         envoieMail("Facture", $chrono, $facture, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
     }

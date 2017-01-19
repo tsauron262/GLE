@@ -11,6 +11,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
 include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
 require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
 
+require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
 $chrono = new Chrono($db);
 $chrono->fetch($_REQUEST['id']);

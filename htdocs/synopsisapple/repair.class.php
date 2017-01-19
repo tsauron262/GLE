@@ -292,7 +292,7 @@ class Repair
                 return false;
             }
         }
-        $sql = "UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_repair` SET  `closed` =  1, `date_close` = " . date('Y-m-d');
+        $sql = "UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_repair` SET  `closed` =  1, `date_close` = '" . date('Y-m-d'). "' ";
         $sql .= "WHERE  `rowid` = " . $this->rowId . ";";
         if (!$this->db->query($sql)) {
             $this->addError('Echec de l\'enregistrement de la fermeture de la réparation en base de données<br/>

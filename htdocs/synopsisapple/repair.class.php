@@ -476,7 +476,7 @@ class Repair
                     $client = 'IPhoneUpdateCarryIn';
                     $requestName = 'IPhoneUpdateCarryInRequest';
                 } else {
-                    $client = 'UpdateCarryInRequest';
+                    $client = 'updateCarryInRequest';
                     $requestName = 'UpdateCarryInRequest';
                 }
                 $data['statusCode'] = $status;

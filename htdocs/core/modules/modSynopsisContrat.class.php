@@ -49,7 +49,7 @@ class modSynopsisContrat extends DolibarrModules {
         // Config pages
         //$this->config_page_url = "";
         // Dependences
-        $this->depends = array("modSynopsisTools", "modContrat");
+        $this->depends = array("modSynopsistools", "modContrat");
         $this->requiredby = array();
 
         // Constantes
@@ -152,6 +152,7 @@ class modSynopsisContrat extends DolibarrModules {
   `qte` int(11) DEFAULT NULL,
   `hotline` int(11) DEFAULT NULL,
   `telemaintenance` int(11) DEFAULT NULL,
+  `telemaintenanceCur` int(11) DEFAULT NULL,
   `maintenance` int(11) DEFAULT NULL,
   `SLA` varchar(150) DEFAULT NULL,
   `isSAV` int(11) DEFAULT NULL,

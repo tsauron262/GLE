@@ -428,7 +428,7 @@ if ($user->rights->synopsisFinanc->write) {
     //echo '<td><INPUT type="text" id="dure_degr" name="duree_degr" value="'.$duree_degr.'"/></td>';
     echo "<td><select id='dure_degr' name='duree_degr' ". (($contrat_exist) ? "disabled='disabled'" : "") .">";
     echo '<option value="0">désactivé</option>';
-    foreach (Synopsisfinancement::$tabD as $dure => $mois) {
+    foreach (Synopsisfinancement::$tabD2 as $dure => $mois) {
         echo "<option value='" . $dure . "'" . (($dure == $duree_degr) ? 'selected="selected"' : "") . ">" . $mois . "</option>";
     }
     echo "</select></td>";

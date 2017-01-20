@@ -47,6 +47,7 @@ class Synopsisfinancement extends CommonObject {
     static $tabM = array(1 => "Mois", 3 => "Trimestres", 4 => "Quadrimestres", 6 => "Semestres");
     static $rad = array("financier" => "Location financière", "operationnel" => "Location operationnel", "evolPlus" => "Location à taux 0");
     static $tabD = array(/* 12 => "12 mois", 24 => "24 mois", */36 => "36 mois", 48 => "48 mois", 60 => "60 mois", 72 => "72 mois", 84 => "84 mois");
+    static $tabD2 = array(4 => "4 mois", 6 => "6 mois", 12 => "12 mois");
 
     function __construct($db) {
         $this->db = $db;

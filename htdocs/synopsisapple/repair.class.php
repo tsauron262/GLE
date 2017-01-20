@@ -404,7 +404,7 @@ class Repair
         if (isset($this->repairLookUp['repairConfirmationNumber']) && ($this->repairLookUp['repairConfirmationNumber'] != ''))
             $this->confirmNumbers['repair'] = $this->repairLookUp['repairConfirmationNumber'];
         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
-            if (($this->repairLookUp['repairStatus'] == 'Closed') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée'))
+            if (($this->repairLookUp['repairStatus'] == 'Closed') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée') || ($this->repairLookUp['repairStatus'] == 'Réparation marquée comme complète'))
                 $this->repairComplete = 1;
             else
                 $this->repairComplete = 0;

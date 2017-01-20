@@ -18,7 +18,7 @@ class Synopsis_Contrat extends Contrat {
     public $totalDInter = 0;
     public $totalFInter = 0;
 
-    public function _construct($db) {
+    public function __construct($db) {
         $this->db = $db;
         $this->product = new Product($this->db);
         $this->societe = new Societe($this->db);

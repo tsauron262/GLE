@@ -2203,7 +2203,10 @@ class User extends CommonObject
                 }
                 
                 $info['enabledservice'] = array("internal");
-                $info['mtaTransport'] = "smtp:[mail.bimp.fr]:25";
+                if(isset($this->array_options['options_mtatransport']))
+                    $info['mtaTransport'] = $this->array_options['options_mtatransport'];
+                else
+                    $info['mtaTransport'] = "";
                 
                 if($domain){
                     $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
@@ -2215,6 +2218,9 @@ class User extends CommonObject
                         $ident = $this->id.$info['mail'];
                         $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
+                        if(isset($this->array_options['options_mailquota']) && $this->array_options['options_mailquota'] > 0)
+                        $info ['mailQuota'] = $this->array_options['options_mailquota'];
+                        else
                         $info ['mailQuota'] = "2147483648";
                     }
                 }

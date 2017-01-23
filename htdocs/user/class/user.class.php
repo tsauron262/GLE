@@ -2219,9 +2219,9 @@ class User extends CommonObject
                         $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
                         if(isset($this->array_options['options_mailquota']) && $this->array_options['options_mailquota'] > 0)
-                        $info ['mailQuota'] = $this->array_options['options_mailquota'];
+                            $info ['mailQuota'] = $this->array_options['options_mailquota'];
                         else
-                        $info ['mailQuota'] = "2147483648";
+                            $info ['mailQuota'] = "2147483648";
                     }
                 }
                 if($this->admin){

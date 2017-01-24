@@ -114,9 +114,45 @@ AND  `targettype` LIKE  'facture' AND fk_target = f.rowid WHERE fk_source is nul
     }
 }
 
+$my_key = "TriDESSuperEncryptKeyGLE";
+$data = "P@sŝw0rd";
+$data = pkcs5_pad($data, mcrypt_get_block_size("tripledes", "cbc"));
+$td = mcrypt_encrypt(MCRYPT_3DES, $my_key, $data, MCRYPT_MODE_ECB);
+//$td = mcrypt_encrypt(MCRYPT_3DES, $my_key, $td, MCRYPT_MODE_ECB);
+//$td = mcrypt_encrypt(MCRYPT_3DES, $my_key, $td, MCRYPT_MODE_ECB);
+    if(!$td)
+    die("<br/><br/>false");
+echo("<br/><br/>ici|{3DES}". base64_encode($td));
 
 
+$td2 = mcrypt_decrypt(MCRYPT_3DES, $my_key, $td, MCRYPT_MODE_ECB);
+//$td2 = mcrypt_decrypt(MCRYPT_3DES, $my_key, $td2, MCRYPT_MODE_ECB);
+//$td2 = mcrypt_decrypt(MCRYPT_3DES, $my_key, $td2, MCRYPT_MODE_ECB);
 
+
+echo("<br/><br/>icidecodé|".$td2."|");
+
+if($td2 === base64_decode("CYQmiCYaTIGPFJmHpXn7Wg=="))
+    die("identique");
+
+$td3 = mcrypt_decrypt(MCRYPT_3DES, $my_key, base64_decode("CYQmiCYaTIGPFJmHpXn7Wg=="), MCRYPT_MODE_ECB);
+
+
+echo("<br/><br/>icidecodé|".$td3."|");
+
+function pkcs5_pad ($text, $blocksize)
+{
+    $pad = $blocksize - (strlen($text) % $blocksize);
+    return $text . str_repeat(chr($pad), $pad);
+}
+
+//function pkcs5_unpad($text)
+//{
+//    $pad = ord($text{strlen($text)-1});
+//    if ($pad > strlen($text)) return false;
+//    if (strspn($text, chr($pad), strlen($text) - $pad) != $pad) return false;
+//    return substr($text, 0, -1 * $pad);
+//}
 
 llxFooter();
 ?>

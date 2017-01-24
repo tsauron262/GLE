@@ -896,6 +896,7 @@ class TaskP extends CommonObject
         $sql.= ", task_duration";
         $sql.= ", fk_user";
         $sql.= ", note";
+        $sql.= ", occupation";
         $sql.= ") VALUES (";
         $sql.= $this->id;
         $sql.= ", '".$this->db->idate($this->timespent_date)."'";
@@ -904,6 +905,7 @@ class TaskP extends CommonObject
         $sql.= ", ".$this->timespent_duration;
         $sql.= ", ".$this->timespent_fk_user;
         $sql.= ", ".(isset($this->timespent_note)?"'".$this->db->escape($this->timespent_note)."'":"null");
+        $sql.= ", ".(isset($this->occupation)?"'".$this->occupation."'":"null");
         $sql.= ")";
 
         $resql=$this->db->query($sql);
@@ -1089,6 +1091,7 @@ class TaskP extends CommonObject
         $sql.= " t.task_duration,";
         $sql.= " t.fk_user,";
         $sql.= " t.note";
+        $sql.= " t.occupation";
         $sql.= " FROM ".MAIN_DB_PREFIX."synopsis_projet_task_timeP as t";
         $sql.= " WHERE t.rowid = ".$id;
 
@@ -1108,6 +1111,7 @@ class TaskP extends CommonObject
                 $this->timespent_duration	= $obj->task_duration;
                 $this->timespent_fk_user	= $obj->fk_user;
                 $this->timespent_note		= $obj->note;
+                $this->occupation				= $obj->occupation;
             }
 
             $this->db->free($resql);
@@ -1145,6 +1149,7 @@ class TaskP extends CommonObject
         $sql.= " task_datehour = '".$this->db->idate($this->timespent_datehour)."',";
         $sql.= " task_date_withhour = ".(empty($this->timespent_withhour)?0:1).",";
         $sql.= " task_duration = ".$this->timespent_duration.",";
+        $sql.= " occupation = '".$this->occupation."',";
         $sql.= " fk_user = ".$this->timespent_fk_user.",";
         $sql.= " note = ".(isset($this->timespent_note)?"'".$this->db->escape($this->timespent_note)."'":"null");
         $sql.= " WHERE rowid = ".$this->timespent_id;
@@ -1608,5 +1613,10 @@ class TaskP extends CommonObject
 
 		return $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref);
 	}
+        
+        
+        public function traiteAction(){
+            
+        }
 
 }

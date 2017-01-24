@@ -1585,3 +1585,8 @@ PETTER
 Serveur mail depuis serveur GLE
 ssh bimproot@172.31.100.95       xx-BiMp/16
 mysql -u bimpadmin -p --host 172.31.100.95      MmmAdBi33
+
+
+capsim new
+ssh gle@80.11.84.106 -p 6322
+ascwse13

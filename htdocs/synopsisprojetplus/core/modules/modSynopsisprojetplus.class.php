@@ -162,10 +162,30 @@ class modSynopsisprojetplus extends DolibarrModules {
         // Permissions
         $this->remove();
         
-        $sql = array("CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisprojet_stat` (
+        $sql = array("
+CREATE TABLE `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
+  `rowid` int(11) NOT NULL,
+  `fk_task` int(11) NOT NULL,
+  `task_date` date DEFAULT NULL,
+  `task_datehour` datetime DEFAULT NULL,
+  `task_date_withhour` int(11) DEFAULT '0',
+  `task_duration` double DEFAULT NULL,
+  `fk_user` int(11) DEFAULT NULL,
+  `thm` double(24,8) DEFAULT NULL,
+  `note` text,
+  `occupation` int(11) NOT NULL
+);",
+            "ALTER TABLE `".MAIN_DB_PREFIX."synopsis_projet_task_timeP`
+  ADD PRIMARY KEY (`rowid`),
+  ADD KEY `idx_Synopsis_projet_task_time_task` (`fk_task`),
+  ADD KEY `idx_Synopsis_projet_task_time_date` (`task_date`),
+  ADD KEY `idx_Synopsis_projet_task_time_datehour` (`task_datehour`);",
+            
+            "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisprojet_stat` (
   `rowid` int(11) NOT NULL,
   `dateC` date NOT NULL,
   `type` varchar(255) NOT NULL,
+  `occupation` int(11) NOT NULL,
   `valeur` decimal(10,2) NOT NULL);",
             "
 ALTER TABLE `".MAIN_DB_PREFIX."synopsisprojet_stat`

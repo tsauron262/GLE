@@ -242,7 +242,7 @@ if ($id_chrono) {
                         
                         if(isset($chrono->publicValues[1056]) && isset($chrono->publicValues[1056]['value'])){
                             $etat = $chrono->publicValues[1056]['value'];
-                            $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostique de votre machine.",
+                            $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostic de votre machine.",
                                 "Examen en cours" => "Nous avons commencé le diagnostic de votre produit",
                                 "Attente client" => "Nous attendons une information de votre part. Merci de nous contacter",
                                 "Attente Pièce" => "Nous avons commandé une pièce ou un produit et nous l’attendons",

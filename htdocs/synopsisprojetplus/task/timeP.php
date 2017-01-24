@@ -85,7 +85,7 @@ if ($action == 'addtimespent' && $user->rights->projet->lire)
 		else
 		{
 			$object->timespent_note = $_POST["timespent_note"];
-			$object->progress = GETPOST('progress', 'int');
+			$object->occupation = GETPOST('progress', 'int');
 			$object->timespent_duration = $_POST["timespent_durationhour"]*60*60;	// We store duration in seconds
 			$object->timespent_duration+= $_POST["timespent_durationmin"]*60;		// We store duration in seconds
 	        if (GETPOST("timehour") != '' && GETPOST("timehour") >= 0)	// If hour was entered
@@ -145,6 +145,7 @@ if ($action == 'updateline' && ! $_POST["cancel"] && $user->rights->projet->cree
 			$object->timespent_date = dol_mktime(12,0,0,GETPOST("timelinemonth"),GETPOST("timelineday"),GETPOST("timelineyear"));
 		}
 		$object->timespent_fk_user = $_POST["userid_line"];
+			$object->occupation = GETPOST('progress', 'int');
 
 		$result=$object->updateTimeSpent($user);
 		if ($result >= 0)
@@ -376,7 +377,7 @@ if ($id > 0 || ! empty($ref))
 			print '<td width="100">'.$langs->trans("Date").'</td>';
 			print '<td>'.$langs->trans("By").'</td>';
 			print '<td>'.$langs->trans("Note").'</td>';
-//			print '<td>'.$langs->trans("ProgressDeclared").'</td>';
+			print '<td>'.$langs->trans("Occupation").'</td>';
 			print '<td align="right" colspan="2">'.$langs->trans("NewTimeSpent").'</td>';
 			print "</tr>\n";
 
@@ -409,10 +410,10 @@ if ($id > 0 || ! empty($ref))
 			print '<textarea name="timespent_note" width="95%" rows="'.ROWS_2.'">'.($_POST['timespent_note']?$_POST['timespent_note']:'').'</textarea>';
 			print '</td>';
 
-//			// Progress declared
-//			print '<td class="nowrap">';
-//			print $formother->select_percent(GETPOST('progress')?GETPOST('progress'):$object->progress,'progress');
-//			print '</td>';
+			// Progress declared
+			print '<td class="nowrap">';
+			print $formother->select_percent(GETPOST('progress')?GETPOST('progress'):$object->occupation,'progress');
+			print '</td>';
 
 			// Duration - Time spent
 			print '<td class="nowrap" align="right">';
@@ -433,7 +434,7 @@ if ($id > 0 || ! empty($ref))
 		 */
 		$tasks = array();
 		
-		$sql = "SELECT t.rowid, t.task_date, t.task_datehour, t.task_date_withhour, t.task_duration, t.fk_user, t.note, t.thm";
+		$sql = "SELECT t.rowid, t.task_date, t.task_datehour, t.task_date_withhour, t.task_duration, t.fk_user, t.note, t.thm, t.occupation";
 		$sql.= ", u.lastname, u.firstname";
 		$sql .= " FROM ".MAIN_DB_PREFIX."synopsis_projet_task_timeP as t";
 		$sql .= " , ".MAIN_DB_PREFIX."user as u";
@@ -539,6 +540,15 @@ if ($id > 0 || ! empty($ref))
 			{
 				print dol_nl2br($task_time->note);
 			}
+			print '</td>';
+                        
+                        
+			// Progress declared
+			print '<td class="nowrap">';
+			if ($_GET['action'] == 'editline' && $_GET['lineid'] == $task_time->rowid)
+                            print $formother->select_percent(GETPOST('progress')?GETPOST('progress'):$task_time->occupation,'progress');
+                        else
+                            print $task_time->occupation." %";
 			print '</td>';
 
 			// Time spent

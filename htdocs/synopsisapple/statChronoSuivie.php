@@ -2,13 +2,13 @@
 
 require_once('../main.inc.php');
 
-llxHeader("", "Signaler un bug");
+llxHeader("", "Suivie des interventions SAV");
 
 
 print load_fiche_titre("Suivie des interventions SAV");
 
 
-echo("SELECT c.id, c.ref FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 c105, " . MAIN_DB_PREFIX . "element_element e1, " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "facture f"
+$sql = $db->query("SELECT c.id, c.ref FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 c105, " . MAIN_DB_PREFIX . "element_element e1, " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "facture f"
         . " WHERE (c105.Suivie = '' || c105.Suivie is NULL) AND c105.id = c.id AND fk_source = p.rowid AND sourcetype = 'propal' AND targettype = 'facture' AND fk_target = f.rowid AND c.propalid = p.rowid AND `facnumber` LIKE 'FA%' "
         . "AND DATEDIFF(now(), f.`date_valid`) > 2 AND DATEDIFF(now(), f.`date_valid`) < 7 ORDER BY DATEDIFF(now(), f.`date_valid`) DESC");
 

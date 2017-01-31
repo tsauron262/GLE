@@ -88,8 +88,11 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
      * @public
      */
     public function PrintChapter($num, $title, $file, $mode = false) {
+        
         // add a new page
         $this->pdf->AddPage();
+        
+		$this->addLogo($this->pdf, 30);
         //$this->_pagehead($this->pdf, $this->contrat);
         // disable existing columns
         $this->pdf->resetColumns();
@@ -97,8 +100,15 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
         $this->ChapterTitle($num, $title);
         // set columns
         $this->pdf->setEqualColumns(3, 63);
+        
         // print chapter body
         $this->ChapterBody($file, $mode);
+    }
+    
+    public function addLogo(&$pdf, $size){
+        global $conf;
+        $logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
+                        $pdf->Image($logo, 0, 0, 0, $size,'','','',false,300,'C');
     }
 
     /**
@@ -237,6 +247,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                         $pdf = getNewPdf($this->format,$logo_B);
                         $this->pdf = $pdf;
                     }
+                    
                     $pdf->setPrintHeader(true);
                     $pdf->setPrintFooter(true);
                 }
@@ -272,6 +283,11 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 // Tete de page
                 //$this->_pagehead($pdf, $contrat, 1, $outputlangs);
                 $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                
+                
+                
+                
+		$this->addLogo($pdf, 40);
 
 //locataire/////////////////////////////////////////////////////////////////////
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);

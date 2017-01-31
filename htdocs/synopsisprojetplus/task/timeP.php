@@ -49,6 +49,10 @@ if (!$user->rights->projet->lire) accessforbidden();
 $object = new TaskP($db);
 $projectstatic = new Project($db);
 
+/*mod drsi*/
+$heureDef = 9;
+global $heureDef;
+
 
 /*
  * Actions
@@ -95,13 +99,15 @@ if ($action == 'addtimespent' && $user->rights->projet->lire)
 	        }
 	        else
 			{
-				$object->timespent_date = dol_mktime(12,0,0,GETPOST("timemonth"),GETPOST("timeday"),GETPOST("timeyear"));
+				$object->timespent_date = dol_mktime($heureDef,0,0,GETPOST("timemonth"),GETPOST("timeday"),GETPOST("timeyear"));
 			}
 			$object->timespent_fk_user = $_POST["userid"];
 			$result=$object->addTimeSpent($user);
 			if ($result >= 0)
 			{
 				setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+                                
+                                traiteAction($object, $db);
 			}
 			else
 			{
@@ -151,6 +157,8 @@ if ($action == 'updateline' && ! $_POST["cancel"] && $user->rights->projet->cree
 		if ($result >= 0)
 		{
 			setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+                        
+                        traiteAction($object, $db);
 		}
 		else
 		{
@@ -168,6 +176,9 @@ if ($action == 'confirm_delete' && $confirm == "yes" && $user->rights->projet->c
 {
 	$object->fetchTimeSpent($_GET['lineid']);
 	$result = $object->delTimeSpent($user);
+        
+        
+        traiteAction($object, $db, "suppr");
 
 	if ($result < 0)
 	{
@@ -611,6 +622,64 @@ if ($id > 0 || ! empty($ref))
 		print "</table>";
 		print "</form>";
 	}
+}
+
+function traiteAction($object, $db, $actionStr = "insert"){
+    global $user, $heureDef;
+    require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+    
+    $note = $object->ref."-[".$object->timespent_id."]";
+    $sql = $db->query("SELECT id FROM ".MAIN_DB_PREFIX."actioncomm WHERE note LIKE '%".$note."%'");
+//    echo "SELECT id FROM ".MAIN_DB_PREFIX."actioncomm WHERE note = '".$note."'";
+    while ($ln = $db->fetch_object($sql)){
+        $actionSupp = new ActionComm($db);
+        $actionSupp->fetch($ln->id);
+        $actionSupp->delete();
+    }
+    
+    if($actionStr != "suppr"){
+        $action = new ActionComm($db);
+        $action->userassigned = $object->timespent_fk_user;
+        $action->type_id = 1;
+        $action->elementtype = "projet_task";
+        $action->fk_element = $object->id;
+        $action->socid = $object->project->socid;
+        $action->fk_project = $object->project->id;
+        $action->note = $note;
+        $action->label = "Tache : ".$object->label;
+
+        $nbMinTot = $object->timespent_duration / 60;
+        $nbMinParJ = 7 * $object->occupation / 100* 60;
+        $nbMinPlan = 0;
+
+        $dateDeb = $object->timespent_date;
+        while ($nbMinTot > $nbMinPlan){
+            $action->datep = $dateDeb;
+            $restant = $nbMinTot - $nbMinPlan;
+            if($nbMinParJ > $restant)
+                $attrib = $restant;
+            else
+                $attrib = $nbMinParJ;
+
+            $action->datef = strtotime(date('Y-m-d H:i:s', strtotime('+'.$attrib.' minutes', $action->datep)));
+
+
+            $action->add($user);
+
+            //Jour suivant
+            $nbMinPlan += $attrib;
+            $dateDeb = strtotime(date('Y-m-d', strtotime('+1 day', $dateDeb))." ".$heureDef.":00:00");
+            if(date('w', $dateDeb) == 6)
+                $dateDeb = strtotime(date('Y-m-d', strtotime('+1 day', $dateDeb))." ".$heureDef.":00:00");
+            if(date('w', $dateDeb) == 0)
+                $dateDeb = strtotime(date('Y-m-d', strtotime('+1 day', $dateDeb))." ".$heureDef.":00:00");
+    //        echo $dateDeb."<br/><br/>";
+        }
+
+
+    //    echo $action->error."<pre>";
+    //    print_r($object);die;
+    }
 }
 
 

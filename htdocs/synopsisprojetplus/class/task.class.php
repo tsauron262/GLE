@@ -41,6 +41,7 @@ class TaskP extends CommonObject
     
     /*mod drsi*/
     private $contactsoftask = false;
+    public $occupation = 100;
     function verifUser($idUser){
         if(!$this->contactsoftask)
             $this->contactsoftask=$this->getListContactId('internal');
@@ -1090,7 +1091,7 @@ class TaskP extends CommonObject
         $sql.= " t.task_date_withhour,";
         $sql.= " t.task_duration,";
         $sql.= " t.fk_user,";
-        $sql.= " t.note";
+        $sql.= " t.note,";
         $sql.= " t.occupation";
         $sql.= " FROM ".MAIN_DB_PREFIX."synopsis_projet_task_timeP as t";
         $sql.= " WHERE t.rowid = ".$id;

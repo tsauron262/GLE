@@ -403,7 +403,15 @@ if (! defined('NOLOGIN'))
             }
         }
         
-        /*mod drsi*/ //verif si captcha doit étre vérifié.
+        /*mod drsi*/ 
+//Change mail en login
+//        if(stripos(GETPOST("username","alpha",2), "@") !== 0){
+//            $db->query("SELECT login FROM `".MAIN_DB_PREFIX."user` WHERE `email` LIKE '".GETPOST("username","alpha",2)."'");
+//            while ($res = $db->fetch_object($sql))
+//                    $_POST['username'] = $res->login;
+//        }
+
+//verif si captcha doit étre vérifié.
         $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
         if(isset($tabT[0])){
             $nbErr = intval($tabT[0]['d']);

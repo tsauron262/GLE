@@ -566,15 +566,15 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $this->marge_haute = $this->marge_haute - 5;
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
 
-                if ($valfinance->banque != "") {
-                    if (file_exists(DOL_DATA_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt')) {
-                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt', false);
-                    }/* else {
-                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
-                    }*/
-                } else {
+//                if ($valfinance->banque != "") {
+//                    if (file_exists(DOL_DATA_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt')) {
+//                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_' . $valfinance->banque . '.txt', false);
+//                    }/* else {
+//                        $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
+//                    }*/
+//                } else {
                     $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/banque_test.txt', false);
-                }
+//                }
 
                 $pdf->SetAutoPageBreak(1, 0);
                 $pdf->setFont('', '', 8);

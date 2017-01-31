@@ -741,7 +741,7 @@ echo "<br/>totale derive   ".$totderiveCoef."</br>";
         if ($ecriture) {
             $sortieTmp = array_merge($sortieTmp, $sortieTmp2);
             $this->sauvegarde = true;
-        } elseif (!$tousVide || _AFFICHE_LIGNE_VIDE_) {
+        } elseif (!$tousVide || (_AFFICHE_LIGNE_VIDE_ && $this->typeTableau != 2)) {//sauf par user
             foreach ($sortieTmp2 as $i => $cell)
                 $sortieTmp2[$i][0] = $sortieTmp2[$i][3];
             $sortieTmp = array_merge($sortieTmp, $sortieTmp2);

@@ -2188,7 +2188,7 @@ class User extends CommonObject
                 
                 
                 $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
-                $info ['accountstatus'] = ($this->statut == 1)? "active" : "disablaed";
+                $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";
                 $info ['enabledservice'] = array();
                 
                 

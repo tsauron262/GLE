@@ -29,6 +29,8 @@ $dolibarr_main_authentication='dolibarr';
 //define('IMPORT_BDD_PASSE', $dolibarr_main_db_pass);
 //define('IMPORT_BDD_NAME', 'synopsis_oldBimp2');
 
+define('_ID_GROUP_NON_LDAP_', array(7));
+
 
 //define('MOD_DEV_SYN', 1);
 define('MOD_DEV_SYN_MAIL', 'tommy@drsi.fr');

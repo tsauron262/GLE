@@ -175,7 +175,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 				return $result;
     		}
         }
-        elseif ($action == 'USER_SETINGROUP')
+        elseif ($action == 'USER_SETINGROUP' && (!defined ('_ID_GROUP_NON_LDAP_') || !in_array($object->newgroupid, _ID_GROUP_NON_LDAP_)))
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
             if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
@@ -213,7 +213,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                 return $result;
             }
         }
-        elseif ($action == 'USER_REMOVEFROMGROUP')
+        elseif ($action == 'USER_REMOVEFROMGROUP' && (!defined ('_ID_GROUP_NON_LDAP_') || !in_array($object->oldgroupid, _ID_GROUP_NON_LDAP_)))
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
             if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')

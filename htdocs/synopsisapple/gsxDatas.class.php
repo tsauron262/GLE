@@ -161,7 +161,7 @@ class gsxDatas
         $repair = new Repair($db, $this->gsx, $this->isIphone);
         $repair->rowId = $repairRowId;
         if ($repair->load()) {
-            if ($repair->close(true, (isset($_GET['checkRepair']) && ($_GET['checkRepair'] != '')) ? $_GET['checkRepair'] : true))
+            if ($repair->close(true, (isset($_GET['checkRepair']) && ($_GET['checkRepair'] != '')) ? $_GET['checkRepair'] : false))
                 return 'ok';
         }
         $html = '<p class="error">Echec de la fermeture de la réparation</p>';

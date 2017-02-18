@@ -614,7 +614,7 @@ class GSX_Request {
             }
 
             global $db;
-            $tab3 = array();
+            $tab3 = array(array("", "Part", "Tier Part"));
             $sql = $db->query("SELECT `description` as nom FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '".$serial."'");
             if($db->num_rows($sql) > 0){
                 $result = $db->fetch_object($sql);

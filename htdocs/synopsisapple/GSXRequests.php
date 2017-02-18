@@ -625,13 +625,10 @@ class GSX_Request {
                     foreach($tabT as $tabT2)
                         $tab3[] =$tabT2;
             }
-            $i = 2;
+            $i = 100;
 
             $html .= "<div class='partDatasBlockHide'>";
-            $html .= "<input type='hidden' value=''  name='comptiaGroup_".$i."'>";
-            $html .= "<input type='hidden' value=''  name='comptiaCode_".$i."'>";
-            $html .= "<input type='hidden' value=''  name='comptiaModifier_".$i."'>";
-            $html .= "<select name='partNumber_".$i."'>";
+            $html .= "<select class='tierPart' name='partNumber_".$i."'>";
             foreach ($tab3 as $ligne)
                 $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
             $html .= "</select></div>";

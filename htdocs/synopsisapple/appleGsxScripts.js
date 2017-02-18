@@ -1406,6 +1406,8 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     }
     formElement = $form.get(0);
     var partCount = $form.find('div.partDatasBlock').length;
+    if($form.find('select.partNumber_2').val() != "Part")
+        partCount ++;
 
     var $template = $form.find('div.repairsPartsInputsTemplate');
     var templateHtml = '';

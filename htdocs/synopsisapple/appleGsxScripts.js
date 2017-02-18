@@ -1409,8 +1409,8 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     
     var tierPart = $form.find('select.tierPart');
     if(tierPart.val() != "Part"){
-        tierPart.attr("name", "partNumber_"+partCount)
         partCount ++;
+        tierPart.attr("name", "partNumber_"+partCount);
     }
 
     var $template = $form.find('div.repairsPartsInputsTemplate');

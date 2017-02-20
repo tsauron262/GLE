@@ -110,6 +110,7 @@ class gsxDatas
                 $repair->setDatas($row->repairNumber, $row->repairConfirmNumber, $row->serialUpdateConfirmNumber, $row->closed, $row->rowid);
                 $repair->isReimbursed = $row->is_reimbursed;
                 $repair->readyForPickUp = $row->ready_for_pick_up;
+                $repair->totalFromOrder = $row->totalFromOrder;
                 $this->repairs[] = $repair;
             }
         }

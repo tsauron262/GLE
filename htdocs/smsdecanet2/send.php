@@ -88,7 +88,7 @@ if ($action == 'send' && ! $_POST['cancel'])
 
 		$smsfile = new CSMSFile($sendto, $smsfrom, $body, $deliveryreceipt, $deferred, $priority, $class);
 		$result=$smsfile->sendfile();
-		if ($result!='0')
+		if ($result>0)
 		{
 			$message='<div class="ok">'.$langs->trans("SmsSuccessfulySent",$smsfrom,$sendto).'</div>';
 		}
@@ -110,9 +110,7 @@ if($socid>0) {
 	$soc->fetch($socid);
 	$soc->info($socid);
 	if(substr($soc->phone,0,1)!='+')
-		$to = '+33'.substr($soc->phone,1);
-	else
-		$to = $soc->phone;
+		$to = '+'.substr($soc->phone,1);
 }
 
 

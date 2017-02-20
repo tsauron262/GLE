@@ -142,10 +142,11 @@ class FormSms
             print $form->textwithpicto($langs->trans("SmsTestSubstitutionReplacedByGenericValues"),$help);
             print "</td></tr>\n";
         }
+
         // From
         if ($this->withfrom)
         {
-            /*if ($this->withfromreadonly)
+            if ($this->withfromreadonly)
             {
                 print '<input type="hidden" name="fromsms" value="'.$this->fromsms.'">';
                 print "<tr><td width=\"".$width."\">".$langs->trans("SmsFrom")."</td><td>";
@@ -173,13 +174,53 @@ class FormSms
                 print "</td></tr>\n";
             }
             else
-            {*/
+            {
                 print "<tr><td width=\"".$width."\">".$langs->trans("SmsFrom")."</td><td>";
-                print '<input type="text" name="fromname" size="30" value="'.$this->fromsms.'">';
-			
+                //print '<input type="text" name="fromname" size="30" value="'.$this->fromsms.'">';
+               if (!empty($conf->global->MAIN_SMS_SENDMODE))    // $conf->global->MAIN_SMS_SENDMODE looks like a value 'class@module'
+                {
+                    $tmp=explode('@',$conf->global->MAIN_SMS_SENDMODE);
+                    $classfile=$tmp[0]; $module=(empty($tmp[1])?$tmp[0]:$tmp[1]);
+                    dol_include_once('/'.$module.'/class/'.$classfile.'.class.php');
+                    try
+                    {
+                        $classname=ucfirst($classfile);
+                        $sms = new $classname($this->db);
+                        $resultsender = $sms->SmsSenderList();
+                    }
+                    catch(Exception $e)
+                    {
+                        dol_print_error('','Error to get list of senders: '.$e->getMessage());
+                        exit;
+                    }
+                }
+                else
+                {
+                    dol_syslog("Warning: The SMS sending method has not been defined into MAIN_SMS_SENDMODE", LOG_WARNING);
+	                $resultsender=array();
+                    $resultsender[0]->number=$this->fromsms;
+                }
+
+                if (is_array($resultsender) && count($resultsender) > 0)
+                {
+                    print '<select name="fromsms" id="valid" class="flat">';
+                    foreach($resultsender as $obj)
+                    {
+                        print '<option value="'.$obj->number.'">'.$obj->number.'</option>';
+                    }
+                    print '</select>';
+                }elseif(!empty($resultsender)){
+					print "<input size=\"16\" id=\"fromsms\" name=\"fromsms\" value=\"".(! empty($resultsender)? (isset($_REQUEST["fromsms"])?$_REQUEST["fromsms"]:$resultsender):"+")."\">";
+				}
+                else
+                {
+                    print '<span class="error">'.$langs->trans("SmsNoPossibleRecipientFound");
+                    if (is_object($sms) && ! empty($sms->error)) print ' '.$sms->error;
+                    print '</span>';
+                }
                 print '</td>';
                 print "</tr>\n";
-            //}
+            }
         }
 
         // To (target)

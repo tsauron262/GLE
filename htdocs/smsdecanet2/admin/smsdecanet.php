@@ -202,7 +202,7 @@ asort($listofmethods);
 	if ($action == 'singlesms')
 	{
 		print '<br><div style="padding:15px;">';
-		print_titre($langs->trans("SMSDecanetSingleSend"));
+		load_fiche_titre($langs->trans("SMSDecanetSingleSend"));
 
 		// Cree l'objet formulaire mail
 		include_once DOL_DOCUMENT_ROOT.'/smsdecanet/core/class/html.formsmsdecanet.class.php';
@@ -237,7 +237,7 @@ asort($listofmethods);
 	if ($action == 'smsmulti')
 	{
 		print '<br><div style="padding:15px;">';
-		print_titre($langs->trans("SMSDecanetMultiSend"));
+		load_fiche_titre($langs->trans("SMSDecanetMultiSend"));
 
 		// Cree l'objet formulaire mail
 		include_once DOL_DOCUMENT_ROOT.'/smsdecanet/core/class/html.formsmsdecanet.class.php';

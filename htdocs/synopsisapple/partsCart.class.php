@@ -76,7 +76,8 @@ class partsCart {
         $tabCas2 = array("SVC,IPOD", "Ipod nano");
         
         $tabCas3 = array("661", "Z661");
-        $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE", "Ipad Pro", "Ipad mini");
+        $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");//design commence par
+        $tabCas36 = array("Ipad Pro", "Ipad mini");//design contient
 
         $cas = 0;
         foreach ($tabCas1 as $val)
@@ -91,10 +92,14 @@ class partsCart {
             
             
         //Application double contraite    
-        if ($cas == 3)
+        if ($cas == 3){
             foreach ($tabCas35 as $val)
                 if (stripos($desc, $val) === 0)
                     $cas = 1;
+            foreach ($tabCas36 as $val)
+                if (stripos($desc, $val) !== false)
+                    $cas = 1;
+        }
 
         //Application des coef est constante
         if ($cas == 1) {

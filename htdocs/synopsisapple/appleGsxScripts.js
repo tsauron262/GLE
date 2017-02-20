@@ -1374,6 +1374,7 @@ function duplicateDatasGroup($span, inputName) {
 
 function submitGsxRequestForm(prodId, request, repairRowId) {
     
+            $form = $repairContainer.find('#repairForm_' + request);
     var tierPart = $form.find('select.tierPart');
     if(tierPart){
         alert("oui");

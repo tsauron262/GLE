@@ -298,7 +298,7 @@
     <def name="soldToContactPhone" type="tel" max="30" jsCheck="phone">
         <label>Numéro de téléphone du contact (sold-to)</label>
     </def>
-    <def name="trackingNumber" type="text" max="14" jsCheck="text">
+    <def name="trackingNumber" type="text" max="18" jsCheck="text">
         <label>Numéro de suivi</label>
     </def>
     <def name="technicianName" type="text" max="15" jsCheck="text">

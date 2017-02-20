@@ -1374,33 +1374,33 @@ function duplicateDatasGroup($span, inputName) {
 
 function submitGsxRequestForm(prodId, request, repairRowId) {
  
-//    var $prod = $('#prod_' + prodId);
-//    var $form = null;
-//    var formElement = null;
-//    var $resultContainer = null;
-//    if (typeof (repairRowId) != 'undefined') {
-//        var $repairContainer = $prod.find('#repair_' + repairRowId);
-//        if ($repairContainer.length) {
-//            $form = $repairContainer.find('#repairForm_' + request);
-//            switch (request) {
-//                case 'UpdateSerialNumber':
-//                    $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
-//                    break;
-//
-//                case 'KGBSerialNumberUpdate':
-//                    $resultContainer = $repairContainer.find('.kgbSerialUpdateResults');
-//                    break;
-//            }
-//
-//        }
-//    } else {
-//        if (!$prod.length) {
-//            $form = $('#repairForm_' + request);
-//        } else {
-//            $form = $prod.find('#repairForm_' + request);
-//            $resultContainer = $prod.find('.repairFormResults');
-//        }
-//    }
+    var $prod = $('#prod_' + prodId);
+    var $form = null;
+    var formElement = null;
+    var $resultContainer = null;
+    if (typeof (repairRowId) != 'undefined') {
+        var $repairContainer = $prod.find('#repair_' + repairRowId);
+        if ($repairContainer.length) {
+            $form = $repairContainer.find('#repairForm_' + request);
+            switch (request) {
+                case 'UpdateSerialNumber':
+                    $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
+                    break;
+
+                case 'KGBSerialNumberUpdate':
+                    $resultContainer = $repairContainer.find('.kgbSerialUpdateResults');
+                    break;
+            }
+
+        }
+    } else {
+        if (!$prod.length) {
+            $form = $('#repairForm_' + request);
+        } else {
+            $form = $prod.find('#repairForm_' + request);
+            $resultContainer = $prod.find('.repairFormResults');
+        }
+    }
 //    
  
     var tierPart = $form.find('select.tierPart');

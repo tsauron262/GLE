@@ -1404,7 +1404,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
 //    
  
     var tierPart = $form.find('select.tierPart');
-    if(tierPart){
+    if(tierPart.length > 0){
         alert("oui");
     }
     else{

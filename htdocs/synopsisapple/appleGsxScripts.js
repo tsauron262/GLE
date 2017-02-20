@@ -1373,15 +1373,7 @@ function duplicateDatasGroup($span, inputName) {
 }
 
 function submitGsxRequestForm(prodId, request, repairRowId) {
-    
-            $form = $repairContainer.find('#repairForm_' + request);
-    var tierPart = $form.find('select.tierPart');
-    if(tierPart){
-        alert("oui");
-    }
-    else{
-        alert("non");
-    }
+ 
 //    var $prod = $('#prod_' + prodId);
 //    var $form = null;
 //    var formElement = null;
@@ -1409,6 +1401,15 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
 //            $resultContainer = $prod.find('.repairFormResults');
 //        }
 //    }
+//    
+ 
+    var tierPart = $form.find('select.tierPart');
+    if(tierPart){
+        alert("oui");
+    }
+    else{
+        alert("non");
+    }
 //    if (!$form.length) {
 //        alert('Erreur: échec d\'identification du formulaire. Abandon');
 //        return;

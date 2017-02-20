@@ -1373,95 +1373,103 @@ function duplicateDatasGroup($span, inputName) {
 }
 
 function submitGsxRequestForm(prodId, request, repairRowId) {
-    var $prod = $('#prod_' + prodId);
-    var $form = null;
-    var formElement = null;
-    var $resultContainer = null;
-    if (typeof (repairRowId) != 'undefined') {
-        var $repairContainer = $prod.find('#repair_' + repairRowId);
-        if ($repairContainer.length) {
-            $form = $repairContainer.find('#repairForm_' + request);
-            switch (request) {
-                case 'UpdateSerialNumber':
-                    $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
-                    break;
-
-                case 'KGBSerialNumberUpdate':
-                    $resultContainer = $repairContainer.find('.kgbSerialUpdateResults');
-                    break;
-            }
-
-        }
-    } else {
-        if (!$prod.length) {
-            $form = $('#repairForm_' + request);
-        } else {
-            $form = $prod.find('#repairForm_' + request);
-            $resultContainer = $prod.find('.repairFormResults');
-        }
-    }
-    if (!$form.length) {
-        alert('Erreur: échec d\'identification du formulaire. Abandon');
-        return;
-    }
-    formElement = $form.get(0);
-    var partCount = $form.find('div.partDatasBlock').length;
     
     var tierPart = $form.find('select.tierPart');
-    if(tierPart.val() != "Part"){
-        partCount ++;
-        tierPart.attr("name", "partNumber_"+partCount);
+    if(tierPart){
+        alert("oui");
     }
-
-    var $template = $form.find('div.repairsPartsInputsTemplate');
-    var templateHtml = '';
-    if ($template.length) {
-        templateHtml = $template.html();
-        $template.html('');
+    else{
+        alert("non");
     }
-
-    var check = true;
-    var $inputs = $form.find('input');
-    var $areas = $form.find('textarea')
-    if ($areas.length) {
-        $inputs = $inputs.add($areas);
-    }
-    $inputs.each(function () {
-        if ($(this).attr('onchange')) {
-            var type = $(this).attr('onchange').replace(/^checkInput\(\$\(this\), '(.*)'\)$/, '$1');
-            if (!checkInput($(this), type)) {
-                check = false;
-            }
-        }
-    });
-    if ($template.length) {
-        $template.html(templateHtml);
-    }
-    if (!check) {
-        alert("Des erreurs ont été détectées.\nMerci de corriger ces dernières avant de valider le formulaire.");
-        return;
-    }
-
-    $form.find('#partsCount').val(partCount);
-    if ($resultContainer.length) {
-        displayRequestMsg('requestProcess', '', $resultContainer);
-    }
-    $.ajax({
-        type: "POST",
-        url: $form.attr('action'),
-        dataType: 'html',
-        processData: false,
-        contentType: false,
-        data: new FormData(formElement), // Non compatible pour les IE < 10
-        success: function (html) {
-            traiteCommandeRetour(html, $resultContainer);
-        },
-        error: function (html) {
-            alert("passage en erreur" + html);
-            traiteCommandeRetour(html, $resultContainer);
-            displayRequestMsg('error', 'Une erreur technique est survenue. Ajax', $resultContainer);
-        }
-    });
+//    var $prod = $('#prod_' + prodId);
+//    var $form = null;
+//    var formElement = null;
+//    var $resultContainer = null;
+//    if (typeof (repairRowId) != 'undefined') {
+//        var $repairContainer = $prod.find('#repair_' + repairRowId);
+//        if ($repairContainer.length) {
+//            $form = $repairContainer.find('#repairForm_' + request);
+//            switch (request) {
+//                case 'UpdateSerialNumber':
+//                    $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
+//                    break;
+//
+//                case 'KGBSerialNumberUpdate':
+//                    $resultContainer = $repairContainer.find('.kgbSerialUpdateResults');
+//                    break;
+//            }
+//
+//        }
+//    } else {
+//        if (!$prod.length) {
+//            $form = $('#repairForm_' + request);
+//        } else {
+//            $form = $prod.find('#repairForm_' + request);
+//            $resultContainer = $prod.find('.repairFormResults');
+//        }
+//    }
+//    if (!$form.length) {
+//        alert('Erreur: échec d\'identification du formulaire. Abandon');
+//        return;
+//    }
+//    formElement = $form.get(0);
+//    var partCount = $form.find('div.partDatasBlock').length;
+//    
+//    var tierPart = $form.find('select.tierPart');
+//    if(tierPart.val() != "Part"){
+//        partCount ++;
+//        tierPart.attr("name", "partNumber_"+partCount);
+//    }
+//
+//    var $template = $form.find('div.repairsPartsInputsTemplate');
+//    var templateHtml = '';
+//    if ($template.length) {
+//        templateHtml = $template.html();
+//        $template.html('');
+//    }
+//
+//    var check = true;
+//    var $inputs = $form.find('input');
+//    var $areas = $form.find('textarea')
+//    if ($areas.length) {
+//        $inputs = $inputs.add($areas);
+//    }
+//    $inputs.each(function () {
+//        if ($(this).attr('onchange')) {
+//            var type = $(this).attr('onchange').replace(/^checkInput\(\$\(this\), '(.*)'\)$/, '$1');
+//            if (!checkInput($(this), type)) {
+//                check = false;
+//            }
+//        }
+//    });
+//    if ($template.length) {
+//        $template.html(templateHtml);
+//    }
+//    if (!check) {
+//        alert("Des erreurs ont été détectées.\nMerci de corriger ces dernières avant de valider le formulaire.");
+//        return;
+//    }
+//
+//    $form.find('#partsCount').val(partCount);
+//    if ($resultContainer.length) {
+//        displayRequestMsg('requestProcess', '', $resultContainer);
+//    }
+//    $.ajax({
+//        type: "POST",
+//        url: $form.attr('action'),
+//        dataType: 'html',
+//        processData: false,
+//        contentType: false,
+//        data: new FormData(formElement), // Non compatible pour les IE < 10
+//        success: function (html) {
+//            traiteCommandeRetour(html, $resultContainer);
+//        },
+//        error: function (html) {
+//            alert("passage en erreur" + html);
+//            traiteCommandeRetour(html, $resultContainer);
+//            displayRequestMsg('error', 'Une erreur technique est survenue. Ajax', $resultContainer);
+//        }
+//    });
 }
 
 function traiteCommandeRetour(html, $resultContainer) {

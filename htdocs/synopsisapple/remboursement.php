@@ -4,6 +4,8 @@
 //ADD `is_reimbursed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `date_close`;
 
 require_once('../main.inc.php');
+
+require_once(DOL_DOCUMENT_ROOT.'/synopcicchrono/class/Chrono.class.php');
 llxHeader();
 
 ?>

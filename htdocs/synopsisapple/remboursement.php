@@ -5,7 +5,7 @@
 
 require_once('../main.inc.php');
 
-require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/class/Chrono.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/class/chrono.class.php');
 llxHeader();
 
 ?>

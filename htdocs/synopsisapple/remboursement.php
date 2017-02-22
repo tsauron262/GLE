@@ -238,18 +238,19 @@ if (!count($errors)) {
     $sql .= ' AND `is_reimbursed` = 0';
     
     
-    $result = $db->query($sql);
+    if(count($csvRows) > 0){
+        $result = $db->query($sql);
+        if ($result) {
+            $updateSql = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsis_apple_repair SET ';
+            $updateSql .= '`is_reimbursed` = 1 ';
+            $updateSql .= 'WHERE `rowid` = ';
 
-    if ($result) {
-        $updateSql = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsis_apple_repair SET ';
-        $updateSql .= '`is_reimbursed` = 1 ';
-        $updateSql .= 'WHERE `rowid` = ';
-
-        if ($db->num_rows($result)) {
-            while ($obj = $db->fetch_object($result)) {
-                if (isset($obj->repairConfirmNumber) && !empty($obj->repairConfirmNumber)) {
-                    if (array_key_exists($obj->repairConfirmNumber, $csvRows)) {
-                        $db->query($updateSql . (int) $obj->rowid);
+            if ($db->num_rows($result)) {
+                while ($obj = $db->fetch_object($result)) {
+                    if (isset($obj->repairConfirmNumber) && !empty($obj->repairConfirmNumber)) {
+                        if (array_key_exists($obj->repairConfirmNumber, $csvRows)) {
+                            $db->query($updateSql . (int) $obj->rowid);
+                        }
                     }
                 }
             }

@@ -234,12 +234,10 @@ if (!count($errors)) {
     $datePeriodBegin->sub(new DateInterval($period));
     $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair ';
     $sql .= 'WHERE `closed` = 1 ';
-    $sql .= 'AND `date_close` < \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
-    $sql .= 'AND `date_close` > \'0000-00-00\' ';
     $sql .= 'AND `totalFromOrder` = 0 ';
     $sql .= 'AND `is_reimbursed` = 0';
-
-//    echo $sql; exit;
+    
+    
     $result = $db->query($sql);
 
     if ($result) {
@@ -252,9 +250,28 @@ if (!count($errors)) {
                 if (isset($obj->repairConfirmNumber) && !empty($obj->repairConfirmNumber)) {
                     if (array_key_exists($obj->repairConfirmNumber, $csvRows)) {
                         $db->query($updateSql . (int) $obj->rowid);
-                    } else {
-                        $repairs[] = $obj;
                     }
+                }
+            }
+        }
+    }
+    
+    
+    
+    $sql .= 'AND `date_close` < \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
+    $sql .= 'AND `date_close` > \'0000-00-00\' ';
+
+    
+    
+//    echo $sql; exit;
+    $result = $db->query($sql);
+
+    if ($result) {
+
+        if ($db->num_rows($result)) {
+            while ($obj = $db->fetch_object($result)) {
+                if (isset($obj->repairConfirmNumber) && !empty($obj->repairConfirmNumber)) {
+                        $repairs[] = $obj;
                 }
             }
         }

@@ -234,8 +234,8 @@ if (!count($errors)) {
     $datePeriodBegin->sub(new DateInterval($period));
     $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair ';
     $sql .= 'WHERE `closed` = 1 ';
-    $sql .= 'AND `totalFromOrder` = 0 ';
-    $sql .= 'AND `is_reimbursed` = 0';
+    $sql .= ' AND `totalFromOrder` = 0 ';
+    $sql .= ' AND `is_reimbursed` = 0';
     
     
     $result = $db->query($sql);
@@ -258,8 +258,8 @@ if (!count($errors)) {
     
     
     
-    $sql .= 'AND `date_close` < \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
-    $sql .= 'AND `date_close` > \'0000-00-00\' ';
+    $sql .= ' AND `date_close` < \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
+    $sql .= ' AND `date_close` > \'0000-00-00\' ';
 
     
     

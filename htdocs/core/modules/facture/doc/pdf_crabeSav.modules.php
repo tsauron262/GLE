@@ -532,12 +532,12 @@ class pdf_crabeSav extends ModelePDFFactures
                                     $pdf->MultiCell("40", "25", "", 1);
                                 }
                                 
-                                /*fmoddrsi*/
                                 
                                 $pdf->SetXY("95", "265");
                                 $pdf->SetFont('','', $default_font_size - 3);
                                 $pdf->MultiCell(100, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
 	
+                                /*fmoddrsi*/
                                 
                                 
 

@@ -95,7 +95,7 @@ function bouttonEtatSav($idChrono) {
             $propal->fetch($chrono->propalid);
             foreach ($propal->lines as $line)
                 if($line->desc == "Acompte")
-                    $frais = -$line->total_ht;
+                    $frais = -$line->total_ttc;
         }
         $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='".$frais."'/> TTC";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";

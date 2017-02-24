@@ -90,7 +90,7 @@ function bouttonEtatSav($idChrono) {
     if (/* $etatSav == 2 && */$propId && $etatSav == 6) {
         $frais = 0;
         if(isset($chrono->propalid) && $chrono->propalid > 0){
-            require_once DOL_DOCUMENT_ROOT.'/synopsischrono/class/chrono.class.php';
+            require_once DOL_DOCUMENT_ROOT.'/propal/class/propal.class.php';
             $propal = new Propal($db);
             $propal->fetch($chrono->propalid);
             foreach ($propal->lines as $line)

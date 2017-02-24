@@ -212,7 +212,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 //                $propal->addline("Acompte", -$acompte, 1, 0, 0, 0, 0, 0, 0, -$acompte);
                         $propal->insert_discount($discount->id);
                     }
-echo "av";
+
                     if ($prio) {
                         require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
                         $idProdPrio = 3422;
@@ -241,7 +241,7 @@ echo "av";
 //                $echo .= DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
 
 
-die;
+
                     header('Status: 301 Moved Permanently', false, 301);
                     header("Location: ./FicheRapide.php?idChrono=" . $chrono->id);
                     die;

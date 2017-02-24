@@ -528,8 +528,8 @@ class pdf_crabeSav extends ModelePDFFactures
                                     $pdf->SetFont('','', $default_font_size);
                                     $pdf->SetXY("119", "255");
                                     $pdf->MultiCell("50", "10", "Matériel récupéré\nLe : ", 0, 'L');
-                                    $pdf->SetXY("140", "255");
-                                    $pdf->MultiCell("40", "25", "", 1);
+                                    $pdf->SetXY("155", "255");
+                                    $pdf->MultiCell("40", "18", "", 1);
                                 }
                                 
                                 

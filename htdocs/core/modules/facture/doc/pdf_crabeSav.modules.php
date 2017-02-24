@@ -524,18 +524,18 @@ class pdf_crabeSav extends ModelePDFFactures
                                 
                                                
                                 /*mod drsi ajout signature*/
-//                                if(stripos($object->ref, "FA") !== false){
-//                                    $pdf->SetFont('','', $default_font_size);
-//                                    $pdf->SetXY("39", "239");
-//                                    $pdf->MultiCell("50", "10", "Matériel récupéré\nLe : ", 0, 'L');
-//                                    $pdf->SetXY("40", "249");
-//                                    $pdf->MultiCell("40", "25", "", 1);
-//                                }
-//                                
-//                                
-//                                $pdf->SetXY("95", "265");
-//                                $pdf->SetFont('','', $default_font_size - 3);
-//                                $pdf->MultiCell(100, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
+                                if(stripos($object->ref, "FA") !== false){
+                                    $pdf->SetFont('','', $default_font_size);
+                                    $pdf->SetXY("39", "239");
+                                    $pdf->MultiCell("50", "10", "Matériel récupéré\nLe : ", 0, 'L');
+                                    $pdf->SetXY("40", "249");
+                                    $pdf->MultiCell("40", "25", "", 1);
+                                }
+                                
+                                
+                                $pdf->SetXY("95", "265");
+                                $pdf->SetFont('','', $default_font_size - 3);
+                                $pdf->MultiCell(100, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
 	
                                 /*fmoddrsi*/
                                 

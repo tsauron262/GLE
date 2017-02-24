@@ -2207,8 +2207,8 @@ class User extends CommonObject
                     $info['mtaTransport'] = $this->array_options['options_mtatransport'];
                 else
                     $info['mtaTransport'] = "";
-                if(isset($this->array_options['options_mailForwardingAddress']))
-                    $info['mailForwardingAddress'] = $this->array_options['options_mailForwardingAddress'];
+                if(isset($this->array_options['options_mailforwardingaddress']))
+                    $info['mailForwardingAddress'] = $this->array_options['options_mailforwardingaddress'];
                 else
                     $info['mailForwardingAddress'] = "";
                 

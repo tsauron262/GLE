@@ -526,7 +526,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                 /*mod drsi ajout signature*/
                                 if(stripos($object->ref, "FA") !== false){
                                     $pdf->SetFont('','', $default_font_size);
-                                    $pdf->SetXY("90", "220");
+                                    $pdf->SetXY("90", "230");
                                     $pdf->MultiCell("50", "10", "Matériel récupéré\nLe :\nSignature : ", 0, 'L');
                                     $pdf->SetXY("90", "245");
                                     $pdf->MultiCell("25", "25", "", 1);

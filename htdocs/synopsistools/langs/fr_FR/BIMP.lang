@@ -16,4 +16,4 @@ ActionNotApplicable=Confirmer
 ActionRunningShort=_
 
 
-PaymentByChequeOrderedTo=Règlement (tx incl.) à l'ordre de %s envoyé à
+PaymentByChequeOrderedTo=Règlement TTC à l'ordre de %s envoyé à

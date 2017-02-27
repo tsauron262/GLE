@@ -138,7 +138,7 @@ $(window).load(function() {
                 else{
                     reponse = '<p class="error" id="scroolTo">'+msg+'</p>';
                     $('html, body').animate({
-                        scrollTop: $("#scroolTo").offset().top
+                        scrollTop: zoneRep.offset().top
                     }, 2000);
                 }
 

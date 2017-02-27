@@ -136,8 +136,10 @@ $(window).load(function() {
                     }
                 }
                 else{
-                    reponse = '<p class="error">'+msg+'</p>';
-                    document.bodyElement.scrollTop='0px';
+                    reponse = '<p class="error" id="scroolTo">'+msg+'</p>';
+                    $('html, body').animate({
+                        scrollTop: $("#scroolTo").offset().top
+                    }, 2000);
                 }
 
                 if (valeurM != "")

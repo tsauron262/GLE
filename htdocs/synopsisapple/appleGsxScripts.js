@@ -1096,7 +1096,7 @@ function onYesNoBlockMouseOut($div) {
 function onComptiaGroupSelect($select) {alert("oui");
     var val = $select.val();
     if (typeof (val) != 'undefined') {
-        var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
+        var $options = $select.parent('.dataBlock').parent('.partDatasContent').find('#comptiaCode').find('option');
         var classe = 'comptiaGroup_' + val;
         var newVal = null;
         $options.each(function () {

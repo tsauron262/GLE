@@ -1097,7 +1097,8 @@ function onComptiaGroupSelect($select) {
     var val = $select.val();
     if (typeof (val) != 'undefined') {
 //        var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
-        var $options = $("body").find('#'+$select.id().replace("comptiaGroup", "comptiaCode")).find('option');
+alert('#'+$select.attr("id").replace("comptiaGroup", "comptiaCode"));
+        var $options = $("body").find('#'+$select.attr("id").replace("comptiaGroup", "comptiaCode")).find('option');
         var classe = 'comptiaGroup_' + val;
         var newVal = null;
         $options.each(function () {

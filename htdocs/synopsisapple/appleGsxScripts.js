@@ -1093,7 +1093,7 @@ function onYesNoBlockMouseOut($div) {
         'color': '#505050'
     });
 }
-function onComptiaGroupSelect($select) {
+function onComptiaGroupSelect($select) {alert("oui");
     var val = $select.val();
     if (typeof (val) != 'undefined') {
         var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');

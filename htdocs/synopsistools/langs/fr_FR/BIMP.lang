@@ -14,3 +14,6 @@ ActionRunningNotStarted=A confirmer
 ActionNotApplicable=Confirmer
 
 ActionRunningShort=_
+
+
+PaymentByChequeOrderedTo=Règlement (tx incl.) à l'ordre de %s envoyé à

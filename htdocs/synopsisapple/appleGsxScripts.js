@@ -1097,21 +1097,22 @@ function onComptiaGroupSelect($select) {
     var val = $select.val();
     if (typeof (val) != 'undefined') {
 //        var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
-alert('#'+$select.attr("id").replace("comptiaGroup", "comptiaCode"));
         var $options = $("body").find('#'+$select.attr("id").replace("comptiaGroup", "comptiaCode")).find('option');
         var classe = 'comptiaGroup_' + val;
         var newVal = null;
-        $options.each(function () {
-            if ($(this).hasClass(classe)) {
-                if (newVal == null) {
-                    newVal = $(this).attr('value');
-                    $(this).parent('select').val(newVal)
+        if($options.find("."+classe).length() > 0){
+            $options.each(function () {
+                if ($(this).hasClass(classe)) {
+                    if (newVal == null) {
+                        newVal = $(this).attr('value');
+                        $(this).parent('select').val(newVal)
+                    }
+                    $(this).show();
                 }
-                $(this).show();
-            }
-            else
-                $(this).hide();
-        });
+                else
+                    $(this).hide();
+            });
+        }
     }
 }
 function switchUpdateSerialForm($span) {

@@ -135,8 +135,10 @@ $(window).load(function() {
                         input.parent().append(valeurPlus);
                     }
                 }
-                else
+                else{
                     reponse = msg;
+                    window.scrollTo(0,0);
+                }
 
                 if (valeurM != "")
                     inputM.attr("value", valeurM);

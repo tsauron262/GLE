@@ -259,7 +259,7 @@ if (isset($_GET['action'])) {
                             echo "tabResult = Array('" . $machineinfo . "', '" . $typeGarantie . "', '" . $garantie . "', '" . $dateAchat . "', '" . $infoPlus . "');";
                         }
                         else {
-                            echo "Pas de retour3";
+                            echo "Numéro inconnue chez Apple";
                         }
                     } else {
 //                        echo "Pas de retour2";

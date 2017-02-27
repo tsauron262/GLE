@@ -136,8 +136,8 @@ $(window).load(function() {
                     }
                 }
                 else{
-                    reponse = msg;
-                    window.scrollTo(0,0);
+                    reponse = '<p class="error">'+msg+'</p>';
+                    document.bodyElement.scrollTop='0px';
                 }
 
                 if (valeurM != "")

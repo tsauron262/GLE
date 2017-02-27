@@ -628,7 +628,6 @@ class gsxDatas
         $comptiaCodes = $this->getCompTIACodesArray();
         $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode']) ? $_REQUEST['symCode'] : null));
         $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail') ? $comptiaCodes : null, $symptomesCodes);
-        dol_syslog(print_r($comptiaCodes,1),4,0, "_apple3");
         $chronoId = null;
         if (isset($_REQUEST['chronoId'])) {
             $chronoId = $_REQUEST['chronoId'];

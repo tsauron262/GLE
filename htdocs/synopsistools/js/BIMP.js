@@ -139,7 +139,7 @@ $(window).load(function() {
                     reponse = '<p class="error" id="scroolTo">'+msg+'</p>';
                     $('html, body').animate({
                         scrollTop: zoneRep.offset().top
-                    }, 2000);
+                    }, 500);
                 }
 
                 if (valeurM != "")

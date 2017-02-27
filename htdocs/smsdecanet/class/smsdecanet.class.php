@@ -46,7 +46,7 @@
 				dol_syslog(get_class($this)."::SmsSend ".print_r($result->details, true), LOG_ERR);
 				return 0;
 			} else {
-				return $result->message_id;
+				return 1;
 			}
 		}
 		

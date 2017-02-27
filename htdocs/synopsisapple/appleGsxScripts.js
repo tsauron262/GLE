@@ -1100,7 +1100,7 @@ function onComptiaGroupSelect($select) {
         var $options = $("body").find('#'+$select.attr("id").replace("comptiaGroup", "comptiaCode")).find('option');
         var classe = 'comptiaGroup_' + val;
         var newVal = null;
-        if($options.find("."+classe).length() > 0){
+        if($options.find("."+classe).length > 0){
             $options.each(function () {
                 if ($(this).hasClass(classe)) {
                     if (newVal == null) {

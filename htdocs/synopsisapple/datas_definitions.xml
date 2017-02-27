@@ -26,6 +26,7 @@
             <val val="B">iPhone</val>
             <val val="E">iPod</val>
             <val val="F">iPad</val>
+            <val val="W">Watch</val>
         </values>
     </def>
     <def name="abused" type="YesNo">

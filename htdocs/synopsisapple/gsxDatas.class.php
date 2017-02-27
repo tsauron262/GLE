@@ -29,7 +29,8 @@ class gsxDatas
         'A' => 'Partage',
         'B' => 'iPhone',
         'E' => 'iPod',
-        'F' => 'iPad'
+        'F' => 'iPad',
+        'W'=> 'Watch'
     );
     protected $isIphone = false;
 

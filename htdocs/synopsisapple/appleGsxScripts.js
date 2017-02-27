@@ -14,7 +14,8 @@ var partsGroup = {
     'A': 'Partage',
     'B': 'iPhone',
     'E': 'iPod',
-    'F': 'iPad'
+    'F': 'iPad',
+    'W': 'Watch'
 };
 
 

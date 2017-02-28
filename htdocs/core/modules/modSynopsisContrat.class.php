@@ -91,10 +91,16 @@ class modSynopsisContrat extends DolibarrModules {
         $this->rights[2][3] = 1;
         $this->rights[2][4] = 'renouveller';
 
+        $this->rights[3][0] = 161884;
+        $this->rights[3][1] = 'Gérer les annexe';
+        $this->rights[3][2] = 'r';
+        $this->rights[3][3] = 1;
+        $this->rights[3][4] = 'annexe';
+
 
         $r = 0;
-        $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
-            'contract:+interv:Interventions:@monmodule:/Synopsis_Contrat/intervByContrat.php?id=__ID__',
+        $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:$user->rights->synopsiscontrat->annexe:/Synopsis_Contrat/annexes.php?id=__ID__',
+            'contract:+interv:Interventions:@monmodule:$user->rights->synopsiscontrat->read:/Synopsis_Contrat/intervByContrat.php?id=__ID__',
                 /* 'contract:+tickets:Tickets:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
                   'contract:+sav:SAV:@monmodule:/Babel_GMAO/savByContrat.php?id=__ID__' */                );
     }

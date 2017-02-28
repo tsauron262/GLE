@@ -305,7 +305,7 @@ class process extends CommonObject {
         while ($res = $db->fetch_object($sql)) {
             $i++;
             $typeD = str_replace(array("commande", "facture", "contrat"), array("order", "invoice", "contract"), strtolower($res->type));
-            $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISPROCESS_TABS_" . $i . "',1,'" . $typeD . ":+process:Process:@monmodule:/Synopsis_Process/listProcessForElement.php?type=" . $res->type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
+            $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISPROCESS_TABS_" . $i . "',1,'" . $typeD . ":+process:Process:@monmodule:$user->rights->process->read:/Synopsis_Process/listProcessForElement.php?type=" . $res->type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);
             $sql2 = $db->query($requete3);
         }

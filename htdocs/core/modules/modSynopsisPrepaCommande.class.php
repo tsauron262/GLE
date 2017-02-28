@@ -290,7 +290,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             $r++;
         }
 
-        $this->tabs = array('order:+prepaCommande:Prepa Commande:@monmodule:/Synopsis_PrepaCommande/prepacommande.php?id=__ID__');
+        $this->tabs = array('order:+prepaCommande:Prepa Commande:@monmodule:$user->rights->SynopsisPrepaCom->all->Afficher:/Synopsis_PrepaCommande/prepacommande.php?id=__ID__');
     }
 
     /**

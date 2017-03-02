@@ -1287,7 +1287,7 @@ abstract class CommonObject
         $sql.= " WHERE te.".$fieldid." < '".$this->db->escape(/*mod drsi*/$this->id/*f mod drsi*/)."'";
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " AND sc.fk_user = " .$user->id;
         if (! empty($filter)) $sql.=" AND ".$filter;
-        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
+        if (/*mod drsi*/$this->table_element != "usergroup" && /*fmod drsi*/isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
             if($this->table_element == "user")
             $sql.= ' AND te.fk_soc = s.rowid';
             else
@@ -1313,7 +1313,7 @@ abstract class CommonObject
         $sql.= " WHERE te.".$fieldid." > '".$this->db->escape(/*mod drsi*/$this->id/*f mod drsi*/)."'";
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " AND sc.fk_user = " .$user->id;
         if (! empty($filter)) $sql.=" AND ".$filter;
-        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
+        if (/*mod drsi*/$this->table_element != "usergroup" && /*fmod drsi*/isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
             if($this->table_element == "user")
             $sql.= ' AND te.fk_soc = s.rowid';
             else

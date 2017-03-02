@@ -872,6 +872,14 @@ class gsxDatas
                         }
                     }
                 }
+                
+                 if (isset($response[$responseName]['repairConfirmation']['messages'])){
+                     $mesage = $response[$responseName]['repairConfirmation']['messages'];
+                     if(is_array($mesage))
+                         $message = explode ("<br/>", $message);
+                     $html .= $message ."<br/>";
+                 }
+                
                 switch ($requestType) {
                     default:
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {

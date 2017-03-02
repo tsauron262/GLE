@@ -1164,7 +1164,7 @@ class GSX
             $html .= '</p>';
         }
         if (count($tab['soap'])) {
-            $html .= '<p class="error">Erreur(s) SOAP: <br/>';
+            $html .= '<p class="error alertJs">Erreur(s) SOAP: <br/>';
             $i = 1;
             foreach ($tab['soap'] as $errorMsg) {
                 $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";

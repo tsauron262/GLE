@@ -846,6 +846,15 @@ class gsxDatas
 
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
             $response = $this->gsx->request($requestData, $client);
+            
+            
+            if (isset($response[$responseName]['repairConfirmation']['messages'])){
+                $message = $response[$responseName]['repairConfirmation']['messages'];
+                if(!is_array($message))
+                    $message = array($message);
+                foreach($message as $mess)
+                    $html .= "<div class='alertJs'>".$mess ."</div>";
+            }
 
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
@@ -873,12 +882,6 @@ class gsxDatas
                     }
                 }
                 
-                 if (isset($response[$responseName]['repairConfirmation']['messages'])){
-                     $message = $response[$responseName]['repairConfirmation']['messages'];
-                     if(is_array($message))
-                         $message = implode ("<br/>", $message);
-                     $html .= $message ."<br/>";
-                 }
                 
                 switch ($requestType) {
                     default:

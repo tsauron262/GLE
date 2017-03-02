@@ -1552,6 +1552,13 @@ function getXMLHttpRequest() {
 function onRequestResponse(xhr, requestType, prodId) {
     var $div = null;
     var $span = null;
+    
+    
+    var retour = $("<div></div>");
+    retour.html(xhr.responseText.toString());
+    retour.find('.alertJs').each(function(){
+        alert($(this).text());
+    });
     if (xhr.responseText.indexOf('<ok>Reload</ok>') !== -1)
         location.reload();
     switch (requestType) {

@@ -1404,7 +1404,7 @@ class Contrat extends CommonObject
 			$resql=$this->db->query($sql);
 			if ($resql)
 			{
-				$result=$this->update_statut($user);
+				$result=1;//moddrsi$this->update_statut($user);
 				if ($result > 0)
 				{
 
@@ -1584,7 +1584,7 @@ class Contrat extends CommonObject
 		$result = $this->db->query($sql);
 		if ($result)
 		{
-			$result=$this->update_statut($user);
+			$result=1;//moddrsi$this->update_statut($user);
 			if ($result >= 0)
 			{
 
@@ -2628,7 +2628,7 @@ class ContratLigne extends CommonObjectLine
 		{
 			$contrat=new Contrat($this->db);
 			$contrat->fetch($this->fk_contrat);
-			$result=$contrat->update_statut($user);
+			$result=1;//moddrsi$contrat->update_statut($user);
 		}
 		else
 		{

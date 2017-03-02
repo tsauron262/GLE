@@ -2207,6 +2207,10 @@ class User extends CommonObject
                     $info['mtaTransport'] = $this->array_options['options_mtatransport'];
                 else
                     $info['mtaTransport'] = "";
+                if(isset($this->array_options['options_mailforwardingaddress']))
+                    $info['mailForwardingAddress'] = $this->array_options['options_mailforwardingaddress'];
+                else
+                    $info['mailForwardingAddress'] = "";
                 
                 if($domain){
                     $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);

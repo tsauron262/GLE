@@ -174,7 +174,7 @@ class modSynopsisFinanc extends DolibarrModules
 //					'user'=>0);	
         
 //        $this->tabs = array('contract:+financ:Financement:synopsisGene@synopsistools:/synopsisfinanc/financeContrat.php?id=__ID__');
-        $this->tabs = array('propal:+financ:Financement:synopsisGene@synopsistools:/synopsisfinanc/financePropal.php?id=__ID__');
+        $this->tabs = array('propal:+financ:Financement:synopsisGene@synopsistools:$user->rights->synopsisFinanc->read:/synopsisfinanc/financePropal.php?id=__ID__');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

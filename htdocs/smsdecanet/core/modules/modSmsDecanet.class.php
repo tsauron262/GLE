@@ -45,7 +45,7 @@ class modSmsDecanet extends DolibarrModules
 		$this->family = 'technic';
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		$this->description = "Envoi de SMS à vos clients";
-		$this->version = '3.6.2';
+		$this->version = '4.1.1';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->special = 1;
 		$this->picto='email';
@@ -56,7 +56,7 @@ class modSmsDecanet extends DolibarrModules
 		$this->config_page_url = array("../smsdecanet/admin/smsdecanet_conf.php");
 		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
-		$this->phpmin = array(4,3);					// Minimum version of PHP required by module
+		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,2);	// Minimum version of Dolibarr required by module
 		$this->langfiles = array("smsdecanet@smsdecanet");
 		$this->const = array();
@@ -144,23 +144,6 @@ class modSmsDecanet extends DolibarrModules
 		
 	}
 	
-	function sendRequest($donnees) {
-		global $conf;
-		$url = (intval($conf->global->DECANETSMS_SSL)==1)?'https':'http';
-		$url.='://www.decanet.fr/api/sms.php';	
-		foreach($donnees as $key=>$value) { $donnees_ctn .= $key.'='.$value.'&'; }
-		rtrim($donnees_ctn,'&');
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch,CURLOPT_POST,count($donnees));
-		curl_setopt($ch,CURLOPT_POSTFIELDS,$donnees_ctn);
-		curl_setopt($ch, CURLOPT_SSLVERSION , 3);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		$data=curl_exec($ch);
-		curl_close($ch);
-		return json_decode($data);
-	}
 
 	/**
 	 *		\brief      Function called when module is enabled.
@@ -171,7 +154,6 @@ class modSmsDecanet extends DolibarrModules
 	function init()
 	{
 		$sql = array();
-		$this->sendRequest(array('dolibarr'=>$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']));
 		$result=$this->load_tables();
 
 		return $this->_init($sql);

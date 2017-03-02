@@ -135,8 +135,12 @@ $(window).load(function() {
                         input.parent().append(valeurPlus);
                     }
                 }
-                else
-                    reponse = msg;
+                else{
+                    reponse = '<p class="error" id="scroolTo">'+msg+'</p>';
+                    $('html, body').animate({
+                        scrollTop: zoneRep.offset().top
+                    }, 500);
+                }
 
                 if (valeurM != "")
                     inputM.attr("value", valeurM);

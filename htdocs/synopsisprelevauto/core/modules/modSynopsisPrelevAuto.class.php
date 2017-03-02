@@ -111,7 +111,7 @@ $this->menus = array();			// List of menus to add
 					'target'=>'',
 					'user'=>0);	
         
-        $this->tabs = array('contract:+prelevAuto:Prélèvement:synopsisGene@synopsistools:/synopsisprelevauto/prelev.php?id=__ID__&type=contrat');
+        $this->tabs = array('contract:+prelevAuto:Prélèvement:synopsisGene@synopsistools:$user->rights->synopsisprelevauto->read:/synopsisprelevauto/prelev.php?id=__ID__&type=contrat');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

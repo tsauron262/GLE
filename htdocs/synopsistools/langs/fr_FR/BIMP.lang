@@ -14,3 +14,6 @@ ActionRunningNotStarted=A confirmer
 ActionNotApplicable=Confirmer
 
 ActionRunningShort=_
+
+
+PaymentByChequeOrderedTo=Règlement TTC à l'ordre de %s envoyé à

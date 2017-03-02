@@ -114,7 +114,7 @@ $this->menus = array();			// List of menus to add
 					'target'=>'',
 					'user'=>0);	
         
-        $this->tabs = array('agenda:+caldav:Export CalDav:@synopsiscaldav:/synopsiscaldav/index.php');
+        $this->tabs = array('agenda:+caldav:Export CalDav:@synopsiscaldav:$user->rights->agenda->myactions->read:/synopsiscaldav/index.php');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

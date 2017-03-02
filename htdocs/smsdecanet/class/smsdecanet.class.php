@@ -1,5 +1,5 @@
 <?php
-	class SMSDecanet extends CommonObject{
+	class Smsdecanet extends CommonObject{
 		var $expe='';
 		var $dest='';
 		var $message='';
@@ -7,67 +7,49 @@
 		var $priority='';
 		var $class='';
 		var $error;
+        var $timeDrift = 0;
 		
-		function SMSDecanet($DB) {
-			
+		function Smsdecanet($DB) {
+		
 		}
 		
 		function SmsSenderList() {
 			global $conf;
-                        
-			$obj = new stdClass();
-                        @$obj->number = $conf->global->MAIN_MAIL_SMS_FROM;
-			$from[] = $obj;
-			return $from;
+			$frm = new stdClass();
+			$frm->number = $conf->global->DECANETSMS_FROM;
+			return array($frm);
 		}
 		
 		function SmsSend() {
+			
 			global $langs, $conf;
 			$langs->load("smsdecanet@smsdecanet");
-			$to = str_replace('+','',$this->dest);
+			$to = str_replace('+','00',$this->dest);
 			if(!preg_match('/^[0-9]+$/', $to)) {
 				$this->error = $langs->trans('errorRecipient');
 				return 0;
 			}
-			$donnees = array(
-				'text'=>$this->message,
-				'recipient'=>$to,
-				'sendername'=>$this->expe,
-				'messagetruncationallowed'=>'1',
-				'action'=>'send',
-				'login'=>$conf->global->DECANETSMS_EMAIL,
-				'pass'=>$conf->global->DECANETSMS_PASS,
-				'flash'=>($this->class==0)?1:0,
+			dol_include_once('/smsdecanet/class/DecanetAPI.class.php');
+			$url = (intval($conf->global->DECANETSMS_SSL)==1)?'https':'http';
+			$url.='://api.decanet.fr';	
+			$api = new DecanetApi($conf->global->DECANETSMS_EMAIL,$conf->global->DECANETSMS_PASS, $url);
+			$result = $api->post('/sms/send', array(
+				'FROMNUM'=>$this->expe,
+				'MSG'=>$api->decode($this->message),
+				'TO'=>$to,
 				'lang'=>$langs->defaultlang,
 				'deferred'=>$this->deferred
-				);
-			$result = $this->sendRequest($donnees);
+			));
+			
 			if($result->code==1) {
 				$this->error = $result->details;
-				dol_syslog(get_class($this)."::SmsSend ".print_r($result, true), LOG_ERR);
+				dol_syslog(get_class($this)."::SmsSend ".print_r($result->details, true), LOG_ERR);
 				return 0;
 			} else {
 				return 1;
 			}
 		}
 		
-		function sendRequest($donnees) {
-			global $conf;
-			$url = (intval($conf->global->DECANETSMS_SSL)==1)?'https':'http';
-			$url.='://www.decanet.fr/api/sms.php';	
-			foreach($donnees as $key=>$value) { $donnees_ctn .= $key.'='.$value.'&'; }
-			rtrim($donnees_ctn,'&');
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch,CURLOPT_POST,count($donnees));
-			curl_setopt($ch,CURLOPT_POSTFIELDS,$donnees_ctn);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-			curl_setopt($ch, CURLOPT_SSLVERSION , 3);
-			$data=curl_exec($ch);
-			curl_close($ch);
-			return json_decode($data);
-		}
-
+		
 	}
 ?>

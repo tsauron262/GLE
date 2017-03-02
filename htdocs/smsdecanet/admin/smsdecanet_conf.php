@@ -46,14 +46,7 @@ if ($_POST["action"] == 'majAccess')
 	dolibarr_set_const($db, "DECANETSMS_EMAIL", $_POST["emailSMS"],'chaine',0,'',$conf->entity);
 	if($_POST['passSMS']!='')dolibarr_set_const($db, "DECANETSMS_PASS", $_POST["passSMS"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "DECANETSMS_SSL", $_POST["sslSMS"],'entier',0,'',$conf->entity);
-}
-elseif ($_POST["action"] == 'majFrom')
-{
-	$from = unserialize($conf->global->DECANETSMS_FROM);
-	$frm = new stdClass();
-	$frm->number = $_POST['addSMS'];
-	$from[] = $frm;
-	dolibarr_set_const($db, "DECANETSMS_FROM", serialize($from),'chaine',0,'',$conf->entity);
+	dolibarr_set_const($db, "DECANETSMS_FROM", $_POST['fromSMS'],'chaine',0,'',$conf->entity);
 }
 
 /*
@@ -74,18 +67,15 @@ echo "  <td>".$langs->trans("DiagnosticSMS")."</td>";
 echo '</tr>';
 echo "<tr ".$bc[$var].">";
 echo '<td>';
-$sms = new modSmsDecanet($DB);
-$data = array(
-	'action'	=>	'status',
-	'login'	=>	$conf->global->DECANETSMS_EMAIL,
-	'pass'	=>	$conf->global->DECANETSMS_PASS,
-	'lang'	=>	$langs->defaultlang
-);
-$result = $sms->sendRequest($data);
-if(isset($result->error)) {
-	echo $result->error;
+dol_include_once('/smsdecanet/class/DecanetAPI.class.php');
+$url = (intval($conf->global->DECANETSMS_SSL)==1)?'https':'http';
+$url.='://api.decanet.fr';	
+$api = new DecanetApi($conf->global->DECANETSMS_EMAIL,$conf->global->DECANETSMS_PASS, $url);
+$result = $api->get('/sms/solde');
+if(isset($result->details)) {
+	echo $result->details.' - (<a href="https://www.decanet.fr/prix-sms-premium/france,FR" target="_blank"><strong>'.$langs->trans('CreateSMSAcount').'</strong></a>)';
 } else {
-	echo '<strong>'.$langs->trans('CREDITSMS').'</strong>'.$result->credit.' '.$langs->trans('SMS').' - (<a href="http://www.decanet.fr/prix-sms-premium/france,FR" target="_blank"><strong>'.$langs->trans('RechargeSms').'</strong></a>)';
+	echo '<strong>'.$langs->trans('CREDITSMS').'</strong>'.$result->credit.' '.$langs->trans('SMS').' - (<a href="https://www.decanet.fr/prix-sms-premium/france,FR" target="_blank"><strong>'.$langs->trans('RechargeSms').'</strong></a>)';
 }
 echo '</td>';
 echo '</td>';
@@ -103,6 +93,12 @@ $var=!$var;
 echo "<form method=\"post\" action=\"smsdecanet_conf.php\">";
 echo '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 echo "<input type=\"hidden\" name=\"action\" value=\"majAccess\">";
+echo "<tr ".$bc[$var].">";
+echo '<td>'.$langs->trans("fromSMS").'</td>';
+echo '<td align="left"><input type="text" name="fromSMS" size="50" class="flat" value="'.$conf->global->DECANETSMS_FROM.'"></td>';
+echo '<td align="right"></td>';
+echo '</tr>';
+$var=!$var;
 echo "<tr ".$bc[$var].">";
 echo '<td>'.$langs->trans("emailSMS").'</td>';
 echo '<td align="left"><input type="text" name="emailSMS" size="50" class="flat" value="'.$conf->global->DECANETSMS_EMAIL.'"></td>';
@@ -127,6 +123,28 @@ echo '</form>';
 echo '</table><br><br>';
 
 $db->close();
+
+echo '<table class="noborder" width="100%">';
+echo '<tr class="liste_titre">';
+echo "  <td>".$langs->trans("HistorySMSAccount")."</td>\n";
+echo "  <td align=\"left\" ></td>";
+echo "  <td >&nbsp;</td></tr>";
+$var=!$var;
+
+$result = $api->get('/sms/details?limit=50');
+if(count($result)>0) {
+	foreach($result as $k=>$s) {
+		echo "<tr ".$bc[$var].">";
+		echo '<td>'.$s->date.'</td>';
+		echo '<td align="left">'.$s->details.' ('.$s->Country.')</td>';
+		echo '<td align="right">'.$s->StatusText.'</td>';
+		echo '</tr>';
+		$var=!$var;
+		if($k==50)break;
+	}
+}
+
+echo '</table><br><br>';
 
 llxFooter('$Date: 2010/03/10 15:00:00');
 

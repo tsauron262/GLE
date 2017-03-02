@@ -218,7 +218,7 @@
             <data name="soldToContact" required="1"></data>
             <data name="soldToContactPhone" required="1"></data>
 
-            <data name="trackingNumber" required="1"></data>
+            <data name="trackingNumber" required="0"></data>
             <data name="unitReceivedDate" required="1"></data>
             <data name="unitReceivedTime" required="1"></data>
 

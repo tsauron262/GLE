@@ -293,7 +293,7 @@ class process extends CommonObject {
     public $reviseAction;
     private static $cache = array();
 
-    public function process($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -305,7 +305,7 @@ class process extends CommonObject {
         while ($res = $db->fetch_object($sql)) {
             $i++;
             $typeD = str_replace(array("commande", "facture", "contrat"), array("order", "invoice", "contract"), strtolower($res->type));
-            $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISPROCESS_TABS_" . $i . "',1,'" . $typeD . ":+process:Process:@monmodule:/Synopsis_Process/listProcessForElement.php?type=" . $res->type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
+            $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISPROCESS_TABS_" . $i . "',1,'" . $typeD . ":+process:Process:@monmodule:".'$user->rights->process->read'.":/Synopsis_Process/listProcessForElement.php?type=" . $res->type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);
             $sql2 = $db->query($requete3);
         }
@@ -886,7 +886,7 @@ class processDet extends process {
     public $element = false;
     private static $cacheProcess = array();
 
-    public function processDet($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1327,7 +1327,7 @@ class processDetValue extends processDet {
     public $valeurToModel;
     public $valeur = array();
 
-    public function processDetValue($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1353,7 +1353,7 @@ class process_trigger extends process {
     public $db;
     public $code;
 
-    public function process_trigger($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1386,7 +1386,7 @@ class process_element_type extends process {
     public $_GET_id;
     public $classFile;
 
-    public function process_element_type($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1441,7 +1441,7 @@ class formulaire extends process {
     public $model;
     public $statut;
 
-    public function formulaire($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1829,7 +1829,7 @@ class formulaireModel extends formulaire {
     public $class;
     public $rights;
 
-    public function formulaireModel($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1915,7 +1915,7 @@ class formulaireModelProp extends formulaireModel {
     public $element_name;
     public $model_refid;
 
-    public function formulaireModelProp($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1951,7 +1951,7 @@ class formulaireModelStyle extends formulaireModel {
     public $element_name;
     public $model_refid;
 
-    public function formulaireModelStyle($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1984,7 +1984,7 @@ class formulaireModelClass extends formulaireModel {
     public $db;
     public $valeur;
 
-    public function formulaireModelClass($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -2023,7 +2023,7 @@ class formulaireSource extends formulaire {
     public $type;
     public $uniqElem;
 
-    public function formulaireSource($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -2089,7 +2089,7 @@ class listform extends formulaireSource {
     public $lignes = array();
     public $valueArr = array();
 
-    public function listform($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -2249,7 +2249,7 @@ class listformmember extends listform {
     public $valeur;
     public $list_refid;
 
-    public function listformmember($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -2336,7 +2336,7 @@ class globalvar extends formulaireSource {
     public $valuesArr;
     public $idChrono = 0;
 
-    public function globalvar($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -2401,7 +2401,7 @@ class lien extends formulaireSource {
     public $hasMultiValue = ture;
     public $cssClassM = ""; //Nom du type de chrono au quelle on ve faire le lien
 
-    function lien($db) {
+    function __construct($db) {
         $this->db = $db;
     }
 
@@ -2679,7 +2679,7 @@ class requete extends formulaireSource {
     public $valueGroupArr = array();
     public $valueGroupArrDisplay = array();
 
-    public function requete($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -3007,7 +3007,7 @@ class fct extends formulaireSource {
     public $paramsForHtmlSelect;
     public $postTraitementValue;
 
-    public function fct($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -3289,7 +3289,7 @@ class fct_values extends fct {
     public $valeur;
     public $paramsArr;
 
-    public function fct_values($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -3349,7 +3349,7 @@ class formulaireType extends formulaire {
     public $valueIsChecked;
     public $valueIsSelected;
 
-    public function formulaireType($DB) {
+    public function __construct($DB) {
         $this->db = $DB;
     }
 

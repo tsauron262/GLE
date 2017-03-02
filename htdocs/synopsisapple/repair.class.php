@@ -504,7 +504,7 @@ class Repair
 
 //            echo "<pre>";print_r($response);exit;
         
-        $this->gsx->dispayLastRequestXml($request, $response, $this->gsx->errors);
+//        $this->gsx->dispayLastRequestXml($request, $response, $this->gsx->errors);
 //        exit;
 
         if (count($this->gsx->errors['soap']) > $n) {
@@ -544,6 +544,7 @@ class Repair
             $html .= '<p class="error">numéro de confirmation absent</p>' . "\n";
         else
             $html .= '<p><strong>N° de confirmation: </strong>' . $this->confirmNumbers['repair'] . '</p>';
+        $html .= '<p><strong>Prix de la réparation: </strong>' . $this->totalFromOrder . " €";
         $html .= '<p><strong>Statut dans GSX: </strong>';
         if (isset($this->repairLookUp['repairStatus']))
             $html .= $this->repairLookUp['repairStatus'];

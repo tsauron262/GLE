@@ -88,7 +88,16 @@ function bouttonEtatSav($idChrono) {
     }
 
     if (/* $etatSav == 2 && */$propId && $etatSav == 6) {
-        $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='0'/> TTC";
+        $frais = 0;
+        if(isset($chrono->propalid) && $chrono->propalid > 0){
+            require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
+            $propal = new Propal($db);
+            $propal->fetch($chrono->propalid);
+            foreach ($propal->lines as $line)
+                if($line->desc == "Acompte")
+                    $frais = -$line->total_ttc;
+        }
+        $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='".$frais."'/> TTC";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&frais=\"+$(\"#frais\").val()+\"&nbJours=\"+$(\"#nbJours\").val()+\"&actionEtat=revProp&ligne=0" . $sms . "\"'>Fermé</a>"; 
         $return .= "<br/>";

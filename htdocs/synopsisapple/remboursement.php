@@ -4,6 +4,8 @@
 //ADD `is_reimbursed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `date_close`;
 
 require_once('../main.inc.php');
+
+require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/class/chrono.class.php');
 llxHeader();
 
 ?>
@@ -234,27 +236,45 @@ if (!count($errors)) {
     $datePeriodBegin->sub(new DateInterval($period));
     $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair ';
     $sql .= 'WHERE `closed` = 1 ';
-    $sql .= 'AND `date_close` < \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
-    $sql .= 'AND `date_close` > \'0000-00-00\' ';
-    $sql .= 'AND `totalFromOrder` = 0 ';
-    $sql .= 'AND `is_reimbursed` = 0';
+    $sql .= ' AND `totalFromOrder` = 0 ';
+    $sql .= ' AND `is_reimbursed` = 0';
+    
+    
+    if(count($csvRows) > 0){
+        $result = $db->query($sql);
+        if ($result) {
+            $updateSql = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsis_apple_repair SET ';
+            $updateSql .= '`is_reimbursed` = 1 ';
+            $updateSql .= 'WHERE `rowid` = ';
 
+            if ($db->num_rows($result)) {
+                while ($obj = $db->fetch_object($result)) {
+                    if (isset($obj->repairConfirmNumber) && !empty($obj->repairConfirmNumber)) {
+                        if (array_key_exists($obj->repairConfirmNumber, $csvRows)) {
+                            $db->query($updateSql . (int) $obj->rowid);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    
+    $sql .= ' AND `date_close` < \'' . $datePeriodBegin->format('Y-m-d') . '\' ';
+    $sql .= ' AND `date_close` > \'0000-00-00\' ';
+
+    
+    
 //    echo $sql; exit;
     $result = $db->query($sql);
 
     if ($result) {
-        $updateSql = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsis_apple_repair SET ';
-        $updateSql .= '`is_reimbursed` = 1 ';
-        $updateSql .= 'WHERE `rowid` = ';
 
         if ($db->num_rows($result)) {
             while ($obj = $db->fetch_object($result)) {
                 if (isset($obj->repairConfirmNumber) && !empty($obj->repairConfirmNumber)) {
-                    if (array_key_exists($obj->repairConfirmNumber, $csvRows)) {
-                        $db->query($updateSql . (int) $obj->rowid);
-                    } else {
                         $repairs[] = $obj;
-                    }
                 }
             }
         }

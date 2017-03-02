@@ -89,7 +89,7 @@ class modSynopsisRevProp extends DolibarrModules
 
         
         //Ajout onglet dans fiche utilisateur
-        $this->tabs = array('propal:+revision:Revision/Doc.Indicable:@monmodule:/Synopsis_Revision/revisionProp.php?id=__ID__');
+        $this->tabs = array('propal:+revision:Revision/Doc.Indicable:@monmodule:$user->rights->propale->cloturer:/Synopsis_Revision/revisionProp.php?id=__ID__');
   }
 
    /**

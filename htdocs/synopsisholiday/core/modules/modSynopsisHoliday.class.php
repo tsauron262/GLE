@@ -177,8 +177,8 @@ class modSynopsisHoliday extends DolibarrModules {
 
 
         $this->tabs = array('user:-paidholidays',
-            'user:+paidholidaysRtt:Congés RTT perso:@monmodule:/synopsisholiday/index.php?id=__ID__',
-            'user:+paidholidaysRtt2:Valid Congés RTT à traiter:@monmodule:/synopsisholiday/index.php?search_valideur=__ID__');
+            'user:+paidholidaysRtt:Congés RTT perso:@monmodule:$user->rights->holiday->read:/synopsisholiday/index.php?id=__ID__',
+            'user:+paidholidaysRtt2:Valid Congés RTT à traiter:@monmodule:$user->rights->holiday->read:/synopsisholiday/index.php?search_valideur=__ID__');
     }
 
     /**

@@ -876,7 +876,7 @@ class gsxDatas
                  if (isset($response[$responseName]['repairConfirmation']['messages'])){
                      $message = $response[$responseName]['repairConfirmation']['messages'];
                      if(is_array($message))
-                         $message = explode ("<br/>", $message);
+                         $message = implode ("<br/>", $message);
                      $html .= $message ."<br/>";
                  }
                 

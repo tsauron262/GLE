@@ -57,7 +57,7 @@ class InterfaceZimbraSync {
      *   \brief      Constructeur.
      *   \param      DB      Handler d'acces base
      */
-    function InterfaceZimbraSync($DB) {
+    function __construct($DB) {
         $this->db = $DB;
 
         $this->name = "ZimbraSync";

@@ -61,7 +61,7 @@ class InterfaceTriggerForm
      *   \brief      Constructeur.
      *   \param      DB      Handler d'acces base
      */
-    function InterfaceTriggerForm($DB)
+    function __construct($DB)
     {
         $this->db = $DB ;
 

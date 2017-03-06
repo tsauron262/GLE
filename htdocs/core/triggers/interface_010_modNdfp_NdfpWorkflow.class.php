@@ -42,7 +42,7 @@ class InterfaceNdfpWorkflow
      *   Constructor.
      *   @param      DB      Database handler
      */
-    function InterfaceNdfpWorkflow($DB)
+    function __construct($DB)
     {
         $this->db = $DB;
 

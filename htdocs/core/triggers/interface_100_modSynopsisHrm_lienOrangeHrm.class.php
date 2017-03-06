@@ -58,7 +58,7 @@ class InterfaceLienOrangeHrm {
      *   \brief      Constructeur.
      *   \param      DB      Handler d'acces base
      */
-    function InterfaceLienOrangeHrm($DB) {
+    function __construct($DB) {
         $this->db = $DB;
 
         $this->name = "Lien avec OrangeHrm";

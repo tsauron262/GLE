@@ -413,8 +413,8 @@ class GSX
 
         $opt = ($this->isIphone) ? "IPhone" : "Asp";
 
-        return $this->wsdlUrl = ' https://gsxwsut.apple.com/apidocs/' . $api_mode . '/html/WSArtifacts.html?user=asp';
-//        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
+//        return $this->wsdlUrl = ' https://gsxwsut.apple.com/apidocs/' . $api_mode . '/html/WSArtifacts.html?user=asp';
+        return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
 
 //        $type = "Asp";
 ////        $type = "IPhone";

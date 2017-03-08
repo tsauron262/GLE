@@ -51,12 +51,14 @@ class gsxDatas
         $userId = 'admin.gle@bimp.fr';
 //        $password = 'BIMP@gle69#';
         $serviceAccountNo = '897316';
+        $serviceAccountNoShipTo = '897316';
 
 
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_service']) &&
                 $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != "") {
             $userId = $user->array_options['options_apple_id'];
             $serviceAccountNo = $user->array_options['options_apple_service'];
+            $serviceAccountNoShipTo = $user->array_options['options_apple_shipto'];
         }
 
 
@@ -67,11 +69,12 @@ class gsxDatas
                 'userId' => $userId,
 //                'password' => $password,
                 'serviceAccountNo' => $serviceAccountNo,
+                'serviceAccountNoShipTo' => $serviceAccountNoShipTo,
                 'languageCode' => 'fr',
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
-            $this->shipTo = $serviceAccountNo;
+            $this->shipTo = $serviceAccountNoShipTo;
         } else {
             echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
             return 0;

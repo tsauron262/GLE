@@ -607,7 +607,7 @@ class GSX
 
 //                    $data = new gsxDatas();
 //                    $details['shipTo'] = $data->shipTo;
-                $details['shipTo'] = $this->gsxDetails['serviceAccountNo'];
+                $details['shipTo'] = $this->gsxDetails['serviceAccountNoShipTo'];
 
                 $requestName = $clientLookup . 'Request';
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);

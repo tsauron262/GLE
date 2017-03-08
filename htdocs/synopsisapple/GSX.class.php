@@ -359,6 +359,13 @@ class GSX
         } else {
             $this->gsxDetails['serviceAccountNo'] = $_gsxDetailsArray['serviceAccountNo'];
         }
+        
+
+        if ($_gsxDetailsArray['serviceAccountNoShipTo'] == '') {
+            $this->errors['init'][] = 'Service Account Number ShipTo is blank';
+        } else {
+            $this->gsxDetails['serviceAccountNoShipTo'] = $_gsxDetailsArray['serviceAccountNoShipTo'];
+        }
 
 // If user has left languageCode empty, we assign the GSX default.
         $this->gsxDetails['languageCode'] = ( empty($_gsxDetailsArray['languageCode']) ) ? 'en' : $_gsxDetailsArray['languageCode'];

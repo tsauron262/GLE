@@ -473,6 +473,7 @@ class GSX
 
         $connectionOptions = array(
             'connection_timeout' => '5'
+            ,'soap_version' => 'SOAP_1_2' 
             , 'local_cert' => DOL_DOCUMENT_ROOT . "/synopsisapple/certif/" . $certif[0]
             , 'passphrase' => $certif[1]
             , 'trace' => TRUE

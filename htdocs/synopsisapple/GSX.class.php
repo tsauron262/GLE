@@ -408,13 +408,13 @@ class GSX
      *
      */
     protected function assign_wsdl()
-    {
-        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? 'prod' : $this->gsxDetails['apiMode'];
+    {$api_mode = "production";
+        $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
         $opt = ($this->isIphone) ? "IPhone" : "Asp";
         
         
-        return $this->wsdlUrl = "https://gle.synopsis-erp.com/test1/gsx-emeaAsp.wsdl";
+//        return $this->wsdlUrl = "https://gle.synopsis-erp.com/test1/gsx-emeaAsp.wsdl";
 
 //        return $this->wsdlUrl = ' https://gsxwsut.apple.com/apidocs/' . $api_mode . '/html/WSArtifacts.html?user=asp';
         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';

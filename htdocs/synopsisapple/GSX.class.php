@@ -408,7 +408,7 @@ class GSX
      *
      */
     protected function assign_wsdl()
-    {$api_mode = "production";
+    {
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
         $opt = ($this->isIphone) ? "IPhone" : "Asp";

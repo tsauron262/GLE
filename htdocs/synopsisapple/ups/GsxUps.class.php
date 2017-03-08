@@ -143,7 +143,7 @@ class GsxUps
     {
         try {
             $mode = array(
-                'soap_version' => 'SOAP_1_2', // use soap 1.1 client
+                'soap_version' => 'SOAP_1_1', // use soap 1.1 client
                 'trace' => 1
             );
 

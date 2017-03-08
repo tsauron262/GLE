@@ -354,7 +354,6 @@ class User extends CommonObject
 				return -2;
 			}
 		}
-
 		return 1;
 	}
 
@@ -2090,7 +2089,7 @@ class User extends CommonObject
                 
                 /*mod drsi*/
                 if(!defined("LIST_DOMAINE_VALID"))
-                    die("Constante LIST_DOMAINE_VALID non definie");
+                    dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
                 else{
                     $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
                     $domain = false;
@@ -2194,7 +2193,7 @@ class User extends CommonObject
                 
                 $domain = false;
                 if(!defined("LIST_DOMAINE_VALID"))
-                    die("Constante LIST_DOMAINE_VALID non definie");
+                    dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
                 else{
                     $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
                     foreach($LIST_DOMAINE_VALID as $domaine)

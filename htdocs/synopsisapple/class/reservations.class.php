@@ -14,6 +14,7 @@ class Reservations
     var $display_debug = true;
     // mettre à false pour envoyer les mails aux bons destinataires:
     var $debugMails = true;
+    public $createProductAndChrono = false;
 
     function __construct($db)
     {
@@ -323,15 +324,7 @@ class Reservations
         if (isset($resa->customer) && !empty($resa->customer)) {
             $customer = $this->getOrCreateCustomer($resa->customer);
         }
-        if (isset($resa->product->serialNumber) && !empty($resa->product->serialNumber)) {
-            $id_product = $this->getProductBySerial($resa->product->serialNumber);
-            if (!$id_product) {
-                $id_product = $this->createProduct($resa->product->serialNumber, (isset($customer->id) ? $customer->id : 0));
-            }
-        } else {
-            $id_product = 0;
-        }
-        
+
         //Selection du centre
         $centre = '';
         foreach ($users as $u) {
@@ -343,32 +336,46 @@ class Reservations
         $_REQUEST['centre'] = $centre;
 
         // Création SAV:
-        $chrono = new Chrono($this->db);
-        $chrono->model_refid = 105;
-        if (isset($customer->id))
-            $chrono->socid = $customer->id;
-        $chrono_id = $chrono->create();
+        if ($this->$createProductAndChrono) {
+            if (isset($resa->product->serialNumber) && !empty($resa->product->serialNumber)) {
+                $id_product = $this->getProductBySerial($resa->product->serialNumber);
+                if (!$id_product) {
+                    $id_product = $this->createProduct($resa->product->serialNumber, (isset($customer->id) ? $customer->id : 0));
+                }
+            } else {
+                $id_product = 0;
+            }
 
-        if ($chrono_id <= 0) {
-            $this->logError('Echec de la création du chrono_105 (ID réservation: ' . $resa->reservationId . ')');
-            $chrono_id = 0;
-        }
+            $chrono = new Chrono($this->db);
+            $chrono->model_refid = 105;
+            if (isset($customer->id))
+                $chrono->socid = $customer->id;
+            $chrono_id = $chrono->create();
 
-        if ($chrono_id) {
+            if ($chrono_id <= 0) {
+                $this->logError('Echec de la création du chrono_105 (ID réservation: ' . $resa->reservationId . ')');
+                $chrono_id = 0;
+            }
 
-            if ($this->display_debug)
-                echo 'CENTRE: ' . $centre . '<br/>';
+            if ($chrono_id) {
 
-            $chrono->setDatas($chrono_id, array(
-                1060 => $centre,
-                1047 => (isset($resa->product->issueReported) ? $resa->product->issueReported : '')
-            ));
+                if ($this->display_debug)
+                    echo 'CENTRE: ' . $centre . '<br/>';
 
-            $chrono->fetch($chrono_id);
+                $chrono->setDatas($chrono_id, array(
+                    1060 => $centre,
+                    1047 => (isset($resa->product->issueReported) ? $resa->product->issueReported : '')
+                ));
+
+                $chrono->fetch($chrono_id);
 //        $chrono->ref = str_replace("{CENTRE}", $centre, $chrono->ref);
 //        $chrono->update($chrono_id);
+            }
+        } else {
+            $chrono = 0;
+            $id_product = 0;
         }
-        
+
         // Liaison SAV / produit: 
         if ($id_product && $chrono_id) {
             $lien = new lien($this->db);
@@ -376,7 +383,7 @@ class Reservations
             $lien->fetch(3);
             $lien->setValue($chrono_id, array($id_product));
         }
-        
+
         // Ajout agenda:
         $ac = new ActionComm($this->db);
         $ac->type_id = 52;
@@ -423,18 +430,20 @@ class Reservations
             $this->logError('Echec de la création du RDV pour la réservation "' . $resa->reservationId . '"');
             return;
         }
-        
+
         $ac->array_options['options_resgsx'] = $resa->reservationId;
         $ac->insertExtraFields();
-        
+
         $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
         $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
-        
+
         // Envoi mails: 
         $subject = 'Nouvelle Reservation GSX le ' . $dateBegin->format('d/m/Y') . ' a ' . $dateBegin->format('H\Hi');
         $message = 'Bonjour,' . "\n\n";
         $message .= 'Une nouvelle réservation GSX a été ajouté à votre agenda:' . "\n\n";
-        $message .= "\t" . 'Accès au SAV : ' . $chrono->getNomUrl() . "\n";
+        if ($chrono && $chrono_id) {
+            $message .= "\t" . 'Accès au SAV : ' . $chrono->getNomUrl() . "\n";
+        }
         $message .= "\t" . 'ID réservation: ' . $resa->reservationId . "\n";
         $message .= "\t" . 'Date: ' . $dateBegin->format('d/m/Y') . ' à ' . $dateBegin->format('H\Hi') . ".\n";
         $message .= "\t" . 'Type de produit: ' . $resa->product->productCode . ".\n";
@@ -468,7 +477,7 @@ class Reservations
                 $mails .= $u['email'];
             }
         }
-        
+
         if ($mails) {
             if ($this->display_debug) {
                 if ($this->debugMails)
@@ -477,6 +486,32 @@ class Reservations
             }
             if (!mailSyn2($subject, $mails, '', $message)) {
                 $this->logError('Echec de l\'envoi du mail de notification (ID réservation: ' . $resa->reservationId . ')');
+            } else if ($this->display_debug) {
+                echo '[OK].<br/>';
+            }
+            $messageClient = "Bonjour,
+Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nous vous confirmons la prise en compte de votre réservation.
+Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre attention sur les points suivants :
+-        Vous devez sauvegarder vos données car nous serons peut-être amenés à les effacer de votre appareil.
+
+-        Le délai de traitement des réparations est habituellement de 7 jours.
+
+ 
+Conditions particulières aux iPhones
+ 
+-        Vous devez désactiver l’option de Géolocalisation de votre téléphone avec votre mot de passe iCloud.
+
+-        Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si vous êtes intéressé, merci de vous munir d’un chèque de caution.
+
+-        Les réparations d’écrans d’iPhones sont directement envoyées chez Apple pour calibrer correctement votre iPhone et nécessitent donc un délai moyen de 10 jours ouvrés.
+
+Nous proposons des services de locations d’appareils pour le hors garantie (sous réserve de disponibilité), de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
+Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.
+Bien cordialement
+L’équipe BIMP";
+            $mailsCli = $customer->email;
+            if ($mailsCli && $mailsCli != "" && !mailSyn2("RDV SAV BIMP", $mailsCli, '', str_replace("\n", "<br/>", $messageClient))) {
+                $this->logError('Echec de l\'envoi du mail au client de notification (ID réservation: ' . $resa->reservationId . ')');
             } else if ($this->display_debug) {
                 echo '[OK].<br/>';
             }

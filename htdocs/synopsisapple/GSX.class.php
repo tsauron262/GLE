@@ -1159,7 +1159,7 @@ class GSX
             $html .= '<p class="error">Erreur(s) de connection: <br/>';
             $i = 1;
             foreach ($tab['init'] as $errorMsg) {
-                $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
+                $html .= $i . '. ' . utf8_encode(str_replace("?????", "'", $errorMsg)) . '.<br/>' . "\n";
                 $i++;
             }
             $html .= '</p>';
@@ -1168,7 +1168,7 @@ class GSX
             $html .= '<p class="error alertJs">Erreur(s) SOAP: <br/>';
             $i = 1;
             foreach ($tab['soap'] as $errorMsg) {
-                $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
+                $html .= $i . '. ' . utf8_encode(str_replace("??????", "'", $errorMsg)) . '.<br/>' . "\n";
                 $i++;
             }
             $html .= '</p>';

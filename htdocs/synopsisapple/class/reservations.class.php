@@ -392,7 +392,7 @@ class Reservations
 
         $dateBegin = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
         $dateEnd = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
-        $dateEnd->add(new DateInterval('PT1H'));
+        $dateEnd->add(new DateInterval('PT2H'));
 //        $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
 //        $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 

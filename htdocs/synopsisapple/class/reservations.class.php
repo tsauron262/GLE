@@ -336,7 +336,7 @@ class Reservations
         $_REQUEST['centre'] = $centre;
 
         // Création SAV:
-        if ($this->$createProductAndChrono) {
+        if ($this->createProductAndChrono) {
             if (isset($resa->product->serialNumber) && !empty($resa->product->serialNumber)) {
                 $id_product = $this->getProductBySerial($resa->product->serialNumber);
                 if (!$id_product) {

@@ -457,6 +457,7 @@ class Reservations
 
         if (isset($customer)) {
             $message .= "\t" . 'Client : ' . $customer->name . ' (' . $customer->email . ').' . "\n";
+            $message .= "\t" . '' . $customer->getNomUrl(1) . "\n";
         }
 
         if (count($resa->notes)) {

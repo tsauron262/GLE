@@ -390,14 +390,14 @@ class Reservations
         $ac->label = 'Réservation GSX';
         $ac->transparency = 1;
 
-        $dateBegin = new DateTime($resa->reservationDate,new DateTimeZone("Europe/Paris"));
-        $dateEnd = new DateTime($resa->reservationDate,new DateTimeZone("Europe/Paris"));
+        $dateBegin = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
+        $dateEnd = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
         $dateEnd->add(new DateInterval('PT1H'));
         $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
         $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 
-        $ac->datep = $dateBegin->format('Y-m-d H:i:s');
-        $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+//        $ac->datep = $dateBegin->format('Y-m-d H:i:s');
+//        $ac->datef = $dateEnd->format('Y-m-d H:i:s');
 
         $usersAssigned = array();
         foreach ($users as $u)

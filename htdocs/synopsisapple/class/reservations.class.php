@@ -390,8 +390,8 @@ class Reservations
         $ac->label = 'Réservation GSX';
         $ac->transparency = 1;
 
-        $dateBegin = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
-        $dateEnd = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
+        $dateBegin = new DateTime($resa->reservationDate);
+        $dateEnd = new DateTime($resa->reservationDate);
         $dateEnd->add(new DateInterval('PT1H'));
         $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
         $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));

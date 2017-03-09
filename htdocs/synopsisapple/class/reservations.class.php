@@ -393,11 +393,11 @@ class Reservations
         $dateBegin = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
         $dateEnd = new DateTime($resa->reservationDate, new DateTimeZone("GMT"));
         $dateEnd->add(new DateInterval('PT1H'));
-        $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
-        $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
+//        $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
+//        $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));
 
-//        $ac->datep = $dateBegin->format('Y-m-d H:i:s');
-//        $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+        $ac->datep = $dateBegin->format('Y-m-d H:i:s');
+        $ac->datef = $dateEnd->format('Y-m-d H:i:s');
 
         $usersAssigned = array();
         foreach ($users as $u)
@@ -567,7 +567,7 @@ L’équipe BIMP";
                             }
                             $continue = true; // Aucune réservation pour la période donnée et le type de produit. 
                             break;
-                        } else if (in_array($fault->code, array('SYS.STR.002', 'SYS.STR.006'))) {
+                        } else if (in_array($fault->code, array('SYS.STR.002', 'SYS.STR.006', 'SYS.STR.005'))) {
                             if ($this->display_debug) {
                                 echo '<span class="red">shipTo invalide<br/>' . $fault->message . ' (code: ' . $fault->code . ').</span>';
                             }

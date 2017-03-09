@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/client.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class Reservations
 {

@@ -11,7 +11,7 @@ class Reservations
 {
 
     // Active tous les echos et désactive les logs: 
-    var $display_debug = true;
+    var $display_debug = false;
     // mettre à false pour envoyer les mails aux bons destinataires:
     var $debugMails = false;
     public $createProductAndChrono = false;
@@ -60,7 +60,7 @@ class Reservations
             if ($this->display_debug)
                 echo 'Chargement de la liste des shipto OK<br/>';
         } else {
-            $this->logError('Echec du chargement des couples shipTo / soldTo - ' . $this->db->lasterror());
+            $this->logError('Echec du chargement des couples shipTo / soldTo - ' . $this->db->lasterror(),3);
         }
 
         foreach ($numbers as $n) {

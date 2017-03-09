@@ -362,7 +362,7 @@ class GSX
         
 
         if ($_gsxDetailsArray['serviceAccountNoShipTo'] == '') {
-            $this->errors['init'][] = 'Service Account Number ShipTo is blank';
+            $this->gsxDetails['serviceAccountNoShipTo'] = $this->gsxDetails['serviceAccountNo'];//shipto = sold to si pas de soldto
         } else {
             $this->gsxDetails['serviceAccountNoShipTo'] = $_gsxDetailsArray['serviceAccountNoShipTo'];
         }

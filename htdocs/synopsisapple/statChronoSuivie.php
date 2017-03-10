@@ -13,7 +13,7 @@ $requete = "SELECT c.id, c.ref FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, " 
 $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
 if($centre)
     $requete .= " AND Centre IN ('" . $centre . "') ";
-$requete .= " AND DATEDIFF(now(), f.`date_valid`) > 2 AND DATEDIFF(now(), f.`date_valid`) < 7 ORDER BY DATEDIFF(now(), f.`date_valid`) DESC";
+$requete .= " AND DATEDIFF(now(), f.`date_valid`) > 2 AND DATEDIFF(now(), f.`date_valid`) < 7 ORDER BY f.`date_valid`, f.rowid DESC";
 
 $sql = $db->query($requete);
 

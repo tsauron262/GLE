@@ -406,10 +406,10 @@
         </values>
     </def>
     
-    <def name="length" type="text">
+    <def name="length" type="text" val="2">
         <label>Longeur</label>
     </def>
-    <def name="width" type="text">
+    <def name="width" type="text" value="4">
         <label>Largeur</label>
     </def>
     <def name="height" type="text">

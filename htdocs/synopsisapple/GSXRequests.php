@@ -214,7 +214,7 @@ class GSX_Request {
                     foreach ($dataNodes as $node) {
                         $html .= $this->getDataInput($node, $serial, null, 'idx');
                     }
-                    $html .= print_r($dataNodes."<br/>",true);
+                    $html .= print_r($dataNodes."<br/>",true)."ppppppppppppppp";
                     $html .= '</div>' . "\n";
                     $html .= '<div class="inputsList">' . "\n";
                     $html .= '<div class="subInputsList">' . "\n";

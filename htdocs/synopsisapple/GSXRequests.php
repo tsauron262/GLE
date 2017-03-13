@@ -209,7 +209,6 @@ class GSX_Request {
             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
             if (count($subDatasNode) == 1) {
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                    $html .= print_r($dataNodes."<br/>",true)."ppppppppppppppp";
                 if ($multiple) {
                     $html .= '<div class="dataInputTemplate">' . "\n";
                     foreach ($dataNodes as $node) {
@@ -226,6 +225,7 @@ class GSX_Request {
                     $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="2"/>' . "\n";
                 } else {
                     foreach ($dataNodes as $node) {
+                    $html .= print_r($dataNodes."<br/>",true)."ppppppppppppppp".$node;
                         $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, $index);
                     }
                 }

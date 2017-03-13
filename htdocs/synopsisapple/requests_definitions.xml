@@ -206,7 +206,7 @@
     
     
     
-    <request name="RegisterPartsForWHUBulkReturn" type="repair" request="WHUBulkPartsRegistrationRequest" wrapper="bulkPartsRegistrationRequest">
+    <request name="RegisterPartsForWHUBulkReturn" type="repair" request="RegisterPartsForWHUBulkReturnRequest" wrapper="WHUBulkPartsRegistrationRequest">
         <label>Création d'un retour WHU</label>
         <datas>
             <data name="shipToCode" required="1"></data>

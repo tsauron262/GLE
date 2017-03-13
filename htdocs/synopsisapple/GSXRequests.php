@@ -225,7 +225,7 @@ class GSX_Request {
                     $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="2"/>' . "\n";
                 } else {
                     foreach ($dataNodes as $node) {
-                    $html .= "<br/>"."ppppppppppppppp".$node;
+                    $html .= "<br/>"."ppppppppppppppp".print_r($node,1);
                         $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, $index);
                     }
                 }

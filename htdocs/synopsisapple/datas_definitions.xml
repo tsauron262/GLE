@@ -367,4 +367,62 @@
         </values>
     </def>
     
+    
+    
+    
+    
+    <def name="shipToCode" type="text" max="10" jsCheck="text">
+        <label>Numéro "Ship to"</label>
+    </def>
+    <def name="carrierCode" type="select">
+        <label>Expéditeur</label>
+        <values>
+            <val val="XUPSN">UPS</val>
+            <val val="XAER">Aero 2000</val>
+            <val val="XAIRBEC">Airborne</val>
+            <val val="XARM">Aramex</val>
+            <val val="XOZP">Australia Post</val>
+            <val val="XBAX">BAX GLOBAL PTE LTD</val>
+            <val val="XCPW">CPW Internal</val>
+            <val val="XCL">Citylink</val>
+            <val val="XDHL">DHL</val>
+            <val val="XDZNA">Danzas-AEI</val>
+            <val val="XEAS">EAS</val>
+            <val val="XEGL">Eagle ASIA PACIFIC HOLDINGS</val>
+            <val val="XEXXN">Exel</val>
+            <val val="XFEDE">FedEx</val>
+            <val val="XFDE">FedEx Air</val>
+            <val val="XGLS">GLS-General Logistics Systems</val>
+            <val val="XHNF">H and Friends</val>
+            <val val="XNGLN">Nightline</val>
+            <val val="XPL">Parceline</val>
+            <val val="XPRLA">Purolator</val>
+            <val val="SDS">SDS An Post</val>
+            <val val="XSNO">Seino Transportation Co.,Ltd.</val>
+            <val val="XSTE">Star Track Express</val>
+            <val val="XTNT">TNT</val>
+            <val val="XUTI">UTi (Japan) K.K.</val>
+            <val val="XYMT">YAMATO</val>
+        </values>
+    </def>
+    
+    <def name="length" type="text">
+        <label>Longeur</label>
+    </def>
+    <def name="width" type="text">
+        <label>Largeur</label>
+    </def>
+    <def name="height" type="text">
+        <label>Hauteur</label>
+    </def>
+    <def name="estimatedTotalWeight" type="text">
+        <label>Poids</label>
+    </def>
+    <def name="kbbNotaFiscalNumber" type="text">
+        <label>Numéro fiscal</label>
+    </def>
+    
+    <def name="WHUBulkReturnOrder" type="datasGroup">
+        <label>Composants</label>
+    </def>
 </root>

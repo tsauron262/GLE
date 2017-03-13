@@ -220,9 +220,10 @@
             <data name="kbbNotaFiscalNumber" required="1"></data>
             <data name="WHUBulkReturnOrder" required="1">
                 <datas>
-                    <data name="kbbNotaFiscalNumber" required="1"></data>
-                    <data name="kbbNotaFiscalNumber" required="1"></data>
-                    <data name="kbbNotaFiscalNumber" required="1"></data>                    
+                    <data name="dispatchId" required="1"></data>
+                    <data name="returnOrderNumber" required="0"></data>
+                    <data name="partNumber" required="1"></data>     
+                    <data name="boxNumber" required="0"></data>                    
                 </datas>
             </data>
             

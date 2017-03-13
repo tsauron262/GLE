@@ -691,8 +691,8 @@ class gsxDatas
                         $cart->loadCart();
                         foreach($cart->partsCart as $part){
                             $tabT['partNumber'] = $part->partNumber;
-                        }
                         $valDef['WHUBulkReturnOrder'][] = $tabT;
+                        }
                     }
                     
                     

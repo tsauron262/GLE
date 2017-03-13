@@ -55,7 +55,7 @@
     </request>-->
 
 
-    <request name="RegisterPartsForWHUBulkReturn" type="repair" request="RegisterPartsForWHUBulkReturnRequest" wrapper="repairData">
+    <request name="CreateCarryInRepair" type="repair" request="CreateCarryInRequest" wrapper="repairData">
         <label>Création d'une réparation en magasin (carry-in repair)</label>
         <datas>
             <data name="diagnosedByTechId" required="1"></data>
@@ -206,7 +206,7 @@
     
     
     
-    <request name="registerPartsForBulkReturnRequestType" type="repair" request="RegisterPartsForWHUBulkReturnRequest" wrapper="bulkPartsRegistrationRequest">
+    <request name="RegisterPartsForWHUBulkReturn" type="repair" request="RegisterPartsForWHUBulkReturnRequest" wrapper="bulkPartsRegistrationRequest">
         <label>Création d'un retour WHU</label>
         <datas>
             <data name="shipToCode" required="1"></data>

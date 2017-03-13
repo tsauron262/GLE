@@ -217,7 +217,7 @@
             <data name="height" required="1"></data>
             <data name="estimatedTotalWeight" required="1"></data>
             <data name="notes" required="0"></data>
-            <data name="kbbNotaFiscalNumber" required="1"></data>
+            <data name="kbbNotaFiscalNumber" required="0"></data>
             <data name="WHUBulkReturnOrder" required="1" multiple="1">
                 <datas>
                     <data name="dispatchId" required="1"></data>

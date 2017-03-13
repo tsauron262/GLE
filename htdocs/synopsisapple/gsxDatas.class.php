@@ -690,7 +690,7 @@ class gsxDatas
                         $cart = new partsCart($db, null, $chronoId);
                         $cart->loadCart();
                         foreach($cart->partsCart as $part){
-                            $tabT['partNumber'] = $part->partNumber;
+                            $tabT['partNumber'] = $part['partNumber'];
                         $valDef['WHUBulkReturnOrder'][] = $tabT;
                         }
                     }

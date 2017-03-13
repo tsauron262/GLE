@@ -216,7 +216,6 @@ class GSX_Request {
                     $values[$valuesName][0] = $values[$valuesName];
                 
                 
-                $newValues = isset($values[$valuesName]) ? (isset($values[$valuesName][0]) ? $values[$valuesName][0] : $values[$valuesName]) : null;
                 if ($multiple) {
                     $html .= '<div class="dataInputTemplate">' . "\n";
                     foreach ($dataNodes as $node) {
@@ -229,7 +228,7 @@ class GSX_Request {
                     foreach($values[$valuesName] as $values2){
                         $i++;
                         foreach ($dataNodes as $node) {
-                            $html .= $this->getDataInput($node, $serial, $newValues, $i);
+                            $html .= $this->getDataInput($node, $serial, $values2, $i);
                         }
                     }
                     $html .= '</div>' . "\n";

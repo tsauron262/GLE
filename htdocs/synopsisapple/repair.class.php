@@ -363,7 +363,7 @@ class Repair
             'repairStatus' => '',
             'repairType' => '',
             'serialNumber' => '',
-            'shipToCode' => '',
+            'shipToCode' => '8888777',
             'soldToReferenceNumber' => '',
             'technicianFirstName' => '',
             'technicianLastName' => '',
@@ -587,7 +587,7 @@ class Repair
             'serialNumbers' => array(
                 'serialNumber' => ''
             ),
-            'shipToCode' => 'vvv',
+            'shipToCode' => '44434',
             'customerFirstName' => '',
             'customerLastName' => '',
             'customerEmailAddress' => '',

@@ -5,7 +5,8 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/repair.class.php';
 class gsxDatas
 {
 
-    private $tabReqForceApple = array("CreateIPhoneRepairOrReplace");
+    private $tabReqForceIphone = array("CreateIPhoneRepairOrReplace");
+    private $tabReqForceNonIphone = array("RegisterPartsForWHUBulkReturn");
     private $userExchangePrice = true;
     public $gsx = null;
     public $connect = false;
@@ -38,9 +39,6 @@ class gsxDatas
     {
         global $user;
 
-        if (in_array($requestType, $this->tabReqForceApple)) {
-            $this->isIphone = true;
-        }
 
         if (defined('PRODUCTION_APPLE') && PRODUCTION_APPLE)
             self::$apiMode = 'production';
@@ -81,6 +79,14 @@ class gsxDatas
         }
 
         $this->setSerial($serial);
+        
+        
+        if (in_array($requestType, $this->tabReqForceIphone)) {
+            $this->isIphone = true;
+        }
+        if (in_array($requestType, $this->tabReqForceNonIphone)) {
+            $this->isIphone = false;
+        }
 
         $this->gsx = new GSX($details, $this->isIphone, self::$apiMode);
         if (count($this->gsx->errors['init']) || count($this->gsx->errors['soap'])) {

@@ -425,4 +425,10 @@
     <def name="WHUBulkReturnOrder" type="datasGroup">
         <label>Composants</label>
     </def>
+    <def name="dispatchId" type="text">
+        <label>Id Dispatch</label>
+    </def>
+    <def name="boxNumber" type="text">
+        <label>Numéro boite</label>
+    </def>
 </root>

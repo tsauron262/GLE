@@ -772,6 +772,7 @@ class GsxUps
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
                     $html .= '<td class="partReturnDate">' . (isset($date) ? $date->format('d / m / Y') : 'non spécifiée') . '</td>' . "\n";
+                    $html .= '<td class="vendorName">' . $p['vendorName'] . '</td>' . "\n";
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
                     $html .= '<input type="hidden" class="partDateValue" value="' . (isset($date) ? $date->format('Ymd') : '00000000') . '" />' . "\n";
                     $html .= '</tr>' . "\n";
@@ -846,7 +847,8 @@ class GsxUps
                     'serial' => $part['serialNumber'],
                     'returnOrderNumber' => $part['returnOrderNumber'],
                     'poNumber' => $part['purchaseOrderNumber'],
-                    'expectedReturnDate' => $part['expectedReturnDate']
+                    'expectedReturnDate' => $part['expectedReturnDate'],
+                    'vendorName' => $part['vendorName']
                 );
             }
         }

@@ -686,13 +686,12 @@ class gsxDatas
                     foreach($this->repairs as $repair){
                         $tabT = array();
                         $tabT['dispatchId'] = $repair->confirmNumbers['repair'];
-                        $tabT['partNumber'] = "lllllll";
-                        $valDef['WHUBulkReturnOrder'][] = $tabT;
-                    }
-                    foreach($this->repairs as $repair){
-                        $tabT = array();
-                        $tabT['dispatchId'] = $repair->confirmNumbers['repair'];
-                        $tabT['partNumber'] = "llllfffffffffffffflll";
+                        
+                        $cart = new partsCart($db, null, $chronoId);
+                        $cart->loadCart();
+                        foreach($cart->partsCart as $part){
+                            $tabT['partNumber'] = $part->partNumber;
+                        }
                         $valDef['WHUBulkReturnOrder'][] = $tabT;
                     }
                     

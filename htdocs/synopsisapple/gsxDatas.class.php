@@ -681,6 +681,14 @@ class gsxDatas
                     $valDef['height'] = "4";
                     $valDef['estimatedTotalWeight'] = "4";
                     
+                    if(count($this->repairs) > 1)
+                        $this->loadRepairs ($chronoId);
+                    foreach($this->repairs as $repair){
+                        $tabT = array();
+                        $tabT['dispatchId'] = $repair->confirmNumbers['repair'];
+                        $valDef['WHUBulkReturnOrder'][] = $tabT;
+                    }
+                    
                     
                     
 //

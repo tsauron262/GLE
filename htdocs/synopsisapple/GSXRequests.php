@@ -161,7 +161,7 @@ class GSX_Request {
     protected function getDataInput($dataNode, $serial, $values = null, $index = null) {
         $name = $dataNode->getAttribute('name');
 
-                    $html .= "<br/>".$name."ppppppppppppppp".print_r($values,1);
+                    $html = "<br/>".$name."ppppppppppppppp".print_r($values,1);
         if ($dataNode->hasAttribute('multiple'))
             $multiple = $dataNode->getAttribute('multiple');
         else
@@ -182,7 +182,7 @@ class GSX_Request {
         if (isset($defs['hidden']) && ($defs['hidden'] == '1'))
             return '';
 
-        $html = '';
+//        $html = '';
 
         $required = $dataNode->getAttribute('required');
         if ($required === '1')

@@ -677,9 +677,9 @@ class gsxDatas
                     //pour les retour
                     $valDef['shipToCode'] = $this->shipTo;
                     $valDef['length'] = "4";
-                    $valDef['width'] = "4";
-                    $valDef['height'] = "4";
-                    $valDef['estimatedTotalWeight'] = "4";
+                    $valDef['width'] = "2";
+                    $valDef['height'] = "1";
+                    $valDef['estimatedTotalWeight'] = "1";
                     
                     if(count($this->repairs) < 1)
                         $this->loadRepairs ($chronoId);

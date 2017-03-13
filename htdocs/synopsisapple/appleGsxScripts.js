@@ -1246,6 +1246,8 @@ function assignInputCheckMsg($input, type, msg) {
     }
 }
 function checkInput($input, type) {
+    if($input.parent().parent().hasClass("dataInputTemplate"))
+        return true;
     var val = $input.val();
     if (!val.length) {
         if ($input.attr('required') !== undefined) {

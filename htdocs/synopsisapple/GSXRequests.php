@@ -232,7 +232,7 @@ class GSX_Request {
                         $html .= '</div>' . "\n";
                     }
                     $html .= '</div>' . "\n";
-                    $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="' . $i + 1 . '"/>' . "\n";
+                    $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="' . ($i + 1) . '"/>' . "\n";
                 } else {
                     foreach ($dataNodes as $node) {
                         $html .= $this->getDataInput($node, $serial, $values[$valuesName][0], $index);

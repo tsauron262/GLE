@@ -206,6 +206,29 @@
     
     
     
+    <request name="RegisterPartsForWHUBulkReturn" type="repair" request="RegisterPartsForWHUBulkReturnRequest" wrapper="bulkPartsRegistrationRequest">
+        <label>Création d'un retour WHU</label>
+        <datas>
+            <data name="shipToCode" required="1"></data>
+            <data name="carrierCode" required="1"></data>
+            <data name="trackingNumber" required="1"></data>
+            <data name="length" required="1"></data>
+            <data name="width" required="1"></data>
+            <data name="height" required="1"></data>
+            <data name="estimatedTotalWeight" required="1"></data>
+            <data name="notes" required="0"></data>
+            <data name="kbbNotaFiscalNumber" required="1"></data>
+            <data name="WHUBulkReturnOrder" required="1">
+                <datas>
+                    <data name="kbbNotaFiscalNumber" required="1"></data>
+                    <data name="kbbNotaFiscalNumber" required="1"></data>
+                    <data name="kbbNotaFiscalNumber" required="1"></data>                    
+                </datas>
+            </data>
+            
+        </datas>
+    </request>
+    
     <request name="CreateIPhoneRepairOrReplace" type="repair" request="CreateIPhoneRepairOrReplaceRequest" wrapper="repairData">
         <label>Création d'une réparation ou d'un remplacement d'iPhone (IPhone Repair Or Replace)</label>
         <datas>
@@ -373,7 +396,7 @@
         </datas>
     </request>-->
 
-<!--    <request name="CreateIndirectOnsiteRepair" type="repair" request="CreateIndirectOnsiteRepairRequest" wrapper="repairData">
+    <!--    <request name="CreateIndirectOnsiteRepair" type="repair" request="CreateIndirectOnsiteRepairRequest" wrapper="repairData">
         <label>Création d'une réparation indirecte sur place (indirect onsite repair)</label>
         <datas>
             <data name="technicianName" required="1"></data>

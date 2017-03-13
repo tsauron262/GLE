@@ -161,7 +161,6 @@ class GSX_Request {
     protected function getDataInput($dataNode, $serial, $values = null, $index = null) {
         $name = $dataNode->getAttribute('name');
 
-                    $html = "<br/>".$name."ppppppppppppppp".print_r($values,1);
         if ($dataNode->hasAttribute('multiple'))
             $multiple = $dataNode->getAttribute('multiple');
         else
@@ -182,7 +181,7 @@ class GSX_Request {
         if (isset($defs['hidden']) && ($defs['hidden'] == '1'))
             return '';
 
-//        $html = '';
+        $html = '';
 
         $required = $dataNode->getAttribute('required');
         if ($required === '1')
@@ -210,6 +209,7 @@ class GSX_Request {
             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
             if (count($subDatasNode) == 1) {
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                $newValues = isset($values[$valuesName]) ? (isset($values[$valuesName][0]) ? $values[$valuesName][0] : $values[$valuesName]) : null;
                 if ($multiple) {
                     $html .= '<div class="dataInputTemplate">' . "\n";
                     foreach ($dataNodes as $node) {
@@ -219,14 +219,14 @@ class GSX_Request {
                     $html .= '<div class="inputsList">' . "\n";
                     $html .= '<div class="subInputsList">' . "\n";
                     foreach ($dataNodes as $node) {
-                        $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, 1);
+                        $html .= $this->getDataInput($node, $serial, $newValues, 1);
                     }
                     $html .= '</div>' . "\n";
                     $html .= '</div>' . "\n";
                     $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="2"/>' . "\n";
                 } else {
                     foreach ($dataNodes as $node) {
-                        $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, $index);
+                        $html .= $this->getDataInput($node, $serial, $newValues, $index);
                     }
                 }
             } else {

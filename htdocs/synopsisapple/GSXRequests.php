@@ -209,13 +209,12 @@ class GSX_Request {
             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
             if (count($subDatasNode) == 1) {
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                if(!isset($values[$valuesName])){
+                if (!isset($values[$valuesName])) {
                     $values[$valuesName][0] = null;
-                }
-                elseif(!isset($values[$valuesName][0]))
+                } elseif (!isset($values[$valuesName][0]))
                     $values[$valuesName][0] = $values[$valuesName];
-                
-                
+
+
                 if ($multiple) {
                     $html .= '<div class="dataInputTemplate">' . "\n";
                     foreach ($dataNodes as $node) {
@@ -223,17 +222,17 @@ class GSX_Request {
                     }
                     $html .= '</div>' . "\n";
                     $html .= '<div class="inputsList">' . "\n";
-                    $html .= '<div class="subInputsList">' . "\n";
                     $i = 0;
-                    foreach($values[$valuesName] as $values2){
+                    foreach ($values[$valuesName] as $values2) {
+                        $html .= '<div class="subInputsList">' . "\n";
                         $i++;
                         foreach ($dataNodes as $node) {
                             $html .= $this->getDataInput($node, $serial, $values2, $i);
                         }
+                        $html .= '</div>' . "\n";
                     }
                     $html .= '</div>' . "\n";
-                    $html .= '</div>' . "\n";
-                    $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="'. $i+1 .'"/>' . "\n";
+                    $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="' . $i + 1 . '"/>' . "\n";
                 } else {
                     foreach ($dataNodes as $node) {
                         $html .= $this->getDataInput($node, $serial, $values[$valuesName][0], $index);
@@ -287,7 +286,7 @@ class GSX_Request {
                             $html .= '<br/>' . "\n";
                             $html .= '<textarea cols="80" rows="10" ';
                         }
-                        $html .= ' class="'.$valuesName.'" id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
+                        $html .= ' class="' . $valuesName . '" id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
 
                         if ($defs['type'] != 'textarea') {
                             if (isset($values[$valuesName]))
@@ -312,7 +311,7 @@ class GSX_Request {
 
                     case 'select':
                         if (isset($defs['values'])) {
-                            $html .= '<select class="'.$valuesName.'" name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' );
+                            $html .= '<select class="' . $valuesName . '" name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' );
                             if ($name == 'comptiaGroup')
                                 $html .= ' onchange="onComptiaGroupSelect($(this));"';
                             $html .= '>';
@@ -321,7 +320,7 @@ class GSX_Request {
                                 $html .= '<option value="' . $v . '"';
                                 if (isset($values[$valuesName])) {
                                     if ($values[$valuesName] == $v)
-                                        $html.= ' selected';
+                                        $html .= ' selected';
                                 } else if (isset($default)) {
                                     if ($default == $v)
                                         $html .= ' selected';
@@ -350,7 +349,7 @@ class GSX_Request {
                         break;
 
                     case 'fileSelect':
-                        $html .= '<input type="file" class="'.$valuesName.'" id="' . $inputName . '" name="' . $inputName . '"/>';
+                        $html .= '<input type="file" class="' . $valuesName . '" id="' . $inputName . '" name="' . $inputName . '"/>';
                         break;
 
                     case 'partsList':
@@ -454,7 +453,7 @@ class GSX_Request {
                                     $html .= '<option value="' . $code . '" class="comptiaGroup_' . $compCode . '"';
                                     if (isset($values[$valuesName])) {
                                         if ($values[$valuesName] == $code)
-                                            $html.= ' selected';
+                                            $html .= ' selected';
                                     }
                                     if ($compCode != '0') {
                                         $html .= ' style="display: none"';
@@ -476,7 +475,7 @@ class GSX_Request {
                                     $html .= '<option value="' . $code . '"';
                                     if (isset($values[$valuesName])) {
                                         if ($values[$valuesName] == $code)
-                                            $html.= ' selected';
+                                            $html .= ' selected';
                                     }
                                     $html .= '>' . $code . ' - ' . $desc . '</option>';
                                 }
@@ -499,7 +498,7 @@ class GSX_Request {
                                 $html .= '<option value="' . $mod . '"';
                                 if (isset($values[$valuesName])) {
                                     if ($values[$valuesName] == $mod)
-                                        $html.= ' selected';
+                                        $html .= ' selected';
                                 }
                                 $html .= '>' . $mod . ' - ' . $desc . '</option>';
                             }
@@ -520,7 +519,7 @@ class GSX_Request {
                                 $html .= '<option value="' . $mod . '"';
                                 if (isset($values[$valuesName])) {
                                     if ($values[$valuesName] == $mod)
-                                        $html.= ' selected';
+                                        $html .= ' selected';
                                 }
                                 $html .= '>' . $mod . ' - ' . $desc . '</option>';
                             }
@@ -537,7 +536,7 @@ class GSX_Request {
                                 $html .= '<option value="' . $mod . '"';
                                 if (isset($values[$valuesName])) {
                                     if ($values[$valuesName] == $mod)
-                                        $html.= ' selected';
+                                        $html .= ' selected';
                                 }
                                 $html .= '>' . $mod . ' - ' . $desc . '</option>';
                             }
@@ -617,7 +616,7 @@ class GSX_Request {
 
 
         if ($this->requestName == "CreateIPhoneRepairOrReplace") {
-            $contFile = file_get_contents(DOL_DOCUMENT_ROOT."/synopsisapple/TierParts.csv");
+            $contFile = file_get_contents(DOL_DOCUMENT_ROOT . "/synopsisapple/TierParts.csv");
             $tab1 = explode("\n", $contFile);
             foreach ($tab1 as $ligne) {
                 $champ = explode(";", $ligne);
@@ -626,20 +625,20 @@ class GSX_Request {
 
             global $db;
             $tab3 = array(array("", "Part", "Tier Part"));
-            $sql = $db->query("SELECT `description` as nom FROM `".MAIN_DB_PREFIX."synopsischrono` c, ".MAIN_DB_PREFIX."synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '".$serial."'");
-            if($db->num_rows($sql) > 0){
+            $sql = $db->query("SELECT `description` as nom FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '" . $serial . "'");
+            if ($db->num_rows($sql) > 0) {
                 $result = $db->fetch_object($sql);
                 $tab3 = array_merge($tab3, $tab2[$result->nom]);
             }
-            if (count($tab3) == 1){
+            if (count($tab3) == 1) {
                 foreach ($tab2 as $tabT)
-                    foreach($tabT as $tabT2)
-                        $tab3[] =$tabT2;
+                    foreach ($tabT as $tabT2)
+                        $tab3[] = $tabT2;
             }
             $i = 100;
 
             $html .= "<div class='partDatasBlockHide'>";
-            $html .= "<select class='tierPart' name='partNumber_".$i."'>";
+            $html .= "<select class='tierPart' name='partNumber_" . $i . "'>";
             foreach ($tab3 as $ligne)
                 $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
             $html .= "</select></div>";
@@ -758,8 +757,7 @@ class GSX_Request {
                                             $valuesArray[] = $default;
                                         } else if ($required) {
                                             $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
-                                        }
-                                        else
+                                        } else
                                             $valuesArray[] = "";
                                     }
                                     $datas[$dataName] = $valuesArray;
@@ -772,9 +770,8 @@ class GSX_Request {
                                         $datas[$dataName] = $default;
 //                                    } else if ($required) {
 //                                        $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
-                                    }
-                                        else
-                                            $datas[$dataName] = "";
+                                    } else
+                                        $datas[$dataName] = "";
                                 }
                             }
                         } else {

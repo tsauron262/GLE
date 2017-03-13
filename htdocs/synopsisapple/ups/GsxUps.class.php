@@ -755,7 +755,7 @@ class GsxUps
             $html .= '<th id="partSroNumber_title" class="sortable desc numeric" onclick="onSortableClick($(this))"><span>N° de réparation</span><span class="arrow"></span></th>' . "\n";
             $html .= '<th id="partSerial_title" class="sortable desc" onclick="onSortableClick($(this))"><span>N° de série du produit</span><span class="arrow"></span></th>' . "\n";
             $html .= '<th id="partDateValue_title" class="sortable desc useInput" onclick="onSortableClick($(this))"><span>Date de retour attendue</span><span class="arrow"></span></th>';
-            $html .= '<th id="partDateValue_title" class="sortable desc useInput" onclick="onSortableClick($(this))"><span>Distinataire</span><span class="arrow"></span></th>';
+            $html .= '<th id="vendorName_title" class="sortable desc" onclick="onSortableClick($(this))"><span>Distinataire</span><span class="arrow"></span></th>';
             $html .= '</tr></thead><tbody>' . "\n";
             $odd = false;
             $i = 1;

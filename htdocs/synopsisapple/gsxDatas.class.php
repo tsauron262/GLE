@@ -939,6 +939,25 @@ class gsxDatas
                         }
                         break;
 
+                    case 'RegisterPartsForWHUBulkReturn':
+                        if (isset($responseName) && isset($response[$responseName]['WHUBulkPartsRegistrationData'])) {
+                            $datas = $response[$responseName]['WHUBulkPartsRegistrationData'];
+                            $direName = '/synopsischrono/' . $_REQUEST['chronoId'] . '';
+                            $fileNamePure = str_replace("/", "_", $datas['packingListFileName']);
+                            if (!is_dir(DOL_DATA_ROOT . $direName))
+                                mkdir(DOL_DATA_ROOT . $direName);
+                            $fileName = $direName . "/" . $fileNamePure;
+    //                        die(DOL_DATA_ROOT . $fileName);
+                            if (!file_exists(DOL_DATA_ROOT . $fileName)) {
+                                if (file_put_contents(DOL_DATA_ROOT . $fileName, $datas['packingList']) === false)
+                                    $fileName = null;
+                                $ok = true;
+                            }
+                        } else {
+                            $html .= '<p class="error">Une Erreur est survenue: aucun documents retourné par Apple</p>';
+                        }
+                        break;
+
                     case 'KGBSerialNumberUpdate':
 //                        echo '<pre>';
 //                        print_r($response);

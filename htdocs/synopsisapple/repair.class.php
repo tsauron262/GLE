@@ -587,7 +587,7 @@ class Repair
             'serialNumbers' => array(
                 'serialNumber' => ''
             ),
-            'shipToCode' => '',
+            'shipToCode' => 'vvv',
             'customerFirstName' => '',
             'customerLastName' => '',
             'customerEmailAddress' => '',

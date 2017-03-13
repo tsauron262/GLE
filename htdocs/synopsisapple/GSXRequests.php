@@ -208,13 +208,13 @@ class GSX_Request {
 
             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
             if (count($subDatasNode) == 1) {
+                    $html .= print_r($dataNodes."<br/>",true)."ppppppppppppppp";
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
                 if ($multiple) {
                     $html .= '<div class="dataInputTemplate">' . "\n";
                     foreach ($dataNodes as $node) {
                         $html .= $this->getDataInput($node, $serial, null, 'idx');
                     }
-                    $html .= print_r($dataNodes."<br/>",true)."ppppppppppppppp";
                     $html .= '</div>' . "\n";
                     $html .= '<div class="inputsList">' . "\n";
                     $html .= '<div class="subInputsList">' . "\n";

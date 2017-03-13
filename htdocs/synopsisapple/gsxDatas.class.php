@@ -639,12 +639,12 @@ class gsxDatas
         $valDef = array();
         $valDef['serialNumber'] = $this->serial;
 
-        switch ($requestType) {
-            case 'CreateCarryInRepair':
-            case 'CreateMailInRepair':
-            case 'CreateIndirectOnsiteRepair':
-            case 'CreateIPhoneRepairOrReplace':
-            case 'CreateWholeUnitExchange':
+//        switch ($requestType) {
+//            case 'CreateCarryInRepair':
+//            case 'CreateMailInRepair':
+//            case 'CreateIndirectOnsiteRepair':
+//            case 'CreateIPhoneRepairOrReplace':
+//            case 'CreateWholeUnitExchange':
                 if (isset($chronoId)) {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
                     $chrono = new Chrono($db);
@@ -671,6 +671,18 @@ class gsxDatas
                     $valDef['soldToContactPhone'] = $tech->office_phone;
                     $valDef['poNumber'] = $chrono->ref;
                     $valDef['purchaseOrderNumber'] = $chrono->ref;
+                    
+                    
+                    
+                    //pour les retour
+                    $valDef['shipToCode'] = $this->shipTo;
+                    $valDef['length'] = "4";
+                    $valDef['width'] = "4";
+                    $valDef['height'] = "4";
+                    $valDef['estimatedTotalWeight'] = "4";
+                    
+                    
+                    
 //
 ////        echo "<pre>"; print_r($chrono->contact);
 //        print_r($chrono->extraValue);
@@ -723,8 +735,8 @@ class gsxDatas
                             $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
                     }
                 }
-                break;
-        }
+//                break;
+//        }
 
 //            $valDef['repairConfirmationNumbers'] = $this->confirmNumbers['repair'];
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);

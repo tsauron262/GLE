@@ -687,7 +687,13 @@ class gsxDatas
                         $tabT = array();
                         $tabT['dispatchId'] = $repair->confirmNumbers['repair'];
                         $tabT['partNumber'] = "lllllll";
-                        $valDef['WHUBulkReturnOrder'] = $tabT;
+                        $valDef['WHUBulkReturnOrder'][] = $tabT;
+                    }
+                    foreach($this->repairs as $repair){
+                        $tabT = array();
+                        $tabT['dispatchId'] = $repair->confirmNumbers['repair'];
+                        $tabT['partNumber'] = "llllfffffffffffffflll";
+                        $valDef['WHUBulkReturnOrder'][] = $tabT;
                     }
                     
                     

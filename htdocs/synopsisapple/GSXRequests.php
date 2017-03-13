@@ -209,6 +209,13 @@ class GSX_Request {
             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
             if (count($subDatasNode) == 1) {
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                if(!isset($values[$valuesName])){
+                    $values[$valuesName][0] = null;
+                }
+                elseif(!isset($values[$valuesName][0]))
+                    $values[$valuesName][0] = $values[$valuesName];
+                
+                
                 $newValues = isset($values[$valuesName]) ? (isset($values[$valuesName][0]) ? $values[$valuesName][0] : $values[$valuesName]) : null;
                 if ($multiple) {
                     $html .= '<div class="dataInputTemplate">' . "\n";
@@ -218,15 +225,19 @@ class GSX_Request {
                     $html .= '</div>' . "\n";
                     $html .= '<div class="inputsList">' . "\n";
                     $html .= '<div class="subInputsList">' . "\n";
-                    foreach ($dataNodes as $node) {
-                        $html .= $this->getDataInput($node, $serial, $newValues, 1);
+                    $i = 0;
+                    foreach($values[$valuesName] as $values2){
+                        $i++;
+                        foreach ($dataNodes as $node) {
+                            $html .= $this->getDataInput($node, $serial, $newValues, $i);
+                        }
                     }
                     $html .= '</div>' . "\n";
                     $html .= '</div>' . "\n";
                     $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="2"/>' . "\n";
                 } else {
                     foreach ($dataNodes as $node) {
-                        $html .= $this->getDataInput($node, $serial, $newValues, $index);
+                        $html .= $this->getDataInput($node, $serial, $values[$valuesName][0], $index);
                     }
                 }
             } else {

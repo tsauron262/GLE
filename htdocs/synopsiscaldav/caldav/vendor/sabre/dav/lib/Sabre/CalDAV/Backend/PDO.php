@@ -500,8 +500,14 @@ class PDO extends AbstractBackend {
             $action->location = $calendarData2['LOCATION'];
 
 //            $action->array_options['agendaplus'] = $calendarData;
-        $user = new \User($db);
-        $user->fetch($calendarId);
+        global $USER_CONNECT;
+        if(isset($USER_CONNECT)){
+            $user = $USER_CONNECT;
+        }
+        else{
+            $user = new \User($db);
+            $user->fetch($calendarId);
+        }
 
         $action->type_id = 5;
         global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
@@ -509,9 +515,9 @@ class PDO extends AbstractBackend {
         $objectEtagTemp = $extraData['etag'];
         $objectUriTemp = $objectUri;
         
-        $this->traiteParticipant($action, $calendarData2, $user);
+        $this->traiteParticipant($action, $calendarData2, $calendarId);
         
-        $action->userownerid = $user->id;
+        $action->userownerid = $calendarId;
         $action->percentage = -1;
         $action->add($user);
 
@@ -521,6 +527,8 @@ class PDO extends AbstractBackend {
     public function traiteParticipant($action, $calendarData2, $user){
         global $db;
         $tabMail = array();
+        if(is_object($user))
+            $user = $user->id;
         foreach($calendarData2 as $ligne){
             if(stripos($ligne, "ATTENDEE") !== false){
                 $tabT = explode("mailto:", $ligne);
@@ -534,7 +542,7 @@ class PDO extends AbstractBackend {
             }
         }
         
-        $action->userassigned = array($user->id => array('id' => $user->id));
+        $action->userassigned = array($user => array('id' => $user));
         foreach($tabMail as $mail){
             $mail = str_replace ("\n", "", $mail);
             $mail = str_replace ("\r", "", $mail);
@@ -634,13 +642,21 @@ WHERE  `email` LIKE  '".$mail."'");
                 $action->note = $calendarData2['DESCRIPTION'];
             if (isset($calendarData2['LOCATION']))
                 $action->location = $calendarData2['LOCATION'];
+            
+            $action->userownerid = $calendarId;
 
 //            $action->array_options['agendaplus'] = $calendarData;
-            $user = new \User($db);
-            $user->fetch($calendarId);
+            global $USER_CONNECT;
+            if(isset($USER_CONNECT)){
+                $user = $USER_CONNECT;
+            }
+            else{
+                $user = new \User($db);
+                $user->fetch($calendarId);
+            }
 
 
-            $this->traiteParticipant($action, $calendarData2, $user);
+            $this->traiteParticipant($action, $calendarData2, $calendarId);
             
             $action->update($user);
         }

@@ -79,6 +79,29 @@ abstract class AbstractBasic implements BackendInterface {
             throw new DAV\Exception\NotAuthenticated('Username or password does not match');
         }
         $this->currentUser = $userpass[0];
+        
+        
+        /*md drsi*/
+        if(isset($_SERVER['PATH_INFO'])){
+            $tabT = explode("/", $_SERVER['PATH_INFO']);
+            $userCalendar = strtolower($tabT[2]);
+            global $db;
+            $user = new \User($db);
+            $user->fetch("",$this->currentUser);
+            $user->getrights("agenda");
+            global $USER_CONNECT;
+            $USER_CONNECT = $user;
+            if($user->rights->agenda->allactions->read)
+                $this->currentUser = $userCalendar;
+            
+//            echo "<pre>";
+//            print_r($user);die;
+        }
+        /*fmod drsi*/
+        
+        
+
+
         return true;
     }
 

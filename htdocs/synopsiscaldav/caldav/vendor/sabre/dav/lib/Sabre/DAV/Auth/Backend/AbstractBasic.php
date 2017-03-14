@@ -91,6 +91,8 @@ abstract class AbstractBasic implements BackendInterface {
             $user->getrights("agenda");
             global $USER_CONNECT;
             $USER_CONNECT = $user;
+            if(!isset($user->rights->agenda))
+                return false;
             if($user->rights->agenda->allactions->read)
                 $this->currentUser = $userCalendar;
             

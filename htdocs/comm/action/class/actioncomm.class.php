@@ -204,7 +204,7 @@ class ActionComm extends CommonObject
             return -1;
         }
         
-        if(!$user->rights->agenda->allactions->create && $user->id != $this->userownerid && $user->id != $this->author->id)//Pas le droit de créer celle des autres, on rebascule sur sn propres agenda
+        if(!$user->rights->agenda->allactions->create && $user->id != $this->userownerid)//Pas le droit de créer celle des autres, on rebascule sur sn propres agenda
             $this->userassigned = $user->id; 
         /*fmod drsi*/
         

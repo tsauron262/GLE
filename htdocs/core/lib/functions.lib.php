@@ -631,7 +631,7 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
         $monUrl = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         $oldUrl = (isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : "n/c");
         $nomUser = (is_object($user) && isset($user->login) ? $user->login : "n/c");
-        $message = " | ".$nomUser."\n".$monUrl . " | " . $oldUrl . "\n". $message. "\n";
+        $message = " | ".$nomUser." | ".$_SERVER['HTTP_USER_AGENT']."\n".$monUrl . " | " . $oldUrl . "\n". $message. "\n";
 /*f mod drsi*/
 	if (! empty($level))
 	{

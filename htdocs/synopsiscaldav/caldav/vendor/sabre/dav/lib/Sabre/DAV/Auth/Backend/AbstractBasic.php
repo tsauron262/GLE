@@ -70,7 +70,7 @@ abstract class AbstractBasic implements BackendInterface {
         $userpass = $auth->getUserPass();
         if (!$userpass) {
             $auth->requireLogin();
-            throw new DAV\Exception\NotAuthenticated('No basic authentication headers were found'.print_r($_SERVER, 1));
+            throw new DAV\Exception\NotAuthenticated('No basic authentication headers were found');
         }
 
         // Authenticates the user

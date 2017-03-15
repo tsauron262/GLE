@@ -113,16 +113,11 @@ abstract class AbstractBackend implements BackendInterface {
         $objects = $this->getCalendarObjects($calendarId);
 
         $validator = new \Sabre\CalDAV\CalendarQueryValidator();
-        if(function_exists("dol_syslog"))
-        dol_syslog("Filtre envyée : ".print_r($filters,1),3);
+
         foreach($objects as $object) {
 
             if ($this->validateFilterForObject($object, $filters)) {
                 $result[] = $object['uri'];
-            }
-            else{
-        if(function_exists("dol_syslog"))
-        dol_syslog("rejeté par le Filtre : ".print_r($object,1),3);
             }
 
         }

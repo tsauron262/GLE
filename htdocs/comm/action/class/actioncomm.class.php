@@ -199,7 +199,12 @@ class ActionComm extends CommonObject
         
         
         /*deb mod drsi */ 
-        if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->userownerid && $user->id != $this->author->id)) 
+        if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create){//On a pas le drit de créer ces propres rdv
+            $this->error="Pas le droit de créer ses propres action";
+            return -1;
+        }
+        
+        if(!$user->rights->agenda->allactions->create && $user->id != $this->userownerid && $user->id != $this->author->id)//Pas le droit de créer celle des autres, on rebascule sur sn propres agenda
             $this->userassigned = $user->id; 
         /*fmod drsi*/
         

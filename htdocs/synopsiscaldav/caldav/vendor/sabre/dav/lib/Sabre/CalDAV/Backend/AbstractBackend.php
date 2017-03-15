@@ -119,6 +119,9 @@ abstract class AbstractBackend implements BackendInterface {
             if ($this->validateFilterForObject($object, $filters)) {
                 $result[] = $object['uri'];
             }
+            else{
+        dol_syslog("rejeté par le Filtre : ".print_r($object,1),3);
+            }
 
         }
 

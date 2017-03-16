@@ -2212,8 +2212,11 @@ class User extends CommonObject
                     $info['mailForwardingAddress'] = "";
                 
                 if($domain){
-                    $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","displayedInGlobalAddressBook","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
+                    $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
                     
+                if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
+                    $info['enabledservice'][] = "displayedInGlobalAddressBook";
+                
                     if(isset($info['uid']) && isset($info["mail"])){
 //                        $info['uid'] = $info['uid']."_".$domain;
                         $temp = explode("@", $info["mail"]);

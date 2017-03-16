@@ -805,7 +805,11 @@ class UserGroup extends CommonObject
                 
                 /*mod drsi*/
                 $info ['accountstatus'] = "active";
-                $info ['enabledservice'] = array("mail","deliver","displayedInGlobalAddressBook");
+                $info ['enabledservice'] = array("mail","deliver");
+                
+                if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
+                    $info['enabledservice'][] = "displayedInGlobalAddressBook";
+                
                 if(!defined("LIST_DOMAINE_VALID"))
                     die("Constante LIST_DOMAINE_VALID non definie");
                 if(!defined("DOMAINE_GROUP_ID"))

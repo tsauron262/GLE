@@ -298,7 +298,7 @@
             </data>
             <!--<data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>-->
 
-            <data name="shipper" required="1"></data>
+            <data name="shipper" required="0"></data>
             <data name="shipBox" required="0" default="N"></data>
             <data name="shipUnitToCustomer" required="1" default="N"></data>
             <data name="dataTransferRequired" required="0" default="N"></data>
@@ -311,7 +311,6 @@
             <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
             <data name="reportedSymptomCode" required="1"></data>
             <data name="reportedIssueCode" required="1"></data>
-            <data name="repairStrategy" required="0" default="N"></data>
         </datas>
     </request>
     

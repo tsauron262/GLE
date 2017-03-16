@@ -204,8 +204,8 @@ class ActionComm extends CommonObject
             return -1;
         }
         
-        if(!$user->rights->agenda->allactions->create && $user->id != $this->userownerid)//Pas le droit de créer celle des autres, on rebascule sur sn propres agenda
-            $this->userassigned = $user->id; 
+        if($user->id != $this->userownerid && (!isset($user->rights->agenda->allactions->create) || !$user->rights->agenda->allactions->create))//Pas le droit de créer celle des autres, on rebascule sur sn propres agenda
+            return -1;//$this->userassigned = $user->id; 
         /*fmod drsi*/
         
         // Clean parameters
@@ -632,12 +632,17 @@ class ActionComm extends CommonObject
     function delete($notrigger=0)
     {
         global $user,$langs,$conf;
-
         $error=0;
         
         /* mod drsi */
         if(!$this->id)
             return 0;
+        if(!isset($user->rights->agenda->myactions->delete) || !$user->rights->agenda->myactions->delete)
+            return -100;
+//        print_r($this);
+//        echo $this->authorid ." ". $user->id; die;
+        if($this->authorid != $user->id && $this->userownerid != $user->id && (!isset($user->rights->agenda->allactions->delete) || !$user->rights->agenda->allactions->delete))
+            return -101;
         /*fmod drsi*/
 
         $this->db->begin();

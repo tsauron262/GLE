@@ -109,7 +109,7 @@ class Calendar implements ICalendar, DAV\IProperties, DAVACL\IACL {
 
         $obj = $this->caldavBackend->getCalendarObject($this->calendarInfo['id'],$name);
 
-        if (!$obj) throw new DAV\Exception\NotFound('Calendar object not found');
+        if (!$obj) throw new DAV\Exception\NotFound('Calendar object not found '.$this->calendarInfo['id']." ".$name);
 
         $obj['acl'] = $this->getACL();
         // Removing the irrelivant

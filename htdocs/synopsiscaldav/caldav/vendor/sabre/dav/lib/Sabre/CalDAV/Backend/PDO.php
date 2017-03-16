@@ -500,14 +500,7 @@ class PDO extends AbstractBackend {
             $action->location = $calendarData2['LOCATION'];
 
 //            $action->array_options['agendaplus'] = $calendarData;
-        global $USER_CONNECT;
-        if(isset($USER_CONNECT)){
-            $user = $USER_CONNECT;
-        }
-        else{
-            $user = new \User($db);
-            $user->fetch($calendarId);
-        }
+        $user = $this->getUser($calendarId);
 
         $action->type_id = 5;
         global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
@@ -519,9 +512,22 @@ class PDO extends AbstractBackend {
         
         $action->userownerid = $calendarId;
         $action->percentage = -1;
-        $action->add($user);
+        if($action->add($user) < 1)
+            $this->forbiden();
 
 //        $this->userIdCaldavPlus($calendarId);
+    }
+    
+    public function getUser($calendarId){
+        global $USER_CONNECT;
+        if(isset($USER_CONNECT) && is_object($USER_CONNECT)){
+            $user = $USER_CONNECT;
+        }
+        else{
+            $user = new \User($db);
+            $user->fetch($calendarId);
+        }
+        return $user;
     }
     
     public function traiteParticipant($action, $calendarData2, $user){
@@ -646,19 +652,14 @@ WHERE  `email` LIKE  '".$mail."'");
             $action->userownerid = $calendarId;
 
 //            $action->array_options['agendaplus'] = $calendarData;
-            global $USER_CONNECT;
-            if(isset($USER_CONNECT)){
-                $user = $USER_CONNECT;
-            }
-            else{
-                $user = new \User($db);
-                $user->fetch($calendarId);
-            }
+            
+            $user = $this->getUser($calendarId);
 
 
             $this->traiteParticipant($action, $calendarData2, $calendarId);
             
-            $action->update($user);
+            if($action->update($user) < 1)
+                $this->forbiden ();
         }
 
         return '"' . $extraData['etag'] . '"';
@@ -820,14 +821,20 @@ WHERE  `email` LIKE  '".$mail."'");
         if (!$row)
             return null;
 
-        global $db, $conf, $user;
-        $user = new \User($db);
-        $user->fetch($calendarId);
+        global $db, $user;
+        $user = $this->getUser($calendarId);
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
         $action->fetch($row['id']);
-        $action->delete();
+        if($action->delete() < 1)
+            $this->forbiden();
 //        $this->userIdCaldavPlus($calendarId);
+    }
+    
+    
+    function forbiden(){
+            header('HTTP/1.0 403 Forbidden');
+            die;
     }
 
     /**

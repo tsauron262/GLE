@@ -87,7 +87,7 @@ function getChronosBySerial($serial) {
 }
 
 if ($serial && $userName) {
-    if(is_numeric($serial))//C'est l'id
+    if(is_numeric($serial) && strlen($serial) < 10)//C'est l'id
         $chronos = array($serial);
     else
     $chronos = getChronosBySerial($serial);

@@ -147,7 +147,7 @@ IF(fk_target, fk_target, '0') as ctag, 'Calendrier GLE' as description, 0 as cal
     global $db;
     $sql2 = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."actioncomm WHERE id NOT IN (SELECT `fk_object` FROM `".MAIN_DB_PREFIX."synopsiscaldav_event`) ");
     while($result = $db->fetch_object($sql2)){
-            $sql[] ="INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object) VALUES ('".random(15)."', '-".$result->id.".ics', '".$result->id."')";
+            $sql[] ="INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object) VALUES ('".random2(15)."', '-".$result->id.".ics', '".$result->id."')";
     }
     
     
@@ -166,7 +166,7 @@ IF(fk_target, fk_target, '0') as ctag, 'Calendrier GLE' as description, 0 as cal
 }
 
 
-function random($car) {
+function random2($car) {
 $string = "";
 $chaine = "abcdefghijklmnpqrstuvwxy";
 srand((double)microtime()*1000000);

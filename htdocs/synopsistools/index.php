@@ -114,6 +114,26 @@ AND  `targettype` LIKE  'facture' AND fk_target = f.rowid WHERE fk_source is nul
     }
 }
 
+
+if(isset($_REQUEST['lienProdSav'])){
+    $sql1 = $db->query("SELECT count(cc1.id) as nbProd, count(cc5.id) as nbSav, c1.id as id1, c5.id as id5 FROM `llx_synopsischrono_chrono_105` c5, llx_synopsischrono cc5 LEFT JOIN  llx_synopsischrono cc1 ON cc1.fk_soc=cc5.fk_soc , llx_synopsischrono_chrono_101 c1  
+
+
+
+WHERE cc1.id = c1.id AND cc5.id = c5.id
+
+AND c5.id NOT IN (SELECT fk_source  FROM `llx_element_element` WHERE `sourcetype` LIKE 'sav') GROUP BY cc5.id 
+ORDER BY `nbSav`  DESC");
+    
+    while($ligne = $db->fetch_object($sql1)){
+        if($ligne->nbProd == 1 && $ligne->nbSav == 1){
+            addElementElement ("sav", "productCli", $ligne->id5, $ligne->id1);
+            echo "lien entre  ".$ligne->id5." et ".$ligne->id1;
+//            die;
+        }
+    }
+}
+
 //$my_key = "TriDESSuperEncryptKeyGLE";
 //$data = "P@sŝw0rd";
 //$data = pkcs5_pad($data, mcrypt_get_block_size("tripledes", "cbc"));

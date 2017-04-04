@@ -196,10 +196,10 @@ class synopsisexport {
                 $tabT = explode("(", $ligne->description);
                 $description = traiteCarac(trim($tabT[0]), " ");
                 $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
-//                foreach($tabT as $result)
-//                    $tabMateriel[strtoupper($description)][] = $result['s'];
-                if (count($tabT) > 0)
-                    $tabMateriel[strtoupper($description)][] = $tabT[0]['s'];
+                foreach($tabT as $resultTab)
+                    $tabMateriel[strtoupper($description)][] = $resultTab['s'];
+//                if (count($tabT) > 0)
+//                    $tabMateriel[strtoupper($description)][] = $tabT[0]['s'];
             }
 //        print_r($tabMateriel);die;
             ksort($tabMateriel, SORT_STRING);

@@ -664,6 +664,10 @@ if ($socid != "" && $socid > 0) {
 
 function existProd($nomachine) {
     global $db;
+    if($nomachine == "ZZ501AAAOWP")
+        return -1;
+    
+    
     $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 WHERE N__Serie = '" . addslashes($nomachine) . "';";
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0) {

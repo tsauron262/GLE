@@ -118,7 +118,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
     else {
         $chronoProd = new Chrono($db);
 
-        $chronoProdid = existProd($NoMachine);
+        $chronoProdid = existProd($NoMachine, $socid);
         if ($chronoProdid < 0) {
             $chronoProd->model_refid = 101;
             $chronoProd->socid = $socid;
@@ -662,13 +662,11 @@ if ($socid != "" && $socid > 0) {
     echo "</form>";
 }
 
-function existProd($nomachine) {
-    global $db;
-    if($nomachine == "ZZ501AAAOWP")
-        return -1;
+function existProd($nomachine, $socid) {
+    global $db;    
     
-    
-    $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 WHERE N__Serie = '" . addslashes($nomachine) . "';";
+    $requete = "SELECT c.id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 c1, " . MAIN_DB_PREFIX . "synopsischrono c WHERE c1.id = c.id AND N__Serie = '" . addslashes($nomachine) . "' AND fk_soc = ".$socid;
+
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0) {
         $obj = $db->fetch_object($sql);

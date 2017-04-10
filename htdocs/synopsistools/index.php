@@ -122,7 +122,7 @@ if(isset($_REQUEST['fkSocProductCli'])){
     while($ligne = $db->fetch_object($sql)){
         $req2 = "UPDATE llx_synopsischrono cU SET cU.fk_soc = ".$ligne->fk_soc5. " WHERE cU.id =".$ligne->cid;
    echo $req2;     
-    $sql = $db->query($req2);
+    $sql2 = $db->query($req2);
     }
 }
 

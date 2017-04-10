@@ -124,7 +124,8 @@ if(isset($_REQUEST['lienProdSav2'])){
         $chronoProd = new Chrono($db);
         echo "<br/><br/>debut attribution ZZ au sav perdue<br/><br/>";
     while($ligne = $db->fetch_object($sql)){
-        if($res = existProd($NoMachine, $ligne->fk_soc))
+        $res = existProd($NoMachine, $ligne->fk_soc);
+        if($res)
                 $idP = $res;
         else{
             

@@ -115,6 +115,50 @@ AND  `targettype` LIKE  'facture' AND fk_target = f.rowid WHERE fk_source is nul
 }
 
 
+if(isset($_REQUEST['lienProdSav2'])){
+    $NoMachine = "ZZ501AAAOWP";
+    $req = "SELECT c.id, c.fk_soc FROM `llx_synopsischrono`c , llx_propaldet p, llx_synopsischrono_chrono_105 c5 WHERE `propalid` = p.fk_propal AND p.description LIKE '%".$NoMachine."%' AND c.id not in (SELECT fk_source  FROM `llx_element_element` WHERE `sourcetype` LIKE 'sav') AND c5.id = c.id";
+
+    $sql = $db->query($req);
+    
+        $chronoProd = new Chrono($db);
+        echo "<br/><br/>debut attribution ZZ au sav perdue<br/><br/>";
+    while($ligne = $db->fetch_object($sql)){
+        if($res = existProd($NoMachine, $ligne->fk_soc))
+                $idP = $res;
+        else{
+            
+            $chronoProd->model_refid = 101;
+            $chronoProd->socid = $socid;
+            $chronoProd->description = "Non-Serialized Products";
+            $dataArrProd = array(1011 => $NoMachine);
+            $idP = $chronoProd->create();
+            $testProd = $chronoProd->setDatas($idP, $dataArrProd);
+        }
+        addElementElement("sav", "productCli", $ligne->id, $idP);
+        echo "<br/><br/>Insertion de :"."sav"." | "."productCli"." | ". $ligne->id." | ".$idP;
+    }
+    
+    
+    
+}
+
+function existProd($nomachine, $socid) {
+    global $db;    
+    
+    $requete = "SELECT c.id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 c1, " . MAIN_DB_PREFIX . "synopsischrono c WHERE c1.id = c.id AND N__Serie = '" . addslashes($nomachine) . "' AND fk_soc = ".$socid;
+
+    $sql = $db->query($requete);
+    if ($db->num_rows($sql) > 0) {
+        $obj = $db->fetch_object($sql);
+        $return = $obj->id;
+        return $return;
+    } else {
+        return -1;
+    }
+}
+
+
 if(isset($_REQUEST['lienProdSav'])){
     $sql1 = $db->query("SELECT count(cc1.id) as nbProd, count(cc5.id) as nbSav, c1.id as id1, c5.id as id5 FROM `llx_synopsischrono_chrono_105` c5, llx_synopsischrono cc5 LEFT JOIN  llx_synopsischrono cc1 ON cc1.fk_soc=cc5.fk_soc , llx_synopsischrono_chrono_101 c1  
 

@@ -125,7 +125,7 @@ if(isset($_REQUEST['lienProdSav2'])){
         echo "<br/><br/>debut attribution ZZ au sav perdue<br/><br/>";
     while($ligne = $db->fetch_object($sql)){
         $res = existProd($NoMachine, $ligne->fk_soc);
-        if($res)
+        if($res > 0)
                 $idP = $res;
         else{
             

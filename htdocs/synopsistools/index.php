@@ -115,6 +115,17 @@ AND  `targettype` LIKE  'facture' AND fk_target = f.rowid WHERE fk_source is nul
 }
 
 
+if(isset($_REQUEST['fkSocProductCli'])){
+    $req = "SELECT c.id as cid, cc5.id, c.fk_soc, cc5.fk_soc as fk_soc5 FROM `llx_synopsischrono` c, `llx_synopsischrono` cc5, llx_synopsischrono_chrono_101 c1, llx_synopsischrono_chrono_105 c5, llx_element_element el WHERE c1.id = c.id AND c.fk_soc is null AND el.sourcetype = 'sav' AND el.targettype = 'productCli' AND el.fk_target = c1.id AND el.fk_source = c5.id AND cc5.fk_soc is not null AND cc5.fk_soc > 0 AND c5.id = cc5.id ORDER BY `c`.`id` ASC";
+    
+    $sql = $db->query($req);
+    while($ligne = $db->fetch_object($sql)){
+        $req2 = "UPDATE llx_synopsischrono cU SET cU.fk_soc = ".$ligne->fk_soc5. " WHERE cU.id =".$ligne->cid;
+   echo $req2;     
+    $sql = $db->query($req2);
+    }
+}
+
 if(isset($_REQUEST['lienProdSav2'])){
     $NoMachine = "ZZ501AAAOWP";
     $req = "SELECT c.id, c.fk_soc FROM `llx_synopsischrono`c , llx_propaldet p, llx_synopsischrono_chrono_105 c5 WHERE `propalid` = p.fk_propal AND p.description LIKE '%".$NoMachine."%' AND c.id not in (SELECT fk_source  FROM `llx_element_element` WHERE `sourcetype` LIKE 'sav') AND c5.id = c.id";

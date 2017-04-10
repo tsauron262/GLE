@@ -155,7 +155,7 @@ function existProd($nomachine, $socid) {
         $return = $obj->id;
         return $return;
     } else {
-        return -1;
+        return -2;
     }
 }
 

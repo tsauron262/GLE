@@ -340,7 +340,6 @@ class PDO extends AbstractBackend {
      * @return array
      */
     public function getCalendarObjects($calendarId) {
-
         $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, size FROM ' . $this->calendarObjectTableName . ' WHERE '/*lastoccurence > "' . mktime(0, 0, 0, date("m") - 4, date("d"), date("Y")) . '" AND*/.' calendarid = ?');
         $stmt->execute(array($calendarId));
 
@@ -374,7 +373,6 @@ class PDO extends AbstractBackend {
      * @return array|null
      */
     public function getCalendarObject($calendarId, $objectUri) {
-
         $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -591,7 +589,7 @@ WHERE  `email` LIKE  '".$mail."'");
         global $objectRappel;
         
         
-        dol_syslog(print_r($data,1),3);
+        //dol_syslog(print_r($data,1),3);
         if(isset($data["TRIGGER"]) && stripos($data["TRIGGER"], "VALUE=DURATION"))
                 $objectRappel = 15;
         return 0;
@@ -833,8 +831,22 @@ WHERE  `email` LIKE  '".$mail."'");
     
     
     function forbiden(){
-            header('HTTP/1.0 403 Forbidden');
-            die;
+        throw new DAV\Exception\Forbidden('Permission denied to delete node');
+//            header('HTTP/1.0 403 Forbidden');
+//            header('Content-type: application/xml');
+//            echo '<D:error xmlns:D="DAV:">
+// <D:need-privileges>
+// <D:resource>
+// <D:href>/a</D:href>
+// <D:privilege><D:unbind/></D:privilege>
+// </D:resource>
+// <D:resource>
+// <D:href>/c</D:href>
+// <D:privilege><D:bind/></D:privilege>
+// </D:resource>
+// </D:need-privileges>
+//</D:error>';
+//            die;
     }
 
     /**
@@ -890,7 +902,6 @@ WHERE  `email` LIKE  '".$mail."'");
      * @return array
      */
     public function calendarQuery($calendarId, array $filters) {
-
         $result = array();
         $validator = new \Sabre\CalDAV\CalendarQueryValidator();
 
@@ -924,7 +935,7 @@ WHERE  `email` LIKE  '".$mail."'");
         }
 
         if ($requirePostFilter) {
-            $query = "SELECT uri, calendardata FROM " . $this->calendarObjectTableName . " WHERE calendarid = :calendarid";
+            $query = "SELECT uri, calendarid FROM " . $this->calendarObjectTableName . " WHERE calendarid = :calendarid";
         } else {
             $query = "SELECT uri FROM " . $this->calendarObjectTableName . " WHERE calendarid = :calendarid";
         }
@@ -946,7 +957,6 @@ WHERE  `email` LIKE  '".$mail."'");
             $query.=" AND firstoccurence < :enddate";
             $values['enddate'] = $timeRange['end']->getTimeStamp();
         }
-
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($values);
 
@@ -959,7 +969,7 @@ WHERE  `email` LIKE  '".$mail."'");
             }
             $result[] = $row['uri'];
         }
-
+        dol_syslog(print_r($result,1),3);
         return $result;
     }
 

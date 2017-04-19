@@ -416,7 +416,8 @@ class Repair
                 $this->repairType = 'repair_or_replace';
             }
         }
-            echo "<pre>";print_r($this);
+            echo "<pre>";print_r($response[$client . 'Response']['lookupResponseData']);
+            echo "<br/><br/><br/><br/>".$client;
         return true;
     }
 

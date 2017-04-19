@@ -740,7 +740,7 @@ class GSX
 
                 $repairLookup = $this->request($requestData, $clientLookup);
 
-//$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
+$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
 
                 return $this->outputFormat($repairLookup[$clientLookup . 'Response']['lookupResponseData'], $errorMessage, $returnFormat);
 

@@ -396,7 +396,6 @@ class Repair
         if (!isset($response[$client . 'Response']['lookupResponseData']))
             return false;
 
-            echo "<pre>";print_r($response);
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData'];
         if (is_array($this->repairLookUp) && !isset($this->repairLookUp['repairConfirmationNumber']))
             $this->repairLookUp = $this->repairLookUp[0];
@@ -417,6 +416,7 @@ class Repair
                 $this->repairType = 'repair_or_replace';
             }
         }
+            echo "<pre>";print_r($this);
         return true;
     }
 

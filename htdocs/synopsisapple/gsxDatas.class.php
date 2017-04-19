@@ -138,9 +138,9 @@ class gsxDatas
             return '<p class="confirmation">Les données de la réparation ont été importées avec succès</p><ok>Reload</ok>';
         }
         $html = '<p class="error">Echec de l\'importation.</p>';
-        $html .= $repair->displayErrors();
+        $html .= "error repair : ".$repair->displayErrors();
         if (count($this->gsx->errors['soap']))
-            $html .= $this->getGSXErrorsHtml();
+            $html .= "erreur GSX : ".$this->getGSXErrorsHtml();
         return $html;
     }
 

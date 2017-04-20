@@ -169,7 +169,15 @@ class synopsisexport {
                     . "fact.total,"
                     . "SUM(det.total_ht - (det.buy_price_ht * det.qty)) as total_marge, "
                     . "fact.fk_statut";
+            $partReq1 .= ", p1.fk_paiement, (p1.amount / 1.2) as totPaye";
             $partReq5 = " FROM " . MAIN_DB_PREFIX . "societe soc, " . MAIN_DB_PREFIX . "facturedet det, " . MAIN_DB_PREFIX . "facture fact ";
+            $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "paiement_facture p2
+                            ON p2.fk_facture = fact.rowid 
+
+                            LEFT JOIN `" . MAIN_DB_PREFIX . "paiement` p1
+                             ON p1.rowid = p2.fk_paiement";
+            
+            
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "propal propal on  propal.rowid = el.fk_source ";
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON (`revisionNext` = 0 || `revisionNext` is NULL) AND chrono1.propalId = el.fk_source ";

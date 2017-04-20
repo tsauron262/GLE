@@ -169,7 +169,7 @@ class synopsisexport {
                     . "fact.total,"
                     . "SUM(det.total_ht - (det.buy_price_ht * det.qty)) as total_marge, "
                     . "fact.fk_statut";
-            $partReq1 .= ", p1.fk_paiement, (p1.amount / 1.2) as totPaye";
+            $partReq1 .= ", p1.fk_paiement, p1.amount as payeTTC";
             $partReq5 = " FROM " . MAIN_DB_PREFIX . "societe soc, " . MAIN_DB_PREFIX . "facturedet det, " . MAIN_DB_PREFIX . "facture fact ";
             $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "paiement_facture p2
                             ON p2.fk_facture = fact.rowid 

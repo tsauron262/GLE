@@ -563,9 +563,11 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $tabMailInc[] = $mail;
             }
         }
-        $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
-        dol_syslog($req,3);
-        $sql = $db->query($req);
+        if($action->id > 0){
+            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
+            dol_syslog($req,3);
+            $sql = $db->query($req);
+        }
     }
 
 //    public function userIdCaldavPlus($calendarId) {

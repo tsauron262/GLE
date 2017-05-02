@@ -371,7 +371,7 @@ if ($chr->id > 0) {
         if ($chr->model->hasSociete == 1) {
             print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
 
-            print '    <td  class="ui-widget-content" colspan="' . (($chr->model->hasContact == 1) ? '1' : '3') . '"><span class="addSoc editable" style="float: left; padding : 3px 15px 0 0;">' . img_picto($langs->trans("Create"), 'filenew') . '</span>' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
+            print '    <td  class="ui-widget-content" colspan="' . (($chr->model->hasContact == 1) ? '1' : '3') . '"><span class="addSoc editable" style="float: left; padding : 3px 15px 0 0;">' . img_picto($langs->trans("Create"), 'filenew') . '</span>' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'))), 100) . '</td>';
 //            else
 //                print '    <td  class="ui-widget-content" colspan="3">' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
         }
@@ -406,7 +406,7 @@ if ($chr->id > 0) {
             $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "propal ";
             if ($hasSoc)
                 $requete2 .= " WHERE fk_soc = " . $chr->socid;
-            $requete2 .= " ORDER BY `rowid` DESC";
+            $requete2 .= " ORDER BY `rowid` DESC LIMIT 0,100";
             $sql2 = $db->query($requete2);
             while ($res = $db->fetch_object($sql2)) {
                 print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . "</option>";

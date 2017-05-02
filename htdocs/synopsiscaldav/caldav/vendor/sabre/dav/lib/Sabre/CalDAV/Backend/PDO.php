@@ -677,7 +677,7 @@ WHERE  `email` LIKE  '".$mail."'");
                 $tabResult[] = $ligneT;
         }
         $position = '';
-        $tabCore = $tabHead = array();
+        $tabCore = $tabHead = $tabHead2 = array();
         foreach ($tabResult as $clef => $val) {
             //Pour ce tour
             if (stripos($val, "PARTICIPANT") > -1)
@@ -697,15 +697,27 @@ WHERE  `email` LIKE  '".$mail."'");
                     $tabCore[$clef] = $val;
             }
         }
+        
+        $tabHead2 = array("BEGIN:VTIMEZONE",
+            "TZID:Europe/Paris",
+            "BEGIN:STANDARD");
+        $tabHead2['TZOFFSETFROM'] = "+0200";
+        $tabHead2['TZOFFSETTO'] = "+0100";
+        $tabHead2['TZNAME'] = "CET";
+        $date = explode(":", $tabCore['DTSTART']);
+        if(isset($date[1]))
+            $tabHead2[]= 'DTSTART:' . $date[1];
+        $tabHead2[] = "END:STANDARD";
+        $tabHead2[] = "END:VTIMEZONE";
 //        $tabCore["TZNAME"] = "CET";
 //        $tabHead["TZNAME"] = "CET";
 //        $tabHead["TZOFFSETFROM"] = "+0200";
 //        $tabHead["TZOFFSETTO"] = "+0100";
-
+        
         $tabAlarm = array();
         
 //        $tabAlarm = array("BEGIN:VALARM", "DESCRIPTION:Alame chiante","ACTION:DISPLAY","TRIGGER;VALUE=DURATION:-PT15M","X-KDE-KCALCORE-ENABLED:TRUE","END:VALARM");
-        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, array("BEGIN:VEVENT"), $tabCore, $tabAlarm, array("END:VEVENT", "END:VCALENDAR"));
+        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, $tabHead2, array("BEGIN:VEVENT"), $tabCore, $tabAlarm, array("END:VEVENT", "END:VCALENDAR"));
 
         return $tabResult;
     }

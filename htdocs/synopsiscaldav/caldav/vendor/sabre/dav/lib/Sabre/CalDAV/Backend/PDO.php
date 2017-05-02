@@ -512,6 +512,9 @@ class PDO extends AbstractBackend {
         $action->percentage = -1;
         if ($action->add($user) < 1)
             $this->forbiden();
+        
+
+        $this->traiteParticipant($action, $calendarData2, $calendarId);
 
 //        $this->userIdCaldavPlus($calendarId);
     }

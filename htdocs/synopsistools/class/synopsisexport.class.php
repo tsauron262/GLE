@@ -144,7 +144,7 @@ class synopsisexport {
         } else {
             $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
             $totalVendu = "SUM(factdet.total_ht)";
-            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Etat as Statut, chrono.tms as Date_Modif, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye, Technicien as Tech, repairConfirmNumber";
+            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Etat as Statut, chrono.tms as Date_Modif, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye, Technicien as Tech, repairConfirmNumber, date_close";
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else

@@ -565,7 +565,6 @@ WHERE  `email` LIKE  '" . $mail . "'");
         }
         if($action->id > 0){
             $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
-            dol_syslog($req,3);
             $sql = $db->query($req);
         }
     }
@@ -989,7 +988,6 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
             $result[] = $row['uri'];
         }
-        dol_syslog(print_r($result, 1), 3);
         return $result;
     }
 

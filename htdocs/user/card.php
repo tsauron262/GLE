@@ -591,7 +591,8 @@ $formother=new FormOther($db);
 $formcompany = new FormCompany($db);
 
 llxHeader('',$langs->trans("UserCard"));
-
+//moddrsi die
+die("Momentanément indisponible");
 if (($action == 'create') || ($action == 'adduserldap'))
 {
     /* ************************************************************************** */

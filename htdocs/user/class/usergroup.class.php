@@ -759,6 +759,22 @@ class UserGroup extends CommonObject
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS].",".$conf->global->LDAP_GROUP_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_GROUP_DN;
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS];
+                
+                
+                
+                /*mod drsi*/
+                if(!defined("LIST_DOMAINE_VALID"))
+                    dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
+                else{
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    $domain = false;
+                    foreach($LIST_DOMAINE_VALID as $domaine)
+                        if(stripos($info['mail'], "@".$domaine) > 0)
+                                $domain = $domaine;
+                    if($domain)
+                        $dn = str_replace($LIST_DOMAINE_VALID[0], $domain, $dn);
+                }
+                /*f mod drsi*/
 		return $dn;
 	}
 

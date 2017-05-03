@@ -705,19 +705,30 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
 
-        $tabHead2 = array("BEGIN:VTIMEZONE",
+       $tabHead2 = array("BEGIN:VTIMEZONE",
             "TZID:Europe/Paris",
-            "BEGIN:STANDARD");
-        $tabHead2['TZOFFSETFROM'] = "+0200";
-        $tabHead2['TZOFFSETTO'] = "+0100";
-        $tabHead2['TZNAME'] = "CET";
-        if (isset($tabCore['DTSTART'])) {
-            $date = explode(":", $tabCore['DTSTART']);
-            if (isset($date[1]))
-                $tabHead2[] = 'DTSTART:' . $date[1];
-        }
-        $tabHead2[] = "END:STANDARD";
-        $tabHead2[] = "END:VTIMEZONE";
+            "BEGIN:DAYLIGHT",
+            "TZOFFSETFROM:+0100",
+            "TZOFFSETTO:+0200",
+            "TZNAME:CEST",
+            "DTSTART:19700329T020000",
+            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3",
+            "END:DAYLIGHT",
+            "BEGIN:STANDARD",
+            "TZOFFSETFROM:+0200",
+            "TZOFFSETTO:+0100",
+            "TZNAME:CET",
+            "DTSTART:19701025T030000",
+            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10",
+            "END:STANDARD",
+            "END:VTIMEZONE");
+//        if (isset($tabCore['DTSTART'])) {
+//            $date = explode(":", $tabCore['DTSTART']);
+//            if (isset($date[1]))
+//                $tabHead2[] = 'DTSTART:' . $date[1];
+//        }
+//        $tabHead2[] = "END:STANDARD";
+//        $tabHead2[] = "END:VTIMEZONE";
 //        $tabCore["TZNAME"] = "CET";
 //        $tabHead["TZNAME"] = "CET";
 //        $tabHead["TZOFFSETFROM"] = "+0200";
@@ -726,7 +737,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
         $tabAlarm = array();
 
 //        $tabAlarm = array("BEGIN:VALARM", "DESCRIPTION:Alame chiante","ACTION:DISPLAY","TRIGGER;VALUE=DURATION:-PT15M","X-KDE-KCALCORE-ENABLED:TRUE","END:VALARM");
-        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, array("BEGIN:VEVENT"), $tabCore, $tabAlarm, array("END:VEVENT", "END:VCALENDAR"));
+        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, $tabHead2, array("BEGIN:VEVENT"), $tabCore, $tabAlarm, array("END:VEVENT", "END:VCALENDAR"));
 
         return $tabResult;
     }

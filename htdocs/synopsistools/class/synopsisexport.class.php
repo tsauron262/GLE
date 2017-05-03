@@ -162,6 +162,7 @@ class synopsisexport {
         $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.close_code is null AND fact.rowid = el2.fk_target AND fact.facnumber LIKE 'FA%' ";
         $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "facturedet factdet ON factdet.fk_facture = fact2.rowid  AND (factdet.subprice != 0 || factdet.buy_price_ht != 0) " . $tableSus . " WHERE ";
 
+        $partReq1 .= ", fact.date_valid ";
 
         if ($typeAff2 == "fact") {
             $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, "

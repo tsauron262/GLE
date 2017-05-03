@@ -737,7 +737,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
         $tabAlarm = array();
 
 //        $tabAlarm = array("BEGIN:VALARM", "DESCRIPTION:Alame chiante","ACTION:DISPLAY","TRIGGER;VALUE=DURATION:-PT15M","X-KDE-KCALCORE-ENABLED:TRUE","END:VALARM");
-        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, array("BEGIN:VEVENT"), $tabCore, $tabAlarm, array("END:VEVENT", "END:VCALENDAR"));
+        $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, $tabHead2, array("BEGIN:VEVENT"), $tabCore, $tabAlarm, array("END:VEVENT", "END:VCALENDAR"));
 
         return $tabResult;
     }

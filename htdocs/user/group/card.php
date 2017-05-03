@@ -217,7 +217,8 @@ if ($action == 'update')
  */
 
 llxHeader('',$langs->trans("GroupCard"));
-
+//moddrsi die
+die("Momentanément indisponible");
 $form = new Form($db);
 $fuserstatic = new User($db);
 

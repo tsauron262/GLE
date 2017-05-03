@@ -409,7 +409,8 @@ class PDO extends AbstractBackend {
         }
         $tabPartExt = explode(",",$row['participentExt']);
         foreach($tabPartExt as $part)
-            $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
+            if($part != "")
+                $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
 
 
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);

@@ -815,6 +815,11 @@ class UserGroup extends CommonObject
                 if(!defined("DOMAINE_GROUP_ID"))
                     die("Constante DOMAINE_GROUP_ID non definie");
                 
+                
+                if(isset($this->array_options['options_mail'])){
+                    $info ['mail'] = $this->array_options['options_mail'];
+                }
+                
                 $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
                 if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
                     require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");

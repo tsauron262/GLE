@@ -471,6 +471,10 @@ class PDO extends AbstractBackend {
 //        $stmt->execute(array($calendarId));
 //
 //        return '"' . $extraData['etag'] . '"';
+        
+        
+        $tabR = array(";LANGUAGE=fr-FR:" => ":", ";LANGUAGE=en-EN:" => ":"); 
+        $calendarData = strtr($calendarData,$tabR); 
 
         $extraData = $this->getDenormalizedData($calendarData);
 //        dol_syslog(print_r($extraData,1),3);

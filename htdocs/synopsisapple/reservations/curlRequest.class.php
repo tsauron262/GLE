@@ -67,8 +67,8 @@ class curlRequest
         curl_setopt($this->ch, CURLOPT_SSLCERT, $this->QRSCertfileDir . $this->QRSCertfileName);
         curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->pword);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT ,10); 
-curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT ,10); 
+curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
         return true;
     }
 

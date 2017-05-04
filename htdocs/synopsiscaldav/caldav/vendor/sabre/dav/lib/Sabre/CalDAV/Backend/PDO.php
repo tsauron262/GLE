@@ -745,6 +745,8 @@ WHERE  `email` LIKE  '" . $mail . "'");
     function traiteIcsTab($tab) {
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
+$tabR = array( CHR(13) => " ", CHR(10) => " " ); 
+$ligne = strtr($ligne,$tabR); 
             if (!is_integer($clef)) {
                 if (stripos($ligne, "=") !== false && $clef != "URL")
                     $tab2[] = $clef . ";" . $ligne;

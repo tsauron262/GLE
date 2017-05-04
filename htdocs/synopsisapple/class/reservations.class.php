@@ -527,7 +527,6 @@ L’équipe BIMP";
 
     function fetchReservationSummary($soldTo, $shipTo, $currentReservations)
     {
-        return 0;
         global $tabCert, $dateBegin, $dateEnd, $productCodes;
 
         if ($this->display_debug) {

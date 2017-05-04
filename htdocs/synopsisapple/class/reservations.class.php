@@ -66,7 +66,8 @@ class Reservations
 
         foreach ($numbers as $n) {
             if (!empty($n['soldTo']) && !empty($n['shipTo'])) {
-                $this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $currentReservations);
+                if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $currentReservations))
+                        break;
             }
         }
 
@@ -546,7 +547,7 @@ L’équipe BIMP";
 
         if (empty($pass) || empty($certif)) {
             $this->logError('Aucun certificat trouvé pour le soldTo "' . $soldTo . '"');
-            return;
+            return 0;
         }
 
         $RS = new CurlReservationSummary($soldTo, $shipTo, $pass, $certif);
@@ -558,7 +559,7 @@ L’équipe BIMP";
             $data = $RS->fetch($dateBegin, $dateEnd, $productCode);
             if ($data === false) {
                 $this->logError('Echec de la récupération des réservations pour le code produit "' . $productCode . '" - ' . $RS->getLastError());
-                break;
+                return 0;
             } else {
                 if (isset($data->faults) && count($data->faults)) {
                     $continue = false;
@@ -633,5 +634,6 @@ L’équipe BIMP";
                 }
             }
         }
+        return 1;
     }
 }

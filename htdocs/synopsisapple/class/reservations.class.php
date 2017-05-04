@@ -558,6 +558,7 @@ L’équipe BIMP";
             $data = $RS->fetch($dateBegin, $dateEnd, $productCode);
             if ($data === false) {
                 $this->logError('Echec de la récupération des réservations pour le code produit "' . $productCode . '" - ' . $RS->getLastError());
+                break;
             } else {
                 if (isset($data->faults) && count($data->faults)) {
                     $continue = false;

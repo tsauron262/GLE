@@ -472,9 +472,6 @@ class PDO extends AbstractBackend {
 //
 //        return '"' . $extraData['etag'] . '"';
         
-        
-        $tabR = array(";LANGUAGE=fr-FR:" => ":", ";LANGUAGE=en-EN:" => ":"); 
-        $calendarData = strtr($calendarData,$tabR); 
 
         $extraData = $this->getDenormalizedData($calendarData);
 //        dol_syslog(print_r($extraData,1),3);
@@ -777,6 +774,10 @@ $ligne = strtr($ligne,$tabR);
      * @return array
      */
     protected function getDenormalizedData($calendarData) {
+        
+        
+        $tabR = array(";LANGUAGE=fr-FR:" => ":", ";LANGUAGE=en-EN:" => ":"); 
+        $calendarData = strtr($calendarData,$tabR); 
 
         $vObject = VObject\Reader::read($calendarData);
         $componentType = null;

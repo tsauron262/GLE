@@ -776,8 +776,8 @@ $ligne = strtr($ligne,$tabR);
     protected function getDenormalizedData($calendarData) {
         
         
-        $tabR = array(";LANGUAGE=fr-FR:" => ":", ";LANGUAGE=en-EN:" => ":"); 
-        $calendarData = strtr($calendarData,$tabR); 
+        $tabR = array(";LANGUAGE=fr-FR", ";LANGUAGE=en-EN"); 
+        $calendarData = str_replace($tabR, "",$calendarData); 
 
         $vObject = VObject\Reader::read($calendarData);
         $componentType = null;

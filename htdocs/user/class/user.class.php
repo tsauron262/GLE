@@ -2200,7 +2200,7 @@ class User extends CommonObject
                         if(stripos($info['mail'], "@".$domaine) > 0)
                                 $domain = $domaine;
                 }
-                $info['pager'] = "mail=BIMP@bimp.fr,ou=Groups,domainName=bimp.fr,o=domains,dc=bimp,dc=fr";
+                $info['pager'] = "'mail=BIMP@bimp.fr,ou=Groups,domainName=bimp.fr,o=domains,dc=bimp,dc=fr'";
                 
                 $info['enabledservice'] = array("internal");
                 if(isset($this->array_options['options_mtatransport']))

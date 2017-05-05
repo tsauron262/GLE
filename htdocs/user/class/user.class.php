@@ -2200,7 +2200,6 @@ class User extends CommonObject
                         if(stripos($info['mail'], "@".$domaine) > 0)
                                 $domain = $domaine;
                 }
-                $info['pager'] = "'mail=BIMP@bimp.fr,ou=Groups,domainName=bimp.fr,o=domains,dc=bimp,dc=fr'";
                 
                 $info['enabledservice'] = array("internal");
                 if(isset($this->array_options['options_mtatransport']))
@@ -2215,8 +2214,10 @@ class User extends CommonObject
                 if($domain){
                     $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
                     
-                if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
-                    $info['enabledservice'][] = "displayedInGlobalAddressBook";
+                    if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook']){
+                        $info['enabledservice'][] = "displayedInGlobalAddressBook";
+                        $info['pager'] = "mail=BIMP@bimp.fr";
+                    }
                 
                     if(isset($info['uid']) && isset($info["mail"])){
 //                        $info['uid'] = $info['uid']."_".$domain;

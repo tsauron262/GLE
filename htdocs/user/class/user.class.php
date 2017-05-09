@@ -2216,7 +2216,8 @@ class User extends CommonObject
                     
                     if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook']){
                         $info['enabledservice'][] = "displayedInGlobalAddressBook";
-                        $info['carLicense'] = "mail=BIMP"."@".$domain.",ou=Groups,domainName=".$domain.",o=domains,dc=bimp,dc=fr";
+//                        $info['carLicense'] = "mail=BIMP"."@".$domain.",ou=Groups,domainName=".$domain.",o=domains,dc=bimp,dc=fr";
+                        $info['pager'] = "BIMP";
                     }
                 
                     if(isset($info['uid']) && isset($info["mail"])){

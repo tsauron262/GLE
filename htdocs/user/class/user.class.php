@@ -2211,7 +2211,7 @@ class User extends CommonObject
                 else
                     $info['mailForwardingAddress'] = "";
                 
-                $info['pager'] = " ";
+                $info['pager'] = "inc";
                 if($domain && $this->statut == 1){
                     $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
                     

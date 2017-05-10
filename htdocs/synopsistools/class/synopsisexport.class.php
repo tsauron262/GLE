@@ -436,7 +436,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                 }
                 
                 if($enDouble && in_array($nom, array("total", "total_marge", "fk_statut")))
-                        $valeur = "''";
+                        $valeur = "";
 
                 if ($nom == "id8Sens") {
                     if ($valeur <= 1) {

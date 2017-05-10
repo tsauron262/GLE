@@ -311,8 +311,9 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                     $this->textSortie($titre, "titre");
                     $return1 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", true);
                 }
-
-                $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, $titre, false);
+                
+                $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, $titre, false, $enDouble);
+                
                 $oldLigne = $ligne2;
             }
             if ($i > 1)
@@ -375,7 +376,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
     }
 
     private function textTable($ligne, $separateur, $sautDeLigne, $prefLigne = '', $afficheTitre = true) {
-        global $tabVal;
+        global $tabVal, $enDouble;
         $return = "";
         $tabCacher = array('factid', 'rowid');
         if ($afficheTitre === "Total") {
@@ -424,11 +425,18 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                 }
 
                 if ($nom == "objFact") {
-                    if (isset($tabVal[$valeur]))
+                    if (isset($tabVal[$valeur])){
                         $tabVal[$valeur] = $tabVal[$valeur] + 1;
-                    else
+                        $enDouble = true;
+                    }
+                    else{
                         $tabVal[$valeur] = 1;
+                        $enDouble = false;
+                    }
                 }
+                
+                if($enDouble && in_array($nom, array("total", "total_marge", "fk_statut")))
+                        $valeur = "''";
 
                 if ($nom == "id8Sens") {
                     if ($valeur <= 1) {

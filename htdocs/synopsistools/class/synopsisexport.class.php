@@ -148,7 +148,7 @@ class synopsisexport {
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else
-            $partReqFin = "  Group BY chrono.id LIMIT 0,100000";
+            $partReqFin = "  Group BY fact.rowid LIMIT 0,100000";
         }
 
         if ($typeAff2 != "fact")

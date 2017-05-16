@@ -148,7 +148,7 @@ class synopsisexport {
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else
-            $partReqFin = "  Group BY fact.rowid LIMIT 0,100000";
+            $partReqFin = "  Group BY chrono.id LIMIT 0,100000";
         }
 
         if ($typeAff2 != "fact")
@@ -184,7 +184,7 @@ class synopsisexport {
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON (`revisionNext` = 0 || `revisionNext` is NULL) AND chrono1.propalId = el.fk_source ";
             $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
             $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
-            $partReqFin = " GROUP BY p1.rowid, fact.rowid LIMIT 0,200000";
+            $partReqFin = " GROUP BY p1.rowid, fact.rowid ORDER BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
 //            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         }

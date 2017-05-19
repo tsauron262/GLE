@@ -1267,7 +1267,7 @@ class ActionComm extends CommonObject
                     //Mod drsi pour lien ds agenda externe
                     $obj->note = htmlToAgenda($obj->note);
                     //fin mod rdsi
-                    $event['desc']=$obj->note;
+                    $event['desc']=str_replace(":", ";", $obj->note);
                     $event['startdate']=$datestart;
                     $event['enddate']=$dateend;		// Not required with type 'journal'
                     $event['duration']=$duration;	// Not required with type 'journal'

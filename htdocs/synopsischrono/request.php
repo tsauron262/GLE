@@ -137,41 +137,41 @@ if (isset($_REQUEST['actionEtat'])) {
     }
 
     if ($action == "revProp" && $chrono->propal->id > 0) {
-//        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
-//        $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-//        $chrono->note .= "Devis révisé aprés fermeture le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
-//        $chrono->update($chrono->id);
-//
-//        $revision = new SynopsisRevisionPropal($chrono->propal);
-//        $revision->reviserPropal($_REQUEST['ligne'] ? array(array('Diagnostic'), null) : array(null, null), true);
-////$propal = new Propal();
-//        
-//        //Anulation du montant de la propal
-//        $totHt = 0;
-////            foreach ($chrono->propal->lines as $ligne) {
-////                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU") {
-////                    $totHt += $ligne->total_ht;
-////                    $totTtc += $ligne->total_ttc;
-////                    $totPa += $ligne->pa_ht;
-////                }
-////            }
-//        if($totHt == 0)
-//            $tTva = 0;
-//        else {
-//            $tTva = (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
-//        }
-//            $chrono->propal->addline("Devis refusé", -($totHt)/(100-$chrono->societe->remise_percent)*100, 1, $tTva, 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
+        $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
+        $chrono->note .= "Devis révisé aprés fermeture le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
+        $chrono->update($chrono->id);
+
+        $revision = new SynopsisRevisionPropal($chrono->propal);
+        $revision->reviserPropal($_REQUEST['ligne'] ? array(array('Diagnostic'), null) : array(null, null), true);
+//$propal = new Propal();
+        
+        //Anulation du montant de la propal
+        $totHt = 0;
+//            foreach ($chrono->propal->lines as $ligne) {
+//                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU") {
+//                    $totHt += $ligne->total_ht;
+//                    $totTtc += $ligne->total_ttc;
+//                    $totPa += $ligne->pa_ht;
+//                }
+//            }
+        if($totHt == 0)
+            $tTva = 0;
+        else {
+            $tTva = (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
+        }
+            $chrono->propal->addline("Devis refusé", -($totHt)/(100-$chrono->societe->remise_percent)*100, 1, $tTva, 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
 
         if ($_REQUEST['ligne'] == 0) {//Création de la facture de frais de prise en charge.
-//            $propal->addline(/*"Prise en charge :  : " . $chrono->ref .*/
-//                    "\n" . "Machine : " . $nomMachine .
-//                    "\n" . "Frais de gestion devis refusé.
-//", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 0, $chrono->societe->remise_percent, 'HT', null, null, 1);
-//
-//
-//
-//            $propal->fetch($chrono->propal->id);
-//            $propal->generateDocument("azurSAV", $langs);
+            $propal->addline(/*"Prise en charge :  : " . $chrono->ref .*/
+                    "\n" . "Machine : " . $nomMachine .
+                    "\n" . "Frais de gestion devis refusé.
+", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 0, $chrono->societe->remise_percent, 'HT', null, null, 1);
+
+
+
+            $propal->fetch($chrono->propal->id);
+            $propal->generateDocument("azurSAV", $langs);
             if ($chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
                 $req = "SELECT `nom` FROM `" . MAIN_DB_PREFIX . "usergroup` WHERE rowid IN (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $chrono->extraValue[$chrono->id]['Technicien']['value'] . ") ANd `nom` REGEXP 'Sav([0-9])'";
                 $sql = $db->query($req);
@@ -328,7 +328,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
 
 
-        if ($propal->id > 0) {
+        if ($chrono->propal->id > 0) {
             $facture = new Facture($db);
             $facture->modelpdf = "crabeSav";
             $facture->createFromOrder($propal);

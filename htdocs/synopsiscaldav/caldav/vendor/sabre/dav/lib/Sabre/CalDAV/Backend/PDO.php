@@ -407,9 +407,9 @@ class PDO extends AbstractBackend {
                     $calendarData2[9999 . $row['id'] . $val['id']] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $userT->email;
             }
         }
-        $tabPartExt = explode(",",$row['participentExt']);
-        foreach($tabPartExt as $part)
-            if($part != "")
+        $tabPartExt = explode(",", $row['participentExt']);
+        foreach ($tabPartExt as $part)
+            if ($part != "")
                 $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
 
 
@@ -471,54 +471,65 @@ class PDO extends AbstractBackend {
 //        $stmt->execute(array($calendarId));
 //
 //        return '"' . $extraData['etag'] . '"';
-        
+        //Verif quil existe pas
+        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+        $stmt->execute(array($calendarId, $objectUri));
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        $extraData = $this->getDenormalizedData($calendarData);
+        if ($row) {
+            http_response_code(404);
+            dol_syslog("Uri existe déja ".$objectUri,3,null,"_caldav2");
+            die;
+            return null;
+        } else {
+
+            $extraData = $this->getDenormalizedData($calendarData);
 //        dol_syslog(print_r($extraData,1),3);
-        $calendarData2 = $this->traiteTabIcs($calendarData, array());
+            $calendarData2 = $this->traiteTabIcs($calendarData, array());
 //        dol_syslog("iciciciciicic".print_r($calendarData2,1),3);
 //        $this->getRappel($calendarData2);
 
-        global $db;
-        require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
-        $action = new \ActionComm($db);
+            global $db;
+            require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
+            $action = new \ActionComm($db);
 
-        if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
-            date_default_timezone_set("GMT");
-            $action->fulldayevent = true;
-            $extraData['lastOccurence'] -= 60;
-        } else
-            date_default_timezone_set("Europe/Paris");
+            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
+                date_default_timezone_set("GMT");
+                $action->fulldayevent = true;
+                $extraData['lastOccurence'] -= 60;
+            } else
+                date_default_timezone_set("Europe/Paris");
 
-        $action->datep = $extraData['firstOccurence'];
-        $action->datef = $extraData['lastOccurence'];
-        if (isset($calendarData2['SUMMARY']))
-            $action->label = $calendarData2['SUMMARY'];
-        if (isset($calendarData2['DESCRIPTION']))
-            $action->note = $calendarData2['DESCRIPTION'];
-        if (isset($calendarData2['LOCATION']))
-            $action->location = $calendarData2['LOCATION'];
+            $action->datep = $extraData['firstOccurence'];
+            $action->datef = $extraData['lastOccurence'];
+            if (isset($calendarData2['SUMMARY']))
+                $action->label = $calendarData2['SUMMARY'];
+            if (isset($calendarData2['DESCRIPTION']))
+                $action->note = $calendarData2['DESCRIPTION'];
+            if (isset($calendarData2['LOCATION']))
+                $action->location = $calendarData2['LOCATION'];
 
 //            $action->array_options['agendaplus'] = $calendarData;
-        $user = $this->getUser($calendarId);
+            $user = $this->getUser($calendarId);
 
-        $action->type_id = 5;
-        global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
-        $objectDataTemp = $calendarData;
-        $objectEtagTemp = $extraData['etag'];
-        $objectUriTemp = $objectUri;
+            $action->type_id = 5;
+            global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
+            $objectDataTemp = $calendarData;
+            $objectEtagTemp = $extraData['etag'];
+            $objectUriTemp = $objectUri;
 
-        $this->traiteParticipant($action, $calendarData2, $calendarId);
+            $this->traiteParticipant($action, $calendarData2, $calendarId);
 
-        $action->userownerid = $calendarId;
-        $action->percentage = -1;
-        if ($action->add($user) < 1)
-            $this->forbiden();
-        
+            $action->userownerid = $calendarId;
+            $action->percentage = -1;
+            if ($action->add($user) < 1)
+                $this->forbiden();
 
-        $this->traiteParticipant($action, $calendarData2, $calendarId);
+
+            $this->traiteParticipant($action, $calendarData2, $calendarId);
 
 //        $this->userIdCaldavPlus($calendarId);
+        }
     }
 
     public function getUser($calendarId) {
@@ -565,7 +576,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $tabMailInc[] = $mail;
             }
         }
-        if($action->id > 0){
+        if ($action->id > 0) {
             $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
         }
@@ -706,7 +717,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
 
-       $tabHead2 = array("BEGIN:VTIMEZONE",
+        $tabHead2 = array("BEGIN:VTIMEZONE",
             "TZID:Europe/Paris",
             "BEGIN:DAYLIGHT",
             "TZOFFSETFROM:+0100",
@@ -746,8 +757,8 @@ WHERE  `email` LIKE  '" . $mail . "'");
     function traiteIcsTab($tab) {
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
-$tabR = array( CHR(13) => " ", CHR(10) => " " ); 
-$ligne = strtr($ligne,$tabR); 
+            $tabR = array(CHR(13) => " ", CHR(10) => " ");
+            $ligne = strtr($ligne, $tabR);
             if (!is_integer($clef)) {
                 if (stripos($ligne, "=") !== false && $clef != "URL")
                     $tab2[] = $clef . ";" . $ligne;
@@ -774,10 +785,10 @@ $ligne = strtr($ligne,$tabR);
      * @return array
      */
     protected function getDenormalizedData($calendarData) {
-        
-        
-        $tabR = array(";LANGUAGE=fr-FR", ";LANGUAGE=en-EN", ";LANGUAGE=en-US"); 
-        $calendarData = str_replace($tabR, "",$calendarData); 
+
+
+        $tabR = array(";LANGUAGE=fr-FR", ";LANGUAGE=en-EN", ";LANGUAGE=en-US");
+        $calendarData = str_replace($tabR, "", $calendarData);
 
         $vObject = VObject\Reader::read($calendarData);
         $componentType = null;

@@ -328,45 +328,46 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
 
 
-
-        $facture = new Facture($db);
-        $facture->modelpdf = "crabeSav";
-        $facture->createFromOrder($propal);
+        if ($propal->id > 0) {
+            $facture = new Facture($db);
+            $facture->modelpdf = "crabeSav";
+            $facture->createFromOrder($propal);
 //        $facture->create($user);
-        $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Resolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-        $facture->validate($user, '', $idEntrepot);
-        $facture->fetch($facture->id);
+            $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Resolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+            $facture->validate($user, '', $idEntrepot);
+            $facture->fetch($facture->id);
 
 
-        $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "element_contact 
+            $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "element_contact 
 WHERE  `element_id` =" . $propal->id . "
 AND  `fk_c_type_contact` =40");
-        while ($ligne = $db->fetch_object($sql))
-            $db->query("INSERT INTO " . MAIN_DB_PREFIX . "element_contact (`statut`, `element_id`, `fk_c_type_contact`, `fk_socpeople`) VALUES ('4', '" . $facture->id . "', '60', '" . $ligne->fk_socpeople . "');");
+            while ($ligne = $db->fetch_object($sql))
+                $db->query("INSERT INTO " . MAIN_DB_PREFIX . "element_contact (`statut`, `element_id`, `fk_c_type_contact`, `fk_socpeople`) VALUES ('4', '" . $facture->id . "', '60', '" . $ligne->fk_socpeople . "');");
 
-        if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0 && $_REQUEST['modeP'] != 56)) {
-            require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-            $payement = new Paiement($db);
-            $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());
-            $payement->datepaye = dol_now();
-            $payement->paiementid = $_REQUEST['modeP'];
-            $payement->create($user);
-            $facture->set_paid($user);
+            if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0 && $_REQUEST['modeP'] != 56)) {
+                require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                $payement = new Paiement($db);
+                $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());
+                $payement->datepaye = dol_now();
+                $payement->paiementid = $_REQUEST['modeP'];
+                $payement->create($user);
+                $facture->set_paid($user);
 //            facture_pdf_create($db, $facture, "crabeSav", $langs);
-        }
+            }
 
 
-        $chrono->propal->cloture($user, 2, "Auto via SAV");
+            $chrono->propal->cloture($user, 2, "Auto via SAV");
 
 
 
-        //Generation
-        $facture->fetch($facture->id);
-        $facture->generateDocument("crabeSav", $langs);
+            //Generation
+            $facture->fetch($facture->id);
+            $facture->generateDocument("crabeSav", $langs);
 //        facture_pdf_create($db, $facture, "crabeSav", $langs);
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
-        link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
-
+            link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
+            envoieMail("Facture", $chrono, $facture, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
+        }
 
 
         $sql = $db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "synopsis_apple_repair` WHERE `chronoId` = " . $chrono->id . " AND ready_for_pick_up = 1 ORDER BY `rowid` ASC");
@@ -376,7 +377,6 @@ AND  `fk_c_type_contact` =40");
             $gsxData->closeRepair($data->rowid);
         }
 
-        envoieMail("Facture", $chrono, $facture, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
     }
 
     if ($action == "mailSeul" && isset($_REQUEST['mailType'])) {
@@ -552,8 +552,6 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
 \nL'équipe BIMP" . $signature, array(), array(), array());
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
     } elseif ($type == "commercialRefuse") {
-        mailSyn2("Devis sav refusé par « " . $chrono->societe->getNomUrl(1)." »", $toMail, $fromMail, 
-                "Notre client « " . $chrono->societe->getNomUrl(1)." » a refusé le devis de réparation sur son « ".$nomMachine." » pour un montant de «  ".$chrono->propal->total_ht."€ »", 
-                array(), array(), array());
+        mailSyn2("Devis sav refusé par « " . $chrono->societe->getNomUrl(1) . " »", $toMail, $fromMail, "Notre client « " . $chrono->societe->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . $chrono->propal->total_ht . "€ »", array(), array(), array());
     }
 }

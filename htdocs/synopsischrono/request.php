@@ -172,14 +172,6 @@ if (isset($_REQUEST['actionEtat'])) {
 
             $propal->fetch($chrono->propal->id);
             $propal->generateDocument("azurSAV", $langs);
-            if ($chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
-                $req = "SELECT `nom` FROM `" . MAIN_DB_PREFIX . "usergroup` WHERE rowid IN (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $chrono->extraValue[$chrono->id]['Technicien']['value'] . ") ANd `nom` REGEXP 'Sav([0-9])'";
-                $sql = $db->query($req);
-                while ($ln = $db->fetch_object($sql)) {
-                    $toMail = str_ireplace("Sav", "Boutique", $ln->nom) . "@bimp.fr";
-                    envoieMail("commercialRefuse", $chrono, null, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
-                }
-            }
 //            propale_pdf_create($db, $propal, "azurSAV", $langs);
 //            $facture = new Facture($db);
 //            $facture->createFromOrder($propal);
@@ -211,6 +203,14 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         $chrono->propal->cloture($user, 3, "Auto via SAV");
         $chrono->setDatas($chrono->id, array($idEtat => 6));
+        if ($chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
+            $req = "SELECT `nom` FROM `" . MAIN_DB_PREFIX . "usergroup` WHERE rowid IN (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $chrono->extraValue[$chrono->id]['Technicien']['value'] . ") ANd `nom` REGEXP 'Sav([0-9])'";
+            $sql = $db->query($req);
+            while ($ln = $db->fetch_object($sql)) {
+                $toMail = str_ireplace("Sav", "Boutique", $ln->nom) . "@bimp.fr";
+                envoieMail("commercialRefuse", $chrono, null, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
+            }
+        }
         $ok = true;
     }
     if ($action == "pieceOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {

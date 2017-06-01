@@ -2211,14 +2211,14 @@ class User extends CommonObject
                 else
                     $info['mailForwardingAddress'] = "";
                 
-                $info['carLicense'] = array();
+                $info['pager'] = array();
                 if($domain && $this->statut == 1){
                     $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
                     
                     if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook']){
                         $info['enabledservice'][] = "displayedInGlobalAddressBook";
 //                        $info['carLicense'] = "mail=BIMP"."@".$domain.",ou=Groups,domainName=".$domain.",o=domains,dc=bimp,dc=fr";
-                        $info['carLicense'] = "BIMP";
+                        $info['pager'] = "BIMP";
                     }
                 
                     if(isset($info['uid']) && isset($info["mail"])){

@@ -315,7 +315,7 @@
     </request>
     
 
-    <request name="CreateWholeUnitExchange" type="repair" request="CreateWholeUnitExchangeRequest" wrapper="repairData">
+<!--    <request name="CreateWholeUnitExchange" type="repair" request="CreateWholeUnitExchangeRequest" wrapper="repairData">
         <label>Création d'un échange complet (Create Whole Unit Exchange)</label>
         <datas>
             <data name="billTo" required="0"></data>
@@ -394,7 +394,7 @@
             <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
             <data name="popFaxed" required="0" default="N"></data>
         </datas>
-    </request>
+    </request>-->
 
     <!--    <request name="CreateIndirectOnsiteRepair" type="repair" request="CreateIndirectOnsiteRepairRequest" wrapper="repairData">
         <label>Création d'une réparation indirecte sur place (indirect onsite repair)</label>

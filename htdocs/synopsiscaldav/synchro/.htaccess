@@ -1,0 +1,5 @@
+AuthUserFile /var/GLE/bimp394/.htpasswd
+AuthName Synchro
+AuthType Basic
+ 
+require user toto synchro

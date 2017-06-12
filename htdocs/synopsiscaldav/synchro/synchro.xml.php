@@ -1,6 +1,15 @@
 <?php
 
+
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" || $_SERVER['PHP_AUTH_PW'] != "synchrosynchro" ) {
+    header('WWW-Authenticate: Basic realm="My Realm"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo 'Texte utilisé si le visiteur utilise le bouton d\'annulation';
+    exit;
+} else {
+
 header("Content-type: text/xml");
+}
 
 
 

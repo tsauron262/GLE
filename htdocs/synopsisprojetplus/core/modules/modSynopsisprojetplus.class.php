@@ -175,15 +175,18 @@ CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
   `note` text,
   `occupation` int(11) NOT NULL
 );",
-"CREATE OR REPLACE VIEW `" . MAIN_DB_PREFIX . "Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM " . MAIN_DB_PREFIX . "projet p1 LEFT join " . MAIN_DB_PREFIX . "Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)",            
             
+                        
   "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_projet_sup` (
   `rowid` int(11) NOT NULL,
   `fk_user_resp` int(11) DEFAULT NULL,
   `fk_type_projet` int(11) DEFAULT '1',
   `date_valid` datetime DEFAULT NULL,
   `date_launch` datetime DEFAULT NULL
-);",          
+);",        
+            
+"CREATE OR REPLACE VIEW `" . MAIN_DB_PREFIX . "Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM " . MAIN_DB_PREFIX . "projet p1 LEFT join " . MAIN_DB_PREFIX . "Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)",            
+  
             
             "ALTER TABLE `".MAIN_DB_PREFIX."synopsis_projet_task_timeP`
   ADD PRIMARY KEY (`rowid`),

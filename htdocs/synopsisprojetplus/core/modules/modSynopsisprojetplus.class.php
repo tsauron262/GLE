@@ -163,7 +163,7 @@ class modSynopsisprojetplus extends DolibarrModules {
         $this->remove();
         
         $sql = array("
-CREATE TABLE if not exist `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
+CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
   `rowid` int(11) NOT NULL,
   `fk_task` int(11) NOT NULL,
   `task_date` date DEFAULT NULL,
@@ -175,7 +175,7 @@ CREATE TABLE if not exist `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
   `note` text,
   `occupation` int(11) NOT NULL
 );",
-"CREATE VIEW if not exist `" . MAIN_DB_PREFIX . "Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM " . MAIN_DB_PREFIX . "projet p1 LEFT join " . MAIN_DB_PREFIX . "Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)",            
+"CREATE VIEW IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM " . MAIN_DB_PREFIX . "projet p1 LEFT join " . MAIN_DB_PREFIX . "Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)",            
             
             
             

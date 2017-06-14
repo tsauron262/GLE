@@ -151,7 +151,7 @@ if ($socid>0)
         $sql .= " , ".MAIN_DB_PREFIX."usergroup_user as ugu";
         $sql .= " WHERE u.rowid = ugu.fk_user";
         $sql .= " AND ug.rowid = ugu.fk_usergroup";
-        $sql .= " AND ug.nom = 'Commerciaux (tous)'";
+        $sql .= " AND ug.nom LIKE 'XX Commerciaux (tous)'";
         $sql .= " ORDER BY u.firstname ASC ";
 
         $resql = $db->query($sql);

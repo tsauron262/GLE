@@ -400,7 +400,7 @@ class PDO extends AbstractBackend {
         $action->id = $row['id'];
         $action->fetch_userassigned();
         foreach ($action->userassigned as $val) {
-            if ($val['id'] != $calendarId) {
+            if (1 || $val['id'] != $calendarId) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
@@ -413,7 +413,7 @@ class PDO extends AbstractBackend {
                 $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
             
         if($row['organisateur'] != "")
-            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+            $calendarData2[] = "ORGANIZER;mailto:" . $row['organisateur'];
 
 
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);

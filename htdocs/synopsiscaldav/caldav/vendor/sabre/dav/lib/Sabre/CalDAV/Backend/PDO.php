@@ -413,7 +413,7 @@ class PDO extends AbstractBackend {
                 $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
             
         if($row['organisateur'] != "")
-            $calendarData2[] = "ORGANIZER;mailto:" . $row['organisateur'];
+            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
 
 
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);

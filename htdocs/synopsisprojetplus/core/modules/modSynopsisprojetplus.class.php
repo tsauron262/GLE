@@ -70,7 +70,7 @@ class modSynopsisprojetplus extends DolibarrModules {
         $this->langfiles = array("synopsisprojetplus@synopsisprojetplus");
 
         // Dependances
-        $this->depends = array("modSociete");
+        $this->depends = array();
         $this->requiredby = array();
         $this->config_page_url = preg_replace('/^mod/i', '', get_class($this)).".php";
 

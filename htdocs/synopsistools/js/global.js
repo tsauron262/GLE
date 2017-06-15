@@ -66,7 +66,7 @@ $(window).load(function () {
     //    if ((navigator.appName).search(/Safari.+/) != -1){
     $(".formdoc a").each(function () {
         if ($(this).attr('href').search(/.pdf/i) >= 0)
-            $(this).attr("target", "");
+            $(this).attr("target", "_blank");
     });
     //    }
 //    initFormChrono();

@@ -567,11 +567,16 @@ class PDO extends AbstractBackend {
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
-                    $organisateur = str_replace("\n", "", $tabT[1]);
+                    $organisateur = $tabT[1];
             }
         }
         if($organisateur == "" && isset($tabMail[0]))
             $organisateur = $tabMail[0];
+        
+        dol_syslog(print_r($tabMail,1),3);
+        
+                    $organisateur = str_replace(array("\n", 
+), "", $organisateur);
 
         $tabMailInc = array();
         $action->userassigned = array($user => array('id' => $user));

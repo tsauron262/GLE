@@ -50,7 +50,7 @@ function widget_statProjectWarning() {
         {
             $projet = new Project($db);
             $projet->fetch($res->rowid);
-            $requete1 = "SELECT t.title,
+            $requete1 = "SELECT t.label,
                                 ifnull((SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."projet_task_time WHERE fk_task = t.rowid),0) as sduration_effective,
                                 ifnull((SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."synopsis_projet_task_timeP WHERE fk_task = t.rowid),0) as sduration,
                                 t.progress, t.rowid

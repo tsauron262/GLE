@@ -559,12 +559,12 @@ class PDO extends AbstractBackend {
                 if (isset($tabT[1]))
                     $tabMail[] = $tabT[1];
             }
-            if (stripos($ligne, "CUTYPE") != false) {
+            elseif (stripos($ligne, "CUTYPE") != false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
                     $tabMail[] = $tabT[1];
             }
-            if (stripos($ligne, "ORGANIZER") != false || stripos($nom, "ORGANIZER") != false) {
+            if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
                     $organisateur = str_replace("\n", "", $tabT[1]);

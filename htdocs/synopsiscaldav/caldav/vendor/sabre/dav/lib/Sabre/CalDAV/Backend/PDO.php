@@ -553,7 +553,7 @@ class PDO extends AbstractBackend {
         if (is_object($user))
             $user = $user->id;
         dol_syslog(print_r($calendarData2,1),3);
-        foreach ($calendarData2 as $ligne) {
+        foreach ($calendarData2 as $nom => $ligne) {
             if (stripos($ligne, "ATTENDEE") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
@@ -564,7 +564,7 @@ class PDO extends AbstractBackend {
                 if (isset($tabT[1]))
                     $tabMail[] = $tabT[1];
             }
-            if (stripos($ligne, "ORGANIZER") != false) {
+            if (stripos($ligne, "ORGANIZER") != false || stripos($nom, "ORGANIZER") != false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
                     $organisateur = $tabT[1];

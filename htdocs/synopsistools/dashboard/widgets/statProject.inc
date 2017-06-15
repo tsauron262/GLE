@@ -57,7 +57,7 @@ function widget_statProject() {
             $sql .= " " . MAIN_DB_PREFIX . "societe_commerciaux as sc,";
         $sql.= " " . MAIN_DB_PREFIX . "Synopsis_projet_view as p";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "projet_task as t ON p.rowid = t.fk_projet";
-        $sql.= " WHERE fk_statut < 50";
+        $sql.= " WHERE t.fk_statut < 50";
         if (!$user->rights->societe->client->voir && !$socid)
             $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " . $user->id;
         if ($socid) {

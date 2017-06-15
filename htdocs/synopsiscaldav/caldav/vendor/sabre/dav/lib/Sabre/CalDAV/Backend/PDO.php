@@ -567,7 +567,7 @@ class PDO extends AbstractBackend {
             if (stripos($ligne, "ORGANIZER") != false || stripos($nom, "ORGANIZER") != false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
-                    $organisateur = $tabT[1];
+                    $organisateur = str_replace("\n", "", $tabT[1]);
             }
         }
         if($organisateur == "" && isset($tabMail[0]))
@@ -589,7 +589,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
         if ($action->id > 0) {
-            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET participentExt = '" . $organisateur . "' organisateur = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
+            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "' participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
         }
     }

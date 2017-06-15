@@ -411,6 +411,9 @@ class PDO extends AbstractBackend {
         foreach ($tabPartExt as $part)
             if ($part != "")
                 $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
+            
+        if($row['organisateur'] != "")
+            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
 
 
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
@@ -546,6 +549,7 @@ class PDO extends AbstractBackend {
     public function traiteParticipant($action, $calendarData2, $user) {
         global $db;
         $tabMail = array();
+        $organisateur = "";
         if (is_object($user))
             $user = $user->id;
         foreach ($calendarData2 as $ligne) {
@@ -559,7 +563,14 @@ class PDO extends AbstractBackend {
                 if (isset($tabT[1]))
                     $tabMail[] = $tabT[1];
             }
+            if (stripos($ligne, "ORGANIZER") != false) {
+                $tabT = explode("mailto:", $ligne);
+                if (isset($tabT[1]))
+                    $organisateur = $tabT[1];
+            }
         }
+        if($organisateur == "" && isset($tabMail[0]))
+            $organisateur = $tabMail[0];
 
         $tabMailInc = array();
         $action->userassigned = array($user => array('id' => $user));
@@ -577,7 +588,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
         if ($action->id > 0) {
-            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
+            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET participentExt = '" . $organisateur . "' organisateur = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
         }
     }

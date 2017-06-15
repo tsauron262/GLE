@@ -172,7 +172,8 @@ CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
   `task_duration` double DEFAULT NULL,
   `fk_user` int(11) DEFAULT NULL,
   `thm` double(24,8) DEFAULT NULL,
-  `note` text
+  `note` text,
+  FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
 )",
             
                         
@@ -187,22 +188,19 @@ CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
 "CREATE OR REPLACE VIEW `" . MAIN_DB_PREFIX . "Synopsis_projet_view` AS (SELECT p1.*, p2.`fk_user_resp`,`fk_type_projet`,`date_valid`,`date_launch`,p1.note_public as note FROM " . MAIN_DB_PREFIX . "projet p1 LEFT join " . MAIN_DB_PREFIX . "Synopsis_projet_sup p2 ON p1.rowid = p2.rowid)",            
   
             
-            "ALTER TABLE `".MAIN_DB_PREFIX."synopsis_projet_task_timeP`
+ /*           "ALTER TABLE `".MAIN_DB_PREFIX."synopsis_projet_task_timeP`
   ADD KEY `idx_Synopsis_projet_task_time_task` (`fk_task`),
   ADD KEY `idx_Synopsis_projet_task_time_date` (`task_date`),
-  ADD KEY `idx_Synopsis_projet_task_time_datehour` (`task_datehour`);",
+  ADD KEY `idx_Synopsis_projet_task_time_datehour` (`task_datehour`);",*/
             
             "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisprojet_stat` (
-  `rowid` int(11) NOT NULL,
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `dateC` date NOT NULL,
   `type` varchar(255) NOT NULL,
   `occupation` int(11) NOT NULL,
-  `valeur` decimal(10,2) NOT NULL);",
-            "
-ALTER TABLE `".MAIN_DB_PREFIX."synopsisprojet_stat`
-  ADD PRIMARY KEY (`rowid`);",
-            "ALTER TABLE `".MAIN_DB_PREFIX."synopsisprojet_stat`
-  MODIFY `rowid` int(11) NOT NULL AUTO_INCREMENT;",
+  `valeur` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`rowid`));",
+            
             
             "UPDATE ".MAIN_DB_PREFIX."projet_task t SET t.dateo = (SELECT p.dateo FROM ".MAIN_DB_PREFIX."projet p WHERE t.fk_projet = p.rowid) WHERE t.dateo < '1980-01-01' || t.dateo is NULL;",
 

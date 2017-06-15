@@ -583,6 +583,8 @@ class PDO extends AbstractBackend {
         foreach ($tabMail as $mail) {
             $mail = str_replace("\n", "", $mail);
             $mail = str_replace("\r", "", $mail);
+            $organisateur = str_replace("\n", "", $organisateur);
+            $organisateur = str_replace("\r", "", $organisateur);
             $sql = $db->query("SELECT rowid 
 FROM  `" . MAIN_DB_PREFIX . "user` 
 WHERE  `email` LIKE  '" . $mail . "'");

@@ -552,6 +552,7 @@ class PDO extends AbstractBackend {
         $organisateur = "";
         if (is_object($user))
             $user = $user->id;
+        dol_syslog($calendarData2,3);
         foreach ($calendarData2 as $ligne) {
             if (stripos($ligne, "ATTENDEE") !== false) {
                 $tabT = explode("mailto:", $ligne);

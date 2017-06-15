@@ -373,7 +373,7 @@ class PDO extends AbstractBackend {
      * @return array|null
      */
     public function getCalendarObject($calendarId, $objectUri) {
-        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -552,7 +552,7 @@ class PDO extends AbstractBackend {
         $organisateur = "";
         if (is_object($user))
             $user = $user->id;
-        dol_syslog($calendarData2,3);
+        dol_syslog(print_r($calendarData2,1),3);
         foreach ($calendarData2 as $ligne) {
             if (stripos($ligne, "ATTENDEE") !== false) {
                 $tabT = explode("mailto:", $ligne);

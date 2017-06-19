@@ -81,7 +81,7 @@ class Chrono extends CommonObject {
                         $contact->fetch($this->contactid);
                         $this->contact = $contact;
                     }
-                    $this->file_path = $res->file_path;
+//                    $this->file_path = $res->file_path;
                     $this->description = $res->description;
                     $this->model_refid = $res->model_refid;
                     $this->propalid = $res->propalid;
@@ -791,7 +791,7 @@ class Chrono extends CommonObject {
                 $this->keysList[$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList, "rang" => $res->rang, "rangPublic" => $res->rangPublic);
                 $this->keysListId[] = $res->id;
 
-                $this->keysListByModel[$this->model_refid][$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList, "rang" => $res->rang, "rangPublic" => $res->rangPublic);
+                $this->keysListByModel[$this->model_refid][$res->id] = array("extraCss" => $res->extraCss, "key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList, "rang" => $res->rang, "rangPublic" => $res->rangPublic, "type_subvaleur" => $res->type_subvaleur);
                 $this->keysListIdByModel[$this->model_refid][] = $res->id;
             }
         }
@@ -1147,7 +1147,7 @@ class ChronoRef {
             $this->hasDescription = $res->hasDescription;
             $this->typeDescription = $res->typeDescription;
             $this->nomDescription = $res->nomDescription;
-            $this->hasMultipleValue = $res->hasMultipleValue;
+//            $this->hasMultipleValue = $res->hasMultipleValue;
             $this->hasStatut = $res->hasStatut;
             $this->hasSuivie = $res->hasSuivie;
             $this->hasPropal = $res->hasPropal;

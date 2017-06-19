@@ -82,6 +82,9 @@ function chrono_prepare_head($objsoc)
         $head[$h][4] = 'ui-icon ui-icon-gear';
         $h++;
     }
+    
+    complete_head_from_modules($conf,$langs,$objsoc,$head,$h,'chrono');
+    
     return $head;
 }
 

@@ -195,7 +195,7 @@ if ($selectedFile) {
             $pdf->setXY(167, 247.5);
             $pdf->image($nomSign, 160, 256  , 40);
         }
-        elseif (stripos($signeFile, 'FA') === 0){
+        elseif (stripos($signeFile, 'FA') === 0 || stripos($signeFile, 'AC') === 0){
             $fontSize = 8;
             $pdf->setXY(90, 250);
             $pdf->image($nomSign, 89, 255 , 25);

@@ -180,7 +180,7 @@ if ($selectedFile) {
         }
 
         $date = date("Y-m-d H:i");
-                $pdf->SetFont(null, '', 10);
+                $fontSize = 10;
 
         $pdf->setXY(167, 247.5);
         if (stripos($signeFile, 'Destruction') === 0){
@@ -196,7 +196,7 @@ if ($selectedFile) {
             $pdf->image($nomSign, 160, 256  , 40);
         }
         elseif (stripos($signeFile, 'FA') === 0){
-                $pdf->SetFont(null, '', 8);
+            $fontSize = 8;
             $pdf->setXY(90, 250);
             $pdf->image($nomSign, 89, 255 , 25);
         }
@@ -211,7 +211,8 @@ if ($selectedFile) {
         else
             $pdf->image($nomSign, 148, 220, 65);
         
-        $pdf->MultiCell(25, 20, $date);
+        $pdf->SetFont(null, '', $fontSize);
+        $pdf->MultiCell(($fontSize < 9) ? 25 : 30, 20, $date);
         $pdf->Close();
 
         $pdf->Output($dir . "/" . $signeFile, 'F');

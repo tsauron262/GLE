@@ -93,6 +93,8 @@ function synopsisfichinter_prepare_head($fichinter)
     $head[$h][1] = $langs->trans('Info');
     $head[$h][2] = 'info';
     $h++;
+    
+    complete_head_from_modules($conf,$langs,$fichinter,$head,$h,'intervention');
 
   return $head;
 }

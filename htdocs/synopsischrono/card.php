@@ -84,8 +84,6 @@ $para = "id=" . $_REQUEST['id'];
 if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php");
     $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
-    print_r($chr);
-    die;
     synopsischrono_pdf_create($db, $chr, $model);
     header('location: ?' . $para . "#documentAnchor");
 }

@@ -7,6 +7,21 @@
  * Name : listDetail.php.php
  * GLE-1.2
  */
+$typeObj = (isset($_REQUEST['obj']) ? $_REQUEST['obj'] : null);
+$id = (isset($_REQUEST['id']) ? $_REQUEST['id'] : null);
+$selectedFile = isset($_REQUEST['file']) ? $_REQUEST['file'] : null;
+
+
+
+$invite = false;
+if (isset($_REQUEST['code'])) {
+    $code = $_REQUEST['code'];
+    define("NOLOGIN", '1');
+    $invite = true;
+}
+
+
+
 require_once('../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/chronoDetailList.php");
@@ -17,89 +32,111 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
 $socid = isset($_GET["socid"]) ? $_GET["socid"] : '';
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
+if (!$invite)
+    $result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
+else {
+    if ($code != "nc" && $code != "" && $code != 0)
+        $tabRes = getElementElement("demSign", null, $code);
+    else
+        $code = "nc";
+    $conf->dol_hide_topmenu = true;
+    $conf->dol_hide_leftmenu = true;
+
+
+
+
+    if ($code == "nc" || count($tabRes) < 1) {
+        if ($code != "nc")
+            echo ("<h3>Code incorrect</h3>");
+        echo "Code : <form method='get'>";
+
+        echo "<input type='text' name='code'/><input type='submit'/></form>";
+        die;
+    }
+    else {
+        $id = $tabRes[0]['d'];
+        $temp = explode("|", $tabRes[0]['td']);
+        $typeObj = $temp[0];
+        $selectedFile = $temp[1];
+    }
+}
 //$user, $feature='societe', $objectid=0, $dbtablename='',$feature2='',$feature3=''
 
 
-$id = $_REQUEST['id'];
-$modelT = $_REQUEST['model'];
+
 
 $js = $html = $html2 = $titreGege = "";
 
 
-//$tabModel = array(100, 101);
-
-$tabModel = array();
 $champ = array();
 $clef = "id";
-if (isset($_REQUEST['obj'])) {
-    if ($_REQUEST['obj'] == "soc") {
+if ($typeObj) {
+    if ($typeObj == "soc") {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
         $object = new Societe($db);
-        $object->fetch($_REQUEST['id']);
-        $filtre = "fk_soc=" . urlencode($_REQUEST['id']);
+        $object->fetch($id);
+        $filtre = "fk_soc=" . urlencode($id);
         $head = societe_prepare_head($object);
-        $socid = $_REQUEST['id'];
+        $socid = $id;
 
         $titreGege = $object->getNomUrl();
-//            $tabModel[$result->id] = $result->titre;
-    } else if ($_REQUEST['obj'] == "ctr") {
+    } else if ($typeObj == "ctr") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php';
         require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $object = new Contrat($db);
-        $object->fetch($_REQUEST['id']);
+        $object->fetch($id);
 //        $filtre = "Contrat=" . urlencode($object->ref);
         $filtre = "fk_contrat=" . $object->id;
         $head = contract_prepare_head($object);
         $socid = $object->socid;
-        $objectId = $_REQUEST['id'];
-    }else if ($_REQUEST['obj'] == "fi") {
+        $objectId = $id;
+    } else if ($typeObj == "fi") {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/fichinter.lib.php';
         require_once DOL_DOCUMENT_ROOT . '/fichinter/class/fichinter.class.php';
         $object = new Fichinter($db);
-        $object->fetch($_REQUEST['id']);
+        $object->fetch($id);
         $head = fichinter_prepare_head($object);
         $socid = $object->socid;
-        $objectId = $_REQUEST['id'];
+        $objectId = $id;
         $module = "ficheinter";
         $clef = "ref";
-    } else if ($_REQUEST['obj'] == "shipping") {
+    } else if ($typeObj == "shipping") {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/sendings.lib.php';
         $object = new Expedition($db);
-        $object->fetch($_REQUEST['id']);
+        $object->fetch($id);
         $head = shipping_prepare_head($object);
         $socid = $object->socid;
-        $objectId = $_REQUEST['id'];
+        $objectId = $id;
         $module = "expedition";
-        $dirFile = $module."/sending";
+        $dirFile = $module . "/sending";
         $clef = "ref";
-    } else if ($_REQUEST['obj'] == "project") {
+    } else if ($typeObj == "project") {
         $langs->load("projects");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/project.lib.php';
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
         $object = new Project($db);
-        $object->fetch($_REQUEST['id']);
+        $object->fetch($id);
         $head = project_prepare_head($object);
         $filtre = "fk_projet=" . $object->id;
         $champ['fk_projet'] = $object->id;
         $socid = $object->socid;
-    } else if ($_REQUEST['obj'] == "propal") {
+    } else if ($typeObj == "propal") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/propal.lib.php';
         require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
         $object = new Propal($db);
-        $object->fetch($_REQUEST['id']);
+        $object->fetch($id);
         $filtre = "fk_propal=" . $object->id;
         $champ['fk_propal'] = $object->id;
         $head = propal_prepare_head($object);
         $socid = $object->socid;
-    } else if ($_REQUEST['obj'] == "chrono") {
+    } else if ($typeObj == "chrono") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/synopsischrono/core/lib/synopsischrono.lib.php';
         require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
         $object = new Chrono($db);
-        $object->fetch($_REQUEST['id']);
+        $object->fetch($id);
         $filtre = "fk_propal=" . $object->id;
         $champ['fk_propal'] = $object->id;
         $head = chrono_prepare_head($object);
@@ -111,13 +148,17 @@ if (isset($_REQUEST['obj'])) {
     die;
 }
 
-if(!isset($dirFile))
+
+if (!isset($dirFile))
     $dirFile = $module;
 
 $nomOnglet = "signature";
 $afficheSign = false;
+
 llxHeader($js, $nomOnglet);
-dol_fiche_head($head, 'signature', $langs->trans($nomOnglet));
+if (!$invite) {
+    dol_fiche_head($head, 'signature', $langs->trans($nomOnglet));
+}
 
 
 
@@ -125,7 +166,7 @@ print '<table class="border" width="100%">';
 print '<tr><td width="25%">' . $langs->trans('Nom élément') . '</td>';
 print '<td colspan="3">';
 print $object->getNomUrl(1);
-//print $form->showrefnav($obj, 'obj=' . $_REQUEST['obj'] . '&id', '', ($user->societe_id ? 0 : 1), 'rowid', $champ);
+//print $form->showrefnav($obj, 'obj=' . $typeObj . '&id', '', ($user->societe_id ? 0 : 1), 'rowid', $champ);
 print '</td></tr>';
 if ($object != $soc && $socid > 0) {
     $soc = new Societe($db);
@@ -137,41 +178,47 @@ if ($object != $soc && $socid > 0) {
 }
 
 
-$selectedFile = isset($_REQUEST['file']) ? $_REQUEST['file'] : null;
 
 $dir = DOL_DATA_ROOT . "/" . $dirFile . "/" . $object->$clef;
 if (!$selectedFile) {
     $filearray = dol_dir_list($dir, "files");
     $filearray2 = array();
-    foreach ($filearray as $file) 
+    foreach ($filearray as $file)
         if (stripos($file['name'], ".pdf") > -1 && stripos($file['name'], "-signe") < 1)
-                $filearray2[] = $file['name'];
+            $filearray2[] = $file['name'];
 
     if (count($filearray2) == 1)
         $selectedFile = $filearray2[0];
     else {
         echo "<tr><td>Choix du doc</td><td><form method='post'><select name='file'>";
         foreach ($filearray2 as $file) {
-                echo "<option value='" . $file . "'>" . $file . "</option>";
+            echo "<option value='" . $file . "'>" . $file . "</option>";
         }
         echo "</select><input type='submit'/></form>";
     }
 }
 if ($selectedFile) {
     $afficheSign = true;
-    
+
     $signeFile = str_replace(".pdf", "-signe.pdf", $selectedFile);
-    
-    if (isset($_REQUEST['img'])) {
+
+    if (isset($_REQUEST['demSign'])) {
+        $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
+        setElementElement("demSign", $typeObj . "|" . $selectedFile, $code, $id);
+        $afficheSign = false;
+
+        echo "<h4>Code de sécurité : " . $code . "</h4>";
+        $lien = DOL_URL_ROOT . "/synopsissignature/signature.php?code=" . $code;
+        echo "<br/><h4>Lien : <a href='" . $lien . "'>" . $lien . "</a></h4>";
+    } else if (isset($_REQUEST['img'])) {
         $nomSign = $dir . "/temp/signature.png";
         base64_to_jpeg($_REQUEST['img'], $nomSign);
 
         $afficheSign = false;
 
-
         require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
         $pdf = pdf_getInstance();
-        $pdf->SetMargins(0,0,0,0);   // Left, Top, Right
+        $pdf->SetMargins(0, 0, 0, 0);   // Left, Top, Right
         $pagecount = $pdf->setSourceFile($dir . "/" . $selectedFile);
         for ($i = 0; $i < $pagecount; $i++) {
             $pdf->AddPage();
@@ -180,42 +227,45 @@ if ($selectedFile) {
         }
 
         $date = date("Y-m-d H:i");
-                $fontSize = 10;
+        $fontSize = 10;
 
         $pdf->setXY(167, 247.5);
-        if (stripos($signeFile, 'Destruction') === 0){
+        if (stripos($signeFile, 'Destruction') === 0) {
             $pdf->setXY(17, 233);
             $pdf->image($nomSign, 130, 240, 60);
-        }
-        elseif (stripos($signeFile, 'PC-SAV') === 0){
+        } elseif (stripos($signeFile, 'PC-SAV') === 0) {
             $pdf->setXY(160, 210);
             $pdf->image($nomSign, 155, 220, 45);
-        }
-        elseif (stripos($signeFile, 'PR') === 0){
+        } elseif (stripos($signeFile, 'PR') === 0) {
             $pdf->setXY(167, 247.5);
-            $pdf->image($nomSign, 160, 256  , 40);
-        }
-        elseif (stripos($signeFile, 'FA') === 0 || stripos($signeFile, 'AC') === 0){
+            $pdf->image($nomSign, 160, 256, 40);
+        } elseif (stripos($signeFile, 'FA') === 0 || stripos($signeFile, 'AC') === 0) {
             $fontSize = 8;
             $pdf->setXY(90, 250);
-            $pdf->image($nomSign, 89, 255 , 25);
-        }
-        elseif (stripos($signeFile, 'FI') === 0){
+            $pdf->image($nomSign, 89, 255, 25);
+        } elseif (stripos($signeFile, 'FI') === 0) {
             $pdf->setXY(8, 255);
-            $pdf->image($nomSign, 10,260  , 28);
-        }
-        elseif (stripos($signeFile, 'SH') === 0){
+            $pdf->image($nomSign, 10, 260, 28);
+        } elseif (stripos($signeFile, 'SH') === 0) {
             $pdf->setXY(25, 240);
-            $pdf->image($nomSign, 25,245  , 40);
-        }
-        else
+            $pdf->image($nomSign, 25, 245, 40);
+        } else
             $pdf->image($nomSign, 148, 220, 65);
-        
+
         $pdf->SetFont(null, '', $fontSize);
         $pdf->MultiCell(($fontSize < 9) ? 25 : 30, 20, $date);
         $pdf->Close();
 
         $pdf->Output($dir . "/" . $signeFile, 'F');
+
+        if ($invite) {
+            delElementElement("demSign", null, $code);
+            echo "</table><h2>Merci</h2>";
+            echo "Code : <form method='get'>";
+
+            echo "<input type='text' name='code'/><input type='submit'/></form>";
+            die();
+        }
     }
 
 
@@ -225,57 +275,59 @@ if ($selectedFile) {
     if ($afficheSign) {
         echo "<tr><td colspan='2'>Signez ICI<div id='signatureZone' style='width: 400px; margin: auto;'></div>";
 
-        echo '<form method="post">'
+        echo '<form style="text-align: center;" method="post">'
         . '<input type="hidden" class="nav shrinkwidth_parent" name="img" id="someelement"/>'
         . '<input type="hidden" value="' . $selectedFile . '" name="file"/>'
         . '<input type="submit" value="Signer"/>'
         . '<input type="button" value="Effacer" id="clear"/>'
+        . ($invite ? '' : '<input type="submit" name="demSign" value="Demande Signature" id="demande"/>')
         . '</form></td></tr>';
 
         echo '<script type="text/javascript" src="jSignature.min.js"></script>'
         . '<script type="text/javascript">'
-                . 'var $sigdiv = $("#signatureZone"); '
-                . '$sigdiv.jSignature(); '
-                . '$sigdiv.jSignature("reset");'
-                . '$("#signatureZone").change(function(){'
-                . 'var datapair = $sigdiv.jSignature("getData", "image");
+        . 'var $sigdiv = $("#signatureZone"); '
+        . '$sigdiv.jSignature(); '
+        . '$sigdiv.jSignature("reset");'
+        . '$("#signatureZone").change(function(){'
+        . 'var datapair = $sigdiv.jSignature("getData", "image");
                         var i = new Image();
                         i.src = "data:" + datapair[0] + "," + datapair[1] ;
                         $("#someelement").val("data:" + datapair[0] + "," + datapair[1]);'
-                . '}); '
-                . '$("#clear").click(function(){'
-                    . '$sigdiv.jSignature("reset");'
-                . '});'
+        . '}); '
+        . '$("#clear").click(function(){'
+        . '$sigdiv.jSignature("reset");'
+        . '});'
         . '</script>'
         . '<style>div#signatureZone{    border: solid!important; background-color:white;}</style>';
     }
 
 
+    if (!$invite) {
+        $fileToShow = (is_file($dir . "/" . $signeFile)) ? $signeFile : $selectedFile;
 
-    $fileToShow = (is_file($dir . "/" . $signeFile)) ? $signeFile : $selectedFile;
-
-    $save_to = str_replace(".pdf", ".jpg", $fileToShow);
-    $dirTemp = $dir . "/temp/";
-    if(!is_dir($dir . "/temp/"))
+        $save_to = str_replace(".pdf", ".jpg", $fileToShow);
+        $dirTemp = $dir . "/temp/";
+        if (!is_dir($dir . "/temp/"))
             mkdir($dir . "/temp/");
-    $commande = 'convert "' . $dir . "/" . $fileToShow . '" -colorspace RGB "' . $dirTemp . $save_to . '"';
-    exec($commande, $output, $return_var);
-    
-    $imgPlusieursPages = str_replace(".jpg", "", $save_to);
-    
-    $i = 0;
-    while(is_file($dir . "/temp/" . $imgPlusieursPages."-".$i.".jpg")){
-        $save_to = $imgPlusieursPages."-".$i.".jpg";
-        $i++;
-    }
-    
-    if ($return_var == 0) {
+        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -colorspace RGB "' . $dirTemp . $save_to . '"';
+        exec($commande, $output, $return_var);
 
-        $debLien = DOL_URL_ROOT . "/document.php?modulepart=" . $module . "&file=" . $object->$clef . "/";
-        echo "<tr><td>Fichier PDF</td><td><a href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
-        echo "<tr><td colspan='2'><img src='" . $debLien . "temp/" . $save_to . "'/>";
-    } else
-        print "Conversion failed.<br />" . $output . "<br/>" . $commande;
+        $imgPlusieursPages = str_replace(".jpg", "", $save_to);
+
+        $i = 0;
+        while (is_file($dir . "/temp/" . $imgPlusieursPages . "-" . $i . ".jpg")) {
+            $save_to = $imgPlusieursPages . "-" . $i . ".jpg";
+            $i++;
+        }
+
+        if ($return_var == 0) {
+
+            $debLien = DOL_URL_ROOT . "/document.php?modulepart=" . $module . "&file=" . $object->$clef . "/";
+            echo "<tr><td>Fichier PDF</td><td><a href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
+            echo "<tr><td colspan='2'><img src='" . $debLien . "temp/" . $save_to . "'/>";
+        } else
+            print "Conversion failed.<br />" . $output . "<br/>" . $commande;
+    }
 }
 
 function base64_to_jpeg($base64_string, $output_file) {
@@ -296,7 +348,8 @@ function base64_to_jpeg($base64_string, $output_file) {
     return $output_file;
 }
 
-llxFooter();
+if (!$invite)
+    llxFooter();
 
 $db->close();
 ?>

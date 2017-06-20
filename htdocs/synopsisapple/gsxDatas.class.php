@@ -967,6 +967,7 @@ class gsxDatas
                     case 'KGBSerialNumberUpdate':
 //                        echo '<pre>';
 //                        print_r($response);
+                        dol_syslog("KGBSerialNumberUpdate".print_r($response,1),3);
 //                        echo '</pre>';
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
                             if ($response[$responseName]['updateStatus'] == "Y") {
@@ -995,7 +996,7 @@ class gsxDatas
                         break;
                     case 'UpdateSerialNumber':
 //                        echo '<pre>';
-//                        print_r($response);
+                        dol_syslog("UpdateSerialNumber".print_r($response,1),3);
 //                        echo '</pre>';
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];

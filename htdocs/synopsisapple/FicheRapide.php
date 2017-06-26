@@ -666,7 +666,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     echo "<br />";
     echo "</p>";
     echo "<p>";
-    echo "Prise en charge pro. <input type='checkbox' name='Pro' id='Pro' " . $pro . "/>";
+    echo "Prise en charge par tech Pro <input type='checkbox' name='Pro' id='Pro' " . $pro . "/>";
     echo "</p>";
 
 

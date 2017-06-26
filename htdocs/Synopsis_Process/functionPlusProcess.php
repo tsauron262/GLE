@@ -105,7 +105,7 @@ function bouttonEtatSav($idChrono) {
         $return .= "<br/>";
     }
 
-    if (/* $etatSav == 2 && */!$propId) {
+    if ($etatSav != 999 && !$propId) {
         $return .= '<a class="butAction" href="?id=' . $idChrono . '&action=createPC">Créer devis</a>';
     }
 
@@ -132,15 +132,17 @@ function bouttonEtatSav($idChrono) {
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
     }
 
-    if ($etatSav == 9) {
-        ob_start();
-        $return .= $form->select_types_paiements("SAV");
-        $return .= ob_get_clean();
-        $return .= "</br>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(this).parent().find(\"#selectpaiementtype\").val();' >Restitué (Payer)</a>";
+    if ($etatSav == 9 || (!$propId && $etatSav != 999)) {
+        if($propId){
+            ob_start();
+            $return .= $form->select_types_paiements("SAV");
+            $return .= ob_get_clean();
+            $return .= "</br>";
+        }
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(this).parent().find(\"#selectpaiementtype\").val();' >Restitué".($propId?" (Payer)":"")."</a>";
     }
     
-    if($propStatut == 0 || $propStatut == 1){
+    if($propId && ($propStatut == 0 || $propStatut == 1)){
         
         $return .= "<br/><a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "\"'>Devis Garantie</a>";
     }

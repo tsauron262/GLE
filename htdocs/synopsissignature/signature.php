@@ -208,7 +208,7 @@ if ($selectedFile) {
         $afficheSign = false;
 
         echo "<h4>Code de sécurité : " . $code . "</h4>";
-        $lien = DOL_URL_ROOT . "/synopsissignature/signature.php?code=" . $code;
+        $lien = $_SERVER['HTTP_HOST'].DOL_URL_ROOT . "/synopsissignature/signature.php?code=" . $code;
         echo "<br/><h4>Lien : <a href='" . $lien . "'>" . $lien . "</a></h4>";
     } else if (isset($_REQUEST['img'])) {
         $nomSign = $dir . "/temp/signature.png";

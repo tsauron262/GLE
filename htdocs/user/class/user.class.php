@@ -2232,6 +2232,8 @@ class User extends CommonObject
                             $info ['mailQuota'] = $this->array_options['options_mailquota'];
                         else
                             $info ['mailQuota'] = "2147483648";
+                        if($info ['mailQuota'] < 100)
+                            $info ['mailQuota'] = $info ['mailQuota'] * 1073741824;
                     }
                 }
                 if($this->admin){

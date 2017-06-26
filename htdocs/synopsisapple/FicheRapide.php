@@ -401,7 +401,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     
     
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Prise en charge pro.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Prise en charge par tech Pro</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo " <input type='checkbox' name='Pro' id='Pro' " . $pro . " disabled/>";
     echo " <input type='hidden' name='Pro' id='Pro' value='" . $pro . "'/>";

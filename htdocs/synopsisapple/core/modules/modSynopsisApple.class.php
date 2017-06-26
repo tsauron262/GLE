@@ -55,7 +55,9 @@ class modSynopsisApple extends DolibarrModules
         //$this->config_page_url = "";
         
         
-        $this->module_parts = array('triggers' => 1);
+        $this->module_parts = array('triggers' => 1,
+            'hooks' => array("addSearchEntry")  // Set here all hooks context you want to support
+        );
 
         // Dependences
 //        $this->depends = array('');
@@ -253,6 +255,8 @@ $this->menus = array();			// List of menus to add
   function remove()
   {
       $sql = array();
+      
+        $sql[] = "DELETE FROM `".MAIN_DB_PREFIX."document_model` WHERE `nom` = 'appleretour'";
     return $this->_remove($sql);
   }
 }

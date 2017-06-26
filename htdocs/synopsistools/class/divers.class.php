@@ -14,9 +14,12 @@ class synopsisHook {//FA1506-0369
     private static $reload = false;
 
     function synopsisHook() {
-        global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
+        global $conf, $db, $dbGLE, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
         
         require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
+        
+        //Pour les logiciel externe.
+        $dbGLE = $db;
 
         if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;

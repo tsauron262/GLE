@@ -341,6 +341,11 @@ textarea.grand{
     height: 120px;
 }
 
+textarea.pGrand{
+    width: 300px;
+    height: 120px;
+}
+
 .zonePlus{
     width: 150px;
 }
@@ -438,4 +443,10 @@ table.tabBorder100{
 table.tabBorder100 td{
     border: solid grey 1px;
     padding: 3px;
+}
+
+.captureSignature{
+    min-width: 300px;
+    min-height: 300px;
+    border: solid black;
 }

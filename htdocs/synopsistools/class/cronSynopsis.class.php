@@ -16,6 +16,12 @@ class CronSynopsis {
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE  `sourcetype` LIKE  'resa'");
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE  `tms` <  '" . $this->db->idate(strtotime("-3 day")) . "'");
     }
+    
+    
+    public function mailFiOuvert(){
+        
+        
+    }
 
     public function testGlobal() {
         $this->sauvBdd();
@@ -47,7 +53,7 @@ class CronSynopsis {
     }
 
     public function sortieMail() {
-        mailSyn("Tommy@dri.fr", "Rapport netoyage", $this->sortie . "<br/><br/>" . $this->erreurs());
+        mailSyn("Tommy@drsi.fr", "Rapport netoyage", $this->sortie . "<br/><br/>" . $this->erreurs());
     }
 
 //global $oldPref, $nbIframeMax, $nbIframe, $nbErreur;

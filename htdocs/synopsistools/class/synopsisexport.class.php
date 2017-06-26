@@ -358,7 +358,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                     $folder2 = "extractFactGle";
                 }
                 if ($print)
-                    echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&file=/export/" . $file . "' class='butAction'>Fichier</a>";
+                    echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&attachment=1&file=/export/" . $file . "' class='butAction'>Fichier</a>";
             }
             else {
                 if ($print)

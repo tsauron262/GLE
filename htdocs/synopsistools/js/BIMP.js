@@ -111,7 +111,7 @@ $(window).load(function () {
 
 
 
-
+alert("Script a jour");
     $("input#NoMachine, input#Chrono1011").focusout(function () {
         input = $(this);
         getInfoApple(input);

@@ -195,7 +195,7 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
 
 
 
-                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsischrono/core/modules/synopsischrono/doc/PCMod.pdf');
+                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsischrono/core/modules/synopsischrono/doc/PcModPro.pdf');
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
@@ -302,30 +302,30 @@ class pdf_synopsischrono_pcpro extends ModeleSynopsischrono {
 
                 $pdf->SetXY('28.5', '160.3');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1055]->valueStr, 0, 'L');
-
-                $cgv = "";
-                $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
-
-                if (stripos($chrono2->description, "Iphone") !== false) {
-                    $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
-                    $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
-                    $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
-                } else {
-                    $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
-                    $cgv.="-Les frais de prise en charge diagnostic de 45€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
-                }
-//                $pdf->SetX(6);
-//                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
-//                $pdf->SetX(6);
-                $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 0.75€ par jour.\n\n";
-
-                if ($chrono->valuesPlus[1068]->value == 1) {
-                    $pdf->SetXY('62', '115');
-                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
-                    $pdf->SetTextColor(255, 102, 0);
-                    $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
-                    $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
-                }
+//
+//                $cgv = "";
+//                $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+//
+//                if (stripos($chrono2->description, "Iphone") !== false) {
+//                    $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+//                    $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
+//                    $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
+//                } else {
+//                    $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
+//                    $cgv.="-Les frais de prise en charge diagnostic de 45€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+//                }
+////                $pdf->SetX(6);
+////                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
+////                $pdf->SetX(6);
+//                $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 0.75€ par jour.\n\n";
+//
+//                if ($chrono->valuesPlus[1068]->value == 1) {
+//                    $pdf->SetXY('62', '115');
+//                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
+//                    $pdf->SetTextColor(255, 102, 0);
+//                    $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
+//                    $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
+//                }
 
 
                 $pdf->SetTextColor("black");

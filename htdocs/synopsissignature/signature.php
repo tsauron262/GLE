@@ -179,6 +179,10 @@ $js .= '<style type="text/css">' .
         . 'div.grZoneSignature input{    '
         . 'margin: 0px 20px 10px '
         . '}'
+        . 'img.pdfImg{'
+        . '    min-width: 600px;
+            max-width: 600px;'
+        . '}'
         . '</style>';
 
 
@@ -355,7 +359,7 @@ if ($selectedFile) {
 
             $debLien = DOL_URL_ROOT . "/document.php?modulepart=" . $module . "&file=" . $object->$clef . "/";
             echo "<tr><td>Fichier PDF</td><td><a href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
-            echo "<tr><td colspan='2'><img src='" . DOL_URL_ROOT . "/synopsissignature/temp/" . $save_to . "'/>";
+            echo "<tr><td colspan='2'><img class='pdfImg' src='" . DOL_URL_ROOT . "/synopsissignature/temp/" . $save_to . "'/>";
             
         } else
             print "Conversion failed.<br />" . $output . "<br/>" . $commande;

@@ -188,6 +188,9 @@ $js .= '<style type="text/css">' .
         . '#bodyIndex2{'
         . '  background-color:white;'
         . '}'
+        . '.hideWithSign{'
+        . ' display: none;'
+        . '}'
         . '</style>';
 
 
@@ -317,8 +320,8 @@ if ($selectedFile) {
         echo '<form class="controleSignature" method="post">'
         . '<input type="hidden" class="nav shrinkwidth_parent" name="img" id="someelement"/>'
         . '<input type="hidden" value="' . $selectedFile . '" name="file"/>'
-        . '<input type="submit" value="Signer"/>'
-        . '<input type="button" value="Effacer" id="clear"/>';
+        . '<input type="submit" value="Signer" class="hideWithSign"/>'
+        . '<input type="button" value="Effacer" class="hideWithSign" id="clear"/>';
 
         echo '<script type="text/javascript" src="jSignature.min.js"></script>'
         . '<script type="text/javascript">'
@@ -326,6 +329,7 @@ if ($selectedFile) {
                 . '$("#affSign").click(function(){'
                     . '$(this).parent().parent().hide();'
                     . '$(".grZoneSignature").css("z-index", 1);'
+                    . '$(".hideWithSign").show();'
                 . '});'
         . 'var $sigdiv = $("#signatureZone"); '
         . '$sigdiv.jSignature(); '

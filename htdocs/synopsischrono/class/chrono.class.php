@@ -367,7 +367,7 @@ class Chrono extends CommonObject {
             $requete .= ", propalid = '" . ($this->propalid) . "'";
 
         $requete .= ", orig_ref = '" . $this->orig_ref . "'";
-        $requete .= ", revision = " . ($this->revision > 0)? $this->revision : 'NULL' . "";
+        $requete .= ", revision = " . ($this->revision > 0) ? $this->revision : 'NULL' . "";
         $requete .= ", ref = '" . $this->ref . "'";
 
         $requete .= ", fk_user_modif = " . $user->id;
@@ -675,11 +675,11 @@ class Chrono extends CommonObject {
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {
-            $result.=($lien . lien::traitePicto($this->picto, $this->id, $langs->trans("Chrono") . ': ' . $titre) . $lienfin . ' ');
+            $result .= ($lien . lien::traitePicto($this->picto, $this->id, $langs->trans("Chrono") . ': ' . $titre) . $lienfin . ' ');
         } else if ($withpicto)
-            $result.=($lien . lien::traitePicto($this->picto, $this->id, $langs->trans("ShowChrono") . ': ' . $titre) . $lienfin . ' ');
+            $result .= ($lien . lien::traitePicto($this->picto, $this->id, $langs->trans("ShowChrono") . ': ' . $titre) . $lienfin . ' ');
 
-        $result.=$lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
+        $result .= $lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
         return $result;
     }
 
@@ -722,6 +722,14 @@ class Chrono extends CommonObject {
         $this->db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = '" . $prop->id . "' WHERE id = " . $this->id);
         $this->propalid = $prop->id;
         $this->propal = $prop;
+
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
+        $prop->generateDocument("azurSAV", $langs);
+        $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $this->id . "/";
+        if (!is_dir($repDest))
+            mkdir($repDest);
+
+        link(DOL_DATA_ROOT . "/propale/" . $prop->ref . "/" . $prop->ref . ".pdf", $repDest . $prop->ref . ".pdf");
         return $prop->id;
     }
 
@@ -880,7 +888,7 @@ class Chrono extends CommonObject {
                       " . /* LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $this->id . */"
                      WHERE t.id = k.type_valeur
                        AND k.model_refid = " . $this->model->id
-                . (($orderBy == 'rangPublic')?' AND k.rangPublic > 0':'')
+                . (($orderBy == 'rangPublic') ? ' AND k.rangPublic > 0' : '')
                 . " ORDER BY k." . $orderBy;
 
         $sql2 = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_" . $this->model->id . " WHERE id = " . $this->id);
@@ -1029,13 +1037,13 @@ class Chrono extends CommonObject {
 
 
             if ($keyId != "id") {
-                if($value."x" == "x")
-                        $value = 'NULL';
+                if ($value . "x" == "x")
+                    $value = 'NULL';
                 elseif ($value != "now()" && !is_numeric($value))
-                    $value = "'".addslashes($value)."'";
-                    
-                    
-                    
+                    $value = "'" . addslashes($value) . "'";
+
+
+
                 $tabUpdate[] = $keyId . " = " . $value . "";
             }
 
@@ -1085,13 +1093,13 @@ class Chrono extends CommonObject {
     // Ajout Flo : retourne valeures chrono publiques ('nom' => 'valeure').
     public function getPublicValues() {
         $this->getValuesPlus('rangPublic');
-        
+
         $this->publicValues = array();
         foreach ($this->valuesPlus as $key_id => $datas) {
             $this->publicValues[$key_id] = array(
                 'label' => $datas->nom,
                 'value' => $datas->valueStr
-            ); 
+            );
         }
 
         return $this->publicValues;

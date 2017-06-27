@@ -299,8 +299,7 @@ class ActionComm extends CommonObject
         $sql.= "entity,";
         /*mod drsi */$sql.= "ref_ext";
         $sql.= ") VALUES (";
-//        $sql.= "'".$this->db->idate($now)."',";
-        $sql.= (strval($this->datec)!=''?"'".$this->db->idate($this->datec)."'":("'".$this->db->idate($now)."'")).",";
+        $sql.= "'".$this->db->idate($now)."',";
         $sql.= (strval($this->datep)!=''?"'".$this->db->idate($this->datep)."'":"null").",";
         $sql.= (strval($this->datef)!=''?"'".$this->db->idate($this->datef)."'":"null").",";
         $sql.= ((isset($this->durationp) && $this->durationp >= 0 && $this->durationp != '')?"'".$this->durationp."'":"null").",";	// deprecated

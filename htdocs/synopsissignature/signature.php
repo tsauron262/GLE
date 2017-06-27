@@ -155,6 +155,33 @@ if (!isset($dirFile))
 $nomOnglet = "signature";
 $afficheSign = false;
 
+$js .= '<style type="text/css">' .
+        '.grZoneSignature{'
+        . ' position: fixed;'
+        . ' top:0;'
+        . 'width: 100%;
+    background: white;
+            left: 0;
+    text-align: center;'
+        . '}'
+        . '#signatureZone{'
+        . ' width: 100%; '
+        . 'position:fixed; '
+        . 'top: 30px; left:0; bottom: 0;'
+        . ' margin: auto;'
+        . '}'
+        . '.controleSignature{'
+        . ' text-align: center;'
+        . '}'
+        . 'div#signatureZone{    '
+        . 'border: solid!important;'
+        . '}'
+        . 'div.grZoneSignature input{    '
+        . 'margin: 0px 20px 10px '
+        . '}'
+        . '</style>';
+
+
 llxHeader($js, $nomOnglet);
 if (!$invite) {
     dol_fiche_head($head, 'signature', $langs->trans($nomOnglet));
@@ -208,7 +235,7 @@ if ($selectedFile) {
         $afficheSign = false;
 
         echo "<h4>Code de sécurité : " . $code . "</h4>";
-        $lien = $_SERVER['HTTP_HOST'].DOL_URL_ROOT . "/synopsissignature/signature.php?code=" . $code;
+        $lien = (stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . "/synopsissignature/signature.php?code=" . $code;
         echo "<br/><h4>Lien : <a href='" . $lien . "'>" . $lien . "</a></h4>";
     } else if (isset($_REQUEST['img'])) {
         $nomSign = $dir . "/temp/signature.png";
@@ -273,15 +300,16 @@ if ($selectedFile) {
 
 
     if ($afficheSign) {
-        echo "<tr><td colspan='2'>Signez ICI<div id='signatureZone' style='width: 400px; margin: auto;'></div>";
+        echo "<div class='grZoneSignature'><div id='signatureZone'></div>";
 
-        echo '<form style="text-align: center;" method="post">'
+        echo '<form class="controleSignature" method="post">'
         . '<input type="hidden" class="nav shrinkwidth_parent" name="img" id="someelement"/>'
         . '<input type="hidden" value="' . $selectedFile . '" name="file"/>'
         . '<input type="submit" value="Signer"/>'
         . '<input type="button" value="Effacer" id="clear"/>'
         . ($invite ? '' : '<input type="submit" name="demSign" value="Demande Signature" id="demande"/>')
-        . '</form></td></tr>';
+        //   . '<br/>Signez ICI'
+        . '</form></div>';
 
         echo '<script type="text/javascript" src="jSignature.min.js"></script>'
         . '<script type="text/javascript">'
@@ -297,20 +325,23 @@ if ($selectedFile) {
         . '$("#clear").click(function(){'
         . '$sigdiv.jSignature("reset");'
         . '});'
-        . '</script>'
-        . '<style>div#signatureZone{    border: solid!important; background-color:white;}</style>';
+        . '</script>';
     }
 
 
-    if (!$invite) {
-        $fileToShow = (is_file($dir . "/" . $signeFile)) ? $signeFile : $selectedFile;
+    if (1) {
+        $fileToShow = (!$invite && is_file($dir . "/" . $signeFile)) ? $signeFile : $selectedFile;
 
-        $save_to = str_replace(".pdf", ".jpg", $fileToShow);
-        $dirTemp = $dir . "/temp/";
-        if (!is_dir($dir . "/temp/"))
-            mkdir($dir . "/temp/");
-        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -colorspace RGB "' . $dirTemp . $save_to . '"';
+        $save_to = str_replace(".pdf", ".png", $fileToShow);
+//        $dirTemp = $dir . "/temp/";
+        $dirTemp = DOL_DOCUMENT_ROOT. "/synopsissignature/temp/";
+        if (!is_dir($dirTemp))
+            mkdir($dirTemp);
+        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -density 300 "' . $dirTemp . $save_to . '"';
+        $commande = 'pdftoppm -png -r 100  "' . $dir . "/" . $fileToShow . '"  > "' . $dirTemp . $save_to . '"';
         exec($commande, $output, $return_var);
+        
+        
 
         $imgPlusieursPages = str_replace(".jpg", "", $save_to);
 
@@ -324,7 +355,8 @@ if ($selectedFile) {
 
             $debLien = DOL_URL_ROOT . "/document.php?modulepart=" . $module . "&file=" . $object->$clef . "/";
             echo "<tr><td>Fichier PDF</td><td><a href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
-            echo "<tr><td colspan='2'><img src='" . $debLien . "temp/" . $save_to . "'/>";
+            echo "<tr><td colspan='2'><img src='" . DOL_URL_ROOT . "/synopsissignature/temp/" . $save_to . "'/>";
+            
         } else
             print "Conversion failed.<br />" . $output . "<br/>" . $commande;
     }

@@ -160,22 +160,22 @@ $js .= '<style type="text/css">' .
         . ' position: fixed;'
         . ' top:55px;'
         . 'width: 100%;
-    background: white;
+            background: white;
             left: 0;
-    text-align: center;'
+            text-align: center;
+            z-index: -1;'
         . '}'
-        . '#signatureZone{'
+        . 'div#signatureZone{'
         . ' width: 100%; '
         . 'position:fixed; '
         . 'top: 95px; left:0; bottom: 0;'
         . ' margin: auto;'
+        . 'border: solid!important;'
+        . 'background: rgba(255,255,255,0.8);'
         . '}'
         . '.controleSignature{'
         . ' text-align: center;'
         . 'z-index: 200;'
-        . '}'
-        . 'div#signatureZone{    '
-        . 'border: solid!important;'
         . '}'
         . 'div.grZoneSignature input{    '
         . 'margin: 0px 20px 10px '
@@ -185,12 +185,18 @@ $js .= '<style type="text/css">' .
             max-width: 600px;'
         . 'min-height: 1000px;'
         . '}'
+        . '#bodyIndex2{'
+        . '  background-color:white;'
+        . '}'
         . '</style>';
 
 
 llxHeader($js, $nomOnglet);
 if (!$invite) {
     dol_fiche_head($head, 'signature', $langs->trans($nomOnglet));
+}
+else{
+    echo "<div id='bodyIndex2'>";
 }
 
 
@@ -312,13 +318,15 @@ if ($selectedFile) {
         . '<input type="hidden" class="nav shrinkwidth_parent" name="img" id="someelement"/>'
         . '<input type="hidden" value="' . $selectedFile . '" name="file"/>'
         . '<input type="submit" value="Signer"/>'
-        . '<input type="button" value="Effacer" id="clear"/>'
-        . ($invite ? '' : '<input type="submit" name="demSign" value="Demande Signature" id="demande"/>')
-        //   . '<br/>Signez ICI'
-        . '</form></div>';
+        . '<input type="button" value="Effacer" id="clear"/>';
 
         echo '<script type="text/javascript" src="jSignature.min.js"></script>'
         . '<script type="text/javascript">'
+            . '$(window).load(function () {'
+                . '$("#affSign").click(function(){'
+                    . '$(this).parent().parent().hide();'
+                    . '$(".grZoneSignature").css("z-index", 1);'
+                . '});'
         . 'var $sigdiv = $("#signatureZone"); '
         . '$sigdiv.jSignature(); '
         . '$sigdiv.jSignature("reset");'
@@ -330,6 +338,7 @@ if ($selectedFile) {
         . '}); '
         . '$("#clear").click(function(){'
         . '$sigdiv.jSignature("reset");'
+        . '});'
         . '});'
         . '</script>';
     }
@@ -361,6 +370,11 @@ if ($selectedFile) {
 
             $debLien = DOL_URL_ROOT . "/document.php?modulepart=" . $module . "&file=" . $object->$clef . "/";
             echo "<tr><td>Fichier PDF</td><td><a href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
+            
+            if($afficheSign){
+                echo "<tr><td>Signature</td><td><input type='button' id='affSign' value='Signer'/>";
+                echo ($invite ? '' : '<br/><input type="submit" name="demSign" value="Demande Signature" id="demande"/></form>');
+            }
             echo "<tr><td colspan='2'><img class='pdfImg' src='" . DOL_URL_ROOT . "/synopsissignature/temp/" . $save_to . "'/>";
             
         } else

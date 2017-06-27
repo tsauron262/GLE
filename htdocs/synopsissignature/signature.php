@@ -158,7 +158,7 @@ $afficheSign = false;
 $js .= '<style type="text/css">' .
         '.grZoneSignature{'
         . ' position: fixed;'
-        . ' top:0;'
+        . ' top:55px;'
         . 'width: 100%;
     background: white;
             left: 0;
@@ -167,11 +167,12 @@ $js .= '<style type="text/css">' .
         . '#signatureZone{'
         . ' width: 100%; '
         . 'position:fixed; '
-        . 'top: 30px; left:0; bottom: 0;'
+        . 'top: 85px; left:0; bottom: 0;'
         . ' margin: auto;'
         . '}'
         . '.controleSignature{'
         . ' text-align: center;'
+        . 'z-index: 200;'
         . '}'
         . 'div#signatureZone{    '
         . 'border: solid!important;'

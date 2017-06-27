@@ -521,7 +521,7 @@ class PDO extends AbstractBackend {
             $objectEtagTemp = $extraData['etag'];
             $objectUriTemp = $objectUri;
 
-            $this->traiteParticipant($action, $calendarData2, $calendarId);
+            $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
             $action->userownerid = $calendarId;
             $action->percentage = -1;
@@ -529,7 +529,8 @@ class PDO extends AbstractBackend {
                 $this->forbiden();
 
 
-            $this->traiteParticipant($action, $calendarData2, $calendarId);
+            $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
+            
 
 //        $this->userIdCaldavPlus($calendarId);
         }
@@ -546,7 +547,7 @@ class PDO extends AbstractBackend {
         return $user;
     }
 
-    public function traiteParticipant($action, $calendarData2, $user) {
+    public function traiteParticipantAndTime($action, $calendarData2, $user) {
         global $db;
         $tabMail = array();
         $organisateur = "";
@@ -597,6 +598,11 @@ WHERE  `email` LIKE  '" . $mail . "'");
         if ($action->id > 0) {
             $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
+            
+            
+            
+            $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET `datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."', `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
+            $db->query($sql);
         }
     }
 
@@ -691,7 +697,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $user = $this->getUser($calendarId);
 
 
-            $this->traiteParticipant($action, $calendarData2, $calendarId);
+            $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
             if ($action->update($user) < 1)
                 $this->forbiden();

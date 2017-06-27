@@ -167,7 +167,7 @@ $js .= '<style type="text/css">' .
         . '#signatureZone{'
         . ' width: 100%; '
         . 'position:fixed; '
-        . 'top: 85px; left:0; bottom: 0;'
+        . 'top: 95px; left:0; bottom: 0;'
         . ' margin: auto;'
         . '}'
         . '.controleSignature{'

@@ -182,6 +182,7 @@ $js .= '<style type="text/css">' .
         . 'img.pdfImg{'
         . '    min-width: 600px;
             max-width: 600px;'
+        . 'height: auto;'
         . '}'
         . '</style>';
 

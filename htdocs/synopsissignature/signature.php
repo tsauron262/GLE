@@ -253,6 +253,8 @@ if ($selectedFile) {
         $lien = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . "/synopsissignature/signature.php?code=" . $code;
         echo "<br/><h4>Lien : <a href='" . $lien . "'>" . $lien . "</a></h4>";
     } else if (isset($_REQUEST['img'])) {
+        if (!is_dir($dir . "/temp"))
+            mkdir($dir . "/temp");
         $nomSign = $dir . "/temp/signature.png";
         base64_to_jpeg($_REQUEST['img'], $nomSign);
 

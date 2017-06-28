@@ -181,7 +181,6 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                 $userCF = new User($db);
                                 $userCF->fetch('', 'compteferme');
                                 if($userCF->id > 0){
-                                    dol_syslog("userOK",3);
                                         $info=$userCF->_load_ldap_info();
                                         $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
                                         $tmp = array();
@@ -191,15 +190,15 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                         }
                                         $info['shadowAddress'] = $tmp;
                                                 $dn=$userCF->_load_ldap_dn($info);
-                    dol_syslog(print_r($tmp,1),3);
-                    dol_syslog(print_r($info,1),3);
                                     $result=$ldap->update($dn,$info,$user,$dn);
                                     if ($result < 0)
                                     {
                                             $this->error="ErrorLDAP ".$ldap->error;
+                                            dol_syslog("erreurs LDAP ".$ldap->error,3);
+                                            dol_syslog("erreurs LDAP ".$dn,3);
+                                            dol_syslog("erreurs LDAP ".print_r($user,1),3);
                                     }
                                 }
-                                dol_syslog("fin",3);
                             }
                             /*fmoddrsi*/
             

@@ -175,33 +175,33 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                     $this->error="ErrorLDAP ".$ldap->error;
                             }
                             return $result;
-            }
             
-            //mise a jour du compte "compte fermé"
-            global $db;
-            $userCF = new User($db);
-            $userCF->fetch('', 'compteferme');
-            if($userCF->id > 0){
-                echo "userOK";
-                    $info=$userCF->_load_ldap_info();
-                    $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
-                    $tmp = array();
-                    while($ln = $db->fetch_object($result)){
-                        $tmp[] = $ln->email;
-                    }
-                    $info['shadowAddress'] = $tmp;
-                            $dn=$userCF->_load_ldap_dn($info);
-print_r($tmp);
-print_r ($info);
-                $result=$ldap->update($dn,$info,$user,$dn);
-            }
-            die;
+                //mise a jour du compte "compte fermé"
+                global $db;
+                $userCF = new User($db);
+                $userCF->fetch('', 'compteferme');
+                if($userCF->id > 0){
+                    dol_syslog("userOK",3);
+                        $info=$userCF->_load_ldap_info();
+                        $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
+                        $tmp = array();
+                        while($ln = $db->fetch_object($result)){
+                            $tmp[] = $ln->email;
+                        }
+                        $info['shadowAddress'] = $tmp;
+                                $dn=$userCF->_load_ldap_dn($info);
+    dol_syslog(print_r($tmp,1),3);
+    dol_syslog(print_r($info,1),3);
+                    $result=$ldap->update($dn,$info,$user,$dn);
+                }
+                die;
             
             
             
             
             
             /*fmoddrsi*/
+            }
         }
         elseif ($action == 'USER_DELETE')
         {

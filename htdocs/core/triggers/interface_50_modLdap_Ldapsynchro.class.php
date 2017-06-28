@@ -177,8 +177,6 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                             else{
             
                                 //mise a jour du compte "compte fermé"
-                                $ldap=new Ldap();
-                                $ldap->connect_bind();
                                 global $db;
                                 $userCF = new User($db);
                                 $userCF->fetch('', 'compteferme');
@@ -190,14 +188,13 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                             if($ln->email != "")
                                             $tmp[] = $ln->email;
                                         }
-                                        //$info['shadowAddress'] = $tmp;
+                                        $info['shadowAddress'] = $tmp;
                                                 $dn=$userCF->_load_ldap_dn($info);
                                     $result=$ldap->update($dn,$info,$user,$dn);
                                     if ($result < 0)
                                     {
                                             $this->error="ErrorLDAP ".$ldap->error;
                                             dol_syslog("erreurs LDAP ".$ldap->error,3);
-                                            dol_syslog("erreurs LDAP ".$dn,3);
                                     }
                                 }
                             }

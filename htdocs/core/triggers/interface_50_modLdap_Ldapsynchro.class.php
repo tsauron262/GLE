@@ -182,11 +182,15 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                 $userCF->fetch('', 'compteferme');
                                 if($userCF->id > 0){
                                         $info=$userCF->_load_ldap_info();
-                                        $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
                                         $tmp = array();
+                                        $result = $db->query("SELECT email, alias FROM ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."user_extrafields ue,  WHERE `statut` = 0 ANd u.rowid = ue.fk_object");
                                         while($ln = $db->fetch_object($result)){
                                             if($ln->email != "")
                                             $tmp[] = $ln->email;
+                                            $tmptmp = implode(",", $ln->alias);
+                                            foreach($tmptmp as $mail)
+                                                if($mail != "")
+                                                    $tmp[] = $mail;
                                         }
                                         $info['shadowAddress'] = $tmp;
                                                 $dn=$userCF->_load_ldap_dn($info);

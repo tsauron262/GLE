@@ -190,7 +190,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                             $tmptmp = explode(",", $ln->alias);
                                             foreach($tmptmp as $mail)
                                                 if($mail != "")
-                                                    $tmp[] = $mail;
+                                                    $tmp[] = "trunc".$mail;
                                         }
                                         $info['shadowAddress'] = $tmp;
                                                 $dn=$userCF->_load_ldap_dn($info);

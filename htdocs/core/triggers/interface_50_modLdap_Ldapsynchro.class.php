@@ -180,7 +180,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                 global $db;
                                 $userCF = new User($db);
                                 $userCF->fetch('', 'compteferme');
-                                if($userCF->id > 0){
+                                if(0 && $userCF->id > 0){
                                         $info=$userCF->_load_ldap_info();
                                         $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
                                         $tmp = array();

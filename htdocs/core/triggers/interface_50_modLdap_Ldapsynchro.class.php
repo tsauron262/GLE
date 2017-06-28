@@ -194,6 +194,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
     dol_syslog(print_r($info,1),3);
                     $result=$ldap->update($dn,$info,$user,$dn);
                 }
+                dol_syslog("fin",3);
                 die;
             
             

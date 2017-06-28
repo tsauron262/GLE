@@ -186,7 +186,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                         $result = $db->query("SELECT email, alias FROM ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."user_extrafields ue WHERE `statut` = 0 ANd u.rowid = ue.fk_object");
                                         while($ln = $db->fetch_object($result)){
                                             if($ln->email != "")
-                                            $tmp[] = $ln->email;
+                                            $tmp[] = str_replace("FERME@", "@",$ln->email);
                                             $tmptmp = explode(",", $ln->alias);
                                             foreach($tmptmp as $mail)
                                                 if($mail != "" && !in_array($mail, $tmp))

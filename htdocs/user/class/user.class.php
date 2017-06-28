@@ -2253,7 +2253,7 @@ class User extends CommonObject
                     $info['shadowAddress'] = $arrAlias;
                 }
                 
-                if($this->statut == 0)
+                if($this->statut == 0 && $this->id > 0)
                     $info['mail'] = str_replace("@", "FERME@", $info['mail']);
                 
                 /*fmoddrsi*/

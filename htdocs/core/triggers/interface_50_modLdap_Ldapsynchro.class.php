@@ -187,7 +187,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                         while($ln = $db->fetch_object($result)){
                                             if($ln->email != "")
                                             $tmp[] = $ln->email;
-                                            $tmptmp = implode(",", $ln->alias);
+                                            $tmptmp = explode(",", $ln->alias);
                                             foreach($tmptmp as $mail)
                                                 if($mail != "")
                                                     $tmp[] = $mail;

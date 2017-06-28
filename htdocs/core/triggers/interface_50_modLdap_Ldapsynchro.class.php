@@ -188,7 +188,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                             if($ln->email != "")
                                             $tmp[] = $ln->email;
                                         }
-                                        $info['shadowAddress'] = $tmp;
+                                        //$info['shadowAddress'] = $tmp;
                                                 $dn=$userCF->_load_ldap_dn($info);
                                     $result=$ldap->update($dn,$info,$user,$dn);
                                     if ($result < 0)

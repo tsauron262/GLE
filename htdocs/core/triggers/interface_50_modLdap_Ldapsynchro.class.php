@@ -185,6 +185,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                         $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
                         $tmp = array();
                         while($ln = $db->fetch_object($result)){
+                            if($ln->email != "")
                             $tmp[] = $ln->email;
                         }
                         $info['shadowAddress'] = $tmp;
@@ -194,7 +195,6 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                     $result=$ldap->update($dn,$info,$user,$dn);
                 }
                 dol_syslog("fin",3);
-                die;
             
             
             

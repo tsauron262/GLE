@@ -155,6 +155,63 @@ class InterfaceLdapsynchro extends DolibarrTriggers
         elseif ($action == 'USER_ENABLEDISABLE')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+            /*Moddrsi*/
+            if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
+            {
+                    $ldap=new Ldap();
+                    $ldap->connect_bind();
+
+                if (empty($object->oldcopy) || ! is_object($object->oldcopy))
+            {
+                    dol_syslog("Trigger ".$action." was called by a function that did not set previously the property ->oldcopy onto object", LOG_WARNING);
+                                    $object->oldcopy = clone $object;
+            }
+
+                    $oldinfo=$object->oldcopy->_load_ldap_info();
+                    $olddn=$object->oldcopy->_load_ldap_dn($oldinfo);
+
+                    // Verify if entry exist
+                    $container=$object->oldcopy->_load_ldap_dn($oldinfo,1);
+                    $search = "(".$object->oldcopy->_load_ldap_dn($oldinfo,2).")";
+                    $records=$ldap->search($container,$search);
+                    if (count($records) && $records['count'] == 0)
+                    {
+                            $olddn = '';
+                    }
+
+                    $info=$object->_load_ldap_info();
+                            $dn=$object->_load_ldap_dn($info);
+
+                $result=$ldap->update($dn,$info,$user,$olddn);
+                            if ($result < 0)
+                            {
+                                    $this->error="ErrorLDAP ".$ldap->error;
+                            }
+                            return $result;
+            }
+            
+            //mise a jour du compte "compte fermé"
+            global $db;
+            $userCF = new User($db);
+            $userCF->fetch('', 'compteferme');
+            if($userCF->id > 0){
+                    $info=$userCF->_load_ldap_info();
+                    $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
+                    $tmp = array();
+                    while($ln = $db->fetch_object($result)){
+                        $tmp[] = $ln->email;
+                    }
+                    $info['shadowAddress'] = $tmp;
+                            $dn=$userCF->_load_ldap_dn($info);
+
+                $result=$ldap->update($dn,$info,$user,$dn);
+            }
+            
+            
+            
+            
+            
+            /*fmoddrsi*/
         }
         elseif ($action == 'USER_DELETE')
         {

@@ -177,10 +177,12 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                             else{
             
                                 //mise a jour du compte "compte fermé"
+                                $ldap=new Ldap();
+                                $ldap->connect_bind();
                                 global $db;
                                 $userCF = new User($db);
                                 $userCF->fetch('', 'compteferme');
-                                if(0 && $userCF->id > 0){
+                                if($userCF->id > 0){
                                         $info=$userCF->_load_ldap_info();
                                         $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
                                         $tmp = array();

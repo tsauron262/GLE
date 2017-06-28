@@ -174,7 +174,6 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                             {
                                     $this->error="ErrorLDAP ".$ldap->error;
                             }
-                            return $result;
             
                 //mise a jour du compte "compte fermé"
                 global $db;
@@ -202,6 +201,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
             
             
             /*fmoddrsi*/
+                            return $result;
             }
         }
         elseif ($action == 'USER_DELETE')

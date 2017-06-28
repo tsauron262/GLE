@@ -183,7 +183,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                 if($userCF->id > 0){
                                         $info=$userCF->_load_ldap_info();
                                         $tmp = array();
-                                        $result = $db->query("SELECT email, alias FROM ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."user_extrafields ue,  WHERE `statut` = 0 ANd u.rowid = ue.fk_object");
+                                        $result = $db->query("SELECT email, alias FROM ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."user_extrafields ue WHERE `statut` = 0 ANd u.rowid = ue.fk_object");
                                         while($ln = $db->fetch_object($result)){
                                             if($ln->email != "")
                                             $tmp[] = $ln->email;

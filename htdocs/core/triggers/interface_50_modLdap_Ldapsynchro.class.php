@@ -199,6 +199,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                                     {
                                             $this->error="ErrorLDAP ".$ldap->error;
                                             dol_syslog("erreurs LDAP ".$ldap->error,3);
+                                            dol_syslog("erreurs LDAP ".print_r($info['shadowAddress'],1),3);
                                     }
                                 }
                             }

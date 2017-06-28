@@ -2185,6 +2185,8 @@ class User extends CommonObject
                     $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
                 }
                 
+                $info['address'] = $this->address;
+                
                 
                 $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
                 $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";

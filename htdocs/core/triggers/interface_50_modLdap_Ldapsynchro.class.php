@@ -190,6 +190,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
             $userCF = new User($db);
             $userCF->fetch('', 'compteferme');
             if($userCF->id > 0){
+                echo "userOK";
                     $info=$userCF->_load_ldap_info();
                     $result = $db->query("SELECT email FROM ".MAIN_DB_PREFIX."user WHERE `statut` = 0");
                     $tmp = array();
@@ -198,9 +199,11 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                     }
                     $info['shadowAddress'] = $tmp;
                             $dn=$userCF->_load_ldap_dn($info);
-
+print_r($tmp);
+print_r ($info);
                 $result=$ldap->update($dn,$info,$user,$dn);
             }
+            die;
             
             
             

@@ -164,7 +164,10 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 
                     $oldinfo=$object->_load_ldap_info();
                     $olddn=$object->_load_ldap_dn($oldinfo);
-
+                    if($object->statut == 0)
+                        $olddn = str_replace("FERME@", "@", $olddn);
+                    else
+                        $olddn = str_replace("@", "FERME@", $olddn);
 
                     $info=$object->_load_ldap_info();
                             $dn=$object->_load_ldap_dn($info);

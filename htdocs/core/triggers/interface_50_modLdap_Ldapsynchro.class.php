@@ -165,14 +165,6 @@ class InterfaceLdapsynchro extends DolibarrTriggers
                     $oldinfo=$object->_load_ldap_info();
                     $olddn=$object->_load_ldap_dn($oldinfo);
 
-                    // Verify if entry exist
-                    $container=$object->oldcopy->_load_ldap_dn($oldinfo,1);
-                    $search = "(".$object->oldcopy->_load_ldap_dn($oldinfo,2).")";
-                    $records=$ldap->search($container,$search);
-                    if (count($records) && $records['count'] == 0)
-                    {
-                            $olddn = '';
-                    }
 
                     $info=$object->_load_ldap_info();
                             $dn=$object->_load_ldap_dn($info);

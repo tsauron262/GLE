@@ -2185,9 +2185,10 @@ class User extends CommonObject
                     $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
                 }
                 
+                
                 $info['postalAddress'] = $this->address;
-                $info['postalCode'] = $this->zip;
-                $info['street'] = $this->town;
+                $info['postalCode'] = ($this->zip != "")? $this->zip : "00000";
+                $info['street'] = ($this->town != "")? $this->town : "nc";
                 
                 
                 $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));

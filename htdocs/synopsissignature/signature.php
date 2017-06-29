@@ -35,9 +35,15 @@ if ($user->societe_id)
 if (!$invite)
     $result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
 else {
-    if ($code != "nc" && $code != "" && $code != 0)
-        $tabRes = getElementElement("demSign", null, $code);
-    else
+    if ($code != "nc" && $code != "" && $code != 0) {
+//        $tabRes = getElementElement("demSign", null, $code);
+        $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsissignature WHERE code ='" . $code . "';";
+        $result = $db->query($sql);
+        if ($db->num_rows($result) > 0)
+            $ligne = $db->fetch_object($result);
+        else
+            $code = "inc";
+    } else
         $code = "nc";
     $conf->dol_hide_topmenu = true;
     $conf->dol_hide_leftmenu = true;
@@ -45,7 +51,7 @@ else {
 
 
 
-    if ($code == "nc" || count($tabRes) < 1) {
+    if ($code == "nc" || $code == "inc") {
         if ($code != "nc")
             echo ("<h3>Code incorrect</h3>");
         echo "Code : <form method='get'>";
@@ -54,10 +60,9 @@ else {
         die;
     }
     else {
-        $id = $tabRes[0]['d'];
-        $temp = explode("|", $tabRes[0]['td']);
-        $typeObj = $temp[0];
-        $selectedFile = $temp[1];
+        $id = $ligne->id;
+        $typeObj = $ligne->type;
+        $selectedFile = $ligne->file;
     }
 }
 //$user, $feature='societe', $objectid=0, $dbtablename='',$feature2='',$feature3=''
@@ -197,8 +202,7 @@ $js .= '<style type="text/css">' .
 llxHeader($js, $nomOnglet);
 if (!$invite) {
     dol_fiche_head($head, 'signature', $langs->trans($nomOnglet));
-}
-else{
+} else {
     echo "<div id='bodyIndex2'>";
 }
 
@@ -246,7 +250,15 @@ if ($selectedFile) {
 
     if (isset($_REQUEST['demSign'])) {
         $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
-        setElementElement("demSign", $typeObj . "|" . $selectedFile, $code, $id);
+        //$code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
+//        setElementElement("demSign", $typeObj . "|" . $selectedFile, $code, $id);
+        if (strlen($code) > 8)
+            $dateFin = strtotime("+ 2 day");
+        else
+            $dateFin = strtotime("+ 10 minutes");
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "synopsissignature (code, type, id, file, date_fin) VALUES (" . $code . ",'" . $typeObj . "','" . $id . "','" . $selectedFile . "','" . $db->idate($dateFin) . "');";
+//        die($sql);
+        $db->query($sql);
         $afficheSign = false;
 
         echo "<h4>Code de sécurité : " . $code . "</h4>";
@@ -303,7 +315,8 @@ if ($selectedFile) {
         $pdf->Output($dir . "/" . $signeFile, 'F');
 
         if ($invite) {
-            delElementElement("demSign", null, $code);
+//            delElementElement("demSign", null, $code);
+            $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsissignature WHERE code='".$code."';");
             echo "</table><h2>Merci</h2>";
             echo "Code : <form method='get'>";
 
@@ -327,12 +340,12 @@ if ($selectedFile) {
 
         echo '<script type="text/javascript" src="jSignature.min.js"></script>'
         . '<script type="text/javascript">'
-            . '$(window).load(function () {'
-                . '$("#affSign").click(function(){'
-                    . '$(this).parent().parent().hide();'
-                    . '$(".grZoneSignature").css("z-index", 1);'
-                    . '$(".hideWithSign").show();'
-                . '});'
+        . '$(window).load(function () {'
+        . '$("#affSign").click(function(){'
+        . '$(this).parent().parent().hide();'
+        . '$(".grZoneSignature").css("z-index", 1);'
+        . '$(".hideWithSign").show();'
+        . '});'
         . 'var $sigdiv = $("#signatureZone"); '
         . '$sigdiv.jSignature(); '
         . '$sigdiv.jSignature("reset");'
@@ -353,36 +366,37 @@ if ($selectedFile) {
     if (1) {
         $fileToShow = (!$invite && is_file($dir . "/" . $signeFile)) ? $signeFile : $selectedFile;
 
-        $save_to = str_replace(".pdf", ".png", $fileToShow);
+        $save_to = str_replace(".pdf", "", $fileToShow);
 //        $dirTemp = $dir . "/temp/";
-        $dirTemp = DOL_DOCUMENT_ROOT. "/synopsissignature/temp/";
+        $dirTemp = DOL_DOCUMENT_ROOT . "/synopsissignature/temp/";
         if (!is_dir($dirTemp))
             mkdir($dirTemp);
-        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -density 300 "' . $dirTemp . $save_to . '"';
-        $commande = 'pdftoppm -png -r 100  "' . $dir . "/" . $fileToShow . '"  > "' . $dirTemp . $save_to . '"';
+//        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -density 300 "' . $dirTemp . $save_to . '"';
+        $format = "png";
+        $commande = 'pdftoppm -' . $format . ' -r 100  "' . $dir . "/" . $fileToShow . '"   "' . $dirTemp . $save_to . '"';
+
         exec($commande, $output, $return_var);
-        
-        
 
-        $imgPlusieursPages = str_replace(".jpg", "", $save_to);
 
-        $i = 0;
-        while (is_file($dir . "/temp/" . $imgPlusieursPages . "-" . $i . ".jpg")) {
-            $save_to = $imgPlusieursPages . "-" . $i . ".jpg";
+        $i = 1;
+        while (is_file($dirTemp . $save_to . "-" . $i . "." . $format)) {
+            $tabFile[] = $save_to . "-" . $i . "." . $format;
             $i++;
         }
+        if (count($tabFile) == 0)
+            $tabFile[] = $save_to . "." . $format;
 
         if ($return_var == 0) {
 
             $debLien = DOL_URL_ROOT . "/document.php?modulepart=" . $module . "&file=" . $object->$clef . "/";
             echo "<tr><td>Fichier PDF</td><td><a href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
-            
-            if($afficheSign){
+
+            if ($afficheSign) {
                 echo "<tr><td>Signature</td><td><input type='button' id='affSign' value='Signer'/>";
                 echo ($invite ? '' : '<br/><input type="submit" name="demSign" value="Demande Signature" id="demande"/></form>');
             }
-            echo "<tr><td colspan='2'><img class='pdfImg' src='" . DOL_URL_ROOT . "/synopsissignature/temp/" . $save_to . "'/>";
-            
+            foreach ($tabFile as $file)
+                echo "<tr><td colspan='2'><img class='pdfImg' src='" . DOL_URL_ROOT . "/synopsissignature/temp/" . $file . "'/>";
         } else
             print "Conversion failed.<br />" . $output . "<br/>" . $commande;
     }

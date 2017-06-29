@@ -242,14 +242,13 @@ class modsynopsissignature extends DolibarrModules {
      *      @return     int             1 if OK, 0 if KO
      */
     function init() {
-        $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_Fav_User` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `soc_refid` int(11) DEFAULT NULL,
-  `element_id` int(11) DEFAULT NULL,
-  `ref` varchar(50) DEFAULT NULL,
-  `element_type` varchar(50) DEFAULT NULL,
-  `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+        $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsissignature` (
+  `code` varchar(30) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `id` int(30) NOT NULL,
+  `file` varchar(200) NOT NULL,
+  `date_fin` datetime NOT NULL,
+  UNIQUE KEY `code` (`code`)
 )");
 
         return $this->_init($sql);

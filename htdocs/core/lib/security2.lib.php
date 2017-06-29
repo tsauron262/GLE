@@ -421,7 +421,7 @@ function encodedecode_dbpassconf($level=0)
 			fflush($fp);
 			fclose($fp);
 			clearstatcache();
-			
+
 			// It's config file, so we set read permission for creator only.
 			// Should set permission to web user and groups for users used by batch
 			//@chmod($file, octdec('0600'));
@@ -466,4 +466,3 @@ function getRandomPassword($generic=false)
 
 	return $generated_password;
 }
-

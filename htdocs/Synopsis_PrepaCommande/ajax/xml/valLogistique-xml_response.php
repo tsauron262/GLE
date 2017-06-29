@@ -49,7 +49,7 @@
       $commande->fetch($_REQUEST['comId']);
       $tmpUser = new User($db);
       $tmpUser->fetch($commande->user_author_id);
-
+die("ici");
       //Notification
       //TO commercial author
       //CC Resp Tech et Resp logistique et financier

@@ -411,7 +411,7 @@ class PDO extends AbstractBackend {
         foreach ($tabPartExt as $part)
             if ($part != "")
                 $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
-            
+           //iciattendee 
         if($row['organisateur'] != "")
             $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
 
@@ -641,7 +641,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-//dol_syslog("Update : ".print_r($calendarData,1),3);
+dol_syslog("Update : ".print_r($calendarData,1),3, 0, "caldavLog");
         $extraData = $this->getDenormalizedData($calendarData);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
@@ -883,6 +883,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
 //        $stmt->execute(array($calendarId,$objectUri));
 //        $stmt = $this->pdo->prepare('UPDATE '. $this->calendarTableName .' SET ctag = ctag + 1 WHERE id = ?');
 //        $stmt->execute(array($calendarId));
+dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "caldavLog");
 
 
 

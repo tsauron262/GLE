@@ -322,7 +322,7 @@ if (isset($_REQUEST['idChrono'])) {
     require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
     $formfile = new FormFile($db);
     $filearray = dol_dir_list(DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id);
-    $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 1, $chrono->id . "/");
+    $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 0, $chrono->id . "/");
 
 
     if (count($tabPret) == 0) {

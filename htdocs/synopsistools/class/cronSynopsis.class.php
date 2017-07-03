@@ -250,7 +250,10 @@ class CronSynopsis {
         if (array_key_exists('options_date_s', $user->array_options)) {
             $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` <= now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
-                $sql2 = $this->db->query("UPDATE " . MAIN_DB_PREFIX . "user SET statut = 0 WHERE rowid = " . $result->fk_object);
+                //$sql2 = $this->db->query("UPDATE " . MAIN_DB_PREFIX . "user SET statut = 0 WHERE rowid = " . $result->fk_object);
+                $userF = new User($this->db);
+                $userF->fetch($result->fk_object);
+                $userF->setstatus(0);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
                 mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr, f.poirier@bimp.fr, j.belhocine@bimp.fr", null, $str2);

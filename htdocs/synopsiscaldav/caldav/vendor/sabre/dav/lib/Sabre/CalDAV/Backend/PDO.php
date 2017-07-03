@@ -455,6 +455,7 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
+dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".prin_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //
@@ -641,7 +642,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-dol_syslog("Update : ".print_r($calendarData,1),3, 0, "caldavLog");
+dol_syslog("Update : ".print_r($calendarData,1),3, 0, "_caldavLog");
         $extraData = $this->getDenormalizedData($calendarData);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
@@ -883,7 +884,7 @@ dol_syslog("Update : ".print_r($calendarData,1),3, 0, "caldavLog");
 //        $stmt->execute(array($calendarId,$objectUri));
 //        $stmt = $this->pdo->prepare('UPDATE '. $this->calendarTableName .' SET ctag = ctag + 1 WHERE id = ?');
 //        $stmt->execute(array($calendarId));
-dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "caldavLog");
+dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
 
 
 

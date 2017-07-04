@@ -455,7 +455,7 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".prin_r($calendarData,1),3, 0, "_caldavLog");
+dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //

@@ -410,7 +410,7 @@ class PDO extends AbstractBackend {
         }
         if(count($tabPartExtInt) > 1){
             foreach ($tabPartExtInt as $part)
-                if ($part != "")
+                if ($part != "" && $part != $row['organisateur'])
                     $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
                //iciattendee 
             if($row['organisateur'] != "")

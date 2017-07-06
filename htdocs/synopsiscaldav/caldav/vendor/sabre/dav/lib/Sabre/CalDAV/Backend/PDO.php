@@ -399,21 +399,23 @@ class PDO extends AbstractBackend {
         /* Participant */
         $action->id = $row['id'];
         $action->fetch_userassigned();
+        $tabPartExtInt = explode(",", $row['participentExt']);
         foreach ($action->userassigned as $val) {
             if (1 || $val['id'] != $calendarId) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
-                    $calendarData2[9999 . $row['id'] . $val['id']] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $userT->email;
+                    $tabPartExtInt[] = $userT->email;
             }
         }
-        $tabPartExt = explode(",", $row['participentExt']);
-        foreach ($tabPartExt as $part)
-            if ($part != "")
-                $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
-           //iciattendee 
-        if($row['organisateur'] != "")
-            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+        if(count($tabPartExtInt) > 1){
+            foreach ($tabPartExtInt as $part)
+                if ($part != "")
+                    $calendarData2[] = "ATTENDEE;RSVP=TRUE;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:mailto:" . $part;
+               //iciattendee 
+            if($row['organisateur'] != "")
+                $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+        }
 
 
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);

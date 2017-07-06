@@ -123,7 +123,7 @@ class InterfaceCaldav {
                 
         }
         if ($action == "ACTION_MODIFY"){
-            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET etag = '".random(15)."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET sequence = sequence +1, etag = '".random(15)."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
         }
         if ($action == "ACTION_CREATE"){
             global $objectUriTemp, $objectEtagTemp, $objectDataTemp, $objectRappel;

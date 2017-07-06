@@ -373,7 +373,7 @@ class PDO extends AbstractBackend {
      * @return array|null
      */
     public function getCalendarObject($calendarId, $objectUri) {
-        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+        $stmt = $this->pdo->prepare('SELECT id, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -420,6 +420,7 @@ class PDO extends AbstractBackend {
 
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
+        $calendarData2['SEQUENCE'] = $row['sequence'];
 
 
 
@@ -556,7 +557,11 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
         $organisateur = "";
         if (is_object($user))
             $user = $user->id;
+        $sequence = 0;
         foreach ($calendarData2 as $nom => $ligne) {
+            if (stripos($nom, "SEQUENCE") !== false) {
+                $sequence = $ligne;
+            }
             if (stripos($ligne, "ATTENDEE") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
@@ -599,7 +604,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
         if ($action->id > 0) {
-            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "' WHERE fk_object = '" . $action->id . "'";
+            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "', sequence = '" . $sequence . "' WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
             
             

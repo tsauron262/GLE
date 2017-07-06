@@ -603,7 +603,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
         if ($action->id > 0) {
-            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "', sequence = '" . $sequence . "' WHERE fk_object = '" . $action->id . "'";
+            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
             
             

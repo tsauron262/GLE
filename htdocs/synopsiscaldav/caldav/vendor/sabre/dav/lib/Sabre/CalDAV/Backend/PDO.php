@@ -418,9 +418,9 @@ class PDO extends AbstractBackend {
         }
 
 
+        $calendarData2[] = 'SEQUENCE:'.$row['sequence'];
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
-        $calendarData2[] = 'SEQUENCE:'.$row['sequence'];
 
 
 

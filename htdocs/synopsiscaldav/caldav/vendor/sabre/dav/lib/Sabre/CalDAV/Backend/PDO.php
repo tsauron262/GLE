@@ -436,7 +436,7 @@ class PDO extends AbstractBackend {
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-//        dol_syslog("retour".print_r($return,1),3);
+dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
     }
@@ -581,7 +581,6 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
         if($organisateur == "" && isset($tabMail[0]))
             $organisateur = $tabMail[0];
         
-        dol_syslog(print_r($tabMail,1),3);
         
                     $organisateur = str_replace(array("\n", 
 ), "", $organisateur);
@@ -640,9 +639,6 @@ WHERE  `email` LIKE  '" . $mail . "'");
      */
     public function getRappel($data) {
         global $objectRappel;
-
-
-        //dol_syslog(print_r($data,1),3);
         if (isset($data["TRIGGER"]) && stripos($data["TRIGGER"], "VALUE=DURATION"))
             $objectRappel = 15;
         return 0;

@@ -496,8 +496,8 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
 //
 //        return '"' . $extraData['etag'] . '"';
         //Verif quil existe pas
-        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
-        $stmt->execute(array($calendarId, $objectUri));
+        $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE uri = ?');
+        $stmt->execute(array($objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($row) {

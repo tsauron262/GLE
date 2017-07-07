@@ -713,6 +713,9 @@ dol_syslog("Update : ".print_r($calendarData,1),3, 0, "_caldavLog");
 
             if ($action->update($user) < 1)
                 $this->forbiden();
+            
+            
+            $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
         }
 
         return '"' . $extraData['etag'] . '"';

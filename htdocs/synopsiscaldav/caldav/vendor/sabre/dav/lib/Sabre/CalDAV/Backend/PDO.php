@@ -437,6 +437,9 @@ class PDO extends AbstractBackend {
 
         $calData = $this->traiteIcsTab($calendarData2);
         
+        if($calendarData2['CREATED'] > $calendarData2['LAST-MODIFIED'])
+            $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
+        
         $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. $calendarData2['LAST-MODIFIED'], $calData);
         
         

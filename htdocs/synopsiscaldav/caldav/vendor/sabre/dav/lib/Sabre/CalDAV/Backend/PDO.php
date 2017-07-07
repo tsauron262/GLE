@@ -431,12 +431,13 @@ class PDO extends AbstractBackend {
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         
         
-        $calendarData2['DTSTAMP'] = $calendarData2['LAST-MODIFIED'];
 
 
 
 
         $calData = $this->traiteIcsTab($calendarData2);
+        
+        $calendarData2 = 'DTSTAMP:'. $calendarData2['LAST-MODIFIED'];
 
         $return = array(
             'id' => $row['id'],

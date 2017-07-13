@@ -333,7 +333,7 @@ if (isset($_REQUEST['idChrono'])) {
             echo "<option value='" . $ligne->id . "'>" . $ligne->S_N . "</option>";
         echo "</select>";
         echo "<input type='text' name='nbJours' value='7'/>";
-        echo '<input type="submit" value="Prêter" class="butAction"/>';
+        echo '<input type="submit" value="Prêter" class="butAction"/></form>';
     }
 
     echo "<br/><br/><h3>Nouvelle prise en charge</h3>";

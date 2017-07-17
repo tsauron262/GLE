@@ -65,7 +65,7 @@ if ($inverser) {
     $text = implode("\n", $textT);
 }
 
-$tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_apple2" => "Apple2", "_apple3" => "Apple3", "_time" => "Pages lentes", "_caldav" => "CalDav", "_caldav2" => "CalDav2", "_ldap" => "Ldap", "_caldavLog" => "Log Caldav", "_sauv" => "Sauv");
+$tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_apple2" => "Apple2", "_apple3" => "Apple3", "_time" => "Pages lentes", "_caldav" => "CalDav", "_caldav2" => "CalDav2", "_ldap" => "Ldap", "_caldavLog" => "Log Caldav", "_sauv" => "Sauv", "_admin" => "Log Admin");
 if(is_file($fileLongQuery))
     $tabPrefixe["_mysqllong"] = "Longue query";
 

@@ -902,7 +902,7 @@ $errorMessage = $this->_obtainErrorMessage ( $repairLookup );
             
             global $user;
             if($user->id == 1)
-                dol_syslog("load part".print_r($response,1),3,0,"_admin");
+                dol_syslog("result GSX ".print_r($SOAPRequest,1)."<br/><br/>".$clientLookup.print_r($requestData,1),3,0,"_admin");
         } catch (SoapFault $f) {
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);

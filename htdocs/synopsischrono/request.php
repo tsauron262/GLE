@@ -425,10 +425,13 @@ function sendSms($chrono, $text) {
             $to = $chrono->contact->phone_perso;
         elseif (is_object($chrono->societe) && testNumSms($chrono->societe->phone))
             $to = $chrono->societe->phone;
+        
+        $text.= $chrono->ref;
+        $to = "0628335081";
         $fromsms = urlencode('SAV BIMP');
 
         $to = traiteNumMobile($to);
-        if ($to == "" || stripos($to, "6") === false)
+        if ($to == "" || (stripos($to, "6") === false && stripos($to, "7") === false))
             return 0;
 
 

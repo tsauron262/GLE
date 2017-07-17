@@ -639,6 +639,12 @@ jQuery(document).ready(function(){
                     DnDArray.push(ui.draggable.attr('id'));
             }
         });
+        jQuery(".toRight").click(function(){
+            var elem = $(this).parent().parent().parent().parent();
+                    DnDArray.push(elem.attr("id"));
+             elem.css("left", "400px");
+        });
+
         jQuery('.revertDraggable').droppable({
             hoverClass: "ui-state-active",
             activeClass: "ui-state-hover",

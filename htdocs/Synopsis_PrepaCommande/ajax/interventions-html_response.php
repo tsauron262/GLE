@@ -88,7 +88,7 @@ if ($res > 0) {
                     print "    <td nowrap width=95 align=center class='ui-widget-content'>" . $prod->getNomUrl(1);
                     print "    <td width=95 align=center class='ui-widget-content'>" . price($val->total_ht) . " &euro;";
                     print "    <td width=200 class='ui-widget-content'>" . $val->desc;
-                    print "    <td width=200 class='ui-widget-content'><span class='toRight'>></span>";
+                    print "    <td width=20 class='ui-widget-content'><span class='toRight'>></span>";
                     print "</table>";
                 }
             }

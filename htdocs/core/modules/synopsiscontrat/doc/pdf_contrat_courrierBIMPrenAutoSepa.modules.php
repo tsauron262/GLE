@@ -244,8 +244,8 @@ en cas de réclamation, révocation ou modification relative à vos prélèvemen
 
 BIMP 
 Service mandats SEPA
-4 rue du commandant Dubois
-69003 LYON
+51ter rue de Saint-Cyr 
+69009 LYON
 
 
 Veuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées. 

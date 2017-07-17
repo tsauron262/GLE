@@ -274,8 +274,8 @@ $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
 
         $clause = "Entre les soussignés";
         $clause1 = "BIMP";
-        $clause2 = "Société Anonyme OLYS au capital de 85 372 Euros, dont le siège social sis 4 rue du Cdt. Dubois
-69003 LYON, représentée par Monsieur Christian CONSTANTIN-BERTIN, Président Directeur Général.
+        $clause2 = "Société Anonyme OLYS au capital de 85 372 Euros, dont le siège social sis 51ter rue de Saint-Cyr 
+69009 LYON, représentée par Monsieur Christian CONSTANTIN-BERTIN, Président Directeur Général.
 
 d'une part
 Et,";

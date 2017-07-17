@@ -2,8 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/repair.class.php';
 
-class gsxDatas
-{
+class gsxDatas {
 
     private $tabReqForceIphone = array("CreateIPhoneRepairOrReplace");
     private $tabReqForceNonIphone = array("RegisterPartsForWHUBulkReturn");
@@ -31,12 +30,11 @@ class gsxDatas
         'B' => 'iPhone',
         'E' => 'iPod',
         'F' => 'iPad',
-        'W'=> 'Watch'
+        'W' => 'Watch'
     );
     protected $isIphone = false;
 
-    public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null, $requestType = false)
-    {
+    public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null, $requestType = false) {
         global $user;
 
 
@@ -79,8 +77,8 @@ class gsxDatas
         }
 
         $this->setSerial($serial);
-        
-        
+
+
         if (in_array($requestType, $this->tabReqForceIphone)) {
             $this->isIphone = true;
         }
@@ -96,8 +94,7 @@ class gsxDatas
         }
     }
 
-    public function setSerial($serial)
-    {
+    public function setSerial($serial) {
         if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $this->isIphone = true;
         } /* else
@@ -105,8 +102,7 @@ class gsxDatas
         $this->serial = $serial;
     }
 
-    public function loadRepairs($chronoId)
-    {
+    public function loadRepairs($chronoId) {
         if (!isset($chronoId))
             return;
 
@@ -126,8 +122,7 @@ class gsxDatas
         }
     }
 
-    public function importRepair($chronoId)
-    {
+    public function importRepair($chronoId) {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
         global $db;
@@ -138,14 +133,13 @@ class gsxDatas
             return '<p class="confirmation">Les données de la réparation ont été importées avec succès</p><ok>Reload</ok>';
         }
         $html = '<p class="error">Echec de l\'importation.</p>';
-        $html .= "error repair : ".$repair->displayErrors();
+        $html .= "error repair : " . $repair->displayErrors();
         if (count($this->gsx->errors['soap']))
-            $html .= "erreur GSX : ".$this->getGSXErrorsHtml();
+            $html .= "erreur GSX : " . $this->getGSXErrorsHtml();
         return $html;
     }
 
-    public function endRepair($repairRowId)
-    {
+    public function endRepair($repairRowId) {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
         global $db;
@@ -163,8 +157,7 @@ class gsxDatas
         return $html;
     }
 
-    public function closeRepair($repairRowId)
-    {
+    public function closeRepair($repairRowId) {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
         global $db;
@@ -182,8 +175,7 @@ class gsxDatas
         return $html;
     }
 
-    public function markRepairAsReimbursed($repairRowId)
-    {
+    public function markRepairAsReimbursed($repairRowId) {
         global $db;
 
         $repair = new Repair($db, $this->gsx, $this->isIphone);
@@ -198,8 +190,7 @@ class gsxDatas
         return $html;
     }
 
-    public function getLookupHtml($prodId)
-    {
+    public function getLookupHtml($prodId) {
         if (count($this->errors) || !$this->connect) {
             return $this->getGSXErrorsHtml();
         }
@@ -341,8 +332,7 @@ class gsxDatas
         return $html;
     }
 
-    public function getRepairsHtml($prodId)
-    {
+    public function getRepairsHtml($prodId) {
         $html = '<div class="repairsContainer container">' . "\n";
         $html .= '<div class="rapairsCaption captionContainer" onclick="onCaptionClick($(this))">' . "\n";
         $html .= '<span class="repairsTitle captionTitle")">Réparations</span>';
@@ -417,7 +407,7 @@ class gsxDatas
             $html .= '<option value="' . $mod . '"';
             if (isset($values[$valuesName])) {
                 if ($values[$valuesName] == $mod)
-                    $html.= ' selected';
+                    $html .= ' selected';
             }
             $html .= '>' . $mod . ' - ' . $desc . '</option>';
         }
@@ -433,8 +423,7 @@ class gsxDatas
         return $html;
     }
 
-    public function getCartHtml($prodId)
-    {
+    public function getCartHtml($prodId) {
         $html = '<div class="cartContainer container">' . "\n";
         $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";
         $html .= '<span class="cartTitle captionTitle">Panier de composants&nbsp;&nbsp;&nbsp;</span>';
@@ -466,8 +455,7 @@ class gsxDatas
         return $html;
     }
 
-    public function getPartsListArray($partNumberAsKey = false)
-    {
+    public function getPartsListArray($partNumberAsKey = false) {
         $params = array();
         if ($this->isIphone) {
             $params['imeiNumber'] = $this->serial;
@@ -483,8 +471,9 @@ class gsxDatas
                     $parts = $parts['ResponseArray']['responseData'];
                     if ($partNumberAsKey) {
                         $results = array();
-                    if(isset($parts["partDescription"]))
-                        $parts = array(0 => $parts);
+                        print_r($parts);die;
+                        if (isset($parts["partDescription"]))
+                            $parts = array(0 => $parts);
                         foreach ($parts as $part) {
                             $results[$part['partNumber']] = $part;
                         }
@@ -498,8 +487,7 @@ class gsxDatas
         return null;
     }
 
-    public function getPartsListHtml($prodId)
-    {
+    public function getPartsListHtml($prodId) {
         $parts = $this->getPartsListArray();
         $check = false;
         $html = '';
@@ -565,8 +553,7 @@ class gsxDatas
 //        return '';
     }
 
-    public function getSymptomesCodesArray($serial, $symCode = null)
-    {
+    public function getSymptomesCodesArray($serial, $symCode = null) {
         $this->setSerial($serial);
         $datas = $this->gsx->obtainSymtomes($serial, $symCode);
 
@@ -593,8 +580,7 @@ class gsxDatas
         return $newArray;
     }
 
-    public function getCompTIACodesArray()
-    {
+    public function getCompTIACodesArray() {
         $datas = $this->gsx->obtainCompTIA();
         $codes = array(
             'grps' => array(),
@@ -633,8 +619,7 @@ class gsxDatas
         return $codes;
     }
 
-    public function getRequestFormHtml($requestType, $prodId)
-    {
+    public function getRequestFormHtml($requestType, $prodId) {
         global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
         $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode']) ? $_REQUEST['symCode'] : null));
@@ -653,58 +638,58 @@ class gsxDatas
 //            case 'CreateIndirectOnsiteRepair':
 //            case 'CreateIPhoneRepairOrReplace':
 //            case 'CreateWholeUnitExchange':
-                if (isset($chronoId)) {
-                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
-                    $chrono = new Chrono($db);
-                    $chrono->fetch($chronoId);
-                    $chrono->getValues($chronoId);
+        if (isset($chronoId)) {
+            require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
+            $chrono = new Chrono($db);
+            $chrono->fetch($chronoId);
+            $chrono->getValues($chronoId);
 
-                    $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0) ? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
+            $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0) ? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
 
-                    $tech = new User($db);
-                    $tech->fetch($idUser);
+            $tech = new User($db);
+            $tech->fetch($idUser);
 
-                    $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostic']['value'];
-                    $valDef['symptom'] = $chrono->extraValue[$chronoId]['Symptomes']['value'];
+            $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostic']['value'];
+            $valDef['symptom'] = $chrono->extraValue[$chronoId]['Symptomes']['value'];
 //                    $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
-                    $valDef['unitReceivedDate'] = date("d/m/Y");
-                    $valDef['unitReceivedTime'] = "08:00";
+            $valDef['unitReceivedDate'] = date("d/m/Y");
+            $valDef['unitReceivedTime'] = "08:00";
 
-                    $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
-                    $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
-                    $valDef['shippingLocation'] = $tech->array_options['options_apple_shipto'];
-                    $valDef['billTo'] = $tech->array_options['options_apple_service'];
-                    $valDef['soldToContact'] = $tech->getFullName($langs);
-                    $valDef['technicianName'] = $tech->lastname;
-                    $valDef['soldToContactPhone'] = $tech->office_phone;
-                    $valDef['poNumber'] = $chrono->ref;
-                    $valDef['purchaseOrderNumber'] = $chrono->ref;
-                    
-                    
-                    
-                    //pour les retour
-                    $valDef['shipToCode'] = $this->shipTo;
-                    $valDef['length'] = "4";
-                    $valDef['width'] = "2";
-                    $valDef['height'] = "1";
-                    $valDef['estimatedTotalWeight'] = "1";
-                    
-                    if(count($this->repairs) < 1)
-                        $this->loadRepairs ($chronoId);
-                    foreach($this->repairs as $repair){
-                        $tabT = array();
-                        $tabT['dispatchId'] = $repair->confirmNumbers['repair'];
-                        
-                        $cart = new partsCart($db, null, $chronoId);
-                        $cart->loadCart();
-                        foreach($cart->partsCart as $part){
-                            $tabT['partNumber'] = $part['partNumber'];
-                        $valDef['WHUBulkReturnOrder'][] = $tabT;
-                        }
-                    }
-                    
-                    
-                    
+            $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
+            $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
+            $valDef['shippingLocation'] = $tech->array_options['options_apple_shipto'];
+            $valDef['billTo'] = $tech->array_options['options_apple_service'];
+            $valDef['soldToContact'] = $tech->getFullName($langs);
+            $valDef['technicianName'] = $tech->lastname;
+            $valDef['soldToContactPhone'] = $tech->office_phone;
+            $valDef['poNumber'] = $chrono->ref;
+            $valDef['purchaseOrderNumber'] = $chrono->ref;
+
+
+
+            //pour les retour
+            $valDef['shipToCode'] = $this->shipTo;
+            $valDef['length'] = "4";
+            $valDef['width'] = "2";
+            $valDef['height'] = "1";
+            $valDef['estimatedTotalWeight'] = "1";
+
+            if (count($this->repairs) < 1)
+                $this->loadRepairs($chronoId);
+            foreach ($this->repairs as $repair) {
+                $tabT = array();
+                $tabT['dispatchId'] = $repair->confirmNumbers['repair'];
+
+                $cart = new partsCart($db, null, $chronoId);
+                $cart->loadCart();
+                foreach ($cart->partsCart as $part) {
+                    $tabT['partNumber'] = $part['partNumber'];
+                    $valDef['WHUBulkReturnOrder'][] = $tabT;
+                }
+            }
+
+
+
 //
 ////        echo "<pre>"; print_r($chrono->contact);
 //        print_r($chrono->extraValue);
@@ -712,60 +697,58 @@ class gsxDatas
 //                        if($valDef['componentCheckDetails']['conponent'] == "IMEI")
 //                        $valDef['componentCheckDetails']['componentSerialNumber'] = $this->serial;
 //                    }
-                    $valDef['customerAddress']['companyName'] = $chrono->societe->name;
+            $valDef['customerAddress']['companyName'] = $chrono->societe->name;
 
 
 
 
-                    $valDef['customerAddress']['city'] = $chrono->societe->town;
-                    $valDef['customerAddress']['primaryPhone'] = $chrono->societe->phone;
-                    $valDef['customerAddress']['secondaryPhone'] = $chrono->societe->phone;
-                    $valDef['customerAddress']['zipCode'] = $chrono->societe->zip;
-                    $valDef['customerAddress']['state'] = substr($chrono->societe->zip, 0, 2);
-                    $valDef['customerAddress']['emailAddress'] = $chrono->societe->email;
-                    $valDef['customerAddress']['street'] = $chrono->societe->address;
-                    $valDef['customerAddress']['addressLine1'] = $chrono->societe->address;
-                    $valDef['customerAddress']['country'] = "FRANCE";
+            $valDef['customerAddress']['city'] = $chrono->societe->town;
+            $valDef['customerAddress']['primaryPhone'] = $chrono->societe->phone;
+            $valDef['customerAddress']['secondaryPhone'] = $chrono->societe->phone;
+            $valDef['customerAddress']['zipCode'] = $chrono->societe->zip;
+            $valDef['customerAddress']['state'] = substr($chrono->societe->zip, 0, 2);
+            $valDef['customerAddress']['emailAddress'] = $chrono->societe->email;
+            $valDef['customerAddress']['street'] = $chrono->societe->address;
+            $valDef['customerAddress']['addressLine1'] = $chrono->societe->address;
+            $valDef['customerAddress']['country'] = "FRANCE";
 
-                    $tabName = explode(" ", $chrono->societe->name);
-                    $valDef['customerAddress']['firstName'] = $tabName[0];
-                    $valDef['customerAddress']['lastName'] = (isset($tabName[1]) ? $tabName[1] : $tabName[0]);
+            $tabName = explode(" ", $chrono->societe->name);
+            $valDef['customerAddress']['firstName'] = $tabName[0];
+            $valDef['customerAddress']['lastName'] = (isset($tabName[1]) ? $tabName[1] : $tabName[0]);
 
 
 
-                    if (isset($chrono->contact->id)) {
-                        if ($chrono->contact->address != "")
-                            $valDef['customerAddress']['street'] = $chrono->contact->address;
-                        if ($chrono->contact->address != "")
-                            $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
+            if (isset($chrono->contact->id)) {
+                if ($chrono->contact->address != "")
+                    $valDef['customerAddress']['street'] = $chrono->contact->address;
+                if ($chrono->contact->address != "")
+                    $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
 //            $valDef['addressLine4'] = $chrono->contact->;
-                        if ($chrono->contact->town != "")
-                            $valDef['customerAddress']['city'] = $chrono->contact->town;
-                        $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
-                        $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
-                        if ($chrono->contact->phone_pro != "")
-                            $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
-                        if ($chrono->contact->phone_mobile != "")
-                            $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
-                        if ($chrono->contact->zip != "")
-                            $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
-                        if ($chrono->contact->zip != "")
-                            $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
-                        if ($chrono->contact->email != "")
-                            $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
-                    }
-                }
+                if ($chrono->contact->town != "")
+                    $valDef['customerAddress']['city'] = $chrono->contact->town;
+                $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
+                $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
+                if ($chrono->contact->phone_pro != "")
+                    $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
+                if ($chrono->contact->phone_mobile != "")
+                    $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
+                if ($chrono->contact->zip != "")
+                    $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+                if ($chrono->contact->zip != "")
+                    $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
+                if ($chrono->contact->email != "")
+                    $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
+            }
+        }
 //                break;
 //        }
-
 //            $valDef['repairConfirmationNumbers'] = $this->confirmNumbers['repair'];
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
 
-    public function processRequestForm($prodId, $requestType)
-    {
+    public function processRequestForm($prodId, $requestType) {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
 
@@ -857,7 +840,7 @@ class gsxDatas
                         );
                         $client = 'IPhoneKGBSerialNumberUpdate';
                         $request = 'UpdateIPhoneKGBSerialNumberRequest';
-                        
+
                         $result['imeiNumber'] = $result['alternateDeviceId'];
                         break;
                 }
@@ -883,14 +866,14 @@ class gsxDatas
 
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
             $response = $this->gsx->request($requestData, $client);
-            
-            
-            if (isset($response[$responseName]['repairConfirmation']['messages'])){
+
+
+            if (isset($response[$responseName]['repairConfirmation']['messages'])) {
                 $message = $response[$responseName]['repairConfirmation']['messages'];
-                if(!is_array($message))
+                if (!is_array($message))
                     $message = array($message);
-                foreach($message as $mess)
-                    $html .= "<div class='alertJs'>".$mess ."</div>";
+                foreach ($message as $mess)
+                    $html .= "<div class='alertJs'>" . $mess . "</div>";
             }
 
             if (count($this->gsx->errors['soap'])) {
@@ -918,8 +901,8 @@ class gsxDatas
                         }
                     }
                 }
-                
-                
+
+
                 switch ($requestType) {
                     default:
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
@@ -955,7 +938,7 @@ class gsxDatas
                             if (!is_dir(DOL_DATA_ROOT . $direName))
                                 mkdir(DOL_DATA_ROOT . $direName);
                             $fileName = $direName . "/" . $fileNamePure;
-    //                        die(DOL_DATA_ROOT . $fileName);
+                            //                        die(DOL_DATA_ROOT . $fileName);
                             if (!file_exists(DOL_DATA_ROOT . $fileName)) {
                                 if (file_put_contents(DOL_DATA_ROOT . $fileName, $datas['packingList']) === false)
                                     $fileName = null;
@@ -969,7 +952,7 @@ class gsxDatas
                     case 'KGBSerialNumberUpdate':
 //                        echo '<pre>';
 //                        print_r($response);
-                        dol_syslog("KGBSerialNumberUpdate".print_r($response,1),3);
+                        dol_syslog("KGBSerialNumberUpdate" . print_r($response, 1), 3);
 //                        echo '</pre>';
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
                             if ($response[$responseName]['updateStatus'] == "Y") {
@@ -998,7 +981,7 @@ class gsxDatas
                         break;
                     case 'UpdateSerialNumber':
 //                        echo '<pre>';
-                        dol_syslog("UpdateSerialNumber".print_r($response,1),3);
+                        dol_syslog("UpdateSerialNumber" . print_r($response, 1), 3);
 //                        echo '</pre>';
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
@@ -1068,13 +1051,13 @@ class gsxDatas
         return $html;
     }
 
-    public function getGSXErrorsHtml($log = false)
-    {
+    public function getGSXErrorsHtml($log = false) {
         if (is_object($this->gsx))
             return $this->gsx->getGSXErrorsHtml($log);
         else
             return '';
     }
+
 }
 
 ?>

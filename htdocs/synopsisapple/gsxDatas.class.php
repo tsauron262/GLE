@@ -475,6 +475,8 @@ class gsxDatas
             $params['serialNumber'] = $this->serial;
         }
         $parts = $this->gsx->part($params);
+        if(isset($parts["partDescription"]))
+            $parts = array(0 => $parts);
 //        echo '<pre>';
 //        print_r($parts);
         if (isset($parts) && count($parts)) {

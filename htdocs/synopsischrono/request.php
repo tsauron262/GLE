@@ -426,7 +426,7 @@ function sendSms($chrono, $text) {
         elseif (is_object($chrono->societe) && testNumSms($chrono->societe->phone))
             $to = $chrono->societe->phone;
         
-        $text.= $chrono->ref;
+        $text.= " ".$chrono->ref;
         $to = "0628335081";
         $fromsms = urlencode('SAV BIMP');
 

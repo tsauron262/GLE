@@ -427,7 +427,7 @@ function sendSms($chrono, $text) {
             $to = $chrono->societe->phone;
         
         $text.= " ".$chrono->ref;
-        $to = "0628335081";
+        //$to = "0628335081";
         $fromsms = urlencode('SAV BIMP');
 
         $to = traiteNumMobile($to);

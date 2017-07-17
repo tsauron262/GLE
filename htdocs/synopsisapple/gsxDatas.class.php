@@ -475,8 +475,6 @@ class gsxDatas
             $params['serialNumber'] = $this->serial;
         }
         $parts = $this->gsx->part($params);
-        if(isset($parts["partDescription"]))
-            $parts = array(0 => $parts);
 //        echo '<pre>';
 //        print_r($parts);
         if (isset($parts) && count($parts)) {
@@ -485,6 +483,8 @@ class gsxDatas
                     $parts = $parts['ResponseArray']['responseData'];
                     if ($partNumberAsKey) {
                         $results = array();
+                    if(isset($parts["partDescription"]))
+                        $parts = array(0 => $parts);
                         foreach ($parts as $part) {
                             $results[$part['partNumber']] = $part;
                         }

@@ -609,9 +609,6 @@ class Repair
         $request = $this->gsx->_requestBuilder($requestName, 'repairData', $datas);
         $response = $this->gsx->request($request, $client);
         
-        global $user;
-        if($user->id == 1)
-            dol_syslog("load part".print_r($response,1),3,0,"_admin");
 
         if (count($this->gsx->errors['soap'])) {
             return false;

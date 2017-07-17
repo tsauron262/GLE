@@ -70,7 +70,7 @@ if ($res > 0) {
                         print "<table  cellpadding=10>";
                         print "<tr><th width=95 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Ref.
                            <th width=95 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Vendu HT
-                           <th width=200 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Description";
+                           <th width=200 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default' collspace='2'>Description";
                         print "</table>";
                     }
                     $cnt++;

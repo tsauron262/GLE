@@ -172,6 +172,7 @@ CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsis_projet_task_timeP` (
   `task_duration` double DEFAULT NULL,
   `fk_user` int(11) DEFAULT NULL,
   `thm` double(24,8) DEFAULT NULL,
+  `occupation` int(11) DEFAULT NULL,
   `note` text
 )",
             

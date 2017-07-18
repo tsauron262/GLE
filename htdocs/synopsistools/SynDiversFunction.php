@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT."/synopsisres/manipElementElement.php";
+require_once DOL_DOCUMENT_ROOT . "/synopsisres/manipElementElement.php";
 
 function sanitize_string($str, $newstr = '_') {
     $forbidden_chars_to_underscore = array(" ", "'", "/", "\\", ":", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=", "(", ")");
@@ -31,74 +31,74 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
         $userstatic = new User($db);
         $contactstatic = new Contact($db);
 
-        $out.="\n";
-        $out.='<table width="100%" class="noborder">';
-        $out.='<tr class="liste_titre">';
-        $out.='<td colspan="2">';
+        $out .= "\n";
+        $out .= '<table width="100%" class="noborder">';
+        $out .= '<tr class="liste_titre">';
+        $out .= '<td colspan="2">';
         if (get_class($object) == 'Societe')
-            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/listactions.php?socid=' . $object->id . '&amp;status=' . ($done ? 'done' : 'todo') . '">';
+            $out .= '<a href="' . DOL_URL_ROOT . '/comm/action/listactions.php?socid=' . $object->id . '&amp;status=' . ($done ? 'done' : 'todo') . '">';
 
         if ($done)
-            $out.=$langs->trans("ActionsDoneShort");
+            $out .= $langs->trans("ActionsDoneShort");
         else
-            $out.=$langs->trans("ActionsToDoShort");
+            $out .= $langs->trans("ActionsToDoShort");
         if (get_class($object) == 'Societe')
-            $out.='</a>';
-        $out.='</td>';
-        $out.='<td colspan="5" align="right">';
+            $out .= '</a>';
+        $out .= '</td>';
+        $out .= '<td colspan="5" align="right">';
         $permok = $user->rights->agenda->myactions->create;
         if (($object->id || $objcon->id) && $permok) {
-            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/card.php?action=create';
+            $out .= '<a href="' . DOL_URL_ROOT . '/comm/action/card.php?action=create';
             if (get_class($object) == 'Societe')
-                $out.='&amp;socid=' . $object->id;
-            $out.=(!empty($objcon->id) ? '&amp;contactid=' . $objcon->id : '') . '&amp;backtopage=1&amp;percentage=-1">';
-            $out.=$langs->trans("AddAnAction") . ' ';
-            $out.=img_picto($langs->trans("AddAnAction"), 'filenew');
-            $out.="</a>";
+                $out .= '&amp;socid=' . $object->id;
+            $out .= (!empty($objcon->id) ? '&amp;contactid=' . $objcon->id : '') . '&amp;backtopage=1&amp;percentage=-1">';
+            $out .= $langs->trans("AddAnAction") . ' ';
+            $out .= img_picto($langs->trans("AddAnAction"), 'filenew');
+            $out .= "</a>";
         }
-        $out.='</td>';
-        $out.='</tr>';
+        $out .= '</td>';
+        $out .= '</tr>';
 
         $sql = "SELECT a.id, a.label,";
-        $sql.= " a.datep as dp,";
+        $sql .= " a.datep as dp,";
 //        $sql.= " a.datea as da,";
-        $sql.= " a.percent,";
-        $sql.= " a.fk_user_author, a.fk_contact,";
-        $sql.= " a.fk_element, a.elementtype,";
-        $sql.= " c.code as acode, c.libelle,";
-        $sql.= " u.login, u.rowid";
+        $sql .= " a.percent,";
+        $sql .= " a.fk_user_author, a.fk_contact,";
+        $sql .= " a.fk_element, a.elementtype,";
+        $sql .= " c.code as acode, c.libelle,";
+        $sql .= " u.login, u.rowid";
         if (get_class($object) == 'Adherent')
-            $sql.= ", m.lastname, m.firstname";
+            $sql .= ", m.lastname, m.firstname";
         if (get_class($object) == 'Societe')
-            $sql.= ", sp.lastname, sp.firstname";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "c_actioncomm as c, " . MAIN_DB_PREFIX . "user as u, " . MAIN_DB_PREFIX . "actioncomm as a";
+            $sql .= ", sp.lastname, sp.firstname";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "c_actioncomm as c, " . MAIN_DB_PREFIX . "user as u, " . MAIN_DB_PREFIX . "actioncomm as a";
         if (get_class($object) == 'Adherent')
-            $sql.= ", " . MAIN_DB_PREFIX . "adherent as m";
+            $sql .= ", " . MAIN_DB_PREFIX . "adherent as m";
         if (get_class($object) == 'Societe')
-            $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "socpeople as sp ON a.fk_contact = sp.rowid";
-        $sql.= " WHERE u.rowid = a.fk_user_author";
-        $sql.= " AND a.entity IN (" . getEntity('agenda', 1) . ")";
+            $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "socpeople as sp ON a.fk_contact = sp.rowid";
+        $sql .= " WHERE u.rowid = a.fk_user_author";
+        $sql .= " AND a.entity IN (" . getEntity('agenda', 1) . ")";
         if (get_class($object) == 'Adherent') {
-            $sql.= " AND a.fk_element = m.rowid AND a.elementtype = 'member'";
+            $sql .= " AND a.fk_element = m.rowid AND a.elementtype = 'member'";
             if (!empty($object->id))
-                $sql.= " AND a.fk_element = " . $object->id;
+                $sql .= " AND a.fk_element = " . $object->id;
         }
         if (get_class($object) == 'Societe' && $object->id)
-            $sql.= " AND a.fk_soc = " . $object->id;
+            $sql .= " AND a.fk_soc = " . $object->id;
         if (!empty($objcon->id))
-            $sql.= " AND a.fk_contact = " . $objcon->id;
-        $sql.= " AND c.id=a.fk_action";
+            $sql .= " AND a.fk_contact = " . $objcon->id;
+        $sql .= " AND c.id=a.fk_action";
         if ($done)
-            $sql.= " AND (a.percent = 100 OR (a.percent = -1 AND a.datep <= '" . $db->idate($now) . "'))";
+            $sql .= " AND (a.percent = 100 OR (a.percent = -1 AND a.datep <= '" . $db->idate($now) . "'))";
         else
-            $sql.= " AND ((a.percent >= 0 AND a.percent < 100) OR (a.percent = -1 AND a.datep > '" . $db->idate($now) . "'))";
-        $sql.= " AND elementtype = '" . $type . "' AND fk_element ";
+            $sql .= " AND ((a.percent >= 0 AND a.percent < 100) OR (a.percent = -1 AND a.datep > '" . $db->idate($now) . "'))";
+        $sql .= " AND elementtype = '" . $type . "' AND fk_element ";
         if (is_array($idElement)) {
             $idElement = implode(",", $idElement);
             $sql .= "IN (" . $idElement . ")";
         } else
             $sql .= "=" . $idElement;
-        $sql.= " ORDER BY a.datep DESC, a.id DESC";
+        $sql .= " ORDER BY a.datep DESC, a.id DESC";
 
         dol_syslog("company.lib::show_actions_todo sql=" . $sql);
         $result = $db->query($sql);
@@ -115,17 +115,17 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
 
                     $datep = $db->jdate($obj->dp);
 
-                    $out.="<tr " . $bc[$var] . ">";
+                    $out .= "<tr " . $bc[$var] . ">";
 
-                    $out.='<td width="120" align="left" class="nowrap">' . dol_print_date($datep, 'dayhour') . "</td>\n";
+                    $out .= '<td width="120" align="left" class="nowrap">' . dol_print_date($datep, 'dayhour') . "</td>\n";
 
                     // Picto warning
-                    $out.='<td width="16">';
+                    $out .= '<td width="16">';
                     if ($obj->percent >= 0 && $datep && $datep < ($now - ($conf->global->MAIN_DELAY_ACTIONS_TODO * 60 * 60 * 24)))
-                        $out.=' ' . img_warning($langs->trans("Late"));
+                        $out .= ' ' . img_warning($langs->trans("Late"));
                     else
-                        $out.='&nbsp;';
-                    $out.='</td>';
+                        $out .= '&nbsp;';
+                    $out .= '</td>';
 
                     $actionstatic->type_code = $obj->acode;
                     $transcode = $langs->trans("Action" . $obj->acode);
@@ -136,28 +136,28 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
                     //$out.='<td width="140">'.$actionstatic->getNomUrl(1,16).'</td>';
                     // Title of event
                     //$out.='<td colspan="2">'.dol_trunc($obj->label,40).'</td>';
-                    $out.='<td colspan="2">' . $actionstatic->getNomUrl(1, 40) . '</td>';
+                    $out .= '<td colspan="2">' . $actionstatic->getNomUrl(1, 40) . '</td>';
 
                     // Contact pour cette action
                     if (empty($objcon->id) && $obj->fk_contact > 0) {
                         $contactstatic->lastname = $obj->lastname;
                         $contactstatic->firstname = $obj->firstname;
                         $contactstatic->id = $obj->fk_contact;
-                        $out.='<td width="120">' . $contactstatic->getNomUrl(1, '', 10) . '</td>';
+                        $out .= '<td width="120">' . $contactstatic->getNomUrl(1, '', 10) . '</td>';
                     } else {
-                        $out.='<td>&nbsp;</td>';
+                        $out .= '<td>&nbsp;</td>';
                     }
 
-                    $out.='<td width="80" class="nowrap">';
+                    $out .= '<td width="80" class="nowrap">';
                     $userstatic->id = $obj->fk_user_author;
                     $userstatic->login = $obj->login;
-                    $out.=$userstatic->getLoginUrl(1);
-                    $out.='</td>';
+                    $out .= $userstatic->getLoginUrl(1);
+                    $out .= '</td>';
 
                     // Statut
-                    $out.='<td class="nowrap" width="20">' . $actionstatic->LibStatut($obj->percent, 3) . '</td>';
+                    $out .= '<td class="nowrap" width="20">' . $actionstatic->LibStatut($obj->percent, 3) . '</td>';
 
-                    $out.="</tr>\n";
+                    $out .= "</tr>\n";
                     $i++;
                 }
             } else {
@@ -167,9 +167,9 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
         } else {
             dol_print_error($db);
         }
-        $out.="</table>\n";
+        $out .= "</table>\n";
 
-        $out.="<br>\n";
+        $out .= "<br>\n";
     }
 
     if ($noprint)
@@ -180,12 +180,12 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
 
 function htmlToAgenda($str) {
     $tag = "a";
-    $nomLong = (isset($_SERVER['HTTPS'])? "https://" : "http://") . $_SERVER['HTTP_HOST'];
+    $nomLong = (isset($_SERVER['HTTPS']) ? "https://" : "http://") . $_SERVER['HTTP_HOST'];
     $str = preg_replace("%(<$tag.*?<img)(.*?)(<\/$tag.*?>)%is", "", $str);
     $str = str_replace("<a href=\"", $nomLong, $str);
     $str = str_replace("\">", "\n", $str);
     $str = str_replace("</a>", "", $str);
-    $str = str_replace($nomLong.$nomLong, $nomLong, $str);
+    $str = str_replace($nomLong . $nomLong, $nomLong, $str);
     return $str;
 }
 
@@ -601,16 +601,20 @@ function debug($arr) {
     echo $i;
 }
 
-function getIdInUrl($url, $nomId = "id") {
+function getIdInUrl($url, $tabNomId = "id") {
+    if (!is_array($tabNomId))
+        $tabNomId = array($tabNomId);
     $tabUrl = explode("?", $url);
     $tabUrl = explode("#", $tabUrl[1]);
     $tabUrl = explode("&", $tabUrl[0]);
     foreach ($tabUrl as $val) {
-        if (stripos($val, $nomId) !== false)
-            return str_replace($nomId . "=", "", $val);
+        foreach ($tabNomId as $nomId)
+            if (stripos($val, $nomId) !== false)
+                return str_replace($nomId . "=", "", $val);
     }
-    if (isset($_REQUEST[$nomId]))
-        return $_REQUEST[$nomId];
+    foreach ($tabNomId as $nomId)
+        if (isset($_REQUEST[$nomId]))
+            return $_REQUEST[$nomId];
     return false;
 }
 
@@ -652,13 +656,13 @@ function asPosition($str) {
 
 function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '') {
     global $dolibarr_main_url_root;
-    
+
     $subject = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $subject);
     $msg = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $msg);
-    
+
     $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
-    $msg = str_replace(DOL_URL_ROOT."/", $dolibarr_main_url_root."/", $msg);
-    
+    $msg = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $msg);
+
     $mailOk = true;
 
     if ($from == '')
@@ -781,37 +785,37 @@ function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 
     // On recherche les utilisateurs
     $sql = "SELECT DISTINCT u.rowid, u.lastname as lastname, u.firstname, u.login, u.admin, u.entity";
     if (!empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && !$user->entity) {
-        $sql.= ", e.label";
+        $sql .= ", e.label";
     }
-    $sql.= " FROM " . MAIN_DB_PREFIX . "user as u";
-    $sql.= ", " . MAIN_DB_PREFIX . "usergroup_user as ug2";
+    $sql .= " FROM " . MAIN_DB_PREFIX . "user as u";
+    $sql .= ", " . MAIN_DB_PREFIX . "usergroup_user as ug2";
     if (!empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && !$user->entity) {
-        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "entity as e ON e.rowid=u.entity";
+        $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "entity as e ON e.rowid=u.entity";
         if ($force_entity)
-            $sql.= " WHERE u.entity IN (0," . $force_entity . ")";
+            $sql .= " WHERE u.entity IN (0," . $force_entity . ")";
         else
-            $sql.= " WHERE u.entity IS NOT NULL";
+            $sql .= " WHERE u.entity IS NOT NULL";
     }
     else {
         if (!empty($conf->multicompany->transverse_mode)) {
-            $sql.= ", " . MAIN_DB_PREFIX . "usergroup_user as ug";
-            $sql.= " WHERE ug.fk_user = u.rowid";
-            $sql.= " AND ug.entity = " . $conf->entity;
+            $sql .= ", " . MAIN_DB_PREFIX . "usergroup_user as ug";
+            $sql .= " WHERE ug.fk_user = u.rowid";
+            $sql .= " AND ug.entity = " . $conf->entity;
         } else {
-            $sql.= " WHERE u.entity IN (0," . $conf->entity . ")";
+            $sql .= " WHERE u.entity IN (0," . $conf->entity . ")";
         }
     }
-    $sql.= " AND ug2.fk_user = u.rowid";
+    $sql .= " AND ug2.fk_user = u.rowid";
     if ($group != '')
-        $sql.= " AND ug2.fk_usergroup =" . $group;
+        $sql .= " AND ug2.fk_usergroup =" . $group;
     if (!empty($user->societe_id))
-        $sql.= " AND u.fk_soc = " . $user->societe_id;
+        $sql .= " AND u.fk_soc = " . $user->societe_id;
     if (is_array($exclude) && $excludeUsers)
-        $sql.= " AND u.rowid NOT IN ('" . $excludeUsers . "')";
+        $sql .= " AND u.rowid NOT IN ('" . $excludeUsers . "')";
     if (is_array($include) && $includeUsers)
-        $sql.= " AND u.rowid IN ('" . $includeUsers . "')";
+        $sql .= " AND u.rowid IN ('" . $includeUsers . "')";
     $sql .= " AND statut = 1";
-    $sql.= " ORDER BY u.firstname ASC";
+    $sql .= " ORDER BY u.firstname ASC";
 
     dol_syslog(get_class($form) . "::select_dolusers sql=" . $sql);
     $resql = $form->db->query($sql);
@@ -819,9 +823,9 @@ function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 
         $num = $form->db->num_rows($resql);
         $i = 0;
         if ($num) {
-            $out.= '<select class="flat" id="' . $htmlname . '" name="' . $htmlname . '"' . ($disabled ? ' disabled="disabled"' : '') . '>';
+            $out .= '<select class="flat" id="' . $htmlname . '" name="' . $htmlname . '"' . ($disabled ? ' disabled="disabled"' : '') . '>';
             if ($show_empty)
-                $out.= '<option value="-1"' . ($selected == -1 ? ' selected="selected"' : '') . '>&nbsp;</option>' . "\n";
+                $out .= '<option value="-1"' . ($selected == -1 ? ' selected="selected"' : '') . '>&nbsp;</option>' . "\n";
 
             $userstatic = new User($form->db);
 
@@ -837,38 +841,38 @@ function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 
                     $disableline = 1;
 
                 if ((is_object($selected) && $selected->id == $obj->rowid) || (!is_object($selected) && $selected == $obj->rowid)) {
-                    $out.= '<option value="' . $obj->rowid . '"';
+                    $out .= '<option value="' . $obj->rowid . '"';
                     if ($disableline)
-                        $out.= ' disabled="disabled"';
-                    $out.= ' selected="selected">';
+                        $out .= ' disabled="disabled"';
+                    $out .= ' selected="selected">';
                 }
                 else {
-                    $out.= '<option value="' . $obj->rowid . '"';
+                    $out .= '<option value="' . $obj->rowid . '"';
                     if ($disableline)
-                        $out.= ' disabled="disabled"';
-                    $out.= '>';
+                        $out .= ' disabled="disabled"';
+                    $out .= '>';
                 }
-                $out.= $userstatic->getFullName($langs);
+                $out .= $userstatic->getFullName($langs);
 
                 if (!empty($conf->multicompany->enabled) && empty($conf->multicompany->transverse_mode) && $conf->entity == 1 && $user->admin && !$user->entity) {
                     if ($obj->admin && !$obj->entity)
-                        $out.=" (" . $langs->trans("AllEntities") . ")";
+                        $out .= " (" . $langs->trans("AllEntities") . ")";
                     else
-                        $out.=" (" . $obj->label . ")";
+                        $out .= " (" . $obj->label . ")";
                 }
 
                 //if ($obj->admin) $out.= ' *';
                 if (!empty($conf->global->MAIN_SHOW_LOGIN))
-                    $out.= ' (' . $obj->login . ')';
-                $out.= '</option>';
+                    $out .= ' (' . $obj->login . ')';
+                $out .= '</option>';
                 $i++;
             }
         }
         else {
-            $out.= '<select class="flat" name="' . $htmlname . '" disabled="disabled">';
-            $out.= '<option value="">' . $langs->trans("None") . '</option>';
+            $out .= '<select class="flat" name="' . $htmlname . '" disabled="disabled">';
+            $out .= '<option value="">' . $langs->trans("None") . '</option>';
         }
-        $out.= '</select>';
+        $out .= '</select>';
     } else {
         dol_print_error($form->db);
     }
@@ -949,9 +953,9 @@ function convertirDate($date, $enFr = true, $nowSiNull = false, $delimiteur = "-
     $tabDate = explode('-', $tab0[0]);
     if (!isset($tabDate[1]))
         $tabDate = explode('/', $tab0[0]);
-    
-    
-    if($tab0[0] == "0000-00-00")
+
+
+    if ($tab0[0] == "0000-00-00")
         return "";
     elseif (isset($tabDate[2])) {
         if (($tabDate[0] > 32 && $enFr) || ($tabDate[2] > 32 && !$enFr))
@@ -976,7 +980,7 @@ function convertirDate($date, $enFr = true, $nowSiNull = false, $delimiteur = "-
     else {
         if ($nowSiNull && $date == "")
             if ($enFr)
-                $return = date("d".$delimiteur."m".$delimiteur."Y H:i:s");
+                $return = date("d" . $delimiteur . "m" . $delimiteur . "Y H:i:s");
             else
                 $return = date("Y-m-d H:i:s");
         else

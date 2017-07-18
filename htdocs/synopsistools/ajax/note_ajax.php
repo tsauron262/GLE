@@ -67,6 +67,12 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit2 = $user->rights->facture->creer;
         $nomId = "facid";
     }
+    if (stripos($url, '/projet/') !== false) {
+        $table = MAIN_DB_PREFIX . "projet";
+        $droit1 = $user->rights->projet->lire;
+        $droit2 = $user->rights->projet->creer;
+        $nomId = array("withproject", "id");
+    }
 
     $id = getIdInUrl($url, $nomId);
 

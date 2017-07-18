@@ -607,14 +607,14 @@ function getIdInUrl($url, $tabNomId = "id") {
     $tabUrl = explode("?", $url);
     $tabUrl = explode("#", $tabUrl[1]);
     $tabUrl = explode("&", $tabUrl[0]);
-    foreach ($tabUrl as $val) {
-        foreach ($tabNomId as $nomId)
+    foreach ($tabNomId as $nomId) {
+        foreach ($tabUrl as $val) {
             if (stripos($val, $nomId) !== false)
                 return str_replace($nomId . "=", "", $val);
-    }
-    foreach ($tabNomId as $nomId)
+        }
         if (isset($_REQUEST[$nomId]))
             return $_REQUEST[$nomId];
+    }
     return false;
 }
 

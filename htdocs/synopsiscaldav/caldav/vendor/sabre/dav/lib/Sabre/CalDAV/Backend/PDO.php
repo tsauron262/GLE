@@ -628,7 +628,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($calendarData2['DTSTAMP']))
                 $calendarData2['LAST-MODIFIED'] = $calendarData2['DTSTAMP'];
             
-            $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET `datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."', `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
+            $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
             $db->query($sql);
         }
     }

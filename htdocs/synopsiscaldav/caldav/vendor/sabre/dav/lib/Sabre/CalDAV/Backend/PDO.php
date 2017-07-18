@@ -449,7 +449,7 @@ class PDO extends AbstractBackend {
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],
-            'lastmodified' => $row['lastmodified'],
+            'lastmodified' => $calendarData2['LAST-MODIFIED'],
             'etag' => '' . $row['etag'] . '',
             'calendarid' => $row['calendarid'],
             'size' => (int) $row['size'],

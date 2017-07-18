@@ -394,7 +394,7 @@ if ($selectedFile) {
         if ($return_var == 0) {
 
             $debLien = DOL_URL_ROOT . "/document.php?modulepart=" . $module . "&file=" . $object->$clef . "/";
-            echo "<tr><td>Fichier PDF</td><td><a href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
+            echo "<tr><td>Fichier PDF</td><td><a target='_blank' href='" . $debLien . $fileToShow . "'>" . $fileToShow . "</a>";
 
             if ($afficheSign) {
                 echo "<tr><td>Signature</td><td><input type='button' id='affSign' value='Signer'/>";

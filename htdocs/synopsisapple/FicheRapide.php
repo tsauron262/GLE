@@ -11,6 +11,8 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 require_once DOL_DOCUMENT_ROOT . '/Synopsis_Process/class/process.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
+
+global $langs;
 $js = '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/fiche.js' ></script>";
 $js .= '<script type="text/javascript" >$(window).load(function() { $(".addContact2").click(function() {

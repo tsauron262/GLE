@@ -474,6 +474,8 @@ function ajNoteAjax() {
             if (msg != "0") {
                 if ($("a#note").size() > 0)
                     tab = "note";
+                else if ($("a#notes").size() > 0)
+                    tab = "notes";
                 else
                     tab = "info";
                 //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';

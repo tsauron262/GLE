@@ -373,7 +373,7 @@ class PDO extends AbstractBackend {
      * @return array|null
      */
     public function getCalendarObject($calendarId, $objectUri) {
-        $stmt = $this->pdo->prepare('SELECT id, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+        $stmt = $this->pdo->prepare('SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -437,6 +437,8 @@ class PDO extends AbstractBackend {
 
         $calData = $this->traiteIcsTab($calendarData2);
         
+        $calendarData2['LAST-MODIFIED'] = $row['lastmodified'];
+        $calendarData2['CREATED'] = $row['CREATED'];
         if($calendarData2['CREATED'] > $calendarData2['LAST-MODIFIED'])
             $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
         

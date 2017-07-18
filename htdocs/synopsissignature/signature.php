@@ -302,6 +302,11 @@ if ($selectedFile) {
         } elseif (stripos($signeFile, 'FI') === 0) {
             $pdf->setXY(8, 255);
             $pdf->image($nomSign, 10, 260, 28);
+
+        /*$tabFilePc[] = DOL_DATA_ROOT."/ficheinter/".$object->ref."/";
+        $tabFilePc2[] = ".pdf";
+        $tabFilePc3[] = "PC-" . $chrono->ref . ".pdf";*/
+            mailSyn2("FI Signé", /*"j.mazet@bimp.fr"*/"tommy@bimp.fr", "Application GLE", "Bonjour la FI ".$object->getNomUrl(1)." est Signé");
         } elseif (stripos($signeFile, 'SH') === 0) {
             $pdf->setXY(25, 240);
             $pdf->image($nomSign, 25, 245, 40);

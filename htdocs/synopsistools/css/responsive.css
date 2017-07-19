@@ -31,6 +31,13 @@ and open the template in the editor.
 @media (max-width: 940px) ,(max-device-width: 940px)
 {
     
+    
+    div#blockvmenusearch{
+        position: fixed;
+        top: 8px;
+        left: 70px;
+    }
+    
     span.tmenuimage{
         display: block;
     }
@@ -307,7 +314,7 @@ and open the template in the editor.
         width: 100%;
         top:0;
         padding-right: 0;
-        z-index: 100;
+        z-index: 40;
         background-color: silver;
         height: 50px;
     }

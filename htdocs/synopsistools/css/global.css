@@ -225,7 +225,7 @@ div.mainmenu.synopsisficheinter {
     margin-top: 150px;
     margin-right: 10px;
 }
-#notePublicEdit{
+.notePublicEdit{
     padding: 5px;
     overflow-y: hidden;
     color: rgb(0, 0, 0);
@@ -238,7 +238,7 @@ div.mainmenu.synopsisficheinter {
     cursor: pointer;    
 }
 .lienNote{
-    background-color: #FAE580;
+    background-color: #FAE580!important;
     background-image: none;
 }
 

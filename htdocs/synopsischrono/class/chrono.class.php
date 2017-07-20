@@ -706,7 +706,7 @@ class Chrono extends CommonObject {
     }
 
     public function createPropal() {
-        global $user;
+        global $user,$langs;
         require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
         $prop = new Propal($this->db);
         $prop->modelpdf = "azurSAV";

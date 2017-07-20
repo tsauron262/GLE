@@ -315,8 +315,8 @@ function traiteScroll(heightDif) {
 //                alert($(this).attr("class")+" | "+newTailleT+" | "+grandeTaille);
 //            alert(hauteur_fenetre());
 //                }
-            
-            
+
+
                 if ($(this).is(":visible")
                         && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 300) {
                     newTaille = newTailleT;
@@ -461,81 +461,91 @@ function traiteScroll(heightDif) {
 
 
 function ajNoteAjax() {
-    fermable = true;
-    var datas = 'url=' + window.location;
-    datas = datas + '&type=note';
-    jQuery.ajax({
-        url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
-        data: datas,
-        datatype: "xml",
-        type: "POST",
-        cache: false,
-        success: function (msg) {
-            if (msg != "0") {
-                if ($("a#note").size() > 0)
-                    tab = "note";
-                else if ($("a#notes").size() > 0)
-                    tab = "notes";
-                else
-                    tab = "info";
-                //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
-                //                $('.tabBar').append(htmlDiv);
-                classEdit = "";
-                if (msg.indexOf("[1]") > -1) {
-                    classEdit = "editable";
-                    msg = msg.replace("[1]", "");
-                }
-                var htmlDiv = '<div class="noteAjax"><div class="note">Note (publique) :<br><div class="' + classEdit + '" id="notePublicEdit" title="Editer">' + msg + '</div></div></div>';
-                $('.fiche').append(htmlDiv);
-                //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
-                //                $('a#note').append(htmlDiv);
-                //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
-                $('a#' + tab + ', .noteAjax').hover(shownNote, hideNote);
-                $('a#' + tab + '').addClass("lienNote");
+    //var tab = "";
+    var tabs = new Array("note", "notes", "info", "task_notes");
+    var i = 0;
+    
 
-                //                $(".controlBut").click(function(){
-                //                    if($(this).val() == "<"){
-                //                        $(this).val(">");
-                //                    }
-                //                    else{
-                //                        $(this).val("<");
-                //                    }     
-                //                    shownHideNote();   
-                //                })
-
-                editAjax(jQuery('#notePublicEdit'), datas, function () {
-                    hideNote()
-                });
-
-            }
+    for (tab of tabs)
+        if ($("a#" + tab).size() > 0) {
+            i++;
+            ajNote(tab, i);
+           
         }
-    });
-
-
-
-    function shownHideNote() {
-        $(".noteAjax .note").animate({
-            width: 'toggle'
-        });
-    }
-    function shownNote() {
-        $(".noteAjax .note").slideDown({
-            width: 'toggle'
-        });
-        fermer = false;
-    }
-    function hideNote() {
-        if (fermable) {
-            fermer = true;
-            setTimeout(function () {
-                if (fermer)
-                    $(".noteAjax .note").slideUp({
-                        width: 'toggle'
-                    });
-            }, 500);
-        }
-    }
 }
+
+function  ajNote(tab, i){
+            var idNote = 'noteAjax'+i;
+            fermable = true;
+            var datas = 'url=' + window.location;
+            datas = datas + '&type=note&tab='+tab;
+            jQuery.ajax({
+                url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
+                data: datas,
+                async : true,
+                datatype: "xml",
+                type: "POST",
+                cache: false,
+                success: function (msg) {
+                    //var tab = tabTab[i];
+                    if (msg != "0") {
+                        //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                        //                $('.tabBar').append(htmlDiv);
+                        classEdit = "";
+                        if (msg.indexOf("[1]") > -1) {
+                            classEdit = "editable";
+                            msg = msg.replace("[1]", "");
+                        }
+                        var htmlDiv = '<div class="noteAjax" id="'+idNote+'"><div class="note">Note (publique) :<br><div class="' + classEdit + ' notePublicEdit" id="notePublicEdit'+i+'" title="Editer">' + msg + '</div></div></div>';
+                        $('.fiche').append(htmlDiv);
+                        //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
+                        //                $('a#note').append(htmlDiv);
+                        //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
+                        $('a#' + tab + ', #'+idNote+'').hover(shownNote, hideNote);
+                        $('a#' + tab + '').addClass("lienNote");
+                        //                $(".controlBut").click(function(){
+                        //                    if($(this).val() == "<"){
+                        //                        $(this).val(">");
+                        //                    }
+                        //                    else{
+                        //                        $(this).val("<");
+                        //                    }     
+                        //                    shownHideNote();   
+                        //                })
+
+                        editAjax(jQuery('#notePublicEdit'+i), datas, function () {
+                            hideNote()
+                        });
+
+                    }
+                }
+            });
+
+
+
+            function shownHideNote(i) {
+                $("."+idNote+" .note").animate({
+                    width: 'toggle'
+                });
+            }
+            function shownNote() {
+                $("#"+idNote+" .note").slideDown({
+                    width: 'toggle'
+                });
+                fermer = false;
+            }
+            function hideNote() {
+                if (fermable) {
+                    fermer = true;
+                    setTimeout(function () {
+                        if (fermer)
+                            $("#"+idNote+" .note").slideUp({
+                                width: 'toggle'
+                            });
+                    }, 500);
+                }
+            }
+            }
 
 
 function editAjax(elem, datas, callOut) {
@@ -743,22 +753,21 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
         $(this).contents().find("input[name='updateassignedtouser'], input[name='addassignedtouser'], input[name='addGroupMember']").click(function () {
             nbLoad = 100;
         });
-        
-        
+
+
         urlStr = iFrame.find("iframe").get(0).contentWindow.location.toString();
-        
-        
-        if(urlIF.indexOf("action=create") !== -1 && urlIF.indexOf("societe/soc.php") !== -1){
-            if(urlStr.indexOf("id", 0) !== -1)
+
+
+        if (urlIF.indexOf("action=create") !== -1 && urlIF.indexOf("societe/soc.php") !== -1) {
+            if (urlStr.indexOf("id", 0) !== -1)
                 fermerIframe($(this).parent(), callBack);
-        }
-        else{
-        i++;
-        if (i > nbLoad && urlStr.indexOf("delete", 0) === -1 && urlStr.indexOf("assignedtouser", 0) === -1) {
+        } else {
+            i++;
+            if (i > nbLoad && urlStr.indexOf("delete", 0) === -1 && urlStr.indexOf("assignedtouser", 0) === -1) {
 //        $("#id-container").show();
-            fermerIframe($(this).parent(), callBack);
+                fermerIframe($(this).parent(), callBack);
+            }
         }
-    }
     });
     iFrame.find("span.petit").click(function () {
 //        id = $(this).parent().attr("id").replace("iFrame", "");

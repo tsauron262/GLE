@@ -67,21 +67,30 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit2 = $user->rights->facture->creer;
         $nomId = "facid";
     }
-    if (stripos($url, '/projet/') !== false) {
-        $table = MAIN_DB_PREFIX . "projet";
+    if ($_REQUEST['tab'] == "task_notes") {
+        $table = MAIN_DB_PREFIX . "projet_task";
         $droit1 = $user->rights->projet->lire;
         $droit2 = $user->rights->projet->creer;
-        $nomId = array("withproject", "id");
+    }else if (stripos($url, 'projet') !== false) {
+        $table = MAIN_DB_PREFIX . "projet";
+        if (stripos($url, '/tasks/') !== false || stripos($url, '/task/') !== false){
+            require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
+            $task = new Task($db);
+            $task->fetch($_REQUEST['id']);
+            $id = $task->fk_project;
+        }
+        $droit1 = $user->rights->projet->lire;
+        $droit2 = $user->rights->projet->creer;
     }
 
-    $id = getIdInUrl($url, $nomId);
+    if (!isset($id))
+        $id = getIdInUrl($url, $nomId);
 
-    if (!isset($id) && is_int($id) && $nomId != "id") {
+    if ((!isset($id) || !is_int($id)) && $nomId != "id") {
         //On reesseille avec id standard
         $nomId = "id";
         $id = getIdInUrl($url, $nomId);
     }
-
     if ($forceRightEdit)
         $droit2 = $droit1;
 
@@ -94,6 +103,8 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
 
         $requete = "SELECT " . $nomChampNote . " as note FROM " . $table . " WHERE ".$nomChampId." = " . $id;
         $sql = $db->query($requete);
+        if(!$sql)
+            die($requete);
         $result = $db->fetch_object($sql);
         $return = str_replace("\n", "<br/>", $result->note);
         $return = ($droit2 ? "[1]" : "") . $return;

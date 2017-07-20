@@ -76,7 +76,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         if (stripos($url, '/tasks/') !== false || stripos($url, '/task/') !== false){
             require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
             $task = new Task($db);
-            $task->fetch($_REQUEST['id']);
+            $task->fetch(getIdInUrl($url, $nomId));
             $id = $task->fk_project;
         }
         $droit1 = $user->rights->projet->lire;

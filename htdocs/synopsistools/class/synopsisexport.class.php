@@ -411,7 +411,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         else {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
-                $valeur = str_replace(array("\n", "\t"), array("",""), $valeur);
+                $valeur = preg_replace("/\r\n|\r|\n/",'', $valeur);
                 if($nom == "Centre")
                     continue;
                 if ($nom == 'product_type') {

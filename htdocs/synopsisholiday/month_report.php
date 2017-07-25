@@ -51,6 +51,7 @@ llxHeader(array(),$langs->trans('CPTitreMenu'));
 
 $cp = new SynopsisHoliday($db);
 
+$mode = GETPOST('mode');
 $month = GETPOST('month_start');
 $year = GETPOST('year_start');
 
@@ -61,14 +62,14 @@ if(empty($year)) {
 	$year = date('Y');
 }
 
-$sql = "SELECT cp.rowid, cp.fk_user, cp.date_debut, cp.date_fin, cp.halfday";
+$sql = "SELECT cp.rowid, cp.fk_user, cp.date_debut, cp.date_fin, cp.halfday, cp.type_conges";
 $sql.= " FROM " . MAIN_DB_PREFIX . "holiday cp";
 $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "user u ON cp.fk_user = u.rowid";
-$sql.= " WHERE cp.statut = 3";	// Approved
+$sql.= " WHERE cp.statut = 6";	// Approved
 // TODO Use BETWEEN instead of date_format
 $sql.= " AND (date_format(cp.date_debut, '%Y-%c') = '$year-$month' OR date_format(cp.date_fin, '%Y-%c') = '$year-$month')";
 $sql.= " ORDER BY u.lastname,cp.date_debut";
-
+//echo $sql;
 $result  = $db->query($sql);
 $num = $db->num_rows($result);
 
@@ -82,6 +83,8 @@ print $langs->trans('Month').': ';
 print $htmlother->select_month($month, 'month_start').' ';
 print $htmlother->select_year($year,'year_start',1,10,3);
 
+//print "<select name='mode'><option value='1'>1</option><option value='2' ".($mode == 2 ? "selected" : "").">2</option></select>";
+
 print '<input type="submit" value="'.$langs->trans("Refresh").'" class="button" />';
 
 print '</form>';
@@ -94,6 +97,7 @@ print '<table class="noborder" width="40%;">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('Ref').'</td>';
 print '<td>'.$langs->trans('Employee').'</td>';
+print '<td>Type</td>';
 print '<td>'.$langs->trans('DateDebCP').'</td>';
 print '<td>'.$langs->trans('DateFinCP').'</td>';
 print '<td align="right">'.$langs->trans('nbJours').'</td>';
@@ -115,23 +119,34 @@ if($num == '0') {
 		$user->fetch($holiday['fk_user']);
 		$var=!$var;
 
-		$holidaystatic->id=$holiday['rowid'];
-		$holidaystatic->ref=$holiday['rowid'];
+                if ($mode != 2){
+                    $holidaystatic->id=$holiday['rowid'];
+                    $holidaystatic->ref=$holiday['rowid'];
 
-		$start_date=$db->jdate($holiday['date_debut']);
-		$end_date=$db->jdate($holiday['date_fin']);
-		$start_date_gmt=$db->jdate($holiday['date_debut'],1);
-		$end_date_gmt=$db->jdate($holiday['date_fin'],1);
+                    $start_date=$db->jdate($holiday['date_debut']);
+                    $end_date=$db->jdate($holiday['date_fin']);
+                    $start_date_gmt=$db->jdate($holiday['date_debut'],1);
+                    $end_date_gmt=$db->jdate($holiday['date_fin'],1);
+		$nbopenedday=num_open_day($start_date_gmt, $end_date_gmt, 0, 1, $holiday['halfday']);
+                }
 
+                $type = $holiday['type_conges'];
+                if($nom != $user->getNomUrl(1))
+                    $nom = $nomUser = $user->getNomUrl(1);
+                else
+                    $nomUser = "----";
 		print '<tr '.$bc[$var].'>';
+                if ($mode != 2)
 		print '<td>'.$holidaystatic->getNomUrl(1).'</td>';
-		print '<td>'.$user->getNomUrl(1).'</td>';
+		print '<td>'.$nomUser.'</td>';
+		print '<td>'.($type == 0? "congés" : ($type == 1? "congés exceptionnels" : ($type == 2? "rtt" : ""))).'</td>';
+                if ($mode != 2){
 		print '<td>'.dol_print_date($start_date,'day');
 		print '</td>';
 		print '<td>'.dol_print_date($end_date,'day');
 		print '</td>';
+                }
 		print '<td align="right">';
-		$nbopenedday=num_open_day($start_date_gmt, $end_date_gmt, 0, 1, $holiday['halfday']);
 		print $nbopenedday;
 		print '</td>';
 		print '</tr>';

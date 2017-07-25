@@ -374,6 +374,7 @@ class PDO extends AbstractBackend {
      */
     public function getCalendarObject($calendarId, $objectUri) {
         $stmt = $this->pdo->prepare('SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+        dol_syslog("SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = '".$calendarId."' AND uri = '".$objectUri."'", 3);
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 

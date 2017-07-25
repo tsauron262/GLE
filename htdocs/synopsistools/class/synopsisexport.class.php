@@ -362,7 +362,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
             }
             else {
                 if ($print)
-                    echo "<span style='color:red;'>Impossible d'exporté " . $file . "</span>";
+                    echo "<span style='color:red;'>Impossible d'exporté " .$folder1. $file . "</span>";
             }
         } else {
             echo "<style>"

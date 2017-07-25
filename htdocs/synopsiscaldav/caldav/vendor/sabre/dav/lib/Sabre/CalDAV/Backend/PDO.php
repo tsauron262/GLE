@@ -583,6 +583,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             if (stripos($nom, "SEQUENCE") !== false) {
                 $sequence = $ligne;
             }
+            if (stripos($nom, "DTSTAMP") !== false) {
+                $DTSTAMP = str_replace("DTSTAMP:","",$ligne);
+            }
             if (stripos($ligne, "ATTENDEE") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
@@ -627,8 +630,8 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
             
-            if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($calendarData2['DTSTAMP']))
-                $calendarData2['LAST-MODIFIED'] = $calendarData2['DTSTAMP'];
+            if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
+                $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
             $db->query($sql);

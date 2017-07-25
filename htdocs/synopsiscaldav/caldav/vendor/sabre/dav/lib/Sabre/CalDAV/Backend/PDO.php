@@ -503,10 +503,12 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if ($row) {
-            http_response_code(409);
+            return $this->updateCalendarObject($calendarId, $objectUri, $calendarData);
+            
+            /*http_response_code(409);
             dol_syslog("Uri existe déja ".$objectUri,3,null,"_caldav2");
             die;
-            return null;
+            return null;*/
         } else {
 
             $extraData = $this->getDenormalizedData($calendarData);

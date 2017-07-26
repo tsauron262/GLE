@@ -25,6 +25,9 @@ function widget_listProjetMonActivite() {
     $dateendm=dol_mktime(23,59,59,$info["mon"],30,$info["year"]);
     $datestarty=dol_mktime(0,0,0,1,1,$info["year"]);
     $dateendy=dol_mktime(23,59,59,12,31,$info["year"]);
+    
+    
+                $projet = new SynopsisProject($db);
 
     $socid = 0; if ($user->societe_id > 0)
     {
@@ -62,7 +65,6 @@ function widget_listProjetMonActivite() {
             while ($i < $num)
             {
                 $obj = $db->fetch_object( $resql);
-                $projet = new SynopsisProject($db);
                 $projet->fetch($obj->rowid);
 
                 $var=!$var;

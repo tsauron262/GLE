@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
+require_once (DOL_DOCUMENT_ROOT."/synopsisprojet/class/synopsisproject.class.php");
 
 // The get widget handler.
 function widget_listProjet() {
@@ -18,7 +18,7 @@ function widget_listProjet() {
     }
     $langs->load("projects");
 
-    $projet=new Project($db);
+    $projet=new SynopsisProject($db);
 
     $table =  '<p>';
     $table2 = '</p>';

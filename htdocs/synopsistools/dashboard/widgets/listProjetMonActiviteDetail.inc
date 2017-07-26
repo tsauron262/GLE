@@ -6,13 +6,13 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsisprojet/class/synopsisproject.class.php');
 // The get widget handler.
 function widget_listProjetMonActiviteDetail() {
   // A widget object as per jquery.dashboard.js.
     global $db,$user,$langs,$bc;
 
-    $projet = new Project($db);
+    $projet = new SynopsisProject($db);
 
     // Defini les bornes date debut et fin de semaines, mois et annee pour le jour courant
     $now=time();

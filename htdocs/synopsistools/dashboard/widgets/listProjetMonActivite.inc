@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsisprojet/class/synopsisproject.class.php');
 // The get widget handler.
 function widget_listProjetMonActivite() {
   // A widget object as per jquery.dashboard.js.
@@ -62,7 +62,7 @@ function widget_listProjetMonActivite() {
             while ($i < $num)
             {
                 $obj = $db->fetch_object( $resql);
-                $projet = new Project($db);
+                $projet = new SynopsisProject($db);
                 $projet->fetch($obj->rowid);
 
                 $var=!$var;

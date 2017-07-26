@@ -7,7 +7,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisprojet/class/synopsisproject.class.php");
 
 // The get widget handler.
 function widget_statOfcProjetActivitePrevu() {
@@ -19,7 +19,7 @@ function widget_statOfcProjetActivitePrevu() {
         if ($user->societe_id > 0) {
             $socid = $user->societe_id;
         }
-        $projet = new Project($db);
+        $projet = new SynopsisProject($db);
         $langs->load("products");
 
         $table = "<p>";

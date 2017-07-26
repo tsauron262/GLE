@@ -7,7 +7,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT . '/projet/class/project.class.php');
+require_once(DOL_DOCUMENT_ROOT . '/synopsisprojet/class/synopsisproject.class.php');
 
 // The get widget handler.
 function widget_listProjetActivite() {
@@ -66,7 +66,7 @@ function widget_listProjetActivite() {
 
             while ($i < $num) {
                 $obj = $db->fetch_object($resql);
-                $projet = new Project($db);
+                $projet = new SynopsisProject($db);
                 $projet->fetch($obj->rowid);
 
                 $var = !$var;
@@ -108,7 +108,7 @@ function widget_listProjetActivite() {
 
             while ($i < $num) {
                 $obj = $db->fetch_object($resql);
-                $projet = new Project($db);
+                $projet = new SynopsisProject($db);
                 $projet->fetch($obj->rowid);
                 $var = !$var;
                 $table .= "<tr $bc[$var]>";
@@ -154,7 +154,7 @@ function widget_listProjetActivite() {
 
             while ($i < $num) {
                 $obj = $db->fetch_object($resql);
-                $projet = new Project($db);
+                $projet = new SynopsisProject($db);
                 $projet->fetch($obj->rowid);
                 $var = !$var;
                 $table .= "<tr $bc[$var]>";

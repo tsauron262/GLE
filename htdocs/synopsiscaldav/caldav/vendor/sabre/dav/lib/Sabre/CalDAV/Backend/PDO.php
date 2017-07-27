@@ -443,8 +443,9 @@ class PDO extends AbstractBackend {
         if($calendarData2['CREATED'] > $calendarData2['LAST-MODIFIED'])
             $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
         
-        $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. $calendarData2['LAST-MODIFIED'], $calData);
-        
+        date_default_timezone_set('UTC');
+        $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
+        date_default_timezone_set("Europe/Paris");
         
 
         $return = array(

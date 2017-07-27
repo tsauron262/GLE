@@ -330,7 +330,7 @@ if ($selectedFile) {
             $tabFile1[] = $dir . "/" . $signeFile;
             $tabFile2[] = ".pdf";
             $tabFile3[] = $signeFile;
-            mailSyn2("FI Signé", "tommy@bimp.fr", null, "Bonjour veuillez trouvez ci joint votre document signé.
+            mailSyn2("Document Signé", "tommy@bimp.fr", null, "Bonjour veuillez trouvez ci-joint votre document signé.
                     
                     Cordialement
                     BIMP", $tabFile1, $tabFile2, $tabFile3);

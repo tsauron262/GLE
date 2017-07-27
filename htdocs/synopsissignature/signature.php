@@ -318,6 +318,23 @@ if ($selectedFile) {
         $pdf->Close();
 
         $pdf->Output($dir . "/" . $signeFile, 'F');
+        
+        
+        //mail au client
+        $socid = (isset($object->socid)? $object->socid : 0);
+        if($socid > 0){
+            $soc = new Societe($db);
+            $soc->fetch($socid);
+            $mail = $soc->email;
+            $tabFile1 = $tabFile2 = $tabFile3 = array();
+            $tabFile1[] = $dir . "/" . $signeFile;
+            $tabFile2[] = ".pdf";
+            $tabFile3[] = $signeFile;
+            mailSyn2("FI Signé", "tommy@bimp.fr", null, "Bonjour veuillez trouvez ci joint votre document signé."
+                    . ""
+                    . "Cordialement"
+                    . "BIMP", $tabFile1, $tabFile2, $tabFile3);
+        }
 
         if ($invite) {
 //            delElementElement("demSign", null, $code);

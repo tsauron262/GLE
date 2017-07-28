@@ -219,6 +219,7 @@ while ($res = $db->fetch_object($sql)) {
         require_once(DOL_DOCUMENT_ROOT . '/synopsischrono/modules_chrono.php');
         $ModeleNumRefChrono = new mod_chrono_serpentine($db);
         $exampleRef = $ModeleNumRefChrono->getExample($res->modele, $res->id);
+        
         print "<tr><td width=\"20%\" class=' " . $classArr[$bool] . "' style='border-left: 1px solid;'>" . $res->titre . "</td>";
         print "<td class=' " . $classArr[$bool] . "'>" . $res->modele . "</td>";
         print "<td class=' " . $classArr[$bool] . "'>" . $exampleRef . "</td>";

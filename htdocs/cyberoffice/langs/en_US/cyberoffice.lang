@@ -1,0 +1,19 @@
+# Language file - en_US - Cyberoffice
+CHARSET=UTF-8
+OrderValidatedInDolibarrFromCyberoffice=OrderValidatedInDolibarrFromCyberoffice
+Name=Name
+Value=Value
+ShopAddress=ShopAddress
+StockSynchronization=Stock Synchronization
+InvoiceSynchronization=Invoice Synchronization
+Save=Save
+cyberofficeSetup=cyberoffice Setup
+shoplist=shoplist
+Action=Event
+Synchronization with Prestashop=Synchronization from Prestashop to Dolibarr ERP/CRM
+cyberoffice=CyberOffice
+genererlacle=Click here to generate the webservices key
+Association mode de reglement compte bancaire=bank account <=> payment association
+infocyberpaiement=Note: By default, a bank account by payment mode will be created
+cyberbank=bank id
+banklabel=Bank

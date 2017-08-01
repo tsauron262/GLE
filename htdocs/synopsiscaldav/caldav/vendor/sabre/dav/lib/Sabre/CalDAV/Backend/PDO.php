@@ -401,12 +401,13 @@ class PDO extends AbstractBackend {
         $action->id = $row['id'];
         $action->fetch_userassigned();
         $tabPartExtInt = explode(",", $row['participentExt']);
+            //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
             if (1 || $val['id'] != $calendarId) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
-                    $tabPartExtInt[] = $userT->email;
+                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status']? 'ACCEPTED' : 'NEEDS-ACTION');
             }
         }
         if(count($tabPartExtInt) > 1){
@@ -582,21 +583,23 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $user = $user->id;
         $sequence = 0;
         foreach ($calendarData2 as $nom => $ligne) {
+            
+            $tab = array( CHR(13) => " ", CHR(10) => " " ); 
+            $ligne = strtr($ligne,$tab); 
+            //$ligne = str_replace("\r", "", $ligne);
             if (stripos($nom, "SEQUENCE") !== false) {
                 $sequence = $ligne;
             }
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:","",$ligne);
             }
-            if (stripos($ligne, "ATTENDEE") !== false) {
+            if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false) {
+                $stat = "NEEDS-ACTION";
+                if(preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
+                        $stat = $retour[1];
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
-                    $tabMail[] = $tabT[1];
-            }
-            elseif (stripos($ligne, "CUTYPE") != false) {
-                $tabT = explode("mailto:", $ligne);
-                if (isset($tabT[1]))
-                    $tabMail[] = $tabT[1];
+                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), $stat);
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
@@ -604,31 +607,32 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                     $organisateur = $tabT[1];
             }
         }
-        if($organisateur == "" && isset($tabMail[0]))
-            $organisateur = $tabMail[0];
-        
-        
-                    $organisateur = str_replace(array("\n", 
+        if($organisateur == "" && isset($tabMail[0][0]))
+            $organisateur = $tabMail[0][0];
+        $organisateur = str_replace(array("\n", 
 ), "", $organisateur);
+        $organisateur = str_replace("\n", "", $organisateur);
+        $organisateur = str_replace("\r", "", $organisateur);
 
         $tabMailInc = array();
         $action->userassigned = array($user => array('id' => $user));
-        foreach ($tabMail as $mail) {
-            $mail = str_replace("\n", "", $mail);
-            $mail = str_replace("\r", "", $mail);
-            $organisateur = str_replace("\n", "", $organisateur);
-            $organisateur = str_replace("\r", "", $organisateur);
+        foreach ($tabMail as $tmp) {
+            $mail = $tmp[0];
+            
             $sql = $db->query("SELECT rowid 
 FROM  `" . MAIN_DB_PREFIX . "user` 
 WHERE  `email` LIKE  '" . $mail . "'");
             if ($db->num_rows($sql) > 0) {
                 $ligne = $db->fetch_object($sql);
-                $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid);
+                $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
+                    'answer_status' => ($tmp[1] == "ACCEPTED"));
+                //dol_syslog("action ".$action->id." invit int : ".$mail,3);
             } else {
-                $tabMailInc[] = $mail;
+                $tabMailInc[] = $tmp[0]."|".$tmp[1];
             }
         }
         if ($action->id > 0) {
+                //dol_syslog("action ".$action->id." invit ext : ".print_r($tabMailInc,1),3);
             $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);
             

@@ -2238,7 +2238,7 @@ class User extends CommonObject
                         else
                             $info ['mailQuota'] = "2147483648";
                         if($info ['mailQuota'] < 100)
-                            $info ['mailQuota'] = $info ['mailQuota'] * 1073741824;
+                            $info ['mailQuota'] = round($info ['mailQuota'] * 1073741824);
                     }
                 }
                 if($this->admin){

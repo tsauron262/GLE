@@ -677,7 +677,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-dol_syslog("Update : ".print_r($calendarData,1),3);
+//dol_syslog("Update : ".print_r($calendarData,1),3);
         $extraData = $this->getDenormalizedData($calendarData);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');

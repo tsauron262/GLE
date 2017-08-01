@@ -584,7 +584,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
         $sequence = 0;
         foreach ($calendarData2 as $nom => $ligne) {
             
-            $tab = array( CHR(13) => " ", CHR(10) => " " ); 
+            $tab = array( CHR(13) => "", CHR(10) => "", " " => "" ); 
             $ligne = strtr($ligne,$tab); 
             //$ligne = str_replace("\r", "", $ligne);
             if (stripos($nom, "SEQUENCE") !== false) {
@@ -605,6 +605,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
                     $organisateur = $tabT[1];
+                dol_syslog("Organizer ".$organisateur,3);
             }
         }
         if($organisateur == "" && isset($tabMail[0][0]))
@@ -626,7 +627,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $ligne = $db->fetch_object($sql);
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
                     'answer_status' => ($tmp[1] == "ACCEPTED"));
-                //dol_syslog("action ".$action->id." invit int : ".$mail,3);
+                dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
                 $tabMailInc[] = $tmp[0]."|".$tmp[1];
             }
@@ -676,7 +677,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-dol_syslog("Update : ".print_r($calendarData,1),3, 0, "_caldavLog");
+dol_syslog("Update : ".print_r($calendarData,1),3);
         $extraData = $this->getDenormalizedData($calendarData);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
@@ -725,7 +726,7 @@ dol_syslog("Update : ".print_r($calendarData,1),3, 0, "_caldavLog");
             if (isset($calendarData2['LOCATION']))
                 $action->location = $calendarData2['LOCATION'];
 
-            $action->userownerid = $calendarId;
+            //$action->userownerid = $calendarId;
 
 //            $action->array_options['agendaplus'] = $calendarData;
 

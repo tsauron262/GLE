@@ -78,7 +78,7 @@ if ($search_etatequipement=="-1")
 
 llxHeader();
 
-// premiere étape on cherche les id des équipements composants
+// premiere Ã©tape on cherche les id des Ã©quipements composants
 $scomposition_ref=GETPOST('scomposition_ref', 'alpha');
 $scomposition_numversion=GETPOST('scomposition_numversion', 'alpha');
 $scomposition_productid=GETPOST('scomposition_productid', 'alpha');
@@ -88,7 +88,7 @@ $scomposition_fk_soc_fourn=GETPOST('scomposition_fk_soc_fourn', 'alpha');
 if ($scomposition_fk_soc_fourn=="-1") 
 	$scomposition_fk_soc_fourn="";
 
-// on ne prend que les équipement qui matche et qui rentrent déjà dans une composition
+// on ne prend que les Ã©quipement qui matche et qui rentrent dÃ©jÃ  dans une composition
 $sql = "SELECT distinct e.rowid FROM ".MAIN_DB_PREFIX."equipement as e,";
 $sql.= MAIN_DB_PREFIX."equipementassociation as ea" ;
 $sql.= " WHERE e.entity = ".$conf->entity;
@@ -100,10 +100,10 @@ if ($scomposition_fk_soc_fourn)	$sql .= " AND e.fk_soc_fourn =".$scomposition_fk
 
 // si il y a une recherche de faite
 if ($scomposition_ref.$scomposition_numversion.$scomposition_productid.$scomposition_fk_soc_fourn) {
-	// ensuite pour chaque equipements trouvé on cherche les premiers parents
+	// ensuite pour chaque equipements trouvÃ© on cherche les premiers parents
 	$result=$db->query($sql);
 	if ($result) {
-		// on mémorise les id qui sont parents
+		// on mÃ©morise les id qui sont parents
 		$ListEquipmentParent="";
 
 		$num = $db->num_rows($result);
@@ -112,11 +112,11 @@ if ($scomposition_ref.$scomposition_numversion.$scomposition_productid.$scomposi
 			$objp = $db->fetch_object($result);
 			$equipementstatic=new Equipement($db);
 			$tmpId = $equipementstatic->get_firstParent($objp->rowid);
-			// si pas déjà dans la liste, on le rajoute
+			// si pas dÃ©jÃ  dans la liste, on le rajoute
 			$ListEquipmentParent .= $tmpId.", ";
 			$i++;
 		}
-		// on vire la dernière virgule et l'espace
+		// on vire la derniÃ¨re virgule et l'espace
 		$ListEquipmentParent =substr($ListEquipmentParent, 0, -2);
 	}
 }
@@ -137,11 +137,11 @@ $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn as ff on e.fk_facture_fourn =
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p on e.fk_product = p.rowid";
 $sql.= " WHERE e.entity = ".$conf->entity;
 
-// on ne prend que les équipements dans la liste
+// on ne prend que les Ã©quipements dans la liste
 if ($ListEquipmentParent)
 	$sql.=" and e.rowid in(".$ListEquipmentParent.")";
 else
-	$sql.=" and 1=2"; // on n'affiche que si il y a des données recherchées
+	$sql.=" and 1=2"; // on n'affiche que si il y a des donnÃ©es recherchÃ©es
 
 if ($search_ref)			$sql .= " AND e.ref like '%".$db->escape($search_ref)."%'";
 if ($search_refProduct)		$sql .= " AND p.ref like '%".$db->escape($search_refProduct)."%'";
@@ -169,7 +169,7 @@ if ($result) {
 
 	print '<form method="get" action="'.$_SERVER["PHP_SELF"].'">';
 	
-	// un tableau de saisie des infos du composant recherché
+	// un tableau de saisie des infos du composant recherchÃ©
 	print '<table class="nobordernopadding" >';
 	print "<tr class='liste_titre'>";
 	print '<td colspan="4">'.$langs->trans("SearchInsideEquipement").'</td></tr>';
@@ -278,7 +278,7 @@ if ($result) {
 	print '&nbsp;/&nbsp;<input class="flat" type="text" size="4" maxlength="4" name="yeardateo" value="'.$syear.'">';
 	print '</td>';
 
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement, 'search_etatequipement', 1, 1);
 	print '</td>';

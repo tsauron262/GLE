@@ -84,7 +84,7 @@ if ($action=="save") {
 			$objp = $db->fetch_object($result);
 			$description = GETPOST("descr-".$objp->rowid);
 			if ( $description != "") {
-				// on aliment la table des actions prédef
+				// on aliment la table des actions prÃ©def
 				$sql = "INSERT INTO ".MAIN_DB_PREFIX."equipementevt_predef ";
 				$sql.= "(fk_product, fk_equipementevt_type, description) VALUES";
 				$sql.= " (".$productid.", ".$objp->rowid. ", ";

@@ -147,7 +147,7 @@ if (count($tblversionslast) > count($tblversions)) {
 	}
 
 } elseif (count($tblversionslast) < count($tblversions) && count($tblversionslast) > 0 ) {	
-	// version expérimentale
+	// version expÃ©rimentale
 	for ($i = count($tblversions)-1; $i >=0; $i--) {
 		$var = ! $var;
 		$color="";
@@ -166,7 +166,7 @@ if (count($tblversionslast) > count($tblversions)) {
 	}
 }
 else {
-	//on est à jour des versions ou pas de connection internet 
+	//on est Ã  jour des versions ou pas de connection internet 
 	for ($i = count($tblversions)-1; $i >=0; $i--) {
 		$var = ! $var;
 		print "<tr $bc[$var]>";

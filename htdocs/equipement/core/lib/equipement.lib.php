@@ -91,7 +91,7 @@ function equipement_prepare_head($object)
 	$head[$h][2] = 'event';
 	$h++;
 
-	// gérer la composition d'un équipement avec factory
+	// gÃ©rer la composition d'un Ã©quipement avec factory
 	if ($conf->global->MAIN_MODULE_FACTORY) {
 		$head[$h][0] = dol_buildpath('/equipement/composition.php', 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans('Composition');
@@ -313,7 +313,7 @@ function select_entrepot($selected='', $htmlname='entrepotid', $showempty=0, $hi
 				print '&nbsp;'.$langs->trans("CreateStockMovement");
 			}
 		} else {
-			// si pas de liste, on positionne un hidden à vide
+			// si pas de liste, on positionne un hidden Ã  vide
 			print '<input type="hidden" name="'.$htmlname.'" value=-1>';
 			print '<input type="hidden" name="'.$htmlname.'move" value=-1>';
 		}
@@ -325,7 +325,7 @@ function select_equipements($selected='', $filterproduct='', $filterentrepot='',
 	global $db, $langs; //, $user, $conf;
 	if (empty($hidetext)) print $langs->trans("Equipement").': ';
 	
-	// boucle sur les équipements valides
+	// boucle sur les Ã©quipements valides
 	$sql = "SELECT rowid, ref, unitweight, datee, numversion";
 	$sql.= " FROM ".MAIN_DB_PREFIX."equipement";
 	$sql.= " WHERE fk_statut >= 1";
@@ -422,8 +422,8 @@ function select_interventions($selected='', $filtersoc='0', $htmlname='fichinter
 	$sql = "SELECT rowid, fk_soc, ref "; //, dateo, datee";
 	$sql.= " FROM ".MAIN_DB_PREFIX."fichinter";
 	$sql.= " WHERE fk_statut >= 1";
-	// si une société est sélectionné
-	// ou si il s'agit d'une interventions sélectionné sur une autre société (historique)
+	// si une sociÃ©tÃ© est sÃ©lectionnÃ©
+	// ou si il s'agit d'une interventions sÃ©lectionnÃ© sur une autre sociÃ©tÃ© (historique)
 	if ($filtersoc) {
 		$sql.=" and ( fk_soc=".$filtersoc; 
 		if ($selected)
@@ -506,7 +506,7 @@ function select_produitEntrepot($selected='', $fk_entrepot, $htmlname='fk_produc
 			}
 			print '</select>';
 		}
-		else // si pas de liste, on positionne un hidden à vide
+		else // si pas de liste, on positionne un hidden Ã  vide
 			print '<input type="hidden" name="'.$htmlname.'" value=-1>';
 
 	}
@@ -523,7 +523,7 @@ function select_expeditions($selected='0', $filtersoc='0', $htmlname='expedition
 	$sql.= " FROM ".MAIN_DB_PREFIX."expedition";
 	$sql.= " WHERE 1=1";
 	
-	// on ajoute des équipements que sur les expéditions en préparation
+	// on ajoute des Ã©quipements que sur les expÃ©ditions en prÃ©paration
 	$sql.= " AND fk_statut <> 2";
 		
 	if ($filtersoc) {
@@ -597,7 +597,7 @@ function select_factfourn($selected='', $fournid, $htmlname='fk_factfourn', $sho
 			}
 			print '</select>';
 		}
-		else	// si pas de liste, on positionne un hidden à vide
+		else	// si pas de liste, on positionne un hidden Ã  vide
 			print '<input type="hidden" name="'.$htmlname.'" value=-1>';
 	}
 }
@@ -636,7 +636,7 @@ function select_facture($selected='', $clientid, $htmlname='fk_fact_client', $sh
 			}
 			print '</select>';
 		}
-		else	// si pas de liste, on positionne un hidden à vide
+		else	// si pas de liste, on positionne un hidden Ã  vide
 			print '<input type="hidden" name="'.$htmlname.'" value=-1>';
 	}
 }
@@ -684,7 +684,7 @@ function select_equipement_etat($selected='', $htmlname='fk_etatequipement', $sh
 			}
 			print '</select>';
 		}
-		else	// si pas de liste, on positionne un hidden à vide
+		else	// si pas de liste, on positionne un hidden Ã  vide
 			print '<input type="hidden" name="'.$htmlname.'" value=-1>';
 	}
 }
@@ -734,7 +734,7 @@ function select_equipementevt_type($selected='', $htmlname='fk_equipementevt_typ
 			}
 			print '</select>';
 		}
-		else	// si pas de liste, on positionne un hidden à vide
+		else	// si pas de liste, on positionne un hidden Ã  vide
 			print '<input type="hidden" name="'.$htmlname.'" value=-1>';
 	}
 }
@@ -759,7 +759,7 @@ function print_lotequipement($fk_product, $fk_entrepot, $nbsend)
 		$i = 0;
 		if ($num) {
 			print '<table>';
-			// pour gérer le nombre à expédier
+			// pour gÃ©rer le nombre Ã  expÃ©dier
 			$nbexpedition=$nbsend;
 			while ($i < $num) {
 				print "<tr>";
@@ -768,7 +768,7 @@ function print_lotequipement($fk_product, $fk_entrepot, $nbsend)
 				print "<td>".$obj->ref.' - '.dol_print_date($obj->datee, "daytext")."</td>";
 				print "<td><input type=text size=3 name='lotEquipement[".$obj->fk_product."][".$obj->rowid."-".$obj->quantity."]' ";
 				if ($nbexpedition==0) {
-					// si il y en assez à expédier, on affiche si on veux ventiler l'envoie selon les lots
+					// si il y en assez Ã  expÃ©dier, on affiche si on veux ventiler l'envoie selon les lots
 					print " value='0'>";
 				} elseif ($obj->quantity >= $nbexpedition) {
 					print " value='".$nbexpedition."'>";
@@ -793,7 +793,7 @@ function print_equipementdispo( $fk_product, $fk_entrepot, $nbsend)
 {
 	global $db, $langs;
 	
-	// on commence par récupérer la liste des lots présents dans l'entrepot
+	// on commence par rÃ©cupÃ©rer la liste des lots prÃ©sents dans l'entrepot
 	$sql = "SELECT e.numversion, e.datee, e.dateo, count(*) as nb";
 	$sql.= " FROM ".MAIN_DB_PREFIX."equipement as e";
 	$sql.= " WHERE e.fk_product=".$fk_product;
@@ -879,8 +879,8 @@ function select_projects($selected='', $filtersoc='', $htmlname='projectid', $sh
 	$sql = "SELECT rowid, fk_soc, ref "; //, dateo, datee";
 	$sql.= " FROM ".MAIN_DB_PREFIX."projet";
 	$sql.= " WHERE fk_statut = 1";
-	// si une société est sélectionné
-	// ou si il s'agit d'un projet sélectionné sur une autre société (historique)
+	// si une sociÃ©tÃ© est sÃ©lectionnÃ©
+	// ou si il s'agit d'un projet sÃ©lectionnÃ© sur une autre sociÃ©tÃ© (historique)
 	if ($filtersoc) {
 		$sql.=" and ( fk_soc=".$filtersoc; 
 		if ($selected)

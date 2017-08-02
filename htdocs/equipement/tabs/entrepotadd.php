@@ -82,7 +82,7 @@ $action = GETPOST('action', 'alpha');
 
 
 
-// gestion du transfert d'un équipement dans un entrepot
+// gestion du transfert d'un Ã©quipement dans un entrepot
 if ($action=="AddEquipement") {
 	$tblSerial=explode(";", GETPOST('listEquipementRef', 'alpha'));
 	$nbCreateSerial=count($tblSerial);
@@ -137,7 +137,7 @@ $head = dol_fiche_head($head, 'add', $langs->trans("Equipement"), 0, 'equipement
 $form = new Form($db);
 
 print "<br>";
-// Ajout d'équipement dans l'entrepot
+// Ajout d'Ã©quipement dans l'entrepot
 print '<form method="post" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="AddEquipement">';

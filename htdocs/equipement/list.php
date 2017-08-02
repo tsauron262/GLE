@@ -87,7 +87,7 @@ $equipementstatic=new Equipement($db);
 if (GETPOST("updatecheck") == $langs->trans("Update")) {
 
 	$separatorlist=$conf->global->EQUIPEMENT_SEPARATORLIST;
-	if (!isset($separatorlist)) // Si non saisie on utilise le ; par défaut
+	if (!isset($separatorlist)) // Si non saisie on utilise le ; par dÃ©faut
 		$separatorlist=";";
 	if ($separatorlist == "__N__")
 		$separatorlist="\n";
@@ -98,9 +98,9 @@ if (GETPOST("updatecheck") == $langs->trans("Update")) {
 	
 	foreach ($idlist as $key) {
 		if (GETPOST(trim("chk-".$key))) {
-			// on récupère les anciennes valeurs
+			// on rÃ©cupÃ¨re les anciennes valeurs
 			$equipementstatic->fetch($key);
-			// on met à jours que si la case est cochée
+			// on met Ã  jours que si la case est cochÃ©e
 
 			if (GETPOST("chk_statut"))
 				$equipementstatic->fk_statut = GETPOST("update_statut");
@@ -146,7 +146,7 @@ if (GETPOST("updatecheck") == $langs->trans("Update")) {
 
 
 //var_dump($equipementstatic);
-			// on met à jour l'équipement
+			// on met Ã  jour l'Ã©quipement
 			$equipementstatic->updateInfos($user, GETPOST("update_entrepotmove"));
 		}
 	}
@@ -292,7 +292,7 @@ if ($result) {
 		print '</td>';
 	}
 
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement, 'search_etatequipement', 1, 1);
 
@@ -349,7 +349,7 @@ if ($result) {
 			print ' ('.$objp->quantity.')';
 		print "</td>";
 
-		// toujours un produit associé à un équipement
+		// toujours un produit associÃ© Ã  un Ã©quipement
 		$productstatic=new Product($db);
 		$productstatic->fetch($objp->fk_product);
 		print '<td title="'.$productstatic->label.'">';

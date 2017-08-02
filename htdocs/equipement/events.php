@@ -151,7 +151,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 				$outputlangs->setDefaultLang($newlang);
 			}
 			
-			// pour la mise à jour du pdf
+			// pour la mise Ã  jour du pdf
 			equipement_create($db, $object, $object->modelpdf, $outputlangs);
 			
 			Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
@@ -166,7 +166,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 	&& GETPOST('save', 'alpha') == $langs->trans("Save")
 ) {
 	/*
-	 *  Mise a jour d'une ligne d'évènement
+	 *  Mise a jour d'une ligne d'Ã©vÃ¨nement
 	 */
 
 	$objectline = new Equipementevt($db);
@@ -245,7 +245,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 	exit;
 } elseif ($action == 'confirm_deleteline' && $confirm == 'yes' && $user->rights->equipement->creer) {
 	/*
-	 *  Supprime une ligne d'évènement AVEC confirmation
+	 *  Supprime une ligne d'Ã©vÃ¨nement AVEC confirmation
 	 */
 
 	$objectline = new Equipementevt($db);
@@ -332,13 +332,13 @@ if ($id > 0 || ! empty($ref)) {
 	print "<tr style='display:none' id='descprod'>";
 	print '<td></td><td>'.$prod->description.'</td><tr>';
 
-	// Numéro de version
+	// NumÃ©ro de version
 	print '<tr><td>'.$langs->trans("VersionNumber").'</td>';
 	print '<td colspan="3">';
 	print $object->numversion;
 	print '</td></tr>';
 
-	// quantité modifiable et visible uniquement si supérieur à 1
+	// quantitÃ© modifiable et visible uniquement si supÃ©rieur Ã  1
 	if ($object->quantity >1) {
 		print '<tr><td>'.$langs->trans("Quantity").'</td>';
 		print '<td colspan="3">';
@@ -346,7 +346,7 @@ if ($id > 0 || ! empty($ref)) {
 		print '</td></tr>';
 	}
 
-	// Etat de l'équipement
+	// Etat de l'Ã©quipement
 	print '<tr><td>'.$langs->trans("EtatEquip").'</td>';
 	print '<td colspan="3">';
 	if ($object->etatequiplibelle)
@@ -358,7 +358,7 @@ if ($id > 0 || ! empty($ref)) {
 	print "</table><br>";
 
 	/*
-	 * Lignes d'evènement
+	 * Lignes d'evÃ¨nement
 	 */
 	$sql = 'SELECT ee.rowid, ee.description, ee.fk_equipement, ee.fk_equipementevt_type, ee.total_ht, ';
 	$sql.= ' ee.fulldayevent, ee.dateo, ee.datee, eet.libelle as equipeventlib, ';
@@ -398,20 +398,20 @@ if ($id > 0 || ! empty($ref)) {
 				print '<td >';
 				if ($objp->equipeventlib)
 					print $langs->trans($objp->equipeventlib);
-				// type d'évènement
+				// type d'Ã©vÃ¨nement
 				print '</td>';
 
-				// description de l'évènement de l'équipement
+				// description de l'Ã©vÃ¨nement de l'Ã©quipement
 				print '<td >';
 				print dol_htmlentitiesbr($objp->description);
 				print '</td>';
 
-				// Date complète ou pas.
+				// Date complÃ¨te ou pas.
 				$dayordayhour=($objp->fulldayevent?"day":"dayhour");
 				print '<td align="center">'.dol_print_date($db->jdate($objp->dateo), $dayordayhour).'</td>';
 				print '<td align="center" >'.dol_print_date($db->jdate($objp->datee), $dayordayhour).'</td>';
 
-				// bloc des éléments liés à l'évènement de l'équipement
+				// bloc des Ã©lÃ©ments liÃ©s Ã  l'Ã©vÃ¨nement de l'Ã©quipement
 				print '<td align="center" colspan=3>';
 				
 				// contrat
@@ -420,7 +420,7 @@ if ($id > 0 || ! empty($ref)) {
 					$contrat = new Contrat($db);
 					$contrat->fetch($objp->fk_contrat);
 					print $contrat->getNomUrl(1);
-					// si les clients ne sont pas les mêmes entre le client et le contrat
+					// si les clients ne sont pas les mÃªmes entre le client et le contrat
 					// on affiche le client du contrat
 					if ($object->fk_soc_client != $contrat->socid) {
 						$soc = new Societe($db);
@@ -438,7 +438,7 @@ if ($id > 0 || ! empty($ref)) {
 					$fichinter = new Fichinter($db);
 					$fichinter->fetch($objp->fk_fichinter);
 					print $fichinter->getNomUrl(1);
-					// si les clients ne sont pas les mêmes entre le client et le contrat
+					// si les clients ne sont pas les mÃªmes entre le client et le contrat
 					// on affiche le client du contrat
 					if ($object->fk_soc_client != $fichinter->socid) {
 						$soc = new Societe($db);
@@ -456,7 +456,7 @@ if ($id > 0 || ! empty($ref)) {
 					$expedition = new Expedition($db);
 					$expedition->fetch($objp->fk_expedition);
 					print $expedition->getNomUrl(1);
-					// si les clients ne sont pas les mêmes entre le client et le contrat
+					// si les clients ne sont pas les mÃªmes entre le client et le contrat
 					// on affiche le client du contrat
 					if ($object->fk_soc_client != $expedition->socid) {
 						$soc = new Societe($db);
@@ -474,7 +474,7 @@ if ($id > 0 || ! empty($ref)) {
 					$project = new Project($db);
 					$project->fetch($objp->fk_project);
 					print $project->getNomUrl(1);
-					// si les clients ne sont pas les mêmes entre le client et le projet
+					// si les clients ne sont pas les mÃªmes entre le client et le projet
 					// on affiche le client du contrat
 					if ($object->fk_soc_client != $project->socid) {
 						$soc = new Societe($db);
@@ -535,7 +535,7 @@ if ($id > 0 || ! empty($ref)) {
 				print '<tr '.$bc[$var].'>';
 				print '<td width=100px>'.$langs->trans('TypeofEquipementEvent').'</td><td>';
 				print select_equipementevt_type($objp->fk_equipementevt_type, 'fk_equipementevt_type', 1, 1);
-				// type d'évènement
+				// type d'Ã©vÃ¨nement
 				print '</td>';
 
 				print '<td align="left" >'.$langs->trans('Author').'</td><td>';
@@ -560,7 +560,7 @@ if ($id > 0 || ! empty($ref)) {
 				print '</td></tr>';
 
 				print '<tr '.$bc[$var].">\n";
-				// description de l'évènement de l'équipement
+				// description de l'Ã©vÃ¨nement de l'Ã©quipement
 				print '<td rowspan=3 colspan=2>';
 				// editeur wysiwyg
 				require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
@@ -571,7 +571,7 @@ if ($id > 0 || ! empty($ref)) {
 				$doleditor->Create();
 				print '</td>';
 				//
-				// Date evenement début
+				// Date evenement dÃ©but
 				print '<td align="left" >'.$langs->trans('Dateo').'</td>';
 				print '<td align="left" >';
 				$form->select_date($objp->dateo, 'deo', 1, 1, 0, "addequipevt");
@@ -660,7 +660,7 @@ if ($id > 0 || ! empty($ref)) {
 		$db->free($resql);
 
 		/*
-		 * Add line on a le droit de créer un évènement à tous moment
+		 * Add line on a le droit de crÃ©er un Ã©vÃ¨nement Ã  tous moment
 		 */
 		if ($action <> 'editline' && $user->rights->equipement->creer ) {
 			print '<form action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addline" name="addequipevt" method="post">';
@@ -677,7 +677,7 @@ if ($id > 0 || ! empty($ref)) {
 			print "</tr>\n";
 
 
-			// si il s'agit d'un évènement prédefinie
+			// si il s'agit d'un Ã©vÃ¨nement prÃ©definie
 			$predeftypeid="";
 			$predefdescription="";
 			if (GETPOST("prefefid") >0 ) {
@@ -697,7 +697,7 @@ if ($id > 0 || ! empty($ref)) {
 			$var=false;
 
 			print '<tr '.$bc[$var].">\n";
-			// type d'évènement
+			// type d'Ã©vÃ¨nement
 			print '<td width=100px>'.$langs->trans('TypeofEquipementEvent').'</td><td>';
 			print select_equipementevt_type($predeftypeid, 'fk_equipementevt_type', 1, 1);
 			print '</td>';
@@ -726,7 +726,7 @@ if ($id > 0 || ! empty($ref)) {
 			print '</td></tr>';
 			print '<tr '.$bc[$var].">\n";
 
-			// description de l'évènement de l'équipement
+			// description de l'Ã©vÃ¨nement de l'Ã©quipement
 			print '<td rowspan=3 colspan=2>';
 			// editeur wysiwyg
 			require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
@@ -739,7 +739,7 @@ if ($id > 0 || ! empty($ref)) {
 			print '</td>';
 			//
 
-			// Date evenement début
+			// Date evenement dÃ©but
 			print '<td align="left" >'.$langs->trans("Dateo").'</td>';
 			print '<td align="left" >';
 			$timearray=dol_getdate(mktime());

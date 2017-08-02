@@ -85,7 +85,7 @@ $extralabelsevt = $extrafieldsevt->fetch_name_optionals_label("equipementevt");
 // Add line
 if ($action == "addline" && $user->rights->equipement->creer) {
 
-	// on récupère les sn à utilser
+	// on rÃ©cupÃ¨re les sn Ã  utilser
 	$separatorlist=$conf->global->EQUIPEMENT_SEPARATORLIST;
 	if ($separatorlist == "__N__")
 		$separatorlist="\n";
@@ -98,7 +98,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 	//$db->begin();
 	$error=0;
 	foreach ($tblEquipementRef as $keyEquipement) {
-		// pour gérer le cas du dernier ; foireux
+		// pour gÃ©rer le cas du dernier ; foireux
 		if ($keyEquipement) {
 			$ret=$object->fetch(0, $keyEquipement);
 			$object->fetch_thirdparty();
@@ -204,7 +204,7 @@ if ( $user->rights->equipement->creer ) {
 	print '<td rowspan=4 valign=top>';
 	print '<textarea name="listEquipementRef" cols="60" rows="'.ROWS_6.'"></textarea>';
 	print '</td>';
-	// type d'évènement
+	// type d'Ã©vÃ¨nement
 	print '<td width=100px>'.$langs->trans('TypeofEquipementEvent').'</td><td>';
 	print select_equipementevt_type('','fk_equipementevt_type',1,1);
 	print '</td>';
@@ -232,7 +232,7 @@ if ( $user->rights->equipement->creer ) {
 	print '</td></tr>';
 	print '<tr '.$bc[$var].">\n";
 
-	// description de l'évènement de l'équipement
+	// description de l'Ã©vÃ¨nement de l'Ã©quipement
 	print '<td rowspan=3 colspan=2>';
 	// editeur wysiwyg
 	require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
@@ -244,7 +244,7 @@ if ( $user->rights->equipement->creer ) {
 	print '</td>';
 	//
 
-	// Date evenement début
+	// Date evenement dÃ©but
 	print '<td align="left" >'.$langs->trans("Dateo").'</td>';
 	print '<td align="left" >';
 	$timearray=dol_getdate(mktime());

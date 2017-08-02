@@ -20,7 +20,7 @@
  *  \file		htdocs/equipement/core/modules/equipement/modules_equipement.php
  *  \ingroup	equipement
  *  \brief		Fichier contenant la classe mere de generation des fiches equipement en PDF
- *  			et la classe mere de numerotation des fiches equipement (numéro de série)
+ *  			et la classe mere de numerotation des fiches equipement (numÃ©ro de sÃ©rie)
  */
 
 require_once DOL_DOCUMENT_ROOT."/core/class/commondocgenerator.class.php";

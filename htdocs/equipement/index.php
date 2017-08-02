@@ -18,7 +18,7 @@
 /**
  *	\file	   htdocs/equipement/index.php
  *  \ingroup	equipement
- *  \brief	  Page accueil des équipement est des évènements
+ *  \brief	  Page accueil des Ã©quipement est des Ã©vÃ¨nements
  */
 
 $res=@include("../main.inc.php");					// For root directory
@@ -78,7 +78,7 @@ print '</tr>';
 print "</table></form><br>";
 
 /*
- * Equipement par état
+ * Equipement par Ã©tat
  */
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("EquipementEtatRepart").'</td></tr>';

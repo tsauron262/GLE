@@ -172,7 +172,7 @@ if ($action == 'confirm_validate'
 			$outputlangs = new Translate("", $conf);
 			$outputlangs->setDefaultLang($newlang);
 		}
-		// génére le pdf qui n'existe pas pour le moment
+		// gÃ©nÃ©re le pdf qui n'existe pas pour le moment
 		$result=equipement_create($db, $object, GETPOST('model', 'alpha'), $outputlangs);
 		Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
 		exit;
@@ -349,7 +349,7 @@ llxHeader();
 if ($action == 'create') {
 	/*
 	 * Mode creation
-	 * Creation d'un nouvel équipement
+	 * Creation d'un nouvel Ã©quipement
 	 */
 
 	$prod=new Product($db);
@@ -371,11 +371,11 @@ if ($action == 'create') {
 	$modequipement = new $obj;
 	$numpr = $modequipement->getNextValue($soc, $object);
 
-	// si le produit est sélectionné
+	// si le produit est sÃ©lectionnÃ©
 	if ($productid > 0) {
 		$prod->fetch($productid);
 
-		// si le numéro de lot est actif et pas de lot encore sélectionné
+		// si le numÃ©ro de lot est actif et pas de lot encore sÃ©lectionnÃ©
 		if ($conf->productbatch->enabled && $fk_product_batch == 0) {
 			$lstproductbatch = array();
 			$sql = "SELECT pb.rowid, pb.tms, pb.fk_product_stock,";
@@ -406,7 +406,7 @@ if ($action == 'create') {
 					$i++;
 				}
 			}
-			// si pas de numéro de lot dispo on passe directement à la suite
+			// si pas de numÃ©ro de lot dispo on passe directement Ã  la suite
 			if (count($lstproductbatch) == 0)
 				$fk_product_batch = -1;
 			else {
@@ -414,7 +414,7 @@ if ($action == 'create') {
 
 				$prod=new Product($db);
 				$entrepot=new Entrepot($db);
-				// sinon on demande la sélection du product batch
+				// sinon on demande la sÃ©lection du product batch
 				print '<form name="equipement" action="'.$_SERVER['PHP_SELF'].'" method="POST">';
 				print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 				print '<input type="hidden" name="action" value="create">';
@@ -468,7 +468,7 @@ if ($action == 'create') {
 			}
 
 		}
-		// si pas de batch/lot ou un lot a été sélectionné ou pas
+		// si pas de batch/lot ou un lot a Ã©tÃ© sÃ©lectionnÃ© ou pas
 		if ( empty($conf->productbatch->enabled) || $conf->productbatch->enabled && $fk_product_batch <> 0) {
 			print_fiche_titre($langs->trans("AddEquipement"));
 	
@@ -568,12 +568,12 @@ if ($action == 'create') {
 					$soc->fetch($lstSupplier[0]);
 					print $soc->getNomUrl(1);
 				} else {
-					//sinon c'est une liste de sélection
+					//sinon c'est une liste de sÃ©lection
 					$filterList="";
 					foreach ($lstSupplier as &$arr) {
 						$filterList.=" s.rowid=".$arr." OR";
 					}
-					//on vire le dernier 'or' et on rajoute la parenthèse de fin
+					//on vire le dernier 'or' et on rajoute la parenthÃ¨se de fin
 					$filterList= "( ".substr($filterList, 0, -2).")";
 					print $form->select_company('', 'fk_soc_fourn', $filterList, 1);
 				}
@@ -582,7 +582,7 @@ if ($action == 'create') {
 	
 			switch(GETPOST('serialMethod')) {
 				case 1 : // Internal Serial
-					// Si c'est un produit interne on génère nous-même les numéros de série
+					// Si c'est un produit interne on gÃ©nÃ¨re nous-mÃªme les numÃ©ros de sÃ©rie
 					print '<tr><td class="fieldrequired">'.$langs->trans("RefStart").'</td>';
 					print '<td><input type=text name="ref" value="'.$numpr.'" readonly STYLE="background-color: #D0D0D0;" >';
 					print '</td></tr>'."\n";
@@ -624,7 +624,7 @@ if ($action == 'create') {
 			print '<td><input type=text size=4 name="unitweight" value="">';
 			print '</td></tr>'."\n";
 			
-			// l'entrepot d'affectation est saisissable par défaut, sauf en mode product batch
+			// l'entrepot d'affectation est saisissable par dÃ©faut, sauf en mode product batch
 			print '<tr><td >'.$langs->trans("EntrepotStock").'</td><td>';
 			if ($fk_product_batch > 0) {
 				$entrepotStatic=new Entrepot($db);
@@ -632,7 +632,7 @@ if ($action == 'create') {
 				print $entrepotStatic->getNomUrl(1)." - ".$entrepotStatic->lieu." (".$entrepotStatic->zip.")" ;
 				print '<input type=hidden name="fk_entrepot" value="'.$fk_entrepot.'">';
 			} else {
-				// si on vient d'un of, on ne crée pas de mvt de stock
+				// si on vient d'un of, on ne crÃ©e pas de mvt de stock
 				if (substr($numversion, 0, 2) == "OF") {
 					select_entrepot(GETPOST('fk_entrepot'), 'fk_entrepot', 1, 1, 0, 0);
 					print "&nbsp;".$langs->trans("StockAlreadyMovedOnFactory");
@@ -641,7 +641,7 @@ if ($action == 'create') {
 			}
 			print '</td></tr>'."\n";
 	
-			// le client est saisissable aussi à la création pour gérer le pb des accès limité
+			// le client est saisissable aussi Ã  la crÃ©ation pour gÃ©rer le pb des accÃ¨s limitÃ©
 			print '<tr><td >'.$langs->trans("Client").'</td><td>';
 			print $form->select_company($object->fk_soc_client, 'fk_soc_client', '', 1);
 			print '</td></tr>'."\n";
@@ -686,7 +686,7 @@ if ($action == 'create') {
 			print $form->selectarray('model', $liste, $conf->global->EQUIPEMENT_ADDON_PDF);
 			print "</td></tr>";
 	
-			// Etat de l'équipement
+			// Etat de l'Ã©quipement
 			print '<tr><td>'.$langs->trans("EtatEquip").'</td>';
 			print select_equipement_etat("", 'fk_etatequipement', 1, 1);
 			print "</td></tr>";
@@ -716,7 +716,7 @@ if ($action == 'create') {
 	} else {
 		print_fiche_titre($langs->trans("AddEquipementSelectProduct"));
 		
-		// premiere étape on sélectionne le produit correspondand à l'équipement
+		// premiere Ã©tape on sÃ©lectionne le produit correspondand Ã  l'Ã©quipement
 		print '<form name="equipement" action="'.$_SERVER['PHP_SELF'].'" method="POST">';
 		print '<table class="border" width="100%">';
 		print '<tr><td class="fieldrequired">'.$langs->trans("Products").'</td><td>';
@@ -753,7 +753,7 @@ if ($action == 'create') {
 
 	dol_fiche_head($head, 'card', $langs->trans("EquipementCard"), 0, 'equipement@equipement');
 
-	// Confirmation de la suppression de l'équipement
+	// Confirmation de la suppression de l'Ã©quipement
 	if ($action == 'delete') {
 		$ret=$form->form_confirm(
 						$_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteEquipement'), 
@@ -797,7 +797,7 @@ if ($action == 'create') {
 	// Ref
 	print '<tr><td width=250px><table class="nobordernopadding" width="100%"><tr><td >'.$langs->trans("Ref").'</td>';
 	if ($action != 'editnumref' && $object->statut == 0 && $user->rights->equipement->majserial) {	
-		// si l'équipement est à l'état brouillon et l'habilition requise est active on a le droit de modifier la référence
+		// si l'Ã©quipement est Ã  l'Ã©tat brouillon et l'habilition requise est active on a le droit de modifier la rÃ©fÃ©rence
 		print '<td align="right">';
 		print '<a href="'.$_SERVER["PHP_SELF"].'?action=editnumref&amp;id='.$object->id.'">';
 		print img_edit($langs->trans('Modify'), 1).'</a></td>';
@@ -828,7 +828,7 @@ if ($action == 'create') {
 	print '<td></td><td>'.$prod->description.'</td><tr>';
 
 
-	// Numéro de version
+	// NumÃ©ro de version
 	print '<tr><td><table class="nobordernopadding" width="100%"><tr><td>'.$langs->trans("VersionNumber").'</td>';
 	if ($action != 'editnumversion' && $object->statut == 0) {
 		print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=editnumversion&amp;id='.$object->id.'">';
@@ -846,7 +846,7 @@ if ($action == 'create') {
 		print $object->numversion;
 	print '</td></tr>';
 
-	// quantité modifiable et visible uniquement si supérieur à 1
+	// quantitÃ© modifiable et visible uniquement si supÃ©rieur Ã  1
 	if ($object->quantity >1) {
 		print '<tr><td><table class="nobordernopadding" width="100%"><tr><td>'.$langs->trans("Quantity").'</td>';
 		if ($action != 'editquantity' && $object->statut == 0) { 
@@ -883,7 +883,7 @@ if ($action == 'create') {
 		print $object->unitweight;
 	print '</td></tr>';
 
-	// fournisseur, lui on ne le change pas, si pas bon on supprime l'équipement
+	// fournisseur, lui on ne le change pas, si pas bon on supprime l'Ã©quipement
 	print '<tr><td class="fieldrequired">'.$langs->trans("Fournisseur").'</td><td>';
 	if ($object->fk_soc_fourn > 0 ) {
 		$soc=new Societe($db);
@@ -896,7 +896,7 @@ if ($action == 'create') {
 	if ($user->rights->facture->lire) {
 		print '<tr><td><table class="nobordernopadding" width="100%">';
 		print '<tr><td>'.$langs->trans("RefFactFourn").'</td>';
-		// la facture fournisseur est modifiable ssi il y a un founisseur de sélectionné
+		// la facture fournisseur est modifiable ssi il y a un founisseur de sÃ©lectionnÃ©
 		if ($action != 'editfactfourn' && $object->statut == 0)
 			if ( $object->fk_soc_fourn > 0) {
 				print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=editfactfourn&id='.$object->id.'">';
@@ -977,7 +977,7 @@ if ($action == 'create') {
 
 	// facture client
 	if ($user->rights->facture->lire) {
-		//on autorise la saisie de la facture client SSI il y a un client de sélectionné
+		//on autorise la saisie de la facture client SSI il y a un client de sÃ©lectionnÃ©
 		print '<tr><td><table class="nobordernopadding" width="100%"><tr><td>'.$langs->trans("RefFactClient").'</td>';
 		if ($action != 'editfactclient' && $object->statut == 0) {
 			print '<td align="right">';
@@ -1097,7 +1097,7 @@ if ($action == 'create') {
 	print '</td>';
 	print '</tr>';
 
-	// Etat de l'équipement
+	// Etat de l'Ã©quipement
 	print '<tr><td><table class="nobordernopadding" width="100%"><tr><td>'.$langs->trans("EtatEquip").'</td>';
 	if ($action != 'editetatequip' && $object->statut == 0) 
 		print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=editetatequip&amp;id='.$object->id.'">'.img_edit($langs->trans('Modify'), 1).'</a></td>';
@@ -1117,7 +1117,7 @@ if ($action == 'create') {
 	print '</td></tr>';
 
 
-	// Numéro de immo compta
+	// NumÃ©ro de immo compta
 	print '<tr><td><table class="nobordernopadding" width="100%"><tr><td>'.$langs->trans("NumImmoCompta").'</td>';
 	if ($action != 'editnumimmo' && $object->statut == 0) 
 		print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=editnumimmo&amp;id='.$object->id.'">'.img_edit($langs->trans('Modify'), 1).'</a></td>';
@@ -1181,7 +1181,7 @@ if ($action == '' ) {
 	$reshook = $hookmanager->executeHooks('addMoreActionsButtons', $parameters, $object, $action); 
 	// modified by hook
 	if (empty($reshook)) {
-		// Découpage d'un lot si il y en a plus d'un
+		// DÃ©coupage d'un lot si il y en a plus d'un
 		if ($object->quantity > 1 && $user->rights->equipement->creer ) {
 			if (! empty($conf->use_javascript_ajax)) {
 				print '<div class="inline-block divButAction">';

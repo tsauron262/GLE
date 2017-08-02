@@ -78,16 +78,16 @@ $action	= GETPOST('action', 'alpha');
  */
 
 
-// gestion du transfert d'un équipement dans un entrepot
+// gestion du transfert d'un Ã©quipement dans un entrepot
 if ($action=="AddEquipement") {
-	// a partir de la facture on récupère l'id du client
+	// a partir de la facture on rÃ©cupÃ¨re l'id du client
 	$socid=$object->socid;
 	$tblSerial=explode(";", GETPOST('listEquipementRef', 'alpha'));
 	$nbCreateSerial=count($tblSerial);
 	$i=0;
 	while ($nbCreateSerial > $i) {
 		$equipement = new Equipement($db);
-		// un evènement est toujours associé à un fournisseur
+		// un evÃ¨nement est toujours associÃ© Ã  un fournisseur
 		// on associe avec la facture
 		$equipement->fetch('', $tblSerial[$i]); 
 		$equipement->set_fact_fourn($user, $id);
@@ -203,7 +203,7 @@ if ($result) {
 	print '&nbsp;/&nbsp;<input class="flat" type="text" size="1" maxlength="4" name="yeardateo" value="'.$syear.'">';
 	print '</td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement,'search_etatequipement',1,1);
 	print '</td>';
@@ -285,7 +285,7 @@ if ($result) {
 $form = new Form($db);
 
 print "<br><br>";
-// Ajout d'équipement dans l'entrepot
+// Ajout d'Ã©quipement dans l'entrepot
 print '<form method="post" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="AddEquipement">';

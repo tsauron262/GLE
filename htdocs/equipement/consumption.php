@@ -82,7 +82,7 @@ $entrepot=new Entrepot($db);
 
 // Add line
 if ($action == "addline" && $user->rights->equipement->creer) {
-	// on vérifie les valeurs obligatoire 
+	// on vÃ©rifie les valeurs obligatoire 
 	
 //if (!GETPOST('np_desc'))
 //{
@@ -102,10 +102,10 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 						$qty
 		);
 
-		// Seulement si un seul produit a été ajouté
+		// Seulement si un seul produit a Ã©tÃ© ajoutÃ©
 		if ($result >= 0 && $qty == 1) {
-			// on vérifie si le produit est un équipements dans l'entrepot 
-			//  (saisie supplémentaire possible alors)
+			// on vÃ©rifie si le produit est un Ã©quipements dans l'entrepot 
+			//  (saisie supplÃ©mentaire possible alors)
 			$sql = 'SELECT e.* FROM '.MAIN_DB_PREFIX.'equipement as e';
 			$sql.= ' WHERE e.fk_product = '.$fk_product;
 			$sql.= ' AND e.fk_entrepot = '.$fk_entrepot;
@@ -116,7 +116,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 				$i = 0;
 		
 				if ($num > 0) {
-					// si la produit est sérialisé on ouvre la ligne en modification pour le choisir
+					// si la produit est sÃ©rialisÃ© on ouvre la ligne en modification pour le choisir
 					Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$id.'&amp;action=editline&amp;line_id='.$result);
 					exit;
 				}
@@ -133,7 +133,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 	&& GETPOST('save','alpha') == $langs->trans("Save")
 ) {
 	/*
-	*  Mise a jour d'une ligne d'évènement
+	*  Mise a jour d'une ligne d'Ã©vÃ¨nement
 	*/
 
 	$object->fetch_thirdparty();
@@ -169,7 +169,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 }
 
 /*
- *  Supprime une ligne d'évènement AVEC confirmation
+ *  Supprime une ligne d'Ã©vÃ¨nement AVEC confirmation
  */
 elseif ($action == 'confirm_deleteline' && $confirm == 'yes' && $user->rights->equipement->creer) {
 	$objectline = new Equipementconsumption($db);
@@ -243,13 +243,13 @@ if ($id > 0 || ! empty($ref)) {
 	print "<tr style='display:none' id='descprod'>";
 	print '<td></td><td>'.$prod->description.'</td><tr>';
 
-	// Numéro de version
+	// NumÃ©ro de version
 	print '<tr><td>'.$langs->trans("VersionNumber").'</td>';
 	print '<td colspan="3">';
 	print $object->numversion;
 	print '</td></tr>';
 
-	// quantité modifiable et visible uniquement si supérieur à 1
+	// quantitÃ© modifiable et visible uniquement si supÃ©rieur Ã  1
 	if ($object->quantity >1) {
 		print '<tr><td>'.$langs->trans("Quantity").'</td>';
 		print '<td colspan="3">';
@@ -257,7 +257,7 @@ if ($id > 0 || ! empty($ref)) {
 		print '</td></tr>';
 	}
 
-	// Etat de l'équipement
+	// Etat de l'Ã©quipement
 	print '<tr><td>'.$langs->trans("EtatEquip").'</td>';
 	print '<td colspan="3">';
 	if ($object->etatequiplibelle)
@@ -308,7 +308,7 @@ if ($id > 0 || ! empty($ref)) {
 				print $prod->getNomUrl(1);
 				print '</td>';
 				
-				// description de l'évènement de la consommation
+				// description de l'Ã©vÃ¨nement de la consommation
 				print '<td  rowspan=3 valign=top>';
 				print dol_htmlentitiesbr($objp->description);
 				print '</td>';
@@ -341,7 +341,7 @@ if ($id > 0 || ! empty($ref)) {
 				$entrepot->fetch($objp->fk_entrepot);
 				print $entrepot->getNomUrl(2);
 				print '</td>';
-				// Date evenement début
+				// Date evenement dÃ©but
 				print '<td align="left" >'.$langs->trans("DateCons").'</td>';
 				print '<td align="left" >';
 				print dol_print_date($db->jdate($objp->datecons), "dayhour");
@@ -378,7 +378,7 @@ if ($id > 0 || ! empty($ref)) {
 				print $prod->getNomUrl(1);
 				print '</td>';
 				
-				// description de l'évènement de la consommation
+				// description de l'Ã©vÃ¨nement de la consommation
 				print '<td  rowspan=3>';
 				// editeur wysiwyg
 				require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
@@ -391,7 +391,7 @@ if ($id > 0 || ! empty($ref)) {
 				print '</td>';
 	
 	
-				// Date evenement début
+				// Date evenement dÃ©but
 				print '<td align="left" >'.$langs->trans("DateCons").'</td>';
 				print '<td align="left" >';
 				$timearray=dol_getdate(mktime());
@@ -448,7 +448,7 @@ if ($id > 0 || ! empty($ref)) {
 		dol_fiche_end();
 
 		/*
-		 * Add line on a le droit de créer un évènement à tous moment
+		 * Add line on a le droit de crÃ©er un Ã©vÃ¨nement Ã  tous moment
 		 */
 		if ($action <> 'editline' && $user->rights->equipement->creer) {
 			print_fiche_titre($langs->trans("AddConsumptionProduct"));
@@ -471,7 +471,7 @@ if ($id > 0 || ! empty($ref)) {
 			print $form->select_produits($fk_product, 'productid', 0, $conf->product->limit_size, 0, -1, 2, '', 0);
 			print '</td>';
 			
-			// description de l'évènement de la consommation
+			// description de l'Ã©vÃ¨nement de la consommation
 			print '<td  rowspan=3>';
 			// editeur wysiwyg
 			require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
@@ -513,7 +513,7 @@ if ($id > 0 || ! empty($ref)) {
 			print '</tr>';
 
 			print '<tr '.$bc[$var].">\n";
-			print '<td colspan=2></td>'; // pas de numéro d'équipement à la création
+			print '<td colspan=2></td>'; // pas de numÃ©ro d'Ã©quipement Ã  la crÃ©ation
 
 			print '<td align="left" >'.$langs->trans("Qty").'</td>';
 			print '<td align="left" colspan=2><input type=text name=qty value=1 size=2 >';

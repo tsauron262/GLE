@@ -196,7 +196,7 @@ if ($result)
 
 	print "<tr class=\"liste_titre\">";
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_ref" value="'.$search_ref.'" size="8"></td>';
-	// on affiche les produits présent dans l'entrepot et leur quantité en stock annoncé
+	// on affiche les produits prÃ©sent dans l'entrepot et leur quantitÃ© en stock annoncÃ©
 	print '<td class="liste_titre"></td>';
 	print '<td class="liste_titre"></td>';
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_company_fourn" value="'.$search_company_fourn.'" size="10"></td>';
@@ -217,7 +217,7 @@ if ($result)
 	print '&nbsp;/&nbsp;<input class="flat" type="text" size="1" maxlength="4" name="yeardateo" value="'.$syear.'">';
 	print '</td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement,'search_etatequipement',1,1);
 	print '</td>';

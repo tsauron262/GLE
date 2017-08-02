@@ -208,7 +208,7 @@ if ($result) {
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_reffichinter" value="'.$search_reffichinter.'" size="10"></td>';
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_refexpedition" value="'.$search_refexpedition.'" size="10"></td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement,'search_etatequipement', 1, 1);
 	print '</td>';

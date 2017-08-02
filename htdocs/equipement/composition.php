@@ -129,7 +129,7 @@ if (count($tblParent) > 0) {
 
 $factory->id=$object->fk_product;
 
-// un OF est-il lié à l'équipement (factory)?
+// un OF est-il liÃ© Ã  l'Ã©quipement (factory)?
 $factoryid = $factory->get_equipement_linked($id);
 if ($factoryid >0 )
 	$factory->get_sousproduits_factory_arbo($factoryid);	
@@ -143,9 +143,9 @@ if ($action == 'save' && $user->rights->equipement->creer) {
 	if (count($prods_arbo) > 0) {
 		foreach ($prods_arbo as $value) {
 			if ($value['type']==0) {
-				// on boucle sur le nombre d'équipement saisie
+				// on boucle sur le nombre d'Ã©quipement saisie
 				for ($i=0; $i < $value['nb']; $i++) {
-					// on enregistre ce qui a été saisie
+					// on enregistre ce qui a Ã©tÃ© saisie
 					$object->set_component($id, $value['id'], $i, GETPOST('ref_'.$value['id'].'_'.$i));
 				}
 			}
@@ -175,7 +175,7 @@ if (count($prods_arbo) > 0) {
 		$productstatic->type=$value['type'];
 		
 		if ($value['type']==0) {
-			// on boucle sur le nombre d'équipement à saisir
+			// on boucle sur le nombre d'Ã©quipement Ã  saisir
 			for ($i=0; $i < $value['nb']; $i++) {
 				print '<tr>';
 				print '<td width=150px align="left">'.$productstatic->getNomUrl(1, 'composition').'</td>';
@@ -192,7 +192,7 @@ if (count($prods_arbo) > 0) {
 				print '</td></tr>';
 			}
 		} else {
-			// pas de numéro de série à saisir sur la main-d'oeuvre
+			// pas de numÃ©ro de sÃ©rie Ã  saisir sur la main-d'oeuvre
 			print '<tr>';
 			print '<td align="left">'.$productstatic->getNomUrl(1, 'composition').'</td>';
 			print '<td align="left">'.$productstatic->label.'</td>';

@@ -83,9 +83,9 @@ $result = $object->fetch($factureid, $factureref);
 if ($factureid =="")
 	$factureid = $object->id;
 
-// gestion du transfert d'un équipement dans un entrepot
+// gestion du transfert d'un Ã©quipement dans un entrepot
 if ($action=="AddEquipement") {
-	// a partir de la facture on récupère l'id du client
+	// a partir de la facture on rÃ©cupÃ¨re l'id du client
 	$socid=$object->socid;
 	$separatorlist=$conf->global->EQUIPEMENT_SEPARATORLIST;
 	$separatorlist =($separatorlist ? $separatorlist : ";");
@@ -113,7 +113,7 @@ if ($action=="AddEquipementAuto") {
 	$tblproduct = explode(";", GETPOST('listEquipementRef', 'alpha'));
 
 	foreach ($tblproduct as $fk_product) {
-		// on regarde si il y a des équipements de dispo pour ce produit dans cet EntrepotStock
+		// on regarde si il y a des Ã©quipements de dispo pour ce produit dans cet EntrepotStock
 		$sql = "SELECT e.rowid, e.quantity  FROM ".MAIN_DB_PREFIX."equipement as e";
 		$sql.= " WHERE fk_product=".$fk_product;
 		$sql.= " AND fk_entrepot=".$fk_entrepot;
@@ -122,7 +122,7 @@ if ($action=="AddEquipementAuto") {
 
 		$resql=$db->query($sql);
 		if ($resql) {
-			// on boucle sur les équipements
+			// on boucle sur les Ã©quipements
 			$num = $db->num_rows($resql);
 			if ($num > 0) {
 				$i=0;
@@ -133,12 +133,12 @@ if ($action=="AddEquipementAuto") {
 					// on associe aussi avec le client de la facture
 					$equipement->fetch($obj->rowid); 
 
-					// si c'est un équipement de type lot
+					// si c'est un Ã©quipement de type lot
 					if ($obj->quantity > 1) {
 						$nbtocut = GETPOST("multi-".$obj->rowid);
-						// si pas de quantité à couper/utiliser
+						// si pas de quantitÃ© Ã  couper/utiliser
 						if ($nbtocut > 0 )  {
-							// si on a sélectionné qu'une partie du lot, on découpe et on se positionne sur le découpé
+							// si on a sÃ©lectionnÃ© qu'une partie du lot, on dÃ©coupe et on se positionne sur le dÃ©coupÃ©
 							if ($nbtocut < $obj->quantity)
 								$equipement->fetch($equipement->cut_equipement($equipement->ref."-F", $nbtocut , 1));
 	
@@ -150,7 +150,7 @@ if ($action=="AddEquipementAuto") {
 							$equipement->set_entrepot($user, -1);
 						}
 					} else {
-						// si la case est coché on ajoute à la facture
+						// si la case est cochÃ© on ajoute Ã  la facture
 						if (GETPOST("unit-".$obj->rowid) == 1) {
 							$equipement->set_client($user, $socid);
 							// on associe avec la facture
@@ -320,7 +320,7 @@ if ($result)
 	print '&nbsp;/&nbsp;<input class="flat" type="text" size="1" maxlength="4" name="yeardateo" value="'.$syear.'">';
 	print '</td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement,'search_etatequipement',1,1);
 	print '</td>';
@@ -401,13 +401,13 @@ if ($result)
 
 $form = new Form($db);
 
-// Association d'équipement à la facture
+// Association d'Ã©quipement Ã  la facture
 foreach ($object->lines as $line) {
 	if ($line->product_type == 0 && $line->fk_product > 0) {
 		$remainqty = $line->qty;
 
-		// on vérifie que le produit n'est pas déjà totalement affecté 
-		// on regarde si il y a des équipements de dispo pour ce produit dans cet EntrepotStock
+		// on vÃ©rifie que le produit n'est pas dÃ©jÃ  totalement affectÃ© 
+		// on regarde si il y a des Ã©quipements de dispo pour ce produit dans cet EntrepotStock
 		$sql = "SELECT sum(e.quantity) as nb FROM ".MAIN_DB_PREFIX."equipement as e";
 		$sql.= " WHERE fk_product=".$line->fk_product;
 		$sql.= " AND fk_facture=".$factureid;
@@ -449,7 +449,7 @@ if ($blinepresent) {
 		print '} );  </script>';
 		print '<div id="accordion">';
 		
-		// saisie en mode pavé de lignes
+		// saisie en mode pavÃ© de lignes
 		print '<h3>'.$langs->trans('ManualListEquipementToAdd').'</h3>';
 		print '<div>';
 		print '<form method="post" action="'.$_SERVER["PHP_SELF"].'">'."\n";
@@ -493,8 +493,8 @@ if ($blinepresent) {
 			if ($line->product_type == 0 && $line->fk_product > 0 ) {
 				$remainqty= $line->qty;
 		//		var_dump($line->fk_product);
-				// on vérifie que le produit n'est pas déjà totalement affecté 
-				// on regarde si il y a des équipements de dispo pour ce produit dans cet EntrepotStock
+				// on vÃ©rifie que le produit n'est pas dÃ©jÃ  totalement affectÃ© 
+				// on regarde si il y a des Ã©quipements de dispo pour ce produit dans cet EntrepotStock
 				$sql = "SELECT sum(e.quantity) as nb FROM ".MAIN_DB_PREFIX."equipement as e";
 				$sql.= " WHERE fk_product=".$line->fk_product;
 				$sql.= " AND fk_facture=".$factureid;
@@ -522,7 +522,7 @@ if ($blinepresent) {
 			
 					print '<td valign=top align=left colspan=2 style="padding:0px;">';
 					
-					// on regarde si il y a des équipements de dispo pour ce produit dans cet EntrepotStock
+					// on regarde si il y a des Ã©quipements de dispo pour ce produit dans cet EntrepotStock
 					$sql = "SELECT e.rowid FROM ".MAIN_DB_PREFIX."equipement as e";
 					$sql.= " WHERE fk_product=".$line->fk_product;
 					$sql.= " AND fk_entrepot=".GETPOST('fk_entrepot');
@@ -536,7 +536,7 @@ if ($blinepresent) {
 					dol_syslog("equipement/facture::fetch sql=".$sql, LOG_DEBUG);
 					$resql=$db->query($sql);
 					if ($resql) {	
-						// on boucle sur les équipements
+						// on boucle sur les Ã©quipements
 						$num = $db->num_rows($resql);
 						if ($num > 0)  {
 							print '<table width="100%" style="padding:0px;">';
@@ -616,8 +616,8 @@ if ($blinepresent) {
 	
 			print '</td></tr>'."\n";
 		} else {
-			// si pas d'équipement à affecté à la facture
-			// ben on cache la fonction de sélection
+			// si pas d'Ã©quipement Ã  affectÃ© Ã  la facture
+			// ben on cache la fonction de sÃ©lection
 			print '	<script>'."\n";
 			print ' $("#formselectentrepot").hide();';
 			print ' $("#accordion").hide();';
@@ -644,13 +644,13 @@ if ($blinepresent) {
 dol_fiche_end();
 
 print '<div class="tabsAction">';
-// as-ton une expédition associé à la facture?
+// as-ton une expÃ©dition associÃ© Ã  la facture?
 $object->fetchObjectLinked('','shipping', $object->id,'facture');
 if (count($object->linkedObjects) > 0 ) {
 	print '<a class="butAction" href="facture.php?id='.$factureid.'&action=GetEquipmentFromShipping&shippingid='.$object->linkedObjects['shipping'][0]->id.'">';
 	print $langs->trans("GetEquipmentFromShipping").'</a>';
 }
-// Bouton pour ajouter les numéros de série des équipements de la commande dans la facture ' si il existe
+// Bouton pour ajouter les numÃ©ros de sÃ©rie des Ã©quipements de la commande dans la facture ' si il existe
 if ($numEquipement > 0 )
 	print '<a class="butAction" href="facture.php?id='.$factureid.'&action=Fillinvoice">'.$langs->trans("FillInvoiceFromEquipment").'</a>';
 print '</div>';

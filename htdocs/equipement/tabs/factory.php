@@ -223,16 +223,16 @@ print '</table>';
 print '<br>';
 
 
-// uniquement pour les OF terminées
+// uniquement pour les OF terminÃ©es
 if ($factory->statut == 2) {
-	// bouton de création d'un équipement à partir du produit
+	// bouton de crÃ©ation d'un Ã©quipement Ã  partir du produit
 	print '<form name="equipement" action="../card.php" method="POST">';
 	print '<table >';
 	print '<tr><td >'.$langs->trans("NewEquipementOfProduct").'</td><td>';
 	print '<input type=hidden name=factoryid value="'.$factoryid.'">';
 	print '<input type=hidden name=productid value="'.$factory->fk_product.'">';
 	print '<input type=hidden name=fk_entrepot value="'.$fk_entrepot.'">';
-	// on transfert la référence de l'of en numéro de version
+	// on transfert la rÃ©fÃ©rence de l'of en numÃ©ro de version
 	print '<input type=hidden name=numversion value="'.$refOF.'">'; 
 	print '<input type=hidden name=qtyEquipement value="'.$qtyequipement .'">';
 	print '<input type=hidden name=dateoday value="'.$factory->date_end_made.'">';
@@ -381,7 +381,7 @@ if ($result)
 	print '&nbsp;/&nbsp;<input class="flat" type="text" size="1" maxlength="4" name="yeardateo" value="'.$syear.'">';
 	print '</td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement, 'search_etatequipement', 1, 1);
 	print '</td>';
@@ -529,7 +529,7 @@ function select_equipement_etat($selected='', $htmlname='fk_etatequipement', $sh
 			}
 			print '</select>';
 		} else {
-			// si pas de liste, on positionne un hidden à vide
+			// si pas de liste, on positionne un hidden Ã  vide
 			print '<input type="hidden" name="'.$htmlname.'" value=-1>';
 		}
 	}

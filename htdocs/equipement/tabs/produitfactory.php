@@ -127,7 +127,7 @@ dol_fiche_head($head, 'equipement', $titre, 0, $picto);
 
 
 
-// bouton de création d'un équipement à partir du produit
+// bouton de crÃ©ation d'un Ã©quipement Ã  partir du produit
 print '<form name="equipement" action="../fiche.php" method="POST">';
 print '<table >';
 print '<tr><td >'.$langs->trans("NewEquipementOfProduct").'</td><td>';
@@ -234,7 +234,7 @@ if ($result) {
 	print '&nbsp;/&nbsp;<input class="flat" type="text" size="1" maxlength="4" name="yeardateo" value="'.$syear.'">';
 	print '</td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement,'search_etatequipement', 1, 1);
 	print '</td>';

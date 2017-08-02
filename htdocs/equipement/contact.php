@@ -160,7 +160,7 @@ if ($id > 0 || ! empty($ref)) {
 	print "<tr style='display:none' id='descprod'>";
 	print '<td></td><td>'.$prod->description.'</td><tr>';
 
-	// Numéro de version
+	// NumÃ©ro de version
 	print '<tr><td>'.$langs->trans("VersionNumber").'</td>';
 	print '<td colspan="3">';
 	print $object->numversion;

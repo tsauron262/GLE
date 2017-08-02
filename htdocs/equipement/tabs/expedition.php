@@ -92,7 +92,7 @@ if ($action == 'deleteline' && $user->rights->equipement->creer) {
 	$result=$objectline->deleteline();
 }
 
-// pour valider la préparation de l'expédition, on sort de l'entrepot les équipements
+// pour valider la prÃ©paration de l'expÃ©dition, on sort de l'entrepot les Ã©quipements
 if ($action == 'validExpedition' && $user->rights->equipement->creer) {
 	$sql= " UPDATE  ".MAIN_DB_PREFIX."equipement as e, ".MAIN_DB_PREFIX."equipementevt as ee";
 	$sql.= " SET e.fk_entrepot = null";
@@ -228,7 +228,7 @@ if ($result) {
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_refcontrat" value="'.$search_refcontrat.'" size="10"></td>';
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_refexpedition" value="'.$search_refexpedition.'" size="10"></td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement, 'search_etatequipement', 1, 1);
 	print '</td>';
@@ -319,7 +319,7 @@ if ($result) {
 		print '<td align="right">'.($objp->etatequiplibelle ? $langs->trans($objp->etatequiplibelle):'').'</td>';
 		print '<td align="right">'.($objp->equipevttypelibelle ? $langs->trans($objp->equipevttypelibelle):'').'</td>';
 		print '<td align="right">';
-		// si l'équipement a été envoyé, il n'est plus possible de le supprimer par cette écran
+		// si l'Ã©quipement a Ã©tÃ© envoyÃ©, il n'est plus possible de le supprimer par cette Ã©cran
 		if ($objp->fk_entrepot>0) {
 			print '<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=deleteline&amp;line_id='.$objp->eerowid.'">';
 			print img_delete().'</td>';

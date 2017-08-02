@@ -201,7 +201,7 @@ if ($result)
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_refcontrat" value="'.$search_refcontrat.'" size="10"></td>';
 	print '<td class="liste_titre"><input type="text" class="flat" name="search_refexpedition" value="'.$search_refexpedition.'" size="10"></td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement, 'search_etatequipement', 1, 1);
 	print '</td>';
@@ -302,8 +302,8 @@ if ($result)
 	$db->free($result);
 
 	if ($num > 0) {
-		// ajout bouton transfert des infos équipements sur la fiche inter
-		// Bouton pour ajouter les numéros de série des équipements de la commande dans la facture ' si il existe
+		// ajout bouton transfert des infos Ã©quipements sur la fiche inter
+		// Bouton pour ajouter les numÃ©ros de sÃ©rie des Ã©quipements de la commande dans la facture ' si il existe
 		print '<a class="butAction" href="fichinter.php?id='.$id.'&action=FillIntervention">';
 		print $langs->trans("FillInterventionFromEquipment").'</a>';
 	}

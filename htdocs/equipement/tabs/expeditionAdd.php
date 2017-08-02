@@ -84,19 +84,19 @@ if (!empty($object->origin)) {
 	$object->fetch_origin();
 }
 if ($action == 'joindre' && $user->rights->equipement->creer) {
-	// rÈcupÈration des Èquipements de type lot ‡ joindre
+	// r√©cup√©ration des √©quipements de type lot √† joindre
 	$ListLot= GETPOST('lotEquipement');
 	if (!empty($ListLot)) {
 		foreach ($ListLot as $fk_product => $lotproduct) {
 			//print $fk_product."<br>";
 			foreach ($lotproduct as $idlot => $qtyequipement) {
 				//print "prod=".$fk_product." Lot=".$idlot." Qty=".$qtyequipement."<br>";
-				// si on a des choses ‡ envoyer depuis ce lot
+				// si on a des choses √† envoyer depuis ce lot
 				if ($qtyequipement > 0) {
-					// rÈcupÈration de la quantitÈ du lot
+					// r√©cup√©ration de la quantit√© du lot
 					$tblLot=explode("-", $idlot);
 					
-					if ($qtyequipement > $tblLot[1]) {	// erreur sur les quantitÈs saisie sur le lots
+					if ($qtyequipement > $tblLot[1]) {	// erreur sur les quantit√©s saisie sur le lots
 						$mesg='<div class="error">'.$langs->trans("ErrorQuantityMustLower", $qtyequipement, $tblLot[1]).'</div>';
 						$error++;
 						setEventMessage($mesg);
@@ -104,24 +104,24 @@ if ($action == 'joindre' && $user->rights->equipement->creer) {
 						exit;
 					}
 	
-					// on ajoute tous le lot ‡ l'expÈdition
+					// on ajoute tous le lot √† l'exp√©dition
 					$equipementstatic=new Equipement($db);
 					$ret=$equipementstatic->fetch($tblLot[0]);
 					$equipementstatic->fetch_thirdparty();
 		
-					if ($qtyequipement < $tblLot[1]) {	// ON dÈcoupe le lot en deux parties et on associe le nouveau
-						// la rÈf de du lot 
+					if ($qtyequipement < $tblLot[1]) {	// ON d√©coupe le lot en deux parties et on associe le nouveau
+						// la r√©f de du lot 
 
 						$newequipid = $equipementstatic->cut_equipement($equipementstatic->ref."-".$object->ref, $qtyequipement, 1);
-						// on se positionne sur l'Èquipement nouvellement crÈe
+						// on se positionne sur l'√©quipement nouvellement cr√©e
 						$ret=$equipementstatic->fetch($newequipid);
 						$equipementstatic->fetch_thirdparty();
 					}
 		
-					// on affecte l'Èquipement ‡ expÈdier au client ‡ qui on l'envoie
+					// on affecte l'√©quipement √† exp√©dier au client √† qui on l'envoie
 					$equipementstatic->set_client($user, $object->socid);
 					
-					// on enlËve l'Èquipement du stock
+					// on enl√®ve l'√©quipement du stock
 					$equipementstatic->set_entrepot($user, -1);
 	
 					// on cree enfin un evenement	
@@ -162,14 +162,14 @@ if ($action == 'joindre' && $user->rights->equipement->creer) {
 				}
 			}
 		}
-		// on redirige sur l'onglet ‡ cotÈ
+		// on redirige sur l'onglet √† cot√©
 		Header('Location: expedition.php?id='.$id);
 		exit;
 	}
 	
-	// rÈcupÈration des Èquipements unitaires
+	// r√©cup√©ration des √©quipements unitaires
 	$ListEquip= GETPOST('chkequipement');
-	// on boucle sur les Èquipements sÈlectionnÈs si il y en a
+	// on boucle sur les √©quipements s√©lectionn√©s si il y en a
 	if ($ListEquip !="" ) {
 		foreach ($ListEquip as $EquipID) {
 			//print "==".$EquipID."<br>";
@@ -177,10 +177,10 @@ if ($action == 'joindre' && $user->rights->equipement->creer) {
 			$ret=$equipementstatic->fetch($EquipID);
 			$equipementstatic->fetch_thirdparty();
 
-			// on affecte l'Èquipement ‡ expÈdier au client ‡ qui on l'envoie
+			// on affecte l'√©quipement √† exp√©dier au client √† qui on l'envoie
 			$equipementstatic->set_client($user, $object->socid);
 			
-			// on enlËve l'Èquipement du stock
+			// on enl√®ve l'√©quipement du stock
 			//$equipementstatic->set_entrepot($user, -1);
 
 			$desc=GETPOST('np_desc', 'alpha');
@@ -309,7 +309,7 @@ print "</table><br>";
 
 
 
-// on rÈcupËre les produits ‡ expÈdier et l'entrepot associÈ
+// on r√©cup√®re les produits √† exp√©dier et l'entrepot associ√©
 $object = new Expedition($db);
 $result = $object->fetch($id, $ref);
 
@@ -354,7 +354,7 @@ if ($result) {
 	for ($i = 0 ; $i < $num_prod ; $i++) {
 		// seulement si produit non libre
 		if (!empty($lines[$i]->fk_product)) {
-			// dÈtermination du nombre d'Èquipement ‡ transmettre
+			// d√©termination du nombre d'√©quipement √† transmettre
 			$nbequipement = $lines[$i]->qty_shipped - $equipementstatic->get_nbEquipementProductExpedition($lines[$i]->fk_product, $id);
 
 			print "<tr ".$bc[$var].">";
@@ -405,13 +405,13 @@ if ($result) {
 			print '<td valign=top align="center">'.$lines[$i]->qty_shipped.'</td>';
 			print '<td valign=top align="center">'.$nbequipement.'</td>';
 
-			// Èquipement correspondant au produit et ‡ l'entrepot d'expÈdition
+			// √©quipement correspondant au produit et √† l'entrepot d'exp√©dition
 			print '<td align="left" valign=top>';
 			// si il y a des lots
 			print_lotequipement($lines[$i]->fk_product, $lines[$i]->entrepot_id, $nbequipement);
 			print '</td>';
 			print '<td align="left" valign=top>';
-			// on affiche le nombre d'Èquipement dispo ‡ cocher
+			// on affiche le nombre d'√©quipement dispo √† cocher
 			print_equipementdispo($lines[$i]->fk_product, $lines[$i]->entrepot_id, $nbequipement);
 	
 			print '</td>';
@@ -435,10 +435,10 @@ if ($result) {
 	print '<tr '.$bc[$var].">\n";
 	print '<td width=100px>'.$langs->trans('TypeofEquipementEvent').'</td><td>';
 	print select_equipementevt_type('', 'fk_equipementevt_type', 1, 1);
-	// type d'ÈvËnement
+	// type d'√©v√®nement
 	print '</td>';
 
-	// Date evenement dÈbut
+	// Date evenement d√©but
 	print '<td align="center" rowspan=2>';
 	$timearray=dol_getdate(mktime());
 	if (!GETPOST('deoday','int')) 
@@ -476,7 +476,7 @@ if ($result) {
 	print '</td></tr>';
 
 	print '<tr '.$bc[$var].">\n";
-	// description de l'ÈvËnement de l'Èquipement
+	// description de l'√©v√®nement de l'√©quipement
 	print '<td rowspan=2 colspan=2>';
 	// editeur wysiwyg
 	require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
@@ -534,7 +534,7 @@ $(document).ready(function(){
 		
 // gestion de la selection des references
 $('#filterchk').keyup(function() {
-	// on nettoie les case ‡ cocher
+	// on nettoie les case √† cocher
 	$('input[type=checkbox]').each(function() 
 	{ 
 		// si la zone est a vide on decoche tous

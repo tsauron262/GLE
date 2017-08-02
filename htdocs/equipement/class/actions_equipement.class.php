@@ -18,7 +18,7 @@
 /**
  * 	\file	   htdocs/equipement/class/actions_equipement.class.php
  * 	\ingroup	equipement
- * 	\brief	  Fichier de la classe des actions/hooks des équipements
+ * 	\brief	  Fichier de la classe des actions/hooks des Ã©quipements
  */
  
 class ActionsEquipement // extends CommonObject 
@@ -34,7 +34,7 @@ class ActionsEquipement // extends CommonObject
 	{ 
 		global $conf, $langs;
 	
-		// pour les anciennes version ou si on a activé l'ancienne recherche
+		// pour les anciennes version ou si on a activÃ© l'ancienne recherche
 		if (DOL_VERSION < "3.9.1" || $conf->global->MAIN_USE_OLD_SEARCH_FORM == 1)
 		{
 			$langs->load("equipement@equipement");

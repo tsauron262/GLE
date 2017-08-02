@@ -124,7 +124,7 @@ $head = equipement_product_prepare_head($object, $user);
 //dol_fiche_head($head, 'task_task', $langs->trans("Task"),0,'projecttask');
 dol_fiche_head($head, 'societe', $langs->trans("AssociatedEquipement"), 0, "equipement@equipement");
 
-// bouton de création d'un équipement à partir du produit
+// bouton de crÃ©ation d'un Ã©quipement Ã  partir du produit
 
 $sql = "SELECT";
 $sql.= " e.ref, e.rowid, e.fk_statut, e.fk_product, p.ref as refproduit, e.fk_entrepot, ent.label,";
@@ -215,7 +215,7 @@ if ($result) {
 	print '&nbsp;/&nbsp;<input class="flat" type="text" size="1" maxlength="4" name="yeardateo" value="'.$syear.'">';
 	print '</td>';
 	
-	// liste des état des équipements
+	// liste des Ã©tat des Ã©quipements
 	print '<td class="liste_titre" align="right">';
 	print select_equipement_etat($search_etatequipement,'search_etatequipement',1,1);
 	print '</td>';

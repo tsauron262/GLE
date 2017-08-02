@@ -78,7 +78,7 @@ if ($action  == 'addequipement') {
 		$line =	$object->lines[$nbligneorder];
 		// only recept on serial product
 		if ($line->fk_product > 0) {
-			// on regarde si il y a des équipement à créer (qty > O)
+			// on regarde si il y a des Ã©quipement Ã  crÃ©er (qty > O)
 			if (GETPOST('quantity-'.$line->id)) {
 				$objectequipement->fk_product		= $line->fk_product;
 				$objectequipement->fk_soc_fourn 	= $object->thirdparty->id;
@@ -101,15 +101,15 @@ if ($action  == 'addequipement') {
 								$_POST["dateo-".$line->id."year"]
 				);
 				$objectequipement->dateo			= $dateo;
-				// selon le mode de sérialisation de l'équipement
+				// selon le mode de sÃ©rialisation de l'Ã©quipement
 				switch(GETPOST('SerialMethod-'.$line->id,'int')) {
-					case 1 : // en mode génération auto, on crée des numéros série interne
+					case 1 : // en mode gÃ©nÃ©ration auto, on crÃ©e des numÃ©ros sÃ©rie interne
 						$objectequipement->quantity 		= 1;
 						$objectequipement->nbAddEquipement	= GETPOST('quantity-'.$line->id, 'int');;
 						break;
-					case 2 : // en mode génération à partir de la liste on détermine en fonction de la saisie
+					case 2 : // en mode gÃ©nÃ©ration Ã  partir de la liste on dÃ©termine en fonction de la saisie
 						$objectequipement->quantity 		= 1;
-						$objectequipement->nbAddEquipement	= 0; // sera calculé en fonction 
+						$objectequipement->nbAddEquipement	= 0; // sera calculÃ© en fonction 
 						break;
 					case 3 : // en mode gestion de lot
 						$objectequipement->quantity 		= GETPOST('quantity-'.$line->id, 'int');
@@ -170,7 +170,7 @@ print "</table>";
 
 dol_fiche_end();
 
-// on récupère les produit associé à la commande fournisseur
+// on rÃ©cupÃ¨re les produit associÃ© Ã  la commande fournisseur
 print '<form name="equipement" action="'.$_SERVER['PHP_SELF'].'" method="POST">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<input type="hidden" name="action" value="addequipement">';

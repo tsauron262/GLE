@@ -687,8 +687,10 @@ if ($action == 'create') {
 			print "</td></tr>";
 	
 			// Etat de l'équipement
-			print '<tr><td>'.$langs->trans("EtatEquip").'</td>';
-			print select_equipement_etat("", 'fk_etatequipement', 1, 1);
+			print '<tr>'
+                        . '    <td>'.$langs->trans("EtatEquip").'</td>';
+                        print "<td>";
+                        print select_equipement_etat("", 'fk_etatequipement', 1, 1);
 			print "</td></tr>";
 
 			// Public note

@@ -256,7 +256,9 @@ class Equipement extends CommonObject
 				} else {
 					dol_print_error($this->db);
 					$error++;
+                                        return -1;
 				}
+                                
 
 				if (! $error)
 					$this->db->commit();
@@ -278,6 +280,8 @@ class Equipement extends CommonObject
 					$this->add_object_linked('factory', $this->fk_factory);
 				}
 			}
+                        else
+                            return -1;
 		}
 
 		// si on est allé jusqu'à la fin des création

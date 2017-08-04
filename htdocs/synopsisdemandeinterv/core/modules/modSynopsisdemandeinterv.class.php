@@ -83,7 +83,7 @@ class modsynopsisdemandeinterv  extends DolibarrModules
     $this->config_page_url = array("synopsisdemandeinterv.php");
 
     // Dependances
-    $this->depends = array("modSociete","modCommercial","modSynopsisFicheinter");
+    $this->depends = array("modSociete","modSynopsisFicheinter");
     $this->requiredby = array();
 
     // Constantes

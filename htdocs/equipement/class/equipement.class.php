@@ -140,9 +140,10 @@ class Equipement extends CommonObject
 			dol_syslog(get_class($this)."::Addmethod2 nb2create =".$nbCreateSerial);
 		}
 
-		$i=0;
+		$i=-1;
 		// boucle sur les numéros de série pour créer autant d'équipement
-		while ($this->nbAddEquipement > $i) {
+		while ($this->nbAddEquipement > $i+1) {
+                        $i++;
 			// récup de la ref suivante
 			$this->date = dol_now();
 
@@ -179,9 +180,8 @@ class Equipement extends CommonObject
                   
                             if($this->db->num_rows($result)>0){
                                 $msg = '<div class="error"> Erreur Référence dupliqué : '.$numpr. '</div>';
-                                $msg = "ok";
-                               dol_htmloutput_mesg($msg); 
-                                return -1;
+                                $this->error .= $msg;
+                                continue;
                             }
                             
                                 
@@ -241,7 +241,6 @@ class Equipement extends CommonObject
 				$result=$this->db->query($sql);
 
 				if ($result) {
-					$i++;
 					$this->id=$this->db->last_insert_id(MAIN_DB_PREFIX."equipement");
 
 					// si on veut faire un mouvement correspondant à la création
@@ -299,7 +298,7 @@ class Equipement extends CommonObject
 		}
 
 		// si on est allé jusqu'à la fin des création
-		if ($this->nbAddEquipement == $i) // on se positionne sur le dernier crée en modif
+		if ($this->nbAddEquipement == $i && $this->error == "") // on se positionne sur le dernier crée en modif
 			return $this->id;
 		else
 			return -1; // sinon on revient à la case départ

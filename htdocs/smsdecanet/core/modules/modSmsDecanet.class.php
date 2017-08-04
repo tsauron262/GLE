@@ -45,7 +45,7 @@ class modSmsDecanet extends DolibarrModules
 		$this->family = 'technic';
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		$this->description = "Envoi de SMS à vos clients";
-		$this->version = '4.1.1';
+		$this->version = '5.0.4';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->special = 1;
 		$this->picto='email';

@@ -48,6 +48,9 @@ if ($_POST["action"] == 'majAccess')
 	dolibarr_set_const($db, "DECANETSMS_SSL", $_POST["sslSMS"],'entier',0,'',$conf->entity);
 	dolibarr_set_const($db, "DECANETSMS_FROM", $_POST['fromSMS'],'chaine',0,'',$conf->entity);
 }
+if(isset($_GET['transactional'])) {
+	dolibarr_set_const($db, "DECANETSMS_TRANSACTIONAL", intval($_GET['transactional']),'entier',0,'',$conf->entity);
+}
 
 /*
  * Affiche page
@@ -78,8 +81,14 @@ if(isset($result->details)) {
 	echo '<strong>'.$langs->trans('CREDITSMS').'</strong>'.$result->credit.' '.$langs->trans('SMS').' - (<a href="https://www.decanet.fr/prix-sms-premium/france,FR" target="_blank"><strong>'.$langs->trans('RechargeSms').'</strong></a>)';
 }
 echo '</td>';
-echo '</td>';
+echo '</tr>';
+if(isset($conf->global->DECANETSMS_TRANSACTIONAL) && intval($conf->global->DECANETSMS_TRANSACTIONAL)==1) {
+	echo "<tr ".$bc[$var].">";
+	echo '<td>'.$langs->trans("SmsTransactional").' (<a href="?transactional=0">'.$langs->trans("disable").'</a>)</td>';
+	echo '</tr>';
+}
 echo '</table><br><br>';
+
 
 
 echo '<table class="noborder" width="100%">';

@@ -26,3 +26,5 @@ SMSMultiSend=Envoi multiple
 SMSDecanetSingleSend=Tester envoi simple
 SMSDecanetMultiSend=Tester envoi multiple
 HistorySMSAccount=50 derniers SMS envoyés
+SmsTransactional=Vos envois vers la France passent par le canal des SMS transactionnels. Il est strictement interdit d'envoyer des messages à caractère marketing/publicitaire depuis ce compte.
+disable=désactiver

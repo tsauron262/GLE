@@ -99,7 +99,8 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 						$fk_entrepot,
 						$fk_entrepotmove,
 						$fk_user_author,
-						$qty
+						$qty,
+                                                $price
 		);
 
 		// Seulement si un seul produit a été ajouté
@@ -117,7 +118,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 		
 				if ($num > 0) {
 					// si la produit est sérialisé on ouvre la ligne en modification pour le choisir
-					Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$id.'&amp;action=editline&amp;line_id='.$result);
+					Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$id.'&action=editline&line_id='.$result);
 					exit;
 				}
 			}

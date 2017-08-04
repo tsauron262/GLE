@@ -79,7 +79,7 @@ class modSynopsisFicheinter extends DolibarrModules {
         $this->config_page_url = array("Synopsis_fichinter.php");
 
         // Dependances
-        $this->depends = array("modSociete", "modCommercial");
+        $this->depends = array("modSociete");
         $this->requiredby = array("modSynopsisdemandeinterv");
 
         // Constantes

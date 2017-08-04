@@ -630,7 +630,7 @@ if ($action == 'create') {
 				$entrepotStatic=new Entrepot($db);
 				$entrepotStatic->fetch($fk_entrepot);
 				print $entrepotStatic->getNomUrl(1)." - ".$entrepotStatic->lieu." (".$entrepotStatic->zip.")" ;
-				print '<input type=hidden name="fk_entrepot" value="'.$fk_entrepot.'">';
+				print '<input type=hidden name="fk_entrepot" value=" '.$fk_entrepot.'">';
 			} else {
 				// si on vient d'un of, on ne crée pas de mvt de stock
 				if (substr($numversion, 0, 2) == "OF") {

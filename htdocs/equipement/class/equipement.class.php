@@ -174,7 +174,21 @@ class Equipement extends CommonObject
 			// si il a un soucis avec la ref, on ne cré pas l'équipement
 			if ($numpr)
 			{
-				$this->db->begin();
+                            $sql2 = "SELECT * FROM ".MAIN_DB_PREFIX."equipement WHERE ref='".$numpr."' AND fk_soc_fourn='".$this->fk_soc_fourn."'";
+                            $result = $this->db->query($sql2);
+                  
+                            if($this->db->num_rows($result)>0){
+                                $msg = '<div class="error"> Erreur Référence dupliqué : '.$numpr. '</div>';
+                                $msg = "ok";
+                               dol_htmloutput_mesg($msg); 
+                                return -1;
+                            }
+                            
+                                
+                                
+                            
+                            
+                            $this->db->begin();
 
 				$sql = "INSERT INTO ".MAIN_DB_PREFIX."equipement (";
 				$sql.= "fk_product";
@@ -202,7 +216,7 @@ class Equipement extends CommonObject
 				$sql.= ") ";
 				$sql.= " VALUES ( ".$this->fk_product;
 				$sql.= ", ".($this->fk_soc_client?$this->db->escape($this->fk_soc_client):"null");
-				$sql.= ", ".($this->fk_soc_fourn?$this->db->escape($this->fk_soc_fourn):"null");
+                                $sql.= ", ".($this->fk_soc_fourn?$this->db->escape($this->fk_soc_fourn):"null");
 				$sql.= ", ".($this->fk_facture_fourn?$this->db->escape($this->fk_facture_fourn):"null");
 				$sql.= ", '".$this->db->idate($now)."'";
 				$sql.= ", ".($this->datee?"'".$this->db->idate($this->datee)."'":"null");

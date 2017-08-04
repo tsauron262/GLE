@@ -99,7 +99,8 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 						$fk_entrepot,
 						$fk_entrepotmove,
 						$fk_user_author,
-						$qty
+						$qty,
+                                                $price
 		);
 
 		// Seulement si un seul produit a été ajouté

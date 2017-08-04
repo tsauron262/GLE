@@ -1296,7 +1296,7 @@ class Equipement extends CommonObject
 		$line->desc						= $desc;
 		$line->datecons					= $datecons;
 		$line->fk_product				= $fk_product;
-		$line->price					= $product->subprice;
+		$line->price					= $product->price;
 		$line->fk_entrepot				= $fk_entrepot;
 		$line->fk_entrepotmove			= $fk_entrepotmove;
 		// l'entrepot de l'équipement devient l'entrepot du consommé

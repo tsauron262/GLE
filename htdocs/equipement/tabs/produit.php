@@ -135,7 +135,7 @@ $arraySerialMethod=array(
 				'2'=>$langs->trans("ExternalSerial"), 
 				'3'=>$langs->trans("SeriesMode")
 );
-print $form->selectarray("SerialMethod", $arraySerialMethod, $conf->global->EQUIPEMENT_DEFAULTSERIALMODE);
+print $form->selectarray("serialMethod", $arraySerialMethod, $conf->global->EQUIPEMENT_DEFAULTSERIALMODE);
 print '</td><td>';
 print '<input type="hidden" name="action" value="create">';
 print '<input type="submit" class="button" value="'.$langs->trans("CreateDraftEquipement").'">';

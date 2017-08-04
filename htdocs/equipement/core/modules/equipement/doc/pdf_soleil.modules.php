@@ -131,7 +131,8 @@ class pdf_soleil extends ModeleEquipement
 					$this->error=$outputlangs->trans("ErrorCanNotCreateDir", $dir);
 					return 0;
 				}
-			} else {
+			} 
+                        if ( file_exists($dir)) {
 				$pdf=pdf_getInstance($this->format);
 				
 				if (class_exists('TCPDF')) {

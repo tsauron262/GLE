@@ -140,9 +140,10 @@ class Equipement extends CommonObject
 			dol_syslog(get_class($this)."::Addmethod2 nb2create =".$nbCreateSerial);
 		}
 
-		$i=0;
+		$i=-1;
 		// boucle sur les numéros de série pour créer autant d'équipement
-		while ($this->nbAddEquipement > $i) {
+		while ($this->nbAddEquipement > $i+1) {
+                        $i++;
 			// récup de la ref suivante
 			$this->date = dol_now();
 
@@ -174,7 +175,20 @@ class Equipement extends CommonObject
 			// si il a un soucis avec la ref, on ne cré pas l'équipement
 			if ($numpr)
 			{
-				$this->db->begin();
+                            $sql2 = "SELECT * FROM ".MAIN_DB_PREFIX."equipement WHERE ref='".$numpr."' AND fk_soc_fourn='".$this->fk_soc_fourn."'";
+                            $result = $this->db->query($sql2);
+                  
+                            if($this->db->num_rows($result)>0){
+                                $msg = '<div class="error"> Erreur Référence dupliqué : '.$numpr. '</div>';
+                                $this->error .= $msg;
+                                continue;
+                            }
+                            
+                                
+                                
+                            
+                            
+                            $this->db->begin();
 
 				$sql = "INSERT INTO ".MAIN_DB_PREFIX."equipement (";
 				$sql.= "fk_product";
@@ -202,7 +216,7 @@ class Equipement extends CommonObject
 				$sql.= ") ";
 				$sql.= " VALUES ( ".$this->fk_product;
 				$sql.= ", ".($this->fk_soc_client?$this->db->escape($this->fk_soc_client):"null");
-				$sql.= ", ".($this->fk_soc_fourn?$this->db->escape($this->fk_soc_fourn):"null");
+                                $sql.= ", ".($this->fk_soc_fourn?$this->db->escape($this->fk_soc_fourn):"null");
 				$sql.= ", ".($this->fk_facture_fourn?$this->db->escape($this->fk_facture_fourn):"null");
 				$sql.= ", '".$this->db->idate($now)."'";
 				$sql.= ", ".($this->datee?"'".$this->db->idate($this->datee)."'":"null");
@@ -227,7 +241,6 @@ class Equipement extends CommonObject
 				$result=$this->db->query($sql);
 
 				if ($result) {
-					$i++;
 					$this->id=$this->db->last_insert_id(MAIN_DB_PREFIX."equipement");
 
 					// si on veut faire un mouvement correspondant à la création
@@ -256,7 +269,9 @@ class Equipement extends CommonObject
 				} else {
 					dol_print_error($this->db);
 					$error++;
+                                        return -1;
 				}
+                                
 
 				if (! $error)
 					$this->db->commit();
@@ -278,10 +293,12 @@ class Equipement extends CommonObject
 					$this->add_object_linked('factory', $this->fk_factory);
 				}
 			}
+                        else
+                            return -1;
 		}
 
 		// si on est allé jusqu'à la fin des création
-		if ($this->nbAddEquipement == $i) // on se positionne sur le dernier crée en modif
+		if ($this->nbAddEquipement == $i && $this->error == "") // on se positionne sur le dernier crée en modif
 			return $this->id;
 		else
 			return -1; // sinon on revient à la case départ
@@ -1279,7 +1296,7 @@ class Equipement extends CommonObject
 		$line->desc						= $desc;
 		$line->datecons					= $datecons;
 		$line->fk_product				= $fk_product;
-		$line->price					= $product->subprice;
+		$line->price					= $product->price;
 		$line->fk_entrepot				= $fk_entrepot;
 		$line->fk_entrepotmove			= $fk_entrepotmove;
 		// l'entrepot de l'équipement devient l'entrepot du consommé

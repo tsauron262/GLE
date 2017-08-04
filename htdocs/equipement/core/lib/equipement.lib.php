@@ -270,7 +270,7 @@ function equipement_event_prepare_head($object)
 // */
 function select_entrepot($selected='', $htmlname='entrepotid', $showempty=0, $hidetext=0, $size=0, $addchkbox=1)
 {
-	global $db, $langs; //, $user, $conf;
+	global $db, $langs, $conf; //, $user, $conf;
 
 	if (empty($hidetext)) print $langs->trans("EntrepotStock").': ';
 

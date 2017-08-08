@@ -298,7 +298,7 @@ class Equipement extends CommonObject
 		}
 
 		// si on est allé jusqu'à la fin des création
-		if ($this->nbAddEquipement == $i && $this->error == "") // on se positionne sur le dernier crée en modif
+		if ($this->nbAddEquipement == $i+1 && $this->error == "") // on se positionne sur le dernier crée en modif
 			return $this->id;
 		else
 			return -1; // sinon on revient à la case départ

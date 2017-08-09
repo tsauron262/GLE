@@ -57,7 +57,10 @@ function getTabTypeObject($typeFiltre = null) {
 //                "urls" => array("/group/card.php")),
         'synopsistasks' => array('urls' => array("synopsisprojet/tasks/task.php"),
             'path' => '/synopsisprojet/class/task.class.php',
-            'obj' => 'Task')
+            'obj' => 'Task'),
+        'equipement' => array('urls' => array("equipement/card.php"),
+            'path' => '/equipement/class/equipement.class.php',
+            'obj' => 'Equipement')
     );
 
     $tabTypeObject2 = array();

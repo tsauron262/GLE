@@ -171,7 +171,6 @@ if ($socid > 0) {
             $var = true;
             $num = $db->num_rows($resql);
             $i = 0;
-            //if ($num > 0) {
                 print '<table class="noborder" width="100%">';
 
                 print '<tr class="liste_titre">';
@@ -181,7 +180,6 @@ if ($socid > 0) {
                 print '</tr>';
             //}
 
-//            while ($i < $num && $i < $MAXLIST) {
                 $objp = $db->fetch_object($resql);
                 $var = !$var;
                 print "<tr " . $bc[$var] . ">";

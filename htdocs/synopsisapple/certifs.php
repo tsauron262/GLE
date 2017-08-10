@@ -4,8 +4,8 @@ global $tabCert;
     
 $tabCert = array(
     897316 => array(
-        0 => array('certUtSi.pem', 'freepartyUt'),
-        1 => array('certProdFinal.pem', 'freepartyProd')),
+        0 => array('test.pem', ''),
+        1 => array('prod.pem', '')),
     
 //    128630 => array(
 //        0 => array('clermont/certifTestProdClermont.pem', 'passPhraseTest'),

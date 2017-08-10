@@ -26,3 +26,5 @@ SMSMultiSend=Multi recipient sending
 SMSDecanetSingleSend=Test one recipient sending
 SMSDecanetMultiSend=Test multi recipient sending
 HistorySMSAccount=50 last sent SMS
+SmsTransactional=Your messages to the France will be sent throught the transactional chan. It's forbidden to send marketing messages with this account.
+disable=disable

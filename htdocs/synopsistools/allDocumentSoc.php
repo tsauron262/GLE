@@ -91,7 +91,7 @@ if (GETPOST('sendit') && !empty($conf->global->MAIN_UPLOAD_DOC)) {
 // Delete file
 if ($action == 'confirm_deletefile' && $confirm == 'yes') {
     if ($object->id) {
-        $file = $upload_dir . "/" . GETPOST('urlfile'); // Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
+        $file = $upload_dir . "/" . str_replace($object->id."/", "", GETPOST('urlfile')); // Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
 
         $ret = dol_delete_file($file, 0, 0, 0, $object);
         if ($ret)

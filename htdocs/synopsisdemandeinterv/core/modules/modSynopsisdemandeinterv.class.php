@@ -179,6 +179,7 @@ class modsynopsisdemandeinterv  extends DolibarrModules
         //$this->dirs[0] = $conf->facture->dir_output;
 
         $sql = array(
+            "ALTER TABLE `".MAIN_DB_PREFIX."document_model` CHANGE `type` `type` VARCHAR(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;",
             "DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = '".$this->const[0][2]."'",
             "INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type) VALUES('".$this->const[0][2]."','synopsisdemandeinterv')",
             );

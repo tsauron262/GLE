@@ -2238,7 +2238,7 @@ class User extends CommonObject
                         else
                             $info ['mailQuota'] = "2147483648";
                         if($info ['mailQuota'] < 100)
-                            $info ['mailQuota'] = $info ['mailQuota'] * 1073741824;
+                            $info ['mailQuota'] = round($info ['mailQuota'] * 1073741824);
                     }
                 }
                 if($this->admin){
@@ -2249,6 +2249,8 @@ class User extends CommonObject
 
                 if(isset($this->array_options['options_alias'])){
 //                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+                    $this->array_options['options_alias'] = str_replace(array("\r\n","\r","\n","\\r","\\n","\\r\\n"), ",", $this->array_options['options_alias']);
+                     $this->array_options['options_alias']= nl2br($this->array_options['options_alias']);
                     $arrAlias = explode(",", $this->array_options['options_alias']);
                     $info['shadowAddress'] = $arrAlias;
                 }

@@ -1590,3 +1590,8 @@ mysql -u bimpadmin -p --host 172.31.100.95      MmmAdBi33
 capsim new
 ssh gle@80.11.84.106 -p 6322
 ascwse13
+
+
+ajout de tous 105 ds 107
+INSERT INTO llx_synopsischrono_key SELECT  null as id, `nom`, `description`, 
+ 107 as model_refid, `type_valeur`, `type_subvaleur`, `extraCss`, `inDetList`, `rang`  FROM `llx_synopsischrono_key` WHERE `model_refid` = '105'

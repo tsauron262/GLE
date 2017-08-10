@@ -171,17 +171,17 @@ if ($socid > 0) {
             $var = true;
             $num = $db->num_rows($resql);
             $i = 0;
-            if ($num > 0) {
+            //if ($num > 0) {
                 print '<table class="noborder" width="100%">';
 
                 print '<tr class="liste_titre">';
-                print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("LastCustomersBills", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("AllBills") . ' <span class="badge">' . $num . '</span></a></td>';
+                print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernières factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
                 print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
                 print '</tr></table></td>';
                 print '</tr>';
-            }
+            //}
 
-            while ($i < $num && $i < $MAXLIST) {
+//            while ($i < $num && $i < $MAXLIST) {
                 $objp = $db->fetch_object($resql);
                 $var = !$var;
                 print "<tr " . $bc[$var] . ">";
@@ -212,7 +212,7 @@ if ($socid > 0) {
                 print '<td align="right" class="nowrap" style="min-width: 60px">' . ($facturestatic->LibStatut($objp->paye, $objp->statut, 5, $objp->am)) . '</td>';
                 print "</tr>\n";
                 $i++;
-            }
+            //}
             $db->free($resql);
 
             if ($num > 0)

@@ -147,7 +147,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 	$fk_entrepot 		= GETPOST('fk_entrepot');
 	$fk_equipementcons  = GETPOST('fk_equipementcons');
 
-	$total_ht			= GETPOST('total_ht');
+	$price			= GETPOST('price');
 
 	$objectline = new Equipementconsumption($db);
 	if ($objectline->fetch(GETPOST('line_id', 'int')) > 0) {
@@ -156,7 +156,7 @@ if ($action == "addline" && $user->rights->equipement->creer) {
 		$objectline->fk_entrepotmove	= $fk_entrepotmove;
 		$objectline->datecons			= $datecons;
 		$objectline->desc				= $desc;
-		$objectline->total_ht			= $total_ht;
+		$objectline->price			= $price;
 	
 		$result = $objectline->update();
 		if ($result < 0) {
@@ -431,7 +431,7 @@ if ($id > 0 || ! empty($ref)) {
 				print '</td >';
 				print '<td align="left" >'.$langs->trans("Price").'</td>';
 				print '<td >';
-				print '<input type=text name=price value="'.$objp->price.'">';
+				print '<input type="text" name="price" value="'.$objp->price.'">';
 
 				print '</td></tr>';
 

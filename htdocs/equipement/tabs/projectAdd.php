@@ -419,6 +419,7 @@ if ($result) {
 	else
 		print $langs->trans("NoEquipementLink");
 	print "</form>\n";
+	//dol_print_error($db);
 	$db->free($result);
 }
 else

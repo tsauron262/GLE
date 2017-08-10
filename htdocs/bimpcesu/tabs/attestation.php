@@ -195,8 +195,12 @@ echo '<br />';
 echo '<br />';
 
 // Orga intervenant
+//print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3">';
+//print '<a href="/htdocs/societe/soc.php?socid='.$conf->global->MAIN_INFO_SOCIETE_NOM.'" >$conf->global->MAIN_INFO_SOCIETE_NOM</a>';
+//print "</td></tr>";
+// Orga intervenant
 print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3">';
-print $conf->global->MAIN_INFO_SOCIETE_NOM;
+print_r ($conf->global->MAIN_INFO_SOCIETE_NOM);
 print "</td></tr>";
 
 // Adresse de l'intervenant
@@ -214,9 +218,26 @@ print $date01;
 print "</td></tr>";
 
 // Nom du client
-print '<tr><td class="titelfield">' . $langs->trans("Client : ") . '</td><td colspan="3">';
-print $object->nom;
-print "</td></tr>";
+if ($socid > 0)
+{
+    $objsoc = new Societe($db);
+    $objsoc->fetch($socid);
+}
+$form = new Form($db);
+if (empty($conf->global->SOCIETE_DISABLE_CONTACTS)) {
+    if ($socid > 0) {
+        print '<tr><td><label for="socid">' . $langs->trans("Client : ") . '</label></td>';
+        print '<td colspan="3" class="maxwidthonsmartphone">';
+        print $objsoc->getNomUrl(1);
+        print '</td>';
+        print '<input type="hidden" name="socid" id="socid" value="' . $objsoc->id . '">';
+        print '</td></tr>';
+    } else {
+        print '<tr><td><label for="socid">' . $langs->trans("Client : ") . '</label></td><td colspan="3" class="maxwidthonsmartphone">';
+        print $form->select_company($socid, 'socid', '', 1);
+        print '</td></tr>';
+    }
+}
 
 // Adresse du Client
 print '<tr><td class="titelfield">' . $langs->trans("Adresse du client : ") . '</td><td colspan="3">';
@@ -228,12 +249,57 @@ print_r($object->town);
 print "</td></tr>";
 
 
+
+// Choisir un client
+//$object = new User($db);
+//$form = new Form($db);
+//if (! empty($conf->ldap->enabled)) require_once DOL_DOCUMENT_ROOT.'/core/class/ldap.class.php';
+//print '<tr><td>'.$langs->trans("Client2").'</td>';
+//print '<td>';
+//print $form->select_dolusers($object->fk_user, 'fk_user', 1, array($object->id), 0, '', 0, $conf->global->MAIN_INFO_SOCIETE_NOM, 'maxwidth300');
+//print '</td>';
+//    print "</tr>\n";
+//
+//	if ($conf->salaries->enabled && ! empty($user->rights->salaries->read))
+//	{
+//		$langs->load("salaries");
+//
+//	    // THM
+//	    print '<tr><td>';
+//		$text=$langs->trans("THM");
+//		print $form->textwithpicto($text, $langs->trans("THMDescription"), 1, 'help', 'classthm');
+//	    print '</td>';
+//	    print '<td>';
+//	    print '<input size="8" type="text" name="thm" value="'.GETPOST('thm').'">';
+//	    print '</td>';
+//	    print "</tr>\n";
+//
+//	    // TJM
+//	    print '<tr><td>';
+//		$text=$langs->trans("TJM");
+//		print $form->textwithpicto($text, $langs->trans("TJMDescription"), 1, 'help', 'classtjm');
+//	    print '</td>';
+//	    print '<td>';
+//	    print '<input size="8" type="text" name="tjm" value="'.GETPOST('tjm').'">';
+//	    print '</td>';
+//	    print "</tr>\n";
+//
+//	    // Salary
+//	    print '<tr><td>'.$langs->trans("Salary").'</td>';
+//	    print '<td>';
+//	    print '<input size="8" type="text" name="salary" value="'.GETPOST('salary').'">';
+//	    print '</td>';
+//	    print "</tr>\n";
+//	}
+    
+    
 //<--- -------------- TABLEAU END --------------- --->
 
 
 
-
-
+//echo '<pre>';
+////print_r ($objsoc->id);
+//print_r ($conf);
 
 
 

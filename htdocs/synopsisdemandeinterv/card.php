@@ -51,15 +51,15 @@ require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
-require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsisdemandeinterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/core/lib/synopsisdemandeinterv.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 if (isset($conf->projet->enabled) && $conf->projet->enabled) {
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 }
-if (defined("SYNOPSISDEMANDEINTERV_ADDON") && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/mod_" . SYNOPSISDEMANDEINTERV_ADDON . ".php")) {
-    require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/mod_" . SYNOPSISDEMANDEINTERV_ADDON . ".php");
+if (defined("SYNOPSISDEMANDEINTERV_ADDON") && is_readable(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/mod_" . SYNOPSISDEMANDEINTERV_ADDON . ".php")) {
+    require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/mod_" . SYNOPSISDEMANDEINTERV_ADDON . ".php");
 }
 
 $langs->load("companies");

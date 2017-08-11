@@ -151,7 +151,7 @@ function printHead($type, $id, $js = '') {
         case "synopsisdemandeinterv": {
 
                 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
-                require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsisdemandeinterv.lib.php");
+                require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/core/lib/synopsisdemandeinterv.lib.php");
                 $obj = new Synopsisdemandeinterv($db);
                 $obj->fetch($id);
                 $head = synopsisdemandeinterv_prepare_head($obj);

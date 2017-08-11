@@ -163,7 +163,7 @@ function synopsisdemandeinterv_create($db, $object, $modele='', $outputlangs='')
     global $conf,$langs;
     $langs->load("synopsisdemandeinterv");
 
-    $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsisdemandeinterv/";
+    $dir = DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/";
 
     // Positionne modele sur le nom du modele de facture e utiliser
     if (! strlen($modele))

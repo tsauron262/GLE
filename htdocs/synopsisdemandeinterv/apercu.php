@@ -43,7 +43,7 @@
 */
 
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/core/lib/synopsisdemandeinterv.lib.php");
 
 if (!$user->rights->synopsisdemandeinterv->lire)
     accessforbidden();

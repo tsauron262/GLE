@@ -39,7 +39,7 @@
 
 require('./pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/core/lib/synopsisdemandeinterv.lib.php");
 
 $langs->load('companies');
 

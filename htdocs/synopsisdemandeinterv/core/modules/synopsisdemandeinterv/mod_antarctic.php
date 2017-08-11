@@ -16,7 +16,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -27,7 +29,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -38,7 +41,7 @@
     \version    $Id: mod_arctic.php,v 1.10 2008/07/05 14:20:09 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
+require_once(DOL_DOCUMENT_ROOT ."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
 
 /**
     \class      mod_arctic

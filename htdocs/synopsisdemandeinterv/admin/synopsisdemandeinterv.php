@@ -21,7 +21,7 @@
         \version    $Id: synopsisdemandeinterv.php,v 1.38 2008/07/05 15:31:30 eldy Exp $
 */
 
-require("../main.inc.php");
+require("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
 
@@ -31,7 +31,7 @@ $langs->load("other");
 $langs->load("interventions");
 
 
-    $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/";
+    $dir = DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/";
 
 if (!$user->admin)
   accessforbidden();

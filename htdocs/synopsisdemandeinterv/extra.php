@@ -20,17 +20,17 @@
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/core/lib/synopsisdemandeinterv.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 if ($conf->projet->enabled)
 {
     require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 }
-if (defined($conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF) && is_readable(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/mod_".$conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF.".php"))
+if (defined($conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF) && is_readable(DOL_DOCUMENT_ROOT ."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/mod_".$conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF.".php"))
 {
-    require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/mod_".$conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF.".php");
+    require_once(DOL_DOCUMENT_ROOT ."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/mod_".$conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF.".php");
 }
 
 $langs->load("companies");

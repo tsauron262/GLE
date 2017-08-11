@@ -40,7 +40,7 @@
  \version    $Id: pdf_soleil.modules.php,v 1.46 2008/07/29 19:20:34 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php');

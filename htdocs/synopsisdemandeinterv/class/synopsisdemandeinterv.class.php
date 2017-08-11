@@ -779,7 +779,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function getNextNumRef($soc) {
         global $db, $langs, $conf;
         $langs->load("interventions");
-        $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/";
+        $dir = DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/";
         if ($conf->global->SYNOPSISDEMANDEINTERV_ADDON . "x" != "x") {
             $file = "mod_" . $conf->global->SYNOPSISDEMANDEINTERV_ADDON . ".php";
 

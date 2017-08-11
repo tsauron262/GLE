@@ -39,7 +39,7 @@
     \version    $Id: mod_atlantic.php,v 1.5 2008/07/08 23:02:17 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
+require_once(DOL_DOCUMENT_ROOT ."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
 
 /**
     \class      mod_atlantic

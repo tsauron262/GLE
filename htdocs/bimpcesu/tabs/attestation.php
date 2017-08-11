@@ -128,7 +128,7 @@ if ($socid > 0) {
             print '<table class="noborder" width="100%">';
 
             print '<tr class="liste_titre">';
-            print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernières factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
+            print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les derniÃ¨res factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
             print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
             print '</tr></table></td>';
             print '</tr>';
@@ -175,6 +175,11 @@ if ($socid > 0) {
 }
 
 //<--- -------------- FACTURE LIST END --------------- --->
+
+
+
+
+
 
 
 
@@ -249,51 +254,9 @@ print_r($object->town);
 print "</td></tr>";
 
 
-
-// Choisir un client
-//$object = new User($db);
-//$form = new Form($db);
-//if (! empty($conf->ldap->enabled)) require_once DOL_DOCUMENT_ROOT.'/core/class/ldap.class.php';
-//print '<tr><td>'.$langs->trans("Client2").'</td>';
-//print '<td>';
-//print $form->select_dolusers($object->fk_user, 'fk_user', 1, array($object->id), 0, '', 0, $conf->global->MAIN_INFO_SOCIETE_NOM, 'maxwidth300');
-//print '</td>';
-//    print "</tr>\n";
-//
-//	if ($conf->salaries->enabled && ! empty($user->rights->salaries->read))
-//	{
-//		$langs->load("salaries");
-//
-//	    // THM
-//	    print '<tr><td>';
-//		$text=$langs->trans("THM");
-//		print $form->textwithpicto($text, $langs->trans("THMDescription"), 1, 'help', 'classthm');
-//	    print '</td>';
-//	    print '<td>';
-//	    print '<input size="8" type="text" name="thm" value="'.GETPOST('thm').'">';
-//	    print '</td>';
-//	    print "</tr>\n";
-//
-//	    // TJM
-//	    print '<tr><td>';
-//		$text=$langs->trans("TJM");
-//		print $form->textwithpicto($text, $langs->trans("TJMDescription"), 1, 'help', 'classtjm');
-//	    print '</td>';
-//	    print '<td>';
-//	    print '<input size="8" type="text" name="tjm" value="'.GETPOST('tjm').'">';
-//	    print '</td>';
-//	    print "</tr>\n";
-//
-//	    // Salary
-//	    print '<tr><td>'.$langs->trans("Salary").'</td>';
-//	    print '<td>';
-//	    print '<input size="8" type="text" name="salary" value="'.GETPOST('salary').'">';
-//	    print '</td>';
-//	    print "</tr>\n";
-//	}
-    
     
 //<--- -------------- TABLEAU END --------------- --->
+
 
 
 

@@ -43,6 +43,7 @@ $langs->load("other");
 
 // Security check
 $socid = GETPOST('id', 'int');
+$action = GETPOST('action', 'alpha');
 if ($user->societe_id)
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'societe', $socid, '&societe');
@@ -253,7 +254,7 @@ print (", ");
 print_r($object->zip);
 print (", ");
 print_r($object->town);
-print "</td></tr>";
+print "</td></tr></table>";
 
 
     
@@ -297,18 +298,18 @@ print "</td></tr>";
 
 
     // Actions to build doc
-$upload_dir = $conf->propal->dir_output;
-$permissioncreate = $user->rights->propal->creer;
+$upload_dir = $conf->bimpcesu->dir_output;
+$permissioncreate = $user->rights->bimpcesu->read;
 include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
 
 /*
  * Documents generes
  */
-$filename = dol_sanitizeFileName($object->ref);
-$filedir = $conf->propal->dir_output . "/" . dol_sanitizeFileName($object->ref);
+$filename = dol_sanitizeFileName($object->id);
+$filedir = $conf->bimpcesu->dir_output . "/" . dol_sanitizeFileName($object->id);
 $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
-$genallowed = $user->rights->propal->creer;
-$delallowed = $user->rights->propal->supprimer;
+$genallowed = $user->rights->bimpcesu->read;
+$delallowed = $user->rights->bimpcesu->supprimer;
 
 $var = true;
 $formfile = new FormFile($db);

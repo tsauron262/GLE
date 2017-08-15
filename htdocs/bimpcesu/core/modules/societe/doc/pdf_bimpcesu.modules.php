@@ -180,7 +180,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
 		}
 		if (count($realpatharray) == 0) $this->posxpicture=$this->posxtva;
 
-		if ($conf->propal->dir_output)
+		if ($conf->bimpcesu->dir_output)
 		{
 			$object->fetch_thirdparty();
 			
@@ -189,14 +189,14 @@ class pdf_bimpcesu extends ModeleBimpcesu
 			// Definition of $dir and $file
 			if ($object->specimen)
 			{
-				$dir = $conf->propal->dir_output;
+				$dir = $conf->bimpcesu->dir_output;
 				$file = $dir . "/SPECIMEN.pdf";
 			}
 			else
 			{
-				$objectref = dol_sanitizeFileName($object->ref);
+				$objectref = dol_sanitizeFileName($object->id);
 				$dir = $conf->bimpcesu->dir_output . "/" . $objectref;
-				$file = $dir . "/" . $objectref . "-fin.pdf";
+				$file = $dir . "/" ."attestation.pdf";
 			}
 
 			if (! file_exists($dir))

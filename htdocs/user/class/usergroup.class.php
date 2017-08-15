@@ -37,21 +37,22 @@ class UserGroup extends CommonObject
 	public $element='usergroup';
 	public $table_element='usergroup';
 	protected $ismultientitymanaged = 1;	// 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
+    public $picto='group';
+	public $entity;		// Entity of group
 
-	var $entity;		// Entity of group
 	/**
 	 * @deprecated
 	 * @see name
 	 */
-	var $nom;			// Name of group
-	var $globalgroup;	// Global group
-	var $datec;			// Creation date of group
-	var $datem;			// Modification date of group
-	var $members=array();	// Array of users
+	public $nom;			// Name of group
+	public $globalgroup;	// Global group
+	public $datec;			// Creation date of group
+	public $datem;			// Modification date of group
+	public $members=array();	// Array of users
 
 	private $_tab_loaded=array();		// Array of cache of already loaded permissions
 
-	var $oldcopy;		// To contains a clone of this when we need to save old properties of object
+	public $oldcopy;		// To contains a clone of this when we need to save old properties of object
 
 
 	/**
@@ -68,7 +69,7 @@ class UserGroup extends CommonObject
 
 
 	/**
-	 *	Charge un objet group avec toutes ces caracteristiques (excpet ->members array)
+	 *	Charge un objet group avec toutes ces caracteristiques (except ->members array)
 	 *
 	 *	@param      int		$id			id du groupe a charger
 	 *	@param      string	$groupname	name du groupe a charger
@@ -137,7 +138,7 @@ class UserGroup extends CommonObject
 	 *	@param		int		$userid 	User id to search
 	 * 	@return		array     			Array of groups objects
 	 */
-	function listGroupsForUser($userid, $mode = 1)
+	function listGroupsForUser($userid)
 	{
 		global $conf, $user;
 
@@ -167,10 +168,7 @@ class UserGroup extends CommonObject
 				if (! array_key_exists($obj->rowid, $ret))
 				{
 					$newgroup=new UserGroup($this->db);
-                                        if($mode == 1)
-                                            $newgroup->fetch($obj->rowid);
-                                        else
-					$newgroup->id = $obj->rowid;
+					$newgroup->fetch($obj->rowid);
 					$ret[$obj->rowid]=$newgroup;
 				}
 
@@ -252,19 +250,22 @@ class UserGroup extends CommonObject
 	}
 
 	/**
-	 *    Ajoute un droit a l'utilisateur
+	 *    Add a permission to a group
 	 *
-	 *    @param      int		$rid         id du droit a ajouter
-	 *    @param      string	$allmodule   Ajouter tous les droits du module allmodule
-	 *    @param      string	$allperms    Ajouter tous les droits du module allmodule, perms allperms
-	 *    @return     int         			 > 0 if OK, < 0 if KO
+	 *    @param	int		$rid		id du droit a ajouter
+	 *    @param	string	$allmodule	Ajouter tous les droits du module allmodule
+	 *    @param	string	$allperms	Ajouter tous les droits du module allmodule, perms allperms
+	 *    @param	int		$entity		Entity to use
+	 *    @return	int					> 0 if OK, < 0 if KO
 	 */
-	function addrights($rid,$allmodule='',$allperms='')
+	function addrights($rid, $allmodule='', $allperms='', $entity=0)
 	{
-		global $conf;
+		global $conf, $user, $langs;
 
-		dol_syslog(get_class($this)."::addrights $rid, $allmodule, $allperms");
-		$err=0;
+		$entity = (! empty($entity)?$entity:$conf->entity);
+
+		dol_syslog(get_class($this)."::addrights $rid, $allmodule, $allperms, $entity");
+		$error=0;
 		$whereforadd='';
 
 		$this->db->begin();
@@ -276,7 +277,7 @@ class UserGroup extends CommonObject
 			$sql = "SELECT module, perms, subperms";
 			$sql.= " FROM ".MAIN_DB_PREFIX."rights_def";
 			$sql.= " WHERE id = '".$this->db->escape($rid)."'";
-			$sql.= " AND entity = ".$conf->entity;
+			$sql.= " AND entity = ".$entity;
 
 			$result=$this->db->query($sql);
 			if ($result) {
@@ -286,7 +287,7 @@ class UserGroup extends CommonObject
 				$subperms=$obj->subperms;
 			}
 			else {
-				$err++;
+				$error++;
 				dol_print_error($this->db);
 			}
 
@@ -313,7 +314,7 @@ class UserGroup extends CommonObject
 			$sql = "SELECT id";
 			$sql.= " FROM ".MAIN_DB_PREFIX."rights_def";
 			$sql.= " WHERE $whereforadd";
-			$sql.= " AND entity = ".$conf->entity;
+			$sql.= " AND entity = ".$entity;
 
 			$result=$this->db->query($sql);
 			if ($result)
@@ -325,24 +326,34 @@ class UserGroup extends CommonObject
 					$obj = $this->db->fetch_object($result);
 					$nid = $obj->id;
 
-					$sql = "DELETE FROM ".MAIN_DB_PREFIX."usergroup_rights WHERE fk_usergroup = $this->id AND fk_id=".$nid;
-					if (! $this->db->query($sql)) $err++;
-					$sql = "INSERT INTO ".MAIN_DB_PREFIX."usergroup_rights (fk_usergroup, fk_id) VALUES ($this->id, $nid)";
-					if (! $this->db->query($sql)) $err++;
+					$sql = "DELETE FROM ".MAIN_DB_PREFIX."usergroup_rights WHERE fk_usergroup = $this->id AND fk_id=".$nid." AND entity = ".$entity;
+					if (! $this->db->query($sql)) $error++;
+					$sql = "INSERT INTO ".MAIN_DB_PREFIX."usergroup_rights (entity, fk_usergroup, fk_id) VALUES (".$entity.", ".$this->id.", ".$nid.")";
+					if (! $this->db->query($sql)) $error++;
 
 					$i++;
 				}
 			}
 			else
 			{
-				$err++;
+				$error++;
 				dol_print_error($this->db);
+			}
+
+			if (! $error)
+			{
+			    $this->context = array('audit'=>$langs->trans("PermissionsAdd"));
+
+			    // Call trigger
+			    $result=$this->call_trigger('GROUP_MODIFY',$user);
+			    if ($result < 0) { $error++; }
+			    // End call triggers
 			}
 		}
 
-		if ($err) {
+		if ($error) {
 			$this->db->rollback();
-			return -$err;
+			return -$error;
 		}
 		else {
 			$this->db->commit();
@@ -353,19 +364,22 @@ class UserGroup extends CommonObject
 
 
 	/**
-	 *    Retire un droit a l'utilisateur
+	 *    Remove a permission from group
 	 *
-	 *    @param      int		$rid         id du droit a retirer
-	 *    @param      string	$allmodule   Retirer tous les droits du module allmodule
-	 *    @param      string	$allperms    Retirer tous les droits du module allmodule, perms allperms
-	 *    @return     int         			 > 0 if OK, < 0 if OK
+	 *    @param	int		$rid		id du droit a retirer
+	 *    @param	string	$allmodule	Retirer tous les droits du module allmodule
+	 *    @param	string	$allperms	Retirer tous les droits du module allmodule, perms allperms
+	 *    @param	int		$entity		Entity to use
+	 *    @return	int					> 0 if OK, < 0 if OK
 	 */
-	function delrights($rid,$allmodule='',$allperms='')
+	function delrights($rid, $allmodule='', $allperms='', $entity=0)
 	{
-		global $conf;
+		global $conf, $user, $langs;
 
-		$err=0;
+		$error=0;
 		$wherefordel='';
+
+		$entity = (! empty($entity)?$entity:$conf->entity);
 
 		$this->db->begin();
 
@@ -376,7 +390,7 @@ class UserGroup extends CommonObject
 			$sql = "SELECT module, perms, subperms";
 			$sql.= " FROM ".MAIN_DB_PREFIX."rights_def";
 			$sql.= " WHERE id = '".$this->db->escape($rid)."'";
-			$sql.= " AND entity = ".$conf->entity;
+			$sql.= " AND entity = ".$entity;
 
 			$result=$this->db->query($sql);
 			if ($result) {
@@ -386,7 +400,7 @@ class UserGroup extends CommonObject
 				$subperms=$obj->subperms;
 			}
 			else {
-				$err++;
+				$error++;
 				dol_print_error($this->db);
 			}
 
@@ -413,7 +427,7 @@ class UserGroup extends CommonObject
 			$sql = "SELECT id";
 			$sql.= " FROM ".MAIN_DB_PREFIX."rights_def";
 			$sql.= " WHERE $wherefordel";
-			$sql.= " AND entity = ".$conf->entity;
+			$sql.= " AND entity = ".$entity;
 
 			$result=$this->db->query($sql);
 			if ($result)
@@ -427,21 +441,32 @@ class UserGroup extends CommonObject
 
 					$sql = "DELETE FROM ".MAIN_DB_PREFIX."usergroup_rights";
 					$sql.= " WHERE fk_usergroup = $this->id AND fk_id=".$nid;
-					if (! $this->db->query($sql)) $err++;
+					$sql.= " AND entity = ".$entity;
+					if (! $this->db->query($sql)) $error++;
 
 					$i++;
 				}
 			}
 			else
 			{
-				$err++;
+				$error++;
 				dol_print_error($this->db);
+			}
+
+			if (! $error)
+			{
+		        $this->context = array('audit'=>$langs->trans("PermissionsDelete"));
+
+			    // Call trigger
+			    $result=$this->call_trigger('GROUP_MODIFY',$user);
+			    if ($result < 0) { $error++; }
+			    // End call triggers
 			}
 		}
 
-		if ($err) {
+		if ($error) {
 			$this->db->rollback();
-			return -$err;
+			return -$error;
 		}
 		else {
 			$this->db->commit();
@@ -480,6 +505,7 @@ class UserGroup extends CommonObject
 		$sql.= " FROM ".MAIN_DB_PREFIX."usergroup_rights as u, ".MAIN_DB_PREFIX."rights_def as r";
 		$sql.= " WHERE r.id = u.fk_id";
 		$sql.= " AND r.entity = ".$conf->entity;
+		$sql.= " AND u.entity = ".$conf->entity;
 		$sql.= " AND u.fk_usergroup = ".$this->id;
 		$sql.= " AND r.perms IS NOT NULL";
 		if ($moduletag) $sql.= " AND r.module = '".$this->db->escape($moduletag)."'";
@@ -627,22 +653,14 @@ class UserGroup extends CommonObject
 			$action='create';
 
 			// Actions on extra fields (by external module or standard code)
-            // TODO le hook fait double emploi avec le trigger !!
-			$hookmanager->initHooks(array('groupdao'));
-			$parameters=array();
-			$reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
-			if (empty($reshook))
+			if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
 			{
-				if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+				$result=$this->insertExtraFields();
+				if ($result < 0)
 				{
-					$result=$this->insertExtraFields();
-					if ($result < 0)
-					{
-						$error++;
-					}
+					$error++;
 				}
 			}
-			else if ($reshook < 0) $error++;
 
 			if (! $error && ! $notrigger)
 			{
@@ -698,22 +716,14 @@ class UserGroup extends CommonObject
 			$action='update';
 
 			// Actions on extra fields (by external module or standard code)
-            // TODO le hook fait double emploi avec le trigger !!
-			$hookmanager->initHooks(array('groupdao'));
-			$parameters=array();
-			$reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
-			if (empty($reshook))
+			if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
 			{
-				if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+				$result=$this->insertExtraFields();
+				if ($result < 0)
 				{
-					$result=$this->insertExtraFields();
-					if ($result < 0)
-					{
-						$error++;
-					}
+					$error++;
 				}
 			}
-			else if ($reshook < 0) $error++;
 
 			if (! $error && ! $notrigger)
 			{
@@ -744,6 +754,31 @@ class UserGroup extends CommonObject
 
 
 	/**
+	 *  Return label of status of user (active, inactive)
+	 *
+	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
+	 *  @return	string 			       Label of status
+	 */
+	function getLibStatut($mode=0)
+	{
+	    return $this->LibStatut(0,$mode);
+	}
+
+	/**
+	 *  Renvoi le libelle d'un statut donne
+	 *
+	 *  @param	int		$statut        	Id statut
+	 *  @param  int		$mode          	0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
+	 *  @return string 			       	Label of status
+	 */
+	function LibStatut($statut,$mode=0)
+	{
+	    global $langs;
+	    $langs->load('users');
+	    return '';
+	}
+
+	/**
 	 *	Retourne chaine DN complete dans l'annuaire LDAP pour l'objet
 	 *
 	 *	@param		array	$info		Info array loaded by _load_ldap_info
@@ -756,26 +791,9 @@ class UserGroup extends CommonObject
 	{
 		global $conf;
 		$dn='';
-                $conf->global->LDAP_KEY_GROUPS = "mail";
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS].",".$conf->global->LDAP_GROUP_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_GROUP_DN;
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS];
-                
-                
-                
-                /*mod drsi*/
-                if(!defined("LIST_DOMAINE_VALID"))
-                    dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
-                else{
-                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
-                    $domain = false;
-                    foreach($LIST_DOMAINE_VALID as $domaine)
-                        if(stripos($info['mail'], "@".$domaine) > 0)
-                                $domain = $domaine;
-                    if($domain)
-                        $dn = str_replace($LIST_DOMAINE_VALID[0], $domain, $dn);
-                }
-                /*f mod drsi*/
 		return $dn;
 	}
 
@@ -788,13 +806,14 @@ class UserGroup extends CommonObject
 	function _load_ldap_info()
 	{
 		global $conf,$langs;
+
 		$info=array();
 
 		// Object classes
 		$info["objectclass"]=explode(',',$conf->global->LDAP_GROUP_OBJECT_CLASS);
 
 		// Champs
-		if ($this->name && ! empty($conf->global->LDAP_GROUP_FIELD_FULLNAME)) $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$this->name);
+		if ($this->name && ! empty($conf->global->LDAP_GROUP_FIELD_FULLNAME)) $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = $this->name;
 		//if ($this->name && ! empty($conf->global->LDAP_GROUP_FIELD_NAME)) $info[$conf->global->LDAP_GROUP_FIELD_NAME] = $this->name;
 		if ($this->note && ! empty($conf->global->LDAP_GROUP_FIELD_DESCRIPTION)) $info[$conf->global->LDAP_GROUP_FIELD_DESCRIPTION] = $this->note;
 		if (! empty($conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS))
@@ -804,53 +823,11 @@ class UserGroup extends CommonObject
 			{
 				$muser=new User($this->db);
 				$muser->fetch($val->id);
-//                if ($conf->global->LDAP_KEY_USERS == 'cn') $ldapuserid=$muser->getFullName($langs);
-//                elseif ($conf->global->LDAP_KEY_USERS == 'sn') $ldapuserid=$muser->lastname;
-//                elseif ($conf->global->LDAP_KEY_USERS == 'uid') $ldapuserid=$muser->login;
-//                elseif ($conf->global->LDAP_KEY_USERS == 'mail') $ldapuserid=str_replace("@bimp.fr", "@synopsis-erp.com", $muser->email);
-//
-//				$valueofldapfield[] = $conf->global->LDAP_KEY_USERS.'='.$ldapuserid.','.$conf->global->LDAP_USER_DN;
-                                /*mod drsi*/
-                                $info2 = $muser->_load_ldap_info();
-                                $info2["mail"] = str_replace("FERME@", "", $info2["mail"]);
-                                if (!$conf->global->LDAP_KEY_USERS == 'mail' || !empty($info2["mail"]))
-                                $valueofldapfield[] = $muser->_load_ldap_dn($info2);
-                                /*fmod drsi*/
+				$info2 = $muser->_load_ldap_info();
+				$valueofldapfield[] = $muser->_load_ldap_dn($info2);
 			}
-                        $valueofldapfield = array_unique($valueofldapfield);
 			$info[$conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS] = (!empty($valueofldapfield)?$valueofldapfield:'');
 		}
-                
-                /*mod drsi*/
-                $info ['accountstatus'] = "active";
-                $info ['enabledservice'] = array("mail","deliver");
-                
-                if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
-                    $info['enabledservice'][] = "displayedInGlobalAddressBook";
-                
-                if(!defined("LIST_DOMAINE_VALID"))
-                    die("Constante LIST_DOMAINE_VALID non definie");
-                if(!defined("DOMAINE_GROUP_ID"))
-                    die("Constante DOMAINE_GROUP_ID non definie");
-                
-                
-                if(isset($this->array_options['options_mail'])){
-                    $info ['mail'] = $this->array_options['options_mail'];
-                }
-                
-                $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
-                if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
-                    require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
-                    $info ['mail'] = str_replace(",", "", traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
-                }
-				//$info['uid'] = $info['mail'];
-                
-                if(isset($this->array_options['options_alias'])){
-//                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
-                    $arrAlias = explode(",", $this->array_options['options_alias']);
-                    $info['shadowAddress'] = $arrAlias;
-                }
-                /*fmod drsi*/
 		return $info;
 	}
 
@@ -875,7 +852,45 @@ class UserGroup extends CommonObject
 		$this->note='This is a note';
 		$this->datec=time();
 		$this->datem=time();
-		$this->members=array($user->id);	// Members of this group is just me
+
+		// Members of this group is just me
+		$this->members=array(
+				$user->id => $user
+		);
+	}
+
+	/**
+	 *  Create a document onto disk according to template module.
+	 *
+	 * 	@param	    string		$modele			Force model to use ('' to not force)
+	 * 	@param		Translate	$outputlangs	Object langs to use for output
+	 *  @param      int			$hidedetails    Hide details of lines
+	 *  @param      int			$hidedesc       Hide description
+	 *  @param      int			$hideref        Hide ref
+	 * 	@return     int         				0 if KO, 1 if OK
+	 */
+	public function generateDocument($modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0)
+	{
+		global $conf,$user,$langs;
+
+		$langs->load("user");
+
+		// Positionne le modele sur le nom du modele a utiliser
+		if (! dol_strlen($modele))
+		{
+			if (! empty($conf->global->USERGROUP_ADDON_PDF))
+			{
+				$modele = $conf->global->USERGROUP_ADDON_PDF;
+			}
+			else
+			{
+				$modele = 'grass';
+			}
+		}
+
+		$modelpath = "core/modules/usergroup/doc/";
+
+		return $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref);
 	}
 }
 

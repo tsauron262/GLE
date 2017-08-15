@@ -1,7 +1,0 @@
-[05-Sep-2016 17:09:56 Europe/Paris] PHP Fatal error:  Uncaught Error: Call to a member function fetch_object() on boolean in /home/megajean/Bureau/WorkSpace/PROPRE/GLE/Nouveau dossier/gle-dol-maj/htdocs/core/db/mysqli.class.php:296
-Stack trace:
-#0 /home/megajean/Bureau/WorkSpace/PROPRE/GLE/Nouveau dossier/gle-dol-maj/htdocs/synopsisres/manipElementElement.php(78): DoliDBMysqli->fetch_object(false)
-#1 /home/megajean/Bureau/WorkSpace/PROPRE/GLE/Nouveau dossier/gle-dol-maj/htdocs/main.inc.php(407): getElementElement('userErr', '')
-#2 /home/megajean/Bureau/WorkSpace/PROPRE/GLE/Nouveau dossier/gle-dol-maj/htdocs/user/index.php(28): require('/home/megajean/...')
-#3 {main}
-  thrown in /home/megajean/Bureau/WorkSpace/PROPRE/GLE/Nouveau dossier/gle-dol-maj/htdocs/core/db/mysqli.class.php on line 296

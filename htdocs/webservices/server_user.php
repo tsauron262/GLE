@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2006-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2006-2016 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,9 @@
 /**
  *       \file       htdocs/webservices/server_user.php
  *       \brief      File that is entry point to call Dolibarr WebServices
- *       \version    $Id: server_user.php,v 1.7 2010/12/19 11:49:37 eldy Exp $
  */
 
-// This is to make Dolibarr working with Plesk
-set_include_path($_SERVER['DOCUMENT_ROOT'].'/htdocs');
+if (! defined("NOCSRFCHECK"))    define("NOCSRFCHECK",'1');
 
 require_once '../master.inc.php';
 require_once NUSOAP_PATH.'/nusoap.php';		// Include SOAP
@@ -227,34 +225,6 @@ $server->wsdl->addComplexType(
 	)
 );
 
-// Define other specific objects
-$server->wsdl->addComplexType(
-	'group',
-	'complexType',
-	'struct',
-	'all',
-	'',
-	array(
-	'nom' => array('name'=>'nom','type'=>'xsd:string'),
-	'id' => array('name'=>'id','type'=>'xsd:string'),
-	'datec' => array('name'=>'datec','type'=>'xsd:string'),
-	'nb' => array('name'=>'nb','type'=>'xsd:string')
-	)
-);
-
-$server->wsdl->addComplexType(
-	'GroupsArray',
-	'complexType',
-	'array',
-	'',
-	'SOAP-ENC:Array',
-	array(),
-	array(
-	array('ref'=>'SOAP-ENC:arrayType','wsdl:arrayType'=>'tns:group[]')
-	),
-	'tns:group'
-);
-
 
 
 // 5 styles: RPC/encoded, RPC/literal, Document/encoded (not WS-I compliant), Document/literal, Document/literal wrapped
@@ -446,7 +416,7 @@ function getListOfGroups($authentication)
 		$sql = "SELECT g.rowid, g.nom as name, g.entity, g.datec, COUNT(DISTINCT ugu.fk_user) as nb";
 		$sql.= " FROM ".MAIN_DB_PREFIX."usergroup as g";
 		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."usergroup_user as ugu ON ugu.fk_usergroup = g.rowid";
-		if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && ($conf->multicompany->transverse_mode || ($user->admin && ! $user->entity)))
+		if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && ($conf->global->MULTICOMPANY_TRANSVERSE_MODE || ($user->admin && ! $user->entity)))
 		{
 			$sql.= " WHERE g.entity IS NOT NULL";
 		}

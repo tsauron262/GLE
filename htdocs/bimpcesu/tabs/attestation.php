@@ -309,7 +309,7 @@ $filename = dol_sanitizeFileName($object->id);
 $filedir = $conf->bimpcesu->dir_output . "/" . dol_sanitizeFileName($object->id);
 $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
 $genallowed = $user->rights->bimpcesu->read;
-$delallowed = $user->rights->bimpcesu->supprimer;
+$delallowed = $user->rights->bimpcesu->read;
 
 $var = true;
 $formfile = new FormFile($db);

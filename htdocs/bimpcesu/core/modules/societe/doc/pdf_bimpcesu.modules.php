@@ -194,9 +194,10 @@ class pdf_bimpcesu extends ModeleBimpcesu
 			}
 			else
 			{
-				$objectref = dol_sanitizeFileName($object->id);
-				$dir = $conf->bimpcesu->dir_output . "/" . $objectref;
-				$file = $dir . "/" ."attestation.pdf";
+				$objectid = dol_sanitizeFileName($object->id);
+				$objectref = dol_sanitizeFileName($object->ref);
+				$dir = $conf->bimpcesu->dir_output . "/" . $objectid;
+				$file = $dir . "/" ."attestation_" . $objectref. ".pdf";
 			}
 
 			if (! file_exists($dir))

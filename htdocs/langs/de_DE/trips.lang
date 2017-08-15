@@ -1,7 +1,7 @@
 # Dolibarr language file - Source file is en_US - trips
 ExpenseReport=Spesenabrechnung
 ExpenseReports=Spesenabrechnungen
-Trip=Spesenabrechnung
+ShowExpenseReport=Spesenabrechnung anzeigen
 Trips=Spesenabrechnungen
 TripsAndExpenses=Reise- und Fahrtspesen
 TripsAndExpensesStatistics=Reise- und Fahrtspesen Statistik
@@ -9,24 +9,32 @@ TripCard=Reisekosten - Karte
 AddTrip=Reisekostenabrechnung erstellen
 ListOfTrips=Aufstellung Spesenabrechnungen
 ListOfFees=Liste der Spesen
+TypeFees=Gebührenarten
 ShowTrip=Spesenabrechnung anzeigen
 NewTrip=neue Spesenabrechnung
 CompanyVisited=Besuchter Partner
-Kilometers=Kilometerstand
 FeesKilometersOrAmout=Spesenbetrag bzw. Kilometergeld
 DeleteTrip=Spesenabrechnung löschen
-ConfirmDeleteTrip=Möchten Sie diese Spesenabrechnung wirklich löschen?
+ConfirmDeleteTrip=Sind Sie sicher, dass diese Spesenabrechnung löschen wollen?
 ListTripsAndExpenses=Aufstellung Spesenabrechnungen
 ListToApprove=Warten auf Bestätigung
 ExpensesArea=Spesenabrechnungen
-SearchATripAndExpense=Suche nach einer Spesenabrechnung
 ClassifyRefunded=Als 'erstattet' markieren
 ExpenseReportWaitingForApproval=Eine neue Spesenabrechnung ist zur Genehmigung vorgelegt worden
-ExpenseReportWaitingForApprovalMessage=Eine neue Spesenabrechnung wurde vorgelegt und steht zur Überprüfung an.\n- Benutzer: %s \n- Zeitraum: %s  \nKlicken Sie hier, um zu überprüfen: %s 
+ExpenseReportWaitingForApprovalMessage=Ein neuer Spesenbericht wurde vorgelegt und wartet auf die Genehmigung.\n - Benutzer: %s\n - Zeitraum: %s\nKlicken Sie hier, um diesen freizugeben: %s
+ExpenseReportWaitingForReApproval=Eine Spesenabrechnung ist zur erneuten Genehmigung vorgelegt worden
+ExpenseReportWaitingForReApprovalMessage=Eine Spesenabrechnung wurde eingereicht und wartet darauf, un wartet auf erneute Freigabe.\nDie %s, Sie verweigerte die Freigabe der Spesenabrechnung aus folgenden Grunde: %s.\nEine neue Version wurde für Ihre Freigabe vorgeschlagen und wartet.\n - Benutzer: %s\n - Zeitraum: %s\nKlicken Sie hier, um diesen hier freizugeben: %s
+ExpenseReportApproved=Eine Spesenabrechnung wurde genehmigt
+ExpenseReportApprovedMessage=Der Spesenbericht %s wurde genehmigt.\n - Benutzer: %s\n - Genehmigt von: %s\nKlicken Sie hier, um die Spesenabrechnung zu zeigen: %s
+ExpenseReportRefused=Eine Spesenabrechnung wurde abgelehnt
+ExpenseReportRefusedMessage=Der Spesenbericht %s wurde abgelehnt.\n - Benutzer: %s\n - Refused von: %s\n - Motive für die Ablehnung: %s\nKlicken Sie hier, um die Spesenabrechnung zeigen: %s
+ExpenseReportCanceled=Eine Spesenabrechnung wurde storniert
+ExpenseReportCanceledMessage=Der Spesenbericht %s wurde abgebrochen.\n - Benutzer: %s\n - Storniert von: %s\n - Motive für die Stornierung: %s\nKlicken Sie hier, um die Spesenabrechnung zu zeigen: %s
+ExpenseReportPaid=Eine Spesenabrechnung wurde ausbezahlt
+ExpenseReportPaidMessage=Der Spesenbericht %s wurde bezahlt.\n - Benutzer: %s\n - Paid von: %s\nKlicken Sie hier, um die Spesenabrechnung anzuzeigen: %s
 TripId=Spesenabrechnung ID
 AnyOtherInThisListCanValidate=Person für die Validierung zu informieren .
 TripSociete=Partner
-TripSalarie=Mitarbeiter
 TripNDF=Hinweise Spesenabrechnung 
 PDFStandardExpenseReports=Standard-Vorlage, um ein PDF-Dokument für die Spesenabrechnung zu erzeugen
 ExpenseReportLine=Spesenabrechnung Zeile
@@ -43,13 +51,8 @@ TF_HOTEL=Hotel
 TF_TAXI=Taxi
 
 ErrorDoubleDeclaration=Sie haben bereits eine andere Spesenabrechnung in einem ähnlichen Datumsbereich erstellt.
-AucuneNDF=Keine Spesenabrechnungen für diese Kriterien gefunden
 AucuneLigne=Es wurde noch keine Spesenabrechnung erstellt.
-AddLine=Neue Zeile hinzufügen
-AddLineMini=Hinzufügen
 
-Date_DEBUT=Startdatum Periode
-Date_FIN=Enddatum
 ModePaiement=Zahlungsart
 
 VALIDATOR=verantwortlicher Benutzer für Genehmigung
@@ -64,40 +67,26 @@ MOTIF_CANCEL=Grund
 
 DATE_REFUS=Datum Ablehnung
 DATE_SAVE=Freigabedatum
-DATE_VALIDE=Freigabedatum
 DATE_CANCEL=Stornodatum
 DATE_PAIEMENT=Zahlungsdatum
-
-TO_PAID=bezahlen
 BROUILLONNER=entwerfen
-SendToValid=Zur Genehmigung einreichen
-ModifyInfoGen=Bearbeiten
+ExpenseReportRef=Belegnummer Spesenabrechnung
 ValidateAndSubmit=Validieren und zur Genehmigung einreichen
 ValidatedWaitingApproval=Validiert (Wartet auf Genehmigung)
-
-NOT_VALIDATOR=Sie sind nicht berechtigt, diese Spesenabrechnung zu genehmigen
 NOT_AUTHOR=Sie sind nicht der Autor dieser Spesenabrechnung. Vorgang abgebrochen.
-
-RefuseTrip=Ablehnen eine Spesenabrechnung
 ConfirmRefuseTrip=Möchten Sie diese Spesenabrechnung wirklich ablehnen?
-
 ValideTrip=Genehmigen Spesenabrechnung
 ConfirmValideTrip=Möchten Sie diese Spesenabrechnung wirklich genehmigen?
-
 PaidTrip=Spesenabrechnung bezahlen
 ConfirmPaidTrip=Möchten Sie den Status dieser Spesenabrechnung auf "Bezahlt" ändern?
-
-CancelTrip=Stornieren einer Spesenabrechnung
-ConfirmCancelTrip=Möchten Sie diese Spesenabrechnung wirklich abbrechen?
-
+ConfirmCancelTrip=Möchten Sie diese Spesenabrechnung wirklich stornieren?
 BrouillonnerTrip=Status der Spesenabrechnung auf den Status "Entwurf" ändern
 ConfirmBrouillonnerTrip=Möchten Sie den Status dieser Spesenabrechnung wirklich auf "Entwurf" ändern?
-
 SaveTrip=Bestätige Spesenabrechnung
-ConfirmSaveTrip=Sind Sie sicher, dass Sie diese Spesenabrechnung bestätigen wollen?
-
+ConfirmSaveTrip=Möchten Sie den diese Spesenabrechnung wirklich bestätigen?
 NoTripsToExportCSV=Keine Spesenabrechnung für diesen Zeitraum zu exportieren.
 ExpenseReportPayment=Spesenabrechnung Zahlung
-
 ExpenseReportsToApprove=zu genehmigende Spesenabrechnungen
 ExpenseReportsToPay=zu zahlende Spesenabrechnungen
+CloneExpenseReport=Spesenabrechnung duplizieren
+ConfirmCloneExpenseReport=Möchten Sie den diese Spesenabrechnung wirklich duplizieren?

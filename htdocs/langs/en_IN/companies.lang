@@ -1,2 +1,4 @@
 # Dolibarr language file - Source file is en_US - companies
-ProfId5MA=Id prof. 5 (C.I.C.E.)
+OverAllProposals=Quotations
+ContactForProposals=Quotation's contact
+NoContactForAnyProposal=This contact is not a contact for any quotation

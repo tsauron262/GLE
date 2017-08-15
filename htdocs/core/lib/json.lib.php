@@ -49,11 +49,14 @@ function dol_json_encode($elements)
 {
 	dol_syslog('dol_json_encode() is deprecated. Please update your code to use native json_encode().', LOG_WARNING);
 
-	$num=count($elements);
+	$num=0;
 	if (is_object($elements))	// Count number of properties for an object
 	{
-		$num=0;
 		foreach($elements as $key => $value) $num++;
+	}
+	else
+	{
+	    $num=count($elements);
 	}
 	//var_dump($num);
 
@@ -66,7 +69,7 @@ function dol_json_encode($elements)
 		for ($i = 0, $last = ($num - 1); $i < $num; $i++)
 		{
 			if (! isset($elements[$keysofelements[$i]])) continue;
-			if (is_array($elements[$keysofelements[$i]]) || is_object($elements[$keysofelements[$i]])) $output.= /*amodifierdrsi*/@json_encode($elements[$keysofelements[$i]]);
+			if (is_array($elements[$keysofelements[$i]]) || is_object($elements[$keysofelements[$i]])) $output.= json_encode($elements[$keysofelements[$i]]);
 			else $output .= _val($elements[$keysofelements[$i]]);
 			if ($i !== $last) $output.= ',';
 		}
@@ -264,7 +267,7 @@ function dol_json_decode($json, $assoc=false)
 			}
 			foreach ($array as $key => $value)
 			{
-				if ($key) @$object->{$key} = $value;
+				if ($key) $object->{$key} = $value;
 			}
 
 			return $object;

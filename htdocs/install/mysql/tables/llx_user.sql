@@ -33,7 +33,7 @@ create table llx_user
   tms               timestamp,
   fk_user_creat     integer,
   fk_user_modif     integer,
-  login             varchar(24) NOT NULL,
+  login             varchar(50) NOT NULL,
   pass              varchar(128),
   pass_crypted      varchar(128),
   pass_temp         varchar(128),			    -- temporary password when asked for forget password
@@ -61,7 +61,9 @@ create table llx_user
   fk_socpeople      integer,
   fk_member         integer,
   fk_user           integer,               -- Hierarchic parent
+  note_public		text,
   note              text DEFAULT NULL,
+  model_pdf         varchar(255) DEFAULT NULL,
   datelastlogin     datetime,
   datepreviouslogin datetime,
   egroupware_id     integer,
@@ -77,7 +79,11 @@ create table llx_user
   nb_holiday		integer DEFAULT 0,
   thm				double(24,8),
   tjm				double(24,8),
-  salary			double(24,8),
-  salaryextra		double(24,8),
-  weeklyhours		double(16,8)
+
+  salary			double(24,8),			-- denormalized value coming from llx_user_employment
+  salaryextra		double(24,8),			-- denormalized value coming from llx_user_employment
+  dateemployment	date,					-- denormalized value coming from llx_user_employment
+  weeklyhours		double(16,8),			-- denormalized value coming from llx_user_employment
+
+  import_key        varchar(14)                          		-- import key
 )ENGINE=innodb;

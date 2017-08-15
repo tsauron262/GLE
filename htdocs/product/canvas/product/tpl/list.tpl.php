@@ -69,12 +69,12 @@
  		if ($searchfield['enabled']) {
  			if ($searchfield['search'])	{ ?>
   				<td class="liste_titre" align="<?php echo $searchfield['align']; ?>"><input class="flat" type="text" name="s<?php echo $searchfield['alias']; ?>" value=""></td>
-	<?php } else if ($key == $num) { ?>
-  			<td class="liste_titre" align="right">
-  				<input type="image" class="liste_titre" name="button_search" src="<?php echo DOL_URL_ROOT; ?>/theme/<?php echo $conf->theme; ?>/img/search.png" alt="<?php echo $langs->trans('Search'); ?>">
-  				<input type="image" class="liste_titre" name="button_removefilter" src="<?php echo DOL_URL_ROOT; ?>/theme/<?php echo $conf->theme; ?>/img/searchclear.png" alt="<?php echo $langs->trans('RemoveFilter'); ?>">
-  			</td>
-  	<?php } else { ?>
+	<?php } else if ($key == $num) { 
+        print '<td class="liste_titre" align="right">';
+        $searchpicto=$form->showFilterAndCheckAddButtons(0);
+        print $searchpicto;
+        print '</td>';
+	} else { ?>
   			<td class="liste_titre">&nbsp;</td>
  	<?php } } } ?>
 </tr>
@@ -84,7 +84,7 @@
 <?php
 $var=true;
 foreach($datas as $line) {
-	$var=!$var;	?>
+		?>
 	<tr <?php echo $bc[$var]; ?>>
    		<?php
    		foreach($line as $key => $value) {

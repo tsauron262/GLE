@@ -80,36 +80,6 @@ if (! empty($conf->stock->enabled) && empty($conf->global->CASHDESK_NO_DECREASE_
 }
 
 
-// If stock decrease on bill validation, check user has stock edit permissions
-if (! empty($conf->stock->enabled) && $conf->global->STOCK_CALCULATE_ON_BILL && ! empty($username))
-{
-	$testuser=new User($db);
-	$testuser->fetch(0,$username);
-	$testuser->getrights('stock');
-	if (empty($testuser->rights->stock->creer))
-	{
-		$retour=$langs->trans("UserNeedPermissionToEditStockToUsePos");
-		header('Location: '.DOL_URL_ROOT.'/cashdesk/index.php?err='.urlencode($retour).'&user='.$username.'&socid='.$thirdpartyid.'&warehouseid='.$warehouseid.'&bankid_cash='.$bankid_cash.'&bankid_cheque='.$bankid_cheque.'&bankid_cb='.$bankid_cb);
-		exit;
-	}
-}
-
-
-// If stock decrease on bill validation, check user has stock edit permissions
-if (! empty($conf->stock->enabled) && $conf->global->STOCK_CALCULATE_ON_BILL && ! empty($username))
-{
-	$testuser=new User($db);
-	$testuser->fetch(0,$username);
-	$testuser->getrights('stock');
-	if (empty($testuser->rights->stock->creer))
-	{
-		$retour=$langs->trans("UserNeedPermissionToEditStockToUsePos");
-		header('Location: '.DOL_URL_ROOT.'/cashdesk/index.php?err='.urlencode($retour).'&user='.$username.'&socid='.$thirdpartyid.'&warehouseid='.$warehouseid.'&bankid_cash='.$bankid_cash.'&bankid_cheque='.$bankid_cheque.'&bankid_cb='.$bankid_cb);
-		exit;
-	}
-}
-
-
 /*
 if (! empty($_POST['txtUsername']) && ! empty($conf->banque->enabled) && (empty($conf_fkaccount_cash) && empty($conf_fkaccount_cheque) && empty($conf_fkaccount_cb)))
 {

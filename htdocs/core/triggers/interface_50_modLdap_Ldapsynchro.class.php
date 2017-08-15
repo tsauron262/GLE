@@ -62,12 +62,11 @@ class InterfaceLdapsynchro extends DolibarrTriggers
         if ($action == 'USER_CREATE')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-        	if ($object->email != "" && ! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
+        	if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
         	{
         		$ldap=new Ldap();
         		$ldap->connect_bind();
-global $creationUser;
-$creationUser = true;
+
 				$info=$object->_load_ldap_info();
 				$dn=$object->_load_ldap_dn($info);
 
@@ -82,7 +81,7 @@ $creationUser = true;
         elseif ($action == 'USER_MODIFY')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-        	if ($object->email != "" && ! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
+        	if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
         	{
         		$ldap=new Ldap();
         		$ldap->connect_bind();
@@ -119,7 +118,7 @@ $creationUser = true;
         elseif ($action == 'USER_NEW_PASSWORD')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-            if ($object->email != "" &&! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
+            if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
             {
                 $ldap=new Ldap();
                 $ldap->connect_bind();
@@ -156,69 +155,11 @@ $creationUser = true;
         elseif ($action == 'USER_ENABLEDISABLE')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-            /*Moddrsi*/
-            if ($object->email != "" &&! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
-            {
-                    $ldap=new Ldap();
-                    $ldap->connect_bind();
-
-
-                    $oldinfo=$object->_load_ldap_info();
-                    $olddn=$object->_load_ldap_dn($oldinfo);
-                    if($object->statut == 0)
-                        $olddn = str_replace("FERME@", "@", $olddn);
-                    else
-                        $olddn = str_replace("@", "FERME@", $olddn);
-
-                    $info=$object->_load_ldap_info();
-                            $dn=$object->_load_ldap_dn($info);
-
-                $result=$ldap->update($dn,$info,$user,$olddn);
-                            if ($result < 0)
-                            {
-                                    $this->error="ErrorLDAP ".$ldap->error;
-                            }
-                            else{
-            
-                                //mise a jour du compte "compte fermé"
-                                global $db;
-                                $userCF = new User($db);
-                                $userCF->fetch('', 'compteferme');
-                                if($userCF->id > 0){
-                                        $info=$userCF->_load_ldap_info();
-                                        $tmp = array();
-                                        $result = $db->query("SELECT email, alias FROM ".MAIN_DB_PREFIX."user u, ".MAIN_DB_PREFIX."user_extrafields ue WHERE `statut` = 0 ANd u.rowid = ue.fk_object");
-                                        while($ln = $db->fetch_object($result)){
-                                            if($ln->email != "")
-                                            $tmp[] = str_replace("FERME@", "@",$ln->email);
-                                            $tmptmp = explode(",", $ln->alias);
-                                            foreach($tmptmp as $mail)
-                                                if($mail != "" && !in_array($mail, $tmp))
-                                                    $tmp[] = $mail;
-                                        }
-                                        $info['shadowAddress'] = $tmp;
-                                                $dn=$userCF->_load_ldap_dn($info);
-                                    $result=$ldap->update($dn,$info,$user,$dn);
-                                    if ($result < 0)
-                                    {
-                                            $this->error="ErrorLDAP ".$ldap->error;
-                                            dol_syslog("erreurs LDAP ".$ldap->error,3);
-                                            dol_syslog("erreurs LDAP ".print_r($info['shadowAddress'],1),3);
-                                    }
-                                }
-                            }
-                            /*fmoddrsi*/
-            
-            
-            
-            
-                            return $result;
-            }
         }
         elseif ($action == 'USER_DELETE')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-        	if ($object->email != "" &&! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
+        	if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
         	{
         		$ldap=new Ldap();
         		$ldap->connect_bind();
@@ -234,10 +175,10 @@ $creationUser = true;
 				return $result;
     		}
         }
-        elseif ($action == 'USER_SETINGROUP' && (!defined ('_ID_GROUP_NON_LDAP_') || !in_array($object->newgroupid, _ID_GROUP_NON_LDAP_)))
+        elseif ($action == 'USER_SETINGROUP')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-            if ($object->email != "" &&! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
+            if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
             {
                 $ldap=new Ldap();
                 $ldap->connect_bind();
@@ -272,10 +213,10 @@ $creationUser = true;
                 return $result;
             }
         }
-        elseif ($action == 'USER_REMOVEFROMGROUP' && (!defined ('_ID_GROUP_NON_LDAP_') || !in_array($object->oldgroupid, _ID_GROUP_NON_LDAP_)))
+        elseif ($action == 'USER_REMOVEFROMGROUP')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
-            if ($object->email != "" &&! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
+            if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
             {
                 $ldap=new Ldap();
                 $ldap->connect_bind();

@@ -23,13 +23,13 @@
  */
 
 /**
- *  \class      EcmDirectory
- *  \brief      Class to manage ECM directories
+ *  Class to manage ECM directories
  */
 class EcmDirectory // extends CommonObject
 {
-	//public $element='ecm_directories';			//!< Id that identify managed objects
+	public $element='ecm_directories';			//!< Id that identify managed objects
 	//public $table_element='ecm_directories';	//!< Name of table without prefix where object is stored
+	var $picto = 'dir';
 
 	var $id;
 
@@ -203,7 +203,7 @@ class EcmDirectory // extends CommonObject
 		// Update request
 		$sql = "UPDATE ".MAIN_DB_PREFIX."ecm_directories SET";
 		$sql.= " label='".$this->db->escape($this->label)."',";
-		$sql.= " fk_parent='".$this->fk_parent."',";
+		$sql.= " fk_parent='".$this->db->escape($this->fk_parent)."',";
 		$sql.= " description='".$this->db->escape($this->description)."'";
 		$sql.= " WHERE rowid=".$this->id;
 
@@ -239,14 +239,15 @@ class EcmDirectory // extends CommonObject
 	/**
 	 *	Update cache of nb of documents into database
 	 *
-	 * 	@param	string	$sign		'+' or '-'
+	 * 	@param	string	$value		'+' or '-' or new number
 	 *  @return int		         	<0 if KO, >0 if OK
 	 */
-	function changeNbOfFiles($sign)
+	function changeNbOfFiles($value)
 	{
 		// Update request
 		$sql = "UPDATE ".MAIN_DB_PREFIX."ecm_directories SET";
-		$sql.= " cachenbofdoc = cachenbofdoc ".$sign." 1";
+		if (preg_match('/[0-9]+/', $value)) $sql.= " cachenbofdoc = ".(int) $value;
+		else $sql.= " cachenbofdoc = cachenbofdoc ".$value." 1";
 		$sql.= " WHERE rowid = ".$this->id;
 
 		dol_syslog(get_class($this)."::changeNbOfFiles", LOG_DEBUG);
@@ -255,6 +256,12 @@ class EcmDirectory // extends CommonObject
 		{
 			$this->error="Error ".$this->db->lasterror();
 			return -1;
+		}
+		else
+		{
+		    if (preg_match('/[0-9]+/', $value)) $this->cachenbofdoc = (int) $value;
+		    else if ($value == '+') $this->cachenbofdoc++;
+		    else if ($value == '-') $this->cachenbofdoc--;
 		}
 
 		return 1;
@@ -509,6 +516,31 @@ class EcmDirectory // extends CommonObject
 
 
 	/**
+	 *  Retourne le libelle du status d'un user (actif, inactif)
+	 *
+	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
+	 *  @return	string 			       Label of status
+	 */
+	function getLibStatut($mode=0)
+	{
+		return $this->LibStatut($this->status,$mode);
+	}
+
+	/**
+	 *  Return the status
+	 *
+	 *  @param	int		$status        	Id status
+	 *  @param  int		$mode          	0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 5=Long label + Picto
+	 *  @return string 			       	Label of status
+	 */
+	static function LibStatut($status,$mode=0)
+	{
+		global $langs;
+		return '';
+	}
+
+
+	/**
 	 * 	Reconstruit l'arborescence des categories sous la forme d'un tableau à partir de la base de donnée
 	 *	Renvoi un tableau de tableau('id','id_mere',...) trie selon arbre et avec:
 	 *				id                  Id de la categorie
@@ -661,7 +693,7 @@ class EcmDirectory // extends CommonObject
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 		$dir=$conf->ecm->dir_output.'/'.$this->getRelativePath();
-		$filelist=dol_dir_list($dir,'files',0,'','(\.meta|_preview\.png)$');
+		$filelist=dol_dir_list($dir,'files',0,'','(\.meta|_preview.*\.png)$');
 
 		// Test if filelist is in database
 

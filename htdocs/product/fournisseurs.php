@@ -39,7 +39,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/dynamic_price/class/price_parser.class.
 $langs->load("products");
 $langs->load("suppliers");
 $langs->load("bills");
-if (! empty($conf->margin->enabled)) $langs->load("margins");
+$langs->load("margins");
 
 $id = GETPOST('id', 'int');
 $ref = GETPOST('ref', 'alpha');
@@ -65,7 +65,7 @@ $fieldtype = (! empty($ref) ? 'ref' : 'rowid');
 if ($user->societe_id) $socid=$user->societe_id;
 $result=restrictedArea($user,'produit|service&fournisseur',$fieldvalue,'product&product','','',$fieldtype);
 
-// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('pricesuppliercard','globalcard'));
 
 $object = new ProductFournisseur($db);
@@ -98,11 +98,12 @@ if (empty($reshook))
 		if ($id)
 		{
 			$result=$object->fetch($id);
-			$result=$object->setValueFrom('cost_price', price2num($cost_price));
+			$object->cost_price = price2num($cost_price);
+			$result=$object->update($object->id, $user);
 			if ($result > 0)
 			{
-				$object->cost_price = price2num($cost_price);
 				setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+		        $action='';
 			}
 			else
 			{
@@ -110,10 +111,9 @@ if (empty($reshook))
 				setEventMessages($object->error, $object->errors, 'errors');
 			}
 		}
-		$action='';
 	}
-	
-	if ($action == 'remove_pf')
+
+	if ($action == 'confirm_remove_pf')
 	{
 		if ($rowid)	// id of product supplier price to remove
 		{
@@ -141,6 +141,7 @@ if (empty($reshook))
 		$tva_tx = price2num($tva_tx);
 		$price_expression = GETPOST('eid', 'int') ? GETPOST('eid', 'int') : ''; // Discard expression if not in expression mode
 		$delivery_time_days = GETPOST('delivery_time_days', 'int') ? GETPOST('delivery_time_days', 'int') : '';
+		$supplier_reputation = GETPOST('supplier_reputation');
 
 		if ($tva_tx == '')
 		{
@@ -216,7 +217,7 @@ if (empty($reshook))
 				if (isset($_POST['ref_fourn_price_id']))
 					$object->fetch_product_fournisseur_price($_POST['ref_fourn_price_id']);
 
-				$ret=$object->update_buyprice($quantity, $_POST["price"], $user, $_POST["price_base_type"], $supplier, $_POST["oselDispo"], $ref_fourn, $tva_tx, $_POST["charges"], $remise_percent, 0, $npr, $delivery_time_days);
+				$ret=$object->update_buyprice($quantity, $_POST["price"], $user, $_POST["price_base_type"], $supplier, $_POST["oselDispo"], $ref_fourn, $tva_tx, $_POST["charges"], $remise_percent, 0, $npr, $delivery_time_days, $supplier_reputation);
 				if ($ret < 0)
 				{
 
@@ -225,18 +226,21 @@ if (empty($reshook))
 				}
 				else
 				{
-					if ($price_expression !== '')
+					if (!empty($conf->dynamicprices->enabled) && $price_expression !== '')
 					{
 						//Check the expression validity by parsing it
-						$priceparser = new PriceParser($db);
-						$price_result = $priceparser->parseProductSupplier($id, $price_expression, $quantity, $tva_tx);
+                        $priceparser = new PriceParser($db);
+                        $object->fk_supplier_price_expression = $price_expression;
+                        $price_result = $priceparser->parseProductSupplier($object);
 						if ($price_result < 0) { //Expression is not valid
 							$error++;
 							setEventMessages($priceparser->translatedError(), null, 'errors');
 						}
 					}
-					if (! $error && ! empty($conf->dynamicprices->enabled)) {
-						$ret=$object->setPriceExpression($price_expression);
+					if (! $error && ! empty($conf->dynamicprices->enabled))
+					{
+						//Set the price expression for this supplier price
+						$ret=$object->setSupplierPriceExpression($price_expression);
 						if ($ret < 0)
 						{
 							$error++;
@@ -268,28 +272,52 @@ if (empty($reshook))
  * view
  */
 
+$title = $langs->trans('ProductServiceCard');
+$helpurl = '';
+$shortlabel = dol_trunc($object->label,16);
+if (GETPOST("type") == '0' || ($object->type == Product::TYPE_PRODUCT))
+{
+	$title = $langs->trans('Product')." ". $shortlabel ." - ".$langs->trans('BuyingPrices');
+	$helpurl='EN:Module_Products|FR:Module_Produits|ES:M&oacute;dulo_Productos';
+}
+if (GETPOST("type") == '1' || ($object->type == Product::TYPE_SERVICE))
+{
+	$title = $langs->trans('Service')." ". $shortlabel ." - ".$langs->trans('BuyingPrices');
+	$helpurl='EN:Module_Services_En|FR:Module_Services|ES:M&oacute;dulo_Servicios';
+}
+
+llxHeader('', $title, $helpurl);
+
 $form = new Form($db);
 
 if ($id > 0 || $ref)
 {
-	if ($action <> 're-edit')
-	{
-		llxHeader("","",$langs->trans("CardProduct".$object->type));
-	}
-
 	if ($result)
 	{
+		if ($action == 'ask_remove_pf') {
+			$form = new Form($db);
+			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $id . '&rowid=' . $rowid, $langs->trans('DeleteProductBuyPrice'), $langs->trans('ConfirmDeleteProductBuyPrice'), 'confirm_remove_pf', '', 0, 1);
+			echo $formconfirm;
+		}
+
 		if ($action <> 'edit' && $action <> 're-edit')
 		{
 			$head=product_prepare_head($object);
 			$titre=$langs->trans("CardProduct".$object->type);
 			$picto=($object->type== Product::TYPE_SERVICE?'service':'product');
-			dol_fiche_head($head, 'suppliers', $titre, 0, $picto);
 
-            dol_banner_tab($object, 'ref', '', ($user->societe_id?0:1), 'ref');
-            
+			dol_fiche_head($head, 'suppliers', $titre, -1, $picto);
+
+			$linkback = '<a href="'.DOL_URL_ROOT.'/product/list.php">'.$langs->trans("BackToList").'</a>';
+		    $object->next_prev_filter=" fk_product_type = ".$object->type;
+
+            $shownav = 1;
+            if ($user->societe_id && ! in_array('product', explode(',',$conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
+
+			dol_banner_tab($object, 'ref', $linkback, $shownav, 'ref');
+
             print '<div class="fichecenter">';
-            
+
             print '<div class="underbanner clearboth"></div>';
             print '<table class="border tableforfield" width="100%">';
 
@@ -314,14 +342,14 @@ if ($id > 0 || $ref)
             print '</td><td colspan="2">';
             print $form->editfieldval($text,'cost_price',$object->cost_price,$object,$user->rights->produit->creer||$user->rights->service->creer,'amount:6');
             print '</td></tr>';
-            
+
 			print '</table>';
 
             print '</div>';
             print '<div style="clear:both"></div>';
-			
+
 			dol_fiche_end();
-			
+
 
 			// Form to add or update a price
 			if (($action == 'add_price' || $action == 'updateprice' ) && ($user->rights->produit->creer || $user->rights->service->creer))
@@ -341,12 +369,13 @@ if ($id > 0 || $ref)
 				print '<form action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'" method="POST">';
 				print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 				print '<input type="hidden" name="action" value="updateprice">';
-				
+
 				dol_fiche_head();
 
 				print '<table class="border" width="100%">';
 
-				print '<tr><td class="fieldrequired" width="25%">'.$langs->trans("Supplier").'</td><td>';
+				// Supplier
+				print '<tr><td class="titlefield fieldrequired">'.$langs->trans("Supplier").'</td><td>';
 				if ($rowid)
 				{
 					$supplier=new Fournisseur($db);
@@ -362,7 +391,7 @@ if ($id > 0 || $ref)
 				{
 					$events=array();
 					$events[]=array('method' => 'getVatRates', 'url' => dol_buildpath('/core/ajax/vatrates.php',1), 'htmlname' => 'tva_tx', 'params' => array());
-					print $form->select_company(GETPOST("id_fourn"),'id_fourn','fournisseur=1',1,0,0,$events);
+					print $form->select_company(GETPOST("id_fourn"),'id_fourn','fournisseur=1','SelectThirdParty',0,0,$events);
 
 					$parameters=array('filtre'=>"fournisseur=1",'html_name'=>'id_fourn','selected'=>GETPOST("id_fourn"),'showempty'=>1,'prod_id'=>$object->id);
 				    $reshook=$hookmanager->executeHooks('formCreateThirdpartyOptions',$parameters,$object,$action);
@@ -370,7 +399,7 @@ if ($id > 0 || $ref)
 					{
 						if (empty($form->result))
 						{
-							print ' - <a href="'.DOL_URL_ROOT.'/societe/soc.php?action=create&type=f&backtopage='.urlencode($_SERVER["PHP_SELF"].'?id='.$object->id.'&action='.$action).'">'.$langs->trans("CreateDolibarrThirdPartySupplier").'</a>';
+							print ' - <a href="'.DOL_URL_ROOT.'/societe/card.php?action=create&type=f&backtopage='.urlencode($_SERVER["PHP_SELF"].'?id='.$object->id.'&action='.$action).'">'.$langs->trans("CreateDolibarrThirdPartySupplier").'</a>';
 						}
 					}
 				}
@@ -425,11 +454,11 @@ if ($id > 0 || $ref)
 				$default_vat=get_default_tva($mysoc2, $mysoc, $object->id, 0);
 				$default_npr=get_default_npr($mysoc2, $mysoc, $object->id, 0);
 				if (empty($default_vat)) $default_npr=$default_vat;
-				
+
 				print '<tr><td class="fieldrequired">'.$langs->trans("VATRateForSupplierProduct").'</td>';
 				print '<td>';
 				//print $form->load_tva('tva_tx',$object->tva_tx,$supplier,$mysoc);    // Do not use list here as it may be any vat rates for any country
-				if (! empty($rowid))	// If we have a supplier, it is an update, we must show the vat of current supplier price 
+				if (! empty($rowid))	// If we have a supplier, it is an update, we must show the vat of current supplier price
 				{
 				    $tmpproductsupplier=new ProductFournisseur($db);
 				    $tmpproductsupplier->fetch_product_fournisseur_price($rowid, 1);
@@ -438,7 +467,7 @@ if ($id > 0 || $ref)
 				}
 				else
 				{
-                    if (empty($default_vat)) 
+                    if (empty($default_vat))
                     {
                         $default_vat=$object->tva_tx;
                     }
@@ -468,7 +497,7 @@ if ($id > 0 || $ref)
 							on_change();
 						}
 						function on_click() {
-							window.location = "'.DOL_URL_ROOT.'/product/dynamic_price/editor.php?id='.$id.'&tab=fournisseurs&eid=" + $("#eid").attr("value");
+							window.location = "'.DOL_URL_ROOT.'/product/dynamic_price/editor.php?id='.$id.'&tab=fournisseurs&eid=" + $("#eid").val();
 						}
 						function on_change() {
 							if ($("#eid").val() == 0) {
@@ -499,6 +528,11 @@ if ($id > 0 || $ref)
 				print '<td><input class="flat" name="delivery_time_days" size="4" value="'.($rowid ? $object->delivery_time_days : '').'">&nbsp;'.$langs->trans('days').'</td>';
 				print '</tr>';
 
+				// Reputation
+				print '<tr><td>'.$langs->trans("SupplierReputation").'</td><td>';
+				echo $form->selectarray('supplier_reputation', $object->reputations, $supplier_reputation?$supplier_reputation:$object->supplier_reputation);
+				print '</td></tr>';
+
 				// Option to define a transport cost on supplier price
 				if ($conf->global->PRODUCT_CHARGES)
 				{
@@ -516,6 +550,7 @@ if ($id > 0 || $ref)
 				{
 					$parameters=array('id_fourn'=>$id_fourn,'prod_id'=>$object->id);
 				    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);
+                    print $hookmanager->resPrint;
 				}
 
 				print '</table>';
@@ -555,50 +590,54 @@ if ($id > 0 || $ref)
 
 			if ($user->rights->fournisseur->lire)
 			{
+				$product_fourn = new ProductFournisseur($db);
+				$product_fourn_list = $product_fourn->list_product_fournisseur_price($object->id, $sortfield, $sortorder);
+				$nbtotalofrecords = count($product_fourn_list);
+			    print_barre_liste($langs->trans('SupplierPrices'), $page, $_SERVEUR ['PHP_SELF'], $option, $sortfield, $sortorder, '', count($product_fourn_list), $nbtotalofrecords, 'title_accountancy.png');
+
 				// Suppliers list title
-				print '<table class="noborder" width="100%">';
+			    print '<div class="div-table-responsive">';
+			    print '<table class="noborder" width="100%">';
 				if ($object->isProduct()) $nblignefour=4;
 				else $nblignefour=4;
 
 				$param="&id=".$object->id;
 				print '<tr class="liste_titre">';
-				print_liste_field_titre($langs->trans("Suppliers"),$_SERVER["PHP_SELF"],"s.nom","",$param,"",$sortfield,$sortorder);
-				print_liste_field_titre($langs->trans("SupplierRef"));
-				if (!empty($conf->global->FOURN_PRODUCT_AVAILABILITY)) print_liste_field_titre($langs->trans("Availability"),$_SERVER["PHP_SELF"],"pfp.fk_availability","",$param,"",$sortfield,$sortorder);
-				print_liste_field_titre($langs->trans("QtyMin"),$_SERVER["PHP_SELF"],"pfp.quantity","",$param,'align="right"',$sortfield,$sortorder);
-				print_liste_field_titre($langs->trans("VATRate"),$_SERVER["PHP_SELF"],'','',$param,'align="right"',$sortfield,$sortorder);
-				print_liste_field_titre($langs->trans("PriceQtyMinHT"),$_SERVER["PHP_SELF"],'','',$param,'align="right"',$sortfield,$sortorder);
-				print_liste_field_titre($langs->trans("UnitPriceHT"),$_SERVER["PHP_SELF"],"pfp.unitprice","",$param,'align="right"',$sortfield,$sortorder);
-				print_liste_field_titre($langs->trans("DiscountQtyMin"),$_SERVER["PHP_SELF"],'','',$param,'align="right"',$sortfield,$sortorder);
-				print_liste_field_titre($langs->trans("NbDaysToDelivery"),$_SERVER["PHP_SELF"],"pfp.delivery_time_days","",$param,'align="right"',$sortfield,$sortorder);
-
+				print_liste_field_titre("Suppliers",$_SERVER["PHP_SELF"],"s.nom","",$param,"",$sortfield,$sortorder);
+				print_liste_field_titre("SupplierRef");
+				if (!empty($conf->global->FOURN_PRODUCT_AVAILABILITY)) print_liste_field_titre("Availability",$_SERVER["PHP_SELF"],"pfp.fk_availability","",$param,"",$sortfield,$sortorder);
+				print_liste_field_titre("QtyMin",$_SERVER["PHP_SELF"],"pfp.quantity","",$param,'align="right"',$sortfield,$sortorder);
+				print_liste_field_titre("VATRate",$_SERVER["PHP_SELF"],'','',$param,'align="right"',$sortfield,$sortorder);
+				print_liste_field_titre("PriceQtyMinHT",$_SERVER["PHP_SELF"],'','',$param,'align="right"',$sortfield,$sortorder);
+				print_liste_field_titre("UnitPriceHT",$_SERVER["PHP_SELF"],"pfp.unitprice","",$param,'align="right"',$sortfield,$sortorder);
+				print_liste_field_titre("DiscountQtyMin",$_SERVER["PHP_SELF"],'','',$param,'align="right"',$sortfield,$sortorder);
+				print_liste_field_titre("NbDaysToDelivery",$_SERVER["PHP_SELF"],"pfp.delivery_time_days","",$param,'align="right"',$sortfield,$sortorder);
+				print_liste_field_titre("ReputationForThisProduct",$_SERVER["PHP_SELF"],"pfp.supplier_reputation","",$param,'align="center"',$sortfield,$sortorder);
 				// Charges ????
 				if ($conf->global->PRODUCT_CHARGES)
 				{
-					if (! empty($conf->margin->enabled)) print_liste_field_titre($langs->trans("UnitCharges"));
+					if (! empty($conf->margin->enabled)) print_liste_field_titre("UnitCharges");
 				}
 				print_liste_field_titre('');
 				print "</tr>\n";
 
-				$product_fourn = new ProductFournisseur($db);
-				$product_fourn_list = $product_fourn->list_product_fournisseur_price($object->id, $sortfield, $sortorder);
-
-				if (count($product_fourn_list)>0)
+				if (is_array($product_fourn_list))
 				{
 					$var=true;
 
 					foreach($product_fourn_list as $productfourn)
 					{
-						$var=!$var;
 
-						print "<tr ".$bc[$var].">";
 
+						print '<tr class="oddeven">';
+
+						// Supplier
 						print '<td>'.$productfourn->getSocNomUrl(1,'supplier').'</td>';
 
 						// Supplier
 						print '<td align="left">'.$productfourn->fourn_ref.'</td>';
 
-						//Availability
+						// Availability
 						if(!empty($conf->global->FOURN_PRODUCT_AVAILABILITY))
 						{
 							$form->load_cache_availability();
@@ -621,17 +660,6 @@ if ($id > 0 || $ref)
 						print $productfourn->fourn_price?price($productfourn->fourn_price):"";
 						print '</td>';
 
-						// Charges ????
-						if ($conf->global->PRODUCT_CHARGES)
-						{
-							if (! empty($conf->margin->enabled))
-							{
-								print '<td align="right">';
-								print $productfourn->fourn_charges?price($productfourn->fourn_charges):"";
-								print '</td>';
-							}
-						}
-
 						// Unit price
 						print '<td align="right">';
 						print price($productfourn->fourn_unitprice);
@@ -648,7 +676,15 @@ if ($id > 0 || $ref)
 						print $productfourn->delivery_time_days;
 						print '</td>';
 
+						// Reputation
+						print '<td align="center">';
+						if (!empty($productfourn->supplier_reputation) && !empty($object->reputations[$productfourn->supplier_reputation])) {
+							print $object->reputations[$productfourn->supplier_reputation];
+						}
+						print'</td>';
+
 						// Charges ????
+						/*
 						if ($conf->global->PRODUCT_CHARGES)
 						{
 							if (! empty($conf->margin->enabled))
@@ -657,7 +693,7 @@ if ($id > 0 || $ref)
 								print $productfourn->fourn_unitcharges?price($productfourn->fourn_unitcharges) : ($productfourn->fourn_qty?price($productfourn->fourn_charges/$productfourn->fourn_qty):"&nbsp;");
 								print '</td>';
 							}
-						}
+						}*/
 
 						if (is_object($hookmanager))
 						{
@@ -670,7 +706,8 @@ if ($id > 0 || $ref)
 						if ($user->rights->produit->creer || $user->rights->service->creer)
 						{
 							print '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;socid='.$productfourn->fourn_id.'&amp;action=add_price&amp;rowid='.$productfourn->product_fourn_price_id.'">'.img_edit()."</a>";
-							print '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;socid='.$productfourn->fourn_id.'&amp;action=remove_pf&amp;rowid='.$productfourn->product_fourn_price_id.'">'.img_picto($langs->trans("Remove"),'disable.png').'</a>';
+							print ' &nbsp; ';
+							print '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;socid='.$productfourn->fourn_id.'&amp;action=ask_remove_pf&amp;rowid='.$productfourn->product_fourn_price_id.'">'.img_picto($langs->trans("Remove"),'disable.png').'</a>';
 						}
 
 						print '</td>';
@@ -678,8 +715,13 @@ if ($id > 0 || $ref)
 						print '</tr>';
 					}
 				}
+				else
+				{
+				    dol_print_error($db);
+				}
 
 				print '</table>';
+				print '</div>';
 			}
 		}
 	}

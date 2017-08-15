@@ -36,7 +36,7 @@ $ref = GETPOST('ref','alpha');
 
 $result=restrictedArea($user,'produit|service',$id,'product&product');
 
-// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('infoproduct'));
 
 $object = new Product($db);
@@ -56,13 +56,23 @@ if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'e
  *	View
  */
 
-$form=new Form($b);
+$title = $langs->trans('ProductServiceCard');
+$helpurl = '';
+$shortlabel = dol_trunc($object->label,16);
+if (GETPOST("type") == '0' || ($object->type == Product::TYPE_PRODUCT))
+{
+	$title = $langs->trans('Product')." ". $shortlabel ." - ".$langs->trans('Info');
+	$helpurl='EN:Module_Products|FR:Module_Produits|ES:M&oacute;dulo_Productos';
+}
+if (GETPOST("type") == '1' || ($object->type == Product::TYPE_SERVICE))
+{
+	$title = $langs->trans('Service')." ". $shortlabel ." - ".$langs->trans('Info');
+	$helpurl='EN:Module_Services_En|FR:Module_Services|ES:M&oacute;dulo_Servicios';
+}
 
-$title=$langs->trans("Product");
-$helpurl='';
-if (GETPOST("type") == '0' || ($object->type == Product::TYPE_PRODUCT)) $helpurl='EN:Module_Products|FR:Module_Produits|ES:M&oacute;dulo_Productos';
-if (GETPOST("type") == '1' || ($object->type == Product::TYPE_SERVICE)) $helpurl='EN:Module_Services_En|FR:Module_Services|ES:M&oacute;dulo_Servicios';
-llxHeader('',$title,$help_url);
+llxHeader('', $title, $helpurl);
+
+$form=new Form($b);
 
 if ($id > 0 || $ref)
 {
@@ -77,16 +87,21 @@ if ($id > 0 || $ref)
 
 		exit;
 	}
-	
+
 	$head=product_prepare_head($object);
     $titre=$langs->trans("CardProduct".$object->type);
     $picto=($object->type== Product::TYPE_SERVICE?'service':'product');
-    dol_fiche_head($head, 'info', $titre, 0, $picto);
+
+    dol_fiche_head($head, 'info', $titre, -1, $picto);
 
 	$linkback = '<a href="'.DOL_URL_ROOT.'/product/list.php">'.$langs->trans("BackToList").'</a>';
+	$object->next_prev_filter=" fk_product_type = ".$object->type;
 
-	dol_banner_tab($object, 'ref', '', ($user->societe_id?0:1), 'ref');
-	
+    $shownav = 1;
+    if ($user->societe_id && ! in_array('product', explode(',',$conf->global->MAIN_MODULES_FOR_EXTERNAL))) $shownav=0;
+
+	dol_banner_tab($object, 'ref', $linkback, $shownav, 'ref');
+
 	$object->info($object->id);
 
 	print '<div class="fichecenter">';
@@ -94,11 +109,11 @@ if ($id > 0 || $ref)
 	print '<div class="underbanner clearboth"></div>';
 
 	print '<br>';
-	
+
 	dol_print_object_info($object);
 
 	print '</div>';
-	
+
 	dol_fiche_end();
 }
 

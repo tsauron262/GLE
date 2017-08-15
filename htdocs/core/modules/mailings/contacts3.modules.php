@@ -32,8 +32,8 @@ include_once DOL_DOCUMENT_ROOT.'/core/modules/mailings/modules_mailings.php';
 class mailing_contacts3 extends MailingTargets
 {
 	var $name='ContactsByCompanyCategory';
-    // This label is used if no translation is found for key MailingModuleDescXXX where XXX=name is found
-    var $desc='Add contacts by company category';
+	// This label is used if no translation is found for key XXX neither MailingModuleDescXXX where XXX=name is found
+	var $desc='Add contacts by company category';
     var $require_admin=0;
 
     var $require_module=array();
@@ -75,7 +75,7 @@ class mailing_contacts3 extends MailingTargets
 
     	$target = array();
 
-        // La requete doit retourner: id, email, fk_contact, lastname, firstname, other
+        // La requete doit retourner: id, email, fk_contact, name, firstname, other
         $sql = "SELECT sp.rowid as id, sp.email as email, sp.rowid as fk_contact,";
         $sql.= " sp.lastname, sp.firstname, sp.civility as civility_id,";
         $sql.= " s.nom as companyname";
@@ -86,7 +86,7 @@ class mailing_contacts3 extends MailingTargets
     	$sql.= " WHERE sp.email <> ''";     // Note that null != '' is false
     	$sql.= " AND sp.no_email = 0";
     	$sql.= " AND sp.statut = 1";
-    	$sql.= " AND sp.entity IN (".getEntity('societe', 1).")";
+    	$sql.= " AND sp.entity IN (".getEntity('societe').")";
     	$sql.= " AND sp.email NOT IN (SELECT email FROM ".MAIN_DB_PREFIX."mailing_cibles WHERE fk_mailing=".$mailing_id.")";
     	if ($filtersarray[0] <> 'all') $sql.= " AND cs.fk_categorie = c.rowid";
     	if ($filtersarray[0] <> 'all') $sql.= " AND cs.fk_soc = sp.fk_soc";
@@ -143,7 +143,7 @@ class mailing_contacts3 extends MailingTargets
             $statssql[$i].= " ".MAIN_DB_PREFIX."categorie_societe as cs";
             $statssql[$i].= " WHERE s.rowid = sp.fk_soc";
             $statssql[$i].= " AND sp.email != ''";    // Note that null != '' is false
-            $statssql[$i].= " AND sp.entity IN (".getEntity('societe', 1).")";
+            $statssql[$i].= " AND sp.entity IN (".getEntity('societe').")";
             $statssql[$i].= " AND cs.fk_categorie = c.rowid";
             $statssql[$i].= " AND cs.fk_soc = sp.fk_soc";
             $statssql[$i].= " GROUP BY c.label";
@@ -171,7 +171,7 @@ class mailing_contacts3 extends MailingTargets
     	$sql = "SELECT count(distinct(c.email)) as nb";
         $sql.= " FROM ".MAIN_DB_PREFIX."socpeople as c";
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
-        $sql.= " WHERE c.entity IN (".getEntity('societe', 1).")";
+        $sql.= " WHERE c.entity IN (".getEntity('societe').")";
         $sql.= " AND c.email != ''"; // Note that null != '' is false
         $sql.= " AND c.no_email = 0";
         $sql.= " AND c.statut = 1";
@@ -182,7 +182,7 @@ class mailing_contacts3 extends MailingTargets
         $sql.= " ".MAIN_DB_PREFIX."categorie as c,";
         $sql.= " ".MAIN_DB_PREFIX."categorie_societe as cs";
         $sql.= " WHERE s.rowid = sp.fk_soc";
-        $sql.= " AND sp.entity IN (".getEntity('societe', 1).")";
+        $sql.= " AND sp.entity IN (".getEntity('societe').")";
         $sql.= " AND sp.email != ''"; // Note that null != '' is false
         $sql.= " AND cs.fk_categorie = c.rowid";
         $sql.= " AND cs.fk_soc = sp.fk_soc";
@@ -211,7 +211,7 @@ class mailing_contacts3 extends MailingTargets
         $sql.= " WHERE sp.email != ''";     // Note that null != '' is false
         $sql.= " AND sp.no_email = 0";
         $sql.= " AND sp.statut = 1";
-        $sql.= " AND sp.entity IN (".getEntity('societe', 1).")";
+        $sql.= " AND sp.entity IN (".getEntity('societe').")";
         $sql.= " AND cs.fk_categorie = c.rowid";
         $sql.= " AND cs.fk_soc = sp.fk_soc";
         $sql.= " GROUP BY c.label";
@@ -225,14 +225,22 @@ class mailing_contacts3 extends MailingTargets
         if ($resql)
         {
             $num = $this->db->num_rows($resql);
-            $i = 0;
-            while ($i < $num)
+            if ($num)
             {
-                $obj = $this->db->fetch_object($resql);
-                $s.='<option value="'.$obj->label.'">'.$obj->label.' ('.$obj->nb.')</option>';
-                $i++;
+                $i = 0;
+                while ($i < $num)
+                {
+                    $obj = $this->db->fetch_object($resql);
+                    $s.='<option value="'.$obj->label.'">'.$obj->label.' ('.$obj->nb.')</option>';
+                    $i++;
+                }
+            }
+            else
+            {
+                $s.='<option value="-1" disabled="disabled">'.$langs->trans("NoContactLinkedToThirdpartieWithCategoryFound").'</option>';
             }
         }
+        else dol_print_error($this->db);
         $s.='</select>';
 
         return $s;

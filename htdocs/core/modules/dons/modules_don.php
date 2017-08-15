@@ -239,7 +239,7 @@ function don_create($db, $id, $message, $modele, $outputlangs, $hidedetails=0, $
         {
             $outputlangs->charset_output=$sav_charset_output;
             dol_syslog("Erreur dans don_create");
-            dol_print_error($db,$module->error);
+            dol_print_error($db,$obj->error);
             return 0;
         }
     }

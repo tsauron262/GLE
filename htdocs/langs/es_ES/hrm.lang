@@ -9,12 +9,9 @@ ConfirmDeleteEstablishment=¿Está seguro de querer eliminar este establecimient
 OpenEtablishment=Abrir establecimiento
 CloseEtablishment=Cerrar establecimiento
 # Dictionary
-DictionaryDepartment= R.R.H.H. Listado departamentos
-DictionaryFunction= R.R.H.H. Listado funciones
+DictionaryDepartment=R.R.H.H. Listado departamentos
+DictionaryFunction=R.R.H.H. Listado funciones
 # Module
-ListOfEmployees=Listado de empleados
 Employees=Empleados
 Employee=Empleado
-Employe=Empleado
 NewEmployee=Nuevo empleado
-EmployeeCard=Ficha de empleado

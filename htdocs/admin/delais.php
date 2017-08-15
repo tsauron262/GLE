@@ -40,7 +40,17 @@ $modules=array(
 						'img' => 'action'
 				)
 		),
-		'propal' => array(
+		'projet' => array(
+				array(
+						'code' => 'MAIN_DELAY_PROJECT_TO_CLOSE',
+						'img' => 'project'
+				),
+				array(
+						'code' => 'MAIN_DELAY_TASKS_TODO',
+						'img' => 'task'
+				)
+		),
+        'propal' => array(
 				array(
 						'code' => 'MAIN_DELAY_PROPALS_TO_CLOSE',
 						'img' => 'propal'
@@ -102,7 +112,12 @@ $modules=array(
 				array(
 						'code' => 'MAIN_DELAY_EXPENSEREPORTS',
 						'img' => 'trip'
-				)
+				),
+    		    /* TODO Enable this
+		        array(
+    		        'code' => 'MAIN_DELAY_EXPENSEREPORTS_TO_PAY',
+    		        'img' => 'trip'
+    		    )*/
 		),
 );
 
@@ -150,7 +165,7 @@ if ($action == 'edit')
     $var=true;
 
     print '<table class="noborder" width="100%">';
-    print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("DelaysOfToleranceBeforeWarning").'</td><td width="120px">'.$langs->trans("Value").'</td></tr>';
+    print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("DelaysOfToleranceBeforeWarning").'</td><td class="center" width="120px">'.$langs->trans("Value").'</td></tr>';
 
     foreach($modules as $module => $delays)
     {
@@ -158,12 +173,12 @@ if ($action == 'edit')
     	{
     		foreach($delays as $delay)
     		{
-    			$var=!$var;
+
 				$value=(! empty($conf->global->{$delay['code']})?$conf->global->{$delay['code']}:0);
-    			print '<tr '.$bc[$var].'>';
+    			print '<tr class="oddeven">';
     			print '<td width="20px">'.img_object('',$delay['img']).'</td>';
     			print '<td>'.$langs->trans('Delays_'.$delay['code']).'</td><td>';
-    			print '<input size="5" name="'.$delay['code'].'" value="'.$value.'"> '.$langs->trans("days").'</td></tr>';
+    			print '<input class="right maxwidth75" type="number" name="'.$delay['code'].'" value="'.$value.'"> '.$langs->trans("days").'</td></tr>';
     		}
     	}
     }
@@ -174,11 +189,11 @@ if ($action == 'edit')
 
 	// Show if meteo is enabled
 	print '<table class="noborder" width="100%">';
-	print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="120px">'.$langs->trans("Value").'</td></tr>';
+	print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td class="center" width="120px">'.$langs->trans("Value").'</td></tr>';
 
 	$var=false;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("MAIN_DISABLE_METEO").'</td><td>' .$form->selectyesno('MAIN_DISABLE_METEO',(empty($conf->global->MAIN_DISABLE_METEO)?0:1),1) . '</td></tr>';
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("MAIN_DISABLE_METEO").'</td><td class="center">' .$form->selectyesno('MAIN_DISABLE_METEO',(empty($conf->global->MAIN_DISABLE_METEO)?0:1),1) . '</td></tr>';
 
 	print '</table>';
 
@@ -196,7 +211,7 @@ else
      */
 
 	print '<table class="noborder" width="100%">';
-    print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("DelaysOfToleranceBeforeWarning").'</td><td width="120px">'.$langs->trans("Value").'</td></tr>';
+    print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("DelaysOfToleranceBeforeWarning").'</td><td class="center" width="120px">'.$langs->trans("Value").'</td></tr>';
     $var=true;
 
     foreach($modules as $module => $delays)
@@ -205,12 +220,12 @@ else
     	{
     		foreach($delays as $delay)
     		{
-    			$var=!$var;
+
 				$value=(! empty($conf->global->{$delay['code']})?$conf->global->{$delay['code']}:0);
-    			print '<tr '.$bc[$var].'>';
+    			print '<tr class="oddeven">';
     			print '<td width="20px">'.img_object('',$delay['img']).'</td>';
     			print '<td>'.$langs->trans('Delays_'.$delay['code']).'</td>';
-    			print '<td>'.$value.' '.$langs->trans("days").'</td></tr>';
+    			print '<td class="right">'.$value.' '.$langs->trans("days").'</td></tr>';
     		}
     	}
     }
@@ -221,11 +236,11 @@ else
 
 	// Show if meteo is enabled
 	print '<table class="noborder" width="100%">';
-	print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td width="120px">'.$langs->trans("Value").'</td></tr>';
+	print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td class="center" width="120px">'.$langs->trans("Value").'</td></tr>';
 
 	$var=false;
-	print '<tr '.$bc[$var].'>';
-	print '<td>'.$langs->trans("MAIN_DISABLE_METEO").'</td><td>' . yn($conf->global->MAIN_DISABLE_METEO) . '</td></tr>';
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("MAIN_DISABLE_METEO").'</td><td class="center">' . yn($conf->global->MAIN_DISABLE_METEO) . '</td></tr>';
 
 	print '</table>';
 
@@ -256,24 +271,24 @@ $text=''; $options='height="60px"';
 print '<table>';
 print '<tr>';
 print '<td>';
-print img_picto_common($text,'weather/weather-clear.png',$options);
+print img_weather($text,'weather-clear.png',$options);
 print '</td><td>= '.$level0.'</td>';
 print '<td> &nbsp; &nbsp; &nbsp; &nbsp; </td>';
 print '<td>';
-print img_picto_common($text,'weather/weather-few-clouds.png',$options);
+print img_weather($text,'weather-few-clouds.png',$options);
 print '</td><td>&lt;= '.$level1.'</td>';
 print '<td> &nbsp; &nbsp; &nbsp; &nbsp; </td>';
 print '<td>';
-print img_picto_common($text,'weather/weather-clouds.png',$options);
+print img_weather($text,'weather-clouds.png',$options);
 print '</td><td>&lt;= '.$level2.'</td>';
 print '</tr>';
 
 print '<tr><td>';
-print img_picto_common($text,'weather/weather-many-clouds.png',$options);
+print img_weather($text,'weather-many-clouds.png',$options);
 print '</td><td>&lt;= '.$level3.'</td>';
 print '<td> &nbsp; &nbsp; &nbsp; &nbsp; </td>';
 print '<td>';
-print img_picto_common($text,'weather/weather-storm.png',$options);
+print img_weather($text,'weather-storm.png',$options);
 print '</td><td>&gt; '.$level3.'</td>';
 print '<td> &nbsp; &nbsp; &nbsp; &nbsp; </td>';
 print '<td> &nbsp; &nbsp; &nbsp; &nbsp; </td>';

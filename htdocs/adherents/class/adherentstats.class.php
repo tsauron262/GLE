@@ -24,7 +24,7 @@
  */
 
 include_once DOL_DOCUMENT_ROOT . '/core/class/stats.class.php';
-include_once DOL_DOCUMENT_ROOT . '/adherents/class/cotisation.class.php';
+include_once DOL_DOCUMENT_ROOT . '/adherents/class/subscription.class.php';
 
 
 /**
@@ -57,15 +57,15 @@ class AdherentStats extends Stats
         $this->socid = $socid;
         $this->userid = $userid;
 
-		$object=new Cotisation($this->db);
+		$object=new Subscription($this->db);
 
 		$this->from = MAIN_DB_PREFIX.$object->table_element." as p";
 		$this->from.= ", ".MAIN_DB_PREFIX."adherent as m";
 
-		$this->field='cotisation';
+		$this->field='subscription';
 
 		$this->where.= " m.statut != 0";
-		$this->where.= " AND p.fk_adherent = m.rowid AND m.entity IN (".getEntity('adherent', 1).")";
+		$this->where.= " AND p.fk_adherent = m.rowid AND m.entity IN (".getEntity('adherent').")";
 		//if (!$user->rights->societe->client->voir && !$user->societe_id) $this->where .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
 		if($this->memberid)
 		{
@@ -76,7 +76,7 @@ class AdherentStats extends Stats
 
 
 	/**
-	 * Renvoie le nombre de proposition par mois pour une annee donnee
+	 * Return the number of proposition by month for a given year
 	 *
      * @param   int		$year       Year
      * @return	array				Array of nb each month
@@ -97,7 +97,7 @@ class AdherentStats extends Stats
 	}
 
 	/**
-	 * Renvoie le nombre de cotisation par annee
+	 * Return the number of subscriptions by year
 	 *
      * @return	array				Array of nb each year
 	 */
@@ -116,7 +116,7 @@ class AdherentStats extends Stats
 	}
 
 	/**
-	 * Renvoie le nombre de cotisation par mois pour une annee donnee
+	 * Return the number of subscriptions by month for a given year 
 	 *
      * @param   int		$year       Year
      * @return	array				Array of amount each month
@@ -169,7 +169,7 @@ class AdherentStats extends Stats
 
 		$sql = "SELECT date_format(p.dateadh,'%Y') as year, count(*) as nb, sum(".$this->field.") as total, avg(".$this->field.") as avg";
 		$sql.= " FROM ".$this->from;
-//		if (stripos($this->where, "societe_commerciaux as sc") === false && stripos($this->where, "sc.") !== false AND !$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+		//if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		$sql.= " WHERE ".$this->where;
 		$sql.= " GROUP BY year";
         $sql.= $this->db->order('year','DESC');

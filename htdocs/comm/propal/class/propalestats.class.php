@@ -26,6 +26,7 @@
 
 include_once DOL_DOCUMENT_ROOT . '/core/class/stats.class.php';
 include_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+include_once DOL_DOCUMENT_ROOT . '/supplier_proposal/class/supplier_proposal.class.php';
 include_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 
@@ -50,8 +51,9 @@ class PropaleStats extends Stats
 	 * @param 	DoliDB	$db		   Database handler
 	 * @param 	int		$socid	   Id third party for filter. This value must be forced during the new to external user company if user is an external user.
      * @param   int		$userid    Id user for filter (creation user)
+	 * @param 	string	$mode	   Option ('customer', 'supplier')
 	 */
-	function __construct($db, $socid=0, $userid=0)
+	function __construct($db, $socid=0, $userid=0, $mode='customer')
 	{
 		global $user, $conf;
 
@@ -59,20 +61,34 @@ class PropaleStats extends Stats
         $this->socid = ($socid > 0 ? $socid : 0);
         $this->userid = $userid;
 
-		$object=new Propal($this->db);
-
-		$this->from = MAIN_DB_PREFIX.$object->table_element." as p";
-		$this->from_line = MAIN_DB_PREFIX.$object->table_element_line." as tl";
-
-		$this->field='total_ht';
-		$this->field_line='total_ht';
-
-		$this->where.= " p.fk_statut > 0";
+        if ($mode == 'customer')
+        {
+    		$object=new Propal($this->db);
+    
+    		$this->from = MAIN_DB_PREFIX.$object->table_element." as p";
+    		$this->from_line = MAIN_DB_PREFIX.$object->table_element_line." as tl";
+    		$this->field_date='p.datep';
+    		$this->field='total_ht';
+    		$this->field_line='total_ht';
+    
+    		$this->where.= " p.fk_statut > 0";
+        }
+        if ($mode == 'supplier')
+        {
+    		$object=new SupplierProposal($this->db);
+    
+    		$this->from = MAIN_DB_PREFIX.$object->table_element." as p";
+    		$this->from_line = MAIN_DB_PREFIX.$object->table_element_line." as tl";
+    		$this->field_date='p.date_valid';
+    		$this->field='total_ht';
+    		$this->field_line='total_ht';
+    
+    		$this->where.= " p.fk_statut > 0";    // Validated, accepted, refused and closed
+        }        
 		//$this->where.= " AND p.fk_soc = s.rowid AND p.entity = ".$conf->entity;
-		$this->where.= " AND p.entity IN (".getEntity('propal', 1).")";
+		$this->where.= " AND p.entity IN (".getEntity('propal').")";
 		if (!$user->rights->societe->client->voir && !$this->socid) $this->where .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
 		if($this->socid)
-                    
 		{
 			$this->where.=" AND p.fk_soc = ".$this->socid;
 		}
@@ -90,10 +106,10 @@ class PropaleStats extends Stats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(p.datep,'%m') as dm, COUNT(*) as nb";
+		$sql = "SELECT date_format(".$this->field_date.",'%m') as dm, COUNT(*) as nb";
 		$sql.= " FROM ".$this->from;
-		if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-		$sql.= " WHERE p.datep BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
+		if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+		$sql.= " WHERE ".$this->field_date." BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
 		$sql.= " AND ".$this->where;
 		$sql.= " GROUP BY dm";
         $sql.= $this->db->order('dm','DESC');
@@ -112,7 +128,7 @@ class PropaleStats extends Stats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(p.datep,'%Y') as dm, COUNT(*) as nb, SUM(c.".$this->field.")";
+		$sql = "SELECT date_format(".$this->field_date.",'%Y') as dm, COUNT(*) as nb, SUM(c.".$this->field.")";
 		$sql.= " FROM ".$this->from;
 		if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		$sql.= " WHERE ".$this->where;
@@ -132,10 +148,10 @@ class PropaleStats extends Stats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(p.datep,'%m') as dm, SUM(p.".$this->field.")";
+		$sql = "SELECT date_format(".$this->field_date.",'%m') as dm, SUM(p.".$this->field.")";
 		$sql.= " FROM ".$this->from;
 		if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-		$sql.= " WHERE p.datep BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
+		$sql.= " WHERE ".$this->field_date." BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
 		$sql.= " AND ".$this->where;
 		$sql.= " GROUP BY dm";
         $sql.= $this->db->order('dm','DESC');
@@ -154,10 +170,10 @@ class PropaleStats extends Stats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(p.datep,'%m') as dm, AVG(p.".$this->field.")";
+		$sql = "SELECT date_format(".$this->field_date.",'%m') as dm, AVG(p.".$this->field.")";
 		$sql.= " FROM ".$this->from;
 		if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-		$sql.= " WHERE p.datep BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
+		$sql.= " WHERE ".$this->field_date." BETWEEN '".$this->db->idate(dol_get_first_day($year))."' AND '".$this->db->idate(dol_get_last_day($year))."'";
 		$sql.= " AND ".$this->where;
 		$sql.= " GROUP BY dm";
         $sql.= $this->db->order('dm','DESC');
@@ -174,7 +190,7 @@ class PropaleStats extends Stats
 	{
 		global $user;
 
-		$sql = "SELECT date_format(p.datep,'%Y') as year, COUNT(*) as nb, SUM(".$this->field.") as total, AVG(".$this->field.") as avg";
+		$sql = "SELECT date_format(".$this->field_date.",'%Y') as year, COUNT(*) as nb, SUM(".$this->field.") as total, AVG(".$this->field.") as avg";
 		$sql.= " FROM ".$this->from;
 		if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		$sql.= " WHERE ".$this->where;
@@ -194,16 +210,18 @@ class PropaleStats extends Stats
 	 */
 	function getAllByProduct($year)
 	{
-/*mod drsi trop trop long		$sql = "SELECT product.ref, COUNT(product.ref) as nb, SUM(tl.".$this->field_line.") as total, AVG(tl.".$this->field_line.") as avg";
+		global $user;
+
+		$sql = "SELECT product.ref, COUNT(product.ref) as nb, SUM(tl.".$this->field_line.") as total, AVG(tl.".$this->field_line.") as avg";
 		$sql.= " FROM ".$this->from.", ".$this->from_line.", ".MAIN_DB_PREFIX."product as product";
-		if (!$user->rights->societe->client->voir && !$this->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+		if (!$user->rights->societe->client->voir && !$user->socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 		$sql.= " WHERE ".$this->where;
 		$sql.= " AND p.rowid = tl.fk_propal AND tl.fk_product = product.rowid";
-    	$sql.= " AND p.datep BETWEEN '".$this->db->idate(dol_get_first_day($year,1,false))."' AND '".$this->db->idate(dol_get_last_day($year,12,false))."'";
+    	$sql.= " AND ".$this->field_date." BETWEEN '".$this->db->idate(dol_get_first_day($year,1,false))."' AND '".$this->db->idate(dol_get_last_day($year,12,false))."'";
 		$sql.= " GROUP BY product.ref";
         $sql.= $this->db->order('nb','DESC');
         //$sql.= $this->db->plimit(20);
 
-		return $this->_getAllByProduct($sql);*/
-	}	
+		return $this->_getAllByProduct($sql);
+	}
 }

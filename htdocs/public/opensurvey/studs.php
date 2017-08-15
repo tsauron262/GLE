@@ -32,7 +32,7 @@ require_once(DOL_DOCUMENT_ROOT."/opensurvey/fonctions.php");
 
 
 // Init vars
-$action=GETPOST('action');
+$action=GETPOST('action','aZ09');
 $numsondage = '';
 if (GETPOST('sondage'))
 {
@@ -41,12 +41,14 @@ if (GETPOST('sondage'))
 
 $object=new Opensurveysondage($db);
 $result=$object->fetch(0,$numsondage);
-if ($result <= 0) dol_print_error('','Failed to get survey id '.$numsondage);
 
 $nblignes=$object->fetch_lines();
 
 //If the survey has not yet finished, then it can be modified
-$canbemodified = (empty($object->date_fin) || $object->date_fin > dol_now());
+$canbemodified = ((empty($object->date_fin) || $object->date_fin > dol_now()) && $object->status != Opensurveysondage::STATUS_CLOSED);
+
+// Security check
+if (empty($conf->opensurvey->enabled)) accessforbidden('',0,0,1);
 
 
 /*
@@ -111,14 +113,14 @@ if (GETPOST("boutonp") || GETPOST("boutonp.x") || GETPOST("boutonp_x"))		// bout
 		}
 
 		$nom=substr(GETPOST("nom"),0,64);
-		
+
 		// Check if vote already exists
 		$sql = 'SELECT id_users, nom as name';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'opensurvey_user_studs';
 		$sql.= " WHERE id_sondage='".$db->escape($numsondage)."' AND nom = '".$db->escape($nom)."' ORDER BY id_users";
 		$resql = $db->query($sql);
 		if (! $resql) dol_print_error($db);
-		
+
 		$num_rows = $db->num_rows($resql);
 		if ($num_rows > 0)
 		{
@@ -241,6 +243,16 @@ $arrayofjs=array();
 $arrayofcss=array('/opensurvey/css/style.css');
 llxHeaderSurvey($object->titre, "", 0, 0, $arrayofjs, $arrayofcss);
 
+if (empty($object->ref))     // For survey, id is a hex string
+{
+    $langs->load("errors");
+    print $langs->trans("ErrorRecordNotFound");
+
+    llxFooterSurvey();
+
+    $db->close();
+    exit();
+}
 
 // Define format of choices
 $toutsujet=explode(",",$object->sujet);
@@ -278,7 +290,7 @@ if (!$canbemodified) {
 	llxFooterSurvey();
 
 	$db->close();
-	die;
+	exit;
 }
 
 print '<form name="formulaire" action="studs.php?sondage='.$numsondage.'"'.'#bas" method="POST">'."\n";
@@ -727,7 +739,7 @@ if ($comments)
 if ($object->allow_comments) {
 	print '<div class="addcomment">' .$langs->trans("AddACommentForPoll") . "<br>\n";
 
-	print '<textarea name="comment" rows="2" cols="60"></textarea><br>'."\n";
+	print '<textarea name="comment" rows="'.ROWS_2.'" class="quatrevingtpercent"></textarea><br>'."\n";
 	print $langs->trans("Name") .': ';
 	print '<input type="text" name="commentuser" maxlength="64" /> &nbsp; '."\n";
 	print '<input type="submit" class="button" name="ajoutcomment" value="'.dol_escape_htmltag($langs->trans("AddComment")).'"><br>'."\n";

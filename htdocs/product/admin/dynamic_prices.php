@@ -16,7 +16,7 @@
  */
 
 /**
- *  \file		htdocs/product/admin/expression_globals.php
+ *  \file		htdocs/product/admin/dynamic_prices.php
  *  \ingroup	product
  *  \brief		Page for configuring dynamic prices
  */
@@ -54,9 +54,11 @@ if ($action == 'edit_updater') {
     }
 }
 
+
 /*
  * Actions
  */
+
 if (!empty($action) && empty($cancel)) {
     //Global variable actions
     if ($action == 'create_variable' || $action == 'edit_variable') {
@@ -142,34 +144,56 @@ if (!empty($action) && empty($cancel)) {
  * View
  */
 
-//Header
 llxHeader("","",$langs->trans("CardProduct".$product->type));
+
 print load_fiche_titre($langs->trans("DynamicPriceConfiguration"));
 $form = new Form($db);
+
+print $langs->trans("DynamicPriceDesc").'<br>';
+print '<br>';
 
 //Global variables table
 if ($action != 'create_updater' && $action != 'edit_updater') {
     print $langs->trans("GlobalVariables");
     print '<table summary="listofattributes" class="noborder" width="100%">';
     print '<tr class="liste_titre">';
-    print '<td>'.$langs->trans("Code").'</td>';
+    print '<td>'.$langs->trans("Variable").'</td>';
     print '<td>'.$langs->trans("Description").'</td>';
     print '<td>'.$langs->trans("Value").'</td>';
     print '<td width="80">&nbsp;</td>'; //Space for buttons
     print '</tr>';
 
-    $var=True;
-    foreach ($price_globals->listGlobalVariables() as $i=>$entry) {
-        $var = !$var;
-        print '<tr '.$bc[$var].'>';
-        print '<td>'.$entry->code.'</td>';
-        print '<td>'.$entry->description.'</td>';
-        print '<td>'.price($entry->value).'</td>';
-        print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=edit_variable&selection='.$entry->id.'">'.img_edit().'</a> &nbsp;';
-        print '<a href="'.$_SERVER["PHP_SELF"].'?action=delete_variable&selection='.$entry->id.'">'.img_delete().'</a></td>';
-        print '</tr>';
+    $arrayglobalvars=$price_globals->listGlobalVariables();
+    if (! empty($arrayglobalvars))
+    {
+	    foreach ($arrayglobalvars as $i=>$entry) {
+	        $var = !$var;
+	        print '<tr class="oddeven">';
+	        print '<td>'.$entry->code.'</td>';
+	        print '<td>'.$entry->description.'</td>';
+	        print '<td>'.price($entry->value).'</td>';
+	        print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=edit_variable&selection='.$entry->id.'">'.img_edit().'</a> &nbsp;';
+	        print '<a href="'.$_SERVER["PHP_SELF"].'?action=delete_variable&selection='.$entry->id.'">'.img_delete().'</a></td>';
+	        print '</tr>';
+	    }
+    }
+    else
+    {
+    	print '<tr colspan="7"><td class="opacitymedium">';
+    	print $langs->trans("None");
+    	print '</td></tr>';
     }
     print '</table>';
+
+    if (empty($action))
+    {
+        //Action Buttons
+        print '<div class="tabsAction">';
+        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=create_variable">'.$langs->trans("AddVariable").'</a>';
+        print '</div>';
+        //Separator is only need for updaters table is showed after buttons
+        print '<br><br>';
+    }
 }
 
 //Global variable editor
@@ -184,7 +208,7 @@ if ($action == 'create_variable' || $action == 'edit_variable') {
     print '<br><table summary="listofattributes" class="border centpercent">';
     //Code
     print '<tr>';
-    print '<td class="fieldrequired">'.$langs->trans("Code").'</td>';
+    print '<td class="fieldrequired">'.$langs->trans("Variable").'</td>';
     print '<td class="valeur"><input type="text" name="code" size="20" value="'.(empty($price_globals->code)?'':$price_globals->code).'"></td>';
     print '</tr>';
     //Description
@@ -205,21 +229,14 @@ if ($action == 'create_variable' || $action == 'edit_variable') {
     print '<input type="submit" class="button" name="cancel" id="cancel" value="'.$langs->trans("Cancel").'">';
     print '</div>';
     print '</form>';
-} else {
-    //Action Buttons
-    print '<div class="tabsAction">';
-    print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=create_variable">'.$langs->trans("Add").'</a>';
-    print '</div>';
-    //Separator is only need for updaters table is showed after buttons
-    print '<br><br>';
 }
 
-//Updaters table
+// Updaters table
 if ($action != 'create_variable' && $action != 'edit_variable') {
     print $langs->trans("GlobalVariableUpdaters");
     print '<table summary="listofattributes" class="noborder" width="100%">';
     print '<tr class="liste_titre">';
-    print '<td>'.$langs->trans("Code").'</td>';
+    print '<td>'.$langs->trans("VariableToUpdate").'</td>';
     print '<td>'.$langs->trans("Description").'</td>';
     print '<td>'.$langs->trans("Type").'</td>';
     print '<td>'.$langs->trans("Parameters").'</td>';
@@ -228,28 +245,44 @@ if ($action != 'create_variable' && $action != 'edit_variable') {
     print '<td width="80">&nbsp;</td>'; //Space for buttons
     print '</tr>';
 
-    $var=True;
-    foreach ($price_updaters->listUpdaters() as $i=>$entry) {
-        $code = "";
-        if ($entry->fk_variable > 0) {
-            $res = $price_globals->fetch($entry->fk_variable);
-            if ($res > 0) {
-                $code = $price_globals->code;
-            }
-        }
-        $var = !$var;
-        print '<tr '.$bc[$var].'>';
-        print '<td>'.$code.'</td>';
-        print '<td>'.$entry->description.'</td>';
-        print '<td>'.$langs->trans("GlobalVariableUpdaterType".$entry->type).'</td>';
-        print '<td style="max-width: 250px; word-wrap: break-word; white-space: pre-wrap;">'.$entry->parameters.'</td>';
-        print '<td>'.$entry->update_interval.'</td>';
-        print '<td>'.$entry->getLastUpdated().'</td>';
-        print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=edit_updater&selection='.$entry->id.'">'.img_edit().'</a> &nbsp;';
-        print '<a href="'.$_SERVER["PHP_SELF"].'?action=delete_updater&selection='.$entry->id.'">'.img_delete().'</a></td>';
-        print '</tr>';
+    $arraypriceupdaters = $price_updaters->listUpdaters();
+    if (! empty($arraypriceupdaters))
+    {
+	    foreach ($arraypriceupdaters as $i=>$entry) {
+	        $code = "";
+	        if ($entry->fk_variable > 0) {
+	            $res = $price_globals->fetch($entry->fk_variable);
+	            if ($res > 0) {
+	                $code = $price_globals->code;
+	            }
+	        }
+	        print '<tr>';
+	        print '<td>'.$code.'</td>';
+	        print '<td>'.$entry->description.'</td>';
+	        print '<td>'.$langs->trans("GlobalVariableUpdaterType".$entry->type).'</td>';
+	        print '<td style="max-width: 250px; word-wrap: break-word; white-space: pre-wrap;">'.$entry->parameters.'</td>';
+	        print '<td>'.$entry->update_interval.'</td>';
+	        print '<td>'.$entry->getLastUpdated().'</td>';
+	        print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=edit_updater&selection='.$entry->id.'">'.img_edit().'</a> &nbsp;';
+	        print '<a href="'.$_SERVER["PHP_SELF"].'?action=delete_updater&selection='.$entry->id.'">'.img_delete().'</a></td>';
+	        print '</tr>';
+	    }
+    }
+    else
+    {
+    	print '<tr colspan="7"><td class="opacitymedium">';
+    	print $langs->trans("None");
+    	print '</td></tr>';
     }
     print '</table>';
+
+    if (empty($action))
+    {
+        //Action Buttons
+        print '<div class="tabsAction">';
+        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=create_updater">'.$langs->trans("AddUpdater").'</a>';
+        print '</div>';
+    }
 }
 
 //Updater editor
@@ -264,7 +297,7 @@ if ($action == 'create_updater' || $action == 'edit_updater') {
     print '<br><table summary="listofattributes" class="border centpercent">';
     //Code
     print '<tr>';
-    print '<td class="fieldrequired">'.$langs->trans("Code").'</td><td>';
+    print '<td class="fieldrequired">'.$langs->trans("VariableToUpdate").'</td><td>';
     $globals_list = array();
     foreach ($price_globals->listGlobalVariables() as $entry) {
         $globals_list[$entry->id]=$entry->code;
@@ -301,7 +334,7 @@ if ($action == 'create_updater' || $action == 'edit_updater') {
     $help = $langs->trans("GlobalVariableUpdaterHelp".$type).'<br><b>'.$langs->trans("GlobalVariableUpdaterHelpFormat".$type).'</b>';
     print '<td class="fieldrequired">'.$form->textwithpicto($langs->trans("Parameters"),$help,1).'</td><td>';
     require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
-    $doleditor=new DolEditor('parameters',empty($price_updaters->parameters)?'':$price_updaters->parameters,'',300,'','',false,false,false,10,80);
+    $doleditor=new DolEditor('parameters',empty($price_updaters->parameters)?'':$price_updaters->parameters,'',300,'','',false,false,false,ROWS_8,'90%');
     $doleditor->Create();
     print '</td></tr>';
     print '</tr>';
@@ -318,11 +351,6 @@ if ($action == 'create_updater' || $action == 'edit_updater') {
     print '<input type="submit" class="button" name="cancel" id="cancel" value="'.$langs->trans("Cancel").'">';
     print '</div>';
     print '</form>';
-} else {
-    //Action Buttons
-    print '<div class="tabsAction">';
-    print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=create_updater">'.$langs->trans("Add").'</a>';
-    print '</div>';
 }
 
 llxFooter();

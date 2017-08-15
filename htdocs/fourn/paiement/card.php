@@ -26,6 +26,7 @@
  */
 
 require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require DOL_DOCUMENT_ROOT.'/fourn/class/paiementfourn.class.php';
 require DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php';
 require DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
@@ -41,6 +42,11 @@ $action		= GETPOST('action','alpha');
 $confirm	= GETPOST('confirm','alpha');
 
 $object = new PaiementFourn($db);
+
+// PDF
+$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
+$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
+$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
 
 /*
  * Actions
@@ -133,6 +139,32 @@ if ($action == 'setdatep' && ! empty($_POST['datepday']))
 	}
 }
 
+// Build document
+if ($action == 'builddoc')
+{
+	// Save modele used
+    $object->fetch($id);
+    $object->fetch_thirdparty();
+
+	// Save last template used to generate document
+	if (GETPOST('model')) $object->setDocModel($user, GETPOST('model','alpha'));
+
+    $outputlangs = $langs;
+    $newlang=GETPOST('lang_id','aZ09');
+    if ($conf->global->MAIN_MULTILANGS && empty($newlang)) $newlang=$object->thirdparty->default_lang;
+    if (! empty($newlang))
+    {
+        $outputlangs = new Translate("",$conf);
+        $outputlangs->setDefaultLang($newlang);
+    }
+	$result = $object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+    if ($result	< 0)
+    {
+		setEventMessages($object->error, $object->errors, 'errors');
+	    $action='';
+    }
+}
+
 
 /*
  * View
@@ -143,10 +175,11 @@ llxHeader();
 $result=$object->fetch($id);
 
 $form = new Form($db);
+$formfile = new FormFile($db);
 
 $head = payment_supplier_prepare_head($object);
 
-dol_fiche_head($head, 'payment', $langs->trans('SupplierPayment'), 0, 'payment');
+dol_fiche_head($head, 'payment', $langs->trans('SupplierPayment'), -1, 'payment');
 
 if ($result > 0)
 {
@@ -168,15 +201,23 @@ if ($result > 0)
 
 	}
 
+	$linkback = '<a href="' . DOL_URL_ROOT . '/fourn/facture/paiement.php' . (! empty($socid) ? '?socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
+	
+	
+	dol_banner_tab($object,'id',$linkback,1,'rowid','ref');
+	
+	print '<div class="fichecenter">';
+	print '<div class="underbanner clearboth"></div>';
+	
 	print '<table class="border" width="100%">';
 
-	print '<tr>';
+	/*print '<tr>';
 	print '<td width="20%" colspan="2">'.$langs->trans('Ref').'</td><td colspan="3">';
     print $form->showrefnav($object,'id','',1,'rowid','ref');
-	print '</td></tr>';
+	print '</td></tr>';*/
 
 	// Date payment
-    print '<tr><td colspan="2">'.$form->editfieldkey("Date",'datep',$object->date,$object,$object->statut == 0 && $user->rights->fournisseur->facture->creer).'</td><td colspan="3">';
+    print '<tr><td class="titlefield" colspan="2">'.$form->editfieldkey("Date",'datep',$object->date,$object,$object->statut == 0 && $user->rights->fournisseur->facture->creer).'</td><td colspan="3">';
     print $form->editfieldval("Date",'datep',$object->date,$object,$object->statut == 0 && $user->rights->fournisseur->facture->creer,'datepicker','',null,$langs->trans('PaymentDateUpdateSucceeded'));
     print '</td></tr>';
 
@@ -202,6 +243,7 @@ if ($result > 0)
     print $form->editfieldval("Note",'note',$object->note,$object,$user->rights->fournisseur->facture->creer,'textarea');
     print '</td></tr>';
 
+	$allow_delete = 1 ;
     // Bank account
 	if (! empty($conf->banque->enabled))
 	{
@@ -209,6 +251,11 @@ if ($result > 0)
 		{
             $bankline=new AccountLine($db);
             $bankline->fetch($object->bank_line);
+            if ($bankline->rappro)
+            {
+                $allow_delete=0;
+                $title_button = dol_escape_htmltag($langs->transnoentitiesnoconv("CantRemoveConciliatedPayment"));
+            }
 
             print '<tr>';
             print '<td colspan="2">'.$langs->trans('BankTransactionLine').'</td>';
@@ -221,9 +268,8 @@ if ($result > 0)
 	    	print '<td colspan="2">'.$langs->trans('BankAccount').'</td>';
 			print '<td colspan="3">';
 			$accountstatic=new Account($db);
-	        $accountstatic->id=$bankline->fk_account;
-	        $accountstatic->label=$bankline->bank_account_ref.' - '.$bankline->bank_account_label;
-	        print $accountstatic->getNomUrl(0);
+			$accountstatic->fetch($bankline->fk_account);
+	        print $accountstatic->getNomUrl(1);
 	    	print '</td>';
 	    	print '</tr>';
         }
@@ -231,12 +277,13 @@ if ($result > 0)
 
 	print '</table>';
 
+	print '</div>';
+	
 	print '<br>';
 
 	/**
 	 *	Liste des factures
 	 */
-	$allow_delete = 1 ;
 	$sql = 'SELECT f.rowid, f.ref, f.ref_supplier, f.total_ttc, pf.amount, f.rowid as facid, f.paye, f.fk_statut, s.nom as name, s.rowid as socid';
 	$sql .= ' FROM '.MAIN_DB_PREFIX.'paiementfourn_facturefourn as pf,'.MAIN_DB_PREFIX.'facture_fourn as f,'.MAIN_DB_PREFIX.'societe as s';
 	$sql .= ' WHERE pf.fk_facturefourn = f.rowid AND f.fk_soc = s.rowid';
@@ -268,8 +315,8 @@ if ($result > 0)
 			while ($i < $num)
 			{
 				$objp = $db->fetch_object($resql);
-				$var=!$var;
-				print '<tr '.$bc[$var].'>';
+				
+				print '<tr class="oddeven">';
 				// Ref
 				print '<td><a href="'.DOL_URL_ROOT.'/fourn/facture/card.php?facid='.$objp->facid.'">'.img_object($langs->trans('ShowBill'),'bill').' ';
 				print ($objp->ref?$objp->ref:$objp->rowid);
@@ -288,12 +335,13 @@ if ($result > 0)
 				if ($objp->paye == 1)
 				{
 					$allow_delete = 0;
+                    $title_button = dol_escape_htmltag($langs->transnoentitiesnoconv("CantRemovePaymentWithOneInvoicePaid"));
 				}
 				$total = $total + $objp->amount;
 				$i++;
 			}
 		}
-		$var=!$var;
+		
 
 		print "</table>\n";
 		$db->free($resql);
@@ -323,15 +371,48 @@ if ($result > 0)
 			}
 		}
 	}
-	if ($user->societe_id == 0 && $allow_delete && $object->statut == 0 && $action == '')
+	if ($user->societe_id == 0 && $action == '')
 	{
 		if ($user->rights->fournisseur->facture->supprimer)
 		{
-			print '<a class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=delete">'.$langs->trans('Delete').'</a>';
-
+            if ($allow_delete)
+            {
+				print '<a class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=delete">'.$langs->trans('Delete').'</a>';
+            }
+            else
+            {
+                print '<a class="butActionRefused" href="#" title="'.$title_button.'">'.$langs->trans('Delete').'</a>';
+            }
 		}
 	}
 	print '</div>';
+	
+	print '<div class="fichecenter"><div class="fichehalfleft">';
+
+	/*
+     * Documents generes
+     */
+    $ref=dol_sanitizeFileName($object->ref);
+    $filedir = $conf->fournisseur->payment->dir_output.'/'.dol_sanitizeFileName($object->ref);
+    $urlsource=$_SERVER['PHP_SELF'].'?id='.$object->id;
+    $genallowed=$user->rights->fournisseur->facture->creer;
+    $delallowed=$user->rights->fournisseur->facture->supprimer;
+    $modelpdf=(! empty($object->modelpdf)?$object->modelpdf:(empty($conf->global->SUPPLIER_PAYMENT_ADDON_PDF)?'':$conf->global->SUPPLIER_PAYMENT_ADDON_PDF));
+
+    print $formfile->showdocuments('supplier_payment',$ref,$filedir,$urlsource,$genallowed,$delallowed,$modelpdf,1,0,0,40,0,'','','',$societe->default_lang);
+    $somethingshown=$formfile->numoffiles;
+
+	print '</div><div class="fichehalfright"><div class="ficheaddleft">';
+    //print '</td><td valign="top" width="50%">';
+    //print '<br>';
+
+    // List of actions on element
+    include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
+    $formactions=new FormActions($db);
+    $somethingshown=$formactions->showactions($object,'supplier_payment',$socid,0,'listaction'.($genallowed?'largetitle':''));
+
+	print '</div></div></div>';
+    //print '</td></tr></table>';
 
 }
 else

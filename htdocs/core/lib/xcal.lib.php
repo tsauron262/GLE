@@ -85,9 +85,9 @@ function build_calfile($format,$title,$desc,$events_array,$outputfile)
                 $priority     = $event['priority'];
                 $fulldayevent = $event['fulldayevent'];
 				$location     = $event['location'];
-				$email 		  = (isset($event['email']) ? $event['email'] : "");
+				$email 		  = $event['email'];
 				$url		  = $event['url'];
-				$transparency = (isset($event['transparency']) ? $event['transparency'] : 0);		// OPAQUE (busy) or TRANSPARENT (not busy)
+				$transparency = $event['transparency'];		// OPAQUE (busy) or TRANSPARENT (not busy)
 				$description=preg_replace('/<br[\s\/]?>/i',"\n",$event['desc']);
  				$description=dol_string_nohtmltag($description,0);	// Remove html tags
                 $created      = $event['created'];
@@ -149,11 +149,7 @@ function build_calfile($format,$title,$desc,$events_array,$outputfile)
 					}
 					if (! empty($url))
 					{
-                                            /*mod drsi*/
-                                            if(stripos($url, "http") !== 0)
-                                                    $url = (isset($_SERVER["https"]) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].$url;
 						fwrite($calfileh,"URL:".$url."\n");
-                                                /*fmoddrsi*/
 					};
 
                     if ($created)  fwrite($calfileh,"CREATED:".dol_print_date($created,'dayhourxcard',true)."\n");
@@ -182,53 +178,47 @@ function build_calfile($format,$title,$desc,$events_array,$outputfile)
                     //fwrite($calfileh,"X-MICROSOFT-CDO-BUSYSTATUS:1\n");
                     //ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=Laurent Destailleur;X-NUM-GUESTS=0:mailto:eldy10@gmail.com
 
-                    if (! empty($location))
-                        fwrite($calfileh, "LOCATION:" . $encoding . $location . "\n");
-//                    if ($fulldayevent)
-//                        fwrite($calfileh, "X-FUNAMBOL-ALLDAY:1\n");
-//                    if ($fulldayevent)
-//                        fwrite($calfileh, "X-MICROSOFT-CDO-ALLDAYEVENT:1\n");
-                    date_default_timezone_set("Europe/Paris");
-                    // Date must be GMT dates
-                    // Current date
-                    fwrite($calfileh, "DTSTAMP:" . dol_print_date($now, 'dayhourxcard', true) . "\n");
-                    // Start date
-                    $prefix = ';VALUE=DATE-TIME';
-                    $prefix.=';TZID=Europe/Paris';
-                    $startdatef = str_replace("Z", "", dol_print_date($startdate, 'dayhourxcard'));
-                    if ($fulldayevent) {
-                        $prefix = ';VALUE=DATE';
-                        $startdatef = dol_print_date($startdate, 'dayxcard') . "";     // Local time
-                    }
-                    fwrite($calfileh, "DTSTART" . $prefix . ":" . $startdatef . "\n");
-                    // End date
-                    if ($fulldayevent) {
-                        if (empty($enddate))
-                            $enddate = dol_time_plus_duree($startdate, 1, 'd');
-                    }
-                    else {
-                        if (empty($enddate))
-                            $enddate = $startdate + $duration;
-                    }
-                    $prefix = ';VALUE=DATE-TIME';
-                    $prefix.=';TZID=Europe/Paris';
-                    $enddatef = str_replace("Z", "", dol_print_date($enddate, 'dayhourxcard'));
-                    if ($fulldayevent) {
-                        $prefix = ';VALUE=DATE';
-                        $enddatef = dol_print_date($enddate + (60 * 60 * 24 * 0) + 100, 'dayxcard') . "";
-                        //$en$fulldayeventddatef .= dol_print_date($enddate+1,'dayhourxcard',false);   // Local time
-                    }
-                    fwrite($calfileh, "DTEND" . $prefix . ":" . $enddatef . "\n");
-//                    dol_syslog("Date : " . "DTSTART" . $prefix . ":" . $startdatef . " | " . "DTEND" . $prefix . ":" . $enddatef, 3);
-                    fwrite($calfileh, 'STATUS:CONFIRMED' . "\n");
-                    if (!empty($transparency))
-                        fwrite($calfileh, "TRANSP:" . $transparency . "\n");
-                    if (!empty($category))
-                        fwrite($calfileh, "CATEGORIES:" . $encoding . $category . "\n");
-                    fwrite($calfileh, "END:VEVENT\n");
-                }
+                    if (! empty($location)) fwrite($calfileh,"LOCATION:".$encoding.$location."\n");
+					if ($fulldayevent) fwrite($calfileh,"X-FUNAMBOL-ALLDAY:1\n");
+                    if ($fulldayevent) fwrite($calfileh,"X-MICROSOFT-CDO-ALLDAYEVENT:1\n");
 
-                // Output the vCard/iCal VTODO object
+					// Date must be GMT dates
+					// Current date
+					fwrite($calfileh,"DTSTAMP:".dol_print_date($now,'dayhourxcard',true)."\n");
+					// Start date
+                    $prefix='';
+                    $startdatef = dol_print_date($startdate,'dayhourxcard',true);
+                    if ($fulldayevent)
+					{
+                        $prefix=';VALUE=DATE';
+					    $startdatef = dol_print_date($startdate,'dayxcard',false);     // Local time
+					}
+					fwrite($calfileh,"DTSTART".$prefix.":".$startdatef."\n");
+                    // End date
+					if ($fulldayevent)
+					{
+    					if (empty($enddate)) $enddate=dol_time_plus_duree($startdate,1,'d');
+					}
+					else
+					{
+                        if (empty($enddate)) $enddate=$startdate+$duration;
+					}
+                    $prefix='';
+					$enddatef = dol_print_date($enddate,'dayhourxcard',true);
+					if ($fulldayevent)
+					{
+                        $prefix=';VALUE=DATE';
+					    $enddatef = dol_print_date($enddate+1,'dayxcard',false);
+					    //$enddatef .= dol_print_date($enddate+1,'dayhourxcard',false);   // Local time
+					}
+                    fwrite($calfileh,"DTEND".$prefix.":".$enddatef."\n");
+					fwrite($calfileh,'STATUS:CONFIRMED'."\n");
+					if (! empty($transparency)) fwrite($calfileh,"TRANSP:".$transparency."\n");
+					if (! empty($category)) fwrite($calfileh,"CATEGORIES:".$encoding.$category."\n");
+					fwrite($calfileh,"END:VEVENT\n");
+				}
+
+				// Output the vCard/iCal VTODO object
 				// ...
 				//PERCENT-COMPLETE:39
 
@@ -244,11 +234,7 @@ function build_calfile($format,$title,$desc,$events_array,$outputfile)
 					}
 					if (! empty($url))
 					{
-                                            /*mod drsi*/
-                                            if(stripos($url, "http") !== 0)
-                                                    $url = (isset($_SERVER["https"]) ? 'https' : 'http') ."://". $_SERVER['HTTP_HOST'].$url;
 						fwrite($calfileh,"URL:".$url."\n");
-                                                /*fmoddrsi*/
 					};
 
                     if ($created)  fwrite($calfileh,"CREATED:".dol_print_date($created,'dayhourxcard',true)."\n");

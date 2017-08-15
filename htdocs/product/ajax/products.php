@@ -49,19 +49,23 @@ $action = GETPOST('action', 'alpha');
 $id = GETPOST('id', 'int');
 $price_by_qty_rowid = GETPOST('pbq', 'int');
 $finished = GETPOST('finished', 'int');
+$alsoproductwithnosupplierprice = GETPOST('alsoproductwithnosupplierprice', 'int');
+$warehouseStatus = GETPOST('warehousestatus', 'alpha');
+
 
 /*
  * View
  */
 
-// print '<!-- Ajax page called with url '.$_SERVER["PHP_SELF"].'?'.$_SERVER["QUERY_STRING"].' -->'."\n";
+// print '<!-- Ajax page called with url '.dol_escape_htmltag($_SERVER["PHP_SELF"]).'?'.dol_escape_htmltag($_SERVER["QUERY_STRING"]).' -->'."\n";
 
 dol_syslog(join(',', $_GET));
 // print_r($_GET);
 
-if (! empty($action) && $action == 'fetch' && ! empty($id)) {
+if (! empty($action) && $action == 'fetch' && ! empty($id))
+{
 	require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-	
+
 	$outjson = array();
 
 	$object = new Product($db);
@@ -106,7 +110,7 @@ if (! empty($action) && $action == 'fetch' && ! empty($id)) {
 			$sql = "SELECT price, price_ttc, price_base_type, tva_tx";
 			$sql .= " FROM " . MAIN_DB_PREFIX . "product_price ";
 			$sql .= " WHERE fk_product='" . $id . "'";
-			$sql .= " AND entity IN (" . getEntity('productprice', 1) . ")";
+			$sql .= " AND entity IN (" . getEntity('productprice') . ")";
 			$sql .= " AND price_level=" . $price_level;
 			$sql .= " ORDER BY date_price";
 			$sql .= " DESC LIMIT 1";
@@ -156,7 +160,9 @@ if (! empty($action) && $action == 'fetch' && ! empty($id)) {
 	}
 
 	echo json_encode($outjson);
-} else {
+}
+else
+{
 	require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 	$langs->load("products");
@@ -165,29 +171,35 @@ if (! empty($action) && $action == 'fetch' && ! empty($id)) {
 	top_httphead();
 
 	if (empty($htmlname))
-		return;
+	{
+		print json_encode(array());
+	    return;
+	}
 
 	$match = preg_grep('/(' . $htmlname . '[0-9]+)/', array_keys($_GET));
 	sort($match);
 
 	$idprod = (! empty($match[0]) ? $match[0] : '');
-	
-	if (! GETPOST($htmlname) && ! GETPOST($idprod))
-		return;
 
-		// When used from jQuery, the search term is added as GET param "term".
-	$searchkey = addslashes(GETPOST($idprod) ? GETPOST($idprod) : (GETPOST($htmlname) ? GETPOST($htmlname) : ''));
+	if (GETPOST($htmlname,'alpha') == '' && (! $idprod || ! GETPOST($idprod,'alpha')))
+	{
+		print json_encode(array());
+	    return;
+	}
+
+	// When used from jQuery, the search term is added as GET param "term".
+	$searchkey = (($idprod && GETPOST($idprod,'alpha')) ? GETPOST($idprod,'alpha') :  (GETPOST($htmlname, 'alpha') ? GETPOST($htmlname, 'alpha') : ''));
 
 	$form = new Form($db);
-	if (empty($mode) || $mode == 1) {
-		$arrayresult = $form->select_produits_list("", $htmlname, $type, "", $price_level, $searchkey, $status, $finished, $outjson, $socid);
-	} elseif ($mode == 2) {
-		$arrayresult = $form->select_produits_fournisseurs_list($socid, "", $htmlname, $type, "", $searchkey, $status, $outjson);
+	if (empty($mode) || $mode == 1) {  // mode=1: customer
+		$arrayresult = $form->select_produits_list("", $htmlname, $type, 0, $price_level, $searchkey, $status, $finished, $outjson, $socid, '1', 0, '', 0, $warehouseStatus);
+	} elseif ($mode == 2) {            // mode=2: supplier
+		$arrayresult = $form->select_produits_fournisseurs_list($socid, "", $htmlname, $type, "", $searchkey, $status, $outjson, 0, $alsoproductwithnosupplierprice);
 	}
 
 	$db->close();
 
 	if ($outjson)
-		print @json_encode($arrayresult);
+		print json_encode($arrayresult);
 }
 

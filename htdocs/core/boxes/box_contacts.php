@@ -46,6 +46,21 @@ class box_contacts extends ModeleBoxes
 
 
 	/**
+	 *  Constructor
+	 *
+	 *  @param  DoliDB  $db         Database handler
+	 *  @param  string  $param      More parameters
+	 */
+	function __construct($db,$param)
+	{
+	    global $user;
+
+	    $this->db=$db;
+
+	    $this->hidden=! ($user->rights->societe->lire);
+	}
+
+	/**
 	 *  Load data into info_box_contents array to show array later.
 	 *
 	 *  @param	int		$max        Maximum number of records to load
@@ -69,7 +84,7 @@ class box_contacts extends ModeleBoxes
 			$sql.= " FROM ".MAIN_DB_PREFIX."socpeople as sp";
 			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON sp.fk_soc = s.rowid";
 			if (! $user->rights->societe->client->voir && ! $user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-			$sql.= " WHERE sp.entity IN (".getEntity('societe', 1).")";
+			$sql.= " WHERE sp.entity IN (".getEntity('societe').")";
 			if (! $user->rights->societe->client->voir && ! $user->societe_id) $sql.= " AND sp.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 			if ($user->societe_id) $sql.= " AND sp.fk_soc = ".$user->societe_id;
 			$sql.= " ORDER BY sp.tms DESC";
@@ -83,7 +98,7 @@ class box_contacts extends ModeleBoxes
 				$societestatic=new Societe($db);
 
 				$line = 0;
-                while ($line < $num) 
+                while ($line < $num)
                 {
 					$objp = $db->fetch_object($result);
 					$datec=$db->jdate($objp->datec);
@@ -100,7 +115,7 @@ class box_contacts extends ModeleBoxes
                     $contactstatic->address = $objp->address;
                     $contactstatic->zip = $objp->zip;
                     $contactstatic->town = $objp->town;
-					
+
 					$societestatic->id = $objp->fk_soc;
                     $societestatic->name = $objp->socname;
                     $societestatic->name_alias = $objp->name_alias;
@@ -108,21 +123,21 @@ class box_contacts extends ModeleBoxes
                     $societestatic->code_fournisseur = $objp->code_fournisseur;
                     $societestatic->client = $objp->client;
                     $societestatic->fournisseur = $objp->fournisseur;
-                    
+
                     $this->info_box_contents[$line][] = array(
-                        'td' => 'align="left"',
+                        'td' => '',
                         'text' => $contactstatic->getNomUrl(1),
                         'asis' => 1,
                     );
 
                     $this->info_box_contents[$line][] = array(
-                        'td' => 'align="left"',
+                        'td' => '',
                         'text' => ($objp->fk_soc > 0 ? $societestatic->getNomUrl(1) : ''),
                         'asis' => 1,
                     );
 
                     $this->info_box_contents[$line][] = array(
-                        'td' => 'align="right"',
+                        'td' => 'class="right"',
                         'text' => dol_print_date($datem, "day"),
                     );
 
@@ -131,7 +146,7 @@ class box_contacts extends ModeleBoxes
                         'text' => $contactstatic->getLibStatut(3),
                         'asis'=>1,
                     );
-                    
+
                     $line++;
                 }
 
@@ -144,15 +159,15 @@ class box_contacts extends ModeleBoxes
                 $db->free($result);
             } else {
                 $this->info_box_contents[0][0] = array(
-                    'td' => 'align="left"',
+                    'td' => '',
                     'maxlength'=>500,
                     'text' => ($db->error().' sql='.$sql),
                 );
             }
         } else {
             $this->info_box_contents[0][0] = array(
-                'align' => 'left',
-                'text' => $langs->trans("ReadPermissionNotAllowed"),
+                'td' => 'align="left" class="nohover opacitymedium"',
+                'text' => $langs->trans("ReadPermissionNotAllowed")
             );
         }
 
@@ -163,11 +178,12 @@ class box_contacts extends ModeleBoxes
 	 *
 	 *	@param	array	$head       Array with properties of box title
 	 *	@param  array	$contents   Array with properties of box lines
-	 *	@return	void
+	 *  @param	int		$nooutput	No print, only return string
+	 *	@return	string
 	 */
-	function showBox($head = null, $contents = null)
-	{
-		parent::showBox($this->info_box_head, $this->info_box_contents);
+    function showBox($head = null, $contents = null, $nooutput=0)
+    {
+		return parent::showBox($this->info_box_head, $this->info_box_contents, $nooutput);
 	}
 
 }

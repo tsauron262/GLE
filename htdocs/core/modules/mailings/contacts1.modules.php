@@ -34,12 +34,12 @@ include_once DOL_DOCUMENT_ROOT.'/core/modules/mailings/modules_mailings.php';
 class mailing_contacts1 extends MailingTargets
 {
 	var $name='ContactCompanies';                     // Identifiant du module mailing
-	// This label is used if no translation is found for key MailingModuleDescXXX where XXX=name is found
-	var $desc='Contacts des tiers (prospects, clients, fournisseurs...)';
+	// This label is used if no translation is found for key XXX neither MailingModuleDescXXX where XXX=name is found
+	var $desc='Contacts of thirdparties (prospects, customers, suppliers...)';
 	var $require_module=array("societe");               // Module mailing actif si modules require_module actifs
 	var $require_admin=0;                               // Module mailing actif pour user admin ou non
 	var $picto='contact';
-
+	
 	var $db;
 
 
@@ -72,7 +72,7 @@ class mailing_contacts1 extends MailingTargets
 		$statssql[0] = "SELECT '".$langs->trans("NbOfCompaniesContacts")."' as label,";
 		$statssql[0].= " count(distinct(c.email)) as nb";
 		$statssql[0].= " FROM ".MAIN_DB_PREFIX."socpeople as c";
-		$statssql[0].= " WHERE c.entity IN (".getEntity('societe', 1).")";
+		$statssql[0].= " WHERE c.entity IN (".getEntity('societe').")";
 		$statssql[0].= " AND c.email != ''";      // Note that null != '' is false
 		$statssql[0].= " AND c.no_email = 0";
 		$statssql[0].= " AND c.statut = 1";
@@ -96,7 +96,7 @@ class mailing_contacts1 extends MailingTargets
 		$sql  = "SELECT count(distinct(c.email)) as nb";
 		$sql.= " FROM ".MAIN_DB_PREFIX."socpeople as c";
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
-		$sql.= " WHERE c.entity IN (".getEntity('societe', 1).")";
+		$sql.= " WHERE c.entity IN (".getEntity('societe').")";
 		$sql.= " AND c.email != ''"; // Note that null != '' is false
 		$sql.= " AND c.no_email = 0";
 		$sql.= " AND c.statut = 1";
@@ -197,13 +197,13 @@ class mailing_contacts1 extends MailingTargets
 		}
 		else dol_print_error($this->db);
 
-		// La requete doit retourner: id, email, fk_contact, lastname, firstname, other
+		// La requete doit retourner: id, email, fk_contact, name, firstname, other
 		$sql = "SELECT c.rowid as id, c.email as email, c.rowid as fk_contact,";
 		$sql.= " c.lastname, c.firstname, c.civility as civility_id,";
 		$sql.= " s.nom as companyname";
 		$sql.= " FROM ".MAIN_DB_PREFIX."socpeople as c";
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
-		$sql.= " WHERE c.entity IN (".getEntity('societe', 1).")";
+		$sql.= " WHERE c.entity IN (".getEntity('societe').")";
 		$sql.= " AND c.email <> ''";
 		$sql.= " AND c.no_email = 0";
 		$sql.= " AND c.statut = 1";

@@ -1,5 +1,5 @@
-/* Copyright (C) 2014 delcroip <delcroip@gmail.com>
- * Laurent Destailleur 2015 <eldy@users.sourceforge.net>
+/* Copyright (C) 2014      delcroip            <delcroip@gmail.com>
+ * Copyright (C) 2015-2017 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,8 +163,11 @@ function updateTotal(days,mode)
                 }
             }
         }
-        document.getElementById('totalDay['+days+']').innerHTML = pad(total.getHours())+':'+pad(total.getMinutes());
-        //addText(,total.getHours()+':'+total.getMinutes());
+        if (document.getElementById('totalDay['+days+']'))	// May be null if no task records to output (nbline is also 0 in this case)
+        {
+        	document.getElementById('totalDay['+days+']').innerHTML = pad(total.getHours())+':'+pad(total.getMinutes());
+        	//addText(,total.getHours()+':'+total.getMinutes());
+        }
     }
     else
     {
@@ -204,7 +207,10 @@ function updateTotal(days,mode)
                 }
             }
         }
-        document.getElementById('totalDay['+days+']').innerHTML = total;
+        if (document.getElementById('totalDay['+days+']'))	// May be null if no task records to output (nbline is also 0 in this case)
+        {
+        	document.getElementById('totalDay['+days+']').innerHTML = total;
+        }
     }
     
 }

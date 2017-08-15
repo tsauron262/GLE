@@ -4,6 +4,7 @@
  * Copyright (C) 2004-2011	Laurent Destailleur		<eldy@users.sourceforge.net>
  * Copyright (C) 2006		Andre Cianfarani		<acianfa@free.fr>
  * Copyright (C) 2005-2012	Regis Houssin			<regis.houssin@capnetworks.com>
+ * Copyright (C) 2015       Raphaël Doursenaud      <rdoursenaud@gpcsolutions.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,8 +42,6 @@ class DoliDBMysqli extends DoliDB
     const VERSIONMIN='5.0.3';
 	/** @var mysqli_result Resultset of last query */
 	private $_results;
-        
-        public $countReq = 0;
 
     /**
 	 *	Constructor.
@@ -77,7 +76,6 @@ class DoliDBMysqli extends DoliDB
             $this->ok = false;
             $this->error="Mysqli PHP functions for using Mysqli driver are not available in this version of PHP. Try to use another driver.";
             dol_syslog(get_class($this)."::DoliDBMysqli : Mysqli PHP functions for using Mysqli driver are not available in this version of PHP. Try to use another driver.",LOG_ERR);
-            return $this->ok;
         }
 
         if (! $host)
@@ -86,7 +84,6 @@ class DoliDBMysqli extends DoliDB
             $this->ok = false;
             $this->error=$langs->trans("ErrorWrongHostParameter");
             dol_syslog(get_class($this)."::DoliDBMysqli : Connect error, wrong host parameters",LOG_ERR);
-            return $this->ok;
         }
 
 		// Try server connection
@@ -98,7 +95,6 @@ class DoliDBMysqli extends DoliDB
 			$this->ok = false;
 			$this->error = $this->db->connect_error;
 			dol_syslog(get_class($this) . "::DoliDBMysqli Connect error: " . $this->error, LOG_ERR);
-			return $this->ok;
 		} else {
 			$this->connected = true;
 			$this->ok = true;
@@ -117,11 +113,9 @@ class DoliDBMysqli extends DoliDB
                 $clientmustbe='';
                 if (preg_match('/UTF-8/i',$conf->file->character_set_client))      $clientmustbe='utf8';
                 if (preg_match('/ISO-8859-1/i',$conf->file->character_set_client)) $clientmustbe='latin1';
-                if ($this->db->character_set_name() != $clientmustbe)
-                {
-                    $this->query("SET NAMES '".$clientmustbe."'", $this->db);
-                    //$this->query("SET CHARACTER SET ". $this->forcecharset);
-                }
+				if ($this->db->character_set_name() != $clientmustbe) {
+					$this->db->set_charset($clientmustbe);
+				}
             }
             else
             {
@@ -143,15 +137,11 @@ class DoliDBMysqli extends DoliDB
                 $clientmustbe='';
                 if (preg_match('/UTF-8/i',$conf->file->character_set_client))      $clientmustbe='utf8';
                 if (preg_match('/ISO-8859-1/i',$conf->file->character_set_client)) $clientmustbe='latin1';
-                if ($this->db->character_set_name() != $clientmustbe)
-                {
-                    $this->query("SET NAMES '".$clientmustbe."'", $this->db);
-                    //$this->query("SET CHARACTER SET ". $this->forcecharset);
-                }
+				if ($this->db->character_set_name() != $clientmustbe) {
+					$this->db->set_charset($clientmustbe);
+				}
             }
         }
-
-        return $this->ok;
     }
 
 
@@ -205,7 +195,7 @@ class DoliDBMysqli extends DoliDB
      */
     function getVersion()
     {
-        return $this->db->get_server_info();
+        return $this->db->server_info;
     }
 
     /**
@@ -215,7 +205,7 @@ class DoliDBMysqli extends DoliDB
      */
 	function getDriverInfo()
 	{
-		return $this->db->get_client_info();
+		return $this->db->client_info;
 	}
 
 
@@ -250,7 +240,6 @@ class DoliDBMysqli extends DoliDB
     	global $conf;
 
         $query = trim($query);
-        $this->countReq ++;
 
 	    if (! in_array($query,array('BEGIN','COMMIT','ROLLBACK'))) dol_syslog('sql='.$query, LOG_DEBUG);
 
@@ -384,7 +373,7 @@ class DoliDBMysqli extends DoliDB
      */
     function escape($stringtoencode)
     {
-        return addslashes($stringtoencode);
+        return $this->db->real_escape_string($stringtoencode);
     }
 
     /**
@@ -423,6 +412,7 @@ class DoliDBMysqli extends DoliDB
             1100 => 'DB_ERROR_NOT_LOCKED',
             1136 => 'DB_ERROR_VALUE_COUNT_ON_ROW',
             1146 => 'DB_ERROR_NOSUCHTABLE',
+            1215 => 'DB_ERROR_CANNOT_ADD_FOREIGN_KEY_CONSTRAINT',
             1216 => 'DB_ERROR_NO_PARENT',
             1217 => 'DB_ERROR_CHILD_EXISTS',
             1396 => 'DB_ERROR_USER_ALREADY_EXISTS',    // When creating user already existing
@@ -543,8 +533,12 @@ class DoliDBMysqli extends DoliDB
     function DDLGetConnectId()
     {
         $resql=$this->query('SELECT CONNECTION_ID()');
-        $row=$this->fetch_row($resql);
-        return $row[0];
+        if ($resql)
+        {
+            $row=$this->fetch_row($resql);
+            return $row[0];
+        }
+        else return '?';
     }
 
     /**
@@ -595,9 +589,12 @@ class DoliDBMysqli extends DoliDB
         $sql="SHOW TABLES FROM ".$database." ".$like.";";
         //print $sql;
         $result = $this->query($sql);
-        while($row = $this->fetch_row($result))
+        if ($result)
         {
-            $listtables[] = $row[0];
+            while($row = $this->fetch_row($result))
+            {
+                $listtables[] = $row[0];
+            }
         }
         return $listtables;
     }
@@ -616,9 +613,12 @@ class DoliDBMysqli extends DoliDB
 
         dol_syslog($sql,LOG_DEBUG);
         $result = $this->query($sql);
-        while($row = $this->fetch_row($result))
+        if ($result)
         {
-            $infotables[] = $row;
+            while($row = $this->fetch_row($result))
+            {
+                $infotables[] = $row;
+            }
         }
         return $infotables;
     }
@@ -735,13 +735,13 @@ class DoliDBMysqli extends DoliDB
     {
         // cles recherchees dans le tableau des descriptions (field_desc) : type,value,attribute,null,default,extra
         // ex. : $field_desc = array('type'=>'int','value'=>'11','null'=>'not null','extra'=> 'auto_increment');
-        $sql= "ALTER TABLE ".$table." ADD `".$field_name."` ";
+        $sql= "ALTER TABLE ".$table." ADD ".$field_name." ";
         $sql.= $field_desc['type'];
         if(preg_match("/^[^\s]/i",$field_desc['value']))
-        if (! in_array($field_desc['type'],array('date','datetime')))
-        {
-            $sql.= "(".$field_desc['value'].")";
-        }
+            if (! in_array($field_desc['type'],array('date','datetime')))
+            {
+                $sql.= "(".$field_desc['value'].")";
+            }
         if(preg_match("/^[^\s]/i",$field_desc['attribute']))
         $sql.= " ".$field_desc['attribute'];
         if(preg_match("/^[^\s]/i",$field_desc['null']))
@@ -810,7 +810,7 @@ class DoliDBMysqli extends DoliDB
     /**
 	 * 	Create a user and privileges to connect to database (even if database does not exists yet)
 	 *
-	 *	@param	string	$dolibarr_main_db_host 		Ip serveur
+	 *	@param	string	$dolibarr_main_db_host 		Ip server or '%'
 	 *	@param	string	$dolibarr_main_db_user 		Nom user a creer
 	 *	@param	string	$dolibarr_main_db_pass 		Mot de passe user a creer
 	 *	@param	string	$dolibarr_main_db_name		Database name where user must be granted
@@ -854,9 +854,10 @@ class DoliDBMysqli extends DoliDB
     }
 
     /**
-     *	Return charset used to store data in database
+     *	Return charset used to store data in current database (same result than using SELECT default_character_set_name FROM information_schema.SCHEMATA WHERE schema_name = "databasename";)
      *
      *	@return		string		Charset
+     *  @see getDefaultCollationDatabase
      */
     function getDefaultCharacterSetDatabase()
     {
@@ -867,7 +868,9 @@ class DoliDBMysqli extends DoliDB
             return $this->forcecharset;
         }
         $liste=$this->fetch_array($resql);
-        return $liste['Value'];
+        $tmpval = $liste['Value'];
+
+        return $tmpval;
     }
 
     /**
@@ -897,9 +900,10 @@ class DoliDBMysqli extends DoliDB
     }
 
     /**
-     *	Return collation used in database
+     *	Return collation used in current database
      *
      *	@return		string		Collation value
+     *  @see getDefaultCharacterSetDatabase
      */
     function getDefaultCollationDatabase()
     {
@@ -910,7 +914,9 @@ class DoliDBMysqli extends DoliDB
             return $this->forcecollate;
         }
         $liste=$this->fetch_array($resql);
-        return $liste['Value'];
+        $tmpval = $liste['Value'];
+
+        return $tmpval;
     }
 
     /**

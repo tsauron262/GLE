@@ -33,7 +33,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/modules/mailings/modules_mailings.php';
 class mailing_contacts2 extends MailingTargets
 {
     var $name='ContactsByFunction';
-    // This label is used if no translation is found for key MailingModuleDescXXX where XXX=name is found
+	// This label is used if no translation is found for key XXX neither MailingModuleDescXXX where XXX=name is found
     var $desc='Add contacts by function';
     var $require_admin=0;
 
@@ -77,13 +77,13 @@ class mailing_contacts2 extends MailingTargets
 
     	$target = array();
 
-        // La requete doit retourner: id, email, fk_contact, lastname, firstname, other
+        // La requete doit retourner: id, email, fk_contact, name, firstname, other
         $sql = "SELECT sp.rowid as id, sp.email as email, sp.rowid as fk_contact,";
         $sql.= " sp.lastname, sp.firstname as firstname, sp.civility as civility_id,";
         $sql.= " s.nom as companyname";
     	$sql.= " FROM ".MAIN_DB_PREFIX."socpeople as sp";
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = sp.fk_soc";
-        $sql.= " WHERE sp.entity IN (".getEntity('societe', 1).")";
+        $sql.= " WHERE sp.entity IN (".getEntity('societe').")";
     	$sql.= " AND sp.email <> ''";  // Note that null != '' is false
     	$sql.= " AND sp.no_email = 0";
     	$sql.= " AND sp.statut = 1";
@@ -140,7 +140,7 @@ class mailing_contacts2 extends MailingTargets
             $statssql[$i].= " WHERE s.rowid = sp.fk_soc";
             $statssql[$i].= " AND sp.email != ''";  // Note that null != '' is false
             $statssql[$i].= " AND (sp.poste IS NOT NULL AND sp.poste != '')";
-            $statssql[$i].= " AND sp.entity IN (".getEntity('societe', 1).")";
+            $statssql[$i].= " AND sp.entity IN (".getEntity('societe').")";
             $statssql[$i].= " GROUP BY label";
             $statssql[$i].= " ORDER BY nb DESC";
             $statssql[$i].= " LIMIT $i,1";
@@ -166,7 +166,7 @@ class mailing_contacts2 extends MailingTargets
     	$sql = "SELECT count(distinct(sp.email)) as nb";
     	$sql.= " FROM ".MAIN_DB_PREFIX."socpeople as sp";
     	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = sp.fk_soc";
-        $sql.= " WHERE sp.entity IN (".getEntity('societe', 1).")";
+        $sql.= " WHERE sp.entity IN (".getEntity('societe').")";
     	$sql.= " AND sp.email != ''";  // Note that null != '' is false
     	$sql.= " AND sp.no_email = 0";
     	$sql.= " AND sp.statut = 1";
@@ -190,7 +190,7 @@ class mailing_contacts2 extends MailingTargets
 
         $sql = "SELECT sp.poste, count(distinct(sp.email)) AS nb";
         $sql.= " FROM ".MAIN_DB_PREFIX."socpeople as sp";
-        $sql.= " WHERE sp.entity IN (".getEntity('societe', 1).")";
+        $sql.= " WHERE sp.entity IN (".getEntity('societe').")";
         $sql.= " AND sp.email != ''";    // Note that null != '' is false
         $sql.= " AND sp.no_email = 0";
         $sql.= " AND sp.statut = 1";

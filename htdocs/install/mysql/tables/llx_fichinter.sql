@@ -34,11 +34,13 @@ create table llx_fichinter
   fk_user_modif     integer,                   -- user making last change
   fk_user_valid		integer,                   -- valideur de la fiche
   fk_statut			smallint  DEFAULT 0,
+  dateo				date,						-- date de début d'intervention
+  datee				date,						-- date de fin d'intervention
+  datet				date,						-- date de terminaison de l'intervention
   duree				real,                       -- duree totale de l'intervention
   description		text,
   note_private		text,
   note_public		text,
   model_pdf			varchar(255),
   extraparams		varchar(255)				-- for stock other parameters with json format
-  
 )ENGINE=innodb;

@@ -2,6 +2,7 @@
 /* Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2011 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2011-2015 Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2017      Ferran Marcet        <fmarcet@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,17 +113,29 @@ function getServerTimeZoneInt($refgmtdate='now')
  *  @param      int			$duration_unit      Unit of added delay (d, m, y, w, h)
  *  @return     int      			        	New timestamp
  */
-function dol_time_plus_duree($time,$duration_value,$duration_unit)
+function dol_time_plus_duree($time, $duration_value, $duration_unit)
 {
 	if ($duration_value == 0)  return $time;
 	if ($duration_unit == 'h') return $time + (3600*$duration_value);
 	if ($duration_unit == 'w') return $time + (3600*24*7*$duration_value);
-	if ($duration_value > 0) $deltastring="+".abs($duration_value);
-	if ($duration_value < 0) $deltastring="-".abs($duration_value);
-	if ($duration_unit == 'd') { $deltastring.=" day"; }
-	if ($duration_unit == 'm') { $deltastring.=" month"; }
-	if ($duration_unit == 'y') { $deltastring.=" year"; }
-	return strtotime($deltastring,$time);
+	
+	$deltastring='P';
+	
+	if ($duration_value > 0){ $deltastring.=abs($duration_value); $sub= false; }
+	if ($duration_value < 0){ $deltastring.=abs($duration_value); $sub= true; }
+	if ($duration_unit == 'd') { $deltastring.="D"; }
+	if ($duration_unit == 'm') { $deltastring.="M"; }
+	if ($duration_unit == 'y') { $deltastring.="Y"; }
+	
+	$date = new DateTime();
+	$date->setTimezone(new DateTimeZone('UTC'));
+	$date->setTimestamp($time);
+	$interval = new DateInterval($deltastring);
+	
+	if($sub) $date->sub($interval);
+	else $date->add( $interval );
+	
+	return $date->getTimestamp();
 }
 
 
@@ -159,11 +172,11 @@ function convertSecondToTime($iSecond, $format='all', $lengthOfDay=86400, $lengt
 
 	if ($format == 'all' || $format == 'allwithouthour' || $format == 'allhour' || $format == 'allhourmin')
 	{
-		if ($iSecond === 0) return '0';	// This is to avoid having 0 return a 12:00 AM for en_US
+		if ((int) $iSecond === 0) return '0';	// This is to avoid having 0 return a 12:00 AM for en_US
 
         $sTime='';
         $sDay=0;
-        $sWeek='';
+        $sWeek=0;
 
 		if ($iSecond >= $lengthOfDay)
 		{
@@ -206,7 +219,7 @@ function convertSecondToTime($iSecond, $format='all', $lengthOfDay=86400, $lengt
 		}
 		if ($format == 'allhourmin')
 		{
-			return sprintf("%02d",($sWeek*$lengthOfWeek*24 + $sDay*24 + (int) floor($iSecond/3600))).':'.sprintf("%02d",((int) floor(($iSecond % 3600)/60)));
+		    return sprintf("%02d",($sWeek*$lengthOfWeek*24 + $sDay*24 + (int) floor($iSecond/3600))).':'.sprintf("%02d",((int) floor(($iSecond % 3600)/60)));
 		}
 		if ($format == 'allhour')
 		{
@@ -407,7 +420,7 @@ function dol_get_next_week($day, $week, $month, $year)
 {
 	$tmparray = dol_get_first_day_week($day, $month, $year);
 
-	$time=dol_mktime(12,0,0,$month,$tmparray['first_day'],$year,1,0);
+	$time=dol_mktime(12,0,0,$tmparray['first_month'],$tmparray['first_day'],$tmparray['first_year'],1,0);
 	$time+=24*60*60*7;
 	$tmparray=dol_getdate($time,true);
 
@@ -577,7 +590,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 
 			// Calcul du jour de paques
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques)+1;
+			$jour_paques = date("d", $date_paques);
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -588,7 +601,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
                 date("i", $date_paques),
                 date("s", $date_paques),
                 date("m", $date_paques),
-                date("d", $date_paques) + 39,
+                date("d", $date_paques) + 38,
                 date("Y", $date_paques)
             );
 			$jour_ascension = date("d", $date_ascension);
@@ -596,7 +609,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 			if($jour_ascension == $jour && $mois_ascension == $mois) $ferie=true;
 			//Ascension
 
-			// Calcul de Lundi Pentecote (12 jours apres Paques)
+			// Calcul de Pentecote (11 jours apres Paques)
             $date_pentecote = mktime(
                 date("H", $date_ascension),
                 date("i", $date_ascension),
@@ -607,31 +620,13 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
             );
 			$jour_pentecote = date("d", $date_pentecote);
 			$mois_pentecote = date("m", $date_pentecote);
-
 			if($jour_pentecote == $jour && $mois_pentecote == $mois) $ferie=true;
 			//Pentecote
 
 			// Calul des samedis et dimanches
 			$jour_julien = unixtojd($timestampStart);
 			$jour_semaine = jddayofweek($jour_julien, 0);
-                        /*MOD DRSI*/
-                        global $userHoliday, $db;
-                        if(isset($userHoliday)){
-                            $userH = new User($db);
-                            $userH->fetch($userHoliday);
-                            $tabJ = array(1=>"lundi", 2=>"mardi", 3=>"mercredi", 4=>"jeudi", 5=>"vendredi", 6=>"samedi");
-                            if(isset($userH->array_options) && array_key_exists('options_'.$tabJ[$jour_semaine], $userH->array_options)){
-                                    if($userH->array_options['options_'.$tabJ[$jour_semaine]])
-                                        $nnnnnnn=false;
-                                    else
-                                        $ferie=true;
-                            }
-                            else if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true; 
-                        }
-                        else {
-                            if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;                            
-                        }
-                            /*F MOD DRSI*/
+			if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;
 			//Samedi (6) et dimanche (0)
 		}
 
@@ -655,7 +650,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 
 			// Calcul du jour de paques
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques)+1;
+			$jour_paques = date("d", $date_paques);
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -684,7 +679,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 
 			// Calcul día de Pascua
 			$date_paques = easter_date($annee);
-			$jour_paques = date("d", $date_paques)+1;
+			$jour_paques = date("d", $date_paques);
 			$mois_paques = date("m", $date_paques);
 			if($jour_paques == $jour && $mois_paques == $mois) $ferie=true;
 			// Paques
@@ -724,12 +719,12 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 		if ($ferie) $nbFerie++;
 
 		// Increase number of days (on go up into loop)
-                // /*mod drsi*/
-//		$jour++;
-		$timestampStart=dol_mktime(0,0,0,$mois,$jour,$annee,1);	// Generate GMT date for next day
-                $timestampStart += (60*60*24);
-                /*mod drsi*/
+		$timestampStart=dol_time_plus_duree($timestampStart, 1, 'd');
+		//var_dump($jour.' '.$mois.' '.$annee.' '.$timestampStart);
+
+		$i++;
 	}
+
 	return $nbFerie;
 }
 

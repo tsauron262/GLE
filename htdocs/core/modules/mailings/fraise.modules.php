@@ -32,12 +32,10 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
  */
 class mailing_fraise extends MailingTargets
 {
-    // CHANGE THIS: Put here a name not already used
     var $name='FundationMembers';                    // Identifiant du module mailing
-    // CHANGE THIS: Put here a description of your selector module.
-    // This label is used if no translation found for key MailingModuleDescXXX where XXX=name is found
+	// This label is used if no translation is found for key XXX neither MailingModuleDescXXX where XXX=name is found
     var $desc='Foundation members with emails (by status)';
-    // CHANGE THIS: Set to 1 if selector is available for admin users only
+    // Set to 1 if selector is available for admin users only
     var $require_admin=0;
 
     var $require_module=array('adherent');
@@ -63,7 +61,7 @@ class mailing_fraise extends MailingTargets
      *    array of SQL request that returns two field:
      *    One called "label", One called "nb".
      *
-     *    @return        array        Array with SQL requests
+     *    @return        string[]        Array with SQL requests
      */
     function getSqlArrayForStats()
     {
@@ -198,7 +196,7 @@ class mailing_fraise extends MailingTargets
         $dateendsubscriptionafter=dol_mktime($_POST['subscriptionafterhour'],$_POST['subscriptionaftermin'],$_POST['subscriptionaftersec'],$_POST['subscriptionaftermonth'],$_POST['subscriptionafterday'],$_POST['subscriptionafteryear']);
         $dateendsubscriptionbefore=dol_mktime($_POST['subscriptionbeforehour'],$_POST['subscriptionbeforemin'],$_POST['subscriptionbeforesec'],$_POST['subscriptionbeforemonth'],$_POST['subscriptionbeforeday'],$_POST['subscriptionbeforeyear']);
 
-        // La requete doit retourner: id, email, fk_contact, lastname, firstname
+        // La requete doit retourner: id, email, fk_contact, name, firstname
         $sql = "SELECT a.rowid as id, a.email as email, null as fk_contact, ";
         $sql.= " a.lastname, a.firstname,";
         $sql.= " a.datefin, a.civility as civility_id, a.login, a.societe";    // Other fields

@@ -34,7 +34,7 @@ require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';   // Requ
 /**
  *	Classe mere des modeles de propale
  */
-abstract class ModelePDFPropales extends CommonDocGenerator
+abstract class ModeleBimpcesu extends CommonDocGenerator
 {
 	var $error='';
 

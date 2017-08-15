@@ -39,7 +39,7 @@ if ($user->rights->SynopsisTools->Global->fileInfo != 1) {
 
 $prefixe = (isset($_REQUEST['prefixe']) ? $_REQUEST['prefixe'] : "");
 
-$filename = str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $prefixe . ".log", SYSLOG_FILE));
+$filename = str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $prefixe . ".log", $conf->global->SYSLOG_FILE));
 
 $fileLongQuery = "/var/log/mysql/mysql-slow.log";
 if($prefixe == "_mysqllong")

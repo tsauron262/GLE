@@ -268,6 +268,8 @@ class modBimpcesu extends DolibarrModules
 	{
 		$sql = array();
 
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'azurCesu', 1, 'bimpcesu', 'Attestation CESU', NULL);";
+                
 		$this->_load_tables('/bimpcesu/sql/');
 
 		return $this->_init($sql, $options);
@@ -284,6 +286,8 @@ class modBimpcesu extends DolibarrModules
 	public function remove($options = '')
 	{
 		$sql = array();
+                
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azurCesu';";
 
 		return $this->_remove($sql, $options);
 	}

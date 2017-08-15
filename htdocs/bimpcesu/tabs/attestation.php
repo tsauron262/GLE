@@ -28,8 +28,15 @@ require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 if (!empty($conf->facture->enabled))
     require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+
+
+
+
+
+
 
 $langs->load("companies");
 $langs->load("other");
@@ -282,6 +289,41 @@ print "</td></tr>";
 
 
 //<--- -------------- PAS IMPORTANT END --------------- --->
+
+   
+
+
+
+
+
+    // Actions to build doc
+$upload_dir = $conf->propal->dir_output;
+$permissioncreate = $user->rights->propal->creer;
+include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
+
+/*
+ * Documents generes
+ */
+$filename = dol_sanitizeFileName($object->ref);
+$filedir = $conf->propal->dir_output . "/" . dol_sanitizeFileName($object->ref);
+$urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
+$genallowed = $user->rights->propal->creer;
+$delallowed = $user->rights->propal->supprimer;
+
+$var = true;
+$formfile = new FormFile($db);
+$somethingshown = $formfile->show_documents('propal', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -216,6 +216,13 @@ if (! defined('NOSESSION'))
 // Init the 5 global objects, this include will make the new and set properties for: $conf, $db, $langs, $user, $mysoc
 require_once 'master.inc.php';
 
+/*Mod drsi*/
+include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
+$synopsisHook = new synopsisHook();
+global $synopsisHook;
+/*FMod Drsi*/
+
+
 // Activate end of page function
 register_shutdown_function('dol_shutdown');
 

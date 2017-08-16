@@ -27,7 +27,7 @@ require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions.lib.php");
 require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions2.lib.php");
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
 require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
-require_once(DOL_DOCUMENT_ROOT.'/core/modules/ndfp/modules_ndfp.php');
+require_once(DOL_DOCUMENT_ROOT.'/ndfp/core/modules/ndfp/modules_ndfp.php');
 /**
  *      \class      Ndfp
  *      \brief      Class to manage trips and working credit notes

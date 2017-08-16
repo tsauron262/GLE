@@ -1014,13 +1014,21 @@ class pdf_bimpcesu extends ModeleBimpcesu
 
 		$posy+=2;
 
+                
+                
+                
+                
+                
+                
+                
+                
 		// Show list of linked objects
 		$posy = pdf_writeLinkedObjects($pdf, $object, $outputlangs, $posx, $posy, 100, 3, 'R', $default_font_size);
 
 		if ($showaddress)
 		{
 			// Sender properties
-			$carac_emetteur='';
+			$carac_emetteur='ATTESTATION CESU';
 		 	// Add internal contact of proposal if defined
 			$arrayidcontact=$object->getIdContact('internal','SALESREPFOLL');
 		 	if (count($arrayidcontact) > 0)
@@ -1031,42 +1039,42 @@ class pdf_bimpcesu extends ModeleBimpcesu
 
 		 	$carac_emetteur .= pdf_build_address($outputlangs,$this->emetteur);
 
-			// Show sender
-			$posy=42;
+			// Show sender = Ou le tableau sera sur la page
+			$posy=42; // Endroit sur la page et NON taille du tableau
 		 	$posx=$this->marge_gauche;
 			if (! empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT)) $posx=$this->page_largeur-$this->marge_droite-80;
-			$hautcadre=40;
+			$hautcadre=10; // hauteur du tableau et NON hauteur sur la page
 
-			// Show sender frame
+			// Show sender frame = tableau
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFont('','', $default_font_size - 2);
 			$pdf->SetXY($posx,$posy-5);
-			$pdf->MultiCell(66,5, $outputlangs->transnoentities("BillFrom").":", 0, 'L');
+			//$pdf->MultiCell(66,5, $outputlangs->transnoentities("BillFrom").":", 0, 'L'); // EGALE à "emetteur :" au dessus du tableau
 			$pdf->SetXY($posx,$posy);
 			$pdf->SetFillColor(230,230,230);
-			$pdf->MultiCell(82, $hautcadre, "", 0, 'R', 1);
+			$pdf->MultiCell(182, $hautcadre, "", 0, 'R', 1); // Taille du tableau
 			$pdf->SetTextColor(0,0,60);
 
-			// Show sender name
-			$pdf->SetXY($posx+2,$posy+3);
-			$pdf->SetFont('','B', $default_font_size);
-			$pdf->MultiCell(80, 4, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
+			// Show sender name = Contenu tableau
+			$pdf->SetXY($posx+65,$posy+2); // Position du texte dans le tableau
+			$pdf->SetFont('','B', '14'); // Enable BOLD
+			$pdf->MultiCell(80, 4, "ATTESTATION CESU", 0, 'L'); // ATTESTATION CESU EN GRAS ET DANS LE TABLEAU
 			$posy=$pdf->getY();
 
 			// Show sender information
-			$pdf->SetXY($posx+2,$posy);
-			$pdf->SetFont('','', $default_font_size - 1);
-			$pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
+//			$pdf->SetXY($posx+2,$posy);
+//			$pdf->SetFont('','', $default_font_size - 1);
+//			$pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
 
-			// If CUSTOMER contact defined, we use it
-			$usecontact=false;
-			$arrayidcontact=$object->getIdContact('external','CUSTOMER');
-			if (count($arrayidcontact) > 0)
-			{
-				$usecontact=true;
-				$result=$object->fetch_contact($arrayidcontact[0]);
-			}
+//			// If CUSTOMER contact defined, we use it
+//			$usecontact=false;
+//			$arrayidcontact=$object->getIdContact('external','CUSTOMER');
+//			if (count($arrayidcontact) > 0)
+//			{
+//				$usecontact=true;
+//				$result=$object->fetch_contact($arrayidcontact[0]);
+//			}
 
                         
                         

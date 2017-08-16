@@ -118,7 +118,7 @@ class modBimpcesu extends DolibarrModules
 		$this->const = array();
        
                 
-                $this->tabs = array('thirdparty:+attestation:AttestationCESU:bimpcesu@bimpcesu:$user->rights->bimpcesu->read:/bimpcesu/tabs/attestation.php?id=__ID__');
+                $this->tabs = array('thirdparty:+attestation:AttestationCESU:bimpcesu@bimpcesu:$user->rights->bimpcesu->read:/bimpcesu/tabs/attestation.php?socid=__ID__');
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1

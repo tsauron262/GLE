@@ -37,12 +37,12 @@ if (!empty($conf->facture->enabled))
 
 
 
-
+$MAXLIST = 100;
 $langs->load("companies");
 $langs->load("other");
 
 // Security check
-$socid = GETPOST('id', 'int');
+$socid = GETPOST('socid', 'int');
 $action = GETPOST('action', 'alpha');
 if ($user->societe_id)
     $socid = $user->societe_id;
@@ -134,52 +134,56 @@ if ($socid > 0) {
             $num = $db->num_rows($resql);
             $i = 0;
             if ($num > 0) {
-            print '<table class="noborder" width="100%">';
+                print '<table class="noborder" width="100%">';
 
-            print '<tr class="liste_titre">';
-            print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernieres factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
-            print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
-            print '</tr></table></td>';
-            print '</tr>';
+                print '<tr class="liste_titre">';
+                print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernieres factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
+                print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
+                print '</tr></table></td>';
+                print '</tr>';
+                
             }
+            else
+                echo "Pas de factures client";
 
             while ($i < $num && $i < $MAXLIST) {
-            $objp = $db->fetch_object($resql);
-            $var = !$var;
-            print "<tr " . $bc[$var] . ">";
-            print '<td class="nowrap">';
-            $facturestatic->id = $objp->facid;
-            $facturestatic->ref = $objp->facnumber;
-            $facturestatic->type = $objp->type;
-            $facturestatic->total_ht = $objp->total_ht;
-            $facturestatic->total_tva = $objp->total_tva;
-            $facturestatic->total_ttc = $objp->total_ttc;
-            print $facturestatic->getNomUrl(1);
-            print '</td>';
-            if ($objp->df > 0) {
-                print '<td align="right" width="80px">' . dol_print_date($db->jdate($objp->df), 'day') . '</td>';
-            } else {
-                print '<td align="right"><b>!!!</b></td>';
-            }
-            print '<td align="right" style="min-width: 60px">';
-            print price($objp->total_ht);
-            print '</td>';
-
-            if (!empty($conf->global->MAIN_SHOW_PRICE_WITH_TAX_IN_SUMMARIES)) {
-                print '<td align="right" style="min-width: 60px">';
-                print price($objp->total_ttc);
+                $objp = $db->fetch_object($resql);
+                $var = !$var;
+                print "<tr " . $bc[$var] . ">";
+                print '<td class="nowrap">';
+                $facturestatic->id = $objp->facid;
+                $facturestatic->ref = $objp->facnumber;
+                $facturestatic->type = $objp->type;
+                $facturestatic->total_ht = $objp->total_ht;
+                $facturestatic->total_tva = $objp->total_tva;
+                $facturestatic->total_ttc = $objp->total_ttc;
+                print $facturestatic->getNomUrl(1);
                 print '</td>';
-            }
+                if ($objp->df > 0) {
+                    print '<td align="right" width="80px">' . dol_print_date($db->jdate($objp->df), 'day') . '</td>';
+                } else {
+                    print '<td align="right"><b>!!!</b></td>';
+                }
+                print '<td align="right" style="min-width: 60px">';
+                print price($objp->total_ht);
+                print '</td>';
 
-            print '<td align="right" class="nowrap" style="min-width: 60px">' . ($facturestatic->LibStatut($objp->paye, $objp->statut, 5, $objp->am)) . '</td>';
-            print "</tr>\n";
+                if (!empty($conf->global->MAIN_SHOW_PRICE_WITH_TAX_IN_SUMMARIES)) {
+                    print '<td align="right" style="min-width: 60px">';
+                    print price($objp->total_ttc);
+                    print '</td>';
+                }
+
+                print '<td align="right" class="nowrap" style="min-width: 60px">' . ($facturestatic->LibStatut($objp->paye, $objp->statut, 5, $objp->am)) . '</td>';
+                print "</tr>\n";
+
+                $i++;
+                }
+                $db->free($resql);
+
+                if ($num > 0)
+                    print "</table>";
             
-            $i++;
-            $db->free($resql);
-
-            if ($num > 0)
-                print "</table>";
-        }
         }
         else {
             dol_print_error($db);

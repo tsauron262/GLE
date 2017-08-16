@@ -362,7 +362,7 @@ if ($selectedFile) {
 
         echo '<script type="text/javascript" src="jSignature.min.js"></script>'
         . '<script type="text/javascript">'
-        . '$(window).load(function () {'
+        . '$(window).on("load", function () {'
         . '$("#affSign").click(function(){'
         . '$(this).parent().parent().hide();'
         . '$(".grZoneSignature").css("z-index", 1);'

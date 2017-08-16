@@ -260,7 +260,6 @@ print (", ");
 print_r($object->town);
 print "</td></tr></table>";
 
-
     
 //<--- -------------- TABLEAU END --------------- --->
 
@@ -311,14 +310,13 @@ include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
  */
 $filename = dol_sanitizeFileName($object->id);
 $filedir = $conf->bimpcesu->dir_output . "/" . dol_sanitizeFileName($object->id);
-$urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
+$urlsource = $_SERVER["PHP_SELF"] . "?socid=" . $object->id;
 $genallowed = $user->rights->bimpcesu->read;
 $delallowed = $user->rights->bimpcesu->read;
 
 $var = true;
 $formfile = new FormFile($db);
 $somethingshown = $formfile->show_documents('bimpcesu', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);
-
 
 
 

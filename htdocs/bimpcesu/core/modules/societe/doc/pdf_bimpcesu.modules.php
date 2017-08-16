@@ -228,7 +228,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
                 // Set path to the background PDF File
                 if (empty($conf->global->MAIN_DISABLE_FPDI) && ! empty($conf->global->MAIN_ADD_PDF_BACKGROUND))
                 {
-                    $pagecount = $pdf->setSourceFile($conf->mycompany->dir_output.'/'.$conf->global->MAIN_ADD_PDF_BACKGROUND);
+                    $pagecount = $pdf->setSourceFile($conf->bimpcesu->dir_output.'/'.$conf->global->MAIN_ADD_PDF_BACKGROUND);
                     $tplidx = $pdf->importPage(1);
                 }
 
@@ -948,7 +948,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
 		$pdf->SetXY($this->marge_gauche,$posy);
 
 		// Logo
-		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
+		$logo=$conf->bimpcesu->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo)
 		{
 			if (is_readable($logo))
@@ -973,7 +973,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
 		$pdf->SetFont('','B',$default_font_size + 3);
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
-		$title=$outputlangs->transnoentities("CommercialProposal");
+		$title=$outputlangs->transnoentities("Attestation CESU");
 		$pdf->MultiCell(100, 4, $title, '', 'R');
 
 		$pdf->SetFont('','B',$default_font_size);
@@ -1068,44 +1068,110 @@ class pdf_bimpcesu extends ModeleBimpcesu
 				$result=$object->fetch_contact($arrayidcontact[0]);
 			}
 
-			// Recipient name
-			if (! empty($usecontact))
-			{
-				// On peut utiliser le nom de la societe du contact
-				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = $object->contact->socname;
-				else $socname = $object->client->nom;
-				$carac_client_name=$outputlangs->convToOutputCharset($socname);
-			}
-			else
-			{
-				$carac_client_name=$outputlangs->convToOutputCharset($object->client->nom);
-			}
-
-			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->client,($usecontact?$object->contact:''),$usecontact,'target');
-
-			// Show recipient
-			$widthrecbox=100;
-			if ($this->page_largeur < 210) $widthrecbox=84;	// To work with US executive format
-			$posy=42;
-			$posx=$this->page_largeur-$this->marge_droite-$widthrecbox;
-			if (! empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT)) $posx=$this->marge_gauche;
-
-			// Show recipient frame
-			$pdf->SetTextColor(0,0,0);
-			$pdf->SetFont('','', $default_font_size - 2);
-			$pdf->SetXY($posx+2,$posy-5);
-			$pdf->MultiCell($widthrecbox, 5, $outputlangs->transnoentities("BillTo").":", 0, 'L');
-			$pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
-
-			// Show recipient name
-			$pdf->SetXY($posx+2,$posy+3);
-			$pdf->SetFont('','B', $default_font_size);
-			$pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
-
-			// Show recipient information
-			$pdf->SetFont('','', $default_font_size - 1);
-			$pdf->SetXY($posx+2,$posy+4+(dol_nboflines_bis($carac_client_name,50)*4));
-			$pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
+                        
+                        
+                  
+                        
+                        
+                        
+                    
+                        
+                        
+                        
+//              // Show list of linked objects  ==> BACKUP <==
+//		$posy = pdf_writeLinkedObjects($pdf, $object, $outputlangs, $posx, $posy, 100, 3, 'R', $default_font_size);
+//
+//		if ($showaddress)
+//		{
+//			// Sender properties
+//			$carac_emetteur='';
+//		 	// Add internal contact of proposal if defined
+//			$arrayidcontact=$object->getIdContact('internal','SALESREPFOLL');
+//		 	if (count($arrayidcontact) > 0)
+//		 	{
+//		 		$object->fetch_user($arrayidcontact[0]);
+//		 		$carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Name").": ".$outputlangs->convToOutputCharset($object->user->getFullName($outputlangs))."\n";
+//		 	}
+//
+//		 	$carac_emetteur .= pdf_build_address($outputlangs,$this->emetteur);
+//
+//			// Show sender
+//			$posy=42;
+//		 	$posx=$this->marge_gauche;
+//			if (! empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT)) $posx=$this->page_largeur-$this->marge_droite-80;
+//			$hautcadre=40;
+//
+//			// Show sender frame
+//			$pdf->SetTextColor(0,0,0);
+//			$pdf->SetFont('','', $default_font_size - 2);
+//			$pdf->SetXY($posx,$posy-5);
+//			$pdf->MultiCell(66,5, $outputlangs->transnoentities("BillFrom").":", 0, 'L');
+//			$pdf->SetXY($posx,$posy);
+//			$pdf->SetFillColor(230,230,230);
+//			$pdf->MultiCell(82, $hautcadre, "", 0, 'R', 1);
+//			$pdf->SetTextColor(0,0,60);
+//
+//			// Show sender name
+//			$pdf->SetXY($posx+2,$posy+3);
+//			$pdf->SetFont('','B', $default_font_size);
+//			$pdf->MultiCell(80, 4, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
+//			$posy=$pdf->getY();
+//
+//			// Show sender information
+//			$pdf->SetXY($posx+2,$posy);
+//			$pdf->SetFont('','', $default_font_size - 1);
+//			$pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
+//
+//
+//			// If CUSTOMER contact defined, we use it
+//			$usecontact=false;
+//			$arrayidcontact=$object->getIdContact('external','CUSTOMER');
+//			if (count($arrayidcontact) > 0)
+//			{
+//				$usecontact=true;
+//				$result=$object->fetch_contact($arrayidcontact[0]);
+//			}
+                        
+                        
+                        
+//			// Recipient name
+//			if (! empty($usecontact))
+//			{
+//				// On peut utiliser le nom de la societe du contact
+//				if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socname = $object->contact->socname;
+//				else $socname = $object->client->nom;
+//				$carac_client_name=$outputlangs->convToOutputCharset($socname);
+//			}
+//			else
+//			{
+//				$carac_client_name=$outputlangs->convToOutputCharset($object->client->nom);
+//			}
+//
+//			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->client,($usecontact?$object->contact:''),$usecontact,'target');
+//
+//			// Show recipient
+//			$widthrecbox=100;
+//			if ($this->page_largeur < 210) $widthrecbox=84;	// To work with US executive format
+//			$posy=42;
+//			$posx=$this->page_largeur-$this->marge_droite-$widthrecbox;
+//			if (! empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT)) $posx=$this->marge_gauche;
+//
+//			// Show recipient frame
+//			$pdf->SetTextColor(0,0,0);
+//			$pdf->SetFont('','', $default_font_size - 2);
+//			$pdf->SetXY($posx+2,$posy-5);
+//			$pdf->MultiCell($widthrecbox, 5, $outputlangs->transnoentities("BillTo").":", 0, 'L');
+//			$pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
+//
+//			// Show recipient name
+//			$pdf->SetXY($posx+2,$posy+3);
+//			$pdf->SetFont('','B', $default_font_size);
+//			$pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
+//
+//			// Show recipient information
+//			$pdf->SetFont('','', $default_font_size - 1);
+//			$pdf->SetXY($posx+2,$posy+4+(dol_nboflines_bis($carac_client_name,50)*4));
+//			$pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
 		}
 
 		$pdf->SetTextColor(0,0,0);

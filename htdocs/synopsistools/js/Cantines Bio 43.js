@@ -1,4 +1,4 @@
-$(window).load(function() {
+$(window).on("load", function() {
      var number = 1000 + Math.floor(Math.random() * 99999);
      
      

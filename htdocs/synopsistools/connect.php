@@ -32,7 +32,7 @@ if (isset($_REQUEST['off'])) {
 $_SESSION['pagePrinc'] = $user->id;
 $sql = $db->query("SELECT MAX(id) as id FROM " . MAIN_DB_PREFIX . "actioncomm");
 $result = $db->fetch_object($sql);
-$js = "<script>$(window).load(function() {"
+$js = "<script>$(window).on('load', function() {"
  . "             initSynchServ(". $result->id .");"
  . "$(window).bind('beforeunload', function(){"
  . " return 'Ceci va quiter le mode Connect';"

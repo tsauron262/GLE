@@ -15,7 +15,7 @@ var tailleMenu2 = 200;
 var maxmenu = tailleMenu1 + tailleMenu2;
 
 
-$(window).load(function () {
+$(window).on("load", function () {
     var larg = $(window).width();
     if (larg < 940 || 1) {
         $('.login_table td').wrap("<tr></tr>");

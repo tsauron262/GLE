@@ -245,31 +245,34 @@ class synopsisHook {//FA1506-0369
 
     static function footer() {
         global $conf, $db, $logLongTime;
+        
+        $return = "";
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
             if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT . "/index.php?mainmenu=home") !== false) {
-                dashboard::getDashboard();
+                $return .= dashboard::getDashboard();
             }
         }
 
-        echo "</div>";
+        $return .= "</div>";
 
-        echo "<div class='notificationText'></div><div class='notificationObj'></div>";
+        $return .= "<div class='notificationText'></div><div class='notificationObj'></div>";
         
         $nbReq = $db->countReq;
 
         $time = (microtime(true) - self::$timeDeb);
         if ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time");
-        echo "<span class='timePage'>" . number_format($time,4) . " s | ".$nbReq." requetes</span>";
+        $return .= "<span class='timePage'>" . number_format($time,4) . " s | ".$nbReq." requetes</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
-            echo "<br/>";
-            echo "<br/>";
-            echo "<br/>";
-            echo "<br/>";
-            echo "<br/>";
-            echo "<br/>";
+            $return .= "<br/>";
+            $return .= "<br/>";
+            $return .= "<br/>";
+            $return .= "<br/>";
+            $return .= "<br/>";
+            $return .= "<br/>";
         }
+        return $return;
     }
 
     public static function getObj($type) {
@@ -699,15 +702,16 @@ class dashboard {
     <script type="text/javascript">var dashtype="4";</script>
 
 ';
-        echo $js;
-        print '<div class="titre">Mon tableau de bord - Accueil</div>';
-        print "<br/>";
-        print "<br/>";
-        print "<div style='padding: 5px 10px; width: 270px;' class='ui-button ui-state-default ui-widget-header ui-corner-all'><em><span style='float: left; margin: -1px 3px 0px 0px' class='ui-icon ui-icon-info'></span><a href='#' onClick='addWidget()'>Ajouter des widgets &agrave; votre tableau de bord.</a></em></div>";
-        print "<br/>";
-        print '<div id="dashboard">';
-        print '  You need javascript to use the dashboard.';
-        print '</div>';
+        $return = $js;
+        $return .= '<div class="titre">Mon tableau de bord - Accueil</div>';
+        $return .= "<br/>";
+        $return .= "<br/>";
+        $return .= "<div style='padding: 5px 10px; width: 270px;' class='ui-button ui-state-default ui-widget-header ui-corner-all'><em><span style='float: left; margin: -1px 3px 0px 0px' class='ui-icon ui-icon-info'></span><a href='#' onClick='addWidget()'>Ajouter des widgets &agrave; votre tableau de bord.</a></em></div>";
+        $return .= "<br/>";
+        $return .= '<div id="dashboard">';
+        $return .= '  You need javascript to use the dashboard.';
+        $return .= '</div>';
+        return $return;
     }
 
 }

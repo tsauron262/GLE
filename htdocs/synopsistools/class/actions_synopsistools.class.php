@@ -6,6 +6,12 @@ class ActionsSynopsisTools {
         return 0;
     }
     
+    
+    function printCommonFooter($parameters, &$object, &$action, $hookmanager) {
+        echo synopsisHook::footer();
+        return 0;
+    }
+    
     function printSearchForm($parameters, &$object, &$action, $hookmanager) {
         global $conf, $langs;
         $return = '';

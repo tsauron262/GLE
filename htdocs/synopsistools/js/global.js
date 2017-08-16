@@ -1,4 +1,4 @@
-$(window).load(function () {
+$(window).on("load", function () {
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if ($("div.tmenudiv").is(':visible')) {
         $(window).resize(function () {
@@ -467,7 +467,7 @@ function ajNoteAjax() {
     
 
     for (tab of tabs)
-        if ($("a#" + tab).size() > 0) {
+        if ($("a#" + tab).length > 0) {
             i++;
             ajNote(tab, i);
            

@@ -21,7 +21,7 @@ require_once('../main.inc.php');
 llxHeader();
 
 //if (isset($_REQUEST['connect']))
-//    echo "<script>$(window).load(function() {initSynchServ(idActionMax);});</script>";
+//    echo "<script>$(window).on('load', function() {initSynchServ(idActionMax);});</script>";
 
 $text=$langs->trans("Tools")." Synopsis";
 

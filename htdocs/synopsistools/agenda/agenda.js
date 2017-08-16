@@ -1,4 +1,4 @@
-$(window).load(function () {
+$(window).on("load", function () {
     $("div.eventAbss").hover(function () {
         elem = this;
         setTimeout(function () {

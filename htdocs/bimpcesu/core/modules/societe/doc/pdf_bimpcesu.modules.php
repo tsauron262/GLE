@@ -32,6 +32,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
 
+
+
 /**
  *	Class to generate PDF Azur bimpcesu
  */
@@ -924,7 +926,33 @@ class pdf_bimpcesu extends ModeleBimpcesu
 	{
 		global $conf,$langs;
 
-		$outputlangs->load("main");
+	
+        
+        $total = "Error"; // Inconnu pour le moment       
+        $totalcesu = "Error"; // Inconnu pour le moment       
+        $npref = "Error"; // Inconnu pour le moment
+        $diri = "Christian CONSTANTIN BERTIN";
+        $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
+        $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
+        $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
+        $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
+
+       // $object = new Societe($db);
+        $bene = $object->nom;
+        $beneadd = $object->address; // Inconnu pour le moment
+        $benezip = $object->zip; // Inconnu pour le moment
+        $beneville = $object->town; // Inconnu pour le moment
+
+        // Date & Date -1
+        date_default_timezone_set('UTC+1');
+        $date01 = date('d/m/Y');
+        $date02 = date('d/m/');
+        $date03 = date('Y')-1;
+        $date04 = date('Y')+1;
+        
+
+
+        $outputlangs->load("main");
 		$outputlangs->load("bills");
 		$outputlangs->load("propal");
 		$outputlangs->load("companies");
@@ -997,12 +1025,12 @@ class pdf_bimpcesu extends ModeleBimpcesu
 		$posy+=4;
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
-		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . dol_print_date($object->date,"day",false,$outputlangs,true), '', 'R');
+		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . $date01, '', 'R');
 
 		$posy+=4;
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
-		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dol_print_date($object->fin_validite,"day",false,$outputlangs,true), '', 'R');
+		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . $date02.$date04, '', 'R');
 
 		if ($object->client->code_client)
 		{
@@ -1063,13 +1091,85 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         
                         
                         
-                        // TEST DE TEXTE
-                        $orga=$conf->global->MAIN_INFO_SOCIETE_NOM;
-                        $pdf->SetXY($posx+2,$posy+10); // Position du texte sur la page
+
+
+                        // LIGNES ...
+                        $pdf->SetXY($posx+2,$posy+10); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
                         $pdf->SetFont('','',$default_font_size); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
-                        $pdf->MultiCell(600, 8, "$orga agréé pour les services à la personne par arrêté préfectoral N°... en date du", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->MultiCell(182, 3, "$orga agréé pour les services à la personne par arrêté préfectoral N°$npref en date du", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        
+                        // LIGNES ORGANISATION
+                        $pdf->SetXY($posx+2,$posy+15); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(100, 3, "$date01", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->SetXY($posx+2,$posy+20); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(100, 3, "$orgaadd", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->SetXY($posx+2,$posy+25); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(100, 3, "$orgazip - $orgaville", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
 
+                        // LIGNES BENEFICIAIRE
+                        $pdf->SetXY($posx+2,$posy+40); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
+                        $pdf->MultiCell(600, 3, "$bene", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->SetXY($posx+2,$posy+45); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(100, 3, "$beneadd Error", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->SetXY($posx+2,$posy+50); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(100, 3, "$benezip Error - $beneville Error", 0, 'L'); // imprime du texte
+                        
+                        // LIGNES DATE
+                        $pdf->SetXY($posx+150,$posy+60); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
+                        $pdf->MultiCell(100, 3, "Lieu, le $date02$date03", 0, 'L'); // imprime du texte
+                        
+                        // LIGNES CONTENUS 1
+                        $pdf->SetXY($posx+2,$posy+70); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(182, 3, "Je soussigné(e) M. $diri, de $orga certifie que M. $bene a bénéficié(e) de services à la personne (préciser la nature du service). ", 0, 'L'); // imprime du texte
+                        
+                        // LIGNES CONTENUS 2
+                        $pdf->SetXY($posx+2,$posy+85); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(182, 3, "En $date03, sa participation représente une somme totale de : $total €, dont $totalcesu € au titre du Cesu.", 0, 'L'); // imprime du texte
+                        
+                        // LIGNES CONTENUS 3
+                        $pdf->SetXY($posx+2,$posy+100); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(182, 3, "Montant total des factures $date03 : $total €", 0, 'L'); // imprime du texte
+                        
+                        // LIGNES CONTENUS 4
+                        $pdf->SetXY($posx+2,$posy+105); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(182, 3, "Montant total payé en Cesu préfinancés : $totalcesu €", 0, 'L'); // imprime du texte
+                        
+                        // LIGNES CONTENUS 5
+                        $pdf->SetXY($posx+2,$posy+120); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(182, 3, "Les sommes perçues pour financer les services à la personne sont à déduire de la valeur indiquée
+précédemment. La déclaration engage la responsabilité du seul contribuable.", 0, 'L'); // imprime du texte
+                        
+                        // LIGNES CONTENUS 6
+                        $pdf->SetXY($posx+2,$posy+145); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
+                        $pdf->SetFont('','I',"8"); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
+                        $pdf->MultiCell(182, 3, "* 1. Le client doit conserver à fin de contrôle, les factures remises par le prestataire de services qui précisent les dates
+d’intervention et durées des interventions.
+2. La partie pré-financée par l’employeur du CESU est exonérée d’impôt. Seule la partie autofinancée par le bénéficiaire du
+CESU ouvre droit à la réduction d’impôt de l’article 199 sexdecies du code général des impôts (cf. article 7231 du code
+du travail). La distinction des montants sera portée sur l’attestation émise par l’employeur à son salarié bénéficiaire en vue de
+la déclaration fiscale annuelle.
+3. Pour toute information concernant les services à la personne, le cesu et les aides, consultez services-a-domicile.fr", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        
+                        // LIGNES CONTENUS 7
+                        $pdf->SetXY($posx+2,$posy+185); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
+                        $pdf->SetFont('','',$default_font_size +2); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
+                        $pdf->MultiCell(182, 3, "Fait pour valoir ce que de droit,", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        
+                        // LIGNES CONTENUS FIN
+                        $pdf->SetXY($posx+65,$posy+200); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
+                        $pdf->SetFont('','',$default_font_size); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
+                        $pdf->MultiCell(182, 3, "$bene, Cachet de l’entreprise", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        
+                        
+                        
+                        
+                        
                         
                         
                         

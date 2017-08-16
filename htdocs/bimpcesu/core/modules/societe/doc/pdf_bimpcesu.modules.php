@@ -1060,7 +1060,23 @@ class pdf_bimpcesu extends ModeleBimpcesu
 			$pdf->SetFont('','B', '14'); // Enable BOLD
 			$pdf->MultiCell(80, 4, "ATTESTATION CESU", 0, 'L'); // ATTESTATION CESU EN GRAS ET DANS LE TABLEAU
 			$posy=$pdf->getY();
+                        
+                        
+                        
+                        // TEST DE TEXTE
+                        $orga=$conf->global->MAIN_INFO_SOCIETE_NOM;
+                        $pdf->SetXY($posx+2,$posy+10); // Position du texte sur la page
+                        $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
+                        $pdf->SetFont('','',$default_font_size); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
+                        $pdf->MultiCell(600, 8, "$orga agréé pour les services à la personne par arrêté préfectoral N°... en date du", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
 
+                        
+                        
+                        
+                        
+                        
+                        
+                        
 			// Show sender information
 //			$pdf->SetXY($posx+2,$posy);
 //			$pdf->SetFont('','', $default_font_size - 1);

@@ -250,7 +250,7 @@ class synopsisHook {//FA1506-0369
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
             if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT . "/index.php?mainmenu=home") !== false) {
-                $return .= dashboard::getDashboard();
+                //$return .= dashboard::getDashboard();
             }
         }
 

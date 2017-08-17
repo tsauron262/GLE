@@ -269,6 +269,7 @@ class modBimpcesu extends DolibarrModules
 		$sql = array();
 
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcesu', 1, 'bimpcesu', 'Attestation CESU', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."c_paiement` (`id`, `code`, `libelle`, `type`, `active`, `accountancy_code`, `module`) VALUES (150, 'CESU', 'CESU', 2, 1, NULL, NULL);";
                 
 		$this->_load_tables('/bimpcesu/sql/');
 

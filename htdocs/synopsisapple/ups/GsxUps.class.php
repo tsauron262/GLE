@@ -3,57 +3,59 @@
 require_once '../GSX.class.php';
 require_once dirname(__FILE__) . '/shipment.class.php';
 
+ini_set('display_errors', 1);
+
 class GsxUps
 {
 
     public static $shipToAdresses = array(
         1 => array(
-            'label' => 'B&W (Purple Label)',
-            'Name' => 'DB Schenker',
-            'Attention' => 'B&W',
+            'label'       => 'B&W (Purple Label)',
+            'Name'        => 'DB Schenker',
+            'Attention'   => 'B&W',
             'AddressLine' => 'Hekven 6',
-            'City' => 'Breda',
-            'PostalCode' => '4824 AE',
+            'City'        => 'Breda',
+            'PostalCode'  => '4824 AE',
             'CountryCode' => 'NL',
             'PhoneNumber' => '31-076572-2415'
         ),
         2 => array(
-            'label' => 'KBB (Brown Label)',
-            'Name' => 'DB Schenker',
-            'Attention' => 'KBB',
+            'label'       => 'KBB (Brown Label)',
+            'Name'        => 'DB Schenker',
+            'Attention'   => 'KBB',
             'AddressLine' => 'Hekven 6',
-            'City' => 'Breda',
-            'PostalCode' => '4824 AE',
+            'City'        => 'Breda',
+            'PostalCode'  => '4824 AE',
             'CountryCode' => 'NL',
             'PhoneNumber' => '31-076572-2415'
         ),
         3 => array(
-            'label' => 'LITHIUM BATTERIES',
-            'Name' => 'DB Schenker',
-            'Attention' => 'LITHIUM BATTERIES',
+            'label'       => 'LITHIUM BATTERIES',
+            'Name'        => 'DB Schenker',
+            'Attention'   => 'LITHIUM BATTERIES',
             'AddressLine' => 'Hekven 6',
-            'City' => 'Breda',
-            'PostalCode' => '4824 AE',
+            'City'        => 'Breda',
+            'PostalCode'  => '4824 AE',
             'CountryCode' => 'NL',
             'PhoneNumber' => '31-076572-2415'
         ),
         4 => array(
-            'label' => 'RC (Yellow Label)',
-            'Name' => 'Pegatron Czech',
-            'Attention' => 'RC',
+            'label'       => 'RC (Yellow Label)',
+            'Name'        => 'Pegatron Czech',
+            'Attention'   => 'RC',
             'AddressLine' => 'Na Rovince 862',
-            'City' => 'Ostrava',
-            'PostalCode' => '720 00',
+            'City'        => 'Ostrava',
+            'PostalCode'  => '720 00',
             'CountryCode' => 'CZ',
             'PhoneNumber' => ''
         ),
         5 => array(
-            'label' => 'ROR (Red Label)',
-            'Name' => 'DB Schenker',
-            'Attention' => 'RoR',
+            'label'       => 'ROR (Red Label)',
+            'Name'        => 'DB Schenker',
+            'Attention'   => 'RoR',
             'AddressLine' => 'Hekven 6',
-            'City' => 'Breda',
-            'PostalCode' => '4824 AE',
+            'City'        => 'Breda',
+            'PostalCode'  => '4824 AE',
             'CountryCode' => 'NL',
             'PhoneNumber' => '31-076572-2415'
         ),
@@ -66,13 +68,13 @@ class GsxUps
     public static $upsSoapLocation = 'http://www.ups.com/XMLSchema/XOLTWS/UPSS/v1.0';
     public static $upsEndpointUrls = array(
         'shipment' => array(
-            'test' => 'https://wwwcie.ups.com/webservices/Ship',
+            'test'       => 'https://wwwcie.ups.com/webservices/Ship',
             'production' => 'https://onlinetools.ups.com/webservices/Ship'
         )
     );
     public static $upsMode = 'production';
-    public static $apiMode = 'ut';
-    //    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
     public static $upsCarrierCode = 'UPSWW065';
     public $upsConfig = array(
         'access' => "5CFD6AC514872584",
@@ -106,26 +108,26 @@ class GsxUps
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_service']) &&
                 $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != "")
             $details = array(
-                'apiMode' => self::$apiMode,
-                'regionCode' => 'emea',
-                'userId' => $user->array_options['options_apple_id'],
+                'apiMode'          => self::$apiMode,
+                'regionCode'       => 'emea',
+                'userId'           => $user->array_options['options_apple_id'],
 //                'password' => $user->array_options['options_apple_mdp'],
                 'serviceAccountNo' => $user->array_options['options_apple_service'],
-                'languageCode' => 'fr',
-                'userTimeZone' => 'CEST',
-                'returnFormat' => 'php',
+                'languageCode'     => 'fr',
+                'userTimeZone'     => 'CEST',
+                'returnFormat'     => 'php',
             );
         else
         if (isset($userId) && isset($password) && isset($serviceAccountNo)) {
             $details = array(
-                'apiMode' => self::$apiMode,
-                'regionCode' => 'emea',
-                'userId' => $userId,
+                'apiMode'          => self::$apiMode,
+                'regionCode'       => 'emea',
+                'userId'           => $userId,
 //                'password' => $password,
                 'serviceAccountNo' => $serviceAccountNo,
-                'languageCode' => 'fr',
-                'userTimeZone' => 'CEST',
-                'returnFormat' => 'php',
+                'languageCode'     => 'fr',
+                'userTimeZone'     => 'CEST',
+                'returnFormat'     => 'php',
             );
         } else {
 //            echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
@@ -144,7 +146,7 @@ class GsxUps
         try {
             $mode = array(
                 'soap_version' => 'SOAP_1_1', // use soap 1.1 client
-                'trace' => 1
+                'trace'        => 1
             );
 
             $soapClient = new SoapClient($wsdl, $mode);
@@ -213,7 +215,7 @@ class GsxUps
             }
             $html .= '</p>';
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => $html
             );
         }
@@ -249,99 +251,99 @@ class GsxUps
             $return['html'] .= $ship->getInfosHtml();
         } else {
             $request = array(
-                'Request' => array(
+                'Request'  => array(
                     'RequestOption' => 'nonvalidate'
                 ),
                 'Shipment' => array(
-                    'Description' => "Retour de pièces"
+                    'Description'        => "Retour de pièces"
                     ,
-                    'Shipper' => array(
-                        'Name' => $shipToInfos['Name'],
+                    'Shipper'            => array(
+                        'Name'          => $shipToInfos['Name'],
                         'AttentionName' => $shipToInfos['AttentionName'],
                         'ShipperNumber' => '4W63V6',
-                        'Address' => array(
-                            'AddressLine' => $shipToInfos['Address']['AddressLine'],
-                            'City' => $shipToInfos['Address']['City'],
+                        'Address'       => array(
+                            'AddressLine'       => $shipToInfos['Address']['AddressLine'],
+                            'City'              => $shipToInfos['Address']['City'],
                             'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
-                            'PostalCode' => '4824BM',
-                            'CountryCode' => $shipToInfos['Address']['CountryCode'],
+                            'PostalCode'        => '4824BM',
+                            'CountryCode'       => $shipToInfos['Address']['CountryCode'],
                         ),
-                        'Phone' => array(
+                        'Phone'         => array(
                             'Number' => $shipToInfos['Phone']['Number']
                         )
                     ),
-                    'ShipTo' => array(
-                        'Name' => $shipToAdress['Name'],
+                    'ShipTo'             => array(
+                        'Name'          => $shipToAdress['Name'],
                         'AttentionName' => $shipToAdress['Attention'],
-                        'Address' => array(
+                        'Address'       => array(
                             'AddressLine' => $shipToAdress['AddressLine'],
-                            'City' => $shipToAdress['City'],
-                            'PostalCode' => $shipToAdress['PostalCode'],
+                            'City'        => $shipToAdress['City'],
+                            'PostalCode'  => $shipToAdress['PostalCode'],
                             'CountryCode' => $shipToAdress['CountryCode'],
                         ),
-                        'Phone' => array(
+                        'Phone'         => array(
                             'Number' => $shipToAdress['PhoneNumber'],
                         )
                     ),
-                    'ReturnService' => array(
+                    'ReturnService'      => array(
                         'Code' => 3,
                     ),
-                    'ShipFrom' => array(
-                        'Name' => $shipToInfos['Name'],
+                    'ShipFrom'           => array(
+                        'Name'          => $shipToInfos['Name'],
                         'AttentionName' => $shipToInfos['AttentionName'],
                         'ShipperNumber' => $shipToInfos['ShipperNumber'],
-                        'Address' => array(
-                            'AddressLine' => $shipToInfos['Address']['AddressLine'],
-                            'City' => $shipToInfos['Address']['City'],
+                        'Address'       => array(
+                            'AddressLine'       => $shipToInfos['Address']['AddressLine'],
+                            'City'              => $shipToInfos['Address']['City'],
                             'StateProvinceCode' => $shipToInfos['Address']['StateProvinceCode'],
-                            'PostalCode' => $shipToInfos['Address']['PostalCode'],
-                            'CountryCode' => $shipToInfos['Address']['CountryCode'],
+                            'PostalCode'        => $shipToInfos['Address']['PostalCode'],
+                            'CountryCode'       => $shipToInfos['Address']['CountryCode'],
                         ),
-                        'Phone' => array(
+                        'Phone'         => array(
                             'Number' => $shipToInfos['Phone']['Number']
                         )
                     ),
                     'PaymentInformation' => array(
                         'ShipmentCharge' => array(
-                            'Type' => '01',
+                            'Type'         => '01',
                             'BillReceiver' => array(
                                 'AccountNumber' => '4W63V6',
-                                'Address' => array(
+                                'Address'       => array(
                                     'PostalCode' => '4824BM'
                                 )
                             )
                         )
                     ),
-                    'Service' => array(
-                        'Code' => ($infos['shipToKey'] == 3) ? '11' : '07',
+                    'Service'            => array(
+                        'Code'        => ($infos['shipToKey'] == 3) ? '11' : '07',
                         'Description' => ($infos['shipToKey'] == 3) ? 'Standard' : 'Express'
                     ),
-                    'Package' => array(
-                        'Description' => 'retour pièces',
-                        'Packaging' => array(
+                    'Package'            => array(
+                        'Description'   => 'retour pièces',
+                        'Packaging'     => array(
                             'Code' => '02'
                         ),
-                        'Dimensions' => array(
+                        'Dimensions'    => array(
                             'UnitOfMeasurement' => array(
-                                'Code' => 'CM',
+                                'Code'        => 'CM',
                                 'Description' => 'cm'
                             ),
-                            'Length' => $infos['length'],
-                            'Width' => $infos['width'],
-                            'Height' => $infos['height']
+                            'Length'            => $infos['length'],
+                            'Width'             => $infos['width'],
+                            'Height'            => $infos['height']
                         ),
                         'PackageWeight' => array(
                             'UnitOfMeasurement' => array(
-                                'Code' => 'KGS',
+                                'Code'        => 'KGS',
                                 'Description' => 'kg'
                             ),
-                            'Weight' => $infos['weight']
+                            'Weight'            => $infos['weight']
                         )
                     ),
                     'LabelSpecification' => array(
-                        'HTTPUserAgent' => 'Mozilla/4.5',
+                        'HTTPUserAgent'    => 'Mozilla/4.5',
                         'LabelImageFormat' => array(
-                            'Code' => 'GIF',
+                            'Code'        => 'GIF',
                             'Description' => 'GIF'
                         )
                     )
@@ -361,7 +363,7 @@ class GsxUps
             }
             $return = array(
                 'status' => '',
-                'html' => ''
+                'html'   => ''
             );
             if (isset($result->Response->ResponseStatus->Code) && $result->Response->ResponseStatus->Code == 1) {
                 $result = $result->ShipmentResults;
@@ -426,7 +428,7 @@ class GsxUps
         if (!$this->connect) {
             if (!$this->gsxInit())
                 return array(
-                    'ok' => 0,
+                    'ok'   => 0,
                     'html' => '<p class="error">Echec de la connexion au service GSX</p>' . $this->gsx->getGSXErrorsHtml()
                 );
         }
@@ -453,14 +455,14 @@ class GsxUps
             $html = '<p class="error">Echec du chargement des données de l\'expédition</p>';
             $html .= $ship->displayErrors();
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => $html
             );
         }
 
         if (!count($ship->parts)) {
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => '<p class="error">Erreur: aucun composant enregistré pour cette expédition</p>'
             );
         }
@@ -469,21 +471,21 @@ class GsxUps
         foreach ($ship->parts as $p) {
             $parts[] = array(
                 'returnOrderNumber' => $p['returnOrderNumber'],
-                'partNumber' => isset($p['new_number']) && !empty($p['new_number']) ? $p['new_number'] : $p['number']
+                'partNumber'        => isset($p['new_number']) && !empty($p['new_number']) ? $p['new_number'] : $p['number']
             );
         }
 
         $datas = array(
-            'bulkReturnOrder' => $parts,
-            'shipToCode' => $ship->shipTo,
-            'carrierCode' => self::$upsCarrierCode,
-            'trackingNumber' => $ship->upsInfos['trackingNumber'],
-            'length' => $ship->infos['length'],
-            'width' => $ship->infos['width'],
-            'height' => $ship->infos['height'],
+            'bulkReturnOrder'      => $parts,
+            'shipToCode'           => $ship->shipTo,
+            'carrierCode'          => self::$upsCarrierCode,
+            'trackingNumber'       => $ship->upsInfos['trackingNumber'],
+            'length'               => $ship->infos['length'],
+            'width'                => $ship->infos['width'],
+            'height'               => $ship->infos['height'],
             'estimatedTotalWeight' => $ship->infos['weight'],
-            'notes' => isset($_POST['notes']) ? $_POST['notes'] : '',
-            'notaFiscalNumber' => ''
+            'notes'                => isset($_POST['notes']) ? $_POST['notes'] : '',
+            'notaFiscalNumber'     => ''
         );
 
         $soapClient = 'RegisterPartsForBulkReturn';
@@ -525,13 +527,13 @@ class GsxUps
                     $html .= $ship->displayErrors();
                 }
                 return array(
-                    'ok' => 0,
+                    'ok'   => 0,
                     'html' => $html
                 );
             } else {
                 $html .= $ship->getInfosHtml();
                 return array(
-                    'ok' => 1,
+                    'ok'   => 1,
                     'html' => $html
                 );
             }
@@ -539,13 +541,13 @@ class GsxUps
 
         if (count($this->gsx->errors['soap'])) {
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => $this->gsx->getGSXErrorsHtml()
             );
         }
 
         return array(
-            'ok' => 0,
+            'ok'   => 0,
             'html' => '<p class="error">Pas de réponse</p>'
         );
     }
@@ -555,7 +557,7 @@ class GsxUps
         if (!$this->connect) {
             if (!$this->gsxInit())
                 return array(
-                    'ok' => 0,
+                    'ok'   => 0,
                     'html' => '<p class="error">Echec de la connexion au service GSX</p>' . $this->gsx->getGSXErrorsHtml()
                 );
         }
@@ -564,20 +566,20 @@ class GsxUps
         $ship = new shipment($db, $shipId);
         if (!isset($ship->ref) || empty($ship->ref)) {
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => '<p class="error">Erreur: numéro de suivi UPS absent</p>'
             );
         }
         if (!isset($ship->gsxInfos['bulkReturnId']) || empty($ship->gsxInfos['bulkReturnId'])) {
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => '<p class="error">Erreur: numéro de retour GSX absent</p>'
             );
         }
 
         if (!count($ship->parts)) {
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => '<p class="error">Aucun composant enregistré pour cette expédition.</p>'
             );
         }
@@ -587,7 +589,7 @@ class GsxUps
 
         if (!$filesDir) {
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => '<p class="error">Echec de la création du dossier "' . $filesDir . '"</p>'
             );
         }
@@ -597,7 +599,7 @@ class GsxUps
         if (!file_exists($filesDir))
             if (!mkdir($filesDir)) {
                 return array(
-                    'ok' => 0,
+                    'ok'   => 0,
                     'html' => '<p class="error">Echec de la création du dossier "' . $filesDir . '"</p>'
                 );
             }
@@ -632,7 +634,7 @@ class GsxUps
                 continue;
 
             $datas = array(
-                'partNumber' => $partNumber,
+                'partNumber'        => $partNumber,
                 'returnOrderNumber' => $part['returnOrderNumber']
             );
 
@@ -661,7 +663,7 @@ class GsxUps
             }
             $html .= '</p>';
             return array(
-                'ok' => 0,
+                'ok'   => 0,
                 'html' => $html
             );
         }
@@ -670,7 +672,7 @@ class GsxUps
         synopsisapple_pdf_create($db, $ship, 'appleretour');
 
         return array(
-            'ok' => 1,
+            'ok'   => 1,
             'html' => ''
         );
     }
@@ -734,6 +736,7 @@ class GsxUps
         $html = '<input type="hidden" id="shipToUsed" name="shiptToUsed" value="' . $this->shiptTo . '"/>';
         if ($parts === false) {
             $html .= $this->gsx->getGSXErrorsHtml();
+            return $html;
         } else if (!count($parts)) {
             $html .= '<p>Aucun composant trouvé pour ce numéro ship-to</p>' . "\n";
         } else {
@@ -761,9 +764,18 @@ class GsxUps
             $i = 1;
             foreach ($parts as $sro => $repairParts) {
                 foreach ($repairParts as $p) {
-                    $date = null;
-                    if (!empty($p['expectedReturnDate']))
-                        $date = new DateTime($p['expectedReturnDate']);
+                    $DT = null;
+                    if (!empty($p['expectedReturnDate'])) {
+//                        2017-09-06 07:00:00 +00:00
+                        if (preg_match('/^\{4}\-\d{2}\-\d{2}( \{2}:\d{2}:\d{2} )?(\+\d{2}:\d{2})?$/', $p['expectedReturnDate'])) {
+                            $DT = new DateTime($p['expectedReturnDate']);
+                            $date = $DT->format('d / m / Y');
+                        } else {
+                            $date = $p['expectedReturnDate'];
+                        }
+                    } else {
+                        $date = 'non spécifiée';
+                    }
                     $html .= '<tr id="part_' . $i . '" ' . ($odd ? ' class="odd"' : '') . '>' . "\n";
                     $html .= '<td><input class="partCheck" type="checkbox" name="parts[]"/></td>' . "\n";
                     $html .= '<td class="partName">' . $p['nom'] . '</td>' . "\n";
@@ -772,10 +784,10 @@ class GsxUps
                     $html .= '<td class="partPONumber">' . $p['poNumber'] . '</td>';
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
-                    $html .= '<td class="partReturnDate">' . (isset($date) ? $date->format('d / m / Y') : 'non spécifiée') . '</td>' . "\n";
+                    $html .= '<td class="partReturnDate">' . $date . '</td>' . "\n";
                     $html .= '<td class="vendorName">' . $p['vendorName'] . '</td>' . "\n";
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
-                    $html .= '<input type="hidden" class="partDateValue" value="' . (isset($date) ? $date->format('Ymd') : '00000000') . '" />' . "\n";
+                    $html .= '<input type="hidden" class="partDateValue" value="' . (isset($DT) ? $DT->format('Ymd') : '00000000') . '" />' . "\n";
                     $html .= '</tr>' . "\n";
                     $i++;
                     $odd = !$odd;
@@ -798,23 +810,23 @@ class GsxUps
         $this->gsx->resetSoapErrors();
 
         $datas = array(
-            'repairType' => '',
-            'repairStatus' => '',
-            'purchaseOrderNumber' => '',
-            'sroNumber' => '',
+            'repairType'               => '',
+            'repairStatus'             => '',
+            'purchaseOrderNumber'      => '',
+            'sroNumber'                => '',
             'repairConfirmationNumber' => '',
-            'serialNumbers' => array(
+            'serialNumbers'            => array(
                 'serialNumber' => ''
             ),
-            'shipToCode' => $this->shiptTo,
-            'customerFirstName' => '',
-            'customerLastName' => '',
-            'customerEmailAddress' => '',
-            'createdFromDate' => '',
-            'createdToDate' => '',
-            'warrantyType' => '',
-            'kbbSerialNumberFlag' => '',
-            'comptiaCode' => '',
+            'shipToCode'               => $this->shiptTo,
+            'customerFirstName'        => '',
+            'customerLastName'         => '',
+            'customerEmailAddress'     => '',
+            'createdFromDate'          => '',
+            'createdToDate'            => '',
+            'warrantyType'             => '',
+            'kbbSerialNumberFlag'      => '',
+            'comptiaCode'              => '',
         );
 
         $soapClient = 'PartsPendingReturn';
@@ -830,6 +842,10 @@ class GsxUps
         if (isset($response['PartsPendingReturnResponse']['partsPendingResponse'])) {
             $response = $response['PartsPendingReturnResponse']['partsPendingResponse'];
 
+            if (isset($response['returnOrderNumber'])) {
+                $response = array($response);
+            }
+
             foreach ($response as $part) {
 //                if (isset($part['registeredForReturn']) && $part['registeredForReturn'] == 'Y')
 //                    continue;
@@ -842,14 +858,14 @@ class GsxUps
                     $newRef = true;
 
                 $parts[$part['sroNumber']][] = array(
-                    'nom' => $part['partDescription'],
-                    'ref' => $newRef ? $part['originalPartNumber'] : $part['partNumber'],
-                    'newRef' => $newRef ? $part['partNumber'] : '',
-                    'serial' => $part['serialNumber'],
-                    'returnOrderNumber' => $part['returnOrderNumber'],
-                    'poNumber' => $part['purchaseOrderNumber'],
+                    'nom'                => $part['partDescription'],
+                    'ref'                => $newRef ? $part['originalPartNumber'] : $part['partNumber'],
+                    'newRef'             => $newRef ? $part['partNumber'] : '',
+                    'serial'             => $part['serialNumber'],
+                    'returnOrderNumber'  => $part['returnOrderNumber'],
+                    'poNumber'           => $part['purchaseOrderNumber'],
                     'expectedReturnDate' => $part['expectedReturnDate'],
-                    'vendorName' => $part['vendorName']." | ".$part['vendorState']
+                    'vendorName'         => $part['vendorName'] . " | " . $part['vendorState']
                 );
             }
         }

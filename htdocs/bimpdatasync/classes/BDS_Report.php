@@ -27,29 +27,11 @@ class BDS_Report
     );
     public static $psObjectsLabels = array(
         'Product'        => 'produit{s}',
-        'Category'       => 'categorie{s}[F]',
-        'Customer'       => 'client{s}',
-        'Address'        => 'adresse{s}[F]',
-        'Order'          => 'commande{s}[F]',
-        'OrderState'     => 'état{s} de commande',
-        'OrderHistory'   => 'historique{s} d\'une commande',
-        'Cart'           => 'panier{s}',
-        'Combination'    => 'déclinaison{s}[F]',
-        'Attribute'      => 'attribut{s}',
-        'AttributeGroup' => 'type{s} d\'attribut',
-        'Carrier'        => 'transporteur{s}',
-        'Country'        => 'pays',
-        'Feature'        => 'caractéristique{s}[F]',
-        'FeatureValue'   => 'valeur{s} de caractéristique[F]',
-        'Language'       => 'langue{s}[F]',
-        'Manufacturer'   => 'marque{s}[F]',
-        'State'          => 'état{s} / Région{s}',
-        'Store'          => 'magasin{s}',
-        'Supplier'       => 'fournisseur{s}',
-        'Zone'           => 'zone{s}[F]',
-        'StockAvailable' => 'stock{s} produit',
-        'TaxRule'        => 'règle{s} de taxe[F]'
+        'Categorie'       => 'categorie{s}[F]',
+        'Societe'       => 'client{s}',
+        'Contact'        => 'contact{s}'
     );
+    
     public $file_ref = 0;
     public $rows = array();
     protected $data = array(

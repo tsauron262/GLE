@@ -161,7 +161,7 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         if (is_null($response)) {
-            $msg = 'Echec de la reuqête de suppression externe (aucune réponse reçue)';
+            $msg = 'Echec de la requête de suppression externe (aucune réponse reçue)';
             $this->Error($msg);
         } elseif (!isset($response['success']) || !$response['success']) {
             $msg = 'Echec de la suppression externe<br/>';
@@ -394,7 +394,9 @@ class BDS_SyncProcess extends BDS_Process
 
         if (method_exists($this, $method)) {
             foreach ($objects_ids as $id_object) {
+                
                 $data = $this->{$method}($id_object);
+                
                 if (!is_null($data)) {
                     $sync_data = new BDS_SyncData();
                     $sync_data->setLocValues((int) static::$id, $object_name, $id_object);

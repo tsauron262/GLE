@@ -61,7 +61,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         if ($display_msg) {
             $msg = 'Cette catégorie n\'est pas éligible à l\'export vers Dolibarr ';
             $msg .= '(elle n\'est pas incluse dans l\'une des catégories racines de Prestashop)';
-            $this->alert($msg, $id_category);
+            $this->alert($msg, $id_categorie);
         }
         return false;
     }
@@ -91,7 +91,6 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
     protected function triggerActionProductCreate($object)
     {
-        return;
         $this->triggerActionProductModify($object);
     }
 
@@ -238,6 +237,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
     }
 
     // Données d'export des objets: 
+    
     public function getCategorieExportData($id_categorie)
     {
         if (!class_exists('Categorie')) {

@@ -1,0 +1,34 @@
+Synchronisation avec Prestashop - Opérations automatiques (triggers) du 16 / 08 / 2017;1;0;16/08/2017 10:20:56;16/08/2017 15:44:00;2;0
+[ROW];success;10:20:56;Product;6802;ID externe: 81;Suppression effectuée avec succès
+[ROW];success;10:45:15;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];success;10:57:18;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];success;10:57:59;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];success;11:00:14;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];success;11:00:56;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];success;11:13:09;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];success;11:16:01;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];success;11:16:20;Product;6820;ID externe: 92;Export effectué avec succès
+[ROW];danger;11:46:34;;;;Echec de l'export<br/>
+[ROW];success;11:47:04;Categorie;825;ID externe: 45;Export effectué avec succès
+[ROW];success;12:41:00;Product;6823;ID externe: 93;Suppression effectuée avec succès
+[ROW];success;12:42:13;Product;6824;ID externe: 94;Suppression effectuée avec succès
+[ROW];success;12:43:39;Product;6825;ID externe: 95;Export effectué avec succès
+[ROW];success;12:44:23;Product;6825;ID externe: 95;Suppression effectuée avec succès
+[ROW];success;12:45:37;Product;6826;ID externe: 96;Export effectué avec succès
+[ROW];success;12:52:57;Categorie;890;ID externe: 98;Export effectué avec succès
+[ROW];success;12:53:53;Categorie;891;ID externe: 99;Export effectué avec succès
+[ROW];danger;12:57:17;;;;Echec de l'export<br/>
+[ROW];success;12:57:40;Categorie;892;ID externe: 100;Export effectué avec succès
+[ROW];success;13:28:02;Categorie;968;ID externe: 180;Export effectué avec succès
+[ROW];success;13:55:03;Categorie;889;ID externe: 97;Export effectué avec succès
+[ROW];success;13:55:42;Categorie;969;ID externe: 181;Export effectué avec succès
+[ROW];success;13:55:59;Categorie;969;ID externe: 181;Export effectué avec succès
+[ROW];success;13:56:12;Categorie;969;ID externe: 181;Export effectué avec succès
+[ROW];success;14:48:19;Product;6827;ID externe: 97;Export effectué avec succès
+[ROW];success;15:06:37;Categorie;983;ID externe: 187;Export effectué avec succès
+[ROW];success;15:14:43;Categorie;988;ID externe: 191;Export effectué avec succès
+[ROW];success;15:15:31;Categorie;988;ID externe: 191;Export effectué avec succès
+[ROW];success;15:17:04;Categorie;989;ID externe: 192;Export effectué avec succès
+[ROW];success;15:36:19;Categorie;990;ID externe: 193;Export effectué avec succès
+[ROW];success;15:43:37;Categorie;991;ID externe: 194;Export effectué avec succès
+[ROW];success;15:44:00;Categorie;991;ID externe: 194;Suppression effectuée avec succès

@@ -1,0 +1,60 @@
+Requêtes du 10 / 08 / 2017;1;0;10/08/2017 00:00:38;10/08/2017 17:54:43;7;0
+[OBJECT_DATA];Product;0;52;19;0;0;0;0;0
+[ROW];success;00:00:38;Product;;ps2_dol784;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:39;Product;;ps3_dol785;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:39;Product;;ps13_dol786;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:39;Product;;ps14_dol787;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:39;Product;;ps15_dol788;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:39;Product;;ps16_dol789;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:40;Product;;ps17_dol790;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:40;Product;;ps18_dol791;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:40;Product;;ps19_dol792;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:40;Product;;ps4_dol793;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:40;Product;;ps8_dol794;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:41;Product;;ps6_dol795;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:41;Product;;ps7_dol796;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:41;Product;;ps20_dol797;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:42;Product;;ps21_dol798;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:42;Product;;ps22_dol799;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:42;Product;;ps9_dol800;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:43;Product;;ps10_dol801;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:43;Product;;ps11_dol802;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:43;Product;;ps12_dol803;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:43;Product;;ps5_dol804;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:43;Product;;ps23_dol805;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:44;Product;;ps24_dol806;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:44;Product;;ps25_dol807;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:44;Product;;ps26_dol808;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:44;Product;;ps27_dol809;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:45;Product;;ps28_dol810;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:45;Product;;ps29_dol811;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:45;Product;;ps30_dol812;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:45;Product;;ps31_dol813;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:46;Product;;ps32_dol814;Mise à jour de la catégorie effectuée avec succès
+[ROW];success;00:00:46;Product;;ps33_dol815;Mise à jour de la catégorie effectuée avec succès
+[ROW];danger;09:21:34;Product;;ps77_dol{dol_id};Echec de la création du produit (Erreur: ErrorProductAlreadyExists)
+[ROW];success;09:27:00;Product;6782;ps77_dol{dol_id};Mise à jour du produit effectuée avec succès
+[ROW];success;09:27:16;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;09:28:03;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:21:43;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:22:04;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:22:24;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:24:16;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];danger;10:24:18;Product;6782;;Echec de la désassociation du produit avec la catégorie d'ID "786"
+[ROW];success;10:26:36;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:27:02;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:27:26;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:27:44;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:28:03;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;10:54:17;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;11:00:01;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;11:01:32;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;17:47:00;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];success;17:51:45;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];danger;17:51:45;Product;6782;;Echec de l'import de l'image "36.jpg"
+[ROW];success;17:53:36;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];danger;17:53:36;Product;6782;;Echec de la création du fichier "/var/GLE/DOCUMENTS/test/produit/2/8/6782/photos/36.jpg"
+[ROW];danger;17:53:36;Product;6782;;Echec de l'import de l'image "36.jpg"
+[ROW];success;17:54:43;Product;6782;ps77_dol6782;Mise à jour du produit effectuée avec succès
+[ROW];danger;17:54:43;Product;6782;;Echec de la création du fichier "/var/GLE/DOCUMENTS/test/produit/2/8/6782/photos/36.jpg" (https://gle.synopsis-erp.com/presta/img/p/3/6/36.jpg)
+[ROW];danger;17:54:43;Product;6782;;Echec de l'import de l'image "36.jpg"

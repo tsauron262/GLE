@@ -260,44 +260,20 @@ print (", ");
 print_r($object->town);
 print "</td></tr></table>";
 
-    
+
 //<--- -------------- TABLEAU END --------------- --->
 
-
-
-
-//echo '<pre>';
-////print_r ($objsoc->id);
-//print_r ($conf);
-
-
-
-//<--- -------------- PAS IMPORTANT START --------------- --->
-
-
-//        $sql8 = 'SELECT nom FROM llx_societe WHERE nom = "BIMP"';
-//        $req = $db->query($sql8) or die('Erreur SQL !<br />'.$sql.'<br />'.mysql_error());
-//        if ($db->num_rows($req) > 0)
-//        $data = $db->fetch_object($req);
-//        print $data;
-
-    
-    //print '<a class="noborder" href="/compta/facture/list.php?sall='.$object->id.'&prefefid='.$objp->rowid.'" ';
-//print_r ($object);
-//print ("Facture Numero : "); print_r ($object->mode_reglement_id->);
-//        $sql = "SELECT * FROM llx_facture WHERE fk_soc = ". $socid;
-//        $req = $db->query($sql) or die('Erreur SQL !<br />'.$sql.'<br />'.mysql_error());
-//        $result = "$db->fetch_object($req)";
-//        echo $result['fk_soc'];
-//print_r ($conf->global);
-
-
-//<--- -------------- PAS IMPORTANT END --------------- --->
 
    
 
 
 
+
+
+
+
+
+//<--- -------------- GENE PDF START --------------- --->
 
 
     // Actions to build doc
@@ -314,22 +290,29 @@ $urlsource = $_SERVER["PHP_SELF"] . "?socid=" . $object->id;
 $genallowed = $user->rights->bimpcesu->read;
 $delallowed = $user->rights->bimpcesu->read;
 
-$var = true;
-$formfile = new FormFile($db);
-$somethingshown = $formfile->show_documents('bimpcesu', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);
+
+
+    if (!empty($user->rights->facture->lire)) {
+
+        $resql = $db->query($sql);
+        if ($resql) {
+            $var = true;
+            $formfile = new FormFile($db);
+            $num = $db->num_rows($resql);
+            $i = 0;
+            if ($num > 0) {
+                $somethingshown = $formfile->show_documents('bimpcesu', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);                
+            }
+            else
+                echo "";
+        }
+    }
+
+//<--- -------------- GENE PDF STOP --------------- --->
 
 
 
-
-
-
-
-
-
-
-
-
-
+    
 
 dol_fiche_end();
 

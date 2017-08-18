@@ -733,6 +733,15 @@ class GsxUps
 
         $html = '<input type="hidden" id="shipToUsed" name="shiptToUsed" value="' . $this->shiptTo . '"/>';
         if ($parts === false) {
+            if (count($this->gsx->errors['soap'])) {
+                foreach ($this->gsx->errors['soap'] as $idx => $error) {
+                    if (preg_match('/.*(Code: RPR\.RTN\.005).*/', $error)) {
+                        $html .= '<p class="error">Il n\'y a aucun composant en attente de retour pour ce centre <br/>';
+                        $html .= 'Attention, vous devez avoir un Identifiant Apple valide (Apple ID) pour pouvoir accéder à ce service</p>';
+                        unset($this->gsx->errors['soap'][$idx]);
+                    }
+                }
+            }
             $html .= $this->gsx->getGSXErrorsHtml();
         } else if (!count($parts)) {
             $html .= '<p>Aucun composant trouvé pour ce numéro ship-to</p>' . "\n";

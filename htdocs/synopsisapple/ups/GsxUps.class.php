@@ -737,7 +737,12 @@ class GsxUps
                 foreach ($this->gsx->errors['soap'] as $idx => $error) {
                     if (preg_match('/.*(Code: RPR\.RTN\.005).*/', $error)) {
                         $html .= '<p class="error">Il n\'y a aucun composant en attente de retour pour ce centre <br/>';
-                        $html .= 'Attention, vous devez avoir un Identifiant Apple valide (Apple ID) pour pouvoir accéder à ce service</p>';
+                        global $user;
+                        if (!isset($user->array_options['options_apple_id']) || !isset($user->array_options['options_apple_service']) ||
+                                $user->array_options['options_apple_id'] == "" || $user->array_options['options_apple_service'] == "") {
+                            $html .= 'Attention, vous devez avoir un Identifiant Apple valide (Apple ID) pour pouvoir accéder à ce service</p>';
+                        }
+
                         unset($this->gsx->errors['soap'][$idx]);
                     }
                 }

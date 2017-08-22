@@ -128,6 +128,7 @@ class mod_chrono_serpentine extends ModeleNumRefchrono
         }
 
         $where=' AND model_refid = '.$chrono->model_refid;
+        $where=" AND ref REGEXP '".str_replace("{00000}", "[0-9]+", $mask)."'";
 
         $numFinal=get_next_value($db,$mask,'synopsischrono','ref',$where,$objsoc->code_client,$chrono->date);
 

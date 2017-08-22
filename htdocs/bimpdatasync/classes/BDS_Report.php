@@ -5,6 +5,10 @@
 class BDS_Report
 {
 
+    public static $refRegex = '/\d{8}\-\d{6}_\d+_(.+)/';
+    public static $refDateFormat = 'Ymd';
+    public static $refTimeFormat = 'His';
+    public static $fullRefSyntax = '{date}-{time}_{id_process}_{type}';
     public static $deleteDelay = 'P1M';
     public static $messagesTypes = array('success, info, warning, danger');
     public static $row_def = array(
@@ -25,13 +29,12 @@ class BDS_Report
         'nbActivated'   => 0,
         'nbDeactivated' => 0
     );
-    public static $psObjectsLabels = array(
-        'Product'        => 'produit{s}',
-        'Categorie'       => 'categorie{s}[F]',
-        'Societe'       => 'client{s}',
-        'Contact'        => 'contact{s}'
+    public static $objectsLabels = array(
+        'Product'   => 'produit{s}',
+        'Categorie' => 'categorie{s}[F]',
+        'Societe'   => 'client{s}',
+        'Contact'   => 'contact{s}'
     );
-    
     public $file_ref = 0;
     public $rows = array();
     protected $data = array(
@@ -45,19 +48,39 @@ class BDS_Report
     );
     protected $objects_data = array();
 
-    public function __construct($fileRef = null)
+    public static function createReference($id_process, $type = null)
     {
-        if (!isset($fileRef) || empty($fileRef)) {
-            $date = new DateTime();
-            $this->file_ref = $date->format('Ymd-His');
-            $this->data['begin'] = $date->format('d/m/Y H:i:s');
+        $DT = new DateTime();
+        if (is_null($type)) {
+            return $DT->format(self::$refDateFormat) . '-' . $DT->format(self::$refTimeFormat);
+        }
+
+        $ref = str_replace('{date}', $DT->format(self::$refDateFormat), self::$fullRefSyntax);
+        $ref = str_replace('{time}', '000000', $ref);
+        $ref = str_replace('{id_process}', $id_process, $ref);
+        $ref = str_replace('{type}', $type, $ref);
+        return $ref;
+    }
+
+    public function __construct($id_process = null, $title = null, $fileRef = null)
+    {
+        if (!is_null($id_process)) {
+            $this->data['id_process'] = (int) $id_process;
+        }
+        if (!is_null($title)) {
+            $this->data['title'] = $title;
+        }
+
+        if (is_null($fileRef) || !$fileRef) {
+            $this->file_ref = self::createReference($id_process);
+            $this->data['begin'] = date('Y-m-d H:i:s');
             $this->data['end'] = '';
         } else {
             $this->file_ref = $fileRef;
             $this->loadFile();
         }
     }
-    
+
     public function loadFile()
     {
         $fileName = __DIR__ . '/../reports/' . $this->file_ref . '.csv';
@@ -97,7 +120,7 @@ class BDS_Report
                 }
             }
         } else {
-            $this->data['begin'] = date('d/m/Y H:i:s');
+            $this->data['begin'] = date('Y-m-d H:i:s');
             $this->data['end'] = '';
         }
     }
@@ -224,12 +247,12 @@ class BDS_Report
         }
 
         $this->rows[] = array(
-            'type'         => $type,
-            'time'         => date('H:i:s'),
-            'object'       => $objectName,
+            'type'      => $type,
+            'time'      => date('H:i:s'),
+            'object'    => $objectName,
             'id_object' => $id_object,
-            'reference'    => $reference,
-            'msg'          => $msg
+            'reference' => $reference,
+            'msg'       => $msg
         );
 
         switch ($type) {
@@ -244,11 +267,10 @@ class BDS_Report
 
     public function end()
     {
-        $date = new DateTime();
-        $this->data['end'] = $date->format('d/m/Y H:i:s');
+        $this->data['end'] = date('d-m-Y H:i:s');
     }
 
-    public static function getReportsList($full = false)
+    public static function getReportsList()
     {
         $files = scandir(__DIR__ . '/../reports/');
 
@@ -264,14 +286,14 @@ class BDS_Report
                 continue;
             }
             $ref = str_replace('.csv', '', $f);
-            $report = new BDS_Report($ref);
-            
+            $report = new BDS_Report(null, null, $ref);
+
             if (!count($report->rows)) {
-                unlink(__DIR__.'/../reports/'.$f);
+                unlink(__DIR__ . '/../reports/' . $f);
                 unset($report);
                 continue;
             }
-            
+
             $datetime = $report->getData('begin');
             if (!$datetime) {
                 $datetime = date('Y-m-d H:i:s');
@@ -279,7 +301,7 @@ class BDS_Report
                 $report->saveFile();
             }
             $date = new DateTime($datetime);
-            
+
             if ($date->format('Y-m-d') <= $deleteDate) {
                 unlink(__DIR__ . '/../reports/' . $f);
                 unset($report);
@@ -288,6 +310,7 @@ class BDS_Report
 
             $nErrors = (int) $report->getData('nbErrors');
             $nAlerts = (int) $report->getData('nbAlerts');
+
             $name = 'Le ' . $date->format('d / m / Y') . ' à ' . $date->format('H:i:s') . ' - ' . $report->getData('title');
 
             if ($nErrors > 0) {
@@ -296,12 +319,19 @@ class BDS_Report
             if ($nAlerts > 0) {
                 $name .= ' (' . $nAlerts . ' alerte' . ($nAlerts > 1 ? 's' : '') . ')';
             }
+
+            $type = 'operations';
+            if (preg_match(self::$refRegex, $ref, $matches)) {
+                $type = $matches[1];
+            }
+
             $reports[] = array(
                 'file'       => $f,
                 'ref'        => $ref,
                 'date'       => $date->format('Y-m-d'),
                 'name'       => $name,
                 'id_process' => $report->getData('id_process'),
+                'type'       => $type,
                 'nErrors'    => $nErrors,
                 'nAlerts'    => $nAlerts
             );
@@ -310,7 +340,7 @@ class BDS_Report
         return $reports;
     }
 
-    public static function getObjectNotifications($objectName, $id_object = null, $reference = null, $from = null, $to = null)
+    public static function getObjectNotifications($objectName, $id_object, $from = null, $to = null, $reference = null)
     {
         $data = array();
         if (is_null($id_object) && is_null($reference)) {
@@ -327,26 +357,26 @@ class BDS_Report
 
         $reports = scandir(__DIR__ . '/../reports/');
         foreach ($reports as $report_file) {
-            if (!in_array($report_file, array('.', '..'))) {
-                if (preg_match('/^(.+)\.csv$/', $report_file, $matches)) {
-                    if ($matches[1] > $to) {
+            if (in_array($report_file, array('.', '..'))) {
+                continue;
+            }
+            if (preg_match('/^((\d{8}\-\d{6}).*)\.csv$/', $report_file, $matches)) {
+                if ($matches[2] > $to) {
+                    continue;
+                }
+                if (!is_null($from) && ($matches[2] < $from)) {
+                    continue;
+                }
+                $report = new BDS_Report(null, null, $matches[1]);
+                foreach ($report->rows as $r) {
+                    if ($objectName !== strtolower($r['object'])) {
                         continue;
                     }
-                    if (!is_null($from) && ($matches[1] < $from)) {
-                        continue;
-                    }
-                    $report = new BDS_Report($matches[1]);
-                    foreach ($report->rows as $r) {
-                        if ($objectName !== strtolower($r['object'])) {
-                            continue;
+                    if (($r['id_object'] && ($id_object == $r['id_object']))) {
+                        if (!array_key_exists($report->file_ref, $data)) {
+                            $data[$report->file_ref] = array();
                         }
-                        if ((!is_null($id_object) && ((int) $id_object === (int) $r['id_object'])) ||
-                                (!is_null($reference) && ($reference === $r['reference']))) {
-                            if (!array_key_exists($report->file_ref, $data)) {
-                                $data[$report->file_ref] = array();
-                            }
-                            $data[$report->file_ref][] = $r;
-                        }
+                        $data[$report->file_ref][] = $r;
                     }
                 }
             }
@@ -358,8 +388,8 @@ class BDS_Report
 
     public static function deleteRef($file_ref)
     {
-        if (file_exists(__DIR__ . '/reports/' . $file_ref . '.csv')) {
-            unlink(__DIR__ . '/reports/' . $file_ref . '.csv');
+        if (file_exists(__DIR__ . '/../reports/' . $file_ref . '.csv')) {
+            unlink(__DIR__ . '/../reports/' . $file_ref . '.csv');
         }
     }
 
@@ -375,17 +405,17 @@ class BDS_Report
         }
     }
 
-    public static function getPsObjectLabel($psObject, $plurial = false)
+    public static function getObjectLabel($object, $plurial = false)
     {
         $label = '';
-        if (!array_key_exists($psObject, self::$psObjectsLabels)) {
+        if (!array_key_exists($object, self::$objectsLabels)) {
             if ($plurial) {
                 $label = 'objets';
             } else {
                 $label = 'objets';
             }
         } else {
-            $label = self::$psObjectsLabels[$psObject];
+            $label = self::$objectsLabels[$object];
             if ($plurial) {
                 $label = str_replace('{', '', $label);
                 $label = str_replace('}', '', $label);
@@ -397,7 +427,7 @@ class BDS_Report
         return $label;
     }
 
-    public static function getPsObjectLabelData($psObject)
+    public static function getObjectLabelData($object)
     {
         $data = array(
             'name'     => 'object',
@@ -405,8 +435,8 @@ class BDS_Report
             'isFemale' => 0
         );
 
-        if (array_key_exists($psObject, self::$psObjectsLabels)) {
-            $label = self::$psObjectsLabels[$psObject];
+        if (array_key_exists($object, self::$objectsLabels)) {
+            $label = self::$objectsLabels[$object];
             if (preg_match('/^.+\[F\]$/', $label)) {
                 $data['isFemale'] = 1;
                 $label = str_replace('[F]', '', $label);
@@ -423,13 +453,13 @@ class BDS_Report
         return $data;
     }
 
-    public static function getPsObjetsQuery()
+    public static function getObjetsQuery()
     {
         $query = array();
-        foreach (self::$psObjectsLabels as $name => $label) {
+        foreach (self::$objectsLabels as $name => $label) {
             $query[] = array(
                 'name'  => strtolower($name),
-                'label' => ucfirst(self::getPsObjectLabel($name))
+                'label' => ucfirst(self::getObjectLabel($name))
             );
         }
         return $query;

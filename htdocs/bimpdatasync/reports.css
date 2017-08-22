@@ -1,0 +1,146 @@
+.formRow {
+    padding: 5px;
+}
+.formRow .formLabel {
+    text-align: right;
+    display: inline-block;
+    width: 25%;
+    padding-right: 15px;
+}
+.formRow .formInput {
+    text-align: left;
+    display: inline-block;
+    width: 70%;
+}
+
+.formRow .formInput select.fullwidth {
+    width: 100%;
+}
+
+.formSubmit {
+    text-align: right;
+    padding: 10px 20px;
+}
+
+.buttonsContainer {
+    padding-top: 10px;
+}
+#reportContent,
+#searchResultContent {
+    padding-top: 20px;
+}
+
+#reportContent .deleteReportButton {
+    float: right;
+    margin: 20px;
+}
+
+.reportRowsFilters {
+    padding: 10px;
+}
+
+.reportRowsFilters {
+    width: 250px;
+}
+
+.reportTableContainer table {
+    text-align: left;
+    border: none;
+    box-shadow: none;
+    padding: 10px 15px;
+}
+
+.reportTableContainer table thead tr th {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #292964;
+    color: #292964;
+    text-align: left;
+}
+
+.reportRowsContainer {
+    max-height: 450px;
+    overflow-y: auto;
+}
+.reportRowsContainer table {
+    padding: 0;
+    border-collapse: collapse;
+}
+
+.reportRowsContainer .reportRow {
+    border: none!important;
+}
+.reportRowsContainer .reportRow.even {
+    background-color: #FAFAFA;
+    border: none!important;
+}
+.reportRowsContainer .reportRow td {
+    padding: 8px;
+    border: none!important;
+}
+.reportRowsContainer .reportRow .rowStatus {
+    width: 10%;
+}
+
+.reportRowsContainer .reportRow .rowTime {
+    width: 10%;
+}
+
+.reportRowsContainer .reportRow .rowObject {
+    width: 20%;
+}
+
+.reportRowsContainer .reportRow .rowReference {
+    width: 20%;
+}
+
+.reportRowsContainer .reportRow .rowMessage {
+    width: 40%;
+}
+
+.alert {
+    border: none!important;
+    padding: 5px 12px;
+}
+
+.form-alert {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.alert-success {
+    color: #348C41!important;
+    background-color: #E7FAEA;
+}
+
+.alert-info {
+    color: #3B6EA0!important;
+    background-color: #E2ECF5;
+}
+
+.alert-warning {
+    color: #B48335!important;
+    background-color: #F5EEE2;
+}
+
+.alert-danger {
+    color: #A00000!important;
+    background-color: #F5E2E2;
+}
+
+.success {
+    color: #348C41!important;
+    font-weight: bold;
+}
+.info {
+    color: #3B6EA0!important;
+    font-weight: bold;
+}
+.warning {
+    color: #B48335!important;
+    font-weight: bold;
+}
+.danger {
+    color: #A00000!important;
+    font-weight: bold;
+}

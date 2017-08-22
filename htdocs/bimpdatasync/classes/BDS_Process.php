@@ -4,7 +4,7 @@ abstract class BDS_Process
 {
 
     public static $files_dir_name = '';
-    public static $debug_mod = true;
+    public static $debug_mod = false;
     public static $memory_limit = '1000M';
     public static $objects = array();
     public $db = null;
@@ -94,15 +94,10 @@ abstract class BDS_Process
 
     public function executeTriggerAction($action, $object)
     {
-        $report_ref = 'actions_' . static::$id . '_' . date('Y-m-d') . ' 00:00:00';
-        if (!file_exists(__DIR__ . '/../reports/' . $report_ref . '.csv')) {
-            $this->report = new BDS_Report();
-            $this->report->file_ref = $report_ref;
-            $title = static::$title . ' - Opérations automatiques (triggers) du ' . date('d / m / Y');
-            $this->report->setData('title', $title);
-            $this->report->setData('id_process', static::$id);
-        } else {
-            $this->report = new BDS_Report($report_ref);
+        if (is_null($this->report)) {
+            $report_ref = BDS_Report::createReference(static::$id, 'actions');
+            $title = static::$title . ' - Opérations automatiques du ' . date('d / m / Y');
+            $this->report = new BDS_Report(static::$id, $title, $report_ref);
         }
 
         $check = true;
@@ -136,9 +131,9 @@ abstract class BDS_Process
         $return = array();
 
         if (is_null($this->report)) {
-            $this->report = new BDS_Report('requests_' . date('Y-m-d'));
-            $this->report->setData('title', 'Requêtes du ' . date('d / m / Y'));
-            $this->report->setData('id_process', static::$id);
+            $report_ref = BDS_Report::createReference(static::$id, 'requests');
+            $title = static::$title . ' - Requêtes d\'import du ' . date('d / m / Y');
+            $this->report = new BDS_Report(static::$id, $title, $report_ref);
         }
 
         if (!isset($params['operation']) || !$params['operation']) {
@@ -457,6 +452,34 @@ abstract class BDS_Process
             }
         }
 
+        return $processes;
+    }
+
+    public static function getProcessesQuery()
+    {
+        $dir = __DIR__ . '/process_overrides/';
+        $files = scandir($dir);
+
+        $processes = array();
+        foreach ($files as $f) {
+            if (in_array($f, array('.', '..'))) {
+                continue;
+            }
+
+            if (preg_match('/^(.+)\.php$/', $f, $matches)) {
+                $class_name = $matches[1];
+                if (!class_exists($class_name)) {
+                    require_once $dir . $f;
+                }
+                if (class_exists($class_name)) {
+                    $processes[$class_name::$id] = array(
+                        'id'   => $class_name::$id,
+                        'name' => $class_name::$title
+                    );
+                }
+            }
+        }
+        ksort($processes);
         return $processes;
     }
 

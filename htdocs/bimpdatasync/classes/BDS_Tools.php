@@ -116,4 +116,130 @@ class BDS_Tools
 
         return $dir;
     }
+
+    public static function makeObjectLabel($label, $type = 'the', $isFemale = false, $label_plurial = null)
+    {
+        $vowel_first = false;
+        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $label)) {
+            $vowel_first = true;
+        }
+
+        if (is_null($label_plurial)) {
+            if (preg_match('/^.*au$/', $label)) {
+                $label_plurial = $label . 'x';
+            } elseif (preg_match('/^.*ou$/', $label)) {
+                $label_plurial = $label . 'x';
+            } else {
+                $label_plurial = $label . 's';
+            }
+        }
+
+        $label = strtolower($label);
+
+        switch ($type) {
+            case 'the':
+                if ($vowel_first) {
+                    return 'l\'' . $label;
+                } elseif ($isFemale) {
+                    return 'la ' . $label;
+                } else {
+                    return 'le ' . $label;
+                }
+
+            case 'the_plur':
+                return 'les ' . $label_plurial;
+
+            case 'a':
+                if ($isFemale) {
+                    return 'une ' . $label;
+                } else {
+                    return 'un ' . $label;
+                }
+
+            case 'this':
+                if ($isFemale) {
+                    return 'cette ' . $label;
+                } elseif ($vowel_first) {
+                    return 'cet ' . $label;
+                } else {
+                    return 'ce ' . $label;
+                }
+
+            case 'of':
+                if ($vowel_first) {
+                    return 'd\'' . $label;
+                } else {
+                    return 'de ' . $label;
+                }
+
+            case 'of_plur':
+                if ($vowel_first) {
+                    return 'd\'' . $label_plurial;
+                } else {
+                    return 'de ' . $label_plurial;
+                }
+
+            case 'of_the':
+                if ($vowel_first) {
+                    return 'de l\'' . $label;
+                } elseif ($isFemale) {
+                    return 'de la ' . $label;
+                } else {
+                    'du ' . $label;
+                }
+
+            case 'of_the_plur':
+                return 'des ' . $label_plurial;
+
+            case 'of_this':
+                if ($isFemale) {
+                    return 'de cette ' . $label;
+                } elseif ($vowel_first) {
+                    return 'de cet ' . $label;
+                } else {
+                    return 'de ce ' . $label;
+                }
+
+            case 'of_those':
+                return 'de ces ' . $label;
+        }
+        return $label;
+    }
+
+    public static function makeObjectUrl($object_name, $id_object)
+    {
+        if ($object_name && $id_object) {
+            switch ($object_name) {
+                case 'Product':
+                    return DOL_URL_ROOT . '/product/card.php?id=' . $id_object;
+            }
+        }
+
+        return '';
+    }
+
+    public static function makeObjectName(BimpDb $bdb, $object_name, $id_object)
+    {
+        if (is_null($object_name) || !$object_name) {
+            return '';
+        }
+        if (array_key_exists($object_name, BDS_Report::$objectsLabels)) {
+            $objectLabel = ucfirst(BDS_Report::getObjectLabel($object_name));
+        } else {
+            $objectLabel = ucfirst($object_name);
+        }
+
+        if (!is_null($id_object) && $id_object) {
+            $objectLabel .= ' n° ' . $id_object;
+            switch ($object_name) {
+                case 'Product':
+                    $ref = $bdb->getValue('product', 'ref', '`rowid` = ' . (int) $id_object);
+                    if (!is_null($ref) && $ref) {
+                        $objectLabel .= ' - ' . $ref;
+                    }
+                    break;
+            }
+        }
+        return $objectLabel;
+    }
 }

@@ -1,8 +1,0 @@
-Requêtes du 12 / 08 / 2017;1;0;12/08/2017 10:44:57;12/08/2017 10:44:58;5;0
-[OBJECT_DATA];Product;0;6;1;0;0;0;0;0
-[ROW];success;10:44:58;Product;123;ps1_dol123;Mise à jour du produit effectuée avec succès
-[ROW];danger;10:44:58;Product;6788;ps4_dol6788;Echec de la mise à jour du produit (Erreur: Error : ErrorProductAlreadyExists) - Erreur SQL: <span class="sqlError">Duplicate entry 'demo_3-1' for key 'uk_product_ref'</span>
-[ROW];danger;10:44:58;Product;6790;ps6_dol6790;Echec de la mise à jour du produit (Erreur: Error : ErrorProductAlreadyExists) - Erreur SQL: <span class="sqlError">Duplicate entry 'demo_5-1' for key 'uk_product_ref'</span>
-[ROW];danger;10:44:58;Product;;ps7_dol{dol_id};Echec de la création du produit (Erreur: ErrorProductAlreadyExists) - Erreur SQL: <span class="sqlError">Unknown column 'id_product' in 'field list'</span>
-[ROW];danger;10:44:58;Product;;ps9_dol{dol_id};Echec de la création du produit (Erreur: ErrorProductAlreadyExists) - Erreur SQL: <span class="sqlError">Unknown column 'id_product' in 'field list'</span>
-[ROW];danger;10:44:58;Product;;ps10_dol{dol_id};Echec de la création du produit (Erreur: ErrorProductAlreadyExists) - Erreur SQL: <span class="sqlError">Unknown column 'id_product' in 'field list'</span>

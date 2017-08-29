@@ -278,3 +278,34 @@ function deleteSelectedObjects(object_name, $button) {
         deleteObjects(object_name, objects_list, $button, $resultContainer);
     }
 }
+
+function saveObjectAssociations(id_object, object_name, association, $button) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var $resultContainer = $('#' + object_name + '_' + association + '_associatonsAjaxResult');
+
+    var list = [];
+
+    $('#' + object_name + '_' + association + '_associations_list').find('input[type=checkbox]').each(function () {
+        if ($(this).prop('checked')) {
+            list.push(parseInt($(this).val()));
+        }
+    });
+
+    var data = {
+        'id_object': id_object,
+        'object_name': object_name,
+        'association': association,
+        'list': list
+    };
+
+    bimp_json_ajax('saveObjectAssociations', data, $resultContainer, function () {
+        $button.removeClass('disabled');
+    }, function () {
+        $button.removeClass('disabled');
+    });
+}

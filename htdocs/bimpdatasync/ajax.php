@@ -96,6 +96,53 @@ if (BDS_Tools::isSubmit('action')) {
             }
             break;
 
+        case 'saveObjectAssociations':
+            $id_object = BDS_Tools::getValue('id_object');
+            $object_name = BDS_Tools::getValue('object_name');
+            $association = BDS_Tools::getValue('association');
+            $list = BDS_Tools::getValue('list', array());
+
+            if (is_null($id_object) || !$id_object) {
+                $errors[] = 'ID Absent';
+            }
+            if (is_null($object_name) || !$object_name) {
+                $errors[] = 'Type d\'objet Absent';
+            }
+            if (is_null($association) || !$association) {
+                $errors[] = 'Type d\'association absent';
+            }
+
+            if (!count($errors)) {
+                if (!class_exists($object_name)) {
+                    if (file_exists(__DIR__ . '/classes/' . $object_name . '.class.php')) {
+                        require_once __DIR__ . '/classes/' . $object_name . '.class.php';
+                    }
+                }
+
+                if (!class_exists($object_name)) {
+                    $errors[] = 'Classe "' . $object_name . '" inexistante';
+                } else {
+                    $object = new $object_name();
+
+                    if (!is_null($id_object)) {
+                        $object->fetch($id_object);
+                    }
+
+                    $errors = $object->saveAssociations($association, $list);
+                    if (!count($errors)) {
+                        $class_name = $object_name::$associations[$association]['class_name'];
+                        $label = $class_name::getLabel('name_plur');
+                        $success = 'Enregistrement de la liste des ' . $class_name::getLabel('name_plur') . ' associé';
+                        if ($class_name::isLabelFemale()) {
+                            $success .= 'e';
+                        }
+                        $success .= 's effectué avec succès';
+                    }
+                }
+            }
+
+            break;
+
         case 'loadObjectForm':
             $object_name = BDS_Tools::getValue('object_name');
             $id_object = BDS_Tools::getValue('id_object', 0);

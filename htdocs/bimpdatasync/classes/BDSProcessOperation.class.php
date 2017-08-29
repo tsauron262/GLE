@@ -11,7 +11,7 @@ class BDSProcessOperation extends BimpObject
     public $description;
     public $warning;
     public static $labels = array(
-        'name'     => 'operation',
+        'name'     => 'opération',
         'isFemale' => 1
     );
     public static $fields = array(

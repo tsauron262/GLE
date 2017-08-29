@@ -21,6 +21,10 @@ select.switch {
     width: 75px;
 }
 
+.formRow input[type=checkbox] {
+    margin-right: 12px;
+}
+
 .formRow .formInput select.fullwidth,
 .formRow .formInput input.fullwidth {
     width: 100%;

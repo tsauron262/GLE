@@ -172,10 +172,10 @@ class BDSProcess extends BimpObject
                     $html .= '<div class="formRow">';
                     $html .= '<div class="formLabel">' . $option['label'] . ': </div>';
                     $html .= '<div class="formInput">';
-                    $defVal = isset($option['default_value']) ? $option['default_value'] : '';
+                    $defVal = (isset($option['default_value']) ? $option['default_value'] : '');
                     switch ($option['type']) {
                         case 'text':
-                            $html .= '<input type="text" name="' . $option['name'] . ' value="' . $defVal . '" style="width: 350px"/>';
+                            $html .= '<input type="text" name="' . $option['name'] . '" value="' . $defVal . '" style="width: 350px"/>';
                             break;
 
                         case 'select':

@@ -9,6 +9,7 @@ class BimpObject
     public static $fields = array();
     protected static $labels = array();
     public static $objects = array();
+    public static $associations = array();
     public static $list_params = null;
     public static $form_params = null;
     public $id = null;
@@ -27,6 +28,8 @@ class BimpObject
     {
         return 'BimpObject';
     }
+
+    // Validation des champs:
 
     public function validateForm()
     {
@@ -142,6 +145,8 @@ class BimpObject
         return $errors;
     }
 
+    // Gestion SQL: 
+
     public function fetch($id)
     {
         $row = $this->db->getRow(static::$table, '`id` = ' . (int) $id);
@@ -216,6 +221,15 @@ class BimpObject
                     }
                 }
             }
+            foreach (static::$associations as $name => $params) {
+                $where = '`' . $params['self_key'] . '` = ' . (int) $this->id;
+                $result = $this->db->delete($params['table'], $where);
+                if ($result <= 0) {
+                    $asso_class = $params['class_name'];
+                    $msg = 'Echec de la suppression des associations avec les ' . $asso_class::getLabel('name_plur');
+                    $errors[] = $msg;
+                }
+            }
         }
 
         return $errors;
@@ -267,13 +281,99 @@ class BimpObject
             $where = '1';
         }
         $rows = $bdb->getRows(static::$table, $where, null, 'array');
-        
+
         if (!is_null($rows)) {
             return $rows;
         }
-        
+
         return array();
     }
+
+    public function saveAssociations($association, $list)
+    {
+        $errors = array();
+
+        if (!isset(static::$associations[$association])) {
+            $errors[] = 'le type d\'association "' . $association . '" n\'est pas valide';
+        } elseif (is_null($this->id) || !$this->id) {
+            $errors[] = 'ID Absent';
+        } else {
+            $params = static::$associations[$association];
+            $result = $this->db->delete($params['table'], '`' . $params['self_key'] . '` = ' . (int) $this->id);
+            if ($result <= 0) {
+                $msg = 'Echec de la suppression des associations existantes';
+                $sqlError = $this->db->db->error();
+                if ($sqlError) {
+                    $msg .= ' - Erreur SQL: ' . $sqlError;
+                }
+                $errors[] = $msg;
+            } else {
+                $class_name = $params['class_name'];
+                $label = $class_name::getLabel('the');
+                foreach ($list as $id) {
+                    $data = array();
+                    $data[$params['self_key']] = (int) $this->id;
+                    $data[$params['associate_key']] = (int) $id;
+                    if (!$this->db->insert($params['table'], $data)) {
+                        $msg = 'Echec de l\'enregistrement de l\'association avec ' . $label . ' d\'ID ' . $id;
+                        $sqlError = $this->db->db->error();
+                        if ($sqlError) {
+                            $msg .= ' - Erreur SQL: ' . $sqlError;
+                        }
+                        $errors[] = $msg;
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function getAssociationList($association)
+    {
+        $list = array();
+
+        if (!isset(static::$associations[$association])) {
+            return $list;
+        }
+
+        $params = static::$associations[$association];
+        $class_name = $params['class_name'];
+
+        $id_parent = (isset($params['same_parent']) && $params['same_parent']) ? $this->{static::$parent_id_property} : null;
+        return $class_name::getListData($this->db, $id_parent);
+    }
+
+    public function getAssociatedObjectsIds($association)
+    {
+        if (is_null($this->id) || !$this->id) {
+            return array();
+        }
+
+        if (!isset(static::$associations[$association])) {
+            return array();
+        }
+
+        $params = static::$associations[$association];
+        $sql = 'SELECT `' . $params['associate_key'] . '` as id FROM ' . MAIN_DB_PREFIX . $params['table'];
+        $sql .= ' WHERE `' . $params['self_key'] . '` = ' . (int) $this->id;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (!is_null($rows)) {
+            $ids = array();
+            foreach ($rows as $r) {
+                if (!in_array($r['id'], $ids)) {
+                    $ids[] = $r['id'];
+                }
+            }
+            return $ids;
+        }
+
+        return array();
+    }
+
+    // Gestion des intitulés (labels) : 
 
     public static function getLabels()
     {
@@ -483,6 +583,8 @@ class BimpObject
         return false;
     }
 
+    // Générations HTML: 
+
     public function renderForm($id_parent = null)
     {
         $id_object = (!is_null($this->id) ? $this->id : 0);
@@ -601,7 +703,7 @@ class BimpObject
 
     public function renderEditForm($id_parent = null)
     {
-
+        $html = '<div>';
         $html .= '<table class="noborder" width="100%">';
 
         $html .= '<tr class="liste_titre">';
@@ -623,6 +725,92 @@ class BimpObject
         $html .= '</td/>';
         $html .= '</tr/>';
         $html .= '</table/>';
+        $html .= '</div>';
+
+        if (!is_null($this->id) && $this->id) {
+            if (count(static::$associations)) {
+                foreach (static::$associations as $association => $params) {
+                    $html .= $this->renderAssociationForm($association);
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderAssociationForm($association)
+    {
+        if (!isset(static::$associations[$association])) {
+            return '';
+        }
+
+        $params = static::$associations[$association];
+        $class_name = $params['class_name'];
+        $list = array();
+        $method = 'get' . ucfirst($association) . 'AssociationList';
+
+        if (method_exists($this, $method)) {
+            $list = $this->{$method}();
+        } else {
+            $list = $this->getAssociationList($association);
+        }
+
+        $currents = $this->getAssociatedObjectsIds($association);
+        $label = $class_name::getLabel('name_plur') . ' associé' . ($class_name::isLabelFemale() ? 'e' : '') . 's';
+
+        $html .= '<div>';
+
+        $html .= '<table class="noborder" width="100%">';
+
+        $html .= '<tr class="liste_titre">';
+        $html .= '<td>';
+        $html .= ucfirst($label);
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>';
+        if (count($list)) {
+            $html .= '<div id="' . $this->getClass() . '_' . $association . '_associations_list">';
+            foreach ($list as $object) {
+                $html .= '<div class="formRow">';
+                $html .= '<input type="checkbox" value="' . $object['id'] . '" id="' . $association . '_' . $object['id'] . '" name="' . $association . '[]"';
+                if (in_array($object['id'], $currents)) {
+                    $html .= ' checked';
+                }
+                $html .= '/>';
+                $html .= '<label for="' . $association . '_' . $object['id'] . '">';
+                if (isset($object['label'])) {
+                    $html .= $object['label'];
+                } elseif (isset($object['title'])) {
+                    $html .= $object['title'];
+                } elseif (isset($object['name'])) {
+                    $html .= $object['name'];
+                } else {
+                    $html .= ucfirst($class_name::getLabel('')) . ' n°' . $object['id'];
+                }
+                $html .= '</label>';
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+        } else {
+            $html .= '<div class="alert alert-warning">';
+            $html .= 'Il n\'y a aucun' . $class_name::isLabelFemale() ? 'e' : '' . ' ' . $class_name::getLabel('') . ' à associer';
+            $html .= '</div>';
+        }
+
+        $html .= '<div id="' . $this->getClass() . '_' . $association . '_associatonsAjaxResult"></div>';
+
+        $html .= '<div class="formSubmit">';
+        $html .= '<span class="button" onclick="saveObjectAssociations(' . $this->id . ', \'' . $this->getClass() . '\', \'' . $association . '\', $(this));">';
+        $html .= 'Enregistrer les ' . $label;
+        $html .= '</span>';
+        $html .= '</div>';
+        $html .= '</td/>';
+        $html .= '</tr/>';
+
+        $html .= '</table/>';
+
         $html .= '</div>';
 
         return $html;
@@ -879,7 +1067,7 @@ class BimpObject
             $html .= '<td  colspan="' . $nHeaders . '" style="text-align: center">';
             $html .= '<p class="alert alert-info">';
             $html .= 'Aucun' . (static::$labels['isFemale'] ? 'e' : '') . ' ' . static::$labels['name'];
-            $html .= ' enregistré' . (static::$labels['isFemale'] ? 'e' : ''). ' pour le moment';
+            $html .= ' enregistré' . (static::$labels['isFemale'] ? 'e' : '') . ' pour le moment';
             $html .= '</p>';
             $html .= '</td>';
             $html .= '</tr>';

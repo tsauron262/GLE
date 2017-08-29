@@ -11,6 +11,16 @@ class BDSProcessOption extends BimpObject
     public $info;
     public $type;
     public $default_value;
+    public static $associations = array(
+        'operations' => array(
+            'class_name' => 'BDSProcessOperation',
+            'relation' => 'ManyToMany',
+            'same_parent' => true,
+            'table' => 'bds_process_operation_option',
+            'self_key' => 'id_option',
+            'associate_key' => 'id_operation'
+        )
+    );
     public static $labels = array(
         'name'     => 'option',
         'isFemale' => true

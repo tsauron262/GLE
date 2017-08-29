@@ -58,6 +58,21 @@ class BDS_Tools
         return $str;
     }
 
+    public static function getChildrenCategoriesIds(BimpDb $db, $id_parent)
+    {
+        $sql = 'SELECT `rowid` as id FROM ' . MAIN_DB_PREFIX . 'categorie ';
+        $sql .= 'WHERE `fk_parent` = ' . (int) $id_parent . ' AND `type` = 0';
+        
+        $rows = $db->executeS($sql, 'array');
+        $cats = array();
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $cats[] = $r['id'];
+            }
+        }
+        return $cats;
+    }
+
     public static function getCategorieParent(BimpDb $db, $id_categorie)
     {
         $cat_id_parent = $db->getValue('categorie', 'fk_parent', '`rowid` = ' . (int) $id_categorie);
@@ -241,5 +256,21 @@ class BDS_Tools
             }
         }
         return $objectLabel;
+    }
+
+    public static function isSubmit($key)
+    {
+        return (isset($_POST[$key]) || isset($_GET[$key]));
+    }
+
+    public static function getValue($key, $default_value = null)
+    {
+        $value = (isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? $_GET[$key] : $default_value));
+
+        if (is_string($value)) {
+            return stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
+        }
+
+        return $value;
     }
 }

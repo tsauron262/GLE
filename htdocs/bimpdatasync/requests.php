@@ -112,7 +112,7 @@ function set($authentication, $params)
             $errors[] = 'Nom du processus non spécifié dans les paramètres de la requete';
         } else {
             $error = 0;
-            $process = BDS_Process::createProcess($fuser, $params['process_name'], $error);
+            $process = BDS_Process::createProcessByName($fuser, $params['process_name'], $error);
             if ($error) {
                 $errors[] = $error;
             }
@@ -124,7 +124,7 @@ function set($authentication, $params)
         $result = $process->executeSoapRequest($params, $errors);
     } else {
         $msg = 'Requête d\'import non exécutée' . "\n";
-        $msg .= 'Processus: ' . ((!is_null($process)) ? $process::$title : (isset($params['id_process']) ? 'ID ' . $params['id_process'] : 'non spécifié')) . "\n";
+        $msg .= 'Processus: ' . ((!is_null($process)) ? $process->processDefinition->title : (isset($params['id_process']) ? 'ID ' . $params['id_process'] : 'non spécifié')) . "\n";
         $msg .= 'Opération: ' . ((!is_null($params['operation'])) ? $params['operation'] : 'non spécifiée') . "\n\n";
         $nErrors = count($errors);
         $msg .= $nErrors . ' erreur' . (($nErrors > 1) ? 's' : '') . ' : ' . "\n";
@@ -140,7 +140,7 @@ function set($authentication, $params)
         'success'        => (count($errors) ? 0 : 1),
         'errors'         => $errors,
         'return'         => $result,
-        'ext_id_process' => (!is_null($process) ? $process::$id : 0)
+        'ext_id_process' => (!is_null($process) ? $process->processDefinition->id : 0)
     );
     return $response;
 }

@@ -3,6 +3,7 @@
 abstract class BDS_Process
 {
 
+    public static $process_name = null;
     public static $files_dir_name = '';
     public static $debug_mod = false;
     public static $memory_limit = '1000M';
@@ -12,6 +13,12 @@ abstract class BDS_Process
     public $use_references = false;
     public $report = null;
     public $langs = 0;
+    public $filesDir = '';
+    public $processDefinition = null;
+    public $parameters = array();
+    public $options = array();
+    public $triggers = array();
+    protected $references = array();
     public $parameters_ok = true;
     public $options_ok = true;
     public $current_object = array(
@@ -20,30 +27,23 @@ abstract class BDS_Process
         'ref'      => null,
         'increase' => false
     );
-    public static $id = null;
-    public static $name = '';
-    public static $title = '';
-    public static $active = 1;
-    public $filesDir = '';
-    public $parameters = array();
-    public $options = array();
-    public $triggers = array();
-    protected $references = array();
 
-    public function __construct($user, $params = null)
+    public function __construct(BDSProcess $processDefinition, $user, $params = null)
     {
-        if (is_null(static::$id)) {
+        if (!isset($processDefinition->id) || !$processDefinition->id) {
             $msg = 'ID null lors de l\'initalisation ';
-            if (static::$title) {
-                $msg .= 'du processus "' . static::$title . '"';
+            if (isset($processDefinition->title)) {
+                $msg .= 'du processus "' . $processDefinition->title . '"';
             } else {
-                $msg .= 'd\'un processus (nom inconnu)';
+                $msg .= 'du processus (nom inconnu)';
             }
-            if (static::$name) {
-                $msg .= '. (' . static::$name . ')';
+            if (isset($processDefinition->name)) {
+                $msg .= '. (' . $processDefinition->name . ')';
             }
             $this->logError($msg);
         }
+
+        $this->processDefinition = $processDefinition;
 
         set_time_limit(0);
         ini_set('memory_limit', static::$memory_limit);
@@ -62,16 +62,39 @@ abstract class BDS_Process
             ini_set('display_errors', 0);
         }
 
+        $parameters = BDSProcessParameter::getListData($this->db, $processDefinition->id);
+        foreach ($parameters as $p) {
+            if (!isset($p['value']) || empty($p['value']) || $p['value'] === '') {
+                $msg = 'Erreur de configuration: aucune valeur spécifiée pour le paramètre "';
+                $msg .= $p['label'] . '" (ID ' . $p['id_parameter'] . ')';
+                $this->Alert($msg);
+                $this->parameters_ok = false;
+            } else {
+                $this->parameters[$p['name']] = $p['value'];
+            }
+        }
+
         if (!is_null($params)) {
-            foreach ($params as $option_name => $option_value) {
-                if (array_key_exists($option_name, $this->options)) {
-                    $this->options[$option_name] = $option_value;
+            $options = BDSProcessOption::getListData($this->db, $processDefinition->id);
+            foreach ($options as $o) {
+                if (isset($params[$o['name']])) {
+                    $this->options[$o['name']] = $params[$o['name']];
+                } elseif (isset($o['default_value']) && !is_null($o['default_value']) && ($o['default_value'] !== '')) {
+                    if ($o['type'] === 'switch') {
+                        $this->options[$o['name']] = (int) $o['default_value'];
+                    } else {
+                        $this->options[$o['name']] = $o['default_value'];
+                    }
                 }
             }
         }
 
+        if (isset($params['references'])) {
+            $this->setReferences($params['references']);
+        }
+
         if (self::$debug_mod) {
-            echo '<h1>' . static::$title . '</h1>';
+            echo '<h1>' . $this->processDefinition->title . '</h1>';
         }
     }
 
@@ -92,12 +115,113 @@ abstract class BDS_Process
 
     // Déclenchement des opération: 
 
+    public function initOperation($id_operation, &$errors)
+    {
+        $data = array();
+        $data['id_process'] = $this->processDefinition->id;
+        $data['id_operation'] = $id_operation;
+        $data['use_report'] = true;
+        $data['report_ref'] = '';
+        $data['operation_title'] = '';
+
+        if (is_null($id_operation) || !$id_operation) {
+            $errors[] = 'ID de l\'opération absent';
+        } else {
+            $operation = new BDSProcessOperation();
+            if (!$operation->fetch($id_operation)) {
+                $errors[] = 'Cette opération semble ne pas être enregistrée';
+            } else {
+                $data['operation_title'] = $operation->title;
+
+                $options = BDSProcessOperation::getOperationOptions($operation->id);
+                foreach ($options as $option) {
+                    if (!isset($this->options[$option['name']])) {
+                        if (isset($option['required']) && $option['required']) {
+                            $errors[] = 'Option obligatoire non spécifiée: "' . $option['label'] . '"';
+                            $this->options_ok = false;
+                        }
+                    }
+                }
+
+                $method = 'init';
+                $words = explode('_', $operation->name);
+                foreach ($words as $word) {
+                    $method .= ucfirst($word);
+                }
+
+                if (!method_exists($this, $method)) {
+                    $errors[] = 'Erreur  technique: méthode "' . $method . '" inexistatnte';
+                }
+
+                if (!count($errors)) {
+                    $this->{$method}($data, $errors);
+                    if (!count($errors) && $data['use_report']) {
+                        $title = $this->processDefinition->title . ' - ' . $operation->title . ' du ' . date('d / m / Y');
+                        $this->report = new BDS_Report($this->processDefinition->id, $title);
+                        $this->report->setData('id_operation', $id_operation);
+                        $this->report->saveFile();
+                        $data['report_ref'] = $this->report->file_ref;
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public function executeOperationStep($id_operation, $step, &$errors, $report_ref = null)
+    {
+        $result = array();
+        if (isset($this->processDefinition->id) && $this->processDefinition->id) {
+            if (!is_null($report_ref)) {
+                $this->report = new BDS_Report($this->processDefinition->id, null, $report_ref);
+            }
+            $operation = new BDSProcessOperation();
+            if (!$operation->fetch($id_operation)) {
+                $msg = 'Erreur technique : l\'opération d\'ID ' . $id_operation . ' semble ne pas être enregistrée';
+                $errors[] = $msg;
+                $this->Error($msg);
+            } else {
+                $options = BDSProcessOperation::getOperationOptions($operation->id);
+                foreach ($options as $option) {
+                    if (!isset($this->options[$option['name']])) {
+                        if ($option['required']) {
+                            $errors[] = 'Option obligatoire non spécifiée: "' . $option['label'] . '"';
+                            $this->options_ok = false;
+                        }
+                    }
+                }
+
+                if ($this->options_ok) {
+                    $method = 'execute';
+                    $words = explode('_', $operation->name);
+                    foreach ($words as $word) {
+                        $method .= ucfirst($word);
+                    }
+                    if (!method_exists($this, $method)) {
+                        $msg = 'Erreur technique - Méthode "' . $method . '" inexistante';
+                        $this->Error($msg);
+                        $errors[] = $msg;
+                    } else {
+                        $result = $this->{$method}($step, $errors);
+                    }
+                }
+            }
+        } else {
+            $msg = 'Erreur technique: Définitions du processus absentes';
+            $errors[] = $msg;
+            $this->Error($msg);
+        }
+        $this->end(!is_null($report_ref));
+        return $result;
+    }
+
     public function executeTriggerAction($action, $object)
     {
         if (is_null($this->report)) {
-            $report_ref = BDS_Report::createReference(static::$id, 'actions');
-            $title = static::$title . ' - Opérations automatiques du ' . date('d / m / Y');
-            $this->report = new BDS_Report(static::$id, $title, $report_ref);
+            $report_ref = BDS_Report::createReference($this->processDefinition->id, 'actions');
+            $title = $this->processDefinition->title . ' - Opérations automatiques du ' . date('d / m / Y');
+            $this->report = new BDS_Report($this->processDefinition->id, $title, $report_ref);
         }
 
         $check = true;
@@ -131,9 +255,9 @@ abstract class BDS_Process
         $return = array();
 
         if (is_null($this->report)) {
-            $report_ref = BDS_Report::createReference(static::$id, 'requests');
-            $title = static::$title . ' - Requêtes d\'import du ' . date('d / m / Y');
-            $this->report = new BDS_Report(static::$id, $title, $report_ref);
+            $report_ref = BDS_Report::createReference($this->processDefinition->id, 'requests');
+            $title = $this->processDefinition->title . ' - Requêtes d\'import du ' . date('d / m / Y');
+            $this->report = new BDS_Report($this->processDefinition->id, $title, $report_ref);
         }
 
         if (!isset($params['operation']) || !$params['operation']) {
@@ -405,15 +529,35 @@ abstract class BDS_Process
     }
 
     // Gestion statique des processus:
-
-    public static function createProcess($fuser, $processName, &$error, $params = null)
+    public static function createProcessByName($fuser, $processName, &$error, $params = null)
     {
-        $className = 'BDS_' . $processName . 'Process';
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $where = '`name` = \'' . $processName . '\'';
+        $id_process = $bdb->getValue('bds_process', 'id', $where);
+        if (is_null($id_process) || !$id_process) {
+            $error = 'Processus "' . $processName . '" non enregistré';
+            return null;
+        }
+
+        return self::createProcessById($fuser, $id_process, $error, $params);
+    }
+
+    public static function createProcessById($fuser, $id_process, &$error, $params = null)
+    {
+        $processDefinition = new BDSProcess();
+        if (!$processDefinition->fetch($id_process)) {
+            $error = 'Echec du chargement des données du processus (ID ' . $id_process . ')';
+            return null;
+        }
+
+        $className = 'BDS_' . $processDefinition->name . 'Process';
         if (!self::loadProcessClass($className)) {
             $error = 'Classe "' . $className . '" inexistante';
             return null;
         }
-        return new $className($fuser, $params);
+        return new $className($processDefinition, $fuser, $params);
     }
 
     public static function loadProcessClass($className)
@@ -430,89 +574,83 @@ abstract class BDS_Process
         return false;
     }
 
-    public static function getTriggerActionProcesses($action)
-    {
-        global $db, $user;
-        $bdb = new BimpDb($db);
-        $processes = array();
-        $rows = $bdb->getRows('bds_process_trigger_action', '`active` = 1 AND `action` LIKE \'' . $db->escape($action) . '\'');
-        if ($rows) {
-            foreach ($rows as $r) {
-                $error = 0;
-                $process = self::createProcess($user, $r->process_name, $error);
-                if (is_null($process) && $process::$active) {
-                    $msg = 'Bimp Data Sync - Trigger action "' . $action . '" - Echec de la création du processus "' . $r->process_name . '"';
-                    if ($error) {
-                        $msg .= ' - Erreur: ' . $error;
-                    }
-                    dol_syslog($msg, LOG_ERR);
-                } else {
-                    $processes[] = $process;
-                }
-            }
-        }
-
-        return $processes;
-    }
-
-    public static function getProcessesQuery()
-    {
-        $dir = __DIR__ . '/process_overrides/';
-        $files = scandir($dir);
-
-        $processes = array();
-        foreach ($files as $f) {
-            if (in_array($f, array('.', '..'))) {
-                continue;
-            }
-
-            if (preg_match('/^(.+)\.php$/', $f, $matches)) {
-                $class_name = $matches[1];
-                if (!class_exists($class_name)) {
-                    require_once $dir . $f;
-                }
-                if (class_exists($class_name)) {
-                    $processes[$class_name::$id] = array(
-                        'id'   => $class_name::$id,
-                        'name' => $class_name::$title
-                    );
-                }
-            }
-        }
-        ksort($processes);
-        return $processes;
-    }
-
     // Installation:
 
-    public static function addProcessTriggerActions($actions)
+    public function addProcessParameters($parameters)
     {
         global $db;
         $bdb = new BimpDb($db);
 
         $errors = array();
 
-        if (!$bdb->delete('bds_process_trigger_action', '`id_process` = ' . (int) static::$id)) {
-            $msg = 'Echec de la suppression des actions actuelles';
-            $msg .= ' - Erreur SQL ' . $db->error();
-            $errors[] = $msg;
-            return $errors;
-        }
+        BDSProcessParameter::deleteByParent($bdb, $this->processDefinition->id);
 
-        foreach ($actions as $action) {
-            if (isset($action['name']) && $action['name']) {
-                if (!$bdb->insert('bds_process_trigger_action', array(
-                            'id_process'   => (int) static::$id,
-                            'process_name' => $db->escape(static::$name),
-                            'action'       => $db->escape($action['name']),
-                            'active'       => (isset($action['active']) ? (int) $action['active'] : 0)
-                        ))) {
-                    $msg = 'Echec de l\'ajout de l\'action "' . $action['action'] . '" pour le process "' . static::$name . '"';
+        foreach ($parameters as $name => $data) {
+            $parameter = new BDSProcessParameter();
+            $parameter->id_process = (int) $this->processDefinition->id;
+            $parameter->name = $name;
+            $parameter->label = $data['label'];
+            $parameter->value = '' . $data['value'];
+            if (!$parameter->create()) {
+                $msg = 'Echec de l\'ajout du paramètre "' . $data['label'] . '" pour le process "' . $this->processDefinition->name . '"';
+                $msg .= ' - Erreur SQL: ' . $db->error();
+                $errors[] = $msg;
+            }
+            unset($parameter);
+        }
+        return $errors;
+    }
+
+    public function addProcessOptions($options)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $errors = array();
+
+        BDSProcessOption::deleteByParent($bdb, $this->processDefinition->id);
+
+        foreach ($options as $name => $data) {
+            $option = new BDSProcessOption();
+            $option->id_process = (int) $this->processDefinition->id;
+            $option->name = $name;
+            $option->label = $data['label'];
+            $option->info = isset($data['info']) ? $data['info'] : '';
+            $option->type = $data['type'];
+            $option->default_value = isset($data['default_value']) ? $data['default_value'] : '';
+            if (!$option->create()) {
+                $msg = 'Echec de l\'ajout de l\'option "' . $data['label'] . '" pour le process "' . $this->processDefinition->name . '"';
+                $msg .= ' - Erreur SQL: ' . $db->error();
+                $errors[] = $msg;
+            }
+            unset($option);
+        }
+        return $errors;
+    }
+
+    public function addProcessTriggerActions($actions)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $errors = array();
+
+        BDSProcessTriggerAction::deleteByParent($bdb, $this->processDefinition->id);
+
+        foreach ($actions as $data) {
+            if (isset($data['name']) && $data['name']) {
+                $action = new BDSProcessTriggerAction();
+                $action->id_process = (int) $this->processDefinition->id;
+                $action->action_name = $data['name'];
+                $action->active = (isset($data['active']) ? (int) $data['active'] : 0);
+                if (!$action->create()) {
+                    $msg = 'Echec de l\'ajout de l\'action "' . $data['name'] . '" pour le process "' . $this->processDefinition->name . '"';
                     $msg .= ' - Erreur SQL: ' . $db->error();
                     $errors[] = $msg;
                 }
+                unset($action);
             } else {
-                $errors[] = 'Une action non enregistrée (Nom de l\'action non spécifié) pour le process "' . static::$name . '"';
+                $errors[] = 'Une action non enregistrée (Nom de l\'action non spécifié) pour le process "' . $this->processDefinition->name . '"';
             }
         }
         return $errors;

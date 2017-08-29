@@ -60,7 +60,7 @@ class InterfaceExports extends DolibarrTriggers
             require_once __DIR__ . '/../../BDS_Lib.php';
         }
 
-        $processes = BDS_Process::getTriggerActionProcesses($action);
+        $processes = BDSProcessTriggerAction::getTriggerActionProcesses($action);
 
         if (count($processes)) {
             foreach ($processes as $process) {

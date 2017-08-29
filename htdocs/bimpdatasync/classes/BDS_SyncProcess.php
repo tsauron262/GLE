@@ -70,7 +70,7 @@ class BDS_SyncProcess extends BDS_Process
         $response = $this->soapCall('set', array(
             'process_name'   => $ext_process_name,
             'operation'      => 'onSetObjectsRequest',
-            'ext_id_process' => (int) static::$id,
+            'ext_id_process' => (int) $this->processDefinition->id,
             'objects'        => $objects
         ));
 
@@ -97,7 +97,7 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         if (is_null($response)) {
-            $msg = 'Echec de l\'export (aucune réponse reçue)';
+            $msg = 'Echec de l\'export';
             $this->Error($msg);
         } elseif (!isset($response['success']) || !$response['success']) {
             $msg = 'Echec de l\'export<br/>';
@@ -134,7 +134,7 @@ class BDS_SyncProcess extends BDS_Process
         $response = $this->soapCall('set', array(
             'process_name'   => $ext_process_name,
             'operation'      => 'onDeleteObjectsRequest',
-            'ext_id_process' => static::$id,
+            'ext_id_process' => $this->processDefinition->id,
             'objects'        => $objects
         ));
 
@@ -302,7 +302,7 @@ class BDS_SyncProcess extends BDS_Process
                             $ext_id_sync_data = $object['ext_id_sync_data'];
                         }
                         if (isset($object['id_object']) && $object['id_object']) {
-                            $sync_data->setLocValues(static::$id, $object_name, (int) $object['id_object']);
+                            $sync_data->setLocValues($this->processDefinition->id, $object_name, (int) $object['id_object']);
                             $id_object = $object['id_object'];
                         }
                         if (isset($object['ext_id_object']) && $object['ext_id_object']) {
@@ -372,7 +372,7 @@ class BDS_SyncProcess extends BDS_Process
 
             $object_name = $this->getObjectClass($object);
             if ($object_name && isset($object->id) && $object->id) {
-                $status = BDS_SyncData::getObjectValue($this->db, 'status', static::$id, $object_name, $object->id, 'loc_id_object');
+                $status = BDS_SyncData::getObjectValue($this->db, 'status', $this->processDefinition->id, $object_name, $object->id, 'loc_id_object');
                 if (!is_null($status) && ($status > 0)) {
                     return false;
                 }
@@ -399,7 +399,7 @@ class BDS_SyncProcess extends BDS_Process
                 
                 if (!is_null($data)) {
                     $sync_data = new BDS_SyncData();
-                    $sync_data->setLocValues((int) static::$id, $object_name, $id_object);
+                    $sync_data->setLocValues((int) $this->processDefinition->id, $object_name, $id_object);
                     $sync_data->setExtValues(0, $ext_object_name, 0);
                     if (!$sync_data->loadOrCreate()) {
                         $msg = 'Echec de l\'initialisation des données de synchronisation. Export impossible';
@@ -445,7 +445,7 @@ class BDS_SyncProcess extends BDS_Process
                 'ext_id_object' => $id_object
             );
             $sync_data = new BDS_SyncData();
-            $sync_data->setLocValues(static::$id, $object_name, $id_object);
+            $sync_data->setLocValues($this->processDefinition->id, $object_name, $id_object);
             if ($sync_data->loadOrCreate(true)) {
                 $object_data['ext_id_sync_data'] = (int) $sync_data->id;
                 if (isset($sync_data->ext_id) && $sync_data->ext_id) {
@@ -454,7 +454,7 @@ class BDS_SyncProcess extends BDS_Process
                 if (isset($sync_data->ext_id_object)) {
                     $object_data['id_object'] = (int) $sync_data->ext_id_object;
                 }
-                BDS_SyncData::updateStatusBylocIdObject($this->db, static::$id, $object_name, $id_object, self::BDS_STATUS_DELETING);
+                BDS_SyncData::updateStatusBylocIdObject($this->db, $this->processDefinition->id, $object_name, $id_object, self::BDS_STATUS_DELETING);
             }
             $objects_data['list'][] = $object_data;
         }
@@ -495,7 +495,7 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         $sync_data = new BDS_SyncData(isset($result['id_sync_data']) ? $result['id_sync_data'] : null);
-        $sync_data->setLocValues(static::$id, $object_name, $id_object);
+        $sync_data->setLocValues($this->processDefinition->id, $object_name, $id_object);
         $sync_data->setExtValues($ext_id_process, $ext_object_name, $ext_id_object);
 
         if (isset($result['ext_id_sync_data'])) {
@@ -584,7 +584,7 @@ class BDS_SyncProcess extends BDS_Process
 
             if ($id_object) {
                 $sync_data = new BDS_SyncData(isset($result['id_sync_data']) ? $result['id_sync_data'] : null);
-                $sync_data->setLocValues(static::$id, $object_name, $id_object);
+                $sync_data->setLocValues($this->processDefinition->id, $object_name, $id_object);
                 if ($sync_data->loadOrCreate(true)) {
                     $errors = $sync_data->delete();
                     if (count($errors)) {
@@ -602,7 +602,7 @@ class BDS_SyncProcess extends BDS_Process
                 }
             }
         } else {
-            BDS_SyncData::updateStatusBylocIdObject($this->db, static::$id, $object_name, $id_object, self::BDS_STATUS_DELETE_FAIL);
+            BDS_SyncData::updateStatusBylocIdObject($this->db, $this->processDefinition->id, $object_name, $id_object, self::BDS_STATUS_DELETE_FAIL);
         }
 
         if (isset($result['objects']) && count($result['objects'])) {
@@ -639,7 +639,7 @@ class BDS_SyncProcess extends BDS_Process
         $sync_data->ext_id = $ext_id_sync_data;
         $sync_data->setExtValues($ext_id_process, $ext_object_name, $ext_id_object);
         $sync_data->loc_object_name = $object_name;
-        $sync_data->loc_id_process = (int) static::$id;
+        $sync_data->loc_id_process = (int) $this->processDefinition->id;
 
         if (!$sync_data->loadOrCreate()) {
             $msg = 'Echec de l\'initialisation des données de synchronisation';
@@ -833,7 +833,7 @@ class BDS_SyncProcess extends BDS_Process
                 if ($is_current_object) {
                     $this->incDeleted();
                 }
-                BDS_SyncData::deleteByLocObject(static::$id, $object_name, $id_object, $errors);
+                BDS_SyncData::deleteByLocObject($this->processDefinition->id, $object_name, $id_object, $errors);
                 return true;
             } else {
                 $msg = 'Echec de la suppression ' . $label;

@@ -18,7 +18,7 @@ function testReq()
     $user->fetch(1);
 
     $error = 0;
-    $process = BDS_Process::createProcess($user, 'PS_Sync', $error);
+    $process = BDS_Process::createProcessByName($user, 'PS_Sync', $error);
     if ($error) {
         echo 'Erreur: ' . $error . '<br/>';
     }
@@ -76,4 +76,4 @@ function testSQL()
     print_r($row);
     exit;
 }
-testSQL();
+//testSQL();

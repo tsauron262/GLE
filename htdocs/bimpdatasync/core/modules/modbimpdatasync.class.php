@@ -35,7 +35,7 @@ class modbimpdatasync extends DolibarrModules
         $this->module_parts = array(
             'triggers' => 1,
 //            'css'      => '/bimpdatasync/css/styles.css',
-//            'hooks'    => array('formfile', 'fileslib', 'productcard')  // array('formfile','fileslib')
+            'hooks'    => array('formfile', 'fileslib', 'productcard')
         );
 
         $this->triggers = 1;

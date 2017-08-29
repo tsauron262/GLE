@@ -3,33 +3,20 @@
 class BDS_PS_SyncProcess extends BDS_SyncProcess
 {
 
-    public static $id = 1;
-    public static $name = 'PS_Sync';
-    public static $title = 'Synchronisation avec Prestashop';
-    public static $active = 1;
     public static $files_dir_name = 'ps';
 
-    public function __construct($user, $params = null)
+    public function __construct($processDefinition, $user, $params = null)
     {
-        parent::__construct($user, $params);
+        parent::__construct($processDefinition, $user, $params);
 
-        $this->parameters['ws_url'] = 'https://gle.synopsis-erp.com/presta/modules/bimpdatasync/requests.php';
-        $this->parameters['ws_key'] = '';
-        $this->parameters['ws_login'] = '';
-        $this->parameters['ws_pass'] = '';
-
-        $this->parameters['ps_url'] = 'https://gle.synopsis-erp.com/presta/';
-
-        $this->parameters['id_default_parent_categorie'] = 783;
-        $this->parameters['id_root_categorie'] = 782;
-        $this->parameters['shop_name'] = 'Prestashop - Bimp Education';
-
-        $this->authentication = array(
-            'prestashopkey'     => htmlentities($this->parameters['ws_key'], ENT_COMPAT, 'UTF-8'),
-            'sourceapplication' => 'BimpDataSync',
-            'login'             => $this->parameters['ws_login'],
-            'password'          => $this->parameters['ws_pass']
-        );
+        if ($this->parameters_ok) {
+            $this->authentication = array(
+                'prestashopkey'     => htmlentities($this->parameters['ws_key'], ENT_COMPAT, 'UTF-8'),
+                'sourceapplication' => 'BimpDataSync',
+                'login'             => $this->parameters['ws_login'],
+                'password'          => $this->parameters['ws_pass']
+            );
+        }
     }
 
     public function test()
@@ -38,7 +25,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         self::$debug_mod = true;
         self::$ext_debug_mod = false;
 
-        BDS_SyncData::resetAllStatus($this->db, static::$id, 'Categorie');
+        BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Categorie');
         $objects = $this->getObjectsExportData('Categorie', 'Category', array(970), $errors);
         if (!count($errors) && count($objects['list'])) {
             $this->soapExportObjects(array($objects), 'GLE_Sync');
@@ -51,6 +38,118 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 //        if (count($objects)) {
 //            $this->soapDeleteObjects(array($objects), 'GLE_Sync');
 //        }
+    }
+
+//    Opérations:
+
+    protected function initExportsToPs(&$data, &$errors)
+    {
+        $data['steps'] = array();
+        $data['use_report'] = true;
+
+        if (!$this->parameters_ok) {
+            $errors[] = 'Certains paramètres sont invalides. Veuillez vérifier la configuration du processus';
+            return;
+        }
+
+        if (!$this->options_ok) {
+            $errors[] = 'Options invalides ou manquantes.';
+            return;
+        }
+
+        $categories = $this->findCategoriesToExport();
+
+        if (isset($this->options['exportCategories']) && $this->options['exportCategories']) {
+            $data['steps']['process_categories_export'] = array(
+                'name'                   => 'process_categories_export',
+                'label'                  => 'Export des catégories',
+                'elements'               => $categories,
+                'nbElementsPerIteration' => 1,
+                'on_error'               => 'continue'
+            );
+        }
+
+        if (isset($this->options['exportProducts']) && $this->options['exportProducts']) {
+            $data['steps']['process_products_export'] = array(
+                'name'                   => 'process_products_export',
+                'label'                  => 'Export des produits',
+                'elements'               => $this->findProductsToExport($categories),
+                'nbElementsPerIteration' => 1,
+                'on_error'               => 'continue'
+            );
+        }
+    }
+
+    protected function executeExportsToPs($step, &$errors)
+    {
+        $object_name = '';
+        $ext_object_name = '';
+
+        switch ($step) {
+            case 'process_categories_export':
+                $object_name = 'Categorie';
+                $ext_object_name = 'Category';
+                break;
+
+            case 'process_products_export':
+                $object_name = 'Product';
+                $ext_object_name = 'Product';
+                break;
+        }
+
+        if ($object_name && $ext_object_name &&
+                isset($this->references) && count($this->references)) {
+            $objects = $this->getObjectsExportData($object_name, $ext_object_name, $this->references, $errors);
+            if (!count($errors) && count($objects['list'])) {
+                $this->soapExportObjects(array($objects), 'GLE_Sync');
+            }
+        }
+    }
+
+    protected function findCategoriesToExport()
+    {
+        $root_category = $this->parameters['id_root_categorie'];
+        $subCats = $this->findChildrenCategories((int) $root_category);
+        $categories = array();
+        foreach ($subCats as $idc) {
+            if (!in_array($idc, $categories)) {
+                if ((int) $idc !== (int) $this->parameters['id_default_parent_categorie']) {
+                    $categories[] = (int) $idc;
+                }
+            }
+        }
+        return $categories;
+    }
+
+    protected function findChildrenCategories($id_parent)
+    {
+        $categories = BDS_Tools::getChildrenCategoriesIds($this->db, $id_parent);
+
+        foreach ($categories as $idc) {
+            $subCats = $this->findChildrenCategories($idc);
+            foreach ($subCats as $idsc) {
+                if (!in_array($idsc, $categories)) {
+                    $categories[] = (int) $idsc;
+                }
+            }
+        }
+
+        return $categories;
+    }
+
+    protected function findProductsToExport($categories)
+    {
+        $products = array();
+        $sql = 'SELECT p.rowid as id FROM ' . MAIN_DB_PREFIX . 'product p ';
+        $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'categorie_product cp ON cp.fk_product = p.rowid ';
+        $sql .= 'WHERE cp.fk_categorie IN (' . implode(',', $categories) . ')';
+        $rows = $this->db->executeS($sql, 'array');
+        foreach ($rows as $r) {
+            if (!in_array($r['id'], $products)) {
+                $products[] = (int) $r['id'];
+            }
+        }
+        return $products;
     }
 
     public function isCategorieInSyncCategories($id_categorie, $display_msg = false)
@@ -104,13 +203,13 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             return;
         }
 
-        $status = BDS_SyncData::getObjectValue($this->db, 'status', static::$id, 'Product', $object->id, 'loc_id_object');
+        $status = BDS_SyncData::getObjectValue($this->db, 'status', $this->processDefinition->id, 'Product', $object->id, 'loc_id_object');
         if (!is_null($status)) {
             if ($status > 0) {
                 return;
             }
             if ($status < 0) {
-                BDS_SyncData::updateStatusBylocIdObject($this->db, static::$id, 'Product', $object->id, 0);
+                BDS_SyncData::updateStatusBylocIdObject($this->db, $this->processDefinition->id, 'Product', $object->id, 0);
             }
         }
 
@@ -135,10 +234,10 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             return;
         }
 
-        $status = BDS_SyncData::getObjectValue($this->db, 'status', static::$id, 'Product', $object->id, 'loc_id_object');
+        $status = BDS_SyncData::getObjectValue($this->db, 'status', $this->processDefinition->id, 'Product', $object->id, 'loc_id_object');
         if (!is_null($status)) {
             if ($status < 0) {
-                BDS_SyncData::updateStatusBylocIdObject($this->db, static::$id, 'Product', $object->id, 0);
+                BDS_SyncData::updateStatusBylocIdObject($this->db, $this->processDefinition->id, 'Product', $object->id, 0);
             }
         }
 
@@ -163,21 +262,21 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             return;
         }
 
-        $status = BDS_SyncData::getObjectValue($this->db, 'status', static::$id, 'Categorie', $object->id, 'loc_id_object');
+        $status = BDS_SyncData::getObjectValue($this->db, 'status', $this->processDefinition->id, 'Categorie', $object->id, 'loc_id_object');
         if (!is_null($status)) {
             if ($status > 0) {
                 return;
             }
             if ($status < 0) {
-                BDS_SyncData::updateStatusBylocIdObject($this->db, static::$id, 'Categorie', $object->id, 0);
+                BDS_SyncData::updateStatusBylocIdObject($this->db, $this->processDefinition->id, 'Categorie', $object->id, 0);
             }
         }
 
         $errors = array();
-        
+
         // Hack: 
         $this->db->db->commit();
-        
+
         $categories = $this->getObjectsExportData('Categorie', 'Category', array((int) $object->id), $errors);
         if (!count($errors)) {
             if (isset($categories['list']) && count($categories['list'])) {
@@ -195,10 +294,10 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             return;
         }
 
-        $status = BDS_SyncData::getObjectValue($this->db, 'status', static::$id, 'Categorie', $object->id, 'loc_id_object');
+        $status = BDS_SyncData::getObjectValue($this->db, 'status', $this->processDefinition->id, 'Categorie', $object->id, 'loc_id_object');
         if (!is_null($status)) {
             if ($status < 0) {
-                BDS_SyncData::updateStatusBylocIdObject($this->db, static::$id, 'Categorie', $object->id, 0);
+                BDS_SyncData::updateStatusBylocIdObject($this->db, $this->processDefinition->id, 'Categorie', $object->id, 0);
             }
         }
 
@@ -237,7 +336,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
     }
 
     // Données d'export des objets: 
-    
+
     public function getCategorieExportData($id_categorie)
     {
         if (!class_exists('Categorie')) {
@@ -338,7 +437,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             if (file_exists($img_dir)) {
                 $files = scandir($img_dir);
                 $current_imgs = array();
-                $sync_images = BDS_SyncData::getObjectObjects($this->db, 'image', static::$id, 'Product', $id_product);
+                $sync_images = BDS_SyncData::getObjectObjects($this->db, 'image', $this->processDefinition->id, 'Product', $id_product);
 
                 foreach ($sync_images as $loc_file => $ext_file) {
                     $current_imgs[] = $loc_file;
@@ -435,7 +534,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             if ($data['id_parent'] < 2) {
                 $fk_parent = $this->parameters['id_root_categorie'];
             } else {
-                $fk_parent = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', static::$id, 'Categorie', $data['id_parent'], 'ext_id_object');
+                $fk_parent = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Categorie', $data['id_parent'], 'ext_id_object');
             }
         }
         if (is_null($fk_parent)) {
@@ -790,7 +889,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         if ($ext_ids) {
             $new_cats = array();
             foreach ($categories as $ext_id_categorie) {
-                $id_categorie = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', static::$id, 'Categorie', $ext_id_categorie, 'ext_id_object');
+                $id_categorie = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Categorie', $ext_id_categorie, 'ext_id_object');
                 if (!is_null($id_categorie) && $id_categorie) {
                     if (BDS_Tools::isCategorieChildOf($this->db, (int) $id_categorie, (int) $this->parameters['id_root_categorie'])) {
                         $new_cats[] = (int) $id_categorie;
@@ -922,7 +1021,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $product->fetch($id_product);
 
         if (is_null($product->id) || !$product->id) {
-            BDS_SyncData::deleteByLocObject(static::$id, 'Product', $id_product);
+            BDS_SyncData::deleteByLocObject($this->processDefinition->id, 'Product', $id_product);
             return true;
         }
 
@@ -940,7 +1039,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $categorie->fetch($id_categorie);
 
         if (is_null($categorie->id) || !$categorie->id) {
-//            BDS_SyncData::deleteByLocObject(static::$id, 'Categorie', $id_categorie);
+//            BDS_SyncData::deleteByLocObject($this->processDefinition->id, 'Categorie', $id_categorie);
             return true;
         }
 
@@ -958,7 +1057,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $societe->fetch($id_societe);
 
         if (is_null($societe->id) || !$societe->id) {
-            BDS_SyncData::deleteByLocObject(static::$id, 'Scociete', $id_societe);
+            BDS_SyncData::deleteByLocObject($this->processDefinition->id, 'Scociete', $id_societe);
             return true;
         }
 
@@ -976,7 +1075,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $contact->fetch($id_contact);
 
         if (is_null($contact->id) || !$contact->id) {
-            BDS_SyncData::deleteByLocObject(static::$id, 'Contact', $id_contact);
+            BDS_SyncData::deleteByLocObject($this->processDefinition->id, 'Contact', $id_contact);
             return true;
         }
 
@@ -987,33 +1086,33 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
     public static function install()
     {
-        $actions = array(
-            array('name' => 'COMPANY_CREATE', 'active' => 0),
-            array('name' => 'COMPANY_MODIFY', 'active' => 0),
-            array('name' => 'COMPANY_DELETE', 'active' => 0),
-            array('name' => 'CONTACT_CREATE', 'active' => 0),
-            array('name' => 'CONTACT_MODIFY', 'active' => 0),
-            array('name' => 'CONTACT_DELETE', 'active' => 0),
-            array('name' => 'CONTACT_ENABLEDISABLE', 'active' => 0),
-            array('name' => 'PRODUCT_CREATE', 'active' => 0),
-            array('name' => 'PRODUCT_MODIFY', 'active' => 0),
-            array('name' => 'PRODUCT_DELETE', 'active' => 0),
-            array('name' => 'PRODUCT_PRICE_MODIFY', 'active' => 0),
-            array('name' => 'PRODUCT_SET_MULTILANGS', 'active' => 0),
-            array('name' => 'PRODUCT_DEL_MULTILANGS', 'active' => 0),
-            array('name' => 'STOCK_MOVEMENT', 'active' => 0),
-            array('name' => 'CATEGORY_CREATE', 'active' => 0),
-            array('name' => 'CATEGORY_MODIFY', 'active' => 0),
-            array('name' => 'CATEGORY_DELETE', 'active' => 0),
-            array('name' => 'CATEGORY_SET_MULTILANGS', 'active' => 0)
-        );
-
-        $errors = self::addProcessTriggerActions($actions);
-        if (count($errors) && self::$debug_mod) {
-            echo 'Erreurs lors de l\'ajout des actions sur trigger: ';
-            echo '<pre>';
-            print_r($errors);
-            echo '</pre>';
-        }
+//        $actions = array(
+//            array('name' => 'COMPANY_CREATE', 'active' => 0),
+//            array('name' => 'COMPANY_MODIFY', 'active' => 0),
+//            array('name' => 'COMPANY_DELETE', 'active' => 0),
+//            array('name' => 'CONTACT_CREATE', 'active' => 0),
+//            array('name' => 'CONTACT_MODIFY', 'active' => 0),
+//            array('name' => 'CONTACT_DELETE', 'active' => 0),
+//            array('name' => 'CONTACT_ENABLEDISABLE', 'active' => 0),
+//            array('name' => 'PRODUCT_CREATE', 'active' => 0),
+//            array('name' => 'PRODUCT_MODIFY', 'active' => 0),
+//            array('name' => 'PRODUCT_DELETE', 'active' => 0),
+//            array('name' => 'PRODUCT_PRICE_MODIFY', 'active' => 0),
+//            array('name' => 'PRODUCT_SET_MULTILANGS', 'active' => 0),
+//            array('name' => 'PRODUCT_DEL_MULTILANGS', 'active' => 0),
+//            array('name' => 'STOCK_MOVEMENT', 'active' => 0),
+//            array('name' => 'CATEGORY_CREATE', 'active' => 0),
+//            array('name' => 'CATEGORY_MODIFY', 'active' => 0),
+//            array('name' => 'CATEGORY_DELETE', 'active' => 0),
+//            array('name' => 'CATEGORY_SET_MULTILANGS', 'active' => 0)
+//        );
+//
+//        $errors = self::addProcessTriggerActions($actions);
+//        if (count($errors) && self::$debug_mod) {
+//            echo 'Erreurs lors de l\'ajout des actions sur trigger: ';
+//            echo '<pre>';
+//            print_r($errors);
+//            echo '</pre>';
+//        }
     }
 }

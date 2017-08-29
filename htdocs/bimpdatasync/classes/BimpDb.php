@@ -93,25 +93,34 @@ class BimpDb
         return $result;
     }
 
-    public function executeS($sql)
+    public function executeS($sql, $return = 'object')
     {
         $result = $this->db->query($sql);
+        
         $rows = null;
         if ($result) {
             $rows = array();
             for ($i = 0; $i < $this->db->num_rows($result); $i++) {
-                $rows[] = $this->db->fetch_object($result);
+                switch ($return) {
+                    case 'object':
+                        $rows[] = $this->db->fetch_object($result);
+                        break;
+
+                    case 'array':
+                        $rows[] = $this->db->fetch_array($result);
+                        break;
+                }
             }
         } else {
             $this->logSqlError();
         }
-
+        
         $this->db->free($result);
 
         return $rows;
     }
 
-    public function getRows($table, $where = '1', $limit = null)
+    public function getRows($table, $where = '1', $limit = null, $return = 'object')
     {
         $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
@@ -120,7 +129,7 @@ class BimpDb
             $sql .= ' LIMIT ' . $limit;
         }
 
-        return $this->executeS($sql);
+        return $this->executeS($sql, $return);
     }
 
     public function getRow($table, $where = '1', $fields = null)
@@ -172,7 +181,7 @@ class BimpDb
     public function getValue($table, $field, $where = '1')
     {
         $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where . ' LIMIT 1';
-        
+
         $result = $this->db->query($sql);
 
         if ($result && $this->db->num_rows($result)) {

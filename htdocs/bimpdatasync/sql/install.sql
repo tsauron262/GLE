@@ -1,3 +1,59 @@
+CREATE TABLE `llx_bds_process` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  `title` varchar(256) NOT NULL,
+  `description` text,
+  `type` enum('sync','import','export') NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `llx_bds_process_parameter` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_process` int(10) UNSIGNED NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `label` text NOT NULL,
+  `value` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `llx_bds_process_option` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_process` int(10) UNSIGNED NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `label` text NOT NULL,
+  `info` text NOT NULL,
+  `type` text NOT NULL,
+  `default_value` text NOT NULL,
+  `values` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `llx_bds_process_trigger_action` (
+  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_process` int(11) NOT NULL,
+  `process_name` VARCHAR(128) NOT NULL,
+  `action` varchar(128) NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `llx_bds_process_operation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_process` int(10) UNSIGNED NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `title` text NOT NULL,
+  `description` text,
+  `warning` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `bds_process_operation_option` (
+  `id_operation` int(11) NOT NULL,
+  `id_option` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE `llx_bds_object_sync_data` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `loc_id_process` int(10) UNSIGNED DEFAULT '0',
@@ -16,13 +72,4 @@ CREATE TABLE `llx_bds_object_sync_data_object` (
   `type` varchar(128) NOT NULL,
   `loc_value` text NOT NULL,
   `ext_value` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `llx_bds_process_trigger_action` (
-  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_process` int(11) NOT NULL,
-  `process_name` VARCHAR(128) NOT NULL,
-  `action` varchar(128) NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

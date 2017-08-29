@@ -62,7 +62,7 @@ if (isset($_POST['searchSubmit'])) {
 print load_fiche_titre('Repports des processus d\'import / export / synchronisation des données', '', 'title_generic.png');
 
 $reports = BDS_Report::getReportsList();
-$processes = BDS_Process::getProcessesQuery();
+$processes = BDSProcess::getProcessesQuery();
 $OperationsTypes = array(
     array(
         'name'  => 'operations',
@@ -87,8 +87,9 @@ $DT->sub(new DateInterval('P1D'));
 $dateFrom = $DT->format('Y-m-d');
 ?>
 
-<link type="text/css" rel="stylesheet" href="reports.css"/>
-<script type="text/javascript" src="./reports.js"></script>
+<link type="text/css" rel="stylesheet" href="./views/css/styles.css"/>
+<link type="text/css" rel="stylesheet" href="./views/css/reports.css"/>
+<script type="text/javascript" src="./views/js/reports.js"></script>
 
 <div class="fichecenter">
    <div class="fichehalfleft">
@@ -247,7 +248,7 @@ $dateFrom = $DT->format('Y-m-d');
 if (isset($_POST['searchSubmit'])) {
     if (!count($searchErrors)) {
         if (!function_exists('renderObjectNotifications')) {
-            require_once __DIR__ . '/report_content.php';
+            require_once __DIR__ . '/views/render.php';
         }
         $data = array();
         foreach (BDS_Report::getObjectNotifications($_POST['searchObject'], (int) $_POST['searchIdObject'], $searchDateFrom, $searchDateTo) as $file_ref => $rows) {
@@ -265,7 +266,7 @@ if (isset($_POST['searchSubmit'])) {
 
         $title = 'Résultats de recherche pour "' . BDS_Tools::makeObjectName($bdb, $_POST['searchObject'], (int) $_POST['searchIdObject']) . '"';
         $title .= ' du ' . $_POST['searchDateFrom'] . ' au ' . $_POST['searchDateTo'];
-        renderObjectNotifications($data, $title);
+        echo renderObjectNotifications($data, $title);
     }
 } else {
     $report_ref = null;
@@ -280,10 +281,10 @@ if (isset($_POST['searchSubmit'])) {
             $report = new BDS_Report(null, null, $report_ref);
 
             if (!function_exists('renderReportContent')) {
-                require_once __DIR__ . '/report_content.php';
+                require_once __DIR__ . '/views/render.php';
             }
 
-            renderReportContent($report);
+            echo renderReportContent($report);
         } else {
             echo '<p class="error">';
             echo 'Le fichier correspondant à ce rapport semble ne pas exister';

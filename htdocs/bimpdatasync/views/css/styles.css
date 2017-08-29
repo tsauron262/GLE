@@ -1,0 +1,135 @@
+
+/*Forms*/
+
+.formRow {
+    padding: 5px;
+    width: 100%;
+}
+.formRow .formLabel {
+    text-align: right;
+    display: inline-block;
+    width: 25%;
+    padding-right: 15px;
+}
+.formRow .formInput {
+    text-align: left;
+    display: inline-block;
+    width: 70%;
+}
+
+select.switch {
+    width: 75px;
+}
+
+.formRow .formInput select.fullwidth,
+.formRow .formInput input.fullwidth {
+    width: 100%;
+}
+
+.formSwitch input {
+    margin: 0 5px;
+}
+.formSwitch label {
+    margin-right: 20px;
+}
+.formSubmit {
+    text-align: right;
+    padding: 10px 20px;
+}
+
+.formSubmit .button {
+    margin-left: 10px;
+}
+
+.buttonsContainer {
+    text-align: left;
+    padding: 10px 20px;
+}
+
+.buttonsContainer .button {
+    margin-right: 10px;
+}
+
+.objectToolbar {
+    padding: 15px 0;
+    text-align: right;
+}
+
+/*Listes*/
+.objectListTable thead tr th {
+    padding: 10px 6px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #292964;
+    color: #292964;
+    font-weight: bold;
+    text-align: left;
+}
+
+.objectListTable td {
+    padding: 5px 6px;
+}
+
+.objectListTable .objectListRowInput,
+.objectListTable .objecRowEditInput {
+    width: 90%;
+}
+
+.objectListTable span.button {
+    margin: 0 3px;
+}
+
+/*Messages*/
+
+.alert {
+    border: none!important;
+    padding: 5px 12px;
+}
+.form-alert {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+.alert-success {
+    color: #348C41!important;
+    background-color: #E7FAEA;
+}
+.alert-info {
+    color: #3B6EA0!important;
+    background-color: #E2ECF5;
+}
+.alert-warning {
+    color: #B48335!important;
+    background-color: #F5EEE2;
+}
+.alert-danger {
+    color: #A00000!important;
+    background-color: #F5E2E2;
+}
+
+.success {
+    color: #348C41!important;
+    font-weight: bold;
+}
+.info {
+    color: #3B6EA0!important;
+    font-weight: bold;
+}
+.warning {
+    color: #B48335!important;
+    font-weight: bold;
+}
+.danger {
+    color: #A00000!important;
+    font-weight: bold;
+}
+
+.ajaxResultContainer {
+    display: none;
+    margin: 20px 15px;
+}
+
+/*Opérations */
+
+.operationTable .alert {
+    margin: 0 30px;
+    padding: 10px 15px;
+}

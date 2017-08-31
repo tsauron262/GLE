@@ -545,7 +545,7 @@ L’équipe BIMP";
             }
         }
 
-        if (empty($pass) || empty($certif)) {
+        if (empty($certif)) {
             $this->logError('Aucun certificat trouvé pour le soldTo "' . $soldTo . '"');
             return 0;
         }

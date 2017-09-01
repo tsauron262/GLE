@@ -42,11 +42,6 @@ class DoliDBMysqli extends DoliDB
     const VERSIONMIN='5.0.3';
 	/** @var mysqli_result Resultset of last query */
 	private $_results;
-        
-        
-        /*moddrsi*/
-        public $countReq = 0;
-        /*fmoddrsi*/
 
     /**
 	 *	Constructor.
@@ -243,10 +238,6 @@ class DoliDBMysqli extends DoliDB
     function query($query,$usesavepoint=0,$type='auto')
     {
     	global $conf;
-        
-        /*moddrsi*/
-        $this->countReq ++;
-        /*fmoddrsi*/
 
         $query = trim($query);
 

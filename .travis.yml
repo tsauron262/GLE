@@ -2,6 +2,7 @@
 # from Dolibarr GitHub repository.
 # For syntax, see http://about.travis-ci.org/docs/user/languages/php/
 
+dist: precise
 sudo: required
 
 language: php
@@ -12,20 +13,27 @@ php:
 - '5.5'
 - '5.6'
 - '7.0'
+- '7.1'
 - nightly
 
 addons:
   mariadb: '10.0'
-  # FIXME: find a way to import a MySQL dump into PostgreSQL
-  #postgresql: '9.3'
+  postgresql: '9.3'
   apt:
+    sources:
+    # To use the last version of pgloader, we add repo of postgresql
+    - postgresql
+    - sourceline: 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
+    - key_url: 'https://www.postgresql.org/media/keys/ACCC4CF8.asc'  
     packages:
     # We need a webserver to test the webservices
     # Let's install Apache with.
     - apache2
     # mod_php is not supported by Travis. Add fcgi. We install FPM later on.
     - libapache2-mod-fastcgi
-
+    # We need pgloader for import mysql database into pgsql
+    - pgloader
+ 
 # Start on every boot
 services:
 - memcached
@@ -38,8 +46,7 @@ env:
   # MariaDB overrides MySQL installation so it's not possible to test both yet
   #- DB=mysql
   - DB=mariadb
-  # FIXME: find a way to import a MySQL dump into PostgreSQL
-  #- DB=postgresql
+  - DB=postgresql
   # TODO
   #- DB=sqlite
   # See https://docs.travis-ci.com/user/languages/php/#Apache-%2B-PHP
@@ -50,9 +57,8 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
-  - php: '7.0'
+  - php: 7.1
   - php: nightly
-  # FIXME
   #- env: DB=postgresql
   # TODO
   #- env: DB=sqlite
@@ -76,10 +82,21 @@ before_install:
   phpenv config-rm xdebug.ini
   echo
 
+- |
+  if [ "$DB" = 'postgresql' ]; then
+    echo "Check pgloader version"
+    pgloader --version
+    echo
+  fi
+ 
 install:
 - |
   echo "Updating Composer"
+  rm $TRAVIS_BUILD_DIR/composer.json
+  rm $TRAVIS_BUILD_DIR/composer.lock
   composer self-update
+  composer -n init
+  composer -n config vendor-dir htdocs/includes
   echo
 
 - |
@@ -93,20 +110,21 @@ install:
   if [ "$TRAVIS_PHP_VERSION" = '5.3' ] || [ "$TRAVIS_PHP_VERSION" = '5.4' ] || [ "$TRAVIS_PHP_VERSION" = '5.5' ]; then
     composer -n require phpunit/phpunit ^4
   fi
-  if [ "$TRAVIS_PHP_VERSION" = '5.6' ] || [ "$TRAVIS_PHP_VERSION" = '7.0' ] || [ "$TRAVIS_PHP_VERSION" = 'nightly' ]; then
+  if [ "$TRAVIS_PHP_VERSION" = '5.6' ] || [ "$TRAVIS_PHP_VERSION" = '7.0' ] || [ "$TRAVIS_PHP_VERSION" = '7.1' ] || [ "$TRAVIS_PHP_VERSION" = 'nightly' ]; then
     composer -n require phpunit/phpunit ^5
   fi
   echo
 
 - |
   echo "Installing PHP CodeSniffer"
-  composer require squizlabs/php_codesniffer ^2
+  composer -n require squizlabs/php_codesniffer ^2
   echo
 
 - |
-  echo "Adding Composer binaries to the path"
+  echo "Adding path of binaries tools installed by composer to the PATH"
   export PATH="$TRAVIS_BUILD_DIR/htdocs/includes/bin:$PATH"
   echo
+  
 
 before_script:
 - |
@@ -126,13 +144,13 @@ before_script:
   echo "Set timezone"
   echo 'date.timezone = "Europe/Paris"' >> ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php.ini
   if [ "$TRAVIS_PHP_VERSION" = '5.3' ] || [ "$TRAVIS_PHP_VERSION" = '5.4' ]; then
-    echo
-    echo "Enabling APC for PHP <= 5.4"
+    #echo
+    #echo "Enabling APC for PHP <= 5.4"
     #   Documentation says it should be available for PHP <= 5.6 but it's not for 5.5 and 5.6!
-    echo 'extension = apc.so' >> ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php.ini
+    #echo 'extension = apc.so' >> ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php.ini
     echo
     echo "Enabling Memcached for PHP <= 5.4"
-    #   Documentation says it should be available for all PHP versions but it's not for 5.5 and 5.6, 7.0 and nightly!
+    #   Documentation says it should be available for all PHP versions but it's not for 5.5 and 5.6, 7.0, 7.1 and nightly!
     echo 'extension = memcached.so' >> ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php.ini
   fi
   phpenv rehash
@@ -158,16 +176,19 @@ before_script:
   
 - |
   echo "Setting up database"
-  if [ "$DB" = 'mysql' ] || [ "$DB" = 'mariadb' ]; then
+  if [ "$DB" = 'mysql' ] || [ "$DB" = 'mariadb' ] || [ "$DB" = 'postgresql' ]; then
     echo "MySQL"
     mysql -e 'DROP DATABASE IF EXISTS travis;'
     mysql -e 'CREATE DATABASE IF NOT EXISTS travis;'
-    mysql -D travis < dev/initdata/mysqldump_dolibarr_3.5.0.sql
+    mysql -e 'GRANT ALL PRIVILEGES ON travis.* TO travis@127.0.0.1;'
+    mysql -e 'FLUSH PRIVILEGES;'    
+    mysql -D travis < dev/initdemo/mysqldump_dolibarr_3.5.0.sql
   fi
-  # FIXME: find a way to import a MySQL dump into PostgreSQL
-  #if [ "$DB" = 'postgresql' ]; then
-  #  pgsql travis < dev/initdata/mysqldump_dolibarr_3.5.0.sql
-  #fi
+  if [ "$DB" = 'postgresql' ]; then
+    #pgsql travis < dev/initdemo/mysqldump_dolibarr_3.5.0.sql
+    #pgloader mysql://root:pass@127.0.0.1/base postgresql://dolibarrowner@127.0.0.1/dolibarr
+    pgloader mysql://root@127.0.0.1/travis postgresql:///travis
+  fi
   # TODO: SQLite
   echo
 
@@ -184,10 +205,9 @@ before_script:
   if [ "$DB" = 'mysql' ] || [ "$DB" = 'mariadb' ]; then
     echo '$'dolibarr_main_db_type=\'mysqli\'';' >> $CONF_FILE
   fi
-  # FIXME
-  #if [ "$DB" = 'postgresql' ]; then
-  #  echo '$'dolibarr_main_db_type=\'pgsql\'';' >> $CONF_FILE
-  #fi
+  if [ "$DB" = 'postgresql' ]; then
+    echo '$'dolibarr_main_db_type=\'pgsql\'';' >> $CONF_FILE
+  fi
   # TODO: SQLite
   echo '$'dolibarr_main_authentication=\'dolibarr\'';' >> $CONF_FILE
   cat $CONF_FILE
@@ -197,13 +217,14 @@ before_script:
   echo "Create documents directory and set permissions"
   # and admin/temp subdirectory needed for unit tests
   mkdir -p documents/admin/temp
+  echo "first line" > documents/dolibarr.log
   echo
 
 - |
   echo "Setting up Apache + FPM"
   # enable php-fpm
   cp ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php-fpm.conf.default ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php-fpm.conf
-  if [ "$TRAVIS_PHP_VERSION" = '7.0' ] || [ "$TRAVIS_PHP_VERSION" = 'nightly' ]; then
+  if [ "$TRAVIS_PHP_VERSION" = '7.0' ] || [ "$TRAVIS_PHP_VERSION" = '7.1' ] || [ "$TRAVIS_PHP_VERSION" = 'nightly' ]; then
     # Copy the included pool
     cp ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php-fpm.d/www.conf.default ~/.phpenv/versions/$PHP_VERSION_NAME/etc/php-fpm.d/www.conf
   fi
@@ -245,14 +266,12 @@ script:
   set +e
   echo
 
-# TODO: dev/* checks
-
 - |
   echo "Checking coding style"
   # Ensure we catch errors
   set -e
   # Exclusions are defined in the ruleset.xml file
-  phpcs -s -n -p -d memory_limit=-1 --colors --tab-width=4 --standard=dev/codesniffer/ruleset.xml --encoding=utf-8 .
+  phpcs -s -n -p -d memory_limit=-1 --colors --tab-width=4 --standard=dev/setup/codesniffer/ruleset.xml --encoding=utf-8 .
   set +e
   echo
 
@@ -260,54 +279,75 @@ script:
 
 # TODO: Check CSS (csslint?)
 
-# TODO: check SQL syntax (pgsanity?)
-
 - |
   echo "Upgrading Dolibarr"
   # Ensure we catch errors
-  set -e
+  set +e
   cd htdocs/install
   php upgrade.php 3.5.0 3.6.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade350360.log
-  php upgrade2.php 3.5.0 3.6.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade350360-2.log
-  php step5.php 3.5.0 3.6.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade350360-3.log
+  php upgrade2.php 3.5.0 3.6.0 > $TRAVIS_BUILD_DIR/upgrade350360-2.log
+  php step5.php 3.5.0 3.6.0 > $TRAVIS_BUILD_DIR/upgrade350360-3.log
   php upgrade.php 3.6.0 3.7.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade360370.log
-  php upgrade2.php 3.6.0 3.7.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade360370-2.log
-  php step5.php 3.6.0 3.7.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade360370-3.log
+  php upgrade2.php 3.6.0 3.7.0 > $TRAVIS_BUILD_DIR/upgrade360370-2.log
+  php step5.php 3.6.0 3.7.0 > $TRAVIS_BUILD_DIR/upgrade360370-3.log
   php upgrade.php 3.7.0 3.8.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade370380.log
-  php upgrade2.php 3.7.0 3.8.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade370380-2.log
-  php step5.php 3.7.0 3.8.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade370380-3.log
+  php upgrade2.php 3.7.0 3.8.0 > $TRAVIS_BUILD_DIR/upgrade370380-2.log
+  php step5.php 3.7.0 3.8.0 > $TRAVIS_BUILD_DIR/upgrade370380-3.log
   php upgrade.php 3.8.0 3.9.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade380390.log
-  php upgrade2.php 3.8.0 3.9.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade380390-2.log
-  php step5.php 3.8.0 3.9.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade380390-3.log
+  php upgrade2.php 3.8.0 3.9.0 > $TRAVIS_BUILD_DIR/upgrade380390-2.log
+  php step5.php 3.8.0 3.9.0 > $TRAVIS_BUILD_DIR/upgrade380390-3.log
+  php upgrade.php 3.9.0 4.0.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade390400.log
+  php upgrade2.php 3.9.0 4.0.0 MAIN_MODULE_API,MAIN_MODULE_SUPPLIERPROPOSAL > $TRAVIS_BUILD_DIR/upgrade390400-2.log
+  php step5.php 3.9.0 4.0.0 > $TRAVIS_BUILD_DIR/upgrade390400-3.log
+  php upgrade.php 4.0.0 5.0.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade400500.log
+  php upgrade2.php 4.0.0 5.0.0 MAIN_MODULE_API,MAIN_MODULE_SUPPLIERPROPOSAL > $TRAVIS_BUILD_DIR/upgrade400500-2.log
+  php step5.php 4.0.0 5.0.0 > $TRAVIS_BUILD_DIR/upgrade400500-3.log
+  php upgrade.php 5.0.0 6.0.0 ignoredbversion > $TRAVIS_BUILD_DIR/upgrade500600.log
+  php upgrade2.php 5.0.0 6.0.0 MAIN_MODULE_API,MAIN_MODULE_SUPPLIERPROPOSAL > $TRAVIS_BUILD_DIR/upgrade500600-2.log
+  php step5.php 5.0.0 6.0.0 > $TRAVIS_BUILD_DIR/upgrade500600-3.log
   cd -
   set +e
   echo
-
+  #cat $TRAVIS_BUILD_DIR/upgrade400500-2.log
+  #cat /tmp/dolibarr_install.log
+  
 - |
   echo "Unit testing"
-  # Ensure we catch errors
+  # Ensure we catch errors. Set this to +e if you want to go to the end to see log file.
   set -e
   phpunit -d memory_limit=-1 -c test/phpunit/phpunittest.xml test/phpunit/AllTests.php
   set +e
-  echo
+
+- |
+  #echo "Output dolibarr.log"
+  #echo cat documents/dolibarr.log
+
+after_script:
+- |
+  # Dolibarr log file
+  #echo "After script"
+  #cat documents/dolibarr.log
+
 
 after_success:
+- |
+  echo Success
 
 after_failure:
 - |
+  echo Failure
+  # This part of code seems to be never executed, error or not ???
+  echo "Debugging informations"
+  # Upgrade log files
+  cat *.log
+  echo "Debugging informations"
+  # Apache log file
+  sudo cat /var/log/apache2/error.log
+  # Dolibarr log file
+  cat documents/dolibarr.log
   if [ "$DEBUG" = true ]; then
-    echo "Debugging informations"
-    # Upgrade log files
-    cat *.log
-    # Dolibarr log file
-    cat documents/dolibarr.log
-    # Apache log file
-    sudo cat /var/log/apache2/error.log
     # MariaDB log file
     sudo cat /var/log/mysql/error.log
     # TODO: PostgreSQL log file
     echo
   fi
-
-after_script:
-

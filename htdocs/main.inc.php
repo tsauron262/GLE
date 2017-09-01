@@ -221,7 +221,7 @@ require_once 'master.inc.php';
 /*Mod drsi*/
 include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
 $synopsisHook = new synopsisHook();
-global $synopsisHook;
+global $synopsisHook;//Pour vision global de l'objet
 /*FMod Drsi*/
 
 

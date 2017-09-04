@@ -1473,7 +1473,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
 function traiteCommandeRetour(html, $resultContainer) {
     if ($resultContainer.length) {
         $resultContainer.html(html);
-        if ($resultContainer.find("prix").size() > 0) {
+        if ($resultContainer.find("prix").length > 0) {
             prix = $resultContainer.find("prix").html();
             $resultContainer.find("prix").html("");
             if (prix > 0)

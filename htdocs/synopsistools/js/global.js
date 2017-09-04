@@ -627,16 +627,16 @@ function ajoutPictoConnect() {
         ok = false;
         if ($(this).attr('onclick') == undefined && $(this).attr('href') != undefined) {
             $(this).attr("target", "iframePrinc");
-            if ($(this).find("img").size() > 0) {
+            if ($(this).find("img").length > 0) {
                 parent = $(this).parent();
-                if (parent.find("a.popConnect").size() == 0) {
-                    if (parent.find("a").size() == 2 && parent.find("a").last().find("img").size() == 0) {
+                if (parent.find("a.popConnect").length == 0) {
+                    if (parent.find("a").length == 2 && parent.find("a").last().find("img").length == 0) {
                         ref = parent.find("a").last().html();
                         ok = true;
                     }
 
 
-                    if (parent.find("a").size() == 1) {
+                    if (parent.find("a").length == 1) {
                         tabT = $(this).html().split(">");
                         if (tabT.length == 2 && tabT[1] != '') {
                             ref = tabT[1];
@@ -740,7 +740,7 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
     });
     var i = 0;
     iFrame.find("iframe").load(function () {
-        if ($(this).contents().find("#username").size() > 0)
+        if ($(this).contents().find("#username").length > 0)
             $nbLoad++;
 
 
@@ -799,7 +799,7 @@ function fermerIframe(elem, callBack) {
 }
 function iFramePrinc(createIfNotExist) {
     $(".bottomObj").removeClass("actif");
-    if ($("iframe.fullScreen").size() == 0 && createIfNotExist) {
+    if ($("iframe.fullScreen").length == 0 && createIfNotExist) {
         $("body").append("<iframe class='fullScreen'  name='iframePrinc'></iframe>");
         if (document.location.href.indexOf("?") > 0)
             src = document.location.href + "&inut";

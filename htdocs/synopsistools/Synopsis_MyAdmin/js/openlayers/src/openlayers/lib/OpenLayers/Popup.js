@@ -531,7 +531,7 @@ OpenLayers.Popup = OpenLayers.Class({
 
             //make a new OL.Size object with the clipped dimensions 
             // set or null if not clipped.
-            var fixedSize = new OpenLayers.Size();
+            var fixedSize = new OpenLayers.length;
             fixedSize.w = (safeSize.w < realSize.w) ? safeSize.w : null;
             fixedSize.h = (safeSize.h < realSize.h) ? safeSize.h : null;
         

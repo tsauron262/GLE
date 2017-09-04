@@ -56,6 +56,7 @@ class modSynopsisApple extends DolibarrModules
         
         
         $this->module_parts = array('triggers' => 1,
+            'models' => 1,
             'hooks' => array("addSearchEntry")  // Set here all hooks context you want to support
         );
 

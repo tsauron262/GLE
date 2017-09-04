@@ -17,7 +17,7 @@ $(window).on("load", function () {
     }
 
 
-    if ($(".signatureCh").size() > 0) {
+    if ($(".signatureCh").length > 0) {
         $.getScript(DOL_URL_ROOT + "/synopsistools/js/jquery.signature.min.js", function () {
             $(".signatureCh").each(function () {
                 var elem = $(this);
@@ -38,7 +38,7 @@ $(window).on("load", function () {
 
 
 
-    if ($(".apple_sn").size() && $(".zonePlus").size()) {
+    if ($(".apple_sn").length && $(".zonePlus").length) {
         var serial = $(".apple_sn").html();
         var resultZone = $(".zonePlus");
         ok = false;
@@ -81,7 +81,7 @@ $(window).on("load", function () {
             resultZone.html('<p class="error">Pas de numéro de série</p>');
     }
 
-    if ($("textarea#Descr").size()) {
+    if ($("textarea#Descr").length) {
         textarea2 = $("textarea#Descr");
         tabAccess = Array("Rayure", "Écran cassé", "Liquide");
         textarea2.parent().append(' <select name="sometext" multiple="multiple" class="grand" id="sometext2">    <option>' + tabAccess.join('</option><option>') + '</option></select>');
@@ -91,7 +91,7 @@ $(window).on("load", function () {
     }
 
 
-    if ($("textarea.choixAccess").size()) {
+    if ($("textarea.choixAccess").length) {
         textarea = $("textarea.choixAccess");
         tabAccess = Array("Housse", "Alim", "Carton", "Clavier", "Souris", "Dvd", "Batterie", "Boite complet");
         textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" id="sometext">    <option>' + tabAccess.join('</option><option>') + '</option></select>');
@@ -120,7 +120,7 @@ $(window).on("load", function () {
 
     $("td:contains('Pass Apple')").each(function () {
         $(this).next("td").each(function () {
-            if ($(this).find("input").size() > 0) {
+            if ($(this).find("input").length > 0) {
                 val = $(this).find("input").val();
                 $(this).parent().append("<input type='password' name='options_apple_mdp' value='" + val + "'/>");
                 $(this).remove();

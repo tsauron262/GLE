@@ -65,9 +65,9 @@ function majDoubleSoc(socid, ifVide) {
     if (!socid > 0)
         socid = $("#socid").val();
     if (socid > 0) {
-        if (jQuery('#socid').find('option[value=' + socid + ']').size() > 0)
+        if (jQuery('#socid').find('option[value=' + socid + ']').length > 0)
             valueStr = jQuery('#socid').find('option[value=' + socid + ']').html();
-        else if (jQuery("#search_socid").size() > 0)
+        else if (jQuery("#search_socid").length > 0)
             valueStr = jQuery("#search_socid").val();
         if (typeof valueStr !== 'undefined' && valueStr + "x" != "x") {
             valueStr = valueStr.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_").replace(".", "_");

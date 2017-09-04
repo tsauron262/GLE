@@ -1,0 +1,12 @@
+[01-Sep-2017 13:24:41 Europe/Paris] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl' : failed to load external entity "https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl"
+ in /Users/tommy/Work/Netbeans/gle-6/htdocs/synopsisapple/GSX.class.php on line 492
+[01-Sep-2017 13:52:10 Europe/Paris] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl' : failed to load external entity "https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl"
+ in /Users/tommy/Work/Netbeans/gle-6/htdocs/synopsisapple/GSX.class.php on line 492
+[01-Sep-2017 13:53:13 Europe/Paris] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl' : failed to load external entity "https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl"
+ in /Users/tommy/Work/Netbeans/gle-6/htdocs/synopsisapple/GSX.class.php on line 492
+[01-Sep-2017 13:53:26 Europe/Paris] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl' : failed to load external entity "https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl"
+ in /Users/tommy/Work/Netbeans/gle-6/htdocs/synopsisapple/GSX.class.php on line 492
+[01-Sep-2017 13:53:40 Europe/Paris] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl' : failed to load external entity "https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl"
+ in /Users/tommy/Work/Netbeans/gle-6/htdocs/synopsisapple/GSX.class.php on line 492
+[01-Sep-2017 13:54:12 Europe/Paris] PHP Fatal error:  SOAP-ERROR: Parsing WSDL: Couldn't load from 'https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl' : failed to load external entity "https://gsxapiut.apple.com/wsdl/emeaAsp/gsx-emeaAsp.wsdl"
+ in /Users/tommy/Work/Netbeans/gle-6/htdocs/synopsisapple/GSX.class.php on line 492

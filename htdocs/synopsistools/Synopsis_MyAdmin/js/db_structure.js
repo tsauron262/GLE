@@ -51,7 +51,7 @@ function PMA_adjustTotals() {
      */
     var $allTr = $("#tablesForm").find("table.data tbody:first tr");
     // New summary values for the table
-    var tableSum = $allTr.size();
+    var tableSum = $allTr.length;
     var rowsSum = 0;
     var sizeSum = 0;
     var overheadSum = 0;

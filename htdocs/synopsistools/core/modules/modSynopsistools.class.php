@@ -143,7 +143,7 @@ class modSynopsistools extends DolibarrModules
                             'leftmenu'=>'0',        // To say if we can overwrite leftmenu
                             'url'=>'/synopsistools/index.php',
                             'langs'=>'',
-                            'position'=>999,
+                            'position'=>1099,
                             'perms'=>'$user->rights->SynopsisTools->Global->read',
                             'target'=>'',
                             'user'=>0);
@@ -156,7 +156,7 @@ class modSynopsistools extends DolibarrModules
                             'leftmenu'=>'myAdmin',        // To say if we can overwrite leftmenu
                             'url'=>'/synopsistools/myAdmin.php',
                             'langs'=>'',
-                            'position'=>2,
+                            'position'=>1200,
                             'perms'=>'$user->rights->SynopsisTools->Global->phpMyAdmin',
                             'target'=>'',
                             'user'=>0);
@@ -168,7 +168,7 @@ class modSynopsistools extends DolibarrModules
                             'mainmenu'=>'SynopsisTools',
                             'url'=>'/synopsistools/Synopsis_myAdmin/index.php',
                             'langs'=>'blank',
-                            'position'=>201,
+                            'position'=>1201,
                             'perms'=>'$user->rights->SynopsisTools->Global->phpMyAdmin',
                             'target'=>'',
                             'user'=>0);
@@ -184,7 +184,7 @@ class modSynopsistools extends DolibarrModules
                             'leftmenu'=>'tools',        // To say if we can overwrite leftmenu
                             'url'=>'/synopsistools/maj.php',
                             'langs'=>'',
-                            'position'=>3,
+                            'position'=>1300,
                             'perms'=>'$user->rights->SynopsisTools->Global->import',
                             'target'=>'',
                             'user'=>0);
@@ -195,7 +195,7 @@ class modSynopsistools extends DolibarrModules
                             'mainmenu'=>'SynopsisTools',
                             'url'=>'/synopsistools/maj.php',
                             'langs'=>'',
-                            'position'=>301,
+                            'position'=>1301,
                             'perms'=>'$user->rights->SynopsisTools->Global->import',
                             'target'=>'',
                             'user'=>0);
@@ -206,7 +206,7 @@ class modSynopsistools extends DolibarrModules
                             'mainmenu'=>'SynopsisTools',
                             'url'=>'/synopsistools/notificationUser/list.php',
                             'langs'=>'',
-                            'position'=>302,
+                            'position'=>1302,
                             'perms'=>'$user->rights->SynopsisTools->Global->adminNotifMail',
                             'target'=>'',
                             'user'=>0);
@@ -218,7 +218,7 @@ class modSynopsistools extends DolibarrModules
                             'mainmenu'=>'SynopsisTools',
                             'url'=>'/synopsistools/listFileInfo.php',
                             'langs'=>'',
-                            'position'=>303,
+                            'position'=>1303,
                             'perms'=>'$user->rights->SynopsisTools->Global->fileInfo',
                             'target'=>'',
                             'user'=>0);
@@ -230,7 +230,7 @@ class modSynopsistools extends DolibarrModules
                             'mainmenu'=>'SynopsisTools',
                             'url'=>'/synopsistools/fichierLog.php',
                             'langs'=>'',
-                            'position'=>304,
+                            'position'=>1304,
                             'perms'=>'$user->rights->SynopsisTools->Global->fileInfo',
                             'target'=>'',
                             'user'=>0);
@@ -246,7 +246,7 @@ class modSynopsistools extends DolibarrModules
                             'leftmenu'=>'0',        // To say if we can overwrite leftmenu
                             'url'=>'/synopsistools/repportBug.php',
                             'langs'=>'',
-                            'position'=>1000,
+                            'position'=>2000,
                             'perms'=>'',
                             'target'=>'',
                             'user'=>0);

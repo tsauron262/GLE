@@ -1,0 +1,167 @@
+<?php
+/*
+ * GLE by Synopsis et DRSI
+ *
+ * Author: Tommy SAURON <tommy@drsi.fr>
+ * Licence : Artistic Licence v2.0
+ *
+ * Version 1.1
+ * Create on : 4-1-2009
+ *
+ * Infos on http://www.finapro.fr
+ *
+ */
+
+/**     \defgroup   ProspectBabel     Module ProspectBabel
+        \brief      Module pour inclure ProspectBabel dans Dolibarr
+*/
+
+/**
+        \file       htdocs/core/modules/modProspectBabel.class.php
+        \ingroup    ProspectBabel
+        \brief      Fichier de description et activation du module de Prospection Babel
+*/
+
+include_once "DolibarrModules.class.php";
+
+/**     \class      modProspectBabel
+        \brief      Classe de description et activation du module de Prospection Babel
+*/
+
+class modSynopsisRessources extends DolibarrModules
+{
+
+   /**
+    *   \brief      Constructeur. Definit les noms, constantes et boites
+    *   \param      DB      handler d'acces base
+    */
+    function modSynopsisRessources($DB)
+    {
+        $this->db = $DB ;
+        $this->numero = 22232;
+
+        $this->family = "Synopsis";
+        $this->name = "Ressources materielles";
+        $this->description = "Gestion des ressources materielles";
+        $this->version = '2';
+        $this->const_name = 'MAIN_MODULE_SYNOPSISRESSOURCES';
+        $this->special = 0;
+        $this->picto='trip';
+
+        // Dir
+        $this->dirs = array();
+
+        // Config pages
+        //$this->config_page_url = "Synopsis_Ressources.php";
+
+        // Dependences
+        $this->depends = array();
+        $this->requiredby = array();
+
+        // Constantes
+        $this->const = array();
+
+        // Boites
+        $this->boxes = array();
+
+        // Permissions
+        $this->rights = array();
+        $this->rights_class = 'SynopsisRessources'; //Max 12 lettres
+
+        $r = 0;
+        $this->rights[$r][0] = $this->numero."1";// this->numero ."". 1
+        $this->rights[$r][1] = 'Affichage des ressources disponibles';
+        $this->rights[$r][2] = 'r'; //useless
+        $this->rights[$r][3] = 1; // Default
+        $this->rights[$r][4] = 'SynopsisRessources'; // Famille
+        $this->rights[$r][5] = 'Utilisateur'; // Droit
+        $r ++;
+        $this->rights[$r][0] = $this->numero."2";// this->numero ."". 2
+        $this->rights[$r][1] = 'Affichage des ressources en mode administrateur';
+        $this->rights[$r][2] = 'w'; //useless
+        $this->rights[$r][3] = 1;// Default
+        $this->rights[$r][4] = 'SynopsisRessources';// Famille
+        $this->rights[$r][5] = 'Admin';// Droit
+        $r ++;
+        $this->rights[$r][0] = $this->numero."3";// this->numero ."". 2
+        $this->rights[$r][1] = 'R&eacute;servation d\'une ressource';
+        $this->rights[$r][2] = 'w'; //useless
+        $this->rights[$r][3] = 1;// Default
+        $this->rights[$r][4] = 'SynopsisRessources';// Famille
+        $this->rights[$r][5] = 'Resa';// Droit
+        $r ++;
+$r=0;
+
+        $this->menu[$r]=array('fk_menu'=>0,
+                              'type'=>'top',
+                              'titre'=>'Ressources',
+                              'mainmenu'=>'Ressources',
+                              'leftmenu'=>'1',
+                              'url'=>'/Synopsis_Ressources/index.php',
+                              'langs' => 'synopsisGene@synopsistools',
+                              'position'=>140,
+                              'perms'=>'$user->rights->SynopsisRessources->SynopsisRessources->Utilisateur || $user->rights->SynopsisRessources->SynopsisRessources->Admin|| $user->rights->SynopsisRessources->SynopsisRessources->Resa',
+                              'target'=>'',
+                              'user'=>0);
+        $r++;
+        $this->menu[$r]=array('fk_menu'=>'r=0',
+                              'type'=>'left',
+                              'titre'=>'Ressources',
+                              'mainmenu'=>'Ressources',
+                              'url'=>'/Synopsis_Ressources/index.php',
+                              'langs' => 'synopsisGene@synopsistools',
+                              'position'=>1,
+                              'perms'=>'$user->rights->SynopsisRessources->SynopsisRessources->Utilisateur || $user->rights->SynopsisRessources->SynopsisRessources->Admin|| $user->rights->SynopsisRessources->SynopsisRessources->Resa',
+                              'target'=>'',
+                              'user'=>0);
+        $r++;
+
+//        1er lien
+        $this->menu[$r]=array('fk_menu'=>'r=1',
+                            'type'=>'left',
+                            'titre'=>'Liste',
+                            'mainmenu'=>'Ressources',
+                            'url'=>'/Synopsis_Ressources/index.php',
+                            'langs' => 'synopsisGene@synopsistools',
+                            'position'=>1,
+                            'perms'=>'$user->rights->SynopsisRessources->SynopsisRessources->Utilisateur || $user->rights->SynopsisRessources->SynopsisRessources->Admin|| $user->rights->SynopsisRessources->SynopsisRessources->Resa',
+                            'target'=>'',
+                            'user'=>0);
+        $r++;
+        $this->menu[$r]=array('fk_menu'=>'r=1',
+                            'type'=>'left',
+                            'titre'=>'R&eacute;servation',
+                            'mainmenu'=>'Ressources',
+                            'url'=>'/Synopsis_Ressources/resa.php',
+                            'langs' => 'synopsisGene@synopsistools',
+                            'position'=>2,
+                            'perms'=>'$user->rights->SynopsisRessources->SynopsisRessources->Admin|| $user->rights->SynopsisRessources->SynopsisRessources->Resa',
+                            'target'=>'',
+                            'user'=>0);
+        $r++;
+
+
+
+  }
+
+   /**
+    *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
+    *               Definit egalement les repertoires de donnees e creer pour ce module.
+    */
+  function init()
+  {
+        $sql = array();
+    return $this->_init($sql);
+  }
+
+  /**
+   *    \brief      Fonction appelee lors de la desactivation d'un module.
+   *                Supprime de la base les constantes, boites et permissions du module.
+   */
+  function remove()
+  {
+    $sql = array();
+    return $this->_remove($sql);
+  }
+}
+?>

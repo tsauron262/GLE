@@ -197,7 +197,7 @@ jQuery(document).ready(function(){
         }
     });
     id = 0;
-    if(typeof($.cookie("currentTab")) == 'string' && $($.cookie("currentTab")).size() > 0){
+    if(typeof($.cookie("currentTab")) == 'string' && $($.cookie("currentTab")).length > 0){
         id = $.cookie("currentTab").replace("#", "");
     }
     else{

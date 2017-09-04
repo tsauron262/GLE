@@ -187,7 +187,7 @@ class synopsisHook {//FA1506-0369
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/synopsistools/css/global.css" />' . "\n";
 //        $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/synopsistools/jquerymobile/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.css" />' . "\n";
 //        $return .= '<link rel="stylesheet" href="' . DOL_URL_ROOT . '/synopsistools/jquery/mobile/jquery.mobile-1.4.3.min.css">';
-        $cssSoc = "/synopsistools/css/" . MAIN_INFO_SOCIETE_NOM . ".css";
+        $cssSoc = "/synopsistools/css/" . $conf->global->MAIN_INFO_SOCIETE_NOM . ".css";
         if (is_file(DOL_DOCUMENT_ROOT . $cssSoc))
             $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . $cssSoc . '" />' . "\n";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print")
@@ -227,16 +227,16 @@ class synopsisHook {//FA1506-0369
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/js/responsive.js"></script>';
 //        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/jquerymobile/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>';
 
-        $jsSoc = "/synopsistools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
+        $jsSoc = "/synopsistools/js/" . $conf->global->MAIN_INFO_SOCIETE_NOM . ".js";
         if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))
             $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
 
 //        $return .= '<script src="' . DOL_URL_ROOT . '/synopsistools/jquery/mobile/jquery.mobile-1.4.3.min.js"></script>';
 
         if (is_object($langs)) {
-            $langsSoc = "/synopsistools/langs/fr_FR/" . MAIN_INFO_SOCIETE_NOM . ".lang";
+            $langsSoc = "/synopsistools/langs/fr_FR/" . $conf->global->MAIN_INFO_SOCIETE_NOM . ".lang";
             if (is_file(DOL_DOCUMENT_ROOT . $langsSoc))
-                $langs->load(MAIN_INFO_SOCIETE_NOM . "@synopsistools");
+                $langs->load( $conf->global->MAIN_INFO_SOCIETE_NOM . "@synopsistools");
             $langs->load("synopsisGene@synopsistools");
         }
 

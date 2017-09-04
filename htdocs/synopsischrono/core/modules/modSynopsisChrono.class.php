@@ -177,7 +177,7 @@ class modSynopsisChrono extends DolibarrModules {
             'leftmenu' => 'Chrono', // To say if we can overwrite leftmenu
             'url' => '/synopsischrono/index.php?leftmenu=chrono',
             'langs' => 'synopsisGene@synopsistools',
-            'position' => 1,
+            'position' => 500,
             'perms' => '$user->rights->synopsischrono->read',
             'target' => '',
             'user' => 0);
@@ -190,7 +190,7 @@ class modSynopsisChrono extends DolibarrModules {
             'leftmenu' => '1', // To say if we can overwrite leftmenu
             'url' => '/synopsischrono/liste.php?leftmenu=chrono',
             'langs' => 'synopsisGene@synopsistools',
-            'position' => 1,
+            'position' => 501,
             'perms' => '$user->rights->synopsischrono->read',
             'target' => '',
             'user' => 0);
@@ -202,7 +202,7 @@ class modSynopsisChrono extends DolibarrModules {
             'leftmenu' => '1', // To say if we can overwrite leftmenu
             'url' => '/synopsischrono/listDetail.php?leftmenu=chrono',
             'langs' => 'synopsisGene@synopsistools',
-            'position' => 1,
+            'position' => 502,
             'perms' => '$user->rights->synopsischrono->read',
             'target' => '',
             'user' => 0);
@@ -215,7 +215,7 @@ class modSynopsisChrono extends DolibarrModules {
             'leftmenu' => '1', // To say if we can overwrite leftmenu
             'url' => '/synopsischrono/nouveau.php?leftmenu=chrono',
             'langs' => 'synopsisGene@synopsistools',
-            'position' => 2,
+            'position' => 503,
             'perms' => '$user->rights->synopsischrono->Generer',
             'target' => '',
             'user' => 0);
@@ -230,7 +230,7 @@ class modSynopsisChrono extends DolibarrModules {
             'url' => '/synopsischrono/liste.php',
             'langs' => 'synopsisGene@synopsistools',
             'perms' => '$user->rights->synopsischrono->read',
-            'position' => 15,
+            'position' => 2301,
             'target' => '',
             'user' => 0);
         $r++;
@@ -240,7 +240,7 @@ class modSynopsisChrono extends DolibarrModules {
             'url' => '/synopsischrono/admin/synopsischrono.php',
             'langs' => 'synopsisGene@synopsistools',
             'perms' => '$user->rights->synopsischrono->Generer',
-            'position' => 151,
+            'position' => 2302,
             'target' => '',
             'user' => 0);
         $r++;

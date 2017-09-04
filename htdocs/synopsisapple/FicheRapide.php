@@ -366,7 +366,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     }
     echo "<div id='reponse' >";
     echo "</div>";
-    echo "<form id='form' method='POST' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "&action=semitotal'>";
+    echo "<form method='POST' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "&action=semitotal'>";
     echo "<div style='float:left' >";
     echo "<table id='chronoTable' class='border' width='100%;' style='border-collapse: collapse;' cellpadding='15'>";
     echo "<p>";
@@ -656,16 +656,16 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     echo "</div>";
     echo "</form>";
 } else {
-    echo "<form method='POST' id='form' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "'>";
+    echo "<form method='POST' name='form' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "'>";
     echo "<p>";
     echo "<label for='text'>Rentrez le client avant de passer a la suite : </label>";
     echo "</p>";
 
     echo "<p>";
     echo "<label for='client'>Client : </label>";
-    echo $form->select_thirdparty($socid, 'socid');
+    //echo $form->select_thirdparty($socid, 'socid');
+    print $form->select_company($socid, 'socid');
     echo "<span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'><img src='" . DOL_URL_ROOT . "/theme/eldy/img/filenew.png' border='0' alt='Create' title='Create'></span>";
-    echo "<br />";
     echo "</p>";
     echo "<p>";
     echo "Prise en charge par tech Pro <input type='checkbox' name='Pro' id='Pro' " . $pro . "/>";
@@ -673,17 +673,12 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
 
 
     echo "<p>";
-    echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>N° de série de la machine.</th>";
-    echo "<td class='ui-widget-content' colspan='1'>";
+    echo "N° de série de la machine.";
     echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='' class='required'/>";
-    echo "</span>";
-    echo "</td>";
-    echo "</tr>";
     echo "</p>";
 
     echo "<p>";
-    echo "<input type='submit' value='Valider' name='Envoyer' class='butAction' id ='Envoyer'>";
+    echo "<input type='submit' value='Valider' name='Envoyer' class='butAction' id ='Envoyer'/>";
     echo "</p>";
 
 

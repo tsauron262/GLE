@@ -644,8 +644,8 @@ $.widget("ui.selectmenu", {
 			if ( newIndex < 0 ) {
 				newIndex = 0;
 			}
-			if ( newIndex > this._optionLis.size() - 1 ) {
-				newIndex = this._optionLis.size() - 1;
+			if ( newIndex > this._optionLis.length - 1 ) {
+				newIndex = this._optionLis.length - 1;
 			}
 			// Occurs when a full loop has been made
 			if ( newIndex === recIndex ) {
@@ -673,8 +673,8 @@ $.widget("ui.selectmenu", {
 		if ( newIndex < 0 ) {
 			newIndex = 0;
 		}
-		if ( newIndex > this._optionLis.size() - 1 ) {
-			newIndex = this._optionLis.size() - 1;
+		if ( newIndex > this._optionLis.length - 1 ) {
+			newIndex = this._optionLis.length - 1;
 		}
 
 		//Occurs when a full loop has been made

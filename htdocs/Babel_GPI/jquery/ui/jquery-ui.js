@@ -5276,7 +5276,7 @@ $.widget("ui.accordion", {
 		this._trigger("changestart", null, this.data);
 
 		// count elements to animate
-		this.running = toHide.size() === 0 ? toShow.size() : toHide.size();
+		this.running = toHide.length === 0 ? toShow.length : toHide.length;
 
 		if (o.animated) {
 
@@ -5394,11 +5394,11 @@ $.extend($.ui.accordion, {
 				easing: "swing",
 				duration: 300
 			}, options, additions);
-			if ( !options.toHide.size() ) {
+			if ( !options.toHide.length ) {
 				options.toShow.animate({height: "show"}, options);
 				return;
 			}
-			if ( !options.toShow.size() ) {
+			if ( !options.toShow.length ) {
 				options.toHide.animate({height: "hide"}, options);
 				return;
 			}

@@ -65,7 +65,7 @@ $.fn.visualize = function(options, container){
                         });
                     }
                     else {
-                        var cols = self.find('tr:eq(1) td').size();
+                        var cols = self.find('tr:eq(1) td').length;
                         for(var i=0; i<cols; i++){
                             members[i] = {};
                             members[i].points = [];
@@ -193,7 +193,7 @@ $.fn.visualize = function(options, container){
                         });
                     }
                     else {
-                        var cols = self.find('tr:eq(1) td').size();
+                        var cols = self.find('tr:eq(1) td').length;
                         for(var i=0; i<cols; i++){
                             members[i] = {};
                             members[i].points = [];

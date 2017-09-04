@@ -80,7 +80,7 @@ function initSimult() {
 //        alert($(this).css("top") + "|"+$(this).position().top);
         if (chevauche) {
             if ($(this).css("top").replace("px", "") < $(this).position().top)
-                $(this).parent().find(".wc-cal-event").css("width", (100 / $(this).parent().find(".wc-cal-event").size()) - 1 + "%");
+                $(this).parent().find(".wc-cal-event").css("width", (100 / $(this).parent().find(".wc-cal-event").length) - 1 + "%");
         } else {
             $(this).css("position", "absolute");
         }

@@ -25,7 +25,7 @@ foreach ($tabUser as $userId => $nom) {
 }
 $userStr = "'" . implode("','", $tabUser) . "'";
 
-$js = ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jstree/jquery.cookie.js" type="text/javascript"></script>';
+$js = ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js" type="text/javascript"></script>';
 $js .= <<<EOF
         <script type="text/javascript" src="../agenda/agenda.js"></script>
     <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />

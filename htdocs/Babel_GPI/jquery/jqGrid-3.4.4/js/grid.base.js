@@ -1497,7 +1497,7 @@ $.fn.jqGrid = function( p ) {
 			.append(this);
 		$("table:first",grid.bDiv).css({width:grid.width+"px"});
 		if( isMSIE ) {
-			if( $("tbody",this).size() === 2 ) { $("tbody:first",this).remove();}
+			if( $("tbody",this).length === 2 ) { $("tbody:first",this).remove();}
 			if( ts.p.multikey) {$(grid.bDiv).bind("selectstart",function(){return false;});}
 			if(ts.p.treeGrid) {$(grid.bDiv).css("position","relative");}
 		} else {

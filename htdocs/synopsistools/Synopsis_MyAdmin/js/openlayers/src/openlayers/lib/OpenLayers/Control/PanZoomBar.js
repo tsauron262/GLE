@@ -192,7 +192,7 @@ OpenLayers.Control.PanZoomBar = OpenLayers.Class(OpenLayers.Control.PanZoom, {
             "click": this.doubleClick
         });
         
-        var sz = new OpenLayers.Size();
+        var sz = new OpenLayers.length;
         sz.h = this.zoomStopHeight * this.map.getNumZoomLevels();
         sz.w = this.zoomStopWidth;
         var div = null;

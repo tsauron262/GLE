@@ -189,7 +189,7 @@ class HookManager
         }
 
         // Init return properties
-        $this->resPrint=''; $this->resArray=array(); $this->resNbOfHooks=0;
+        /* mod drsi sinon ca efface les hook precedent $this->resPrint=''; $this->resArray=array(); $this->resNbOfHooks=0;fmoddrsi*/
 
         // Loop on each hook to qualify modules that have declared context
         $modulealreadyexecuted=array();

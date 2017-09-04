@@ -32,9 +32,6 @@ pristine-tar = True
 [buildpackage]
 ignore-branch = True
 
-[buildpackage]
-ignore-branch = True
-
 [git-buildpackage]
 sign-tags = True
 export-dir = ../build-area/
@@ -139,19 +136,6 @@ Thanks. Fixed into git.
 or replay to email control@bugs.debian.org
 With only message 
 tag 729538 +pending
-
-
-To remove status of a bug without "moreinfo" (bug can be processed)
-
-or replay to email 999999@bugs.debian.org + submitter of bug
-With a message starting with: 
-
-Control: tag -1 -moreinfo
-Thanks. Fixed into git.
-
-or replay to email control@bugs.debian.org
-With only message 
-tag 729538 -moreinfo
 
 
 To remove status of a bug without "moreinfo" (bug can be processed)
@@ -463,8 +447,8 @@ Pro are:
 - It fixes also stability bugs
 - Patches were already tested because deployed and used by several thousands of users.
 - It is easier for package maintener to include this official set of fixes than applying one patch after one patch for each debian report or backported each patch into a dedicated version.
-- Debian maintenance version matches with official project maintenance version (better when all fixes are not related to the way the software is packaged)
+- Debian maintenance version is inline with official project maintenance version (better when all fixes are not related to the way the software is packaged)
 Cons are: 
-- The patch include more than the only one security reported fxes
+- The patch include more than the only one security reported fixes
 
 Note: If there is a response to ask more information, don't forget to remove the tag during answer.

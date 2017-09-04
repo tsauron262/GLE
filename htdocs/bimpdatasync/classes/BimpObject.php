@@ -173,7 +173,12 @@ class BimpObject
             $data = $this->getDataArray();
             $result = $this->db->update(static::$table, $data, '`id` = ' . (int) $this->id);
             if ($result <= 0) {
-                $errors[] = 'Echec de la mise à jour - Erreur SQL: ' . $this->db->db->error();
+                $msg = 'Echec de la mise à jour';
+                $sqlError = $this->db->db->error();
+                if ($sqlError) {
+                    $msg .= ' - Erreur SQL: ' . $sqlError;
+                }
+                $errors[] = $msg;
             }
         }
 
@@ -190,7 +195,12 @@ class BimpObject
             if ($result > 0) {
                 $this->id = $id;
             } else {
-                $errors[] = 'Echec de l\'enregistrement - Erreur SQL: ' . $this->db->db->error();
+                $msg = 'Echec de l\'enregistrement';
+                $sqlError = $this->db->db->error();
+                if ($sqlError) {
+                    $msg .= ' - Erreur SQL: ' . $sqlError;
+                }
+                $errors[] = $msg;
             }
         }
 
@@ -205,7 +215,12 @@ class BimpObject
         $errors = array();
         $result = $this->db->delete(static::$table, '`id` = ' . (int) $this->id);
         if ($result <= 0) {
-            $errors[] = 'Echec de la suppression - Erreur SQL: ' . $this->db->db->error();
+            $msg = 'Echec de la suppression';
+            $sqlError = $this->db->db->error();
+            if ($sqlError) {
+                $msg .= ' - Erreur SQL: ' . $sqlError;
+            }
+            $errors[] = $msg;
         } else {
             foreach (static::$objects as $name => $params) {
                 if (isset($params['delete']) && $params['delete']) {
@@ -607,7 +622,18 @@ class BimpObject
                 $html .= '<input type="hidden" name="' . $name . '" value="' . $id_parent . '"/>';
                 continue;
             }
-            $html .= '<tr>';
+            $html .= '<tr';
+            if (isset($params['display_if'])) {
+                $html .= ' class="display_if" ';
+                $html .= ' data-input_name="' . $params['display_if']['input_name'] . '"';
+                if (isset($params['display_if']['show_values'])) {
+                    $html .= ' data-show_values="' . $params['display_if']['show_values'] . '"';
+                }
+                if (isset($params['display_if']['hide_values'])) {
+                    $html .= ' data-hide_values="' . $params['display_if']['hide_values'] . '"';
+                }
+            }
+            $html .= '>';
             $html .= '<th class="ui-widget-header ui-state-default" width="15%">' . $params['label'] . '</th>';
             $html .= '<td class="ui-widget-content">';
             $value = '';
@@ -654,6 +680,10 @@ class BimpObject
                     }
                     $html .= '</select>';
                     break;
+            }
+
+            if (isset($params['help'])) {
+                $html .= '<p class="inputHelp">' . $params['help'] . '</p>';
             }
 
             $html .= '</td>';
@@ -795,7 +825,7 @@ class BimpObject
             $html .= '</div>';
         } else {
             $html .= '<div class="alert alert-warning">';
-            $html .= 'Il n\'y a aucun' . $class_name::isLabelFemale() ? 'e' : '' . ' ' . $class_name::getLabel('') . ' à associer';
+            $html .= 'Il n\'y a aucun' . ($class_name::isLabelFemale() ? 'e' : '') . ' ' . $class_name::getLabel() . ' à associer';
             $html .= '</div>';
         }
 
@@ -838,7 +868,7 @@ class BimpObject
         if (isset($params['title'])) {
             $html .= $params['title'];
         } else {
-            $html .= 'Liste des ' . static::$labels['name_plur'];
+            $html .= 'Liste des ' . static::getLabel('name_plur');
         }
         $html .= '</td>';
         $html .= '</tr>';
@@ -1076,6 +1106,28 @@ class BimpObject
         return $html;
     }
 
+    public static function renderFormAndList()
+    {
+        $html = '';
+        $className = static::getClass();
+        $html .= '<div id="' . $className . '_card">';
+        $html .= '<div class="objectToolbar">';
+        $html .= '<span id="' . $className . '_openFormButton" class="button"';
+        $html .= 'onclick="openObjectForm(\'' . $className . '\', null)">';
+        $html .= 'Ajouter ' . static::getLabel('a') . '</span>';
+        $html .= '<span id="' . $className . '_closeFormButton" class="button"';
+        $html .= 'onclick="closeObjectForm(\'' . $className . '\')"';
+        $html .= ' style="display: none">';
+        $html .= 'Annuler</span>';
+        $html .= '</div>';
+
+        $html .= '<div id="' . $className . '_formContainer" style="display: none"></div>';
+        $html .= static::renderList(null);
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public function renderObjectsList($object_name)
     {
         if (is_null($this->id) || !$this->id) {
@@ -1113,10 +1165,10 @@ class BimpObject
                 $html .= '<div id="' . $className . '_card">';
                 $html .= '<div class="objectToolbar">';
                 $html .= '<span id="' . $className . '_openFormButton" class="button"';
-                $html .= 'onclick="openObjectForm(\'BDSProcessOption\', ' . $this->id . ')">';
+                $html .= 'onclick="openObjectForm(\'' . $className . '\', ' . $this->id . ')">';
                 $html .= 'Ajouter ' . $className::getLabel('a') . '</span>';
                 $html .= '<span id="' . $className . '_closeFormButton" class="button"';
-                $html .= 'onclick="closeObjectForm(\'BDSProcessOption\')"';
+                $html .= 'onclick="closeObjectForm(\'' . $className . '\')"';
                 $html .= ' style="display: none">';
                 $html .= 'Annuler</span>';
                 $html .= '</div>';
@@ -1124,7 +1176,11 @@ class BimpObject
                 $html .= '<div id="' . $className . '_formContainer" style="display: none"></div>';
                 $html .= $className::renderList($this->id);
                 $html .= '</div>';
+            } else {
+                echo 'here';
             }
+        } else {
+            echo 'la';
         }
 
         return $html;

@@ -30,6 +30,34 @@ abstract class BDS_Process
 
     public function __construct(BDSProcess $processDefinition, $user, $params = null)
     {
+        set_time_limit(0);
+        ini_set('memory_limit', static::$memory_limit);
+
+        global $db, $langs;
+
+        if (isset($params['debug_mod']) && $params['debug_mod']) {
+            self::$debug_mod = true;
+            $this->options['debug_mod'] = true;
+        }
+
+        if (self::$debug_mod) {
+            ini_set('display_errors', 1);
+            error_reporting(E_ALL);
+            $lvl = ob_get_level();
+            if ((int) $lvl > 0) {
+                ob_end_flush();
+            }
+            ob_start(null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE);
+        } else {
+            ini_set('display_errors', 0);
+        }
+
+        $this->db = new BimpDb($db);
+        $this->langs = $langs;
+        $this->user = $user;
+
+        $this->filesDir = __DIR__ . '/../files/' . static::$files_dir_name . '/';
+
         if (!isset($processDefinition->id) || !$processDefinition->id) {
             $msg = 'ID null lors de l\'initalisation ';
             if (isset($processDefinition->title)) {
@@ -41,26 +69,10 @@ abstract class BDS_Process
                 $msg .= '. (' . $processDefinition->name . ')';
             }
             $this->logError($msg);
+            $this->Msg($msg, 'danger');
         }
 
         $this->processDefinition = $processDefinition;
-
-        set_time_limit(0);
-        ini_set('memory_limit', static::$memory_limit);
-
-        global $db, $langs;
-        $this->db = new BimpDb($db);
-        $this->langs = $langs;
-        $this->user = $user;
-
-        $this->filesDir = __DIR__ . '/../files/' . static::$files_dir_name . '/';
-
-        if (self::$debug_mod) {
-            ini_set('display_errors', 1);
-            error_reporting(E_ALL);
-        } else {
-            ini_set('display_errors', 0);
-        }
 
         $parameters = BDSProcessParameter::getListData($this->db, $processDefinition->id);
         foreach ($parameters as $p) {
@@ -94,7 +106,7 @@ abstract class BDS_Process
         }
 
         if (self::$debug_mod) {
-            echo '<h1>' . $this->processDefinition->title . '</h1>';
+            echo '<h3>' . $this->processDefinition->title . '</h3>';
         }
     }
 
@@ -103,12 +115,22 @@ abstract class BDS_Process
         
     }
 
-    public function end($saveFile = true)
+    public function end($saveFile = true, &$debug_content = null)
     {
         if (!is_null($this->report)) {
             $this->report->end();
             if ($saveFile) {
                 $this->report->saveFile();
+            }
+        }
+
+        if (self::$debug_mod) {
+            $content = ob_get_clean();
+            if ($content) {
+                dol_syslog($content, 3);
+            }
+            if (!is_null($debug_content)) {
+                $debug_content = $content;
             }
         }
     }
@@ -117,12 +139,15 @@ abstract class BDS_Process
 
     public function initOperation($id_operation, &$errors)
     {
-        $data = array();
-        $data['id_process'] = $this->processDefinition->id;
-        $data['id_operation'] = $id_operation;
-        $data['use_report'] = true;
-        $data['report_ref'] = '';
-        $data['operation_title'] = '';
+        $data = array(
+            'id_process'      => $this->processDefinition->id,
+            'id_operation'    => $id_operation,
+            'use_report'      => true,
+            'report_ref'      => '',
+            'operation_title' => '',
+            'debug_content'   => ''
+        );
+
 
         if (is_null($id_operation) || !$id_operation) {
             $errors[] = 'ID de l\'opération absent';
@@ -166,10 +191,33 @@ abstract class BDS_Process
             }
         }
 
+        if (self::$debug_mod) {
+            echo '<h4>Options: </h4><pre>';
+            print_r($this->options);
+            echo '</pre>';
+            echo '<h4>Données: </h4><pre>';
+            print_r($data);
+            echo '</pre>';
+        }
+
+        if (isset($this->options['debug_mod']) && $this->options['debug_mod']) {
+            $content = ob_get_clean();
+            if ($content) {
+                $html = '<div class="foldable_section closed">';
+                $html .= '<div class="foldable_section_caption">';
+                $html .= '[INITIALISATION]';
+                $html .= '</div>';
+                $html .= '<div class="foldable_section_content">' . $content . '</div>';
+                $html .= '</div>';
+                $data['debug_content'] = $html;
+            }
+            dol_syslog($content, 3);
+        }
+
         return $data;
     }
 
-    public function executeOperationStep($id_operation, $step, &$errors, $report_ref = null)
+    public function executeOperationStep($id_operation, $step, &$errors, $report_ref = null, $iteration = 0)
     {
         $result = array();
         if (isset($this->processDefinition->id) && $this->processDefinition->id) {
@@ -212,7 +260,23 @@ abstract class BDS_Process
             $errors[] = $msg;
             $this->Error($msg);
         }
-        $this->end(!is_null($report_ref));
+
+        $debug_content = '';
+        $this->end(!is_null($report_ref), $debug_content);
+
+        if ($debug_content) {
+            $html = '<div class="foldable_section closed">';
+            $html .= '<div class="foldable_section_caption">';
+            $html .= 'Opération: "' . $step . '" ' . ($iteration ? '#' . $iteration : '');
+            $html .= '</div>';
+            $html .= '<div class="foldable_section_content" id="debugContent">';
+            $html .= $debug_content;
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $result['debug_content'] = $html;
+        }
+
         return $result;
     }
 
@@ -251,6 +315,11 @@ abstract class BDS_Process
 
     public function executeSoapRequest($params, &$errors)
     {
+        // On désactive la temporisation de sortie de manière à ce que le client puisse recevoir 
+        // les notifications, notamment en cas d'erreur fatale.
+        if (self::$debug_mod) {
+            ob_end_flush();
+        }
 
         $return = array();
 
@@ -271,11 +340,80 @@ abstract class BDS_Process
         } else {
             $return = $this->{$params['operation']}($params, $errors);
         }
+
         $this->end();
 
         return $return;
     }
 
+    // Outilsde connexion et d'extraction des données:
+
+    protected function openXML($fileSubDir, $file)
+    {
+        if (!isset($file) || empty($file) || ($file === '')) {
+            $this->Error('Aucun nom spécifié pour le fichier XML');
+        } elseif (!file_exists($this->filesDir . $fileSubDir . $file)) {
+            $this->Error('Fichier XML non trouvé: "' . $this->filesDir . $fileSubDir . $file . '"');
+        } else {
+            $XML = simplexml_load_file($this->filesDir . $fileSubDir . $file, 'SimpleXMLElement', LIBXML_NOCDATA);
+            if (is_null($XML) || !$XML) {
+                $this->Error('Echec du chargement du fichier "' . $file . '"');
+                return null;
+            }
+            return $XML;
+        }
+        return null;
+    }
+
+    protected function openXLS($fileSubDir, $file)
+    {
+        if (!isset($file) || empty($file) || ($file === '')) {
+            $this->Error('Aucun nom spécifié pour le fichier Excel');
+        } elseif (!file_exists($this->filesDir . $fileSubDir . $file)) {
+            $this->Error('Fichier Excel non trouvé: "' . $this->filesDir . $fileSubDir . $file . '"');
+        } else {
+            if (!defined('PHPEXCEL_ROOT')) {
+                include_once __DIR__ . '/phpExcel/PHPExcel.php';
+            }
+            $XLS = PHPExcel_IOFactory::load($this->filesDir . $fileSubDir . $file);
+            if (is_null($XLS) || !$XLS) {
+                $this->Error('Echec du chargement du fichier "' . $file . '"');
+                return null;
+            }
+            return $XLS;
+        }
+        return null;
+    }
+
+    protected function ftpConnect($host, $login, $pword, $passive = true, &$errors = null)
+    {
+        $ftp = ftp_connect($host);
+
+        if ($ftp === false) {
+            $msg = 'Echec de la connexion FTP avec le serveur "' . $host . '"';
+            $this->Error($msg);
+            if (!is_null($errors)) {
+                $errors[] = $msg;
+            }
+            return false;
+        }
+
+        if (!ftp_login($ftp, $login, $pword)) {
+            $msg = 'Echec de la connexion FTP - Identifiant ou mot de passe incorrect.';
+            $msg .= 'Veuillez vérifier les paramètres de connexion';
+            $this->Error($msg);
+            if (!is_null($errors)) {
+                $errors[] = $msg;
+            }
+            return false;
+        }
+
+        if ($passive) {
+            ftp_pasv($ftp, true);
+        }
+        return $ftp;
+    }
+    
     // Gestion des listes de références: 
 
     public function setReferences($references, $object_name = null)
@@ -529,6 +667,7 @@ abstract class BDS_Process
     }
 
     // Gestion statique des processus:
+    
     public static function createProcessByName($fuser, $processName, &$error, $params = null)
     {
         global $db;
@@ -654,5 +793,20 @@ abstract class BDS_Process
             }
         }
         return $errors;
+    }
+    
+    // Outils divers
+    
+    public function getParameterLabelByName($name)
+    {
+        $where = '`id_process` = '.(int) $this->processDefinition->id;
+        $where .= ' AND `name` = \''.$name.'\'';
+        
+        $label = $this->db->getValue('bds_process_parameter', 'label', $where);
+        if (is_null($label) || !$label) {
+            return $name;
+        }
+        
+        return $label;
     }
 }

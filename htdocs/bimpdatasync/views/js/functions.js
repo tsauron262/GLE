@@ -33,13 +33,13 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
         },
         error: function () {
             if (typeof (errorCallBack) === 'string') {
-                    bimp_display_msg(errorCallBack, $resultContainer, 'danger');
+                bimp_display_msg(errorCallBack, $resultContainer, 'danger');
             } else {
                 bimp_display_msg('Une erreur est survenue. La requête n\'a pas aboutie', $resultContainer, 'danger');
             }
             if (typeof (errorCallBack) === 'function') {
                 errorCallBack();
-            } 
+            }
         }
     });
 }
@@ -111,3 +111,38 @@ function bimp_display_result_success(result, $container) {
         }
     }
 }
+
+function toggleFoldableSection($caption) {
+    var $section = $caption.parent('.foldable_section');
+    if (!$section.length) {
+        alert('ici');
+        return;
+    }
+    var $content = $section.children('.foldable_section_content');
+    if (!$content.length) {
+        alert('la');
+        return;
+    }
+
+    if ($section.hasClass('open')) {
+        $content.stop().slideUp(250, function () {
+            $section.removeClass('open').addClass('closed');
+            $(this).removeAttr('style');        });
+
+    } else {
+        $content.stop().slideDown(250, function() {
+            $section.removeClass('closed').addClass('open');
+            $(this).removeAttr('style');
+        });
+    }
+}
+
+function setFoldableEvents() {
+    $('.foldable_section_caption').click(function () {
+        toggleFoldableSection($(this));
+    });
+}
+
+$(document).ready(function () {
+    setFoldableEvents();
+});

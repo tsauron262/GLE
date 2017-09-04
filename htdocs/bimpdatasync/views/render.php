@@ -436,25 +436,45 @@ function renderOperationProcess($data)
     $html .= '</div>';
 
     $html .= '</td></tr></table></div>';
-    
+
+    if (isset($data['debug_content']) && $data['debug_content']) {
+        renderDebugContent($data['debug_content']);
+    }
+
     if ($data['use_report']) {
         $html .= '<div>';
-        
+
         $html .= '<div class="buttonsContainer" style="text-align: left">';
         $html .= '<span id="enableReportButton" class="button" onclick="if (Operation) Operation.enableReport();">Afficher le rapport</span>';
         $html .= '<span id="disableReportButton" class="button" onclick="if (Operation) Operation.disableReport();" style="display: none">Masquer le rapport</span>';
         $html .= '</div>';
-        
+
         $html .= '<div id="reportLoadingResult"></div>';
-        
+
         $html .= '<div id="reportContentContainer">';
         if (isset($data['report_content'])) {
             $html .= $data['report_content'];
         }
         $html .= '</div>';
-        
+
         $html .= '</div>';
     }
 
+    return $html;
+}
+
+function renderDebugContent($debug_content)
+{
+    $html = '';
+    $html .= '<div id="debugContainer">';
+    $html .= '<div class="foldable_section closed">';
+    $html .= '<div class="foldable_section_caption">';
+    $html .= 'Affichage débug';
+    $html .= '</div>';
+    $html .= '<div class="foldable_section_content" id="debugContent">';
+    $html .= $debug_content;
+    $html .= '</div>';
+    $html .= '</div>';
+    $html .= '</div>';
     return $html;
 }

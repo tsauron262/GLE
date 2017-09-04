@@ -1,6 +1,7 @@
 <?php
 
 require_once '../master.inc.php';
+ini_set('display_errors', 1);
 require_once DOL_DOCUMENT_ROOT . '/core/lib/ws.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
@@ -70,10 +71,32 @@ function testSQL()
 {
     global $db;
     $bdb = new BimpDb($db);
-    
+
     $row = $bdb->getRow('bds_object_sync_data', '`id` = 427');
     echo '<pre>';
     print_r($row);
     exit;
 }
+
 //testSQL();
+
+function testMatch()
+{
+    echo 'TEST <br/>';
+//    $match = new BDSProcessMatchingValues();
+//    $match->fetch(2);
+//
+//    $res = $match->getMatchedValue(6);
+//    if (is_null($res)) {
+//        echo $match->db->db->error();
+//    }
+//    echo 'Res: ' . $res;
+    
+    $match = BDSProcessMatchingValues::createInstanceByName(1, 'order_state');
+    if (is_null($match)) {
+        echo 'PAS OK <br/>';
+    }else {
+        echo 'ID: '.$match->id;
+    }
+}
+//testMatch();

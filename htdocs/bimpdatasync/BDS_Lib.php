@@ -10,6 +10,8 @@ if (!defined('BDS_LIB')) {
     include_once $dir . 'BDSProcess.class.php';
     include_once $dir . 'BDSProcessParameter.class.php';
     include_once $dir . 'BDSProcessOption.class.php';
+    include_once $dir . 'BDSProcessMatchingValues.class.php';
+    include_once $dir . 'BDSProcessCustomMatchingValues.class.php';
     include_once $dir . 'BDSProcessTriggerAction.class.php';
     include_once $dir . 'BDSProcessOperation.class.php';
 
@@ -18,4 +20,5 @@ if (!defined('BDS_LIB')) {
     include_once $dir . 'BDS_ImportProcess.php';
     include_once $dir . 'BDS_ExportProcess.php';
     include_once $dir . 'BDS_SyncProcess.php';
+    include_once $dir . 'BDS_WSProcess.php';
 }

@@ -46,4 +46,8 @@ $processes = BDSProcess::getListData($bdb);
    <?php } ?>
 </table>
 
+<div class="objectToolbar">
+   <span class="button">Ajouter un processus</span>
+</div>
+
 <?php llxFooter(); ?>

@@ -62,7 +62,7 @@ class BDS_Tools
     {
         $sql = 'SELECT `rowid` as id FROM ' . MAIN_DB_PREFIX . 'categorie ';
         $sql .= 'WHERE `fk_parent` = ' . (int) $id_parent . ' AND `type` = 0';
-        
+
         $rows = $db->executeS($sql, 'array');
         $cats = array();
         if (!is_null($rows)) {
@@ -227,6 +227,9 @@ class BDS_Tools
             switch ($object_name) {
                 case 'Product':
                     return DOL_URL_ROOT . '/product/card.php?id=' . $id_object;
+
+                case 'Categorie':
+                    return DOL_URL_ROOT . '/categories/viewcat.php?id=' . $id_object;
             }
         }
 
@@ -246,13 +249,18 @@ class BDS_Tools
 
         if (!is_null($id_object) && $id_object) {
             $objectLabel .= ' n° ' . $id_object;
+            $ref = null;
             switch ($object_name) {
                 case 'Product':
                     $ref = $bdb->getValue('product', 'ref', '`rowid` = ' . (int) $id_object);
-                    if (!is_null($ref) && $ref) {
-                        $objectLabel .= ' - ' . $ref;
-                    }
                     break;
+
+                case 'Categorie':
+                    $ref = $bdb->getValue('categorie', 'label', '`rowid` = ' . (int) $id_object);
+                    break;
+            }
+            if (!is_null($ref) && $ref) {
+                $objectLabel .= ' - ' . $ref;
             }
         }
         return $objectLabel;

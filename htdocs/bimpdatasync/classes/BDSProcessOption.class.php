@@ -10,6 +10,7 @@ class BDSProcessOption extends BimpObject
     public $label;
     public $info;
     public $type;
+    public $select_values;
     public $default_value;
     public static $associations = array(
         'operations' => array(
@@ -50,7 +51,7 @@ class BDSProcessOption extends BimpObject
         ),
         'info'          => array(
             'label'    => 'Informations',
-            'type'     => 'string',
+            'type'     => 'html',
             'input'    => 'textarea',
             'required' => false
         ),
@@ -60,6 +61,18 @@ class BDSProcessOption extends BimpObject
             'options'      => 'types',
             'is_key_array' => 'types',
             'required'     => true,
+        ),
+        'select_values' => array(
+            'label'    => 'Valeurs',
+            'type'     => 'string',
+            'input'    => 'text',
+            'display_if' => array(
+                'input_name' => 'type',
+                'show_values' => 'select'
+            ),
+            'help' => 'Utiliser la syntaxe "nom_système=>nom_public". Séparer chaque entrée par une virgule (sans espace)',
+            'required' => false,
+            'required_if' => 'type=select'
         ),
         'default_value' => array(
             'label'    => 'Valeur par défaut',

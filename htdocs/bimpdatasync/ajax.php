@@ -1,7 +1,8 @@
 <?php
 
-require_once '../main.inc.php';
+require_once '../master.inc.php';
 require_once __DIR__ . '/BDS_Lib.php';
+require_once __DIR__ . '/views/render.php';
 
 ini_set('display_errors', 1);
 
@@ -86,7 +87,7 @@ if (BDS_Tools::isSubmit('action')) {
                     }
                     if (!count($errors)) {
                         if ($object_name::isLabelFemale()) {
-                            $success = 'Toutes les ' . $object_name::getLabel('name_plur') . 'ont été supprimées';
+                            $success = 'Toutes les ' . $object_name::getLabel('name_plur') . ' ont été supprimées';
                         } else {
                             $success = 'Tous les ' . $object_name::getLabel('name_plur') . ' ont été supprimés';
                         }
@@ -177,11 +178,8 @@ if (BDS_Tools::isSubmit('action')) {
             break;
 
         case 'loadObjectList':
-            $id_parent = BDS_Tools::getValue('id_parent');
+            $id_parent = BDS_Tools::getValue('id_parent', null);
             $object_name = BDS_Tools::getValue('object_name');
-            if (is_null($id_parent) || !$id_parent) {
-                $errors[] = 'ID de l\'objet parent absent';
-            }
             if (is_null($object_name) || !$object_name) {
                 $errors[] = 'Type d\'objet absent';
             }
@@ -217,17 +215,16 @@ if (BDS_Tools::isSubmit('action')) {
 
             if (!count($errors)) {
                 $error = 0;
-//                BDS_Process::$debug_mod = true;
                 $process = BDS_Process::createProcessById($user, $id_process, $error, $options);
                 if (is_null($process)) {
                     $errors[] = 'Echec de l\'inialisation du processus' . ($error ? ' - ' . $error : '');
                 } else {
                     $data = $process->initOperation($id_operation, $errors);
                     if (!count($errors) && !isset($data['result_html'])) {
-                        if (!function_exists('renderOperationProcess')) {
-                            require_once __DIR__ . '/views/render.php';
-                        }
                         $html = renderOperationProcess($data);
+                    }
+                    if (isset($data['debug_content']) && $data['debug_content']) {
+                        $data['debug_content'] = renderDebugContent($data['debug_content']);
                     }
                 }
             }
@@ -244,8 +241,9 @@ if (BDS_Tools::isSubmit('action')) {
             $id_process = BDS_Tools::getValue('id_process');
             $id_operation = BDS_Tools::getValue('id_operation');
             $step = BDS_Tools::getValue('step_name');
-            $options = BDS_Tools::getValue('report_ref', array());
+            $options = BDS_Tools::getValue('options', array());
             $report_ref = BDS_Tools::getValue('report_ref');
+            $iteration = BDS_Tools::getValue('iteration', 1);
 
             $report_html = 0;
             $step_result = array();
@@ -269,7 +267,7 @@ if (BDS_Tools::isSubmit('action')) {
                     if (BDS_Tools::isSubmit('elements')) {
                         $process->setReferences(BDS_Tools::getValue('elements'));
                     }
-                    $step_result = $process->executeOperationStep($id_operation, $step, $errors, $report_ref);
+                    $step_result = $process->executeOperationStep($id_operation, $step, $errors, $report_ref, $iteration);
                     if (is_null($step_result) || !$step_result) {
                         $step_result = array();
                     }

@@ -369,4 +369,24 @@ class BDS_SyncData
             }
         }
     }
+
+    public static function getObjectsList(BimpDb $db, $id_process, $object_name)
+    {
+        $where = '`loc_id_process` = ' . (int) $id_process;
+        $where .= ' AND `loc_object_name` = \'' . $object_name . '\'';
+
+        $rows = $db->getRows(self::$table, $where, null, 'array');
+        
+        $objects = array();
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $objects[(int) $r['loc_id_object']] = array(
+                    'status'        => (int) $r['status'],
+                    'ext_id_object' => (int) $r['ext_id_object'],
+                    'id_sync_data'  => (int) $r['id']
+                );
+            }
+        }
+        return $objects;
+    }
 }

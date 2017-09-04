@@ -3,7 +3,7 @@ CREATE TABLE `llx_bds_process` (
   `name` varchar(128) NOT NULL,
   `title` varchar(256) NOT NULL,
   `description` text,
-  `type` enum('sync','import','export') NOT NULL,
+  `type` enum('sync','import','export','ws') NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -25,7 +25,33 @@ CREATE TABLE `llx_bds_process_option` (
   `info` text NOT NULL,
   `type` text NOT NULL,
   `default_value` text NOT NULL,
-  `values` text NOT NULL,
+  `select_values` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `llx_bds_process_matching_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_process` int(10) UNSIGNED NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `label` varchar(256) NOT NULL,
+  `description` text,
+  `type` enum('loc_table','custom','','') NOT NULL,
+  `ext_label` varchar(128) NOT NULL,
+  `loc_label` varchar(128) NOT NULL,
+  `loc_table` varchar(128) DEFAULT NULL,
+  `field_in` varchar(128) DEFAULT NULL,
+  `field_out` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `llx_bds_process_custom_matching_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_match` int(10) UNSIGNED NOT NULL,
+  `loc_value` text NOT NULL,
+  `ext_value` text NOT NULL,
+  `loc_label` VARCHAR(128) NOT NULL,
+  `ext_label` VARCHAR(128) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

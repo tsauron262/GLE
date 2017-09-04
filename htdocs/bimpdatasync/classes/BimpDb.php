@@ -29,7 +29,7 @@ class BimpDb
             } elseif (is_numeric($value)) {
                 $values .= $value;
             } else {
-                $values .= '\'' . $value . '\'';
+                $values .= '"' . $this->db->escape($value) . '"';
             }
         }
         $fields .= ')';
@@ -69,7 +69,7 @@ class BimpDb
             if (is_numeric($value)) {
                 $sql .= $value;
             } else {
-                $sql .= '\'' . $value . '\'';
+                $sql .= '"' . $this->db->escape($value) . '"';
             }
         }
         $sql .= ' WHERE ' . $where;
@@ -96,7 +96,7 @@ class BimpDb
     public function executeS($sql, $return = 'object')
     {
         $result = $this->db->query($sql);
-        
+
         $rows = null;
         if ($result) {
             $rows = array();
@@ -114,7 +114,7 @@ class BimpDb
         } else {
             $this->logSqlError();
         }
-        
+
         $this->db->free($result);
 
         return $rows;

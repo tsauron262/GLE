@@ -15,7 +15,8 @@ class BDSProcess extends BimpObject
     public static $types = array(
         'import' => 'Import',
         'export' => 'Export',
-        'sync'   => 'Synchronisation'
+        'sync'   => 'Synchronisation',
+        'ws'     => 'Web service'
     );
     public static $labels = array(
         'name'      => 'processus',
@@ -64,6 +65,11 @@ class BDSProcess extends BimpObject
         ),
         'options'        => array(
             'class_name' => 'BDSProcessOption',
+            'relation'   => 'HasMany',
+            'delete'     => true
+        ),
+        'matching'       => array(
+            'class_name' => 'BDSProcessMatchingValues',
             'relation'   => 'HasMany',
             'delete'     => true
         ),
@@ -124,101 +130,40 @@ class BDSProcess extends BimpObject
         return $processes;
     }
 
-    public function getOperationsData()
+    public static function renderListRows($id_parent = null)
     {
-        $operations = BDSProcessOperation::getListData($this->db, $this->id);
-        foreach ($operations as &$o) {
-            $o['options'] = BDSProcessOperation::getOperationOptions($o['id']);
-        }
-        return $operations;
-    }
-
-    public function renderOperations()
-    {
-        ini_set('display_errors', 1);
-        $operations = $this->getOperationsData();
-
-        $html = '<link type="text/css" rel="stylesheet" href="'. DOL_URL_ROOT . '/bimpdatasync/views/css/operations.css"/>';
-        $html .= '<link type="text/css" rel="stylesheet" href="'. DOL_URL_ROOT . '/bimpdatasync/views/css/reports.css"/>';
-        
-        $html .= '<script type="text/javascript">';
-        $html .= 'var object_labels = ' . json_encode(BDSProcessOperation::getLabels());
-        $html .= '</script>';
-
-        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpdatasync/views/js/reports.js"></script>';
-        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpdatasync/views/js/operations.js"></script>';
-        
-        $html .= '<div id="contentContainer">';
-        $html .= '<div id="operationsListContainer">';
-
-        foreach ($operations as $o) {
-            $html .= '<div id="operation_' . $o['id'] . '">';
-            $html .= '<table class="noborder operationTable" width="100%">';
-
-            $html .= '<tr class="liste_titre"><td>' . $o['title'] . '</td></tr>';
-
-            if (isset($o['description']) && $o['description']) {
-                $html .= '<tr><td><div class="alert alert-info">' . $o['description'] . '</div></td></tr>';
-            }
-
-            if (isset($o['warning']) && $o['warning']) {
-                $html .= '<tr><td><div class="alert alert-warning">' . $o['warning'] . '</div></td></tr>';
-            }
-
-            if (isset($o['options']) && count($o['options'])) {
-                $html .= '<tr><td>';
-                $html .= '<form id="process_' . $this->id . '_operation_' . $o['id'] . '_options_form">';
-                foreach ($o['options'] as $option) {
-                    $html .= '<div class="formRow">';
-                    $html .= '<div class="formLabel">' . $option['label'] . ': </div>';
-                    $html .= '<div class="formInput">';
-                    $defVal = (isset($option['default_value']) ? $option['default_value'] : '');
-                    switch ($option['type']) {
-                        case 'text':
-                            $html .= '<input type="text" name="' . $option['name'] . '" value="' . $defVal . '" style="width: 350px"/>';
-                            break;
-
-                        case 'select':
-                            $html .= '<select name="' . $option['name'] . '" style="width: 350px">';
-                            foreach ($option['values'] as $value) {
-                                $html .= '<option name="' . $value['id'] . '">' . $value['label'] . '</option>';
-                            }
-                            $html .= '</select>';
-                            break;
-
-                        case 'switch':
-                            $html .= '<select class="switch" name="' . $option['name'] . '">';
-                            $html .= '<option value="1"' . ((int) $defVal ? ' selected' : '') . '>OUI</option>';
-                            $html .= '<option value="0"' . (!(int) $defVal ? ' selected' : '') . '>NON</option>';
-                            $html .= '</select>';
-                            break;
-                    }
-                    $html .= '</div>';
-                    $html .= '</div>';
-                }
-                $html .= '</form>';
-                $html .= '</td></tr>';
-
+        global $db;
+        $bdb = new BimpDb($db);
+        $processes = self::getListData($bdb);
+        $html = '';
+        if (count($processes)) {
+            foreach ($processes as $process) {
                 $html .= '<tr>';
-                $html .= '<td>';
-                $html .= '<div id="operation_' . $o['id'] . '_resultContainer" style="display: none"></div>';
+                $html .= '<td width="5%" style="text-align: center"><strong>' . $process['id'] . '</<strong></td>';
+                $html .= '<td width="25%">';
+                $html .= '<a href="' . DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $process['id'] . '">';
+                $html .= $process['title'] . '</a></td>';
+                $html .= '<td width="55%">' . $process['description'] . '</td>';
+                $html .= '<td width="5%" style="text-align: center">' . self::$types[$process['type']] . '</td>';
+                $html .= '<td width="5%" style="text-align: center">';
+                if ((int) $process['active']) {
+                    $html .= '<span class="success">activé</span>';
+                } else {
+                    $html .= '<span class="danger">désactivé</span>';
+                }
+                $html .= '</td>';
+                $html .= '<td width="5%">';
+                $html .= '<a class="button" href="' . DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $process['id'] . '">Afficher</a>';
                 $html .= '</td>';
                 $html .= '</tr>';
-
-                $html .= '<tr><td>';
-                $html .= '<div class="formSubmit">';
-                $html .= '<span class="button" onclick="initProcessOperation($(this), ' . $this->id . ', ' . $o['id'] . ')">Exécuter</span>';
-                $html .= '</div>';
-                $html .= '</td></tr>';
             }
-
-            $html .= '</table>';
-            $html .= '</div>';
+        } else {
+            $html .= '<tr>';
+            $html .= '<td>';
+            $html .= '<p class="alert alert-info">Aucun processus enregistré</p>';
+            $html .= '</td>';
+            $html .= '</tr>';
         }
-
-        $html .= '</div>';
-        $html .= '</div>';
-
         return $html;
     }
 }

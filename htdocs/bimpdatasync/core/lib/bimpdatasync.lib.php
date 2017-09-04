@@ -67,6 +67,11 @@ function process_prepare_head($objsoc)
     $head[$h][1] = $langs->trans("Options");
     $head[$h][2] = 'options';
     $h++;
+    
+    $head[$h][0] = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $objsoc->id . '&tab=matching';
+    $head[$h][1] = $langs->trans("Corresponcances");
+    $head[$h][2] = 'matching';
+    $h++;
 
     $head[$h][0] = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $objsoc->id . '&tab=triggers';
     $head[$h][1] = $langs->trans("Triggers");

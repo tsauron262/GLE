@@ -30,6 +30,26 @@ select.switch {
     width: 100%;
 }
 
+.formRow .inputDesc {
+    padding-left: 25%;
+}
+
+.formRow .inputDesc p{
+    font-size: 12px;
+    font-style: italic;
+    color: #787878;
+    margin: 8px 0;
+    padding-left: 15px;
+}
+
+.inputHelp {
+    display: block;
+    margin: 8px 0 0;
+    font-size: 12px;
+    font-style: italic;
+    color: #787878;
+}
+
 .formSwitch input {
     margin: 0 5px;
 }
@@ -60,6 +80,10 @@ select.switch {
 }
 
 /*Listes*/
+.objectListTable table {
+    border: none;
+    box-shadow: none;
+}
 .objectListTable thead tr th {
     padding: 10px 6px;
     margin-bottom: 8px;
@@ -133,7 +157,77 @@ select.switch {
 
 /*Opérations */
 
+.operationTable {
+    border: 1px solid #C8C8C8!important;
+}
 .operationTable .alert {
-    margin: 0 30px;
+    margin: 5px 30px;
     padding: 10px 15px;
+}
+
+#debugContainer {
+    background-color: #fafafa;
+    border: 1px solid #dcdcdc;
+    margin: 15px 0;
+    padding: 0 15px 15px;
+}
+/*Sections dépliables*/
+
+.foldable_section .foldable_section_caption {
+    margin-top: 15px;
+    padding: 8px 15px;
+
+    background: #f9f9f9; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f9f9f9 1%, #e5e5e5 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #f9f9f9 1%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #f9f9f9 1%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+
+    border: 1px solid #B4B4B4;
+    font-size: 12px;
+    font-weight: bold;
+    color: #292964;
+    cursor: pointer;
+}
+
+.foldable_section .foldable_section_caption:hover {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ffffff+1,f2f2f2+100 */
+    background: #ffffff; /* Old browsers */
+    background: -moz-linear-gradient(top,  #ffffff 1%, #f2f2f2 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top,  #ffffff 1%,#f2f2f2 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom,  #ffffff 1%,#f2f2f2 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f2f2f2',GradientType=0 ); /* IE6-9 */
+
+}
+
+.foldable_section > .foldable_section_caption:after {
+    font-family: 'FontAwesome';
+    margin-right: 10px;
+    float: right;
+    font-size: 14px;
+}
+
+.foldable_section.closed > .foldable_section_caption:after {
+    content: '\f0d7';
+}
+
+.foldable_section.open > .foldable_section_caption:after {
+    content: '\f0d8';
+}
+
+.foldable_section.closed > .foldable_section_content {
+    display: none;
+}
+
+.foldable_section.open > .foldable_section_content {
+    display: block;
+}
+
+.foldable_section .foldable_section_content {
+    margin-left: 15px;
+    margin-top: 15px;
+
+    padding-left: 15px;
+
+    border-left: 1px dotted #B4B4B4;
 }

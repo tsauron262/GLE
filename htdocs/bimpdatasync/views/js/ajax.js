@@ -21,6 +21,7 @@ function loadObjectForm(object_name, $container, id_object, id_parent) {
         if (typeof (result.html) !== 'undefined') {
             $container.html(result.html).slideDown(250);
             $('#' + object_name + '_closeFormButton').show();
+            setFormEvents();
         }
     }, function (result) {
         bimp_display_msg('Echec du chargement du formulaire', $container, 'danger');
@@ -88,14 +89,8 @@ function reloadObjectsList(object_name) {
     var $resultContainer = $('#' + object_name + '_listResultContainer');
     var id_parent_object = parseInt($('#' + object_name + '_id_parent').val());
 
-    if (!id_parent_object) {
-        var msg = 'Impossible de recharger la liste';
-        if (typeof (object_labels.name_plur) !== 'undefined') {
-            msg += ' des ' + object_labels.name_plur;
-        }
-        msg += '. ID de l\'objet parent absent';
-        bimp_display_msg(msg, $resultContainer, 'danger');
-        return;
+    if ((typeof (id_parent_object) === 'undefined') || !id_parent_object) {
+        id_parent_object = 0;
     }
 
     var data = {
@@ -309,3 +304,90 @@ function saveObjectAssociations(id_object, object_name, association, $button) {
         $button.removeClass('disabled');
     });
 }
+
+function toggleInputDisplay($container, $input) {
+    var input_val = $input.val();
+    var show_values = $container.data('show_values');
+    var hide_values = $container.data('hide_values');
+    var show = false;
+    if (show_values) {
+        if (typeof (show_values) === 'object') {
+            for (i in show_values) {
+                if (input_val == show_values[i]) {
+                    show = true;
+                    break;
+                }
+            }
+        } else {
+            if (input_val == show_values) {
+                show = true;
+            }
+        }
+    } else {
+        if (hide_values !== 'undefined') {
+            show = true;
+            if (typeof (hide_values) === 'object') {
+                for (i in hide_values) {
+                    if (input_val == hide_values[i]) {
+                        show = false;
+                        break;
+                    }
+                }
+            } else {
+                if (input_val == hide_values) {
+                    show = false;
+                }
+            }
+        }
+    }
+    if (show) {
+        $container.stop().slideDown(250);
+    } else {
+        $container.stop().slideUp(250);
+    }
+}
+
+function resetInputDisplay($form) {
+    $form.find('.display_if').each(function () {
+        var $display_if = $(this);
+        var input_name = $display_if.data('input_name');
+        if (input_name) {
+            var $input = $form.find('[name=' + input_name + ']');
+            if ($input.length) {
+                if ($input.attr('type') === 'radio') {
+                    $input = $form.find('input[name=' + input_name + ']:checked');
+                }
+                toggleInputDisplay($display_if, $input);
+            }
+        }
+    });
+}
+
+function setFormEvents() {
+    // Gestion automatique des affichages d'options supplémentaires lorsque certains input prennent certaines valeurs.
+    // placer les champs optionnels dans un container avec class="display_if". 
+    // Et Attributs: 
+    // data-input_name=nom_input_a_checker (string)
+    // data-show_values=valeur(s)_pour_afficher_container (string ou objet)
+    // data-hide_values=valeur(s)_pour_masquer_container (string ou objet)
+    $('.objectForm').each(function () {
+        var $form = $(this);
+        $form.find('.display_if').each(function () {
+            var $container = $(this);
+            var input_name = $container.data('input_name');
+            if (input_name) {
+                var $input = $form.find('[name=' + input_name + ']');
+                if ($input.length) {
+                    $input.change(function () {
+                        toggleInputDisplay($container, $(this));
+                    });
+                }
+            }
+        });
+        resetInputDisplay($form);
+    });
+}
+
+$(document).ready(function () {
+    setFormEvents();
+});

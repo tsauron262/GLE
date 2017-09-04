@@ -19,6 +19,15 @@ class BDS_SyncProcess extends BDS_Process
 
     // Actions SOAP:
 
+    public function __construct(\BDSProcess $processDefinition, $user, $params = null)
+    {
+        if (isset($params['ext_debug_mod']) && $params['ext_debug_mod']) {
+            if ((isset($params['debug_mod']) && $params['debug_mod']) || self::$debug_mod)
+                self::$ext_debug_mod = true;
+        }
+        parent::__construct($processDefinition, $user, $params);
+    }
+
     protected function soapClientInit()
     {
         if (!$this->parameters_ok) {
@@ -33,7 +42,7 @@ class BDS_SyncProcess extends BDS_Process
 
         $this->soap_client = new nusoap_client($this->parameters['ws_url']);
         if ($this->soap_client) {
-            $this->soap_client->soap_defencoding = 'UTF-8';
+//            $this->soap_client->soap_defencoding = 'UTF-8';
             return true;
         }
 
@@ -55,11 +64,10 @@ class BDS_SyncProcess extends BDS_Process
         $parameters['params'] = $params;
 
         if (self::$debug_mod) {
-            echo '<h2>Soap Call méthode: "' . $ws_method . '"</h2>';
-            echo 'Paramètres: <pre>';
+            echo '<h3>Soap Call méthode: "' . $ws_method . '"</h3>';
+            echo '<h4>Paramètres: </h4><pre>';
             print_r($parameters);
             echo '</pre>';
-//            exit;
         }
 
         return $this->soap_client->call($ws_method, $parameters);
@@ -76,43 +84,41 @@ class BDS_SyncProcess extends BDS_Process
 
         if (self::$debug_mod) {
             if (self::$ext_debug_mod) {
-                echo 'SOAP CLIENT: <pre>';
+                echo '<h4>SOAP CLIENT: </h4><pre>';
                 print_r($this->soap_client);
                 echo '</pre>';
-            }
-
-            if (self::$ext_debug_mod) {
                 return;
             } else {
-                echo 'Réponse: ';
+                echo '<h4>Réponse: </h4>';
                 if (is_array($response)) {
                     echo '<pre>';
                     print_r($response);
                     echo '</pre>';
-//                    exit;
                 } else {
                     echo $response . '<br/>';
                 }
             }
         }
 
-        if (is_null($response)) {
-            $msg = 'Echec de l\'export';
-            $this->Error($msg);
-        } elseif (!isset($response['success']) || !$response['success']) {
-            $msg = 'Echec de l\'export<br/>';
-            if (isset($response['errors'])) {
-                $nErrors = count($response['errors']);
-                if ($nErrors) {
-                    $msg .= $nErrors . 'erreur' . (($nErrors > 1) ? 's' : '') . ':<br/>';
-                    $msg .= '<ul>';
-                    foreach ($response['errors'] as $error) {
-                        $msg .= '<li>' . $error . '</li>';
+        if (!self::$ext_debug_mod) {
+            if (is_null($response)) {
+                $msg = 'Echec de l\'export';
+                $this->Error($msg);
+            } elseif (!isset($response['success']) || !$response['success']) {
+                $msg = 'Echec de l\'export<br/>';
+                if (isset($response['errors'])) {
+                    $nErrors = count($response['errors']);
+                    if ($nErrors) {
+                        $msg .= $nErrors . 'erreur' . (($nErrors > 1) ? 's' : '') . ':<br/>';
+                        $msg .= '<ul>';
+                        foreach ($response['errors'] as $error) {
+                            $msg .= '<li>' . $error . '</li>';
+                        }
+                        $msg .= '</ul>';
                     }
-                    $msg .= '</ul>';
                 }
+                $this->Error($msg);
             }
-            $this->Error($msg);
         }
 
         if (isset($response['return']) && count($response['return'])) {
@@ -126,7 +132,6 @@ class BDS_SyncProcess extends BDS_Process
                 }
             }
         }
-//        exit;
     }
 
     protected function soapDeleteObjects($objects, $ext_process_name)
@@ -140,43 +145,40 @@ class BDS_SyncProcess extends BDS_Process
 
         if (self::$debug_mod) {
             if (self::$ext_debug_mod) {
-                echo 'SOAP CLIENT: <pre>';
-                print_r($this->soap_client);
+                echo '<h4>[DEBUG MOD EXTERNE] Réponse: </h4><pre>';
+                print_r($this->soap_client['responseData']);
                 echo '</pre>';
-            }
-
-            if (self::$ext_debug_mod) {
-                return;
             } else {
-                echo 'Réponse: ';
+                echo '<h4>Réponse: </h4>';
                 if (is_array($response)) {
                     echo '<pre>';
                     print_r($response);
                     echo '</pre>';
-//                    exit;
                 } else {
                     echo $response . '<br/>';
                 }
             }
         }
 
-        if (is_null($response)) {
-            $msg = 'Echec de la requête de suppression externe (aucune réponse reçue)';
-            $this->Error($msg);
-        } elseif (!isset($response['success']) || !$response['success']) {
-            $msg = 'Echec de la suppression externe<br/>';
-            if (isset($response['errors'])) {
-                $nErrors = count($response['errors']);
-                if ($nErrors) {
-                    $msg .= $nErrors . 'erreur' . (($nErrors > 1) ? 's' : '') . ':<br/>';
-                    $msg .= '<ul>';
-                    foreach ($response['errors'] as $error) {
-                        $msg .= '<li>' . $error . '</li>';
+        if (!self::$ext_debug_mod) {
+            if (is_null($response)) {
+                $msg = 'Echec de la requête de suppression externe (aucune réponse reçue)';
+                $this->Error($msg);
+            } elseif (!isset($response['success']) || !$response['success']) {
+                $msg = 'Echec de la suppression externe<br/>';
+                if (isset($response['errors'])) {
+                    $nErrors = count($response['errors']);
+                    if ($nErrors) {
+                        $msg .= $nErrors . 'erreur' . (($nErrors > 1) ? 's' : '') . ':<br/>';
+                        $msg .= '<ul>';
+                        foreach ($response['errors'] as $error) {
+                            $msg .= '<li>' . $error . '</li>';
+                        }
+                        $msg .= '</ul>';
                     }
-                    $msg .= '</ul>';
                 }
+                $this->Error($msg);
             }
-            $this->Error($msg);
         }
 
         if (isset($response['return']) && count($response['return'])) {
@@ -394,9 +396,9 @@ class BDS_SyncProcess extends BDS_Process
 
         if (method_exists($this, $method)) {
             foreach ($objects_ids as $id_object) {
-                
+
                 $data = $this->{$method}($id_object);
-                
+
                 if (!is_null($data)) {
                     $sync_data = new BDS_SyncData();
                     $sync_data->setLocValues((int) $this->processDefinition->id, $object_name, $id_object);
@@ -608,6 +610,69 @@ class BDS_SyncProcess extends BDS_Process
         if (isset($result['objects']) && count($result['objects'])) {
             $this->processObjectsExportResult($ext_id_process, $result['objects']);
         }
+    }
+
+    protected function checkOptionsForObjectsExport($object_name, $objectsIds)
+    {
+        $export_mod = 'all';
+        if (isset($this->options['export_mod']) && $this->options['export_mod']) {
+            $export_mod = $this->options['export_mod'];
+        }
+
+        $export_fail = false;
+        if (isset($this->options['allow_export_fail']) && $this->options['allow_export_fail']) {
+            $export_fail = (int) $this->options['allow_export_fail'];
+        }
+        $import_fail = false;
+        if (isset($this->options['allow_import_fail']) && $this->options['allow_import_fail']) {
+            $import_fail = (int) $this->options['allow_import_fail'];
+        }
+
+        $sync_objects = BDS_SyncData::getObjectsList($this->db, $this->processDefinition->id, $object_name);
+        
+        $objects = array();
+        $ignored = array();
+
+        foreach ($objectsIds as $id_object) {
+            if (!in_array($id_object, $objects)) {
+                if (array_key_exists((int) $id_object, $sync_objects)) {
+                    if ($export_mod === 'not_sync_only') {
+                        $ignored[$id_object] = 'Déjà synchronisé';
+                        continue;
+                    }
+                    $status = (int) $sync_objects[$id_object]['status'];
+
+                    if ($status !== 0) {
+                        if (in_array($status, array(self::BDS_STATUS_EXPORTING, self::BDS_STATUS_EXPORT_FAIL))) {
+                            if (!$export_fail) {
+                                $ignored[$id_object] = 'Dernier export échoué';
+                                continue;
+                            }
+                        } elseif (in_array($status, array(self::BDS_STATUS_IMPORTING, self::BDS_STATUS_IMPORT_FAIL))) {
+                            if (!$import_fail) {
+                                $ignored[$id_object] = 'Dernier import échoué';
+                                continue;
+                            }
+                        }
+                        BDS_SyncData::updateStatusById($this->db, $sync_objects[$id_object]['id_sync_data'], self::BDS_STATUS_SYNCHRONISED);
+                    }
+                } elseif ($export_mod === 'sync_only') {
+                    $ignored[$id_object] = 'Non synchronisé';
+                    continue;
+                }
+
+                $objects[] = (int) $id_object;
+            }
+        }
+
+        if (self::$debug_mod) {
+            echo '<h4>Objets "' . $object_name . '" ignorés de l\'export</h4>';
+            echo '<pre>';
+            print_r($ignored);
+            echo '</pre>';
+        }
+
+        return $objects;
     }
 
     // Traitement des objets Dolibarr:

@@ -1,6 +1,8 @@
 $(window).on("load", function () {
+    activeScroll = false;
+    
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
-    if ($("div.tmenudiv").is(':visible')) {
+    if ($("div.tmenudiv").is(':visible') && activeScroll) {
         $(window).resize(function () {
             traiteScroll(heightDif);
         });

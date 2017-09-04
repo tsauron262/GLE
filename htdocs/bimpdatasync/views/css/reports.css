@@ -1,0 +1,72 @@
+#reportContent,
+#searchResultContent {
+    padding-top: 20px;
+}
+
+#reportContent .deleteReportButton {
+    float: right;
+    margin: 20px;
+}
+
+.reportRowsFilters {
+    padding: 10px;
+}
+
+.reportRowsFilters {
+    width: 250px;
+}
+
+.reportTableContainer table {
+    text-align: left;
+    border: none;
+    box-shadow: none;
+    padding: 10px 15px;
+}
+
+.reportTableContainer table thead tr th {
+    padding: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #292964;
+    color: #292964;
+    text-align: left;
+}
+
+.reportRowsContainer {
+    max-height: 450px;
+    overflow-y: auto;
+}
+.reportRowsContainer table {
+    padding: 0;
+    border-collapse: collapse;
+}
+
+.reportRowsContainer .reportRow {
+    border: none!important;
+}
+.reportRowsContainer .reportRow.even {
+    background-color: #FAFAFA;
+    border: none!important;
+}
+.reportRowsContainer .reportRow td {
+    padding: 8px;
+    border: none!important;
+}
+.reportRowsContainer .reportRow .rowStatus {
+    width: 10%;
+}
+
+.reportRowsContainer .reportRow .rowTime {
+    width: 10%;
+}
+
+.reportRowsContainer .reportRow .rowObject {
+    width: 20%;
+}
+
+.reportRowsContainer .reportRow .rowReference {
+    width: 20%;
+}
+
+.reportRowsContainer .reportRow .rowMessage {
+    width: 40%;
+}

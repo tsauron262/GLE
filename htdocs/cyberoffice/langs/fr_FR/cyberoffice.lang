@@ -1,0 +1,20 @@
+﻿# Language file - fr_FR - Cyberoffice
+CHARSET=UTF-8
+OrderValidatedInDolibarrFromCyberoffice=Commande %s validée depuis Cyberoffice
+Name=Nom
+Value=Valeur
+ShopAddress=Adresse Boutique
+StockSynchronization=Synchronisation du stock
+InvoiceSynchronization=Synchronisation de facture
+Save=Enregistrer
+cyberofficeSetup=Configuration du module CyberOffice
+shoplist=Liste des boutiques
+Action=Action
+Synchronization with Prestashop=Synchronisation de Prestashop vers Dolibarr ERP/CRM
+cyberoffice=CyberOffice
+genererlacle=Cliquer ici pour générer la clé
+Association mode de reglement compte bancaire=Association mode de règlement <=> compte bancaire
+infocyberpaiement=Remarque : Par défaut un compte bancaire par mode de réglement sera créé
+cyberbank=Id banque
+banklabel=Banque
+Synchronization from Prestashop to Dolibarr ERP/CRM=Synchronisation de Prestashop vers Dolibarr ERP/CRM

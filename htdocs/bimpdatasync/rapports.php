@@ -1,0 +1,302 @@
+<?php
+require_once '../main.inc.php';
+require_once __DIR__ . '/BDS_Lib.php';
+
+llxHeader();
+
+if (isset($_GET['deleteAllReports']) && $_GET['deleteAllReports']) {
+    BDS_Report::deleteAll();
+}
+if (isset($_GET['deleteReport']) && $_GET['deleteReport']) {
+    BDS_Report::deleteRef($_GET['deleteReport']);
+}
+
+$searchErrors = array();
+$searchDateFrom = 0;
+$searchDateTo = 0;
+
+if (isset($_POST['searchSubmit'])) {
+    if (!$_POST['searchIdObject']) {
+        $searchErrors[] = 'Veuillez indiquer un ID pour l\'objet à rechercher';
+    } elseif (!preg_match('/^\d+$/', $_POST['searchIdObject'])) {
+        $searchErrors[] = 'L\'ID de l\'objet à rechercher doit être un nombre entier positif ' . $_POST['searchIdObject'];
+    }
+    if ($_POST['searchDateFrom']) {
+        $searchDateFrom = $_POST['searchDateFromyear'] . '-' . $_POST['searchDateFrommonth'] . '-' . $_POST['searchDateFromday'];
+        if ($_POST['searchDateFromhour']) {
+            $searchDateTo .= $_POST['searchDateFromhour'];
+        } else {
+            $searchDateTo .= '00';
+        }
+        if ($_POST['searchDateFrommin']) {
+            $searchDateTo .= $_POST['searchDateFrommin'];
+        } else {
+            $searchDateTo .= '00';
+        }
+        $searchDateTo .= '00';
+    } else {
+        $searchDateFrom = '00000000-000000';
+    }
+    if ($_POST['searchDateTo']) {
+        $searchDateTo = $_POST['searchDateToyear'] . $_POST['searchDateTomonth'] . $_POST['searchDateToday'];
+        if ($_POST['searchDateTohour']) {
+            $searchDateTo .= $_POST['searchDateTohour'];
+        } else {
+            $searchDateTo .= '00';
+        }
+        if ($_POST['searchDateTomin']) {
+            $searchDateTo .= $_POST['searchDateTomin'];
+        } else {
+            $searchDateTo .= '00';
+        }
+        $searchDateTo .= '00';
+    } else {
+        $searchDateTo = date('Ymd-His');
+    }
+
+    if ($searchDateFrom > $searchDateTo) {
+        $searchErrors[] = 'La date de début de la recherche doit être inférieure ou égale à la date de fin';
+    }
+}
+
+print load_fiche_titre('Repports des processus d\'import / export / synchronisation des données', '', 'title_generic.png');
+
+$reports = BDS_Report::getReportsList();
+$processes = BDSProcess::getProcessesQuery();
+$OperationsTypes = array(
+    array(
+        'name'  => 'operations',
+        'label' => 'Opérations manuelles'
+    ),
+    array(
+        'name'  => 'actions',
+        'label' => 'Opérations automatiques'
+    ),
+    array(
+        'name'  => 'requests',
+        'label' => 'Requêtes entrantes'
+    ),
+);
+
+global $db;
+$bdb = new BimpDb($db);
+$form = new Form($db);
+$DT = new DateTime();
+$dateTo = $DT->format('Y-m-d H:i');
+$DT->sub(new DateInterval('P1D'));
+$dateFrom = $DT->format('Y-m-d');
+?>
+
+<link type="text/css" rel="stylesheet" href="./views/css/styles.css"/>
+<link type="text/css" rel="stylesheet" href="./views/css/reports.css"/>
+<script type="text/javascript" src="./views/js/reports.js"></script>
+
+<div class="fichecenter">
+   <div class="fichehalfleft">
+      <table  class="noborder" width="100%">
+         <thead>
+            <tr class="liste_titre">
+               <td class="liste_titre">
+                  Afficher un rapport
+               </td>
+            </tr>
+         </thead>
+         <tbody>
+            <tr>
+               <td>
+                  <form method="post" action="<?php DOL_URL_ROOT . '/bimpdatasync/rapport.php' ?>">
+                     <div class="formRow">
+                        <div class="formLabel">
+                           Type de processus:
+                        </div>
+                        <div class="formInput">
+                           <select class="fullwidth" id="processesToDisplay" name="processesToDisplay">
+                              <option value="all">Tous les processus</option>
+                              <?php
+                              foreach ($processes as $process) {
+                                  echo '<option value="' . $process['id'] . '">' . $process['name'] . '</option>';
+                              }
+                              ?>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="formRow">
+                        <div class="formLabel">
+                           Type d'opération:
+                        </div>
+                        <div class="formInput">
+                           <select class="fullwidth" id="typesToDisplay" name="typesToDisplay">
+                              <option value="all">Tous les types d'opération</option>
+                              <?php
+                              foreach ($OperationsTypes as $opType) {
+                                  echo '<option value="' . $opType['name'] . '">' . $opType['label'] . '</option>';
+                              }
+                              ?>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="formRow">
+                        <div class="formLabel">
+                           Rapport à afficher:
+                        </div>
+                        <div class="formInput">
+                           <select class="fullwidth" id="reportToLoad" name="reportToLoad">
+                               <?php
+                               foreach ($reports as $report) {
+                                   echo '<option value="' . $report['ref'] . '"';
+                                   echo ' data-id_process="' . $report['id_process'] . '"';
+                                   echo ' data-nerrors="' . $report['nErrors'] . '"';
+                                   echo ' data-nalerts="' . $report['nAlerts'] . '"';
+                                   echo ' data-type="' . $report['type'] . '"';
+                                   echo '>';
+                                   echo $report['name'] . '</option>';
+                               }
+                               ?>
+                           </select>
+                        </div>
+                     </div>
+                     <div class="formSubmit">
+                        <input class="button" type="submit" value="Charger ce rapport">
+                     </div>
+                  </form>
+               </td>
+            </tr>
+         </tbody>
+      </table>
+   </div>
+   <div class="fichehalfright">
+      <div class="ficheaddleft">
+         <table  class="noborder" width="100%">
+            <thead>
+               <tr class="liste_titre">
+                  <td class="liste_titre">
+                     Recherche
+                  </td>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td>
+                     <form method="post" action="<?php DOL_URL_ROOT . '/bimpdatasync/rapport.php' ?>">
+                        <div class="formRow">
+                           <div class="formLabel">
+                              Type d'objet:
+                           </div>
+                           <div class="formInput">
+                              <select class="fullwidth" id="searchObject" name="searchObject">
+                                  <?php
+                                  foreach (BDS_Report::$objectsLabels as $object => $label) {
+                                      echo '<option value="' . $object . '">' . ucfirst(BDS_Report::getObjectLabel($object)) . '</option>';
+                                  }
+                                  ?>
+                              </select>
+                           </div>
+                        </div>
+                        <div class="formRow">
+                           <div class="formLabel">
+                              ID de l'objet:
+                           </div>
+                           <div class="formInput">
+                              <input type="text" value="" id="searchIdObject" name="searchIdObject"/>
+                           </div>
+                        </div>
+                        <div class="formRow">
+                           <div class="formLabel">
+                              Du:
+                           </div>
+                           <div class="formInput">
+                               <?php $form->select_date($dateFrom, 'searchDateFrom', 1, 1) ?>
+                           </div>
+                        </div>
+                        <div class="formRow">
+                           <div class="formLabel">
+                              Au:
+                           </div>
+                           <div class="formInput">
+                               <?php $form->select_date($dateTo, 'searchDateTo', 1, 1) ?>
+                           </div>
+                        </div>
+                        <?php
+                        if (isset($searchErrors) && count($searchErrors)) {
+                            echo '<div class="alert form-alert alert-danger">';
+                            echo '<ul>';
+                            foreach ($searchErrors as $e) {
+                                echo '<li>' . $e . '</li>';
+                            }
+                            echo '</ul>';
+                            echo '</div>';
+                        }
+                        ?>
+                        <div class="formSubmit">
+                           <input class="button" type="submit" name="searchSubmit" value="Rechercher">
+                        </div>
+                     </form>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+</div>
+
+<div class="fichecenter buttonsContainer">
+   <a class="button delete-button" href="<?php echo DOL_URL_ROOT . '/bimpdatasync/rapports.php?deleteAllReports=1' ?>" style="color: #800">
+      Supprimer tous les rapports
+   </a>
+</div>
+<?php
+if (isset($_POST['searchSubmit'])) {
+    if (!count($searchErrors)) {
+        if (!function_exists('renderObjectNotifications')) {
+            require_once __DIR__ . '/views/render.php';
+        }
+        $data = array();
+        foreach (BDS_Report::getObjectNotifications($_POST['searchObject'], (int) $_POST['searchIdObject'], $searchDateFrom, $searchDateTo) as $file_ref => $rows) {
+            $date = '';
+            if (preg_match('/^(\d{4})(\d{2})(\d{2})\-\d{6}.*$/', $file_ref, $matches)) {
+                $date = $matches[3] . '/' . $matches[2] . '/' . $matches[1];
+                foreach ($rows as $r) {
+                    $row = $r;
+                    $row['date'] = $date;
+                    $row['file_ref'] = $file_ref;
+                    $data[] = $row;
+                }
+            }
+        }
+
+        $title = 'Résultats de recherche pour "' . BDS_Tools::makeObjectName($bdb, $_POST['searchObject'], (int) $_POST['searchIdObject']) . '"';
+        $title .= ' du ' . $_POST['searchDateFrom'] . ' au ' . $_POST['searchDateTo'];
+        echo renderObjectNotifications($data, $title);
+    }
+} else {
+    $report_ref = null;
+    if (isset($_POST['reportToLoad'])) {
+        $report_ref = $_POST['reportToLoad'];
+    } elseif (isset($_GET['reportToLoad'])) {
+        $report_ref = $_GET['reportToLoad'];
+    }
+    if (!is_null($report_ref)) {
+        echo '<div class="fichecenter">';
+        if (file_exists(__DIR__ . '/reports/' . $report_ref . '.csv')) {
+            $report = new BDS_Report(null, null, $report_ref);
+
+            if (!function_exists('renderReportContent')) {
+                require_once __DIR__ . '/views/render.php';
+            }
+
+            echo renderReportContent($report);
+        } else {
+            echo '<p class="error">';
+            echo 'Le fichier correspondant à ce rapport semble ne pas exister';
+            echo '</p>';
+        }
+
+        echo '</div>';
+    }
+}
+?>
+
+
+<?php
+llxFooter();
+?>

@@ -31,7 +31,7 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
 
-dol_syslog("Call Dolibarr webservices interfaces");
+dol_syslog("Call Dolibarr webservices interfaces", 3);
 
 $langs->load("main");
 

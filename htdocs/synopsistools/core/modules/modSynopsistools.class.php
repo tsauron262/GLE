@@ -261,7 +261,8 @@ class modSynopsistools extends DolibarrModules
         
 
         $this->module_parts = array(
-            'hooks' => array('printTopRightMenu', 'toprightmenu', 'printSearchForm')  // Set here all hooks context you want to support
+            'hooks' => array('printTopRightMenu', 'toprightmenu', 'printSearchForm'),  // Set here all hooks context you want to support
+            'societe' => 'synopsistools/core/modules/societe/'
         );
     }
    /**

@@ -1827,7 +1827,7 @@ class Societe extends CommonObject
      */
     function getNomUrl($withpicto=0, $option='', $maxlen=0, $notooltip=0, $save_lastsearch_value=-1)
     {
-        global $conf, $langs, $hookmanager;
+        global $conf, $langs/*mod drsi, $hookmanager fmoddrsi*/;
 
         if (! empty($conf->dol_no_mouse_hover)) $notooltip=1;   // Force disable tooltips
 

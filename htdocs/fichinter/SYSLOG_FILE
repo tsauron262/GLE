@@ -1,0 +1,10 @@
+[04-Sep-2017 12:15:31 Europe/Paris] PHP Fatal error:  Uncaught Error: Call to undefined method Fichinter::generateDocument() in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/actions_builddoc.inc.php:86
+Stack trace:
+#0 /Users/tommy/Work/Netbeans/gle-6/htdocs/fichinter/card.php(758): include()
+#1 {main}
+  thrown in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/actions_builddoc.inc.php on line 86
+[04-Sep-2017 12:16:09 Europe/Paris] PHP Fatal error:  Uncaught Error: Call to undefined method Fichinter::generateDocument() in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/actions_builddoc.inc.php:86
+Stack trace:
+#0 /Users/tommy/Work/Netbeans/gle-6/htdocs/fichinter/card.php(758): include()
+#1 {main}
+  thrown in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/actions_builddoc.inc.php on line 86

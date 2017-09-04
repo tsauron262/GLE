@@ -381,7 +381,7 @@ if ($selectedFile) {
         . '$sigdiv.jSignature("reset");'
         . '});'
         . '});'
-        . '</script>';
+        . '</script></div>';
     }
 
 
@@ -394,15 +394,23 @@ if ($selectedFile) {
         if (!is_dir($dirTemp))
             mkdir($dirTemp);
 //        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -density 300 "' . $dirTemp . $save_to . '"';
-        $format = "png";
-        $commande = 'pdftoppm -' . $format . ' -r 100  "' . $dir . "/" . $fileToShow . '"   "' . $dirTemp . $save_to . '"';
-
+        $format = "ppm";
+        $format2 = "png";
+        $adressScript = "/opt/";
+        $adressScript2 = "/Applications/MAMP/Library/bin/";
+        $prefixePage = "00000";
+        
+        $commande = $adressScript.'pdftoppm '   . ' -r 100  "' . $dir . "/" . $fileToShow . '"   "' . $dirTemp . $save_to . '"';
         exec($commande, $output, $return_var);
 
-
         $i = 1;
-        while (is_file($dirTemp . $save_to . "-" . $i . "." . $format)) {
-            $tabFile[] = $save_to . "-" . $i . "." . $format;
+        while (is_file($dirTemp . $save_to . "-".$prefixePage . $i . "." . $format)) {
+            $file1 = $save_to . "-".$prefixePage . $i . "." . $format;
+            $file2 = $save_to . "-".$prefixePage . $i . "." . $format2;
+            $commande2 = $adressScript2."convert ".$dirTemp."/".$file1 . " ".$dirTemp."/".$file2;
+     
+            exec($commande2, $output, $return_var2);
+            $tabFile[] = $file2;
             $i++;
         }
         if (count($tabFile) == 0)

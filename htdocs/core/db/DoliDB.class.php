@@ -116,14 +116,14 @@ abstract class DoliDB implements Database
 			{
 				$this->transaction_opened++;
 				dol_syslog("BEGIN Transaction",LOG_DEBUG);
-				dol_syslog('',0,1);
+				/*mod drsi dol_syslog('',0,1);  fmod drsi*/
 			}
 			return $ret;
 		}
 		else
 		{
 			$this->transaction_opened++;
-			dol_syslog('',0,1);
+			/*mod drsi dol_syslog('',0,1);  fmod drsi*/
 			return 1;
 		}
 	}
@@ -136,7 +136,7 @@ abstract class DoliDB implements Database
 	 */
 	function commit($log='')
 	{
-		dol_syslog('',0,-1);
+		/*mod drsi dol_syslog('',0,-1);  fmoddrsi*/
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("COMMIT");
@@ -166,7 +166,7 @@ abstract class DoliDB implements Database
 	 */
 	function rollback($log='')
 	{
-		dol_syslog('',0,-1);
+		/*mod drsi dol_syslog('',0,-1); fmod drsi*/
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("ROLLBACK");

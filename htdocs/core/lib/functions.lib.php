@@ -521,9 +521,7 @@ function dol_include_once($relpath, $classname='')
 {
 	global $conf,$langs,$user,$mysoc;   // Do not remove this. They must be defined for files we include. Other globals var must be retreived with $GLOBALS['var']
 
-	/* mod drsi $fullpath = dol_buildpath($relpath);*/
-	$fullpath = (stripos($relpath, DOL_DOCUMENT_ROOT) === false ? dol_buildpath($relpath) : $relpath);
-        /*fmoddrsi*/
+	$fullpath = dol_buildpath($relpath);
 
 	if (!file_exists($fullpath)) {
 		dol_syslog('functions::dol_include_once Tried to load unexisting file: '.$relpath, LOG_ERR);

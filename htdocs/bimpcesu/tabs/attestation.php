@@ -28,14 +28,22 @@ require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 if (!empty($conf->facture->enabled))
     require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 
+
+
+
+
+
+$MAXLIST = 100;
 $langs->load("companies");
 $langs->load("other");
 
 // Security check
-$socid = GETPOST('id', 'int');
+$socid = GETPOST('socid', 'int');
+$action = GETPOST('action', 'alpha');
 if ($user->societe_id)
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'societe', $socid, '&societe');
@@ -61,7 +69,7 @@ if ($reshook < 0)
  * 	View
  */
 
-$form = new Form($b);
+$form = new Form($db);
 
 $title = $langs->trans("ThirdParty");
 if (!empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/', $conf->global->MAIN_HTML_TITLE) && $object->name)
@@ -125,48 +133,57 @@ if ($socid > 0) {
             $var = true;
             $num = $db->num_rows($resql);
             $i = 0;
-            print '<table class="noborder" width="100%">';
+            if ($num > 0) {
+                print '<table class="noborder" width="100%">';
 
-            print '<tr class="liste_titre">';
-            print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernières factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
-            print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
-            print '</tr></table></td>';
-            print '</tr>';
-
-            $objp = $db->fetch_object($resql);
-            $var = !$var;
-            print "<tr " . $bc[$var] . ">";
-            print '<td class="nowrap">';
-            $facturestatic->id = $objp->facid;
-            $facturestatic->ref = $objp->facnumber;
-            $facturestatic->type = $objp->type;
-            $facturestatic->total_ht = $objp->total_ht;
-            $facturestatic->total_tva = $objp->total_tva;
-            $facturestatic->total_ttc = $objp->total_ttc;
-            print $facturestatic->getNomUrl(1);
-            print '</td>';
-            if ($objp->df > 0) {
-                print '<td align="right" width="80px">' . dol_print_date($db->jdate($objp->df), 'day') . '</td>';
-            } else {
-                print '<td align="right"><b>!!!</b></td>';
+                print '<tr class="liste_titre">';
+                print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernieres factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
+                print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
+                print '</tr></table></td>';
+                print '</tr>';
+                
             }
-            print '<td align="right" style="min-width: 60px">';
-            print price($objp->total_ht);
-            print '</td>';
+            else
+                echo "Pas de factures client";
 
-            if (!empty($conf->global->MAIN_SHOW_PRICE_WITH_TAX_IN_SUMMARIES)) {
-                print '<td align="right" style="min-width: 60px">';
-                print price($objp->total_ttc);
+            while ($i < $num && $i < $MAXLIST) {
+                $objp = $db->fetch_object($resql);
+                $var = !$var;
+                print "<tr " . $bc[$var] . ">";
+                print '<td class="nowrap">';
+                $facturestatic->id = $objp->facid;
+                $facturestatic->ref = $objp->facnumber;
+                $facturestatic->type = $objp->type;
+                $facturestatic->total_ht = $objp->total_ht;
+                $facturestatic->total_tva = $objp->total_tva;
+                $facturestatic->total_ttc = $objp->total_ttc;
+                print $facturestatic->getNomUrl(1);
                 print '</td>';
-            }
+                if ($objp->df > 0) {
+                    print '<td align="right" width="80px">' . dol_print_date($db->jdate($objp->df), 'day') . '</td>';
+                } else {
+                    print '<td align="right"><b>!!!</b></td>';
+                }
+                print '<td align="right" style="min-width: 60px">';
+                print price($objp->total_ht);
+                print '</td>';
 
-            print '<td align="right" class="nowrap" style="min-width: 60px">' . ($facturestatic->LibStatut($objp->paye, $objp->statut, 5, $objp->am)) . '</td>';
-            print "</tr>\n";
-            $i++;
-            $db->free($resql);
+                if (!empty($conf->global->MAIN_SHOW_PRICE_WITH_TAX_IN_SUMMARIES)) {
+                    print '<td align="right" style="min-width: 60px">';
+                    print price($objp->total_ttc);
+                    print '</td>';
+                }
 
-            if ($num > 0)
-                print "</table>";
+                print '<td align="right" class="nowrap" style="min-width: 60px">' . ($facturestatic->LibStatut($objp->paye, $objp->statut, 5, $objp->am)) . '</td>';
+                print "</tr>\n";
+
+                $i++;
+                }
+                $db->free($resql);
+
+                if ($num > 0)
+                    print "</table>";
+            
         }
         else {
             dol_print_error($db);
@@ -175,6 +192,11 @@ if ($socid > 0) {
 }
 
 //<--- -------------- FACTURE LIST END --------------- --->
+
+
+
+
+
 
 
 
@@ -194,11 +216,6 @@ echo '<br />';
 echo '<br />';
 echo '<br />';
 
-// Orga intervenant
-//print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3">';
-//print '<a href="/htdocs/societe/soc.php?socid='.$conf->global->MAIN_INFO_SOCIETE_NOM.'" >$conf->global->MAIN_INFO_SOCIETE_NOM</a>';
-//print "</td></tr>";
-// Orga intervenant
 print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3">';
 print_r ($conf->global->MAIN_INFO_SOCIETE_NOM);
 print "</td></tr>";
@@ -223,7 +240,6 @@ if ($socid > 0)
     $objsoc = new Societe($db);
     $objsoc->fetch($socid);
 }
-$form = new Form($db);
 if (empty($conf->global->SOCIETE_DISABLE_CONTACTS)) {
     if ($socid > 0) {
         print '<tr><td><label for="socid">' . $langs->trans("Client : ") . '</label></td>';
@@ -232,11 +248,7 @@ if (empty($conf->global->SOCIETE_DISABLE_CONTACTS)) {
         print '</td>';
         print '<input type="hidden" name="socid" id="socid" value="' . $objsoc->id . '">';
         print '</td></tr>';
-    } else {
-        print '<tr><td><label for="socid">' . $langs->trans("Client : ") . '</label></td><td colspan="3" class="maxwidthonsmartphone">';
-        print $form->select_company($socid, 'socid', '', 1);
-        print '</td></tr>';
-    }
+    } 
 }
 
 // Adresse du Client
@@ -246,87 +258,61 @@ print (", ");
 print_r($object->zip);
 print (", ");
 print_r($object->town);
-print "</td></tr>";
+print "</td></tr></table>";
 
 
-
-// Choisir un client
-//$object = new User($db);
-//$form = new Form($db);
-//if (! empty($conf->ldap->enabled)) require_once DOL_DOCUMENT_ROOT.'/core/class/ldap.class.php';
-//print '<tr><td>'.$langs->trans("Client2").'</td>';
-//print '<td>';
-//print $form->select_dolusers($object->fk_user, 'fk_user', 1, array($object->id), 0, '', 0, $conf->global->MAIN_INFO_SOCIETE_NOM, 'maxwidth300');
-//print '</td>';
-//    print "</tr>\n";
-//
-//	if ($conf->salaries->enabled && ! empty($user->rights->salaries->read))
-//	{
-//		$langs->load("salaries");
-//
-//	    // THM
-//	    print '<tr><td>';
-//		$text=$langs->trans("THM");
-//		print $form->textwithpicto($text, $langs->trans("THMDescription"), 1, 'help', 'classthm');
-//	    print '</td>';
-//	    print '<td>';
-//	    print '<input size="8" type="text" name="thm" value="'.GETPOST('thm').'">';
-//	    print '</td>';
-//	    print "</tr>\n";
-//
-//	    // TJM
-//	    print '<tr><td>';
-//		$text=$langs->trans("TJM");
-//		print $form->textwithpicto($text, $langs->trans("TJMDescription"), 1, 'help', 'classtjm');
-//	    print '</td>';
-//	    print '<td>';
-//	    print '<input size="8" type="text" name="tjm" value="'.GETPOST('tjm').'">';
-//	    print '</td>';
-//	    print "</tr>\n";
-//
-//	    // Salary
-//	    print '<tr><td>'.$langs->trans("Salary").'</td>';
-//	    print '<td>';
-//	    print '<input size="8" type="text" name="salary" value="'.GETPOST('salary').'">';
-//	    print '</td>';
-//	    print "</tr>\n";
-//	}
-    
-    
 //<--- -------------- TABLEAU END --------------- --->
 
 
-
-//echo '<pre>';
-////print_r ($objsoc->id);
-//print_r ($conf);
+   
 
 
 
-//<--- -------------- PAS IMPORTANT START --------------- --->
 
 
-//        $sql8 = 'SELECT nom FROM llx_societe WHERE nom = "BIMP"';
-//        $req = $db->query($sql8) or die('Erreur SQL !<br />'.$sql.'<br />'.mysql_error());
-//        if ($db->num_rows($req) > 0)
-//        $data = $db->fetch_object($req);
-//        print $data;
+
+
+
+//<--- -------------- GENE PDF START --------------- --->
+
+
+    // Actions to build doc
+$upload_dir = $conf->bimpcesu->dir_output;
+$permissioncreate = $user->rights->bimpcesu->read;
+include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
+
+/*
+ * Documents generes
+ */
+$filename = dol_sanitizeFileName($object->id);
+$filedir = $conf->bimpcesu->dir_output . "/" . dol_sanitizeFileName($object->id);
+$urlsource = $_SERVER["PHP_SELF"] . "?socid=" . $object->id;
+$genallowed = $user->rights->bimpcesu->read;
+$delallowed = $user->rights->bimpcesu->read;
+
+
+
+    if (!empty($user->rights->facture->lire)) {
+
+        $resql = $db->query($sql);
+        if ($resql) {
+            $var = true;
+            $formfile = new FormFile($db);
+            $num = $db->num_rows($resql);
+            $i = 0;
+            if ($num > 0) {
+                $somethingshown = $formfile->show_documents('bimpcesu', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);                
+            }
+            else
+                echo "";
+        }
+    }
+
+//<--- -------------- GENE PDF STOP --------------- --->
+
+
 
     
-    //print '<a class="noborder" href="/compta/facture/list.php?sall='.$object->id.'&prefefid='.$objp->rowid.'" ';
-//print_r ($object);
-//print ("Facture Numero : "); print_r ($object->mode_reglement_id->);
-//        $sql = "SELECT * FROM llx_facture WHERE fk_soc = ". $socid;
-//        $req = $db->query($sql) or die('Erreur SQL !<br />'.$sql.'<br />'.mysql_error());
-//        $result = "$db->fetch_object($req)";
-//        echo $result['fk_soc'];
-//print_r ($conf->global);
-
-
-//<--- -------------- PAS IMPORTANT END --------------- --->
-
-
-
 
 dol_fiche_end();
 

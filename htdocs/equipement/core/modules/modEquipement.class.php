@@ -228,21 +228,21 @@ class modequipement extends DolibarrModules
 
 		// Additionnals Equipement tabs in other modules
 		// Additionnals Equipement tabs for adding Events in other modules
-		$this->tabs = array('thirdparty:+equipement:Equipements:@equipement:/equipement/tabs/societe.php?id=__ID__',
-			'invoice:+equipement:Equipements:@equipement:/equipement/tabs/facture.php?id=__ID__',
-			'supplier_invoice:+equipement:Equipements:@equipement:/equipement/tabs/facturefourn.php?id=__ID__',
-			'contract:+equipement:Equipements:@equipement:/equipement/tabs/contrat.php?id=__ID__',
-			'contract:+eventadd:EventsAdd:@equipement:/equipement/tabs/contratAdd.php?id=__ID__',
-			'intervention:+equipement:Equipements:@equipement:/equipement/tabs/fichinter.php?id=__ID__',
-			'intervention:+eventadd:EventsAdd:@equipement:/equipement/tabs/fichinterAdd.php?id=__ID__',
-			'delivery:+equipement:Equipements:@equipement:/equipement/tabs/expedition.php?id=__ID__',
-			'delivery:+eventadd:EventsAdd:@equipement:/equipement/tabs/expeditionAdd.php?id=__ID__',
-			'stock:+equipement:Equipements:@equipement:/equipement/tabs/entrepot.php?id=__ID__',
-			'supplier_order:+equipement:Equipements:@equipement:/equipement/tabs/supplier_order.php?id=__ID__',
-			'project:+equipement:Equipements:@equipement:/equipement/tabs/project.php?id=__ID__',
-			'project:+eventadd:EventsAdd:@equipement:/equipement/tabs/projectAdd.php?id=__ID__',
-			'factory:+equipement:Equipements:@equipement:/equipement/tabs/factory.php?id=__ID__',
-			'product:+equipement:Equipements:@equipement:/equipement/tabs/produit.php?id=__ID__');
+		$this->tabs = array('thirdparty:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/societe.php?id=__ID__',
+			'invoice:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/facture.php?id=__ID__',
+			'supplier_invoice:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/facturefourn.php?id=__ID__',
+			'contract:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/contrat.php?id=__ID__',
+			'contract:+eventadd:EventsAdd:@equipement:$user->rights->equipement->lire:/equipement/tabs/contratAdd.php?id=__ID__',
+			'intervention:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/fichinter.php?id=__ID__',
+			'intervention:+eventadd:EventsAdd:@equipement:$user->rights->equipement->lire:/equipement/tabs/fichinterAdd.php?id=__ID__',
+			'delivery:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/expedition.php?id=__ID__',
+			'delivery:+eventadd:EventsAdd:@equipement:$user->rights->equipement->lire:/equipement/tabs/expeditionAdd.php?id=__ID__',
+			'stock:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/entrepot.php?id=__ID__',
+			'supplier_order:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/supplier_order.php?id=__ID__',
+			'project:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/project.php?id=__ID__',
+			'project:+eventadd:EventsAdd:@equipement:$user->rights->equipement->lire:/equipement/tabs/projectAdd.php?id=__ID__',
+			'factory:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/factory.php?id=__ID__',
+			'product:+equipement:Equipements:@equipement:$user->rights->equipement->lire:/equipement/tabs/produit.php?id=__ID__');
 
 		// dictionnarys
 		$this->dictionnaries = array('langs'=>array('equipement@equipement'),

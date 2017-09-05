@@ -314,7 +314,7 @@ and open the template in the editor.
         width: 100%;
         top:0;
         padding-right: 0;
-        z-index: 40;
+        z-index: 60;
         background-color: silver;
         height: 50px;
     }

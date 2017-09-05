@@ -239,15 +239,15 @@ class GSX
      *
      */
     protected $gsxDetails = array(
-        'apiMode' => 'ut',
-        'regionCode' => 'apac',
-        'userId' => '',
-        'password' => '',
+        'apiMode'          => 'ut',
+        'regionCode'       => 'apac',
+        'userId'           => '',
+        'password'         => '',
         'serviceAccountNo' => '',
-        'languageCode' => 'fr',
-        'userTimeZone' => 'CET',
-        'returnFormat' => 'php',
-        'gsxWsdl' => '',
+        'languageCode'     => 'fr',
+        'userTimeZone'     => 'CET',
+        'returnFormat'     => 'php',
+        'gsxWsdl'          => '',
     );
 
     /**
@@ -359,10 +359,10 @@ class GSX
         } else {
             $this->gsxDetails['serviceAccountNo'] = $_gsxDetailsArray['serviceAccountNo'];
         }
-        
+
 
         if ($_gsxDetailsArray['serviceAccountNoShipTo'] == '') {
-            $this->gsxDetails['serviceAccountNoShipTo'] = $this->gsxDetails['serviceAccountNo'];//shipto = sold to si pas de soldto
+            $this->gsxDetails['serviceAccountNoShipTo'] = $this->gsxDetails['serviceAccountNo']; //shipto = sold to si pas de soldto
         } else {
             $this->gsxDetails['serviceAccountNoShipTo'] = $_gsxDetailsArray['serviceAccountNoShipTo'];
         }
@@ -419,10 +419,9 @@ class GSX
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
         $opt = ($this->isIphone) ? "IPhone" : "Asp";
-        
-        
-//        return $this->wsdlUrl = "https://gle.synopsis-erp.com/test1/gsx-emeaAsp.wsdl";
 
+
+//        return $this->wsdlUrl = "https://gle.synopsis-erp.com/test1/gsx-emeaAsp.wsdl";
 //        return $this->wsdlUrl = ' https://gsxwsut.apple.com/apidocs/' . $api_mode . '/html/WSArtifacts.html?user=asp';
         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
 
@@ -480,11 +479,11 @@ class GSX
 
         $connectionOptions = array(
             'connection_timeout' => '5'
-            ,'soap_version' => 'SOAP_1_2' 
-            , 'local_cert' => DOL_DOCUMENT_ROOT . "/synopsisapple/certif/" . $certif[0]
-            , 'passphrase' => $certif[1]
-            , 'trace' => TRUE
-            , 'exceptions' => TRUE
+            , 'soap_version'       => 'SOAP_1_2'
+            , 'local_cert'         => DOL_DOCUMENT_ROOT . "/synopsisapple/certif/" . $certif[0]
+            , 'passphrase'         => $certif[1]
+            , 'trace'              => TRUE
+            , 'exceptions'         => TRUE
                 //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
         );
 //print_r($connectionOptions);die;
@@ -522,11 +521,11 @@ class GSX
         }
         $authentication_array = array(
             'AuthenticateRequest' => array(
-                'userId' => $this->gsxDetails['userId'],
-                'password' => $this->gsxDetails['password'],
+                'userId'           => $this->gsxDetails['userId'],
+                'password'         => $this->gsxDetails['password'],
                 'serviceAccountNo' => $this->gsxDetails['serviceAccountNo'],
-                'languageCode' => $this->gsxDetails['languageCode'],
-                'userTimeZone' => $this->gsxDetails['userTimeZone']
+                'languageCode'     => $this->gsxDetails['languageCode'],
+                'userTimeZone'     => $this->gsxDetails['userTimeZone']
             )
         );
 
@@ -599,7 +598,7 @@ class GSX
                     $wrapperName = 'iphoneUnitDetail';
                     $details = array(
                         'serialNumber' => '',
-                        'imeiNumber' => $serial
+                        'imeiNumber'   => $serial
                     );
                     $responseName = 'iphoneWarrantyDetailInfo';
                 } else {
@@ -740,7 +739,7 @@ class GSX
 
                 $repairLookup = $this->request($requestData, $clientLookup);
 
-$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
+                $errorMessage = $this->_obtainErrorMessage($repairLookup);
 
                 return $this->outputFormat($repairLookup[$clientLookup . 'Response']['lookupResponseData'], $errorMessage, $returnFormat);
 
@@ -899,10 +898,10 @@ $errorMessage = $this->_obtainErrorMessage ( $repairLookup );
         $SOAPRequest = array();
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
-            
+
             global $user;
-            if($user->id == 1)
-                dol_syslog("result GSX ".print_r($SOAPRequest,1)."<br/><br/>".$clientLookup.print_r($requestData,1),3,0,"_admin");
+            if ($user->id == 1)
+                dol_syslog("result GSX " . print_r($SOAPRequest, 1) . "<br/><br/>" . $clientLookup . print_r($requestData, 1), 3, 0, "_admin");
         } catch (SoapFault $f) {
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
@@ -962,7 +961,13 @@ $errorMessage = $this->_obtainErrorMessage ( $repairLookup );
                 $add = "";
                 if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error, 1);
-                $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true) . print_r($requestData, true));
+                global $user;
+                if (in_array($user->id, array(1, 270, 271))) {
+                    $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true) . print_r($requestData, true));
+                } else {
+                    $this->soap_error($f->faultcode, $f->faultstring);
+                }
+                
 //            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
                 return array();
             }
@@ -1013,9 +1018,9 @@ $errorMessage = $this->_obtainErrorMessage ( $repairLookup );
 
         $finalReturnArray = array(
             'ResponseArray' => array(
-                'type' => 'output',
+                'type'          => 'output',
                 // 'code'			=> $code ,
-                'responseData' => $output,
+                'responseData'  => $output,
                 'urgentMessage' => $errorMessage
             )
         );
@@ -1135,8 +1140,8 @@ $errorMessage = $this->_obtainErrorMessage ( $repairLookup );
     {
         $this->errors[] = array(
             'function' => $method,
-            'line' => $line,
-            'msg' => $message
+            'line'     => $line,
+            'msg'      => $message
         );
     }
 
@@ -1187,30 +1192,30 @@ $errorMessage = $this->_obtainErrorMessage ( $repairLookup );
                 $i++;
             }
             $html .= '</p>';
-        } else
-            $html .= 'pas d\'erreurs!';
+        }
         return $html;
     }
-    
-    public function dispayLastRequestXml($request = null, $response = null, $error = null) {
+
+    public function dispayLastRequestXml($request = null, $response = null, $error = null)
+    {
         $sortie = 'Dernière requête: <br/><br/>';
-        if(isset($request))
+        if (isset($request))
             $sortie .= print_r($request, 1);
         else
-        $sortie .= $this->soapClient->__getLastRequest();
+            $sortie .= $this->soapClient->__getLastRequest();
         $sortie .= '<br/><br/>';
         $sortie .= 'Dernière réponse: <br/><br/>';
-        
-        if(isset($response))
+
+        if (isset($response))
             $sortie .= print_r($response, 1);
         else
             $sortie .= $this->soapClient->__getLastResponse();
-        
+
         $sortie .= 'Dernière erreur: <br/><br/>';
-        
-        if(isset($error))
+
+        if (isset($error))
             $sortie .= print_r($error, 1);
-        
+
         dol_syslog($sortie, 3, 0, "_apple3");
     }
 }

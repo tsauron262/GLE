@@ -92,7 +92,7 @@ class modBimpcesu extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@mymodule')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array();
+		$this->module_parts = array("models" => 1);
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/mymodule/temp");
@@ -118,7 +118,7 @@ class modBimpcesu extends DolibarrModules
 		$this->const = array();
        
                 
-                $this->tabs = array('thirdparty:+attestation:AttestationCESU:bimpcesu@bimpcesu:$user->rights->bimpcesu->read:/bimpcesu/tabs/attestation.php?id=__ID__');
+                $this->tabs = array('thirdparty:+attestation:AttestationCESU:bimpcesu@bimpcesu:$user->rights->bimpcesu->read:/bimpcesu/tabs/attestation.php?socid=__ID__');
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
@@ -268,6 +268,9 @@ class modBimpcesu extends DolibarrModules
 	{
 		$sql = array();
 
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcesu', 1, 'bimpcesu', 'Attestation CESU', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."c_paiement` (`id`, `code`, `libelle`, `type`, `active`, `accountancy_code`, `module`) VALUES (150, 'CESU', 'CESU', 2, 1, NULL, NULL);";
+                
 		$this->_load_tables('/bimpcesu/sql/');
 
 		return $this->_init($sql, $options);
@@ -284,6 +287,8 @@ class modBimpcesu extends DolibarrModules
 	public function remove($options = '')
 	{
 		$sql = array();
+                
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcesu';";
 
 		return $this->_remove($sql, $options);
 	}

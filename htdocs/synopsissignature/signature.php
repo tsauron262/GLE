@@ -396,8 +396,8 @@ if ($selectedFile) {
 //        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -density 300 "' . $dirTemp . $save_to . '"';
         $format = "ppm";
         $format2 = "png";
-        $adressScript = "/opt/";
-        $adressScript2 = "/Applications/MAMP/Library/bin/";
+        $adressScript = (defined("PATH_PDFTOPPM"))? PATH_PDFTOPPM."/" : "";
+        $adressScript2 = (defined("PATH_CONVERT"))? PATH_CONVERT."/" : "";
         $prefixePage = "00000";
         
         $commande = $adressScript.'pdftoppm '   . ' -r 100  "' . $dir . "/" . $fileToShow . '"   "' . $dirTemp . $save_to . '"';
@@ -408,8 +408,9 @@ if ($selectedFile) {
             $file1 = $save_to . "-".$prefixePage . $i . "." . $format;
             $file2 = $save_to . "-".$prefixePage . $i . "." . $format2;
             $commande2 = $adressScript2."convert ".$dirTemp."/".$file1 . " ".$dirTemp."/".$file2;
-     
-            exec($commande2, $output, $return_var2);
+
+            exec($commande2, $output2, $return_var2);
+            //echo $return_var2;echo $output2;die($commande2);
             $tabFile[] = $file2;
             $i++;
         }

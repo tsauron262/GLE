@@ -303,10 +303,10 @@ if ($selectedFile) {
             $pdf->setXY(8, 255);
             $pdf->image($nomSign, 10, 260, 28);
 
-        /*$tabFilePc[] = DOL_DATA_ROOT."/ficheinter/".$object->ref."/";
-        $tabFilePc2[] = ".pdf";
-        $tabFilePc3[] = "PC-" . $chrono->ref . ".pdf";*/
-            mailSyn2("FI Signé", "j.mazet@bimp.fr", null, "Bonjour la FI ".$object->getNomUrl(1)." est Signé", array(), array(), array());
+            /* $tabFilePc[] = DOL_DATA_ROOT."/ficheinter/".$object->ref."/";
+              $tabFilePc2[] = ".pdf";
+              $tabFilePc3[] = "PC-" . $chrono->ref . ".pdf"; */
+            mailSyn2("FI Signé", "j.mazet@bimp.fr", null, "Bonjour la FI " . $object->getNomUrl(1) . " est Signé", array(), array(), array());
         } elseif (stripos($signeFile, 'SH') === 0) {
             $pdf->setXY(25, 240);
             $pdf->image($nomSign, 25, 245, 40);
@@ -318,11 +318,11 @@ if ($selectedFile) {
         $pdf->Close();
 
         $pdf->Output($dir . "/" . $signeFile, 'F');
-        
-        
+
+
         //mail au client
-        $socid = (isset($object->socid)? $object->socid : 0);
-        if($socid > 0){
+        $socid = (isset($object->socid) ? $object->socid : 0);
+        if ($socid > 0) {
             $soc = new Societe($db);
             $soc->fetch($socid);
             $mail = $soc->email;
@@ -338,7 +338,7 @@ if ($selectedFile) {
 
         if ($invite) {
 //            delElementElement("demSign", null, $code);
-            $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsissignature WHERE code='".$code."';");
+            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsissignature WHERE code='" . $code . "';");
             echo "</table><h2>Merci</h2>";
             echo "Code : <form method='get'>";
 
@@ -396,24 +396,27 @@ if ($selectedFile) {
 //        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -density 300 "' . $dirTemp . $save_to . '"';
         $format = "ppm";
         $format2 = "png";
-        $adressScript = (defined("PATH_PDFTOPPM"))? PATH_PDFTOPPM."/" : "";
-        $adressScript2 = (defined("PATH_CONVERT"))? PATH_CONVERT."/" : "";
-        $prefixePage = "00000";
-        
-        $commande = $adressScript.'pdftoppm '   . ' -r 100  "' . $dir . "/" . $fileToShow . '"   "' . $dirTemp . $save_to . '"';
+        $adressScript = (defined("PATH_PDFTOPPM")) ? PATH_PDFTOPPM . "/" : "";
+        $adressScript2 = (defined("PATH_CONVERT")) ? PATH_CONVERT . "/" : "";
+        $tabPref = array("", "0000", "00000");
+
+        $commande = $adressScript . 'pdftoppm ' . ' -r 100  "' . $dir . "/" . $fileToShow . '"   "' . $dirTemp . $save_to . '"';
         exec($commande, $output, $return_var);
 
         $i = 1;
-        while (is_file($dirTemp . $save_to . "-".$prefixePage . $i . "." . $format)) {
-            $file1 = $save_to . "-".$prefixePage . $i . "." . $format;
-            $file2 = $save_to . "-".$prefixePage . $i . "." . $format2;
-            $commande2 = $adressScript2."convert ".$dirTemp."/".$file1 . " ".$dirTemp."/".$file2;
+        foreach ($tabPref as $prefixePage) {
+            while (is_file($dirTemp . $save_to . "-" . $prefixePage . $i . "." . $format)) {
+                $file1 = $save_to . "-" . $prefixePage . $i . "." . $format;
+                $file2 = $save_to . "-" . $prefixePage . $i . "." . $format2;
+                $commande2 = $adressScript2 . "convert " . $dirTemp . "/" . $file1 . " " . $dirTemp . "/" . $file2;
 
-            exec($commande2, $output2, $return_var2);
-            //echo $return_var2;echo $output2;die($commande2);
-            $tabFile[] = $file2;
-            $i++;
+                exec($commande2, $output2, $return_var2);
+                //echo $return_var2;echo $output2;die($commande2);
+                $tabFile[] = $file2;
+                $i++;
+            }
         }
+        
         if (count($tabFile) == 0)
             $tabFile[] = $save_to . "." . $format;
 

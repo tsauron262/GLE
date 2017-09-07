@@ -5,6 +5,7 @@
 class BDS_Report
 {
 
+    public $dir;
     public static $refRegex = '/\d{8}\-\d{6}_\d+_(.+)/';
     public static $refDateFormat = 'Ymd';
     public static $refTimeFormat = 'His';
@@ -64,6 +65,12 @@ class BDS_Report
 
     public function __construct($id_process = null, $title = null, $fileRef = null)
     {
+        $this->dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
+
+        if (!file_exists($this->dir)) {
+            mkdir($this->dir, 0777);
+        }
+
         if (!is_null($id_process)) {
             $this->data['id_process'] = (int) $id_process;
         }
@@ -83,7 +90,7 @@ class BDS_Report
 
     public function loadFile()
     {
-        $fileName = __DIR__ . '/../reports/' . $this->file_ref . '.csv';
+        $fileName = $this->dir . $this->file_ref . '.csv';
         if (file_exists($fileName)) {
             $rows = file($fileName, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($rows as $idx => $r) {
@@ -127,6 +134,9 @@ class BDS_Report
 
     public function saveFile()
     {
+        if (!file_exists($this->dir)) {
+            return;
+        }
         if ($this->data['end'] === '') {
             $this->end();
         }
@@ -158,8 +168,7 @@ class BDS_Report
             }
             $txt .= $line . "\n";
         }
-
-        file_put_contents(__DIR__ . '/../reports/' . $this->file_ref . '.csv', $txt);
+        file_put_contents($this->dir . $this->file_ref . '.csv', $txt);
     }
 
     public function addObjectData($objectName)
@@ -272,7 +281,12 @@ class BDS_Report
 
     public static function getReportsList()
     {
-        $files = scandir(__DIR__ . '/../reports/');
+        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        if (!file_exists($dir)) {
+            return array();
+        }
+        
+        $files = scandir($dir);
 
         $reports = array();
         arsort($files);
@@ -289,7 +303,7 @@ class BDS_Report
             $report = new BDS_Report(null, null, $ref);
 
             if (!count($report->rows)) {
-                unlink(__DIR__ . '/../reports/' . $f);
+                unlink($dir . $f);
                 unset($report);
                 continue;
             }
@@ -303,7 +317,7 @@ class BDS_Report
             $date = new DateTime($datetime);
 
             if ($date->format('Y-m-d') <= $deleteDate) {
-                unlink(__DIR__ . '/../reports/' . $f);
+                unlink($this->dir . $f);
                 unset($report);
                 continue;
             }
@@ -342,6 +356,10 @@ class BDS_Report
 
     public static function getObjectNotifications($objectName, $id_object, $from = null, $to = null, $reference = null)
     {
+        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        if (!file_exists($dir)) {
+            return array();
+        }
         $data = array();
         if (is_null($id_object) && is_null($reference)) {
             return $data;
@@ -355,7 +373,7 @@ class BDS_Report
 
         $objectName = strtolower($objectName);
 
-        $reports = scandir(__DIR__ . '/../reports/');
+        $reports = scandir($dir);
         foreach ($reports as $report_file) {
             if (in_array($report_file, array('.', '..'))) {
                 continue;
@@ -388,20 +406,26 @@ class BDS_Report
 
     public static function deleteRef($file_ref)
     {
-        if (file_exists(__DIR__ . '/../reports/' . $file_ref . '.csv')) {
-            unlink(__DIR__ . '/../reports/' . $file_ref . '.csv');
+        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        
+        if (file_exists($dir . $file_ref . '.csv')) {
+            unlink($dir . $file_ref . '.csv');
         }
     }
 
     public static function deleteAll()
     {
+        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        if (!file_exists($dir)) {
+            return;
+        }
         ini_set('display_errors', 1);
-        $files = scandir(__DIR__ . '/../reports/');
+        $files = scandir($dir);
         foreach ($files as $f) {
             if (in_array($f, array('.', '..'))) {
                 continue;
             }
-            unlink(__DIR__ . '/../reports/' . $f);
+            unlink($dir . $f);
         }
     }
 

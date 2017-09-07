@@ -64,10 +64,10 @@ class BDS_SyncProcess extends BDS_Process
         $parameters['params'] = $params;
 
         if (self::$debug_mod) {
-            echo '<h3>Soap Call méthode: "' . $ws_method . '"</h3>';
-            echo '<h4>Paramètres: </h4><pre>';
-            print_r($parameters);
-            echo '</pre>';
+            $this->debug_content .= '<h3>Soap Call méthode: "' . $ws_method . '"</h3>';
+            $this->debug_content .= '<h4>Paramètres: </h4><pre>';
+            $this->debug_content .= print_r($parameters, 1);
+            $this->debug_content .= '</pre>';
         }
 
         return $this->soap_client->call($ws_method, $parameters);
@@ -84,25 +84,25 @@ class BDS_SyncProcess extends BDS_Process
 
         if (self::$debug_mod) {
             if (self::$ext_debug_mod) {
-                echo '<h4>SOAP CLIENT: </h4><pre>';
-                print_r($this->soap_client);
-                echo '</pre>';
+                $this->debug_content .= '<h4>SOAP CLIENT: </h4><pre>';
+                $this->debug_content .= print_r($this->soap_client, 1);
+                $this->debug_content .= '</pre>';
                 return;
             } else {
-                echo '<h4>Réponse: </h4>';
+                $this->debug_content .= '<h4>Réponse: </h4>';
                 if (is_array($response)) {
-                    echo '<pre>';
-                    print_r($response);
-                    echo '</pre>';
+                    $this->debug_content .= '<pre>';
+                    $this->debug_content .= print_r($response, 1);
+                    $this->debug_content .= '</pre>';
                 } else {
-                    echo $response . '<br/>';
+                    $this->debug_content .= $response . '<br/>';
                 }
             }
         }
 
         if (!self::$ext_debug_mod) {
             if (is_null($response)) {
-                $msg = 'Echec de l\'export';
+                $msg = 'Echec de l\'export (Aucune réponse reçue)';
                 $this->Error($msg);
             } elseif (!isset($response['success']) || !$response['success']) {
                 $msg = 'Echec de l\'export<br/>';
@@ -145,17 +145,17 @@ class BDS_SyncProcess extends BDS_Process
 
         if (self::$debug_mod) {
             if (self::$ext_debug_mod) {
-                echo '<h4>[DEBUG MOD EXTERNE] Réponse: </h4><pre>';
-                print_r($this->soap_client['responseData']);
-                echo '</pre>';
+                $this->debug_content .= '<h4>[DEBUG MOD EXTERNE] Réponse: </h4><pre>';
+                $this->debug_content .= print_r($this->soap_client['responseData'], 1);
+                $this->debug_content .= '</pre>';
             } else {
-                echo '<h4>Réponse: </h4>';
+                $this->debug_content .= '<h4>Réponse: </h4>';
                 if (is_array($response)) {
-                    echo '<pre>';
-                    print_r($response);
-                    echo '</pre>';
+                    $this->debug_content .= '<pre>';
+                    $this->debug_content .= print_r($response, 1);
+                    $this->debug_content .= '</pre>';
                 } else {
-                    echo $response . '<br/>';
+                    $this->debug_content .= $response . '<br/>';
                 }
             }
         }
@@ -666,10 +666,10 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         if (self::$debug_mod) {
-            echo '<h4>Objets "' . $object_name . '" ignorés de l\'export</h4>';
-            echo '<pre>';
-            print_r($ignored);
-            echo '</pre>';
+            $this->debug_content .= '<h4>Objets "' . $object_name . '" ignorés de l\'export</h4>';
+            $this->debug_content .= '<pre>';
+            $this->debug_content .= print_r($ignored, 1);
+            $this->debug_content .= '</pre>';
         }
 
         return $objects;

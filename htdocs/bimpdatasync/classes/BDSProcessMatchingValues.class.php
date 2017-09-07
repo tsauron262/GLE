@@ -234,7 +234,6 @@ class BDSProcessMatchingValues extends BimpObject
         }
 
         if ($table && $where && $select) {
-            echo 'ici';
             $where .= ' = \'' . $value . '\'';
             return $this->db->getValue($table, $select, $where);
         }

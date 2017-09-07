@@ -50,7 +50,7 @@ class BDS_Tools
         $str = str_replace('#', '', $str);
         $str = str_replace('{', '(', $str);
         $str = str_replace('}', ')', $str);
-        $str = str_replace(';', ',', $str);
+//        $str = str_replace(';', ',', $str);
         $str = str_replace('>', ':', $str);
         $str = str_replace('<', '', $str);
         $str = str_replace('=', ':', $str);
@@ -280,5 +280,42 @@ class BDS_Tools
         }
 
         return $value;
+    }
+
+    public static function makeDirectories($dir_tree, $root_dir = null)
+    {
+        if (is_null($root_dir)) {
+            $root_dir = DOL_DATA_ROOT . '/bimpdatasync';
+        }
+        
+        if (!file_exists($root_dir)) {
+            if (!mkdir($root_dir, 0777)) {
+                return 'Echec de la création du dossier "' . $root_dir . '"';
+            }
+        }
+
+        foreach ($dir_tree as $dir => $sub_dir_tree) {
+            if (!file_exists($root_dir . '/' . $dir)) {
+                if (!mkdir($root_dir . '/' . $dir, 0777)) {
+                    return 'Echec de la création du dossier "' . $root_dir . '/' . $dir . '"';
+                }
+            }
+            if (!is_null($sub_dir_tree)) {
+                if (is_array($sub_dir_tree) && count($sub_dir_tree)) {
+                    $result = self::makeDirectories($sub_dir_tree, $root_dir . '/' . $dir);
+                    if ($result) {
+                        return $result;
+                    }
+                } elseif (is_string($sub_dir_tree)) {
+                    if (!file_exists($root_dir . '/' . $dir . '/' . $sub_dir_tree)) {
+                        if (!mkdir($root_dir . '/' . $dir . '/' . $sub_dir_tree, 0777)) {
+                            return 'Echec de la création du dossier "' . $root_dir . '/' . $dir . '/' . $sub_dir_tree . '"';
+                        }
+                    }
+                }
+            }
+        }
+
+        return 0;
     }
 }

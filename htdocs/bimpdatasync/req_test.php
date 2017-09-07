@@ -14,7 +14,8 @@ function testReq()
     global $conf, $db;
 
     BDS_Process::$debug_mod = 1;
-
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
     $user = new User($db);
     $user->fetch(1);
 
@@ -26,7 +27,7 @@ function testReq()
 
     if (!is_null($process)) {
         $errors = array();
-
+        
         $process->test();
 
         if (count($errors)) {
@@ -37,7 +38,7 @@ function testReq()
     }
 }
 
-//testReq();
+testReq();
 
 function testImg()
 {
@@ -91,12 +92,41 @@ function testMatch()
 //        echo $match->db->db->error();
 //    }
 //    echo 'Res: ' . $res;
-    
+
     $match = BDSProcessMatchingValues::createInstanceByName(1, 'order_state');
     if (is_null($match)) {
         echo 'PAS OK <br/>';
-    }else {
-        echo 'ID: '.$match->id;
+    } else {
+        echo 'ID: ' . $match->id;
     }
 }
+
 //testMatch();
+
+function testFtp()
+{
+    $ftp = ftp_connect('ExportFTP.techdata.fr');
+
+    if ($ftp) {
+        echo 'Connexion OK<br/>';
+        $logged = ftp_login($ftp, 'allcom', 'Jrl$98Ztj*DH');
+
+        if ($logged) {
+            echo 'Login OK<br/>';
+
+            $files = ftp_nlist($ftp, '/');
+            if (!$files) {
+                echo 'Echec de la récup des fichiers';
+            } else {
+                echo 'Fichiers: <pre>';
+                print_r($files);
+                echo '</pre>';
+            }
+        } else {
+            echo 'Echec Login<br/>';
+        }
+    } else {
+        echo 'Echec connexion<br/>';
+    }
+}
+//testFtp();

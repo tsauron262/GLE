@@ -3,7 +3,7 @@
 class BDS_PS_SyncProcess extends BDS_SyncProcess
 {
 
-    public static $files_dir_name = 'ps';
+    public static $files_dir_name = 'psBimpEducation';
 
     public function __construct($processDefinition, $user, $params = null)
     {
@@ -16,25 +16,39 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                 'login'             => $this->parameters['ws_login'],
                 'password'          => $this->parameters['ws_pass']
             );
+
+            if (file_exists($this->filesDir)) {
+                $dir_tree = array(
+                    'product' => 'images'
+                );
+                $result = BDS_Tools::makeDirectories($dir_tree, $this->filesDir);
+                if ($result) {
+                    $this->logError($result);
+                    $this->Msg($result);
+                    $this->parameters_ok = false;
+                }
+            }
         }
     }
 
     public function test()
     {
-        $errors = array();
+//        $errors = array();
         self::$debug_mod = true;
-        self::$ext_debug_mod = false;
-
-        BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Categorie');
-        $objects = $this->getObjectsExportData('Categorie', 'Category', array(970), $errors);
+//        self::$ext_debug_mod = true;
+//
+        BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Product');
+        $objects = $this->getObjectsExportData('Product', 'Product', array(1242), $errors);
         if (!count($errors) && count($objects['list'])) {
             $this->soapExportObjects(array($objects), 'GLE_Sync');
         } else {
-            echo 'Erreurs: <pre>';
-            print_r($errors);
-            echo '</pre>';
+            $this->debug_content .= 'Erreurs: <pre>';
+            $this->debug_content .= print_r($errors, 1);
+            $this->debug_content .= '</pre>';
         }
-//        $objects = $this->getObjectsDeleteData('Categorie', 'Categorie', array(6817));
+
+        echo $this->debug_content;
+//        $objects = $this->getObjectsDeleteData('Categorie', 'Categorie', array(809));
 //        if (count($objects)) {
 //            $this->soapDeleteObjects(array($objects), 'GLE_Sync');
 //        }
@@ -115,28 +129,12 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $categories = array();
         foreach ($subCats as $idc) {
             if (!in_array($idc, $categories)) {
-                if ((int) $idc !== (int) $this->parameters['id_default_parent_categorie']) {
-                    $categories[] = (int) $idc;
-                }
+//                if ((int) $idc !== (int) $this->parameters['id_default_parent_categorie']) {
+                $categories[] = (int) $idc;
+//                }
             }
         }
         return $this->checkOptionsForObjectsExport('Categorie', $categories);
-    }
-
-    protected function findChildrenCategories($id_parent)
-    {
-        $categories = BDS_Tools::getChildrenCategoriesIds($this->db, $id_parent);
-
-        foreach ($categories as $idc) {
-            $subCats = $this->findChildrenCategories($idc);
-            foreach ($subCats as $idsc) {
-                if (!in_array($idsc, $categories)) {
-                    $categories[] = (int) $idsc;
-                }
-            }
-        }
-
-        return $categories;
     }
 
     protected function findProductsToExport($categories)
@@ -217,8 +215,6 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         $errors = array();
         $products = $this->getObjectsExportData('Product', 'Product', array((int) $object->id), $errors);
-        $msg = 'Données envoyées: <pre>' . print_r($products, 1) . '</pre>';
-        $this->Info($msg);
 
         if (!count($errors)) {
             if (isset($products['list']) && count($products['list'])) {
@@ -399,7 +395,6 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         }
 
         $img_dir = BDS_Tools::getProductImagesDir($product);
-//        $img_url = rawurlencode(get_exdir($product->id, 2, false, false, $product, 'product') . $product->id . '/photos/');
 
         $categories = $this->db->getValues('categorie_product', 'fk_categorie', '`fk_product` = ' . (int) $id_product);
         if (is_null($categories)) {
@@ -412,7 +407,9 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             }
         }
 
-        $images_base_url = 'bimpdatasync/files/ps/product/images/' . $id_product . '/';
+        $temp_imgs = array();
+        $images_base_url = 'bimpdatasync/temp_files/images/product/' . $id_product . '/';
+        $temp_images_path = DOL_DOCUMENT_ROOT . $images_base_url;
 
         $data = array(
             'id'              => $id_product,
@@ -424,16 +421,14 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             'status'          => $product->status,
             'weight'          => $product->weight,
             'length'          => $product->length,
+            'stock'           => $product->stock_reel,
             'cost_price'      => (DOL_VERSION < '3.9.0' ? $product->pmp : $product->cost_price),
-//            'images_base_url' => 'viewimage.php?modulepart=produit&file=' . $img_url,
-//            'images_base_url' => 'document.php?modulepart=produit&entity=1&file=',
             'images_base_url' => $images_base_url,
             'categories'      => implode('-', $categories),
             'images'          => array()
         );
 
-        $temp_imgs = array();
-        $temp_images_path = DOL_DOCUMENT_ROOT . $images_base_url;
+
 
         if (is_null($img_dir)) {
             $msg = 'Impossible d\'exporter les images du produit (Répertoire non trouvé)';
@@ -459,8 +454,18 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
                     if (!in_array($f, $current_imgs)) {
                         if (!file_exists($temp_images_path)) {
-                            if (!mkdir($temp_images_path)) {
-                                $this->Error('Echec de la création du dossier temporaire: "' . $temp_images_path . '"');
+                            $dir_tree = array(
+                                'temp_files' => array(
+                                    'images' => array(
+                                        'product' => '' . $id_product
+                                    )
+                                )
+                            );
+                            $error = BDS_Tools::makeDirectories($dir_tree, DOL_DOCUMENT_ROOT . '/bimpdatasync');
+                            if ($error) {
+                                $msg = $error . ' - Export des images impossible';
+                                $this->Error($msg, 'Product', $id_product);
+                                break;
                             }
                         }
                         if (!file_exists($temp_images_path . $f)) {
@@ -636,7 +641,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             else
                 $product->label = $data['name'];
         }
-        if (isset($data['description_short']) && $data['description_short']) {
+        if (isset($data['description_short'])) {
             $product->description = $data['description_short'];
         }
 //        if (isset($data['description']) && $data['description']) {
@@ -657,7 +662,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                 $product->barcode_type = 4;
             }
         }
-        if (isset($data['reference']) && $data['reference']) {
+        if (isset($data['reference'])) {
             $product->ref = $data['reference'];
         } else {
             $code_module = (!empty($conf->global->PRODUCT_CODEPRODUCT_ADDON) ? $conf->global->PRODUCT_CODEPRODUCT_ADDON : 'mod_codeproduct_leopard');
@@ -1049,7 +1054,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                             'fk_categorie' => (int) $id_categorie,
                             'fk_product'   => (int) $id_product
                         ))) {
-                    $msg = 'Echec de l\association du produit avec la catégorie d\'ID "' . $id_categorie . '"';
+                    $msg = 'Echec de l\'association du produit avec la catégorie d\'ID "' . $id_categorie . '"';
                     $this->SqlError($msg, 'Product', $id_product);
                     $errors[] = $msg;
                 }
@@ -1231,10 +1236,10 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 //
 //        $errors = self::addProcessTriggerActions($actions);
 //        if (count($errors) && self::$debug_mod) {
-//            echo 'Erreurs lors de l\'ajout des actions sur trigger: ';
-//            echo '<pre>';
-//            print_r($errors);
-//            echo '</pre>';
+//            $this->debug_content .= 'Erreurs lors de l\'ajout des actions sur trigger: ';
+//            $this->debug_content .= '<pre>';
+//            $this->debug_content .= print_r($errors, 1);
+//            $this->debug_content .= '</pre>';
 //        }
     }
 }

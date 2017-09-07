@@ -10,6 +10,7 @@ abstract class BDS_Process
     public static $objects = array();
     public $db = null;
     public $user = null;
+    public $debug_content = '';
     public $use_references = false;
     public $report = null;
     public $langs = 0;
@@ -30,7 +31,7 @@ abstract class BDS_Process
 
     public function __construct(BDSProcess $processDefinition, $user, $params = null)
     {
-        set_time_limit(0);
+        set_time_limit(600);
         ini_set('memory_limit', static::$memory_limit);
 
         global $db, $langs;
@@ -56,7 +57,19 @@ abstract class BDS_Process
         $this->langs = $langs;
         $this->user = $user;
 
-        $this->filesDir = __DIR__ . '/../files/' . static::$files_dir_name . '/';
+
+        $this->filesDir = DOL_DATA_ROOT . '/bimpdatasync/files/' . static::$files_dir_name . '/';
+
+        if (!file_exists($this->filesDir)) {
+            $result = BDS_Tools::makeDirectories(array(
+                        'files' => static::$files_dir_name
+            ));
+            if ($result) {
+                $this->logError($result);
+                $this->parameters_ok = false;
+                $this->Msg($result);
+            }
+        }
 
         if (!isset($processDefinition->id) || !$processDefinition->id) {
             $msg = 'ID null lors de l\'initalisation ';
@@ -106,7 +119,7 @@ abstract class BDS_Process
         }
 
         if (self::$debug_mod) {
-            echo '<h3>' . $this->processDefinition->title . '</h3>';
+            $this->debug_content .= '<h3>' . $this->processDefinition->title . '</h3>';
         }
     }
 
@@ -115,7 +128,7 @@ abstract class BDS_Process
         
     }
 
-    public function end($saveFile = true, &$debug_content = null)
+    public function end($saveFile = true)
     {
         if (!is_null($this->report)) {
             $this->report->end();
@@ -125,14 +138,14 @@ abstract class BDS_Process
         }
 
         if (self::$debug_mod) {
-            $content = ob_get_clean();
-            if ($content) {
-                dol_syslog($content, 3);
+            $notifications = ob_get_clean();
+            if ($notifications) {
+                $this->debug_content .= '<h4>Notifiactions: </h4>' . $notifications;
             }
-            if (!is_null($debug_content)) {
-                $debug_content = $content;
-            }
+            dol_syslog($notifications, 3);
         }
+        
+        $this->cleanTempDirectory();
     }
 
     // Déclenchement des opération: 
@@ -192,26 +205,26 @@ abstract class BDS_Process
         }
 
         if (self::$debug_mod) {
-            echo '<h4>Options: </h4><pre>';
-            print_r($this->options);
-            echo '</pre>';
-            echo '<h4>Données: </h4><pre>';
-            print_r($data);
-            echo '</pre>';
+            $this->debug_content .= '<h4>Options: </h4><pre>';
+            $this->debug_content .= print_r($this->options, 1);
+            $this->debug_content .= '</pre>';
+            $this->debug_content .= '<h4>Données: </h4><pre>';
+            $this->debug_content .= print_r($data, 1);
+            $this->debug_content .= '</pre>';
         }
 
+        $this->end(false);
+
         if (isset($this->options['debug_mod']) && $this->options['debug_mod']) {
-            $content = ob_get_clean();
-            if ($content) {
+            if ($this->debug_content) {
                 $html = '<div class="foldable_section closed">';
                 $html .= '<div class="foldable_section_caption">';
                 $html .= '[INITIALISATION]';
                 $html .= '</div>';
-                $html .= '<div class="foldable_section_content">' . $content . '</div>';
+                $html .= '<div class="foldable_section_content">' . $this->debug_content . '</div>';
                 $html .= '</div>';
                 $data['debug_content'] = $html;
             }
-            dol_syslog($content, 3);
         }
 
         return $data;
@@ -261,16 +274,23 @@ abstract class BDS_Process
             $this->Error($msg);
         }
 
-        $debug_content = '';
-        $this->end(!is_null($report_ref), $debug_content);
+        if (self::$debug_mod) {
+            if ($result) {
+                $this->debug_content .= '<h4>Résultat: </h4><pre>';
+                $this->debug_content .= print_r($result, 1);
+                $this->debug_content .= '</pre>';
+            }
+        }
 
-        if ($debug_content) {
+        $this->end(!is_null($report_ref));
+
+        if ($this->debug_content) {
             $html = '<div class="foldable_section closed">';
             $html .= '<div class="foldable_section_caption">';
             $html .= 'Opération: "' . $step . '" ' . ($iteration ? '#' . $iteration : '');
             $html .= '</div>';
             $html .= '<div class="foldable_section_content" id="debugContent">';
-            $html .= $debug_content;
+            $html .= $this->debug_content;
             $html .= '</div>';
             $html .= '</div>';
 
@@ -413,7 +433,7 @@ abstract class BDS_Process
         }
         return $ftp;
     }
-    
+
     // Gestion des listes de références: 
 
     public function setReferences($references, $object_name = null)
@@ -521,25 +541,25 @@ abstract class BDS_Process
             $this->logError($msg);
             return;
         }
-        echo '<' . $tag . ($class ? ' class="' . $class . '"' : '') . '>';
+        $this->debug_content .= '<' . $tag . ($class ? ' class="' . $class . '"' : '') . '>';
         if (is_array($msg)) {
-            echo '<ul>';
+            $this->debug_content .= '<ul>';
             foreach ($msg as $m) {
-                echo '<li>';
+                $this->debug_content .= '<li>';
                 if (is_array($m)) {
-                    echo '<pre>';
+                    $this->debug_content .= '<pre>';
                     print_r($m);
-                    echo '</pre>';
+                    $this->debug_content .= '</pre>';
                 } else {
-                    echo $m;
+                    $this->debug_content .= $m;
                 }
-                echo '</li>';
+                $this->debug_content .= '</li>';
             }
-            echo '</ul>';
+            $this->debug_content .= '</ul>';
         } else {
-            echo $msg;
+            $this->debug_content .= $msg;
         }
-        echo '</' . $tag . '>';
+        $this->debug_content .= '</' . $tag . '>';
     }
 
     public function addReportRow($type, $msg, $objectName = '', $id_object = '', $reference = '')
@@ -667,7 +687,7 @@ abstract class BDS_Process
     }
 
     // Gestion statique des processus:
-    
+
     public static function createProcessByName($fuser, $processName, &$error, $params = null)
     {
         global $db;
@@ -794,19 +814,66 @@ abstract class BDS_Process
         }
         return $errors;
     }
-    
+
     // Outils divers
-    
+
+    protected function findChildrenCategories($id_parent)
+    {
+        $categories = BDS_Tools::getChildrenCategoriesIds($this->db, $id_parent);
+
+        foreach ($categories as $idc) {
+            $subCats = $this->findChildrenCategories($idc);
+            foreach ($subCats as $idsc) {
+                if (!in_array($idsc, $categories)) {
+                    $categories[] = (int) $idsc;
+                }
+            }
+        }
+
+        return $categories;
+    }
+
     public function getParameterLabelByName($name)
     {
-        $where = '`id_process` = '.(int) $this->processDefinition->id;
-        $where .= ' AND `name` = \''.$name.'\'';
-        
+        $where = '`id_process` = ' . (int) $this->processDefinition->id;
+        $where .= ' AND `name` = \'' . $name . '\'';
+
         $label = $this->db->getValue('bds_process_parameter', 'label', $where);
         if (is_null($label) || !$label) {
             return $name;
         }
-        
+
         return $label;
+    }
+
+    protected function cleanTempDirectory($subDir = '')
+    {
+        $dir = DOL_DOCUMENT_ROOT . 'bimpdatasync/temp_files' . ($subDir ? '/' . $subDir : '');
+
+        if (!file_exists($dir)) {
+            return;
+        }
+
+        $files = scandir($dir);
+
+        if (is_array($files)) {
+            foreach ($files as $f) {
+                if (in_array($f, array('.', '..'))) {
+                    continue;
+                }
+
+                if (is_dir($dir . '/' . $f)) {
+                    $this->cleanTempDirectory($subDir . '/' . $f);
+                } else {
+                    echo 'Suppr. du fichier ' . $dir . '/' . $f . '<br/>';
+                    unlink($dir . '/' . $f);
+                }
+            }
+        }
+
+        if ($subDir) {
+            echo 'Suppr du dir ' . $dir . '<br/>';
+            rmdir($dir);
+        }
     }
 }

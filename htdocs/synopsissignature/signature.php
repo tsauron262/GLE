@@ -392,7 +392,8 @@ if ($selectedFile) {
 //        $dirTemp = $dir . "/temp/";
         $dirTemp = DOL_DOCUMENT_ROOT . "/synopsissignature/temp/";
         if (!is_dir($dirTemp))
-            mkdir($dirTemp);
+            if(!mkdir($dirTemp))
+                echo "Impossible de créer le rep permition refusé.";
 //        $commande = 'convert "' . $dir . "/" . $fileToShow . '"  -density 300 "' . $dirTemp . $save_to . '"';
         $format = "ppm";
         $format2 = "png";

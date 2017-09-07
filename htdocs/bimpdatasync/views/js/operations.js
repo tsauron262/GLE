@@ -698,7 +698,7 @@ function ProcessOperation(data, options) {
         var html = '<div class="alert alert-success">';
         html += msg;
         html += '</div>';
-        operation.$notification.html(html);
+        operation.$notification.append(html);
         operation.hideButtons();
         operation.buttons.$back.show();
     };

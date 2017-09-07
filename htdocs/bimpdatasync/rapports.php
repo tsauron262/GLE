@@ -4,6 +4,8 @@ require_once __DIR__ . '/BDS_Lib.php';
 
 llxHeader();
 
+ini_set('display_errors', 1);
+
 if (isset($_GET['deleteAllReports']) && $_GET['deleteAllReports']) {
     BDS_Report::deleteAll();
 }
@@ -277,7 +279,7 @@ if (isset($_POST['searchSubmit'])) {
     }
     if (!is_null($report_ref)) {
         echo '<div class="fichecenter">';
-        if (file_exists(__DIR__ . '/reports/' . $report_ref . '.csv')) {
+        if (file_exists(DOL_DATA_ROOT . '/bimpdatasync/reports/' . $report_ref . '.csv')) {
             $report = new BDS_Report(null, null, $report_ref);
 
             if (!function_exists('renderReportContent')) {

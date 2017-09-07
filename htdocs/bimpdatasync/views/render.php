@@ -438,7 +438,7 @@ function renderOperationProcess($data)
     $html .= '</td></tr></table></div>';
 
     if (isset($data['debug_content']) && $data['debug_content']) {
-        renderDebugContent($data['debug_content']);
+        $html .= renderDebugContent($data['debug_content']);
     }
 
     if ($data['use_report']) {

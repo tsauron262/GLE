@@ -69,7 +69,7 @@ function process_prepare_head($objsoc)
     $h++;
     
     $head[$h][0] = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $objsoc->id . '&tab=matching';
-    $head[$h][1] = $langs->trans("Corresponcances");
+    $head[$h][1] = $langs->trans("Correspondances");
     $head[$h][2] = 'matching';
     $h++;
 

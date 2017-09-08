@@ -507,7 +507,7 @@ class Synopsis_Commande extends Commande {
 ////        return $this->fetch_lines($only_product);
     }
 
-    function getNomUrl($withpicto = 0, $option = 0, $max = 0, $short = 0) {
+    function getNomUrl($withpicto = 0, $option = 0, $max = 0, $short = 0, $notooltip = 0, $save_lastsearch_value = -1) {
         global $conf, $langs;
 
         $result = '';

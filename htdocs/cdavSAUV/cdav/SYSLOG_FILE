@@ -1,0 +1,7 @@
+[08-Sep-2017 18:36:22 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 8192 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/db/mysqli.class.php on line 296
+[08-Sep-2017 18:36:40 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 8192 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/db/mysqli.class.php on line 296
+[08-Sep-2017 18:38:10 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 8192 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/db/mysqli.class.php on line 296
+[08-Sep-2017 18:38:32 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 8192 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/db/mysqli.class.php on line 296
+[08-Sep-2017 18:38:47 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 20480 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/cdav/lib/SabreDAV/vendor/sabre/dav/lib/CardDAV/AddressBook.php on line 293
+[08-Sep-2017 18:39:12 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 8192 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/db/mysqli.class.php on line 296
+[08-Sep-2017 18:42:01 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 8192 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/db/mysqli.class.php on line 296

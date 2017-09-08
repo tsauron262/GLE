@@ -20,6 +20,7 @@
 CREATE TABLE IF NOT EXISTS `llx_actioncomm_cdav` (
   `fk_object` int(11) NOT NULL,
   `uuidext` varchar(255) NOT NULL,
+  `sourceuid` varchar(255) NOT NULL,
   PRIMARY KEY (`fk_object`),
   KEY `uuidext` (`uuidext`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Storage of external UUID created by externals applications';

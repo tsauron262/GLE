@@ -1,12 +1,15 @@
 <?php
 
-require_once '../master.inc.php';
+require_once '../main.inc.php';
 require_once __DIR__ . '/BDS_Lib.php';
 require_once __DIR__ . '/views/render.php';
 
 ini_set('display_errors', 1);
 
 global $user;
+
+print_r($user);
+die;
 
 $errors = array();
 $success = 0;

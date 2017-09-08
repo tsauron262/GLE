@@ -2,7 +2,7 @@
 
 ## What is it ?
 
-This module for Dolibarr 3.7/3.8/3.9 add CardDAV / CalDAV and ICS synchronisation. It uses included [Sabre/DAV](http://sabre.io/dav/) library.
+This module for Dolibarr 3.7/3.8/3.9/4.0/5.0 add CardDAV / CalDAV and ICS synchronisation. It uses included [Sabre/DAV](http://sabre.io/dav/) library.
 
 You can :
 
@@ -13,19 +13,25 @@ You can :
 
 Each user can access his/her contacts address book (public and own private contacts), his/her own calendar and other users calendars according to his/her rights.
 
-Dolibarr contact informations fill personnal informations in client software cards.
+Dolibarr contact informations fill personnal informations in client software cards (including contact photo).
 
 Society informations (to which contact is attached) fill professional informations in client software cards.
 
 Cards updated in client software fill only Dolibarr contacts (not Society).
 
+It is possible to select which contacts to sync with CDAV_CONTACT_TAG configuration value in Home / Setup / Other setup. Enter a contact tag value and then only contacts with this tag will be synced (empty value for all).
+
 Calendar records with "Status / Percentage" set to "Not applicable" are converted to events in CalDAV (VEVENT), others are converted to tasks (VTODO).
+
+Recurring events are not handled (Dolibarr does not handle them).
 
 ## Help improvements
 
-If you find the module is useful and want to finance improvements, consider to pay it on [Dolistore](https://www.dolistore.com/fr/modules/526-Synchronisation-CardDAV---CalDAV---ICS.html)
+If you find the module is useful and want to finance improvements, consider to pay it on [Dolistore](https://www.dolistore.com/modules/526-Synchronisation-CardDAV---CalDAV---ICS.html)
 
 ## How to install
+
+PHP 5.5 or greater is needed.
 
 Dolibarr native calendar module must be activated before installing CDav module.
 
@@ -41,7 +47,7 @@ Use these URLs in your CardDAV or CalDAV client software.
 
 * Disable CDav module in Interfaces Modules list.
 * Unzip last version or _git pull_ in dolibarr/htdocs/cdav
-* Enable CDav module in Interfaces Modules list.
+* Enable CDav module in Modules list.
 
 
 ## DAV URLs

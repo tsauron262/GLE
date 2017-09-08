@@ -50,6 +50,7 @@ class CdavLib
 					s.town soc_town,
 					cos.label soc_country_label,
 					s.phone soc_phone,
+					ac.sourceuid,
 					(SELECT GROUP_CONCAT(u.login) FROM '.MAIN_DB_PREFIX.'actioncomm_resources ar
 						LEFT OUTER JOIN '.MAIN_DB_PREFIX.'user AS u ON (u.rowid=fk_element) 
 						WHERE ar.element_type=\'user\' AND fk_actioncomm=a.id) AS other_users
@@ -147,7 +148,10 @@ class CdavLib
 		$caldata.="CREATED:".gmdate('Ymd\THis', strtotime($obj->datec))."Z\n";
 		$caldata.="LAST-MODIFIED:".gmdate('Ymd\THis', strtotime($obj->lastupd))."Z\n";
 		$caldata.="DTSTAMP:".gmdate('Ymd\THis', strtotime($obj->lastupd))."Z\n";
-		$caldata.="UID:".$obj->id.'-ev-'.$calid.'-cal-'.CDAV_URI_KEY."\n";
+		if($obj->sourceuid=='')
+			$caldata.="UID:".$obj->id.'-ev-'.$calid.'-cal-'.CDAV_URI_KEY."\n";
+		else
+			$caldata.="UID:".$obj->sourceuid."\n";
 		$caldata.="SUMMARY:".$obj->label."\n";
 		$caldata.="LOCATION:".$location."\n";
 		$caldata.="PRIORITY:".$obj->priority."\n";
@@ -155,7 +159,12 @@ class CdavLib
 		{
 			$caldata.="DTSTART;VALUE=DATE:".date('Ymd', strtotime($obj->datep))."\n";
 			if($type=='VEVENT')
-				$caldata.="DTEND;VALUE=DATE:".date('Ymd', strtotime($obj->datep2)+1)."\n";
+			{
+				if(trim($obj->datep2)!='')
+					$caldata.="DTEND;VALUE=DATE:".date('Ymd', strtotime($obj->datep2)+1)."\n";
+				else
+					$caldata.="DTEND;VALUE=DATE:".date('Ymd', strtotime($obj->datep)+(25*3600))."\n";
+			}
 			elseif(trim($obj->datep2)!='')
 				$caldata.="DUE;VALUE=DATE:".date('Ymd', strtotime($obj->datep2)+1)."\n";
 		}
@@ -163,7 +172,12 @@ class CdavLib
 		{
 			$caldata.="DTSTART;TZID=".$timezone.":".strtr($obj->datep,array(" "=>"T", ":"=>"", "-"=>""))."\n";
 			if($type=='VEVENT')
-				$caldata.="DTEND;TZID=".$timezone.":".strtr($obj->datep2,array(" "=>"T", ":"=>"", "-"=>""))."\n";
+			{
+				if(trim($obj->datep2)!='')
+					$caldata.="DTEND;TZID=".$timezone.":".strtr($obj->datep2,array(" "=>"T", ":"=>"", "-"=>""))."\n";
+				else
+					$caldata.="DTEND;TZID=".$timezone.":".strtr($obj->datep,array(" "=>"T", ":"=>"", "-"=>""))."\n";
+			}
 			elseif(trim($obj->datep2)!='')
 				$caldata.="DUE;TZID=".$timezone.":".strtr($obj->datep2,array(" "=>"T", ":"=>"", "-"=>""))."\n";
 		}

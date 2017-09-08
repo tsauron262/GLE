@@ -15,17 +15,21 @@
  ******************************************************************/
 
 error_reporting(E_ALL & ~E_NOTICE);
-ini_set("display_errors", 1);
+ini_set("display_errors", 0);
 ini_set("log_errors", 1);
 
 function exception_error_handler($errno, $errstr, $errfile, $errline) {
 	if(function_exists("debug_log"))
+	{
 		debug_log("Error $errno : $errstr - $errfile @ $errline");
+		foreach(debug_backtrace(false) as $trace)
+			debug_log(" - ".$trace['file'].'@'.$trace['line'].' '.$trace['function'].'(...)');
+    }
     throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
 
 // debug
-//$debug_file = fopen('/tmp/cdav_'.date('Ymd_'),'a');
+//$debug_file = fopen('/tmp/cdav_'.date('Ymd').'.log','a');
 $debug_file = false;
 
 function debug_log($txt)
@@ -69,13 +73,21 @@ else
 	$dir = '../../';
 
 require $dir.'main.inc.php';	// Load $user and permissions
+require $dir.'core/lib/security2.lib.php';	// auth method
+require_once $dir.'/contact/class/contact.class.php';
 
 if(!$conf->cdav->enabled)
-	die('module CDav not enabled !'); 
+	die('module CDav not enabled !');
 
-set_error_handler("exception_error_handler");
+set_error_handler("exception_error_handler", E_ERROR | E_USER_ERROR |
+				E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR );
+
 
 require_once './lib/cdav.lib.php';
+
+// define CDAV_CONTACT_TAG if not
+if(!defined('CDAV_CONTACT_TAG'))
+	define('CDAV_CONTACT_TAG', '');
 
 // Sabre/dav configuration
 
@@ -102,15 +114,26 @@ $cdavLib = new CdavLib($user, $db, $langs);
 $authBackend = new DAV\Auth\Backend\BasicCallBack(function ($username, $password)
 {
 	global $user;
+	global $conf;
+	global $dolibarr_main_authentication;
+	
+	
 	if ( ! isset($user->login) || $user->login=='')
 		return false;
 	if ($user->societe_id!=0)
 		return false;
 	if ($user->login!=$username)
 		return false;
-	if ($user->pass_indatabase_crypted == '' || dol_hash($password) != $user->pass_indatabase_crypted)
+	/*if ($user->pass_indatabase_crypted == '' || dol_hash($password) != $user->pass_indatabase_crypted)
+		return false;*/
+	
+	// Authentication mode
+	if (empty($dolibarr_main_authentication))
+		$dolibarr_main_authentication='http,dolibarr';
+	$authmode = explode(',',$dolibarr_main_authentication);
+	$entity = (GETPOST('entity','int') ? GETPOST('entity','int') : (!empty($conf->entity) ? $conf->entity : 1));
+	if(checkLoginPassEntity($username,$password,$entity,$authmode)!=$username)
 		return false;
-
 	return true;
 });
 

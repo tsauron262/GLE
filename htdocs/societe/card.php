@@ -839,7 +839,6 @@ else
         $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
         foreach ($dirsociete as $dirroot)
         {
-            /*moddrsi*/if(is_file(DOL_DOCUMENT_ROOT."/".$dirroot.$module.'.php'))/*fmoddrsi*/
             $res=dol_include_once($dirroot.$module.'.php');
             if ($res) break;
         }
@@ -853,7 +852,6 @@ else
         $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
         foreach ($dirsociete as $dirroot)
         {
-            /*moddrsi*/if(is_file(DOL_DOCUMENT_ROOT."/".$dirroot.$module.'.php'))/*fmoddrsi*/
             $res=dol_include_once($dirroot.$module.'.php');
             if ($res) break;
         }
@@ -1405,7 +1403,6 @@ else
             $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
             foreach ($dirsociete as $dirroot)
             {
-            /*moddrsi*/if(is_file(DOL_DOCUMENT_ROOT."/".$dirroot.$module.'.php'))/*fmoddrsi*/
                 $res=dol_include_once($dirroot.$module.'.php');
                 if ($res) break;
             }
@@ -1423,7 +1420,6 @@ else
             $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
             foreach ($dirsociete as $dirroot)
             {
-            /*moddrsi*/if(is_file(DOL_DOCUMENT_ROOT."/".$dirroot.$module.'.php'))/*fmoddrsi*/
                 $res=dol_include_once($dirroot.$module.'.php');
                 if ($res) break;
             }

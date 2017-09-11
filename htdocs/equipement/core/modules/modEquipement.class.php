@@ -40,7 +40,7 @@ class modequipement extends DolibarrModules
 	*/
 	function __construct($db)
 	{
-		//global $conf;
+		global $conf;
 
 		$this->db = $db;
 		$this->numero = 160070;

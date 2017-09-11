@@ -24,7 +24,7 @@ $(window).on("load", function () {
 //    }, 5000);
 
 
-    if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/card.php") > -1) {
+    if (window.location.pathname.indexOf("societe/card.php") > -1 || window.location.pathname.indexOf("contact/card.php") > -1) {
         desactEntrer = false;
         $("textarea").focusin(function () {
             desactEntrer = true;
@@ -619,7 +619,7 @@ function popOjectAffiche(id, type, callBack, titreNotif, nbLoad) {//Affiche ici
     else if (type == 'newContact')
         urlT = DOL_URL_ROOT + "/contact/card.php?action=create&optioncss=print&socid=";
     else if (type == 'newSoc')
-        urlT = DOL_URL_ROOT + "/societe/soc.php?leftmenu=customers&action=create&type=c&optioncss=print&cc=";
+        urlT = DOL_URL_ROOT + "/societe/card.php?leftmenu=customers&action=create&type=c&optioncss=print&cc=";
     else if (type == 'sms')
         urlT = DOL_URL_ROOT + "/smsdecanet/send.php?optioncss=print&id=";
     popIFrame(urlT + id, callBack, titreNotif, nbLoad);
@@ -741,7 +741,7 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
         fermerIframe($(this).parent(), callBack);
     });
     var i = 0;
-    iFrame.find("iframe").load(function () {
+    iFrame.find("iframe").on('load', function () {
         if ($(this).contents().find("#username").length > 0)
             $nbLoad++;
 
@@ -760,7 +760,7 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
         urlStr = iFrame.find("iframe").get(0).contentWindow.location.toString();
 
 
-        if (urlIF.indexOf("action=create") !== -1 && urlIF.indexOf("societe/soc.php") !== -1) {
+        if (urlIF.indexOf("action=create") !== -1 && urlIF.indexOf("societe/card.php") !== -1) {
             if (urlStr.indexOf("id", 0) !== -1)
                 fermerIframe($(this).parent(), callBack);
         } else {

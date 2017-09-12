@@ -8,7 +8,7 @@ $tabCert = array(
         1 => array('prod.pem', '')),
     579256 => array(
         0 => array('Applecare-APP157-0000579256.Prod.apple.com.chain.pem', ''),
-        1 => array('prod.pem', '')),
+        1 => array('privatekey.nopass.pem', '')),
     
 //    128630 => array(
 //        0 => array('clermont/certifTestProdClermont.pem', 'passPhraseTest'),

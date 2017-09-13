@@ -57,7 +57,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/card.php?id=" . $ligne->id . "'>" . $ligne->label;
         $text = "<input type='hidden' class='idAction' value='" . $ligne->id . "'/>";
         $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
-        $text .= "<a title='" . $ligne->label . "' href='" . DOL_URL_ROOT . "/comm/action/card.php?id=" . substr($ligne->id, 0, 30) . "'>" . $ligne->label . "</a>";
+        $text .= str_replace("+", '\+', "<a title='" . $ligne->label . "' href='" . DOL_URL_ROOT . "/comm/action/card.php?id=" . substr($ligne->id, 0, 30) . "'>" . $ligne->label . "</a>");
         if ($ligne->fk_soc > 0) {
             $soc = new Societe($db);
             $soc->fetch($ligne->fk_soc);
@@ -67,7 +67,6 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
         $text = str_replace('"', '\"', $text);
         $text = str_replace("'", '\'', $text);
-        $text = str_replace("+", '\+', $text);
 
 
         if (!isset($ligne->datep2))

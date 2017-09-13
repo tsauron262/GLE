@@ -67,7 +67,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
         $text = str_replace('"', '\"', $text);
         $text = str_replace("'", '\'', $text);
-        $text = str_replace("+", '', $text);
+        $text = str_replace("	", ' ', $text);
 
 
         if (!isset($ligne->datep2))

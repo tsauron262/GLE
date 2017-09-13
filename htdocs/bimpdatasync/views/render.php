@@ -94,7 +94,7 @@ function renderReportContent(BDS_Report $report)
     $html .= '<tr>';
     $html .= '<td>';
     $html .= '<div class="reportInfos">';
-    $html .= '<a class="button deleteReportButton" href="' . DOL_URL_ROOT . '/bimpdatasync/rapports.php?deleteReport=' . $report->file_ref . '" style="color: #800">';
+    $html .= '<a class="butActionDelete deleteReportButton" href="' . DOL_URL_ROOT . '/bimpdatasync/rapports.php?deleteReport=' . $report->file_ref . '">';
     $html .= 'Supprimer ce rapport';
     $html .= '</a>';
     if (count($infos)) {
@@ -437,7 +437,7 @@ function renderOperationProcess($data)
 
     $html .= '</td></tr></table></div>';
 
-    if (isset($data['debug_content']) && $data['debug_content']) {
+    if (isset($data['debug_content'])) {
         $html .= renderDebugContent($data['debug_content']);
     }
 

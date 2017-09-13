@@ -7,7 +7,7 @@ require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once __DIR__ . '/BDS_Lib.php';
 
-ini_set('display_errors', 1);
+//ini_set('display_errors', 1);
 
 function testReq()
 {
@@ -27,7 +27,7 @@ function testReq()
 
     if (!is_null($process)) {
         $errors = array();
-        
+
         $process->test();
 
         if (count($errors)) {
@@ -38,26 +38,7 @@ function testReq()
     }
 }
 
-testReq();
-
-function testImg()
-{
-    global $conf, $db;
-
-    ini_set('display_errors', 1);
-
-    if (!class_exists('Product')) {
-        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-        require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-    }
-
-    $product = new Product($db);
-    $product->fetch(6782);
-    $dir = rawurlencode(get_exdir($product->id, 2, false, false, $product, 'product') . $product->id . '/photos/');
-    echo rawurlencode($dir);
-}
-
-//testImg();
+//testReq();
 
 function installProcess()
 {
@@ -68,65 +49,20 @@ function installProcess()
 
 //installProcess();
 
-function testSQL()
+function testCommande($id)
 {
-    global $db;
-    $bdb = new BimpDb($db);
+    if (!class_exists('Commande')) {
+        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+    }
 
-    $row = $bdb->getRow('bds_object_sync_data', '`id` = 427');
+    global $db;
+
+    $comm = new Commande($db);
+    $comm->fetch($id);
+    $products = $comm->fetch_lines(1);
     echo '<pre>';
-    print_r($row);
+    print_r($comm->lines);
     exit;
 }
-
-//testSQL();
-
-function testMatch()
-{
-    echo 'TEST <br/>';
-//    $match = new BDSProcessMatchingValues();
-//    $match->fetch(2);
-//
-//    $res = $match->getMatchedValue(6);
-//    if (is_null($res)) {
-//        echo $match->db->db->error();
-//    }
-//    echo 'Res: ' . $res;
-
-    $match = BDSProcessMatchingValues::createInstanceByName(1, 'order_state');
-    if (is_null($match)) {
-        echo 'PAS OK <br/>';
-    } else {
-        echo 'ID: ' . $match->id;
-    }
-}
-
-//testMatch();
-
-function testFtp()
-{
-    $ftp = ftp_connect('ExportFTP.techdata.fr');
-
-    if ($ftp) {
-        echo 'Connexion OK<br/>';
-        $logged = ftp_login($ftp, 'allcom', 'Jrl$98Ztj*DH');
-
-        if ($logged) {
-            echo 'Login OK<br/>';
-
-            $files = ftp_nlist($ftp, '/');
-            if (!$files) {
-                echo 'Echec de la récup des fichiers';
-            } else {
-                echo 'Fichiers: <pre>';
-                print_r($files);
-                echo '</pre>';
-            }
-        } else {
-            echo 'Echec Login<br/>';
-        }
-    } else {
-        echo 'Echec connexion<br/>';
-    }
-}
-//testFtp();
+testCommande(3842);

@@ -122,70 +122,6 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         }
     }
 
-    protected function findCategoriesToExport()
-    {
-        $root_category = $this->parameters['id_root_categorie'];
-        $subCats = $this->findChildrenCategories((int) $root_category);
-        $categories = array();
-        foreach ($subCats as $idc) {
-            if (!in_array($idc, $categories)) {
-//                if ((int) $idc !== (int) $this->parameters['id_default_parent_categorie']) {
-                $categories[] = (int) $idc;
-//                }
-            }
-        }
-        return $this->checkOptionsForObjectsExport('Categorie', $categories);
-    }
-
-    protected function findProductsToExport($categories)
-    {
-        $sql = 'SELECT p.rowid as id FROM ' . MAIN_DB_PREFIX . 'product p ';
-        $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'categorie_product cp ON cp.fk_product = p.rowid ';
-        $sql .= 'WHERE cp.fk_categorie IN (' . implode(',', $categories) . ')';
-        $rows = $this->db->executeS($sql, 'array');
-
-        $ids = array();
-        foreach ($rows as $r) {
-            $ids[] = $r['id'];
-        }
-
-        return $this->checkOptionsForObjectsExport('Product', $ids);
-    }
-
-    public function isCategorieInSyncCategories($id_categorie, $display_msg = false)
-    {
-        if (BDS_Tools::isCategorieChildOf($this->db, $id_categorie, $this->parameters['id_root_categorie'])) {
-            return true;
-        }
-        if ($display_msg) {
-            $msg = 'Cette catégorie n\'est pas éligible à l\'export vers Dolibarr ';
-            $msg .= '(elle n\'est pas incluse dans l\'une des catégories racines de Prestashop)';
-            $this->alert($msg, $id_categorie);
-        }
-        return false;
-    }
-
-    public function isProductInSyncCategories($id_product, $display_msg = false)
-    {
-        $categories = array();
-        $rows = $this->db->getRows('categorie_product', '`fk_product` = ' . (int) $id_product);
-        foreach ($rows as $r) {
-            $categories[] = (int) $r->fk_categorie;
-        }
-
-        foreach ($categories as $id_category) {
-            if (BDS_Tools::isCategorieChildOf($this->db, $id_category, (int) $this->parameters['id_root_categorie'])) {
-                return true;
-            }
-        }
-
-        if ($display_msg) {
-            $msg = 'Ce produit n\'est pas éligible à l\'export vers Dolibarr';
-            $this->alert($msg, $id_category);
-        }
-        return false;
-    }
-
     // Triggers:
 
     protected function triggerActionProductCreate($object)
@@ -336,6 +272,20 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         }
     }
 
+    protected function triggerActionStockMovement($object)
+    {
+        if (isset($object->product_id)) {
+            if (!class_exists('Product')) {
+                require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+            }
+            $product = new Product($this->db->db);
+            $product->fetch($object->product_id);
+            if (isset($product->id) && $product->id) {
+                $this->triggerActionProductModify($product);
+            }
+        }
+    }
+
     // Données d'export des objets: 
 
     public function getCategorieExportData($id_categorie)
@@ -356,10 +306,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $result = $categorie->fetch($id_categorie);
 
         if ($result <= 0) {
-            $msg = 'Echec du chargement des données de la catégorie. Export abandonné';
-            if (isset($categorie->error) && $categorie->error) {
-                $msg .= ' - Erreur: ' . $categorie->error;
-            }
+            $msg = 'Echec du chargement des données de la catégorie. Export abandonné' . $this->ObjectError($categorie);
             $this->Error($msg, 'Categorie', $id_categorie);
             return;
         }
@@ -386,10 +333,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $result = $product->fetch($id_product);
 
         if ($result <= 0) {
-            $msg = 'Echec du chargement des données du produit. Export abandonné';
-            if (isset($product->error) && $product->error) {
-                $msg .= ' - Erreur: ' . $product->error;
-            }
+            $msg = 'Echec du chargement des données du produit. Export abandonné' . $this->ObjectError($product);
             $this->Error($msg, 'Product', $id_product);
             return;
         }
@@ -489,16 +433,6 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                 break;
         }
 
-//        if (count($temp_imgs)) {
-//            foreach ($temp_imgs as $temp_img) {
-//                unlink($temp_img);
-//            }
-//        }
-//
-//        if (file_exists($temp_images_path)) {
-//            rmdir($temp_images_path);
-//        }
-
         return $data;
     }
 
@@ -559,8 +493,8 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         if ((is_null($id_categorie) || !$id_categorie) &&
                 (isset($data['name']) && $data['name'])) {
             $where = '`type` = ' . (int) $categorie->type;
-            $where.= ' AND `fk_parent` = ' . (int) $categorie->fk_parent;
-            $where.= ' AND `label` = \'' . $this->db->db->escape($categorie->label) . '\'';
+            $where .= ' AND `fk_parent` = ' . (int) $categorie->fk_parent;
+            $where .= ' AND `label` = \'' . $this->db->db->escape($categorie->label) . '\'';
             $id_categorie = $this->db->getValue('categorie', 'rowid', $where);
             if (!is_null($id_categorie) && $id_categorie) {
                 $categorie->fetch($id_categorie);
@@ -897,7 +831,9 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $errors = array();
         if (!class_exists('Commande')) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-            require_once DOL_DOCUMENT_ROOT . '/commande/class/command.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
         }
 
         $id_commande = null;
@@ -916,7 +852,25 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $commande = new Commande($this->db->db);
 
         if (!is_null($id_commande) && $id_commande) {
-            $commande->fetch($id_commande);
+            if ($commande->fetch($id_commande) <= 0) {
+                $msg = 'Commande d\'ID ' . $id_commande . ' non trouvée';
+                $errors[] = $msg;
+                $this->Error($msg, $this->curName(), null, $this->curRef());
+                return array(
+                    'object' => null,
+                    'errors' => $errors
+                );
+            } else {
+                // La commande n'est mise à jour que si elle a le statut "Brouillon". 
+                if ((int) $commande->statut !== Commande::STATUS_DRAFT) {
+                    $msg = 'Cette commande ne peut pas être mise à jour';
+                    $this->Info($msg, $this->curName(), $this->curId(), $this->curRef());
+                    return array(
+                        'object' => $commande,
+                        'errors' => $errors
+                    );
+                }
+            }
         }
 
         // Données de base:
@@ -925,25 +879,25 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         }
 
         // Statut de la commande:
-        if (isset($data['id_order_state']) && $data['id_order_state']) {
-            $match = BDSProcessMatchingValues::createInstanceByName($this->processDefinition->id, 'order_states');
-            if (is_null($match)) {
-                $msg = 'Correspondance des états de commande non trouvée';
-                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
-                $errors[] = $msg;
-            } else {
-                $match = new BDSProcessMatchingValues();
-                $statut = $match->getMatchedValue($data['id_order_state']);
-                if (!is_null($statut)) {
-                    $commande->statut = $statut;
-                } else {
-                    $msg = 'Statut de commande non trouvé pour l\'ID d\'état Prestashop: ' . $data['id_order_state'];
-                    $errors[] = $msg;
-                    $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
-                    $commande->statut = Commande::STATUS_DRAFT;
-                }
-            }
-        }
+//        if (isset($data['id_order_state']) && $data['id_order_state']) {
+//            $match = BDSProcessMatchingValues::createInstanceByName($this->processDefinition->id, 'order_states');
+//            if (is_null($match)) {
+//                $msg = 'Correspondance des états de commande non trouvée';
+//                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+//                $errors[] = $msg;
+//            } else {
+//                $match = new BDSProcessMatchingValues();
+//                $statut = $match->getMatchedValue($data['id_order_state']);
+//                if (!is_null($statut)) {
+//                    $commande->statut = $statut;
+//                } else {
+//                    $msg = 'Statut de commande non trouvé pour l\'ID d\'état Prestashop: ' . $data['id_order_state'];
+//                    $errors[] = $msg;
+//                    $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+//                    $commande->statut = Commande::STATUS_DRAFT;
+//                }
+//            }
+//        }
         if (!isset($commande->statut)) {
             $commande->statut = Commande::STATUS_DRAFT;
         }
@@ -951,8 +905,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         // Client:
         $id_soc = null;
         if (isset($data['id_customer']) && $data['id_customer']) {
-            $id_soc = BDS_SyncData::getObjectValue($this->db, 'id_loc_object', $this->processDefinition->id, 'Societe', (int) $data['id_customer'], 'ext_id_object');
-
+            $id_soc = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Societe', (int) $data['id_customer'], 'ext_id_object');
             if (is_null($id_soc) || !$id_soc) {
                 $msg = 'Client non enregistré pour l\'ID Prestashop: ' . $data['id_customer'];
                 $errors[] = $msg;
@@ -976,37 +929,163 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             }
         }
 
+        // Suppression des contacts actuels si le client a changé
         if (!is_null($soc)) {
+            if (isset($commande->socid) && $commande->socid &&
+                    ((int) $commande->socid !== (int) $soc->id)) {
+                $current_contacts = $commande->liste_contact();
+                foreach ($current_contacts as $key => $current_contact) {
+                    if ($current_contact['socid'] !== $soc->id) {
+                        $this->deleteCommandeContact($current_contact['socid'], $commande, $current_contact['code'], $errors);
+                    }
+                }
+                unset($current_contacts);
+            }
             $commande->socid = $soc->id;
+        } else {
+            $msg = 'Client non trouvé pour cette commande';
+            $errors[] = $msg;
+            $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+            return array(
+                'object' => null,
+                'errors' => $errors
+            );
         }
-
-        // Addresse de livraison:
-        if (isset($data['id_address_delivery']) && $data['id_address_delivery']) {
-            
-        }
-
-//        $data = array(
-//            'date_create'          => $order->date_add,
-//            'id_address_invoice'   => (int) $order->id_address_invoice,
-//            'reference'            => $order->reference,
-//            'payment'              => $order->payment,
-//            'id_carrier'           => (int) $order->id_carrier,
-//            'id_carrier_reference' => (int) BimpObjectManager::getValue('carrier', $order->id_carrier, 'id_reference'),
-//            'products'             => array()
-//        );
 
         if (count($errors)) {
             $commande->statut = Commande::STATUS_DRAFT;
         }
 
         if ($this->saveObject($commande, 'de la commande', $errors, true)) {
-            // Todo: enregistrer la liste des produits. 
+            // Addresse de livraison:
+            if (isset($data['id_address_delivery']) && $data['id_address_delivery']) {
+                $id_contact = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Contact', (int) $data['id_address_delivery'], 'ext_id_object');
+                if (is_null($id_contact) || !$id_contact) {
+                    $msg = 'Contact non trouvé pour l\'addresse de livraison d\'ID externe ' . $data['id_address_delivery'];
+                    $errors[] = $msg;
+                    $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                } else {
+                    $this->processCommandeContact($commande, $id_contact, 'SHIPPING', $errors);
+                }
+            }
+
+            // Addresse de facturation:
+            if (isset($data['id_address_invoice']) && $data['id_address_invoice']) {
+                $id_contact = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Contact', (int) $data['id_address_invoice'], 'ext_id_object');
+                if (is_null($id_contact) || !$id_contact) {
+                    $msg = 'Contact non trouvé pour l\'addresse de facturation d\'ID externe ' . $data['id_address_invoice'];
+                    $errors[] = $msg;
+                    $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                } else {
+                    $this->processCommandeContact($commande, $id_contact, 'BILLING', $errors);
+                }
+            }
+
+            // Liste des produits: 
+            $commande->fetch_lines(1);
+            $current_products = $commande->lines;
+
+            if (isset($data['products']) && count($data['products'])) {
+                foreach ($data['products'] as $product_data) {
+                    $id_product = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Product', $product_data['id_product'], 'ext_id_object');
+
+                    if (is_null($id_product) || !$id_product) {
+                        $msg = 'Produit non trouvé pour l\'ID externe ' . $product_data['id_product'];
+                        $errors[] = $msg;
+                        $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                        continue;
+                    }
+
+                    $id_line = null;
+                    foreach ($current_products as $key => $current_product) {
+                        if ($current_product->fk_product === $id_product) {
+                            $id_line = $current_product->id;
+                            unset($current_products[$key]);
+                            break;
+                        }
+                    }
+
+                    $this->processCommandeProduct($commande, $id_line, $id_product, $product_data, $errors);
+                }
+            }
+
+            // Suppression de tous les produis ne figurant plus dans la commande:
+            foreach ($current_products as $product_line) {
+                $this->deleteCommandeProduct($commande, $product_line['rowid'], $product_line['fk_product'], $errors);
+            }
+            $commande->call_trigger('ORDER_MODIFY', $this->user);
         }
 
         return array(
-            'object' => $Commande,
+            'object' => $commande,
             'errors' => $errors
         );
+    }
+
+    // Helpers:
+
+    protected function findCategoriesToExport()
+    {
+        $root_category = $this->parameters['id_root_categorie'];
+        $subCats = $this->findChildrenCategories((int) $root_category);
+        $categories = array();
+        foreach ($subCats as $idc) {
+            if (!in_array($idc, $categories)) {
+//                if ((int) $idc !== (int) $this->parameters['id_default_parent_categorie']) {
+                $categories[] = (int) $idc;
+//                }
+            }
+        }
+        return $this->checkOptionsForObjectsExport('Categorie', $categories);
+    }
+
+    protected function findProductsToExport($categories)
+    {
+        $sql = 'SELECT p.rowid as id FROM ' . MAIN_DB_PREFIX . 'product p ';
+        $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'categorie_product cp ON cp.fk_product = p.rowid ';
+        $sql .= 'WHERE cp.fk_categorie IN (' . implode(',', $categories) . ')';
+        $rows = $this->db->executeS($sql, 'array');
+
+        $ids = array();
+        foreach ($rows as $r) {
+            $ids[] = $r['id'];
+        }
+
+        return $this->checkOptionsForObjectsExport('Product', $ids);
+    }
+
+    public function isCategorieInSyncCategories($id_categorie, $display_msg = false)
+    {
+        if (BDS_Tools::isCategorieChildOf($this->db, $id_categorie, $this->parameters['id_root_categorie'])) {
+            return true;
+        }
+        if ($display_msg) {
+            $msg = 'Cette catégorie n\'est pas éligible à l\'export vers Dolibarr ';
+            $msg .= '(elle n\'est pas incluse dans l\'une des catégories racines de Prestashop)';
+            $this->alert($msg, $id_categorie);
+        }
+        return false;
+    }
+
+    public function isProductInSyncCategories($id_product, $display_msg = false)
+    {
+        $categories = array();
+        $rows = $this->db->getRows('categorie_product', '`fk_product` = ' . (int) $id_product);
+        foreach ($rows as $r) {
+            $categories[] = (int) $r->fk_categorie;
+        }
+
+        foreach ($categories as $id_category) {
+            if (BDS_Tools::isCategorieChildOf($this->db, $id_category, (int) $this->parameters['id_root_categorie'])) {
+                return true;
+            }
+        }
+
+        if ($display_msg) {
+            $msg = 'Ce produit n\'est pas éligible à l\'export vers Dolibarr';
+            $this->alert($msg, $id_category);
+        }
+        return false;
     }
 
     protected function processImportProductCategories($id_product, $categories, $ext_ids = true)
@@ -1133,6 +1212,152 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         $sync_data->setObjects('image', $sync_imgs);
         return $errors;
+    }
+
+    protected function processCommandeContact(Commande $commande, $id_contact, $type, &$errors)
+    {
+        $label = '';
+        switch ($type) {
+            case 'BILLING': $label = 'facturation';
+                break;
+            case' SHIPPING': $label = 'livraison';
+                break;
+        }
+
+        $addContact = true;
+        $current_contacts = $commande->liste_contact();
+        foreach ($current_contacts as $current_contact) {
+            if ($current_contact['code'] === $type) {
+                if ((int) $current_contact['id'] !== (int) $id_contact) {
+                    $this->deleteCommandeContact($id_contact, $commande, $type, $errors);
+                } else {
+                    $addContact = false;
+                }
+            }
+        }
+        if ($addContact) {
+            $contact = new Contact($this->db->db);
+            if ($contact->fetch($id_contact) <= 0) {
+                $msg = 'Contact pour la ' . $label . ' d\'ID ' . $id_contact . ' non trouvé';
+                $errors[] = $msg;
+                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+            } else {
+                if ((int) $contact->socid !== (int) $commande->socid) {
+                    $msg = 'Le contact d\'ID ' . $id_contact . ' n\'appartient pas à la société associée à cette commande';
+                    $errors[] = $msg;
+                    $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                } else {
+                    $this->addCommandeContact($id_contact, $commande, $type, $errors);
+                }
+            }
+        }
+    }
+
+    protected function addCommandeContact($id_contact, Commande $commande, $type, &$errors)
+    {
+        $label = '';
+        switch ($type) {
+            case 'BILLING': $label = 'facturation';
+                break;
+            case 'SHIPPING': $label = 'livraison';
+                break;
+        }
+
+        if ($commande->add_contact($id_contact, $type) <= 0) {
+            $msg = 'Echec de l\'enregistrement du contact d\'ID ' . $id_contact . ' pour l\'adresse de ' . $label . ' de cette commande';
+            $msg .= $this->ObjectError($commande);
+            $errors[] = $msg;
+            $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+        } else {
+            $msg = 'Contact pour la ' . $label . ' enregistré correctement';
+            $this->Success($msg, $this->curName(), $this->curId(), $this->curRef());
+            return true;
+        }
+        return false;
+    }
+
+    protected function deleteCommandeContact($id_contact, Commande $commande, $type, &$errors)
+    {
+        $label = '';
+        switch ($type) {
+            case 'BILLING': $label = 'facturation';
+                break;
+            case' SHIPPING': $label = 'livraison';
+                break;
+        }
+
+        if ($commande->delete_contact($id_contact) < 0) {
+            $msg = 'Echec de la suppression du contact pour la ' . $label . ' d\'ID ' . $id_contact;
+            $msg .= $this->ObjectError($commande);
+            $errors[] = $msg;
+            $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+        } else {
+            $this->Info('Contact pour la ' . $label . ' supprimé (ID ' . $id_contact . ')', $this->curName(), $this->curId(), $this->curRef());
+            return true;
+        }
+        return false;
+    }
+
+    protected function processCommandeProduct(Commande $commande, $id_order_line, $id_product, $product_data, &$errors)
+    {
+        $product = new Product($this->db->db);
+
+        if ($product->fetch($id_product) <= 0) {
+            $msg = 'Produit "' . $product_data['name'] . '" non trouvé (ID ' . $id_product . ')';
+            $msg .= $this->ObjectError($product);
+            $errors[] = $msg;
+            $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+            return false;
+        }
+
+        $qty = $product_data['quantity'];
+        $pu_ht = $product_data['base_unit_price_ht'];
+        $txtva = $product_data['tax_rate'] * 100;
+
+        $remise_percent = 0;
+        if (isset($product_data['reduction_percent']) && (float) $product_data['reduction_percent']) {
+            $remise_percent = $product_data['reduction_percent'];
+        }
+
+        if (isset($product_data['reduction_amount_ht']) && (float) $product_data['reduction_amount_ht']) {
+            $pu_ht -= (float) $product_data['reduction_amount_ht'];
+        }
+
+        $txlocaltax1 = 0; // ??
+        $txlocaltax2 = 0; // ??
+
+        if (is_null($id_order_line) || !$id_order_line) {
+            if ($commande->addline($product->label, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $product->id, $remise_percent) <= 0) {
+                $msg = 'Echec de l\'ajout du produit "' . $product->label . '" à la commande';
+                $msg .= $this->ObjectError($commande);
+                $errors[] = $msg;
+                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                return false;
+            }
+        } else {
+            if ($commande->updateline($id_order_line, $product->label, $pu_ht, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2) <= 0) {
+                $msg = 'Echec de la mise à jour du produit "' . $product->label . '"';
+                $msg .= $this->ObjectError($commande);
+                $errors[] = $msg;
+                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected function deleteCommandeProduct(Commande $commande, $id_order_line, $id_product, &$errors)
+    {
+        if ($commande->deleteline($this->user, $id_order_line) <= 0) {
+            $msg = 'Echec de la suppression du produit d\'ID ' . $id_product . ')';
+            $msg .= $this->ObjectError($commande);
+            $errors[] = $msg;
+            $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+            return false;
+        }
+        $msg = 'Produit d\'ID ' . $id_product . ' retiré de la commande';
+        $this->Info($msg, $this->curName(), $this->curId(), $this->curRef());
+        return true;
     }
 
     // Suppression des objets: 

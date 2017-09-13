@@ -43,7 +43,7 @@ abstract class BDS_Process
 
         if (self::$debug_mod) {
             ini_set('display_errors', 1);
-            error_reporting(E_ALL);
+            error_reporting(E_ERROR);
             $lvl = ob_get_level();
             if ((int) $lvl > 0) {
                 ob_end_flush();
@@ -55,8 +55,10 @@ abstract class BDS_Process
 
         $this->db = new BimpDb($db);
         $this->langs = $langs;
-        $this->user = $user;
+        $this->langs->load("errors");
 
+        global $user;
+        $this->user = $user;
 
         $this->filesDir = DOL_DATA_ROOT . '/bimpdatasync/files/' . static::$files_dir_name . '/';
 
@@ -112,6 +114,13 @@ abstract class BDS_Process
                     }
                 }
             }
+            if (isset($params['mode'])) {
+                $this->options['mode'] = $params['mode'];
+            }
+            if (isset($params['debug_mod']) && !isset($this->options['debug_mode'])) {
+                $this->options['debug_mod'] = (int) $params['debug_mod'];
+                
+            }
         }
 
         if (isset($params['references'])) {
@@ -141,10 +150,10 @@ abstract class BDS_Process
             $notifications = ob_get_clean();
             if ($notifications) {
                 $this->debug_content .= '<h4>Notifiactions: </h4>' . $notifications;
+                dol_syslog($notifications, 3);
             }
-            dol_syslog($notifications, 3);
         }
-        
+
         $this->cleanTempDirectory();
     }
 
@@ -152,6 +161,12 @@ abstract class BDS_Process
 
     public function initOperation($id_operation, &$errors)
     {
+        if (!isset($this->options['mode'])) {
+            $this->options['mode'] = 'debug';
+            self::$debug_mod = true;
+            $this->options['debug_mod'] = true;
+        }
+
         $data = array(
             'id_process'      => $this->processDefinition->id,
             'id_operation'    => $id_operation,
@@ -160,8 +175,7 @@ abstract class BDS_Process
             'operation_title' => '',
             'debug_content'   => ''
         );
-
-
+        
         if (is_null($id_operation) || !$id_operation) {
             $errors[] = 'ID de l\'opération absent';
         } else {
@@ -208,6 +222,9 @@ abstract class BDS_Process
             $this->debug_content .= '<h4>Options: </h4><pre>';
             $this->debug_content .= print_r($this->options, 1);
             $this->debug_content .= '</pre>';
+            $this->debug_content .= '<h4>Paramètres: </h4><pre>';
+            $this->debug_content .= print_r($this->parameters, 1);
+            $this->debug_content .= '</pre>';
             $this->debug_content .= '<h4>Données: </h4><pre>';
             $this->debug_content .= print_r($data, 1);
             $this->debug_content .= '</pre>';
@@ -216,14 +233,20 @@ abstract class BDS_Process
         $this->end(false);
 
         if (isset($this->options['debug_mod']) && $this->options['debug_mod']) {
-            if ($this->debug_content) {
-                $html = '<div class="foldable_section closed">';
-                $html .= '<div class="foldable_section_caption">';
-                $html .= '[INITIALISATION]';
-                $html .= '</div>';
-                $html .= '<div class="foldable_section_content">' . $this->debug_content . '</div>';
-                $html .= '</div>';
-                $data['debug_content'] = $html;
+            $html = '<div class="foldable_section closed">';
+            $html .= '<div class="foldable_section_caption">';
+            $html .= '[INITIALISATION]';
+            $html .= '</div>';
+            $html .= '<div class="foldable_section_content">' . $this->debug_content . '</div>';
+            $html .= '</div>';
+            $data['debug_content'] = $html;
+        }
+
+        if ($this->options['mode'] === 'debug') {
+            echo $data['debug_content'];
+
+            if (isset($data['result_html']) && $data['result_html']) {
+                echo $data['result_html'];
             }
         }
 
@@ -232,6 +255,12 @@ abstract class BDS_Process
 
     public function executeOperationStep($id_operation, $step, &$errors, $report_ref = null, $iteration = 0)
     {
+        if (!isset($this->options['mode'])) {
+            $this->options['mode'] = 'debug';
+            self::$debug_mod = true;
+            $this->options['debug_mod'] = true;
+        }
+
         $result = array();
         if (isset($this->processDefinition->id) && $this->processDefinition->id) {
             if (!is_null($report_ref)) {
@@ -295,6 +324,10 @@ abstract class BDS_Process
             $html .= '</div>';
 
             $result['debug_content'] = $html;
+        }
+
+        if ($this->options['mode'] === 'debug') {
+            echo $result['debug_content'];
         }
 
         return $result;
@@ -817,6 +850,26 @@ abstract class BDS_Process
 
     // Outils divers
 
+    protected function findProductsInCategory($id_category, $search_in_children = true)
+    {
+        $categories = array($id_category);
+        if ($search_in_children) {
+            $categories = array_merge($categories, $this->findChildrenCategories($id_category));
+        }
+
+        $products = array();
+        foreach ($categories as $id_cat) {
+            $ids = $this->db->getValues('categorie_product', 'fk_product', '`fk_categorie` = ' . (int) $id_cat);
+            if (!is_null($ids) && count($ids)) {
+                foreach ($ids as $id_product)
+                    if (!in_array((int) $id_product, $products)) {
+                        $products[] = (int) $id_product;
+                    }
+            }
+        }
+        return $products;
+    }
+
     protected function findChildrenCategories($id_parent)
     {
         $categories = BDS_Tools::getChildrenCategoriesIds($this->db, $id_parent);
@@ -865,15 +918,61 @@ abstract class BDS_Process
                 if (is_dir($dir . '/' . $f)) {
                     $this->cleanTempDirectory($subDir . '/' . $f);
                 } else {
-                    echo 'Suppr. du fichier ' . $dir . '/' . $f . '<br/>';
                     unlink($dir . '/' . $f);
                 }
             }
         }
 
         if ($subDir) {
-            echo 'Suppr du dir ' . $dir . '<br/>';
             rmdir($dir);
         }
+    }
+
+    protected function ObjectError($object, $unset_errors = true)
+    {
+        $msg = '';
+        if (isset($object->error) && $object->error) {
+            $msg .= ' - Erreur: ' . html_entity_decode(htmlspecialchars_decode($this->langs->trans($object->error), ENT_QUOTES));
+        }
+        if (isset($object->errors) && is_array($object->errors) && count($object->errors)) {
+            $msg .= '<br/>Erreurs:';
+            foreach ($object->errors as $err) {
+                $msg .= '<br/> - ' . html_entity_decode(htmlspecialchars_decode($this->langs->trans($err), ENT_QUOTES));
+            }
+        }
+        if ($unset_errors) {
+            $object->error = '';
+            $object->errors = array();
+        }
+        return $msg;
+    }
+
+    protected function checkParameter($name, $type = '', $required = true)
+    {
+        if (!isset($this->parameters[$name]) || !$this->parameters[$name]) {
+            if ($required) {
+                $this->Error('Paramètre "' . $name . '" absent');
+                return false;
+            }
+        }
+
+        if ($type) {
+            switch ($type) {
+                case 'int':
+                    if (!preg_match('/^\-?[0-9]+$/', $this->parameters[$name])) {
+                        $this->Error('Paramètre "' . $name . '" invalide (Doit être un nombre entier)');
+                        return false;
+                    }
+                    break;
+
+                case 'float':
+                    if (!preg_match('/^\-?[0-9]+\.?[0-9]*$/', $this->parameters[$name])) {
+                        $this->Error('Paramètre "' . $name . '" invalide (Doit être un nombre décimal)');
+                        return false;
+                    }
+                    break;
+            }
+        }
+        return true;
     }
 }

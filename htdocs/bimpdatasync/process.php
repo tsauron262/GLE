@@ -64,7 +64,6 @@ if (!$id_process) {
             break;
 
         case 'operations';
-            ini_set('display_errors', 1);
             echo $process->renderObjectFormAndList('operations');
             break;
     }

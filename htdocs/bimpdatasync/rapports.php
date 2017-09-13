@@ -158,7 +158,7 @@ $dateFrom = $DT->format('Y-m-d');
                         </div>
                      </div>
                      <div class="formSubmit">
-                        <input class="button" type="submit" value="Charger ce rapport">
+                        <input class="butAction" type="submit" value="Charger ce rapport">
                      </div>
                   </form>
                </td>
@@ -230,7 +230,7 @@ $dateFrom = $DT->format('Y-m-d');
                         }
                         ?>
                         <div class="formSubmit">
-                           <input class="button" type="submit" name="searchSubmit" value="Rechercher">
+                           <input class="butAction" type="submit" name="searchSubmit" value="Rechercher">
                         </div>
                      </form>
                   </td>
@@ -242,7 +242,7 @@ $dateFrom = $DT->format('Y-m-d');
 </div>
 
 <div class="fichecenter buttonsContainer">
-   <a class="button delete-button" href="<?php echo DOL_URL_ROOT . '/bimpdatasync/rapports.php?deleteAllReports=1' ?>" style="color: #800">
+   <a class="butActionDelete delete-button" href="<?php echo DOL_URL_ROOT . '/bimpdatasync/rapports.php?deleteAllReports=1' ?>">
       Supprimer tous les rapports
    </a>
 </div>

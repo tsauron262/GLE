@@ -1,7 +1,6 @@
 <?php
 
 //ALTER TABLE `llx_synopsis_apple_repair` ADD `ready_for_pick_up` BOOLEAN NOT NULL DEFAULT FALSE AFTER `serialUpdateConfirmNumber`;
-
 //ALTER TABLE `llx_synopsis_apple_repair` ADD `repairType` TEXT NULL DEFAULT NULL AFTER `serialUpdateConfirmNumber`, 
 //ADD `totalFromOrder` FLOAT NOT NULL DEFAULT '0.00' AFTER `repairType`;
 
@@ -11,11 +10,11 @@ class Repair
 {
 
     public static $lookupNumbers = array(
-        'serialNumber' => 'Numéro de série',
-        'repairNumber' => 'Numéro de réparation (repair #)',
+        'serialNumber'             => 'Numéro de série',
+        'repairNumber'             => 'Numéro de réparation (repair #)',
         'repairConfirmationNumber' => 'Numéro de confirmation (Dispatch ID)',
-        'purchaseOrderNumber' => 'Numéro de bon de commande (Purchase Order)',
-        'imeiNumber' => 'Numéro IMEI (IPhone)'
+        'purchaseOrderNumber'      => 'Numéro de bon de commande (Purchase Order)',
+        'imeiNumber'               => 'Numéro IMEI (IPhone)'
     );
     public static $repairStatusCodes = array(
         'RFPU' => 'Ready For Pick Up',
@@ -23,11 +22,9 @@ class Repair
         'AWTR' => 'Parts allocated',
         'BEGR' => 'In Repair',
     );
-    
     public static $repairTypes = array(
         'carry_in', 'repair_or_replace'
     );
-    
     public $gsx = null;
     public $db = null;
     public $serial = null;
@@ -198,7 +195,7 @@ class Repair
         return true;
     }
 
-    public function import($chronoId, $number, $numberType)
+    public function import($chronoId, $number, $numberType, $update_if_exists = false)
     {
         if ($this->lookup($number, $numberType)) {
             if (isset($this->confirmNumbers['repair']) &&
@@ -206,20 +203,24 @@ class Repair
                     isset($this->repairNumber) &&
                     ($this->repairNumber != '')) {
 
-                $sql = 'SELECT `chronoId` FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair WHERE ';
-                $sql .= '`repairNumber` = "' . $this->repairNumber . '" AND ';
-                $sql .= '`repairConfirmNumber` = "' . $this->confirmNumbers['repair'] . '"';
-                $result = $this->db->query($sql);
-                if ($this->db->num_rows($result) > 0) {
-                    while ($row = $this->db->fetch_object($result)) {
-                        if ($row->chronoId == $chronoId) {
-                            $this->addError('Cette réparation a déjà été importé');
-                            return false;
+                if (!$update_if_exists) {
+                    $sql = 'SELECT `chronoId` FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair WHERE ';
+                    $sql .= '`repairNumber` = "' . $this->repairNumber . '" AND ';
+                    $sql .= '`repairConfirmNumber` = "' . $this->confirmNumbers['repair'] . '"';
+                    $result = $this->db->query($sql);
+                    if ($this->db->num_rows($result) > 0) {
+                        while ($row = $this->db->fetch_object($result)) {
+                            if ($row->chronoId == $chronoId) {
+                                $this->addError('Cette réparation a déjà été importé');
+                                return false;
+                            }
                         }
                     }
-                }
 
-                return $this->add($chronoId);
+                    return $this->add($chronoId);
+                } else {
+                    return $this->update();
+                }
             }
         }
         return false;
@@ -292,7 +293,7 @@ class Repair
                 return false;
             }
         }
-        $sql = "UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_repair` SET  `closed` =  1, `date_close` = '" . date('Y-m-d'). "' ";
+        $sql = "UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_repair` SET  `closed` =  1, `date_close` = '" . date('Y-m-d') . "' ";
         $sql .= "WHERE  `rowid` = " . $this->rowId . ";";
         if (!$this->db->query($sql)) {
             $this->addError('Echec de l\'enregistrement de la fermeture de la réparation en base de données<br/>
@@ -351,23 +352,23 @@ class Repair
         $n = count($this->gsx->errors['soap']);
         $datas = array(
             'repairConfirmationNumber' => isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : '',
-            'customerEmailAddress' => '',
-            'customerFirstName' => '',
-            'customerLastName' => '',
-            'fromDate' => '',
-            'toDate' => '',
-            'incompleteRepair' => '',
-            'pendingShipment' => '',
-            'purchaseOrderNumber' => '',
-            'repairNumber' => isset($this->repairNumber) ? $this->repairNumber : '',
-            'repairStatus' => '',
-            'repairType' => '',
-            'serialNumber' => '',
-            'shipToCode' => '',
-            'soldToReferenceNumber' => '',
-            'technicianFirstName' => '',
-            'technicianLastName' => '',
-            'unreceivedModules' => '',
+            'customerEmailAddress'     => '',
+            'customerFirstName'        => '',
+            'customerLastName'         => '',
+            'fromDate'                 => '',
+            'toDate'                   => '',
+            'incompleteRepair'         => '',
+            'pendingShipment'          => '',
+            'purchaseOrderNumber'      => '',
+            'repairNumber'             => isset($this->repairNumber) ? $this->repairNumber : '',
+            'repairStatus'             => '',
+            'repairType'               => '',
+            'serialNumber'             => '',
+            'shipToCode'               => '',
+            'soldToReferenceNumber'    => '',
+            'technicianFirstName'      => '',
+            'technicianLastName'       => '',
+            'unreceivedModules'        => '',
         );
         if ($this->isIphone)
             $datas['imeiNumber'] = '';
@@ -464,7 +465,7 @@ class Repair
 
         $client = '';
         $requestName = '';
-        
+
         $data = array(
             'repairConfirmationNumber' => $this->confirmNumbers['repair']
         );
@@ -503,7 +504,6 @@ class Repair
         $response = $this->gsx->request($request, $client);
 
 //            echo "<pre>";print_r($response);exit;
-        
 //        $this->gsx->dispayLastRequestXml($request, $response, $this->gsx->errors);
 //        exit;
 
@@ -513,7 +513,7 @@ class Repair
         if (!isset($response[$clientRep]['repairConfirmation'])) {
             return false;
         }
-        
+
         if ($status === 'RFPU') {
             $this->readyForPickUp = 1;
             $this->update();
@@ -579,23 +579,23 @@ class Repair
         }
         $this->gsx->resetSoapErrors();
         $datas = array(
-            'repairType' => '',
-            'repairStatus' => '',
-            'purchaseOrderNumber' => '',
-            'sroNumber' => isset($this->repairNumber) ? $this->repairNumber : '',
+            'repairType'               => '',
+            'repairStatus'             => '',
+            'purchaseOrderNumber'      => '',
+            'sroNumber'                => isset($this->repairNumber) ? $this->repairNumber : '',
             'repairConfirmationNumber' => isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : '',
-            'serialNumbers' => array(
+            'serialNumbers'            => array(
                 'serialNumber' => ''
             ),
-            'shipToCode' => '',
-            'customerFirstName' => '',
-            'customerLastName' => '',
-            'customerEmailAddress' => '',
-            'createdFromDate' => '',
-            'createdToDate' => '',
-            'warrantyType' => '',
-            'kbbSerialNumberFlag' => '',
-            'comptiaCode' => '',
+            'shipToCode'               => '',
+            'customerFirstName'        => '',
+            'customerLastName'         => '',
+            'customerEmailAddress'     => '',
+            'createdFromDate'          => '',
+            'createdToDate'            => '',
+            'warrantyType'             => '',
+            'kbbSerialNumberFlag'      => '',
+            'comptiaCode'              => '',
         );
 
         if ($this->isIphone) {
@@ -608,7 +608,7 @@ class Repair
 
         $request = $this->gsx->_requestBuilder($requestName, 'repairData', $datas);
         $response = $this->gsx->request($request, $client);
-        
+
 
         if (count($this->gsx->errors['soap'])) {
             return false;
@@ -632,7 +632,7 @@ class Repair
 
                     $request = $this->gsx->_requestBuilder($requestName2, '', array(
                         'returnOrderNumber' => $part['returnOrderNumber'],
-                        'partNumber' => $part['partNumber']
+                        'partNumber'        => $part['partNumber']
                     ));
                     $labelResponse = $this->gsx->request($request, $client2);
                     if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
@@ -651,10 +651,10 @@ class Repair
                 }
                 if (1 || $part['registeredForReturn'] == "Y") {
                     $this->partsPending[] = array(
-                        'partDescription' => $part['partDescription'],
-                        'partNumber' => $part['partNumber'],
+                        'partDescription'   => $part['partDescription'],
+                        'partNumber'        => $part['partNumber'],
                         'returnOrderNumber' => $part['returnOrderNumber'],
-                        'fileName' => $fileName2
+                        'fileName'          => $fileName2
                     );
                 }
                 if (count($this->partsPending) == 0)
@@ -744,7 +744,7 @@ class Repair
                 $valDef['partInfo'] = array();
                 foreach ($this->partsPending as $partPending) {
                     $valDef['partInfo'][] = array(
-                        'partNumber' => $partPending['partNumber'],
+                        'partNumber'      => $partPending['partNumber'],
                         'partDescription' => $partPending['partDescription'],
                     );
                 }

@@ -127,10 +127,11 @@ function toggleFoldableSection($caption) {
     if ($section.hasClass('open')) {
         $content.stop().slideUp(250, function () {
             $section.removeClass('open').addClass('closed');
-            $(this).removeAttr('style');        });
+            $(this).removeAttr('style');
+        });
 
     } else {
-        $content.stop().slideDown(250, function() {
+        $content.stop().slideDown(250, function () {
             $section.removeClass('closed').addClass('open');
             $(this).removeAttr('style');
         });
@@ -143,6 +144,23 @@ function setFoldableEvents() {
     });
 }
 
+function setInputsEvents() {
+    $('select.switch').change(function () {
+        if (parseInt($(this).val()) === 1) {
+            $(this).css({
+                'color': '#3b6ea0',
+                'border-bottom-color': '#3b6ea0'
+            });
+        } else {
+            $(this).css({
+                'color': '#B4B4B4',
+                'border-bottom-color': '#B4B4B4'
+            });
+        }
+    });
+    $('select.switch').change();
+}
 $(document).ready(function () {
     setFoldableEvents();
+    setInputsEvents();
 });

@@ -6,21 +6,23 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
     public static $files_dir_name = 'TechData';
     public $ftp = null;
     public static $product_infos = array(
-        'code_produit'  => 0,
-        'designation_2' => 2,
-        'code_article'  => 3,
-        'ean'           => 6,
-        'famille'       => 8,
-        'classe'        => 10,
-        'sous-classe'   => 12
+        'code_produit'             => 0,
+        'designation_2'            => 2,
+        'article_manufacturer_ref' => 3,
+        'manufacturer_name'        => 4,
+        'ean'                      => 6,
+        'famille'                  => 8,
+        'classe'                   => 10,
+        'sous-classe'              => 12
     );
     public static $product_prices = array(
-        'code_produit'  => 1,
-        'designation_1' => 2,
-        'marque'        => 4,
-        'pv_ht'         => 5,
-        'pa_ht'         => 7,
-        'pa_reduction'  => 8
+        'code_produit'             => 1,
+        'designation_1'            => 2,
+        'article_manufacturer_ref' => 3,
+        'manufacturer_name'        => 4,
+        'pv_ht'                    => 5,
+        'pa_ht'                    => 7,
+        'pa_reduction'             => 8
     );
     public static $product_taxes = array(
         'code_produit' => 0,
@@ -28,9 +30,11 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         'fee'          => 3
     );
     public static $product_stocks = array(
-        'code_produit'   => 0,
-        'stock'          => 3,
-        'date_livraison' => 4
+        'code_produit'             => 0,
+        'article_manufacturer_ref' => 1,
+        'manufacturer_name'        => 2,
+        'stock'                    => 3,
+        'date_livraison'           => 4
     );
 
     public function __construct($processDefinition, $user, $params = null)
@@ -90,7 +94,6 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
                 }
             }
         }
-
         ftp_close($this->ftp);
         $this->ftp = null;
         $data['result_html'] = $html;
@@ -128,7 +131,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             $this->options['update_infos'] = true;
         }
 
-        if (isset($this->options['update_infos']) && $this->options['update_infos']) {
+        if (isset($this->options['update_infos']) && (int) $this->options['update_infos']) {
             $data['steps']['download_file_infos'] = array(
                 'name'     => 'download_file_infos',
                 'label'    => 'Téléchargement du fichier des informations produits',
@@ -136,7 +139,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             );
         }
 
-        if (isset($this->options['update_prices']) && $this->options['update_prices']) {
+        if (isset($this->options['update_prices']) && (int) $this->options['update_prices']) {
             $data['steps']['download_file_prices'] = array(
                 'name'     => 'download_file_prices',
                 'label'    => 'Téléchargement du fichier des prix',
@@ -144,7 +147,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             );
         }
 
-        if (isset($this->options['update_stocks']) && $this->options['update_stocks']) {
+        if (isset($this->options['update_stocks']) && (int) $this->options['update_stocks']) {
             $data['steps']['download_file_stocks'] = array(
                 'name'     => 'download_file_stocks',
                 'label'    => 'Téléchargement du fichier des stocks',
@@ -152,25 +155,21 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             );
         }
 
-        if (isset($this->options['update_taxes']) && $this->options['update_taxes']) {
-            $data['steps']['download_file_taxes'] = array(
-                'name'     => 'download_file_taxes',
-                'label'    => 'Téléchargement du fichier des taxes',
+//        if (isset($this->options['update_taxes']) && $this->options['update_taxes']) {
+//            $data['steps']['download_file_taxes'] = array(
+//                'name'     => 'download_file_taxes',
+//                'label'    => 'Téléchargement du fichier des taxes',
+//                'on_error' => 'stop'
+//            );
+//        }
+
+        if (count($data['steps'])) {
+            $data['steps']['search_references'] = array(
+                'name'     => 'search_references',
+                'label'    => 'Recherche des références à mettre à jour',
                 'on_error' => 'stop'
             );
         }
-
-        $references = BDS_ImportData::getObjectsImportReferences($this->db, $this->processDefinition->id, 'Product');
-        if (isset($this->options['new_references']) && $this->options['new_references']) {
-            $references = array_merge($references, explode(',', $this->options['new_references']));
-        }
-        $data['steps']['update_products_process'] = array(
-            'name'                   => 'update_products_process',
-            'label'                  => 'Mise à jour des produits',
-            'elements'               => $references,
-            'nbElementsPerIteration' => 1,
-            'on_error'               => 'continue'
-        );
     }
 
     protected function executeFtpUpdates($step, &$errors)
@@ -190,8 +189,25 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
                 $this->FtpDownloadFile($this->parameters['ftp_file_stocks'], $errors);
                 break;
 
-            case 'download_file_taxes':
-                $this->FtpDownloadFile($this->parameters['ftp_file_taxes'], $errors);
+//            case 'download_file_taxes':
+//                $this->FtpDownloadFile($this->parameters['ftp_file_taxes'], $errors);
+//                break;
+
+            case 'search_references':
+                $references = $this->findReferences();
+                if (!count($references)) {
+                    $this->Alert('Aucune référence à mettre à jour trouvée');
+                } else {
+                    $return['new_steps'] = array(
+                        'update_products_process' => array(
+                            'name'                   => 'update_products_process',
+                            'label'                  => 'Mise à jour des produits',
+                            'elements'               => $references,
+                            'nbElementsPerIteration' => 1,
+                            'on_error'               => 'continue'
+                        )
+                    );
+                }
                 break;
 
             case 'update_products_process':
@@ -238,6 +254,9 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         $product = new Product($this->db->db);
         $import_data = new BDS_ImportData();
 
+        if (is_null($id_product)) {
+            $id_product = $this->findProductByFournisseurReference($import_reference);
+        }
         if (!is_null($id_product)) {
             $product->fetch($id_product);
             $import_data->fetchByObjectId($this->processDefinition->id, 'Product', $id_product);
@@ -251,14 +270,14 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             $product->status_buy = 1;
             $product->status = 1;
             $product->stock_reel = 0;
-            $product->tva_tx = 20;
+            $product->tva_tx = $this->parameters['tva_tx_default'];
         }
 
         $this->setCurrentObject('Product', $id_product, $import_reference);
 
         $data = $this->getProductUpdateData($import_reference);
         if (!count($data)) {
-            $msg = 'Aucune de donnée à mettre à jour trouvée';
+            $msg = 'Aucune donnée à mettre à jour trouvée';
             $this->alert($msg, $this->curName(), $this->curId(), $this->curRef());
             return;
         }
@@ -282,96 +301,38 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         }
 
         if (!isset($product->ref) || !$product->ref) {
-            $code_module = (!empty($conf->global->PRODUCT_CODEPRODUCT_ADDON) ? $conf->global->PRODUCT_CODEPRODUCT_ADDON : 'mod_codeproduct_leopard');
-            if ($code_module != 'mod_codeproduct_leopard') {
-                if (substr($code_module, 0, 16) == 'mod_codeproduct_' && substr($code_module, -3) == 'php') {
-                    $code_module = substr($code_module, 0, dol_strlen($code_module) - 4);
-                }
-                dol_include_once('/core/modules/product/' . $code_module . '.php');
-                $modCodeProduct = new $code_module;
-                if (!empty($modCodeProduct->code_auto)) {
-                    $product->ref = $modCodeProduct->getNextValue($product, $product->type);
-                }
-                unset($modCodeProduct);
-            }
-            if (empty($product->ref)) {
-                $product->ref = 'TD_' . $import_reference;
-            }
+            $product->ref = 'TD_' . $import_reference;
+//            $this->createProductReference($product, 'TD_'.$import_reference);
         }
 
-        // Mise à jour du prix et de la tva:
-        if (isset($data['pv_ht']) && $data['pv_ht']) {
-            $price = (float) $data['pv_ht'];
-            if (!is_null($id_product) && !is_null($product->id) && $product->id) {
-                // On met à jour le prix maintenant pour qu'il soit pris en compte au moment du trigger
-                if (!$price) {
-                    $price = $product->price;
-                }
-                if (!$tax) {
-                    
-                }
-                if (!$product->updatePrice($price, 'HT', $this->user, $tax)) {
-                    $this->Error('Echec de la mise à jour du prix', $this->curName(), $this->curId(), $this->curRef());
-                }
-            } else {
-                $product->price = $price;
-                $product->tva_tx = $tax;
-            }
-        } else {
-            $price = 0;
-        }
+        $errors = array();
 
-        if ($this->saveObject($product, 'du produit')) {
-            $call_trigger = false;
-            if (isset($data['stock'])) {
-                // Mise à jour du stock: 
-                $nPces = (int) $data['stock'] - (isset($product->stock_reel) ? (int) $product->stock_reel : 0);
-                if ($nPces !== 0) {
-                    if ($nPces < 0) {
-                        $mvt = 1;
-                        $nPces *= -1;
-                    } else {
-                        $mvt = 0;
-                    }
-                    $product->error = '';
-                    if ($product->correct_stock($this->user, $this->parameters['id_wharehouse'], (int) $nPces, $mvt, 'Mise à jour automatique')) {
-                        $call_trigger = true;
-                    } else {
-                        $msg = 'Echec de la mise à jour des stocks';
-                        if ($product->error) {
-                            $msg .= ' Erreur: ' . $product->error;
-                        }
-                        $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
-                    }
-                }
+        if ($this->saveObject($product, 'du produit', true, $errors, true)) {
+            // Mise à jour du stock: 
+            if (isset($data['stock']) && ($data['stock'] !== '')) {
+                $this->updateProductStock($product, $data['stock']);
             }
+
+            // Mise à jour du pric d'achat:
+            if (isset($data['pa_ht']) && $data['pa_ht']) {
+                $this->updateProductBuyPrice($product->id, $data['pa_ht'], $import_reference);
+            }
+
+            // Mise à jour du prix de vente (désactivé pour le moment):
+//            if (isset($data['pv_ht']) && $data['pv_ht']) {
+//                $this->updateProductPrice($product, $data['pv_ht']);
+//            }
 
             if (is_null($id_product)) {
-                // Ajout à la catégorie (nouveau produit seulement): 
                 $this->current_object['id'] = $product->id;
-                if (isset($this->options['new_references_category']) && $this->options['new_references_category']) {
-                    $id_categorie = (int) $this->options['new_references_category'];
-                } else {
-                    $id_categorie = $this->parameters['id_categorie_default'];
-                }
-                if (!$this->db->insert('categorie_product', array(
-                            'fk_categorie' => (int) $id_categorie,
-                            'fk_product'   => (int) $product->id
-                        ))) {
-                    $msg = 'Echec de l\'association du produit avec la catégorie d\'ID "' . $id_categorie . '"';
-                    $this->SqlError($msg, $this->curName(), $this->curId(), $this->curRef());
-                } else {
-                    $call_trigger = true;
-                }
                 $import_data->id_object = $product->id;
-                $import_data->create();
-            } else {
-                $import_data->update();
+
+                // Ajout à la catégorie (nouveau produit seulement):           
+                $this->addProductToCategory($product->id);
             }
 
-            if ($call_trigger) {
-                $product->call_trigger('PRODUCT_MODIFY', $this->user);
-            }
+            $import_data->update();
+            $product->call_trigger('PRODUCT_MODIFY', $this->user);
         }
     }
 
@@ -403,17 +364,17 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
                 }
             }
 
-            if (isset($this->options['update_taxes']) && $this->options['update_taxes']) {
-                $row = $this->getRowFromFile('ftp_file_taxes', $import_reference, 0);
-
-                if (is_null($row)) {
-                    $msg = 'Echec de la récupération des données depuis le fichier "' . $this->parameters['ftp_file_taxes'] . '"';
-                    $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
-                } else {
-                    $data['fee_name'] = trim($row[self::$product_taxes['fee_name']]);
-                    $data['fee'] = trim($row[self::$product_taxes['fee']]);
-                }
-            }
+//            if (isset($this->options['update_taxes']) && $this->options['update_taxes']) {
+//                $row = $this->getRowFromFile('ftp_file_taxes', $import_reference, 0);
+//
+//                if (is_null($row)) {
+//                    $msg = 'Echec de la récupération des données depuis le fichier "' . $this->parameters['ftp_file_taxes'] . '"';
+//                    $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+//                } else {
+//                    $data['fee_name'] = trim($row[self::$product_taxes['fee_name']]);
+//                    $data['fee'] = trim($row[self::$product_taxes['fee']]);
+//                }
+//            }
 
             if (isset($this->options['update_stocks']) && $this->options['update_stocks']) {
                 $row = $this->getRowFromFile('ftp_file_stocks', $import_reference, 0);
@@ -433,7 +394,6 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
     protected function getRowFromFile($file_key, $import_reference, $index_reference)
     {
         $row = null;
-
         if ($this->parameters_ok) {
             $file_path = $this->filesDir . 'ftp_files/' . $this->parameters[$file_key];
             if (file_exists($file_path)) {
@@ -470,6 +430,9 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
 
     protected function FtpDownloadFile($file_name, &$errors = null)
     {
+        //TO REMOVE:
+        return true;
+
         if (is_null($errors)) {
             $errors = array();
         }
@@ -490,5 +453,203 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         }
 
         return true;
+    }
+
+    protected function findReferences()
+    {
+        // Récupération des références déjà enregistrées: 
+        $references = BDS_ImportData::getObjectsImportReferences($this->db, $this->processDefinition->id, 'Product');
+
+        // Ajout des références indiquées dans les options au lancement du processus. 
+        if (isset($this->options['new_references']) && $this->options['new_references']) {
+            $new_references = explode(',', $this->options['new_references']);
+            foreach ($new_references as $new_ref) {
+                if (!in_array($new_ref, $references)) {
+                    $references[] = $new_ref;
+                }
+            }
+        }
+
+        // Recherche des nouvelles références: 
+        if (isset($this->options['find_new_references']) && $this->options['find_new_references'] &&
+                isset($this->parameters['id_search_root_category']) && $this->parameters['id_search_root_category']) {
+            $this->debug_content .= '<h4>Recherche de nouvelles références</h4>';
+            $products_ids = BDS_ImportData::getObjectsIds($this->db, $this->processDefinition->id, 'Product');
+            $categories = explode(',', $this->parameters['id_search_root_category']);
+
+            $whereFourn = '`fk_soc` = ' . (int) $this->parameters['id_soc_fournisseur'];
+            $whereFourn .= ' AND `fk_product` = ';
+
+            foreach ($categories as $cat) {
+                if (!preg_match('/^\d+$/', $cat)) {
+                    $msg = 'ID de catégorie invalide pour le paramètre "';
+                    $msg .= BDSProcessParameter::getParameterLabel($this->db, $this->processDefinition->id, 'id_search_root_category');
+                    $msg .= '": ' . $cat . ' (doit être un nombre entier positif)';
+                    $this->Alert($msg);
+                } else {
+                    $products = $this->findProductsInCategory((int) $cat);
+                    foreach ($products as $id_product) {
+                        if (in_array($id_product, $products_ids)) {
+                            continue;
+                        }
+
+                        $import_data = new BDS_ImportData();
+                        $import_data->fetchByObjectId($this->processDefinition->id, 'Product', $id_product);
+
+                        // Recherche via le code fournisseur:
+                        $reference = $this->db->getValue('product_fournisseur_price', 'ref_fourn', $whereFourn . (int) $id_product);
+                        if (!is_null($reference) && $reference) {
+                            if (!in_array($reference, $references)) {
+                                $this->Msg('Nouvelle référence détectée (via code fournisseur): ' . $reference, 'info');
+                                $references[] = $reference;
+                                $import_data->import_reference = $reference;
+                                $import_data->update();
+                            }
+                            continue;
+                        }
+
+                        // Recherche via le code fabricant:
+                        $prod_ref = $this->db->getValue('product', 'ref', '`rowid` = ' . (int) $id_product);
+                        if (preg_match('/^([A-Z]{3}\-)(.*)$/U', $prod_ref, $matches)) {
+//                            $manufacturer = $this->db->getValue('manufacturer', 'name', '`ref_prefixe` = \'' . $matches[1] . '\'');
+//                            if (is_null($manufacturer) || !$manufacturer) {
+//                                $this->alert('Fabricant non trouvé pour le préfixe "' . $matches[1] . '"');
+//                            } else {
+//                                $reference = $this->findImportReferenceByManufacturerCode($manufacturer, $matches[2]);
+                            $reference = $this->findImportReferenceByManufacturerCode($matches[2]);
+                            if (!is_null($reference)) {
+                                // Enregistrement de la référence frounisseur TechData pour ce produit:
+                                $this->updateProductBuyPrice($id_product, 0.0, $reference);
+                                if (!in_array($reference, $references)) {
+                                    $this->Msg('Nouvelle référence détectée (via code fabricant): ' . $reference, 'info');
+                                    $references[] = $reference;
+                                    $import_data->import_reference = $reference;
+                                    $import_data->update();
+                                }
+                            }
+//                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            $this->Msg('Recherche de nouvelles références désactivée', 'warning');
+        }
+
+
+        return $references;
+    }
+
+    protected function findImportReferenceByManufacturerCode($code)//($manufacturer, $code)
+    {
+        $files_keys = array(
+            'ftp_file_infos',
+            'ftp_file_prices',
+            'ftp_file_stocks'
+        );
+
+        $search_pattern = 0;
+        // S'il y a un underscore dans le code fabricant, on met en place la possiblité d'effectuer une recherche avec 
+        // n'impote quel cararctère pouvant remplacer l'underscore. 
+        if (preg_match('/^(.+)_(.+)$/', $code, $matches)) {
+            $search_pattern = '/^' . preg_quote($matches[1]) . '.' . preg_quote($matches[2]) . '$/';
+        }
+
+        foreach ($files_keys as $file_key) {
+            $indexes = $this->getFileIndexesByFileKey($file_key);
+            if (is_null($indexes)) {
+                $this->Error('Erreur technique: type de fichier invalide: "' . $file_key . '"');
+                return null;
+            } else {
+                if (!isset($indexes['article_manufacturer_ref'])) {
+                    $this->Error('Erreur technique: index du code article fabricant absent pour le fichier "' . $this->parameters[$file_key] . '"');
+                    return null;
+                }
+//                if (!isset($indexes['manufacturer_name'])) {
+//                    $this->Error('Erreur technique: index du nom fabricant absent pour le fichier "' . $this->parameters[$file_key] . '"');
+//                    return null;
+//                }
+            }
+
+            $file_path = $this->filesDir . 'ftp_files/' . $this->parameters[$file_key];
+            if (file_exists($file_path)) {
+                if (is_readable($file_path)) {
+                    $file = fopen($file_path, 'r');
+                    while ($row = utf8_encode(fgets($file))) {
+                        $row = explode("\t", $row);
+//                        $row_manufacturer = trim($row[$indexes['manufacturer_name']]);
+//                        if (!isset($row_manufacturer) || !$manufacturer) {
+//                            continue;
+//                        }
+//                        if ($row_manufacturer !== $manufacturer) {
+//                            continue;
+//                        }
+                        $row_article_ref = trim($row[$indexes['article_manufacturer_ref']]);
+                        if (!isset($row_article_ref) || !$row_article_ref) {
+                            continue;
+                        }
+                        if ($row_article_ref === $code) {
+                            if ($row[$indexes['code_produit']]) {
+                                return $row[$indexes['code_produit']];
+                            }
+                            break;
+                        } elseif ($search_pattern) {
+                            if (preg_match($search_pattern, $row_article_ref)) {
+                                if ($row[$indexes['code_produit']]) {
+                                    return $row[$indexes['code_produit']];
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    $msg = 'Référence non trouvée dans le fichier "' . $this->parameters[$file_key] . '" ';
+                    $msg .= 'pour le code "' . $code . '" du fabricant'; // "' . $manufacturer . '"';
+                    $this->Alert($msg);
+                    fclose($file);
+                } else {
+                    $msg = 'Impossible de rechercher la référence TechData pour le code "' . $code . '" du fabricant'; // "' . $manufacturer . '"';
+                    $msg .= ' - lecture du fichier "' . $this->parameters[$file_key] . '" non permise';
+                    $this->Alert($msg);
+                }
+            } else {
+                $msg = 'Impossible de rechercher la référence TechData pour le code "' . $code . '" du fabricant'; // "' . $manufacturer . '"';
+                $msg .= ' - Fichier "' . $this->parameters[$file_key] . '" absent';
+                $this->Alert($msg);
+            }
+        }
+        return null;
+    }
+
+    protected function findProductByFournisseurReference($reference)
+    {
+        if (!$this->checkParameter('id_soc_fournisseur', 'int')) {
+            return null;
+        }
+        $where = '`fk_soc` = ' . (int) $this->parameters['id_soc_fournisseur'];
+        $where .= ' AND `ref_fourn` = \'' . $reference . '\'';
+
+        $id_product = $this->db->getValue('product_fournisseur_price', 'fk_product', $where);
+        if (!is_null($id_product) && !$id_product) {
+            return null;
+        }
+        return $id_product;
+    }
+
+    protected function getFileIndexesByFileKey($file_key)
+    {
+        switch ($file_key) {
+            case 'ftp_file_infos':
+                return self::$product_infos;
+
+            case 'ftp_file_prices':
+                return self::$product_prices;
+
+            case 'ftp_file_stocks':
+                return self::$product_stocks;
+
+            case 'ftp_file_taxes':
+                return self::$product_taxes;
+        }
+        return null;
     }
 }

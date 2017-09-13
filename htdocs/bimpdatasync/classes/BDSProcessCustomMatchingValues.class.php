@@ -50,12 +50,12 @@ class BDSProcessCustomMatchingValues extends BimpObject
             array(
                 'label'     => 'Supprimer les correspondances sélectionnées',
                 'onclick'   => 'deleteSelectedObjects(\'BDSProcessCustomMatchingValues\', $(this));',
-                'btn_class' => 'deleteSelectedObjects'
+                'btn_class' => 'butActionDelete deleteSelectedObjects'
             )
         ),
         'headers'         => array(
             array(
-                'width' => 20,
+                'width' => 15,
                 'label' => 'Valeur locale',
                 'input' => true
             ),
@@ -65,7 +65,7 @@ class BDSProcessCustomMatchingValues extends BimpObject
                 'input' => true
             ),
             array(
-                'width' => 20,
+                'width' => 15,
                 'label' => 'Valeur externe',
                 'input' => true
             ),
@@ -75,7 +75,7 @@ class BDSProcessCustomMatchingValues extends BimpObject
                 'input' => true
             ),
             array(
-                'width' => 20
+                'width' => 30
             )
         ),
         'cols'            => array(

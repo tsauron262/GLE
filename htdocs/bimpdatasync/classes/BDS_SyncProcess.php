@@ -629,7 +629,7 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         $sync_objects = BDS_SyncData::getObjectsList($this->db, $this->processDefinition->id, $object_name);
-        
+
         $objects = array();
         $ignored = array();
 
@@ -666,7 +666,7 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         if (self::$debug_mod) {
-            $this->debug_content .= '<h4>Objets "' . $object_name . '" ignorés de l\'export</h4>';
+            $this->debug_content .= '<h4>Objets "' . $object_name . '" exclus de l\'export</h4>';
             $this->debug_content .= '<pre>';
             $this->debug_content .= print_r($ignored, 1);
             $this->debug_content .= '</pre>';
@@ -746,7 +746,7 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         if (isset($result['object']->error) && $result['object']->error) {
-            $return['errors'][] = 'Erreur: ' . html_entity_decode(htmlspecialchars_decode($result['object']->error, ENT_QUOTES));
+            $return['errors'][] = $this->ObjectError($result['object']);
         }
 
         if (isset($result['errors']) && count($result['errors'])) {
@@ -794,13 +794,13 @@ class BDS_SyncProcess extends BDS_Process
                         if (!$isCurrentObject) {
                             $msg .= ' d\'ID: ' . $object->id;
                         }
+                        $msg .= $this->ObjectError($object);
+                        
                         if (!is_null($errors)) {
                             $errors[] = $msg;
                         }
-                        if (isset($object->error) && $object->error) {
-                            $msg .= ' (Erreur: ' . html_entity_decode(htmlspecialchars_decode($object->error, ENT_QUOTES)) . ')';
-                        }
-                        $this->SqlError($msg, $this->curName(), $this->curId(), $this->curRef());
+                        
+                        $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
 
                         return false;
                     } else {
@@ -824,14 +824,12 @@ class BDS_SyncProcess extends BDS_Process
                 if (method_exists($object, 'create')) {
                     $result = $object->create($this->user);
                     if ($result <= 0) {
-                        $msg = 'Echec de la création ' . $label;
-                        if (isset($object->error) && $object->error) {
-                            $msg .= ' (Erreur: ' . html_entity_decode(htmlspecialchars_decode($object->error, ENT_QUOTES)) . ')';
-                        }
-                        $this->SqlError($msg, $this->curName(), $this->curId(), $this->curRef());
+                        $msg = 'Echec de la création ' . $label;                        
+                        $msg .= $this->ObjectError($object);
                         if (!is_null($errors)) {
                             $errors[] = $msg;
                         }
+                        $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
                         return false;
                     } else {
                         if ($isCurrentObject) {
@@ -905,13 +903,11 @@ class BDS_SyncProcess extends BDS_Process
                 if (!$is_current_object) {
                     $msg .= ' d\'ID ' . $id_object;
                 }
-                if (isset($object->error) && $object->error) {
-                    $msg .= ' - Erreur: ' . $object->error;
-                }
-                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                $msg .= $this->ObjectError($object);
                 if (!is_null($errors)) {
                     $errors[] = $msg;
                 }
+                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
                 return false;
             }
         } else {

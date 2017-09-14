@@ -29,7 +29,7 @@ dol_fiche_head('', 'SynopsisTools', $langs->trans("Maj vers 6"));
     include_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
         $extrafields = new ExtraFields($db);
     
-    $tabModuleReactive = array("modSynopsistools", "modSynopsisApple", "modSynopsisChrono");
+    $tabModuleReactive = array("modSynopsistools", "modSynopsisChrono", "modSynopsisApple");
     
 if (isset($_REQUEST['ok'])) {
     foreach($tabModuleReactive as $mod){

@@ -33,7 +33,7 @@ dol_fiche_head('', 'SynopsisTools', $langs->trans("Maj vers 6"));
     
 if (isset($_REQUEST['ok'])) {
     foreach($tabModuleReactive as $mod){
-        unActivateModule($mod,0);
+        unActivateModule($mod,1);
         test($db, "Module ".$mod." desactiver");
     }
     
@@ -41,7 +41,7 @@ if (isset($_REQUEST['ok'])) {
 }
 elseif (isset($_REQUEST['ok2'])) {
     foreach($tabModuleReactive as $mod){
-        activateModule($mod,0);
+        activateModule($mod,1);
         test($db, "Module ".$mod." activer");
     }
     

@@ -159,6 +159,23 @@ else $arrayresult=$hookmanager->resArray;
 // Print output if called by ajax or do nothing (var $arrayresult will be used) if called by an include
 if (! isset($usedbyinclude) || empty($usedbyinclude))
 {
+    
+/*mod drsi pour le trie*/
+if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
+	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
+if((strlen($search_boxvalue) == 12 OR strlen($search_boxvalue) == 15) && isset($arrayresult["searchintosn"]))
+	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
+if(stripos($search_boxvalue, "fa") === 0 OR 
+        stripos($search_boxvalue, "av") === 0 OR
+        stripos($search_boxvalue, "ac") === 0)
+	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);
+if(stripos($search_boxvalue, "pr") === 0)
+	$arrayresult=array_merge(array($arrayresult["searchintopropal"]), $arrayresult);
+/*fmod drsi*/
+    
+    
+    
+    
     print json_encode($arrayresult);
     if (is_object($db)) $db->close();
 }

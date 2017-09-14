@@ -246,7 +246,7 @@ class modSynopsisChrono extends DolibarrModules {
         $r++;
 
         $this->module_parts = array(
-            'hooks' => array('printTopRightMenu', 'toprightmenu', "addSearchEntry")  // Set here all hooks context you want to support
+            'hooks' => array('printTopRightMenu', 'toprightmenu', "searchform")  // Set here all hooks context you want to support
         );
     }
 

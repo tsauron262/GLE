@@ -461,7 +461,7 @@ class modequipement extends DolibarrModules
 	 */
 	function init($options='')
 	{
-		global $conf;
+		//global $conf;
 		// Permissions
 		$this->remove($options);
 

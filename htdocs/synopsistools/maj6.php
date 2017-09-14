@@ -26,16 +26,23 @@ $mainmenu = isset($_GET["mainmenu"]) ? $_GET["mainmenu"] : "";
 llxHeader("", "Maj vers 6");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Maj vers 6"));
 
-if (isset($_REQUEST['ok'])) {
     include_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
         $extrafields = new ExtraFields($db);
     
-    $tabModuleReactive = array("modSynopsistools", "modSynopsisChrono", "modSynopsisApple");
+    $tabModuleReactive = array("modSynopsistools", "modSynopsisApple", "modSynopsisChrono");
     
+if (isset($_REQUEST['ok'])) {
     foreach($tabModuleReactive as $mod){
-        unActivateModule($mod,1);
-        activateModule($mod,1);
-        test($db, "Module ".$mod." reinitialisé");
+        unActivateModule($mod,0);
+        test($db, "Module ".$mod." desactiver");
+    }
+    
+    echo "<form><input type='submit' name='ok2' value='ok'/></form>";
+}
+elseif (isset($_REQUEST['ok2'])) {
+    foreach($tabModuleReactive as $mod){
+        activateModule($mod,0);
+        test($db, "Module ".$mod." activer");
     }
     
     
@@ -98,7 +105,7 @@ $i=0;
 }
 
 else {
-    echo "Attention ajouter extrafields     <br/>type2 dans produit<br/>0,Materiel<br/>1,Service inter<br/>2,Service Contrat<br/>3,Déplacement inter<br/>4,Déplacement Contrat<br/>5,Logiciel";
+    echo "Commencé ?";
 
 
 

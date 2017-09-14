@@ -40,7 +40,7 @@ while ($ln = $db->fetch_object($sql)) {
         }
     }
 
-    $type = "appel";
+    $type = "APPEL";
 
     echo "
     </fieldset>";
@@ -72,7 +72,7 @@ while ($ln = $db->fetch_object($sql)) {
 
 
 
-    $type = "contratdet";
+    $type = "CONTRADET";
     echo "
     </fieldset>
   <fieldset>

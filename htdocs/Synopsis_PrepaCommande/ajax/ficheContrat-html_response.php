@@ -79,13 +79,16 @@ if ($id > 0) {
     $longHtml .= "    <th class='ui-widget-header ui-state-default'>Contrat associ&eacute;";
 
     $requete = "SELECT fk_product,
-                               " . MAIN_DB_PREFIX . "commandedet.qty,
-                               " . MAIN_DB_PREFIX . "commandedet.rowid
-                          FROM " . MAIN_DB_PREFIX . "commandedet,
-                               " . MAIN_DB_PREFIX . "product
-                         WHERE " . MAIN_DB_PREFIX . "product.rowid = " . MAIN_DB_PREFIX . "commandedet.fk_product
-                           AND fk_product_type = 2
+                               cd.qty,
+                               cd.rowid
+                          FROM " . MAIN_DB_PREFIX . "commandedet cd,
+                               " . MAIN_DB_PREFIX . "product p,
+                               " . MAIN_DB_PREFIX . "product_extrafields pe
+                         WHERE p.rowid = cd.fk_product
+                             AND pe.fk_object = p.rowid
+                           AND type2 = 2
                            AND fk_commande = " . $id;
+
     $sql = $db->query($requete);
     $touCreer = false;
     while ($res = $db->fetch_object($sql)) {

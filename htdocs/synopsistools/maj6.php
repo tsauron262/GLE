@@ -30,7 +30,7 @@ if (isset($_REQUEST['ok'])) {
     include_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
         $extrafields = new ExtraFields($db);
     
-    $tabModuleReactive = array("modSynopsisChrono", "modSynopsisApple", "modSynopsisTools");
+    $tabModuleReactive = array("modSynopsisChrono", "modSynopsisApple", "modSynopsistools");
     
     foreach($tabModuleReactive as $mod){
         unActivateModule($mod,1);

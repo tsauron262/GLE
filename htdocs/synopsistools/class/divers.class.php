@@ -52,7 +52,7 @@ class synopsisHook {//FA1506-0369
 
         ini_set('display_errors', ($modDev > 0));
         ini_set('log_errors', '1');
-        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE));
+        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, $conf->global->SYSLOG_FILE));
 
 
         setlocale(LC_TIME, 'fr_FR.utf8', 'fra');

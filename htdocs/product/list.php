@@ -730,7 +730,7 @@ else
 				{
 				    if ($obj->fk_product_type != 1 || ! empty($conf->global->STOCK_SUPPORTS_SERVICES))    // Not a service
 				    {
-				        $product_static->load_stock('nobatch');             // Load stock_reel + stock_warehouse. This also call load_virtual_stock()
+				        /*mod drsi*/$product_static->load_stock('nobatch novirtual'); /*fmoddrsi*/            // Load stock_reel + stock_warehouse. This also call load_virtual_stock()
 				    }
 				}
 

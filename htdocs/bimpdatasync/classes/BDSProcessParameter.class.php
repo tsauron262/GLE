@@ -9,7 +9,6 @@ class BDSProcessParameter extends BimpObject
     public $name;
     public $label;
     public $value;
-    
     public static $labels = array(
         'name' => 'paramètre'
     );
@@ -34,11 +33,11 @@ class BDSProcessParameter extends BimpObject
         'title'           => 'Liste des paramètres',
         'no_items'        => 'Aucun paramètre enregistré pour le moment',
         'checkboxes'      => 1,
-        'bulk_actions'     => array(
+        'bulk_actions'    => array(
             array(
                 'label'     => 'Supprimer les paramètres sélectionnés',
                 'onclick'   => 'deleteSelectedObjects(\'BDSProcessParameter\', $(this));',
-                'btn_class' => 'deleteSelectedObjects'
+                'btn_class' => 'butActionDelete deleteSelectedObjects'
             )
         ),
         'headers'         => array(
@@ -102,5 +101,16 @@ class BDSProcessParameter extends BimpObject
     public static function getClass()
     {
         return 'BDSProcessParameter';
+    }
+
+    public static function getParameterLabel(BimpDb $bdb, $id_process, $name)
+    {
+        $where = '`id_process` = ' . (int) $this->processDefinition->id;
+        $where .= ' AND `name` = \'' . $name . '\'';
+        $title = $this->db->getValue(static::$table, 'label', $where);
+        if (is_null($title)) {
+            return $name;
+        }
+        return $title;
     }
 }

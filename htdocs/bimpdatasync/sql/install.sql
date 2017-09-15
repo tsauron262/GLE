@@ -63,7 +63,6 @@ CREATE TABLE `llx_bds_process_trigger_action` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
 CREATE TABLE `llx_bds_process_operation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_process` int(10) UNSIGNED NOT NULL,
@@ -108,5 +107,12 @@ CREATE TABLE `llx_bds_object_import_data` (
   `status` int(11) NOT NULL,
   `date_add` datetime NOT NULL,
   `date_update` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `llx_manufacturer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  `ref_prefixe` varchar(128) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

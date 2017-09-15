@@ -109,6 +109,7 @@ function reloadObjectsList(object_name) {
                 inputsRowHtml += '</tr>';
             }
             $('#' + object_name + '_list_table').find('tbody').html(result.html + inputsRowHtml);
+            setFormEvents();
         }
     }, function (result) {
         if (!bimp_display_result_errors(result, $resultContainer)) {
@@ -386,6 +387,8 @@ function setFormEvents() {
         });
         resetInputDisplay($form);
     });
+    setInputsEvents();
+    setFoldableEvents();
 }
 
 $(document).ready(function () {

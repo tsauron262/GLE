@@ -93,8 +93,6 @@ class BDSProcessOperation extends BimpObject
 
     public static function renderList($id_parent = null)
     {
-        ini_set('display_errors', 1);
-
         $html = '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpdatasync/views/css/operations.css"/>';
         $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpdatasync/views/css/reports.css"/>';
 
@@ -207,10 +205,10 @@ class BDSProcessOperation extends BimpObject
 
             $html .= '<tr><td>';
             $html .= '<div class="formSubmit">';
-            $html .= '<span class="button" style="float: left" onclick="openObjectForm(\'' . static::getClass() . '\', ' . $id_parent . ', ' . $operation['id'] . ')">Editer</span>';
-            $html .= '<span class="button" style="float: left" onclick="deleteObjects(\'' . static::getClass() . '\', [' . $operation['id'] . '], $(this), ';
+            $html .= '<span class="butAction" style="float: left" onclick="openObjectForm(\'' . static::getClass() . '\', ' . $id_parent . ', ' . $operation['id'] . ')">Editer</span>';
+            $html .= '<span class="butActionDelete" style="float: left" onclick="deleteObjects(\'' . static::getClass() . '\', [' . $operation['id'] . '], $(this), ';
             $html .= '$(\'#' . static::getClass() . '_listResultContainer\'))">Supprimer</span>';
-            $html .= '<span class="button" onclick="initProcessOperation($(this), ' . $id_parent . ', ' . $operation['id'] . ')">Exécuter</span>';
+            $html .= '<span class="butAction" onclick="initProcessOperation($(this), ' . $id_parent . ', ' . $operation['id'] . ')">Exécuter</span>';
             $html .= '</div>';
             $html .= '</td></tr>';
 

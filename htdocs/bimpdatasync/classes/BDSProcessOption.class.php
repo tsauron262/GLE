@@ -87,7 +87,7 @@ class BDSProcessOption extends BimpObject
             array(
                 'label'     => 'Supprimer les options sélectionnées',
                 'onclick'   => 'deleteSelectedObjects(\'BDSProcessOption\', $(this));',
-                'btn_class' => 'deleteSelectedObjects'
+                'btn_class' => 'butActionDelete deleteSelectedObjects'
             )
         ),
         'headers'      => array(

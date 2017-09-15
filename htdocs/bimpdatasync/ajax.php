@@ -8,9 +8,6 @@ ini_set('display_errors', 1);
 
 global $user;
 
-print_r($user);
-die;
-
 $errors = array();
 $success = 0;
 $html = '';
@@ -182,6 +179,9 @@ if (BDS_Tools::isSubmit('action')) {
 
         case 'loadObjectList':
             $id_parent = BDS_Tools::getValue('id_parent', null);
+            if (!$id_parent) {
+                $id_parent = null;
+            }
             $object_name = BDS_Tools::getValue('object_name');
             if (is_null($object_name) || !$object_name) {
                 $errors[] = 'Type d\'objet absent';
@@ -209,6 +209,8 @@ if (BDS_Tools::isSubmit('action')) {
             $id_operation = BDS_Tools::getValue('id_operation');
             $html = 0;
 
+            $options['mode'] = 'ajax';
+            
             if (is_null($id_process) || !$id_process) {
                 $errors[] = 'ID du processus absent';
             }
@@ -250,6 +252,8 @@ if (BDS_Tools::isSubmit('action')) {
 
             $report_html = 0;
             $step_result = array();
+            
+            $options['mode'] = 'ajax';
 
             if (is_null($id_process) || !$id_process) {
                 $errors[] = 'ID du processus absent';

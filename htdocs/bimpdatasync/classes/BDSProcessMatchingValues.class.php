@@ -114,7 +114,7 @@ class BDSProcessMatchingValues extends BimpObject
             array(
                 'label'     => 'Supprimer les Correspondances sélectionnées',
                 'onclick'   => 'deleteSelectedObjects(\'BDSProcessMatchingValues\', $(this));',
-                'btn_class' => 'deleteSelectedObjects'
+                'btn_class' => 'butActionDelete deleteSelectedObjects'
             )
         ),
         'headers'      => array(
@@ -127,7 +127,7 @@ class BDSProcessMatchingValues extends BimpObject
                 'label' => 'Nom public',
             ),
             array(
-                'width' => 35,
+                'width' => 25,
                 'label' => 'Description',
             ),
             array(
@@ -135,7 +135,7 @@ class BDSProcessMatchingValues extends BimpObject
                 'label' => 'Type',
             ),
             array(
-                'width' => 20
+                'width' => 30
             )
         ),
         'cols'         => array(

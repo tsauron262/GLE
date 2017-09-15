@@ -126,7 +126,7 @@ class BDS_Tools
                 $dir .= get_exdir($product->id, 2, 0, 0, $product, 'product') . $product->id . "/photos/";
             }
         } else {
-            dol_sanitizeFileName($product->reference);
+            $dir .= get_exdir(0, 0, 0, 0, $product, 'product').dol_sanitizeFileName($product->ref).'/';
         }
 
         return $dir;

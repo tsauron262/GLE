@@ -7,6 +7,7 @@ if (!defined('BDS_LIB')) {
     include_once $dir . 'BimpDb.php';
     include_once $dir . 'BDS_Tools.php';
 
+    include_once $dir . 'Manufacturer.class.php';
     include_once $dir . 'BDSProcess.class.php';
     include_once $dir . 'BDSProcessParameter.class.php';
     include_once $dir . 'BDSProcessOption.class.php';

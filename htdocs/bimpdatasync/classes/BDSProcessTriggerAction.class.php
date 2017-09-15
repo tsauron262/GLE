@@ -35,7 +35,7 @@ class BDSProcessTriggerAction extends BimpObject
             array(
                 'label'     => 'Supprimer les actions sélectionnées',
                 'onclick'   => 'deleteSelectedObjects(\'BDSProcessTriggerAction\', $(this));',
-                'btn_class' => 'deleteSelectedObjects'
+                'btn_class' => 'butActionDelete deleteSelectedObjects'
             )
         ),
         'headers'         => array(

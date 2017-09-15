@@ -19,6 +19,14 @@
 
 select.switch {
     width: 75px;
+    font-weight: bold;
+}
+
+select.switch option[value='1'] {
+    color: #3b6ea0;
+}
+select.switch option[value='0'] {
+    color: #8C8C8C;
 }
 
 .formRow input[type=checkbox] {

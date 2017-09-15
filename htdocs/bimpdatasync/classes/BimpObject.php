@@ -697,7 +697,7 @@ class BimpObject
         $html .= '</div>';
 
         $html .= '<div class="formSubmit">';
-        $html .= '<span class="button" onclick="saveObjectFromForm(\'' . $this->getClass() . '\')">';
+        $html .= '<span class="butAction" onclick="saveObjectFromForm(\'' . $this->getClass() . '\')">';
         $html .= 'Enregistrer';
         $html .= '</span>';
         $html .= '</div>';
@@ -832,7 +832,7 @@ class BimpObject
         $html .= '<div id="' . $this->getClass() . '_' . $association . '_associatonsAjaxResult"></div>';
 
         $html .= '<div class="formSubmit">';
-        $html .= '<span class="button" onclick="saveObjectAssociations(' . $this->id . ', \'' . $this->getClass() . '\', \'' . $association . '\', $(this));">';
+        $html .= '<span class="butAction" onclick="saveObjectAssociations(' . $this->id . ', \'' . $this->getClass() . '\', \'' . $association . '\', $(this));">';
         $html .= 'Enregistrer les ' . $label;
         $html .= '</span>';
         $html .= '</div>';
@@ -924,30 +924,32 @@ class BimpObject
             }
             foreach ($params['row_form_inputs'] as $input) {
                 $html .= '<td' . (($input['type'] === 'hidden') ? ' style="display: none"' : '') . '>';
-                if ($input['type'] === 'switch') {
-                    $defVal = 1;
-                    $html .= '<select id="rowInput_' . static::getClass() . '_' . $input['id'] . '" class="switch objectListRowInput" name="' . $input['name'] . '"';
-                    if (isset($input['default_value'])) {
-                        $html .= ' data-default_value="' . $input['default_value'] . '"';
-                        $defVal = (int) $input['default_value'];
+                if ($input['type'] !== 'empty') {
+                    if ($input['type'] === 'switch') {
+                        $defVal = 1;
+                        $html .= '<select id="rowInput_' . static::getClass() . '_' . $input['id'] . '" class="switch objectListRowInput" name="' . $input['name'] . '"';
+                        if (isset($input['default_value'])) {
+                            $html .= ' data-default_value="' . $input['default_value'] . '"';
+                            $defVal = (int) $input['default_value'];
+                        }
+                        $html .= '>';
+                        $html .= '<option value="1"' . (($defVal === 1) ? ' selected' : '') . '>OUI</option>';
+                        $html .= '<option value="0"' . (($defVal === 0) ? ' selected' : '') . '>NON</option>';
+                        $html .= '</select>';
+                    } else {
+                        $html .= '<input type="' . $input['type'] . '" name="' . $input['name'] . '" ';
+                        $html .= 'class="objectListRowInput" id="rowInput_' . static::getClass() . '_' . $input['id'] . '"';
+                        $html .= 'value="';
+                        if (isset($input['default_value'])) {
+                            $html .= $input['default_value'] . '" data-default_value="' . $input['default_value'];
+                        }
+                        $html .= '"/>';
                     }
-                    $html .= '>';
-                    $html .= '<option value="1"' . (($defVal === 1) ? ' selected' : '') . '>OUI</option>';
-                    $html .= '<option value="0"' . (($defVal === 0) ? ' selected' : '') . '>NON</option>';
-                    $html .= '</select>';
-                } else {
-                    $html .= '<input type="' . $input['type'] . '" name="' . $input['name'] . '" ';
-                    $html .= 'class="objectListRowInput" id="rowInput_' . static::getClass() . '_' . $input['id'] . '"';
-                    $html .= 'value="';
-                    if (isset($input['default_value'])) {
-                        $html .= $input['default_value'] . '" data-default_value="' . $input['default_value'];
-                    }
-                    $html .= '"/>';
                 }
                 $html .= '</td>';
             }
             $html .= '<td>';
-            $html .= '<span class="button" onclick="addObjectFromListInputsRow(\'' . static::getClass() . '\', $(this))">Ajouter</span>';
+            $html .= '<span class="butAction" onclick="addObjectFromListInputsRow(\'' . static::getClass() . '\', $(this))">Ajouter</span>';
             $html .= '</td>';
             $html .= '</tr>';
         }
@@ -963,7 +965,7 @@ class BimpObject
             $html .= '<tr>';
             $html .= '<td style="padding: 15px 10px">';
             foreach ($params['bulk_actions'] as $action) {
-                $html .= '<span class="button';
+                $html .= '<span class="butAction';
                 if (isset($action['btn_class'])) {
                     $html .= ' ' . $action['btn_class'];
                 }
@@ -1066,17 +1068,17 @@ class BimpObject
                 }
                 $html .= '<td>';
                 if (isset($params['update_btn']) && $params['update_btn']) {
-                    $html .= '<span class="button" onclick="updateObjectFromRow(\'' . static::getClass() . '\', ' . $r['id'] . ', $(this))">';
+                    $html .= '<span class="butAction" onclick="updateObjectFromRow(\'' . static::getClass() . '\', ' . $r['id'] . ', $(this))">';
                     $html .= 'Mettre à jour';
                     $html .= '</span>';
                 }
                 if (isset($params['edit_btn']) && $params['edit_btn']) {
-                    $html .= '<span class="button" onclick="openObjectForm(\'' . static::getClass() . '\', ' . $id_parent . ', ' . $r['id'] . ')">';
+                    $html .= '<span class="butAction" onclick="openObjectForm(\'' . static::getClass() . '\', ' . $id_parent . ', ' . $r['id'] . ')">';
                     $html .= 'Editer';
                     $html .= '</span>';
                 }
                 if (isset($params['delete_btn']) && $params['delete_btn']) {
-                    $html .= '<span class="button" onclick="deleteObjects(\'' . static::getClass() . '\', [' . $r['id'] . '], $(this), ';
+                    $html .= '<span class="butActionDelete" onclick="deleteObjects(\'' . static::getClass() . '\', [' . $r['id'] . '], $(this), ';
                     $html .= '$(\'#' . static::getClass() . '_listResultContainer\'))">';
                     $html .= 'Supprimer';
                     $html .= '</span>';
@@ -1112,10 +1114,10 @@ class BimpObject
         $className = static::getClass();
         $html .= '<div id="' . $className . '_card">';
         $html .= '<div class="objectToolbar">';
-        $html .= '<span id="' . $className . '_openFormButton" class="button"';
+        $html .= '<span id="' . $className . '_openFormButton" class="butAction"';
         $html .= 'onclick="openObjectForm(\'' . $className . '\', null)">';
         $html .= 'Ajouter ' . static::getLabel('a') . '</span>';
-        $html .= '<span id="' . $className . '_closeFormButton" class="button"';
+        $html .= '<span id="' . $className . '_closeFormButton" class="butActionDelete"';
         $html .= 'onclick="closeObjectForm(\'' . $className . '\')"';
         $html .= ' style="display: none">';
         $html .= 'Annuler</span>';
@@ -1164,10 +1166,10 @@ class BimpObject
             if (class_exists($className)) {
                 $html .= '<div id="' . $className . '_card">';
                 $html .= '<div class="objectToolbar">';
-                $html .= '<span id="' . $className . '_openFormButton" class="button"';
+                $html .= '<span id="' . $className . '_openFormButton" class="butAction"';
                 $html .= 'onclick="openObjectForm(\'' . $className . '\', ' . $this->id . ')">';
                 $html .= 'Ajouter ' . $className::getLabel('a') . '</span>';
-                $html .= '<span id="' . $className . '_closeFormButton" class="button"';
+                $html .= '<span id="' . $className . '_closeFormButton" class="butActionDelete"';
                 $html .= 'onclick="closeObjectForm(\'' . $className . '\')"';
                 $html .= ' style="display: none">';
                 $html .= 'Annuler</span>';

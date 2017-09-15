@@ -38,6 +38,10 @@ class BDS_ImportData
 
     public function fetchByObjectId($id_process, $object_name, $id_object)
     {
+        $this->id_process = $id_process;
+        $this->object_name = $object_name;
+        $this->id_object = $id_object;
+        
         $row = $this->db->getRow(self::$table, self::whereObjectId($id_process, $object_name, $id_object));
         if (!is_null($row)) {
             foreach ($row as $property => $value) {
@@ -53,6 +57,10 @@ class BDS_ImportData
 
     public function fetchByObjectReference($id_process, $object_name, $import_reference)
     {
+        $this->id_process = $id_process;
+        $this->object_name = $object_name;
+        $this->import_reference = $import_reference;
+        
         $row = $this->db->getRow(self::$table, self::whereObjectReference($id_process, $object_name, $import_reference));
         if (!is_null($row)) {
             foreach ($row as $property => $value) {
@@ -84,6 +92,7 @@ class BDS_ImportData
         $data = array(
             'id_process'  => (int) $this->id_process,
             'object_name' => $this->db->db->escape($this->object_name),
+            'date_add'    => date('Y-m-d H:i:s'),
             'date_update' => date('Y-m-d H:i:s')
         );
 

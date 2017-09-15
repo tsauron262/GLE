@@ -12,6 +12,7 @@ require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/lib/synopsischrono.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
+
 //  require_once('Var_Dump.php');
 //Var_Dump::Display($_REQUEST);
 $id = $_REQUEST['id'];
@@ -298,6 +299,7 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
 
     $mesg = '<div class="ok">' . $langs->trans("FileWasRemoved") . '</div>';
 }
+
 //if ($action == "Modify" || $action == "ModifyAfterValid") {
 $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/fiche.js'></script>";
 //}

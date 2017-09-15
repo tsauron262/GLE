@@ -120,9 +120,25 @@ class BimpDb
         return $rows;
     }
 
-    public function getRows($table, $where = '1', $limit = null, $return = 'object')
+    public function getRows($table, $where = '1', $limit = null, $return = 'object', $fields = null)
     {
-        $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . $table;
+        $sql = 'SELECT ';
+
+        if (!is_null($fields)) {
+            $fl = true;
+            foreach ($fields as $field) {
+                if (!$fl) {
+                    $sql .= ', ';
+                } else {
+                    $fl = false;
+                }
+                $sql .= '`' . $field . '`';
+            }
+        } else {
+            $sql .= '*';
+        }
+
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
 
         if (!is_null($limit)) {

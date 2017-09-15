@@ -65,4 +65,31 @@ function testCommande($id)
     print_r($comm->lines);
     exit;
 }
-testCommande(3842);
+
+//testCommande(3842);
+
+function testFournPrice()
+{
+    $fk_fournprice = null;
+    $pa_ht = 0;
+
+    global $db;
+    $bdb = new BimpDb($db);
+    
+    $where = '`fk_product` = 6375';
+    $rows = $bdb->getRows('product_fournisseur_price', $where, null, 'object', array(
+        'rowid', 'unitprice'
+    ));
+    
+    if (!is_null($rows)) {
+        foreach ($rows as $r) {
+            if (!$pa_ht ||  ((float) $r->unitprice < (float) $pa_ht)) {
+                $pa_ht = (float) $r->unitprice;
+                $fk_fournprice = $r->rowid;
+            }
+        }
+    }
+    
+    echo $pa_ht.', '.$fk_fournprice;
+}
+testFournPrice();

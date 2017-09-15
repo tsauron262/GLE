@@ -1326,8 +1326,30 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $txlocaltax1 = 0; // ??
         $txlocaltax2 = 0; // ??
 
+        $fk_fournprice = null;
+        $pa_ht = 0;
+
+        $where = '`fk_product` = ' . (int) $product->id;
+        $rows = $this->db->getRows('product_fournisseur_price', $where, null, 'object', array(
+            'rowid', 'unitprice'
+        ));
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                if (!$pa_ht ||  ((float) $r->unitprice < (float) $pa_ht)) {
+                    $pa_ht = (float) $r->unitprice;
+                    $fk_fournprice = $r->rowid;
+                }
+            }
+        }
+
+        if (!$pa_ht || is_null($fk_fournprice)) {
+            $msg = 'Aucun prix d\'achat fournisseur enregistré pour ce produit';
+            $this->Alert($msg, $this->curName(), $this->curId(), $this->curRef());
+        }
+
         if (is_null($id_order_line) || !$id_order_line) {
-            if ($commande->addline($product->label, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $product->id, $remise_percent) <= 0) {
+            if ($commande->addline($product->label, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $product->id, $remise_percent, 0, 0, 'HT', 0, '', '', 0, -1, 0, 0, $fk_fournprice, $pa_ht) <= 0) {
                 $msg = 'Echec de l\'ajout du produit "' . $product->label . '" à la commande';
                 $msg .= $this->ObjectError($commande);
                 $errors[] = $msg;

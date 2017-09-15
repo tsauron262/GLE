@@ -22,6 +22,7 @@
 
 require_once("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/lib/synopsischrono.lib.php");
 #require_once(DOL_DOCUMENT_ROOT.'/lib/webcal.class.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 
@@ -289,60 +290,5 @@ print "<div class='ui-state-highlight' style='padding:5px'><b><span class='ui-ic
 print "</form>\n";
 
 llxFooter('$Date: 2005/10/03 01:36:21 $ - $Revision: 1.23 $');
-
-function iniTabChronoList() {
-    global $db;
-    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "const WHERE `name` LIKE  '%MAIN_MODULE_SYNOPSISCHRONO_TABS%'";
-    $db->query($requete);
-    $requete = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active = 1";
-    $sql = $db->query($requete);
-    $i = -1;
-    $hasPropal = $hasProjet = $hasSoc = 0;
-    while ($res = $db->fetch_object($sql)) {
-        $i++;
-        if ($res->hasPropal == "1")
-            $hasPropal = 1;
-        if ($res->hasProjet == "1")
-            $hasProjet = 1;
-        if ($res->hasSociete == "1")
-            $hasSoc = 1;
-    }
-
-    $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono_key`, `" . MAIN_DB_PREFIX . "synopsischrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` IN(1000, 1007) AND model_refid = c.id GROUP by c.id");
-    while ($result = $db->fetch_object($sql))
-        $hasContrat = true;
-
-    $i = 0;
-    if ($hasPropal) {
-        $i++;
-        $type = "propal";
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@synopsischrono:".$user->rights->synopsischrono->read.":/synopsischrono/listByObjet.php?obj=" . $type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
-//            die($requete3);
-        $sql2 = $db->query($requete3);
-    }
-    if ($hasProjet) {
-        $i++;
-        $type = "project";
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@synopsischrono:".$user->rights->synopsischrono->read.":/synopsischrono/listByObjet.php?obj=" . $type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
-//            die($requete3);
-        $sql2 = $db->query($requete3);
-    }
-    if ($hasSoc) {
-        $type = "thirdparty";
-        $type2 = "soc";
-        $i++;
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@synopsischrono:".$user->rights->synopsischrono->read.":/synopsischrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
-//            die($requete3);
-        $sql2 = $db->query($requete3);
-    }
-    if ($hasContrat) {
-        $type = "contract";
-        $type2 = "ctr";
-        $i++;
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@synopsischrono:".$user->rights->synopsischrono->read.":/synopsischrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
-//            die($requete3);
-        $sql2 = $db->query($requete3);
-    }
-}
 
 ?>

@@ -75,7 +75,7 @@ class UserGroup extends CommonObject
 	 *	@param      string	$groupname	name du groupe a charger
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	function fetch($id='', $groupname='', $load_members)
+	function fetch($id='', $groupname='', $load_members = true)
 	{
 		global $conf;
                 
@@ -139,7 +139,7 @@ class UserGroup extends CommonObject
 	 *	@param		int		$userid 	User id to search
 	 * 	@return		array     			Array of groups objects
 	 */
-	function listGroupsForUser($userid, $load_members)
+	function listGroupsForUser($userid, $load_members = true)
 	{
 		global $conf, $user;
 

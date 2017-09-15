@@ -579,7 +579,7 @@ class process extends CommonObject {
                 $this->getRights($user);
                 require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
                 $usergroup = new UserGroup($this->db);
-                $groupslist = $usergroup->listGroupsForUser($user->id);
+                $groupslist = $usergroup->listGroupsForUser($user->id, false);
 
                 foreach ($groupslist as $key => $val)
                     $this->getGrpRights($val);

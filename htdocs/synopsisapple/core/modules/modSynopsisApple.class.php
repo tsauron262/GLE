@@ -57,7 +57,7 @@ class modSynopsisApple extends DolibarrModules
         
         $this->module_parts = array('triggers' => 1,
             'models' => 1,
-            'hooks' => array("searchform")  // Set here all hooks context you want to support
+                'hooks' => array("searchform", "addMoreActionsButtons")  // Set here all hooks context you want to support
         );
 
         // Dependences

@@ -131,7 +131,7 @@ if (! empty($conf->global->MAIN_SEARCH_FORM_ON_HOME_AREAS))     // This is usele
     }
 }
 
-
+    
 /*
  * Draft proposals
  */
@@ -164,7 +164,7 @@ if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 		if ($num > 0)
 		{
 			$i = 0;
-			while ($i < $num)
+			while ($i < $num && $i < $conf->liste_limit)
 			{
 				$obj = $db->fetch_object($resql);
 				
@@ -245,7 +245,7 @@ if (! empty($conf->supplier_proposal->enabled) && $user->rights->supplier_propos
         if ($num > 0)
         {
             $i = 0;
-            while ($i < $num)
+            while ($i < $num && $i < $conf->liste_limit)
             {
                 $obj = $db->fetch_object($resql);
                 
@@ -583,7 +583,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->societe->lire)
  */
 if ($user->rights->agenda->myactions->read)
 {
-	show_array_last_actions_done($max);
+//	show_array_last_actions_done($max);
 }
 
 
@@ -592,7 +592,7 @@ if ($user->rights->agenda->myactions->read)
  */
 if ($user->rights->agenda->myactions->read)
 {
-	show_array_actions_to_do(10);
+//	show_array_actions_to_do(10);
 }
 
 

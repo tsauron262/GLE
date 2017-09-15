@@ -10,7 +10,8 @@ class object {
 class synopsisHook {//FA1506-0369
 
     static $timeDeb = 0;
-    private static $MAX_TIME_LOG = 10;
+    private static $MAX_TIME_LOG = 3;
+    private static $MAX_REQ_LOG = 300;
     private static $reload = false;
 
     function synopsisHook() {
@@ -52,7 +53,7 @@ class synopsisHook {//FA1506-0369
 
         ini_set('display_errors', ($modDev > 0));
         ini_set('log_errors', '1');
-        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE));
+        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, $conf->global->SYSLOG_FILE));
 
 
         setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
@@ -263,6 +264,8 @@ class synopsisHook {//FA1506-0369
         $time = (microtime(true) - self::$timeDeb);
         if ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time");
+        if ($nbReq > self::$MAX_REQ_LOG && (!isset($logLongTime) || $logLongTime))
+            dol_syslog("Pages trop de req " . $nbReq . " ", 4, 0, "_time");
         $return .= "<span class='timePage'>" . number_format($time,4) . " s | ".$nbReq." requetes</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
             $return .= "<br/>";

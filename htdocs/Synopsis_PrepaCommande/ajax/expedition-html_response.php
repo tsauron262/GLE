@@ -321,11 +321,12 @@ EOF;
         $sql = "SELECT cd.fk_product, cd.description, cd.price, cd.qty as qty, cd.rowid, cd.tva_tx, cd.subprice";
         $sql.= " FROM " . MAIN_DB_PREFIX . "commandedet as cd ";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON cd.fk_product = p.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields as pe ON pe.fk_object = p.rowid";
         $arrTmp = array();
         foreach ($arrGrpTmp as $key => $val)
             $arrTmp[] = $val->id;
         $sql.= " WHERE cd.fk_commande IN (" . join(",", $arrTmp) . ")";
-        $sql.= " AND p.fk_product_type = 0 ";
+        $sql.= " AND pe.type2 = 0 ";
 //        $sql.= " GROUP BY cd.fk_product";
         $sql.= " ORDER BY cd.rowid";
 

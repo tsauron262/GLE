@@ -18,6 +18,7 @@ $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/
 $js .= '<script type="text/javascript" >$(window).on("load", function() { $(".addContact2").click(function() {
         socid = $("#socid").val();
         dispatchePopObject(socid, "newContact", function() {
+        alert("ok");
         $("#form").append(\'<input type="hidden" name="action2" value="Modify"/><input type="hidden" name="contactSociete" value="max"/>\');
         $(".required").removeClass("required");
         $("#form").submit();
@@ -656,7 +657,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     echo "</div>";
     echo "</form>";
 } else {
-    echo "<form method='POST' name='form' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "'>";
+    echo "<form method='POST' name='form' id='form' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "'>";
     echo "<p>";
     echo "<label for='text'>Rentrez le client avant de passer a la suite : </label>";
     echo "</p>";

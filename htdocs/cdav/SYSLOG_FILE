@@ -1,1 +1,0 @@
-[08-Sep-2017 18:56:54 Europe/Paris] PHP Fatal error:  Allowed memory size of 134217728 bytes exhausted (tried to allocate 8192 bytes) in /Users/tommy/Work/Netbeans/gle-6/htdocs/core/db/mysqli.class.php on line 296

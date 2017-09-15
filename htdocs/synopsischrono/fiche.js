@@ -176,7 +176,7 @@ jQuery(document).ready(function () {
         socid = jQuery('#socid').find(':selected').val();
         if (!socid > 0)
             socid = $("#socid").val();
-        majDoubleSoc(socid, true);
+        //majDoubleSoc(socid, true);
         jQuery('#socid').change(function () {
             setTimeout(function () {
                 socid = jQuery(this).find(':selected').val();

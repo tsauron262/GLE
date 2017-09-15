@@ -41,7 +41,8 @@
             $requete = "SELECT *
                           FROM ".MAIN_DB_PREFIX."product p,
                                ".MAIN_DB_PREFIX."commandedet cdet
-                         WHERE p.fk_product_type=3
+                                 LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields as pe ON pe.fk_object = p.rowid
+                         WHERE pe.type2=3
                            AND cdet.rowid = ".$res->fk_commandedet."
                            AND cdet.fk_product = p.rowid";
             $sql1 = $db->query($requete);

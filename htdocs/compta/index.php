@@ -589,7 +589,7 @@ if (! empty($conf->tax->enabled) && $user->rights->tax->charges->lire)
 			{
 				$i = 0;
 				$tot_ttc=0;
-				while ($i < $num)
+				while ($i < $num && $i < $conf->liste_limit)
 				{
 					$obj = $db->fetch_object($resql);
 					print '<tr class="oddeven">';
@@ -673,7 +673,7 @@ if (! empty($conf->facture->enabled) && ! empty($conf->commande->enabled) && $us
 			print '</tr>';
 			$tot_ht=$tot_ttc=$tot_tobill=0;
 			$societestatic = new Societe($db);
-			while ($i < $num)
+			while ($i < $num && $i < $conf->liste_limit)
 			{
 				$obj = $db->fetch_object($resql);
 
@@ -903,7 +903,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 		{
 			$i = 0;
 			$total = $total_ttc = $totalam = 0;
-			while ($i < $num)
+			while ($i < $num && $i < $conf->liste_limit)
 			{
 				$obj = $db->fetch_object($resql);
 

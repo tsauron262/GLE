@@ -42,6 +42,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/client.class.php';
 require_once DOL_DOCUMENT_ROOT.'/margin/lib/margins.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/multicurrency/class/multicurrency.class.php';
+		include_once DOL_DOCUMENT_ROOT.'/core/class/discount.class.php';
 
 /**
  *	Class to manage invoices
@@ -1547,7 +1548,6 @@ class Facture extends CommonInvoice
 		global $langs;
 
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
-		include_once DOL_DOCUMENT_ROOT.'/core/class/discount.class.php';
 
 		$this->db->begin();
 

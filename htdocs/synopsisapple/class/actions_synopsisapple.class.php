@@ -24,6 +24,7 @@ class ActionsSynopsisapple {
     
     function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager){
         global $langs;
+        if($object->element == "societe")
 		print '<div class="inline-block divButAction"><a class="butAction" href="'.DOL_URL_ROOT.'/synopsisapple/FicheRapide.php?socid='.$object->id.'">'.$langs->trans("Créer SAV").'</a></div>';
     }
 }

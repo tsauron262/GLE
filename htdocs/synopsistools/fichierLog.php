@@ -39,7 +39,7 @@ if ($user->rights->SynopsisTools->Global->fileInfo != 1) {
 
 $prefixe = (isset($_REQUEST['prefixe']) ? $_REQUEST['prefixe'] : "");
 
-$filename = str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $prefixe . ".log", $conf->global->SYSLOG_FILE));
+$filename = nameToFile($prefixe);
 
 $fileLongQuery = "/var/log/mysql/mysql-slow.log";
 if($prefixe == "_mysqllong")
@@ -70,7 +70,9 @@ if(is_file($fileLongQuery))
     $tabPrefixe["_mysqllong"] = "Longue query";
 
 foreach ($tabPrefixe as $prefV => $pref) {
-    echo "<a style='margin:2px 8px;' href='?prefixe=" . $prefV . "'>" . $pref . "</a>";
+    $sizeT = dol_trunc(filesize(nameToFile($prefV))/1024/1024, 5);
+    if($sizeT > 0 OR $prefV == "")
+        echo "<a style='margin:2px 8px;' href='?prefixe=" . $prefV . "'>" . $pref . " (".$sizeT.")</a>";
 }
 
 
@@ -89,4 +91,10 @@ echo "<br/><div class='divButAction'><input type='submit' class='butAction' valu
 
 
 llxFooter();
+
+
+function nameToFile($name){
+    global $conf;
+    return str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $name . ".log", $conf->global->SYSLOG_FILE));
+}
 ?>

@@ -77,11 +77,14 @@ if (! empty($conf->global->MAIN_APPLICATION_TITLE)) $title=$langs->trans("HomeAr
 
 llxHeader('',$title);
 
+/*moddrsi*/$cache = cachePage("index?user=".$user->id, "1", isset($_REQUEST['action']));
+if(!$cache){/*fmoddrsi*/
+    
 
 $resultboxes=FormOther::getBoxesArea($user,"0");    // Load $resultboxes (selectboxlist + boxactivated + boxlista + boxlistb)
 
 
-print load_fiche_titre($langs->trans("HomeArea"),$resultboxes['selectboxlist'],'title_home');
+print load_fiche_titre($langs->trans("HomeArea")." (en cache pendant 1h)",$resultboxes['selectboxlist'],'title_home');
 
 if (! empty($conf->global->MAIN_MOTD))
 {
@@ -666,6 +669,13 @@ if ($user->admin && empty($conf->global->MAIN_REMOVE_INSTALL_WARNING))
 }
 
 //print 'mem='.memory_get_usage().' - '.memory_get_peak_usage();
+    
+
+/*moddrsi*/
+    cachePage("index?user=".$user->id);
+}
+global $logLongTime;
+$logLongTime = false;/*fmoddrsi*/
 
 llxFooter();
 

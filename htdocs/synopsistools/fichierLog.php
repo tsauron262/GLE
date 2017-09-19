@@ -71,7 +71,7 @@ if(is_file($fileLongQuery))
 
 foreach ($tabPrefixe as $prefV => $pref) {
     $sizeT = dol_trunc(filesize(nameToFile($prefV))/1024/1024, 5);
-    if($sizeT > 0.00001 OR $prefV == "")
+    if($sizeT > 0.0001 OR $prefV == "")
         echo "<a style='margin:2px 8px;' href='?prefixe=" . $prefV . "'>" . $pref . " (".$sizeT.")</a>";
 }
 

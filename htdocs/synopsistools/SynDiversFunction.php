@@ -1005,4 +1005,26 @@ function userInGroupe($groupe, $idUser) {
     }
 }
 
+function cachePage($page, $delay = 0, $mode = 2){//Mod 0 = get, 1 = force refresh, 2 = set
+    $path = DOL_DATA_ROOT."/cacheSyn/";
+    if(!is_dir($path))
+        mkdir($path);
+    $file = $path.$page;
+    if($mode === 2){
+        $contenu = ob_get_contents();
+        ob_clean();
+        file_put_contents($file, $contenu);
+        echo $contenu;
+        return 1;
+    }
+    elseif($mode == 0){
+        if(is_file($file) && filemtime($file) > strtotime("-".$delay." hour")){
+                echo file_get_contents ($file);
+                return filemtime($file);
+        }
+    }
+    ob_start();
+    return 0;
+}
+
 ?>

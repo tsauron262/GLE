@@ -266,6 +266,8 @@ class synopsisHook {//FA1506-0369
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time");
         if ($nbReq > self::$MAX_REQ_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages trop de req " . $nbReq . " ", 4, 0, "_time");
+        if ($nbReq > self::$MAX_REQ_LOG/2 && $time > self::$MAX_TIME_LOG/2 && (!isset($logLongTime) || $logLongTime))
+            dol_syslog("Pages trop de req*temp " . $nbReq . " en ". $time . " s", 4, 0, "_time");
         $return .= "<span class='timePage'>" . number_format($time,4) . " s | ".$nbReq." requetes</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
             $return .= "<br/>";

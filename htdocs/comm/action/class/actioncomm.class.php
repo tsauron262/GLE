@@ -1279,7 +1279,7 @@ class ActionComm extends CommonObject
             $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."user as u on u.rowid = a.fk_user_author";	// Link to get author of event for export
             $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on s.rowid = a.fk_soc";
 			// We must filter on assignement table
-			if ($filters['logint']) $sql.=", ".MAIN_DB_PREFIX."actioncomm_resources as ar";
+			if (isset($filters['logint'])) $sql.=", ".MAIN_DB_PREFIX."actioncomm_resources as ar";
 			$sql.= " WHERE a.fk_action=c.id";
             $sql.= " AND a.entity IN (".getEntity('agenda').")";
             foreach ($filters as $key => $value)

@@ -418,8 +418,10 @@ class PDO extends AbstractBackend {
                     $tmpEtat = (isset($tabT3[1])? $tabT3[1] : "ACCEPTED");
                     
                     
-                    if($row['organisateur'] == "")
+                    if($row['organisateur'] == "" OR $row['organisateur'] == $tmpMail){
                         $row['organisateur'] = $tmpMail;
+                        $tmpEtat = "ACCEPTED";
+                    }
                     
                     $calendarData2[] = "ATTENDEE;".($tmpEtat == "ACCEPTED" ? "" : "RSVP=TRUE;")."PARTSTAT=".$tmpEtat.";ROLE=REQ-PARTICIPANT:mailto:" . $tmpMail;
                 }

@@ -41,7 +41,7 @@ $prefixe = (isset($_REQUEST['prefixe']) ? $_REQUEST['prefixe'] : "");
 
 $filename = nameToFile($prefixe);
 
-$fileLongQuery = "/var/log/mysql/mysql-slow.log";
+$fileLongQuery = "/Applications/MAMP/db/mysql56/MacBook-Pro-de-Tommy-slow.log";
 if($prefixe == "_mysqllong")
         $filename = $fileLongQuery;
 
@@ -71,7 +71,7 @@ if(is_file($fileLongQuery))
 
 foreach ($tabPrefixe as $prefV => $pref) {
     $sizeT = filesize(nameToFile($prefV))/1024/1024;
-    if($sizeT > 0.000001 OR $prefV == "")
+    if($sizeT > 0.000005 OR $prefV == "")
         echo "<a style='margin:2px 8px;' href='?prefixe=" . $prefV . "'>" . $pref . " (".dol_trunc($sizeT, 6).")</a>";
 }
 

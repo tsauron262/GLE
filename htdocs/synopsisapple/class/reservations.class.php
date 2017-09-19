@@ -150,7 +150,7 @@ class Reservations
 
         $sql = 'SELECT u.`rowid` as id, u.email, ue.apple_techid as techid, ue.apple_centre as centre_sav FROM ' . MAIN_DB_PREFIX . 'user u';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user_extrafields ue ON u.rowid = ue.fk_object';
-        $sql .= ' WHERE ue.apple_shipto = ' . $shipTo . ' AND ue.apple_techid IS NOT NULL AND u.statut = 1';
+        $sql .= ' WHERE ue.apple_shipto = ' . $shipTo . ' AND ue.apple_techid IS NOT NULL AND u.statut = 1 AND ue.gsxresa = 1';
 
         $result = $this->db->query($sql);
         if ($result) {

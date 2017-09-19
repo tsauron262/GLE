@@ -73,9 +73,9 @@ class PDO extends AbstractBackend {
      * @param string $calendarObjectTableName
      */
     public function __construct(\PDO $pdo, $calendarTableName = 'calendars', $calendarObjectTableName = 'calendarobjects') {
-
+global $conf;
         error_reporting(E_ALL);
-        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE));
+        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, $conf->global->SYSLOG_FILE));
         $this->pdo = $pdo;
         $this->calendarTableName = $calendarTableName;
         $this->calendarObjectTableName = $calendarObjectTableName;

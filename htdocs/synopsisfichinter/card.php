@@ -54,7 +54,7 @@
 $afficherLigneContrat = false;
 
 
-require("./pre.inc.php");
+require("../synopsisfichinter/pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/modules_fichinter.php");

@@ -41,9 +41,6 @@ $prefixe = (isset($_REQUEST['prefixe']) ? $_REQUEST['prefixe'] : "");
 
 $filename = nameToFile($prefixe);
 
-$fileLongQuery = "/Applications/MAMP/db/mysql56/MacBook-Pro-de-Tommy-slow.log";
-if($prefixe == "_mysqllong")
-        $filename = $fileLongQuery;
 
 if (isset($textSave))
     file_put_contents($filename, $textSave);
@@ -65,9 +62,8 @@ if ($inverser) {
     $text = implode("\n", $textT);
 }
 
-$tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_apple2" => "Apple2", "_apple3" => "Apple3", "_time" => "Pages lentes", "_caldav" => "CalDav", "_caldav2" => "CalDav2", "_ldap" => "Ldap", "_caldavLog" => "Log Caldav", "_sauv" => "Sauv", "_admin" => "Log Admin");
-if(is_file($fileLongQuery))
-    $tabPrefixe["_mysqllong"] = "Longue query";
+$tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated", "_recur" => "Récurent", "_mail" => "Mail", "_sms" => "SMS", "_apple" => "Apple", "_apple2" => "Apple2", "_apple3" => "Apple3", "_time" => "Pages lentes", "_mysqllong" => "Longue query", "_caldav" => "CalDav", "_caldav2" => "CalDav2", "_ldap" => "Ldap", "_caldavLog" => "Log Caldav", "_sauv" => "Sauv", "_admin" => "Log Admin");
+
 
 foreach ($tabPrefixe as $prefV => $pref) {
     $sizeT = filesize(nameToFile($prefV))/1024/1024;
@@ -95,6 +91,12 @@ llxFooter();
 
 function nameToFile($name){
     global $conf;
+    if($name == "_mysqllong"){
+        if(defined("MYSQL_SLOW_LOG"))
+            return MYSQL_SLOW_LOG;
+        else
+            return "/var/log/mysql/mysql-slow.log";
+    }
     return str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $name . ".log", $conf->global->SYSLOG_FILE));
 }
 ?>

@@ -63,7 +63,7 @@ require_once 'PHPExcel/Calculation/FormulaToken.php';
 class PHPExcel_Calculation_FormulaParser {
 	/* Character constants */
 	const QUOTE_DOUBLE  = '"';
-	const QUOTE_SIGLE  = '\'';
+	const QUOTE_SINGLE  = '\'';
 	const BRACKET_CLOSE = ']';
 	const BRACKET_OPEN  = '[';
 	const BRACE_OPEN    = '{';
@@ -203,9 +203,9 @@ class PHPExcel_Calculation_FormulaParser {
 			// embeds are double
 			// end does not mark a token
 			if ($inPath) {
-				if ($this->_formula{$index} == PHPExcel_Calculation_FormulaParser::QUOTE_SIGLE) {
-					if ((($index + 2) <= $formulaLength) && ($this->_formula{$index + 1} == PHPExcel_Calculation_FormulaParser::QUOTE_SIGLE)) {
-						$value .= PHPExcel_Calculation_FormulaParser::QUOTE_SIGLE;
+				if ($this->_formula{$index} == PHPExcel_Calculation_FormulaParser::QUOTE_SINGLE) {
+					if ((($index + 2) <= $formulaLength) && ($this->_formula{$index + 1} == PHPExcel_Calculation_FormulaParser::QUOTE_SINGLE)) {
+						$value .= PHPExcel_Calculation_FormulaParser::QUOTE_SINGLE;
 						++$index;
 					} else {
 						$inPath = false;
@@ -266,7 +266,7 @@ class PHPExcel_Calculation_FormulaParser {
 				continue;
  			}
 
-			if ($this->_formula{$index} == PHPExcel_Calculation_FormulaParser::QUOTE_SIGLE) {
+			if ($this->_formula{$index} == PHPExcel_Calculation_FormulaParser::QUOTE_SINGLE) {
 				if (strlen($value) > 0) { // unexpected
 					$tokens1[] = new PHPExcel_Calculation_FormulaToken($value, PHPExcel_Calculation_FormulaToken::TOKEN_TYPE_UNKNOWN);
 					$value = "";

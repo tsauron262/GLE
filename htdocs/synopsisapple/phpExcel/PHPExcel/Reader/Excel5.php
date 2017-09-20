@@ -1923,13 +1923,13 @@ class PHPExcel_Reader_Excel5 extends PHPExcel_Reader_Abstract implements PHPExce
 				case 0x00:
 					break; // no underline
 				case 0x01:
-					$objFont->setUnderline(PHPExcel_Style_Font::UNDERLINE_SIGLE);
+					$objFont->setUnderline(PHPExcel_Style_Font::UNDERLINE_SINGLE);
 					break;
 				case 0x02:
 					$objFont->setUnderline(PHPExcel_Style_Font::UNDERLINE_DOUBLE);
 					break;
 				case 0x21:
-					$objFont->setUnderline(PHPExcel_Style_Font::UNDERLINE_SIGLEACCOUNTING);
+					$objFont->setUnderline(PHPExcel_Style_Font::UNDERLINE_SINGLEACCOUNTING);
 					break;
 				case 0x22:
 					$objFont->setUnderline(PHPExcel_Style_Font::UNDERLINE_DOUBLEACCOUNTING);

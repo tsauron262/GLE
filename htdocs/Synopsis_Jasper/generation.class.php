@@ -91,9 +91,9 @@ class jasperSoap {
          * These constants are copied here from InputControl for facility
          */
         define("IC_TYPE_BOOLEAN", 1);
-        define("IC_TYPE_SIGLE_VALUE", 2);
-        define("IC_TYPE_SIGLE_SELECT_LIST_OF_VALUES", 3);
-        define("IC_TYPE_SIGLE_SELECT_QUERY", 4);
+        define("IC_TYPE_SINGLE_VALUE", 2);
+        define("IC_TYPE_SINGLE_SELECT_LIST_OF_VALUES", 3);
+        define("IC_TYPE_SINGLE_SELECT_QUERY", 4);
         define("IC_TYPE_MULTI_VALUE", 5);
         define("IC_TYPE_MULTI_SELECT_LIST_OF_VALUES", 6);
         define("IC_TYPE_MULTI_SELECT_QUERY", 7);

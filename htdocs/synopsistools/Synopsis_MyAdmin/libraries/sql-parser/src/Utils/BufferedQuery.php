@@ -29,7 +29,7 @@ class BufferedQuery
 {
 
     // Constants that describe the current status of the parser.
-    const STATUS_STRING_SIGLE_QUOTES   = 1;
+    const STATUS_STRING_SINGLE_QUOTES   = 1;
     const STATUS_STRING_DOUBLE_QUOTES   = 2;
     const STATUS_STRING_BACKTICK        = 3;
     const STATUS_COMMENT_BASH           = 4;
@@ -201,7 +201,7 @@ class BufferedQuery
             /*
              * Handling special parses statuses.
              */
-            if ($this->status === static::STATUS_STRING_SIGLE_QUOTES) {
+            if ($this->status === static::STATUS_STRING_SINGLE_QUOTES) {
                 // Single-quoted strings like 'foo'.
                 if ($this->query[$i] === '\'') {
                     $this->status = 0;
@@ -241,7 +241,7 @@ class BufferedQuery
              * Checking if a string started.
              */
             if ($this->query[$i] === '\'') {
-                $this->status = static::STATUS_STRING_SIGLE_QUOTES;
+                $this->status = static::STATUS_STRING_SINGLE_QUOTES;
                 $this->current .= $this->query[$i];
                 continue;
             } elseif ($this->query[$i] === '"') {

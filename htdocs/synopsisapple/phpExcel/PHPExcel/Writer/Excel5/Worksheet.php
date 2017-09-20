@@ -3219,8 +3219,8 @@ class PHPExcel_Writer_Excel5_Worksheet extends PHPExcel_Writer_Excel5_BIFFwriter
 				case PHPExcel_Style_Font::UNDERLINE_NONE             : $dataBlockFont .= pack('C', 0x00); $fontUnderline = 0; break;
 				case PHPExcel_Style_Font::UNDERLINE_DOUBLE           : $dataBlockFont .= pack('C', 0x02); $fontUnderline = 0; break;
 				case PHPExcel_Style_Font::UNDERLINE_DOUBLEACCOUNTING : $dataBlockFont .= pack('C', 0x22); $fontUnderline = 0; break;
-				case PHPExcel_Style_Font::UNDERLINE_SIGLE           : $dataBlockFont .= pack('C', 0x01); $fontUnderline = 0; break;
-				case PHPExcel_Style_Font::UNDERLINE_SIGLEACCOUNTING : $dataBlockFont .= pack('C', 0x21); $fontUnderline = 0; break;
+				case PHPExcel_Style_Font::UNDERLINE_SINGLE           : $dataBlockFont .= pack('C', 0x01); $fontUnderline = 0; break;
+				case PHPExcel_Style_Font::UNDERLINE_SINGLEACCOUNTING : $dataBlockFont .= pack('C', 0x21); $fontUnderline = 0; break;
 				default                                              : $dataBlockFont .= pack('C', 0x00); $fontUnderline = 1; break;
 			}
 			// Not used (3)

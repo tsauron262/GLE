@@ -1137,9 +1137,9 @@ class PHPExcel_Reader_Excel5 implements PHPExcel_Reader_IReader
 			$underlineType = ord($recordData{10});
 			switch ($underlineType) {
 				case 0x00: break; // no underline
-				case 0x01: $font['underline'] = PHPExcel_Style_Font::UNDERLINE_SIGLE; break;
+				case 0x01: $font['underline'] = PHPExcel_Style_Font::UNDERLINE_SINGLE; break;
 				case 0x02: $font['underline'] = PHPExcel_Style_Font::UNDERLINE_DOUBLE; break;
-				case 0x21: $font['underline'] = PHPExcel_Style_Font::UNDERLINE_SIGLEACCOUNTING; break;
+				case 0x21: $font['underline'] = PHPExcel_Style_Font::UNDERLINE_SINGLEACCOUNTING; break;
 				case 0x22: $font['underline'] = PHPExcel_Style_Font::UNDERLINE_DOUBLEACCOUNTING; break;
 			}
 

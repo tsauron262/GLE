@@ -74,10 +74,10 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
     },
 
     /**
-     * Constant: SIGLE_TILE_PARAMS
+     * Constant: SINGLE_TILE_PARAMS
      * {Object} Hashtable of default parameter key/value pairs for untiled layer
      */
-    SIGLE_TILE_PARAMS: {
+    SINGLE_TILE_PARAMS: {
         operation: 'GETMAPIMAGE',
         format: 'PNG',
         locale: 'en',
@@ -193,7 +193,7 @@ OpenLayers.Layer.MapGuide = OpenLayers.Class(OpenLayers.Layer.Grid, {
           } else {
             OpenLayers.Util.applyDefaults(
                            this.params,
-                           this.SIGLE_TILE_PARAMS
+                           this.SINGLE_TILE_PARAMS
                            );
           }         
         } else {

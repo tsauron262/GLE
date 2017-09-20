@@ -434,7 +434,7 @@ class PHPExcel_Reader_Excel2007_Chart
 				$underscore = (self::_getAttribute($titleDetailElement->rPr, 'u', 'string'));
 				if (!is_null($underscore)) {
 					if ($underscore == 'sng') {
-						$objText->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SIGLE);
+						$objText->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SINGLE);
 					} elseif($underscore == 'dbl') {
 						$objText->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_DOUBLE);
 					} else {

@@ -1,6 +1,6 @@
 <?php
 require_once('pre.inc.php');
-$url =  $conf->global->GLE_RT_ROOT;
+$url =  $conf->global->BIMP-ERP_RT_ROOT;
 $rtUrl = $url .'/index.html';
 $rtUser=$user->login;
 $rtPass=$user->pass_indatabase;

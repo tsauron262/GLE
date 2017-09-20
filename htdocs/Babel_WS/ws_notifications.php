@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : ws_notifications.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   **/
 
   $cookieName = "GleWSCookie";
@@ -50,7 +50,7 @@ ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
 ini_set('soap.wsdl_cache_ttl',0);
 ini_set('soap.wsdl_cache',0);
 
-$server = new SoapServer("http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/BabelNotification.wsdl");
+$server = new SoapServer("http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/BabelNotification.wsdl");
 $server->addFunction("getNotifications");
 
 $server->handle();

@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : socinfo_html-response.php
-  * GLE-1.0
+  * BIMP-ERP-1.0
   */
 require_once('../../main.inc.php');
 require_once('../Campagne.class.php');
@@ -69,7 +69,7 @@ $durMonth = 12;
                 <li><a href="#fragment-Contact"><span>Contact</span></a></li>
                 <li><a href="#fragment-Calendar"><span>Calendrier</span></a></li>
                 <li><a href="#fragment-DocClients"><span>Documents clients</span></a></li>
-                <li><a href="#fragment-DocGLE"><span>Documents GLE</span></a></li>
+                <li><a href="#fragment-DocBIMP-ERP"><span>Documents BIMP-ERP</span></a></li>
                 <li><a href="#fragment-Stats"><span>Stats</span></a></li>
                 <li><a href="#fragment-ActCom"><span>Action Com</span></a></li>
                 <li><a href="#fragment-SuiviCom"><span>Suivi commercial</span></a></li>
@@ -733,19 +733,19 @@ EOF;
                     }
                 }
                 $urlRoot = $conf->global->ZIMBRA_PROTO.'://'.$conf->global->ZIMBRA_HOST."/home/gle";
-                $url = $conf->global->ZIMBRA_PROTO.'://'.$conf->global->ZIMBRA_HOST."/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/"."abc"."/".rawurlencode($societe->nom."-".$socid.".html")."?view=month";
+                $url = $conf->global->ZIMBRA_PROTO.'://'.$conf->global->ZIMBRA_HOST."/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/"."abc"."/".rawurlencode($societe->nom."-".$socid.".html")."?view=month";
 
-                $url1 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid.".html")."?view=month";
-                $url2 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Propales.html"."?view=month";
-                $url3 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Commandes.html"."?view=month";
-                $url4 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Factures.html"."?view=month";
-                $url5 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Expeditions.html"."?view=month";
-                $url6 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Contrats.html"."?view=month";
-                $url7 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Actions.html"."?view=month";
-                $url8 = "/home/gle/Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Interventions.html"."?view=month";
+                $url1 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid.".html")."?view=month";
+                $url2 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Propales.html"."?view=month";
+                $url3 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Commandes.html"."?view=month";
+                $url4 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Factures.html"."?view=month";
+                $url5 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Expeditions.html"."?view=month";
+                $url6 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Contrats.html"."?view=month";
+                $url7 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Actions.html"."?view=month";
+                $url8 = "/home/gle/Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Interventions.html"."?view=month";
 
-                $url9 = "/home/".$user->login."/"."Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Commandes%20fournisseur.html"."?view=month";
-                $url10 = "/home/".$user->login."/"."Calendriers%20-%20GLE"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Factures%20fournisseur.html"."?view=month";
+                $url9 = "/home/".$user->login."/"."Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Commandes%20fournisseur.html"."?view=month";
+                $url10 = "/home/".$user->login."/"."Calendriers%20-%20BIMP-ERP"."/"."Soci%C3%A9t%C3%A9s"."/".$firstLetterIn."/".rawurlencode($societe->nom."-".$socid)."/Factures%20fournisseur.html"."?view=month";
 
 
                 $arrAlpha=array(0=>'abc',1=>'def',2=>'ghi',3=>'jkl',4=>'mno', 5=>'pqrs', 6=>'tuv', 7=>'wxyz', 8=>'autres');
@@ -1145,9 +1145,9 @@ print '            <div id="fragment-Stats">';
             print '</div>';
 
 
-            print '            <div id="fragment-DocGLE">';
+            print '            <div id="fragment-DocBIMP-ERP">';
 
-            //Affiche un tree avec la liste des documents de GLE
+            //Affiche un tree avec la liste des documents de BIMP-ERP
             print "<iframe style='width: 100%; height: 600px; border: 0px;' src='".DOL_URL_ROOT."/BabelProspect/ajax/iframe-doc.php'></iframe>";
 
             print '            </div>';

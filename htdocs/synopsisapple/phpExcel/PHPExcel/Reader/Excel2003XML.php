@@ -299,8 +299,8 @@ class PHPExcel_Reader_Excel2003XML extends PHPExcel_Reader_Abstract implements P
 				PHPExcel_Style_Font::UNDERLINE_NONE,
 				PHPExcel_Style_Font::UNDERLINE_DOUBLE,
 				PHPExcel_Style_Font::UNDERLINE_DOUBLEACCOUNTING,
-				PHPExcel_Style_Font::UNDERLINE_SINGLE,
-				PHPExcel_Style_Font::UNDERLINE_SINGLEACCOUNTING
+				PHPExcel_Style_Font::UNDERLINE_SIGLE,
+				PHPExcel_Style_Font::UNDERLINE_SIGLEACCOUNTING
 			);
 		$verticalAlignmentStyles = array (
 				PHPExcel_Style_Alignment::VERTICAL_BOTTOM,

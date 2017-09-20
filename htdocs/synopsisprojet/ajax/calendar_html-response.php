@@ -5,7 +5,7 @@
   /**
  *
  * Name : calendar_html-repsonse.php
- * GLE-1.1
+ * BIMP-ERP-1.1
  */
 
 require_once('../../main.inc.php');

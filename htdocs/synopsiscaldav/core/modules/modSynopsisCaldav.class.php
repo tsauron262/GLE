@@ -1,6 +1,6 @@
 <?php
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -134,7 +134,7 @@ $this->menus = array();			// List of menus to add
 );",
 
 "CREATE OR REPLACE VIEW calendars as (SELECT u.`rowid` as id, LOWER(login) as login, CONCAT('principals/', LOWER(`login`)) as principaluri, REPLACE(CONCAT(`lastname`, CONCAT('_', `firstname`)), ' ', '_') as displayname, 'Calendar' as uri, 
-IF(fk_target, fk_target, '0') as ctag, 'Calendrier GLE' as description, 0 as calendarorder, '' as calendarcolor, 
+IF(fk_target, fk_target, '0') as ctag, 'Calendrier BIMP-ERP' as description, 0 as calendarorder, '' as calendarcolor, 
 '' as timezone, 'VEVENT,VTODO' as components, 
 0 as transparent FROM " . MAIN_DB_PREFIX . "user u LEFT JOIN " . MAIN_DB_PREFIX . "element_element ON sourcetype = 'user' AND targettype = 'idCaldav' AND fk_source = u.rowid)",
         

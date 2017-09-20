@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : test.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
   require_once('../master.inc.php');
   $cookieName = "GleWSCookie";
@@ -39,7 +39,7 @@ clearstatcache();
 //                     VALUES (now(), '".$secret."', ".$user->id.")";
 //    $sql=$db->query($requete);
 try {
-        $preclient = new SoapClient("http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/connect.wsdl");
+        $preclient = new SoapClient("http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/connect.wsdl");
         $login ='eos';
         $md5pass = md5('redalert');
         $return = $preclient->WSconnect($login,$md5pass);
@@ -47,7 +47,7 @@ try {
         $secret = $return;
 
         try {
-            $client = new SoapClient("http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/BabelGMAO.wsdl",array('cache_wsdl' => 0));
+            $client = new SoapClient("http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/BabelGMAO.wsdl",array('cache_wsdl' => 0));
             $client->__setCookie ( $cookieName, $secret);
 //            $client->connect('eos');
 

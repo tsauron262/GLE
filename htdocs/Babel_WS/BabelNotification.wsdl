@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions name="BabelNotification"
- targetNamespace='urn:GLEInventory'
- xmlns:tns='urn:GLEInventory'
+ targetNamespace='urn:BIMP-ERPInventory'
+ xmlns:tns='urn:BIMP-ERPInventory'
  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
  xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
@@ -44,19 +44,19 @@
         />
         <wsdl:operation name="getNotifications">
             <soap:operation
-                soapAction="urn:GLEInventory/getNotifications"
+                soapAction="urn:BIMP-ERPInventory/getNotifications"
             />
             <wsdl:input>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLEInventory"
+                    namespace="urn:BIMP-ERPInventory"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:input>
             <wsdl:output>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLEInventory"
+                    namespace="urn:BIMP-ERPInventory"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:output>
@@ -70,7 +70,7 @@
             binding="tns:NotifBinding"
         >
             <soap:address
-                location="http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/ws_notifications.php" />
+                location="http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/ws_notifications.php" />
         </wsdl:port>
     </service>
 </definitions>

@@ -7,14 +7,14 @@
 //
 global $dolibarr_main_url_root;
 $dolibarr_main_url_root="https://gle.synopsis-erp.com/bimp";
-$dolibarr_main_document_root='/var/GLE/bimp/htdocs/';
+$dolibarr_main_document_root='/var/BIMP-ERP/bimp/htdocs/';
 //$dolibarr_main_url_root_alt='http://192.168.1.10/newGle/htdocs/custom';
 //$dolibarr_main_document_root_alt='/Library/WebServer/Documents/newGle/htdocs/custom';
-$dolibarr_main_data_root='/var/GLE/DOCUMENTS/bimp';
+$dolibarr_main_data_root='/var/BIMP-ERP/DOCUMENTS/bimp';
 $dolibarr_main_db_host='127.0.0.1';
 $dolibarr_main_db_port='3306';
 $dolibarr_main_db_pass='admin@synopsis';
-$dolibarr_main_db_name='GLE_PROD_BIMP';
+$dolibarr_main_db_name='BIMP-ERP_PROD_BIMP';
 /*$dolibarr_main_db_port='3307';
 $dolibarr_main_db_pass='roland2007';
 $dolibarr_main_db_name='gle360';*/
@@ -30,7 +30,7 @@ $dolibarr_main_authentication='dolibarr';
 define('IP_ADMIN', '78.217.11.123');
 */
 
-//define('DIR_SYNCH', '/var/GLE/XRAIDAUTO/GLE_8sens/');
+//define('DIR_SYNCH', '/var/BIMP-ERP/XRAIDAUTO/BIMP-ERP_8sens/');
 
 define('MAX_TIME_LOG', 6);
 

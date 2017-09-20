@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by Synopsis et DRSI
+  * BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : pdf_contrat_courrierBIMPresiliationAvoir.modules.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
 
 require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
@@ -158,7 +158,7 @@ class pdf_contrat_courrierBIMPresiliationAvoir extends ModeleSynopsiscontrat
 
                 $pdf->SetTitle($contrat->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
-                $pdf->SetCreator("GLE ".GLE_VERSION);
+                $pdf->SetCreator("BIMP-ERP ".DOL_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right

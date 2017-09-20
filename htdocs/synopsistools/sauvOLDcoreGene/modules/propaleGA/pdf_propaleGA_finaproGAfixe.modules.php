@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 /*
-  * GLE by Synopsis et DRSI
+  * BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -193,7 +193,7 @@ class pdf_propaleGA_finaproGAfixe extends ModelePDFPropalesGA
 
                 $pdf->SetTitle($propale->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("CommercialProposal"));
-                $pdf->SetCreator("GLE ".GLE_VERSION);
+                $pdf->SetCreator("BIMP-ERP ".DOL_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right

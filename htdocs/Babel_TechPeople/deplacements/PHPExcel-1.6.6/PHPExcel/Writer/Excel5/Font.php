@@ -187,9 +187,9 @@ class PHPExcel_Writer_Excel5_Font
 	private function _mapUnderline($underline) {
 		switch ($underline) {
 			case PHPExcel_Style_Font::UNDERLINE_NONE:				return 0x00;
-			case PHPExcel_Style_Font::UNDERLINE_SINGLE:				return 0x01;
+			case PHPExcel_Style_Font::UNDERLINE_SIGLE:				return 0x01;
 			case PHPExcel_Style_Font::UNDERLINE_DOUBLE:				return 0x02;
-			case PHPExcel_Style_Font::UNDERLINE_SINGLEACCOUNTING:	return 0x21;
+			case PHPExcel_Style_Font::UNDERLINE_SIGLEACCOUNTING:	return 0x21;
 			case PHPExcel_Style_Font::UNDERLINE_DOUBLEACCOUNTING:	return 0x22;
 			default:												return 0x00;
 		}

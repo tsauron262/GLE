@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -16,7 +16,7 @@
 /**
  *
  * Name : hrm.class.php.php
- * GLE-1.1
+ * BIMP-ERP-1.1
  */
 class hrm {
 
@@ -59,7 +59,7 @@ class hrm {
                     $this->allRessource[$res1->emp_number]['lastName'] = $res1->emp_lastname;
                     $this->allRessource[$res1->emp_number]['firstName'] = $res1->emp_firstname;
                     $this->allRessource[$res1->emp_number]['nickName'] = $res1->emp_nick_name;
-                    $this->allRessource[$res1->emp_number]['GLEId'] = $res2->user_id;
+                    $this->allRessource[$res1->emp_number]['BIMP-ERPId'] = $res2->user_id;
                     $this->allRessource[$res1->emp_number]['empNumber'] = $res1->emp_number;
                 }
             }
@@ -87,7 +87,7 @@ class hrm {
                     $this->allRessource[$res1->emp_number]['lastName'] = $res1->emp_lastname;
                     $this->allRessource[$res1->emp_number]['firstName'] = $res1->emp_firstname;
                     $this->allRessource[$res1->emp_number]['nickName'] = $res1->emp_nick_name;
-                    $this->allRessource[$res1->emp_number]['GLEId'] = $res2->user_id;
+                    $this->allRessource[$res1->emp_number]['BIMP-ERPId'] = $res2->user_id;
                     $this->allRessource[$res1->emp_number]['empNumber'] = $res1->emp_number;
                 }
             }
@@ -224,7 +224,7 @@ class hrm {
         return($html);
     }
 
-    public function getRessourcesFromGLEid($gleId) {
+    public function getRessourcesFromBIMP-ERPid($gleId) {
         $requete = "SELECT *
                       FROM " . MAIN_DB_PREFIX . "Synopsis_hrm_user
                      WHERE user_id = " . $gleId . "
@@ -356,10 +356,10 @@ class hrm {
         }
     }
 
-    public function projectTask_GLEId2HRMId($id) {
+    public function projectTask_BIMP-ERPId2HRMId($id) {
         $requete = "SELECT HRMId as hrmid
                       FROM Babel_hrm_project_task
-                     WHERE GLEid = " . $id;
+                     WHERE BIMP-ERPid = " . $id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $hrmId = $res->hrmid;
@@ -369,8 +369,8 @@ class hrm {
         return ($hrmId);
     }
 
-    public function projectTask_HRMId2GLEId($id) {
-        $requete = "SELECT GLEid as gleid
+    public function projectTask_HRMId2BIMP-ERPId($id) {
+        $requete = "SELECT BIMP-ERPid as gleid
                       FROM Babel_hrm_project_task
                      WHERE HRMId = " . $id;
         $sql = $this->db->query($requete);
@@ -384,10 +384,10 @@ class hrm {
         }
     }
 
-    public function project_GLEId2HRMId($id) {
+    public function project_BIMP-ERPId2HRMId($id) {
         $requete = "SELECT HRMId as hrmid
                       FROM Babel_hrm_project
-                     WHERE GLEid = " . $id;
+                     WHERE BIMP-ERPid = " . $id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $hrmId = $res->hrmid;
@@ -397,8 +397,8 @@ class hrm {
         return ($hrmId);
     }
 
-    public function customer_GLEId2HRMId($id) {
-        $requete = "SELECT HRMId as hrmCustId FROM Babel_hrm_customer WHERE GLEid = " . $object->socid;
+    public function customer_BIMP-ERPId2HRMId($id) {
+        $requete = "SELECT HRMId as hrmCustId FROM Babel_hrm_customer WHERE BIMP-ERPid = " . $object->socid;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $hrmCustId = $res->hrmCustId;

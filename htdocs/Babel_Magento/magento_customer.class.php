@@ -1,7 +1,7 @@
 <?php
 
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -76,7 +76,7 @@ class magento_customer extends magento_soap{
         return ($result);
 
     }
-//Sync GLE
+//Sync BIMP-ERP
 
     public $isSoc=false;
     public function addToGle($magentoId)

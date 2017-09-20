@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -25,7 +25,7 @@ require_once('./pre.inc.php');
 <?php
 //<html>
 //<head>
-//<title>GLE - Note de frais</title>
+//<title>BIMP-ERP - Note de frais</title>
 $js ='<script src="'.DOL_URL_ROOT.'/Synopsis_Common/js/rico2/src/prototype.js" type="text/javascript"></script>
 <script src="'.DOL_URL_ROOT.'/Synopsis_Common/js/rico2/src/rico.js" type="text/javascript"></script>';
 //print $js;
@@ -49,7 +49,7 @@ if ($user->rights->TechPeople->ndf->Affiche || $user->rights->TechPeople->ndf->V
              group by id
              order by periode DESC";
     //print $sqltext;
-    $_SESSION['GLE_NdfGrid']=$sqltext;
+    $_SESSION['BIMP-ERP_NdfGrid']=$sqltext;
 
 } else if ($user->rights->TechPeople->ndf->AfficheMien) {
     OpenDB();
@@ -68,7 +68,7 @@ if ($user->rights->TechPeople->ndf->Affiche || $user->rights->TechPeople->ndf->V
              group by id
              order by periode DESC";
     //print $sqltext;
-    $_SESSION['GLE_NdfGrid']=$sqltext;
+    $_SESSION['BIMP-ERP_NdfGrid']=$sqltext;
 } else {
     print "L'acc&egrave; à ce menu vous est impossible.'";
     exit(0);
@@ -80,18 +80,18 @@ require "settings.php";
 ?>
 
 <script type='text/javascript'>
-Rico.loadModule('LiveGridAjax','LiveGridMenu','GLE.css');
+Rico.loadModule('LiveGridAjax','LiveGridMenu','BIMP-ERP.css');
 <?php
 setStyle();
 ?>
 
-var GLE_NdfGrid;
+var BIMP-ERP_NdfGrid;
 
 function setFilter() {
   for (var i=0; i<yrboxes.length; i++) {
     if (yrboxes[i].checked==true) {
       var yr=yrboxes[i].value;
-      GLE_NdfGrid.columns[2].setSystemFilter('EQ',yr);
+      BIMP-ERP_NdfGrid.columns[2].setSystemFilter('EQ',yr);
       return;
     }
   }
@@ -170,7 +170,7 @@ MyCustomColumn1.prototype = {
     this._href=href;
     this._target=target;
     this._anchors=[];
-    this._prefixGLE=prefix;
+    this._prefixBIMP-ERP=prefix;
   },
 
   _create: function(gridCell,windowRow) {
@@ -185,10 +185,10 @@ MyCustomColumn1.prototype = {
   },
 
   _display: function(v,gridCell,windowRow) {
-    if (this._prefixGLE)
+    if (this._prefixBIMP-ERP)
     {
         //var col0=this.liveGrid.buffer.getWindowValue(windowRow,5);
-        this._anchors[windowRow].innerHTML= this._prefixGLE+" "+ v;
+        this._anchors[windowRow].innerHTML= this._prefixBIMP-ERP+" "+ v;
     } else {
         this._anchors[windowRow].innerHTML=  v.formatDate("mmm yyyy");
     }
@@ -221,8 +221,8 @@ Rico.onLoad( function() {
                       ]
   };
   var buffer=new Rico.Buffer.AjaxSQL('ricoXMLquery.php', {TimeOut:<?php print array_shift(session_get_cookie_params())/60 ?>});
-  GLE_NdfGrid=new Rico.LiveGrid ('GLE_NdfGrid', buffer, opts);
-  GLE_NdfGrid.menu=new Rico.GridMenu(<?php GridSettingsMenu(); ?>);
+  BIMP-ERP_NdfGrid=new Rico.LiveGrid ('BIMP-ERP_NdfGrid', buffer, opts);
+  BIMP-ERP_NdfGrid.menu=new Rico.GridMenu(<?php GridSettingsMenu(); ?>);
   setFilter();
 });
 </script>
@@ -264,11 +264,11 @@ if ($resql = $db->query($requete))
     }
 }
 ?>
-<button onclick='GLE_NdfGrid.buffer.refresh()' style='margin-left:1em;font-size:8pt;'>Refresh</button>
+<button onclick='BIMP-ERP_NdfGrid.buffer.refresh()' style='margin-left:1em;font-size:8pt;'>Refresh</button>
 </p>
 
-<p class="ricoBookmark"><span id="GLE_NdfGrid_bookmark">&nbsp;</span></p>
-<table id="GLE_NdfGrid" class="ricoLiveGrid" cellspacing="0" cellpadding="0">
+<p class="ricoBookmark"><span id="BIMP-ERP_NdfGrid_bookmark">&nbsp;</span></p>
+<table id="BIMP-ERP_NdfGrid" class="ricoLiveGrid" cellspacing="0" cellpadding="0">
 <colgroup>
 <col style='width:40px;' >
 <col style='width:60px;' >
@@ -287,7 +287,7 @@ if ($resql = $db->query($requete))
   </tr>
 </table>
 <!--
-<textarea id='GLE_NdfGrid_debugmsgs' rows='5' cols='80'>
+<textarea id='BIMP-ERP_NdfGrid_debugmsgs' rows='5' cols='80'>
 -->
 </body>
 </html>

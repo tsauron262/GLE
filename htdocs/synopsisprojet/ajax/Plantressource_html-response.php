@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : ressource_html-repsonse.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
   require_once('../../main.inc.php');
   require_once(DOL_DOCUMENT_ROOT."/Synopsis_Hrm/hrm.class.php");
@@ -99,7 +99,7 @@ $hrm->listRessources();
 $inProjetArr = array();
 foreach($hrm->allRessource as $key=>$val)
 {
-    if ("x".$val['GLEId'] != "x")
+    if ("x".$val['BIMP-ERPId'] != "x")
     {
         $requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
                       FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
@@ -108,7 +108,7 @@ foreach($hrm->allRessource as $key=>$val)
                      WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
                        AND ".MAIN_DB_PREFIX."Synopsis_hrm_user .user_id =  ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user
                        AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$project_id."
-                       AND ".MAIN_DB_PREFIX."Synopsis_hrm_user.user_id = ".$val['GLEId']."";
+                       AND ".MAIN_DB_PREFIX."Synopsis_hrm_user.user_id = ".$val['BIMP-ERPId']."";
         $sql = $db->query($requete);
         if ($sql)
         {

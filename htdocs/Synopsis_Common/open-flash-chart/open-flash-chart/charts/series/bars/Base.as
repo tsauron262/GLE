@@ -45,7 +45,7 @@
 			this.addEventListener(MouseEvent.MOUSE_OUT, this.mouseOut);
 			
 			//
-			// This is UGLY!!! We need to decide if we are passing in a SINGLE style object,
+			// This is UGLY!!! We need to decide if we are passing in a SIGLE style object,
 			// or many parameters....
 			//
 			if ( props.has('on-click') )	// <-- may be null/not set

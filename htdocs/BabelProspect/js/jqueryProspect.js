@@ -326,7 +326,7 @@ var mygrid1 = $("#gridListSocNLRo").jqGrid({
                                                                 var comm = "";
                                                                 var dateDeb = $('#modCampdateDebut').val();
                                                                 var dateFin = $('#modCampdateFin').val();
-                                                                var note = $.fck.content('fckGLE', '');
+                                                                var note = $.fck.content('fckBIMP-ERP', '');
                                                                 var iter =0;
                                                                 $('#comm :selected').each(function(){
                                                                     comm += "&comm"+iter+"="+$(this).val();
@@ -374,7 +374,7 @@ var mygrid1 = $("#gridListSocNLRo").jqGrid({
                                                             }
                                                 },
                                        open: function (e,u){
-                                            $('#fckGLE').fck({ path: "../..//includes/fckeditor/",height:100
+                                            $('#fckBIMP-ERP').fck({ path: "../..//includes/fckeditor/",height:100
                                             //$.scrollTo(0,0);
                                        });
                                     }

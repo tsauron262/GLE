@@ -3,7 +3,7 @@
  /**
   *
   * Name : agenda.php
-  * GLE-1.0
+  * BIMP-ERP-1.0
   */
 
 
@@ -26,7 +26,7 @@ require_once(DOL_DOCUMENT_ROOT."/synopsisprojet/class/synopsisproject.class.php"
 
   //Assigner des ressources global au projet
 
-  //Faire gestion de ressource matériels dans GLE avec calendrier => planning occupation
+  //Faire gestion de ressource matériels dans BIMP-ERP avec calendrier => planning occupation
 
   //Pour chacun afficher une table
   //Col 1 : nom de la ressource pour toutes les lignes

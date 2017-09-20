@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -18,7 +18,7 @@ class magento_soap
     public $pass;
     public $client;
     public $session;
-    private $MagentoSoapUrl ='http://127.0.0.1/magentoGLE/magento/api/soap/?wsdl';
+    private $MagentoSoapUrl ='http://127.0.0.1/magentoBIMP-ERP/magento/api/soap/?wsdl';
     public $magCustomerList=array();
 
 

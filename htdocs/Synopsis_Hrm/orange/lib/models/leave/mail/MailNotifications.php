@@ -173,7 +173,7 @@ class MailNotifications {
 
         Zend_Mail::setDefaultTransport($transport);
         $this->mailer = new Zend_Mail();
-        $this->mailer->setFrom($confObj->getMailAddress(), "GLE - HRM");
+        $this->mailer->setFrom($confObj->getMailAddress(), "BIMP-ERP - HRM");
 
         $sysConfObj = new sysConf();
 

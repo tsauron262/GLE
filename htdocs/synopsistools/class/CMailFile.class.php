@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 /*
- * GLE by DRSI & Synopsis
+ * BIMP-ERP by DRSI & Synopsis
  *
  * Author: SAURON Tommy <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -289,7 +289,7 @@ class CMailFile {
             $out .= "Disposition-Notification-To: " . getValidAddress($this->addr_from, 2) . $this->eol;
 
         //$out .= "X-Priority: 3".$this->eol;
-        $out .= "X-Mailer: Dolibarr version " . GLE_VERSION . $this->eol;
+        $out .= "X-Mailer: Dolibarr version " . DOL_VERSION . $this->eol;
         $out .= "MIME-Version: 1.0" . $this->eol;
 
         if ($this->msgishtml) {

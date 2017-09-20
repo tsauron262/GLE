@@ -26,10 +26,13 @@ $(window).on("load", function () {
         
 
         $('#id-container').append("<div id='but-menu'></div>");
+        
+        $('#mainmenutd_menu').click();
+        $('#mainmenutd_menu, .side-nav').css('margin-left', '-200px');
 
         $('#id-right').parent().append("<div id='id_cach' ></div>");
         
-        $('#tmenu_tooltip').append("<div id='responsive_titre'><a href='"+DOL_URL_ROOT+"/index.php?mainmenu=home'>GLE</a></div>");
+        $('#tmenu_tooltip').append("<div id='responsive_titre'><a href='"+DOL_URL_ROOT+"/index.php?mainmenu=home'>BIMP-ERP</a></div>");
 
         $('#but-menu').click(function (e) {
             if (is_open == false) {

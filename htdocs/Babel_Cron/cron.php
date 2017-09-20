@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : index.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 $curDir =  __FILE__;
 $curDir = preg_replace('/Babel_Cron\/cron.php$/','',$curDir);

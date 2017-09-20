@@ -1,5 +1,5 @@
 /*
- ** GLE by Synopsis et DRSI
+ ** BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@ var CustomDraggable;
 var grid1;
 var grid;
 
-Rico.loadModule('LiveGrid','Effect','LiveGridMenu','GLE.css');
+Rico.loadModule('LiveGrid','Effect','LiveGridMenu','BIMP-ERP.css');
 Rico.onLoad(
     function() {
         var imgctl=new Rico.TableColumn.image();

@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : listFct.php GLE-1.2
+  * Name : listFct.php BIMP-ERP-1.2
   */
 
 

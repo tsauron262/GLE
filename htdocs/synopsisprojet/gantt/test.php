@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : test.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 
 
@@ -34,7 +34,7 @@ $jqueryuipath = DOL_URL_ROOT.'/Synopsis_Common/jquery/ui/';
 
 $header = '<link rel="stylesheet" type="text/css" href="'.$csspath.'ui.all.css" />'."\n";
 $header .= '<link rel="stylesheet" type="text/css" href="css/jsgantt.css" />'."\n";
-$header .= '<link rel="stylesheet" type="text/css" href="css/GLEgantt.css" />'."\n";
+$header .= '<link rel="stylesheet" type="text/css" href="css/BIMP-ERPgantt.css" />'."\n";
 $header .= '<script language="javascript" src="'.$jspath.'jquery-1.3.2.js"></script>'."\n";
 
 $header .= '<link rel="stylesheet" href="'.$csspath.'flick/jquery-ui-1.7.2.custom.css" type="text/css" />'."\n";

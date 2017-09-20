@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -92,7 +92,7 @@ $upload_dir = $conf->synopsischrono->dir_output . "/" . $id;
 
 
 if ($_REQUEST['SynAction'] == 'dlZip') {
-    $zipFilename = tempnam("/tmp", "zipping-GLE-chrono-");
+    $zipFilename = tempnam("/tmp", "zipping-BIMP-ERP-chrono-");
     unlink($zipFilename);
     $zipFilename .= ".zip";
     $chrono = new Chrono($db);
@@ -101,7 +101,7 @@ if ($_REQUEST['SynAction'] == 'dlZip') {
         $filearray = dol_dir_list($upload_dir, "files", 0, '', '\.meta$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_ASC : SORT_DESC), 1);
         $zip = new ZipArchive();
         if ($zip->open($zipFilename, ZIPARCHIVE::CREATE) === TRUE) {
-            $zip->setArchiveComment('Generate by GLE - Synopsis et DRSI');
+            $zip->setArchiveComment('Generate by BIMP-ERP - Synopsis et DRSI');
             foreach ($filearray as $key => $val) {
                 //Add files
                 $zip->addFile($val['fullname'], "" . sanitize_string($chrono->ref) . '/' . sanitize_string($val['name']));

@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -50,7 +50,7 @@ if ($_REQUEST['action']=='generatePdf')
 }
 //<html>
 //<head>
-//<title>GLE - Note de frais</title>
+//<title>BIMP-ERP - Note de frais</title>
 $js ='<script src="'.DOL_URL_ROOT.'/Synopsis_Common/js/rico2/src/prototype.js" type="text/javascript"></script>
 <script src="'.DOL_URL_ROOT.'/Synopsis_Common/js/rico2/src/rico.js" type="text/javascript"></script>';
 //print $js;
@@ -155,7 +155,7 @@ require_once "applib.php";
 
 OpenDB();
 
-$_SESSION['GLE_NdfGrid']=$sqltext;
+$_SESSION['BIMP-ERP_NdfGrid']=$sqltext;
 CloseApp();
 
 require "chklang2.php";
@@ -163,12 +163,12 @@ require "settings.php";
 ?>
 
 <script type='text/javascript'>
-Rico.loadModule('LiveGridAjax','LiveGridMenu','GLE.css');
+Rico.loadModule('LiveGridAjax','LiveGridMenu','BIMP-ERP.css');
 <?php
 setStyle();
 ?>
 
-var GLE_NdfGrid;
+var BIMP-ERP_NdfGrid;
 MyCustomColumn = Class.create();
 
 MyCustomColumn.prototype = {
@@ -214,7 +214,7 @@ MyCustomColumn1.prototype = {
     this._href=href;
     this._target=target;
     this._anchors=[];
-    this._prefixGLE=prefix;
+    this._prefixBIMP-ERP=prefix;
   },
 
   _create: function(gridCell,windowRow) {
@@ -229,10 +229,10 @@ MyCustomColumn1.prototype = {
   },
 
   _display: function(v,gridCell,windowRow) {
-    if (this._prefixGLE)
+    if (this._prefixBIMP-ERP)
     {
         //var col0=this.liveGrid.buffer.getWindowValue(windowRow,5);
-        this._anchors[windowRow].innerHTML= this._prefixGLE+" "+ v;
+        this._anchors[windowRow].innerHTML= this._prefixBIMP-ERP+" "+ v;
     } else {
         this._anchors[windowRow].innerHTML=  v.formatDate("dd mmm yyyy");
     }
@@ -318,8 +318,8 @@ Rico.onLoad( function() {
                       ]
   };
   var buffer=new Rico.Buffer.AjaxSQL('ricoXMLquery.php', {TimeOut:<?php print array_shift(session_get_cookie_params())/60 ?>});
-  GLE_NdfGrid=new Rico.LiveGrid ('GLE_NdfGrid', buffer, opts);
-  GLE_NdfGrid.menu=new Rico.GridMenu(<?php GridSettingsMenu(); ?>);
+  BIMP-ERP_NdfGrid=new Rico.LiveGrid ('BIMP-ERP_NdfGrid', buffer, opts);
+  BIMP-ERP_NdfGrid.menu=new Rico.GridMenu(<?php GridSettingsMenu(); ?>);
   //setFilter();
 });
 
@@ -401,11 +401,11 @@ print "<table id='explanation' border='0' cellpadding='0' cellspacing='5' style=
 </td>
 
 
-<p class="ricoBookmark"><span id="GLE_NdfGrid_bookmark">&nbsp;</span></p>
+<p class="ricoBookmark"><span id="BIMP-ERP_NdfGrid_bookmark">&nbsp;</span></p>
 <div style="max-width: 100%; width: 100%; height: 80%;">
-<div id="GLE_NdfGrid" class="ricoLiveGrid" style="max-width: 100%; width: 100%;" cellspacing="0" cellpadding="0" >
+<div id="BIMP-ERP_NdfGrid" class="ricoLiveGrid" style="max-width: 100%; width: 100%;" cellspacing="0" cellpadding="0" >
 <!--<thead>
-   <tr id="GLE_NdfGrid_main">
+   <tr id="BIMP-ERP_NdfGrid_main">
       <th>Id#</th>
       <th>Date</th>
       <th>Soci&eacute;t&eacute;</th>
@@ -419,7 +419,7 @@ print "<table id='explanation' border='0' cellpadding='0' cellspacing='5' style=
 </thead-->
 </div>
 <!--
-<textarea id='GLE_NdfGrid_debugmsgs' rows='5' cols='80'>
+<textarea id='BIMP-ERP_NdfGrid_debugmsgs' rows='5' cols='80'>
 -->
 </div>
 

@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : ajoutElements.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
   //ajoute des éléments à une affaire
   //Lie une affaire à 1 ou n projets

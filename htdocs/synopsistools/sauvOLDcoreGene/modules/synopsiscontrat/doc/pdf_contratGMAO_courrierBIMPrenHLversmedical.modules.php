@@ -146,7 +146,7 @@ class pdf_contratGMAO_courrierBIMPrenHLversmedical extends ModelePDFContrat
 
                 $pdf->SetTitle($contrat->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
-                $pdf->SetCreator("GLE ".GLE_VERSION);
+                $pdf->SetCreator("BIMP-ERP ".DOL_VERSION);
                 $pdf->SetAuthor($user->fullname);
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right

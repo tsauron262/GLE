@@ -5,7 +5,7 @@
 /**
  *
  * Name : listDetail.php.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 $typeObj = (isset($_REQUEST['obj']) ? $_REQUEST['obj'] : null);
 $id = (isset($_REQUEST['id']) ? $_REQUEST['id'] : null);

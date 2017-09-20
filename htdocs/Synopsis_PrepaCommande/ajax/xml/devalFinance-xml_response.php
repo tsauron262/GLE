@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
   *
   * Name : devalFinance-xml_response.php
   *
-  * GLE-1.2
+  * BIMP-ERP-1.2
   *
   */
 
@@ -64,7 +64,7 @@
         $soc->fetch($commande->socid);
         $msg .= "La commande " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") a &eacute;t&eacute; invalid&eacute;e financi&egrave;rement.";
 
-        $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
+        $msg .= "<br/><br/>Cordialement,<br/>\nBIMP-ERP\n";
         $from = $conf->global->BIMP_MAIL_FROM;
         $addr_cc = $conf->global->BIMP_MAIL_GESTFINANCIER.", ".$conf->global->BIMP_MAIL_GESTPROD;
 

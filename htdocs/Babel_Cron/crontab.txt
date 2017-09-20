@@ -1,1 +1,1 @@
-*/10 * * * *  /opt/local/bin/php /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/Babel_Cron/cron.php
+*/10 * * * *  /opt/local/bin/php /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/Babel_Cron/cron.php

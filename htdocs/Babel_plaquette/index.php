@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by Synopsis et DRSI
+  * BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : index.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 
   require_once('pre.inc.php');
@@ -413,7 +413,7 @@ EOF;
                 <td class='ui-widget-content'>MR
             <tr><th class='ui-widget-header ui-state-default'>Label / Nom plaquette</th>
                 <td class='ui-widget-content'>##LABEL##
-                <td class='ui-widget-content'>Plaquette GLE
+                <td class='ui-widget-content'>Plaquette BIMP-ERP
             <tr><th class='ui-widget-header ui-state-default'>Pr&eacute;nom</th>
                 <td class='ui-widget-content'>##MON_PRENOM##
                 <td class='ui-widget-content'><?php echo $user->firstname ?>

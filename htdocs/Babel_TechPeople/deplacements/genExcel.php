@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -186,8 +186,8 @@ $feuilxl->getDefaultStyle()->getFont()->setName('Arial');
 $feuilxl->getDefaultStyle()->getFont()->setSize(12);
 
 
-$docxl->getProperties()->setCreator("GLE ++");
-$docxl->getProperties()->setLastModifiedBy("GLE ++");
+$docxl->getProperties()->setCreator("BIMP-ERP ++");
+$docxl->getProperties()->setLastModifiedBy("BIMP-ERP ++");
 $docxl->getProperties()->setTitle("Note de frais");
 $docxl->getProperties()->setSubject("Note de frais de ".$fuser->getFullName($langs) ." pour la période ".$deplacement->tsperiode);
 $docxl->getProperties()->setDescription("Note de frais de ".$fuser->getFullName($langs) ." pour la période ".$deplacement->tsperiode);

@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : magento_import.php
-  * GLE-1.0
+  * BIMP-ERP-1.0
   */
   //receive a call from syncDaemon or wgatever
   //<magentoCall>
@@ -47,7 +47,7 @@
     </message>
   </magentoCall>";
 
-$alllog = "/tmp/importGLE.log";
+$alllog = "/tmp/importBIMP-ERP.log";
 $request = print_r($_REQUEST,true);
 file_put_contents($alllog,$request);
 
@@ -266,8 +266,8 @@ $magProd->session= $magSal->session;
 
                         }
                         //get product/sales/cust/cat info
-                        //insert dans GLE si mode 0
-                        //update dans GLE si mode 1
+                        //insert dans BIMP-ERP si mode 0
+                        //update dans BIMP-ERP si mode 1
 
                     }
                 }

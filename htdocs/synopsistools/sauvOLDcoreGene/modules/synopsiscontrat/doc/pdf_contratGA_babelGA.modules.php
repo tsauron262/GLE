@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by Synopsis et DRSI
+  * BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -156,7 +156,7 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
 
                 $pdf->SetTitle($contratGA->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
-                $pdf->SetCreator("GLE ".GLE_VERSION);
+                $pdf->SetCreator("BIMP-ERP ".DOL_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right

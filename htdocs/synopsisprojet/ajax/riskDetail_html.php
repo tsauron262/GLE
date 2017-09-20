@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : riskDetail.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 
   //TODO :> impact dépendance sur coût du risque
@@ -224,7 +224,7 @@ print "<br/>";
 //$hrm->listRessources();
 //foreach($hrm->allRessource as $key=>$val)
 //{
-//    if ("x".$val['GLEId'] != "x")
+//    if ("x".$val['BIMP-ERPId'] != "x")
 //    {
 //        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user,
 //                           ".MAIN_DB_PREFIX."projet_task.rowid as tid,
@@ -232,7 +232,7 @@ print "<br/>";
 //                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
 //                           ".MAIN_DB_PREFIX."projet_task
 //                     WHERE ".MAIN_DB_PREFIX."projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
-//                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".$val['GLEId']."
+//                       AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = ".$val['BIMP-ERPId']."
 //                       AND ".MAIN_DB_PREFIX."projet_task.fk_projet = ".$project_id;
 //        $sql=$db->query($requete);
 //        while ($res=$db->fetch_object($sql))

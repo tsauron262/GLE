@@ -248,6 +248,7 @@ class DoliDBMysqli extends DoliDB
         
         /*moddrsi*/
         $this->countReq ++;
+//        echo $this->countReq." ";
         /*fmoddrsi*/
 
         $query = trim($query);

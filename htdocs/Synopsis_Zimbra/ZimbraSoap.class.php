@@ -1,7 +1,7 @@
 <?php
 
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -5430,9 +5430,9 @@ class Zimbra {
                     //fill SQL table
                     $this->BabelInsertTriggerFolder($ret['id'], $ret['name'], $ret['parent'], "appointment", 2);
                     //create SubFolder =>
-                    $this->subFolderGLE = array();
-                    $this->Babel_createGLESubFolder($ret['id'], "soc");
-                    foreach ($this->subFolderGLE as $key => $val) {
+                    $this->subFolderBIMP-ERP = array();
+                    $this->Babel_createBIMP-ERPSubFolder($ret['id'], "soc");
+                    foreach ($this->subFolderBIMP-ERP as $key => $val) {
                         $this->BabelInsertTriggerFolder($val['id'], $val['name'], $val['parent'], "appointment", 2);
                     }
                 }
@@ -5448,7 +5448,7 @@ class Zimbra {
                               AND folder_parent = ( SELECT  max(folder_uid) FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder," . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                      WHERE " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type.val ='contact'
                                                       AND " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type.id = " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder.folder_type_refid
-                                                      AND folder_name  = 'Contacts - GLE')";
+                                                      AND folder_name  = 'Contacts - BIMP-ERP')";
                 $resql = $db->query($requete);
                 if ($resTmp = $db->fetch_object($resql)) {
                     $where = $resTmp->folder_uid;
@@ -5529,7 +5529,7 @@ class Zimbra {
                               AND folder_parent = ( SELECT  max(folder_uid) FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder," . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                      WHERE " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type.val ='contact'
                                                       AND " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type.id = " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder.folder_type_refid
-                                                      AND folder_name  LIKE 'Contacts - GLE')";
+                                                      AND folder_name  LIKE 'Contacts - BIMP-ERP')";
                 if ($resql = $db->query($requete)) {
                     $cont = new Contact($db);
                     $cont->fetch($res->rowid);
@@ -5923,10 +5923,10 @@ class Zimbra {
                     //fill SQL table
                     $this->BabelInsertTriggerFolder($ret['id'], $ret['name'], $ret['parent'], "appointment", 2);
                     //create SubFolder =>
-                    $this->subFolderGLE = array();
-                    $this->Babel_createGLESubFolder($ret['id'], "fourn");
+                    $this->subFolderBIMP-ERP = array();
+                    $this->Babel_createBIMP-ERPSubFolder($ret['id'], "fourn");
 
-                    foreach ($this->subFolderGLE as $key => $val) {
+                    foreach ($this->subFolderBIMP-ERP as $key => $val) {
                         //get new Id
                         $this->BabelInsertTriggerFolder($val['id'], $val['name'], $val['parent'], "appointment", 2);
                     }
@@ -5989,16 +5989,16 @@ class Zimbra {
         //2 créer le folder dans le bon folder id et les sous folders propal , commande, facture expedition, ...
     }
 
-    public $subFolderGLE = array();
+    public $subFolderBIMP-ERP = array();
 
-    function Babel_createGLESubFolder($where, $type = 'soc') {
+    function Babel_createBIMP-ERPSubFolder($where, $type = 'soc') {
         if ($type == 'soc') {
             foreach (array('Propales', 'Commandes', "Factures", "Expeditions", "Interventions", "Contrats", "Actions") as $key) {
                 $createArray = array('view' => 'appointment',
                     "name" => $key,
                     "where" => $where);
                 $ret = $this->BabelCreateFolder($createArray);
-                array_push($this->subFolderGLE, $ret);
+                array_push($this->subFolderBIMP-ERP, $ret);
             }
         }
         if ($type == 'fourn') {
@@ -6007,7 +6007,7 @@ class Zimbra {
                     "name" => $key,
                     "where" => $where);
                 $ret = $this->BabelCreateFolder($createArray);
-                array_push($this->subFolderGLE, $ret);
+                array_push($this->subFolderBIMP-ERP, $ret);
             }
         }
         if ($type == 'user') {
@@ -6016,7 +6016,7 @@ class Zimbra {
                     "name" => $key,
                     "where" => $where);
                 $ret = $this->BabelCreateFolder($createArray);
-                array_push($this->subFolderGLE, $ret);
+                array_push($this->subFolderBIMP-ERP, $ret);
             }
         }
     }

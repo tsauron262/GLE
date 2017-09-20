@@ -1,7 +1,7 @@
 <?php
 
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -103,7 +103,7 @@ if ($_REQUEST['SynAction'] == 'dlZip')
             $zip = new ZipArchive();
             if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)
             {
-                $zip->setArchiveComment('Generate by GLE - Synopsis et DRSI');
+                $zip->setArchiveComment('Generate by BIMP-ERP - Synopsis et DRSI');
                 foreach($filearray as $key=>$val)
                 {
                     //Add files
@@ -150,7 +150,7 @@ if ($_REQUEST['SynAction'] == 'dlZipByGrp')
             $zip = new ZipArchive();
             if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)
             {
-                $zip->setArchiveComment('Generate by GLE - Synopsis et DRSI');
+                $zip->setArchiveComment('Generate by BIMP-ERP - Synopsis et DRSI');
                 foreach($filearray as $key=>$val)
                 {
                     //Add files
@@ -479,7 +479,7 @@ jQuery(document).ready(function(){
     });
 
     var ZimId="";
-    var GLEId="";
+    var BIMP-ERPId="";
 
     jQuery('#mailDialog').dialog({
             autoOpen: false,
@@ -512,7 +512,7 @@ while ($res = $db->fetch_object($sql))
 {
     $tmpUser = new User($db);
     $tmpUser->fetch($res->fk_user);
-    $tableInProj .= "<tr><td>".$tmpUser->getNomUrl(1)."</td><td>".$tmpUser->email."</td><td>"./*img_GLE('Ajouter',"plus.gif").*/"</td></tr>";
+    $tableInProj .= "<tr><td>".$tmpUser->getNomUrl(1)."</td><td>".$tmpUser->email."</td><td>"./*img_BIMP-ERP('Ajouter',"plus.gif").*/"</td></tr>";
 }
 $tableInProj .= "</tbody></table></div>";
 $header .= " tmp += '".$tableInProj."'; "."\n";
@@ -522,7 +522,7 @@ $header .= <<< EOF
                     tmp += "<div id='MailFragment-2'>";
 //".MAIN_DB_PREFIX."contact ou ".MAIN_DB_PREFIX."user
                     tmp += "<FieldSet>";
-                    tmp += "<legend style='padding: 0 10px 0 10px; margin: 0 10px 0 10px; '>Recherche dans GLE</legend><br/>";
+                    tmp += "<legend style='padding: 0 10px 0 10px; margin: 0 10px 0 10px; '>Recherche dans BIMP-ERP</legend><br/>";
                     tmp += "   <center><p> Veuillez saisir les premi&egrave;res lettres du nom/pr&eacute;nom/email de la personne recherch&eacute;e  </p><br/><br/>";
                     tmp += "   <input type='text' class='gleAutoComplete'><span class='butAction'>D&eacute;tails</span><span class='butAction'>Ajouter</span></center><br/><br/>";
                     tmp += "</FieldSet>";
@@ -592,7 +592,7 @@ $header .= <<< EOF
                     },
                     modifAutocompleteSynopsisReturnSelId: function(selected)
                     {
-                        GLEId = selected.data[2];
+                        BIMP-ERPId = selected.data[2];
                     }
                 });
             },

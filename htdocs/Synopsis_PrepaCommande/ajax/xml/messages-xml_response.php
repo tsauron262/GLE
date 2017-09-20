@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : messages-xml_response.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
   require_once('../../../main.inc.php');
   $id = $_REQUEST['id'];
@@ -57,7 +57,7 @@
         //Notification
         //TO commercial author
         //CC Resp Tech et Resp logistique et financier
-        $subject="[Nouveau message GLE] Nouveau message concernant la commande ".$commande->ref;
+        $subject="[Nouveau message BIMP-ERP] Nouveau message concernant la commande ".$commande->ref;
         $to = $tmpUser->email;
         $msg = "Bonjour ".$tmpUser->getFullName($langs).", <br/><br/>";
         if ($typeMsg)
@@ -91,7 +91,7 @@
         $msg .= "<br/><div><table border=1 width=100%><tr><td>De</td><td>
 ".$tmpUser->getNomUrl(1,"",true)."\n</td></tr><tr><td colspan=2>".nl2br($message)."</td></tr></table>\n</div>";
 
-        $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
+        $msg .= "<br/><br/>Cordialement,<br/>\nBIMP-ERP\n";
         $from = $conf->global->BIMP_MAIL_FROM;
         //$addr_cc = $conf->global->BIMP_MAIL_GESTLOGISTIQUE.", ".$conf->global->BIMP_MAIL_GESTFINANCIER.", ".$conf->global->BIMP_MAIL_GESTPROD;
 

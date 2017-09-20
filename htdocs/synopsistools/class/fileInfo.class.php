@@ -110,7 +110,7 @@ unset($_REQUEST['appli']);
         global $db;
         $info = $this->getFile($nom);
         if (isset($_REQUEST['appli']) || (!isset($this->php) && !isset($this->tabSql))) {
-            $message = "Attention ceci est et message due a une mise a jour de GLE.
+            $message = "Attention ceci est et message due a une mise a jour de BIMP-ERP.
             <br/>Ce n'est pas un beug mais des instruction pour le bon déroulement de cette mise a jour.<br/><br/>";
             $messafe .= $info;
             $message .= '<br/><br/>Attention ce message ne s\'affichera que une foix.

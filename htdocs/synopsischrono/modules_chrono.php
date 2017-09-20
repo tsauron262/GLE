@@ -103,7 +103,7 @@ class ModeleNumRefChrono
 
         if ($this->version == 'development') return $langs->trans("VersionDevelopment");
         if ($this->version == 'experimental') return $langs->trans("VersionExperimental");
-        if ($this->version == 'dolibarr') return GLE_VERSION;
+        if ($this->version == 'dolibarr') return DOL_VERSION;
         return $langs->trans("NotAvailable");
     }
 }

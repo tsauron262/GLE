@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : formPreview.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  *
  */
 //$a = memory_get_usage(1);
@@ -148,8 +148,8 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
                          SET processdet_refid =" . $processDetId . "
                        WHERE element_refid = " . $processDet->element_refid . "
                          AND process_refid= " . $processDet->process_refid . "
-                         AND type_refid  = " . $_REQUEST['type_element_GLE'];
-        $sqlGLE = $db->query($requete);
+                         AND type_refid  = " . $_REQUEST['type_element_BIMP-ERP'];
+        $sqlBIMP-ERP = $db->query($requete);
     }
     //TODO Save Datas
     //Liste les parametres
@@ -576,7 +576,7 @@ EOF;
         print "<input type='hidden' name='action2' id='action2' value='none'>";
     }
     if (!$processDetId > 0 && $_REQUEST['type'] > 0) {
-        print '<input type="hidden" name="type_element_GLE" value="' . $_REQUEST['type'] . '"></input>';
+        print '<input type="hidden" name="type_element_BIMP-ERP" value="' . $_REQUEST['type'] . '"></input>';
     }
     if ($res > 0) {
         print "<div>";

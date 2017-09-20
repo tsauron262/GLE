@@ -5,7 +5,7 @@
  /**
   *
   * Name : config.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 
   //tabs

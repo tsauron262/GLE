@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : listProcessDetValid_json.php
- * GLE-1.1
+ * BIMP-ERP-1.1
  */
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");

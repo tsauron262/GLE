@@ -639,13 +639,13 @@ class PHPExcel_Reader_Gnumeric extends PHPExcel_Reader_Abstract implements PHPEx
 							$styleArray['font']['strike'] = ($fontAttributes['StrikeThrough'] == '1') ? True : False;
 							switch($fontAttributes['Underline']) {
 								case '1' :
-									$styleArray['font']['underline'] = PHPExcel_Style_Font::UNDERLINE_SINGLE;
+									$styleArray['font']['underline'] = PHPExcel_Style_Font::UNDERLINE_SIGLE;
 									break;
 								case '2' :
 									$styleArray['font']['underline'] = PHPExcel_Style_Font::UNDERLINE_DOUBLE;
 									break;
 								case '3' :
-									$styleArray['font']['underline'] = PHPExcel_Style_Font::UNDERLINE_SINGLEACCOUNTING;
+									$styleArray['font']['underline'] = PHPExcel_Style_Font::UNDERLINE_SIGLEACCOUNTING;
 									break;
 								case '4' :
 									$styleArray['font']['underline'] = PHPExcel_Style_Font::UNDERLINE_DOUBLEACCOUNTING;

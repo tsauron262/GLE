@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : pointage.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 
   //TODO : saisi facile
@@ -250,7 +250,7 @@ foreach($hrm->teamRessource as $teamid => $val) // pour chaque team
             //Foreach($usr in team)
             // si vacances :> affiche vacances
             $tmpUser=new User($db);
-            $tmpUser->fetch($val1['GLEId']);
+            $tmpUser->fetch($val1['BIMP-ERPId']);
             $bool = !$bool;
             print "<tr class='".$pairImpair[$bool]."'>";
             print "<td>".$tmpUser->getNomUrl(1)."</td>";

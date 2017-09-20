@@ -7,4 +7,4 @@ Date(s)    Type     Durée (heures)    Commentaire
 
 Merci,
 
-GLE - HRM
+BIMP-ERP - HRM

@@ -137,7 +137,7 @@ class Token
     const FLAG_NUMBER_BINARY            = 16;
 
     // Strings related flags.
-    const FLAG_STRING_SINGLE_QUOTES     =  1;
+    const FLAG_STRING_SIGLE_QUOTES     =  1;
     const FLAG_STRING_DOUBLE_QUOTES     =  2;
 
     // Comments related flags.

@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
 
 //$username = "eos";
 //$password = "redalert";
-//      $client = new SoapClient('http://127.0.0.1/magentoGLE/magento/api/soap/?wsdl');
+//      $client = new SoapClient('http://127.0.0.1/magentoBIMP-ERP/magento/api/soap/?wsdl');
       // If soap isn't default use this link instead
       // http://youmagentohost/api/soap/?wsdl
       // If somestuff requires api authentification,
@@ -88,7 +88,7 @@ class magento_soap
     public $pass="redalert";
     public $client;
     public $session;
-    private $MagentoSoapUrl ='http://127.0.0.1/magentoGLE/magento/api/soap/?wsdl';
+    private $MagentoSoapUrl ='http://127.0.0.1/magentoBIMP-ERP/magento/api/soap/?wsdl';
     public $magCustomerList=array();
 
 

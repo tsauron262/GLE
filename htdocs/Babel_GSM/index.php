@@ -1,6 +1,6 @@
 <?php
 /*
- ** GLE by Synopsis et DRSI
+ ** BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -36,7 +36,7 @@ llxHeader("", "Dolibarr GSM", '',$jsFile=array(0=>"Babel_GSM/js/babel_gsm.js"));
 $gsm = new gsm($db,$user);
 $gsm->MainInit(true);
 
-print "<br/><br/><div>Bienvenue sur GLE pour GSM ! </div>";
+print "<br/><br/><div>Bienvenue sur BIMP-ERP pour GSM ! </div>";
 
 
 

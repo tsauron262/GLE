@@ -1,6 +1,6 @@
 <?php
 /*
- ** GLE by Synopsis et DRSI
+ ** BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -395,7 +395,7 @@ $POST['callSync']="<magentoCall>
           syncspool
     </message>
   </magentoCall>";
-send_to_WS("http://127.0.0.1/GLE-1.2/main/htdocs/Babel_Magento/SyncDaemon/magento_import.php",$POST);
+send_to_WS("http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_Magento/SyncDaemon/magento_import.php",$POST);
 
 function send_to_WS($url,$POST)
 {

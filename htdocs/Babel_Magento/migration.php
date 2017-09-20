@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : migration.php
-  * magentoGLE
+  * magentoBIMP-ERP
   */
 
 
@@ -129,25 +129,25 @@ switch($action)
         $mag->connect();
         $mgt = new magento_tools($db);
 
-        if ($_REQUEST['resetGLE']=='on')
+        if ($_REQUEST['resetBIMP-ERP']=='on')
         {
-            //delete all productCat in GLE
+            //delete all productCat in BIMP-ERP
             //delete all images and addon datas
             //import all productCat from magento
             //import all images
-        } else if($_REQUEST['syncGLEmag']=='on')
+        } else if($_REQUEST['syncBIMP-ERPmag']=='on')
         {
-            //list all productCat in GLE not in magento
+            //list all productCat in BIMP-ERP not in magento
             //export them
             //export images
-        } else if($_REQUEST['syncmagGLE']=='on')
+        } else if($_REQUEST['syncmagBIMP-ERP']=='on')
         {
             //category
             $list=$mag->prod_cat_list();
             $mag->parseProdCat($list);
 
-            $mgt->listCatGLE(false);
-            $arrTmp = $mgt->catGLEArr['MAGID'];
+            $mgt->listCatBIMP-ERP(false);
+            $arrTmp = $mgt->catBIMP-ERPArr['MAGID'];
             //var_dump::Display($arrTmp);
             print "<form action='migration.php' method='POST'> ";
             print "<input type='hidden' name='actionPhase2' value='productCat' >";
@@ -158,7 +158,7 @@ switch($action)
             $switch = false;
             foreach($mag->catArr as $key=>$val)
             {
-                $syncOp = $mgt->testSyncCatMagToGLE($val);
+                $syncOp = $mgt->testSyncCatMagToBIMP-ERP($val);
                 if ($syncOp == "INSERT")
                 {
                     $switch=!$switch;
@@ -196,7 +196,7 @@ switch($action)
             print "</form>";
 
             //cf magnto_tools.class.php
-            //list all productCat in magento not in GLE
+            //list all productCat in magento not in BIMP-ERP
             //import them
             //import images
 
@@ -210,18 +210,18 @@ switch($action)
         $mag->connect();
         $mgt = new magento_tools($db);
 
-        if ($_REQUEST['resetGLE']=='on')
+        if ($_REQUEST['resetBIMP-ERP']=='on')
         {
-            //delete all productCat in GLE
+            //delete all productCat in BIMP-ERP
             //delete all images and addon datas
             //import all productCat from magento
             //import all images
-        } else if($_REQUEST['syncGLEmag']=='on')
+        } else if($_REQUEST['syncBIMP-ERPmag']=='on')
         {
-            //list all productCat in GLE not in magento
+            //list all productCat in BIMP-ERP not in magento
             //export them
             //export images
-        } else if($_REQUEST['syncmagGLE']=='on')
+        } else if($_REQUEST['syncmagBIMP-ERP']=='on')
         {
             print "<span>loading</span>";
             //category
@@ -231,7 +231,7 @@ switch($action)
             //Var_Dump::Display($list);
 
             //Get Categorie:
-            //Si categorie pas dans GLE => exit => ask for cat sync
+            //Si categorie pas dans BIMP-ERP => exit => ask for cat sync
             foreach($mag->ProdByCatArr as $key => $val)
             {
                 $requete = "SELECT *
@@ -241,7 +241,7 @@ switch($action)
                 $res = $db->fetch_object($sql);
                 if ($res->rowid ."x" == "x")
                 {
-                    print "Toutes les cat&eacute;gories Magento n'existent pas dans GLE. Merci de synchroniser les cat&eacute;gories";
+                    print "Toutes les cat&eacute;gories Magento n'existent pas dans BIMP-ERP. Merci de synchroniser les cat&eacute;gories";
                     break;
                 }
             }
@@ -278,7 +278,7 @@ switch($action)
                 print "<a href='#' onClick='selectAll(".$key.")'>Tous</a>";
                 print "<a href='#' onClick='selectNone(".$key.")'>Aucun</a>";
                 print "<table style='background-color: ".$color[$bool]."'><tbody>";
-                $mgt->testSyncProdToGLE($val,$key);
+                $mgt->testSyncProdToBIMP-ERP($val,$key);
                 foreach ($mgt->modeProd as $key1 => $val1)
                 {
                     if ($val1['mode'] == "UPDATE")
@@ -536,7 +536,7 @@ if ($actionPhase2 ."x" != "x")
 
                 }
             }
-            //Get GLE parent
+            //Get BIMP-ERP parent
             foreach($_REQUEST as $key=>$val)
             {
                 if (preg_match("/^([ui]{1})([0-9]*)$/",$key,$arr))
@@ -709,14 +709,14 @@ print <<<EOF
 <fieldset>
 <legend>&nbsp;&nbsp;Cat&eacute;gories&nbsp;&nbsp;</legend>
 <table width=100% style='border-collapse: collapse; text-align: center;' border=1><tr class="pair"><td>
-<label for='resetGLE'>Reset GLE</label></td><td>
-<input type=checkbox name="resetGLE"></input>
+<label for='resetBIMP-ERP'>Reset BIMP-ERP</label></td><td>
+<input type=checkbox name="resetBIMP-ERP"></input>
 </td></tr><tr class="impair"><td>
-<label for='syncGLEmag'>Synchro GLE -> Magento</label></td><td>
-<input type=checkbox name="syncGLEmag"></input>
+<label for='syncBIMP-ERPmag'>Synchro BIMP-ERP -> Magento</label></td><td>
+<input type=checkbox name="syncBIMP-ERPmag"></input>
 </td></tr><tr  class="pair"><td>
-<label for='syncmagGLE'>Synchro Magento -> GLE</label></td><td>
-<input type=checkbox name="syncmagGLE"></input>
+<label for='syncmagBIMP-ERP'>Synchro Magento -> BIMP-ERP</label></td><td>
+<input type=checkbox name="syncmagBIMP-ERP"></input>
 </td></tr><tr><td colspan="2">
 <input type="button" class="butAction" onClick="document.getElementById('productCat').submit();" value="GO!"></input>
 </td></tr>
@@ -732,14 +732,14 @@ print <<<EOF
 <fieldset>
 <legend>&nbsp;&nbsp;Produits&nbsp;&nbsp;</legend>
 <table width=100% style='border-collapse: collapse; text-align: center;' border=1><tr class="pair"><td>
-<label for='resetGLE'>Reset GLE</label></td><td>
-<input type=checkbox name="resetGLE"></input>
+<label for='resetBIMP-ERP'>Reset BIMP-ERP</label></td><td>
+<input type=checkbox name="resetBIMP-ERP"></input>
 </td></tr><tr class="impair"><td>
-<label for='syncGLEmag'>Synchro GLE -> Magento</label></td><td>
-<input type=checkbox name="syncGLEmag"></input>
+<label for='syncBIMP-ERPmag'>Synchro BIMP-ERP -> Magento</label></td><td>
+<input type=checkbox name="syncBIMP-ERPmag"></input>
 </td></tr><tr  class="pair"><td>
-<label for='syncmagGLE'>Synchro Magento -> GLE</label></td><td>
-<input type=checkbox name="syncmagGLE"></input>
+<label for='syncmagBIMP-ERP'>Synchro Magento -> BIMP-ERP</label></td><td>
+<input type=checkbox name="syncmagBIMP-ERP"></input>
 </td></tr><tr><td colspan="2">
 <input type="button" class="butAction" onClick="document.getElementById('product').submit();" value="GO!"></input>
 </td></tr>
@@ -756,14 +756,14 @@ print <<<EOF
 <fieldset>
 <legend>&nbsp;&nbsp;Utilisateurs&nbsp;&nbsp;</legend>
 <table width=100% style='border-collapse: collapse; text-align: center;' border=1><tr class="pair"><td>
-<label for='resetGLE'>Reset GLE</label></td><td>
-<input type=checkbox name="resetGLE"></input>
+<label for='resetBIMP-ERP'>Reset BIMP-ERP</label></td><td>
+<input type=checkbox name="resetBIMP-ERP"></input>
 </td></tr><tr class="impair"><td>
-<label for='syncGLEmag'>Synchro GLE -> Magento</label></td><td>
-<input type=checkbox name="syncGLEmag"></input>
+<label for='syncBIMP-ERPmag'>Synchro BIMP-ERP -> Magento</label></td><td>
+<input type=checkbox name="syncBIMP-ERPmag"></input>
 </td></tr><tr  class="pair"><td>
-<label for='syncmagGLE'>Synchro Magento -> GLE</label></td><td>
-<input type=checkbox name="syncmagGLE"></input>
+<label for='syncmagBIMP-ERP'>Synchro Magento -> BIMP-ERP</label></td><td>
+<input type=checkbox name="syncmagBIMP-ERP"></input>
 </td></tr><tr><td colspan="2">
 <input type="button" class="butAction"  onClick="document.getElementById('user').submit();" value="GO!"></input>
 </td></tr>
@@ -779,14 +779,14 @@ print <<<EOF
 <fieldset>
 <legend>&nbsp;&nbsp;Ventes / Commandes&nbsp;&nbsp;</legend>
 <table width=100% style='border-collapse: collapse; text-align: center;' border=1><tr class="pair"><td>
-<label for='resetGLE'>Reset GLE</label></td><td>
-<input type=checkbox name="resetGLE"></input>
+<label for='resetBIMP-ERP'>Reset BIMP-ERP</label></td><td>
+<input type=checkbox name="resetBIMP-ERP"></input>
 </td></tr><tr class="impair"><td>
-<label for='syncGLEmag'>Synchro GLE -> Magento</label></td><td>
-<input type=checkbox name="syncGLEmag"></input>
+<label for='syncBIMP-ERPmag'>Synchro BIMP-ERP -> Magento</label></td><td>
+<input type=checkbox name="syncBIMP-ERPmag"></input>
 </td></tr><tr  class="pair"><td>
-<label for='syncmagGLE'>Synchro Magento -> GLE</label></td><td>
-<input type=checkbox name="syncmagGLE"></input>
+<label for='syncmagBIMP-ERP'>Synchro Magento -> BIMP-ERP</label></td><td>
+<input type=checkbox name="syncmagBIMP-ERP"></input>
 </td></tr><tr><td colspan="2">
 <input type="button" class="butAction"  onClick="document.getElementById('sales').submit();" value="GO!"></input>
 </td></tr>

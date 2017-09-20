@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : intervByContrat.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 require("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php');

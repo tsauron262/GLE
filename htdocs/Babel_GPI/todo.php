@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : todo.php
-  * magentoGLE
+  * magentoBIMP-ERP
   */
 
     //PgSQL!!!
@@ -30,7 +30,7 @@
 
 
 
-  //User GLE
+  //User BIMP-ERP
     // Acces à modification / mod / del
     // Liaison contrat / parc
     //

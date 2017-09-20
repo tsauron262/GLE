@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -18,26 +18,26 @@ class magento_tools {
         $this->db = $db;
     }
 
-    public $catGLEArr = array();
-    public function listCatGLE($force=false)
+    public $catBIMP-ERPArr = array();
+    public function listCatBIMP-ERP($force=false)
     {
-        if (!$force || count($this->catGLEArr) == 0)
+        if (!$force || count($this->catBIMP-ERPArr) == 0)
         {
             $requete = "SELECT * FROM babel_categorie";
             $sql = $this->db->query($requete);
             while ($res = $this->db->fetch_object($sql))
             {
-                $this->catGLEArr["GLEID"][$res->rowid]=$res->label;
+                $this->catBIMP-ERPArr["BIMP-ERPID"][$res->rowid]=$res->label;
                 if ("x".$res->magento_id != "x")
-                   $this->catGLEArr["MAGID"][$res->magento_id]=$res->label;
+                   $this->catBIMP-ERPArr["MAGID"][$res->magento_id]=$res->label;
             }
         }
     }
-    public function testSyncCatMagToGLE($arr)
+    public function testSyncCatMagToBIMP-ERP($arr)
     {
         $atLeastOneFound = false;
         //TODO ajouter active, position, level, parentid
-        foreach($this->catGLEArr['MAGID'] as $key=>$val)
+        foreach($this->catBIMP-ERPArr['MAGID'] as $key=>$val)
         {
 //            print $key . " ".$arr['MagcatId']."<br>".$arr['name'] ." ". $val."<br>";
             if ($arr['MagcatId'] == $key && $arr['name'] == $val )
@@ -58,10 +58,10 @@ class magento_tools {
         }
     }
     //idem a dessus, sauf que l'Arr est filtre
-    public function syncCatMagToGLE($arr)
+    public function syncCatMagToBIMP-ERP($arr)
     {
         $atLeastOneFound = false;
-        foreach($this->catGLEArr['MAGID'] as $key=>$val)
+        foreach($this->catBIMP-ERPArr['MAGID'] as $key=>$val)
         {
             if ($arr['MagcatId'] == $key && $arr['name'] == $val )
             {
@@ -81,23 +81,23 @@ class magento_tools {
                                 VALUES              ('".$arr['name']."','Magento: ".$arr['name']."',1,0,".$arr['MagcatId'].",".$arr['position'].",".$arr['level'].",1 )";
         }
     }
-    public $prodGLEArr = array();
-    public function listProdGLE($force=false)
+    public $prodBIMP-ERPArr = array();
+    public function listProdBIMP-ERP($force=false)
     {
-        if (!$force || count($this->prodGLEArr) == 0)
+        if (!$force || count($this->prodBIMP-ERPArr) == 0)
         {
             $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product";
             $sql = $this->db->query($requete);
             while ($res = $this->db->fetch_object($sql))
             {
-                $this->prodGLEArr["GLEID"][$res->rowid]=$res->label;
+                $this->prodBIMP-ERPArr["BIMP-ERPID"][$res->rowid]=$res->label;
                 if ("x".$res->magento_id != "x")
-                   $this->prodGLEArr["MAGID"][$res->magento_id]=$res->label;
+                   $this->prodBIMP-ERPArr["MAGID"][$res->magento_id]=$res->label;
             }
         }
     }
     public $modeProd=array();
-    public function testSyncProdToGLE($arr,$key)
+    public function testSyncProdToBIMP-ERP($arr,$key)
     {
         $db=$this->db;
         foreach ($arr as $prodID => $prodArr)
@@ -157,9 +157,9 @@ class magento_tools {
     }
 
 //TODO :> ajouter la ref produit
-//1) Faire une meth qui donne/tock la liste des produits de GLE
-//2) Faire une sub pour la synchro :> soit le produit existe dans GLE => demande utilisateur, soir pas present, et synchro
-//3) Faire une sub pour la vrai synchro :> on ajoute le produit dans GLE
+//1) Faire une meth qui donne/tock la liste des produits de BIMP-ERP
+//2) Faire une sub pour la synchro :> soit le produit existe dans BIMP-ERP => demande utilisateur, soir pas present, et synchro
+//3) Faire une sub pour la vrai synchro :> on ajoute le produit dans BIMP-ERP
 
 
 }

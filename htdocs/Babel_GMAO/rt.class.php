@@ -12,8 +12,8 @@ class rt {
     function rt($db) {
         $this->db = $db;
         global $conf;
-        $this->username = $conf->global->GLE_RT_USER;
-        $this->password = $conf->global->GLE_RT_PASS;
+        $this->username = $conf->global->BIMP-ERP_RT_USER;
+        $this->password = $conf->global->BIMP-ERP_RT_PASS;
         $this->url = DOL_URL_ROOT."/rt/REST/1.0";
         $this->baseurl = DOL_URL_ROOT."/rt/REST/1.0";
     }

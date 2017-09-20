@@ -7,4 +7,4 @@ Applied Date(s)    Type of Leave    Duration (hours)    Comments
 
 Thanks,
 
-GLE - HRM
+BIMP-ERP - HRM

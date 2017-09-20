@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : test-script.class.php GLE-1.1
+  * Name : test-script.class.php BIMP-ERP-1.1
   */
 
     class prepaComDispoLogistiqueScript extends CommonObject
@@ -73,12 +73,12 @@
                 if (count($arrCom) > 0 ){
                     //Send Email
                     $commande->fetch($res->rowid);
-                    $subject = "[GLE] Avertissement logistique";
+                    $subject = "[BIMP-ERP] Avertissement logistique";
                     global $conf;
                     $sendto = $conf->global->BIMP_MAIL_GESTLOGISTIQUE;
 
 
-                    $from = "GLE <".$conf->global->MAIN_MAIL_EMAIL_FROM.">";
+                    $from = "BIMP-ERP <".$conf->global->MAIN_MAIL_EMAIL_FROM.">";
                     $filepath = array();
                     $mimetype=array();
                     $filename =array();

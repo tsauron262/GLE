@@ -3,8 +3,8 @@ header('text/xml');
 print <<<EOF
 <?xml version='1.0' encoding='UTF-8'?>
 <definitions name='Inventory'
- targetNamespace='urn:GLEConnect'
- xmlns:tns='urn:GLEConnect'
+ targetNamespace='urn:BIMP-ERPConnect'
+ xmlns:tns='urn:BIMP-ERPConnect'
  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
  xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
@@ -57,29 +57,29 @@ print <<<EOF
         />
         <wsdl:operation name="WSconnect">
             <soap:operation
-                soapAction="urn:GLEConnect/WSconnect"
+                soapAction="urn:BIMP-ERPConnect/WSconnect"
             />
             <wsdl:input>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLEConnect"
+                    namespace="urn:BIMP-ERPConnect"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLEConnect"
+                    namespace="urn:BIMP-ERPConnect"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:input>
             <wsdl:output>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLEConnect"
+                    namespace="urn:BIMP-ERPConnect"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLEConnect"
+                    namespace="urn:BIMP-ERPConnect"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:output>

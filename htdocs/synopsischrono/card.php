@@ -3,7 +3,7 @@
 /*
 
  * Name : card.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 
 require_once('pre.inc.php');

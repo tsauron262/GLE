@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : test-script.class.php GLE-1.1
+  * Name : test-script.class.php BIMP-ERP-1.1
   */
 
     class finContratGAScript extends CommonObject
@@ -63,7 +63,7 @@
                 {
                     //Send Email
                     $contrat->fetch($res1->rowid);
-                    $subject = "[GLE] Avertissement de fin du contrat ".$contrat->ref;
+                    $subject = "[BIMP-ERP] Avertissement de fin du contrat ".$contrat->ref;
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($contrat->fk_user_author);
                     $to = $tmpUser->email;
@@ -83,7 +83,7 @@
                     }
 
                     $sendtocc = join(',',$ccArr);
-                    $from = "GLE <".$conf->global->MAIN_MAIL_EMAIL_FROM.">";
+                    $from = "BIMP-ERP <".$conf->global->MAIN_MAIL_EMAIL_FROM.">";
                     $filepath = array();
                     $mimetype=array();
                     $filename =array();

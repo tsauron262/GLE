@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -354,7 +354,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $msg .= "<br/>";
                     $msg .= "Ref Demande Intervertion : " . $this->getNomUrl(1);
 
-                    $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
+                    $msg .= "<br/><br/>Cordialement,<br/>\nBIMP-ERP\n";
                     $from = $conf->global->BIMP_MAIL_FROM;
 //                    $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
                     $addr_cc = "";
@@ -508,7 +508,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $msg .= "<br/>";
                     $msg .= "Ref Demande Intervertion : " . $this->getNomUrl(1);
 
-                    $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
+                    $msg .= "<br/><br/>Cordialement,<br/>\nBIMP-ERP\n";
                     $from = $conf->global->BIMP_MAIL_FROM;
                     $addr_cc = $this->user_prisencharge->email;
 

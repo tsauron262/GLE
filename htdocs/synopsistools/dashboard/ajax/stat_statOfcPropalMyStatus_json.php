@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by DRSI & Synopsis
+  * BIMP-ERP by DRSI & Synopsis
   *
   * Author: SAURON Tommy <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : stat_produit_json.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 
   require_once('../../../main.inc.php');

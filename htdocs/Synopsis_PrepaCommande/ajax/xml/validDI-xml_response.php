@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by Babel-Services
+  * BIMP-ERP by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : validDI-xml_response.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
 
 

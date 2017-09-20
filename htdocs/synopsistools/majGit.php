@@ -1,7 +1,7 @@
 <?php
 
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -26,7 +26,7 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 }
 //$return = array();
 //
-//echo shell_exec("cd /opt/GLE/main");
+//echo shell_exec("cd /opt/BIMP-ERP/main");
 //echo shell_exec("git pull https://dsauron@bitbucket.org/dsauron/gle-dol-maj.git");
 //echo shell_exec("freeparty");
 //
@@ -37,14 +37,14 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 //echo $stat1 . $stat2;
 
 //include_once(DOL_DOCUMENT_ROOT."/synopsistools/PHPGit/Repository.php");
-////$repo = new PHPGit_Repository('/home/jean/Bureau2/Workspace GLE/GIT/PROJET/gle-dol-maj');
-//$repo = new PHPGit_Repository('/opt/GLE/main');
+////$repo = new PHPGit_Repository('/home/jean/Bureau2/Workspace BIMP-ERP/GIT/PROJET/gle-dol-maj');
+//$repo = new PHPGit_Repository('/opt/BIMP-ERP/main');
 //
 ////print_r($repo->getBranches());
 //$repo->git('pull https://dsauron@bitbucket.org/dsauron/gle-dol-maj.git');
 
 
-exec("cd '/opt/GLE/main' && /usr/bin/git pull https://dsauron@bitbucket.org/dsauron/gle-dol-maj.git");
+exec("cd '/opt/BIMP-ERP/main' && /usr/bin/git pull https://dsauron@bitbucket.org/dsauron/gle-dol-maj.git");
 
 llxFooter();
 

@@ -179,7 +179,7 @@ class pdf_synopsisapple_appleretour extends ModeleSynopsisapple {
                 $pdf->SetTitle($retour->model->titre . ' : ' . $retour->ref);
 
                 $pdf->SetSubject($outputlangs->transnoentities("Panier"));
-                $pdf->SetCreator("GLE " . GLE_VERSION);
+                $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right

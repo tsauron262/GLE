@@ -31,7 +31,7 @@ $jspath = DOL_URL_ROOT . '/Synopsis_Common/jquery/';
 $jqueryuipath = DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/';
 //
 $header = '<link rel="stylesheet" type="text/css" href="css/jsgantt.css" />' . "\n";
-$header .= '<link rel="stylesheet" type="text/css" href="css/GLEgantt.css" />' . "\n";
+$header .= '<link rel="stylesheet" type="text/css" href="css/BIMP-ERPgantt.css" />' . "\n";
 //$header .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/css/smoothness/jquery-ui-latest.custom.css" />' . "\n";
 //
 //$header .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery.min.js"></script>' . "\n";
@@ -74,7 +74,7 @@ $header .= '<link rel="stylesheet" href="' . $csspath . 'jquery.treeview.css" ty
 $header .= "<style>.contextMenu{ width: 200px; } table { border-collapse: collapse} .promoteZZ{ z-index: 2006; position: absolute; } .delFromDepTableMod{ cursor: pointer; } .delFromDepTableadd{ cursor: pointer; }  .addDep{ cursor: pointer; } #divTitle{ fonsize: 120%; } .horaire { font-size:75%; }.horaire td { text-align: center; } .treeview li {  cursor: pointer; } #AddToTable { cursor: pointer; }  .notSelectable { font-style: italic; color: #CCCCCC; cursor: no-drop;  } .delFromTable { cursor: pointer; } #SubAccordion{ overflow: hidden; max-height: 300px min-height: 250px; font-size:75%; } #fragmentadd-2{ font-size:75%; } .treeview span { font-weight: 500; padding-left: 3px; } .treeview li { margin-top: 1px; font-size: 90%; padding-top: 3px;  }</style>";
 
 
-$header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/synopsisprojet/gantt/js/GLEgantt.js"></script>' . "\n";
+$header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/synopsisprojet/gantt/js/BIMP-ERPgantt.js"></script>' . "\n";
 
 $header .= '<script language="javascript">' . "\n";
 $header .= '    var project_id = ' . $project_id . ";" . "\n";
@@ -124,7 +124,7 @@ $header .= "</script>";
 
 
 
-llxHeader($header, "GLE-Gantt");
+llxHeader($header, "BIMP-ERP-Gantt");
 $head = synopsis_project_prepare_head($projet);
 dol_fiche_head($head, 'Gantt', $langs->trans("Project"));
 

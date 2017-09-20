@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -98,7 +98,7 @@ if ($_REQUEST['SynAction'] == 'dlZip')
             $zip = new ZipArchive();
             if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)
             {
-                $zip->setArchiveComment('Generate by GLE - Synopsis et DRSI');
+                $zip->setArchiveComment('Generate by BIMP-ERP - Synopsis et DRSI');
                 foreach($filearray as $key=>$val)
                 {
                     //Add files

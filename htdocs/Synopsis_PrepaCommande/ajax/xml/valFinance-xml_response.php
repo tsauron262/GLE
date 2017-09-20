@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -16,7 +16,7 @@
  *
  * Name : valFinance-xml_response.php
  *
- * GLE-1.2
+ * BIMP-ERP-1.2
  *
  */
 require_once('../../../main.inc.php');
@@ -105,7 +105,7 @@ if ($sql) {
             $msg .= "La commande de " . $societe->nom . " ref: " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") du " . date('d/m/Y', $commande->date) . " a &eacute;t&eacute; valid&eacute;e financi&egrave;rement.";
         $msg .= " Ce statut est " . $statusFin;
 
-        $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
+        $msg .= "<br/><br/>Cordialement,<br/>\nBIMP-ERP\n";
         $from = $conf->global->BIMP_MAIL_FROM;
 //        $addr_cc = $conf->global->BIMP_MAIL_GESTFINANCIER . ", " . $conf->global->BIMP_MAIL_GESTPROD;
         $addr_cc = "";

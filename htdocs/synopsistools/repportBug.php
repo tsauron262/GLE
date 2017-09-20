@@ -1,7 +1,7 @@
 <?php
 
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -28,7 +28,7 @@ if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
     $obj = $db->fetch_object($sql);
 
 
-    $message = 'Bonjour votre bug signalé sur GLE est passé au statut résolu. ' . "\n\n"
+    $message = 'Bonjour votre bug signalé sur BIMP-ERP est passé au statut résolu. ' . "\n\n"
             . 'Si le bug réapparaît ou est toujours présent, merci de le resignaler : ' . "\n\n"
             . 'Message : ' . $obj->text;
 
@@ -47,7 +47,7 @@ if (isset($_GET['action']) && $_GET['action'] == "setAnnuler") {
     $obj = $db->fetch_object($sql);
 
 
-    $message = 'Bonjour votre bug signalé sur GLE est passé au statut Annulé. ' . "\n\n"
+    $message = 'Bonjour votre bug signalé sur BIMP-ERP est passé au statut Annulé. ' . "\n\n"
             . 'Message : ' . $obj->text;
 
     $userT = new User($db);
@@ -67,7 +67,7 @@ if (isset($_GET['action']) && $_GET['action'] == "setInfo") {
     $obj = $db->fetch_object($sql);
 
 
-    $message = 'Bonjour je n\'ai pas pu traiter votre bug signalé sur GLE merci de le resignaler avec plus d\'informations ou de contacter votre assistance technique. ' . "\n\n"
+    $message = 'Bonjour je n\'ai pas pu traiter votre bug signalé sur BIMP-ERP merci de le resignaler avec plus d\'informations ou de contacter votre assistance technique. ' . "\n\n"
             . 'Message : ' . $obj->text;
 
     $userT = new User($db);

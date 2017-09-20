@@ -1,7 +1,7 @@
 <?php
 
     /*
-     ** GLE by Synopsis et DRSI
+     ** BIMP-ERP by Synopsis et DRSI
      *
      * Author: Tommy SAURON <tommy@drsi.fr>
      * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
     /**
      *
      * Name : ressource_json.php
-     * GLE-1.0
+     * BIMP-ERP-1.0
      */
 //TODO left menu + lib/*php
 

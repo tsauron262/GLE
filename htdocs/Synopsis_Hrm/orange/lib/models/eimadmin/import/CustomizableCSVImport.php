@@ -488,7 +488,7 @@ class CustomizableCSVImport implements CSVImportPlugin {
 
 	private function _getTaxInfo($federalTaxStatus, $fedEx, $taxState, $stateTaxStatus, $stateEx, $unemploymentState, $workState) {
 
-		$allStatuses = array(EmpTax::TAX_STATUS_MARRIED,EmpTax::TAX_STATUS_SINGLE,
+		$allStatuses = array(EmpTax::TAX_STATUS_MARRIED,EmpTax::TAX_STATUS_SIGLE,
 						EmpTax::TAX_STATUS_NONRESIDENTALIEN, EmpTax::TAX_STATUS_NOTAPPLICABLE);
 
 		$taxInfo = new EmpTax();

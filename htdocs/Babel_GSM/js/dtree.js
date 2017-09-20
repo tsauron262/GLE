@@ -1,4 +1,4 @@
-/* ** GLE by Synopsis et DRSI * * Author: Tommy SAURON <tommy@drsi.fr> * Licence : Artistic Licence v2.0 * * Version 1.0 * Create on : 4-1-2009 * * Infos on http://www.finapro.fr * */
+/* ** BIMP-ERP by Synopsis et DRSI * * Author: Tommy SAURON <tommy@drsi.fr> * Licence : Artistic Licence v2.0 * * Version 1.0 * Create on : 4-1-2009 * * Infos on http://www.finapro.fr * */
 // Node object
 function Node(id, pid, name, url, title, target, icon, iconOpen, open) {
 	this.id = id;

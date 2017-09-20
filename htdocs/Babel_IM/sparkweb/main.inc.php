@@ -28,7 +28,7 @@
 //    \version    $Id: main.inc.php,v 1.364.2.1 2008/09/10 11:13:39 eldy Exp $
 //*/
 /*
- ** GLE by Synopsis et DRSI
+ ** BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -661,7 +661,7 @@ function dol_loginfunction($langs,$conf,$mysoc)
     }
     else
     {
-        print '<tr class="vmenu"><td align="center">GLE '.GLE_VERSION.'</td></tr>';
+        print '<tr class="vmenu"><td align="center">BIMP-ERP '.DOL_VERSION.'</td></tr>';
     }
     print '</table>';
     print '<br>';
@@ -1070,7 +1070,7 @@ function left_menu($menu_array, $helppagename='', $form_search='')
         $bugbaseurl.='func=additem&group=dolibarr&privacy=1&';
         $bugbaseurl.="&details=";
         $bugbaseurl.=urlencode("\n\n\n\n\n-------------\n");
-        $bugbaseurl.=urlencode($langs->trans("Version").": ".GLE_VERSION."\n");
+        $bugbaseurl.=urlencode($langs->trans("Version").": ".DOL_VERSION."\n");
         $bugbaseurl.=urlencode($langs->trans("Server").": ".$_SERVER["SERVER_SOFTWARE"]."\n");
         $bugbaseurl.=urlencode($langs->trans("Url").": ".$_SERVER["REQUEST_URI"]."\n");
         print '<div class="help"><a class="help" target="_blank" href="'.$bugbaseurl.'">'.$langs->trans("FindBug").'</a></div>';

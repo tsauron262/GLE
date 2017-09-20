@@ -4,7 +4,7 @@
  /**
   *
   * Name : Hressources.php
-  * GLE-1.0
+  * BIMP-ERP-1.0
   */
 
 

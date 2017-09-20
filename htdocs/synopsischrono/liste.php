@@ -6,7 +6,7 @@
 /**
  *
  * Name : liste.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");

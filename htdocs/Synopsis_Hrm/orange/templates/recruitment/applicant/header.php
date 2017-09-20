@@ -18,6 +18,6 @@
  */
 
 ?>
-<div style="background: url(../../../../theme/GLE/Logo-72ppp.png) 50% 50% no-repeat; width: 320px; margin-left: 0; bottom:0; Z-index:0; left: 0; position: absolute; height: 115px; float: left;"></div>
+<div style="background: url(../../../../theme/BIMP-ERP/Logo-72ppp.png) 50% 50% no-repeat; width: 320px; margin-left: 0; bottom:0; Z-index:0; left: 0; position: absolute; height: 115px; float: left;"></div>
 <div style="z-index: 2; position: absolute; background-color: white;">
 <center>

@@ -10,7 +10,7 @@ use Data::Dumper;
   my $pass = md5_hex('redalert');
 
   my $result;
-  my $service = SOAP::Lite->service('http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/connect.wsdl');
+  my $service = SOAP::Lite->service('http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/connect.wsdl');
  eval {  $result = $service->WSconnect('eos',$pass) };
  my $secret = $result;
  if ($@) {
@@ -18,7 +18,7 @@ use Data::Dumper;
  }
 
 
-# $client = new SoapClient("http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/stockquote.wsdl");
+# $client = new SoapClient("http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/stockquote.wsdl");
 #            $client->__setCookie ( $cookieName, $secret);
 #            //$client->connect('eos');
 #
@@ -28,8 +28,8 @@ use Data::Dumper;
     $cookie_jar->set_cookie( 1, "GleWSCookie", $secret, "/", "127.0.0.1", 80, 0, 0, $expire );
 
   my $service1 = SOAP::Lite
-                          ->proxy('http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/webservices.php', cookie_jar => $cookie_jar)
-                          #->service('http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/stockquote.wsdl')
+                          ->proxy('http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/webservices.php', cookie_jar => $cookie_jar)
+                          #->service('http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/stockquote.wsdl')
                           ;
  eval {  $result = $service1->listSocWithContract()->result() };
  if ($@) {
@@ -41,7 +41,7 @@ use Data::Dumper;
  print Dumper(@arr);
 
 #
-#  $service = SOAP::Lite -> uri('http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/webservices.php')
-#               -> proxy('http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/webservices.php');
+#  $service = SOAP::Lite -> uri('http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/webservices.php')
+#               -> proxy('http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/webservices.php');
 #  $result = $service -> getItemCount('12345') -> result();
 #  print $result->faultstring;

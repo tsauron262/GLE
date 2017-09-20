@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : testImport.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 $maxFileImport = 20;
 $tempDeb = microtime(true);
@@ -155,7 +155,7 @@ $dir = $conf->global->BIMP_PATH_IMPORT;
 // Remettre liste au lieu de carte dans product/liste.php recherche par ref
 // Contrat -> commandedet => prob accent
 // total ht ds contrat bug
-// contrat en double si non rattaché à un produit http://192.168.1.10/GLE/contrat/card.php?id=3
+// contrat en double si non rattaché à un produit http://192.168.1.10/BIMP-ERP/contrat/card.php?id=3
 // limite contrat warning 30j
 // BI stats trimestre + annuel
 // BI doubleValue in duration (2 rapport 4 ss rapport)
@@ -2057,7 +2057,7 @@ EOF;
             $mailFileMimeNameArr[] = $val;
         }
 
-        mailSyn2('Rapport d\'import', $conf->global->BIMP_MAIL_TO, "GLE <" . $conf->global->BIMP_MAIL_FROM . ">", $mailContent, $mailFileArr, $mailFileMimeArr, $mailFileMimeNameArr, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_CC), ($conf->global->BIMP_MAIL_BCC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_BCC), 0, 1, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_FROM));
+        mailSyn2('Rapport d\'import', $conf->global->BIMP_MAIL_TO, "BIMP-ERP <" . $conf->global->BIMP_MAIL_FROM . ">", $mailContent, $mailFileArr, $mailFileMimeArr, $mailFileMimeNameArr, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_CC), ($conf->global->BIMP_MAIL_BCC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_BCC), 0, 1, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_FROM));
     }
 
 
@@ -2380,7 +2380,7 @@ function processUser($import_key) {
         if (isset($result[0]['d']))
             return $result[0]['d'];
         else
-            affErreur("Pas de correspondance pour l'utilisateur dans GLE : id 8Sens " . $import_key);
+            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key);
 //        if (!isset($remUserArray[$import_key])) {
 //            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
 //            $sql = requeteWithCache($requete);

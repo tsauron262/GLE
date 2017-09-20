@@ -3,8 +3,8 @@ header('text/xml');
 print <<<EOF
 <?xml version='1.0' encoding='UTF-8'?>
 <definitions name='Inventory'
- targetNamespace='urn:GLE_GMAO'
- xmlns:tns='urn:GLE_GMAO'
+ targetNamespace='urn:BIMP-ERP_GMAO'
+ xmlns:tns='urn:BIMP-ERP_GMAO'
  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
  xmlns:xsd='http://www.w3.org/2001/XMLSchema'
  xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
@@ -171,50 +171,50 @@ print <<<EOF
         </operation>
         <wsdl:operation name="getItemList">
             <soap:operation
-                soapAction="urn:GLE_GMAO/getItemList"
+                soapAction="urn:BIMP-ERP_GMAO/getItemList"
             />
             <wsdl:input>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:input>
             <wsdl:output>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="setContratNbTicket">
             <soap:operation
-                soapAction="urn:GLE_GMAO/setContratNbTicket"
+                soapAction="urn:BIMP-ERP_GMAO/setContratNbTicket"
             />
             <wsdl:input>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:input>
             <wsdl:output>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="listSocWithContract">
             <soap:operation
-                soapAction="urn:GLE_GMAO/listSocWithContract"
+                soapAction="urn:BIMP-ERP_GMAO/listSocWithContract"
             />
             <wsdl:output>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:output>
@@ -230,38 +230,38 @@ print <<<EOF
         />
         <wsdl:operation name="getContratList">
             <soap:operation
-                soapAction="urn:GLE_GMAO/getContratList"
+                soapAction="urn:BIMP-ERP_GMAO/getContratList"
             />
             <wsdl:input>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:input>
             <wsdl:output>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="createTicketAction">
             <soap:operation
-                soapAction="urn:GLE_GMAO/createTicketAction"
+                soapAction="urn:BIMP-ERP_GMAO/createTicketAction"
             />
             <wsdl:input>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:input>
             <wsdl:output>
                 <soap:body
                     use="encoded"
-                    namespace="urn:GLE_GMAO"
+                    namespace="urn:BIMP-ERP_GMAO"
                     encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
                 />
             </wsdl:output>

@@ -15,8 +15,8 @@ class BDS_Report
     public static $row_def = array(
         'type'      => 'Statut',
         'time'      => 'Heure',
-        'object'    => 'Objet GLE',
-        'id_object' => 'ID Objet GLE',
+        'object'    => 'Objet BIMP-ERP',
+        'id_object' => 'ID Objet BIMP-ERP',
         'reference' => 'Référence objet',
         'msg'       => 'Message'
     );

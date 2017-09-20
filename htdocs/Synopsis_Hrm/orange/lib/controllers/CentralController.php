@@ -1764,18 +1764,18 @@ switch ($moduletype) {
                                                                                     break;
                                                     case 'Time_Event_Save'        :    $obj = $timeEventExtractor->parseSingleEvent($_POST);
 
-                                                                                        //Add in GLE task_time_effective
+                                                                                        //Add in BIMP-ERP task_time_effective
                                                                                         require_once("../../../../master.inc.php");
                                                                                         require_once(DOL_DOCUMENT_ROOT."/hrm/hrm.class.php");
 
                                                                                         $hrm=new hrm($db);
-                                                                                        //recupere l'ID GLE de la personne
+                                                                                        //recupere l'ID BIMP-ERP de la personne
                                                                                         $hrmUId = $obj->getEmployeeId();
                                                                                         $GleUserId = $hrm->HrmId2GleId($hrmUId);
 
-                                                                                        //recupere l'ID GLE de la task
+                                                                                        //recupere l'ID BIMP-ERP de la task
                                                                                         $hrmTaskId = $obj->getActivityId();
-                                                                                        $GleTaskId = $hrm->projectTask_HRMId2GLEId($hrmTaskId);
+                                                                                        $GleTaskId = $hrm->projectTask_HRMId2BIMP-ERPId($hrmTaskId);
                                                                                         $taskNote = $obj->getDescription();
                                                                                         $taskDuration = $obj->getDuration() * 3600;
                                                                                         $taskdate=$_POST['txtStartTime'];

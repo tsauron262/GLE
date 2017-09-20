@@ -40,7 +40,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Product');
         $objects = $this->getObjectsExportData('Product', 'Product', array(1242), $errors);
         if (!count($errors) && count($objects['list'])) {
-            $this->soapExportObjects(array($objects), 'GLE_Sync');
+            $this->soapExportObjects(array($objects), 'BIMP-ERP_Sync');
         } else {
             $this->debug_content .= 'Erreurs: <pre>';
             $this->debug_content .= print_r($errors, 1);
@@ -50,7 +50,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         echo $this->debug_content;
 //        $objects = $this->getObjectsDeleteData('Categorie', 'Categorie', array(809));
 //        if (count($objects)) {
-//            $this->soapDeleteObjects(array($objects), 'GLE_Sync');
+//            $this->soapDeleteObjects(array($objects), 'BIMP-ERP_Sync');
 //        }
     }
 
@@ -117,7 +117,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             if (!count($errors) && count($objects['list'])) {
 //                $msg = 'Données envoyées: <pre>' . str_replace("\n", '<br/>', print_r($objects, 1)) . '</pre>';
 //                $this->Info($msg);
-                $this->soapExportObjects(array($objects), 'GLE_Sync');
+                $this->soapExportObjects(array($objects), 'BIMP-ERP_Sync');
             }
         }
     }
@@ -154,7 +154,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         if (!count($errors)) {
             if (isset($products['list']) && count($products['list'])) {
-                $this->soapExportObjects(array($products), 'GLE_Sync');
+                $this->soapExportObjects(array($products), 'BIMP-ERP_Sync');
             } else {
                 $this->Alert('Aucun produit à exporter');
             }
@@ -180,7 +180,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         $products = $this->getObjectsDeleteData('Product', 'Product', array($object->id));
         if (count($products)) {
-            $this->soapDeleteObjects(array($products), 'GLE_Sync');
+            $this->soapDeleteObjects(array($products), 'BIMP-ERP_Sync');
         }
     }
 
@@ -217,7 +217,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $categories = $this->getObjectsExportData('Categorie', 'Category', array((int) $object->id), $errors);
         if (!count($errors)) {
             if (isset($categories['list']) && count($categories['list'])) {
-                $this->soapExportObjects(array($categories), 'GLE_Sync');
+                $this->soapExportObjects(array($categories), 'BIMP-ERP_Sync');
             } else {
                 $this->Alert('Aucune catégorie à exporter');
             }
@@ -240,7 +240,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         $products = $this->getObjectsDeleteData('Categorie', 'Category', array($object->id));
         if (count($products)) {
-            $this->soapDeleteObjects(array($products), 'GLE_Sync');
+            $this->soapDeleteObjects(array($products), 'BIMP-ERP_Sync');
         }
     }
 

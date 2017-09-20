@@ -1,6 +1,6 @@
 <?php
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -172,7 +172,7 @@ class BabelCalendar {
             $last .= '            body: "'.preg_replace('/\n|\r/',"", $val['descHtml']).' ",'."\n";
             $last .= '            attributes: {'."\n";
             $last .= '                Location: "'.$val['loc'].'",'."\n";
-            $last .= '                Chair: "Admin GLE"'."\n";
+            $last .= '                Chair: "Admin BIMP-ERP"'."\n";
             $last .= '            },'."\n";
             $last .= '            type: ["meeting","appointment"]'."\n";
             $last .= '        },';//close ID

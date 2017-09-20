@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
 $menu=GetQSitem("menu", "contextmenu");
 $frozen=GetQSitem("frozen", "1");
 $highlt=GetQSitem("highlt", "none");
-$style=GetQSitem("style", "GLE");
+$style=GetQSitem("style", "BIMP-ERP");
 if (isset($_GET["menu"])) {
   $sort=GetQSitem("sort", "false");
   $hide=GetQSitem("hide", "false");

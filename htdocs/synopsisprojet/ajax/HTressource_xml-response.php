@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : HTressource_xml-response.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
   $user_id = $_REQUEST['user_id'];
   $user_id = preg_replace("/^Actor-/","",$user_id);

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : BIMPStatus-xml_response.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 require_once('../../../main.inc.php');
 
@@ -55,7 +55,7 @@ if ($sql) {
         $soc = new Societe($db);
         $soc->fetch($commande->socid);
         $msg .= "La commande " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") a &eacute;t&eacute; modifi&eacute;e. Elle est maintenant au statut : " . $res->label;
-    $msg .= "<br/><br/>Cordialement,<br/>GLE";
+    $msg .= "<br/><br/>Cordialement,<br/>BIMP-ERP";
     $addr_cc = (isset($conf->global->BIMP_MAIL_GESTPROD)? $conf->global->BIMP_MAIL_GESTPROD : '');
     
     

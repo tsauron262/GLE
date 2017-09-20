@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : SAVgetData-xml_response.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
 
   //data = "serial="+serial+"&fk_prod="+fk_prod+"&socid="+socid;

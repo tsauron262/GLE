@@ -1,7 +1,7 @@
 <?php
 
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -206,7 +206,7 @@ class magento_product extends magento_soap{
 
     public $gleCatArr = array();
     private $db;
-    public function parseCatGLE($db)
+    public function parseCatBIMP-ERP($db)
     {
         $this->db=$db;
         $requete = "SELECT *
@@ -232,12 +232,12 @@ class magento_product extends magento_soap{
             {
                 while ($res1 = $db->fetch_object($sql1))
                 {
-                    $this->parseCatGLEChild($res1->fk_categorie_fille,&$this->gleCatArr["children"],$res1->fk_categorie_mere);
+                    $this->parseCatBIMP-ERPChild($res1->fk_categorie_fille,&$this->gleCatArr["children"],$res1->fk_categorie_mere);
                 }
             }
         }
     }
-    public function parseCatGLEChild($fille_id,&$catArr,$parentId)
+    public function parseCatBIMP-ERPChild($fille_id,&$catArr,$parentId)
     {
 
         $db=$this->db;
@@ -265,7 +265,7 @@ class magento_product extends magento_soap{
             {
                 while ($res1 = $db->fetch_object($sql1))
                 {
-                    $this->parseCatGLEChild($res1->fk_categorie_fille,&$catArr[$idx]["children"],$res1->fk_categorie_mere);
+                    $this->parseCatBIMP-ERPChild($res1->fk_categorie_fille,&$catArr[$idx]["children"],$res1->fk_categorie_mere);
                 }
             }
         }

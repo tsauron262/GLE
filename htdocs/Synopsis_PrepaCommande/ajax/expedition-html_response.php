@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : fiche-xml_response.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
@@ -85,7 +85,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQU
     $msg = "Bonjour,<br/><br/>";
     $msg .= "Le mat&eacute;riel de la commande " . $commande->getNomUrl(1) . " vous a &eacute;t&eacute; exp&eacute;di&eacute;.";
 
-    $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
+    $msg .= "<br/><br/>Cordialement,<br/>\nBIMP-ERP\n";
     $from = $conf->global->BIMP_MAIL_FROM;
     $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
 

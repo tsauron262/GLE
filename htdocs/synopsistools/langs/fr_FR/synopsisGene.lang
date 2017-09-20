@@ -117,7 +117,7 @@ TechPeopleArea=Zone Technique
 MenuTechPeople=Interv./Dep.
 
 ECMFileManager=Liste des documents
-ECMAuto=Documents GLE
+ECMAuto=Documents BIMP-ERP
 propal=Proposit. commerciale
 order=Commande
 bill=Facture
@@ -138,13 +138,13 @@ ZIMBRA_DOMAIN=domaine du serveur Zimbra
 ZIMBRA_PROTO=Protocole d'accès au serveur Zimbra
 ZIMBRA_PREAUTH=Preauth Key du serveur Zimbra
 ZIMBRA_WEBDAVPROTO=Protocole webdav à utiliser pour joindre le serveur Zimbra
-ZIMBRA_ADMINUSER=Nom de l'utilisateur GLE dans Zimbra
-ZIMBRA_ADMINPASS=Mot de passe de l'utilisateur GLE dans Zimbra
-ZIMBRA_ZIMBRA_USE_LDAP=Synchronisation des comptes Zimbra/GLE
+ZIMBRA_ADMINUSER=Nom de l'utilisateur BIMP-ERP dans Zimbra
+ZIMBRA_ADMINPASS=Mot de passe de l'utilisateur BIMP-ERP dans Zimbra
+ZIMBRA_ZIMBRA_USE_LDAP=Synchronisation des comptes Zimbra/BIMP-ERP
 
-BABELJASPER_JASPER_USE_LDAP=Synchronisation des comptes JasperServer/GLE
-JASPER_REPO_PATH_REPORT=Chemin vers les répertoires des rapports GLE
-JASPER_REPO_PATH_GENERATED=Chemin vers les répertoires des rapports auto-générés GLE
+BABELJASPER_JASPER_USE_LDAP=Synchronisation des comptes JasperServer/BIMP-ERP
+JASPER_REPO_PATH_REPORT=Chemin vers les répertoires des rapports BIMP-ERP
+JASPER_REPO_PATH_GENERATED=Chemin vers les répertoires des rapports auto-générés BIMP-ERP
 JASPER_PATH=Chemin du WebService Jasper
 JASPER_PROTO=Protocole d'accè au serveur
 JASPER_PORT=Port TCP du serveur Jasper
@@ -174,7 +174,7 @@ BABELIM_HOST=IP ou nom public du serveur Jabber
 BABELIM_PORT=Port TCP du serveur Jabber
 BABELIM_PROTO=Protocole d'accès au serveur Jabber
 BABELIM_DOMAIN=Domaine configurer sur le serveur Jabber
-BABELIM_IM_USE_LDAP=Synchronisation des comptes GLE avec les comptes Jabber
+BABELIM_IM_USE_LDAP=Synchronisation des comptes BIMP-ERP avec les comptes Jabber
 BABELIM_XMLSOCKETPORT=Port TCP pour l'accès au serveur jabber en mode xml socket
 
 MAGENTO_HOST=IP ou nom public du serveur Magento

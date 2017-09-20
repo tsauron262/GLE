@@ -71,10 +71,10 @@ function ofc_resize(left, width, top, height)
 EOF;
 
 
-$rtUrl = $conf->global->GLE_RT_ROOT.'/rt/Search/Chart.html?Order=ASC|ASC|ASC|ASC&Query=Queue+%3D+%27General%27&Rows=50&OrderBy=id|||&Format=%27+++%3Cb%3E%3Ca+href%3D%22__WebPath__%2FTicket%2FDisplay.html%3Fid%3D__id__%22%3E__id__%3C%2Fa%3E%3C%2Fb%3E%2FTITLE%3A%23%27%2C%0D%0A%27%3Cb%3E%3Ca+href%3D%22__WebPath__%2FTicket%2FDisplay.html%3Fid%3D__id__%22%3E__Subject__%3C%2Fa%3E%3C%2Fb%3E%2FTITLE%3ASubject%27%2C%0D%0A%27__Status__%27%2C%0D%0A%27__QueueName__%27%2C%0D%0A%27__OwnerName__%27%2C%0D%0A%27__Priority__%27%2C%0D%0A%27__NEWLINE__%27%2C%0D%0A%27%27%2C%0D%0A%27%3Csmall%3E__Requestors__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__CreatedRelative__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__ToldRelative__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__LastUpdatedRelative__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__TimeLeft__%3C%2Fsmall%3E%27&ChartStyle=bar&PrimaryGroupBy=Status';
+$rtUrl = $conf->global->BIMP-ERP_RT_ROOT.'/rt/Search/Chart.html?Order=ASC|ASC|ASC|ASC&Query=Queue+%3D+%27General%27&Rows=50&OrderBy=id|||&Format=%27+++%3Cb%3E%3Ca+href%3D%22__WebPath__%2FTicket%2FDisplay.html%3Fid%3D__id__%22%3E__id__%3C%2Fa%3E%3C%2Fb%3E%2FTITLE%3A%23%27%2C%0D%0A%27%3Cb%3E%3Ca+href%3D%22__WebPath__%2FTicket%2FDisplay.html%3Fid%3D__id__%22%3E__Subject__%3C%2Fa%3E%3C%2Fb%3E%2FTITLE%3ASubject%27%2C%0D%0A%27__Status__%27%2C%0D%0A%27__QueueName__%27%2C%0D%0A%27__OwnerName__%27%2C%0D%0A%27__Priority__%27%2C%0D%0A%27__NEWLINE__%27%2C%0D%0A%27%27%2C%0D%0A%27%3Csmall%3E__Requestors__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__CreatedRelative__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__ToldRelative__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__LastUpdatedRelative__%3C%2Fsmall%3E%27%2C%0D%0A%27%3Csmall%3E__TimeLeft__%3C%2Fsmall%3E%27&ChartStyle=bar&PrimaryGroupBy=Status';
 //TODO changer user
-$rtUser=$conf->global->GLE_RT_USER;
-$rtPass=$conf->global->GLE_RT_PASS;
+$rtUser=$conf->global->BIMP-ERP_RT_USER;
+$rtPass=$conf->global->BIMP-ERP_RT_PASS;
 
 $tmp = md5(time());
 $expire = time()+60*60;

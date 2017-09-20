@@ -212,14 +212,14 @@ class EmailConfiguration {
         } elseif ($this->getTestEmailType() == "sendmail") {
 
             $transport = new Zend_Mail_Transport_Sendmail();
-            $subject = "GLE - HRM - Email de test";
+            $subject = "BIMP-ERP - HRM - Email de test";
             $message = utf8_decode("Si vous avez reçu cet email, c'est que la configuration de l'envoi de mail est correcte.");
             $logMessage = date('r')." Sending Test Email Using SendMail to {$this->getTestEmail()} ";
 
         }
 
         $mail = new Zend_Mail();
-        $mail->setFrom($this->getMailAddress(), "GLE - HRM");
+        $mail->setFrom($this->getMailAddress(), "BIMP-ERP - HRM");
         $mail->addTo($this->getTestEmail());
         $mail->setSubject($subject);
         $mail->setBodyText($message);

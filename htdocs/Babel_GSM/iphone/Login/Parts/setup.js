@@ -21,6 +21,6 @@ var dashcodePartSpecs = {
     "text": { "creationFunction": "CreateText", "text": "Settings" },
     "text1": { "creationFunction": "CreateText", "text": "Login" },
     "text2": { "creationFunction": "CreateText", "text": "Mot de passe" },
-    "title": { "creationFunction": "CreateText", "text": "GLE ++" },
+    "title": { "creationFunction": "CreateText", "text": "BIMP-ERP ++" },
     "views": { "creationFunction": "CreateStackLayout", "subviewsTransitions": [{ "direction": "right-left", "duration": "", "timing": "ease-in-out", "type": "flip" }, { "direction": "right-left", "duration": "", "timing": "ease-in-out", "type": "flip" }] }
 };

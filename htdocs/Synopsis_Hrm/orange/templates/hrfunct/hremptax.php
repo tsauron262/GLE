@@ -21,7 +21,7 @@
 <?php
 require_once ROOT_PATH . '/lib/models/hrfunct/EmpTax.php';
 
-$arrTaxStatus = array (EmpTax::TAX_STATUS_MARRIED => $lang_hrEmpMain_TaxStatusMarried, EmpTax::TAX_STATUS_SINGLE => $lang_hrEmpMain_TaxStatusSingle,
+$arrTaxStatus = array (EmpTax::TAX_STATUS_MARRIED => $lang_hrEmpMain_TaxStatusMarried, EmpTax::TAX_STATUS_SIGLE => $lang_hrEmpMain_TaxStatusSingle,
 				EmpTax::TAX_STATUS_NONRESIDENTALIEN => $lang_hrEmpMain_TaxStatusNonResidentAlien, EmpTax::TAX_STATUS_NOTAPPLICABLE => $lang_hrEmpMain_TaxStatusNotApplicable);
 ?>
 

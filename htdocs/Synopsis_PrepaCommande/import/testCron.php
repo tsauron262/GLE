@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,10 +14,10 @@
  /**
   *
   * Name : testCron.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
 
-$ch = curl_init("http://127.0.0.1/GLE-1.2/main/htdocs/Synopsis_PrepaCommande/import/testImport.php");
+$ch = curl_init("http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Synopsis_PrepaCommande/import/testImport.php");
 
 curl_setopt($ch, CURLOPT_HEADER, 0);
 curl_setopt ($ch, CURLOPT_POST, 1);

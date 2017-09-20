@@ -7,6 +7,6 @@ Date(s)    Type     Durée (heures)    Commentaire
 
 Ce message vous a été envoyé car vous êtes le supérieur hiérarchique de #subordinate.
 
-Merci de vous connecter sur GLE -> RH afin de traiter cette demande.
+Merci de vous connecter sur BIMP-ERP -> RH afin de traiter cette demande.
 
-GLE - HRM
+BIMP-ERP - HRM

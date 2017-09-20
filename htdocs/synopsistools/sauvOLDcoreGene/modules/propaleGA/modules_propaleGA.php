@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 /*
-  * GLE by Synopsis et DRSI
+  * BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -152,7 +152,7 @@ class ModeleNumRefPropalesGA
 
         if ($this->version == 'development') return $langs->trans("VersionDevelopment");
         if ($this->version == 'experimental') return $langs->trans("VersionExperimental");
-        if ($this->version == 'dolibarr') return GLE_VERSION;
+        if ($this->version == 'dolibarr') return DOL_VERSION;
         return $langs->trans("NotAvailable");
     }
 }

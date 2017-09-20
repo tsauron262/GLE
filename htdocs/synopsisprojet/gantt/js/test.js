@@ -39,7 +39,7 @@ function init2ndPanel(pMod)
     $('#'+mod+'depend').change(function(){
         //draw a dependancy form
         var longHtml = "<div class='dependChange'><table width=100%><tbody>"
-            + "<tr><td colspan=3 align=right><span id='addDep' class='addDep'><img src='"+DOL_URL_ROOT+"/theme/GLE/plus.gif' width=16 height=16></span></tr>"
+            + "<tr><td colspan=3 align=right><span id='addDep' class='addDep'><img src='"+DOL_URL_ROOT+"/theme/BIMP-ERP/plus.gif' width=16 height=16></span></tr>"
                     + "<tr><td>Pourcentage d'accomplissement</td>" +
                         "<td><span class='sliderDependSpan'>100</span>%<input type='hidden' class='sliderDepend"+mod+"Input' value=100></input></td>" +
                         "<td width=300><div class='sliderDepend'></div></td></tr>"

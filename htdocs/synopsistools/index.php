@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : index.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 require_once('../main.inc.php');
 llxHeader();
@@ -37,7 +37,7 @@ if (isset($user->rights->SynopsisTools->Global->fileInfo)) {
 }
 
 if (isset($user->rights->SynopsisPrepaCom->import->Admin))
-    print" <br/><br/><a href='../Synopsis_PrepaCommande/import/testImport.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Import 8sens -> GLE</span></a>";
+    print" <br/><br/><a href='../Synopsis_PrepaCommande/import/testImport.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Import 8sens -> BIMP-ERP</span></a>";
 
 
 print" <br/><br/><a href='../synopsistools/agenda/vue.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Agenda</span></a>";
@@ -93,9 +93,9 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 //        }
 //    }
 //    foreach ($text as $id => $tab) {
-//        echo $tab[0]->email . "Problème technique GLE" . $tab[1];
+//        echo $tab[0]->email . "Problème technique BIMP-ERP" . $tab[1];
 //        if($_REQUEST['propalMail'] == "mail")
-//        mailSyn2("Problème technique GLE", $tab[0]->email.",jc.cannet@bimp.fr", "", $tab[1]);
+//        mailSyn2("Problème technique BIMP-ERP", $tab[0]->email.",jc.cannet@bimp.fr", "", $tab[1]);
 //    }
 //}
 
@@ -190,7 +190,7 @@ ORDER BY `nbSav`  DESC");
     }
 }
 
-//$my_key = "TriDESSuperEncryptKeyGLE";
+//$my_key = "TriDESSuperEncryptKeyBIMP-ERP";
 //$data = "P@sŝw0rd";
 //$data = pkcs5_pad($data, mcrypt_get_block_size("tripledes", "cbc"));
 //$td = mcrypt_encrypt(MCRYPT_3DES, $my_key, $data, MCRYPT_MODE_ECB);

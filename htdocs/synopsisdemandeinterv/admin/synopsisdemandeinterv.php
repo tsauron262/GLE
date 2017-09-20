@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by DRSI & Synopsis
+  * BIMP-ERP by DRSI & Synopsis
   *
   * Author: SAURON Tommy <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0

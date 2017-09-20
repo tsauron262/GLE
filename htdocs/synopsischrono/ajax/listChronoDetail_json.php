@@ -3,7 +3,7 @@
 /*
  *
  * Name : listContrat_json.php
- * GLE-1.1
+ * BIMP-ERP-1.1
  */
 
 function searchtext($nom, $pref = '') {

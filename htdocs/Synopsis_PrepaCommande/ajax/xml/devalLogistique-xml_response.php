@@ -1,7 +1,7 @@
 <?php
 
 /*
- * * GLE by Synopsis et DRSI
+ * * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -16,7 +16,7 @@
  *
  * Name : devalLogistique-xml_response.php
  *
- * GLE-1.2
+ * BIMP-ERP-1.2
  *
  *
  */
@@ -100,7 +100,7 @@ if ($sql) {
         else
             $msg .= "<br/><b>Tous les produits sont disponibles !!!</b>";
 
-        $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
+        $msg .= "<br/><br/>Cordialement,<br/>\nBIMP-ERP\n";
         $from = $conf->global->BIMP_MAIL_FROM;
         $addr_cc = $conf->global->BIMP_MAIL_GESTLOGISTIQUE . ", " . $conf->global->BIMP_MAIL_GESTPROD;
 

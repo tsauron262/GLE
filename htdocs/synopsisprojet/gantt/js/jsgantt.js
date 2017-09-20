@@ -1480,9 +1480,9 @@ JSGantt.changeFormat =      function(pFormat,ganttObj) {
     {
         ganttObj.setFormat(pFormat);
         ganttObj.DrawDependencies();
-        //GLE
+        //BIMP-ERP
         redrawResizeDrag();
-    //GLE
+    //BIMP-ERP
     }
     else
         alert('Chart undefined');

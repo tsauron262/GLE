@@ -706,10 +706,10 @@ class RecruitmentController {
                 $this->_saveApplicationEvent($event, JobApplicationEvent::EVENT_APPROVE);
 
                 // Create employee in PIM
-                //CREATE GLE USER HERE !!!!!!!!
+                //CREATE BIMP-ERP USER HERE !!!!!!!!
                 //
 
-                //cf http://127.0.0.1/GLE-1.1/main/htdocs//user/card.php?action=create&idmenu=402
+                //cf http://127.0.0.1/BIMP-ERP-1.1/main/htdocs//user/card.php?action=create&idmenu=402
 
 
 //                  $edituser->lastname           = $_POST["nom"];

@@ -1,7 +1,7 @@
 // This file should be used if you want to debug
 function jqGridInclude()
 {
-    var pathtojsfiles = "/GLE-1.2/main/htdocs/Babel_GPI/jquery/jqGrid-3.5/js/"; // need to be ajusted
+    var pathtojsfiles = "/BIMP-ERP-1.2/main/htdocs/Babel_GPI/jquery/jqGrid-3.5/js/"; // need to be ajusted
     // set include to false if you do not want some modules to be included
     var modules = [
         { include: true, incfile:'i18n/grid.locale-fr.js'}, // jqGrid translation

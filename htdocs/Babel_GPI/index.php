@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : index.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
 
 
@@ -37,7 +37,7 @@ if ($_COOKIE['logged'] != "OK")
         print "<html>\n";
         print "<head>\n";
         print '<meta name="robots" content="noindex,nofollow">'."\n";      // Evite indexation par robots
-        print "<title>GLE login</title>\n";
+        print "<title>BIMP-ERP login</title>\n";
 
 $header = <<<EOJS
 
@@ -250,7 +250,7 @@ EOF;
 -moz-border-radius-topright:6px;
 -webkit-border-top-left-radius:6px; -webkit-border-top-right-radius:6px;-webkit-border-bottom-left-radius:6px;-webkit-border-bottom-right-radius:6px ">';
 
-            print '<tr class="vmenu"><td align="center">GLE ++ - Acc&egrave;s client</td></tr>';
+            print '<tr class="vmenu"><td align="center">BIMP-ERP ++ - Acc&egrave;s client</td></tr>';
         print '</table>';
         print '<br>';
     //    var_dump($conf->global);

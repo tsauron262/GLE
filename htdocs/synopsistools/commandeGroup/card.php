@@ -1,7 +1,7 @@
 <?php
 
 /*
- * GLE by Synopsis & DRSI
+ * BIMP-ERP by Synopsis & DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -15,7 +15,7 @@
 /**
  *
  * Name : card.php
- * GLE-1.2
+ * BIMP-ERP-1.2
  */
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/synopsistools/commandeGroup/commandeGroup.class.php");

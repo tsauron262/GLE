@@ -1,6 +1,6 @@
 <?php
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -4250,9 +4250,9 @@ public $appointmentFolderLevel=array();
                     //fill SQL table
                     $this->BabelInsertTriggerFolder($ret['id'],$ret['name'],$ret['parent'],"appointment",2);
                     //create SubFolder =>
-                    $this->subFolderGLE=array();
-                    $this->Babel_createGLESubFolder($ret['id'],"soc");
-                    foreach($this->subFolderGLE as $key=>$val)
+                    $this->subFolderBIMP-ERP=array();
+                    $this->Babel_createBIMP-ERPSubFolder($ret['id'],"soc");
+                    foreach($this->subFolderBIMP-ERP as $key=>$val)
                     {
                         $this->BabelInsertTriggerFolder($val['id'],$val['name'],$val['parent'],"appointment",2);
                     }
@@ -4270,7 +4270,7 @@ public $appointmentFolderLevel=array();
                               AND folder_parent = ( SELECT folder_uid FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_folder,".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type
                                                      WHERE ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type.val ='contact'
                                                       AND ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type.id = ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_folder.folder_type_refid
-                                                      AND folder_name  = 'Contacts - GLE')";
+                                                      AND folder_name  = 'Contacts - BIMP-ERP')";
 //                                                      print $requete."<br>";
               if($resql=$db->query($requete))
               {
@@ -4338,7 +4338,7 @@ public $appointmentFolderLevel=array();
                               AND folder_parent = ( SELECT folder_uid FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_folder,".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type
                                                      WHERE ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type.val ='contact'
                                                       AND ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type.id = ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_folder.folder_type_refid
-                                                      AND folder_name  LIKE 'Contacts - GLE')";
+                                                      AND folder_name  LIKE 'Contacts - BIMP-ERP')";
               if($resql=$db->query($requete))
               {
                     $cont = new Contact($db);
@@ -4474,14 +4474,14 @@ public $appointmentFolderLevel=array();
                     //fill SQL table
                     $this->BabelInsertTriggerFolder($ret['id'],$ret['name'],$ret['parent'],"appointment",2);
                     //create SubFolder =>
-                    $this->subFolderGLE=array();
-                    $this->Babel_createGLESubFolder($ret['id'],"fourn");
+                    $this->subFolderBIMP-ERP=array();
+                    $this->Babel_createBIMP-ERPSubFolder($ret['id'],"fourn");
 
 //                    print $requete;
-                    //while(count($this->subFolderGLE)>0)
-                    foreach($this->subFolderGLE as $key=>$val)
+                    //while(count($this->subFolderBIMP-ERP)>0)
+                    foreach($this->subFolderBIMP-ERP as $key=>$val)
                     {
-//                        $val = array_pop($this->subFolderGLE);
+//                        $val = array_pop($this->subFolderBIMP-ERP);
                         //get new Id
                         $this->BabelInsertTriggerFolder($val['id'],$val['name'],$val['parent'],"appointment",2);
                     }
@@ -4531,8 +4531,8 @@ public $appointmentFolderLevel=array();
 
     }
 
-    public $subFolderGLE=array();
-    function Babel_createGLESubFolder($where,$type='soc')
+    public $subFolderBIMP-ERP=array();
+    function Babel_createBIMP-ERPSubFolder($where,$type='soc')
     {
         if ($type=='soc')
         {
@@ -4541,12 +4541,12 @@ public $appointmentFolderLevel=array();
                     $createArray=array('view' => 'appointment',
                                        "name" => $key ,
                                        "where" => $where);
-//                    if (!is_array($this->subFolderGLE[$where]))
+//                    if (!is_array($this->subFolderBIMP-ERP[$where]))
 //                    {
-//                        $this->subFolderGLE[$where]=array();
+//                        $this->subFolderBIMP-ERP[$where]=array();
 //                    }
                     $ret = $this->BabelCreateFolder($createArray);
-                    array_push($this->subFolderGLE,$ret);
+                    array_push($this->subFolderBIMP-ERP,$ret);
             }
         }
         if ($type=='fourn')
@@ -4556,12 +4556,12 @@ public $appointmentFolderLevel=array();
                     $createArray=array('view' => 'appointment',
                                        "name" => $key ,
                                        "where" => $where);
-//                    if (!is_array($this->subFolderGLE[$where]))
+//                    if (!is_array($this->subFolderBIMP-ERP[$where]))
 //                    {
-//                        $this->subFolderGLE[$where]=array();
+//                        $this->subFolderBIMP-ERP[$where]=array();
 //                    }
                     $ret = $this->BabelCreateFolder($createArray);
-                    array_push($this->subFolderGLE,$ret);
+                    array_push($this->subFolderBIMP-ERP,$ret);
             }
         }
     }

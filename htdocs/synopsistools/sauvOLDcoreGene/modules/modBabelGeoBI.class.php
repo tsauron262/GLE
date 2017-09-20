@@ -1,7 +1,7 @@
 <?php
 
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  */
 
 /**     \defgroup   JasperBabel     Module GeoBI
-  \brief      Module pour inclure GeoBI dans GLE
+  \brief      Module pour inclure GeoBI dans BIMP-ERP
  */
 /**
   \file       htdocs/core/modules/modBabelGeoBI.class.php

@@ -1546,7 +1546,7 @@ EOF;
 
 
                     $this->db->commit();
-                    //Modif post GLE 1.0
+                    //Modif post BIMP-ERP 1.0
                     $this->newContractLigneId =  $lastid;
                     //fin Modif
                     return $lastid;

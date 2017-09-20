@@ -378,7 +378,7 @@ abstract class Context
     public static function isString($str)
     {
         if ($str[0] === '\'') {
-            return Token::FLAG_STRING_SINGLE_QUOTES;
+            return Token::FLAG_STRING_SIGLE_QUOTES;
         } elseif ($str[0] === '"') {
             return Token::FLAG_STRING_DOUBLE_QUOTES;
         }

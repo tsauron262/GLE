@@ -21,7 +21,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -40,7 +40,7 @@
    \version    $Id: master.inc.php,v 1.196.2.2 2008/09/11 17:44:56 eldy Exp $
 */
 
-define('GLE_VERSION','1.2');    // Also defined in htdocs/install/inc.php
+define('DOL_VERSION','1.2');    // Also defined in htdocs/install/inc.php
 define('EURO',chr(128));
 
 // La fonction clearstatcache ne doit pas etre appelee de maniere globale car ralenti.

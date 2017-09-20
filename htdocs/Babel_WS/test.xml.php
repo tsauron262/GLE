@@ -55,7 +55,7 @@ print <<<EOF
     </wsdl:binding>
     <wsdl:service name="connectInventory">
         <wsdl:port name="babelConnect" binding="tns:connectBinding">
-            <soap:address location="http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/loginWS.php"/>
+            <soap:address location="http://127.0.0.1/BIMP-ERP-1.2/main/htdocs/Babel_WS/loginWS.php"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

@@ -1,6 +1,6 @@
 <?php
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -13,7 +13,7 @@
  */
 
 /**     \defgroup   JasperBabel     Module Notification
-        \brief      Module pour inclure Notification dans GLE
+        \brief      Module pour inclure Notification dans BIMP-ERP
 */
 
 /**

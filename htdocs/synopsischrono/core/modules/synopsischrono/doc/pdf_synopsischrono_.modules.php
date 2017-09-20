@@ -174,7 +174,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
                 $pdf->SetTitle($chrono->model->titre . ' : ' . $chrono->ref);
 
                 $pdf->SetSubject($outputlangs->transnoentities("Panier"));
-                $pdf->SetCreator("GLE " . GLE_VERSION);
+                $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
@@ -457,7 +457,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
             $ligne .= " - APE " . MAIN_INFO_APE;
         if (defined('MAIN_INFO_TVAINTRA'))
             $ligne .= " - TVA/CEE " . MAIN_INFO_TVAINTRA;
-        $ligne .= "\n\n" . "Document généré par GLE Copyright © Synopsis & DRSI";
+        $ligne .= "\n\n" . "Document généré par BIMP-ERP Copyright © Synopsis & DRSI";
 
 //        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
 //        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";

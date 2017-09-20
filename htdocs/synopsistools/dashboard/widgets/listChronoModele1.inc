@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by Synopsis
+  * BIMP-ERP by Synopsis
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : widget-modele.php
-  * GLE-1.2
+  * BIMP-ERP-1.2
   */
 
 require_once("../../main.inc.php");

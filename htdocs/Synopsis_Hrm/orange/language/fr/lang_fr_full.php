@@ -1753,7 +1753,7 @@
     * Update of Mark Translation
     * Translation all the module except the Benifits Module
     * Date : 2009-04-14
-    * GLE by Synopsis et DRSI
+    * BIMP-ERP by Synopsis et DRSI
     * Author: Tommy SAURON <tommy@drsi.fr>
     * Licence : Artistic Licence v2.0
     * Version 1.0

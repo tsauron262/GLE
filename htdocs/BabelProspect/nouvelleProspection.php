@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : tests.php
-  * GLE-1.0
+  * BIMP-ERP-1.0
   */
 
 
@@ -762,7 +762,7 @@ function cartouche_campagne_edit($db,$id,$title='Nouvelle campagne de prospectio
         print '</td>';
         print "<td colspan=1 rowspan=1 width=45%>";
         print "<div style='height: 100px; overflow: scroll;'>";
-        print '<textarea name="modNote" id="fckGLE" cols="10" class="fck" rows="9">'.dol_htmlentitiesbr_decode(preg_replace('/^\[[\w]*\]/','',$camp->note)).'</textarea>';
+        print '<textarea name="modNote" id="fckBIMP-ERP" cols="10" class="fck" rows="9">'.dol_htmlentitiesbr_decode(preg_replace('/^\[[\w]*\]/','',$camp->note)).'</textarea>';
         print "</div>";
 //                    }
         print "</td></tr>";

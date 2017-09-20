@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : testECMjquery.php
-  * GLE-1.1
+  * BIMP-ERP-1.1
   */
 
 require_once('../../main.inc.php');
@@ -309,7 +309,7 @@ if ($conf->global->MAIN_MODULE_ZIMBRA)
 }
 
 
-llxHeader($js,"GLE - ECM", 1);
+llxHeader($js,"BIMP-ERP - ECM", 1);
 function llxHeader($head, $title,$noscript)
 {
         global $conf,$langs,$user;

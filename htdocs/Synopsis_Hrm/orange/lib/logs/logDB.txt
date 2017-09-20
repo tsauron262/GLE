@@ -1,387 +1,387 @@
 Fri, 24 Apr 2009 13:36:57 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Sun, 26 Apr 2009 00:21:42 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Mon, 27 Apr 2009 15:07:12 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Tue, 28 Apr 2009 20:00:29 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Thu, 30 Apr 2009 02:21:52 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Tue, 05 May 2009 18:15:50 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Tue, 05 May 2009 19:49:50 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Wed, 06 May 2009 11:41:42 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Thu, 07 May 2009 17:48:48 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Thu, 04 Jun 2009 12:16:34 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Sun, 14 Jun 2009 12:07:50 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Tue, 23 Jun 2009 14:15:32 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Tue, 23 Jun 2009 15:29:01 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Wed, 24 Jun 2009 15:28:30 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Wed, 24 Jun 2009 22:08:27 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Thu, 25 Jun 2009 15:13:21 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Thu, 25 Jun 2009 15:47:38 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Fri, 26 Jun 2009 11:35:00 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Fri, 26 Jun 2009 11:40:57 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Mon, 29 Jun 2009 09:14:02 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 40783 June 29, 2009, 9:32 am MySQL Query Error
 Mon, 29 Jun 2009 09:32:38 +0200 : Error :\nMySQL Query Error : UPDATE hs_hr_employee SET EMP_SMOKER=\'1\', ETHNIC_RACE_CODE=\'\', EMP_BIRTHDAY=null, NATION_CODE=null, EMP_GENDER=\'1\', EMP_MARITAL_STATUS=\'0\', EMP_SSN_NUM=AES_ENCRYPT(\'\', \'b3b56133e39ba94c6c33fecea7d84cb1a0c287b81d36464bc07a6256bd8eec5815435857a65f3fd019f7d3825d445fbc34bf029f6428aac00a80501c9e25e464\'), EMP_SIN_NUM=\'\', EMP_OTHER_ID=\'\', EMP_DRI_LICE_NUM=\'\', EMP_DRI_LICE_EXP_DATE=null, EMP_MILITARY_SERVICE= \'\' WHERE EMP_NUMBER=\'003\'\nTech Info\n------------\nCannot add or update a child row: a foreign key constraint fails (`hr_mysql`.`hs_hr_employee`, CONSTRAINT `hs_hr_employee_ibfk_2` FOREIGN KEY (`ethnic_race_code`) REFERENCES `hs_hr_ethnic_race` (`ethnic_race_code`) ON DELETE SET NULL)52957 June 29, 2009, 9:34 am MySQL Query Error
 Mon, 29 Jun 2009 09:34:01 +0200 : Error :\nMySQL Query Error : UPDATE hs_hr_employee SET EMP_SMOKER=\'1\', ETHNIC_RACE_CODE=\'\', EMP_BIRTHDAY=null, NATION_CODE=null, EMP_GENDER=\'2\', EMP_MARITAL_STATUS=\'Married\', EMP_SSN_NUM=AES_ENCRYPT(\'\', \'b3b56133e39ba94c6c33fecea7d84cb1a0c287b81d36464bc07a6256bd8eec5815435857a65f3fd019f7d3825d445fbc34bf029f6428aac00a80501c9e25e464\'), EMP_SIN_NUM=\'\', EMP_OTHER_ID=\'\', EMP_DRI_LICE_NUM=\'\', EMP_DRI_LICE_EXP_DATE=null, EMP_MILITARY_SERVICE= \'\' WHERE EMP_NUMBER=\'003\'\nTech Info\n------------\nCannot add or update a child row: a foreign key constraint fails (`hr_mysql`.`hs_hr_employee`, CONSTRAINT `hs_hr_employee_ibfk_2` FOREIGN KEY (`ethnic_race_code`) REFERENCES `hs_hr_ethnic_race` (`ethnic_race_code`) ON DELETE SET NULL)Thu, 02 Jul 2009 14:12:57 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Fri, 03 Jul 2009 11:01:52 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Mon, 13 Jul 2009 17:10:58 +0200 : 
-Undefined index:  isAdmin in /opt/GLE/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /opt/BIMP-ERP/main/htdocs/hrm/orange/index.php on line 98
 Tue, 21 Jul 2009 15:17:39 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 98
 Tue, 21 Jul 2009 15:18:40 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 98
 Tue, 21 Jul 2009 15:20:53 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 98
 Sun, 26 Jul 2009 00:02:44 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 98
 Sun, 26 Jul 2009 11:50:39 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 98
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 98
 Sun, 26 Jul 2009 11:57:09 +0200 : 
-require_once(/Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
+require_once(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
 Sun, 26 Jul 2009 11:57:19 +0200 : 
-require_once(/Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
+require_once(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
 Sun, 26 Jul 2009 11:57:22 +0200 : 
-require_once(/Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
+require_once(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
 Sun, 26 Jul 2009 12:02:18 +0200 : 
-require_once(/Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
+require_once(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
 Sun, 26 Jul 2009 12:02:20 +0200 : 
-require_once(/Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
+require_once(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/plugins/ldap/LdapDetails.php) [function.require-once]: failed to open stream: No such file or directory in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 67
 Sun, 26 Jul 2009 12:05:50 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:07:12 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:07:52 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:09:38 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:11:00 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:11:11 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:13:23 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:14:47 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:17:04 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:19:42 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:24:46 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:29:20 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSun, 26 Jul 2009 12:29:41 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 124
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 124
 Sun, 26 Jul 2009 12:30:12 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 124
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 124
 Sun, 26 Jul 2009 12:33:04 +0200 : 
-Undefined variable: leaveHomePage in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 1234
+Undefined variable: leaveHomePage in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 1234
 Sun, 26 Jul 2009 12:34:29 +0200 : 
-Undefined variable: leaveHomePage in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 1232
+Undefined variable: leaveHomePage in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 1232
 Sun, 26 Jul 2009 12:34:29 +0200 : 
-Undefined variable: leaveHomePage in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 1232
+Undefined variable: leaveHomePage in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 1232
 Sun, 26 Jul 2009 20:27:10 +0200 : Notice :\nUnauthorized access\nTech Info\n------------\nSun, 26 Jul 2009 20:27:13 +0200 : Notice :\nUnauthorized access\nTech Info\n------------\nMon, 27 Jul 2009 15:51:35 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nMon, 27 Jul 2009 15:51:37 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nTue, 28 Jul 2009 19:10:58 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 126
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 126
 76855 July 29, 2009, 8:43 pm NO database Connection found
 Wed, 29 Jul 2009 20:43:28 +0200 : Error :\nNO database Connection found\nTech Info\n------------\n88688 July 29, 2009, 9:38 pm NO database Connection found
 Wed, 29 Jul 2009 21:38:20 +0200 : Error :\nNO database Connection found\nTech Info\n------------\n98893 July 30, 2009, 11:30 am NO database Connection found
 Thu, 30 Jul 2009 11:30:34 +0200 : Error :\nNO database Connection found\nTech Info\n------------\n25464 July 30, 2009, 1:22 pm NO database Connection found
 Thu, 30 Jul 2009 13:22:33 +0200 : Error :\nNO database Connection found\nTech Info\n------------\n66218 July 31, 2009, 3:42 pm NO database Connection found
 Fri, 31 Jul 2009 15:42:34 +0200 : Error :\nNO database Connection found\nTech Info\n------------\nSun, 09 Aug 2009 01:02:22 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 126
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 126
 Thu, 13 Aug 2009 11:37:18 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.0/main/htdocs/hrm/orange/index.php on line 126
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.0/main/htdocs/hrm/orange/index.php on line 126
 Wed, 23 Sep 2009 16:48:06 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 136
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 136
 Wed, 23 Sep 2009 16:48:51 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 136
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 136
 Wed, 23 Sep 2009 16:49:16 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 134
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 134
 Wed, 23 Sep 2009 16:49:58 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 153
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 153
 Wed, 23 Sep 2009 16:50:16 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 153
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 153
 Wed, 23 Sep 2009 16:50:38 +0200 : 
-Undefined index:  isManager in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 161
+Undefined index:  isManager in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 161
 Wed, 23 Sep 2009 16:50:59 +0200 : 
-Undefined index:  isManager in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 161
+Undefined index:  isManager in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 161
 Wed, 23 Sep 2009 16:51:08 +0200 : 
-Undefined index:  empID in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 203
+Undefined index:  empID in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 203
 Wed, 23 Sep 2009 17:00:51 +0200 : 
-Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 143
+Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 143
 Wed, 23 Sep 2009 17:01:03 +0200 : 
-Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 143
+Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 143
 Wed, 23 Sep 2009 17:01:45 +0200 : 
-Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 143
+Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 143
 Wed, 23 Sep 2009 17:02:24 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 156
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 156
 Wed, 23 Sep 2009 17:20:16 +0200 : 
-Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 151
+Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 151
 Wed, 23 Sep 2009 17:28:09 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nWed, 23 Sep 2009 17:36:57 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nWed, 23 Sep 2009 17:37:24 +0200 : 
-Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 151
+Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 151
 Wed, 23 Sep 2009 17:44:36 +0200 : 
-Undefined variable: recruitHomePage in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 1276
+Undefined variable: recruitHomePage in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 1276
 Wed, 23 Sep 2009 17:44:43 +0200 : 
-Undefined variable: projectList in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 3321
+Undefined variable: projectList in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 3321
 Wed, 23 Sep 2009 17:44:44 +0200 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nWed, 23 Sep 2009 17:44:45 +0200 : 
-Undefined variable: recruitHomePage in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 1276
+Undefined variable: recruitHomePage in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 1276
 Wed, 23 Sep 2009 17:45:17 +0200 : 
-Undefined variable: recruitHomePage in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 1276
+Undefined variable: recruitHomePage in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 1276
 Thu, 24 Sep 2009 15:25:30 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 164
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 164
 Thu, 24 Sep 2009 15:27:24 +0200 : 
-Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 155
+Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 155
 Thu, 24 Sep 2009 15:31:50 +0200 : 
-Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 155
+Undefined index:  userGroup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 155
 Fri, 25 Sep 2009 13:06:04 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Fri, 25 Sep 2009 14:04:35 +0200 : 
-Undefined variable: res in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/TimeController.php on line 655
+Undefined variable: res in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/TimeController.php on line 655
 Fri, 25 Sep 2009 14:04:49 +0200 : 
-Undefined variable: res in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/TimeController.php on line 655
+Undefined variable: res in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/TimeController.php on line 655
 85412 September 25, 2009, 2:05 pm MySQL Query Error
 Fri, 25 Sep 2009 14:05:13 +0200 : Error :\nMySQL Query Error : INSERT INTO `hs_hr_time_event` ( `time_event_id`, `project_id`, `activity_id`, `employee_id`, `timesheet_id`, `start_time`, `end_time`, `reported_date`, `duration`, `description`  ) VALUES (\'6\', \'1\', \'-1\', \'001\', \'4\', \'2009-09-24 14:04\', \'2009-09-24 18:04\', \'2009-09-25\', \'14400\', \'Test\' )\nTech Info\n------------\nCannot add or update a child row: a foreign key constraint fails (`hr_mysql`.`hs_hr_time_event`, CONSTRAINT `hs_hr_time_event_ibfk_2` FOREIGN KEY (`activity_id`) REFERENCES `hs_hr_project_activity` (`activity_id`) ON DELETE CASCADE)Fri, 25 Sep 2009 14:39:25 +0200 : 
-Undefined variable: conf in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/hrm.class.php on line 28
+Undefined variable: conf in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/hrm.class.php on line 28
 Fri, 25 Sep 2009 14:41:36 +0200 : 
-Undefined variable: conf in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/hrm.class.php on line 28
+Undefined variable: conf in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/hrm.class.php on line 28
 Fri, 25 Sep 2009 14:42:46 +0200 : 
-Undefined variable: GleTaskId in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 1753
+Undefined variable: GleTaskId in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 1753
 Fri, 25 Sep 2009 14:43:47 +0200 : 
-Undefined variable: res in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/TimeController.php on line 655
+Undefined variable: res in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/TimeController.php on line 655
 Fri, 25 Sep 2009 14:44:12 +0200 : 
-Undefined variable: GleTaskId in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 1752
+Undefined variable: GleTaskId in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 1752
 Fri, 25 Sep 2009 14:47:29 +0200 : 
-Undefined variable: conf in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/hrm.class.php on line 28
+Undefined variable: conf in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/hrm.class.php on line 28
 Fri, 25 Sep 2009 14:49:07 +0200 : 
-Undefined variable: object in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/hrm.class.php on line 281
+Undefined variable: object in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/hrm.class.php on line 281
 Fri, 25 Sep 2009 14:50:52 +0200 : 
-Trying to get property of non-object in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/hrm.class.php on line 283
+Trying to get property of non-object in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/hrm.class.php on line 283
 Fri, 25 Sep 2009 14:51:51 +0200 : 
-Trying to get property of non-object in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/hrm.class.php on line 285
+Trying to get property of non-object in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/hrm.class.php on line 285
 Fri, 25 Sep 2009 14:54:04 +0200 : 
-preg_match() [function.preg-match]: Compilation failed: unmatched parentheses at offset 38 in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 1771
+preg_match() [function.preg-match]: Compilation failed: unmatched parentheses at offset 38 in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 1771
 Sat, 26 Sep 2009 00:20:18 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 149
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 149
 Sat, 26 Sep 2009 17:03:12 +0200 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 149
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 149
 Sat, 26 Sep 2009 17:12:30 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sat, 26 Sep 2009 17:36:14 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:14:45 +0200 : 
-file_put_contents(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
+file_put_contents(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
 Sat, 26 Sep 2009 18:15:02 +0200 : 
-file_put_contents(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
+file_put_contents(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
 Sat, 26 Sep 2009 18:39:05 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:39:37 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:40:13 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:40:21 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:41:16 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:41:21 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:41:25 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:41:37 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:42:20 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:42:25 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:43:02 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:43:05 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:43:38 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:43:42 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:43:45 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:43:48 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:43:50 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:44:09 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:44:11 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:44:16 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:44:20 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:44:23 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 26 Sep 2009 18:44:24 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sun, 27 Sep 2009 14:55:40 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sun, 27 Sep 2009 14:55:50 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sun, 27 Sep 2009 14:55:52 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sun, 27 Sep 2009 14:56:04 +0200 : 
-Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index:  uniqcode in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/CentralController.php on line 221
 Sun, 27 Sep 2009 14:59:00 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sun, 27 Sep 2009 15:02:41 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sun, 27 Sep 2009 15:03:59 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sun, 27 Sep 2009 15:31:41 +0200 : 
-Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
+Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
 Sun, 04 Oct 2009 23:12:57 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sat, 02 Jan 2010 19:53:11 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sat, 02 Jan 2010 19:53:36 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nWed, 06 Jan 2010 21:31:38 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Thu, 11 Mar 2010 11:44:57 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Fri, 26 Mar 2010 15:39:45 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Fri, 26 Mar 2010 15:40:43 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sat, 27 Mar 2010 11:26:10 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sat, 27 Mar 2010 11:40:44 +0100 : 
-Undefined variable: emailConfig in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 2102
+Undefined variable: emailConfig in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 2102
 Sat, 27 Mar 2010 12:13:57 +0100 : 
-file_put_contents(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
+file_put_contents(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
 Sat, 27 Mar 2010 12:39:25 +0100 : 
-Undefined index:  cmbMarital in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 146
+Undefined index:  cmbMarital in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 146
 Sat, 27 Mar 2010 12:40:28 +0100 : 
-Undefined index:  cmbMarital in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 146
+Undefined index:  cmbMarital in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 146
 Sat, 27 Mar 2010 12:41:18 +0100 : 
-Undefined offset:  4 in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 152
+Undefined offset:  4 in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 152
 Sat, 27 Mar 2010 12:41:52 +0100 : 
-Undefined offset:  4 in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 152
+Undefined offset:  4 in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 152
 Sat, 27 Mar 2010 12:42:34 +0100 : 
-Undefined offset:  4 in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 152
+Undefined offset:  4 in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hremppers.php on line 152
 Sat, 27 Mar 2010 15:34:22 +0100 : 
-error_log(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/logs/notification_mails.log) [function.error-log]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 265
+error_log(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/logs/notification_mails.log) [function.error-log]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 265
 Sat, 27 Mar 2010 15:48:31 +0100 : 
-error_log(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/logs/notification_mails.log) [function.error-log]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 265
+error_log(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/logs/notification_mails.log) [function.error-log]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 265
 Sat, 27 Mar 2010 16:09:19 +0100 : 
-file_put_contents(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
+file_put_contents(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
 Sat, 27 Mar 2010 16:34:57 +0100 : 
-Undefined variable: applications in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/recruitment/applicationList.php on line 89
+Undefined variable: applications in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/recruitment/applicationList.php on line 89
 Sat, 27 Mar 2010 16:35:07 +0100 : 
-Undefined variable: applications in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/recruitment/applicationList.php on line 89
+Undefined variable: applications in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/recruitment/applicationList.php on line 89
 Sat, 27 Mar 2010 16:44:59 +0100 : 
-error_log(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/../..//lib/logs/notification_mails.log) [function.error-log]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/recruitment/RecruitmentMailNotifier.php on line 709
+error_log(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/../..//lib/logs/notification_mails.log) [function.error-log]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/recruitment/RecruitmentMailNotifier.php on line 709
 Sat, 27 Mar 2010 16:49:33 +0100 : 
-Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
+Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
 Sat, 27 Mar 2010 17:20:30 +0100 : 
-file_put_contents(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
+file_put_contents(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
 Sat, 27 Mar 2010 18:14:53 +0100 : 
-Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 149
+Undefined index:  isAdmin in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 149
 Sat, 27 Mar 2010 18:15:02 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sat, 27 Mar 2010 18:19:36 +0100 : 
-Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
+Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
 Sat, 27 Mar 2010 18:24:02 +0100 : 
-Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
+Undefined variable: arrayDispList in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/hrfunct/EmpRepTo.php on line 407
 Sat, 27 Mar 2010 19:14:04 +0100 : 
-file_put_contents(/Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
+file_put_contents(/Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/confs/mailConf.php) [function.file-put-contents]: failed to open stream: Permission denied in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 185
 Sat, 27 Mar 2010 21:19:26 +0100 : 
-Undefined property:  LeaveRequests::$leave_available in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411
+Undefined property:  LeaveRequests::$leave_available in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411
 Sat, 27 Mar 2010 21:31:31 +0100 : 
-Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
+Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
 Sat, 27 Mar 2010 21:31:36 +0100 : 
-Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
+Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
 Sat, 27 Mar 2010 21:31:53 +0100 : 
-Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
+Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
 Sat, 27 Mar 2010 21:32:06 +0100 : 
-Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
+Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
 Sat, 27 Mar 2010 21:32:28 +0100 : 
-Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
+Missing argument 1 for Leave::fetchAllEmployeeLeaveSummary(), called in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 411 and defined in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/Leave.php on line 184
 Sat, 27 Mar 2010 21:43:07 +0100 : 
-Undefined index:  leave_available in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 412
+Undefined index:  leave_available in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 412
 Sat, 27 Mar 2010 21:43:23 +0100 : 
-Undefined index:  leave_available in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 414
+Undefined index:  leave_available in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/leave/leaveRequestList.php on line 414
 Sat, 27 Mar 2010 22:06:43 +0100 : 
-Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 356
+Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 356
 Sat, 27 Mar 2010 22:07:36 +0100 : 
-Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 357
+Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 357
 Sat, 27 Mar 2010 22:08:24 +0100 : 
-Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 357
+Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 357
 Sat, 27 Mar 2010 22:16:18 +0100 : 
-Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 385
+Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 385
 Sat, 27 Mar 2010 22:18:23 +0100 : 
-Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 385
+Undefined index:  firstName in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 385
 Sat, 27 Mar 2010 22:19:06 +0100 : 
-Undefined index:  location in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 385
+Undefined index:  location in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 385
 Sat, 27 Mar 2010 22:19:52 +0100 : 
-Undefined index:  workState in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 386
+Undefined index:  workState in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 386
 Sat, 27 Mar 2010 22:20:30 +0100 : 
-Undefined index:  FITWStatus in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 387
+Undefined index:  FITWStatus in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 387
 Sat, 27 Mar 2010 22:21:01 +0100 : 
-Undefined index:  DD2Amount in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 387
+Undefined index:  DD2Amount in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/customExportDefine.php on line 387
 Sat, 27 Mar 2010 22:48:31 +0100 : 
-preg_replace() [function.preg-replace]: Delimiter must not be alphanumeric or backslash in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/emailConfiguration.php on line 196
+preg_replace() [function.preg-replace]: Delimiter must not be alphanumeric or backslash in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/emailConfiguration.php on line 196
 Sat, 27 Mar 2010 22:48:32 +0100 : 
-preg_replace() [function.preg-replace]: Delimiter must not be alphanumeric or backslash in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/emailConfiguration.php on line 196
+preg_replace() [function.preg-replace]: Delimiter must not be alphanumeric or backslash in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/emailConfiguration.php on line 196
 Sat, 27 Mar 2010 22:49:15 +0100 : 
-preg_replace() [function.preg-replace]: Compilation failed: nothing to repeat at offset 12 in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/eimadmin/emailConfiguration.php on line 196
+preg_replace() [function.preg-replace]: Compilation failed: nothing to repeat at offset 12 in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/eimadmin/emailConfiguration.php on line 196
 Sat, 27 Mar 2010 23:01:47 +0100 : 
-Undefined variable: subject in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 219
+Undefined variable: subject in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 219
 Sat, 27 Mar 2010 23:05:56 +0100 : 
-Undefined variable: subject in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 219
+Undefined variable: subject in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 219
 Sat, 27 Mar 2010 23:06:48 +0100 : 
-Undefined variable: transport in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 228
+Undefined variable: transport in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/eimadmin/EmailConfiguration.php on line 228
 Sat, 27 Mar 2010 23:20:24 +0100 : 
-Undefined index:  chkTestEmail in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 2104
+Undefined index:  chkTestEmail in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/controllers/ViewController.php on line 2104
 Sun, 28 Mar 2010 00:56:38 +0100 : 
-Missing argument 2 for MailNotifications::_getMailSubject(), called in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 465 and defined in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 728
+Missing argument 2 for MailNotifications::_getMailSubject(), called in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 465 and defined in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/lib/models/leave/mail/MailNotifications.php on line 728
 Sun, 28 Mar 2010 01:32:35 +0100 : 
-Undefined index:  editIDSup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 170
+Undefined index:  editIDSup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 170
 Sun, 28 Mar 2010 01:33:15 +0100 : 
-Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
+Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
 Sun, 28 Mar 2010 01:33:43 +0100 : 
-Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
+Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
 Sun, 28 Mar 2010 01:33:47 +0100 : 
-Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
+Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
 Sun, 28 Mar 2010 01:33:51 +0100 : 
-Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
+Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
 Sun, 28 Mar 2010 01:33:57 +0100 : 
-Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
+Undefined index:  editIDSub in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 212
 Sun, 28 Mar 2010 01:35:09 +0100 : 
-Undefined index:  editIDSup in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 170
+Undefined index:  editIDSup in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/templates/hrfunct/hrempreportto.php on line 170
 Sun, 28 Mar 2010 01:39:18 +0100 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sun, 28 Mar 2010 03:32:21 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 168
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 168
 Sun, 28 Mar 2010 03:42:46 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Sun, 28 Mar 2010 03:45:23 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Sun, 28 Mar 2010 12:51:16 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Fri, 02 Apr 2010 18:25:35 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Sat, 03 Apr 2010 23:28:25 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Thu, 15 Apr 2010 10:31:58 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Fri, 30 Apr 2010 12:11:51 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Tue, 04 May 2010 09:36:33 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Thu, 20 May 2010 13:26:09 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Fri, 21 May 2010 11:46:43 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Fri, 09 Jul 2010 11:58:31 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.1/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.1/main/htdocs/hrm/orange/index.php on line 172
 Wed, 28 Jul 2010 13:02:44 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.2/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.2/main/htdocs/hrm/orange/index.php on line 172
 Wed, 25 Aug 2010 14:42:09 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.2/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.2/main/htdocs/hrm/orange/index.php on line 172
 Thu, 23 Sep 2010 23:24:08 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.2/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.2/main/htdocs/hrm/orange/index.php on line 172
 Fri, 22 Oct 2010 15:41:07 +0200 : 
-Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/GLE-1.2/main/htdocs/hrm/orange/index.php on line 172
+Undefined index:  isSupervisor in /Volumes/Babel/WebServer/Documents/BIMP-ERP-1.2/main/htdocs/hrm/orange/index.php on line 172
 73075 November 2, 2012, 6:33 pm NO database Connection found
 Fri, 02 Nov 2012 18:33:30 +0100 : Error :\nNO database Connection found\nTech Info\n------------\nAccess denied for user \'root\'@\'localhost\' (using password: NO)57831 November 2, 2012, 6:33 pm NO database Connection found
 Fri, 02 Nov 2012 18:33:30 +0100 : Error :\nNO database Connection found\nTech Info\n------------\nAccess denied for user \'root\'@\'localhost\' (using password: NO)67245 November 2, 2012, 6:38 pm NO database found
@@ -389,369 +389,369 @@ Fri, 02 Nov 2012 18:38:38 +0100 : Error :\nNO database found\nTech Info\n-------
 Fri, 02 Nov 2012 18:38:39 +0100 : Error :\nNO database found\nTech Info\n------------\nUnknown database \'hr_mysql11\'48569 November 2, 2012, 6:43 pm NO database found
 Fri, 02 Nov 2012 18:43:43 +0100 : Error :\nNO database found\nTech Info\n------------\nAccess denied for user \'orangehrm11\'@\'localhost\' to database \'hr_mysql111\'64383 November 2, 2012, 6:43 pm NO database found
 Fri, 02 Nov 2012 18:43:44 +0100 : Error :\nNO database found\nTech Info\n------------\nAccess denied for user \'orangehrm11\'@\'localhost\' to database \'hr_mysql111\'Fri, 02 Nov 2012 18:44:07 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 18:45:28 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 18:45:33 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:06:35 +0100 : 
-Undefined index: txtPassword in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/login.php on line 173
+Undefined index: txtPassword in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/login.php on line 173
 Fri, 02 Nov 2012 19:12:58 +0100 : 
-Undefined variable: leaveHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 1280
+Undefined variable: leaveHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 1280
 Fri, 02 Nov 2012 19:13:18 +0100 : 
-Undefined variable: projectList in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/lib/controllers/ViewController.php on line 3333
+Undefined variable: projectList in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/lib/controllers/ViewController.php on line 3333
 Fri, 02 Nov 2012 19:13:25 +0100 : 
-Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 1286
+Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 1286
 Fri, 02 Nov 2012 19:13:29 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\n26768 November 2, 2012, 7:13 pm MySQL Query Error
 Fri, 02 Nov 2012 19:13:36 +0100 : Error :\nMySQL Query Error : SELECT * FROM hs_hr_comp_property LIMIT -10,10\nTech Info\n------------\nYou have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near \'-10,10\' at line 1Fri, 02 Nov 2012 19:13:39 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 19:13:41 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 19:13:53 +0100 : 
-Undefined variable: projectList in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/lib/controllers/ViewController.php on line 3333
+Undefined variable: projectList in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/lib/controllers/ViewController.php on line 3333
 Fri, 02 Nov 2012 19:14:04 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 19:18:56 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:27:26 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:31:23 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:31:36 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:31:55 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:31:59 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:33:11 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:33:11 +0100 : 
-Undefined index: txtUserName in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/login.php on line 116
+Undefined index: txtUserName in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/login.php on line 116
 Fri, 02 Nov 2012 19:33:50 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:33:50 +0100 : 
-Undefined index: txtUserName in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/login.php on line 115
+Undefined index: txtUserName in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/login.php on line 115
 Fri, 02 Nov 2012 19:34:52 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:34:52 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:35:07 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:35:07 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:37:14 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:37:15 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 172
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 172
 Fri, 02 Nov 2012 19:38:37 +0100 : 
-Undefined index: isManager in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 179
+Undefined index: isManager in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 179
 Fri, 02 Nov 2012 19:38:37 +0100 : 
-Undefined index: isManager in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 179
+Undefined index: isManager in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 179
 Fri, 02 Nov 2012 19:39:33 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:39:33 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:41:37 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:41:37 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:42:27 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:42:27 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:42:33 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:42:33 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:42:54 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:42:55 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:43:10 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:43:10 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:43:46 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:43:46 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:43:54 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:43:54 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:46:22 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:46:22 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:46:45 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:46:45 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:49:12 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:49:12 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:51:06 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 284
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 284
 Fri, 02 Nov 2012 19:51:06 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 284
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 284
 Fri, 02 Nov 2012 19:51:35 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:51:35 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 220
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 220
 Fri, 02 Nov 2012 19:51:49 +0100 : 
-Undefined variable: authorizeObj in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 223
+Undefined variable: authorizeObj in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 223
 Fri, 02 Nov 2012 19:51:50 +0100 : 
-Undefined variable: authorizeObj in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 223
+Undefined variable: authorizeObj in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 223
 Fri, 02 Nov 2012 19:52:03 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 296
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 296
 Fri, 02 Nov 2012 19:52:03 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 296
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 296
 Fri, 02 Nov 2012 19:52:18 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 429
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 429
 Fri, 02 Nov 2012 19:52:18 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 429
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 429
 Fri, 02 Nov 2012 19:53:15 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 174
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 174
 Fri, 02 Nov 2012 19:53:15 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 174
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 174
 Fri, 02 Nov 2012 19:53:36 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 19:53:37 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 19:53:44 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 19:53:44 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 19:54:27 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 178
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 178
 Fri, 02 Nov 2012 19:54:27 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 178
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 178
 Fri, 02 Nov 2012 19:54:28 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 178
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 178
 Fri, 02 Nov 2012 19:54:28 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 178
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 178
 Fri, 02 Nov 2012 19:54:58 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 19:54:59 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 19:55:00 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 19:55:00 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 175
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 175
 Fri, 02 Nov 2012 20:43:32 +0100 : 
-Undefined index: isManager in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 182
+Undefined index: isManager in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 182
 Fri, 02 Nov 2012 20:43:33 +0100 : 
-Undefined index: isManager in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 182
+Undefined index: isManager in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 182
 Fri, 02 Nov 2012 20:44:23 +0100 : 
-Undefined index: isManager in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 183
+Undefined index: isManager in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 183
 Fri, 02 Nov 2012 20:44:23 +0100 : 
-Undefined index: isManager in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 183
+Undefined index: isManager in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 183
 Fri, 02 Nov 2012 20:44:43 +0100 : 
-Undefined index: isDirector in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 183
+Undefined index: isDirector in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 183
 Fri, 02 Nov 2012 20:44:44 +0100 : 
-Undefined index: isDirector in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 183
+Undefined index: isDirector in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 183
 Fri, 02 Nov 2012 20:44:56 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 224
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 224
 Fri, 02 Nov 2012 20:44:57 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 224
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 224
 Fri, 02 Nov 2012 20:50:05 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 288
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 288
 Fri, 02 Nov 2012 20:50:05 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 288
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 288
 Fri, 02 Nov 2012 20:50:24 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 300
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 300
 Fri, 02 Nov 2012 20:50:25 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 300
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 300
 Fri, 02 Nov 2012 20:50:41 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 433
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 433
 Fri, 02 Nov 2012 20:50:42 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 433
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 433
 Fri, 02 Nov 2012 20:51:18 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 433
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 433
 Fri, 02 Nov 2012 20:51:18 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 433
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 433
 Fri, 02 Nov 2012 20:51:48 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 460
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 460
 Fri, 02 Nov 2012 20:51:48 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 460
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 460
 Fri, 02 Nov 2012 20:52:26 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 462
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 462
 Fri, 02 Nov 2012 20:52:26 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 462
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 462
 Fri, 02 Nov 2012 20:53:14 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 464
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 464
 Fri, 02 Nov 2012 20:53:15 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 464
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 464
 Fri, 02 Nov 2012 20:53:53 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 467
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 467
 Fri, 02 Nov 2012 20:53:53 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 467
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 467
 Fri, 02 Nov 2012 20:54:12 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 467
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 467
 Fri, 02 Nov 2012 20:54:12 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 467
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 467
 Fri, 02 Nov 2012 20:56:24 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:56:25 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:56:40 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:56:40 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:58:22 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:58:22 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:59:05 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:59:06 +0100 : 
-Undefined index: isSupervisor in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 456
+Undefined index: isSupervisor in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 456
 Fri, 02 Nov 2012 20:59:35 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 495
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 495
 Fri, 02 Nov 2012 20:59:36 +0100 : 
-Undefined index: empID in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 495
+Undefined index: empID in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 495
 Fri, 02 Nov 2012 20:59:56 +0100 : 
-Undefined index: user in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 621
+Undefined index: user in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 621
 Fri, 02 Nov 2012 20:59:57 +0100 : 
-Undefined index: user in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 621
+Undefined index: user in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 621
 Fri, 02 Nov 2012 21:02:42 +0100 : 
-Undefined index: userGroup in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 161
+Undefined index: userGroup in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 161
 Fri, 02 Nov 2012 21:09:54 +0100 : 
-Undefined variable: projectList in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/lib/controllers/ViewController.php on line 3333
+Undefined variable: projectList in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/lib/controllers/ViewController.php on line 3333
 Fri, 02 Nov 2012 21:10:09 +0100 : 
-Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 1304
+Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 1304
 Fri, 02 Nov 2012 21:10:34 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 21:10:36 +0100 : 
-Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 1304
+Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 1304
 Fri, 02 Nov 2012 21:10:55 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 21:11:00 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 21:11:13 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 21:28:55 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\n21698 November 2, 2012, 9:29 pm MySQL Query Error
 Fri, 02 Nov 2012 21:29:05 +0100 : Error :\nMySQL Query Error : SELECT * FROM hs_hr_comp_property LIMIT -10,10\nTech Info\n------------\nYou have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near \'-10,10\' at line 137028 November 2, 2012, 9:29 pm MySQL Query Error
 Fri, 02 Nov 2012 21:29:07 +0100 : Error :\nMySQL Query Error : SELECT * FROM hs_hr_comp_property LIMIT -10,10\nTech Info\n------------\nYou have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near \'-10,10\' at line 195620 November 2, 2012, 9:29 pm MySQL Query Error
 Fri, 02 Nov 2012 21:29:09 +0100 : Error :\nMySQL Query Error : SELECT * FROM hs_hr_comp_property LIMIT -10,10\nTech Info\n------------\nYou have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near \'-10,10\' at line 1Fri, 02 Nov 2012 21:36:49 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 21:44:05 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 21:52:18 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nFri, 02 Nov 2012 21:52:21 +0100 : 
-Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/hrm/orange/index.php on line 1304
+Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/hrm/orange/index.php on line 1304
 Fri, 02 Nov 2012 21:52:24 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 00:32:27 +0100 : 
-Undefined index: userGroup in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 161
+Undefined index: userGroup in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 161
 Sat, 03 Nov 2012 00:32:38 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 00:34:09 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 00:34:10 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 00:34:46 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 00:36:24 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 00:49:24 +0100 : 
-Constant _DOLNAME_ already defined in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/confs/Conf.php on line 19
+Constant _DOLNAME_ already defined in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/confs/Conf.php on line 19
 Sat, 03 Nov 2012 00:51:17 +0100 : 
-Use of undefined constant _DOLNAME_ - assumed '_DOLNAME_' in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/confs/Conf.php on line 20
+Use of undefined constant _DOLNAME_ - assumed '_DOLNAME_' in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/confs/Conf.php on line 20
 Sat, 03 Nov 2012 00:51:18 +0100 : 
-Use of undefined constant _DOLNAME_ - assumed '_DOLNAME_' in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/confs/Conf.php on line 20
+Use of undefined constant _DOLNAME_ - assumed '_DOLNAME_' in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/confs/Conf.php on line 20
 Sat, 03 Nov 2012 00:52:55 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 00:53:09 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 00:53:50 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 00:55:00 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 00:55:36 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 00:55:50 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 00:56:04 +0100 : Notice :\nNot Authorized!\nTech Info\n------------\nSat, 03 Nov 2012 00:56:53 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:02:45 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:02:50 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:03:28 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:05:09 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:06:20 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:06:55 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:07:36 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:07:59 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:09:34 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 444
 Sat, 03 Nov 2012 01:10:13 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:11:10 +0100 : 
-Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 1305
+Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 1305
 Sat, 03 Nov 2012 01:12:05 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:12:10 +0100 : Notice :\nNot Authorized!\nTech Info\n------------\nSat, 03 Nov 2012 01:16:43 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:18:43 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:20:09 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:21:02 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:21:32 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:22:20 +0100 : 
-Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
+Undefined index: isProjectAdmin in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 443
 Sat, 03 Nov 2012 01:40:10 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:40:37 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:41:10 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:41:37 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:42:57 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:43:00 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:43:47 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:44:15 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:46:53 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:48:26 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\n58785 November 3, 2012, 1:50 am MySQL Query Error
 Sat, 03 Nov 2012 01:50:38 +0100 : Error :\nMySQL Query Error : SELECT * FROM hs_hr_comp_property LIMIT -10,10\nTech Info\n------------\nYou have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near \'-10,10\' at line 1Sat, 03 Nov 2012 01:51:44 +0100 : 
-Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 1304
+Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 1304
 Sat, 03 Nov 2012 01:52:07 +0100 : 
-Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 1304
+Undefined variable: recruitHomePage in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/index.php on line 1304
 Sat, 03 Nov 2012 01:53:35 +0100 : Notice :\nNot Authorized!\nTech Info\n------------\nSat, 03 Nov 2012 01:53:44 +0100 : 
-Undefined index: WPATH in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/common/yui.php on line 21
+Undefined index: WPATH in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/common/yui.php on line 21
 Sat, 03 Nov 2012 01:54:04 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:54:08 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:58:37 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:58:47 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:59:21 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 01:59:52 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:00:30 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:00:34 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:01:39 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:01:43 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:01:44 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:01:58 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:02:46 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\n11290 November 3, 2012, 2:02 am MySQL Query Error
 Sat, 03 Nov 2012 02:02:59 +0100 : Error :\nMySQL Query Error : SELECT * FROM hs_hr_comp_property LIMIT -10,10\nTech Info\n------------\nYou have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near \'-10,10\' at line 1Sat, 03 Nov 2012 02:03:03 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:04:04 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:19:31 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:27:43 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:34:41 +0100 : 
-Undefined index: ldap in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/ViewController.php on line 66
+Undefined index: ldap in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/ViewController.php on line 66
 Sat, 03 Nov 2012 02:37:29 +0100 : 
-Undefined index: ldap in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/ViewController.php on line 66
+Undefined index: ldap in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/ViewController.php on line 66
 Sat, 03 Nov 2012 02:45:15 +0100 : 
-Undefined index: ldap in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/ViewController.php on line 66
+Undefined index: ldap in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/ViewController.php on line 66
 Sat, 03 Nov 2012 02:46:45 +0100 : 
-Undefined index: userGroup in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/CentralController.php on line 221
+Undefined index: userGroup in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/CentralController.php on line 221
 Sat, 03 Nov 2012 02:47:05 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:47:08 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:47:52 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:47:55 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:47:58 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 02:48:03 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\n87493 November 3, 2012, 2:48 am MySQL Query Error
 Sat, 03 Nov 2012 02:48:41 +0100 : Error :\nMySQL Query Error : UPDATE hs_hr_employee SET EMP_SMOKER=\'1\', ETHNIC_RACE_CODE=\'\', EMP_BIRTHDAY=null, NATION_CODE=null, EMP_GENDER=\'1\', EMP_MARITAL_STATUS=\'0\', EMP_SSN_NUM=AES_ENCRYPT(\'vfdfd\', \'b3b56133e39ba94c6c33fecea7d84cb1a0c287b81d36464bc07a6256bd8eec5815435857a65f3fd019f7d3825d445fbc34bf029f6428aac00a80501c9e25e464\'), EMP_SIN_NUM=\'\', EMP_OTHER_ID=\'\', EMP_DRI_LICE_NUM=\'\', EMP_DRI_LICE_EXP_DATE=null, EMP_MILITARY_SERVICE= \'\' WHERE EMP_NUMBER=\'003\'\nTech Info\n------------\nCannot add or update a child row: a foreign key constraint fails (`hr_mysql111`.`hs_hr_employee`, CONSTRAINT `hs_hr_employee_ibfk_2` FOREIGN KEY (`ethnic_race_code`) REFERENCES `hs_hr_ethnic_race` (`ethnic_race_code`) ON DELETE SET NULL)Sat, 03 Nov 2012 13:52:54 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 13:56:46 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 13:56:49 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:01:54 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:02:54 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:04:35 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:05:25 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:05:45 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:06:52 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:07:53 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:08:43 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:09:06 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:09:10 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:09:15 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:09:29 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:09:50 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:10:05 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:11:38 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:13:14 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:13:33 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:13:46 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:13:55 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:14:04 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:16:47 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:20:10 +0100 : Error :\nAuthorization Failed: You are not allowed to view this page\nTech Info\n------------\nSat, 03 Nov 2012 14:34:16 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:34:18 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:34:27 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:37:27 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:37:56 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:38:11 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:38:22 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:38:22 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:38:23 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sat, 03 Nov 2012 14:38:23 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sun, 04 Nov 2012 21:12:08 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sun, 04 Nov 2012 21:12:23 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sun, 04 Nov 2012 21:13:48 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
 Sun, 04 Nov 2012 21:15:15 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1645
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1645
 Sun, 04 Nov 2012 21:33:27 +0100 : 
-Undefined index: id in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/CentralController.php on line 1139
+Undefined index: id in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/CentralController.php on line 1139
 Sun, 04 Nov 2012 21:34:55 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1642
 Sun, 04 Nov 2012 21:41:20 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
 Sun, 04 Nov 2012 21:41:45 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
 Sun, 04 Nov 2012 21:41:46 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
 Sun, 04 Nov 2012 21:41:48 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
 Sun, 04 Nov 2012 21:41:50 +0100 : 
-Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace GLE/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643
+Uninitialized string offset: 0 in /home/jean/Bureau2/Workspace BIMP-ERP/versionDevGle/gle3/Synopsis_Hrm/orange/lib/controllers/EmpViewController.php on line 1643

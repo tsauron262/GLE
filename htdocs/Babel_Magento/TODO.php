@@ -1,6 +1,6 @@
 <?php
 /*
-  ** GLE by Synopsis et DRSI
+  ** BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -14,7 +14,7 @@
  /**
   *
   * Name : TODO.php
-  * magentoGLE
+  * magentoBIMP-ERP
   */
 
 
@@ -26,5 +26,5 @@
 => ui-state-content && ui-state-default ui-widget-header
 
 ==> entreprise / pas entreprise pour magento
-==> tools pour les prospects => si sync avec GLE overflow ???
+==> tools pour les prospects => si sync avec BIMP-ERP overflow ???
 ==> tools pour les contacts (aka prospect, membre newsletter, ... ) Magento

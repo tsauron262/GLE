@@ -1155,7 +1155,7 @@ class SynopsisProject extends CommonObject {
 //Var_Dump::Display($hrm->allRessource);
 //        foreach($hrm->allRessource as $key=>$val) //Humm
 //        {
-//            if ("x".$val['GLEId'] != "x")
+//            if ("x".$val['BIMP-ERPId'] != "x")
 //            {
         $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user,
                                    " . MAIN_DB_PREFIX . "projet_task.rowid as tid,

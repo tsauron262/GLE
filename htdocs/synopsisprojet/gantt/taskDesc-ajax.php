@@ -3,7 +3,7 @@
   /**
   *
   * Name : taskDesc-ajax.php
-  * GLE-1.0
+  * BIMP-ERP-1.0
   */
 
   $xml="<name>test</name>";

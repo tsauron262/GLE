@@ -131,7 +131,7 @@ class CronSynopsis {
             if ($idTech < 1)
                 $idTech = 1;
 
-            $html = "Bonjour, GLE a détécté des problèmes avec certaines factures, merci de vérifier ces factures et de 'Classer Abandonnée' éventuellement les factures qui sont remplacées ou inutiles "
+            $html = "Bonjour, BIMP-ERP a détécté des problèmes avec certaines factures, merci de vérifier ces factures et de 'Classer Abandonnée' éventuellement les factures qui sont remplacées ou inutiles "
                     . "(seul les factures positives peuvent étre fermées, ajoutez une ligne à 1€ pour les factures à 0 avant de les 'Classer Abandonnée'). "
                     . "<br/>Si les factures sont classées payées merci de cliquer sur 'Demande Annulation'"
                     . "<br/>Si le SAV n'est pas lié à la bonne propal, merci de modifier ce dernier pour choisir la propal.<br/><br/> Merci.<br/><br/>";
@@ -146,7 +146,7 @@ class CronSynopsis {
 
             if ($mailTech && $tech->email != '') {
                 sleep(1);
-                mailSyn2("GLE problémes factures", $tech->email, "Application GLE <tommy@drsi.fr>", $html);
+                mailSyn2("BIMP-ERP problémes factures", $tech->email, "Application BIMP-ERP <tommy@drsi.fr>", $html);
             }
             $this->titre($html);
         }

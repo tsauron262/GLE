@@ -15,12 +15,12 @@ class synopsisHook {//FA1506-0369
     private static $reload = false;
 
     function synopsisHook() {
-        global $conf, $db, $dbGLE, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
+        global $conf, $db, $dbBIMPERP, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
         
         require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
         
         //Pour les logiciel externe.
-        $dbGLE = $db;
+        $dbBIMPERP = $db;
 
         if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;
@@ -67,7 +67,7 @@ class synopsisHook {//FA1506-0369
         $conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
         $conf->global->MAIN_MAX_DECIMALS_SHOWN = 2;
 
-        $conf->global->MAIN_APPLICATION_TITLE = "GLE";
+        $conf->global->MAIN_APPLICATION_TITLE = "BIMP-ERP";
         $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
         $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
         $conf->global->MAIN_MODULE_ORANGEHRM = "1";

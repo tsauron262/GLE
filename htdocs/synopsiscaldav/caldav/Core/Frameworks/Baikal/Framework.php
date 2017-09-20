@@ -88,9 +88,9 @@ class Framework extends \Flake\Core\Framework {
 	
 	# Mapping PHP errors to exceptions; needed by SabreDAV
 	public static function exception_error_handler($errno, $errstr, $errfile, $errline) {
-            if(function_exists("dol_syslog") && $errstr != "No digest authentication headers were found"){
+            if(function_exists("dol_syslog") && stripos($errstr, "NO LOG") === false){
                 $niveau = ($errno != 8)? 3 : 4;
-                dol_syslog($errstr."|".$errno." ".$errfile." (ln ".$errline.")",$niveau);
+                dol_syslog("Exception Framework caldav   ".$errstr."|".$errno." ".$errfile." (ln ".$errline.")",$niveau);
             }
             else
 		throw new \ErrorException("rrrrrrrr".$errstr, 0, $errno, $errfile, $errline);

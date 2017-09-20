@@ -110,7 +110,10 @@ function getBug($user) {
 
             if ($user->rights->SynopsisTools->Global->adminBug) {
                 $userT = new User($db);
-                $userT->fetch($data->fk_user);
+                $userT->id = $data->fk_user;
+                $test = explode("\n", $data->text);
+                $test = str_replace("Utlisateur : ", "", $test[2]);
+                $userT->name = $test;
                 $html .= "<td>" . $userT->getNomUrl() . "</td>";
             }
 

@@ -263,7 +263,7 @@ print "<div id='fragment-3'>";
     print "<input type='hidden' name='id' value='".$res->id."'>";
     print "<tr><td width=200 style='width:200px;' class='ui-widget-content'><input type='text' value='".$res->pattern."' name='pattern'>";
     print "<td class='ui-widget-content' style='width:200px;'>";
-    print $html->select_all_categories(0,$res->categorie_refid,"catId");
+    print $html->select_all_categories('product',$res->categorie_refid,"catId");
     print "<td class='ui-widget-content' align=center style='width:50px;'><input type='text' name='rang' style='text-align:center; width:32px' value='".$res->rang."'>";
     print "<td width=130 style='width:130px;' align=center class='ui-widget-content'><button class='butAction'>Modifier</button>";
     print "<td width=130 style='width:130px;' align=center class='ui-widget-content'><button name='suppr' value='supprimer'  class='butAction'>Supprimer</button>";
@@ -280,7 +280,7 @@ print "<div id='fragment-3'>";
   print "<tr><th class='ui-state-hover ui-widget-header' style='padding:5px;' colspan=4>Nouveau";
   print "<tr><td style='width:200px;' width=200 class='ui-widget-content'><input type='text' value='".$res->pattern."' name='NewPattern'>";
   print "<td  class='ui-widget-content' style='width:200px;'>";
-  print $html->select_all_categories(0,"","catId");
+  print $html->select_all_categories('product',"","catId");
   print "<td class='ui-widget-content' align=center style='width:50px;'><input type='text' name='rang' style='text-align:center; width:32px' value=''>";
   print "<td  width=292 align=center class='ui-widget-content'><button class='butAction'>Ajouter</button>";
 

@@ -63,7 +63,7 @@ abstract class AbstractDigest implements BackendInterface {
         // No username was given
         if (!$username) {
             $digest->requireLogin();
-            throw new DAV\Exception\NotAuthenticated('No digest authentication headers were found');
+            throw new DAV\Exception\NotAuthenticated('No digest authentication headers were found NO LOG');
         }
 
         $hash = $this->getDigestHash($realm, $username);

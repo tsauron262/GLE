@@ -97,7 +97,7 @@ else $type=dol_mimetype($original_file);
 $attachment = true;
 if (preg_match('/\.(html|htm)$/i',$original_file)) $attachment = false;
 if (isset($_GET["attachment"])) $attachment = GETPOST("attachment",'alpha')?true:false;
-if (! empty($conf->global->MAIN_DISABLE_FORCE_SAVEAS)) $attachment=false;
+elseif (! empty($conf->global->MAIN_DISABLE_FORCE_SAVEAS)) $attachment=false;
 
 // Security: Delete string ../ into $original_file
 $original_file = str_replace("../","/", $original_file);

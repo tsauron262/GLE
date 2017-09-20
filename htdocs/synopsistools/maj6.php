@@ -29,7 +29,7 @@ dol_fiche_head('', 'SynopsisTools', $langs->trans("Maj vers 6"));
     include_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
         $extrafields = new ExtraFields($db);
     
-    $tabModuleReactive = array("modSynopsistools", "modSynopsisChrono", "modSynopsisApple");
+$tabModuleReactive = array("modSynopsistools", "modSynopsisChrono", "modSynopsisApple", "modNdfp");
     
 if (isset($_REQUEST['ok'])) {
     foreach($tabModuleReactive as $mod){
@@ -71,6 +71,10 @@ elseif (isset($_REQUEST['ok2'])) {
     test($db, "Correction product type");
 
 
+    $db->query("UPDATE `llx_menu` SET url = '/synopsistools/agenda/vue.php' WHERE `url` LIKE '/comm/action/index.php' AND type='top'");
+        
+    test($db, "Changement menu pour agenda");
+    
 
     $db->query("INSERT INTO `llx_contratdet_extrafields` (`fk_object`) (SELECT rowid FROM llx_contratdet WHERE rowid not in (SELECT fk_object FROM llx_contratdet_extrafields))");
 

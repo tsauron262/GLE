@@ -17,16 +17,15 @@
  * Name : getResults-html_response.php
  * GLE-1.2
  */
-if (!isset($conf)) {
+if(!isset($commande) && !isset($conf)){
     require_once('../../main.inc.php');
     $id = $_REQUEST['id'];
-} elseif (isset($idCommande) && $idCommande > 0) {
-    global $idCommande;
-    $id = $idCommande;
-}
     require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
     $com = new Synopsis_Commande($db);
     $com->fetch($id);
+}
+else
+    $com = $commande;
 if ($com->id > 0) {
     print "<div>";
     print "<div class='titre'>R&eacute;sum&eacute;</div>";

@@ -357,11 +357,8 @@ if ($droitAll) {
 
     $validator = new UserGroup($db);
 //    $excludefilter = $user->admin ? '' : 'u.rowid <> ' . $user->id;
-    $valideurobjects = $validator->listUsersForGroup($excludefilter);
-    $valideurarray = array();
-    foreach ($valideurobjects as $val)
-        $valideurarray[$val->id] = $val->id;
-    $form->select_users($search_valideur, "search_valideur", 1, "", 0, $valideurarray, '');
+    $valideurobjects = $validator->listUsersForGroup($excludefilter,1);
+    $form->select_users($search_valideur, "search_valideur", 1, "", 0, $valideurobjects, '');
     print '</td>';
 } else {
     print '<td class="liste_titre">&nbsp;</td>';

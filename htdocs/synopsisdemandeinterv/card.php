@@ -730,6 +730,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
     $obj = $conf->global->SYNOPSISDEMANDEINTERV_ADDON;
     $obj = "mod_" . $obj;
+    require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/core/modules/synopsisdemandeinterv/".$obj.".php");
 
     $modsynopsisdemandeinterv = new $obj;
     $numpr = $modsynopsisdemandeinterv->getNextValue($societe, $synopsisdemandeinterv);

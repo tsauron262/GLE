@@ -73,9 +73,9 @@ class PDO extends AbstractBackend {
      * @param string $calendarObjectTableName
      */
     public function __construct(\PDO $pdo, $calendarTableName = 'calendars', $calendarObjectTableName = 'calendarobjects') {
-
+global $conf;
         error_reporting(E_ALL);
-        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE));
+        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, $conf->global->SYSLOG_FILE));
         $this->pdo = $pdo;
         $this->calendarTableName = $calendarTableName;
         $this->calendarObjectTableName = $calendarObjectTableName;
@@ -607,7 +607,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                     $organisateur = $tabT[1];
                     $tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
-                dol_syslog("Organizer ".$organisateur,3);
+                //dol_syslog("Organizer ".$organisateur,3);
             }
         }
         if($organisateur == "" && isset($tabMail[0][0]))
@@ -629,7 +629,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $ligne = $db->fetch_object($sql);
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
                     'answer_status' => ($tmp[1] == "ACCEPTED"));
-                dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
+                //dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
                 $tabMailInc[] = $tmp[0]."|".$tmp[1];
             }

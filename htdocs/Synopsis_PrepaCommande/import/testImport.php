@@ -2512,17 +2512,16 @@ function get_resource_id($resource) {
 }
 
 function updateType($ref, $prodId) {
-    global $db;
     if ($ref . 'x' != "x" && $prodId > 0) {
         $type = getProdType($ref);
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafileds SET type2 = '" . $type . "' WHERE fk_object = " . $prodId;
-        $sql = requeteWithCache($requete);
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET type2 = '" . $type . "' WHERE fk_object = " . $prodId;
+        requeteWithCache($requete);
     }
 }
 
 function getProdType($ref) {
     if ($ref . 'x' != "x" && $ref != "0") {
-        global $remTypeGlob, $db;
+        global $remTypeGlob;
         if (!is_array($remTypeGlob)) {
             $remTypeGlob = array();
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_import_product_type ORDER BY rang";

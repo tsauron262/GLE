@@ -234,6 +234,9 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             $prodF->find_min_price_product_fournisseur($prodF->id, 1);
                             $propal->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, $idProdPrio, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
                         }
+                        
+                        $propal->valid($user);
+                        $propal->set_draft($user);
 
                         $propal->fetch($propal->id);
 

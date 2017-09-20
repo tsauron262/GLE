@@ -955,7 +955,8 @@ class Form
      */
     function select_thirdparty($selected='', $htmlname='socid', $filter='', $limit=20, $ajaxoptions=array(), $forcecombo=0)
     {
-   		return $this->select_thirdparty_list($selected,$htmlname,$filter,1,0,$forcecombo,array(),'',0,$limit);
+        dol_syslog("select_thirdparty appeler sans ajax (remplacer par select_company !!!! paramétre diférent 1,0,$forcecombo,array(),'',0,   au 4eme)".print_r($_REQUEST,1),3);
+   		return $this->select_thirdparty_list_DRSI($selected,$htmlname,$filter,1,0,$forcecombo,array(),'',0,$limit);
     }
 
     /**
@@ -1018,7 +1019,7 @@ class Form
     	else
     	{
     	    // Immediate load of all database
-    		$out.=$this->select_thirdparty_list($selected, $htmlname, $filter, $showempty, $showtype, $forcecombo, $events, '', 0, $limit, $morecss, $moreparam);
+    		$out.=$this->select_thirdparty_list_DRSI($selected, $htmlname, $filter, $showempty, $showtype, $forcecombo, $events, '', 0, $limit, $morecss, $moreparam);
     	}
 
     	return $out;
@@ -1043,6 +1044,11 @@ class Form
      * 	@return	string					HTML string with
      */
     function select_thirdparty_list($selected='',$htmlname='socid',$filter='',$showempty='', $showtype=0, $forcecombo=0, $events=array(), $filterkey='', $outputmode=0, $limit=0, $morecss='minwidth100', $moreparam='')
+    {
+        dol_syslog("select_thirdparty_list appeler sans ajax (remplacer par select_company)".print_r($_REQUEST,1),3);
+        return $this->select_thirdparty_list_DRSI($selected, $htmlname, $filter, $showempty, $showtype, $forcecombo, $events, $filterkey, $outputmode);
+    }
+    function select_thirdparty_list_DRSI($selected='',$htmlname='socid',$filter='',$showempty='', $showtype=0, $forcecombo=0, $events=array(), $filterkey='', $outputmode=0, $limit=0, $morecss='minwidth100', $moreparam='')
     {
         global $conf,$user,$langs;
 

@@ -17,7 +17,7 @@
   * BIMP-ERP-1.2
   */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisContrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
@@ -91,7 +91,7 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
-        if ($conf->synopsiscontrat->dir_output)
+        if ($conf->contrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (! is_object($contrat))
@@ -110,11 +110,11 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
             // Definition de $dir et $file
             if ($contrat->specimen)
             {
-                $dir = $conf->synopsiscontrat->dir_output;
+                $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
+                $dir = $conf->contrat->dir_output . "/" . $propref;
                 $file = $dir ."/Courrier_avenant_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
@@ -133,18 +133,6 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf="";
                 $nblignes = sizeof($contrat->lignes);
                 // Protection et encryption du pdf
-//                if ($conf->global->PDF_SECURITY_ENCRYPTION)
-//                {
-//                    $pdf=new FPDI_Protection('P','mm',$this->format);
-//                    $pdfrights = array('print'); // Ne permet que l'impression du document
-//                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
-//                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
-//                    $pdf->SetProtection($pdfrights,$pdfuserpass,$pdfownerpass);
-//                } else  {
-//
-//                    $pdf=new FPDI('P','mm',$this->format);
-//                }
-//                $pdf1=new FPDI('P','mm',$this->format);
                 $pdf = pdf_getInstance($this->format);
                 if (class_exists('TCPDF'))
                 {
@@ -163,7 +151,7 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf1->Open();
                 $pdf->AddPage();
                 $pdf1->AddPage();
-                $pdf1->SetFont('', '', 8);
+                $pdf1->SetFont(''/*'Arial'*/, '', 8);
 
                 $pdf->SetDrawColor(128,128,128);
 
@@ -177,17 +165,17 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(0,0);
 
-//                $pdf->AddFont('BI', 'BI', 'BI.php');
-//                //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
+                //$pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
+                //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
 
                 // Tete de page
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-                $pdf->SetFont('', 'B', 12);
+                $pdf->SetFont(''/*'Arial'*/, 'B', 12);
 
 //Encart societe
                 $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6,($contrat->societe->titre."x" != "x"?$contrat->societe->titre." ":"").$contrat->societe->nom,0,'L');
-                $pdf->SetFont('', '', 11);
+                $pdf->SetFont(''/*'Arial'*/, '', 11);
                 $pdf->SetX($this->marge_gauche + 100);
 
 //representant légal : signataire contrat
@@ -216,22 +204,22 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contrat->societe->address."\n".$contrat->societe->zip." ".$contrat->societe->town,0,'L');
 
 //Date
-                $pdf->SetFont('', '', 10);
+                $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute + 44);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 50) ,6,"Lyon, le ".date("d/m/Y"),0,'L');
 
 //Objet
-                $pdf->SetFont('', 'U', 10);
+                $pdf->SetFont(''/*'Arial'*/, 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 60);
                 $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
-                $pdf->SetFont('', '', 10);
+                $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_encodeRien("Avenant à votre contrat ".$contrat->ref),0,'L');
                 $remY = $pdf->GetY();
-                $pdf->SetFont('', 'U', 10);
+                $pdf->SetFont(''/*'Arial'*/, 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$remY);
                 $pdf->MultiCell(23 ,4,"Code Client : ",0,'L');
-                $pdf->SetFont('', '', 10);
+                $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 23,$remY);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_encodeRien($contrat->societe->code_client),0,'L');
 
@@ -260,7 +248,7 @@ Direction Technique
 
                 $this->file = $file;$pdf->Output($file, 'f');
 
-//                //$langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur

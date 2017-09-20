@@ -13,11 +13,11 @@
   */
  /**
   *
-  * Name : pdf_contrat_courrierBIMPavenant.modules.php
+  * Name : pdf_contrat_courrierBIMPrenouvellement.modules.php
   * BIMP-ERP-1.2
   */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisContrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 if(!defined('EURO'))
     define ('EURO', chr(128) );
 
-class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
+class pdf_contrat_courrierBIMPrenouvellement extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
 
@@ -42,7 +42,7 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
     \brief      Constructeur
     \param        db        Handler acces base de donnee
     */
-    function pdf_contrat_courrierBIMPavenant($db)
+    function pdf_contrat_courrierBIMPrenouvellement($db)
     {
 
         global $conf,$langs,$mysoc;
@@ -91,7 +91,7 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
-        if ($conf->synopsiscontrat->dir_output)
+        if ($conf->contrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (! is_object($contrat))
@@ -110,12 +110,12 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
             // Definition de $dir et $file
             if ($contrat->specimen)
             {
-                $dir = $conf->synopsiscontrat->dir_output;
+                $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
-                $file = $dir ."/Courrier_avenant_".date("d_m_Y")."_" . $propref . ".pdf";
+                $dir = $conf->contrat->dir_output . "/" . $propref;
+                $file = $dir ."/Courrier_renouvellement_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
 
@@ -214,7 +214,7 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
                 $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_encodeRien("Avenant à votre contrat ".$contrat->ref),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_encodeRien("Renouvellement de votre contrat ".$contrat->ref),0,'L');
                 $remY = $pdf->GetY();
                 $pdf->SetFont(''/*'Arial'*/, 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$remY);
@@ -228,14 +228,29 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Madame, Monsieur,"),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Vous trouverez ci-joint l'avenant correspondant à votre contrat
-N° ").$contrat->ref.".",0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Le contrat N° ".$contrat->ref." que vous avez souscrit (ou un des éléments qui le constitue) arrive à échéance").".",0,'L');
 
-                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 118);
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 112);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Sans dénonciation de votre part sous dix jours, nous le renouvellerons pour
+une durée d'un an."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Vous recevrez alors la facture correspondante. En cas de références particulières (bon de commande officiel, N° interne, adresse spécifique de facturation, etc.) à notifier sur celle-ci, merci de nous les transmettre avant l'échéance de votre contrat afin que celles-ci soient prises en compte."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Conformément à l'autorisation de prélèvement annexée à votre contrat, votre débit s'effectuera environ une semaine après la date de facture.
+Merci de vérifier si vos coordonnées bancaires n'ont pas changé."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Ce contrat sera totalement validé lors du règlement de la facture."),0,'L');
+
+
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Bimp reste à votre disposition pour tout renseignement complémentaire.
 Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
 
-                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 143);
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+18);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_encodeRien("M BELHOCINE
 Direction Technique
 "),0,'L');

@@ -20,7 +20,7 @@
   \ingroup    ProspectBabel
   \brief      Fichier de description et activation du module de Prospection Babel
  */
-include_once "DolibarrModules.class.php";
+include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
 
 /**     \class      modProspectBabel
   \brief      Classe de description et activation du module de Prospection Babel
@@ -54,6 +54,12 @@ class modSynopsisContrat extends DolibarrModules {
 
         // Constantes
         $this->const = array();
+        
+        
+        $this->module_parts = array(
+            'models' => 1
+        );
+        
         $r = 0;
 
         $this->const[$r][0] = "SYNOPSIS_CONTRAT_ADDON_PDF";
@@ -213,9 +219,9 @@ class modSynopsisContrat extends DolibarrModules {
   KEY `fk_user_author` (`fk_user_author`)
 )");
 //    $this->dirs[0] = $conf->chrono->dir_output;
-$tabModel = array("Bimp" => "Modèle BIMP", "courrierBIMPavenant" => "BIMP Courrier - Avenant", "courrierBIMPconfirmation" => "BIMP Courrier - Confirmation", "courrierBIMPrenouvellement" => "BIMP Courrier - Renouvellement", "courrierBIMPresiliation" => "BIMP Courrier - Resiliation", "courrierBIMPsignature" => "BIMP Courrier - Signature", "courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", "courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique");
+$tabModel = array("contrat_Bimp" => "Modèle BIMP", "contrat_courrierBIMPavenant" => "BIMP Courrier - Avenant", "contrat_courrierBIMPconfirmation" => "BIMP Courrier - Confirmation", "contrat_courrierBIMPrenouvellement" => "BIMP Courrier - Renouvellement", "contrat_courrierBIMPresiliation" => "BIMP Courrier - Resiliation", "contrat_courrierBIMPsignature" => "BIMP Courrier - Signature", "contrat_courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique");
         foreach($tabModel as $result => $nom){
-            $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('" . $result . "','synopsiscontrat'," . $conf->entity . ", '".$nom."')";
+            $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('" . $result . "','contract'," . $conf->entity . ", '".$nom."')";
         }
         return $this->_init($sql);
     }

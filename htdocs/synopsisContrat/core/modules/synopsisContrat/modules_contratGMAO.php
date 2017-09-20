@@ -103,7 +103,7 @@ function contratGMAO_pdf_create($db, $id, $modele = '', $outputlangs = '') {
     $langs->load("synopsisGene@synopsistools");
     $langs->load("contracts");
 
-    $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/doc/";
+    $dir = DOL_DOCUMENT_ROOT . "/synopsisContrat/core/modules/synopsiscontrat/doc/";
     $modelisok = 0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser
@@ -192,9 +192,9 @@ function contratGMAO_delete_preview($db, $contratid, $contratref = '') {
         $contratref = $contrat->ref;
     }
 
-    if ($conf->synopsiscontrat->dir_output) {
+    if ($conf->contrat->dir_output) {
         $contratref = sanitize_string($contratref);
-        $dir = $conf->synopsiscontrat->dir_output . "/" . $contratref;
+        $dir = $conf->contrat->dir_output . "/" . $contratref;
         $file = $dir . "/" . $contratref . ".pdf.png";
         $multiple = $file . ".";
 

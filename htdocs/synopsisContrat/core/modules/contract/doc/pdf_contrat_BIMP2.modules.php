@@ -13,7 +13,7 @@
   \author     Christian CONSTANTIN-BERTIN
   \version    $Id: pdf_contrat_bimp.modules.php,v 1.121 2011/08/07  $
  */
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisContrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
@@ -106,7 +106,7 @@ ini_set('display_errors', 1);
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
-        if ($conf->synopsiscontrat->dir_output) {
+        if ($conf->contrat->dir_output) {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (!is_object($contrat)) {
                 $id = $contrat;
@@ -122,11 +122,11 @@ ini_set('display_errors', 1);
 
             // Definition de $dir et $file
             if (isset($contrat->specimen) && $contrat->specimen) {
-                $dir = $conf->synopsiscontrat->dir_output;
+                $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
+                $dir = $conf->contrat->dir_output . "/" . $propref;
                 $file = $dir . "/" . $propref . "-lettre.pdf";
             }
             $this->contrat = $contrat;
@@ -190,7 +190,7 @@ ini_set('display_errors', 1);
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
-                require_once DOL_DOCUMENT_ROOT.'/core/modules/synopsiscontrat/doc/annexe.class.php';
+                require_once DOL_DOCUMENT_ROOT.'/synopsisContrat/core/modules/contract/doc/annexe.class.php';
 $classAnnexe = new annexe();
 $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
 

@@ -23,7 +23,7 @@
   \author     Tommy SAURON
   \version    $Id: pdf_contrat_babel.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisContrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
@@ -104,7 +104,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
         $outputlangs->load("contrat");
         $outputlangs->load("products");
 //        //$outputlangs->setPhpLang();
-        if ($conf->synopsiscontrat->dir_output) {
+        if ($conf->contrat->dir_output) {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (!is_object($contrat)) {
                 $id = $contrat;
@@ -120,11 +120,11 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
             // Definition de $dir et $file
             if ($contrat->specimen) {
-                $dir = $conf->synopsiscontrat->dir_output;
+                $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
+                $dir = $conf->contrat->dir_output . "/" . $propref;
                 $file = $dir . "/" . $propref . ".pdf";
             }
             $this->contrat = $contrat;

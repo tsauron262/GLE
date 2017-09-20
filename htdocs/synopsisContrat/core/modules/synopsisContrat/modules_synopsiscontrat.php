@@ -115,7 +115,7 @@ function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
     $langs->load("babel");
     $langs->load("contracts");
 
-    $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/doc/";
+    $dir = DOL_DOCUMENT_ROOT."/synopsisContrat/core/modules/synopsiscontrat/doc/";
     $modelisok=0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser

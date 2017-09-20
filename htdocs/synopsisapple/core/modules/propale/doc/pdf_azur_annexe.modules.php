@@ -439,7 +439,7 @@ class pdf_azur_annexe extends ModelePDFPropales {
 
 
                 $this->hauteurHeader = 30;
-                require_once DOL_DOCUMENT_ROOT . '/core/modules/synopsiscontrat/doc/annexe.class.php';
+                require_once DOL_DOCUMENT_ROOT . '/synopsisContrat/core/modules/contract/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs);
                 $classAnnexe->getAnnexeCGV($object);
 

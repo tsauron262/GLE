@@ -23,7 +23,7 @@
  \version    $Id: pdf_contratGA_finaproStd.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_contratGA.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisContrat/core/modules/synopsiscontrat/modules_contratGA.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';

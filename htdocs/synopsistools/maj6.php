@@ -79,6 +79,10 @@ elseif (isset($_REQUEST['ok2'])) {
     $db->query("INSERT INTO `llx_contratdet_extrafields` (`fk_object`) (SELECT rowid FROM llx_contratdet WHERE rowid not in (SELECT fk_object FROM llx_contratdet_extrafields))");
 
     test($db, "Creation contradet extrafields");
+    
+        $db->query('UPDATE `llx_document_model` SET `type` = "contract" WHERE `type` = "synopsiscontrat"');
+    test($db, "Modification modele contract");
+    
 
 
     $tabDepGmaoToContradet = array("sla", "durValid", array("fk_prod", "fk_equipement"), "reconductionAuto", "hotline", "telemaintenanceCur", "maintenanceCur", "nbVisite", "nbVisiteCur", "fk_contrat", "rang");

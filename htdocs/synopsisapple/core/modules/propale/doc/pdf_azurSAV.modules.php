@@ -1050,7 +1050,7 @@ class pdf_azurSAV extends ModelePDFPropales
                                 
                                 
                                 $pdf->SetFont('','', $default_font_size - 3);
-                                $pdf->MultiCell(148, 20, "\n\n\n\n\n\n\nLes informations personnelles requises suivantes (nom, adresse, téléphone et adresse mail) sont nécessaires pour poursuivre la demande de réparation. Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront transférées au tiers pour vérification et des objectifs de qualité, notamment la confirmation de la transaction de réparation et la soumission d’une enquéte client. En signant, vous acceptez ce transfert ainsi que l’utilisation de ces informations par un tiers.", 0, 'L', 0);
+                                $pdf->MultiCell(148, 20, "\n\n\n\n\n\n\n\nLes informations personnelles requises suivantes (nom, adresse, téléphone et adresse mail) sont nécessaires pour poursuivre la demande de réparation. Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront transférées au tiers pour vérification et des objectifs de qualité, notamment la confirmation de la transaction de réparation et la soumission d’une enquéte client. En signant, vous acceptez ce transfert ainsi que l’utilisation de ces informations par un tiers.", 0, 'L', 0);
                                 $pdf->MultiCell(148, 10, "\nLes pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d'un état équivalent à neuf en termes de performance et de fiabilité.", 0, 'L', 0);
 			}
 		}

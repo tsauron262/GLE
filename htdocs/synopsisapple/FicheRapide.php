@@ -236,6 +236,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         }
                         
                         $propal->valid($user);
+                        $propal->set_draft($user);
 
                         $propal->fetch($propal->id);
 

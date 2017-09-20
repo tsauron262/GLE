@@ -431,7 +431,7 @@ function sendSms($chrono, $text) {
         $fromsms = urlencode('SAV BIMP');
 
         $to = traiteNumMobile($to);
-        if ($to == "" || (stripos($to, "6") === false && stripos($to, "7") === false))
+        if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false))
             return 0;
 
 

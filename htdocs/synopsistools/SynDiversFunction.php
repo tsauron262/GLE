@@ -1027,4 +1027,15 @@ function cachePage($page, $delay = 0, $mode = 2){//Mod 0 = get, 1 = force refres
     return 0;
 }
 
+
+
+
+
+function traiteNumMobile($to){
+        $to = str_replace(" ", "", $to);
+        if (stripos($to, "+") === false)
+            $to = "+33" . substr($to, 1, 10);
+        return $to;
+}
+
 ?>

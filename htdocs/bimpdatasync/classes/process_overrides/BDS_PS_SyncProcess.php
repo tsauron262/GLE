@@ -38,7 +38,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 //        self::$ext_debug_mod = true;
 //
         BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Product');
-        $objects = $this->getObjectsExportData('Product', 'Product', array(1242), $errors);
+        $objects = $this->getObjectsExportData('Product', 'Product', array(6848), $errors);
         if (!count($errors) && count($objects['list'])) {
             $this->soapExportObjects(array($objects), 'GLE_Sync');
         } else {
@@ -295,7 +295,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
         }
 
-        if (!BDS_Tools::isCategorieChildOf($this->db, $id_categorie, $this->parameters['id_root_categorie'])) {
+        if (!BDS_Tools::isCategorieChildOf($this->db, $id_categorie, $this->parameters['id_root_categorie'], false)) {
             $msg = 'Cette catégorie n\'est pas éligible à l\'export vers Prestashop ';
             $msg .= '(elles n\'appartient pas à la catégorie racine Prestashop.';
             $this->alert($msg, $id_categorie);
@@ -475,7 +475,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         }
         $fk_parent = null;
         if (isset($data['id_parent'])) {
-            if ($data['id_parent'] < 2) {
+            if ($data['id_parent'] <= 1) {
                 $fk_parent = $this->parameters['id_root_categorie'];
             } else {
                 $fk_parent = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Categorie', $data['id_parent'], 'ext_id_object');
@@ -623,6 +623,9 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                 // Traitement des catégories:
                 if (isset($data['categories'])) {
                     $categories = explode('-', $data['categories']);
+                    if (!isset($categories[0]) || !$categories[0]) {
+                        $categories[0] = (int) $this->parameters['id_default_products_categorie'];
+                    }
                     $categories_errors = $this->processImportProductCategories($product->id, $categories, true);
                     if (count($categories_errors)) {
                         $errors = array_merge($errors, $categories_errors);
@@ -878,6 +881,10 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             $commande->date_commande = $this->db->db->jdate($data['date_create']);
         }
 
+        if (isset($data['reference'])) {
+            $commande->ref_client = $data['reference'];
+        }
+
         // Statut de la commande:
 //        if (isset($data['id_order_state']) && $data['id_order_state']) {
 //            $match = BDSProcessMatchingValues::createInstanceByName($this->processDefinition->id, 'order_states');
@@ -982,36 +989,68 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             }
 
             // Liste des produits: 
-            $commande->fetch_lines(1);
-            $current_products = $commande->lines;
+            $commande->fetch_lines(0);
+            $current_lines = $commande->lines;
+            $lines = $sync_data->getObjects('lines');
+            $newLines = array();
 
             if (isset($data['products']) && count($data['products'])) {
                 foreach ($data['products'] as $product_data) {
-                    $id_product = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Product', $product_data['id_product'], 'ext_id_object');
+                    if ($product_data['type'] === 'product') {
+                        $id_product = BDS_SyncData::getObjectValue($this->db, 'loc_id_object', $this->processDefinition->id, 'Product', $product_data['id_product'], 'ext_id_object');
 
-                    if (is_null($id_product) || !$id_product) {
-                        $msg = 'Produit non trouvé pour l\'ID externe ' . $product_data['id_product'];
-                        $errors[] = $msg;
-                        $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
-                        continue;
-                    }
+                        if (is_null($id_product) || !$id_product) {
+                            $msg = 'Produit non trouvé pour l\'ID externe ' . $product_data['id_product'];
+                            $errors[] = $msg;
+                            $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                            continue;
+                        }
 
-                    $id_line = null;
-                    foreach ($current_products as $key => $current_product) {
-                        if ($current_product->fk_product === $id_product) {
-                            $id_line = $current_product->id;
-                            unset($current_products[$key]);
-                            break;
+                        $id_line = null;
+                        foreach ($current_lines as $key => $current_line) {
+                            if ($current_line->fk_product === $id_product) {
+                                $id_line = $current_line->id;
+                                unset($current_lines[$key]);
+                                if (isset($lines[$id_line])) {
+                                    unset($lines[$id_line]);
+                                }
+                                break;
+                            }
+                        }
+
+                        if ($this->processCommandeProduct($commande, $id_line, $id_product, $product_data, $errors)) {
+                            $newLines[$id_line] = $id_product;
+                        }
+                    } elseif ($product_data['type'] === 'pack') {
+                        $id_order_line = null;
+                        foreach ($lines as $id_line => $ext_id_pack) {
+                            if ((int) $ext_id_pack === (int) $product_data['id_product']) {
+                                $id_order_line = $id_line;
+                                unset($lines[$id_line]);
+                                break;
+                            }
+                        }
+                        if ($this->processCommandePack($commande, $id_order_line, $product_data, $errors)) {
+                            $newLines[$id_order_line] = $product_data['id_product'];
                         }
                     }
-
-                    $this->processCommandeProduct($commande, $id_line, $id_product, $product_data, $errors);
                 }
             }
 
+            $sync_data->setObjects('lines', $newLines);
+
             // Suppression de tous les produis ne figurant plus dans la commande:
-            foreach ($current_products as $product_line) {
-                $this->deleteCommandeProduct($commande, $product_line['rowid'], $product_line['fk_product'], $errors);
+            foreach ($lines as $id_line => $ext_id) {
+                $id_product = null;
+                foreach ($current_lines as $key => $current_line) {
+                    if ($current_line->id === $id_line) {
+                        if (isset($current_line->fk_product) && $current_line->fk_product) {
+                            $id_product = $current_line->fk_product;
+                        }
+                        unset($current_lines[$key]);
+                    }
+                }
+                $this->deleteCommandeLine($commande, $id_line, $errors, $id_product);
             }
             $commande->call_trigger('ORDER_MODIFY', $this->user);
         }
@@ -1031,9 +1070,9 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $categories = array();
         foreach ($subCats as $idc) {
             if (!in_array($idc, $categories)) {
-//                if ((int) $idc !== (int) $this->parameters['id_default_parent_categorie']) {
+                if ((int) $idc !== (int) $this->parameters['id_root_categorie']) {
                 $categories[] = (int) $idc;
-//                }
+                }
             }
         }
         return $this->checkOptionsForObjectsExport('Categorie', $categories);
@@ -1298,7 +1337,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         return false;
     }
 
-    protected function processCommandeProduct(Commande $commande, $id_order_line, $id_product, $product_data, &$errors)
+    protected function processCommandeProduct(Commande $commande, &$id_order_line, $id_product, $product_data, &$errors)
     {
         $product = new Product($this->db->db);
 
@@ -1336,7 +1375,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         if (!is_null($rows)) {
             foreach ($rows as $r) {
-                if (!$pa_ht ||  ((float) $r->unitprice < (float) $pa_ht)) {
+                if (!$pa_ht || ((float) $r->unitprice < (float) $pa_ht)) {
                     $pa_ht = (float) $r->unitprice;
                     $fk_fournprice = $r->rowid;
                 }
@@ -1349,15 +1388,16 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         }
 
         if (is_null($id_order_line) || !$id_order_line) {
-            if ($commande->addline($product->label, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $product->id, $remise_percent, 0, 0, 'HT', 0, '', '', 0, -1, 0, 0, $fk_fournprice, $pa_ht) <= 0) {
+            if (($result = $commande->addline($product->label, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $product->id, $remise_percent, 0, 0, 'HT', 0, '', '', 0, -1, 0, 0, $fk_fournprice, $pa_ht)) <= 0) {
                 $msg = 'Echec de l\'ajout du produit "' . $product->label . '" à la commande';
                 $msg .= $this->ObjectError($commande);
                 $errors[] = $msg;
                 $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
                 return false;
             }
+            $id_order_line = $result;
         } else {
-            if ($commande->updateline($id_order_line, $product->label, $pu_ht, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2) <= 0) {
+            if ($commande->updateline($id_order_line, $product->label, $pu_ht, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, 'HT', 0, '', '', 0, 0, 0, $fk_fournprice, $pa_ht) <= 0) {
                 $msg = 'Echec de la mise à jour du produit "' . $product->label . '"';
                 $msg .= $this->ObjectError($commande);
                 $errors[] = $msg;
@@ -1368,16 +1408,47 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         return true;
     }
 
-    protected function deleteCommandeProduct(Commande $commande, $id_order_line, $id_product, &$errors)
+    protected function processCommandePack(Commande $commande, &$id_order_line, $data, &$errors)
+    {
+        if (!is_null($id_order_line) && $id_order_line) {
+            if ($commande->updateline($id_order_line, $data['name'], 0, $data['quantity'], 0, 0) <= 0) {
+                $msg = 'Echec de la mise à jour de la ligne libre "' . $data['name'] . '" à la commande';
+                $msg .= $this->ObjectError($commande);
+                $errors[] = $msg;
+                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                return false;
+            }
+        } else {
+            if (($result = $commande->addline($data['name'], 0, $data['quantity'], 0)) <= 0) {
+                $msg = 'Echec de l\'ajout de la ligne libre "' . $data['name'] . '" à la commande';
+                $msg .= $this->ObjectError($commande);
+                $errors[] = $msg;
+                $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
+                return false;
+            }
+            $id_order_line = $result;
+        }
+        return true;
+    }
+
+    protected function deleteCommandeLine(Commande $commande, $id_order_line, &$errors, $id_product = null)
     {
         if ($commande->deleteline($this->user, $id_order_line) <= 0) {
-            $msg = 'Echec de la suppression du produit d\'ID ' . $id_product . ')';
+            if (!is_null($id_product)) {
+                $msg = 'Echec de la suppression du produit d\'ID ' . $id_product;
+            } else {
+                $msg = 'Echec de la suppression de la ligne d\'ID ' . $id_order_line;
+            }
             $msg .= $this->ObjectError($commande);
             $errors[] = $msg;
             $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
             return false;
         }
-        $msg = 'Produit d\'ID ' . $id_product . ' retiré de la commande';
+        if (!is_null($id_product)) {
+            $msg = 'Produit d\'ID ' . $id_product . ' retiré de la commande';
+        } else {
+            $msg = 'Ligne d\'ID ' . $id_order_line . ' retirée de la commande';
+        }
         $this->Info($msg, $this->curName(), $this->curId(), $this->curRef());
         return true;
     }

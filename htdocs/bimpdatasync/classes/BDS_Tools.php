@@ -126,7 +126,7 @@ class BDS_Tools
                 $dir .= get_exdir($product->id, 2, 0, 0, $product, 'product') . $product->id . "/photos/";
             }
         } else {
-            $dir .= get_exdir(0, 0, 0, 0, $product, 'product').dol_sanitizeFileName($product->ref).'/';
+            $dir .= get_exdir(0, 0, 0, 0, $product, 'product') . dol_sanitizeFileName($product->ref) . '/';
         }
 
         return $dir;
@@ -287,7 +287,7 @@ class BDS_Tools
         if (is_null($root_dir)) {
             $root_dir = DOL_DATA_ROOT . '/bimpdatasync';
         }
-        
+
         if (!file_exists($root_dir)) {
             if (!mkdir($root_dir, 0777)) {
                 return 'Echec de la création du dossier "' . $root_dir . '"';
@@ -317,5 +317,15 @@ class BDS_Tools
         }
 
         return 0;
+    }
+
+    public static function getDateTimeFromForm($name)
+    {
+        $date = self::getValue($name . 'year', '0000') . '-';
+        $date .= self::getValue($name . 'month', '00') . '-';
+        $date .= self::getValue($name . 'day', '00') . ' ';
+        $date .= self::getValue($name . 'hour', '00') . ':';
+        $date .= self::getValue($name . 'min', '00') . ':00';
+        return $date;
     }
 }

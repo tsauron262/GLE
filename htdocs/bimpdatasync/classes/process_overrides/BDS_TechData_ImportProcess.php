@@ -319,9 +319,9 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             }
 
             // Mise à jour du prix de vente (désactivé pour le moment):
-//            if (isset($data['pv_ht']) && $data['pv_ht']) {
-//                $this->updateProductPrice($product, $data['pv_ht']);
-//            }
+            if (isset($data['pv_ht']) && $data['pv_ht']) {
+                $this->updateProductPrice($product, $data['pv_ht']);
+            }
 
             if (is_null($id_product)) {
                 $this->current_object['id'] = $product->id;
@@ -359,7 +359,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
                     $msg = 'Echec de la récupération des données depuis le fichier "' . $this->parameters['ftp_file_prices'] . '"';
                     $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
                 } else {
-                    $data['pv_ht'] = (float) trim($row[self::$product_prices['pv_ht']]);
+                    $data['pv_ht'] = (float) trim($row[self::$product_prices['pv_ht']]);                    
                     $data['pa_ht'] = (float) trim($row[self::$product_prices['pa_ht']]) - (float) trim($row[self::$product_prices['pa_reduction']]);
                 }
             }

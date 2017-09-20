@@ -182,17 +182,43 @@ abstract class BDS_ImportProcess extends BDS_Process
 
     // Gestion des produits: 
 
-    protected function updateProductPrice($product, $prix_ht)
+    protected function updateProductPrice(Product $product, $prix_ht)
     {
+        if (isset($product->price) && $product->price > 0) {
+            if (isset($this->parameters['select_price']) &&
+                    in_array($this->parameters['select_price'], array('highest', 'lowest'))) {
+                $elements = getElementElement('product', 'fournisseur_for_price', $product->id);
+                if (count($elements)) {
+                    $fk_fourn = $elements[0]['d'];
+                    if ((int) $fk_fourn !== (int) $this->parameters['id_soc_fournisseur']) {
+                        switch ($this->parameters['select_price']) {
+                            case 'highest':
+                                if ((float) $prix_ht <= $product->price) {
+                                    return;
+                                }
+
+                            case 'lowest':
+                                if ((float) $prix_ht >= $product->price) {
+                                    return;
+                                }
+                        }
+                    }
+                }
+            }
+        }
+
         if (!isset($product->tva_tx) || !$product->tva_tx) {
             if (!$this->checkParameter('tva_tx_default', 'float')) {
                 return;
             }
             $product->tva_tx = $this->parameters['tva_tx_default'];
         }
+
         if ((float) $prix_ht !== (float) $product->price) {
-            if (!$product->updateProductPrice($prix_ht, 'HT', $this->user, $product->tva_tx)) {
+            if (!$product->updatePrice($prix_ht, 'HT', $this->user, $product->tva_tx)) {
                 $this->Error('Echec de la mise à jour du prix', $this->curName(), $this->curId(), $this->curRef());
+            } else {
+                setElementElement('product', 'fournisseur_for_price', $product->id, $this->parameters['id_soc_fournisseur']);
             }
         }
     }
@@ -217,7 +243,7 @@ abstract class BDS_ImportProcess extends BDS_Process
         }
         $pfp = new ProductFournisseur($this->db->db);
 
-        $where = '`fk_soc` = ' . (int)$id_soc_fournisseur;
+        $where = '`fk_soc` = ' . (int) $id_soc_fournisseur;
         $where .= ' AND `fk_product` = ' . (int) $id_product;
 
         $row = $this->db->getRow('product_fournisseur_price', $where, array('rowid', 'price'));

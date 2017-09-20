@@ -41,7 +41,11 @@ class BimpObject
         foreach ($this::$fields as $name => $params) {
             $value = null;
             if (BDS_Tools::isSubmit($name)) {
-                $value = BDS_Tools::getValue($name);
+                if ($params['type'] === 'datetime') {
+                    $value = BDS_Tools::getDateTimeFromForm($name);
+                } else {
+                    $value = BDS_Tools::getValue($name);
+                }
             } elseif (isset($this->{$name})) {
                 $value = $this->{$name};
             }
@@ -102,6 +106,15 @@ class BimpObject
                 }
             } else {
                 $validate = true;
+                if ($validation['type'] === 'datetime') {
+                    if (!preg_match('/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
+                        $validate = false;
+                        if (!isset($validation['invalid_msg'])) {
+                            $validation['invalid_msg'] = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
+                        }
+                    }
+                }
+
                 if (!count($errors) && isset($validation['regexp'])) {
                     if (!preg_match('/' . $validation['regexp'] . '/', $value)) {
                         $validate = false;
@@ -602,6 +615,8 @@ class BimpObject
 
     public function renderForm($id_parent = null)
     {
+        global $db;
+        $form = new Form($db);
         $id_object = (!is_null($this->id) ? $this->id : 0);
 
         $html = '<form id="' . $this->getClass() . '_form" class="objectForm" method="post">';
@@ -623,6 +638,9 @@ class BimpObject
                 continue;
             }
             $html .= '<tr';
+            if ($params['input'] === 'hidden') {
+                $html .= ' style="display: none"';
+            }
             if (isset($params['display_if'])) {
                 $html .= ' class="display_if" ';
                 $html .= ' data-input_name="' . $params['display_if']['input_name'] . '"';
@@ -644,9 +662,17 @@ class BimpObject
             }
 
             switch ($params['input']) {
+                case 'hidden':
+                    $html .= '<input type="hidden" name="' . $name . '" value="' . $value . '"/>';
+                    break;
+
+                case 'datetime':
+                    $html .= $form->select_date($value, $name, 1, 1);
+                    break;
+
                 case 'text':
                     $size = (isset($params['input_size']) ? $params['input_size'] : 60);
-                    $html .= '<input type="text" name="' . $name . '" value="' . $value . '" size="' . $size . '">';
+                    $html .= '<input type="text" name="' . $name . '" value="' . $value . '" size="' . $size . '"/>';
                     break;
 
                 case 'textarea':
@@ -667,7 +693,7 @@ class BimpObject
                     if (isset($params['options'])) {
                         $method = 'get' . ucfirst($params['options']) . 'QueryArray';
                         if (method_exists($this, $method)) {
-                            $options = $this->{$method}();
+                            $options = $this->{$method}($id_parent);
                         }
                     }
                     $html .= '<select name="' . $name . '">';
@@ -848,7 +874,9 @@ class BimpObject
 
     public static function renderList($id_parent = null)
     {
-        ini_set('display_errors', 1);
+        global $db;
+        $form = new Form($db);
+
         if (isset(static::$list_params)) {
             $params = static::$list_params;
         } else {
@@ -936,6 +964,13 @@ class BimpObject
                         $html .= '<option value="1"' . (($defVal === 1) ? ' selected' : '') . '>OUI</option>';
                         $html .= '<option value="0"' . (($defVal === 0) ? ' selected' : '') . '>NON</option>';
                         $html .= '</select>';
+                    } elseif ($input['type'] === 'datetime') {
+                        if (isset($input['default_value'])) {
+                            $defVal = $input['default_value'];
+                        } else {
+                            $defVal = '0000-00-00 00:00';
+                        }
+                        $html .= $form->select_date($defVal, $input['name'], 1, 1);
                     } else {
                         $html .= '<input type="' . $input['type'] . '" name="' . $input['name'] . '" ';
                         $html .= 'class="objectListRowInput" id="rowInput_' . static::getClass() . '_' . $input['id'] . '"';
@@ -992,7 +1027,7 @@ class BimpObject
         }
         global $db;
         $bdb = new BimpDb($db);
-
+        $form = new Form($db);
         $rows = static::getListData($bdb, $id_parent);
 
         $html = '';
@@ -1040,6 +1075,13 @@ class BimpObject
                                 $html .= '<option value="1"' . (((int) $val !== 0) ? ' selected' : '') . '>OUI</option>';
                                 $html .= '<option value="0"' . (((int) $val === 0) ? ' selected' : '') . '>NON</option>';
                                 $html .= '</select>';
+                            } elseif ($col['input'] === 'datetime') {
+                                if (isset($r[$col['name']])) {
+                                    $val = $r[$col['name']];
+                                } else {
+                                    $val = '0000-00-00 00:00';
+                                }
+                                $html .= $form->select_date($val, $col['name'], 1, 1);
                             }
                         } elseif (isset($col['data_type'])) {
                             switch ($col['data_type']) {
@@ -1055,6 +1097,11 @@ class BimpObject
                                     if (isset($col['array_name'])) {
                                         $html .= static::${$col['array_name']}[$r[$col['name']]];
                                     }
+                                    break;
+
+                                case 'datetime':
+                                    $date = new DateTime($r[$col['name']]);
+                                    $html .= $date->format('d / m / Y H:i');
                                     break;
 
                                 case 'string':
@@ -1152,6 +1199,7 @@ class BimpObject
 
     public function renderObjectFormAndList($object_name)
     {
+
         if (is_null($this->id) || !$this->id) {
             return '';
         }
@@ -1179,10 +1227,10 @@ class BimpObject
                 $html .= $className::renderList($this->id);
                 $html .= '</div>';
             } else {
-                echo 'here';
+                $html .= '<p class="alert alert-danger">Classe "' . $className . '" absente</p>';
             }
         } else {
-            echo 'la';
+            $html .= '<p class="alert alert-danger">Paramètre des objets "' . $object_name . '" absents</p>';
         }
 
         return $html;

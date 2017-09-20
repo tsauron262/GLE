@@ -67,7 +67,7 @@ function process_prepare_head($objsoc)
     $head[$h][1] = $langs->trans("Options");
     $head[$h][2] = 'options';
     $h++;
-    
+
     $head[$h][0] = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $objsoc->id . '&tab=matching';
     $head[$h][1] = $langs->trans("Correspondances");
     $head[$h][2] = 'matching';
@@ -77,11 +77,18 @@ function process_prepare_head($objsoc)
     $head[$h][1] = $langs->trans("Triggers");
     $head[$h][2] = 'triggers';
     $h++;
-    
+
     $head[$h][0] = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $objsoc->id . '&tab=operations';
     $head[$h][1] = $langs->trans("Opérations");
     $head[$h][2] = 'operations';
     $h++;
+
+    if (in_array($objsoc->type, array('import', 'export'))) {
+        $head[$h][0] = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $objsoc->id . '&tab=crons';
+        $head[$h][1] = $langs->trans("Tâches planifiées");
+        $head[$h][2] = 'crons';
+        $h++;
+    }
 
 //    complete_head_from_modules($conf, $langs, $objsoc, $head, $h, 'chrono');
 

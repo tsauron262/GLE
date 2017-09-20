@@ -82,6 +82,11 @@ class BDSProcess extends BimpObject
             'class_name' => 'BDSProcessOperation',
             'relation'   => 'HasMany',
             'delete'     => true
+        ),
+        'crons'     => array(
+            'class_name' => 'BDSProcessCron',
+            'relation'   => 'HasMany',
+            'delete'     => true
         )
     );
 
@@ -105,7 +110,7 @@ class BDSProcess extends BimpObject
         return 'BDSProcess';
     }
 
-    public static function getTypesQueryArray()
+    public static function getTypesQueryArray($id_parent = null)
     {
         return self::$types;
     }

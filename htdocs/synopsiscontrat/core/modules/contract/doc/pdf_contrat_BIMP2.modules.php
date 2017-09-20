@@ -13,7 +13,7 @@
   \author     Christian CONSTANTIN-BERTIN
   \version    $Id: pdf_contrat_bimp.modules.php,v 1.121 2011/08/07  $
  */
-require_once(DOL_DOCUMENT_ROOT . "/synopsisContrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
@@ -190,7 +190,7 @@ ini_set('display_errors', 1);
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
-                require_once DOL_DOCUMENT_ROOT.'/synopsisContrat/core/modules/contract/doc/annexe.class.php';
+                require_once DOL_DOCUMENT_ROOT.'/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
 $classAnnexe = new annexe();
 $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
 

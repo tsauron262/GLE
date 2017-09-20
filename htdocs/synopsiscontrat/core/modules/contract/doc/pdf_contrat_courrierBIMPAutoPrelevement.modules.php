@@ -17,7 +17,7 @@
   * BIMP-ERP-1.2
   */
 
-require_once(DOL_DOCUMENT_ROOT."/synopsisContrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
@@ -173,7 +173,7 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
                 $pdf->SetFont(''/*'Arial'*/, 'B', 12);
 
-                $pagecountTpl=$pdf->setSourceFile(DOL_DOCUMENT_ROOT.'/synopsisContrat/core/modules/synopsiscontrat/SEPA_BP.pdf');
+                $pagecountTpl=$pdf->setSourceFile(DOL_DOCUMENT_ROOT.'/synopsiscontrat/core/modules/synopsiscontrat/SEPA_BP.pdf');
 
                 $tplidx=$pdf->importPage(1,"/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0,0,0,true);

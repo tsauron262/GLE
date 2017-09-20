@@ -112,7 +112,7 @@ function contratGA_pdf_create($db, $id, $modele='', $outputlangs='')
     $langs->load("synopsisGene@synopsistools");
     $langs->load("contracts");
 
-    $dir = DOL_DOCUMENT_ROOT."/synopsisContrat/core/modules/synopsiscontrat/";
+    $dir = DOL_DOCUMENT_ROOT."/synopsiscontrat/core/modules/synopsiscontrat/";
     $modelisok=0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser

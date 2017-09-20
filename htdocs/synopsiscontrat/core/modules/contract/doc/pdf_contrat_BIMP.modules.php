@@ -13,7 +13,7 @@
   \author     Christian CONSTANTIN-BERTIN
   \version    $Id: pdf_contrat_bimp.modules.php,v 1.121 2011/08/07  $
  */
-require_once(DOL_DOCUMENT_ROOT . "/synopsisContrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
@@ -826,7 +826,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 $this->_pagefoot($pdf, $contrat, $outputlangs);
 
 
-                require_once DOL_DOCUMENT_ROOT . '/synopsisContrat/core/modules/contract/doc/annexe.class.php';
+                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs);
                 $classAnnexe->getAnnexeContrat($contrat);
                 

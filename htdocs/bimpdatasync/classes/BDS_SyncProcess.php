@@ -198,6 +198,11 @@ class BDS_SyncProcess extends BDS_Process
 
     protected function onSetObjectsRequest($params, &$errors)
     {
+        if (self::$debug_mod) {
+            echo 'Paramètres reçus: <pre>';
+            print_r($params);
+            echo '</pre>';
+        }
         $ext_id_process = (isset($params['ext_id_process']) ? $params['ext_id_process'] : null);
         $return = array();
 

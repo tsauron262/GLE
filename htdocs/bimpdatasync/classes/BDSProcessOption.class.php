@@ -131,7 +131,7 @@ class BDSProcessOption extends BimpObject
         return 'BDSProcessOption';
     }
 
-    public static function getTypesQueryArray()
+    public static function getTypesQueryArray($id_parent = null)
     {
         return self::$types;
     }

@@ -116,3 +116,17 @@ CREATE TABLE `llx_manufacturer` (
   `ref_prefixe` varchar(128) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `llx_bds_process_cron` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_process` int(10) UNSIGNED NOT NULL,
+  `id_operation` int(10) UNSIGNED NOT NULL,
+  `id_cronjob` int(10) UNSIGNED DEFAULT NULL,
+  `title` varchar(256) NOT NULL,
+  `description` text,
+  `active` tinyint(1) NOT NULL DEFAULT '0',
+  `frequency_val` INT NOT NULL DEFAULT '1',
+  `frequency_type` ENUM('min','day','week','month') NOT NULL DEFAULT 'min'
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

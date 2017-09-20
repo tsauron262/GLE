@@ -19,14 +19,14 @@ class modbimpdatasync extends DolibarrModules
 
         $this->db = $db;
         $langs->load("bimpdatasync@bimpdatasync");
-        
+
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
         $this->numero = 17102;
-        
+
         $this->rights_class = 'bimpdatasync';
         $this->family = "technic";
         $this->name = preg_replace('/^mod/i', '', get_class($this));
-        $this->description = $langs->trans("Synchronization between Dolibarr and Prestashop");
+        $this->description = $langs->trans("ModDescription");
         $this->version = '1.0.0';
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
         $this->special = 2;
@@ -44,22 +44,20 @@ class modbimpdatasync extends DolibarrModules
         $r = 0;
 
         //$this->style_sheet = '/bimpdatasync/css/bimpdatasync.css';
-        
+
         $this->config_page_url = array(); //array("bimpdatasync_setupapage.php@bimpdatasync");
         $this->depends = array();  // List of modules id that must be enabled if this module is enabled
         $this->requiredby = array(); // List of modules id to disable if this one is disabled
         $this->phpmin = array(5, 0);     // Minimum version of PHP required by module
         $this->need_dolibarr_version = array(3, 7); // Minimum version of Dolibarr required by module
-        $this->langfiles = array("bimpdatasync@bimpdatasync");//mettre aussi le nom et la description dans /langs/fr_FR/admin.lang
-        
+        $this->langfiles = array("bimpdatasync@bimpdatasync"); //mettre aussi le nom et la description dans /langs/fr_FR/admin.lang
         // Constants
         // Example: $this->const=array(0=>array('MYMODULE_MYNEWCONST1','chaine','myvalue','This is a constant to add',0),
         //                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0) );
         //                             2=>array('MAIN_MODULE_MYMODULE_NEEDSMARTY','chaine',1,'Constant to say module need smarty',0)
         $this->const = array();   // List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 0 or 'allentities')
-        
         // Array to add new pages in new tabs
-        //$this->tabs = array('thirdparty:CptR:@CptR:/CptR/thirdpartyTab.php?socid=__ID__');
+        $this->tabs = array('product:+synchro:Synchronization:bimpdatasync@bimpdatasync:/bimpdatasync/tabs/product.php?id=__ID__');
         // where entity can be
         // 'thirdparty'       to add a tab in third party view
         // 'intervention'     to add a tab in intervention view
@@ -83,17 +81,17 @@ class modbimpdatasync extends DolibarrModules
         //$r++;
         // Permissions
         $this->rights = array();  // Permission array used by this module
-        /*
-          $this->rights_class = 'CashdeskPro';
-          $r=0;
 
-          $r++;
-          $this->rights[$r][0] = 50101;
-          $this->rights[$r][1] = 'Use CashdeskPro';
-          $this->rights[$r][2] = 'a';
-          $this->rights[$r][3] = 1;
-          $this->rights[$r][4] = 'use';
-         */
+        $this->rights_class = $this->name;
+        $r = 0;
+
+        $r++;
+        $this->rights[$r][0] = 501019;
+        $this->rights[$r][1] = 'Use BimpDataSync';
+        $this->rights[$r][2] = 'a';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'use';
+
         // Add here list of permission defined by an id, a label, a boolean and two constant strings.
         // Example:
         // $this->rights[$r][0] = 2000; 				// Permission id (must not be already used)
@@ -108,37 +106,37 @@ class modbimpdatasync extends DolibarrModules
 
         // Add here entries to declare new menus
         // Example to declare the Top Menu entry:
-        /*
-          $this->menu[$r]=array(	'fk_menu'=>0,			// Put 0 if this is a top menu
-          'type'=>'top',			// This is a Top menu entry
-          'titre'=>'CashdeskPro',
-          'mainmenu'=>'CashdeskPro',
-          'leftmenu'=>'1',		// Use 1 if you also want to add left menu entries using this descriptor.
-          'url'=>'/CashdeskPro/index.php?user=__LOGIN__',
-          'langs'=>'CashdeskPro',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-          //'position'=>1000,
-          'enabled'=>'$conf->CashdeskPro->enabled',		// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-          'perms'=>'1',				// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-          'target'=>'CashdeskPro',
-          'user'=>2);				// 0=Menu for internal users, 1=external users, 2=both
-          $r++;
-         */
-        /*
-          $this->menu[$r]=array(	    'fk_menu'=>0,			// Put 0 if this is a top menu
-          'type'=>'top',			// This is a Top menu entry
-          'titre'=>'CashdeskPro',
-          'mainmenu'=>'cashdeskpro',
-          'leftmenu'=>'',		// Use 1 if you also want to add left menu entries using this descriptor. Use 0 if left menu entries are defined in a file pre.inc.php (old school).
-          'url'=>'/CashdeskPro/index.php?user=__LOGIN__',
-          'langs'=>'CashdeskPro@CashdeskPro',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-          'position'=>100,
-          'enabled'=>'$conf->cashdeskpro->enabled',
-          'perms'=>'',		// Use 'perms'=>'1' if you want your menu with no permission rules
-          'target'=>'CashdeskPro',
-          'user'=>0);				// 0=Menu for internal users, 1=external users, 2=both
+        $this->menu[$r] = array(
+            'fk_menu'  => 'fk_mainmenu=tools', // Put 0 if this is a top menu
+            'type'     => 'left', // This is a Top menu entry
+            'titre'    => 'Synchronization',
+            'mainmenu' => 'tools',
+            'leftmenu' => 'Synchronization', // Use 1 if you also want to add left menu entries using this descriptor.
+            'url'      => '/bimpdatasync/process.php',
+            'langs'    => 'bimpdatasync@bimpdatasync', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+            //'position'=>1000,
+            'enabled'  => '$conf->bimpdatasync->enabled', // Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+            'perms'    => '$user->rights->' . $this->name . '->use', // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+            'target'   => '',
+            'user'     => 0);    // 0=Menu for internal users, 1=external users, 2=both
+        $r++;
 
-          $r++;
-         */
+
+        $this->menu[$r] = array(
+            'fk_menu'  => 'fk_mainmenu=tools,fk_leftmenu=Synchronization', // Put 0 if this is a top menu
+            'type'     => 'left', // This is a Top menu entry
+            'titre'    => 'Rapports',
+            'mainmenu' => 'tools',
+            'leftmenu' => 'Synchronization', // Use 1 if you also want to add left menu entries using this descriptor. Use 0 if left menu entries are defined in a file pre.inc.php (old school).
+            'url'      => '/bimpdatasync/rapports.php',
+            'langs'    => 'bimpdatasync@bimpdatasync', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+            'position' => 100,
+            'enabled'  => '$conf->bimpdatasync->enabled',
+            'perms'    => '$user->rights->' . $this->name . '->use', // Use 'perms'=>'1' if you want your menu with no permission rules
+            'target'   => '',
+            'user'     => 0);    // 0=Menu for internal users, 1=external users, 2=both
+
+        $r++;
     }
 
     function init($options = '')
@@ -167,7 +165,7 @@ class modbimpdatasync extends DolibarrModules
         $sql = array();
         return $this->_remove($sql, $options);
     }
-    
+
     function load_tables()
     {
         return $this->_load_tables(); //'/bimpdatasync/sql/');

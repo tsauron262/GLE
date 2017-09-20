@@ -38,7 +38,7 @@ function testReq()
     }
 }
 
-//testReq();
+testReq();
 
 function installProcess()
 {
@@ -60,13 +60,13 @@ function testCommande($id)
 
     $comm = new Commande($db);
     $comm->fetch($id);
-    $products = $comm->fetch_lines(1);
+    $products = $comm->fetch_lines(0);
     echo '<pre>';
     print_r($comm->lines);
     exit;
 }
 
-//testCommande(3842);
+//testCommande(9785);
 
 function testFournPrice()
 {
@@ -92,4 +92,4 @@ function testFournPrice()
     
     echo $pa_ht.', '.$fk_fournprice;
 }
-testFournPrice();
+//testFournPrice();

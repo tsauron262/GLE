@@ -63,8 +63,12 @@ if (!$id_process) {
             echo $process->renderObjectsList('trigger_action');
             break;
 
-        case 'operations';
+        case 'operations':
             echo $process->renderObjectFormAndList('operations');
+            break;
+        
+        case 'crons':
+            echo $process->renderObjectFormAndList('crons');
             break;
     }
 }

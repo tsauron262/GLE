@@ -1179,7 +1179,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 			$docStyle->getFont()->getColor()->setARGB($this->_readColor($style->font->color));
 
 			if (isset($style->font->u) && !isset($style->font->u["val"])) {
-				$docStyle->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SIGLE);
+				$docStyle->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SINGLE);
 			} else if (isset($style->font->u) && isset($style->font->u["val"])) {
 				$docStyle->getFont()->setUnderline((string)$style->font->u["val"]);
 			}
@@ -1323,7 +1323,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 					}
 
 					if (isset($run->rPr->u) && !isset($run->rPr->u["val"])) {
-						$objText->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SIGLE);
+						$objText->getFont()->setUnderline(PHPExcel_Style_Font::UNDERLINE_SINGLE);
 					} else if (isset($run->rPr->u) && isset($run->rPr->u["val"])) {
 						$objText->getFont()->setUnderline((string)$run->rPr->u["val"]);
 					}

@@ -38,7 +38,7 @@ class EmpTax {
 	const EMP_TAX_WORK_STATE = 'tax_work_state';
 
 	const TAX_STATUS_MARRIED = "M";
-	const TAX_STATUS_SIGLE = "S";
+	const TAX_STATUS_SINGLE = "S";
 	const TAX_STATUS_NONRESIDENTALIEN = "NRA";
 	const TAX_STATUS_NOTAPPLICABLE = "NA";
 

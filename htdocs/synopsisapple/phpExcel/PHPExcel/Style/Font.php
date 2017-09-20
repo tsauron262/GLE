@@ -39,8 +39,8 @@ class PHPExcel_Style_Font extends PHPExcel_Style_Supervisor implements PHPExcel_
 	const UNDERLINE_NONE					= 'none';
 	const UNDERLINE_DOUBLE					= 'double';
 	const UNDERLINE_DOUBLEACCOUNTING		= 'doubleAccounting';
-	const UNDERLINE_SIGLE					= 'single';
-	const UNDERLINE_SIGLEACCOUNTING		= 'singleAccounting';
+	const UNDERLINE_SINGLE					= 'single';
+	const UNDERLINE_SINGLEACCOUNTING		= 'singleAccounting';
 
 	/**
 	 * Font Name
@@ -427,13 +427,13 @@ class PHPExcel_Style_Font extends PHPExcel_Style_Supervisor implements PHPExcel_
 	 * Set Underline
 	 *
 	 * @param string|boolean $pValue	PHPExcel_Style_Font underline type
-	 *									If a boolean is passed, then TRUE equates to UNDERLINE_SIGLE,
+	 *									If a boolean is passed, then TRUE equates to UNDERLINE_SINGLE,
 	 *										false equates to UNDERLINE_NONE
 	 * @return PHPExcel_Style_Font
 	 */
 	public function setUnderline($pValue = self::UNDERLINE_NONE) {
 		if (is_bool($pValue)) {
-			$pValue = ($pValue) ? self::UNDERLINE_SIGLE : self::UNDERLINE_NONE;
+			$pValue = ($pValue) ? self::UNDERLINE_SINGLE : self::UNDERLINE_NONE;
 		} elseif ($pValue == '') {
 			$pValue = self::UNDERLINE_NONE;
 		}

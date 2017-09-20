@@ -1202,7 +1202,7 @@ YAHOO.widget.Calendar._STYLES = {
 	CSS_WEEKDAY_ROW : "calweekdayrow",
 	CSS_FOOTER : "calfoot",
 	CSS_CALENDAR : "yui-calendar",
-	CSS_SIGLE : "single",
+	CSS_SINGLE : "single",
 	CSS_CONTAINER : "yui-calcontainer",
 	CSS_NAV_LEFT : "calnavleft",
 	CSS_NAV_RIGHT : "calnavright",
@@ -1352,7 +1352,7 @@ YAHOO.widget.Calendar.prototype.init = function(id, containerId, config) {
 	this.initStyles();
 
 	YAHOO.util.Dom.addClass(this.oDomContainer, this.Style.CSS_CONTAINER);	
-	YAHOO.util.Dom.addClass(this.oDomContainer, this.Style.CSS_SIGLE);
+	YAHOO.util.Dom.addClass(this.oDomContainer, this.Style.CSS_SINGLE);
 	
 	this.cellDates = [];
 	this.cells = [];
@@ -2197,9 +2197,9 @@ YAHOO.widget.Calendar.prototype.initStyles = function() {
 		*/
 		CSS_CALENDAR : defStyle.CSS_CALENDAR,
 		/**
-		* @property Style.CSS_SIGLE
+		* @property Style.CSS_SINGLE
 		*/
-		CSS_SIGLE : defStyle.CSS_SIGLE,
+		CSS_SINGLE : defStyle.CSS_SINGLE,
 		/**
 		* @property Style.CSS_CONTAINER
 		*/
@@ -4368,7 +4368,7 @@ YAHOO.widget.CalendarGroup.prototype.configPages = function(type, args, obj) {
 		this._setMonthOnDate(caldate, caldate.getMonth() + p);
 		cal.cfg.setProperty(cfgPageDate, caldate);
 
-		YAHOO.util.Dom.removeClass(cal.oDomContainer, this.Style.CSS_SIGLE);
+		YAHOO.util.Dom.removeClass(cal.oDomContainer, this.Style.CSS_SINGLE);
 		YAHOO.util.Dom.addClass(cal.oDomContainer, groupCalClass);
 
 		if (p===0) {

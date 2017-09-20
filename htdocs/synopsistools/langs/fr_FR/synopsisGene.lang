@@ -12,6 +12,8 @@ BabelKeepToShip = Qté res
 BabelDateSending = Date exp
 BabelRefCustomerOrderShort = Ref. cli.
 
+ListOfMyInterventions=Liste de mes interventions
+
 //GSM BI
 BabelGSMpushECM = Placer dans l'ECM
 BabelGSMDlReport = Rapports statique

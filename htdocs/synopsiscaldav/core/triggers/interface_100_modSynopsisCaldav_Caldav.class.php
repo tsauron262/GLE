@@ -133,7 +133,7 @@ class InterfaceCaldav {
             $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? addslashes($objectDataTemp) : "";
             $objectRappel = (isset($objectRappel) && $objectRappel != "") ? addslashes($objectRappel) : 0;
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
-            dol_syslog("Insert event ".$object->id, 3);
+
             $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."')");
         }
         if ($action == "ACTION_DELETE"){

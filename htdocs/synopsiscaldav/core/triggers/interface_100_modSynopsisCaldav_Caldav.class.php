@@ -127,7 +127,8 @@ class InterfaceCaldav {
         }
         if ($action == "ACTION_CREATE"){
             global $objectUriTemp, $objectEtagTemp, $objectDataTemp, $objectRappel;
-            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : "-".$object->id.".ics";
+            $newUri = $conf->global->MAIN_APPLICATION_TITLE.(defined("CHAINE_CALDAV")? "-".CHAINE_CALDAV : "") ."-".$object->id.".ics";
+            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : $newUri;
             $objectEtag2 = (isset($objectEtagTemp) && $objectEtagTemp != "") ? $objectEtagTemp : random(15);
             $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? addslashes($objectDataTemp) : "";
             $objectRappel = (isset($objectRappel) && $objectRappel != "") ? addslashes($objectRappel) : 0;

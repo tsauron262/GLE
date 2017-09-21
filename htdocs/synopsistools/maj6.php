@@ -80,8 +80,8 @@ elseif (isset($_REQUEST['ok2'])) {
 
     test($db, "Creation contradet extrafields");
     
-        $db->query('UPDATE `' . MAIN_DB_PREFIX . 'document_model` SET `type` = "contract" WHERE `type` = "synopsiscontrat"');
-    test($db, "Modification modele contract");
+        $db->query('DELETE FROM `' . MAIN_DB_PREFIX . 'document_model` WHERE `type` = "synopsiscontrat"');
+    test($db, "Supppression modele contract");
     
     
     $db->query("UPDATE " . MAIN_DB_PREFIX . "menu set Titre = 'Chrono/Process', url = '/synopsischrono/index.php' WHERE Titre = 'Process' AND type ='top'");

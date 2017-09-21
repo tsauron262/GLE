@@ -197,13 +197,15 @@ class synopsisexport {
 
 
 
-        if ($typeAff == "parTypeMat") {
-            $result = $this->db->query("SELECT description, c.id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 ct," . MAIN_DB_PREFIX . "synopsischrono c WHERE c.id = ct.id;");
+        if ($typeAff == "parTypeMat" OR $typeAff == "parTypeMat2") {
+            $result = $this->db->query("SELECT description, Type_garantie, c.id FROM " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 ct," . MAIN_DB_PREFIX . "synopsischrono c WHERE c.id = ct.id;");
 
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
                 $tabT = explode("(", $ligne->description);
                 $description = traiteCarac(trim($tabT[0]), " ");
+                if($typeAff == "parTypeMat2")        
+                        $description .= " (". traiteCarac($ligne->Type_garantie).")";
                 $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
                 foreach($tabT as $resultTab)
                     $tabMateriel[strtoupper($description)][] = $resultTab['s'];

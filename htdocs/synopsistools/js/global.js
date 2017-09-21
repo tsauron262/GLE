@@ -1,6 +1,9 @@
 $(window).on("load", function () {
     activeScroll = false;
     
+    
+    cacherMenuConge();
+    
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if ($("div.tmenudiv").is(':visible') && activeScroll) {
         $(window).resize(function () {
@@ -460,6 +463,11 @@ function traiteScroll(heightDif) {
 //        x: _x
 //    };
 //}
+
+function cacherMenuConge(){
+    $('a[href*="/holiday/list.php"]').parent().parent().hide();
+}
+
 
 
 function ajNoteAjax() {

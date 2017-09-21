@@ -460,7 +460,7 @@ table.tabBorder100 td{
 #id-top, a.tabTitle,
 div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_sel, form.liste_titre, form.liste_titre_sel, table.dataTable thead tr{
 
-    background: rgba(0,0,0,0.4)!important;
+    background: rgba(0,0,0,0.6)!important;
 }
 
 .liste_titre a:not(.select2-choice), .mainmenuaspan,

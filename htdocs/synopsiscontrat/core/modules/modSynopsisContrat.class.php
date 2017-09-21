@@ -118,7 +118,6 @@ class modSynopsisContrat extends DolibarrModules {
     function init() {
         global $conf;
         $sql = array(
-            "DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE type = 'synopsiscontrat' AND entity = " . $conf->entity,
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (
   `annexe_refid` int(11) DEFAULT NULL,
   `contrat_refid` int(11) DEFAULT NULL,
@@ -220,9 +219,17 @@ class modSynopsisContrat extends DolibarrModules {
 )");
 //    $this->dirs[0] = $conf->chrono->dir_output;
 $tabModel = array("contrat_BIMP" => "Modèle BIMP", "contrat_courrierBIMPavenant" => "BIMP Courrier - Avenant", "contrat_courrierBIMPconfirmation" => "BIMP Courrier - Confirmation", "contrat_courrierBIMPrenouvellement" => "BIMP Courrier - Renouvellement", "contrat_courrierBIMPresiliation" => "BIMP Courrier - Resiliation", "contrat_courrierBIMPsignature" => "BIMP Courrier - Signature", "contrat_courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique");
+
+        foreach($tabModel as $result => $nom){
+            $sql[] = "DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '".$result."'";        
+        }
+        
         foreach($tabModel as $result => $nom){
             $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('" . $result . "','contract'," . $conf->entity . ", '".$nom."')";
         }
+        
+        
+            
         return $this->_init($sql);
     }
 

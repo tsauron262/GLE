@@ -450,3 +450,16 @@ table.tabBorder100 td{
     min-height: 300px;
     border: solid black;
 }
+
+
+
+
+
+/*style bimp*/
+.mainmenuaspan, #id-top,
+div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_sel, form.liste_titre, form.liste_titre_sel, table.dataTable thead tr{
+    color: rgb(237,124,28)!important;
+    background: black!important;
+}
+
+/*fstyle bimp*/

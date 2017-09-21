@@ -464,7 +464,7 @@ div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_se
 }
 
 .liste_titre a:not(.select2-choice), .mainmenuaspan,
-tr.liste_titre, a.tabTitle{
+tr.liste_titre, a.tabTitle, div.titre{
         color: rgb(237,124,28)!important;
         font-weight: bold;
 }

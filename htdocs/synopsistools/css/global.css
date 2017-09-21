@@ -458,6 +458,7 @@ table.tabBorder100 td{
 
 /*style bimp*/
 .mainmenuaspan, #id-top, a.tabTitle,
+.liste_titre a:not(.select2-choice),
 div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_sel, form.liste_titre, form.liste_titre_sel, table.dataTable thead tr{
     color: rgb(237,124,28)!important;
     background: black!important;

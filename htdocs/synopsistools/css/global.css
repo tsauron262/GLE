@@ -463,4 +463,8 @@ div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_se
     color: rgb(237,124,28)!important;
     background: black!important;
 }
+.liste_titre a:not(.select2-choice){
+    color: rgb(237,124,28)!important;
+    background: rgba(0,0,0,0.4)!important;
+}
 /*fstyle bimp*/

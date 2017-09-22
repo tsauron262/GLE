@@ -924,10 +924,10 @@ class BDS_SyncProcess extends BDS_Process
 
         if (method_exists($object, 'delete')) {
             $object->do_not_export = 1;
-            if (in_array($object_name, array('Categorie'))) {
+            if (in_array($object_name, array('Categorie', 'Product', 'Commande'))) {
                 $result = $object->delete($this->user);
             } elseif (in_array($object_name, array('Societe'))) {
-                $result = $object->delete($object->id);
+                $result = $object->delete($object->id, $this->user);
             } else {
                 $result = $object->delete();
             }

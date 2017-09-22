@@ -76,8 +76,9 @@ foreach ($search_array_options as $key => $val)
 		$param.='&search_options_'.$tmpkey.'='.urlencode($val);
 	}
 	$mode=0;
-	if (in_array($typ, array('int','double'))) $mode=1;    // Search on a numeric
-	if ($val && ( ($crit != '' && ! in_array($typ, array('select'))) || ! empty($crit)))
+    if (in_array($typ, array('int','double','real'))) $mode=1;    							// Search on a numeric
+    if (in_array($typ, array('sellist')) && $crit != '0' && $crit != '-1') $mode=2;    		// Search on a foreign key int
+    if ($crit != '' && (! in_array($typ, array('select','sellist')) || $crit != '0'))
 	{
 		$filter['ef.'.$tmpkey]=natural_search('ef.'.$tmpkey, $crit, $mode);
 	}
@@ -236,7 +237,7 @@ print "</tr>\n";
 
 print '<tr class="liste_titre">';
 if (! empty($arrayfields['t.ref']['checked']))           print_liste_field_titre($arrayfields['t.ref']['label'],$_SERVER["PHP_SELF"],"t.ref","",$param,"",$sortfield,$sortorder);
-if (! empty($arrayfields['ty.label']['checked']))        print_liste_field_titre($arrayfields['ty.label']['label'],$_SERVER["PHP_SELF"],"t.code","",$param,"",$sortfield,$sortorder);
+if (! empty($arrayfields['ty.label']['checked']))        print_liste_field_titre($arrayfields['ty.label']['label'],$_SERVER["PHP_SELF"],"ty.label","",$param,"",$sortfield,$sortorder);
 // Extra fields
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label))
 {

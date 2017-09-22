@@ -398,6 +398,7 @@ if (empty($reshook))
 						}
 
 						// Now we create same links to contact than the ones found on origin object
+						/* Useless, already into the create
 						if (! empty($conf->global->MAIN_PROPAGATE_CONTACTS_FROM_ORIGIN))
 						{
 						    $originforcontact = $object->origin;
@@ -420,7 +421,7 @@ if (empty($reshook))
 						        }
 						    }
 						    else dol_print_error($resqlcontact);
-						}
+						}*/
 
 						// Hooks
 						$parameters = array('objFrom' => $srcobject);
@@ -1476,7 +1477,7 @@ if ($action == 'create' && $user->rights->commande->creer)
 		print '</td>';
 	} else {
 		print '<td>';
-		print $form->select_company('', 'socid', 's.client = 1 OR s.client = 3', 'SelectThirdParty', 0, 0, null, 0, 'minwidth300');
+		print $form->select_company('', 'socid', '(s.client = 1 OR s.client = 3)', 'SelectThirdParty', 0, 0, null, 0, 'minwidth300');
 		// reload page to retrieve customer informations
 		if (!empty($conf->global->RELOAD_PAGE_ON_CUSTOMER_CHANGE))
 		{

@@ -88,6 +88,8 @@ CREATE TABLE `llx_bds_object_sync_data` (
   `ext_object_name` varchar(128) NOT NULL DEFAULT '',
   `ext_id_object` int(11) NOT NULL DEFAULT '0',
   `status` int(11) NOT NULL DEFAULT '0',
+  `date_add` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

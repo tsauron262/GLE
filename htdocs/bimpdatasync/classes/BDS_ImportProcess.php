@@ -5,6 +5,16 @@ include_once __DIR__ . '/BDS_ImportData.php';
 abstract class BDS_ImportProcess extends BDS_Process
 {
 
+    const BDS_STATUS_IMPORTED = 0;
+    const BDS_STATUS_IMPORTING = 1;
+    const BDS_STATUS_IMPORT_FAIL = -1;
+
+    public static $status_labels = array(
+        0  => 'importé',
+        1  => 'en cours d\'import',
+        -1 => 'échec import'
+    );
+
     // Traitement des objets Dolibarr:
 
     protected function saveObject(&$object, $label = null, $display_success = true, &$errors = null, $notrigger = false)
@@ -178,6 +188,32 @@ abstract class BDS_ImportProcess extends BDS_Process
         }
 
         return false;
+    }
+    
+    protected function executeObjectImport($object_name, $id_object)
+    {
+        $this->Error('Opération "executeObjectImport" non disponible pour ce processus');
+    }
+
+    // Gestion statique des données d'importation des objets: 
+
+    public static function getObjectProcessData($id_process, $id_object, $object_name)
+    {
+        $import_data = new BDS_ImportData();
+        if ($import_data->fetchByObjectId($id_process, $object_name, $id_object)) {
+            $reference = 'Référence d\'import: ';
+            $reference .= $import_data->import_reference ? '"' . $import_data->import_reference . '"' : '(inconnu)';
+            return array(
+                'references'   => $reference,
+                'status_label' => static::$status_labels[(int) $import_data->status],
+                'status_value' => $import_data->status,
+                'date_add'     => (isset($import_data->date_add) && $import_data->date_add ? $import_data->date_add : 0),
+                'date_update'  => (isset($import_data->date_update) && $import_data->date_update ? $import_data->date_update : 0),
+                'actions'      => array(
+                    'import' => 'Importer'
+                )
+            );
+        }
     }
 
     // Gestion des produits: 

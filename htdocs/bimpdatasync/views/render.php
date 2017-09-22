@@ -122,7 +122,7 @@ function renderReportContent(BDS_Report $report)
 
     if (count($report->rows)) {
         $html .= '<div class="reportRowsFilters">';
-        $html .= '<select id="reportRowsFilter" name="reportRowsFilter">
+        $html .= '<select class="reportRowsFilter" name="reportRowsFilter">
                <option value="all">
                   Tout afficher
                </option>
@@ -257,7 +257,7 @@ function renderObjectNotifications($rows, $title)
 
     if (count($rows)) {
         $html .= '<div class="reportRowsFilters">';
-        $html .= '<select id="reportRowsFilter" name="reportRowsFilter">
+        $html .= '<select class="reportRowsFilter" name="reportRowsFilter">
                <option value="all">
                   Tout afficher
                </option>
@@ -282,9 +282,10 @@ function renderObjectNotifications($rows, $title)
     $html .= '<thead>';
     $html .= '<tr>';
     $html .= '<th width="10%">Date</th>';
-    $html .= '<th width="10%">Statut</th>';
     $html .= '<th width="10%">Heure</th>';
-    $html .= '<th width="55%">Message</th>';
+    $html .= '<th width="20%">Origine de l\'opération</th>';
+    $html .= '<th width="10%">Statut</th>';
+    $html .= '<th width="35%">Message</th>';
     $html .= '<th width="15%"></th>';
     $html .= '</tr>';
     $html .= '</thead>';
@@ -299,10 +300,17 @@ function renderObjectNotifications($rows, $title)
     if (count($rows)) {
         $even = true;
         foreach ($rows as $r) {
-            $html .= '<tr class="reportRow' . ($even ? ' even' : '') . '" data-msg_type="' . $r['type'] . '">';
+            $html .= '<tr class="reportRow' . ($even ? ' even' : '') . '"';
+            $html .= ' data-msg_type="' . $r['type'] . '"';
+            $html .= ' data-operation_type="' . $r['operation_type'] . '">';
+
             $html .= '<td width="10%">';
             $html .= '<strong>Le ' . $r['date'] . '<br/>';
             $html .= '</td>';
+
+            $html .= '<td width="10%">' . (isset($r['time']) ? $r['time'] : ' - ') . '</td>';
+
+            $html .= '<td width="20%">' . $r['operation_type_label'] . '</td>';
             $html .= '<td width="10%">';
             switch ($r['type']) {
                 case 'danger':
@@ -323,9 +331,7 @@ function renderObjectNotifications($rows, $title)
             }
             $html .= '</td>';
 
-            $html .= '<td width="10%">' . (isset($r['time']) ? $r['time'] : ' - ') . '</td>';
-
-            $html .= '<td width="55%">';
+            $html .= '<td width="35%">';
             $html .= '<div class="alert alert-' . $r['type'] . '">';
             if (isset($r['msg'])) {
                 $html .= $r['msg'];
@@ -336,7 +342,8 @@ function renderObjectNotifications($rows, $title)
             $html .= '</td>';
             $html .= '<td width="15%">';
             if (isset($r['file_ref']) && $r['file_ref']) {
-                $html .= '<a class="button" href="' . DOL_URL_ROOT . '/bimpdatasync/rapports.php?reportToLoad=' . $r['file_ref'] . '">';
+                $html .= '<a class="button" target="_blank" ';
+                $html .= 'href="' . DOL_URL_ROOT . '/bimpdatasync/rapports.php?reportToLoad=' . $r['file_ref'] . '">';
                 $html .= 'Voir le rapport</a>';
             }
             $html .= '</td>';
@@ -476,5 +483,111 @@ function renderDebugContent($debug_content)
     $html .= '</div>';
     $html .= '</div>';
     $html .= '</div>';
+    return $html;
+}
+
+function renderObjectProcessesData($data)
+{
+    $html = '';
+
+    $html .= '<div id="processesDataContainer">';
+    $html .= '<table class="noborder" width="100%">';
+
+    $html .= '<tr class="liste_titre">';
+    $html .= '<td>Liste des processus</td>';
+    $html .= '</tr>';
+
+    $html .= '<tr>';
+    $html .= '<td>';
+
+    $html .= '<div class="processDataTableContainer">';
+    $html .= '<table class="noborder" style="border: none" width="100%">';
+    $html .= '<thead>';
+    $html .= '<tr>';
+    $html .= '<th style="text-align: left" width="20%">Processus</th>';
+    $html .= '<th style="text-align: left" width="25%">Référence</th>';
+    $html .= '<th style="text-align: left" width="15%">Statut</th>';
+    $html .= '<th style="text-align: left" width="20%">Dernière opération</th>';
+    $html .= '<th style="text-align: left" width="20%"></th>';
+    $html .= '</tr>';
+    $html .= '</thead>';
+    $html .= '<tbody>';
+
+    $html .= renderObjectProcessDataRows($data);
+
+    $html .= '</tbody>';
+    $html .= '</table>';
+    $html .= '</div>';
+
+    $html .= '</td>';
+    $html .= '</tr>';
+    $html .= '</table>';
+
+    $html .= '</div>';
+
+    return $html;
+}
+
+function renderObjectProcessDataRows($data)
+{
+    $html = '';
+    if (count($data)) {
+        $process_url = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=';
+        foreach ($data as $process) {
+            $html .= '<tr>';
+            $html .= '<td>';
+            $html .= '<a href="' . $process_url . $process['id_process'] . '" target="_blank">';
+            $html .= $process['process_name'];
+            $html .= '</a>';
+            $html .= '</td>';
+
+            $html .= '<td>' . $process['data']['references'] . '</td>';
+            $html .= '<td>';
+            $html .= '<span class="';
+            if ((int) $process['data']['status_value'] > 0) {
+                $html .= 'warning';
+            } elseif ((int) $process['data']['status_value'] < 0) {
+                $html .= 'danger';
+            } else {
+                $html .= 'success';
+            }
+            $html .= '">' . $process['data']['status_label'] . '</span>';
+            $html .= '</td>';
+
+            $html .= '<td>';
+
+            if (isset($process['data']['date_update']) && $process['data']['date_update']) {
+                $date = new DateTime($process['data']['date_update']);
+                $html .= 'Le <span style="font-weight: bold">' . $date->format('d / m / Y') . '</span>';
+                $html .= ' à ' . $date->format('H:i:s');
+            } else {
+                $html .= '<span class="warning">Non spécifié</span>';
+            }
+
+            if (isset($process['data']['actions']) && count($process['data']['actions'])) {
+                $html .= '<td>';
+                foreach ($process['data']['actions'] as $name => $label) {
+                    $html .= '<span class="butAction"';
+                    $html .= ' onclick="executeObjectProcess($(this), \'' . $name . '\', ' . $process['id_process'] . ', \'' . $process['object_name'] . '\', ' . $process['id_object'] . ')"';
+                    $html .= '>' . $label . '</span>';
+                }
+                $html .= '</td>';
+            }
+
+            $html .= '</td>';
+            $html .= '</tr>';
+
+            if (isset($process['data']['actions']) && count($process['data']['actions'])) {
+                $html .= '<tr style="display: none">';
+                $html .= '<td colspan="5">';
+                $html .= '<div id="process_' . $process['id_process'] . '_ajaxResult">';
+                $html .= '</div>';
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+        }
+    } else {
+        $html .= '<p class="alert alert-info">Cet objet n\'est impliqué dans aucun processus</p>';
+    }
     return $html;
 }

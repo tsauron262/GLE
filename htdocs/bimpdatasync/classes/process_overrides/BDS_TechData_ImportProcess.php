@@ -218,6 +218,22 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         return $return;
     }
 
+    protected function executeObjectImport($object_name, $id_object)
+    {
+        if ($object_name !== 'Product') {
+            $this->Error('Opération disponible uniquement pour les produits');
+            return;
+        }
+
+        $import_reference = BDS_ImportData::getObjectImportReferenceById($this->db, $this->processDefinition->id, $object_name, $id_object);
+        if (!is_null($import_reference) && $import_reference) {
+            $this->current_object['ref'] = $import_reference;
+            $this->updateProduct($import_reference);
+        } else {
+            $this->Error('Référence d\'import non enregistrée', $this->curId(), $this->curName(), $this->curRef());
+        }
+    }
+
     protected function updateProducts()
     {
         if (is_null($this->references) || !$this->references) {
@@ -359,7 +375,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
                     $msg = 'Echec de la récupération des données depuis le fichier "' . $this->parameters['ftp_file_prices'] . '"';
                     $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
                 } else {
-                    $data['pv_ht'] = (float) trim($row[self::$product_prices['pv_ht']]);                    
+                    $data['pv_ht'] = (float) trim($row[self::$product_prices['pv_ht']]);
                     $data['pa_ht'] = (float) trim($row[self::$product_prices['pa_ht']]) - (float) trim($row[self::$product_prices['pa_reduction']]);
                 }
             }

@@ -23,14 +23,6 @@
     padding: 10px 15px;
 }
 
-.reportTableContainer table thead tr th {
-    padding: 8px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #292964;
-    color: #292964;
-    text-align: left;
-}
-
 .reportRowsContainer {
     max-height: 450px;
     overflow-y: auto;

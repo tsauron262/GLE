@@ -12,6 +12,24 @@ class BDS_Report
     public static $fullRefSyntax = '{date}-{time}_{id_process}_{type}';
     public static $deleteDelay = 'P1M';
     public static $messagesTypes = array('success, info, warning, danger');
+    public static $OperationsTypes = array(
+        'operations' => array(
+            'name'      => 'Opération manuelle',
+            'name_plur' => 'Opérations manuelles'
+        ),
+        'actions'    => array(
+            'name'      => 'Opération automatique',
+            'name_plur' => 'Opérations automatiques'
+        ),
+        'crons'      => array(
+            'name'      => 'Tâche planifiée',
+            'name_plur' => 'Tâches planifiées'
+        ),
+        'requests'   => array(
+            'name'      => 'Requête entrante',
+            'name_plur' => 'Requêtes entrantes'
+        )
+    );
     public static $row_def = array(
         'type'      => 'Statut',
         'time'      => 'Heure',
@@ -34,7 +52,8 @@ class BDS_Report
         'Product'   => 'produit{s}',
         'Categorie' => 'categorie{s}[F]',
         'Societe'   => 'client{s}',
-        'Contact'   => 'contact{s}'
+        'Contact'   => 'contact{s}',
+        'Commande'  => 'commande{s}[F]'
     );
     public $file_ref = 0;
     public $rows = array();
@@ -281,11 +300,11 @@ class BDS_Report
 
     public static function getReportsList()
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
         if (!file_exists($dir)) {
             return array();
         }
-        
+
         $files = scandir($dir);
 
         $reports = array();
@@ -354,9 +373,9 @@ class BDS_Report
         return $reports;
     }
 
-    public static function getObjectNotifications($objectName, $id_object, $from = null, $to = null, $reference = null)
+    public static function getObjectNotifications($objectName, $id_object, $from = null, $to = null, $reference = null, $id_process = null)
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
         if (!file_exists($dir)) {
             return array();
         }
@@ -386,14 +405,30 @@ class BDS_Report
                     continue;
                 }
                 $report = new BDS_Report(null, null, $matches[1]);
+
+                $type = 'operations';
+                if (preg_match(self::$refRegex, $report->file_ref, $matches2)) {
+                    $type = $matches2[1];
+                }
+
+                $type_label = self::$OperationsTypes[$type]['name'];
+
                 foreach ($report->rows as $r) {
                     if ($objectName !== strtolower($r['object'])) {
                         continue;
                     }
+                    if (!is_null($id_process)) {
+                        if ((int) $report->getData('id_process') !== (int) $id_process) {
+                            continue;
+                        }
+                    }
+
                     if (($r['id_object'] && ($id_object == $r['id_object']))) {
                         if (!array_key_exists($report->file_ref, $data)) {
                             $data[$report->file_ref] = array();
                         }
+                        $r['operation_type'] = $type;
+                        $r['operation_type_label'] = $type_label;
                         $data[$report->file_ref][] = $r;
                     }
                 }
@@ -401,13 +436,27 @@ class BDS_Report
         }
 
         krsort($data);
-        return $data;
+
+        $return = array();
+        foreach ($data as $file_ref => $rows) {
+            if (preg_match('/^(\d{4})(\d{2})(\d{2})\-\d{6}.*$/', $file_ref, $matches)) {
+                $date_str = $matches[3] . '/' . $matches[2] . '/' . $matches[1];
+                foreach ($rows as $r) {
+                    $row = $r;
+                    $row['date'] = $date_str;
+                    $row['file_ref'] = $file_ref;
+                    $return[] = $row;
+                }
+            }
+        }
+
+        return $return;
     }
 
     public static function deleteRef($file_ref)
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
-        
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
+
         if (file_exists($dir . $file_ref . '.csv')) {
             unlink($dir . $file_ref . '.csv');
         }
@@ -415,7 +464,7 @@ class BDS_Report
 
     public static function deleteAll()
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
         if (!file_exists($dir)) {
             return;
         }

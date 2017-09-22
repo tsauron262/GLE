@@ -1,7 +1,7 @@
 function setReportEvents() {
-    $('#reportRowsFilter').change(function () {
+    $('select.reportRowsFilter').change(function () {
         var typeClass = $(this).val();
-        $('.reportRowsContainer').find('tbody').find('tr.reportRow').each(function () {
+        $(this).parent('div.reportRowsFilters').parent('td').find('.reportRowsContainer').find('tbody').find('tr.reportRow').each(function () {
             if ((typeClass === 'all') || (typeClass === $(this).data('msg_type'))) {
                 $(this).show();
             } else {

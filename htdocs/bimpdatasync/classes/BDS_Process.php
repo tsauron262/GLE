@@ -119,7 +119,6 @@ abstract class BDS_Process
             }
             if (isset($params['debug_mod']) && !isset($this->options['debug_mode'])) {
                 $this->options['debug_mod'] = (int) $params['debug_mod'];
-                
             }
         }
 
@@ -149,7 +148,7 @@ abstract class BDS_Process
         if (self::$debug_mod) {
             $notifications = ob_get_clean();
             if ($notifications) {
-                $this->debug_content .= '<h4>Notifiactions: </h4>' . $notifications;
+                $this->debug_content .= '<h4>Notifications: </h4>' . $notifications;
                 dol_syslog($notifications, 3);
             }
         }
@@ -175,7 +174,7 @@ abstract class BDS_Process
             'operation_title' => '',
             'debug_content'   => ''
         );
-        
+
         if (is_null($id_operation) || !$id_operation) {
             $errors[] = 'ID de l\'opération absent';
         } else {
@@ -399,7 +398,50 @@ abstract class BDS_Process
         return $return;
     }
 
-    // Outilsde connexion et d'extraction des données:
+    public function executeObjectProcess($action, $object_name, $id_object)
+    {
+        if (!isset($this->options['mode'])) {
+            $this->options['mode'] = 'debug';
+            self::$debug_mod = true;
+            $this->options['debug_mod'] = true;
+        }
+
+        $this->setCurrentObject($object_name, $id_object, '');
+
+        $title = $this->processDefinition->title = $this->processDefinition->title . ' - Objet "' . $object_name . '"';
+        $title .= ' - ID ' . $id_object . ' - Le ' . date('d / m / Y à H:i:s');
+        $this->report = new BDS_Report($this->processDefinition->id, $title, null);
+
+        $method = 'executeObject' . ucfirst($action);
+        if (method_exists($this, $method)) {
+            $this->{$method}($object_name, $id_object);
+        } else {
+            $this->Error('Erreur technique: méthode "' . $method . '" absente');
+        }
+
+        $return = array(
+            'report_rows' => $this->report->rows
+        );
+
+        $this->end();
+
+        if (self::$debug_mod) {
+            $html = '<div class="foldable_section closed">';
+            $html .= '<div class="foldable_section_caption">';
+            $html .= 'Données debug';
+            $html .= '</div>';
+            $html .= '<div class="foldable_section_content" id="debugContent">';
+            $html .= $this->debug_content;
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $return['debug_content'] = $html;
+        }
+
+        return $return;
+    }
+
+    // Outils de connexion et d'extraction des données:
 
     protected function openXML($fileSubDir, $file)
     {
@@ -764,6 +806,40 @@ abstract class BDS_Process
             return class_exists($className);
         }
         return false;
+    }
+
+    // Gestion statique des données objets
+
+    public static function getObjectProcessesData($id_object, $object_name)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $processes = BDSProcess::getListData($bdb);
+
+        $return = array();
+        foreach ($processes as $p) {
+            $className = 'BDS_' . $p['name'] . 'Process';
+            if (!class_exists($className)) {
+                self::loadProcessClass($className);
+            }
+            if (!class_exists($className)) {
+                continue;
+            }
+            if (method_exists($className, 'getObjectProcessData')) {
+                $data = $className::getObjectProcessData($p['id'], $id_object, $object_name);
+                if (!is_null($data)) {
+                    $return[] = array(
+                        'id_process'   => (int) $p['id'],
+                        'process_name' => $p['title'],
+                        'id_object'    => $id_object,
+                        'object_name'  => $object_name,
+                        'data'         => $data
+                    );
+                }
+            }
+        }
+        return $return;
     }
 
     // Installation:

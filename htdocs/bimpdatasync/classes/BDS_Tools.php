@@ -328,4 +328,37 @@ class BDS_Tools
         $date .= self::getValue($name . 'min', '00') . ':00';
         return $date;
     }
+
+    public static function renameFile($dir, $old_name, $new_name)
+    {
+        if (!preg_match('/.+\/$/', $dir)) {
+            $dir .= '/';
+        }
+
+        if (!file_exists($dir . $old_name)) {
+            return false;
+        }
+
+        if (file_exists($dir . $new_name)) {
+            return false;
+        }
+
+        if (!rename($dir . $old_name, $dir . $new_name)) {
+            return false;
+        }
+        if (file_exists($dir . 'thumbs/')) {
+            $old_path = pathinfo($old_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
+            $new_path = pathinfo($new_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
+            $dir .= 'thumbs/';
+            $suffixes = array('_mini', '_small');
+            foreach ($suffixes as $suffix) {
+                $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
+                if (file_exists($old_thumb)) {
+                    $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
+                    rename($old_thumb, $new_thumb);
+                }
+            }
+        }
+        return true;
+    }
 }

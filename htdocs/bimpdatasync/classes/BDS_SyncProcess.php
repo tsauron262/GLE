@@ -6,6 +6,7 @@ class BDS_SyncProcess extends BDS_Process
 {
 
     public static $ext_debug_mod = false;
+    public static $ext_process_name = null;
     public $soap_client = null;
     public $authentication = array();
 
@@ -16,6 +17,16 @@ class BDS_SyncProcess extends BDS_Process
     const BDS_STATUS_EXPORT_FAIL = -1;
     const BDS_STATUS_IMPORT_FAIL = -2;
     const BDS_STATUS_DELETE_FAIL = -3;
+
+    public static $status_labels = array(
+        0  => 'synchronisé',
+        1  => 'en cours d\'export',
+        2  => 'en cours d\'import',
+        3  => 'en cours de suppression',
+        -1 => 'échec export',
+        -2 => 'échec import',
+        -3 => 'échec suppression'
+    );
 
     // Actions SOAP:
 
@@ -680,6 +691,32 @@ class BDS_SyncProcess extends BDS_Process
         return $objects;
     }
 
+    protected function executeObjectExport($object_name, $id_object)
+    {
+        $sync_data = new BDS_SyncData();
+        $sync_data->setLocValues($this->processDefinition->id, $object_name, $id_object);
+        if ($sync_data->loadOrCreate(true)) {
+            if (isset($sync_data->ext_object_name) && $sync_data->ext_object_name) {
+                $this->current_object['ref'] = 'ID externe: ' . ($sync_data->ext_id_object ? $sync_data->ext_id_object : 'inconnu');
+                $sync_data->status = 0;
+                $sync_data->save();
+                $errors = array();
+                $objects = $this->getObjectsExportData($object_name, $sync_data->ext_object_name, array($id_object), $errors);
+                if (!count($errors) && count($objects['list'])) {
+                    $this->soapExportObjects(array($objects), static::$ext_process_name);
+                } else {
+                    foreach ($errors as $e) {
+                        $this->Error($e, $this->curId(), $this->curName(), $this->curRef());
+                    }
+                }
+            } else {
+                $this->Error('Type d\'objet externe non enregistré');
+            }
+        } else {
+            $this->Error('Données de synchronisation non trouvées pour cet objet');
+        }
+    }
+
     // Traitement des objets Dolibarr:
 
     protected function updateObject($object_name, $data, $ext_id_sync_data, $ext_id_process = 0, $ext_object_name = '', $ext_id_object = 0)
@@ -800,11 +837,11 @@ class BDS_SyncProcess extends BDS_Process
                             $msg .= ' d\'ID: ' . $object->id;
                         }
                         $msg .= $this->ObjectError($object);
-                        
+
                         if (!is_null($errors)) {
                             $errors[] = $msg;
                         }
-                        
+
                         $this->Error($msg, $this->curName(), $this->curId(), $this->curRef());
 
                         return false;
@@ -829,7 +866,7 @@ class BDS_SyncProcess extends BDS_Process
                 if (method_exists($object, 'create')) {
                     $result = $object->create($this->user);
                     if ($result <= 0) {
-                        $msg = 'Echec de la création ' . $label;                        
+                        $msg = 'Echec de la création ' . $label;
                         $msg .= $this->ObjectError($object);
                         if (!is_null($errors)) {
                             $errors[] = $msg;
@@ -925,6 +962,29 @@ class BDS_SyncProcess extends BDS_Process
         }
 
         return false;
+    }
+
+    // Gestion statique des données de synchronisation des objets: 
+
+    public static function getObjectProcessData($id_process, $id_object, $object_name)
+    {
+        $sync_data = new BDS_SyncData();
+        $sync_data->setLocValues($id_process, $object_name, $id_object);
+        if ($sync_data->loadOrCreate(true)) {
+            $reference = 'Object externe: ';
+            $reference .= $sync_data->ext_object_name ? '"' . $sync_data->ext_object_name . '"' : '(inconnu)';
+            $reference .= ', ID: ' . ($sync_data->ext_id_object ? $sync_data->ext_id_object : 'iconnu');
+            return array(
+                'references'   => $reference,
+                'status_label' => static::$status_labels[(int) $sync_data->status],
+                'status_value' => $sync_data->status,
+                'date_add'     => $sync_data->date_add,
+                'date_update'  => $sync_data->date_update,
+                'actions'      => array(
+                    'export' => 'Exporter'
+                )
+            );
+        }
     }
 
     // Outils de traitement des Catégories et Produits:

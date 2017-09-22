@@ -61,7 +61,7 @@ if (isset($_POST['searchSubmit'])) {
     }
 }
 
-print load_fiche_titre('Repports des processus d\'import / export / synchronisation des données', '', 'title_generic.png');
+print load_fiche_titre('Rapports des processus d\'import / export / synchronisation des données', '', 'title_generic.png');
 
 $reports = BDS_Report::getReportsList();
 $processes = BDSProcess::getProcessesQuery();
@@ -252,20 +252,7 @@ if (isset($_POST['searchSubmit'])) {
         if (!function_exists('renderObjectNotifications')) {
             require_once __DIR__ . '/views/render.php';
         }
-        $data = array();
-        foreach (BDS_Report::getObjectNotifications($_POST['searchObject'], (int) $_POST['searchIdObject'], $searchDateFrom, $searchDateTo) as $file_ref => $rows) {
-            $date = '';
-            if (preg_match('/^(\d{4})(\d{2})(\d{2})\-\d{6}.*$/', $file_ref, $matches)) {
-                $date = $matches[3] . '/' . $matches[2] . '/' . $matches[1];
-                foreach ($rows as $r) {
-                    $row = $r;
-                    $row['date'] = $date;
-                    $row['file_ref'] = $file_ref;
-                    $data[] = $row;
-                }
-            }
-        }
-
+        $data = BDS_Report::getObjectNotifications($_POST['searchObject'], (int) $_POST['searchIdObject'], $searchDateFrom, $searchDateTo);
         $title = 'Résultats de recherche pour "' . BDS_Tools::makeObjectName($bdb, $_POST['searchObject'], (int) $_POST['searchIdObject']) . '"';
         $title .= ' du ' . $_POST['searchDateFrom'] . ' au ' . $_POST['searchDateTo'];
         echo renderObjectNotifications($data, $title);

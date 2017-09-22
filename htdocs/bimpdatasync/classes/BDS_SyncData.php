@@ -12,6 +12,9 @@ class BDS_SyncData
     public $ext_object_name = '';
     public $ext_id_object = 0;
     public $status = 0;
+    public $date_add = '';
+    public $date_update = '';
+    
     protected $objects = array();
     protected $db;
     protected static $table = 'bds_object_sync_data';
@@ -376,7 +379,7 @@ class BDS_SyncData
         $where .= ' AND `loc_object_name` = \'' . $object_name . '\'';
 
         $rows = $db->getRows(self::$table, $where, null, 'array');
-        
+
         $objects = array();
         if (!is_null($rows)) {
             foreach ($rows as $r) {

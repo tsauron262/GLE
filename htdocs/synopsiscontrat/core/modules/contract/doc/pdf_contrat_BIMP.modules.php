@@ -13,7 +13,7 @@
   \author     Christian CONSTANTIN-BERTIN
   \version    $Id: pdf_contrat_bimp.modules.php,v 1.121 2011/08/07  $
  */
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
@@ -97,6 +97,12 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
       \return        int             1=ok, 0=ko
      */
     function write_file($contrat, $outputlangs = '') {
+        if(get_class($contrat) != "Synopsis_Contrat"){
+            require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php");
+            $contratOld = $contrat;
+            $contrat = new Synopsis_Contrat($this->db);
+            $contrat->fetch($contratOld->id);
+        }
         global $user, $langs, $conf;
 
         $afficherPrix = false;
@@ -110,7 +116,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
-        if ($conf->synopsiscontrat->dir_output) {
+        if ($conf->contrat->dir_output) {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (!is_object($contrat)) {
                 $id = $contrat;
@@ -126,11 +132,11 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
             // Definition de $dir et $file
             if (isset($contrat->specimen) && $contrat->specimen) {
-                $dir = $conf->synopsiscontrat->dir_output;
+                $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
+                $dir = $conf->contrat->dir_output . "/" . $propref;
                 $file = $dir . "/" . $propref . "_" . date("d-m-y") . ".pdf";
             }
             $this->contrat = $contrat;
@@ -574,7 +580,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                 $pdf->AddPage();
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
 
-
+echo
                 //Titre Page 1
                 $pdf->SetXY(59, 32);
                 $pdf->SetFont('', 'B', 12);
@@ -750,6 +756,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                                 $pdf->SetDrawColor(209, 221, 255);
                                 $type = "Tickets";
                             }
+                            
                             if ($val->prodContrat->extra_Type_PDF) {
                                 $type = $val->prodContrat->extra_Type_PDF;
                             }
@@ -819,7 +826,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 $this->_pagefoot($pdf, $contrat, $outputlangs);
 
 
-                require_once DOL_DOCUMENT_ROOT . '/core/modules/synopsiscontrat/doc/annexe.class.php';
+                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs);
                 $classAnnexe->getAnnexeContrat($contrat);
                 
@@ -846,7 +853,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
                 $pdf->Close();
-
+                
                 $this->file = $file;
                 $pdf->Output($file, 'F');
 
@@ -857,6 +864,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
             } else {
                 $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
                 ////$langs->setPhpLang();    // On restaure langue session
+                
                 return 0;
             }
         } else {

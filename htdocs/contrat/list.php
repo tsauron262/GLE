@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2001-2004 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2015 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2013      Cédric Salvador      <csalvador@gpcsolutions.fr>
  * Copyright (C) 2014      Juanjo Menent        <jmenent@2byte.es>
@@ -29,8 +29,9 @@
  */
 
 require ("../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
+require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
@@ -45,6 +46,10 @@ $show_files=GETPOST('show_files','int');
 $confirm=GETPOST('confirm','alpha');
 $toselect = GETPOST('toselect', 'array');
 
+$dfmonth=GETPOST('dfmonth')?GETPOST('dfmonth'):date("n");
+$dfyear=GETPOST('dfyear');
+$filter_op2df=GETPOST('filter_op2df');
+
 $search_name=GETPOST('search_name');
 $search_town=GETPOST('search_town','alpha');
 $search_zip=GETPOST('search_zip','alpha');
@@ -52,6 +57,7 @@ $search_state=trim(GETPOST("search_state"));
 $search_country=GETPOST("search_country",'int');
 $search_type_thirdparty=GETPOST("search_type_thirdparty",'int');
 $search_contract=GETPOST('search_contract');
+$search_ref_customer=GETPOST('search_ref_customer','alpha');
 $search_ref_supplier=GETPOST('search_ref_supplier','alpha');
 $sall=GETPOST('sall', 'alphanohtml');
 $search_status=GETPOST('search_status');
@@ -80,6 +86,8 @@ if (! $sortorder) $sortorder='DESC';
 $id=GETPOST('id','int');
 if ($user->societe_id) $socid=$user->societe_id;
 $result = restrictedArea($user, 'contrat', $id);
+
+$diroutputmassaction=$conf->contrat->dir_output . '/temp/massgeneration/'.$user->id;
 
 $staticcontrat=new Contrat($db);
 $staticcontratligne=new ContratLigne($db);
@@ -120,6 +128,7 @@ $arrayfields=array(
     'c.date_contrat'=>array('label'=>$langs->trans("DateContract"), 'checked'=>1),
     'c.datec'=>array('label'=>$langs->trans("DateCreation"), 'checked'=>0, 'position'=>500),
     'c.tms'=>array('label'=>$langs->trans("DateModificationShort"), 'checked'=>0, 'position'=>500),
+    'first_date_fin_validite'=>array('label'=>"1er ".$langs->trans("DateEndPlannedShort"), 'checked'=>1, 'position'=>900),
     'status'=>array('label'=>$langs->trans("Status"), 'checked'=>1, 'position'=>1000),
 );
 // Extra fields
@@ -136,8 +145,8 @@ if (is_array($extrafields->attribute_label) && count($extrafields->attribute_lab
  * Action
  */
 
-if (GETPOST('cancel')) { $action='list'; $massaction=''; }
-if (! GETPOST('confirmmassaction') && $massaction != 'presend' && $massaction != 'confirm_presend') { $massaction=''; }
+if (GETPOST('cancel','alpha')) { $action='list'; $massaction=''; }
+if (! GETPOST('confirmmassaction','alpha') && $massaction != 'presend' && $massaction != 'confirm_presend') { $massaction=''; }
 
 $parameters=array('socid'=>$socid);
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
@@ -151,6 +160,9 @@ if (GETPOST('button_removefilter_x','alpha') || GETPOST('button_removefilter.x',
 	$day='';
 	$month='';
 	$year='';
+	$dfmonth='';
+	$dfyear='';
+        $filter_op2df='';
     $search_name="";
 	$search_town='';
 	$search_zip="";
@@ -158,6 +170,7 @@ if (GETPOST('button_removefilter_x','alpha') || GETPOST('button_removefilter.x',
 	$search_type='';
 	$search_country='';
 	$search_contract="";
+	$search_ref_customer="";
 	$search_ref_supplier="";
     $search_user='';
     $search_sale='';
@@ -184,7 +197,8 @@ if (empty($reshook))
  */
 
 $now=dol_now();
-$form=new Form($db);
+$form = new Form($db);
+$formfile = new FormFile($db);
 $formother = new FormOther($db);
 $socstatic = new Societe($db);
 $contracttmp = new Contrat($db);
@@ -196,6 +210,7 @@ $sql.= " c.rowid, c.ref, c.datec as date_creation, c.tms as date_update, c.date_
 $sql.= ' s.rowid as socid, s.nom as name, s.town, s.zip, s.fk_pays, s.client, s.code_client,';
 $sql.= " typent.code as typent_code,";
 $sql.= " state.code_departement as state_code, state.nom as state_name,";
+$sql.= " MIN(CASE WHEN cd.statut=4 THEN cd.date_fin_validite END) as first_date_fin_validite,";
 $sql.= ' SUM('.$db->ifsql("cd.statut=0",1,0).') as nb_initial,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NULL OR cd.date_fin_validite >= '".$db->idate($now)."')",1,0).') as nb_running,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NOT NULL AND cd.date_fin_validite < '".$db->idate($now)."')",1,0).') as nb_expired,';
@@ -241,6 +256,7 @@ else if ($year > 0)
 }
 if ($search_name) $sql .= natural_search('s.nom', $search_name);
 if ($search_contract) $sql .= natural_search(array('c.rowid', 'c.ref'), $search_contract);
+if (!empty($search_ref_customer)) $sql .= natural_search(array('c.ref_customer'), $search_ref_customer);
 if (!empty($search_ref_supplier)) $sql .= natural_search(array('c.ref_supplier'), $search_ref_supplier);
 if ($search_sale > 0)
 {
@@ -255,8 +271,9 @@ foreach ($search_array_options as $key => $val)
     $tmpkey=preg_replace('/search_options_/','',$key);
     $typ=$extrafields->attribute_type[$tmpkey];
     $mode=0;
-    if (in_array($typ, array('int','double'))) $mode=1;    // Search on a numeric
-    if ($val && ( ($crit != '' && ! in_array($typ, array('select'))) || ! empty($crit)))
+    if (in_array($typ, array('int','double','real'))) $mode=1;    							// Search on a numeric
+    if (in_array($typ, array('sellist')) && $crit != '0' && $crit != '-1') $mode=2;    		// Search on a foreign key int
+    if ($crit != '' && (! in_array($typ, array('select','sellist')) || $crit != '0'))
     {
         $sql .= natural_search('ef.'.$tmpkey, $crit, $mode);
     }
@@ -270,15 +287,17 @@ $sql.= " GROUP BY c.rowid, c.ref, c.datec, c.tms, c.date_contrat, c.statut, c.re
 $sql.= ' s.rowid, s.nom, s.town, s.zip, s.fk_pays, s.client, s.code_client,';
 $sql.= " typent.code,";
 $sql.= " state.code_departement, state.nom";
-// Add where from extra fields
-foreach ($extrafields->attribute_label as $key => $val)
-{
-    $sql .= ', ef.'.$key;
-}
+// Add fields from extrafields
+foreach ($extrafields->attribute_label as $key => $val) $sql.=($extrafields->attribute_type[$key] != 'separate' ? ",ef.".$key : '');
 // Add where from hooks
 $parameters=array();
 $reshook=$hookmanager->executeHooks('printFieldListGroupBy',$parameters);    // Note that $action and $object may have been modified by hook
 $sql.=$hookmanager->resPrint;
+
+if ($dfyear > 0)
+{
+    $sql.= " HAVING first_date_fin_validite ".$filter_op2df."= '".$db->idate(($filter_op2df == "<" ? dol_get_last_day($dfyear,$dfmonth,false) : dol_get_first_day($dfyear,$dfmonth,false)))."'";
+}
 
 $sql.= $db->order($sortfield,$sortorder);
 
@@ -333,8 +352,8 @@ if ($resql)
 
     // List of mass actions available
     $arrayofmassactions =  array(
-        //'presend'=>$langs->trans("SendByMail"),
-        //'builddoc'=>$langs->trans("PDFMerge"),
+        'presend'=>$langs->trans("SendByMail"),
+        'builddoc'=>$langs->trans("PDFMerge"),
     );
     if ($user->rights->contrat->supprimer) $arrayofmassactions['delete']=$langs->trans("Delete");
     if ($massaction == 'presend') $arrayofmassactions=array();
@@ -350,6 +369,16 @@ if ($resql)
 	print '<input type="hidden" name="page" value="'.$page.'">';
 
     print_barre_liste($langs->trans("ListOfContracts"), $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $totalnboflines, 'title_commercial.png', 0, '', '', $limit);
+
+    if ($massaction == 'presend')
+    {
+    	$topicmail="SendContractRef";
+    	$modelmail="contract";
+    	$objecttmp=new Contrat($db);
+    	$trackid='con'.$object->id;
+
+    	include DOL_DOCUMENT_ROOT.'/core/tpl/massactions_form.tpl.php';
+    }
 
 	if ($sall)
     {
@@ -416,13 +445,13 @@ if ($resql)
     if (! empty($arrayfields['c.ref_customer']['checked']))
     {
         print '<td class="liste_titre">';
-        print '<input type="text" class="flat" size="6" name="search_ref_customer value="'.dol_escape_htmltag($search_ref_customer).'">';
+        print '<input type="text" class="flat" size="6" name="search_ref_customer" value="'.dol_escape_htmltag($search_ref_customer).'">';
         print '</td>';
     }
     if (! empty($arrayfields['c.ref_supplier']['checked']))
     {
         print '<td class="liste_titre">';
-        print '<input type="text" class="flat" size="6" name="search_ref_supplier value="'.dol_escape_htmltag($search_ref_supplier).'">';
+        print '<input type="text" class="flat" size="6" name="search_ref_supplier" value="'.dol_escape_htmltag($search_ref_supplier).'">';
         print '</td>';
     }
     if (! empty($arrayfields['s.nom']['checked']))
@@ -511,6 +540,18 @@ if ($resql)
         print '<td class="liste_titre">';
         print '</td>';
     }
+    // 1er Date de fin
+    if (! empty($arrayfields['first_date_fin_validite']['checked']))
+    {
+            print '<td class="liste_titre" align="center">';
+            $arrayofoperators=array('<'=>'<','>'=>'>');
+            print $form->selectarray('filter_op2df',$arrayofoperators,$filter_op2df,0);
+            print '</br>';
+            print $formother->select_month($dfmonth,'dfmonth');
+            print ' ';
+            $formother->select_year($dfyear,'dfyear',1, 20, 5);
+            print '</td>';
+    }
     // Status
     if (! empty($arrayfields['status']['checked']))
     {
@@ -554,6 +595,7 @@ if ($resql)
     print $hookmanager->resPrint;
 	if (! empty($arrayfields['c.datec']['checked']))     print_liste_field_titre($arrayfields['c.datec']['label'],$_SERVER["PHP_SELF"],"c.date_creation","",$param,'align="center" class="nowrap"',$sortfield,$sortorder);
 	if (! empty($arrayfields['c.tms']['checked']))       print_liste_field_titre($arrayfields['c.tms']['label'],$_SERVER["PHP_SELF"],"c.tms","",$param,'align="center" class="nowrap"',$sortfield,$sortorder);
+    if (! empty($arrayfields['first_date_fin_validite']['checked']))       print_liste_field_titre($arrayfields['first_date_fin_validite']['label'],$_SERVER["PHP_SELF"],"first_date_fin_validite","",$param,'align="center" class="nowrap"',$sortfield,$sortorder);
     if (! empty($arrayfields['status']['checked']))
     {
         print_liste_field_titre($staticcontratligne->LibStatut(0,3), '', '', '', '', 'width="16"');
@@ -585,6 +627,13 @@ if ($resql)
                 print '<a href="'.DOL_URL_ROOT.'/contrat/note.php?id='.$obj->rowid.'">'.img_picto($langs->trans("ViewPrivateNote"),'object_generic').'</a>';
                 print '</span>';
             }
+
+            $filename=dol_sanitizeFileName($obj->ref);
+            $filedir=$conf->contrat->dir_output . '/' . dol_sanitizeFileName($obj->ref);
+            $urlsource=$_SERVER['PHP_SELF'].'?id='.$obj->rowid;
+            print $formfile->getDocumentsLink($contracttmp->element, $filename, $filedir);
+            print '</td>';
+
             print '</td>';
         }
         if (! empty($arrayfields['c.ref_customer']['checked']))
@@ -721,6 +770,14 @@ if ($resql)
             print '</td>';
             if (! $i) $totalarray['nbfield']++;
         }
+        // Date 1er date fin
+        if (! empty($arrayfields['first_date_fin_validite']['checked']))
+        {
+            print '<td align="center" class="nowrap">';
+            print dol_print_date($db->jdate($obj->first_date_fin_validite), 'day');
+            print '</td>';
+            if (! $i) $totalarray['nbfield']++;
+        }
         // Status
         if (! empty($arrayfields['status']['checked']))
         {
@@ -749,6 +806,25 @@ if ($resql)
     print '</div>';
 
     print '</form>';
+
+    if ($massaction == 'builddoc' || $action == 'remove_file' || $show_files)
+    {
+    	/*
+    	 * Show list of available documents
+    	 */
+    	$urlsource=$_SERVER['PHP_SELF'].'?sortfield='.$sortfield.'&sortorder='.$sortorder;
+    	$urlsource.=str_replace('&amp;','&',$param);
+
+    	$filedir=$diroutputmassaction;
+    	$genallowed=$user->rights->contrat->lire;
+    	$delallowed=$user->rights->contrat->lire;
+
+    	print $formfile->showdocuments('massfilesarea_contract','',$filedir,$urlsource,0,$delallowed,'',1,1,0,48,1,$param,$title,'');
+    }
+    else
+    {
+    	print '<br><a name="show_files"></a><a href="'.$_SERVER["PHP_SELF"].'?show_files=1'.$param.'#show_files">'.$langs->trans("ShowTempMassFilesArea").'</a>';
+    }
 }
 else
 {

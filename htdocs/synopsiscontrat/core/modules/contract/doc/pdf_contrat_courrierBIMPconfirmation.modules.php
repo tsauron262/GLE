@@ -17,7 +17,7 @@
   * BIMP-ERP-1.2
   */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
@@ -91,7 +91,7 @@ class pdf_contrat_courrierBIMPconfirmation extends ModeleSynopsiscontrat
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
-        if ($conf->synopsiscontrat->dir_output)
+        if ($conf->contrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (! is_object($contrat))
@@ -110,11 +110,11 @@ class pdf_contrat_courrierBIMPconfirmation extends ModeleSynopsiscontrat
             // Definition de $dir et $file
             if ($contrat->specimen)
             {
-                $dir = $conf->synopsiscontrat->dir_output;
+                $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
+                $dir = $conf->contrat->dir_output . "/" . $propref;
                 $file = $dir ."/Courrier_confirmation_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;

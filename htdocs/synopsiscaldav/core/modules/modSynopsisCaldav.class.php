@@ -146,11 +146,11 @@ IF(fk_target, fk_target, '0') as ctag, 'Calendrier BIMP-ERP' as description, 0 a
 //        . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, e.`fk_user_action` as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `" . MAIN_DB_PREFIX . "actioncomm` e, " . MAIN_DB_PREFIX . "synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 3 MONTH > now());");
           . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, sequence, etag, uri, agendaplus, participentExt, organisateur, IF(ar.fk_element, ar.fk_element, e.`fk_user_action`) as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, UNIX_TIMESTAMP(e.`datec`) as CREATED, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `" . MAIN_DB_PREFIX . "actioncomm` e LEFT JOIN " . MAIN_DB_PREFIX . "actioncomm_resources ar ON ar.fk_actioncomm = e.id AND ar.element_type = 'user', " . MAIN_DB_PREFIX . "synopsiscaldav_event WHERE fk_object = e.id AND e.`datep2` + INTERVAL 24 MONTH > now()  AND fk_action NOT IN (3,8,9,10,30,31,40));");
     
-    global $db;
+    global $db, $conf;
     $sql2 = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."actioncomm WHERE id NOT IN (SELECT `fk_object` FROM `".MAIN_DB_PREFIX."synopsiscaldav_event`) ");
     if($sql2){
         while($result = $db->fetch_object($sql2)){
-                $sql[] ="INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object) VALUES ('".random2(15)."', '-".$result->id.".ics', '".$result->id."')";
+                $sql[] ="INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object) VALUES ('".random2(15)."', '".$conf->global->MAIN_APPLICATION_TITLE.(defined("CHAINE_CALDAV")? "-".CHAINE_CALDAV : "")."-".$result->id.".ics', '".$result->id."')";
         }
     }
     

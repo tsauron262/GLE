@@ -4,7 +4,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -14,21 +14,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-*/
-/*
-  * BIMP-ERP by DRSI & Synopsis
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+  * BIMP-ERP by Synopsis et DRSI
   *
-  * Author: SAURON Tommy <tommy@drsi.fr>
+  * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.synopsis-erp.com
+  * Infos on http://www.finapro.fr
   *
-  */
-/*
+  *//*
  * or see http://www.gnu.org/
  */
 
@@ -41,15 +38,15 @@
 */
 
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php');
-require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
+require_once(DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php');
 
 
 /**
-        \class      ModeleSynopsiscontrat
+        \class      ModeleSynopsiscontratGA
         \brief      Classe mere des modeles de deplacement
 */
 
-class ModeleSynopsiscontrat extends CommonDocGenerator
+class ModeleSynopsiscontratGA extends CommonDocGenerator
 {
     var $error='';
 
@@ -66,9 +63,9 @@ class ModeleSynopsiscontrat extends CommonDocGenerator
     /**
      *      \brief      Renvoi la liste des modeles actifs
      */
-    static function liste_modeles($db, $maxfilenamelength = 0)
+    function liste_modeles($db)
     {
-        $type='synopsiscontrat';
+        $type='contratGA';
         $liste=array();
         $sql ="SELECT nom as id, ifnull(libelle,nom) as lib";
         $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
@@ -109,62 +106,74 @@ class ModeleSynopsiscontrat extends CommonDocGenerator
         \param        outputlangs        objet lang a utiliser pour traduction
         \return     int             0 si KO, 1 si OK
 */
-function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
+function contratGA_pdf_create($db, $id, $modele='', $outputlangs='')
 {
-    global $langs, $conf;
-    $langs->load("babel");
+    global $langs;
+    $langs->load("synopsisGene@synopsistools");
     $langs->load("contracts");
 
-    $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/doc/";
+    $dir = DOL_DOCUMENT_ROOT."/synopsiscontrat/core/modules/synopsiscontrat/";
     $modelisok=0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser
-    $file = "pdf_contrat_".$modele.".modules.php";
+    $file = "pdf_contratGA_".$modele.".modules.php";
     if ($modele && file_exists($dir.$file)) $modelisok=1;
 
     // Si model pas encore bon
     if (! $modelisok)
     {
-        if (isset($conf->global->SYNOPSIS_CONTRAT_ADDON_PDF))
-            $modele = $conf->global->SYNOPSIS_CONTRAT_ADDON_PDF;
-        $file = "pdf_contrat_".$modele.".modules.php";
+        if ($conf->global->CONTRATGA_ADDON_PDF) $modele = $conf->global->CONTRATGA_ADDON_PDF;
+        $file = "pdf_contratGA_".$modele.".modules.php";
         if (file_exists($dir.$file)) $modelisok=1;
     }
     // Si model pas encore bon
     if (! $modelisok)
     {
         $liste=array();
-        $model=new ModeleSynopsiscontrat();
+        $model=new ModeleSynopsiscontratGA();
         $liste=$model->liste_modeles($db);
         $modele=key($liste);        // Renvoie premiere valeur de cle trouve dans le tableau
-        $file = "pdf_contrat_".$modele.".modules.php";
+        $file = "pdf_contratGA_".$modele.".modules.php";
         if (file_exists($dir.$file)) $modelisok=1;
     }
+
 
     // Charge le modele
     if ($modelisok)
     {
-        $classname = "pdf_contrat_".$modele;
+        $classname = "pdf_contratGA_".$modele;
         require_once($dir.$file);
-
-//        $requete = "UPDATE ".MAIN_DB_PREFIX."contrat SET modelPdf= '".$modele."' WHERE rowid=".$id;
-//        $db->query($requete);
+        $requete = "UPDATE ".MAIN_DB_PREFIX."contrat SET modelPdf= '".$modele."' WHERE rowid=".$id;
+        $db->query($requete);
         $obj = new $classname($db);
-
         if ($obj->write_file($id, $outputlangs) > 0)
         {
             // on supprime l'image correspondant au preview
-            contrat_delete_preview($db, $id);
+            contratGA_delete_preview($db, $id);
+
+            global $user,$langs, $conf;
+            require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contratMixte.class.php");
+            $contrat=getContratObj($id);
+            $contrat->fetch($id);
+
+            // Appel des triggers
+            include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+            $interface=new Interfaces($db);
+            $contrat->file = $obj->file;
+            $result=$interface->run_triggers('ECM_GENCONTRAT',$contrat,$user,$langs,$conf);
+            if ($result < 0) { $error++; $this->errors=$interface->errors; }
+            // Fin appel triggers
+
             return 1;
         } else {
-            dol_syslog("Erreur dans contrat_pdf_create");
+            dol_syslog("Erreur dans contratGA_pdf_create");
             dol_print_error($db,$obj->pdferror());
             return 0;
         }
     } else {
-        if (!isset($conf->global->SYNOPSIS_CONTRAT_ADDON_PDF))
+        if (! $conf->global->CONTRATGA_ADDON_PDF)
         {
-            print $langs->trans("Error")." ".$langs->trans("Error_SYNOPSIS_CONTRAT_ADDON_PDF_NotDefined :" .$modele);
+            print $langs->trans("Error")." ".$langs->trans("Error_contratGA_ADDON_PDF_NotDefined");
         } else {
             print $langs->trans("Error")." ".$langs->trans("ErrorFileDoesNotExists",$dir.$file);
         }
@@ -180,22 +189,22 @@ function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
    \param        propalid    id de la propal e effacer
    \param     propalref reference de la propal si besoin
 */
-function contrat_delete_preview($db, $contratid, $contratref='')
+function contratGA_delete_preview($db, $contratGAid, $contratGAref='')
 {
         global $langs,$conf;
 
-        if (!$contratref)
+        if (!$contratGAref)
         {
-            $contrat = new Contrat($db);
-            $contrat->fetch($contratid);
-            $contratref = $contrat->ref;
+            $contratGA = new ContratGA($db);
+            $contratGA->fetch($contratGAid);
+            $contratGAref = $contratGA->ref;
         }
 
-        if ($conf->contrat->dir_output)
+        if ($conf->CONTRATGA->dir_output)
         {
-            $contratref = sanitize_string($contratref);
-            $dir = $conf->contrat->dir_output . "/" . $contratref ;
-            $file = $dir . "/" . $contratref . ".pdf.png";
+            $contratGAref = sanitize_string($contratGAref);
+            $dir = $conf->CONTRATGA->dir_output . "/" . $contratGAref ;
+            $file = $dir . "/" . $contratGAref . ".pdf.png";
             $multiple = $file . ".";
 
             if ( file_exists( $file ) && is_writable( $file ) )
@@ -205,9 +214,7 @@ function contrat_delete_preview($db, $contratid, $contratref='')
                         $this->error=$langs->trans("ErrorFailedToOpenFile",$file);
                         return 0;
                     }
-            }
-            else
-            {
+            } else {
                 for ($i = 0; $i < 20; $i++)
                 {
                     $preview = $multiple.$i;
@@ -231,7 +238,7 @@ function contrat_delete_preview($db, $contratid, $contratref='')
             \brief      Classe mere des modeles de numerotation des references de commandes
 */
 
-class ModeleNumRefSynopsiscontrat
+class ModeleNumRefContratGA
 {
     var $error='';
 
@@ -242,7 +249,7 @@ class ModeleNumRefSynopsiscontrat
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("babel");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoDescription");
     }
 
@@ -253,7 +260,7 @@ class ModeleNumRefSynopsiscontrat
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("babel");
+        $langs->load("synopsisGene@synopsistools");
         return $langs->trans("NoExample");
     }
 

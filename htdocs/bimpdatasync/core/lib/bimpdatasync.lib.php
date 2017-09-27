@@ -90,6 +90,27 @@ function process_prepare_head($objsoc)
         $h++;
     }
 
+    $head[$h][0] = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $objsoc->id . '&tab=objects';
+    switch ($objsoc->type) {
+        case 'sync':
+            $head[$h][1] = $langs->trans("Objets synchronisés");
+            break;
+
+        case 'import':
+            $head[$h][1] = $langs->trans("Objets importés");
+            break;
+
+        case 'export':
+            $head[$h][1] = $langs->trans("Objets exportés");
+            break;
+        
+        default:
+            $head[$h][1] = $langs->trans("Objets");
+            break;
+    }
+    $head[$h][2] = 'objects';
+    $h++;
+
 //    complete_head_from_modules($conf, $langs, $objsoc, $head, $h, 'chrono');
 
     return $head;

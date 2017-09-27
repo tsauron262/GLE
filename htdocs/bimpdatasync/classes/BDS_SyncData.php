@@ -14,7 +14,6 @@ class BDS_SyncData
     public $status = 0;
     public $date_add = '';
     public $date_update = '';
-    
     protected $objects = array();
     protected $db;
     protected static $table = 'bds_object_sync_data';
@@ -373,10 +372,21 @@ class BDS_SyncData
         }
     }
 
-    public static function getObjectsList(BimpDb $db, $id_process, $object_name)
+    public static function getObjectsList(BimpDb $db, $id_process = null, $object_name = null)
     {
-        $where = '`loc_id_process` = ' . (int) $id_process;
-        $where .= ' AND `loc_object_name` = \'' . $object_name . '\'';
+        $where = '';
+
+        $first = true;
+        if (!is_null($id_process)) {
+            $where .= '`loc_id_process` = ' . (int) $id_process;
+            $first = false;
+        }
+        if (!is_null($object_name)) {
+            if (!$first) {
+                $where .= ' AND ';
+            }
+            $where .= '`loc_object_name` = \'' . $object_name . '\'';
+        }
 
         $rows = $db->getRows(self::$table, $where, null, 'array');
 
@@ -389,6 +399,75 @@ class BDS_SyncData
                     'id_sync_data'  => (int) $r['id']
                 );
             }
+        }
+        return $objects;
+    }
+
+    public static function getAllObjectsList(BimpDb $db, $id_process = null, $order_by = 'date_update', $order_way = 'desc')
+    {
+        ini_set('display_errors', 1);
+        $where = '';
+        if (!is_null($id_process)) {
+            $where .= '`loc_id_process` = ' . (int) $id_process;
+        }
+
+        $rows = $db->getRows(self::$table, $where, null, 'object');
+
+        $objects = array();
+
+        if (!is_null($rows)) {
+            foreach ($rows as $obj) {
+                if (!array_key_exists($obj->loc_object_name, $objects)) {
+                    $objects[$obj->loc_object_name] = array(
+                        'name'       => $obj->loc_object_name,
+                        'label'      => BDS_Report::getObjectLabel($obj->loc_object_name, false),
+                        'label_plur' => BDS_Report::getObjectLabel($obj->loc_object_name, true),
+                        'list'       => array()
+                    );
+                }
+                $data = array(
+                    'id_sync_data'  => $obj->id,
+                    'date_add'      => $obj->date_add,
+                    'date_update'   => $obj->date_update,
+                    'id_object'     => $obj->loc_id_object,
+                    'ext_id_object' => $obj->ext_id_object,
+                    'ext_object_name'    => $obj->ext_object_name,
+                    'status'        => $obj->status
+                );
+                $objects[$obj->loc_object_name]['list'][] = $data;
+            }
+        }
+
+        global $bds_array_sort;
+        $bds_array_sort = array(
+            'order_by'  => $order_by,
+            'order_way' => $order_way
+        );
+
+        function bds_compare($a, $b)
+        {
+            global $bds_array_sort;
+
+            if (!array_key_exists($bds_array_sort['order_by'], $a)) {
+                return 0;
+            }
+            if (!in_array($bds_array_sort['order_way'], array('asc', 'ASC', 'desc', 'DESC'))) {
+                return 0;
+            }
+
+            $mult = 1;
+            if (strtolower($bds_array_sort['order_way']) === 'desc') {
+                $mult = -1;
+            }
+            if ($a[$bds_array_sort['order_by']] < $b[$bds_array_sort['order_by']]) {
+                return -1 * $mult;
+            } elseif ($a[$bds_array_sort['order_by']] > $b[$bds_array_sort['order_by']]) {
+                return 1 * $mult;
+            }
+            return 0;
+        }
+        foreach ($objects as $object_name => &$array) {
+            usort($array['list'], 'bds_compare');
         }
         return $objects;
     }

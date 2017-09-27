@@ -11,6 +11,9 @@ class BDSProcessCron extends BimpObject
     public $title;
     public $description;
     public $active;
+    public $frequency_val;
+    public $frequency_type;
+    public $frequency_start;
     public static $periods = array(
         'min'   => 'Minute',
         'day'   => 'Jour',
@@ -23,63 +26,63 @@ class BDSProcessCron extends BimpObject
         'isFemale'  => 1
     );
     public static $fields = array(
-        'id_process'     => array(
+        'id_process'      => array(
             'label'    => 'ID du processus',
             'type'     => 'int',
             'required' => true
         ),
-        'id_cronjob'     => array(
-            'label'    => 'ID du travail planifié',
-            'type'     => 'int',
-            'input'    => 'hidden',
-            'required' => false
+        'id_cronjob'      => array(
+            'label'         => 'ID du travail planifié',
+            'type'          => 'int',
+            'input'         => 'hidden',
+            'required'      => false,
+            'default_value' => 0
         ),
-        'title'          => array(
+        'title'           => array(
             'label'    => 'Nom',
             'type'     => 'string',
             'input'    => 'text',
             'required' => true
         ),
-        'description'    => array(
+        'description'     => array(
             'label'    => 'Description',
             'type'     => 'string',
             'input'    => 'textarea',
             'required' => false
         ),
-        'id_operation'   => array(
+        'id_operation'    => array(
             'label'    => 'Opération',
             'type'     => 'int',
             'input'    => 'select',
             'options'  => 'operations',
             'required' => true
         ),
-        'active'         => array(
+        'active'          => array(
             'label'         => 'Activée',
             'type'          => 'bool',
             'input'         => 'switch',
             'required'      => true,
             'default_value' => 0
         ),
-        'frequency_val'  => array(
+        'frequency_val'   => array(
             'label'         => 'Fréquence d\'exécution (valeur)',
             'type'          => 'int',
             'input'         => 'text',
             'required'      => true,
             'default_value' => 1
         ),
-        'frequency_type' => array(
-            'label'    => 'Fréquence d\'exécution (type)',
+        'frequency_type'  => array(
+            'label'    => 'Fréquence d\'exécution (unité)',
             'type'     => 'string',
             'input'    => 'select',
             'options'  => 'periods',
             'required' => true
         ),
         'frequency_start' => array(
-            'label' => 'Date et heure de début d\'exécution',
-            'type' => 'datetime',
-            'input' => 'datetime',
+            'label'    => 'Date et heure de première exécution',
+            'type'     => 'datetime',
+            'input'    => 'datetime',
             'required' => true,
-            'default_value' => '0000-00-00 00:00'
         )
     );
     public static $list_params = array(
@@ -132,6 +135,52 @@ class BDSProcessCron extends BimpObject
             'delete'     => true
         ),
     );
+
+    protected function validateFrequency()
+    {
+        switch ($this->frequency_type) {
+            case 'min':
+                break;
+
+            case 'day':
+                break;
+
+            case 'week':
+                break;
+
+            case 'month':
+                break;
+        }
+    }
+
+    public function create()
+    {
+        $errors = parent::create();
+        if (count($errors)) {
+            return $errors;
+        }
+
+        return $errors;
+    }
+
+    public function update()
+    {
+        $errors = array();
+
+        return $errors;
+    }
+
+    public function delete()
+    {
+        $errors = array();
+
+        return $errors;
+    }
+
+    public function getOptionsData()
+    {
+        return array();
+    }
 
     public static function getClass()
     {

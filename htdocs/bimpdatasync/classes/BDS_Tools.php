@@ -236,17 +236,13 @@ class BDS_Tools
         return '';
     }
 
-    public static function makeObjectName(BimpDb $bdb, $object_name, $id_object)
+    public static function makeObjectName(BimpDb $bdb, $object_name, $id_object, $include_id = true)
     {
         if (is_null($object_name) || !$object_name) {
             return '';
         }
-        if (array_key_exists($object_name, BDS_Report::$objectsLabels)) {
-            $objectLabel = ucfirst(BDS_Report::getObjectLabel($object_name));
-        } else {
-            $objectLabel = ucfirst($object_name);
-        }
 
+        $ref = null;
         if (!is_null($id_object) && $id_object) {
             $objectLabel .= ' n° ' . $id_object;
             $ref = null;
@@ -259,10 +255,28 @@ class BDS_Tools
                     $ref = $bdb->getValue('categorie', 'label', '`rowid` = ' . (int) $id_object);
                     break;
             }
+        }
+
+        if ($include_id) {
+            $objectLabel = '';
+            if (array_key_exists($object_name, BDS_Report::$objectsLabels)) {
+                $objectLabel = ucfirst(BDS_Report::getObjectLabel($object_name));
+            } else {
+                $objectLabel = ucfirst($object_name);
+            }
             if (!is_null($ref) && $ref) {
                 $objectLabel .= ' - ' . $ref;
             }
+        } elseif (!is_null($ref) && $ref) {
+            $objectLabel = $ref;
+        } else {
+            if (array_key_exists($object_name, BDS_Report::$objectsLabels)) {
+                $objectLabel = ucfirst(BDS_Report::getObjectLabel($object_name));
+            } else {
+                $objectLabel = ucfirst($object_name);
+            }
         }
+
         return $objectLabel;
     }
 

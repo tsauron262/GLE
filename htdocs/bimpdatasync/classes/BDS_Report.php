@@ -386,6 +386,10 @@ class BDS_Report
         if (!preg_match('/^\d{8}\-\d{6}$/', $from)) {
             $from = null;
         }
+        if (!preg_match('/^\d{8}\-\d{6}$/', $to)) {
+            $to = null;
+        }
+
         if (is_null($to)) {
             $to = date('Ymd-His');
         }
@@ -451,6 +455,71 @@ class BDS_Report
         }
 
         return $return;
+    }
+
+    public static function getReportsDetails($from, $to)
+    {
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
+        if (!file_exists($dir)) {
+            return array();
+        }
+        $data = array();
+
+        if (!preg_match('/^\d{8}\-\d{6}$/', $from)) {
+            $from = null;
+        }
+        if (!preg_match('/^\d{8}\-\d{6}$/', $to)) {
+            $to = null;
+        }
+
+        if (is_null($to)) {
+            $to = date('Ymd-His');
+        }
+
+        if (is_null($from)) {
+            $from = date('Ymd-His');
+        }
+
+        $reports = scandir($dir);
+        foreach ($reports as $report_file) {
+            if (in_array($report_file, array('.', '..'))) {
+                continue;
+            }
+            if (preg_match('/^((\d{8}\-\d{6}).*)\.csv$/', $report_file, $matches)) {
+                if ($matches[2] > $to) {
+                    continue;
+                }
+                if (!is_null($from) && ($matches[2] < $from)) {
+                    continue;
+                }
+                $report = new BDS_Report(null, null, $matches[1]);
+
+                $type = 'operations';
+                if (preg_match(self::$refRegex, $report->file_ref, $matches2)) {
+                    $type = $matches2[1];
+                }
+
+                $id_process = $report->getData(('id_process'));
+                if (!isset($data[$id_process])) {
+                    $data[$id_process] = array();
+                }
+
+                $data[$id_process][$report->getData('begin')] = array(
+                    'report_ref' => $report->file_ref,
+                    'title'      => $report->getData('title'),
+                    'type'       => $type,
+                    'begin'      => $report->getData('begin'),
+                    'end'        => $report->getData('end'),
+                    'nbErrors'   => $report->getData('nbErrors'),
+                    'nbAlerts'   => $report->getData('nbAlerts'),
+                    'objectsInfos' => $report->getObjectsInfos()
+                );
+            }
+        }
+        foreach ($data as $id_process => $array) {
+            krsort($data[$id_process]);
+        }
+        return $data;
     }
 
     public static function deleteRef($file_ref)
@@ -536,5 +605,60 @@ class BDS_Report
             );
         }
         return $query;
+    }
+
+    public function getObjectsInfos()
+    {
+        $objectsInfos = array();
+        foreach ($this->objects_data as $object_name => $data) {
+            $label_data = $this->getObjectLabelData($object_name);
+            $objectInfos = array(
+                'name'  => ucfirst($label_data['plurial']),
+                'infos' => array()
+            );
+            $label = BDS_Tools::makeObjectLabel($label_data['name'], 'of_plur', $label_data['isFemale'], $label_data['plurial']);
+            foreach ($data as $dataName => $value) {
+                $name = 0;
+                if ((int) $value > 0) {
+                    switch ($dataName) {
+                        case 'nbProcessed':
+                            $name = 'Nombre ' . $label . ' traité' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbUpdated':
+                            $name = 'Nombre ' . $label . ' mis' . ($label_data['isFemale'] ? 'es' : '') . ' à jour';
+                            break;
+
+                        case 'nbCreated':
+                            $name = 'Nombre ' . $label . ' créé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbDeleted':
+                            $name = 'Nombre ' . $label . ' supprimé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbActivated':
+                            $name = 'Nombre ' . $label . ' activé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbDeactivated':
+                            $name = 'Nombre ' . $label . ' désactivé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbIgnored':
+                            $name = 'Nombre ' . $label . ' ignoré' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+                    }
+                    if ($name) {
+                        $objectInfos['infos'][] = array(
+                            'name'  => $name,
+                            'value' => $value
+                        );
+                    }
+                }
+            }
+            $objectsInfos[] = $objectInfos;
+        }
+        return $objectsInfos;
     }
 }

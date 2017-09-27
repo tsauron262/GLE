@@ -48,6 +48,20 @@ function filterReportsList() {
     });
 }
 
+function toggleDetailsDisplay($button, report_ref) {
+    var $row = $button.parent('td').parent('tr').parent('tbody').find('#reportDetails_' + report_ref);
+    if (!$row.length) {
+        return;
+    }
+
+    if ($button.hasClass('closed')) {
+        $button.removeClass('closed').addClass('open');
+        $row.stop().slideDown(250);
+    } else {
+        $button.removeClass('open').addClass('closed');
+        $row.stop().slideUp(250);
+    }
+}
 $(document).ready(function () {
     $('#processesToDisplay').add('#typesToDisplay').change(function () {
         filterReportsList();

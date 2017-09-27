@@ -111,6 +111,44 @@ table thead tr th {
     margin: 0 3px;
 }
 
+.sortTitle.active {
+    font-weight: bold;
+}
+.sortTitle:after
+{
+    font-family: 'FontAwesome';
+    margin-left: 8px;
+    opacity: 0;
+    color: #fff;
+}
+.sortTitle:hover {
+    text-decoration: none!important;
+}
+.sortTitle.active:after,
+.sortTitle:hover:after {
+    opacity: 1;
+    text-decoration: none!important
+}
+
+.sortTitle.sort-asc:after {
+    content: '\f0d8';
+}
+.sortTitle.sort-desc:after {
+    content: '\f0d7';
+}
+.sortTitle.active.sort-asc:after {
+    content: '\f0d7';
+}
+.sortTitle.active.sort-desc:after {
+    content: '\f0d8';
+}
+.sortTitle.active.sort-asc:hover:after {
+    content: '\f0d8';
+}
+.sortTitle.active.sort-desc:hover:after {
+    content: '\f0d7';
+}
+
 /*Messages*/
 
 .alert {
@@ -176,6 +214,7 @@ table thead tr th {
     margin: 15px 0;
     padding: 0 15px 15px;
 }
+
 /*Sections dépliables*/
 
 .foldable_section .foldable_section_caption {

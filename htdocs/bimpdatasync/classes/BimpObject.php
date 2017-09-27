@@ -667,7 +667,10 @@ class BimpObject
                     break;
 
                 case 'datetime':
-                    $html .= $form->select_date($value, $name, 1, 1);
+                    if (!$value) {
+                        $value = date('Y-m-d H:i:s');
+                    }
+                    $html .= $form->select_date($value, $name, 1, 1, 0, "", 1, 0, 1);
                     break;
 
                 case 'text':

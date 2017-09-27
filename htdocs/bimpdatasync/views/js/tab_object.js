@@ -35,7 +35,7 @@ function displayObjectProcessResult($container, result) {
             html += rows[i].msg;
             html += '</p>';
         }
-        $container.stop().slideUp(function() {
+        $container.stop().slideUp(function () {
             $(this).html(html).slideDown(250);
         });
     }

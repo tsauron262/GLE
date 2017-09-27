@@ -129,6 +129,7 @@ CREATE TABLE `llx_bds_process_cron` (
   `description` text,
   `active` tinyint(1) NOT NULL DEFAULT '0',
   `frequency_val` INT NOT NULL DEFAULT '1',
-  `frequency_type` ENUM('min','day','week','month') NOT NULL DEFAULT 'min'
+  `frequency_type` ENUM('min','day','week','month') NOT NULL DEFAULT 'min',
+  `frequency_start` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

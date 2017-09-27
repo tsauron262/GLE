@@ -7,7 +7,6 @@ function renderReportContent(BDS_Report $report)
     global $db;
     $bdb = new BimpDb($db);
 
-    ini_set('display_errors', 1);
     $infos = array();
 
     $begin = new DateTime($report->getData('begin'));
@@ -32,57 +31,7 @@ function renderReportContent(BDS_Report $report)
         'value' => $report->getData('nbAlerts')
     );
 
-    $objects_data = $report->getObjectsData();
-    $objectsInfos = array();
-    foreach ($objects_data as $object_name => $data) {
-        $label_data = $report->getObjectLabelData($object_name);
-        $objectInfos = array(
-            'name'  => ucfirst($label_data['plurial']),
-            'infos' => array()
-        );
-        $label = BDS_Tools::makeObjectLabel($label_data['name'], 'of_plur', $label_data['isFemale'], $label_data['plurial']);
-        foreach ($data as $dataName => $value) {
-            $name = 0;
-            if ((int) $value > 0) {
-                switch ($dataName) {
-                    case 'nbProcessed':
-                        $name = 'Nombre ' . $label . ' traité' . ($label_data['isFemale'] ? 'e' : '') . 's';
-                        break;
-
-                    case 'nbUpdated':
-                        $name = 'Nombre ' . $label . ' mis' . ($label_data['isFemale'] ? 'es' : '') . ' à jour';
-                        break;
-
-                    case 'nbCreated':
-                        $name = 'Nombre ' . $label . ' créé' . ($label_data['isFemale'] ? 'e' : '') . 's';
-                        break;
-
-                    case 'nbDeleted':
-                        $name = 'Nombre ' . $label . ' supprimé' . ($label_data['isFemale'] ? 'e' : '') . 's';
-                        break;
-
-                    case 'nbActivated':
-                        $name = 'Nombre ' . $label . ' activé' . ($label_data['isFemale'] ? 'e' : '') . 's';
-                        break;
-
-                    case 'nbDeactivated':
-                        $name = 'Nombre ' . $label . ' désactivé' . ($label_data['isFemale'] ? 'e' : '') . 's';
-                        break;
-
-                    case 'nbIgnored':
-                        $name = 'Nombre ' . $label . ' ignoré' . ($label_data['isFemale'] ? 'e' : '') . 's';
-                        break;
-                }
-                if ($name) {
-                    $objectInfos['infos'][] = array(
-                        'name'  => $name,
-                        'value' => $value
-                    );
-                }
-            }
-        }
-        $objectsInfos[] = $objectInfos;
-    }
+    $objectsInfos = $report->getObjectsInfos();
 
     $html = '';
 
@@ -104,7 +53,7 @@ function renderReportContent(BDS_Report $report)
         }
         $html .= '</ul>';
     }
-    if (count($objectInfos)) {
+    if (count($objectsInfos)) {
         foreach ($objectsInfos as $objectInfos) {
             $html .= '<p style="margin-left: 15px">' . $objectInfos['name'] . ': </p>';
             if (isset($objectInfos['infos']) && count($objectInfos['infos'])) {
@@ -374,6 +323,126 @@ function renderObjectNotifications($rows, $title)
     return $html;
 }
 
+function renderProcessesRecentActivity($processes_data)
+{
+    if (!count($processes_data)) {
+        return '';
+    }
+
+    $html = '<h3>Activité récente</h3>';
+
+    global $db;
+    $bdb = new BimpDb($db);
+    foreach ($processes_data as $id_process => $data) {
+        $html .= '<table class="noborder" width="100%">';
+
+        $html .= '<tr class="liste_titre">';
+        $html .= '<td>' . $bdb->getValue(BDSProcess::$table, 'title', '`id` = ' . (int) $id_process) . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td>';
+
+        $html .= '<div class="reportTableContainer">';
+        $html .= '<table class="noborder" width="100%">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th width="10%">Date</th>';
+        $html .= '<th width="10%">Heure</th>';
+        $html .= '<th width="15%">Origine</th>';
+        $html .= '<th width="25%">Opération</th>';
+        $html .= '<th width="10%">Erreurs</th>';
+        $html .= '<th width="10%">Alertes</th>';
+        $html .= '<th width="20%"></th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td colspan="7">';
+
+        $html .= '<div class="reportRowsContainer">';
+        $html .= '<table width="100%">';
+        $html .= '<tbody>';
+
+        $even = false;
+        foreach ($data as $row) {
+            $html .= '<tr class="reportRow' . ($even ? ' even' : '') . '">';
+
+            $date = new DateTime($row['begin']);
+
+            $html .= '<td width="10%"><strong>Le ' . $date->format('d / m / Y') . '</strong></td>';
+            $html .= '<td width="10%">à ' . $date->format('H:i') . '</td>';
+
+            $html .= '<td width="15%">';
+            $html .= BDS_Report::$OperationsTypes[$row['type']]['name'];
+            $html .= '</td>';
+
+            $html .= '<td width="25%">' . $row['title'] . '</td>';
+            $html .= '<td width="10%">';
+            if ($row['nbErrors']) {
+                $html .= '<span class="danger">' . $row['nbErrors'] . ' erreur';
+                $html .= ($row['nbErrors'] > 1 ? 's' : '') . '</span>';
+            }
+            $html .= '</td>';
+
+            $html .= '<td width="10%">';
+            if ($row['nbAlerts']) {
+                $html .= '<span class="warning">' . $row['nbAlerts'] . ' alerte';
+                $html .= ($row['nbAlerts'] > 1 ? 's' : '') . '</span>';
+            }
+            $html .= '</td>';
+
+            $html .= '<td width="20%">';
+
+            $html .= '<a style="float: right" class="button" href="./rapports.php?reportToLoad=' . $row['report_ref'] . '" ';
+            $html .= 'target="_blank">Voir le rapport</a>';
+
+            if (count($row['objectsInfos'])) {
+                $html .= '<span style="float: right" class="detailsDisplayButton closed" onclick="toggleDetailsDisplay($(this), \'' . $row['report_ref'] . '\')">Détails</span>';
+            }
+
+            $html .= '</td>';
+
+            $html .= '</tr>';
+
+            if (count($row['objectsInfos'])) {
+                $html .= '<tr class="reportDetailsRow" id="reportDetails_' . $row['report_ref'] . '">';
+                $html .= '<td colspan="7">';
+
+
+                foreach ($row['objectsInfos'] as $objectInfos) {
+                    $html .= '<p style="margin-left: 15px">' . $objectInfos['name'] . ': </p>';
+                    if (isset($objectInfos['infos']) && count($objectInfos['infos'])) {
+                        $html .= '<ul>';
+                        foreach ($objectInfos['infos'] as $info) {
+                            $html .= '<li><strong>' . $info['name'] . ': </strong>' . $info['value'] . '</li>';
+                        }
+                        $html .= '</ul>';
+                    } else {
+                        $html .= '<p>Aucune opération effectuée</p>';
+                    }
+                }
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+            $even = !$even;
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+    }
+    return $html;
+}
+
 function renderOperationProcess($data)
 {
     $backUrl = DOL_URL_ROOT . '/bimpdatasync/process.php?id_process=' . $data['id_process'] . '&tab=operations';
@@ -589,5 +658,284 @@ function renderObjectProcessDataRows($data)
     } else {
         $html .= '<p class="alert alert-info">Cet objet n\'est impliqué dans aucun processus</p>';
     }
+    return $html;
+}
+
+function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
+{
+    $html = '';
+    global $db;
+    $form = new Form($db);
+
+    $base_url = $_SERVER['PHP_SELF'] . '?tab=objects&id_process=' . GETPOST('id_process');
+
+    $current_object = BDS_Tools::getValue('object_name', 0);
+    $sort_by = BDS_Tools::getValue('sort_by', 0);
+    $sort_way = BDS_Tools::getValue('sort_way', 0);
+
+    $colspan = 2 + count($fields);
+
+    if (count($data)) {
+        foreach ($data as $object_name => $object) {
+            $html .= '<div class="foldable_section ';
+            $html .= ($current_object === $object_name) ? 'open' : 'closed';
+            $html .= '">';
+            $html .= '<div class="foldable_section_caption">';
+            $html .= ucfirst($object['label_plur']) . '&nbsp;&nbsp;';
+            $html .= '<span class="badge">' . count($object['list']) . '</span>';
+            $html .= '</div>';
+
+            $html .= '<div class="foldable_section_content">';
+
+            if (count($object['list'])) {
+                $url = $base_url . '&object_name=' . $object_name;
+
+                if (count($bulkActions)) {
+                    $html .= '<div class="buttonsContainer">';
+                    foreach ($bulkActions as $bulkAction) {
+                        $onclick = $bulkAction['function'];
+                        $onclick = str_replace('{object_name}', $object_name, $onclick);
+                        $html .= '<span class="butAction" onclick="' . $onclick . '">';
+                        $html .= $bulkAction['label'];
+                        $html .= '</span>';
+                    }
+                }
+                $html .= '</div>';
+                $html .= '<form id="object_' . $object_name . '_searchForm" method="post" action="' . $url . '">';
+                $html .= '<div style="margin: 15px 0">';
+
+                $html .= '<table class="noborder" width="100%;">';
+
+                $html .= '<thead>';
+                $html .= '<tr class="liste_titre">';
+
+                $html .= '<th width="5%"></th>';
+
+                foreach ($fields as $field_name => $params) {
+                    $html .= '<th width="' . $params['width'] . '">';
+                    $href = $url;
+                    $class = 'sortTitle';
+                    if ($params['sort']) {
+                        $href .= '&sort_by=' . $field_name . '&sort_way=';
+                        if (($current_object === $object_name) &&
+                                ($sort_by === $field_name)) {
+                            $href .= ($sort_way === 'desc') ? 'asc' : 'desc';
+                            $class .= ' active sort-' . (($sort_way === 'desc') ? 'asc' : 'desc');
+                        } else {
+                            $href .= 'desc';
+                            $class .= ' sort-desc';
+                        }
+                    }
+                    $html .= '<a href="' . $href . '" class="' . $class . '">';
+                    if (isset($params['label'])) {
+                        $html .= $params['label'];
+                    } elseif (isset($params['label_eval'])) {
+                        $html .= eval($params['label_eval']);
+                    }
+                    $html .= '</a>';
+                    $html .= '</th>';
+                }
+
+                $html .= '<th></th>';
+                $html .= '</tr>';
+
+                $html .= '<tr class="liste_titre">';
+                $html .= '<td style="text-align: center">';
+                $html .= '<input type="checkbox" name="' . $object_name . '_checkall" ';
+                $html .= 'onchange="toggleObjectListCheck(\'' . $object_name . '\', $(this))"/>';
+                $html .= '</td>';
+
+                foreach ($fields as $field_name => $params) {
+                    $html .= '<td width="' . $params['width'] . '">';
+                    if (isset($params['search'])) {
+                        $input_name = 'object_' . $object_name . '_field_' . $field_name . '_search';
+
+                        $input_value = null;
+
+                        if (!BDS_Tools::isSubmit($object_name . '_searchReset')) {
+                            $input_value = BDS_Tools::getValue($input_name, null);
+                        }
+
+                        switch ($params['search']) {
+                            case 'text':
+                                $html .= '<input type="text" id="' . $input_name . '"';
+                                $html .= ' name="' . $input_name . '"';
+                                if (!is_null($input_value)) {
+                                    $html .= ' value="' . $input_value . '"';
+                                }
+                                $html .= ' style="width: 80%; margin-left: 5%; margin-right: 5%"/>';
+                                break;
+
+                            case 'select':
+                                $html .= '<select id="' . $input_name . '" name="' . $input_name . '">';
+                                foreach ($params['search_query'] as $value => $label) {
+                                    $html .= '<option value="' . $value . '"';
+                                    if (!is_null($input_value) && ($input_value == $value)) {
+                                        $html .= ' selected';
+                                    }
+                                    $html .= '>' . $label . '</option>';
+                                }
+                                $html .= '</select>';
+                                break;
+
+                            case 'date':
+                                $input_value = null;
+                                $from_value = '';
+                                $to_value = '';
+                                if (!BDS_Tools::isSubmit($object_name . '_searchReset')) {
+                                    $from_value = BDS_Tools::getValue($input_name . '_from', '');
+                                    $to_value = BDS_Tools::getValue($input_name . '_to', '');
+                                }
+                                $date_to = '';
+                                $date_from = '';
+                                if ($from_value || $to_value) {
+                                    if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $to_value, $matches)) {
+                                        $date_to = $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                                    }
+                                    if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $from_value, $matches2)) {
+                                        $date_from = $matches2[3] . '-' . $matches2[2] . '-' . $matches2[1];
+                                    }
+                                }
+
+                                $date = new DateTime($date_to ? $date_to : null);
+                                $date_to = $date->format('Y-m-d');
+                                if (!$date_from) {
+                                    $date_from = '2017-01-01';
+                                }
+
+                                $fields[$field_name]['search_from'] = $date_from;
+                                $fields[$field_name]['search_to'] = $date_to;
+
+                                $html .= 'Du:&nbsp;' . $form->select_date($date_from, $input_name . '_from', 0, 0, 0, '', 1, 0, 1) . '<br/>';
+                                $html .= 'Au:&nbsp;' . $form->select_date($date_to, $input_name . '_to', 0, 0, 0, '', 1, 0, 1);
+                                break;
+                        }
+                        if (!is_null($input_value)) {
+                            $fields[$field_name]['search_value'] = $input_value;
+                        }
+                    }
+                    $html .= '</td>';
+                }
+
+                $html .= '<td>';
+                $html .= '<input type="submit" name="' . $object_name . '_searchSubmit" class="button searchSubmit" value="Rechercher"/>';
+                $html .= '<input type="submit" name="' . $object_name . '_searchReset" class="button searchReset" value="Réinitialiser"/>';
+                $html .= '</td>';
+
+                $html .= '</tr>';
+
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                $search = BDS_Tools::isSubmit($object_name . '_searchSubmit');
+
+                foreach ($object['list'] as $row) {
+                    if ($search) {
+                        foreach ($fields as $field_name => $params) {
+                            if ($params['search'] === 'date') {
+                                if (isset($row[$field_name . '_value'])) {
+                                    $row_date = new DateTime($row[$field_name . '_value']);
+                                } elseif (isset($row[$field_name])) {
+                                    $row_date = new DateTime($row[$field_name]);
+                                } else {
+                                    continue 2;
+                                }
+                                $row_value = $row_date->format('Y-m-d');
+                                unset($row_date);
+                                if (isset($params['search_from'])) {
+                                    if ($row_value < $params['search_from']) {
+                                        continue 2;
+                                    }
+                                }
+                                if (isset($params['search_to'])) {
+                                    if ($row_value > $params['search_to']) {
+                                        continue 2;
+                                    }
+                                }
+                            } elseif (isset($params['search_value']) &&
+                                    !is_null($params['search_value']) &&
+                                    $params['search_value'] !== '') {
+                                if (isset($row[$field_name . '_value'])) {
+                                    $row_value = $row[$field_name . '_value'];
+                                } elseif (isset($row[$field_name])) {
+                                    $row_value = $row[$field_name];
+                                } else {
+                                    $row_value = null;
+                                }
+                                if (is_null($row_value) ||
+                                        ($row_value != $params['search_value'])) {
+                                    continue 2;
+                                }
+                            }
+                        }
+                    }
+
+                    $html .= '<tr class="objectRow ' . $object_name . 'Row" ';
+                    $html .= 'data-id_data="' . $row['id_data'] . '"';
+                    $html .= ' data-id_object="' . $row['id_object'] . '"';
+                    $html .= '>';
+
+                    $html .= '<td style="text-align: center">';
+                    $html .= '<input type="checkbox" id="' . $object_name . '_' . $row['id_object'] . '_check" ';
+                    $html .= 'name="' . $object_name . '_' . $row['id_object'] . '_check"';
+                    $html .= ' class="' . $object_name . '_check"/>';
+                    $html .= '</td>';
+
+                    foreach ($fields as $field_name => $params) {
+                        $html .= '<td>';
+                        if (isset($row[$field_name . '_html'])) {
+                            $html .= $row[$field_name . '_html'];
+                        } elseif (isset($row[$field_name])) {
+                            $html .= $row[$field_name];
+                        }
+                        $html .= '</td>';
+                    }
+
+                    $html .= '<td>';
+                    foreach ($buttons as $button) {
+                        $onclick = $button['onclick'];
+                        $onclick = str_replace('{object_name}', $object_name, $onclick);
+                        $onclick = str_replace('{id_object}', $row['id_object'], $onclick);
+                        $html .= '<span class="' . $button['class'] . '" style="float: right" onclick="' . $onclick . '">';
+                        $html .= $button['label'] . '</span>';
+                    }
+                    $html .= '</td>';
+                    $html .= '</tr>';
+
+                    $html .= '<tr style="display:none">';
+                    $html .= '<td colspan="' . $colspan . '">';
+                    $html .= '<div class="objectAjaxResult" id="' . $object_name . '_' . $row['id_object'] . '_ajaxResult"></div>';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+
+                $html .= '</table>';
+
+                $html .= '</div>';
+                $html .= '</form>';
+                if (count($bulkActions)) {
+                    $html .= '<div class="buttonsContainer">';
+                    foreach ($bulkActions as $bulkAction) {
+                        $onclick = $bulkAction['function'];
+                        $onclick = str_replace('{object_name}', $object_name, $onclick);
+                        $html .= '<span class="butAction bulkActionButton" onclick="' . $onclick . '">';
+                        $html .= $bulkAction['label'];
+                        $html .= '</span>';
+                    }
+                }
+            } else {
+                $html .= '<p class="alert alert-warning" style="text-align: center">Aucun enregistrement</p>';
+            }
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+    } else {
+        $html .= '<p class="alert alert-warning">Aucun objet synchronisé enregistré</p>';
+    }
+
     return $html;
 }

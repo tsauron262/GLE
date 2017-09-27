@@ -440,6 +440,17 @@ abstract class BDS_Process
 
         return $return;
     }
+    
+    public function executeCronProcess($id_operation)
+    {
+        $begin = time();
+        $timer = 0;
+        set_time_limit(60);
+        
+        $errors = array();
+        
+        
+    }
 
     // Outils de connexion et d'extraction des données:
 

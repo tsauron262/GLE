@@ -33,10 +33,10 @@
 }
 
 .reportRowsContainer .reportRow {
-    border: none!important;
+    border: none!important;;
 }
 .reportRowsContainer .reportRow.even {
-    background-color: #FAFAFA;
+    background-color: #F0F0F0;
     border: none!important;
 }
 .reportRowsContainer .reportRow td {
@@ -62,3 +62,31 @@
 .reportRowsContainer .reportRow .rowMessage {
     width: 40%;
 }
+
+.reportRowsContainer .reportDetailsRow {
+    display: none;
+}
+
+.reportRowsContainer .reportDetailsRow td {
+    background-color: #EBEBEB!important;
+}
+
+.detailsDisplayButton {
+    font-weight: bold;
+    margin: 0 15px;
+    cursor: pointer;
+    color: #003C78;
+}
+
+.detailsDisplayButton:after {
+    font-family: 'FontAwesome';
+    margin-left: 8px;
+}
+.detailsDisplayButton.closed:after {
+    content: '\f107';
+}
+
+.detailsDisplayButton.open:after {
+    content: '\f106';
+}
+

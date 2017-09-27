@@ -164,6 +164,7 @@ function setInputsEvents() {
     });
     $('select.switch').change();
 }
+
 $(document).ready(function () {
     setFoldableEvents();
     setInputsEvents();

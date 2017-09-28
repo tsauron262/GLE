@@ -549,7 +549,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
                 }
             }
         } else {
-            $this->Msg('Recherche de nouvelles références désactivée', 'warning');
+            $this->Alert('Recherche de nouvelles références désactivée');
         }
 
 

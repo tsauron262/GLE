@@ -405,7 +405,6 @@ class BDS_SyncData
 
     public static function getAllObjectsList(BimpDb $db, $id_process = null, $order_by = 'date_update', $order_way = 'desc')
     {
-        ini_set('display_errors', 1);
         $where = '';
         if (!is_null($id_process)) {
             $where .= '`loc_id_process` = ' . (int) $id_process;

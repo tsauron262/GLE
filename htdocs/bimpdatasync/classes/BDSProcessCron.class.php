@@ -166,6 +166,9 @@ class BDSProcessCron extends BimpObject
             unset($cronOption);
         }
 
+        if (count($errors)) {
+            $this->delete();
+        }
         return $errors;
     }
 
@@ -242,13 +245,13 @@ class BDSProcessCron extends BimpObject
             $cronJob->note .= $this->description;
 
             $cronJob->datestart = $this->db->db->jdate($this->frequency_start);
+            $cronJob->dateend = '';
 
             if ($this->active) {
                 $cronJob->dateend = '';
                 $cronJob->status = 1;
             } else {
                 $cronJob->status = 0;
-                $cronJob->dateend = $this->db->db->jdate(date('Y-m-d H:i:s'));
             }
 
             $cronJob->datenextrun = '';
@@ -259,12 +262,12 @@ class BDSProcessCron extends BimpObject
             global $user;
             if (isset($this->id_cronjob) && $this->id_cronjob) {
                 if ($cronJob->update($user) <= 0) {
-                    $errors[] = 'Echec de la mise à jour du travail planifié';
+                    $errors[] = 'Echec de la mise à jour du travail planifié - ' . $cronJob->error;
                 }
             } else {
                 $id_cronjob = $cronJob->create($user);
                 if ($id_cronjob <= 0) {
-                    $errors[] = 'Echec de la mise à jour du travail planifié';
+                    $errors[] = 'Echec de création du travail planifié - ' . $cronJob->error;
                 } else {
                     if ($this->db->update(self::$table, array(
                                 'id_cronjob' => (int) $id_cronjob

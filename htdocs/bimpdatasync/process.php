@@ -24,7 +24,7 @@ $id_process = BDS_Tools::getValue('id_process', 0);
 if (!$id_process) {
     echo '<link type="text/css" rel="stylesheet" href="./views/css/reports.css"/>';
     echo '<style>.reportRowsContainer {max-height: 250px!important;}</style>';
-    
+
     print load_fiche_titre('Gestion des imports, exports et synchronisations des données', '', 'title_generic.png');
 
     echo BDSProcess::renderFormAndList();
@@ -83,9 +83,9 @@ if (!$id_process) {
         case 'crons':
             echo $process->renderObjectFormAndList('crons');
             break;
-        
+
         case 'objects':
-            $class_name = 'BDS_'.ucfirst($process->name).'Process';
+            $class_name = 'BDS_' . ucfirst($process->name) . 'Process';
             if (!class_exists($class_name)) {
                 BDS_Process::loadProcessClass($class_name);
             }
@@ -98,6 +98,12 @@ if (!$id_process) {
             }
             break;
     }
+
+    echo '<div class="buttonsContainer">';
+    echo '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '">';
+    echo '<i class="fa fa-chevron-left" aria-hidden="true"></i>&nbsp;&nbsp;Retour à la liste des processus';
+    echo '</a>';
+    echo '</div>';
 }
 
 llxFooter();

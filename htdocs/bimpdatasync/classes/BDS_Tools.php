@@ -333,14 +333,38 @@ class BDS_Tools
         return 0;
     }
 
-    public static function getDateTimeFromForm($name)
+    public static function getDateTimeFromForm($name, $default_date = '')
     {
-        $date = self::getValue($name . 'year', '0000') . '-';
-        $date .= self::getValue($name . 'month', '00') . '-';
-        $date .= self::getValue($name . 'day', '00') . ' ';
-        $date .= self::getValue($name . 'hour', '00') . ':';
-        $date .= self::getValue($name . 'min', '00') . ':00';
-        return $date;
+        if (self::isSubmit($name)) {
+            $year = '' . self::getValue($name . 'year', '0000');
+            $month = (int) self::getValue($name . 'month', 0);
+            if ($month < 10) {
+                $month = '0' . $month;
+            } else {
+                $month = '' . $month;
+            }
+            $day = (int) self::getValue($name . 'day', 0);
+            if ($day < 10) {
+                $day = '0' . $day;
+            } else {
+                $day = '' . $day;
+            }
+            $hour = (int) self::getValue($name . 'hour', 0);
+            if ($hour < 10) {
+                $hour = '0' . $hour;
+            } else {
+                $hour = '' . $hour;
+            }
+            $min = (int) self::getValue($name . 'min', 0);
+            if ($min < 10) {
+                $min = '0' . $min;
+            } else {
+                $min = '' . $min;
+            }
+
+            return $year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':00';
+        }
+        return $default_date;
     }
 
     public static function renameFile($dir, $old_name, $new_name)

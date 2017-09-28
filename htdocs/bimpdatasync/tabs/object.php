@@ -76,70 +76,53 @@ if (count($processes_data)) {
 
     $date_from = new DateTime();
     $date_from->sub(new DateInterval('P5D'));
+
     echo '<div style="margin: 30px 0">';
     echo '<form method="POST" action="' . $_SERVER['REQUEST_URI'] . '">';
     echo '<h3>Recherche des opérations: </h3>';
-    
+
     echo '<div style="margin: 5px 0">';
     echo '<span class="formLabel">Du: </span>';
     echo '<span class="display: inline-block">';
-    echo $form->select_date($date_from->format('Y-m-d H:i:s'), 'from', 1, 1);
+    echo $form->select_date($date_from->getTimestamp(), 'from', 1, 1);
     echo '</span>';
     echo '</div>';
-    
+
     echo '<div style="margin: 5px 0">';
     echo '<span class="formLabel">Au: </span>';
     echo '<span class="display: inline-block">';
-    echo $form->select_date(date('Y-m-d H:i:s'), 'to', 1, 1);
+    echo $form->select_date(time(), 'to', 1, 1);
     echo '</span>';
     echo '</div>';
-    
+
     echo '<div style="margin: 15px 0">';
     echo '<input type="submit" class="button" value="Rechercher"/>';
     echo '</div>';
-    
+
     echo '</form>';
     echo '</div>';
 
-    $date = new DateTime();
-    $from_title = '';
-    $to_title = '';
     if (BDS_Tools::isSubmit('to')) {
-        $to_Y = BDS_Tools::getValue('toyear', $date->format('Y'));
-        $to_m = BDS_Tools::getValue('tomonth', $date->format('m'));
-        $to_d = BDS_Tools::getValue('today', $date->format('d'));
-        $to_H = BDS_Tools::getValue('tohour', $date->format('H'));
-        $to_i = BDS_Tools::getValue('tomin', $date->format('i'));
-        $to_s = '00';
-        $to = $to_Y . $to_m . $to_d . '-' . $to_H . $to_i . $to_s;
-        $to_title = ' au ' . $to_d . ' / ' . $to_m . ' / ' . $to_Y . ' ' . $to_H . ':' . $to_i;
+        $date_to = new DateTime(BDS_Tools::getDateTimeFromForm('to'));
     } else {
-        $to = $date->format('Ymd-His');
-        if (BDS_Tools::isSubmit('from')) {
-            $to_title = ' à aujourd\'hui';
-        } else {
-            $to_title .= ' sur les 5 derniers jours';
-        }
+        $date_to = new DateTime();
     }
 
     if (BDS_Tools::isSubmit('from')) {
-        $from_Y = BDS_Tools::getValue('fromyear', $date->format('Y'));
-        $from_m = BDS_Tools::getValue('frommonth', $date->format('m'));
-        $from_d = BDS_Tools::getValue('fromday', $date->format('d'));
-        $from_H = BDS_Tools::getValue('fromhour', $date->format('H'));
-        $from_i = BDS_Tools::getValue('frommin', $date->format('i'));
-        $from_s = '00';
-        $from = $from_Y . $from_m . $from_d . '-' . $from_H . $from_i . $from_s;
-        $from_title = ' du ' . $from_d . ' / ' . $from_m . ' / ' . $from_Y . ' ' . $from_H . ':' . $from_i;
+        $date_from = new DateTime(BDS_Tools::getDateTimeFromForm('from'));
     } else {
-        $date->sub(new DateInterval('P5D'));
-        $from = $date->format('Ymd-His');
+        $date_from = new DateTime();
     }
 
-    foreach ($processes_data as $process) {
-        $title = $process['process_name'] . ' - opérations' . $from_title . $to_title;
-        $data = BDS_Report::getObjectNotifications($object_name, $id, $from, $to, null, $process['id_process']);
-        $title .= '&nbsp;&nbsp;&nbsp;<span class="badge">' . count($data) . '</span>';
-        echo renderObjectNotifications($data, $title);
+    if ($date_from->getTimestamp() > $date_to->getTimestamp()) {
+        echo '<p class="alert alert-danger">La date de début de la recherche doit être inférieure ou égale à la date de fin</p>';
+    } else {
+        foreach ($processes_data as $process) {
+            $title = $process['process_name'] . ' - opérations du ' . $date_from->format('d/m/Y H:i');
+            $title .= ' au ' . $date_to->format('d/m/Y H:i');
+            $data = BDS_Report::getObjectNotifications($object_name, $id, $date_from->format('Ymd-His'), $date_to->format('Ymd-His'), null, $process['id_process']);
+            $title .= '&nbsp;&nbsp;&nbsp;<span class="badge">' . count($data) . '</span>';
+            echo renderObjectNotifications($data, $title);
+        }
     }
 }

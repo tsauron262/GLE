@@ -269,7 +269,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         $id_product = BDS_ImportData::getObjectIdByImportReference($this->db, $this->processDefinition->id, 'Product', $import_reference);
         $product = new Product($this->db->db);
         $import_data = new BDS_ImportData();
-
+        
         if (is_null($id_product)) {
             $id_product = $this->findProductByFournisseurReference($import_reference);
         }
@@ -288,6 +288,9 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             $product->stock_reel = 0;
             $product->tva_tx = $this->parameters['tva_tx_default'];
         }
+        
+        $import_data->status = self::BDS_STATUS_IMPORTING;
+        $import_data->update();
 
         $this->setCurrentObject('Product', $id_product, $import_reference);
 
@@ -295,61 +298,64 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         if (!count($data)) {
             $msg = 'Aucune donnée à mettre à jour trouvée';
             $this->alert($msg, $this->curName(), $this->curId(), $this->curRef());
-            return;
-        }
+            $import_data->status = self::BDS_STATUS_IMPORT_FAIL;
+        } else {
+            if (self::$debug_mod) {
+                $this->debug_content .= '<h4>Mise à jour de la référence "' . $import_reference . '"</h4>';
+                $this->debug_content .= 'Données: <pre>';
+                $this->debug_content .= print_r($data, 1);
+                $this->debug_content .= '</pre>';
+            }
 
-        if (self::$debug_mod) {
-            $this->debug_content .= '<h4>Mise à jour de la référence "' . $import_reference . '"</h4>';
-            $this->debug_content .= 'Données: <pre>';
-            $this->debug_content .= print_r($data, 1);
-            $this->debug_content .= '</pre>';
-        }
+            if (isset($data['label']) && $data['label']) {
+                if (DOL_VERSION < '3.8.0')
+                    $product->libelle = $data['label'];
+                else
+                    $product->label = $data['label'];
+            }
+            if (isset($data['ean']) && $data['ean']) {
+                $product->barcode = $data['ean'];
+                $product->barcode_type = 2; // EAN
+            }
 
-        if (isset($data['label']) && $data['label']) {
-            if (DOL_VERSION < '3.8.0')
-                $product->libelle = $data['label'];
-            else
-                $product->label = $data['label'];
-        }
-        if (isset($data['ean']) && $data['ean']) {
-            $product->barcode = $data['ean'];
-            $product->barcode_type = 2; // EAN
-        }
-
-        if (!isset($product->ref) || !$product->ref) {
-            $product->ref = 'TD_' . $import_reference;
+            if (!isset($product->ref) || !$product->ref) {
+                $product->ref = 'TD_' . $import_reference;
 //            $this->createProductReference($product, 'TD_'.$import_reference);
+            }
+
+            $errors = array();
+
+            if ($this->saveObject($product, 'du produit', true, $errors, true)) {
+                // Mise à jour du stock: 
+                if (isset($data['stock']) && ($data['stock'] !== '')) {
+                    $this->updateProductStock($product, $data['stock']);
+                }
+
+                // Mise à jour du pric d'achat:
+                if (isset($data['pa_ht']) && $data['pa_ht']) {
+                    $this->updateProductBuyPrice($product->id, $data['pa_ht'], $import_reference);
+                }
+
+                // Mise à jour du prix de vente (désactivé pour le moment):
+                if (isset($data['pv_ht']) && $data['pv_ht']) {
+                    $this->updateProductPrice($product, $data['pv_ht']);
+                }
+
+                if (is_null($id_product)) {
+                    $this->current_object['id'] = $product->id;
+                    $import_data->id_object = $product->id;
+
+                    // Ajout à la catégorie (nouveau produit seulement):           
+                    $this->addProductToCategory($product->id);
+                }
+
+                $import_data->status = self::BDS_STATUS_IMPORTED;
+                $product->call_trigger('PRODUCT_MODIFY', $this->user);
+            } else {
+                $import_data->status = self::BDS_STATUS_IMPORT_FAIL;
+            }
         }
-
-        $errors = array();
-
-        if ($this->saveObject($product, 'du produit', true, $errors, true)) {
-            // Mise à jour du stock: 
-            if (isset($data['stock']) && ($data['stock'] !== '')) {
-                $this->updateProductStock($product, $data['stock']);
-            }
-
-            // Mise à jour du pric d'achat:
-            if (isset($data['pa_ht']) && $data['pa_ht']) {
-                $this->updateProductBuyPrice($product->id, $data['pa_ht'], $import_reference);
-            }
-
-            // Mise à jour du prix de vente (désactivé pour le moment):
-            if (isset($data['pv_ht']) && $data['pv_ht']) {
-                $this->updateProductPrice($product, $data['pv_ht']);
-            }
-
-            if (is_null($id_product)) {
-                $this->current_object['id'] = $product->id;
-                $import_data->id_object = $product->id;
-
-                // Ajout à la catégorie (nouveau produit seulement):           
-                $this->addProductToCategory($product->id);
-            }
-
-            $import_data->update();
-            $product->call_trigger('PRODUCT_MODIFY', $this->user);
-        }
+        $import_data->update();
     }
 
     protected function getProductUpdateData($import_reference)

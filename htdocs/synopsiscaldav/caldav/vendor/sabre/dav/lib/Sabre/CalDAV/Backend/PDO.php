@@ -605,9 +605,8 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1])){
                     $organisateur = $tabT[1];
-                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
+                    //$tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
-                //dol_syslog("Organizer ".$organisateur,3);
             }
         }
         if($organisateur == "" && isset($tabMail[0][0]))
@@ -627,8 +626,19 @@ FROM  `" . MAIN_DB_PREFIX . "user`
 WHERE  `email` LIKE  '" . $mail . "'");
             if ($db->num_rows($sql) > 0) {
                 $ligne = $db->fetch_object($sql);
+                
+                
+                if($organisateur == $mail){
+                    $action->userdoneid = $ligne->rowid;
+                    $tmp[1] = "ACCEPTED";
+                }
+                
+                
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
                     'answer_status' => ($tmp[1] == "ACCEPTED"));
+                
+                
+                
                 //dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
                 $tabMailInc[] = $tmp[0]."|".$tmp[1];
@@ -642,8 +652,10 @@ WHERE  `email` LIKE  '" . $mail . "'");
             if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
+            //date_default_timezone_set("Europe/Paris");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
             $db->query($sql);
+            //date_default_timezone_set();
         }
     }
 

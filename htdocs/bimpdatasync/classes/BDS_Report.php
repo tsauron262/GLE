@@ -21,7 +21,7 @@ class BDS_Report
             'name'      => 'Opération automatique',
             'name_plur' => 'Opérations automatiques'
         ),
-        'crons'      => array(
+        'cron'      => array(
             'name'      => 'Tâche planifiée',
             'name_plur' => 'Tâches planifiées'
         ),
@@ -82,7 +82,7 @@ class BDS_Report
         return $ref;
     }
 
-    public function __construct($id_process = null, $title = null, $fileRef = null)
+    public function __construct($id_process = null, $title = null, $fileRef = null, $type = null)
     {
         $this->dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
 
@@ -98,7 +98,7 @@ class BDS_Report
         }
 
         if (is_null($fileRef) || !$fileRef) {
-            $this->file_ref = self::createReference($id_process);
+            $this->file_ref = self::createReference($id_process, $type);
             $this->data['begin'] = date('Y-m-d H:i:s');
             $this->data['end'] = '';
         } else {
@@ -505,13 +505,13 @@ class BDS_Report
                 }
 
                 $data[$id_process][$report->getData('begin')] = array(
-                    'report_ref' => $report->file_ref,
-                    'title'      => $report->getData('title'),
-                    'type'       => $type,
-                    'begin'      => $report->getData('begin'),
-                    'end'        => $report->getData('end'),
-                    'nbErrors'   => $report->getData('nbErrors'),
-                    'nbAlerts'   => $report->getData('nbAlerts'),
+                    'report_ref'   => $report->file_ref,
+                    'title'        => $report->getData('title'),
+                    'type'         => $type,
+                    'begin'        => $report->getData('begin'),
+                    'end'          => $report->getData('end'),
+                    'nbErrors'     => $report->getData('nbErrors'),
+                    'nbAlerts'     => $report->getData('nbAlerts'),
                     'objectsInfos' => $report->getObjectsInfos()
                 );
             }

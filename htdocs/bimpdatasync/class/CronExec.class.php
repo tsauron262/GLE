@@ -1,6 +1,6 @@
 <?php
 
-require_once '../BDS_Lib.php';
+require_once __DIR__ . '/../BDS_Lib.php';
 
 class CronExec
 {
@@ -21,15 +21,13 @@ class CronExec
                 $user = new User($this->db);
                 $user->fetch(1);
                 $options = $processCron->getOptionsData();
-                $options['mode'] = 'cron';
                 $process = BDS_Process::createProcessById($user, $processCron->id_process, $error, $options);
-                $process = new BDS_PS_SyncProcess();
-//                $process->ex
-                
                 if ($error) {
                     $error = ' - ' . $error;
                 } elseif (is_null($process)) {
                     $error .= ' - Echec du chargement du processus';
+                } else {
+                    $process->executeCronProcess($processCron->id_operation);
                 }
             } else {
                 $error .= ' - ID du processus absent';

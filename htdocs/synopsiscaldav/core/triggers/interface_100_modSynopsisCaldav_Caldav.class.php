@@ -102,7 +102,7 @@ class InterfaceCaldav {
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
     function run_trigger($action, $object, $user, $langs, $conf) {
-        global $user, $db;
+        global $db;
         if ($action == "ACTION_MODIFY" || $action == "ACTION_CREATE" || $action == "ACTION_DELETE") {
 //                $db->query("UPDATE " . MAIN_DB_PREFIX . "user_extrafields SET ctag = ctag+1 WHERE fk_object = " . $object->userownerid);
                 

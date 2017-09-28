@@ -1,6 +1,6 @@
 <?php
 
-require_once '../master.inc.php';
+require_once '../main.inc.php';
 ini_set('display_errors', 1);
 require_once DOL_DOCUMENT_ROOT . '/core/lib/ws.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -38,7 +38,7 @@ function testReq()
     }
 }
 
-testReq();
+//testReq();
 
 function installProcess()
 {
@@ -75,12 +75,12 @@ function testFournPrice()
 
     global $db;
     $bdb = new BimpDb($db);
-    
+
     $where = '`fk_product` = 6375';
     $rows = $bdb->getRows('product_fournisseur_price', $where, null, 'object', array(
         'rowid', 'unitprice'
     ));
-    
+
     if (!is_null($rows)) {
         foreach ($rows as $r) {
             if (!$pa_ht ||  ((float) $r->unitprice < (float) $pa_ht)) {
@@ -89,7 +89,17 @@ function testFournPrice()
             }
         }
     }
-    
-    echo $pa_ht.', '.$fk_fournprice;
+
+    echo $pa_ht . ', ' . $fk_fournprice;
 }
+
 //testFournPrice();
+
+function testCron()
+{
+    require_once './class/CronExec.class.php';
+    global $db;
+    $cronExec = new CronExec($db);
+    $cronExec->execute(1);
+}
+//testCron();

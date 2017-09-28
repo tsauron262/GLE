@@ -195,7 +195,7 @@ class Repair
         return true;
     }
 
-    public function import($chronoId, $number, $numberType, $update_if_exists = false)
+    public function import($chronoId, $number, $numberType, $update_if_exists = true)
     {
         if ($this->lookup($number, $numberType)) {
             if (isset($this->confirmNumbers['repair']) &&
@@ -211,15 +211,17 @@ class Repair
                     if ($this->db->num_rows($result) > 0) {
                         while ($row = $this->db->fetch_object($result)) {
                             if ($row->chronoId == $chronoId) {
-                                $this->addError('Cette réparation a déjà été importé');
+                                $this->addError('Cette réparation a déjà été importée');
                                 return false;
                             }
                         }
                     }
 
-                    return $this->add($chronoId);
+                    if ($this->add($chronoId)) {
+                        return $this->updateTotalOrder();
+                    }
                 } else {
-                    return $this->update();
+                    return $this->updateTotalOrder();
                 }
             }
         }
@@ -556,6 +558,7 @@ class Repair
         if (!isset($response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'])) {
             return false;
         }
+        
         $parts = $response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'];
 
         if (isset($parts['partNumber'])) {

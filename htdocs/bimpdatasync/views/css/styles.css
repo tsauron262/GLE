@@ -41,7 +41,6 @@ select.switch option[value='0'] {
 .formRow .inputDesc {
     padding-left: 25%;
 }
-
 .formRow .inputDesc p{
     font-size: 12px;
     font-style: italic;
@@ -77,7 +76,6 @@ select.switch option[value='0'] {
     text-align: left;
     padding: 10px 20px;
 }
-
 .buttonsContainer .button {
     margin-right: 10px;
 }
@@ -88,19 +86,18 @@ select.switch option[value='0'] {
 }
 
 /*Listes*/
-.objectListTable table {
-    border: none;
-    box-shadow: none;
-}
-.objectListTable thead tr th {
+table thead tr th {
     padding: 10px 6px;
     margin-bottom: 8px;
     border-bottom: 1px solid #292964;
     color: #292964;
-    font-weight: bold;
     text-align: left;
 }
 
+.objectListTable table {
+    border: none;
+    box-shadow: none;
+}
 .objectListTable td {
     padding: 5px 6px;
 }
@@ -112,6 +109,44 @@ select.switch option[value='0'] {
 
 .objectListTable span.button {
     margin: 0 3px;
+}
+
+.sortTitle.active {
+    font-weight: bold;
+}
+.sortTitle:after
+{
+    font-family: 'FontAwesome';
+    margin-left: 8px;
+    opacity: 0;
+    color: #fff;
+}
+.sortTitle:hover {
+    text-decoration: none!important;
+}
+.sortTitle.active:after,
+.sortTitle:hover:after {
+    opacity: 1;
+    text-decoration: none!important
+}
+
+.sortTitle.sort-asc:after {
+    content: '\f0d8';
+}
+.sortTitle.sort-desc:after {
+    content: '\f0d7';
+}
+.sortTitle.active.sort-asc:after {
+    content: '\f0d7';
+}
+.sortTitle.active.sort-desc:after {
+    content: '\f0d8';
+}
+.sortTitle.active.sort-asc:hover:after {
+    content: '\f0d8';
+}
+.sortTitle.active.sort-desc:hover:after {
+    content: '\f0d7';
 }
 
 /*Messages*/
@@ -179,6 +214,7 @@ select.switch option[value='0'] {
     margin: 15px 0;
     padding: 0 15px 15px;
 }
+
 /*Sections dépliables*/
 
 .foldable_section .foldable_section_caption {
@@ -197,7 +233,6 @@ select.switch option[value='0'] {
     color: #292964;
     cursor: pointer;
 }
-
 .foldable_section .foldable_section_caption:hover {
     /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ffffff+1,f2f2f2+100 */
     background: #ffffff; /* Old browsers */
@@ -207,30 +242,24 @@ select.switch option[value='0'] {
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f2f2f2',GradientType=0 ); /* IE6-9 */
 
 }
-
 .foldable_section > .foldable_section_caption:after {
     font-family: 'FontAwesome';
     margin-right: 10px;
     float: right;
     font-size: 14px;
 }
-
 .foldable_section.closed > .foldable_section_caption:after {
     content: '\f0d7';
 }
-
 .foldable_section.open > .foldable_section_caption:after {
     content: '\f0d8';
 }
-
 .foldable_section.closed > .foldable_section_content {
     display: none;
 }
-
 .foldable_section.open > .foldable_section_content {
     display: block;
 }
-
 .foldable_section .foldable_section_content {
     margin-left: 15px;
     margin-top: 15px;

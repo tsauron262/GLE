@@ -186,7 +186,7 @@ class BimpObject
             $data = $this->getDataArray();
             $result = $this->db->update(static::$table, $data, '`id` = ' . (int) $this->id);
             if ($result <= 0) {
-                $msg = 'Echec de la mise à jour';
+                $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
                 $sqlError = $this->db->db->error();
                 if ($sqlError) {
                     $msg .= ' - Erreur SQL: ' . $sqlError;
@@ -206,9 +206,9 @@ class BimpObject
             $data = $this->getDataArray();
             $result = $this->db->insert(static::$table, $data, true);
             if ($result > 0) {
-                $this->id = $id;
+                $this->id = $result;
             } else {
-                $msg = 'Echec de l\'enregistrement';
+                $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
                 $sqlError = $this->db->db->error();
                 if ($sqlError) {
                     $msg .= ' - Erreur SQL: ' . $sqlError;
@@ -240,7 +240,7 @@ class BimpObject
                     $class_name = $params['class_name'];
                     if (class_exists($class_name)) {
                         if (method_exists($class_name, 'deleteByParent')) {
-                            if (!$class_name::deleteByParent($this->id)) {
+                            if (!$class_name::deleteByParent($this->db, $this->id)) {
                                 $msg = 'Des erreurs sont survenues lors de la tentative de suppresion ';
                                 $msg += 'des ' . $class_name::getLabel('name_plur');
                                 $errors[] = $msg;
@@ -667,7 +667,12 @@ class BimpObject
                     break;
 
                 case 'datetime':
-                    $html .= $form->select_date($value, $name, 1, 1);
+                    if (!$value) {
+                        $value = date('Y-m-d H:i:s');
+                    }
+                    $display_now = (isset($params['display_now']) && $params['display_now']);
+
+                    $html .= $form->select_date($value, $name, 1, 1, 0, "", 1, $display_now, 1);
                     break;
 
                 case 'text':
@@ -1058,6 +1063,11 @@ class BimpObject
 
                 if (isset($params['cols'])) {
                     foreach ($params['cols'] as $col) {
+                        if (isset($col['params_callback'])) {
+                            if (method_exists(static::getClass(), $col['params_callback'])) {
+                                static::{$col['params_callback']}($col, $r);
+                            }
+                        }
                         $html .= '<td' . (isset($col['hidden']) && $col['hidden'] ? ' style="display: none"' : '') . '>';
                         if (isset($col['input'])) {
                             if ($col['input'] === 'text') {
@@ -1082,6 +1092,25 @@ class BimpObject
                                     $val = '0000-00-00 00:00';
                                 }
                                 $html .= $form->select_date($val, $col['name'], 1, 1);
+                            } elseif ($col['input'] === 'select') {
+                                $html .= '<select class="objecRowEditInput" name="' . $col['name'] . '">';
+                                if (isset($col['options'])) {
+                                    $options = array();
+                                    if (is_array($col['options'])) {
+                                        $options = $col['options'];
+                                    } elseif (property_exists(static::getClass(), $col['options'])) {
+                                        $options = static::${$col['options']};
+                                    } else {
+                                        $method_name = 'get' . ucfirst($col['options']) . 'QueryArray';
+                                        if (method_exists(static::getClass(), $method_name)) {
+                                            $options = static::{$method_name}($id_parent);
+                                        }
+                                    }
+                                    foreach ($options as $value => $label) {
+                                        $html .= '<option value="' . $value . '">' . $label . '</option>';
+                                    }
+                                }
+                                $html .= '</select>';
                             }
                         } elseif (isset($col['data_type'])) {
                             switch ($col['data_type']) {
@@ -1095,8 +1124,24 @@ class BimpObject
 
                                 case 'array_value':
                                     if (isset($col['array_name'])) {
-                                        $html .= static::${$col['array_name']}[$r[$col['name']]];
+                                        $array = array();
+                                        $array_value = '';
+                                        if (property_exists(static::getClass(), $col['array_name'])) {
+                                            $array = static::${$col['array_name']};
+                                        } else {
+                                            $method_name = 'get' . ucfirst($col['array_name']) . 'QueryArray';
+                                            if (method_exists(static::getClass(), $method_name)) {
+                                                $array = static::{$method_name}($id_parent);
+                                            }
+                                        }
+                                        if (array_key_exists($r[$col['name']], $array)) {
+                                            $array_value = $array[$r[$col['name']]];
+                                        }
                                     }
+                                    if (!$array_value) {
+                                        $array_value = $r[$col['name']];
+                                    }
+                                    $html .= $array_value;
                                     break;
 
                                 case 'datetime':

@@ -12,6 +12,24 @@ class BDS_Report
     public static $fullRefSyntax = '{date}-{time}_{id_process}_{type}';
     public static $deleteDelay = 'P1M';
     public static $messagesTypes = array('success, info, warning, danger');
+    public static $OperationsTypes = array(
+        'operations' => array(
+            'name'      => 'Opération manuelle',
+            'name_plur' => 'Opérations manuelles'
+        ),
+        'actions'    => array(
+            'name'      => 'Opération automatique',
+            'name_plur' => 'Opérations automatiques'
+        ),
+        'cron'      => array(
+            'name'      => 'Tâche planifiée',
+            'name_plur' => 'Tâches planifiées'
+        ),
+        'requests'   => array(
+            'name'      => 'Requête entrante',
+            'name_plur' => 'Requêtes entrantes'
+        )
+    );
     public static $row_def = array(
         'type'      => 'Statut',
         'time'      => 'Heure',
@@ -34,7 +52,8 @@ class BDS_Report
         'Product'   => 'produit{s}',
         'Categorie' => 'categorie{s}[F]',
         'Societe'   => 'client{s}',
-        'Contact'   => 'contact{s}'
+        'Contact'   => 'contact{s}',
+        'Commande'  => 'commande{s}[F]'
     );
     public $file_ref = 0;
     public $rows = array();
@@ -63,7 +82,7 @@ class BDS_Report
         return $ref;
     }
 
-    public function __construct($id_process = null, $title = null, $fileRef = null)
+    public function __construct($id_process = null, $title = null, $fileRef = null, $type = null)
     {
         $this->dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
 
@@ -79,7 +98,7 @@ class BDS_Report
         }
 
         if (is_null($fileRef) || !$fileRef) {
-            $this->file_ref = self::createReference($id_process);
+            $this->file_ref = self::createReference($id_process, $type);
             $this->data['begin'] = date('Y-m-d H:i:s');
             $this->data['end'] = '';
         } else {
@@ -281,11 +300,11 @@ class BDS_Report
 
     public static function getReportsList()
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
         if (!file_exists($dir)) {
             return array();
         }
-        
+
         $files = scandir($dir);
 
         $reports = array();
@@ -354,9 +373,9 @@ class BDS_Report
         return $reports;
     }
 
-    public static function getObjectNotifications($objectName, $id_object, $from = null, $to = null, $reference = null)
+    public static function getObjectNotifications($objectName, $id_object, $from = null, $to = null, $reference = null, $id_process = null)
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
         if (!file_exists($dir)) {
             return array();
         }
@@ -367,6 +386,10 @@ class BDS_Report
         if (!preg_match('/^\d{8}\-\d{6}$/', $from)) {
             $from = null;
         }
+        if (!preg_match('/^\d{8}\-\d{6}$/', $to)) {
+            $to = null;
+        }
+
         if (is_null($to)) {
             $to = date('Ymd-His');
         }
@@ -386,14 +409,30 @@ class BDS_Report
                     continue;
                 }
                 $report = new BDS_Report(null, null, $matches[1]);
+
+                $type = 'operations';
+                if (preg_match(self::$refRegex, $report->file_ref, $matches2)) {
+                    $type = $matches2[1];
+                }
+
+                $type_label = self::$OperationsTypes[$type]['name'];
+
                 foreach ($report->rows as $r) {
                     if ($objectName !== strtolower($r['object'])) {
                         continue;
                     }
+                    if (!is_null($id_process)) {
+                        if ((int) $report->getData('id_process') !== (int) $id_process) {
+                            continue;
+                        }
+                    }
+
                     if (($r['id_object'] && ($id_object == $r['id_object']))) {
                         if (!array_key_exists($report->file_ref, $data)) {
                             $data[$report->file_ref] = array();
                         }
+                        $r['operation_type'] = $type;
+                        $r['operation_type_label'] = $type_label;
                         $data[$report->file_ref][] = $r;
                     }
                 }
@@ -401,13 +440,92 @@ class BDS_Report
         }
 
         krsort($data);
+
+        $return = array();
+        foreach ($data as $file_ref => $rows) {
+            if (preg_match('/^(\d{4})(\d{2})(\d{2})\-\d{6}.*$/', $file_ref, $matches)) {
+                $date_str = $matches[3] . '/' . $matches[2] . '/' . $matches[1];
+                foreach ($rows as $r) {
+                    $row = $r;
+                    $row['date'] = $date_str;
+                    $row['file_ref'] = $file_ref;
+                    $return[] = $row;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    public static function getReportsDetails($from, $to)
+    {
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
+        if (!file_exists($dir)) {
+            return array();
+        }
+        $data = array();
+
+        if (!preg_match('/^\d{8}\-\d{6}$/', $from)) {
+            $from = null;
+        }
+        if (!preg_match('/^\d{8}\-\d{6}$/', $to)) {
+            $to = null;
+        }
+
+        if (is_null($to)) {
+            $to = date('Ymd-His');
+        }
+
+        if (is_null($from)) {
+            $from = date('Ymd-His');
+        }
+
+        $reports = scandir($dir);
+        foreach ($reports as $report_file) {
+            if (in_array($report_file, array('.', '..'))) {
+                continue;
+            }
+            if (preg_match('/^((\d{8}\-\d{6}).*)\.csv$/', $report_file, $matches)) {
+                if ($matches[2] > $to) {
+                    continue;
+                }
+                if (!is_null($from) && ($matches[2] < $from)) {
+                    continue;
+                }
+                $report = new BDS_Report(null, null, $matches[1]);
+
+                $type = 'operations';
+                if (preg_match(self::$refRegex, $report->file_ref, $matches2)) {
+                    $type = $matches2[1];
+                }
+
+                $id_process = $report->getData(('id_process'));
+                if (!isset($data[$id_process])) {
+                    $data[$id_process] = array();
+                }
+
+                $data[$id_process][$report->getData('begin')] = array(
+                    'report_ref'   => $report->file_ref,
+                    'title'        => $report->getData('title'),
+                    'type'         => $type,
+                    'begin'        => $report->getData('begin'),
+                    'end'          => $report->getData('end'),
+                    'nbErrors'     => $report->getData('nbErrors'),
+                    'nbAlerts'     => $report->getData('nbAlerts'),
+                    'objectsInfos' => $report->getObjectsInfos()
+                );
+            }
+        }
+        foreach ($data as $id_process => $array) {
+            krsort($data[$id_process]);
+        }
         return $data;
     }
 
     public static function deleteRef($file_ref)
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
-        
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
+
         if (file_exists($dir . $file_ref . '.csv')) {
             unlink($dir . $file_ref . '.csv');
         }
@@ -415,7 +533,7 @@ class BDS_Report
 
     public static function deleteAll()
     {
-        $dir = DOL_DATA_ROOT.'/bimpdatasync/reports/';
+        $dir = DOL_DATA_ROOT . '/bimpdatasync/reports/';
         if (!file_exists($dir)) {
             return;
         }
@@ -487,5 +605,60 @@ class BDS_Report
             );
         }
         return $query;
+    }
+
+    public function getObjectsInfos()
+    {
+        $objectsInfos = array();
+        foreach ($this->objects_data as $object_name => $data) {
+            $label_data = $this->getObjectLabelData($object_name);
+            $objectInfos = array(
+                'name'  => ucfirst($label_data['plurial']),
+                'infos' => array()
+            );
+            $label = BDS_Tools::makeObjectLabel($label_data['name'], 'of_plur', $label_data['isFemale'], $label_data['plurial']);
+            foreach ($data as $dataName => $value) {
+                $name = 0;
+                if ((int) $value > 0) {
+                    switch ($dataName) {
+                        case 'nbProcessed':
+                            $name = 'Nombre ' . $label . ' traité' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbUpdated':
+                            $name = 'Nombre ' . $label . ' mis' . ($label_data['isFemale'] ? 'es' : '') . ' à jour';
+                            break;
+
+                        case 'nbCreated':
+                            $name = 'Nombre ' . $label . ' créé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbDeleted':
+                            $name = 'Nombre ' . $label . ' supprimé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbActivated':
+                            $name = 'Nombre ' . $label . ' activé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbDeactivated':
+                            $name = 'Nombre ' . $label . ' désactivé' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+
+                        case 'nbIgnored':
+                            $name = 'Nombre ' . $label . ' ignoré' . ($label_data['isFemale'] ? 'e' : '') . 's';
+                            break;
+                    }
+                    if ($name) {
+                        $objectInfos['infos'][] = array(
+                            'name'  => $name,
+                            'value' => $value
+                        );
+                    }
+                }
+            }
+            $objectsInfos[] = $objectInfos;
+        }
+        return $objectsInfos;
     }
 }

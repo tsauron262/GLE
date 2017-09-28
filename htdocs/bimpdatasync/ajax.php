@@ -210,7 +210,7 @@ if (BDS_Tools::isSubmit('action')) {
             $html = 0;
 
             $options['mode'] = 'ajax';
-            
+
             if (is_null($id_process) || !$id_process) {
                 $errors[] = 'ID du processus absent';
             }
@@ -252,7 +252,7 @@ if (BDS_Tools::isSubmit('action')) {
 
             $report_html = 0;
             $step_result = array();
-            
+
             $options['mode'] = 'ajax';
 
             if (is_null($id_process) || !$id_process) {
@@ -305,6 +305,46 @@ if (BDS_Tools::isSubmit('action')) {
             }
 
             die(renderReportContent($report));
+            break;
+
+        case 'executeObjectProcess':
+            $id_process = BDS_Tools::getValue('id_process');
+            $process_action = BDS_Tools::getValue('process_action');
+            $object_name = BDS_Tools::getValue('object_name');
+            $id_object = BDS_Tools::getValue('id_object');
+
+            $options = array(
+                'mode' => 'ajax'
+            );
+
+            if (is_null($id_process) || !$id_process) {
+                $errors[] = 'ID du processus absent';
+            }
+            if (is_null($process_action) || !$process_action) {
+                $errors[] = 'Type d\'opération absent';
+            }
+            if (is_null($object_name) || !$object_name) {
+                $errors[] = 'Type d\'objet absent';
+            }
+            if (is_null($id_object) || !$id_object) {
+                $errors[] = 'ID de l\'objet absent';
+            }
+
+            if (!count($errors)) {
+                $error = 0;
+                $process = BDS_Process::createProcessById($user, $id_process, $error, $options);
+                if (is_null($process)) {
+                    $errors[] = 'Echec de l\'inialisation du processus' . ($error ? ' - ' . $error : '');
+                } else {
+                    $result = $process->executeObjectProcess($process_action, $object_name, $id_object);
+                    $result['errors'] = array();
+                    die(json_encode($result));
+                }
+            }
+
+            die(json_encode(array(
+                'errors' => $errors
+            )));
             break;
 
         default:

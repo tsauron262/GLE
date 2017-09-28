@@ -236,17 +236,13 @@ class BDS_Tools
         return '';
     }
 
-    public static function makeObjectName(BimpDb $bdb, $object_name, $id_object)
+    public static function makeObjectName(BimpDb $bdb, $object_name, $id_object, $include_id = true)
     {
         if (is_null($object_name) || !$object_name) {
             return '';
         }
-        if (array_key_exists($object_name, BDS_Report::$objectsLabels)) {
-            $objectLabel = ucfirst(BDS_Report::getObjectLabel($object_name));
-        } else {
-            $objectLabel = ucfirst($object_name);
-        }
 
+        $ref = null;
         if (!is_null($id_object) && $id_object) {
             $objectLabel .= ' n° ' . $id_object;
             $ref = null;
@@ -259,10 +255,28 @@ class BDS_Tools
                     $ref = $bdb->getValue('categorie', 'label', '`rowid` = ' . (int) $id_object);
                     break;
             }
+        }
+
+        if ($include_id) {
+            $objectLabel = '';
+            if (array_key_exists($object_name, BDS_Report::$objectsLabels)) {
+                $objectLabel = ucfirst(BDS_Report::getObjectLabel($object_name));
+            } else {
+                $objectLabel = ucfirst($object_name);
+            }
             if (!is_null($ref) && $ref) {
                 $objectLabel .= ' - ' . $ref;
             }
+        } elseif (!is_null($ref) && $ref) {
+            $objectLabel = $ref;
+        } else {
+            if (array_key_exists($object_name, BDS_Report::$objectsLabels)) {
+                $objectLabel = ucfirst(BDS_Report::getObjectLabel($object_name));
+            } else {
+                $objectLabel = ucfirst($object_name);
+            }
         }
+
         return $objectLabel;
     }
 
@@ -327,5 +341,38 @@ class BDS_Tools
         $date .= self::getValue($name . 'hour', '00') . ':';
         $date .= self::getValue($name . 'min', '00') . ':00';
         return $date;
+    }
+
+    public static function renameFile($dir, $old_name, $new_name)
+    {
+        if (!preg_match('/.+\/$/', $dir)) {
+            $dir .= '/';
+        }
+
+        if (!file_exists($dir . $old_name)) {
+            return false;
+        }
+
+        if (file_exists($dir . $new_name)) {
+            return false;
+        }
+
+        if (!rename($dir . $old_name, $dir . $new_name)) {
+            return false;
+        }
+        if (file_exists($dir . 'thumbs/')) {
+            $old_path = pathinfo($old_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
+            $new_path = pathinfo($new_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
+            $dir .= 'thumbs/';
+            $suffixes = array('_mini', '_small');
+            foreach ($suffixes as $suffix) {
+                $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
+                if (file_exists($old_thumb)) {
+                    $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
+                    rename($old_thumb, $new_thumb);
+                }
+            }
+        }
+        return true;
     }
 }

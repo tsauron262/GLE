@@ -4,6 +4,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 {
 
     public static $files_dir_name = 'psBimpEducation';
+    public static $ext_process_name = 'BIMP_ERP_Sync';
 
     public function __construct($processDefinition, $user, $params = null)
     {
@@ -38,9 +39,9 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 //        self::$ext_debug_mod = true;
 //
         BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Product');
-        $objects = $this->getObjectsExportData('Product', 'Product', array(6848), $errors);
+        $objects = $this->getObjectsExportData('Product', 'Product', array(6849), $errors);
         if (!count($errors) && count($objects['list'])) {
-            $this->soapExportObjects(array($objects), 'BIMP-ERP_Sync');
+            $this->soapExportObjects(array($objects), 'BIMP_ERP_Sync');
         } else {
             $this->debug_content .= 'Erreurs: <pre>';
             $this->debug_content .= print_r($errors, 1);
@@ -50,7 +51,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         echo $this->debug_content;
 //        $objects = $this->getObjectsDeleteData('Categorie', 'Categorie', array(809));
 //        if (count($objects)) {
-//            $this->soapDeleteObjects(array($objects), 'BIMP-ERP_Sync');
+//            $this->soapDeleteObjects(array($objects), 'BIMP_ERP_Sync');
 //        }
     }
 
@@ -117,9 +118,11 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             if (!count($errors) && count($objects['list'])) {
 //                $msg = 'Données envoyées: <pre>' . str_replace("\n", '<br/>', print_r($objects, 1)) . '</pre>';
 //                $this->Info($msg);
-                $this->soapExportObjects(array($objects), 'BIMP-ERP_Sync');
+                $this->soapExportObjects(array($objects), 'BIMP_ERP_Sync');
             }
         }
+
+        return array();
     }
 
     // Triggers:
@@ -154,7 +157,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         if (!count($errors)) {
             if (isset($products['list']) && count($products['list'])) {
-                $this->soapExportObjects(array($products), 'BIMP-ERP_Sync');
+                $this->soapExportObjects(array($products), 'BIMP_ERP_Sync');
             } else {
                 $this->Alert('Aucun produit à exporter');
             }
@@ -180,7 +183,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         $products = $this->getObjectsDeleteData('Product', 'Product', array($object->id));
         if (count($products)) {
-            $this->soapDeleteObjects(array($products), 'BIMP-ERP_Sync');
+            $this->soapDeleteObjects(array($products), 'BIMP_ERP_Sync');
         }
     }
 
@@ -217,7 +220,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         $categories = $this->getObjectsExportData('Categorie', 'Category', array((int) $object->id), $errors);
         if (!count($errors)) {
             if (isset($categories['list']) && count($categories['list'])) {
-                $this->soapExportObjects(array($categories), 'BIMP-ERP_Sync');
+                $this->soapExportObjects(array($categories), 'BIMP_ERP_Sync');
             } else {
                 $this->Alert('Aucune catégorie à exporter');
             }
@@ -240,7 +243,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
         $products = $this->getObjectsDeleteData('Categorie', 'Category', array($object->id));
         if (count($products)) {
-            $this->soapDeleteObjects(array($products), 'BIMP-ERP_Sync');
+            $this->soapDeleteObjects(array($products), 'BIMP_ERP_Sync');
         }
     }
 
@@ -389,6 +392,12 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
 
                 foreach ($files as $f) {
                     if (in_array($f, array('.', '..'))) {
+                        continue;
+                    }
+
+                    $parts = pathinfo($f);
+
+                    if (!in_array(strtolower($parts['extension']), array('jpg', 'jpeg', 'png', 'gif'))) {
                         continue;
                     }
 
@@ -1071,7 +1080,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         foreach ($subCats as $idc) {
             if (!in_array($idc, $categories)) {
                 if ((int) $idc !== (int) $this->parameters['id_root_categorie']) {
-                $categories[] = (int) $idc;
+                    $categories[] = (int) $idc;
                 }
             }
         }
@@ -1228,27 +1237,94 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             }
         }
 
+        // Recherche de l'image de couverture actuelle:
+        $dir = BDS_Tools::getProductImagesDir($product);
+        $current_cover = 0;
+        foreach ($sync_imgs as $loc_file => $ext_file) {
+            if (preg_match('/^cover_(.+)$/', $loc_file, $matches)) {
+                // On ne conserve que la première image de couverture: 
+                if ($current_cover) {
+                    BDS_Tools::renameFile($dir, $loc_file, $matches[1]);
+                    unset($sync_imgs[$loc_file]);
+                    $sync_imgs[$matches[1]] = $ext_file;
+                } else {
+                    $current_cover = $loc_file;
+                }
+            }
+        }
+
         // Recherche des images à importer:
+        $cover_done = false;
         foreach ($images as $img) {
             if (isset($img['file']) && $img['file'] &&
                     isset($img['url']) && $img['url']) {
                 if (!in_array($img['file'], $sync_imgs)) {
                     $cover = false;
-                    if (isset($img['cover']) && $img['cover']) {
+                    if (!$cover_done && isset($img['cover']) && $img['cover']) {
                         $cover = true;
+                        if ($current_cover) {
+                            // renommage de l'ancienne image de couverture: 
+                            $new_name = str_replace('cover_', '', $current_cover);
+                            BDS_Tools::renameFile($dir, $current_cover, $new_name);
+                            $sync_imgs[$new_name] = $sync_imgs[$current_cover];
+                            unset($sync_imgs[$current_cover]);
+                            $current_cover = 0;
+                        }
                     }
                     $loc_file = $this->importProductImageByUrl($product, $img['file'], $base_url . $img['url'], $img_dir, $cover);
                     if (!is_null($loc_file)) {
+                        if ($cover) {
+                            $current_cover = $loc_file;
+                            $cover_done = true;
+                        }
                         $sync_imgs[$loc_file] = $img['file'];
                     } else {
                         $msg = 'Echec de l\'import de l\'image "' . $img['file'] . '"';
                         $this->Error($msg, 'Product', $id_product);
                         $errors[] = $msg;
                     }
+                } elseif (!$cover_done && isset($img['cover']) && $img['cover']) {
+                    if ($current_cover) {
+                        if ($sync_imgs[$current_cover] !== $img['file']) {
+                            // renommage de l'ancienne image de couverture: 
+                            $new_name = str_replace('cover_', '', $current_cover);
+                            BDS_Tools::renameFile($dir, $current_cover, $new_name);
+                            $sync_imgs[$new_name] = $sync_imgs[$current_cover];
+                            unset($sync_imgs[$current_cover]);
+                            $current_cover = 0;
+                        } else {
+                            $cover_done = true;
+                        }
+                    }
+
+                    if (!$current_cover) {
+                        // Recherche de la nouvelle image de couverture: 
+                        foreach ($sync_imgs as $loc_file => $ext_file) {
+                            if ($ext_file === $img['file']) {
+                                if (!preg_match('/^cover_.+$/', $loc_file)) {
+                                    BDS_Tools::renameFile($dir, $loc_file, 'cover_' . $loc_file);
+                                    unset($sync_imgs[$loc_file]);
+                                    $sync_imgs['cover_' . $loc_file] = $ext_file;
+                                }
+                                $current_cover = $loc_file;
+                                $cover_done = true;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
 
+        if (!$cover_done && !$current_cover) {
+            foreach ($sync_imgs as $loc_file => $ext_file) {
+                if (!preg_match('/^cover_.+$/', $loc_file)) {
+                    BDS_Tools::renameFile($dir, $loc_file, 'cover_' . $loc_file);
+                    unset($sync_imgs[$loc_file]);
+                    $sync_imgs['cover_' . $loc_file] = $ext_file;
+                }
+            }
+        }
         $sync_data->setObjects('image', $sync_imgs);
         return $errors;
     }

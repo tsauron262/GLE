@@ -15,6 +15,7 @@ if (!defined('BDS_LIB')) {
     include_once $dir . 'BDSProcessCustomMatchingValues.class.php';
     include_once $dir . 'BDSProcessTriggerAction.class.php';
     include_once $dir . 'BDSProcessOperation.class.php';
+    include_once $dir . 'BDSProcessCronOption.class.php';
     include_once $dir . 'BDSProcessCron.class.php';
 
     include_once $dir . 'BDS_Report.php';

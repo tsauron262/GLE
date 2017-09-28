@@ -243,7 +243,7 @@ function deleteObjects(object_name, objects_list, $button, $resultContainer) {
         var data = {
             'object_name': object_name,
             'objects': objects_list
-        }
+        };
 
         bimp_json_ajax('deleteObjects', data, $resultContainer, function (result) {
             $button.removeClass('disabled');

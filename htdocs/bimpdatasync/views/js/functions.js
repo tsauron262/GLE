@@ -9,9 +9,13 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
 
     bimp_display_msg('Traitement en cours', $resultContainer, 'info');
 
+    var ajaxRequestsUrl = './ajax.php';
+    if (typeof (data.ajaxRequestsUrl) !== 'undefined') {
+        ajaxRequestsUrl = data.ajaxRequestsUrl;
+    }
     $.ajax({
         type: "POST",
-        url: './ajax.php?action=' + action,
+        url: ajaxRequestsUrl + '?action=' + action,
         dataType: 'json',
         data: data,
         success: function (result) {
@@ -160,6 +164,7 @@ function setInputsEvents() {
     });
     $('select.switch').change();
 }
+
 $(document).ready(function () {
     setFoldableEvents();
     setInputsEvents();

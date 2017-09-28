@@ -607,7 +607,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                     $organisateur = $tabT[1];
                     //$tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
-                //dol_syslog("Organizer ".$organisateur,3);
+                dol_syslog("Organizer ".$organisateur,3);
             }
         }
         if($organisateur == "" && isset($tabMail[0][0]))

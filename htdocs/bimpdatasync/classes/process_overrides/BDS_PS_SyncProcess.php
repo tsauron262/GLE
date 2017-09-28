@@ -121,8 +121,6 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                 $this->soapExportObjects(array($objects), 'BIMP_ERP_Sync');
             }
         }
-
-        return array();
     }
 
     // Triggers:
@@ -1302,7 +1300,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                         foreach ($sync_imgs as $loc_file => $ext_file) {
                             if ($ext_file === $img['file']) {
                                 if (!preg_match('/^cover_.+$/', $loc_file)) {
-                                    BDS_Tools::renameFile($dir, $loc_file, 'cover_' . $loc_file);
+                                    BDS_Tools::renameFile($dir, $loc_file, 'cover_'.$loc_file);
                                     unset($sync_imgs[$loc_file]);
                                     $sync_imgs['cover_' . $loc_file] = $ext_file;
                                 }
@@ -1319,7 +1317,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         if (!$cover_done && !$current_cover) {
             foreach ($sync_imgs as $loc_file => $ext_file) {
                 if (!preg_match('/^cover_.+$/', $loc_file)) {
-                    BDS_Tools::renameFile($dir, $loc_file, 'cover_' . $loc_file);
+                    BDS_Tools::renameFile($dir, $loc_file, 'cover_'.$loc_file);
                     unset($sync_imgs[$loc_file]);
                     $sync_imgs['cover_' . $loc_file] = $ext_file;
                 }

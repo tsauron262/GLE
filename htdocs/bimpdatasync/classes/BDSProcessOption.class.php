@@ -14,11 +14,11 @@ class BDSProcessOption extends BimpObject
     public $default_value;
     public static $associations = array(
         'operations' => array(
-            'class_name'    => 'BDSProcessOperation',
-            'relation'      => 'ManyToMany',
-            'same_parent'   => true,
-            'table'         => 'bds_process_operation_option',
-            'self_key'      => 'id_option',
+            'class_name' => 'BDSProcessOperation',
+            'relation' => 'ManyToMany',
+            'same_parent' => true,
+            'table' => 'bds_process_operation_option',
+            'self_key' => 'id_option',
             'associate_key' => 'id_operation'
         )
     );
@@ -63,15 +63,15 @@ class BDSProcessOption extends BimpObject
             'required'     => true,
         ),
         'select_values' => array(
-            'label'       => 'Valeurs',
-            'type'        => 'string',
-            'input'       => 'text',
-            'display_if'  => array(
-                'input_name'  => 'type',
+            'label'    => 'Valeurs',
+            'type'     => 'string',
+            'input'    => 'text',
+            'display_if' => array(
+                'input_name' => 'type',
                 'show_values' => 'select'
             ),
-            'help'        => 'Utiliser la syntaxe "nom_système=>nom_public". Séparer chaque entrée par une virgule (sans espace)',
-            'required'    => false,
+            'help' => 'Utiliser la syntaxe "nom_système=>nom_public". Séparer chaque entrée par une virgule (sans espace)',
+            'required' => false,
             'required_if' => 'type=select'
         ),
         'default_value' => array(
@@ -117,8 +117,8 @@ class BDSProcessOption extends BimpObject
                 'data_type' => 'string',
             ),
             array(
-                'name'       => 'type',
-                'data_type'  => 'array_value',
+                'name'      => 'type',
+                'data_type' => 'array_value',
                 'array_name' => 'types'
             ),
         ),
@@ -134,19 +134,5 @@ class BDSProcessOption extends BimpObject
     public static function getTypesQueryArray($id_parent = null)
     {
         return self::$types;
-    }
-
-    public function delete()
-    {
-        $errors = parent::delete();
-        $this->db->delete(BDSProcessCronOption::$table, '`id_option` = ' . (int) $this->id);
-        return $errors;
-    }
-
-    public function saveAssociations($association, $list)
-    {
-        $errors = parent::saveAssociations($association, $list);
-        BDSProcessCron::checkAllOptions($this->id_process);
-        return $errors;
     }
 }

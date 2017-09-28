@@ -208,13 +208,7 @@ abstract class BDS_Process
                     $this->{$method}($data, $errors);
                     if (!count($errors) && $data['use_report']) {
                         $title = $this->processDefinition->title . ' - ' . $operation->title . ' du ' . date('d / m / Y');
-                        if ($this->options['mode'] === 'cron') {
-                            $DT = new DateTime();
-                            $file_ref = $DT->format(BDS_Report::$refDateFormat);
-                            $file_ref .= '-' . $DT->format(BDS_Report::$refTimeFormat);
-                            $file_ref .= '_' . $this->processDefinition->id . '_cron';
-                        }
-                        $this->report = new BDS_Report($this->processDefinition->id, $title, $file_ref);
+                        $this->report = new BDS_Report($this->processDefinition->id, $title);
                         $this->report->setData('id_operation', $id_operation);
                         $this->report->saveFile();
                         $data['report_ref'] = $this->report->file_ref;
@@ -446,123 +440,16 @@ abstract class BDS_Process
 
         return $return;
     }
-
+    
     public function executeCronProcess($id_operation)
     {
-        self::$debug_mod = false;
-        $this->options['mode'] = 'cron';
-        set_time_limit(600);
-
+        $begin = time();
+        $timer = 0;
+        set_time_limit(60);
+        
         $errors = array();
-        $data = $this->initOperation($id_operation, $errors);
-
-        if (!count($errors)) {
-            if (is_null($id_operation) || !$id_operation) {
-                $errors[] = 'ID de l\'opération absent';
-            } else {
-                $operation = new BDSProcessOperation();
-                if (!$operation->fetch($id_operation)) {
-                    $errors[] = 'L\'opération d\'ID ' . $id_operation . ' semble ne pas être enregistrée';
-                } else {
-                    if (isset($data['steps']) && count($data['steps'])) {
-                        $this->executeCronOperationSteps($operation, $data['steps']);
-                    }
-                }
-            }
-        }
-
-        if (count($errors)) {
-            $this->Error($errors);
-        }
-
-        $this->end();
-    }
-
-    protected function executeCronOperationSteps(BDSProcessOperation $operation, $steps)
-    {
-        if (!count($steps)) {
-            return array();
-        }
-
-        $extraSteps = array();
-
-        foreach ($steps as $step => $step_params) {
-            if (isset($step_params['elements']) && count($step_params['elements'])) {
-                $n = 0;
-                while ($n < count($step_params['elements'])) {
-                    $elements = array();
-                    for ($i = 0; $i < 100; $i++) {
-                        if (!isset($step_params['elements'][$n])) {
-                            $n = count($step_params['elements']);
-                            break;
-                        }
-                        $elements[] = $step_params['elements'][$n];
-                        $n++;
-                    }
-                    if (count($elements)) {
-                        set_time_limit(count($elements) * 30);
-                        $this->setReferences($elements);
-                        $errors = array();
-                        $result = $this->executeCronOperationStep($operation, $step, $errors);
-                        if (count($errors)) {
-                            if (isset($step_params['on_error'])) {
-                                if ($step_params['on_error'] === 'continue') {
-                                    continue;
-                                } else {
-                                    $this->Error('Une erreur est survenue. Opération abandonnée');
-                                    break 2;
-                                }
-                            }
-                        } else {
-                            if (isset($result['new_steps'])) {
-                                $extraSteps = array_merge($extraSteps, $result['new_steps']);
-                            }
-                        }
-                    }
-                }
-            } else {
-                set_time_limit(600);
-                $errors = array();
-                $result = $this->executeCronOperationStep($operation, $step, $errors);
-                if (count($errors)) {
-                    if (isset($step_params['on_error'])) {
-                        if ($step_params['on_error'] === 'continue') {
-                            continue;
-                        } else {
-                            $this->Error('Une erreur est survenue. Opération abandonnée');
-                            break;
-                        }
-                    }
-                } else {
-                    if (isset($result['new_steps'])) {
-                        $extraSteps = array_merge($extraSteps, $result['new_steps']);
-                    }
-                }
-            }
-        }
-
-        if (count($extraSteps)) {
-            $this->executeCronOperationSteps($operation, $extraSteps);
-        }
-    }
-
-    protected function executeCronOperationStep(BDSProcessOperation $operation, $step, &$errors)
-    {
-        $method = 'execute';
-        $words = explode('_', $operation->name);
-        foreach ($words as $word) {
-            $method .= ucfirst($word);
-        }
-        $result = array();
-        if (!method_exists($this, $method)) {
-            $msg = 'Erreur technique - Méthode "' . $method . '" inexistante';
-            $errors[] = $msg;
-            $this->Error($msg);
-        } else {
-            $errors = array();
-            $result = $this->{$method}($step, $errors);
-        }
-        return $result;
+        
+        
     }
 
     // Outils de connexion et d'extraction des données:

@@ -42,21 +42,12 @@ class BDSProcessCronOption extends BimpObject
         'checkboxes' => 0,
         'headers'    => array(
             array(
-                'width' => 0,
-                'input' => true
-            ),
-            array(
-                'width' => 25,
+                'width' => 30,
                 'label' => 'Option',
                 'input' => false
             ),
             array(
-                'width' => 15,
-                'label' => 'Utiliser la valeur par défaut',
-                'input' => true
-            ),
-            array(
-                'width' => 30,
+                'width' => 40,
                 'label' => 'valeur',
                 'input' => true
             ),
@@ -70,17 +61,16 @@ class BDSProcessCronOption extends BimpObject
                 'input' => 'hidden'
             ),
             array(
-                'name'       => 'id_option',
-                'data_type'  => 'array_value',
-                'array_name' => 'optionsNames'
+                'name'      => 'name',
+                'data_type' => 'string'
             ),
             array(
-                'name'  => 'use_def_val',
+                'name' => 'use_def_val',
                 'input' => 'switch'
             ),
             array(
-                'name'            => 'value',
-                'params_callback' => 'setValueColInputParams'
+                'name'  => 'value',
+                'input' => 'text'
             )
         ),
         'update_btn' => 1
@@ -90,56 +80,4 @@ class BDSProcessCronOption extends BimpObject
     {
         return 'BDSProcessCronOption';
     }
-
-    public static function getOptionsNamesQueryArray($id_parent = null)
-    {
-        global $db;
-        $bdb = new BimpDb($db);
-
-        $where = '`id` IN (SELECT `id_option` FROM ' . MAIN_DB_PREFIX . self::$table;
-        $where .= ' WHERE `id_process_cron` = ' . (int) $id_parent . ')';
-
-        $rows = $bdb->getRows(BDSProcessOption::$table, $where, null, 'object', array(
-            'id',
-            'label'
-        ));
-
-        $options = array();
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $options[(int) $r->id] = $r->label;
-            }
-        }
-
-        unset($bdb);
-        return $options;
-    }
-
-    public static function setValueColInputParams(&$col, $row)
-    {
-        global $db;
-        $bdb = new BimpDb($db);
-
-        $type = $bdb->getValue(BDSProcessOption::$table, 'type', '`id` = ' . (int) $row['id_option']);
-
-        if (!is_null($type)) {
-            $col['input'] = $type;
-        }
-
-        if ($type === 'select') {
-            $values = $bdb->getValue(BDSProcessOption::$table, 'select_values', '`id` = ' . (int) $row['id_option']);
-            $options = array();
-            if (!is_null($values)) {
-                $lines = explode(',', $values);
-                foreach ($lines as $line) {
-                    $data = explode('=>', $line);
-                    $options[$data[0]] = $data[1];
-                }
-            }
-            $col['options'] = $options;
-        }
-        unset($bdb);
-    }
-    
-    
 }

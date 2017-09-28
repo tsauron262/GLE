@@ -65,6 +65,20 @@ print load_fiche_titre('Rapports des processus d\'import / export / synchronisat
 
 $reports = BDS_Report::getReportsList();
 $processes = BDSProcess::getProcessesQuery();
+$OperationsTypes = array(
+    array(
+        'name'  => 'operations',
+        'label' => 'Opérations manuelles'
+    ),
+    array(
+        'name'  => 'actions',
+        'label' => 'Opérations automatiques'
+    ),
+    array(
+        'name'  => 'requests',
+        'label' => 'Requêtes entrantes'
+    ),
+);
 
 global $db;
 $bdb = new BimpDb($db);
@@ -116,8 +130,8 @@ $dateFrom = $DT->format('Y-m-d');
                            <select class="fullwidth" id="typesToDisplay" name="typesToDisplay">
                               <option value="all">Tous les types d'opération</option>
                               <?php
-                              foreach (BDS_Report::$OperationsTypes as $name => $opType) {
-                                  echo '<option value="' . $name . '">' . $opType['name_plur'] . '</option>';
+                              foreach ($OperationsTypes as $opType) {
+                                  echo '<option value="' . $opType['name'] . '">' . $opType['label'] . '</option>';
                               }
                               ?>
                            </select>

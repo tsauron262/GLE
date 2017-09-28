@@ -220,11 +220,4 @@ class BDSProcessOperation extends BimpObject
 
         return $html;
     }
-    
-    public function saveAssociations($association, $list)
-    {
-        $errors = parent::saveAssociations($association, $list);
-        BDSProcessCron::checkAllOptions($this->id_process);
-        return $errors;
-    }
 }

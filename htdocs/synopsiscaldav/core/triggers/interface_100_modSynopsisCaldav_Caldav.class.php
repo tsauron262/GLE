@@ -127,12 +127,15 @@ class InterfaceCaldav {
         }
         if ($action == "ACTION_CREATE"){
             global $objectUriTemp, $objectEtagTemp, $objectDataTemp, $objectRappel;
-            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : "-".$object->id.".ics";
+            $newUri = $conf->global->MAIN_APPLICATION_TITLE.(defined("CHAINE_CALDAV")? "-".CHAINE_CALDAV : "") ."-".$object->id.".ics";
+            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : $newUri;
             $objectEtag2 = (isset($objectEtagTemp) && $objectEtagTemp != "") ? $objectEtagTemp : random(15);
             $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? addslashes($objectDataTemp) : "";
             $objectRappel = (isset($objectRappel) && $objectRappel != "") ? addslashes($objectRappel) : 0;
+            $organisateur = (in_array($user->id, $tIdUser) ? $user->email : "gle_suivi@bimp.fr");
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
-            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."')");
+
+            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."')");
         }
         if ($action == "ACTION_DELETE"){
             $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsiscaldav_event WHERE fk_object = ".$object->id);

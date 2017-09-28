@@ -73,9 +73,9 @@ class PDO extends AbstractBackend {
      * @param string $calendarObjectTableName
      */
     public function __construct(\PDO $pdo, $calendarTableName = 'calendars', $calendarObjectTableName = 'calendarobjects') {
-
+global $conf;
         error_reporting(E_ALL);
-        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE));
+        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, $conf->global->SYSLOG_FILE));
         $this->pdo = $pdo;
         $this->calendarTableName = $calendarTableName;
         $this->calendarObjectTableName = $calendarObjectTableName;
@@ -418,10 +418,8 @@ class PDO extends AbstractBackend {
                     $tmpEtat = (isset($tabT3[1])? $tabT3[1] : "ACCEPTED");
                     
                     
-                    if($row['organisateur'] == "" OR $row['organisateur'] == $tmpMail){
+                    if($row['organisateur'] == "")
                         $row['organisateur'] = $tmpMail;
-                        $tmpEtat = "ACCEPTED";
-                    }
                     
                     $calendarData2[] = "ATTENDEE;".($tmpEtat == "ACCEPTED" ? "" : "RSVP=TRUE;")."PARTSTAT=".$tmpEtat.";ROLE=REQ-PARTICIPANT:mailto:" . $tmpMail;
                 }
@@ -607,9 +605,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1])){
                     $organisateur = $tabT[1];
-                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
+                    //$tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
-                dol_syslog("Organizer ".$organisateur,3);
+                //dol_syslog("Organizer ".$organisateur,3);
             }
         }
         if($organisateur == "" && isset($tabMail[0][0]))
@@ -629,9 +627,20 @@ FROM  `" . MAIN_DB_PREFIX . "user`
 WHERE  `email` LIKE  '" . $mail . "'");
             if ($db->num_rows($sql) > 0) {
                 $ligne = $db->fetch_object($sql);
+                
+                
+                if($organisateur == $mail){
+                    $action->userdoneid = $ligne->rowid;
+                    $tmp[1] = "ACCEPTED";
+                }
+                
+                
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
                     'answer_status' => ($tmp[1] == "ACCEPTED"));
-                dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
+                
+                
+                
+                //dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
                 $tabMailInc[] = $tmp[0]."|".$tmp[1];
             }
@@ -644,8 +653,10 @@ WHERE  `email` LIKE  '" . $mail . "'");
             if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
+            date_default_timezone_set("GMT");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
             $db->query($sql);
+            date_default_timezone_set("Europe/Paris");
         }
     }
 

@@ -609,7 +609,6 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 } 
             }
         }
-                dol_syslog("Organizer ".$organisateur.print_r($calendarData2,1),3);
         if($organisateur == "" && isset($tabMail[0][0]))
             $organisateur = $tabMail[0][0];
         $organisateur = str_replace(array("\n", 

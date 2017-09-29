@@ -209,7 +209,7 @@ class Repair
 
     public function import($chronoId, $number, $numberType)
     {
-        // On tente de charger une répa existante via l'un le number fourni:
+        // On tente de charger une répa existante via l'un des numbers fournis:
         switch ($numberType) {
             case 'repairConfirmationNumber':
                 $this->confirmNumbers['repair'] = $number;
@@ -221,7 +221,6 @@ class Repair
 
             case 'serialNumber':
                 $this->setSerial($number);
-                ;
                 break;
 
             case 'imeiNumber':
@@ -231,7 +230,7 @@ class Repair
         }
         $this->load();
 
-        // récupération des données deuis GSX: 
+        // récupération des données depuis GSX: 
         if ($this->lookup($number, $numberType)) {
             if ((isset($this->confirmNumbers['repair']) &&
                     ($this->confirmNumbers['repair'] != '')) ||

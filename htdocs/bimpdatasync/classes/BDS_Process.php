@@ -131,6 +131,11 @@ abstract class BDS_Process
         }
     }
 
+    public static function getClassName()
+    {
+        return 'BDS_Process';
+    }
+    
     public function deleteObjects($objects)
     {
         

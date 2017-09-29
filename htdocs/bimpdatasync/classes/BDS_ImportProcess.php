@@ -15,6 +15,11 @@ abstract class BDS_ImportProcess extends BDS_Process
         -1 => 'échec import'
     );
 
+    public static function getClassName()
+    {
+        return 'BDS_ImportProcess';
+    }
+
     // Traitement des objets Dolibarr:
 
     protected function saveObject(&$object, $label = null, $display_success = true, &$errors = null, $notrigger = false)
@@ -272,15 +277,29 @@ abstract class BDS_ImportProcess extends BDS_Process
                 unset($date_update);
             }
             $object['list'] = $rows;
+            $object['buttons'] = array(
+                array(
+                    'label'   => 'Importer',
+                    'class'   => 'butAction',
+                    'onclick' => 'executeObjectProcess($(this), \'import\', ' . $process->id . ', \'{object_name}\', {id_object})'
+                )
+            );
+
+            $object['bulkActions'] = array(
+                array(
+                    'function' => 'executeSelectedObjectProcess(\'import\', ' . $process->id . ', \'{object_name}\')',
+                    'label'    => 'Importer les éléments sélectionnés'
+                )
+            );
         }
         $fields = array(
-            'id_object'     => array(
+            'id_object'        => array(
                 'label'  => 'ID',
                 'sort'   => true,
                 'search' => 'text',
                 'width'  => '5%'
             ),
-            'object_label'  => array(
+            'object_label'     => array(
                 'label_eval' => 'return ucfirst($object[\'label\']);',
                 'sort'       => false,
                 'search'     => 'text',
@@ -292,40 +311,25 @@ abstract class BDS_ImportProcess extends BDS_Process
                 'search' => 'text',
                 'width'  => '10%'
             ),
-            'date_add'      => array(
+            'date_add'         => array(
                 'label'  => '1ère synchronisation',
                 'sort'   => true,
                 'search' => 'date',
                 'width'  => '20%'
             ),
-            'date_update'   => array(
+            'date_update'      => array(
                 'label'  => 'Dernière mise à jour',
                 'sort'   => true,
                 'search' => 'date',
                 'width'  => '20%'
             ),
-            'status'        => array(
+            'status'           => array(
                 'label'        => 'Statut',
                 'sort'         => true,
                 'search'       => 'select',
                 'search_query' => self::$status_labels,
                 'width'        => '15%'
             ),
-        );
-
-        $buttons = array(
-            array(
-                'label'   => 'Importer',
-                'class'   => 'butAction',
-                'onclick' => 'executeObjectProcess($(this), \'import\', ' . $process->id . ', \'{object_name}\', {id_object})'
-            )
-        );
-
-        $bulkActions = array(
-            array(
-                'function' => 'executeSelectedObjectProcess(\'import\', ' . $process->id . ', \'{object_name}\')',
-                'label'    => 'Importer les éléments sélectionnés'
-            )
         );
         return renderProcessObjectsList($objects, $fields, $buttons, $bulkActions);
     }

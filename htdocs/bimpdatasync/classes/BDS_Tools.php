@@ -230,6 +230,15 @@ class BDS_Tools
 
                 case 'Categorie':
                     return DOL_URL_ROOT . '/categories/viewcat.php?id=' . $id_object;
+
+                case 'Societe':
+                    return DOL_URL_ROOT . '/societe/card.php?socid=' . $id_object;
+
+                case 'Contact':
+                    return DOL_URL_ROOT . '/contact/card.php?id=' . $id_object;
+
+                case 'Commande':
+                    return DOL_URL_ROOT . '/commande/card.php?id=' . $id_object;
             }
         }
 
@@ -254,6 +263,20 @@ class BDS_Tools
                 case 'Categorie':
                     $ref = $bdb->getValue('categorie', 'label', '`rowid` = ' . (int) $id_object);
                     break;
+
+                case 'Societe':
+                    $ref = $bdb->getValue('societe', 'nom', '`rowid` = ' . (int) $id_object);
+                    break;
+
+                case 'Contact':
+                    $firstname = $bdb->getValue('socpeople', 'firstname', '`rowid` = ' . (int) $id_object);
+                    $lastname = $bdb->getValue('socpeople', 'lastname', '`rowid` = ' . (int) $id_object);
+                    $ref = $firstname . ' ' . strtoupper($lastname);
+                    break;
+
+                case 'Commande':
+                    $ref = $bdb->getValue('commande', 'ref', '`rowid` = ' . (int) $id_object);
+                    break;
             }
         }
 
@@ -277,7 +300,7 @@ class BDS_Tools
             }
         }
 
-        return $objectLabel;
+        return $objectLabel . ' ' . $id_object;
     }
 
     public static function isSubmit($key)

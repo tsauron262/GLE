@@ -433,7 +433,7 @@ table.fullTable {
     display: block;
 }
 table.fullTable tr td.resize{/*correction bug dans repport Bug*/
-                             font-size:11px!important;
+    font-size:11px!important;
 }
 
 table.tabBorder100{
@@ -476,13 +476,19 @@ div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_se
 }
 
 .liste_titre a:not(.select2-choice),
-tr.liste_titre, a.tabTitle, div.titre,
-a.tabunactive{
-        color: rgb(237,124,28)!important;
-        color: white!important;
-        font-weight: bold;
+tr.liste_titre, a.tabTitle, 
+
+/*div.titre, a.tabunactive */
+{
+    color: rgb(237,124,28)!important;
+    color: white!important;
+    font-weight: bold;
 }
 
+div.titre, a.tabunactive {
+    color: rgb(237,124,28)!important;
+    font-weight: bold;
+}
 
 
 

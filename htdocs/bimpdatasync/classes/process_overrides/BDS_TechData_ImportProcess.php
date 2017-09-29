@@ -53,6 +53,11 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
             }
         }
     }
+    
+    public static function getClassName()
+    {
+        return 'BDS_TechData_ImportProcess';
+    }
 
     public function test()
     {

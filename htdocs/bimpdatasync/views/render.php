@@ -701,9 +701,9 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
             if (count($object['list'])) {
                 $url = $base_url . '&object_name=' . $object_name;
 
-                if (count($bulkActions)) {
+                if (count($object['bulkActions'])) {
                     $html .= '<div class="buttonsContainer">';
-                    foreach ($bulkActions as $bulkAction) {
+                    foreach ($object['bulkActions'] as $bulkAction) {
                         $onclick = $bulkAction['function'];
                         $onclick = str_replace('{object_name}', $object_name, $onclick);
                         $html .= '<span class="butAction" onclick="' . $onclick . '">';
@@ -890,7 +890,7 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
                     }
 
                     $html .= '<td>';
-                    foreach ($buttons as $button) {
+                    foreach ($object['buttons'] as $button) {
                         $onclick = $button['onclick'];
                         $onclick = str_replace('{object_name}', $object_name, $onclick);
                         $onclick = str_replace('{id_object}', $row['id_object'], $onclick);
@@ -913,9 +913,9 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
 
                 $html .= '</div>';
                 $html .= '</form>';
-                if (count($bulkActions)) {
+                if (count($object['bulkActions'])) {
                     $html .= '<div class="buttonsContainer">';
-                    foreach ($bulkActions as $bulkAction) {
+                    foreach ($object['bulkActions'] as $bulkAction) {
                         $onclick = $bulkAction['function'];
                         $onclick = str_replace('{object_name}', $object_name, $onclick);
                         $html .= '<span class="butAction bulkActionButton" onclick="' . $onclick . '">';

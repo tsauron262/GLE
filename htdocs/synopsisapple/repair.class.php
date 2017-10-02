@@ -361,7 +361,6 @@ class Repair
             return false;
         }
 
-        $this->addError($sql);
         $result = $this->db->query($sql);
         if ($this->db->num_rows($result) > 0) {
             $datas = $this->db->fetch_object($result);

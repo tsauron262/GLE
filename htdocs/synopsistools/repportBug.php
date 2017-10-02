@@ -155,7 +155,7 @@ function bug($user, $text, $adresse) {
         \n Utlisateur : " . $user->getNomUrl() . "
         \n Message : " . $text;
 
-    $requete = "INSERT into " . MAIN_DB_PREFIX . "synopsistools_bug (fk_user, text) VALUES (" . $user->id . ", '" . addslashes($message) . "');";
+    $requete = "INSERT into " . MAIN_DB_PREFIX . "synopsistools_bug (fk_user, text, resolu) VALUES (" . $user->id . ", '" . addslashes($message) . "', 0);";
     $db->query($requete);
 
     mailSyn("tommy@bimp.fr", "Bug Gle", $message);

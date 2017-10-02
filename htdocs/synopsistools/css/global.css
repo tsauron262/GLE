@@ -498,7 +498,7 @@ div.titre, a.tabunactive {
     border-radius: 10px;
     border-color: rgb(239,125,0);
 }
-a.tabactive.tab{
+a.tabactive.tab, span.tabTitleText{
     color: rgb(239,125,0)!important;
 }
 div.menu_titre a.vmenu{

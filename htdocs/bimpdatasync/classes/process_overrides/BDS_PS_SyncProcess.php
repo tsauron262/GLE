@@ -41,7 +41,7 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
     {
 //        $errors = array();
         self::$debug_mod = true;
-//        self::$ext_debug_mod = true;
+        self::$ext_debug_mod = true;
 //
 //        BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Product');
 //        $objects = $this->getObjectsExportData('Product', 'Product', array(6849), $errors);
@@ -70,6 +70,9 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             $this->debug_content .= '</pre>';
         }
         
+        echo '<pre>';
+        print_r($this->debug_content);
+        exit;
         echo $this->debug_content;
     }
 

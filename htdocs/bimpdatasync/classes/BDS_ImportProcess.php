@@ -232,6 +232,8 @@ abstract class BDS_ImportProcess extends BDS_Process
         $objects = BDS_ImportData::getAllObjectsList($bdb, $process->id, $sort_by, $sort_way);
 
         foreach ($objects as $object_name => &$object) {
+            $object['nbFails'] = 0;
+            $object['nbProcessing'] = 0;
             $rows = array();
             $object_label = ucfirst(BDS_Report::getObjectLabel($object_name));
             foreach ($object['list'] as $row) {
@@ -253,7 +255,9 @@ abstract class BDS_ImportProcess extends BDS_Process
                 $status = '<span class="';
                 if ((int) $row['status'] < 0) {
                     $status .= 'danger';
+                    $object['nbFails']++;
                 } elseif ((int) $row['status'] > 0) {
+                    $object['nbProcessing']++;
                     $status .= 'warning';
                 } else {
                     $status .= 'success';

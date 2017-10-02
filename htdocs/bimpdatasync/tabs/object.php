@@ -110,8 +110,8 @@ switch ($object_name) {
             $head = contact_prepare_head($object);
         }
         break;
-        
-        case 'Commande':
+
+    case 'Commande':
         require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
         require_once DOL_DOCUMENT_ROOT . '/core/lib/order.lib.php';
 
@@ -120,7 +120,7 @@ switch ($object_name) {
         $result = restrictedArea($user, 'commande', $id);
         $help_url = 'EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes';
         $picto = 'order';
-        $linkback = '<a href="' . DOL_URL_ROOT . '/commande/list.php?restore_lastsearch_values=1' . (! empty($socid) ? '&socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
+        $linkback = '<a href="' . DOL_URL_ROOT . '/commande/list.php?restore_lastsearch_values=1' . (!empty($socid) ? '&socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
 
         $object = new Commande($db);
         if ($id > 0) {
@@ -169,6 +169,15 @@ if ($linkback) {
 $processes_data = BDS_Process::getObjectProcessesData($id, $object_name);
 
 echo renderObjectProcessesData($processes_data);
+
+echo '<div class="buttonsContainer">';
+echo '<a class="butAction" href="' . DOL_URL_ROOT . '/bimpdatasync/process.php" target="_blank">';
+echo 'Gestion des processus';
+echo '</a>';
+echo '<a class="butAction" href="' . DOL_URL_ROOT . '/bimpdatasync/rapports.php" target="_blank">';
+echo 'Voir tous les rapports';
+echo '</a>';
+echo '</div>';
 
 if (count($processes_data)) {
     global $db;

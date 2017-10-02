@@ -672,7 +672,7 @@ function renderObjectProcessDataRows($data)
     return $html;
 }
 
-function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
+function renderProcessObjectsList($data, $fields)
 {
     $html = '';
     global $db;
@@ -694,6 +694,18 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
             $html .= '<div class="foldable_section_caption">';
             $html .= ucfirst($object['label_plur']) . '&nbsp;&nbsp;';
             $html .= '<span class="badge">' . count($object['list']) . '</span>';
+
+            if (isset($object['nbFails']) && $object['nbFails']) {
+                $html .= '&nbsp;&nbsp;<span class="badge badge-danger">';
+                $html .= $object['nbFails'] . ' échec' . ((int) $object['nbFails'] > 1 ? 's' : '');
+                $html .= '</span>';
+            }
+            if (isset($object['nbProcessing']) && $object['nbProcessing']) {
+                $html .= '&nbsp;&nbsp;<span class="badge badge-warning">';
+                $html .= $object['nbProcessing'] . ' en cours';
+                $html .= '</span>';
+            }
+
             $html .= '</div>';
 
             $html .= '<div class="foldable_section_content">';

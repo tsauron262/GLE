@@ -186,6 +186,14 @@ table thead tr th {
     background-color: #F5E2E2;
 }
 
+.badge-warning {
+    background-color: #B48335!important;
+}
+
+.badge-danger {
+    background-color: #A00000;
+}
+
 .success {
     color: #348C41!important;
     font-weight: bold;

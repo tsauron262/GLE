@@ -1205,10 +1205,10 @@ class BDS_SyncProcess extends BDS_Process
             $reference .= $sync_data->ext_object_name ? '"' . $sync_data->ext_object_name . '"' : '(inconnu)';
             $reference .= ', ID: ' . ($sync_data->ext_id_object ? $sync_data->ext_id_object : 'iconnu');
             $actions = array();
-            if (method_exists(static::getClassName(), 'get'. ucfirst($object_name).'ExportData')) {
+            if (method_exists(static::getClassName(), 'get' . ucfirst($object_name) . 'ExportData')) {
                 $actions['export'] = 'Exporter';
             }
-            if (method_exists(static::getClassName(), 'update'. ucfirst($object_name))) {
+            if (method_exists(static::getClassName(), 'update' . ucfirst($object_name))) {
                 $actions['import'] = 'Importer';
             }
             return array(
@@ -1234,6 +1234,8 @@ class BDS_SyncProcess extends BDS_Process
         $objects = BDS_SyncData::getAllObjectsList($bdb, $process->id, $sort_by, $sort_way);
 
         foreach ($objects as $object_name => &$object) {
+            $object['nbFails'] = 0;
+            $object['nbProcessing'] = 0;
             $rows = array();
             $object_label = ucfirst(BDS_Report::getObjectLabel($object_name));
             foreach ($object['list'] as $row) {
@@ -1254,8 +1256,10 @@ class BDS_SyncProcess extends BDS_Process
 
                 $status = '<span class="';
                 if ((int) $row['status'] < 0) {
+                    $object['nbFails'] ++;
                     $status .= 'danger';
                 } elseif ((int) $row['status'] > 0) {
+                    $object['nbProcessing'] ++;
                     $status .= 'warning';
                 } else {
                     $status .= 'success';

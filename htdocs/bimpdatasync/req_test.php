@@ -38,7 +38,7 @@ function testReq()
     }
 }
 
-testReq();
+//testReq();
 
 function installProcess()
 {

@@ -476,7 +476,7 @@ div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_se
 }
 
 .liste_titre a:not(.select2-choice),
-tr.liste_titre, a.tabTitle, div.titre,
+tr.liste_titre, a.tabTitle,
 a.tabunactive{
         color: rgb(237,124,28)!important;
         color: white!important;
@@ -492,7 +492,7 @@ a.tabunactive{
     border-radius: 10px;
     border-color: rgb(239,125,0);
 }
-a.tabactive.tab{
+a.tabactive.tab, span.tabTitleText{
     color: rgb(239,125,0)!important;
 }
 div.menu_titre a.vmenu{

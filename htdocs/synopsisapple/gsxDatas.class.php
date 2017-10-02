@@ -131,17 +131,25 @@ class gsxDatas
     {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
+        
         global $db;
         if (!isset($_GET['importNumber']) || !isset($_GET['importNumberType']))
             return '<p class="error">Erreur: informations manquantes.</p>';
+        
         $repair = new Repair($db, $this->gsx, $this->isIphone);
+        
         if ($repair->import($chronoId, $_GET['importNumber'], $_GET['importNumberType'])) {
             return '<p class="confirmation">Les données de la réparation ont été importées avec succès</p><ok>Reload</ok>';
         }
+        
         $html = '<p class="error">Echec de l\'importation.</p>';
+        
+        
         $html .= "error repair : " . $repair->displayErrors();
+        
         if (count($this->gsx->errors['soap']))
             $html .= "erreur GSX : " . $this->getGSXErrorsHtml();
+        
         return $html;
     }
 

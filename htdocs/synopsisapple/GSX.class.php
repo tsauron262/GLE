@@ -318,6 +318,7 @@ class GSX
      *
      */
     public $isIphone = false;
+    public $last_response = null;
 
     public function __construct($_gsxDetailsArray = array(), $isIphone = false, $apiMode)
     {
@@ -883,6 +884,9 @@ class GSX
      */
     public function request($requestData, $clientLookup)
     {
+        $this->last_response = null;
+        $response = array();
+
         if (!$this->userSessionId) {
             $this->authenticate();
         }
@@ -898,11 +902,31 @@ class GSX
         $SOAPRequest = array();
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
-
+            $response = $this->_objToArr($SOAPRequest);
+            $this->last_response = $response;
             global $user;
-            if ($user->id == 1)
-                dol_syslog("result GSX " . print_r($SOAPRequest, 1) . "<br/><br/>" . $clientLookup . print_r($requestData, 1), 3, 0, "_admin");
+            if (in_array($user->id, array(1, 270, 271))) {
+                $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
+                $msg .= 'Données envoyées:' . "\n";
+                $msg .= print_r($requestData, 1);
+                $msg .= 'Données reçues:' . "\n";
+                $msg .= print_r($response, 1);
+                dol_syslog($msg, 3);
+            }
+
+//            if ($user->id == 1)
+//                dol_syslog("result GSX " . print_r($SOAPRequest, 1) . "<br/><br/>" . $clientLookup . print_r($requestData, 1), 3, 0, "_admin");
         } catch (SoapFault $f) {
+            global $user;
+                if (in_array($user->id, array(1, 270, 271))) {
+                    $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
+                    $msg .= 'Données envoyées:' . "\n";
+                    $msg .= print_r($requestData, 1);
+                    $msg .= 'Erreur(s):' . "\n";
+                    $msg .= $f->faultstring;
+                    dol_syslog($msg, 3);
+                }
+                
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
@@ -921,6 +945,7 @@ class GSX
                 }
                 echo "<input type='hidden' name='componentCheckDetails_nextIdx' value='" . ($i + 1) . "'/>";
                 echo '</div></div></div></fieldset>';
+
                 die;
                 return array();
             }
@@ -948,9 +973,6 @@ class GSX
                 die;
                 return array();
             }
-
-
-
             if (stripos($f->faultstring, "La réparation est hors garantie") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
@@ -961,19 +983,18 @@ class GSX
                 $add = "";
                 if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error, 1);
-                global $user;
                 if (in_array($user->id, array(1, 270, 271))) {
                     $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true) . print_r($requestData, true));
                 } else {
                     $this->soap_error($f->faultcode, $f->faultstring);
                 }
-                
+
 //            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
                 return array();
             }
         }
 
-        return $this->_objToArr($SOAPRequest);
+        return $response;
     }
 
     /**
@@ -1217,6 +1238,17 @@ class GSX
             $sortie .= print_r($error, 1);
 
         dol_syslog($sortie, 3, 0, "_apple3");
+    }
+
+    public function displayLastResponse()
+    {
+        if (!is_null($this->last_response)) {
+            echo 'Réponse: <pre>';
+            print_r($this->last_response);
+            echo '</pre>';
+        } else {
+            echo '<p class="error">Aucune réponse</p>';
+        }
     }
 }
 

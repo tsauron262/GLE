@@ -415,6 +415,7 @@ class Repair
         );
         if ($this->isIphone)
             $datas['imeiNumber'] = '';
+
         if (isset($data) && isset($dataType)) {
             if (isset($datas[$dataType])) {
                 $datas[$dataType] = $data;
@@ -616,11 +617,22 @@ class Repair
         if (count($this->gsx->errors['soap']) > $n) {
             return false;
         }
-        if (!isset($response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'])) {
-            return false;
+
+        $parts = null;
+        if ($this->isIphone) {
+            if (isset($response['IPhoneRepairDetailsLookupResponse']['lookupResponseData']['repairPartDetailsInfo'])) {
+                $parts = $response['IPhoneRepairDetailsLookupResponse']['lookupResponseData']['repairPartDetailsInfo'];
+            }
+        } else {
+            if (isset($response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'])) {
+                $parts = $response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'];
+            }
         }
 
-        $parts = $response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'];
+        if (is_null($parts)) {
+            $this->addError('Echec de la récupération du montant total: Aucune réponse reçue');
+            return false;
+        }
 
         if (isset($parts['partNumber'])) {
             $parts = array($parts);

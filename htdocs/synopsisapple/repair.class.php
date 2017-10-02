@@ -620,16 +620,17 @@ class Repair
 
         $parts = null;
         if ($this->isIphone) {
-            if (isset($response['IPhoneRepairDetailsLookupResponse']['lookupResponseData']['repairPartDetailsInfo'])) {
-                $parts = $response['IPhoneRepairDetailsLookupResponse']['lookupResponseData']['repairPartDetailsInfo'];
+            if (isset($response['IPhoneRepairDetailsLookupResponse']['lookupResponseData'])) {
+                $response = $response['IPhoneRepairDetailsLookupResponse']['lookupResponseData'];
             }
         } else {
-            if (isset($response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'])) {
-                $parts = $response['RepairDetailsLookupResponse']['repairDetails']['repairPartDetailsInfo'];
+            if (isset($response['RepairDetailsLookupResponse']['repairDetails'])) {
+                $response = $response['RepairDetailsLookupResponse']['repairDetails'];
             }
         }
-
-        if (is_null($parts)) {
+        if (isset($response['repairPartDetailsInfo'])) {
+            $parts = $response['repairPartDetailsInfo'];
+        } else {
             $this->addError('Echec de la récupération du montant total: Aucune réponse reçue');
             return false;
         }
@@ -642,6 +643,12 @@ class Repair
         foreach ($parts as $part) {
             if (isset($part['netPrice']) && $part['netPrice']) {
                 $totalFromOrder += (float) $part['netPrice'];
+            }
+        }
+
+        if (!$totalFromOrder) {
+            if (isset($response['isInvoiced']) && $response['isInvoiced'] === 'Y') {
+                $totalFromOrder = 1.00;
             }
         }
 
@@ -678,7 +685,19 @@ class Repair
             $html .= '<p class="error">numéro de confirmation absent</p>' . "\n";
         else
             $html .= '<p><strong>N° de confirmation: </strong>' . $this->confirmNumbers['repair'] . '</p>';
-        $html .= '<p><strong>Prix de la réparation: </strong>' . $this->totalFromOrder . " €";
+
+        if (isset($this->totalFromOrder)) {
+            $html .= '<p><strong>Hors garantie: </strong>';
+            if ((float) $this->totalFromOrder > 0) {
+                $html .= 'OUI ';
+                if ((float) $this->totalFromOrder !== 1) {
+                    $html .= '(' . $this->totalFromOrder . ' &euro;)';
+                }
+            } else {
+                $htm .= 'NON';
+            }
+            $html .= '</p>';
+        }
         $html .= '<p><strong>Statut dans GSX: </strong>';
         if (isset($this->repairLookUp['repairStatus']))
             $html .= $this->repairLookUp['repairStatus'];

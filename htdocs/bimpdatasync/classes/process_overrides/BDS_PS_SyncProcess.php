@@ -31,6 +31,11 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
             }
         }
     }
+    
+    public static function getClassName()
+    {
+        return 'BDS_PS_SyncProcess';
+    }
 
     public function test()
     {
@@ -38,21 +43,34 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
         self::$debug_mod = true;
 //        self::$ext_debug_mod = true;
 //
+//        BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Product');
+//        $objects = $this->getObjectsExportData('Product', 'Product', array(6849), $errors);
+//        if (!count($errors) && count($objects['list'])) {
+//            $this->soapExportObjects(array($objects), 'BIMP_ERP_Sync');
+//        } else {
+//            $this->debug_content .= 'Erreurs: <pre>';
+//            $this->debug_content .= print_r($errors, 1);
+//            $this->debug_content .= '</pre>';
+//        }
+
+//        echo $this->debug_content;
+//        $objects = $this->getObjectsDeleteData('Categorie', 'Categorie', array(809));
+//        if (count($objects)) {
+//            $this->soapDeleteObjects(array($objects), 'BIMP_ERP_Sync');
+//        }
+        
+        // Tests imports: 
         BDS_SyncData::resetAllStatus($this->db, $this->processDefinition->id, 'Product');
-        $objects = $this->getObjectsExportData('Product', 'Product', array(6849), $errors);
+        $objects = $this->getObjectsImportData('Product', 'Product', array(6851), $errors);
         if (!count($errors) && count($objects['list'])) {
-            $this->soapExportObjects(array($objects), 'BIMP_ERP_Sync');
+            $this->soapImportObjects(array($objects), 'BIMP_ERP_Sync');
         } else {
             $this->debug_content .= 'Erreurs: <pre>';
             $this->debug_content .= print_r($errors, 1);
             $this->debug_content .= '</pre>';
         }
-
+        
         echo $this->debug_content;
-//        $objects = $this->getObjectsDeleteData('Categorie', 'Categorie', array(809));
-//        if (count($objects)) {
-//            $this->soapDeleteObjects(array($objects), 'BIMP_ERP_Sync');
-//        }
     }
 
 //    Opérations:
@@ -116,8 +134,6 @@ class BDS_PS_SyncProcess extends BDS_SyncProcess
                 isset($this->references) && count($this->references)) {
             $objects = $this->getObjectsExportData($object_name, $ext_object_name, $this->references, $errors);
             if (!count($errors) && count($objects['list'])) {
-//                $msg = 'Données envoyées: <pre>' . str_replace("\n", '<br/>', print_r($objects, 1)) . '</pre>';
-//                $this->Info($msg);
                 $this->soapExportObjects(array($objects), 'BIMP_ERP_Sync');
             }
         }

@@ -17,46 +17,27 @@ $searchErrors = array();
 $searchDateFrom = 0;
 $searchDateTo = 0;
 
-if (isset($_POST['searchSubmit'])) {
-    if (!$_POST['searchIdObject']) {
+if (BDS_Tools::isSubmit('searchSubmit')) {
+    $searchIdObject = BDS_Tools::getValue('searchIdObject');
+    if (is_null($searchIdObject)) {
         $searchErrors[] = 'Veuillez indiquer un ID pour l\'objet à rechercher';
-    } elseif (!preg_match('/^\d+$/', $_POST['searchIdObject'])) {
+    } elseif (!preg_match('/^\d+$/', $searchIdObject)) {
         $searchErrors[] = 'L\'ID de l\'objet à rechercher doit être un nombre entier positif ' . $_POST['searchIdObject'];
-    }
-    if ($_POST['searchDateFrom']) {
-        $searchDateFrom = $_POST['searchDateFromyear'] . '-' . $_POST['searchDateFrommonth'] . '-' . $_POST['searchDateFromday'];
-        if ($_POST['searchDateFromhour']) {
-            $searchDateTo .= $_POST['searchDateFromhour'];
-        } else {
-            $searchDateTo .= '00';
-        }
-        if ($_POST['searchDateFrommin']) {
-            $searchDateTo .= $_POST['searchDateFrommin'];
-        } else {
-            $searchDateTo .= '00';
-        }
-        $searchDateTo .= '00';
     } else {
-        $searchDateFrom = '00000000-000000';
+        $searchIdObject = (int) $searchIdObject;
     }
-    if ($_POST['searchDateTo']) {
-        $searchDateTo = $_POST['searchDateToyear'] . $_POST['searchDateTomonth'] . $_POST['searchDateToday'];
-        if ($_POST['searchDateTohour']) {
-            $searchDateTo .= $_POST['searchDateTohour'];
-        } else {
-            $searchDateTo .= '00';
-        }
-        if ($_POST['searchDateTomin']) {
-            $searchDateTo .= $_POST['searchDateTomin'];
-        } else {
-            $searchDateTo .= '00';
-        }
-        $searchDateTo .= '00';
+    if (BDS_Tools::isSubmit('searchDateFrom')) {
+        $searchDateFrom = new DateTime(BDS_Tools::getDateTimeFromForm('searchDateFrom'));
     } else {
-        $searchDateTo = date('Ymd-His');
+        $searchDateFrom = new DateTime(0);
+    }
+    if (BDS_Tools::isSubmit('searchDateTo')) {
+        $searchDateTo = new DateTime(BDS_Tools::getDateTimeFromForm('searchDateTo'));
+    } else {
+        $searchDateTo = new DateTime();
     }
 
-    if ($searchDateFrom > $searchDateTo) {
+    if ($searchDateFrom->getTimestamp() > $searchDateTo->getTimestamp()) {
         $searchErrors[] = 'La date de début de la recherche doit être inférieure ou égale à la date de fin';
     }
 }
@@ -69,10 +50,10 @@ $processes = BDSProcess::getProcessesQuery();
 global $db;
 $bdb = new BimpDb($db);
 $form = new Form($db);
-$DT = new DateTime();
-$dateTo = $DT->format('Y-m-d H:i');
-$DT->sub(new DateInterval('P1D'));
-$dateFrom = $DT->format('Y-m-d');
+
+$dateTo = new DateTime();
+$dateFrom = new DateTime();
+$dateFrom->sub(new DateInterval('P1D'));
 ?>
 
 <link type="text/css" rel="stylesheet" href="./views/css/styles.css"/>
@@ -193,7 +174,7 @@ $dateFrom = $DT->format('Y-m-d');
                               Du:
                            </div>
                            <div class="formInput">
-                               <?php $form->select_date($dateFrom, 'searchDateFrom', 1, 1) ?>
+                               <?php $form->select_date($dateFrom->getTimestamp(), 'searchDateFrom', 1, 1) ?>
                            </div>
                         </div>
                         <div class="formRow">
@@ -201,7 +182,7 @@ $dateFrom = $DT->format('Y-m-d');
                               Au:
                            </div>
                            <div class="formInput">
-                               <?php $form->select_date($dateTo, 'searchDateTo', 1, 1) ?>
+                               <?php $form->select_date($dateTo->getTimestamp(), 'searchDateTo', 1, 1) ?>
                            </div>
                         </div>
                         <?php
@@ -227,29 +208,27 @@ $dateFrom = $DT->format('Y-m-d');
    </div>
 </div>
 
-<div class="fichecenter buttonsContainer">
+<div class="fichecenter toolBar">
+   <a class="butAction" href="<?php echo DOL_URL_ROOT . '/bimpdatasync/process.php' ?>">
+      Liste des processus
+   </a>
    <a class="butActionDelete delete-button" href="<?php echo DOL_URL_ROOT . '/bimpdatasync/rapports.php?deleteAllReports=1' ?>">
       Supprimer tous les rapports
    </a>
 </div>
 <?php
-if (isset($_POST['searchSubmit'])) {
+if (BDS_Tools::isSubmit('searchSubmit')) {
     if (!count($searchErrors)) {
         if (!function_exists('renderObjectNotifications')) {
             require_once __DIR__ . '/views/render.php';
         }
-        $data = BDS_Report::getObjectNotifications($_POST['searchObject'], (int) $_POST['searchIdObject'], $searchDateFrom, $searchDateTo);
+        $data = BDS_Report::getObjectNotifications($_POST['searchObject'], (int) $_POST['searchIdObject'], $searchDateFrom->format('Ymd-His'), $searchDateTo->format('Ymd-His'));
         $title = 'Résultats de recherche pour "' . BDS_Tools::makeObjectName($bdb, $_POST['searchObject'], (int) $_POST['searchIdObject']) . '"';
         $title .= ' du ' . $_POST['searchDateFrom'] . ' au ' . $_POST['searchDateTo'];
         echo renderObjectNotifications($data, $title);
     }
 } else {
-    $report_ref = null;
-    if (isset($_POST['reportToLoad'])) {
-        $report_ref = $_POST['reportToLoad'];
-    } elseif (isset($_GET['reportToLoad'])) {
-        $report_ref = $_GET['reportToLoad'];
-    }
+    $report_ref = BDS_Tools::getValue('reportToLoad', null);
     if (!is_null($report_ref)) {
         echo '<div class="fichecenter">';
         if (file_exists(DOL_DATA_ROOT . '/bimpdatasync/reports/' . $report_ref . '.csv')) {

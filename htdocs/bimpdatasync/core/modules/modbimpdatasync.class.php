@@ -57,7 +57,14 @@ class modbimpdatasync extends DolibarrModules
         //                             2=>array('MAIN_MODULE_MYMODULE_NEEDSMARTY','chaine',1,'Constant to say module need smarty',0)
         $this->const = array();   // List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 0 or 'allentities')
         // Array to add new pages in new tabs
-        $this->tabs = array('product:+synchro:Synchronization:bimpdatasync@bimpdatasync:/bimpdatasync/tabs/object.php?id=__ID__&object_name=Product');
+        $this->tabs = array(
+            'product:+synchro:Synchronization:bimpdatasync@bimpdatasync:/bimpdatasync/tabs/object.php?id=__ID__&object_name=Product',
+            'categories_0:+synchro:Synchronization:bimpdatasync@bimpdatasync:/bimpdatasync/tabs/object.php?id=__ID__&object_name=Categorie',
+            'thirdparty:+synchro:Synchronization:bimpdatasync@bimpdatasync:/bimpdatasync/tabs/object.php?id=__ID__&object_name=Societe',
+            'contact:+synchro:Synchronization:bimpdatasync@bimpdatasync:/bimpdatasync/tabs/object.php?id=__ID__&object_name=Contact',
+            'order:+synchro:Synchronization:bimpdatasync@bimpdatasync:/bimpdatasync/tabs/object.php?id=__ID__&object_name=Commande'
+        );
+
         // where entity can be
         // 'thirdparty'       to add a tab in third party view
         // 'intervention'     to add a tab in intervention view

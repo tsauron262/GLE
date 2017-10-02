@@ -230,6 +230,15 @@ class BDS_Tools
 
                 case 'Categorie':
                     return DOL_URL_ROOT . '/categories/viewcat.php?id=' . $id_object;
+
+                case 'Societe':
+                    return DOL_URL_ROOT . '/societe/card.php?socid=' . $id_object;
+
+                case 'Contact':
+                    return DOL_URL_ROOT . '/contact/card.php?id=' . $id_object;
+
+                case 'Commande':
+                    return DOL_URL_ROOT . '/commande/card.php?id=' . $id_object;
             }
         }
 
@@ -254,6 +263,20 @@ class BDS_Tools
                 case 'Categorie':
                     $ref = $bdb->getValue('categorie', 'label', '`rowid` = ' . (int) $id_object);
                     break;
+
+                case 'Societe':
+                    $ref = $bdb->getValue('societe', 'nom', '`rowid` = ' . (int) $id_object);
+                    break;
+
+                case 'Contact':
+                    $firstname = $bdb->getValue('socpeople', 'firstname', '`rowid` = ' . (int) $id_object);
+                    $lastname = $bdb->getValue('socpeople', 'lastname', '`rowid` = ' . (int) $id_object);
+                    $ref = $firstname . ' ' . strtoupper($lastname);
+                    break;
+
+                case 'Commande':
+                    $ref = $bdb->getValue('commande', 'ref', '`rowid` = ' . (int) $id_object);
+                    break;
             }
         }
 
@@ -277,7 +300,7 @@ class BDS_Tools
             }
         }
 
-        return $objectLabel;
+        return $objectLabel . ' ' . $id_object;
     }
 
     public static function isSubmit($key)
@@ -333,14 +356,38 @@ class BDS_Tools
         return 0;
     }
 
-    public static function getDateTimeFromForm($name)
+    public static function getDateTimeFromForm($name, $default_date = '')
     {
-        $date = self::getValue($name . 'year', '0000') . '-';
-        $date .= self::getValue($name . 'month', '00') . '-';
-        $date .= self::getValue($name . 'day', '00') . ' ';
-        $date .= self::getValue($name . 'hour', '00') . ':';
-        $date .= self::getValue($name . 'min', '00') . ':00';
-        return $date;
+        if (self::isSubmit($name)) {
+            $year = '' . self::getValue($name . 'year', '0000');
+            $month = (int) self::getValue($name . 'month', 0);
+            if ($month < 10) {
+                $month = '0' . $month;
+            } else {
+                $month = '' . $month;
+            }
+            $day = (int) self::getValue($name . 'day', 0);
+            if ($day < 10) {
+                $day = '0' . $day;
+            } else {
+                $day = '' . $day;
+            }
+            $hour = (int) self::getValue($name . 'hour', 0);
+            if ($hour < 10) {
+                $hour = '0' . $hour;
+            } else {
+                $hour = '' . $hour;
+            }
+            $min = (int) self::getValue($name . 'min', 0);
+            if ($min < 10) {
+                $min = '0' . $min;
+            } else {
+                $min = '' . $min;
+            }
+
+            return $year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':00';
+        }
+        return $default_date;
     }
 
     public static function renameFile($dir, $old_name, $new_name)

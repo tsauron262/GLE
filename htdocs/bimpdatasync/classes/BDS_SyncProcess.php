@@ -28,8 +28,6 @@ class BDS_SyncProcess extends BDS_Process
         -3 => 'échec suppression'
     );
 
-    // Actions SOAP:
-
     public function __construct(\BDSProcess $processDefinition, $user, $params = null)
     {
         if (isset($params['ext_debug_mod']) && $params['ext_debug_mod']) {
@@ -39,6 +37,12 @@ class BDS_SyncProcess extends BDS_Process
         parent::__construct($processDefinition, $user, $params);
     }
 
+    public static function getClassName()
+    {
+        return 'BDS_SyncProcess';
+    }
+
+    // Actions SOAP:
     protected function soapClientInit()
     {
         if (!$this->parameters_ok) {
@@ -139,6 +143,67 @@ class BDS_SyncProcess extends BDS_Process
                 foreach ($object_data['list'] as $object) {
                     if (isset($object['ext_id_sync_data']) && $object['ext_id_sync_data']) {
                         BDS_SyncData::updateStatusById($this->db, $object['ext_id_sync_data'], self::BDS_STATUS_EXPORT_FAIL);
+                    }
+                }
+            }
+        }
+    }
+
+    protected function soapImportObjects($objects, $ext_process_name)
+    {
+        $response = $this->soapCall('set', array(
+            'process_name'   => $ext_process_name,
+            'operation'      => 'onGetObjectsRequest',
+            'ext_id_process' => (int) $this->processDefinition->id,
+            'objects'        => $objects
+        ));
+
+        if (self::$debug_mod) {
+            if (self::$ext_debug_mod) {
+                $this->debug_content .= '<h4>SOAP CLIENT: </h4><pre>';
+                $this->debug_content .= print_r($this->soap_client, 1);
+                $this->debug_content .= '</pre>';
+                return;
+            } else {
+                $this->debug_content .= '<h4>Réponse: </h4>';
+                if (is_array($response)) {
+                    $this->debug_content .= '<pre>';
+                    $this->debug_content .= print_r($response, 1);
+                    $this->debug_content .= '</pre>';
+                } else {
+                    $this->debug_content .= $response . '<br/>';
+                }
+            }
+        }
+
+        if (!self::$ext_debug_mod) {
+            if (is_null($response)) {
+                $msg = 'Echec de l\'import (Aucune réponse reçue)';
+                $this->Error($msg);
+            } elseif (!isset($response['success']) || !$response['success']) {
+                $msg = 'Echec de l\'import<br/>';
+                if (isset($response['errors'])) {
+                    $nErrors = count($response['errors']);
+                    if ($nErrors) {
+                        $msg .= $nErrors . 'erreur' . (($nErrors > 1) ? 's' : '') . ':<br/>';
+                        $msg .= '<ul>';
+                        foreach ($response['errors'] as $error) {
+                            $msg .= '<li>' . $error . '</li>';
+                        }
+                        $msg .= '</ul>';
+                    }
+                }
+                $this->Error($msg);
+            }
+        }
+
+        if (isset($response['return']) && count($response['return'])) {
+            $this->processObjectsImportResult(isset($response['ext_id_process']), $response['return']);
+        } else {
+            foreach ($objects as $object_data) {
+                foreach ($object_data['list'] as $object) {
+                    if (isset($object['ext_id_sync_data']) && $object['ext_id_sync_data']) {
+                        BDS_SyncData::updateStatusById($this->db, $object['ext_id_sync_data'], self::BDS_STATUS_IMPORT_FAIL);
                     }
                 }
             }
@@ -450,6 +515,45 @@ class BDS_SyncProcess extends BDS_Process
         return $objects_data;
     }
 
+    protected function getObjectsImportData($object_name, $ext_object_name, $objects_ids, &$errors)
+    {
+        $objects_data = array(
+            'object_name'     => $ext_object_name,
+            'ext_object_name' => $object_name,
+            'list'            => array()
+        );
+
+        foreach ($objects_ids as $id_object) {
+            $sync_data = new BDS_SyncData();
+            $sync_data->setLocValues((int) $this->processDefinition->id, $object_name, $id_object);
+            $sync_data->setExtValues(0, $ext_object_name, 0);
+            if (!$sync_data->loadOrCreate()) {
+                $msg = 'Echec de l\'initialisation des données de synchronisation. Import impossible';
+                $this->Error($msg, $object_name, $id_object);
+                continue;
+            }
+
+            if ($sync_data->status > 0) {
+                $msg = 'Des opérations de synchronisation sont en cours sur cet objet. Objet ignoré pour l\'import';
+                $this->Alert($msg, $object_name, $id_object);
+                continue;
+            }
+
+            $sync_data->status = self::BDS_STATUS_IMPORTING;
+
+            $objects_data['list'][] = array(
+                'ext_id_object'    => (int) $id_object,
+                'ext_id_sync_data' => (int) $sync_data->id,
+                'id_object'        => ($sync_data->ext_id_object ? $sync_data->ext_id_object : null),
+                'id_sync_data'     => ($sync_data->ext_id ? $sync_data->ext_id : null),
+            );
+
+            $sync_data->save();
+            unset($sync_data);
+        }
+        return $objects_data;
+    }
+
     protected function getObjectsDeleteData($object_name, $ext_object_name, $objects_ids)
     {
         $objects_data = array(
@@ -508,7 +612,7 @@ class BDS_SyncProcess extends BDS_Process
             $ext_object_name = $result['ext_object_name'];
         }
 
-        if (isset($ext_id_object)) {
+        if (isset($result['ext_id_object'])) {
             $ext_id_object = $result['ext_id_object'];
         }
 
@@ -567,6 +671,106 @@ class BDS_SyncProcess extends BDS_Process
 
         if (isset($result['objects']) && count($result['objects'])) {
             $this->processObjectsExportResult($ext_id_process, $result['objects']);
+        }
+    }
+
+    protected function processObjectsImportResult($ext_id_process, $objects)
+    {
+        if (!is_null($objects) && count($objects)) {
+            foreach ($objects as $object_name => $objects_list) {
+                if (!is_null($objects_list) && count($objects_list)) {
+                    foreach ($objects_list as $result) {
+                        $this->processObjectImportResult($ext_id_process, $object_name, $result);
+                    }
+                }
+            }
+        }
+    }
+
+    protected function processObjectImportResult($ext_id_process, $object_name, $result)
+    {
+        $ext_object_name = '';
+        $ext_id_object = 0;
+        $id_object = 0;
+
+        if (isset($result['ext_object_name'])) {
+            $ext_object_name = $result['ext_object_name'];
+        }
+        if (isset($result['ext_id_object'])) {
+            $ext_id_object = $result['ext_id_object'];
+        }
+        if (isset($result['id_object'])) {
+            $id_object = $result['id_object'];
+        }
+
+        $sync_data = new BDS_SyncData(isset($result['id_sync_data']) ? $result['id_sync_data'] : null);
+        $sync_data->setLocValues($this->processDefinition->id, $object_name, $id_object);
+        $sync_data->setExtValues($ext_id_process, $ext_object_name, $ext_id_object);
+        if (isset($result['ext_id_sync_data'])) {
+            $sync_data->ext_id = (int) $result['ext_id_sync_data'];
+        }
+
+        if (!$sync_data->loadOrCreate()) {
+            $msg = 'Echec de la récupération des données de synchronisation pour l\'objet "' . $object_name . '" d\'ID ' . $id_object;
+            $msg .= '. Impossible de traiter les résultats de l\'export pour cet objet';
+            $this->Error($msg, $object_name, $id_object, $ext_id_object ? 'ID externe: ' . $ext_id_object : null);
+            return;
+        }
+
+        if (isset($result['errors']) && count($result['errors'])) {
+            $nErrors = count($result['errors']);
+            $msg = $nErrors . ' erreur' . (($nErrors > 1) ? 's détectées' : ' détectée') . ': ';
+            $msg .= '<ul>';
+            foreach ($result['errors'] as $error) {
+                $msg .= '<li>' . $error . '</li>';
+            }
+            $msg .= '</ul>';
+            $this->Error($msg, $object_name, $id_object);
+            $sync_data->status = self::BDS_STATUS_IMPORT_FAIL;
+        } else {
+            $method = 'update' . ucfirst($object_name);
+
+            if (method_exists($this, $method)) {
+                $update_result = $this->{$method}($result['data'], $sync_data);
+
+                if (isset($update_result['object']) && isset($update_result['object']->id) && $update_result['object']->id) {
+                    if (!isset($sync_data->loc_id_object) || !$sync_data->loc_id_object) {
+                        $sync_data->loc_id_object = (int) $update_result['object']->id;
+                    }
+
+                    if (!count($update_result['errors'])) {
+                        $msg = 'Import effectué avec succès';
+                        $this->Success($msg, $object_name, $id_object, $ext_id_object ? 'ID externe: ' . $ext_id_object : null);
+                        $sync_data->status = self::BDS_STATUS_SYNCHRONISED;
+                    }
+                }
+            } else {
+                $msg = 'Mise à jour impossible. Méthode "' . $method . '" inexistante';
+                $this->Error($msg, $object_name, $id_object, $ext_id_object ? 'ID externe: ' . $ext_id_object : null);
+            }
+        }
+
+        if ($sync_data->status !== self::BDS_STATUS_SYNCHRONISED) {
+            $msg = 'Echec de l\'import';
+            $this->Error($msg, $object_name, $id_object, $ext_id_object ? 'ID externe: ' . $ext_id_object : null);
+            $sync_data->status = self::BDS_STATUS_IMPORT_FAIL;
+        }
+
+        $errors = $sync_data->save();
+        unset($sync_data);
+
+        if (count($errors)) {
+            $msg = 'Des erreurs sont survenues lors de l\'enregistrement des données de synchronisation';
+            $msg .= '<ul>';
+            foreach ($error as $e) {
+                $msg .= '<li>' . $e . '</li>';
+            }
+            $msg .= '</ul>';
+            $this->Error($msg, $object_name, $id_object, $ext_id_object ? 'ID externe: ' . $ext_id_object : null);
+        }
+
+        if (isset($result['objects']) && count($result['objects'])) {
+            $this->processObjectsImportResult($ext_id_process, $result['objects']);
         }
     }
 
@@ -704,6 +908,32 @@ class BDS_SyncProcess extends BDS_Process
                 $objects = $this->getObjectsExportData($object_name, $sync_data->ext_object_name, array($id_object), $errors);
                 if (!count($errors) && count($objects['list'])) {
                     $this->soapExportObjects(array($objects), static::$ext_process_name);
+                } else {
+                    foreach ($errors as $e) {
+                        $this->Error($e, $this->curId(), $this->curName(), $this->curRef());
+                    }
+                }
+            } else {
+                $this->Error('Type d\'objet externe non enregistré');
+            }
+        } else {
+            $this->Error('Données de synchronisation non trouvées pour cet objet');
+        }
+    }
+
+    protected function executeObjectImport($object_name, $id_object)
+    {
+        $sync_data = new BDS_SyncData();
+        $sync_data->setLocValues($this->processDefinition->id, $object_name, $id_object);
+        if ($sync_data->loadOrCreate(true)) {
+            if (isset($sync_data->ext_object_name) && $sync_data->ext_object_name) {
+                $this->current_object['ref'] = 'ID externe: ' . ($sync_data->ext_id_object ? $sync_data->ext_id_object : 'inconnu');
+                $sync_data->status = 0;
+                $sync_data->save();
+                $errors = array();
+                $objects = $this->getObjectsImportData($object_name, $sync_data->ext_object_name, array($id_object), $errors);
+                if (!count($errors) && count($objects['list'])) {
+                    $this->soapImportObjects(array($objects), static::$ext_process_name);
                 } else {
                     foreach ($errors as $e) {
                         $this->Error($e, $this->curId(), $this->curName(), $this->curRef());
@@ -974,17 +1204,23 @@ class BDS_SyncProcess extends BDS_Process
             $reference = 'Object externe: ';
             $reference .= $sync_data->ext_object_name ? '"' . $sync_data->ext_object_name . '"' : '(inconnu)';
             $reference .= ', ID: ' . ($sync_data->ext_id_object ? $sync_data->ext_id_object : 'iconnu');
+            $actions = array();
+            if (method_exists(static::getClassName(), 'get'. ucfirst($object_name).'ExportData')) {
+                $actions['export'] = 'Exporter';
+            }
+            if (method_exists(static::getClassName(), 'update'. ucfirst($object_name))) {
+                $actions['import'] = 'Importer';
+            }
             return array(
                 'references'   => $reference,
                 'status_label' => static::$status_labels[(int) $sync_data->status],
                 'status_value' => $sync_data->status,
                 'date_add'     => $sync_data->date_add,
                 'date_update'  => $sync_data->date_update,
-                'actions'      => array(
-                    'export' => 'Exporter'
-                )
+                'actions'      => $actions
             );
         }
+        return array();
     }
 
     public static function renderProcessObjectsList($process)
@@ -1010,10 +1246,10 @@ class BDS_SyncProcess extends BDS_Process
                 $label = '';
                 if ($object_link) {
                     $label .= '<a href="' . $object_link . '" target="_blank">';
-                    $label .= $name ? $name : $object_label;
+                    $label .= $name ? $name : $object_label . ' ' . $row['id_object'];
                     $label .= '</a>';
                 } else {
-                    $label .= $name ? $name : $object_label;
+                    $label .= $name ? $name : $object_label . ' ' . $row['id_object'];
                 }
 
                 $status = '<span class="';
@@ -1043,6 +1279,32 @@ class BDS_SyncProcess extends BDS_Process
                 unset($date_update);
             }
             $object['list'] = $rows;
+            $object['buttons'] = array();
+            $object['bulkActions'] = array();
+            $method = 'update' . ucfirst($object_name);
+            if (method_exists(static::getClassName(), $method)) {
+                $object['buttons'][] = array(
+                    'label'   => 'Importer',
+                    'class'   => 'butAction',
+                    'onclick' => 'executeObjectProcess($(this), \'import\', ' . $process->id . ', \'{object_name}\', {id_object})'
+                );
+                $object['bulkActions'][] = array(
+                    'function' => 'executeSelectedObjectProcess(\'import\', ' . $process->id . ', \'{object_name}\')',
+                    'label'    => 'Importer les éléments sélectionnés'
+                );
+            }
+            $method = 'get' . ucfirst($object_name) . 'ExportData';
+            if (method_exists(static::getClassName(), $method)) {
+                $object['buttons'][] = array(
+                    'label'   => 'Exporter',
+                    'class'   => 'butAction',
+                    'onclick' => 'executeObjectProcess($(this), \'export\', ' . $process->id . ', \'{object_name}\', {id_object})'
+                );
+                $object['bulkActions'][] = array(
+                    'function' => 'executeSelectedObjectProcess(\'export\', ' . $process->id . ', \'{object_name}\')',
+                    'label'    => 'Exporter les éléments sélectionnés'
+                );
+            }
         }
         $fields = array(
             'id_object'     => array(
@@ -1055,7 +1317,7 @@ class BDS_SyncProcess extends BDS_Process
                 'label_eval' => 'return ucfirst($object[\'label\']);',
                 'sort'       => false,
                 'search'     => 'text',
-                'width'      => '25%'
+                'width'      => '20%'
             ),
             'ext_id_object' => array(
                 'label'  => 'ID externe',
@@ -1067,38 +1329,24 @@ class BDS_SyncProcess extends BDS_Process
                 'label'  => '1ère synchronisation',
                 'sort'   => true,
                 'search' => 'date',
-                'width'  => '20%'
+                'width'  => '15%'
             ),
             'date_update'   => array(
                 'label'  => 'Dernière mise à jour',
                 'sort'   => true,
                 'search' => 'date',
-                'width'  => '20%'
+                'width'  => '15%'
             ),
             'status'        => array(
                 'label'        => 'Statut',
                 'sort'         => true,
                 'search'       => 'select',
                 'search_query' => self::$status_labels,
-                'width'        => '15%'
+                'width'        => '10%'
             ),
         );
 
-        $buttons = array(
-            array(
-                'label'   => 'Exporter',
-                'class'   => 'butAction',
-                'onclick' => 'executeObjectProcess($(this), \'export\', ' . $process->id . ', \'{object_name}\', {id_object})'
-            )
-        );
-
-        $bulkActions = array(
-            array(
-                'function' => 'executeSelectedObjectProcess(\'export\', ' . $process->id . ', \'{object_name}\')',
-                'label'    => 'Exporter les éléments sélectionnés'
-            )
-        );
-        return renderProcessObjectsList($objects, $fields, $buttons, $bulkActions);
+        return renderProcessObjectsList($objects, $fields);
     }
 
     // Outils de traitement des Catégories et Produits:

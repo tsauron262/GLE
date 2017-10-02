@@ -671,8 +671,9 @@ class BimpObject
                         $value = date('Y-m-d H:i:s');
                     }
                     $display_now = (isset($params['display_now']) && $params['display_now']);
-
-                    $html .= $form->select_date($value, $name, 1, 1, 0, "", 1, $display_now, 1);
+                    $DT = new DateTime($value);
+                    $html .= $form->select_date($DT->getTimestamp(), $name, 1, 1, 0, "", 1, $display_now, 1);
+                    unset($DT);
                     break;
 
                 case 'text':
@@ -975,7 +976,9 @@ class BimpObject
                         } else {
                             $defVal = '0000-00-00 00:00';
                         }
-                        $html .= $form->select_date($defVal, $input['name'], 1, 1);
+                        $DT = new DateTime($defVal);
+                        $html .= $form->select_date($DT->getTimestamp(), $input['name'], 1, 1);
+                        unset($DT);
                     } else {
                         $html .= '<input type="' . $input['type'] . '" name="' . $input['name'] . '" ';
                         $html .= 'class="objectListRowInput" id="rowInput_' . static::getClass() . '_' . $input['id'] . '"';
@@ -1091,7 +1094,9 @@ class BimpObject
                                 } else {
                                     $val = '0000-00-00 00:00';
                                 }
-                                $html .= $form->select_date($val, $col['name'], 1, 1);
+                                $DT = new DateTime($val);
+                                $html .= $form->select_date($DT->getTimestamp(), $col['name'], 1, 1);
+                                unset($DT);
                             } elseif ($col['input'] === 'select') {
                                 $html .= '<select class="objecRowEditInput" name="' . $col['name'] . '">';
                                 if (isset($col['options'])) {

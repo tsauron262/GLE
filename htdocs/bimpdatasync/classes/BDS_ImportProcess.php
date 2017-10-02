@@ -15,6 +15,11 @@ abstract class BDS_ImportProcess extends BDS_Process
         -1 => 'échec import'
     );
 
+    public static function getClassName()
+    {
+        return 'BDS_ImportProcess';
+    }
+
     // Traitement des objets Dolibarr:
 
     protected function saveObject(&$object, $label = null, $display_success = true, &$errors = null, $notrigger = false)
@@ -189,7 +194,7 @@ abstract class BDS_ImportProcess extends BDS_Process
 
         return false;
     }
-    
+
     protected function executeObjectImport($object_name, $id_object)
     {
         $this->Error('Opération "executeObjectImport" non disponible pour ce processus');
@@ -214,6 +219,119 @@ abstract class BDS_ImportProcess extends BDS_Process
                 )
             );
         }
+    }
+
+    public static function renderProcessObjectsList($process)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $sort_by = BDS_Tools::getValue('sort_by', 'date_update');
+        $sort_way = BDS_Tools::getValue('sort_way', 'desc');
+
+        $objects = BDS_ImportData::getAllObjectsList($bdb, $process->id, $sort_by, $sort_way);
+
+        foreach ($objects as $object_name => &$object) {
+            $rows = array();
+            $object_label = ucfirst(BDS_Report::getObjectLabel($object_name));
+            foreach ($object['list'] as $row) {
+                $date_add = new DateTime($row['date_add']);
+                $date_update = new DateTime($row['date_update']);
+
+                $object_link = BDS_Tools::makeObjectUrl($object_name, $row['id_object']);
+                $name = BDS_Tools::makeObjectName($bdb, $object_name, $row['id_object'], false);
+
+                $label = '';
+                if ($object_link) {
+                    $label .= '<a href="' . $object_link . '" target="_blank">';
+                    $label .= $name ? $name : $object_label;
+                    $label .= '</a>';
+                } else {
+                    $label .= $name ? $name : $object_label;
+                }
+
+                $status = '<span class="';
+                if ((int) $row['status'] < 0) {
+                    $status .= 'danger';
+                } elseif ((int) $row['status'] > 0) {
+                    $status .= 'warning';
+                } else {
+                    $status .= 'success';
+                }
+                $status .= '">' . self::$status_labels[(int) $row['status']] . '</span>';
+
+                $rows[] = array(
+                    'id_data'            => $row['id_Import_data'],
+                    'id_object'          => $row['id_object'],
+                    'object_label_html'  => $label,
+                    'object_label_value' => $name ? $name : null,
+                    'import_reference'   => $row['import_reference'],
+                    'date_add_html'      => $date_add->format('d / m / Y - H:i:s'),
+                    'date_add_value'     => $row['date_add'],
+                    'date_update_html'   => $date_update->format('d / m / Y - H:i:s'),
+                    'date_update_value'  => $row['date_update'],
+                    'status_html'        => $status,
+                    'status_value'       => (int) $row['status']
+                );
+                unset($date_add);
+                unset($date_update);
+            }
+            $object['list'] = $rows;
+            $object['buttons'] = array(
+                array(
+                    'label'   => 'Importer',
+                    'class'   => 'butAction',
+                    'onclick' => 'executeObjectProcess($(this), \'import\', ' . $process->id . ', \'{object_name}\', {id_object})'
+                )
+            );
+
+            $object['bulkActions'] = array(
+                array(
+                    'function' => 'executeSelectedObjectProcess(\'import\', ' . $process->id . ', \'{object_name}\')',
+                    'label'    => 'Importer les éléments sélectionnés'
+                )
+            );
+        }
+        $fields = array(
+            'id_object'        => array(
+                'label'  => 'ID',
+                'sort'   => true,
+                'search' => 'text',
+                'width'  => '5%'
+            ),
+            'object_label'     => array(
+                'label_eval' => 'return ucfirst($object[\'label\']);',
+                'sort'       => false,
+                'search'     => 'text',
+                'width'      => '25%'
+            ),
+            'import_reference' => array(
+                'label'  => 'Référence d\'import',
+                'sort'   => true,
+                'search' => 'text',
+                'width'  => '10%'
+            ),
+            'date_add'         => array(
+                'label'  => '1ère synchronisation',
+                'sort'   => true,
+                'search' => 'date',
+                'width'  => '20%'
+            ),
+            'date_update'      => array(
+                'label'  => 'Dernière mise à jour',
+                'sort'   => true,
+                'search' => 'date',
+                'width'  => '20%'
+            ),
+            'status'           => array(
+                'label'        => 'Statut',
+                'sort'         => true,
+                'search'       => 'select',
+                'search_query' => self::$status_labels,
+                'width'        => '15%'
+            ),
+        );
+        return renderProcessObjectsList($objects, $fields, $buttons, $bulkActions);
     }
 
     // Gestion des produits: 

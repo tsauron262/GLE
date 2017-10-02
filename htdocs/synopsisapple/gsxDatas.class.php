@@ -116,6 +116,7 @@ class gsxDatas
         if ($db->num_rows($rows) > 0) {
             while ($row = $db->fetch_object($rows)) {
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
+                $repair->rowId = $row->rowid;
                 $repair->setSerial($this->serial);
                 $repair->setDatas($row->repairNumber, $row->repairConfirmNumber, $row->serialUpdateConfirmNumber, $row->closed, $row->rowid);
                 $repair->isReimbursed = $row->is_reimbursed;
@@ -922,6 +923,7 @@ class gsxDatas
 //                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
                     $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
+                $repair->setSerial($this->serial);
                 $confirmNumber = null;
                 $responseName = $requestType . "Response";
                 if (isset($responseNames) && is_array($responseNames)) {

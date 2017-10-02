@@ -15,19 +15,23 @@ class BDS_Report
     public static $OperationsTypes = array(
         'operations' => array(
             'name'      => 'Opération manuelle',
-            'name_plur' => 'Opérations manuelles'
+            'name_plur' => 'Opérations manuelles',
+            'color' => '#005DA0',
         ),
         'actions'    => array(
             'name'      => 'Opération automatique',
-            'name_plur' => 'Opérations automatiques'
+            'name_plur' => 'Opérations automatiques',
+            'color' => '#C86400'
         ),
         'cron'      => array(
             'name'      => 'Tâche planifiée',
-            'name_plur' => 'Tâches planifiées'
+            'name_plur' => 'Tâches planifiées',
+            'color' => '#500050'
         ),
         'requests'   => array(
             'name'      => 'Requête entrante',
-            'name_plur' => 'Requêtes entrantes'
+            'name_plur' => 'Requêtes entrantes',
+            'color' => '#A00000'
         )
     );
     public static $row_def = array(

@@ -41,7 +41,7 @@ class BDS_ImportData
         $this->id_process = $id_process;
         $this->object_name = $object_name;
         $this->id_object = $id_object;
-        
+
         $row = $this->db->getRow(self::$table, self::whereObjectId($id_process, $object_name, $id_object));
         if (!is_null($row)) {
             foreach ($row as $property => $value) {
@@ -60,7 +60,7 @@ class BDS_ImportData
         $this->id_process = $id_process;
         $this->object_name = $object_name;
         $this->import_reference = $import_reference;
-        
+
         $row = $this->db->getRow(self::$table, self::whereObjectReference($id_process, $object_name, $import_reference));
         if (!is_null($row)) {
             foreach ($row as $property => $value) {
@@ -249,5 +249,72 @@ class BDS_ImportData
         }
 
         return $rows;
+    }
+
+    public static function getAllObjectsList(BimpDb $db, $id_process, $order_by = 'date_update', $order_way = 'desc')
+    {
+        $where = '';
+        if (!is_null($id_process)) {
+            $where .= '`id_process` = ' . (int) $id_process;
+        }
+
+        $rows = $db->getRows(self::$table, $where, null, 'object');
+
+        $objects = array();
+
+        if (!is_null($rows)) {
+            foreach ($rows as $obj) {
+                if (!array_key_exists($obj->object_name, $objects)) {
+                    $objects[$obj->object_name] = array(
+                        'name'       => $obj->object_name,
+                        'label'      => BDS_Report::getObjectLabel($obj->object_name, false),
+                        'label_plur' => BDS_Report::getObjectLabel($obj->object_name, true),
+                        'list'       => array()
+                    );
+                }
+                $data = array(
+                    'id_import_data'   => $obj->id,
+                    'date_add'         => $obj->date_add,
+                    'date_update'      => $obj->date_update,
+                    'id_object'        => $obj->id_object,
+                    'import_reference' => $obj->import_reference,
+                    'status'           => $obj->status
+                );
+                $objects[$obj->object_name]['list'][] = $data;
+            }
+        }
+
+        global $bds_array_sort;
+        $bds_array_sort = array(
+            'order_by'  => $order_by,
+            'order_way' => $order_way
+        );
+
+        function bds_compare($a, $b)
+        {
+            global $bds_array_sort;
+
+            if (!array_key_exists($bds_array_sort['order_by'], $a)) {
+                return 0;
+            }
+            if (!in_array($bds_array_sort['order_way'], array('asc', 'ASC', 'desc', 'DESC'))) {
+                return 0;
+            }
+
+            $mult = 1;
+            if (strtolower($bds_array_sort['order_way']) === 'desc') {
+                $mult = -1;
+            }
+            if ($a[$bds_array_sort['order_by']] < $b[$bds_array_sort['order_by']]) {
+                return -1 * $mult;
+            } elseif ($a[$bds_array_sort['order_by']] > $b[$bds_array_sort['order_by']]) {
+                return 1 * $mult;
+            }
+            return 0;
+        }
+        foreach ($objects as $object_name => &$array) {
+            usort($array['list'], 'bds_compare');
+        }
+        return $objects;
     }
 }

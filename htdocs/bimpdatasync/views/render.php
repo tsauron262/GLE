@@ -259,7 +259,11 @@ function renderObjectNotifications($rows, $title)
 
             $html .= '<td width="10%">' . (isset($r['time']) ? $r['time'] : ' - ') . '</td>';
 
-            $html .= '<td width="20%">' . $r['operation_type_label'] . '</td>';
+            $html .= '<td width="20%">';
+            $html .= '<span class="typeLabel" style="background-color: ' . BDS_Report::$OperationsTypes[$r['operation_type']]['color'] . '">';
+            $html .= BDS_Report::$OperationsTypes[$r['operation_type']]['name'];
+            $html .= '</span>';
+            $html .= '</td>';
             $html .= '<td width="10%">';
             switch ($r['type']) {
                 case 'danger':
@@ -331,6 +335,11 @@ function renderProcessesRecentActivity($processes_data)
 
     $html = '<h3>Activité récente</h3>';
 
+    $html .= '<div class="toolBar">';
+    $html .= '<a class="butAction" href="' . DOL_URL_ROOT . '/bimpdatasync/rapports.php">';
+    $html .= 'Vor tous les rapports';
+    $html .= '</a>';
+    $html .= '</div>';
     global $db;
     $bdb = new BimpDb($db);
     foreach ($processes_data as $id_process => $data) {
@@ -374,7 +383,9 @@ function renderProcessesRecentActivity($processes_data)
             $html .= '<td width="10%">à ' . $date->format('H:i') . '</td>';
 
             $html .= '<td width="15%">';
+            $html .= '<span class="typeLabel" style="background-color: ' . BDS_Report::$OperationsTypes[$row['type']]['color'] . '">';
             $html .= BDS_Report::$OperationsTypes[$row['type']]['name'];
+            $html .= '</span>';
             $html .= '</td>';
 
             $html .= '<td width="25%">' . $row['title'] . '</td>';
@@ -690,9 +701,9 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
             if (count($object['list'])) {
                 $url = $base_url . '&object_name=' . $object_name;
 
-                if (count($bulkActions)) {
+                if (count($object['bulkActions'])) {
                     $html .= '<div class="buttonsContainer">';
-                    foreach ($bulkActions as $bulkAction) {
+                    foreach ($object['bulkActions'] as $bulkAction) {
                         $onclick = $bulkAction['function'];
                         $onclick = str_replace('{object_name}', $object_name, $onclick);
                         $html .= '<span class="butAction" onclick="' . $onclick . '">';
@@ -779,35 +790,21 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
                                 break;
 
                             case 'date':
+                                ini_set('display_errors', 1);
                                 $input_value = null;
-                                $from_value = '';
-                                $to_value = '';
                                 if (!BDS_Tools::isSubmit($object_name . '_searchReset')) {
-                                    $from_value = BDS_Tools::getValue($input_name . '_from', '');
-                                    $to_value = BDS_Tools::getValue($input_name . '_to', '');
-                                }
-                                $date_to = '';
-                                $date_from = '';
-                                if ($from_value || $to_value) {
-                                    if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $to_value, $matches)) {
-                                        $date_to = $matches[3] . '-' . $matches[2] . '-' . $matches[1];
-                                    }
-                                    if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $from_value, $matches2)) {
-                                        $date_from = $matches2[3] . '-' . $matches2[2] . '-' . $matches2[1];
-                                    }
+                                    $date_to = new DateTime(BDS_Tools::getDateTimeFromForm($input_name . '_to', date('Y-m-d H:i:s')));
+                                    $date_from = new DateTime(BDS_Tools::getDateTimeFromForm($input_name . '_from', '2017-01-01 00:00:00'));
+                                } else {
+                                    $date_to = new DateTime();
+                                    $date_from = new DateTime('2017-01-01 00:00:00');
                                 }
 
-                                $date = new DateTime($date_to ? $date_to : null);
-                                $date_to = $date->format('Y-m-d');
-                                if (!$date_from) {
-                                    $date_from = '2017-01-01';
-                                }
+                                $fields[$field_name]['search_from'] = $date_from->format('Y-m-d H:i:s');
+                                $fields[$field_name]['search_to'] = $date_to->format('Y-m-d H:i:s');
 
-                                $fields[$field_name]['search_from'] = $date_from;
-                                $fields[$field_name]['search_to'] = $date_to;
-
-                                $html .= 'Du:&nbsp;' . $form->select_date($date_from, $input_name . '_from', 0, 0, 0, '', 1, 0, 1) . '<br/>';
-                                $html .= 'Au:&nbsp;' . $form->select_date($date_to, $input_name . '_to', 0, 0, 0, '', 1, 0, 1);
+                                $html .= 'Du:&nbsp;' . $form->select_date($date_from->getTimestamp(), $input_name . '_from', 0, 0, 0, '', 1, 0, 1) . '<br/>';
+                                $html .= 'Au:&nbsp;' . $form->select_date($date_to->getTimestamp(), $input_name . '_to', 0, 0, 0, '', 1, 0, 1);
                                 break;
                         }
                         if (!is_null($input_value)) {
@@ -893,7 +890,7 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
                     }
 
                     $html .= '<td>';
-                    foreach ($buttons as $button) {
+                    foreach ($object['buttons'] as $button) {
                         $onclick = $button['onclick'];
                         $onclick = str_replace('{object_name}', $object_name, $onclick);
                         $onclick = str_replace('{id_object}', $row['id_object'], $onclick);
@@ -916,9 +913,9 @@ function renderProcessObjectsList($data, $fields, $buttons, $bulkActions)
 
                 $html .= '</div>';
                 $html .= '</form>';
-                if (count($bulkActions)) {
+                if (count($object['bulkActions'])) {
                     $html .= '<div class="buttonsContainer">';
-                    foreach ($bulkActions as $bulkAction) {
+                    foreach ($object['bulkActions'] as $bulkAction) {
                         $onclick = $bulkAction['function'];
                         $onclick = str_replace('{object_name}', $object_name, $onclick);
                         $html .= '<span class="butAction bulkActionButton" onclick="' . $onclick . '">';

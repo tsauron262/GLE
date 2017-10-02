@@ -38,7 +38,7 @@ function testReq()
     }
 }
 
-//testReq();
+testReq();
 
 function installProcess()
 {
@@ -46,8 +46,6 @@ function installProcess()
     include_once __DIR__ . '/classes/process_overrides/BDS_PS_SyncProcess.php';
     BDS_PS_SyncProcess::install();
 }
-
-//installProcess();
 
 function testCommande($id)
 {
@@ -65,8 +63,6 @@ function testCommande($id)
     print_r($comm->lines);
     exit;
 }
-
-//testCommande(9785);
 
 function testFournPrice()
 {
@@ -93,8 +89,6 @@ function testFournPrice()
     echo $pa_ht . ', ' . $fk_fournprice;
 }
 
-//testFournPrice();
-
 function testCron()
 {
     require_once './class/CronExec.class.php';
@@ -102,4 +96,3 @@ function testCron()
     $cronExec = new CronExec($db);
     $cronExec->execute(1);
 }
-//testCron();

@@ -1408,6 +1408,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 			if (is_readable($logo))
 			{
 			    $height=pdf_getHeightForLogo($logo);
+                            $height = 40;
 			    $pdf->Image($logo, $this->marge_gauche, $posy, 0, $height);	// width=0 (auto)
 			}
 			else

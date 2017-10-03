@@ -457,9 +457,13 @@ table.tabBorder100 td{
 
 
 /*style bimp*/
-div#id-top{
-    background: rgb(239,125,0);
+div#id-top,
+div.side-nav, .vmenu, div.blockvmenuend, div.blockvmenubookmarks, div.blockvmenusearch, .vmenu a{
+    background: rgb(239,125,0)!important;
+    color: white!important;
 }
+
+
 .mainmenuaspan{
     color: white;
     text-transform: uppercase; 
@@ -470,18 +474,15 @@ div#id-top{
 
 a.tabTitle,
 div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_sel, form.liste_titre, form.liste_titre_sel, table.dataTable thead tr{
-
-    background: rgba(0,0,0,0.6)!important;
     background: rgb(99,99,99)!important;
 }
 
 .liste_titre a:not(.select2-choice),
-tr.liste_titre, a.tabTitle, 
+tr.liste_titre, a.tabTitle
 
 /*div.titre, a.tabunactive */
 {
-    color: rgb(237,124,28)!important;
-    color: white!important;
+    color: rgb(239,125,0)!important;
     font-weight: bold;
 }
 

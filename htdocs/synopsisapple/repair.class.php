@@ -46,6 +46,7 @@ class Repair
     protected $errors = array();
     public $isIphone;
     public $majSerialOk = false;
+    public $totalFromOrderChanged = false;
 
     public function __construct($db, $gsx, $isIphone)
     {
@@ -652,11 +653,14 @@ class Repair
             }
         }
 
-        $this->totalFromOrder = $totalFromOrder;
-
-        if (isset($this->rowId) && $this->rowId) {
-            return $this->update();
+        if ($totalFromOrder != $this->totalFromOrder) {
+            $this->totalFromOrder = $totalFromOrder;
+            $this->totalFromOrderChanged = true;
+            if (isset($this->rowId) && $this->rowId) {
+                return $this->update();
+            }
         }
+        
         return true;
     }
 
@@ -691,16 +695,25 @@ class Repair
             $html .= '<p><strong>N° de confirmation: </strong>' . $this->confirmNumbers['repair'] . '</p>';
 
         if (isset($this->totalFromOrder)) {
-            $html .= '<p><strong>Hors garantie: </strong>';
+            $html = '<p><strong>Sous garantie: </strong>';
+            $msg = 'Sous garantie: ';
             if ((float) $this->totalFromOrder > 0) {
-                $html .= 'OUI ';
+                $html .= 'NON ';
+                $msg .= 'NON ';
                 if ((float) $this->totalFromOrder != 1) {
-                    $html .= '(' . $this->totalFromOrder . ' &euro;)';
+                    $html .= '(montant: ' . $this->totalFromOrder . ' &euro;)';
+                    $msg .= '(montant: ' . $this->totalFromOrder . ' €)';
                 }
             } else {
-                $html .= 'NON';
+                $html .= 'OUI';
+                $msg .= 'OUI';
             }
             $html .= '</p>';
+            if ($this->totalFromOrderChanged) {
+                $html .= '<script type="text/javascript">';
+                $html .= 'alert("' . $msg . '")';
+                $html .= '</script>';
+            }
         }
         $html .= '<p><strong>Statut dans GSX: </strong>';
         if (isset($this->repairLookUp['repairStatus']))
@@ -928,5 +941,4 @@ class Repair
         return $html;
     }
 }
-
 ?>

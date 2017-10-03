@@ -369,16 +369,22 @@ class gsxDatas
     public function getRepairsHtml($prodId)
     {
         $html = '<div class="repairsContainer container">' . "\n";
+        
         $html .= '<div class="rapairsCaption captionContainer" onclick="onCaptionClick($(this))">' . "\n";
         $html .= '<span class="repairsTitle captionTitle")">Réparations</span>';
         $html .= '<span class="arrow downArrow"></span>';
         $html .= '</div>' . "\n";
+        
         $html .= '<div class="repairsContent blocContent">' . "\n";
+        
         $html .= '<div class="toolBar">' . "\n";
         $html .= '<span class="button importRepairDatas" onclick="openRepairImportForm(' . $prodId . ')">Importer depuis GSX</span>';
         $html .= '<span class="button createNewRepair greenHover" onclick="displayCreateRepairPopUp($(this))">Créer une nouvelle réparation</span>';
         $html .= '</div>';
+        
+        
         $html .= '<div class="importRepairForm">' . "\n";
+        
         $html .= '<p class="info">Afin de récupérer les données d\'une réparation déjà effectuée sur le site gsx.apple.com, ';
         $html .= 'merci de saisir l\'un des identifiants proposés que vous pourrez trouver dans votre espace GSX.<br/></p>';
         $html .= '<label for="importNumber">Identifiant: </label>' . "\n";
@@ -396,12 +402,17 @@ class gsxDatas
             $html .= '>' . $text . '</option>';
         }
         $html .= '</select>' . "\n";
+        
         $html .= '<div style="padding: 15px; text-align: right;">' . "\n";
         $html .= '<span class="button redHover repairImportClose" onclick="closeRepairImportForm(' . $prodId . ')">Annuler</span>';
         $html .= '<span class="button greenHover repairImportSubmit" onclick="importRepairSubmit(' . $prodId . ')">Importer</span>';
         $html .= '</div>' . "\n";
+        
         $html .= '<div class="importRepairResult"></div>' . "\n";
+        
         $html .= '</div>' . "\n";
+        
+        
         if (isset($_REQUEST['chronoId'])) {
             $this->loadRepairs($_REQUEST['chronoId']);
             if (count($this->repairs)) {
@@ -415,7 +426,7 @@ class gsxDatas
         } else {
             $html .= '<p class="error">Erreur: Les réparations associées à cette fiche n\'ont pas pu être chargées (id chrono absent)</p>' . "\n";
         }
-        $html .= '</div></div>' . "\n";
+        $html .= '</div>' . "\n";
 
         $html .= '<div class="repairPopUp">' . "\n";
         $html .= '<input type="hidden" class="prodId" value="' . $prodId . '"/>' . "\n";
@@ -452,8 +463,10 @@ class gsxDatas
         $html .= '<p style="text-align: right">' . "\n";
         $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Valider</span>' . "\n";
         $html .= '</p>' . "\n";
+        
         $html .= '<div class="repairFormContainer"></div>' . "\n";
         $html .= '<div class="repairFormResults"></div>' . "\n";
+        
         $html .= '</div>' . "\n";
         return $html;
     }

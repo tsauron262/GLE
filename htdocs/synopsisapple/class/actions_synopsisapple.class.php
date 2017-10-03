@@ -21,4 +21,10 @@ class ActionsSynopsisapple {
 	$hookmanager->resArray['searchintosn']=array('text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("S/N"), 'url'=>DOL_URL_ROOT.'/synopsisapple/list.php?mainmenu=Process&filtre='.GETPOST('q'));
         return 0;
     }
+    
+    function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager){
+        global $langs;
+        if($object->element == "societe")
+		print '<div class="inline-block divButAction"><a class="butAction" href="'.DOL_URL_ROOT.'/synopsisapple/FicheRapide.php?socid='.$object->id.'">'.$langs->trans("Créer SAV").'</a></div>';
+    }
 }

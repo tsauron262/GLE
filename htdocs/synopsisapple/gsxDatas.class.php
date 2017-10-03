@@ -2,7 +2,8 @@
 
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/repair.class.php';
 
-class gsxDatas {
+class gsxDatas
+{
 
     private $tabReqForceIphone = array("CreateIPhoneRepairOrReplace");
     private $tabReqForceNonIphone = array("RegisterPartsForWHUBulkReturn");
@@ -13,19 +14,19 @@ class gsxDatas {
     protected $errors = array();
     protected $repairs = array();
     public $partsPending = null;
-    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
 //    public static $apiMode = 'production';
     public static $componentsTypes = array(
-        0 => 'Général',
-        1 => 'Visuel',
-        2 => 'Moniteurs',
-        3 => 'Mémoire auxiliaire',
-        4 => 'Périphériques d\'entrées',
-        5 => 'Cartes',
-        6 => 'Alimentation',
-        7 => 'Imprimantes',
-        8 => 'Périphériques multi-fonctions',
-        9 => 'Périphériques de communication',
+        0   => 'Général',
+        1   => 'Visuel',
+        2   => 'Moniteurs',
+        3   => 'Mémoire auxiliaire',
+        4   => 'Périphériques d\'entrées',
+        5   => 'Cartes',
+        6   => 'Alimentation',
+        7   => 'Imprimantes',
+        8   => 'Périphériques multi-fonctions',
+        9   => 'Périphériques de communication',
         'A' => 'Partage',
         'B' => 'iPhone',
         'E' => 'iPod',
@@ -34,7 +35,8 @@ class gsxDatas {
     );
     protected $isIphone = false;
 
-    public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null, $requestType = false) {
+    public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null, $requestType = false)
+    {
         global $user;
 
 
@@ -60,15 +62,15 @@ class gsxDatas {
 
         if (isset($userId) && isset($serviceAccountNo)) {
             $details = array(
-                'apiMode' => self::$apiMode,
-                'regionCode' => 'emea',
-                'userId' => $userId,
+                'apiMode'                => self::$apiMode,
+                'regionCode'             => 'emea',
+                'userId'                 => $userId,
 //                'password' => $password,
-                'serviceAccountNo' => $serviceAccountNo,
+                'serviceAccountNo'       => $serviceAccountNo,
                 'serviceAccountNoShipTo' => $serviceAccountNoShipTo,
-                'languageCode' => 'fr',
-                'userTimeZone' => 'CEST',
-                'returnFormat' => 'php',
+                'languageCode'           => 'fr',
+                'userTimeZone'           => 'CEST',
+                'returnFormat'           => 'php',
             );
             $this->shipTo = $serviceAccountNoShipTo;
         } else {
@@ -94,7 +96,8 @@ class gsxDatas {
         }
     }
 
-    public function setSerial($serial) {
+    public function setSerial($serial)
+    {
         if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $this->isIphone = true;
         } /* else
@@ -102,7 +105,8 @@ class gsxDatas {
         $this->serial = $serial;
     }
 
-    public function loadRepairs($chronoId) {
+    public function loadRepairs($chronoId)
+    {
         if (!isset($chronoId))
             return;
 
@@ -112,6 +116,7 @@ class gsxDatas {
         if ($db->num_rows($rows) > 0) {
             while ($row = $db->fetch_object($rows)) {
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
+                $repair->rowId = $row->rowid;
                 $repair->setSerial($this->serial);
                 $repair->setDatas($row->repairNumber, $row->repairConfirmNumber, $row->serialUpdateConfirmNumber, $row->closed, $row->rowid);
                 $repair->isReimbursed = $row->is_reimbursed;
@@ -122,24 +127,34 @@ class gsxDatas {
         }
     }
 
-    public function importRepair($chronoId) {
+    public function importRepair($chronoId)
+    {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
+        
         global $db;
         if (!isset($_GET['importNumber']) || !isset($_GET['importNumberType']))
             return '<p class="error">Erreur: informations manquantes.</p>';
+        
         $repair = new Repair($db, $this->gsx, $this->isIphone);
+        
         if ($repair->import($chronoId, $_GET['importNumber'], $_GET['importNumberType'])) {
             return '<p class="confirmation">Les données de la réparation ont été importées avec succès</p><ok>Reload</ok>';
         }
+        
         $html = '<p class="error">Echec de l\'importation.</p>';
+        
+        
         $html .= "error repair : " . $repair->displayErrors();
+        
         if (count($this->gsx->errors['soap']))
             $html .= "erreur GSX : " . $this->getGSXErrorsHtml();
+        
         return $html;
     }
 
-    public function endRepair($repairRowId) {
+    public function endRepair($repairRowId)
+    {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
         global $db;
@@ -157,7 +172,8 @@ class gsxDatas {
         return $html;
     }
 
-    public function closeRepair($repairRowId) {
+    public function closeRepair($repairRowId)
+    {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
         global $db;
@@ -175,7 +191,8 @@ class gsxDatas {
         return $html;
     }
 
-    public function markRepairAsReimbursed($repairRowId) {
+    public function markRepairAsReimbursed($repairRowId)
+    {
         global $db;
 
         $repair = new Repair($db, $this->gsx, $this->isIphone);
@@ -190,7 +207,24 @@ class gsxDatas {
         return $html;
     }
 
-    public function getLookupHtml($prodId) {
+    public function updateRepairTotalOrder($repairRowId)
+    {
+        global $db;
+
+        $repair = new Repair($db, $this->gsx, $this->isIphone);
+        $repair->rowId = $repairRowId;
+        if ($repair->load()) {
+            if ($repair->updateTotalOrder()) {
+                return 'ok';
+            }
+        }
+        $html = '<p class="error">Echec de la mise à jour du montant total de la réparation</p>';
+        $html .= $repair->displayErrors();
+        return $html;
+    }
+
+    public function getLookupHtml($prodId)
+    {
         if (count($this->errors) || !$this->connect) {
             return $this->getGSXErrorsHtml();
         }
@@ -332,7 +366,8 @@ class gsxDatas {
         return $html;
     }
 
-    public function getRepairsHtml($prodId) {
+    public function getRepairsHtml($prodId)
+    {
         $html = '<div class="repairsContainer container">' . "\n";
         $html .= '<div class="rapairsCaption captionContainer" onclick="onCaptionClick($(this))">' . "\n";
         $html .= '<span class="repairsTitle captionTitle")">Réparations</span>';
@@ -372,7 +407,7 @@ class gsxDatas {
             if (count($this->repairs)) {
                 foreach ($this->repairs as $repair) {
                     $repair->prodId = $prodId;
-                    $html .= $repair->getInfosHtml();
+                    $html .= $repair->getInfosHtml($prodId);
                 }
             } else {
                 $html .= '<p>Aucune réparation enregistrée</p>';
@@ -423,7 +458,8 @@ class gsxDatas {
         return $html;
     }
 
-    public function getCartHtml($prodId) {
+    public function getCartHtml($prodId)
+    {
         $html = '<div class="cartContainer container">' . "\n";
         $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";
         $html .= '<span class="cartTitle captionTitle">Panier de composants&nbsp;&nbsp;&nbsp;</span>';
@@ -455,7 +491,8 @@ class gsxDatas {
         return $html;
     }
 
-    public function getPartsListArray($partNumberAsKey = false) {
+    public function getPartsListArray($partNumberAsKey = false)
+    {
         $params = array();
         if ($this->isIphone) {
             $params['imeiNumber'] = $this->serial;
@@ -486,7 +523,8 @@ class gsxDatas {
         return null;
     }
 
-    public function getPartsListHtml($prodId) {
+    public function getPartsListHtml($prodId)
+    {
         $parts = $this->getPartsListArray();
         $check = false;
         $html = '';
@@ -552,7 +590,8 @@ class gsxDatas {
 //        return '';
     }
 
-    public function getSymptomesCodesArray($serial, $symCode = null) {
+    public function getSymptomesCodesArray($serial, $symCode = null)
+    {
         $this->setSerial($serial);
         $datas = $this->gsx->obtainSymtomes($serial, $symCode);
 
@@ -579,7 +618,8 @@ class gsxDatas {
         return $newArray;
     }
 
-    public function getCompTIACodesArray() {
+    public function getCompTIACodesArray()
+    {
         $datas = $this->gsx->obtainCompTIA();
         $codes = array(
             'grps' => array(),
@@ -618,7 +658,8 @@ class gsxDatas {
         return $codes;
     }
 
-    public function getRequestFormHtml($requestType, $prodId) {
+    public function getRequestFormHtml($requestType, $prodId)
+    {
         global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
         $symptomesCodes = $this->getSymptomesCodesArray($this->serial, (isset($_REQUEST['symCode']) ? $_REQUEST['symCode'] : null));
@@ -747,7 +788,8 @@ class gsxDatas {
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
 
-    public function processRequestForm($prodId, $requestType) {
+    public function processRequestForm($prodId, $requestType)
+    {
         if (!$this->connect)
             return $this->getGSXErrorsHtml();
 
@@ -889,6 +931,7 @@ class gsxDatas {
 //                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
                     $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
+                $repair->setSerial($this->serial);
                 $confirmNumber = null;
                 $responseName = $requestType . "Response";
                 if (isset($responseNames) && is_array($responseNames)) {
@@ -1050,13 +1093,13 @@ class gsxDatas {
         return $html;
     }
 
-    public function getGSXErrorsHtml($log = false) {
+    public function getGSXErrorsHtml($log = false)
+    {
         if (is_object($this->gsx))
             return $this->gsx->getGSXErrorsHtml($log);
         else
             return '';
     }
-
 }
 
 ?>

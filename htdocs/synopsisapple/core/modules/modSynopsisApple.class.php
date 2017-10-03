@@ -1,6 +1,6 @@
 <?php
 /*
- * GLE by Synopsis et DRSI
+ * BIMP-ERP by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -56,7 +56,8 @@ class modSynopsisApple extends DolibarrModules
         
         
         $this->module_parts = array('triggers' => 1,
-            'hooks' => array("addSearchEntry")  // Set here all hooks context you want to support
+            'models' => 1,
+                'hooks' => array("searchform", "addMoreActionsButtons")  // Set here all hooks context you want to support
         );
 
         // Dependences

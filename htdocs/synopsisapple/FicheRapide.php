@@ -15,9 +15,10 @@ require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
 global $langs;
 $js = '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/fiche.js' ></script>";
-$js .= '<script type="text/javascript" >$(window).load(function() { $(".addContact2").click(function() {
+$js .= '<script type="text/javascript" >$(window).on("load", function() { $(".addContact2").click(function() {
         socid = $("#socid").val();
         dispatchePopObject(socid, "newContact", function() {
+        alert("ok");
         $("#form").append(\'<input type="hidden" name="action2" value="Modify"/><input type="hidden" name="contactSociete" value="max"/>\');
         $(".required").removeClass("required");
         $("#form").submit();
@@ -233,6 +234,9 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             $prodF->find_min_price_product_fournisseur($prodF->id, 1);
                             $propal->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, $idProdPrio, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
                         }
+                        
+                        $propal->valid($user);
+                        $propal->set_draft($user);
 
                         $propal->fetch($propal->id);
 
@@ -366,7 +370,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     }
     echo "<div id='reponse' >";
     echo "</div>";
-    echo "<form id='form' method='POST' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "&action=semitotal'>";
+    echo "<form method='POST' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "&action=semitotal'>";
     echo "<div style='float:left' >";
     echo "<table id='chronoTable' class='border' width='100%;' style='border-collapse: collapse;' cellpadding='15'>";
     echo "<p>";
@@ -656,16 +660,16 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     echo "</div>";
     echo "</form>";
 } else {
-    echo "<form method='POST' id='form' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "'>";
+    echo "<form method='POST' name='form' id='form' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "'>";
     echo "<p>";
     echo "<label for='text'>Rentrez le client avant de passer a la suite : </label>";
     echo "</p>";
 
     echo "<p>";
     echo "<label for='client'>Client : </label>";
-    echo $form->select_thirdparty($socid, 'socid');
+    //echo $form->select_thirdparty($socid, 'socid');
+    print $form->select_company($socid, 'socid');
     echo "<span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'><img src='" . DOL_URL_ROOT . "/theme/eldy/img/filenew.png' border='0' alt='Create' title='Create'></span>";
-    echo "<br />";
     echo "</p>";
     echo "<p>";
     echo "Prise en charge par tech Pro <input type='checkbox' name='Pro' id='Pro' " . $pro . "/>";
@@ -673,17 +677,12 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
 
 
     echo "<p>";
-    echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>N° de série de la machine.</th>";
-    echo "<td class='ui-widget-content' colspan='1'>";
+    echo "N° de série de la machine.";
     echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='' class='required'/>";
-    echo "</span>";
-    echo "</td>";
-    echo "</tr>";
     echo "</p>";
 
     echo "<p>";
-    echo "<input type='submit' value='Valider' name='Envoyer' class='butAction' id ='Envoyer'>";
+    echo "<input type='submit' value='Valider' name='Envoyer' class='butAction' id ='Envoyer'/>";
     echo "</p>";
 
 

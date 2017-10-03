@@ -3,6 +3,8 @@
 require_once '../GSX.class.php';
 require_once dirname(__FILE__) . '/shipment.class.php';
 
+ini_set('display_errors', 1);
+
 class GsxUps
 {
 
@@ -71,8 +73,8 @@ class GsxUps
         )
     );
     public static $upsMode = 'production';
-    public static $apiMode = 'ut';
-    //    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
     public static $upsCarrierCode = 'UPSWW065';
     public $upsConfig = array(
         'access' => "5CFD6AC514872584",
@@ -748,6 +750,7 @@ class GsxUps
                 }
             }
             $html .= $this->gsx->getGSXErrorsHtml();
+            return $html;
         } else if (!count($parts)) {
             $html .= '<p>Aucun composant trouvé pour ce numéro ship-to</p>' . "\n";
         } else {
@@ -775,9 +778,18 @@ class GsxUps
             $i = 1;
             foreach ($parts as $sro => $repairParts) {
                 foreach ($repairParts as $p) {
-                    $date = null;
-                    if (!empty($p['expectedReturnDate']))
-                        $date = new DateTime($p['expectedReturnDate']);
+                    $DT = null;
+                    if (!empty($p['expectedReturnDate'])) {
+//                        2017-09-06 07:00:00 +00:00
+                        if (preg_match('/^\{4}\-\d{2}\-\d{2}( \{2}:\d{2}:\d{2} )?(\+\d{2}:\d{2})?$/', $p['expectedReturnDate'])) {
+                            $DT = new DateTime($p['expectedReturnDate']);
+                            $date = $DT->format('d / m / Y');
+                        } else {
+                            $date = $p['expectedReturnDate'];
+                        }
+                    } else {
+                        $date = 'non spécifiée';
+                    }
                     $html .= '<tr id="part_' . $i . '" ' . ($odd ? ' class="odd"' : '') . '>' . "\n";
                     $html .= '<td><input class="partCheck" type="checkbox" name="parts[]"/></td>' . "\n";
                     $html .= '<td class="partName">' . $p['nom'] . '</td>' . "\n";
@@ -786,10 +798,10 @@ class GsxUps
                     $html .= '<td class="partPONumber">' . $p['poNumber'] . '</td>';
                     $html .= '<td class="partSroNumber">' . $sro . '</td>' . "\n";
                     $html .= '<td class="partSerial">' . $p['serial'] . '</td>' . "\n";
-                    $html .= '<td class="partReturnDate">' . (isset($date) ? $date->format('d / m / Y') : 'non spécifiée') . '</td>' . "\n";
+                    $html .= '<td class="partReturnDate">' . $date . '</td>' . "\n";
                     $html .= '<td class="vendorName">' . $p['vendorName'] . '</td>' . "\n";
                     $html .= '<input type="hidden" class="partReturnOrderNumber" value="' . $p['returnOrderNumber'] . '"/>' . "\n";
-                    $html .= '<input type="hidden" class="partDateValue" value="' . (isset($date) ? $date->format('Ymd') : '00000000') . '" />' . "\n";
+                    $html .= '<input type="hidden" class="partDateValue" value="' . (isset($DT) ? $DT->format('Ymd') : '00000000') . '" />' . "\n";
                     $html .= '</tr>' . "\n";
                     $i++;
                     $odd = !$odd;

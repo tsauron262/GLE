@@ -115,7 +115,6 @@ function Part(name, num, type, price, eeeCode, newNum) {
     this.price = price;
     this.eeeCode = eeeCode;
 }
-
 function CartProduct(code, name, num, price) {
     this.listId = null;
     this.code = code;
@@ -139,7 +138,6 @@ function CartProduct(code, name, num, price) {
         }
     };
 }
-
 function Cart(prodId, serial, PM) {
     var ptr = this;
     this.prodId = prodId;
@@ -450,7 +448,6 @@ function Cart(prodId, serial, PM) {
         }
     }
 }
-
 function PartsManager(prodId, serial) {
     this.prodId = prodId;
     this.serial = serial;
@@ -814,7 +811,6 @@ function PartsManager(prodId, serial) {
         }
     };
 }
-
 function GSX_Product(id, serial) {
     this.id = id;
     this.serial = serial;
@@ -832,7 +828,6 @@ function GSX_Product(id, serial) {
         this.PM.loadParts();
     };
 }
-
 function GSX() {
     this.products = [];
     this.nextProdId = 1;
@@ -1040,8 +1035,7 @@ function checkProdQty($input) {
     var val = $input.val();
     if (!val) {
         $input.val(1);
-    }
-    else if (!/^[0-9]+$/.test(val)) {
+    } else if (!/^[0-9]+$/.test(val)) {
         $input.val(1);
     } else {
         val = parseInt(val);
@@ -1097,10 +1091,10 @@ function onComptiaGroupSelect($select) {
     var val = $select.val();
     if (typeof (val) != 'undefined') {
 //        var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
-        var $options = $("body").find('#'+$select.attr("id").replace("comptiaGroup", "comptiaCode")).find('option');
+        var $options = $("body").find('#' + $select.attr("id").replace("comptiaGroup", "comptiaCode")).find('option');
         var classe = 'comptiaGroup_' + val;
         var newVal = null;
-        if($options.parent().find("."+classe).length > 0){
+        if ($options.parent().find("." + classe).length > 0) {
             $options.each(function () {
                 if ($(this).hasClass(classe)) {
                     if (newVal == null) {
@@ -1108,8 +1102,7 @@ function onComptiaGroupSelect($select) {
                         $(this).parent('select').val(newVal)
                     }
                     $(this).show();
-                }
-                else
+                } else
                     $(this).hide();
             });
         }
@@ -1246,7 +1239,7 @@ function assignInputCheckMsg($input, type, msg) {
     }
 }
 function checkInput($input, type) {
-    if($input.parent().parent().hasClass("dataInputTemplate"))
+    if ($input.parent().parent().hasClass("dataInputTemplate"))
         return true;
     var val = $input.val();
     if (!val.length) {
@@ -1412,11 +1405,11 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     }
     formElement = $form.get(0);
     var partCount = $form.find('div.partDatasBlock').length;
-    
+
     var tierPart = $form.find('select.tierPart');
-    if(tierPart.length > 0 && tierPart.val() != "Part"){
-        partCount ++;
-        tierPart.attr("name", "partNumber_"+partCount);
+    if (tierPart.length > 0 && tierPart.val() != "Part") {
+        partCount++;
+        tierPart.attr("name", "partNumber_" + partCount);
     }
 
     var $template = $form.find('div.repairsPartsInputsTemplate');
@@ -1469,11 +1462,10 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         }
     });
 }
-
 function traiteCommandeRetour(html, $resultContainer) {
     if ($resultContainer.length) {
         $resultContainer.html(html);
-        if ($resultContainer.find("prix").size() > 0) {
+        if ($resultContainer.find("prix").length > 0) {
             prix = $resultContainer.find("prix").html();
             $resultContainer.find("prix").html("");
             if (prix > 0)
@@ -1505,6 +1497,24 @@ function traiteCommandeRetour(html, $resultContainer) {
         }
     }
 
+}
+
+function reloadProductInfos(prod_id, serial) {
+    var $container = $('#prod_' + prod_id);
+    if (!$container.length) {
+        return;
+    }
+
+    $.ajax({
+        type: "GET",
+        url: DOL_URL_ROOT + '/synopsisapple/ajax/requestProcess.php?action=loadProduct&serial=' + serial + '&prodId=' + prod_id + '&chronoId=' + chronoId,
+        dataType: 'html',
+        success: function (html) {
+            if (typeof (html) !== 'undefined') {
+                $container.html(html);
+            }
+        }
+    });
 }
 
 function importRepairSubmit(prodId) {
@@ -1540,12 +1550,10 @@ function getXMLHttpRequest() {
         if (window.ActiveXObject) {
             try {
                 xhr = new ActiveXObject("msxml2.XMLHTTP");
-            }
-            catch (e) {
+            } catch (e) {
                 xhr = new ActiveXObject("Microsoft.XMLHTTP");
             }
-        }
-        else {
+        } else {
             xhr = new XMLHttpRequest();
         }
     }
@@ -1554,15 +1562,16 @@ function getXMLHttpRequest() {
 function onRequestResponse(xhr, requestType, prodId) {
     var $div = null;
     var $span = null;
-    
-    
+
+
     var retour = $("<div></div>");
     retour.html(xhr.responseText.toString());
-    retour.find('.alertJs').each(function(){
+    retour.find('.alertJs').each(function () {
         alert($(this).text());
     });
     if (xhr.responseText.indexOf('<ok>Reload</ok>') !== -1)
         location.reload();
+
     switch (requestType) {
         case 'loadCompTIACodes':
             if (xhr.responseText == 'fail') {
@@ -1579,8 +1588,7 @@ function onRequestResponse(xhr, requestType, prodId) {
             if ($div.length) {
                 $div.html(xhr.responseText).slideDown(250).show();
                 GSX.onProductLoad(prodId);
-            }
-            else {
+            } else {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
             }
             break;
@@ -1596,14 +1604,14 @@ function onRequestResponse(xhr, requestType, prodId) {
                     $("#requestReviewByApple_yes").click(function () {
                         $("#checkIfOutOfWarrantyCoverage_no").click();
                     });
-                    
-                    $(".replacementSerialNumber, .replacementIMEINumber").focusout(function(){
+
+                    $(".replacementSerialNumber, .replacementIMEINumber").focusout(function () {
                         var champ = $(this).attr("id");
                         var champ = champ.replace("replacementSerialNumber", "consignmentFlag");
                         var champ = champ.replace("replacementIMEINumber", "consignmentFlag");
-                        $("#"+champ+"_yes").click();
+                        $("#" + champ + "_yes").click();
                     });
-                    
+
                 });
             } else {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
@@ -1676,7 +1684,7 @@ function onRequestResponse(xhr, requestType, prodId) {
                 alert(xhr.responseText);
             }
             break;
-            
+
         case 'closeRepair':
             var repairRowId = prodId;
             var $repair = $('#repair_' + repairRowId);
@@ -1685,8 +1693,14 @@ function onRequestResponse(xhr, requestType, prodId) {
                 $span = $repair.find('span.closeRepair');
                 if ($repairResult.length) {
                     if (xhr.responseText == 'ok') {
-                        displayRequestMsg('confirmation', 'La réparation a été fermée avec succés.<ok>Reload</ok>', $repairResult);
+                        displayRequestMsg('confirmation', 'La réparation a été fermée avec succés.', $repairResult);
                         $span.hide();
+                        var prod_id = $repair.data('prodid');
+                        if (prod_id) {
+                            reloadProductInfos(prod_id, $repair.data('serial'));
+                        } else {
+                            alert('la');
+                        }
                         return;
                     }
                     $span.attr('class', 'button redHover closeRepair');
@@ -1800,7 +1814,6 @@ function scrollToAnchor() {
     }
     $curAnchor = null;
 }
-
 function setNewScrollToAnchor($anchor) {
     count = 0;
     $curAnchor = $anchor;

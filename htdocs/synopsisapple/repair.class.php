@@ -690,11 +690,11 @@ class Repair
             $html .= '<p><strong>Hors garantie: </strong>';
             if ((float) $this->totalFromOrder > 0) {
                 $html .= 'OUI ';
-                if ((float) $this->totalFromOrder !== 1) {
+                if ((float) $this->totalFromOrder != 1) {
                     $html .= '(' . $this->totalFromOrder . ' &euro;)';
                 }
             } else {
-                $htm .= 'NON';
+                $html .= 'NON';
             }
             $html .= '</p>';
         }

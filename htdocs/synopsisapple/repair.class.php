@@ -239,7 +239,7 @@ class Repair
 
                 if (!isset($this->rowId) || !$this->rowId) {
                     // On vérifie si la réparation existe déjà via l'un des numéros de réparation: 
-                    $sql = 'SELECT `chronoId` FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair WHERE ';
+                    $sql = 'SELECT `rowid`, `chronoId` FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_repair WHERE ';
                     if (isset($this->confirmNumbers['repair']) && $this->confirmNumbers['repair']) {
                         $sql .= '`repairNumber` = "' . $this->repairNumber . '" AND ';
                     }
@@ -250,18 +250,16 @@ class Repair
                     if ($this->db->num_rows($result) > 0) {
                         while ($row = $this->db->fetch_object($result)) {
                             if ($row->chronoId == $chronoId) {
-                                return $this->updateTotalOrder();
+                                // On ne met pas à jour pour éviter l'écrasement de données. 
+                                return true;
                             }
                         }
                     }
                 } else {
-                    return $this->updateTotalOrder();
+                    return true;
                 }
             }
-
-            if ($this->add($chronoId)) {
-                return $this->updateTotalOrder();
-            }
+            return $this->add($chronoId);
         }
         return false;
     }
@@ -476,7 +474,9 @@ class Repair
             $this->repairType = $repair_type;
         }
 
-        if ($update && isset($this->rowId) && $this->rowId) {
+        if (!isset($this->totalFromOrder) || !$this->totalFromOrder) {
+            $this->updateTotalOrder();
+        } elseif ($update && isset($this->rowId) && $this->rowId) {
             $this->update();
         }
 
@@ -653,7 +653,11 @@ class Repair
         }
 
         $this->totalFromOrder = $totalFromOrder;
-        return $this->update();
+
+        if (isset($this->rowId) && $this->rowId) {
+            return $this->update();
+        }
+        return true;
     }
 
     public function getInfosHtml($prodId = null)

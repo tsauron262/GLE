@@ -46,6 +46,7 @@ class Repair
     protected $errors = array();
     public $isIphone;
     public $majSerialOk = false;
+    public $totalFromOrderChanged = false;
 
     public function __construct($db, $gsx, $isIphone)
     {
@@ -466,7 +467,7 @@ class Repair
         if (isset($this->repairLookUp['repairType'])) {
             $repair_type = 'repair_or_replace';
             if ($this->repairLookUp['repairType'] === 'CA' || $this->repairLookUp['repairType'] === 'Carry-in') {
-                $this->repairType = 'carry_in';
+                $repair_type = 'carry_in';
             }
             if (!isset($this->repairType) || ($this->repairType !== $repair_type)) {
                 $update = true;
@@ -475,7 +476,7 @@ class Repair
         }
 
         if (!isset($this->totalFromOrder) || !$this->totalFromOrder) {
-            $this->updateTotalOrder();
+            $this->updateTotalOrder($update);
         } elseif ($update && isset($this->rowId) && $this->rowId) {
             $this->update();
         }
@@ -582,7 +583,7 @@ class Repair
         return true;
     }
 
-    public function updateTotalOrder()
+    public function updateTotalOrder($force_repair_update = false)
     {
         if (!$this->rowId) {
             if (!$this->load()) {
@@ -652,11 +653,16 @@ class Repair
             }
         }
 
-        $this->totalFromOrder = $totalFromOrder;
-
-        if (isset($this->rowId) && $this->rowId) {
+        if ($totalFromOrder != $this->totalFromOrder) {
+            $this->totalFromOrder = $totalFromOrder;
+            $this->totalFromOrderChanged = true;
+            if (isset($this->rowId) && $this->rowId) {
+                return $this->update();
+            }
+        } elseif ($force_repair_update && isset($this->rowId) && $this->rowId) {
             return $this->update();
         }
+        
         return true;
     }
 
@@ -691,16 +697,25 @@ class Repair
             $html .= '<p><strong>N° de confirmation: </strong>' . $this->confirmNumbers['repair'] . '</p>';
 
         if (isset($this->totalFromOrder)) {
-            $html .= '<p><strong>Hors garantie: </strong>';
+            $html = '<p><strong>Sous garantie: </strong>';
+            $msg = 'Sous garantie: ';
             if ((float) $this->totalFromOrder > 0) {
-                $html .= 'OUI ';
+                $html .= 'NON ';
+                $msg .= 'NON ';
                 if ((float) $this->totalFromOrder != 1) {
-                    $html .= '(' . $this->totalFromOrder . ' &euro;)';
+                    $html .= '(montant: ' . $this->totalFromOrder . ' &euro;)';
+                    $msg .= '(montant: ' . $this->totalFromOrder . ' €)';
                 }
             } else {
-                $html .= 'NON';
+                $html .= 'OUI';
+                $msg .= 'OUI';
             }
             $html .= '</p>';
+            if ($this->totalFromOrderChanged) {
+                $html .= '<script type="text/javascript">';
+                $html .= 'alert("' . $msg . '")';
+                $html .= '</script>';
+            }
         }
         $html .= '<p><strong>Statut dans GSX: </strong>';
         if (isset($this->repairLookUp['repairStatus']))
@@ -928,5 +943,4 @@ class Repair
         return $html;
     }
 }
-
 ?>

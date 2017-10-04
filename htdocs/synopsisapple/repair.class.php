@@ -476,7 +476,7 @@ class Repair
         }
 
         if (!isset($this->totalFromOrder) || !$this->totalFromOrder) {
-            $this->updateTotalOrder();
+            $this->updateTotalOrder($update);
         } elseif ($update && isset($this->rowId) && $this->rowId) {
             $this->update();
         }
@@ -583,7 +583,7 @@ class Repair
         return true;
     }
 
-    public function updateTotalOrder()
+    public function updateTotalOrder($force_repair_update = false)
     {
         if (!$this->rowId) {
             if (!$this->load()) {
@@ -659,6 +659,8 @@ class Repair
             if (isset($this->rowId) && $this->rowId) {
                 return $this->update();
             }
+        } elseif ($force_repair_update && isset($this->rowId) && $this->rowId) {
+            return $this->update();
         }
         
         return true;

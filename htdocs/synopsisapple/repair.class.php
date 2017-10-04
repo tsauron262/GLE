@@ -466,7 +466,7 @@ class Repair
         }
         if (isset($this->repairLookUp['repairType'])) {
             $repair_type = 'repair_or_replace';
-            if ($repair_type === 'CA' || $repair_type === 'Carry-in') {
+            if ($this->repairLookUp['repairType'] === 'CA' || $this->repairLookUp['repairType'] === 'Carry-in') {
                 $repair_type = 'carry_in';
             }
             if (!isset($this->repairType) || ($this->repairType !== $repair_type)) {

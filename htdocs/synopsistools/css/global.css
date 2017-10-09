@@ -480,15 +480,8 @@ div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_se
 
 .liste_titre a:not(.select2-choice),
 tr.liste_titre
-
-/*div.titre, a.tabunactive */
-{
-    color: rgb(239,125,0)!important;
-    font-weight: bold;
-}
-
-div.titre, a.tabunactive, a.tabactive.tab {
-    color: rgb(237,124,28)!important;
+,div.titre, a.tabunactive, a.tabactive.tab {
+    color: black!important;
     font-weight: bold;
 }
 

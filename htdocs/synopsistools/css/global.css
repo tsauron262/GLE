@@ -458,7 +458,8 @@ table.tabBorder100 td{
 
 /*style bimp*/
 div#id-top,
-div.side-nav, .vmenu, div.blockvmenuend, div.blockvmenubookmarks, div.blockvmenusearch, .vmenu a{
+div.side-nav, .vmenu, div.blockvmenuend, div.blockvmenubookmarks, div.blockvmenusearch, .vmenu a,
+div.blockvmenuimpair, div.blockvmenufirst, div.blockvmenupair{
     background: rgb(239,125,0)!important;
     color: white!important;
 }

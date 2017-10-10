@@ -442,7 +442,7 @@ global $conf;
         $calData = $this->traiteIcsTab($calendarData2);
         
         $calendarData2['LAST-MODIFIED'] = $row['lastmodified'];
-        $calendarData2['CREATED'] = $row['CREATED'];
+        $calendarData2['CREATED'] = $row['CREATED']+7200;
         if($calendarData2['CREATED'] > $calendarData2['LAST-MODIFIED'])
             $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
         

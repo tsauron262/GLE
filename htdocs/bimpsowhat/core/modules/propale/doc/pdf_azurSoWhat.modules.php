@@ -1377,6 +1377,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
 	{
 		global $conf,$langs;
+                $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/fond.png", 65, 20, 80);
 
 		$outputlangs->load("main");
 		$outputlangs->load("bills");
@@ -1406,7 +1407,6 @@ class pdf_azurSoWhat extends ModelePDFPropales
 		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo)
 		{
-                $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/fond.png", 65, 20, 80);
 			if (is_readable($logo))
 			{
 			    $height=pdf_getHeightForLogo($logo);

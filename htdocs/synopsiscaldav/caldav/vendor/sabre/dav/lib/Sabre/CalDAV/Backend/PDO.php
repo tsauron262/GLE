@@ -658,6 +658,9 @@ WHERE  `email` LIKE  '" . $mail . "'");
             
             //date_default_timezone_set("Europe/Paris");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
+        //if(stripos($objectUri, $this->uriTest) > 0)
+dol_syslog("UPDATE date : ".$sql."    |   ".$objectUri."   |".print_r($calendarData2,1),3, 0, "_caldavLog");
+
             $db->query($sql);
             //date_default_timezone_set();
         }

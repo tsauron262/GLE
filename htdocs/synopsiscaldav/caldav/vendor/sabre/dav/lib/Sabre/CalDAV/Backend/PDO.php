@@ -65,7 +65,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
     
-    public $uriTest = "35aef3ab-dd26-41b8-b361-f30dd6ff1bc4";
+    public $uriTest = "5aef3ab-dd26-41b8-b361-f30dd6ff1bc4";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -460,7 +460,7 @@ global $conf;
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-        if(stripos($objectUri, $this->uriTest) !== false)
+        if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
@@ -483,7 +483,7 @@ dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($ret
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        if(stripos($objectUri, $this->uriTest) !== false)
+        if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
@@ -695,7 +695,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-        if(stripos($objectUri, $this->uriTest) !== false)
+        if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 
 //dol_syslog("Update : ".print_r($calendarData,1),3);
@@ -943,7 +943,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
 //        $stmt->execute(array($calendarId,$objectUri));
 //        $stmt = $this->pdo->prepare('UPDATE '. $this->calendarTableName .' SET ctag = ctag + 1 WHERE id = ?');
 //        $stmt->execute(array($calendarId));
-        if(stripos($objectUri, $this->uriTest) !== false)
+        if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
 
 

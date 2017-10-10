@@ -64,6 +64,8 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-order' => 'calendarorder',
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
+    
+    public $uriTest = "5aef3ab-dd26-41b8-b361-f30dd6ff1bc4";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -458,6 +460,7 @@ global $conf;
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
+        if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
@@ -472,7 +475,7 @@ dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($ret
      *
      * However, you should only really return this ETag if you don't mangle the
      * calendar-data. If the result of a subsequent GET to this object is not
-     * the exact same as this request body, you should omit the ETag.
+     * the exact same as this request boupdaedy, you should omit the ETag.
      *
      * @param mixed $calendarId
      * @param string $objectUri
@@ -480,6 +483,7 @@ dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($ret
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
+        if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
@@ -607,7 +611,6 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                     $organisateur = $tabT[1];
                     //$tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
-                //dol_syslog("Organizer ".$organisateur,3);
             }
         }
         if($organisateur == "" && isset($tabMail[0][0]))
@@ -653,10 +656,10 @@ WHERE  `email` LIKE  '" . $mail . "'");
             if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
-            //date_default_timezone_set("GMT");
+            //date_default_timezone_set("Europe/Paris");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
             $db->query($sql);
-            //date_default_timezone_set("Europe/Paris");
+            //date_default_timezone_set();
         }
     }
 
@@ -692,6 +695,9 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
+        if(stripos($objectUri, $this->uriTest) > 0)
+dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
+
 //dol_syslog("Update : ".print_r($calendarData,1),3);
         $extraData = $this->getDenormalizedData($calendarData);
 
@@ -937,6 +943,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
 //        $stmt->execute(array($calendarId,$objectUri));
 //        $stmt = $this->pdo->prepare('UPDATE '. $this->calendarTableName .' SET ctag = ctag + 1 WHERE id = ?');
 //        $stmt->execute(array($calendarId));
+        if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
 
 

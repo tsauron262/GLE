@@ -442,7 +442,7 @@ global $conf;
         $calData = $this->traiteIcsTab($calendarData2);
         
         $calendarData2['LAST-MODIFIED'] = $row['lastmodified'];
-        $calendarData2['CREATED'] = $row['CREATED']+7200;
+        $calendarData2['CREATED'] = $row['CREATED'];
         if($calendarData2['CREATED'] > $calendarData2['LAST-MODIFIED'])
             $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
         
@@ -656,13 +656,13 @@ WHERE  `email` LIKE  '" . $mail . "'");
             if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
-            //date_default_timezone_set("Europe/Paris");
+            date_default_timezone_set("GMT");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
         if(stripos($calendarData2['UID'], $this->uriTest) > 0)
 dol_syslog("UPDATE date : ".$sql."    |   ".$objectUri."   |".print_r($calendarData2,1),3, 0, "_caldavLog");
 
             $db->query($sql);
-            //date_default_timezone_set();
+            date_default_timezone_set("Europe/Paris");
         }
     }
 

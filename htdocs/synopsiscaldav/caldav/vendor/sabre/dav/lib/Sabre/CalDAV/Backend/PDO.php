@@ -484,7 +484,7 @@ dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($ret
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
         if(stripos($objectUri, $this->uriTest) > 0)
-dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
+dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //

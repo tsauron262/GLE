@@ -111,10 +111,12 @@ table thead tr th {
 .objectListTable td {
     padding: 5px 6px;
 }
+
 .objectListTable .objectListRowInput,
 .objectListTable .objecRowEditInput {
     width: 90%;
 }
+
 .objectListTable span.button {
     margin: 0 3px;
 }
@@ -187,6 +189,7 @@ table thead tr th {
 .badge-warning {
     background-color: #B48335!important;
 }
+
 .badge-danger {
     background-color: #A00000;
 }

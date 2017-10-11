@@ -12,7 +12,6 @@ $jsFiles = array(
     '/bimpdatasync/views/js/ajax.js'
 );
 
-
 llxHeader('', '', '', false, false, false, $jsFiles);
 
 echo '<link type="text/css" rel="stylesheet" href="./views/css/font-awesome.css"/>';

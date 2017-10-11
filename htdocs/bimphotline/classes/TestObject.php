@@ -31,7 +31,12 @@ class TestObject extends BimpObject
             'label'    => 'CHAMP PERSO',
             'type'     => 'string',
             'input'    => 'callback',
-            'required' => true
+            'required' => true,
+            'steps' => array(
+                1 => array(
+                    
+                )
+            )
         ),
     );
 

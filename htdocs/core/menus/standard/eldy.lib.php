@@ -104,12 +104,12 @@ function print_eldy_menu($db,$atarget,$type_user,&$tabMenu,&$menu,$noout=0,$mode
 		if (! empty($conf->product->enabled)) {
 			$chaine.=$langs->trans("TMenuProducts");
 		}
-		if (! empty($conf->product->enabled) && ! empty($conf->service->enabled)) {
-			$chaine.=" | ";
-		}
-		if (! empty($conf->service->enabled)) {
-			$chaine.=$langs->trans("TMenuServices");
-		}
+//		if (! empty($conf->product->enabled) && ! empty($conf->service->enabled)) {
+//			$chaine.=" | ";
+//		}
+//		if (! empty($conf->service->enabled)) {
+//			$chaine.=$langs->trans("TMenuServices");
+//		}
 
 		$menu->add('/product/index.php?mainmenu=products&amp;leftmenu=', $chaine, 0, $showmode, $atarget, "products", '', 30, $id, $idsel, $classname);
 	}

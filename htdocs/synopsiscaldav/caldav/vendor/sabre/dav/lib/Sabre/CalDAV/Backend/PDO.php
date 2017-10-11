@@ -65,7 +65,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
     
-    public $uriTest = "5aef3ab-dd26-41b8-b361-f30dd6ff1bc4";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "40000008200E00074C5B7101A82E0080000000000FC9B2417B2D20100000000000000001000000043A46DFD6626FD438711C092CE8AA464";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -484,7 +484,7 @@ dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($ret
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
         if(stripos($objectUri, $this->uriTest) > 0)
-dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
+dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //
@@ -656,10 +656,13 @@ WHERE  `email` LIKE  '" . $mail . "'");
             if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
-            //date_default_timezone_set("Europe/Paris");
+            //date_default_timezone_set("GMT");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
+        if(stripos($calendarData2['UID'], $this->uriTest) > 0)
+dol_syslog("UPDATE date : ".$sql."    |   ".$objectUri."   |".print_r($calendarData2,1),3, 0, "_caldavLog");
+
             $db->query($sql);
-            //date_default_timezone_set();
+            //date_default_timezone_set("Europe/Paris");
         }
     }
 

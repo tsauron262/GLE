@@ -479,8 +479,9 @@ div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_se
 }
 
 .liste_titre a:not(.select2-choice),
-tr.liste_titre{
+tr.liste_titre, #id-left span.help, #id-left span.select2-chosen{
     color: white!important;
+    opacity: 1!important;
 }
 div.titre, a.tabunactive, a.tabactive.tab {
     color: black!important;
@@ -518,5 +519,9 @@ img.mycompany{
     background: rgba(255,255,255,0.8);
     border-radius: 20px;
     padding: 6px;
+}
+
+#id-left .select2-choice{
+    border-bottom: solid 1px white !important;
 }
 /*fstyle bimp*/

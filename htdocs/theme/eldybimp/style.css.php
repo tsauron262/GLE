@@ -4802,9 +4802,9 @@ div.menu_titre a.vmenu{
 
 
 img.mycompany{
-    background: rgba(255,255,255,0.8);
+   /* background: rgba(255,255,255,0.8);
     border-radius: 20px;
-    padding: 6px;
+    padding: 6px;*/
 }
 
 #id-left .select2-choice{

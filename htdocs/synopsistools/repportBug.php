@@ -165,9 +165,7 @@ function bug($user, $text, $adresse) {
 print '<form method="post">
     <input type="hidden" name="action" value="send"/>
     <input type="hidden" name="oldUrl" value="' . str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $_SERVER["HTTP_REFERER"]) . '"/>
-     Décrivez brièvement les conditions du bogue svp <br/><br/>
-     
-Attention si vous rencontrer des probléme d\'affichage sur l\'agenda, merci de vider le cache de votre navigateur puis de faire un nouvel essaie avant de signaler le bug.<br/><br/>
+     Décrivez brièvement le problème rencontré lors de votre navigation <br/><br/>
 
 
 

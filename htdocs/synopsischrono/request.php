@@ -61,8 +61,10 @@ if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCent
 //    if($lettreCentre == "AB")
 //        $lettreCentre = "M";
     //f a virer
-    if ($lettreCentre == "M" || $lettreCentre == "AB" || $lettreCentre == "CB")
+    if ($lettreCentre == "M" || $lettreCentre == "AB")
         $lettreCentre = "A";
+    if ($lettreCentre == "CFB")
+        $lettreCentre = "CF";
     $sql = $db->query("SELECT * FROM  `" . MAIN_DB_PREFIX . "entrepot` WHERE  `label` LIKE  'SAV" . $lettreCentre . "'");
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);

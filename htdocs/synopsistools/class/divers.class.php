@@ -63,9 +63,9 @@ class synopsisHook {//FA1506-0369
 
         include_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
-        $conf->global->MAIN_MAX_DECIMALS_TOT = 5;
+        /*$conf->global->MAIN_MAX_DECIMALS_TOT = 5;
         $conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
-        $conf->global->MAIN_MAX_DECIMALS_SHOWN = 2;
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = 2;*/
 
         $conf->global->MAIN_APPLICATION_TITLE = "BIMP-ERP";
         $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;

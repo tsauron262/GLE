@@ -458,7 +458,8 @@ table.tabBorder100 td{
 
 /*style bimp*/
 div#id-top,
-div.side-nav, .vmenu, div.blockvmenuend, div.blockvmenubookmarks, div.blockvmenusearch, .vmenu a{
+div.side-nav, .vmenu, div.blockvmenuend, div.blockvmenubookmarks, div.blockvmenusearch, .vmenu a,
+div.blockvmenuimpair, div.blockvmenufirst, div.blockvmenupair{
     background: rgb(239,125,0)!important;
     color: white!important;
 }
@@ -478,16 +479,12 @@ div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_se
 }
 
 .liste_titre a:not(.select2-choice),
-tr.liste_titre, a.tabTitle
-
-/*div.titre, a.tabunactive */
-{
-    color: rgb(239,125,0)!important;
-    font-weight: bold;
+tr.liste_titre, #id-left span.help, #id-left span.select2-chosen{
+    color: white!important;
+    opacity: 1!important;
 }
-
-div.titre, a.tabunactive {
-    color: rgb(237,124,28)!important;
+div.titre, a.tabunactive, a.tabactive.tab {
+    color: black!important;
     font-weight: bold;
 }
 
@@ -499,11 +496,32 @@ div.titre, a.tabunactive {
     border-radius: 10px;
     border-color: rgb(239,125,0);
 }
-a.tabactive.tab, span.tabTitleText{
-    color: rgb(239,125,0)!important;
+
+
+a.tabTitle{
+    background: none!important;
 }
+a.tabTitle span.tabTitleText{
+    color: black!important;
+    text-transform: uppercase; 
+}
+
+
+
 div.menu_titre a.vmenu{
     text-transform: uppercase; 
     font-weight: normal;
+}
+
+
+
+img.mycompany{
+    background: rgba(255,255,255,0.8);
+    border-radius: 20px;
+    padding: 6px;
+}
+
+#id-left .select2-choice{
+    border-bottom: solid 1px white !important;
 }
 /*fstyle bimp*/

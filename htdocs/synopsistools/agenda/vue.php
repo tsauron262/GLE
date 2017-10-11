@@ -433,4 +433,7 @@ function printMenu($tabUser) {
     echo "<br/>ATTENTION sur l'année 2016 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";
 }
 
+
+
+llxFooter();
 ?>

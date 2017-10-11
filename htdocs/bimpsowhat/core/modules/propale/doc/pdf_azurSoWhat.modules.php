@@ -1377,6 +1377,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
 	{
 		global $conf,$langs;
+                $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/fond.png", 65, 20, 80);
 
 		$outputlangs->load("main");
 		$outputlangs->load("bills");
@@ -1386,6 +1387,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 
 		pdf_pagehead($pdf,$outputlangs,$this->page_hauteur);
+                
 
 		//  Show Draft Watermark
 		if($object->statut==0 && (! empty($conf->global->PROPALE_DRAFT_WATERMARK)) )
@@ -1625,7 +1627,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 		$pdf->SetXY($posx, $tab_top + $tab_hl);
 		$pdf->MultiCell($largcol, $tab_hl*3, '', 1, 'R');
                 
-                $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/logo2.jpg", 160, 269, 40);
+                $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/logo2.png", 160, 269, 40);
                 $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/logo3.jpg", 10, 276, 70);
                 
 		return ($tab_hl*7);

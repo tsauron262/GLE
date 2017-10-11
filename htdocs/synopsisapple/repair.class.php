@@ -697,7 +697,7 @@ class Repair
             $html .= '<p><strong>N° de confirmation: </strong>' . $this->confirmNumbers['repair'] . '</p>';
 
         if (isset($this->totalFromOrder)) {
-            $html = '<p><strong>Sous garantie: </strong>';
+            $html .= '<p><strong>Sous garantie: </strong>';
             $msg = 'Sous garantie: ';
             if ((float) $this->totalFromOrder > 0) {
                 $html .= 'NON ';

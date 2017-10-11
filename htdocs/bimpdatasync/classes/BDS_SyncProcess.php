@@ -1223,6 +1223,42 @@ class BDS_SyncProcess extends BDS_Process
         return array();
     }
 
+    public static function getObjectsStatusInfos($id_process, $object_name = null)
+    {
+        $data = array();
+
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $where = '`loc_id_process` = ' . (int) $id_process;
+
+        if (!is_null($object_name)) {
+            $where .= ' AND `loc_object_name` = \'' . $object_name . '\'';
+        }
+        $rows = $bdb->getRows(BDS_SyncData::$table, $where, null, 'object', array(
+            'status', 'loc_object_name'
+        ));
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                if (!isset($r->status) || !isset($r->loc_object_name) || !$r->loc_object_name) {
+                    continue;
+                }
+                if (!isset($data[$r->loc_object_name])) {
+                    $data[$r->loc_object_name] = array();
+                }
+                if (!isset($data[$r->loc_object_name][(int) $r->status])) {
+                    $data[$r->loc_object_name][(int) $r->status] = array(
+                        'label' => self::$status_labels[(int) $r->status],
+                        'count' => 1
+                    );
+                } else {
+                    $data[$r->loc_object_name][(int) $r->status]['count'] ++;
+                }
+            }
+        }
+        return $data;
+    }
+
     public static function renderProcessObjectsList($process)
     {
         global $db;

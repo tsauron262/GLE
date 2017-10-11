@@ -14,6 +14,7 @@ class BDSProcessCronOption extends BimpObject
         'name_plur' => 'options',
         'isFemale'  => 1
     );
+    
     public static $fields = array(
         'id_process_cron' => array(
             'label'    => 'ID de la tâche planifiée',
@@ -36,6 +37,7 @@ class BDSProcessCronOption extends BimpObject
             'required_if' => 'use_def_val=0',
         )
     );
+    
     public static $list_params = array(
         'title'      => 'Liste des options',
         'no_items'   => 'Aucune option disponible',

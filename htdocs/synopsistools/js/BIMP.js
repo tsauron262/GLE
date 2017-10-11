@@ -144,6 +144,11 @@ $(window).on("load", function () {
     $("#inputautocompleteChrono1070, #inputautocompleteChrono1071").focusout(function () {
         $("#mailTrans").attr("checked", "checked");
     });
+    
+    
+    
+    //change nom menu product bimp
+    $('#mainmenutd_products').find('.mainmenuaspan').text('PRESTATIONS');
 });
 
 

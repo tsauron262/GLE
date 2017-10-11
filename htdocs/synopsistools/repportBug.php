@@ -16,7 +16,7 @@ require_once('../main.inc.php');
 
 $mainmenu = isset($_GET["mainmenu"]) ? $_GET["mainmenu"] : "";
 llxHeader("", "Signaler un bug");
-print load_fiche_titre($langs->trans("Signaler un bug"));
+print load_fiche_titre($langs->trans("Signaler un bug"), '', "title_bug@synopsistools");
 
 if (isset($_POST['action']) && $_POST['action'] == "send") {
     bug($user, $_POST['text'], $_POST['oldUrl']);

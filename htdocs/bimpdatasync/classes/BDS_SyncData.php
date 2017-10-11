@@ -16,7 +16,7 @@ class BDS_SyncData
     public $date_update = '';
     protected $objects = array();
     protected $db;
-    protected static $table = 'bds_object_sync_data';
+    public static $table = 'bds_object_sync_data';
 
     public function __construct($id = null)
     {

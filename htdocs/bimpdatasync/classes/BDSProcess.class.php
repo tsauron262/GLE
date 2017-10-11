@@ -12,17 +12,20 @@ class BDSProcess extends BimpObject
     public $description;
     public $type;
     public $active;
+    
     public static $types = array(
         'import' => 'Import',
         'export' => 'Export',
         'sync'   => 'Synchronisation',
         'ws'     => 'Web service'
     );
+    
     public static $labels = array(
         'name'      => 'processus',
         'isFemale'  => false,
         'name_plur' => 'processus'
     );
+    
     public static $fields = array(
         'name'        => array(
             'label'    => 'Nom système',

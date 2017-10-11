@@ -241,7 +241,7 @@ class modSynopsistools extends DolibarrModules
         
         $this->menu[$r]=array(
                             'type'=>'top',
-                            'titre'=>'Signaler un bug',
+                            'titre'=>'Bug',
                             'mainmenu'=>'SynopsisToolsBug',
                             'leftmenu'=>'0',        // To say if we can overwrite leftmenu
                             'url'=>'/synopsistools/repportBug.php',

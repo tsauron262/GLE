@@ -31,7 +31,7 @@ if (!$id_process) {
 
     $date = new DateTime();
     $to = $date->format('Ymd-His');
-    $date->sub(new DateInterval('P5D'));
+    $date->sub(new DateInterval('P15D'));
     $from = $date->format('Ymd-His');
     $data = BDS_Report::getReportsDetails($from, $to);
     echo renderProcessesRecentActivity($data);

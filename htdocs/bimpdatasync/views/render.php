@@ -333,7 +333,7 @@ function renderProcessesRecentActivity($processes_data)
         return '';
     }
 
-    $html = '<h3>Activité récente</h3>';
+    $html = '';
 
     $html .= '<div class="toolBar">';
     $html .= '<a class="butAction" href="' . DOL_URL_ROOT . '/bimpdatasync/rapports.php">';
@@ -352,6 +352,13 @@ function renderProcessesRecentActivity($processes_data)
         $html .= '<tr>';
         $html .= '<td>';
 
+        $html .= renderObjectsStatusInfos(BDS_Process::getProcessObjectsStatusInfos($id_process));
+
+        $html .= '<div class="foldable_section closed">';
+        $html .= '<div class="foldable_section_caption">';
+        $html .= 'Activité récente';
+        $html .= '</div>';
+        $html .= '<div class="foldable_section_content">';
         $html .= '<div class="reportTableContainer">';
         $html .= '<table class="noborder" width="100%">';
         $html .= '<thead>';
@@ -442,6 +449,7 @@ function renderProcessesRecentActivity($processes_data)
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
+        $html .= '</div></div>';
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</tbody>';
@@ -451,6 +459,39 @@ function renderProcessesRecentActivity($processes_data)
         $html .= '</tr>';
         $html .= '</table>';
     }
+    return $html;
+}
+
+function renderObjectsStatusInfos($objects)
+{
+    $html = '';
+
+    if (!is_null($objects) && count($objects)) {
+        $html .= '<div class="foldable_section closed">';
+        $html .= '<div class="foldable_section_caption">';
+        $html .= 'Statuts des objets';
+        $html .= '</div>';
+        $html .= '<div class="foldable_section_content">';
+        foreach ($objects as $object_name => $infos) {
+            if (count($infos)) {
+                if (isset(BDS_Report::$objectsLabels[$object_name])) {
+                    $html .= '<h4 style="margin-bottom: 5px">' . ucfirst(BDS_Report::getObjectLabel($object_name, true)) . '</h4>';
+                } else {
+                    $html .= '<h4>Objets: "' . $object_name . '"</h4>';
+                }
+
+                $html .= '<ul style="background-color: #F0F0F0; margin: 0; padding: 5px 15px">';
+                foreach ($infos as $status_code => $status) {
+                    $html .= '<li><strong><span class="';
+                    $html .= ($status_code > 0) ? 'warning' : ($status_code < 0) ? 'danger' : 'success';
+                    $html .= '">"' . $status['label'] . '":</span>&nbsp;' . $status['count'] . '</strong></li>';
+                }
+                $html .= '</ul>';
+            }
+        }
+        $html .= '</div></div>';
+    }
+
     return $html;
 }
 

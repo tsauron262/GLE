@@ -135,7 +135,7 @@ abstract class BDS_Process
     {
         return 'BDS_Process';
     }
-    
+
     public function deleteObjects($objects)
     {
         
@@ -937,6 +937,28 @@ abstract class BDS_Process
         return false;
     }
 
+    public static function getClassByProcessId($id_process)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $className = null;
+
+        $process_name = $bdb->getValue(BDSProcess::$table, 'name', '`id` = ' . (int) $id_process);
+        if (!is_null($process_name) && $process_name) {
+            $className = 'BDS_' . $process_name . 'Process';
+            if (!class_exists($className)) {
+                self::loadProcessClass($className);
+                if (!class_exists($className)) {
+                    $className = null;
+                }
+            }
+        }
+
+        unset($bdb);
+        return $className;
+    }
+
     // Gestion statique des données objets
 
     public static function getObjectProcessesData($id_object, $object_name)
@@ -969,6 +991,19 @@ abstract class BDS_Process
             }
         }
         return $return;
+    }
+
+    public static function getProcessObjectsStatusInfos($id_process, $object_name = null)
+    {
+        $className = self::getClassByProcessId($id_process);
+        if (!is_null($className)) {
+            $method = 'getObjectsStatusInfos';
+            if (method_exists($className, $method)) {
+                return $className::{$method}($id_process, $object_name);
+            }
+        }
+
+        return null;
     }
 
     // Installation:

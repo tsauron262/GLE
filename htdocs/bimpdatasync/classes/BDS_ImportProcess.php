@@ -220,6 +220,42 @@ abstract class BDS_ImportProcess extends BDS_Process
             );
         }
     }
+    
+    public static function getObjectsStatusInfos($id_process, $object_name = null)
+    {
+        $data = array();
+
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $where = '`id_process` = ' . (int) $id_process;
+
+        if (!is_null($object_name)) {
+            $where .= ' AND `object_name` = \'' . $object_name . '\'';
+        }
+        $rows = $bdb->getRows(BDS_ImportData::$table, $where, null, 'object', array(
+            'status', 'object_name'
+        ));
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                if (!isset($r->status) || !isset($r->object_name) || !$r->object_name) {
+                    continue;
+                }
+                if (!isset($data[$r->object_name])) {
+                    $data[$r->object_name] = array();
+                }
+                if (!isset($data[$r->object_name][(int) $r->status])) {
+                    $data[$r->object_name][(int) $r->status] = array(
+                        'label' => self::$status_labels[(int) $r->status],
+                        'count' => 1
+                    );
+                } else {
+                    $data[$r->object_name][(int) $r->status]['count'] ++;
+                }
+            }
+        }
+        return $data;
+    }
 
     public static function renderProcessObjectsList($process)
     {

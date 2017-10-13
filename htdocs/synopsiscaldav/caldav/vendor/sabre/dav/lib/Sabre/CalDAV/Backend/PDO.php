@@ -533,7 +533,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
                 //date_default_timezone_set("GMT");
                 $action->fulldayevent = true;
-                $extraData['firstOccurence'] -= 7200;
+                $extraData['firstOccurence'] -= 0;
                 $extraData['lastOccurence'] -= 7260;
             } //else
                 //date_default_timezone_set("Europe/Paris");
@@ -745,7 +745,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
                 //date_default_timezone_set("GMT");
                 $action->fulldayevent = true;
-                $extraData['firstOccurence'] -= 7200;
+                $extraData['firstOccurence'] -= 0;
                 $extraData['lastOccurence'] -= 7260;
             } else {
                 //date_default_timezone_set("Europe/Paris");

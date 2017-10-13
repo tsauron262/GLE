@@ -537,16 +537,16 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             
             
             
-            $tabR = array("LANGUAGE=fr-FR:", ":LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
             foreach($extraData as $clef => $val)
                 $extraData[$clef] = str_replace($tabR, "", $val);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = $calendarData2['SUMMARY'];
+                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = $calendarData2['DESCRIPTION'];
+                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))
                 $action->location = $calendarData2['LOCATION'];
 
@@ -747,7 +747,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
                 $action->fulldayevent = false;
             }
 
-            $tabR = array("LANGUAGE=fr-FR:", ":LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
             foreach($calendarData as $clef => $val)
                 $calendarData[$clef] = str_replace($tabR, "", $val);
             $action->datep = $extraData['firstOccurence'];

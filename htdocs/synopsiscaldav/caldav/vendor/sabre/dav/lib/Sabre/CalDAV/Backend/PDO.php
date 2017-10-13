@@ -65,7 +65,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
     
-    public $uriTest = "63a8139-9dbf-47be-a03a-5f2b251be7b";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "E91D3A9-E647-4C37-A51E-7561BA397A";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend

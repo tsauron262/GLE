@@ -65,7 +65,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
     
-    public $uriTest = "40000008200E00074C5B7101A82E0080000000000FC9B2417B2D20100000000000000001000000043A46DFD6626FD438711C092CE8AA464";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "40000008200E00074C5B7101A82E00800000000F0773E543244D301000000000000000010000000B58A0ED956828249B012E7BB2F487925";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -534,6 +534,12 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 $extraData['lastOccurence'] -= 60;
             } else
                 date_default_timezone_set("Europe/Paris");
+            
+            
+            
+            $tabR = array("LANGUAGE=fr-FR:", ":LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            foreach($extraData as $clef => $val)
+                $extraData[$clef] = str_replace($tabR, "", $val);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
@@ -741,6 +747,9 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
                 $action->fulldayevent = false;
             }
 
+            $tabR = array("LANGUAGE=fr-FR:", ":LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            foreach($calendarData as $clef => $val)
+                $calendarData[$clef] = str_replace($tabR, "", $val);
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))

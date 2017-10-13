@@ -409,7 +409,7 @@ global $conf;
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
-                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status']? 'ACCEPTED' : 'NEEDS-ACTION');
+                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1? 'ACCEPTED' : ($val['answer_status'] == -1? 'DECLINED' : 'NEEDS-ACTION'));
             }
         }
         if(count($tabPartExtInt) > 1){
@@ -648,7 +648,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 
                 
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
-                    'answer_status' => ($tmp[1] == "ACCEPTED"));
+                    'answer_status' => ($tmp[1] == "ACCEPTED" ? 1 : $tmp[1] == "DECLINED" ? -1 : 0));
                 
                 
                 

@@ -65,7 +65,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
     
-    public $uriTest = "40000008200E00074C5B7101A82E00800000000F0773E543244D301000000000000000010000000B58A0ED956828249B012E7BB2F487925";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "63a8139-9dbf-47be-a03a-5f2b251be7b";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -753,11 +753,11 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = $calendarData2['SUMMARY'];
+                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = $calendarData2['DESCRIPTION'];
+                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))
-                $action->location = $calendarData2['LOCATION'];
+                $action->location = str_replace($tabR, "", $calendarData2['LOCATION']);
 
             //$action->userownerid = $calendarId;
 

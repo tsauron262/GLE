@@ -648,7 +648,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 
                 
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
-                    'answer_status' => ($tmp[1] == "ACCEPTED" ? 1 : $tmp[1] == "DECLINED" ? -1 : 0));
+                    'answer_status' => ($tmp[1] == "ACCEPTED" ? 1 : $tmp[1] == "DECLINED" ? -2 : 0));
                 
                 
                 

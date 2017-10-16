@@ -652,7 +652,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 
                 
                 
-                //dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
+                dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
                 $tabMailInc[] = $tmp[0]."|".$tmp[1];
             }

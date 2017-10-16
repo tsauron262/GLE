@@ -1627,7 +1627,7 @@ class Form
 			if ($nbassignetouser > 1 && $action != 'view') $out.=' <input type="image" style="border: 0px;" src="'.img_picto($langs->trans("Remove"), 'delete', '', 0, 1).'" value="'.$userstatic->id.'" class="removedassigned" id="removedassigned_'.$userstatic->id.'" name="removedassigned_'.$userstatic->id.'">';
 			//$out.=' '.($value['mandatory']?$langs->trans("Mandatory"):$langs->trans("Optional"));
 			//$out.=' '.($value['transparency']?$langs->trans("Busy"):$langs->trans("NotBusy"));
-			$out.=' '.($value['answer_status'] == -1?img_picto($langs->trans("Remove"), 'delete'):($value['answer_status'] == 1 ?img_picto($langs->trans("Ok"), 'tick') : ""));
+			$out.=' '.($value['answer_status'] == -1?img_picto($langs->trans("Refused"), 'off'):($value['answer_status'] == 1 ?img_picto($langs->trans("Accepted"), 'on') : ""));
 			$out.='<br>';
 			$i++;
 		}

@@ -618,7 +618,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1])){
                     $organisateur = $tabT[1];
-                    //$tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
+                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
             }
         }
@@ -643,6 +643,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 
                 if($organisateur == $mail){
                     $action->userdoneid = $ligne->rowid;
+                    $action->userownerid = $ligne->rowid;
                     $tmp[1] = "ACCEPTED";
                 }
                 

@@ -165,7 +165,7 @@ function bug($user, $text, $adresse) {
 print '<form method="post">
     <input type="hidden" name="action" value="send"/>
     <input type="hidden" name="oldUrl" value="' . str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $_SERVER["HTTP_REFERER"]) . '"/>
-     Décrivez brièvement le problème rencontré lors de votre navigation <br/><br/>
+     Décrivez brièvement le problème rencontré lors de votre navigation. <br/><br/>
 
 
 

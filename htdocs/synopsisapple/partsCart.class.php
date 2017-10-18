@@ -71,7 +71,7 @@ class partsCart {
     private function convertPrix($prix, $ref, $desc) {
         $coefPrix = 1;
         $constPrix = 0;
-        $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "ZD661", "ZK661");
+        $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661");
         
         $tabCas2 = array("SVC,IPOD", "Ipod nano");
         

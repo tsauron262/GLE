@@ -92,7 +92,7 @@ class partsCart {
             
             
         //Application double contraite    
-        if ($cas == 3){
+        if ($cas == 3){ 
             foreach ($tabCas35 as $val)
                 if (stripos($desc, $val) === 0)
                     $cas = 1;

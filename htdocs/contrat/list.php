@@ -296,7 +296,7 @@ $sql.=$hookmanager->resPrint;
 
 if ($dfyear > 0)
 {
-    $sql.= " HAVING first_date_fin_validite ".$filter_op2df."= '".$db->idate(($filter_op2df == "<" ? dol_get_last_day($dfyear,$dfmonth,false) : dol_get_first_day($dfyear,$dfmonth,false)))."'";
+    $sql.= " HAVING first_date_fin_validite ".$filter_op2df."= '". dol_print_date(($filter_op2df == "<" ? dol_get_last_day($dfyear,$dfmonth,false) : dol_get_first_day($dfyear,$dfmonth,false)),"%Y-%m-%d %H:%M:%S")."'";
 }
 
 $sql.= $db->order($sortfield,$sortorder);

@@ -77,7 +77,7 @@ class partsCart {
         
         $tabCas3 = array("661", "Z661");
         $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");//design commence par
-        $tabCas36 = array("Ipad Pro", "Ipad mini");//design contient
+        $tabCas36 = array("Ipad Pro", "Ipad mini", "Apple Watc");//design contient
 
         $cas = 0;
         foreach ($tabCas1 as $val)

@@ -65,7 +65,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
     
-    public $uriTest = "40000008200E00074C5B7101A82E0080000000000FC9B2417B2D20100000000000000001000000043A46DFD6626FD438711C092CE8AA464";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "LE-338025";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -409,7 +409,7 @@ global $conf;
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
-                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status']? 'ACCEPTED' : 'NEEDS-ACTION');
+                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1? 'ACCEPTED' : ($val['answer_status'] == -1? 'DECLINED' : 'NEEDS-ACTION'));
             }
         }
         if(count($tabPartExtInt) > 1){
@@ -528,19 +528,28 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
             $action = new \ActionComm($db);
 
-            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
-                date_default_timezone_set("GMT");
-                $action->fulldayevent = true;
-                $extraData['lastOccurence'] -= 60;
-            } else
+            
                 date_default_timezone_set("Europe/Paris");
+            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
+                //date_default_timezone_set("GMT");
+                $action->fulldayevent = true;
+                $extraData['firstOccurence'] -= 0;
+                $extraData['lastOccurence'] -= 7260;
+            } //else
+                //date_default_timezone_set("Europe/Paris");
+            
+            
+            
+            $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            foreach($extraData as $clef => $val)
+                $extraData[$clef] = str_replace($tabR, "", $val);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = $calendarData2['SUMMARY'];
+                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = $calendarData2['DESCRIPTION'];
+                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))
                 $action->location = $calendarData2['LOCATION'];
 
@@ -609,7 +618,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1])){
                     $organisateur = $tabT[1];
-                    //$tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
+                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
             }
         }
@@ -634,16 +643,17 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 
                 if($organisateur == $mail){
                     $action->userdoneid = $ligne->rowid;
+                    $action->userownerid = $ligne->rowid;
                     $tmp[1] = "ACCEPTED";
                 }
                 
                 
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
-                    'answer_status' => ($tmp[1] == "ACCEPTED"));
+                    'answer_status' => ($tmp[1] == "ACCEPTED" ? 1 : ($tmp[1] == "DECLINED" ? -1 : 0)));
                 
                 
                 
-                //dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
+                dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
                 $tabMailInc[] = $tmp[0]."|".$tmp[1];
             }
@@ -732,23 +742,28 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             $action->fetch($ligne->fk_object);
 
 
-            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
-                date_default_timezone_set("GMT");
-                $action->fulldayevent = true;
-                $extraData['lastOccurence'] -= 60;
-            } else {
                 date_default_timezone_set("Europe/Paris");
+            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
+                //date_default_timezone_set("GMT");
+                $action->fulldayevent = true;
+                $extraData['firstOccurence'] -= 0;
+                $extraData['lastOccurence'] -= 7260;
+            } else {
+                //date_default_timezone_set("Europe/Paris");
                 $action->fulldayevent = false;
             }
 
+            $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            foreach($calendarData as $clef => $val)
+                $calendarData[$clef] = str_replace($tabR, "", $val);
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = $calendarData2['SUMMARY'];
+                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = $calendarData2['DESCRIPTION'];
+                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))
-                $action->location = $calendarData2['LOCATION'];
+                $action->location = str_replace($tabR, "", $calendarData2['LOCATION']);
 
             //$action->userownerid = $calendarId;
 
@@ -845,9 +860,10 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => " ", CHR(10) => " ");
+            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION");
             $ligne = strtr($ligne, $tabR);
             if (!is_integer($clef)) {
-                if (stripos($ligne, "=") !== false && $clef != "URL")
+                if (stripos($ligne, "=") !== false && !in_array($clef,  $tabException))
                     $tab2[] = $clef . ";" . $ligne;
                 else
                     $tab2[] = $clef . ":" . $ligne;

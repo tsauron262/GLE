@@ -860,9 +860,10 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => " ", CHR(10) => " ");
+            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION");
             $ligne = strtr($ligne, $tabR);
             if (!is_integer($clef)) {
-                if (stripos($ligne, "=") !== false && $clef != "URL")
+                if (stripos($ligne, "=") !== false && !in_array($clef,  $tabException))
                     $tab2[] = $clef . ";" . $ligne;
                 else
                     $tab2[] = $clef . ":" . $ligne;

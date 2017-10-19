@@ -81,6 +81,9 @@ global $conf;
         $this->pdo = $pdo;
         $this->calendarTableName = $calendarTableName;
         $this->calendarObjectTableName = $calendarObjectTableName;
+        
+        global $infoEvent;
+        $infoEvent = array();
     }
 
     /**
@@ -557,10 +560,13 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $user = $this->getUser($calendarId);
 
             $action->type_id = 5;
-            global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
-            $objectDataTemp = $calendarData;
-            $objectEtagTemp = $extraData['etag'];
-            $objectUriTemp = $objectUri;
+            
+            
+            
+        global $infoEvent;
+        $infoEvent["data"] = $calendarData;
+        $infoEvent["etag"] = $extraData['etag'];
+        $infoEvent["uri"] = $objectUri;
 
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
@@ -651,25 +657,27 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
                     'answer_status' => ($tmp[1] == "ACCEPTED" ? 1 : ($tmp[1] == "DECLINED" ? -1 : 0)));
                 
-                
-                
-                dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
                 $tabMailInc[] = $tmp[0]."|".$tmp[1];
             }
         }
+        
+        
+        global $infoEvent;
+        $infoEvent["sequence"] = $sequence;
+        $infoEvent["participentExt"] = implode(",", $tabMailInc);
+        
+        
         if ($action->id > 0) {
                 //dol_syslog("action ".$action->id." invit ext : ".print_r($tabMailInc,1),3);
-            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
-            $sql = $db->query($req);
+            /*$req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
+            $sql = $db->query($req);*/
             
             if(!isset($calendarData2['LAST-MODIFIED']))// || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
             //date_default_timezone_set("GMT");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
-        if(stripos($calendarData2['UID'], $this->uriTest) > 0)
-dol_syslog("UPDATE date : ".$sql."    |   ".$objectUri."   |".print_r($calendarData2,1),3, 0, "_caldavLog");
 
             $db->query($sql);
             //date_default_timezone_set("Europe/Paris");
@@ -701,9 +709,9 @@ dol_syslog("UPDATE date : ".$sql."    |   ".$objectUri."   |".print_r($calendarD
      * @return string|null
      */
     public function getRappel($data) {
-        global $objectRappel;
+        global $infoEvent;
         if (isset($data["TRIGGER"]) && stripos($data["TRIGGER"], "VALUE=DURATION"))
-            $objectRappel = 15;
+            $infoEvent["rappel"] = 15;
         return 0;
     }
 
@@ -720,8 +728,8 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
 //        $stmt->execute(array($calendarId));
 
 
-        global $objectEtagTemp;
-        $objectEtagTemp = $extraData['etag'];
+        global $infoEvent;
+        $infoEvent["etag"] = $extraData['etag'];
 
 //        $this->getRappel($extraData);
 //        $this->userIdCaldavPlus($calendarId);

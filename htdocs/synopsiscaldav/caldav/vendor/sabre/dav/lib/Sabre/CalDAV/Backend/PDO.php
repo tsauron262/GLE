@@ -465,7 +465,7 @@ global $conf;
         );
         if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
-
+sleep(2);
         return $return;
     }
 

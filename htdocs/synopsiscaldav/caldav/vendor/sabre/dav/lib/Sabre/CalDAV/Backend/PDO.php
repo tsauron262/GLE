@@ -637,6 +637,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
 
         $tabMailInc = array();
         $action->userassigned = array($user => array('id' => $user));
+        $action->userownerid = $user;
         foreach ($tabMail as $tmp) {
             $mail = $tmp[0];
             

@@ -132,7 +132,14 @@ class InterfaceCaldav {
             $objectEtag2 = (isset($objectEtagTemp) && $objectEtagTemp != "") ? $objectEtagTemp : random(15);
             $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? addslashes($objectDataTemp) : "";
             $objectRappel = (isset($objectRappel) && $objectRappel != "") ? addslashes($objectRappel) : 0;
-            $organisateur = (in_array($user->id, $tIdUser) ? $user->email : "gle_suivi@bimp.fr");
+            
+            if($object->userownerid > 0){
+                $userOrga = new User($this->db);
+                $userOrga->fetch($object->userownerid);
+                $organisateur = $userOrga->email;
+            }
+            else
+                $organisateur = (in_array($user->id, $tIdUser) ? $user->email : "gle_suivi@bimp.fr");
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
 
             $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."')");

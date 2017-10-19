@@ -33,7 +33,10 @@ define("PROJECT_CONTEXT_BASEURI", "/");
 
 $prePath = "/caldav";
 
-file_put_contents("/var/GLE/tmpLog/".$_SERVER['REQUEST_TIME'].".txt", print_r($_REQUEST,1));
+$file = "/var/GLE/tmpLog/test.txt";
+
+    file_put_contents($file, print_r($_REQUEST,1), FILE_APPEND);
+
 
 if(file_exists(getcwd() .$prePath. "/Core")) {
 	# Flat FTP mode

@@ -411,7 +411,7 @@ global $conf;
             $tabPartExtInt = array();
             //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
-            if (1 || $val['id'] != $calendarId) {
+            if ($val['id'] > 0) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")

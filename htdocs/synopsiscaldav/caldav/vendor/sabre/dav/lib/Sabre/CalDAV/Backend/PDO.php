@@ -405,9 +405,9 @@ global $conf;
         /* Participant */
         $action->id = $row['id'];
         $action->fetch_userassigned();
-        if($row['participentExt'] =! "")
-            $tabPartExtInt = explode(",", $row['participentExt']);
-        else
+//        if($row['participentExt'] =! "")
+//            $tabPartExtInt = explode(",", $row['participentExt']);
+//        else
             $tabPartExtInt = array();
             //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {

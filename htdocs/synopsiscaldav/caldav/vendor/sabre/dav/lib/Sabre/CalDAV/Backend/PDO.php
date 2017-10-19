@@ -674,7 +674,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             /*$req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
             $sql = $db->query($req);*/
             
-            if(!isset($calendarData2['LAST-MODIFIED']))// || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
+            if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
             //date_default_timezone_set("GMT");

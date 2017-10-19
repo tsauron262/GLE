@@ -102,7 +102,7 @@ class InterfaceCaldav {
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
     function run_trigger($action, $object, $user, $langs, $conf) {
-        global $db;
+        global $db, $infoEvent;
         if ($action == "ACTION_MODIFY" || $action == "ACTION_CREATE" || $action == "ACTION_DELETE") {
 //                $db->query("UPDATE " . MAIN_DB_PREFIX . "user_extrafields SET ctag = ctag+1 WHERE fk_object = " . $object->userownerid);
                 
@@ -121,18 +121,20 @@ class InterfaceCaldav {
                         addElementElement ("user", "idCaldav", $idUser, 1);
                 }
                 
+                
+                $newUri = $conf->global->MAIN_APPLICATION_TITLE.(defined("CHAINE_CALDAV")? "-".CHAINE_CALDAV : "") ."-".$object->id.".ics";
+                $objectUri2 = (isset($infoEvent["uri"]) && $infoEvent["uri"] != "") ? $infoEvent["uri"] : $newUri;
+                $objectEtag2 = (isset($infoEvent["etag"]) && $infoEvent["etag"] != "") ? $infoEvent["etag"] : random(15);
+                $objectDataTemp = (isset($infoEvent["data"]) && $infoEvent["data"] != "") ? addslashes($infoEvent["data"]) : "";
+                $participentExt = (isset($infoEvent["participentExt"]) && $infoEvent["participentExt"] != "") ? addslashes($infoEvent["participentExt"]) : "";
+                $objectRappel = (isset($infoEvent["rappel"]) && $infoEvent["rappel"] != "") ? addslashes($infoEvent["rappel"]) : 0;
+
+                
         }
         if ($action == "ACTION_MODIFY"){
-            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET sequence = sequence +1, etag = '".random(15)."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET participentExt = '".$participentExt."'sequence = ".((isset($infoEvent["sequence"]) && ($infoEvent["sequence"] > 0 OR $infoEvent["sequence"] === 0))? $sequenceTmp : "sequence +1").", etag = '".random(15)."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
         }
         if ($action == "ACTION_CREATE"){
-            global $objectUriTemp, $objectEtagTemp, $objectDataTemp, $objectRappel;
-            $newUri = $conf->global->MAIN_APPLICATION_TITLE.(defined("CHAINE_CALDAV")? "-".CHAINE_CALDAV : "") ."-".$object->id.".ics";
-            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : $newUri;
-            $objectEtag2 = (isset($objectEtagTemp) && $objectEtagTemp != "") ? $objectEtagTemp : random(15);
-            $objectDataTemp = (isset($objectDataTemp) && $objectDataTemp != "") ? addslashes($objectDataTemp) : "";
-            $objectRappel = (isset($objectRappel) && $objectRappel != "") ? addslashes($objectRappel) : 0;
-            
             if($object->userownerid > 0){
                 $userOrga = new User($this->db);
                 $userOrga->fetch($object->userownerid);
@@ -142,7 +144,7 @@ class InterfaceCaldav {
                 $organisateur = (in_array($user->id, $tIdUser) ? $user->email : "gle_suivi@bimp.fr");
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
 
-            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."')");
+            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur, participentExt) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."', '".$participentExt."')");
         }
         if ($action == "ACTION_DELETE"){
             $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsiscaldav_event WHERE fk_object = ".$object->id);

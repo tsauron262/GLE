@@ -732,6 +732,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
 
         global $infoEvent;
         $infoEvent["etag"] = $extraData['etag'];
+dol_syslog("UPDATE OBJECT ETAG : ".$extraData['etag'],3, 0);
 
 //        $this->getRappel($extraData);
 //        $this->userIdCaldavPlus($calendarId);

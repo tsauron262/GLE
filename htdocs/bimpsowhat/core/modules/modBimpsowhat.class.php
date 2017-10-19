@@ -269,9 +269,14 @@ class modBimpsowhat extends DolibarrModules
 		$sql = array();
 
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'azurSoWhat', 1, 'propal', 'Devis SoWhat', NULL);";
-//                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."c_paiement` (`id`, `code`, `libelle`, `type`, `active`, `accountancy_code`, `module`) VALUES (150, 'CESU', 'CESU', 2, 1, NULL, NULL);";
-                
+//            
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azur';";
+                
+                
+
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'crabeSoWhat', 1, 'invoice', 'Facture SoWhat', NULL);";
+//            
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'crabe';";
 //		$this->_load_tables('/bimpcesu/sql/');
 
 		return $this->_init($sql, $options);
@@ -291,6 +296,9 @@ class modBimpsowhat extends DolibarrModules
                 
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azurSoWhat';";
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'azur', 1, 'propal', 'Devis', NULL);";
+
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'crabeSoWhat';";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'crabe', 1, 'invoice', 'Facture', NULL);";
 
 		return $this->_remove($sql, $options);
 	}

@@ -679,7 +679,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             
             //date_default_timezone_set("GMT");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
-
+dol_syslog($sql,3);
             $db->query($sql);
             //date_default_timezone_set("Europe/Paris");
         }

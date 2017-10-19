@@ -405,7 +405,10 @@ global $conf;
         /* Participant */
         $action->id = $row['id'];
         $action->fetch_userassigned();
-        $tabPartExtInt = explode(",", $row['participentExt']);
+        if($row['participentExt'] =! "")
+            $tabPartExtInt = explode(",", $row['participentExt']);
+        else
+            $tabPartExtInt = array();
             //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
             if (1 || $val['id'] != $calendarId) {

@@ -564,7 +564,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
 
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
-            $action->userownerid = $calendarId;
+            //$action->userownerid = $calendarId;
             $action->percentage = -1;
             if ($action->add($user) < 1)
                 $this->forbiden();

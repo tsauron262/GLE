@@ -794,7 +794,7 @@ dol_syslog("UPDATE OBJECT ETAG : ".$extraData['etag'],3, 0);
             
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
         }
-
+        sleep(4);
         return '"' . $extraData['etag'] . '"';
     }
 

@@ -433,10 +433,10 @@ global $conf;
                 }
                //iciattendee 
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+                $calendarData2[] = 'SEQUENCE:'.$row['sequence'];
         }
 
 
-        $calendarData2[] = 'SEQUENCE:'.$row['sequence'];
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         

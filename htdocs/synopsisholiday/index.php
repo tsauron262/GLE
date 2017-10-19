@@ -345,7 +345,7 @@ print '<input class="flat" type="text" size="1" maxlength="2" name="month_create
 $formother->select_year($year_create, 'year_create', 1, $min_year, 0);
 print '</td>';
 
-$tabType = array(-1 => "", 0 => "Congé", 1=>"Exceptionel", 2=> "Rtt");
+$tabType = array(-1 => "", 0 => "Congés", 1=>"Exceptionels", 2=> "Rtt");
 // TYPE
 print '<td class="liste_titre" colspan="1" align="center">';
 print '<select name="type_conges">';

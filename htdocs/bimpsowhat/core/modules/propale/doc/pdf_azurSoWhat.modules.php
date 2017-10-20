@@ -451,13 +451,10 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                         
                                         
                                         $extra = "";
-                                        $afficherLigne = 0;
+                                        $afficherLigne = ($i>0);
                                         if($object->lines[$i]->subprice == 0){//Ligne titre
                                             $object->lines[$i]->qty = "";
                                             $object->lines[$i]->total_ht = "";
-                                            if($i>0){
-                                                $afficherLigne = true;
-                                            }
                                             $pdf->SetFont('','', $default_font_size + 2);
                                         }
                                         else{//Ligne non titre
@@ -474,9 +471,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                 if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
                                                     $object->lines[$i]->qty = $testDesc;
                                                     $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
-                                                }
-                                                else{
-                                                    $afficherLigne = true;
+                                                    $afficherLigne = 0;
                                                 }
                                             }
                                         }

@@ -2038,7 +2038,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         if (($user->id == $drhUserId) && is_array($cp->fk_user)) {
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=groupCPValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
                         } else if (($canedit && ($user->id == $cp->fk_user)) || $user->id == $drhUserId || $user->rights->holiday->write_all) {
-                            print '<a href="card.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Envoyé") . '</a>';
                         }
                         if ($user->id == $drhUserId || $droitAll || $user->rights->holiday->delete || $user->id == $cp->fk_user)
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=delete" class="butActionDelete">' . $langs->trans("DeleteCP") . '</a>';

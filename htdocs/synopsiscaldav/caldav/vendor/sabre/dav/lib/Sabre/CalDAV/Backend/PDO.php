@@ -429,7 +429,10 @@ global $conf;
                     if($row['organisateur'] == "")
                         $row['organisateur'] = $tmpMail;
                     
-                    $calendarData2[] = "ATTENDEE;".($tmpEtat == "ACCEPTED" ? "" : "RSVP=TRUE;")."PARTSTAT=".$tmpEtat.";ROLE=REQ-PARTICIPANT:mailto:" . $tmpMail;
+                    $extra = ($tmpMail == $row['organisateur'])? "" : ";ROLE=REQ-PARTICIPANT";
+                    $extra .= ($tmpEtat == "ACCEPTED" ? "" : ";RSVP=TRUE");
+                    
+                    $calendarData2[] = "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=".$tmpEtat.$extra.":mailto:" . $tmpMail;
                 }
                //iciattendee 
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];

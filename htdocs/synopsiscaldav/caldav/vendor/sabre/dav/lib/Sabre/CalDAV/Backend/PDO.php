@@ -430,7 +430,12 @@ global $conf;
                     if($row['organisateur'] == "")
                         $row['organisateur'] = $tmpMail;
                     
-                    $extra = (($tmpMail == $row['organisateur'])? "" : ";ROLE=REQ-PARTICIPANT");
+                    if($tmpMail == $row['organisateur']){
+                        $extra = ";ROLE=CHAIR";
+                        $tmpEtat = "ACCEPTED";
+                    }
+                    else
+                        $extra = ";ROLE=REQ-PARTICIPANT";
                     $extra .= ($tmpEtat == "ACCEPTED" ? "" : ";RSVP=TRUE");
                     
                     $calendarData2[] = "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=".$tmpEtat.$extra.":mailto:" . $tmpMail;

@@ -451,13 +451,15 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                         
                                         
                                         $extra = "";
-                                        $afficherLigne = ($i>0);
+                                        $afficherLigne = ($i>0 && (!isset($titre) OR !$titre));
                                         if($object->lines[$i]->subprice == 0){//Ligne titre
+                                            $titre = ((isset($titre) && $titre > 0)? $titre+1 : 1);
                                             $object->lines[$i]->qty = "";
                                             $object->lines[$i]->total_ht = "";
-                                            $pdf->SetFont('','', $default_font_size + 2);
+                                            $pdf->SetFont('','', $default_font_size + 6 - $titre*2);
                                         }
                                         else{//Ligne non titre
+                                            $titre = 0;
                                             $pdf->SetFont('','', $default_font_size - 1);
                                             if(($object->lines[$i]->qty == 1 OR $object->lines[$i]->qty == 0)){
                                                 $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;

@@ -510,9 +510,9 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					}
 
 					// Unit price before discount
-					$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
+					/*$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
 					$pdf->SetXY($this->posxup, $curY);
-					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);
+					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);*/
 
 					// Quantity
 					$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
@@ -524,6 +524,14 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					}
 					else
 					{
+                                            if(($qty == 1 OR $qty == 0)){
+                                                $object->lines[$i]->qty = 1;
+                                                $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
+                                                $object->lines[$i]->special_code = 0;
+                                                $testDesc = str_ireplace(array("Qte:", " "), "", $object->lines[$i]->desc);
+                                                if(filter_var($testDesc, FILTER_VALIDATE_INT))
+                                                    $qty = $testDesc;
+                                            }
 						$pdf->MultiCell($this->posxdiscount-$this->posxqty-0.8, 4, $qty, 0, 'R');
 					}
 
@@ -1315,12 +1323,12 @@ class pdf_azurSoWhat extends ModelePDFPropales
 			}
 		}
 
-		$pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
-		if (empty($hidetop))
+		//$pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
+		/*if (empty($hidetop))
 		{
 			$pdf->SetXY($this->posxup-1, $tab_top+1);
 			$pdf->MultiCell($this->posxqty-$this->posxup-1,2, $outputlangs->transnoentities("PriceUHT"),'','C');
-		}
+		}*/
 
 		$pdf->line($this->posxqty-1, $tab_top, $this->posxqty-1, $tab_top + $tab_height);
 		if (empty($hidetop))

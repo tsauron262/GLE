@@ -449,17 +449,17 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					}
                                         
                                         
-                                        
+                                        /*mod drsi pour afficher titre + gestion multi tarifs*/
                                         $extra = "";
-                                        $afficherLigne = ($i>0 && (!isset($titre) OR !$titre));
+                                        $afficherLigne = ($i>0 && (!isset($niveauTitre) OR !$niveauTitre));
                                         if($object->lines[$i]->subprice == 0){//Ligne titre
-                                            $titre = ((isset($titre) && $titre > 0)? $titre+1 : 1);
+                                            $niveauTitre = $object->lines[$i]->qty;
                                             $object->lines[$i]->qty = "";
                                             $object->lines[$i]->total_ht = "";
-                                            $pdf->SetFont('','', $default_font_size + 6 - $titre*2);
+                                            $pdf->SetFont('','', $default_font_size + 10 - $niveauTitre*2);
                                         }
                                         else{//Ligne non titre
-                                            $titre = 0;
+                                            $niveauTitre = 0;
                                             $pdf->SetFont('','', $default_font_size - 1);
                                             if(($object->lines[$i]->qty == 1 OR $object->lines[$i]->qty == 0)){
                                                 $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
@@ -485,6 +485,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                             $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY-1);
                                             $pdf->SetLineStyle(array('dash'=>0));
                                         }
+                                        /*fmod drsi*/
 
 					// Description of product line
 					$curX = $this->posxdesc-1;

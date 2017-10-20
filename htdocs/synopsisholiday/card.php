@@ -1468,10 +1468,10 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             print '<div id="userGroupBlock" style="display: none">';
             print '<label>Groupe: </label>';
             print $form->select_dolgroups(0, 'group_id', 1);
-            print '<input class="button" type="button" id="showGroupUsers" value="Sélectionner les utilisateurs" style="margin-left: 15px; display: none"/>';
+            print '<input class="butAction" type="button" id="showGroupUsers" value="Sélectionner les utilisateurs" style="margin-left: 15px; display: none"/>';
 
             print '<div id="groupUsersCheckboxes" style="position: absolute; display: none; background: #fff; padding: 10px; margin: 10px; border: 1px solid #969696">';
-            print '<div style="text-align: right; margin: 10px"><input type="button" class="button" id="closeGroupUsers" value="Fermer"/></div>';
+            print '<div style="text-align: right; margin: 10px"><input type="button" class="butAction" id="closeGroupUsers" value="Fermer"/></div>';
             print '<div class="loading" style="display: none">Chargement de la liste des utilisateurs en cours...</div>';
             print '<div id="groupUsersList" style="display: none"></div>';
             print '</div>';
@@ -1554,9 +1554,9 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '</from>' . "\n";
 
         print '<center>';
-        print '<input type="submit" value="' . $langs->trans("Save") . '" name="bouton" class="button">';
+        print '<input type="submit" value="' . $langs->trans("Save") . '" name="bouton" class="butAction">';
         print '&nbsp; &nbsp; ';
-        print '<input type="button" value="' . $langs->trans("Cancel") . '" class="button" onclick="history.go(-1)">';
+        print '<input type="button" value="' . $langs->trans("Cancel") . '" class="butAction" onclick="history.go(-1)">';
         print '</center>';
 
         // js - sélection d'un seul checkbox RTT ou congés exceptionnels
@@ -1577,7 +1577,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
     if ($error) {
         print '<div class="tabBar">';
         print $error;
-        print '<br /><br /><input type="button" value="' . $langs->trans("ReturnCP") . '" class="button" onclick="history.go(-1)" />';
+        print '<br /><br /><input type="button" value="' . $langs->trans("ReturnCP") . '" class="butAction" onclick="history.go(-1)" />';
         print '</div>';
     } else {
         // Affichage de la fiche d'une demande de congés payés
@@ -1770,10 +1770,10 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         print 'Congés collectifs ';
                         print '<input type="hidden" name="group_id" id="group_id" value="-1"/>';
                     }
-                    print '<input class="button" id="showUsersList" type="button" value="Afficher la liste des utilisateurs"/>';
+                    print '<input class="butAction" id="showUsersList" type="button" value="Afficher la liste des utilisateurs"/>';
                     print '<div id="usersListContainer" style="display: none; background:#fff; padding: 15px; position: absolute; border: 1px solid #787878">';
                     print '<div style="margin-bottom: 10px; text-align: right">';
-                    print '<input type="button" class="button" id="closeUsersList" value="Fermer"/>';
+                    print '<input type="button" class="butAction" id="closeUsersList" value="Fermer"/>';
                     print '</div>';
                     foreach ($users as $curUser) {
                         if ($edit) {
@@ -1995,7 +1995,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 if ($action == 'edit' && $cp->statut == 1) {
                     print '<br/><div align="center">';
                     if ($canedit && $cp->statut == 1) {
-                        print '<input type="submit" value="' . $langs->trans("UpdateButtonCP") . '" class="button">';
+                        print '<input type="submit" value="' . $langs->trans("UpdateButtonCP") . '" class="butAction">';
                     }
                     print '</div>';
 
@@ -2018,7 +2018,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         print '<td>' . "\n";
                         $form->select_users((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, array($cp->fk_user));
                         print '</td>' . "\n";
-                        print '<td><input type="submit" value="Enregistrer" class="button"></td>';
+                        print '<td><input type="submit" value="Enregistrer" class="butAction"></td>';
                         print '</tr>' . "\n";
                         print '</tbody>';
                         print '</table>';
@@ -2069,13 +2069,13 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             } else {
                 print '<div class="tabBar">';
                 print $langs->trans('ErrorUserViewCP');
-                print '<br /><br /><input type="button" value="' . $langs->trans("ReturnCP") . '" class="button" onclick="history.go(-1)" />';
+                print '<br /><br /><input type="button" value="' . $langs->trans("ReturnCP") . '" class="butAction" onclick="history.go(-1)" />';
                 print '</div>';
             }
         } else {
             print '<div class="tabBar">';
             print $langs->trans('ErrorIDFicheCP');
-            print '<br /><br /><input type="button" value="' . $langs->trans("ReturnCP") . '" class="button" onclick="history.go(-1)" />';
+            print '<br /><br /><input type="button" value="' . $langs->trans("ReturnCP") . '" class="butAction" onclick="history.go(-1)" />';
             print '</div>';
         }
     }

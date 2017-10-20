@@ -829,7 +829,7 @@ dol_syslog("UPDATE OBJECT ETAG : ".$extraData['etag'],3, 0);
         $tabCore = $tabHead = $tabHead2 = array();
         foreach ($tabResult as $clef => $val) {
             //Pour ce tour
-            if (stripos($val, "PARTICIPANT") > -1)
+            if (stripos($val, "CUTYPE=INDIVIDUAL") > -1)
                 $position = 'core';
 
             //pour le tour d'apres

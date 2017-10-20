@@ -1554,7 +1554,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '</from>' . "\n";
 
         print '<center>';
-        print '<input type="submit" value="' . $langs->trans("SendRequestCP") . '" name="bouton" class="button">';
+        print '<input type="submit" value="' . $langs->trans("Save") . '" name="bouton" class="button">';
         print '&nbsp; &nbsp; ';
         print '<input type="button" value="' . $langs->trans("Cancel") . '" class="button" onclick="history.go(-1)">';
         print '</center>';
@@ -2038,7 +2038,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         if (($user->id == $drhUserId) && is_array($cp->fk_user)) {
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=groupCPValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
                         } else if (($canedit && ($user->id == $cp->fk_user)) || $user->id == $drhUserId || $user->rights->holiday->write_all) {
-                            print '<a href="card.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Envoyé") . '</a>';
+                            print '<a href="card.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("SendRequestCP") . '</a>';
                         }
                         if ($user->id == $drhUserId || $droitAll || $user->rights->holiday->delete || $user->id == $cp->fk_user)
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=delete" class="butActionDelete">' . $langs->trans("DeleteCP") . '</a>';

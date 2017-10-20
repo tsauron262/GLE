@@ -469,6 +469,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                     $object->lines[$i]->qty = 1;
                                                 }
                                                 if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
+                                                    $pdf->SetFont('','', $default_font_size - 3);
                                                     $object->lines[$i]->qty = $testDesc;
                                                     $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
                                                     $afficherLigne = 0;

@@ -463,21 +463,21 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                             }
                                             $pdf->SetFont('','', $default_font_size + 2);
                                         }
-                                        else{
+                                        else{//Ligne non titre
                                             $pdf->SetFont('','', $default_font_size - 1);
-                                        }
-                                        if(($object->lines[$i]->qty == 1 OR $object->lines[$i]->qty == 0)){
-                                            $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
-                                            $object->lines[$i]->special_code = 0;
-                                            $testDesc = str_ireplace(array("Qte:", " ", "-"), "", $object->lines[$i]->desc);
-                                            
-                                            if($object->lines[$i]->qty == 0){
-                                                $object->lines[$i]->desc = $object->lines[$i]->desc." (option)";   
-                                                $object->lines[$i]->qty = 1;
-                                            }
-                                            if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
-                                                $object->lines[$i]->qty = $testDesc;
-                                                $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
+                                            if(($object->lines[$i]->qty == 1 OR $object->lines[$i]->qty == 0)){
+                                                $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
+                                                $object->lines[$i]->special_code = 0;
+                                                $testDesc = str_ireplace(array("Quantité", "Quantite", ":", "Qte", "Qte", " ", "-"), "", $object->lines[$i]->desc);
+
+                                                if($object->lines[$i]->qty == 0){
+                                                    $object->lines[$i]->desc = $object->lines[$i]->desc." (option)";   
+                                                    $object->lines[$i]->qty = 1;
+                                                }
+                                                if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
+                                                    $object->lines[$i]->qty = $testDesc;
+                                                    $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
+                                                }
                                             }
                                         }
 

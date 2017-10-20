@@ -526,7 +526,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					}
 					else
 					{
-                                            if($object->lines[$i]->subprice)
+                                            if($object->lines[$i]->subprice == 0)
                                                 $qty = "";
                                             else if(($qty == 1 OR $qty == 0)){
                                                 $object->lines[$i]->qty = 1;

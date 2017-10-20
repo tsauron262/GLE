@@ -451,15 +451,12 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                         
                                         
                                         $extra = "";
+                                        $afficherLigne = 0;
                                         if($object->lines[$i]->subprice == 0){//Ligne titre
                                             $object->lines[$i]->qty = "";
                                             $object->lines[$i]->total_ht = "";
                                             if($i>0){
-                                                    $pdf->setPage($pageposafter);
-                                                    $pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(80,80,80)));
-                                                    //$pdf->SetDrawColor(190,190,200);
-                                                    $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY-1);
-                                                    $pdf->SetLineStyle(array('dash'=>0));
+                                                $afficherLigne = true;
                                             }
                                             $pdf->SetFont('','', $default_font_size + 2);
                                         }
@@ -478,7 +475,17 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                     $object->lines[$i]->qty = $testDesc;
                                                     $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
                                                 }
+                                                else{
+                                                    $afficherLigne = true;
+                                                }
                                             }
+                                        }
+                                        if($afficherLigne){
+                                            $pdf->setPage($pageposafter);
+                                            $pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(80,80,80)));
+                                            //$pdf->SetDrawColor(190,190,200);
+                                            $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY-1);
+                                            $pdf->SetLineStyle(array('dash'=>0));
                                         }
 
 					// Description of product line

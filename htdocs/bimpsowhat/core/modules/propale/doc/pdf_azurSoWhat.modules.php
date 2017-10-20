@@ -505,6 +505,8 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN))
 					{
 						$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
+                                                if($object->lines[$i]->subprice == 0)
+                                                    $vat_rate = "";
 						$pdf->SetXY($this->posxtva, $curY);
 						$pdf->MultiCell($this->posxup-$this->posxtva-0.8, 3, $vat_rate, 0, 'R');
 					}
@@ -524,7 +526,9 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					}
 					else
 					{
-                                            if(($qty == 1 OR $qty == 0)){
+                                            if($object->lines[$i]->subprice)
+                                                $qty = "";
+                                            else if(($qty == 1 OR $qty == 0)){
                                                 $object->lines[$i]->qty = 1;
                                                 $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
                                                 $object->lines[$i]->special_code = 0;
@@ -554,6 +558,8 @@ class pdf_azurSoWhat extends ModelePDFPropales
 
 					// Total HT line
 					$total_excl_tax = pdf_getlinetotalexcltax($object, $i, $outputlangs, $hidedetails);
+                                        if($object->lines[$i]->subprice == 0)
+                                            $total_excl_tax = "";
 					$pdf->SetXY($this->postotalht, $curY);
 					$pdf->MultiCell($this->page_largeur-$this->marge_droite-$this->postotalht, 3, $total_excl_tax, 0, 'R', 0);
 

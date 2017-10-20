@@ -2051,7 +2051,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     }
                     if (($user->id == $drhUserId) &&
                             (($cp->statut == 2) || ($cp->statut == 3))) {
-                        print '<a href="card.php?id=' . $_GET['id'] . '&action=drhValid" class="butAction">' . $langs->trans("Approve") . '</a>';
+                        print '<a href="card.php?id=' . $_GET['id'] . '&action=drhValid" class="butAction">' . $langs->trans("Approve") . ' DRH</a>';
                         print '<a href="card.php?id=' . $_GET['id'] . '&action=drhRefuse" class="butAction">' . $langs->trans("ActionRefuseCP") . '</a>';
                     }
                     if (($user->id == $cp->fk_validator || $user->id == $cp->fk_user || $user->id == $drhUserId) &&

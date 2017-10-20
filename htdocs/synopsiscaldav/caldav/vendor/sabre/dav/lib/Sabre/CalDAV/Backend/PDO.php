@@ -464,7 +464,7 @@ global $conf;
             $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
                 dol_syslog("invit3".print_r($calendarData2,1),3);
         date_default_timezone_set('UTC');
-        //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
+        $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
         date_default_timezone_set("Europe/Paris");
         
 

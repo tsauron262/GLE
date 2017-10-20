@@ -418,6 +418,7 @@ global $conf;
                     $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1? 'ACCEPTED' : ($val['answer_status'] == -1? 'DECLINED' : 'NEEDS-ACTION'));
             }
         }
+        dol_syslog("invit".print_r($tabPartExtInt,1),3);
         if(count($tabPartExtInt) > 1){
             foreach ($tabPartExtInt as $part)
                 if ($part != "" /*&& $part != $row['organisateur']*/){

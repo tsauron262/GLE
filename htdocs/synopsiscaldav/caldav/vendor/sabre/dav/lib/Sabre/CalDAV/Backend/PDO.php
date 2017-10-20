@@ -427,6 +427,7 @@ global $conf;
                     $tmpEtat = (isset($tabT3[1])? $tabT3[1] : "ACCEPTED");
                     
                     
+        dol_syslog("invit2".print_r($part,1),3);
                     if($row['organisateur'] == "")
                         $row['organisateur'] = $tmpMail;
                     
@@ -434,6 +435,7 @@ global $conf;
                     $extra .= ($tmpEtat == "ACCEPTED" ? "" : ";RSVP=TRUE");
                     
                     $calendarData2[] = "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=".$tmpEtat.$extra.":mailto:" . $tmpMail;
+        dol_syslog("invit3".print_r($calendarData2,1),3);
                 }
                //iciattendee 
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];

@@ -1888,6 +1888,10 @@ function pdf_getlinetotalexcltax($object,$i,$outputlangs,$hidedetails=0)
         if (empty($hidedetails) || $hidedetails > 1)
         {
         	$total_ht = ($conf->multicurrency->enabled && $object->multicurrency_tx != 1 ? $object->lines[$i]->multicurrency_total_ht : $object->lines[$i]->total_ht);
+                /*mod drsi*/
+                if($total_ht == "")
+                    return "";
+                /*fmoddrsi*/
         	if ($object->lines[$i]->situation_percent > 0 )
         	{
 		 	$prev_progress = $object->lines[$i]->get_prev_progress($object->id);

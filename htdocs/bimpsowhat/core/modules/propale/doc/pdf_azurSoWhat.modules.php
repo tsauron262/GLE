@@ -528,7 +528,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                 $object->lines[$i]->qty = 1;
                                                 $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
                                                 $object->lines[$i]->special_code = 0;
-                                                $testDesc = str_ireplace(array("Qte:", " "), "", $object->lines[$i]->desc);
+                                                $testDesc = str_ireplace(array("Qte:", " ", "-"), "", $object->lines[$i]->desc);
                                                 if(filter_var($testDesc, FILTER_VALIDATE_INT))
                                                     $qty = $testDesc;
                                             }

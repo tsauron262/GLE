@@ -811,7 +811,7 @@ dol_syslog("UPDATE OBJECT ETAG : ".$extraData['etag'],3, 0);
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
         }
 
-        return '"' . $extraData['etag'] . '"';
+        return '' . $extraData['etag'] . '';
     }
 
     function traiteTabIcs($tab, $tabResult = array()) {

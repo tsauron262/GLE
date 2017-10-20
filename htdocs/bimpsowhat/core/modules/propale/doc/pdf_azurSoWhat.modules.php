@@ -450,7 +450,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                         
                                         
                                         
-                                        
+                                        $extra = "";
                                         if($object->lines[$i]->subprice == 0){//Ligne titre
                                             $object->lines[$i]->qty = "";
                                             $object->lines[$i]->total_ht = "";
@@ -471,7 +471,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                 $testDesc = str_ireplace(array("Quantité", "Quantite", ":", "Qte", "Qte", " ", "-"), "", $object->lines[$i]->desc);
 
                                                 if($object->lines[$i]->qty == 0){
-                                                    $object->lines[$i]->desc = $object->lines[$i]->desc." (option)";   
+                                                    $extra = "(option)";   
                                                     $object->lines[$i]->qty = 1;
                                                 }
                                                 if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
@@ -543,9 +543,12 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					}
 
 					// Unit price before discount
-					/*$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
+					$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
 					$pdf->SetXY($this->posxup, $curY);
-					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);*/
+					/* mod drsi$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);*/
+					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $extra, 0, 'R', 0);
+                                        /*mod drsi*/
+                                        
 
 					// Quantity
 					$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);

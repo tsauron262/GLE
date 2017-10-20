@@ -94,7 +94,7 @@ $(window).on("load", function () {
     if ($("textarea.choixAccess").length) {
         textarea = $("textarea.choixAccess");
         tabAccess = Array("Housse", "Alim", "Carton", "Clavier", "Souris", "Dvd", "Batterie", "Boite complet");
-        textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" id="sometext">    <option>' + tabAccess.join('</option><option>') + '</option></select>');
+        textarea.parent().append(' <select name="sometext" style="height: '+(20*count(tabAccess))+'px;" multiple="multiple" class="grand" id="sometext">    <option>' + tabAccess.join('</option><option>') + '</option></select>');
         $("#sometext").click(function () {
             textarea.val(textarea.val() + $(this).val() + ', ');
         });

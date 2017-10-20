@@ -447,6 +447,39 @@ class pdf_azurSoWhat extends ModelePDFPropales
 						// $pdf->Image does not increase value return by getY, so we save it manually
 						$posYAfterImage=$curY+$imglinesize['height'];
 					}
+                                        
+                                        
+                                        
+                                        
+                                        if($object->lines[$i]->subprice == 0){//Ligne titre
+                                            $object->lines[$i]->qty = "";
+                                            $object->lines[$i]->total_ht = "";
+                                            if($i>0){
+                                                    $pdf->setPage($pageposafter);
+                                                    $pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(80,80,80)));
+                                                    //$pdf->SetDrawColor(190,190,200);
+                                                    $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY+1);
+                                                    $pdf->SetLineStyle(array('dash'=>0));
+                                            }
+                                            $pdf->SetFont('','', $default_font_size + 2);
+                                        }
+                                        else{
+                                            $pdf->SetFont('','', $default_font_size - 1);
+                                        }
+                                        if(($object->lines[$i]->qty == 1 OR $object->lines[$i]->qty == 0)){
+                                            $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
+                                            $object->lines[$i]->special_code = 0;
+                                            $testDesc = str_ireplace(array("Qte:", " ", "-"), "", $object->lines[$i]->desc);
+                                            
+                                            if($object->lines[$i]->qty == 0){
+                                                $object->lines[$i]->desc = $object->lines[$i]->desc." (option)";   
+                                                $object->lines[$i]->qty = 1;
+                                            }
+                                            if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
+                                                $object->lines[$i]->qty = $testDesc;
+                                                $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
+                                            }
+                                        }
 
 					// Description of product line
 					$curX = $this->posxdesc-1;
@@ -505,8 +538,6 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN))
 					{
 						$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
-                                                if($object->lines[$i]->subprice == 0)
-                                                    $vat_rate = "";
 						$pdf->SetXY($this->posxtva, $curY);
 						$pdf->MultiCell($this->posxup-$this->posxtva-0.8, 3, $vat_rate, 0, 'R');
 					}
@@ -526,16 +557,6 @@ class pdf_azurSoWhat extends ModelePDFPropales
 					}
 					else
 					{
-                                            if($object->lines[$i]->subprice == 0)
-                                                $qty = "";
-                                            else if(($qty == 1 OR $qty == 0)){
-                                                $object->lines[$i]->qty = 1;
-                                                $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
-                                                $object->lines[$i]->special_code = 0;
-                                                $testDesc = str_ireplace(array("Qte:", " ", "-"), "", $object->lines[$i]->desc);
-                                                if(filter_var($testDesc, FILTER_VALIDATE_INT))
-                                                    $qty = $testDesc;
-                                            }
 						$pdf->MultiCell($this->posxdiscount-$this->posxqty-0.8, 4, $qty, 0, 'R');
 					}
 
@@ -558,8 +579,6 @@ class pdf_azurSoWhat extends ModelePDFPropales
 
 					// Total HT line
 					$total_excl_tax = pdf_getlinetotalexcltax($object, $i, $outputlangs, $hidedetails);
-                                        if($object->lines[$i]->subprice == 0)
-                                            $total_excl_tax = "";
 					$pdf->SetXY($this->postotalht, $curY);
 					$pdf->MultiCell($this->page_largeur-$this->marge_droite-$this->postotalht, 3, $total_excl_tax, 0, 'R', 0);
 

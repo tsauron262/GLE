@@ -458,7 +458,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                     $pdf->setPage($pageposafter);
                                                     $pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(80,80,80)));
                                                     //$pdf->SetDrawColor(190,190,200);
-                                                    $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY+1);
+                                                    $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY-1);
                                                     $pdf->SetLineStyle(array('dash'=>0));
                                             }
                                             $pdf->SetFont('','', $default_font_size + 2);

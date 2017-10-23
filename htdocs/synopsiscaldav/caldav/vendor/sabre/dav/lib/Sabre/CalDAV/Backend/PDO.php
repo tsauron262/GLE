@@ -378,7 +378,7 @@ global $conf;
      * @return array|null
      */
     public function getCalendarObject($calendarId, $objectUri) {
-        $stmt = $this->pdo->prepare('SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+        $stmt = $this->pdo->prepare('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
        // dol_syslog("SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM " . $this->calendarObjectTableName . " WHERE calendarid = '".$calendarId."' AND uri = '".$objectUri."'", 3);
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -465,7 +465,8 @@ global $conf;
                 dol_syslog("invit3".print_r($calendarData2,1),3);
         date_default_timezone_set('UTC');
         //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
-        //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$row['dtstamp'], $calData);
+        if($row['dtstamp'] != "")
+        $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$row['dtstamp'], $calData);
         date_default_timezone_set("Europe/Paris");
         
 

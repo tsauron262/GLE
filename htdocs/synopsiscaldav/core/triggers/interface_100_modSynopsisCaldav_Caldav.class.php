@@ -133,7 +133,7 @@ class InterfaceCaldav {
                 
         }
         if ($action == "ACTION_MODIFY"){
-            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET "./*dtstamp = '".$dtstamp."', */"participentExt = '".$participentExt."', sequence = ".((isset($infoEvent["sequence"]) && ($infoEvent["sequence"] > 0 OR $infoEvent["sequence"] === 0))? $infoEvent["sequence"] : "sequence +1").", etag = '".$objectEtag2."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET dtstamp = '".$dtstamp."', participentExt = '".$participentExt."', sequence = ".((isset($infoEvent["sequence"]) && ($infoEvent["sequence"] > 0 OR $infoEvent["sequence"] === 0))? $infoEvent["sequence"] : "sequence +1").", etag = '".$objectEtag2."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
         }
         if ($action == "ACTION_CREATE"){
             if($object->userownerid > 0){

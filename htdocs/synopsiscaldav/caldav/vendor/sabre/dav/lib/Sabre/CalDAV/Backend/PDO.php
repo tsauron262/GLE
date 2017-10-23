@@ -446,13 +446,13 @@ global $conf;
         }
         dol_syslog("invit2".print_r($calendarData2,1),3);
 
+        if($row['organisateur'] != "")
+        $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
 
         $calendarData2[] = 'SEQUENCE:'.$row['sequence'];
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         
-        if($row['organisateur'] != "")
-        $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
         
 
 
@@ -838,6 +838,9 @@ dol_syslog("UPDATE OBJECT ETAG : ".$extraData['etag'],3, 0);
             //Pour ce tour
             if (stripos($val, "CUTYPE=INDIVIDUAL") > -1)
                 $position = 'core';
+            
+            if (stripos($val, "X-OWNER") > -1)
+                $position = 'header';
 
             //pour le tour d'apres
             if (stripos($val, "BEGIN:VCALENDAR") > -1)

@@ -285,6 +285,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                 {
                     $pagecount = $pdf->setSourceFile($conf->mycompany->dir_output.'/'.$conf->global->MAIN_ADD_PDF_BACKGROUND);
                     $tplidx = $pdf->importPage(1);
+                    $this->tplidx = $tplidx;
                 }
 
 				$pdf->Open();
@@ -1425,6 +1426,8 @@ class pdf_azurSoWhat extends ModelePDFPropales
 		$outputlangs->load("bills");
 		$outputlangs->load("propal");
 		$outputlangs->load("companies");
+                
+				if (! empty($this->tplidx)) $pdf->useTemplate($this->tplidx);
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 

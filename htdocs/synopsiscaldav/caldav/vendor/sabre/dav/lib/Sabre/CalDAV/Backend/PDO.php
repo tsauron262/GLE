@@ -451,12 +451,16 @@ global $conf;
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         
+        if($row['organisateur'] != "")
+        $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
         
 
 
 
 
         $calData = $this->traiteIcsTab($calendarData2);
+        
+        
         
         $calendarData2['LAST-MODIFIED'] = $row['lastmodified'];
         $calendarData2['CREATED'] = $row['CREATED'];

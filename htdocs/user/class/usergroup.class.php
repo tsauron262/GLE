@@ -855,6 +855,7 @@ class UserGroup extends CommonObject
 		}
                 
                 /*mod drsi*/
+        $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$info[$conf->global->LDAP_GROUP_FIELD_FULLNAME]);
                 $info ['accountstatus'] = "active";
                 $info ['enabledservice'] = array("mail","deliver");
                 

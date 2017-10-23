@@ -451,7 +451,7 @@ global $conf;
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         
-        if($row['organisateur'] != "")
+        if($row['organisateur'] != "" && $row['organisateur'] != "0")
         $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
         
 

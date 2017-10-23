@@ -451,7 +451,7 @@ global $conf;
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
         $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         
-        if($row['organisateur'] != "" && $row['organisateur'] != "0")
+        if($row['organisateur'] != "")
         $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
         
 
@@ -469,7 +469,7 @@ global $conf;
                 dol_syslog("invit3".print_r($calendarData2,1),3);
         date_default_timezone_set('UTC');
         //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
-        if($row['dtstamp'] != "")
+        if($row['dtstamp'] != "" && $row['dtstamp'] != "0")
         $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$row['dtstamp'], $calData);
         date_default_timezone_set("Europe/Paris");
         

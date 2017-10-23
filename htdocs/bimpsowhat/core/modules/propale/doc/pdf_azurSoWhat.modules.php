@@ -272,7 +272,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 				// Create pdf instance
                 $pdf=pdf_getInstance($this->format);
                 $default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
-	            $pdf->SetAutoPageBreak(1,0);
+	            $pdf->SetAutoPageBreak(0,0);
 
                 if (class_exists('TCPDF'))
                 {
@@ -471,7 +471,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                     $object->lines[$i]->qty = 1;
                                                 }
                                                 if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
-                                                    $pdf->SetFont('','', $default_font_size - 3);
+                                                    $pdf->SetFont('','', $default_font_size - 1);
                                                     $object->lines[$i]->qty = $testDesc;
                                                     $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
                                                     $afficherLigne = 0;

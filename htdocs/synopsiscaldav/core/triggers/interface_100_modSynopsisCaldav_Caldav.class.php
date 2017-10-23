@@ -145,7 +145,7 @@ class InterfaceCaldav {
                 $organisateur = (in_array($user->id, $tIdUser) ? $user->email : "gle_suivi@bimp.fr");
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
 
-            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur, participentExt) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."', '".$participentExt."')");
+            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur, participentExt, dtstamp) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."', '".$participentExt."', '".$dtstamp."')");
         }
         if ($action == "ACTION_DELETE"){
             $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsiscaldav_event WHERE fk_object = ".$object->id);

@@ -792,6 +792,9 @@ class UserGroup extends CommonObject
 	{
 		global $conf;
 		$dn='';
+                /*mod drsi*/
+                $conf->global->LDAP_KEY_GROUPS = "mail";
+                /*fmoddrsi*/
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS].",".$conf->global->LDAP_GROUP_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_GROUP_DN;
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS];

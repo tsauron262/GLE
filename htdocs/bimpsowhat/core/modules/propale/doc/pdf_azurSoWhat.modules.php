@@ -457,7 +457,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                             $niveauTitre = $object->lines[$i]->qty;
                                             $object->lines[$i]->qty = "";
                                             $object->lines[$i]->total_ht = "";
-                                            $pdf->SetFont('','', $default_font_size - 1 + $niveauTitre*2);
+                                            $pdf->SetFont('','', $default_font_size - 3 + $niveauTitre*2);
                                         }
                                         else{//Ligne non titre
                                             $niveauTitre = 0;
@@ -1420,7 +1420,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
 	{
 		global $conf,$langs;
-                $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/fond.png", 65, 20, 80);
+                //$pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/fond.png", 65, 20, 80);
 
 		$outputlangs->load("main");
 		$outputlangs->load("bills");

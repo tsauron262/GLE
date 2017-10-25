@@ -482,9 +482,15 @@ class pdf_crabeSoWhat extends ModelePDFFactures
                                             $pdf->SetLineStyle(array('dash'=>0));
                                         }
                                         //Saut de ligne automatique
-                                        if(stripos($object->lines[$i]->desc, "[LIGNE]") !== false){
-                                            $object->lines[$i]->desc = str_replace("[LIGNE]", "", $object->lines[$i]->desc);
-                                           $pdf->AddPage('','',true);
+                                        if(stripos($object->lines[$i]->desc, "[PAGE]") !== false){
+                                            $object->lines[$i]->desc = str_replace("[PAGE]", "", $object->lines[$i]->desc);
+                                            $pdf->AddPage('','',true);
+                                            if (! empty($tplidx)) $pdf->useTemplate($tplidx);
+                                            if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)) $this->_pagehead($pdf, $object, 0, $outputlangs);
+                                            $pdf->setPage($pageposbefore+1);
+
+                                            $curY = $tab_top_newpage;
+                                            $showpricebeforepagebreak=0;
                                         }
                                         /*fmod drsi*/
 

@@ -338,7 +338,7 @@ class pdf_crabeSoWhat extends ModelePDFFactures
 
 				$tab_top = 90;
                             $tab_top+=15;
-				$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?42:10);
+				$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?57:10);
 				$tab_height = 130;
 				$tab_height_newpage = 150;
 
@@ -471,7 +471,6 @@ class pdf_crabeSoWhat extends ModelePDFFactures
                                                     $object->lines[$i]->qty = $testDesc;
                                                     $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
                                                     $afficherLigne = 0;
-                                                    $niveauTitre = 1; //pour simuler un titre et pas mettre de ligne
                                                 }
                                             }
                                         }

@@ -476,7 +476,6 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                     $object->lines[$i]->qty = $testDesc;
                                                     $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
                                                     $afficherLigne = 0;
-                                                    $niveauTitre = 1; //pour simuler un titre et pas mettre de ligne
                                                 }
                                             }
                                         }

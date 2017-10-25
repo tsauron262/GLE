@@ -441,6 +441,48 @@ class pdf_crabeSoWhat extends ModelePDFFactures
 						// $pdf->Image does not increase value return by getY, so we save it manually
 						$posYAfterImage=$curY+$imglinesize['height'];
 					}
+                                        
+                                        
+                                        
+                                        
+                                        /*mod drsi pour afficher titre + gestion multi tarifs*/
+                                        $extra = "";
+                                        $afficherLigne = ($i>0 && (!isset($niveauTitre) OR !$niveauTitre));
+                                        if($object->lines[$i]->subprice == 0){//Ligne titre
+                                            $niveauTitre = $object->lines[$i]->qty;
+                                            $object->lines[$i]->qty = "";
+                                            $object->lines[$i]->total_ht = "";
+                                            $pdf->SetFont('','', $default_font_size - 3 + $niveauTitre*2);
+                                        }
+                                        else{//Ligne non titre
+                                            $niveauTitre = 0;
+                                            $pdf->SetFont('','', $default_font_size - 1);
+                                            if(($object->lines[$i]->qty == 1 OR $object->lines[$i]->qty == 0)){
+                                                $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;//Pour qte 0 afficher quand meme prix
+                                                $object->lines[$i]->special_code = 0;
+                                                $testDesc = str_ireplace(array("Quantité", "Quantite", ":", "Qte", "Qte", " ", "-"), "", $object->lines[$i]->desc);
+
+                                                if($object->lines[$i]->qty == 0){
+                                                    $extra = "(option)";   
+                                                    $object->lines[$i]->qty = 1;
+                                                }
+                                                if(filter_var($testDesc, FILTER_VALIDATE_INT)){//Ligne prix d'istinct
+                                                    $pdf->SetFont('','', $default_font_size - 1);
+                                                    $object->lines[$i]->qty = $testDesc;
+                                                    $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
+                                                    $afficherLigne = 0;
+                                                    $niveauTitre = 1; //pour simuler un titre et pas mettre de ligne
+                                                }
+                                            }
+                                        }
+                                        if($afficherLigne){
+                                            $pdf->setPage($pageposafter);
+                                            $pdf->SetLineStyle(array('dash'=>'1,1','color'=>array(80,80,80)));
+                                            //$pdf->SetDrawColor(190,190,200);
+                                            $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY-1);
+                                            $pdf->SetLineStyle(array('dash'=>0));
+                                        }
+                                        /*fmod drsi*/
 
 					// Description of product line
 					$curX = $this->posxdesc-1;
@@ -504,7 +546,9 @@ class pdf_crabeSoWhat extends ModelePDFFactures
 					// Unit price before discount
 					$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
 					$pdf->SetXY($this->posxup, $curY);
-					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);
+					/* mod drsi$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);*/
+					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $extra, 0, 'R', 0);
+                                        /*mod drsi*/
 
 					// Quantity
 					$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
@@ -1410,12 +1454,12 @@ class pdf_crabeSoWhat extends ModelePDFFactures
 			}
 		}
 
-		$pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
+		/*moddrsi$pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
 		if (empty($hidetop))
 		{
 			$pdf->SetXY($this->posxup-1, $tab_top+1);
 			$pdf->MultiCell($this->posxqty-$this->posxup-1,2, $outputlangs->transnoentities("PriceUHT"),'','C');
-		}
+		}fmoddrsi*/
 
 		$pdf->line($this->posxqty-1, $tab_top, $this->posxqty-1, $tab_top + $tab_height);
 		if (empty($hidetop))
@@ -1512,7 +1556,7 @@ class pdf_crabeSoWhat extends ModelePDFFactures
 	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
 	{
 		global $conf,$langs;
-                $pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/fond.png", 65, 20, 80);
+                //$pdf->Image(DOL_DOCUMENT_ROOT."/bimpsowhat/fond.png", 65, 20, 80);
 
 		$outputlangs->load("main");
 		$outputlangs->load("bills");

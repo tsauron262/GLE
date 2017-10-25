@@ -463,7 +463,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                             $niveauTitre = 0;
                                             $pdf->SetFont('','', $default_font_size - 1);
                                             if(($object->lines[$i]->qty == 1 OR $object->lines[$i]->qty == 0)){
-                                                $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;
+                                                $object->lines[$i]->total_ht = 1*$object->lines[$i]->subprice*(100-$object->lines[$i]->remise_percent)/100;//Pour qte 0 afficher quand meme prix
                                                 $object->lines[$i]->special_code = 0;
                                                 $testDesc = str_ireplace(array("Quantité", "Quantite", ":", "Qte", "Qte", " ", "-"), "", $object->lines[$i]->desc);
 
@@ -476,6 +476,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                                     $object->lines[$i]->qty = $testDesc;
                                                     $object->lines[$i]->desc = str_replace($testDesc, "", $object->lines[$i]->desc);
                                                     $afficherLigne = 0;
+                                                    $niveauTitre = 1; //pour simuler un titre et pas mettre de ligne
                                                 }
                                             }
                                         }
@@ -1359,11 +1360,11 @@ class pdf_azurSoWhat extends ModelePDFPropales
 		}
 
 		//$pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
-		/*if (empty($hidetop))
+		/*modd rsiif (empty($hidetop))
 		{
 			$pdf->SetXY($this->posxup-1, $tab_top+1);
 			$pdf->MultiCell($this->posxqty-$this->posxup-1,2, $outputlangs->transnoentities("PriceUHT"),'','C');
-		}*/
+		}fmod drsi*/
 
 		$pdf->line($this->posxqty-1, $tab_top, $this->posxqty-1, $tab_top + $tab_height);
 		if (empty($hidetop))

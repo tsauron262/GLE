@@ -486,6 +486,11 @@ class pdf_azurSoWhat extends ModelePDFPropales
                                             $pdf->line($this->marge_gauche, $nexY-1, $this->page_largeur - $this->marge_droite, $nexY-1);
                                             $pdf->SetLineStyle(array('dash'=>0));
                                         }
+                                        //Saut de ligne automatique
+                                        if(stripos($object->lines[$i]->desc, "[LIGNE]") !== false){
+                                            $object->lines[$i]->desc = str_replace("[LIGNE]", "", $object->lines[$i]->desc);
+                                           $pdf->AddPage('','',true);
+                                        }
                                         /*fmod drsi*/
 
 					// Description of product line

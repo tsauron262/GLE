@@ -451,7 +451,6 @@ global $conf;
                //iciattendee 
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
         }
-        dol_syslog("invit2".print_r($calendarData2,1),3);
 
         if($row['organisateur'] != "")
         $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
@@ -473,7 +472,7 @@ global $conf;
         $calendarData2['CREATED'] = $row['CREATED'];
         if($calendarData2['CREATED'] > $calendarData2['LAST-MODIFIED'])
             $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
-                dol_syslog("invit3".print_r($calendarData2,1),3);
+                
         date_default_timezone_set('UTC');
         //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
         if($row['dtstamp'] != "" && $row['dtstamp'] != "0")

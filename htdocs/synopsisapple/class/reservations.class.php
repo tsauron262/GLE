@@ -216,9 +216,10 @@ class Reservations
         $client->client = 1;
         $client->code_client = -1;
         $client->status = 1;
+        $client->tva_assuj = 1;
 
         if (isset($customer->firstName) && !empty($customer->firstName))
-            $client->name = $customer->firstName . ((isset($customer->lastName) && !empty($customer->lastName)) ? ' ' . $customer->lastName : '');
+            $client->name = ((isset($customer->lastName) && !empty($customer->lastName)) ? $customer->lastName.' ' : '').$customer->firstName;
         if (isset($customer->phoneNumber) && !empty($customer->phoneNumber))
             $client->phone = $customer->phoneNumber;
         if (isset($customer->addressLine1) && !empty($customer->addressLine1))

@@ -413,7 +413,7 @@ global $conf;
             $tabPartExtInt = array();
             //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
-            if ($val['id'] > 0) {
+            if ($val['id'] > 0 && $val["id"] != USER_EXTERNE_ID) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")

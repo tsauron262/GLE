@@ -128,7 +128,7 @@ class InterfaceCaldav {
                 $objectDataTemp = (isset($infoEvent["data"]) && $infoEvent["data"] != "") ? addslashes($infoEvent["data"]) : "";
                 $participentExt = (isset($infoEvent["participentExt"]) && $infoEvent["participentExt"] != "") ? addslashes($infoEvent["participentExt"]) : "";
                 $objectRappel = (isset($infoEvent["rappel"]) && $infoEvent["rappel"] != "") ? addslashes($infoEvent["rappel"]) : 0;
-                $organisateur = (isset($infoEvent["organisateur"]) && $infoEvent["organisateur"] != "") ? $organisateur : "";
+                $organisateur = (isset($infoEvent["organisateur"]) && $infoEvent["organisateur"] != "") ? $infoEvent["organisateur"] : "";
                 
                 if($organisateur == "")   {//ne devrais pas arrivé
                    if($object->userownerid > 0){

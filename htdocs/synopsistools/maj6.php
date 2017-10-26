@@ -65,7 +65,7 @@ elseif (isset($_REQUEST['ok2'])) {
     
     test($db, "Correction gmao contradet ok");
 
-    $db->query("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` pe SET `type2` = (SELECT fk_product_type FROM " . MAIN_DB_PREFIX . "product p WHERE pe.`fk_object` = p.rowid) WHERE type2 < 1");
+    $db->query("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` pe SET `type2` = (SELECT fk_product_type FROM " . MAIN_DB_PREFIX . "product p WHERE pe.`fk_object` = p.rowid) WHERE type2 < 1 || type2 IS NULL");
     $db->query("UPDATE `" . MAIN_DB_PREFIX . "product` SET fk_product_type = 1 WHERE fk_product_type IN (2,3,4)");
 
     test($db, "Correction product type");

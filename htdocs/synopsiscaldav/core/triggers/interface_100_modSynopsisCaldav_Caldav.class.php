@@ -128,6 +128,17 @@ class InterfaceCaldav {
                 $objectDataTemp = (isset($infoEvent["data"]) && $infoEvent["data"] != "") ? addslashes($infoEvent["data"]) : "";
                 $participentExt = (isset($infoEvent["participentExt"]) && $infoEvent["participentExt"] != "") ? addslashes($infoEvent["participentExt"]) : "";
                 $objectRappel = (isset($infoEvent["rappel"]) && $infoEvent["rappel"] != "") ? addslashes($infoEvent["rappel"]) : 0;
+                $organisateur = (isset($infoEvent["organisateur"]) && $infoEvent["organisateur"] != "") ? $organisateur : "";
+                
+                if($organisateur == "")   {//ne devrais pas arrivé
+                   if($object->userownerid > 0){
+                       $userOrga = new User($this->db);
+                       $userOrga->fetch($object->userownerid);
+                       $organisateur = $userOrga->email;
+                   }
+                   else
+                       $organisateur = (in_array($user->id, $tIdUser) ? $user->email : "gle_suivi@bimp.fr");
+                }
                 
                 if(isset($infoEvent["dtstamp"]) && $infoEvent["dtstamp"] != ""){//On vien en caldav                    
                     $dtstamp = addslashes($infoEvent["dtstamp"]);
@@ -144,13 +155,6 @@ class InterfaceCaldav {
             $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET dtstamp = '".$dtstamp."', participentExt = '".$participentExt."', sequence = ".$sequence.", etag = '".$objectEtag2."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
         }
         if ($action == "ACTION_CREATE"){
-            if($object->userownerid > 0){
-                $userOrga = new User($this->db);
-                $userOrga->fetch($object->userownerid);
-                $organisateur = $userOrga->email;
-            }
-            else
-                $organisateur = (in_array($user->id, $tIdUser) ? $user->email : "gle_suivi@bimp.fr");
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
 
             $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur, participentExt, dtstamp) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."', '".$participentExt."', '".$dtstamp."')");

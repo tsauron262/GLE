@@ -382,11 +382,8 @@ global $conf;
     public function getCalendarObject($calendarId, $objectUri) {
         global $db;
         $stmt = $this->pdo->prepare('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
-        dol_syslog('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?', 3);
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
-        $partext = $row['participentExt'];
         
         if (!$row)
             return null;
@@ -416,7 +413,7 @@ global $conf;
         /* Participant */
         $action->id = $row['id'];
         $action->fetch_userassigned();
-        if($row['participentExt'] =! "")
+        if($row['participentExt'] != "")
             $tabPartExtInt = explode(",", $row['participentExt']);
         else
             $tabPartExtInt = array();
@@ -429,9 +426,6 @@ global $conf;
                     $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1? 'ACCEPTED' : ($val['answer_status'] == -1? 'DECLINED' : 'NEEDS-ACTION'));
             }
         }
-        dol_syslog("invit".print_r($tabPartExtInt,1),3);
-        dol_syslog("invitext".print_r($row,1),3);
-        dol_syslog("invitext".$partext,3);
         if(count($tabPartExtInt) > 1){
             foreach ($tabPartExtInt as $part)
                 if ($part != "" /*&& $part != $row['organisateur']*/){
@@ -759,9 +753,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
         if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
-dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0);
 
-//dol_syslog("Update : ".print_r($calendarData,1),3);
         $extraData = $this->getDenormalizedData($calendarData);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
@@ -772,8 +764,6 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
 
         global $infoEvent;
         $infoEvent["etag"] = $extraData['etag'];
-dol_syslog("UPDATE OBJECT ETAG : ".$extraData['etag'],3, 0);
-
 //        $this->getRappel($extraData);
 //        $this->userIdCaldavPlus($calendarId);
 

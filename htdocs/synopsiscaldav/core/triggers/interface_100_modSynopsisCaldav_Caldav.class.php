@@ -126,7 +126,7 @@ class InterfaceCaldav {
                 $objectUri2 = (isset($infoEvent["uri"]) && $infoEvent["uri"] != "") ? $infoEvent["uri"] : $newUri;
                 $objectEtag2 = (isset($infoEvent["etag"]) && $infoEvent["etag"] != "") ? $infoEvent["etag"] : random(15);
                 $objectDataTemp = (isset($infoEvent["data"]) && $infoEvent["data"] != "") ? addslashes($infoEvent["data"]) : "";
-                $participentExt = (isset($infoEvent["participentExt"]) && $infoEvent["participentExt"] != "") ? addslashes($infoEvent["participentExt"]) : "";
+                $participentExt = (isset($infoEvent["participentExt"]) && $infoEvent["participentExt"] != "") ? "'".addslashes($infoEvent["participentExt"])."'" : "participentExt";
                 $objectRappel = (isset($infoEvent["rappel"]) && $infoEvent["rappel"] != "") ? addslashes($infoEvent["rappel"]) : 0;
                 $organisateur = (isset($infoEvent["organisateur"]) && $infoEvent["organisateur"] != "") ? $infoEvent["organisateur"] : "";
                 
@@ -152,12 +152,12 @@ class InterfaceCaldav {
                 
         }
         if ($action == "ACTION_MODIFY"){
-            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET dtstamp = '".$dtstamp."', participentExt = '".$participentExt."', sequence = ".$sequence.", etag = '".$objectEtag2."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET dtstamp = '".$dtstamp."', participentExt = ".$participentExt.", sequence = ".$sequence.", etag = '".$objectEtag2."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
         }
         if ($action == "ACTION_CREATE"){
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");
 
-            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur, participentExt, dtstamp) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."', '".$participentExt."', '".$dtstamp."')");
+            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, organisateur, participentExt, dtstamp) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$organisateur."', ".$participentExt.", '".$dtstamp."')");
         }
         if ($action == "ACTION_DELETE"){
             $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsiscaldav_event WHERE fk_object = ".$object->id);

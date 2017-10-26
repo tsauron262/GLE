@@ -4741,7 +4741,7 @@ div.side-nav, .vmenu, div.blockvmenuend, div.blockvmenubookmarks, div.blockvmenu
 div.blockvmenuimpair, div.blockvmenufirst, div.blockvmenupair{
     background: rgb(239,125,0)!important;
     color: white!important;
-}
+}   
 
 
 .mainmenuaspan{
@@ -4762,6 +4762,10 @@ tr.liste_titre, #id-left span.help, #id-left span.select2-chosen{
     color: white!important;
     opacity: 1!important;
 }
+.ulselectedfields{
+    color: black!important;
+}
+
 a.tabunactive, a.tabactive.tab {
     color: black!important;
     font-weight: bold;

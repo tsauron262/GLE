@@ -128,7 +128,7 @@ class InterfaceCaldav {
                 $objectDataTemp = (isset($infoEvent["data"]) && $infoEvent["data"] != "") ? addslashes($infoEvent["data"]) : "";
                 $participentExt = (isset($infoEvent["participentExt"]) && $infoEvent["participentExt"] != "") ? addslashes($infoEvent["participentExt"]) : "";
                 $objectRappel = (isset($infoEvent["rappel"]) && $infoEvent["rappel"] != "") ? addslashes($infoEvent["rappel"]) : 0;
-                $dtstamp = (isset($infoEvent["dtstamp"]) && $infoEvent["dtstamp"] != "") ? addslashes($infoEvent["dtstamp"]) : 0;
+                $dtstamp = (isset($infoEvent["dtstamp"]) && $infoEvent["dtstamp"] != "") ? addslashes($infoEvent["dtstamp"]) : (gmdate('Ymd').'T'. gmdate('His') . "Z");
 
                 
         }

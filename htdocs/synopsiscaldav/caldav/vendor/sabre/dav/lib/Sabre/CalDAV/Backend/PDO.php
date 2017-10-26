@@ -640,13 +640,13 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                         $stat = $retour[1];
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1]))
-                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), $stat);
+                    $tabMail[str_replace(" ", "", $tabT[1])] = array(str_replace(" ", "", $tabT[1]), $stat);
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1])){
                     $organisateur = $tabT[1];
-                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
+                    $tabMail[str_replace(" ", "", $tabT[1])] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
             }
         }

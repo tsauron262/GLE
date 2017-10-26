@@ -692,6 +692,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
         global $infoEvent;
         $infoEvent["dtstamp"] = $DTSTAMP;
         $infoEvent["sequence"] = $sequence;
+        $infoEvent["organisateur"] = $organisateur;
         $infoEvent["participentExt"] = implode(",", $tabMailInc);
         
         

@@ -380,13 +380,22 @@ global $conf;
      * @return array|null
      */
     public function getCalendarObject($calendarId, $objectUri) {
+        global $db;
         $stmt = $this->pdo->prepare('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
-       // dol_syslog("SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM " . $this->calendarObjectTableName . " WHERE calendarid = '".$calendarId."' AND uri = '".$objectUri."'", 3);
+        dol_syslog('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?', 3);
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
+        
+        $partext = $row['participentExt'];
+        
         if (!$row)
             return null;
+        
+//        $sql = $db->query('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = "'.$calendarId.'" AND uri = "'.$objectUri.'"');
+//        if($db->num_rows($sql) < 1)
+//            return null;
+//        $row = $db->fetch_array($sql);
+
 
         global $db, $conf;
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
@@ -421,6 +430,8 @@ global $conf;
             }
         }
         dol_syslog("invit".print_r($tabPartExtInt,1),3);
+        dol_syslog("invitext".print_r($row,1),3);
+        dol_syslog("invitext".$partext,3);
         if(count($tabPartExtInt) > 1){
             foreach ($tabPartExtInt as $part)
                 if ($part != "" /*&& $part != $row['organisateur']*/){

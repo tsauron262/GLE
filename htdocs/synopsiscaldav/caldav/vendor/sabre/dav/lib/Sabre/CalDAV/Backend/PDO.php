@@ -407,9 +407,9 @@ global $conf;
         /* Participant */
         $action->id = $row['id'];
         $action->fetch_userassigned();
-//        if($row['participentExt'] =! "")
-//            $tabPartExtInt = explode(",", $row['participentExt']);
-//        else
+        if($row['participentExt'] =! "")
+            $tabPartExtInt = explode(",", $row['participentExt']);
+        else
             $tabPartExtInt = array();
             //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
@@ -665,6 +665,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $action->userownerid = $user;
         foreach ($tabMail as $tmp) {
             $mail = $tmp[0];
+            $statut = (isset($tmp[1])? $tmp[1] : "NEEDS-ACTION");
             
             $sql = $db->query("SELECT rowid 
 FROM  `" . MAIN_DB_PREFIX . "user` 
@@ -676,15 +677,16 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 if($organisateur == $mail){
                     $action->userdoneid = $ligne->rowid;
                     $action->userownerid = $ligne->rowid;
-                    $tmp[1] = "ACCEPTED";
+                    $statut = "ACCEPTED";
                 }
                 
                 
+                $statutId = ($statut == "ACCEPTED" ? 1 : ($statut == "DECLINED" ? -1 : 0));
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
-                    'answer_status' => ($tmp[1] == "ACCEPTED" ? 1 : ($tmp[1] == "DECLINED" ? -1 : 0)));
+                    'answer_status' => $statutId);
                 
             } else {
-                $tabMailInc[] = $tmp[0]."|".$tmp[1];
+                $tabMailInc[] = $mail."|".$statut;
             }
         }
         

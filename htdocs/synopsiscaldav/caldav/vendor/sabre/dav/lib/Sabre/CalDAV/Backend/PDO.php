@@ -84,6 +84,8 @@ global $conf;
         
         global $infoEvent;
         $infoEvent = array();
+        
+        define("USER_EXTERNE_ID", 326);
     }
 
     /**
@@ -657,7 +659,10 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
 
         $tabMailInc = array();
         $action->userassigned = array($user => array('id' => $user));
-        $action->userownerid = $user;
+        if(count($tabMail) > 1)
+            $action->userownerid = USER_EXTERNE_ID;
+        else
+            $action->userownerid = $user;
         foreach ($tabMail as $tmp) {
             $mail = $tmp[0];
             

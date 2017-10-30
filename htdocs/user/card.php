@@ -2118,7 +2118,7 @@ else
 			{
 				$type=0;
 	            if ($object->contact_id) $type=$object->contact_id;
-	            print $form->selectcontacts(0,$type,'contactid',2,'','',1,'',false,1);
+	            //print $form->selectcontacts(0,$type,'contactid',2,'','',1,'',false,1);
 	           	if ($object->ldap_sid) print ' ('.$langs->trans("DomainUser").')';
             }
            	print '</td></tr>';

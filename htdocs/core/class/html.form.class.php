@@ -1045,7 +1045,8 @@ class Form
      */
     function select_thirdparty_list($selected='',$htmlname='socid',$filter='',$showempty='', $showtype=0, $forcecombo=0, $events=array(), $filterkey='', $outputmode=0, $limit=0, $morecss='minwidth100', $moreparam='')
     {
-        dol_syslog("select_thirdparty_list appeler sans ajax (remplacer par select_company)".print_r($_REQUEST,1),3);
+        if(strlen($filterkey) < 3)
+            dol_syslog("select_thirdparty_list appeler sans ajax (remplacer par select_company) Filtre :".$filterkey." ".print_r($_REQUEST,1),3);
         return $this->select_thirdparty_list_DRSI($selected, $htmlname, $filter, $showempty, $showtype, $forcecombo, $events, $filterkey, $outputmode);
     }
     function select_thirdparty_list_DRSI($selected='',$htmlname='socid',$filter='',$showempty='', $showtype=0, $forcecombo=0, $events=array(), $filterkey='', $outputmode=0, $limit=0, $morecss='minwidth100', $moreparam='')

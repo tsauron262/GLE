@@ -94,7 +94,7 @@ class FormMargin
 			}
 
 			$pv = $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
-			$pa_ht = ($pv < 0 ? - $line->pa_ht : $line->pa_ht);      // We choosed to have line->pa_ht always positive in database, so we guess the correct sign
+			$pa_ht = $line->pa_ht;      // We choosed to have line->pa_ht always positive in database, so we guess the correct sign
 			$pa = $line->qty * $pa_ht;
 			
 			// calcul des marges
@@ -158,14 +158,14 @@ class FormMargin
 				}
 			}
 		}
-		if ($marginInfos['pa_products'] != 0)
+		if ($marginInfos['pa_products'] > 0)
 			$marginInfos['margin_rate_products'] = 100 * $marginInfos['margin_on_products'] / $marginInfos['pa_products'];
-		if ($marginInfos['pv_products'] != 0)
+		if ($marginInfos['pv_products'] > 0)
 			$marginInfos['mark_rate_products'] = 100 * $marginInfos['margin_on_products'] / $marginInfos['pv_products'];
 
-		if ($marginInfos['pa_services'] != 0)
+		if ($marginInfos['pa_services'] > 0)
 			$marginInfos['margin_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pa_services'];
-		if ($marginInfos['pv_services'] != 0)
+		if ($marginInfos['pv_services'] > 0)
 			$marginInfos['mark_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pv_services'];
 
 		// if credit note, margin = -1 * (abs(selling_price) - buying_price)
@@ -173,9 +173,9 @@ class FormMargin
 		//	$marginInfos['total_margin'] = -1 * (abs($marginInfos['pv_total']) - $marginInfos['pa_total']);
 		//else
 			$marginInfos['total_margin'] = $marginInfos['pv_total'] - $marginInfos['pa_total'];
-		if ($marginInfos['pa_total'] != 0)
+		if ($marginInfos['pa_total'] > 0)
 			$marginInfos['total_margin_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pa_total'];
-		if ($marginInfos['pv_total'] != 0)
+		if ($marginInfos['pv_total'] > 0)
 			$marginInfos['total_mark_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pv_total'];
 
 		return $marginInfos;

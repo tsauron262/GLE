@@ -204,7 +204,7 @@ class SMTPs
 	/**
 	 * Class error codes and messages
 	 */
-	var $_smtpsErrors = null;
+	var $_smtpsErrors = array();
 
 	/**
 	 * Defines log level

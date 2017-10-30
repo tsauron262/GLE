@@ -326,12 +326,20 @@ if (empty($reshook))
 									{
 										$label = $lines[$i]->product_label;
 									}
-
-									$desc .= ($lines[$i]->desc && $lines[$i]->desc!=$lines[$i]->libelle)?dol_htmlentitiesbr($lines[$i]->desc):'';
+									$desc = ($lines[$i]->desc && $lines[$i]->desc!=$lines[$i]->libelle)?dol_htmlentitiesbr($lines[$i]->desc):'';
 								}
 								else {
 								    $desc = dol_htmlentitiesbr($lines[$i]->desc);
 						        }
+
+								// Extrafields
+								$array_options = array();
+								if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) 							// For avoid conflicts if
+								// trigger used
+								{
+									$lines[$i]->fetch_optionals($lines[$i]->rowid);
+									$array_options = $lines[$i]->array_options;
+								}
 
 								$txtva = $lines[$i]->vat_src_code ? $lines[$i]->tva_tx . ' (' .  $lines[$i]->vat_src_code . ')' : $lines[$i]->tva_tx;
 
@@ -355,7 +363,7 @@ if (empty($reshook))
 					                $lines[$i]->info_bits,
 				                    $lines[$i]->fk_fournprice,
 				                    $lines[$i]->pa_ht,
-			                        array(),
+			                        $array_options,
 				                    $lines[$i]->fk_unit
 			                    );
 
@@ -2112,17 +2120,17 @@ else
     		$filename = dol_sanitizeFileName($object->ref);
     		$filedir = $conf->contrat->dir_output . "/" . dol_sanitizeFileName($object->ref);
     		$urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
-    		$genallowed = $user->rights->contrat->creer;
-    		$delallowed = $user->rights->contrat->supprimer;
+    		$genallowed = $user->rights->contrat->lire;
+    		$delallowed = $user->rights->contrat->creer;
 
     		$var = true;
 
     		print $formfile->showdocuments('contract', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);
 
 
-    			// Show links to link elements
-    			$linktoelem = $form->showLinkToObjectBlock($object, null, array('contrat'));
-    			$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
+    		// Show links to link elements
+    		$linktoelem = $form->showLinkToObjectBlock($object, null, array('contrat'));
+    		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
 
 
     		print '</div><div class="fichehalfright"><div class="ficheaddleft">';

@@ -1415,7 +1415,7 @@ AND  `targettype` LIKE  'productCli'";
 			}
 
 			$carac_client_name= pdfBuildThirdpartyName($object->thirdparty, $outputlangs);
-			//$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->thirdparty,($usecontact?$object->contact:''),$usecontact,'target');
+			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->thirdparty,($usecontact?$object->contact:''),$usecontact,'target');
 
 			// Show recipient
 			$widthrecbox=100;

@@ -1602,7 +1602,7 @@ function dol_print_date($time,$format='',$tzoutput='tzserver',$outputlangs='',$e
 	|| preg_match('/^([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])$/i',$time,$reg))	// Deprecated. Ex: 1970-01-01, 1970-01-01 01:00:00, 19700101010000
 	{
 		// This part of code should not be used. TODO Remove this.
-		dol_syslog("Functions.lib::dol_print_date function call with deprecated value of time in page ".$_SERVER["PHP_SELF"], LOG_WARNING);
+		//moddrsi pas de log erreurdol_syslog("Functions.lib::dol_print_date function call with deprecated value of time in page ".$_SERVER["PHP_SELF"], LOG_WARNING);
 		// Date has format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' or 'YYYYMMDDHHMMSS'
 		$syear	= (! empty($reg[1]) ? $reg[1] : '');
 		$smonth	= (! empty($reg[2]) ? $reg[2] : '');

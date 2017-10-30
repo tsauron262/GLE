@@ -533,6 +533,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
 //        $stmt->execute(array($calendarId));
 //
 //        return '"' . $extraData['etag'] . '"';
+//        
+//        
+//        
         //Verif quil existe pas
         $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE uri = ?');
         $stmt->execute(array($objectUri));
@@ -643,14 +646,17 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 if(preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                         $stat = $retour[1];
                 $tabT = explode("mailto:", $ligne);
-                if (isset($tabT[1]))
-                    $tabMail[str_replace(" ", "", $tabT[1])] = array(str_replace(" ", "", $tabT[1]), $stat);
+                if (isset($tabT[1])){
+                    $mailT = str_replace(" ", "", $tabT[1]);
+                    $tabMail[$mailT] = array($mailT, $stat);
+                }
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1])){
-                    $organisateur = $tabT[1];
-                    $tabMail[str_replace(" ", "", $tabT[1])] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
+                    $mailT = str_replace(" ", "", $tabT[1]);
+                    $organisateur = $mailT;
+                    $tabMail[$mailT] = array($mailT, "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
             }
         }

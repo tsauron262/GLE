@@ -163,6 +163,7 @@ if ($_REQUEST["id"] > 0) {
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
         $com = new Synopsis_Commande($db);
         $com->fetch($fichinter->fk_commande);
+        $com->fetch_group_lines(0, 0, 0, 0, 1);
         print "<td class='ui-widget-content'>" . $com->getNomUrl(1);
         /* print "<th class='ui-widget-header ui-state-default' width=20%>Pr&eacute;paration de commande";
           print "<td class='ui-widget-content'> ". $com->getNomUrl(1,5) ."</td> "; */
@@ -184,8 +185,9 @@ if ($_REQUEST["id"] > 0) {
 
     $selectHtml = '';
     $tabSelect = array(-1 => "Choix", 1 => "Forfait", 2 => "Sous garantie", 3 => "Contrat", 4 => "Temps pass&eacute;");
+    $extra35 = extra(35);
     foreach ($tabSelect as $i => $option) {
-        if ($i == extra(35)) {
+        if ($i == $extra35) {
             $selectHtml .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
         } else {
             $selectHtml .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
@@ -281,9 +283,9 @@ if ($_REQUEST["id"] > 0) {
 
         $htmlSelect2 = "";
         if ($fichinter->fk_commande > 0) {
-            $com = new Synopsis_Commande($db);
-            $com->fetch($fichinter->fk_commande);
-            $com->fetch_group_lines(0, 0, 0, 0, 1);
+//            $com = new Synopsis_Commande($db);
+//            $com->fetch($fichinter->fk_commande);
+//            $com->fetch_group_lines(0, 0, 0, 0, 1);
             $htmlSelect2 .= "<select name='" . $prefId . "fk_prod'>";
             $htmlSelect2 .= "<option value='0'>S&eacute;lectionner-></option>";
 
@@ -444,9 +446,9 @@ $selectHtml .= "</SELECT>";
 
 $htmlSelect2 = "";
 if ($fichinter->fk_commande > 0) {
-    $com = new Synopsis_Commande($db);
-    $com->fetch($fichinter->fk_commande);
-    $com->fetch_group_lines(0, 0, 0, 0, 1);
+//    $com = new Synopsis_Commande($db);
+//    $com->fetch($fichinter->fk_commande);
+//    $com->fetch_group_lines(0, 0, 0, 0, 1);
     $htmlSelect2 .= '<select-supprjs name="\'+prefId+\'fk_prod">';
     $htmlSelect2 .= '<option value="0">S&eacute;lectionner-></option>';
 

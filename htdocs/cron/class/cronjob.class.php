@@ -922,7 +922,12 @@ class Cronjob extends CommonObject
 			// load classes
 			if (! $error)
 			{
-				/*moddrsi*/$ret=dol_include_once($this->module_name."/class/".$this->classesname);/*fmoddrsi*/
+				/*moddrsi*/
+                                if(stripos($this->classesname, "/"))
+                                        dol_include_once($this->classesname);
+                                else
+                                    $ret=dol_include_once($this->module_name."/class/".$this->classesname);
+                                    /*fmoddrsi*/
 				if ($ret===false || (! class_exists($this->objectname)))
 				{
 					$this->error=$langs->trans('CronCannotLoadClass',$this->classesname,$this->objectname);

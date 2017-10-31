@@ -923,7 +923,7 @@ class Cronjob extends CommonObject
 			if (! $error)
 			{
 				/*moddrsi*/
-                                if(stripos($this->classesname, "/"))
+                                if(stripos($this->classesname, "/") !== false)
                                         dol_include_once($this->classesname);
                                 else
                                     $ret=dol_include_once($this->module_name."/class/".$this->classesname);

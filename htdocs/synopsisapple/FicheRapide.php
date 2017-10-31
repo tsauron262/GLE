@@ -221,8 +221,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             $discount->amount_tva = $acompte - ($acompte / 1.2);
                             $discount->tva_tx = 20;
                             $discount->create($user);
-//                $propal->addline("Acompte", -$acompte, 1, 0, 0, 0, 0, 0, 0, -$acompte);
-                            $propal->insert_discount($discount->id);
+                $propal->addline("Acompte", -$discount->amount_ht, 1, 20, 0, 0, 0, 0, 'HT', -$acompte, 0,1,0,0,0,0,-$discount->amount_ht, null, null, null, null, null, null, null, null, $discount->id);
+                            //$propal->insert_discount($discount->id);
                         }
 
                         if ($prio) {

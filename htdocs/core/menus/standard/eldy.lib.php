@@ -214,7 +214,7 @@ function print_eldy_menu($db,$atarget,$type_user,&$tabMenu,&$menu,$noout=0,$mode
 		else $classname = 'class="tmenu"';
 		$idsel='hrm';
 
-		$menu->add('/hrm/index.php?mainmenu=hrm&amp;leftmenu=', $langs->trans("HRM"), 0, $showmode, $atarget, "hrm", '', 80, $id, $idsel, $classname);
+		$menu->add('/synopsisholiday/index.php?leftmenu=holiday&mainmenu=hrm&amp;leftmenu=', $langs->trans("HRM"), 0, $showmode, $atarget, "hrm", '', 80, $id, $idsel, $classname);
 	}
 
 

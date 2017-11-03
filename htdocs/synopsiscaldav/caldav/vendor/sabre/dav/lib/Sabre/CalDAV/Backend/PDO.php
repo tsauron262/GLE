@@ -646,6 +646,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             if (stripos($ligne, "CONFIDENTIAL") !== false) {
                 $action->array_options['options_conf'] = true;
             }
+            else{
+                $action->array_options['options_conf'] = false;
+            }
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:","",$ligne);
             }

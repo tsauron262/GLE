@@ -579,7 +579,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
+                $action->label = str_replace($tabR, "", substr($calendarData2['SUMMARY'],0,300));
             if (isset($calendarData2['DESCRIPTION']))
                 $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))

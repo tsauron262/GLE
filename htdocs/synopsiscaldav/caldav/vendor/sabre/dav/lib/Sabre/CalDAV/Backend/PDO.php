@@ -914,6 +914,8 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             $tabR = array(CHR(13) => " ", CHR(10) => " ");
             $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION");
             $ligne = strtr($ligne, $tabR);
+            if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
+                $ligne = substr($ligne,0,300);
             if (!is_integer($clef)) {
                 if (stripos($ligne, "=") !== false && !in_array($clef,  $tabException))
                     $tab2[] = $clef . ";" . $ligne;
@@ -921,8 +923,6 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
                     $tab2[] = $clef . ":" . $ligne;
             } else
                 $tab2[] = $ligne;
-            if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
-                $ligne = substr($ligne,0,300);
         }
         return implode("\n", $tab2);
     }

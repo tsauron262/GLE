@@ -248,27 +248,27 @@ class modProductBrowser extends DolibarrModules
 		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT */
 
 		$r=1;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products',
+/*		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=cat',
 					'type'=>'left',	
 					'titre'=>'Recherche',
-					'mainmenu'=>'products',
-					'leftmenu'=>'browse',
-					'url'=>'/bimpproductbrowser/index.php?leftmenu=browse&type=1',
+					'mainmenu'=>'cat',
+					'leftmenu'=>'cat',
+					'url'=>'/bimpproductbrowser/index.php?leftmenu=cat&type=1',
 					'langs'=>'rechercherecherche@recherche',
 					'position'=>110, 'enabled'=>'1',
 					'perms'=>'1',
 					'target'=>'', 'user'=>2);
-/*		$r++;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products,fk_leftmenu=browse',
+		$r++;
+*/		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products,fk_leftmenu=cat',
 					'type'=>'left',
-					'titre'=>'Nouvelle recherche',
-					'mainmenu'=>'', 'leftmenu'=>'',
-					'url'=>'/bimpproductbrowser/card.php?action=create&leftmenu=browse',
-					'langs'=>'browse@browse',
+					'titre'=>'Rechercher',
+					'mainmenu'=>'products', 'leftmenu'=>'cat',
+					'url'=>'/bimpproductbrowser/index.php?leftmenu=cat&type=1',
+					'langs'=>'cat@cat',
 					'position'=>110, 'enabled'=>'1',
 					'perms'=>'1',
 					'target'=>'', 'user'=>2);
-*/
+
 		// END MODULEBUILDER LEFTMENU MYOBJECT */
 
 

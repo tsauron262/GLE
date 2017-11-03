@@ -579,7 +579,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = str_replace($tabR, "", substr($calendarData2['SUMMARY'],0,300));
+                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
                 $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))
@@ -921,6 +921,8 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
                     $tab2[] = $clef . ":" . $ligne;
             } else
                 $tab2[] = $ligne;
+            if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
+                $ligne = substr($ligne,0,300);
         }
         return implode("\n", $tab2);
     }

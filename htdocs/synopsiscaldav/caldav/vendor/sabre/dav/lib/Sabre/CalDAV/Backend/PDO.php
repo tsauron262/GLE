@@ -453,7 +453,6 @@ global $conf;
         }
         
 	$action->fetch_optionals();
-        dol_syslog(print_r($action->array_options,1),3);
         if (isset($action->array_options['options_conf']) && $action->array_options['options_conf'] == true) {
             $calendarData2[] = 'CLASS:CONFIDENTIAL';
         }
@@ -645,7 +644,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 $sequence = $ligne;
             }
             if (stripos($ligne, "CONFIDENTIAL") !== false) {
-                $action->array_options['options_confidentiel'] = true;
+                $action->array_options['options_conf'] = true;
             }
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:","",$ligne);

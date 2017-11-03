@@ -452,7 +452,7 @@ global $conf;
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
         }
         
-        
+        dol_syslog(print_r($action->array_options,1),3);
         if ($action->array_options['options_confidentiel'] == true) {
             $calendarData2[] = 'CLASS:CONFIDENTIAL';
         }

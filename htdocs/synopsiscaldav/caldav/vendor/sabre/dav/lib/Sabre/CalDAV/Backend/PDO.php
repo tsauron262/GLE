@@ -453,6 +453,7 @@ global $conf;
         }
         
 	$action->fetch_optionals();
+        dol_syslog(print_r($action->array_options,1),3);
         if (isset($action->array_options['options_conf']) && $action->array_options['options_conf'] == true) {
             $calendarData2[] = 'CLASS:CONFIDENTIAL';
         }

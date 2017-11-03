@@ -861,6 +861,8 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             //Pour ce tour
             if (stripos($val, "CUTYPE=INDIVIDUAL") > -1)
                 $position = 'core';
+            if (stripos($val, "CONFIDENTIAL") > -1)
+                $position = 'core';
             
             if (stripos($val, "X-OWNER") > -1)
                 $position = 'header';

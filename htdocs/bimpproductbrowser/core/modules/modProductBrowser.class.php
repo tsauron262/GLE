@@ -222,12 +222,12 @@ class modProductBrowser extends DolibarrModules
 
 		// Main menu entries
 		$this->menu = array();			// List of menus to add
-		$r=0;
+		$r=1;
 
 		// Add here entries to declare new menus
 
 		// Example to declare a new Top Menu entry and its Left menu entry:
-		/* BEGIN MODULEBUILDER TOPMENU */
+		/* BEGIN MODULEBUILDER TOPMENU
 		$this->menu[$r++]=array('fk_menu'=>'',			                // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 								'type'=>'top',			                // This is a Top menu entry
 								'titre'=>'MyModule',
@@ -241,35 +241,34 @@ class modProductBrowser extends DolibarrModules
 								'target'=>'',
 								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
 
-		/* END MODULEBUILDER TOPMENU */
+		END MODULEBUILDER TOPMENU */
 
 		// Example to declare a Left Menu entry into an existing Top menu entry:
-		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT
-		$this->menu[$r++]=array(	'fk_menu'=>'fk_mainmenu=mymodule',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-								'type'=>'left',			                // This is a Left menu entry
-								'titre'=>'List MyObject',
-								'mainmenu'=>'mymodule',
-								'leftmenu'=>'mymodule',
-								'url'=>'/mymodule/myobject_list.php',
-								'langs'=>'mymodule@mymodule',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>1000+$r,
-								'enabled'=>'$conf->mymodule->enabled',  // Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-								'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
-		$this->menu[$r++]=array(	'fk_menu'=>'fk_mainmenu=mymodule,fk_leftmenu=mymodule',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-								'type'=>'left',			                // This is a Left menu entry
-								'titre'=>'New MyObject',
-								'mainmenu'=>'mymodule',
-								'leftmenu'=>'mymodule',
-								'url'=>'/mymodule/myobject_page.php?action=create',
-								'langs'=>'mymodule@mymodule',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-								'position'=>1000+$r,
-								'enabled'=>'$conf->mymodule->enabled',  // Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-								'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-								'target'=>'',
-								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
-		END MODULEBUILDER LEFTMENU MYOBJECT */
+		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT */
+
+		$r=1;
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products',
+					'type'=>'left',	
+					'titre'=>'Recherche',
+					'mainmenu'=>'products',
+					'leftmenu'=>'browse',
+					'url'=>'/bimpproductbrowser/index.php?leftmenu=browse&type=1',
+					'langs'=>'rechercherecherche@recherche',
+					'position'=>110, 'enabled'=>'1',
+					'perms'=>'1',
+					'target'=>'', 'user'=>2);
+/*		$r++;
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products,fk_leftmenu=browse',
+					'type'=>'left',
+					'titre'=>'Nouvelle recherche',
+					'mainmenu'=>'', 'leftmenu'=>'',
+					'url'=>'/bimpproductbrowser/card.php?action=create&leftmenu=browse',
+					'langs'=>'browse@browse',
+					'position'=>110, 'enabled'=>'1',
+					'perms'=>'1',
+					'target'=>'', 'user'=>2);
+*/
+		// END MODULEBUILDER LEFTMENU MYOBJECT */
 
 
 		// Exports

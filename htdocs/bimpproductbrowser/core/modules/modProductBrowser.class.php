@@ -17,11 +17,11 @@
  */
 
 /**
- * 	\defgroup   modBrowseProduct     Module MyModule
+ * 	\defgroup   mymodule     Module MyModule
  *  \brief      MyModule module descriptor.
  *
- *  \file       htdocs/modBrowseProduct/core/modules/modBrowseProduct.class.php
- *  \ingroup    modBrowseProduct
+ *  \file       htdocs/mymodule/core/modules/modProductBrowser.class.php
+ *  \ingroup    mymodule
  *  \brief      Description and activation file for module MyModule
  */
 include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
@@ -33,7 +33,7 @@ include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 /**
  *  Description and activation class for module MyModule
  */
-class modBrowseProduct extends DolibarrModules
+class modProductBrowser extends DolibarrModules
 {
 	// @codingStandardsIgnoreEnd
 	/**
@@ -49,13 +49,13 @@ class modBrowseProduct extends DolibarrModules
 
 		// Id for module (must be unique).
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-		$this->numero = 652141;		// Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+		$this->numero = 752342;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
-		$this->rights_class = 'modBrowseProduct';
+		$this->rights_class = 'bimpproductbrowser';
 
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
 		// It is used to group modules by family in module setup page
-		$this->family = "other";
+		$this->family = "products";
 		// Module position in the family
 		$this->module_position = 500;
 		// Gives the possibility to the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
@@ -64,28 +64,26 @@ class modBrowseProduct extends DolibarrModules
 		// Module label (no space allowed), used if translation string 'ModuleMyModuleName' not found (MyModue is name of module).
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description, used if translation string 'ModuleMyModuleDesc' not found (MyModue is name of module).
-		$this->description = "modBrowseProductDescription";
+		$this->description = "Allow the user to browse in product using categories on a single page";
 		// Used only if file README.md and README-LL.md not found.
-		$this->descriptionlong = "modBrowseProductDescription (Long)";
+		$this->descriptionlong = "Allow the user to browse in product using categories on a single page. It require ajax to be user friendly";
 
-		$this->editor_name = 'Editor name';
+		$this->editor_name = 'Romain';
 		$this->editor_url = 'https://www.example.com';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
 		$this->version = '1.0';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
-		$this->special = 2;
-
 		// Name of image file used for this module.
 		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
 		$this->picto='generic';
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
-		// for default path (eg: /modBrowseProduct/core/xxxxx) (0=disable, 1=enable)
-		// for specific path of parts (eg: /modBrowseProduct/core/modules/barcode)
-		// for specific css file (eg: /modBrowseProduct/css/modBrowseProduct.css.php)
+		// for default path (eg: /mymodule/core/xxxxx) (0=disable, 1=enable)
+		// for specific path of parts (eg: /mymodule/core/modules/barcode)
+		// for specific css file (eg: /mymodule/css/mymodule.css.php)
 		$this->module_parts = array(
 		                        	'triggers' => 1,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
 									'login' => 0,                                    	// Set this to 1 if module has its own login method directory (core/login)
@@ -95,17 +93,17 @@ class modBrowseProduct extends DolibarrModules
 		                        	'tpl' => 0,                                      	// Set this to 1 if module overwrite template dir (core/tpl)
 									'barcode' => 0,                                  	// Set this to 1 if module has its own barcode directory (core/modules/barcode)
 									'models' => 0,                                   	// Set this to 1 if module has its own models directory (core/modules/xxx)
-									'css' => array('/modBrowseProduct/css/modBrowseProduct.css.php'),	// Set this to relative path of css file if module has its own css file
-	 								'js' => array('/modBrowseProduct/js/modBrowseProduct.js.php'),          // Set this to relative path of js file if module must load a js on all pages
+									'css' => array('/bimpproductbrowser/css/modProductBrowser.css.php'),	// Set this to relative path of css file if module has its own css file
+	 								'js' => array('/bimpproductbrowser/js/modProductBrowser.js.php'),          // Set this to relative path of js file if module must load a js on all pages
 									'hooks' => array('hookcontext1','hookcontext2') 	// Set here all hooks context managed by module. You can also set hook context 'all'
 		                        );
 
 		// Data directories to create when module is enabled.
-		// Example: this->dirs = array("/modBrowseProduct/temp","/modBrowseProduct/subdir");
+		// Example: this->dirs = array("/mymodule/temp","/mymodule/subdir");
 		$this->dirs = array();
 
-		// Config pages. Put here list of php page, stored into modBrowseProduct/admin directory, to use to setup module.
-		$this->config_page_url = array("setup.php@modBrowseProduct");
+		// Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
+		$this->config_page_url = array("setup.php@mymodule");
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module
@@ -114,22 +112,22 @@ class modBrowseProduct extends DolibarrModules
 		$this->conflictwith = array();	// List of module class names as string this module is in conflict with
 		$this->phpmin = array(5,3);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(4,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("modBrowseProduct@modBrowseProduct");
+		$this->langfiles = array("mymodule@mymodule");
 		$this->warnings_activation = array();                     // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();                 // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 
 		// Constants
 		// List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
-		// Example: $this->const=array(0=>array('MYMODULE_MYNEWCONST1','chaine','modBrowseProduct','This is a constant to add',1),
-		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','modBrowseProduct','This is another constant to add',0, 'current', 1)
+		// Example: $this->const=array(0=>array('MYMODULE_MYNEWCONST1','chaine','myvalue','This is a constant to add',1),
+		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
 		$this->const = array(
 			1=>array('MYMODULE_MYCONSTANT', 'chaine', 'avalue', 'This is a constant to add', 1, 'allentities', 1)
 		);
 
 		// Array to add new pages in new tabs
-		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@modBrowseProduct:$user->rights->modBrowseProduct->read:/modBrowseProduct/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
-        //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@modBrowseProduct:$user->rights->othermodule->read:/modBrowseProduct/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
+		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
+        //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
         //                              'objecttype:-tabname:NU:conditiontoremove');                                                     										// To remove an existing tab identified by code tabname
         // Can also be:	$this->tabs = array('data'=>'...', 'entity'=>0);
         //
@@ -155,17 +153,17 @@ class modBrowseProduct extends DolibarrModules
 		// 'user'             to add a tab in user view
         $this->tabs = array();
 
-		if (! isset($conf->modBrowseProduct) || ! isset($conf->modBrowseProduct->enabled))
+		if (! isset($conf->modProductBrowser) || ! isset($conf->modProductBrowser->enabled))
         {
-        	$conf->modBrowseProduct=new stdClass();
-        	$conf->modBrowseProduct->enabled=0;
+        	$conf->modProductBrowser=new stdClass();
+        	$conf->modProductBrowser->enabled=0;
         }
 
         // Dictionaries
 		$this->dictionaries=array();
         /* Example:
         $this->dictionaries=array(
-            'langs'=>'mylangfile@modBrowseProduct',
+            'langs'=>'mylangfile@mymodule',
             'tabname'=>array(MAIN_DB_PREFIX."table1",MAIN_DB_PREFIX."table2",MAIN_DB_PREFIX."table3"),		// List of tables we want to see into dictonnary editor
             'tablib'=>array("Table1","Table2","Table3"),													// Label of tables
             'tabsql'=>array('SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table1 as f','SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table2 as f','SELECT f.rowid as rowid, f.code, f.label, f.active FROM '.MAIN_DB_PREFIX.'table3 as f'),	// Request to select fields
@@ -174,23 +172,23 @@ class modBrowseProduct extends DolibarrModules
             'tabfieldvalue'=>array("code,label","code,label","code,label"),																				// List of fields (list of fields to edit a record)
             'tabfieldinsert'=>array("code,label","code,label","code,label"),																			// List of fields (list of fields for insert)
             'tabrowid'=>array("rowid","rowid","rowid"),																									// Name of columns with primary key (try to always name it 'rowid')
-            'tabcond'=>array($conf->modBrowseProduct->enabled,$conf->modBrowseProduct->enabled,$conf->modBrowseProduct->enabled)												// Condition to show each dictionary
+            'tabcond'=>array($conf->mymodule->enabled,$conf->mymodule->enabled,$conf->mymodule->enabled)												// Condition to show each dictionary
         );
         */
 
 
         // Boxes/Widgets
-		// Add here list of php file(s) stored in modBrowseProduct/core/boxes that contains class to show a widget.
+		// Add here list of php file(s) stored in mymodule/core/boxes that contains class to show a widget.
         $this->boxes = array(
-        	0=>array('file'=>'modBrowseProductwidget1.php@modBrowseProduct','note'=>'Widget provided by MyModule','enabledbydefaulton'=>'Home'),
-        	//1=>array('file'=>'modBrowseProductwidget2.php@modBrowseProduct','note'=>'Widget provided by MyModule'),
-        	//2=>array('file'=>'modBrowseProductwidget3.php@modBrowseProduct','note'=>'Widget provided by MyModule')
+        	0=>array('file'=>'mymodulewidget1.php@mymodule','note'=>'Widget provided by MyModule','enabledbydefaulton'=>'Home'),
+        	//1=>array('file'=>'mymodulewidget2.php@mymodule','note'=>'Widget provided by MyModule'),
+        	//2=>array('file'=>'mymodulewidget3.php@mymodule','note'=>'Widget provided by MyModule')
         );
 
 
 		// Cronjobs (List of cron jobs entries to add when module is enabled)
 		$this->cronjobs = array(
-			0=>array('label'=>'MyJob label', 'jobtype'=>'method', 'class'=>'/modBrowseProduct/class/modBrowseProductmyjob.class.php', 'objectname'=>'MyModuleMyJob', 'method'=>'myMethod', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true)
+			0=>array('label'=>'MyJob label', 'jobtype'=>'method', 'class'=>'/bimpproductbrowser/class/mymodulemyjob.class.php', 'objectname'=>'MyModuleMyJob', 'method'=>'myMethod', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true)
 		);
 		// Example: $this->cronjobs=array(0=>array('label'=>'My label', 'jobtype'=>'method', 'class'=>'/dir/class/file.class.php', 'objectname'=>'MyClass', 'method'=>'myMethod', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true),
 		//                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
@@ -204,22 +202,22 @@ class modBrowseProduct extends DolibarrModules
 		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Read objects of My Module';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->modBrowseProduct->level1->level2)
-		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->modBrowseProduct->level1->level2)
+		$this->rights[$r][4] = 'read';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
 		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Create/Update objects of My Module';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'create';				// In php code, permission will be checked by test if ($user->rights->modBrowseProduct->level1->level2)
-		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->modBrowseProduct->level1->level2)
+		$this->rights[$r][4] = 'create';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;
 		$this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete objects of My Module';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
-		$this->rights[$r][4] = 'delete';				// In php code, permission will be checked by test if ($user->rights->modBrowseProduct->level1->level2)
-		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->modBrowseProduct->level1->level2)
+		$this->rights[$r][4] = 'delete';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 
 		// Main menu entries
@@ -233,13 +231,13 @@ class modBrowseProduct extends DolibarrModules
 		$this->menu[$r++]=array('fk_menu'=>'',			                // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 								'type'=>'top',			                // This is a Top menu entry
 								'titre'=>'MyModule',
-								'mainmenu'=>'modBrowseProduct',
+								'mainmenu'=>'modProductBrowser',
 								'leftmenu'=>'',
-								'url'=>'/modBrowseProduct/modBrowseProductindex.php',
-								'langs'=>'modBrowseProduct@modBrowseProduct',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+								'url'=>'/bimpproductbrowser/modProductBrowser.php',
+								'langs'=>'mymodule@mymodule',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>1000+$r,
-								'enabled'=>'$conf->modBrowseProduct->enabled',	// Define condition to show or hide menu entry. Use '$conf->modBrowseProduct->enabled' if entry must be visible if module is enabled.
-								'perms'=>'1',			                // Use 'perms'=>'$user->rights->modBrowseProduct->level1->level2' if you want your menu with a permission rules
+								'enabled'=>'$conf->bimpproductbrowser->enabled',	// TODO changer path peut-être	 Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+								'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 								'target'=>'',
 								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
 
@@ -247,28 +245,28 @@ class modBrowseProduct extends DolibarrModules
 
 		// Example to declare a Left Menu entry into an existing Top menu entry:
 		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT
-		$this->menu[$r++]=array(	'fk_menu'=>'fk_mainmenu=modBrowseProduct',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+		$this->menu[$r++]=array(	'fk_menu'=>'fk_mainmenu=mymodule',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 								'type'=>'left',			                // This is a Left menu entry
 								'titre'=>'List MyObject',
-								'mainmenu'=>'modBrowseProduct',
-								'leftmenu'=>'modBrowseProduct',
-								'url'=>'/modBrowseProduct/myobject_list.php',
-								'langs'=>'modBrowseProduct@modBrowseProduct',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+								'mainmenu'=>'mymodule',
+								'leftmenu'=>'mymodule',
+								'url'=>'/mymodule/myobject_list.php',
+								'langs'=>'mymodule@mymodule',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>1000+$r,
-								'enabled'=>'$conf->modBrowseProduct->enabled',  // Define condition to show or hide menu entry. Use '$conf->modBrowseProduct->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-								'perms'=>'1',			                // Use 'perms'=>'$user->rights->modBrowseProduct->level1->level2' if you want your menu with a permission rules
+								'enabled'=>'$conf->mymodule->enabled',  // Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+								'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 								'target'=>'',
 								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
-		$this->menu[$r++]=array(	'fk_menu'=>'fk_mainmenu=modBrowseProduct,fk_leftmenu=modBrowseProduct',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+		$this->menu[$r++]=array(	'fk_menu'=>'fk_mainmenu=mymodule,fk_leftmenu=mymodule',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 								'type'=>'left',			                // This is a Left menu entry
 								'titre'=>'New MyObject',
-								'mainmenu'=>'modBrowseProduct',
-								'leftmenu'=>'modBrowseProduct',
-								'url'=>'/modBrowseProduct/myobject_page.php?action=create',
-								'langs'=>'modBrowseProduct@modBrowseProduct',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+								'mainmenu'=>'mymodule',
+								'leftmenu'=>'mymodule',
+								'url'=>'/mymodule/myobject_page.php?action=create',
+								'langs'=>'mymodule@mymodule',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>1000+$r,
-								'enabled'=>'$conf->modBrowseProduct->enabled',  // Define condition to show or hide menu entry. Use '$conf->modBrowseProduct->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-								'perms'=>'1',			                // Use 'perms'=>'$user->rights->modBrowseProduct->level1->level2' if you want your menu with a permission rules
+								'enabled'=>'$conf->mymodule->enabled',  // Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+								'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
 								'target'=>'',
 								'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
 		END MODULEBUILDER LEFTMENU MYOBJECT */
@@ -283,7 +281,7 @@ class modBrowseProduct extends DolibarrModules
 		$this->export_label[$r]='MyModule';	                         // Translation key (used only if key ExportDataset_xxx_z not found)
         $this->export_enabled[$r]='1';                               // Condition to show export in list (ie: '$user->id==3'). Set to 1 to always show when module is enabled.
         $this->export_icon[$r]='generic:MyModule';					 // Put here code of icon then string for translation key of module name
-		//$this->export_permission[$r]=array(array("modBrowseProduct","level1","level2"));
+		//$this->export_permission[$r]=array(array("mymodule","level1","level2"));
         $this->export_fields_array[$r]=array('t.rowid'=>"Id",'t.ref'=>'Ref','t.label'=>'Label','t.datec'=>"DateCreation",'t.tms'=>"DateUpdate");
 		$this->export_TypeFields_array[$r]=array('t.rowid'=>'Numeric', 't.ref'=>'Text', 't.label'=>'Label', 't.datec'=>"Date", 't.tms'=>"Date");
 		// $this->export_entities_array[$r]=array('t.rowid'=>"company",'s.nom'=>'company','s.address'=>'company','s.zip'=>'company','s.town'=>'company','s.fk_pays'=>'company','s.phone'=>'company','s.siren'=>'company','s.siret'=>'company','s.ape'=>'company','s.idprof4'=>'company','s.code_compta'=>'company','s.code_compta_fournisseur'=>'company','f.rowid'=>"invoice",'f.facnumber'=>"invoice",'f.datec'=>"invoice",'f.datef'=>"invoice",'f.total'=>"invoice",'f.total_ttc'=>"invoice",'f.tva'=>"invoice",'f.paye'=>"invoice",'f.fk_statut'=>'invoice','f.note'=>"invoice",'fd.rowid'=>'invoice_line','fd.description'=>"invoice_line",'fd.price'=>"invoice_line",'fd.total_ht'=>"invoice_line",'fd.total_tva'=>"invoice_line",'fd.total_ttc'=>"invoice_line",'fd.tva_tx'=>"invoice_line",'fd.qty'=>"invoice_line",'fd.date_start'=>"invoice_line",'fd.date_end'=>"invoice_line",'fd.fk_product'=>'product','p.ref'=>'product');
@@ -308,7 +306,7 @@ class modBrowseProduct extends DolibarrModules
 	{
 		$sql = array();
 
-		$this->_load_tables('/modBrowseProduct/sql/');
+		$this->_load_tables('/bimpproductbrowser/sql/');
 
 		// Create extrafields
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';

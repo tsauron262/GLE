@@ -451,6 +451,11 @@ global $conf;
                //iciattendee 
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
         }
+        
+        
+        if ($action->array_options['options_confidentiel'] == true) {
+            $calendarData2[] = 'CLASS:CONFIDENTIAL';
+        }
 
         if($row['organisateur'] != "")
         $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
@@ -637,6 +642,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             //$ligne = str_replace("\r", "", $ligne);
             if (stripos($nom, "SEQUENCE") !== false) {
                 $sequence = $ligne;
+            }
+            if (stripos($ligne, "CONFIDENTIAL") !== false) {
+                $action->array_options['options_confidentiel'] = true;
             }
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:","",$ligne);

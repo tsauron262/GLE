@@ -16,11 +16,10 @@
 /teclib*
 /test.php
 /ultimatepdf*
-/lead
-/dolimed*
-/allscreens*
 /ecommerce/
 /cabinetmed*
 /webmail*
 /conf/conf.php
 /subtotal/
+/TODO_romain.txt
+/.gitignore

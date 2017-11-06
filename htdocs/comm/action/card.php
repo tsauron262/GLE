@@ -1124,12 +1124,14 @@ if ($id > 0)
 			print '</td></tr>';
 
 			// related contact
+                        if($object->socid > 0){
 			print '<tr><td>'.$langs->trans("ActionOnContact").'</td><td>';
 			print '<div class="maxwidth200onsmartphone">';
-			$form->select_contacts($object->socid, $object->contactid, 'contactid', 1, '', '', 0, 'minwidth200');
+			$form->select_contacts($object->socid, $object->contactid, 'contactid', 1, '', 15, 0, 'minwidth200');
 			print '</div>';
 			print '</td>';
 			print '</tr>';
+                        }
 		}
 
 		// Project

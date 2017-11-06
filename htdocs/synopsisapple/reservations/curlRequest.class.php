@@ -65,7 +65,7 @@ class curlRequest
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($this->ch, CURLOPT_SSLCERT, $this->QRSCertfileDir . $this->QRSCertfileName);
-        curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->pword);
+        //curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->pword);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT ,10); 
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
@@ -93,7 +93,7 @@ class curlRequest
         if (!$this->ch) {
             return 'Echec de la connexion au service';
         }
-        return curl_error($this->ch);
+        return "Erreur Curl : ".curl_error($this->ch);
     }
 }
 

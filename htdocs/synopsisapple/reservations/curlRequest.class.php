@@ -77,6 +77,8 @@ class curlRequest
         if (!$this->ch)
             return false;
 
+        echo json_encode($params);
+        
         if (count($params))
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, json_encode($params));
 
@@ -93,7 +95,7 @@ class curlRequest
         if (!$this->ch) {
             return 'Echec de la connexion au service';
         }
-        return "Erreur Curl : ".curl_error($this->ch);
+        return "Erreur Curl : '".curl_error($this->ch)."' Ch : ".$this->ch;
     }
 }
 

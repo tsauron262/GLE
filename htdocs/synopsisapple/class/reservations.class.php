@@ -630,6 +630,8 @@ L’équipe BIMP";
                                 }
                                 $this->logError($txt);
                             }
+                            else
+                                $this->logError("Erreur inconnue");
                         }
                     }
                 }

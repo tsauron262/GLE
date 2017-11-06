@@ -1039,7 +1039,7 @@ class Chrono extends CommonObject {
             if ($keyId != "id") {
                 if ($value . "x" == "x")
                     $value = 'NULL';
-                elseif ($value != "now()" && !is_numeric($value))
+                elseif ($value != "now()" /*&& !is_numeric($value)*/)
                     $value = "'" . addslashes($value) . "'";
 
 

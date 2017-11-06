@@ -22,7 +22,7 @@
  *
  *  \file       htdocs/mymodule/core/modules/modProductBrowser.class.php
  *  \ingroup    mymodule
- *  \brief      Description and activation file for module MyModule
+ *  \brief      Descriptor for the module product browser
  */
 include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
@@ -86,15 +86,15 @@ class modProductBrowser extends DolibarrModules
 		// for specific path of parts (eg: /mymodule/core/modules/barcode)
 		// for specific css file (eg: /mymodule/css/mymodule.css.php)
 		$this->module_parts = array(
-		                        	'triggers' => 1,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
+		                        	'triggers' => 0,                                 	// Set this to 1 if module has its own trigger directory (core/triggers)
 									'login' => 0,                                    	// Set this to 1 if module has its own login method directory (core/login)
-									'substitutions' => 1,                            	// Set this to 1 if module has its own substitution function file (core/substitutions)
+									'substitutions' => 0,                            	// Set this to 1 if module has its own substitution function file (core/substitutions)
 									'menus' => 0,                                    	// Set this to 1 if module has its own menus handler directory (core/menus)
 									'theme' => 0,                                    	// Set this to 1 if module has its own theme directory (theme)
 		                        	'tpl' => 0,                                      	// Set this to 1 if module overwrite template dir (core/tpl)
 									'barcode' => 0,                                  	// Set this to 1 if module has its own barcode directory (core/modules/barcode)
 									'models' => 0,                                   	// Set this to 1 if module has its own models directory (core/modules/xxx)
-									'css' => array('/bimpproductbrowser/css/modProductBrowser.css.php'),	// Set this to relative path of css file if module has its own css file
+								//	'css' => array('/bimpproductbrowser/css/modProductBrowser.css.php'),	// Set this to relative path of css file if module has its own css file
 	 								'js' => array('/bimpproductbrowser/js/modProductBrowser.js.php'),          // Set this to relative path of js file if module must load a js on all pages
 									'hooks' => array('hookcontext1','hookcontext2') 	// Set here all hooks context managed by module. You can also set hook context 'all'
 		                        );

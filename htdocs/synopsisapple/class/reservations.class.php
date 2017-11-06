@@ -562,6 +562,9 @@ L’équipe BIMP";
                 $this->logError('Echec de la récupération des réservations pour le code produit "' . $productCode . '" - ' . $RS->getLastError());
                 return 0;
             } else {
+            if ($this->display_debug) {
+                echo 'Data ' . print_r($data,1) . ': <br/>';
+            }
                 if (isset($data->faults) && count($data->faults)) {
                     $continue = false;
                     $break = false;

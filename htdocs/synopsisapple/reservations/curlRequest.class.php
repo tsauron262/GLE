@@ -111,11 +111,7 @@ class CurlReservationSummary extends curlRequest
     public function fetch($from, $to, $productCode)
     {
         $params = array(
-            "shipToCode" => $this->shipTo,
-            "fromDate" => $from,
-            "toDate" => $to,
-            "productCode" => $productCode,
-            "currentStatus" => "RESERVED"
+            "shipToCode" => $this->shipTo
         );
 
         return parent::exec($params);

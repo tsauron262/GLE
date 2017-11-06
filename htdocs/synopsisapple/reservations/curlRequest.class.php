@@ -65,7 +65,7 @@ class curlRequest
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($this->ch, CURLOPT_SSLCERT, $this->QRSCertfileDir . $this->QRSCertfileName);
-        //curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->pword);
+        curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->pword);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT ,10); 
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
@@ -77,8 +77,6 @@ class curlRequest
         if (!$this->ch)
             return false;
 
-        echo json_encode($params);
-        
         if (count($params))
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, json_encode($params));
 
@@ -95,7 +93,7 @@ class curlRequest
         if (!$this->ch) {
             return 'Echec de la connexion au service';
         }
-        return "Erreur Curl : '".curl_error($this->ch)."' Ch : ".$this->ch;
+        return curl_error($this->ch);
     }
 }
 
@@ -111,7 +109,11 @@ class CurlReservationSummary extends curlRequest
     public function fetch($from, $to, $productCode)
     {
         $params = array(
-            "shipToCode" => $this->shipTo
+            "shipToCode" => $this->shipTo,
+            "fromDate" => $from,
+            "toDate" => $to,
+            "productCode" => $productCode,
+            "currentStatus" => "RESERVED"
         );
 
         return parent::exec($params);

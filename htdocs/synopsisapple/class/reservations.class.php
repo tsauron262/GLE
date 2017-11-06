@@ -558,13 +558,10 @@ L’équipe BIMP";
                 echo 'Code ' . $productCode . ': <br/>';
             }
             $data = $RS->fetch($dateBegin, $dateEnd, $productCode);
-            if ($data === false || $data == "v") {
+            if ($data === false) {
                 $this->logError('Echec de la récupération des réservations pour le code produit "' . $productCode . '" - ' . $RS->getLastError());
                 return 0;
             } else {
-            if ($this->display_debug) {
-                echo $RS->getLastError().print_r($RS)." ".$dateBegin." ".$dateEnd.$productCode." ".$soldTo." ".$shipTo." ".$pass." ".$certif.'Data ' . print_r($data,1) . ': <br/>';
-            }
                 if (isset($data->faults) && count($data->faults)) {
                     $continue = false;
                     $break = false;
@@ -633,8 +630,6 @@ L’équipe BIMP";
                                 }
                                 $this->logError($txt);
                             }
-                            else
-                                $this->logError("Erreur inconnue");
                         }
                     }
                 }

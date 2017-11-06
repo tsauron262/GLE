@@ -406,6 +406,9 @@ class Reservations
         foreach ($users as $u)
             $usersAssigned[] = array('id' => $u['id'], 'transparency' => 1);
         $ac->userassigned = $usersAssigned;
+        if(!isset($userAssigned[0]))
+            return false;
+        $ac->userownerid = $userAssigned[0]['id'];
 
         $note_text = '';
         if (count($resa->notes)) {

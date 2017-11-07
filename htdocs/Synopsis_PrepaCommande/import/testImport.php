@@ -2512,10 +2512,17 @@ function get_resource_id($resource) {
 }
 
 function updateType($ref, $prodId) {
+    global $db;
     if ($ref . 'x' != "x" && $prodId > 0) {
         $type = getProdType($ref);
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET type2 = '" . $type . "' WHERE fk_object = " . $prodId;
-        echo $requete;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "product_extrafields WHERE fk_object = " . $prodId;
+        $sql = $db->query($requete);
+        if($db->num_rows($sql) == 0){
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "product_extrafields (fk_object, type2) VALUES ('".$prodId."','".$type."')";
+        }
+        else{
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET type2 = '" . $type . "' WHERE fk_object = " . $prodId;
+        }
         requeteWithCache($requete);
     }
 }

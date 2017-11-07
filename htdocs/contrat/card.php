@@ -2268,6 +2268,40 @@ else
 }
 
 
+/*moddrsi*/
+        $header .= '<script>
+                    userId = "' . $user->id . '";
+                        idContratCurrent = "' . $id . '";
+                    $(document).ready(function(){ 
+                    var z = 0;
+                        $(\'img[title="Supprimer"]\').each(function(){
+                            z++;
+                            var j = z;
+                            var id = $(this).parent().attr("href");
+                            var nId = id;
+                            id = id.split("&");
+                            id2 = id[0].split("?id=");
+                            idCt = id2[1];
+                            for ( var i=0;i<id.length;i++) 
+                                if(id[i].indexOf("ligne") > -1 || id[i].indexOf("rowid") > -1)
+                                    nId = id[i].split("=")[1];
+                            elem = $(this).parent().parent().parent().parent().children("tr.liste_titre").children("td").first();
+                            elem.html("<p class=\'fl\'>"+elem.html()+"</p>"+"<p class=\'fl\'>&nbsp;</p>");
+                            /*elem.html(elem.html()+"<p class=\'mod fl cp\'>Modifier</p>");*/
+                            elem.html(elem.html()+"<p class=\'detail fl cp\'>Detail</p>");
+//                            elem.click(function(){
+//                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
+//                            });
+                            elem.find(".mod").click(function(){
+                                editLine(this, ' . $id . ', nId);
+                            });
+                            elem.find(".detail").click(function(){
+                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
+                            });
+                        });
+            });</script>'; echo $header;
+/*fmoddrsi*/
+
 llxFooter();
 
 $db->close();

@@ -57,7 +57,8 @@ class modSynopsisContrat extends DolibarrModules {
         
         
         $this->module_parts = array(
-            'models' => 1
+            'models' => 1,
+            'triggers' => 1
         );
         
         $r = 0;
@@ -106,7 +107,7 @@ class modSynopsisContrat extends DolibarrModules {
 
         $r = 0;
         $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:$user->rights->synopsiscontrat->annexe:/Synopsis_Contrat/annexes.php?id=__ID__',
-            'contract:+interv:Interventions:@monmodule:$user->rights->synopsiscontrat->read:/Synopsis_Contrat/intervByContrat.php?id=__ID__',
+            'contract:+interv:Interventions:@monmodule:$user->rights->synopsiscontrat->generate:/Synopsis_Contrat/intervByContrat.php?id=__ID__',
                 /* 'contract:+tickets:Tickets:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
                   'contract:+sav:SAV:@monmodule:/Babel_GMAO/savByContrat.php?id=__ID__' */                );
     }

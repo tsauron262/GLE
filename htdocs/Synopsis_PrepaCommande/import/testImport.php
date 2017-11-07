@@ -2514,6 +2514,7 @@ function get_resource_id($resource) {
 function updateType($ref, $prodId) {
     if ($ref . 'x' != "x" && $prodId > 0) {
         $type = getProdType($ref);
+        echo $requete;
         $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET type2 = '" . $type . "' WHERE fk_object = " . $prodId;
         requeteWithCache($requete);
     }

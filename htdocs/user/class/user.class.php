@@ -2235,6 +2235,22 @@ class User extends CommonObject
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS].",".$conf->global->LDAP_USER_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_USER_DN;
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS];
+                
+                /*mod drsi*/
+                if(!defined("LIST_DOMAINE_VALID"))
+                    dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
+                else{
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    $domain = false;
+                    foreach($LIST_DOMAINE_VALID as $domaine)
+                        if(stripos($info['mail'], "@".$domaine) > 0)
+                                $domain = $domaine;
+                    if($domain)
+                        $dn = str_replace($LIST_DOMAINE_VALID[0], $domain, $dn);
+                }
+                /*f mod drsi*/
+                
+                
 		return $dn;
 	}
 
@@ -2307,6 +2323,94 @@ class User extends CommonObject
 			if ($this->email) $info["rfc822Mailbox"] = $this->email;
 			if ($this->phone_mobile) $info["phpgwCellTelephoneNumber"] = $this->phone_mobile;
 		}
+                
+                /*mod drsi*/
+//                if(!empty($conf->global->LDAP_FIELD_PASSWORD_CRYPTED))
+//                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{MD5}".base64_encode( pack( 'H*' , $this->pass_indatabase_crypted));
+//                $info["mail"] = str_replace("bimp.fr", "synopsis-erp.com", $info["mail"]);
+                
+                if( function_exists( 'mhash' ) && function_exists( 'mhash_keygen_s2k' ) ) {
+                    $password_clear = $this->pass_indatabase;
+                    mt_srand( (double) microtime() * 1000000 );
+                    $salt = mhash_keygen_s2k( MHASH_SHA1, $password_clear, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
+                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
+                }
+                
+                
+                $info['postalAddress'] = $this->address;
+                $info['postalCode'] = ($this->zip != "")? $this->zip : "00000";
+                $info['street'] = ($this->town != "")? $this->town : "nc";
+                
+                
+                $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser"));
+                $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";
+                $info ['enabledservice'] = array();
+                
+                
+                $domain = false;
+                if(!defined("LIST_DOMAINE_VALID"))
+                    dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
+                else{
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    foreach($LIST_DOMAINE_VALID as $domaine)
+                        if(stripos($info['mail'], "@".$domaine) > 0)
+                                $domain = $domaine;
+                }
+                
+                $info['enabledservice'] = array("internal");
+                if(isset($this->array_options['options_mtatransport']))
+                    $info['mtaTransport'] = $this->array_options['options_mtatransport'];
+                else
+                    $info['mtaTransport'] = "";
+                if(isset($this->array_options['options_mailforwardingaddress']))
+                    $info['mailForwardingAddress'] = $this->array_options['options_mailforwardingaddress'];
+                else
+                    $info['mailForwardingAddress'] = "";
+                
+                //$info['pager'] = array();
+                if($domain && $this->statut == 1){
+                    $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
+                    
+                    if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook']){
+                        $info['enabledservice'][] = "displayedInGlobalAddressBook";
+//                        $info['carLicense'] = "mail=BIMP"."@".$domain.",ou=Groups,domainName=".$domain.",o=domains,dc=bimp,dc=fr";
+                        $info['pager'] = "BIMP";
+                    }
+                
+                    if(isset($info['uid']) && isset($info["mail"])){
+//                        $info['uid'] = $info['uid']."_".$domain;
+                        $temp = explode("@", $info["mail"]);
+                        $date = '2016.01.01.01.01.01';
+                        $ident = $this->id.$info['mail'];
+                        $info ['homedirectory'] = '/var/vmail/vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
+                        $info ['mailmessagestore'] = 'vmail1/'.$domain.'/p/o/s/'.$ident.'-'.$date.'/';
+                        if(isset($this->array_options['options_mailquota']) && $this->array_options['options_mailquota'] > 0)
+                            $info ['mailQuota'] = $this->array_options['options_mailquota'];
+                        else
+                            $info ['mailQuota'] = "2147483648";
+                        if($info ['mailQuota'] < 100)
+                            $info ['mailQuota'] = round($info ['mailQuota'] * 1073741824);
+                    }
+                }
+                if($this->admin){
+                    $info['enabledservice'][] = "domainadmin";
+                    $info["domainGlobalAdmin"] = "yes";
+                }
+                
+
+                if(isset($this->array_options['options_alias'])){
+//                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+                    $this->array_options['options_alias'] = str_replace(array("\r\n","\r","\n","\\r","\\n","\\r\\n"), ",", $this->array_options['options_alias']);
+                     $this->array_options['options_alias']= nl2br($this->array_options['options_alias']);
+                    $arrAlias = explode(",", $this->array_options['options_alias']);
+                    $info['shadowAddress'] = $arrAlias;
+                }
+                
+                global $creationUser;
+                if($this->statut == 0 && !$creationUser)
+                    $info['mail'] = str_replace("@", "FERME@", $info['mail']);
+                
+                /*fmoddrsi*/
 
 		return $info;
 	}

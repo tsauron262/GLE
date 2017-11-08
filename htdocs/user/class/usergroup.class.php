@@ -792,9 +792,30 @@ class UserGroup extends CommonObject
 	{
 		global $conf;
 		$dn='';
+                /*mod drsi*/
+                $conf->global->LDAP_KEY_GROUPS = "mail";
+                /*fmoddrsi*/
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS].",".$conf->global->LDAP_GROUP_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_GROUP_DN;
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS];
+                
+                
+                
+                /*mod drsi*/
+                if(!defined("LIST_DOMAINE_VALID"))
+                    dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
+                else{
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    $domain = false;
+                    foreach($LIST_DOMAINE_VALID as $domaine)
+                        if(stripos($info['mail'], "@".$domaine) > 0)
+                                $domain = $domaine;
+                    if($domain)
+                        $dn = str_replace($LIST_DOMAINE_VALID[0], $domain, $dn);
+                }
+                /*f mod drsi*/
+                
+                
 		return $dn;
 	}
 
@@ -824,11 +845,49 @@ class UserGroup extends CommonObject
 			{
 				$muser=new User($this->db);
 				$muser->fetch($val->id);
-				$info2 = $muser->_load_ldap_info();
-				$valueofldapfield[] = $muser->_load_ldap_dn($info2);
+                                /*mod drsi*/
+                                $info2 = $muser->_load_ldap_info();
+                                if(stripos($info2["mail"], "FERME@") === false){
+                                    $info2["mail"] = str_replace("FERME@", "", $info2["mail"]);
+                                    if (!$conf->global->LDAP_KEY_USERS == 'mail' || !empty($info2["mail"]))
+                                    $valueofldapfield[] = $muser->_load_ldap_dn($info2);
+                                }
+                                /*fmod drsi*/
 			}
 			$info[$conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS] = (!empty($valueofldapfield)?$valueofldapfield:'');
 		}
+                
+                /*mod drsi*/
+        $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$info[$conf->global->LDAP_GROUP_FIELD_FULLNAME]);
+                $info ['accountstatus'] = "active";
+                $info ['enabledservice'] = array("mail","deliver");
+                
+                if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
+                    $info['enabledservice'][] = "displayedInGlobalAddressBook";
+                
+                if(!defined("LIST_DOMAINE_VALID"))
+                    die("Constante LIST_DOMAINE_VALID non definie");
+                if(!defined("DOMAINE_GROUP_ID"))
+                    die("Constante DOMAINE_GROUP_ID non definie");
+                
+                
+                if(isset($this->array_options['options_mail'])){
+                    $info ['mail'] = $this->array_options['options_mail'];
+                }
+                
+                $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
+                    require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
+                    $info ['mail'] = str_replace(",", "", traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
+                }
+				//$info['uid'] = $info['mail'];
+                
+                if(isset($this->array_options['options_alias'])){
+//                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+                    $arrAlias = explode(",", $this->array_options['options_alias']);
+                    $info['shadowAddress'] = $arrAlias;
+                }
+                /*fmod drsi*/
 		return $info;
 	}
 

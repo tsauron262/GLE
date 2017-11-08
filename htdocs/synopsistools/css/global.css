@@ -453,75 +453,14 @@ table.tabBorder100 td{
 }
 
 
-
-
-
-/*style bimp*/
-div#id-top,
-div.side-nav, .vmenu, div.blockvmenuend, div.blockvmenubookmarks, div.blockvmenusearch, .vmenu a,
-div.blockvmenuimpair, div.blockvmenufirst, div.blockvmenupair{
-    background: rgb(239,125,0)!important;
-    color: white!important;
-}
-
-
-.mainmenuaspan{
-    color: white;
-    text-transform: uppercase; 
-    font-family: "Fira sans","Helvetica Neue",sans-serif;
+.loginphoto{
+    width: 16px;
 }
 
 
 
-a.tabTitle,
-div.liste_titre_bydiv, .liste_titre div.tagtr, tr.liste_titre, tr.liste_titre_sel, form.liste_titre, form.liste_titre_sel, table.dataTable thead tr{
-    background: rgb(99,99,99)!important;
-}
-
-.liste_titre a:not(.select2-choice),
-tr.liste_titre, #id-left span.help, #id-left span.select2-chosen{
-    color: white!important;
-    opacity: 1!important;
-}
-div.titre, a.tabunactive, a.tabactive.tab {
-    color: black!important;
-    font-weight: bold;
+#calendar .ui-checkboxradio-icon, #calendar .ui-button-icon{
+        float: left;
 }
 
 
-
-.butAction, .butAction:link, .butAction:visited, .butAction:hover, .butAction:active, .butActionDelete, .butActionDelete:link, .butActionDelete:visited, .butActionDelete:hover, .butActionDelete:active{
-    color: white;
-    background: rgb(239,125,0);
-    border-radius: 10px;
-    border-color: rgb(239,125,0);
-}
-
-
-a.tabTitle{
-    background: none!important;
-}
-a.tabTitle span.tabTitleText{
-    color: black!important;
-    text-transform: uppercase; 
-}
-
-
-
-div.menu_titre a.vmenu{
-    text-transform: uppercase; 
-    font-weight: normal;
-}
-
-
-
-img.mycompany{
-    background: rgba(255,255,255,0.8);
-    border-radius: 20px;
-    padding: 6px;
-}
-
-#id-left .select2-choice{
-    border-bottom: solid 1px white !important;
-}
-/*fstyle bimp*/

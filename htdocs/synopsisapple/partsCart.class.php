@@ -71,13 +71,13 @@ class partsCart {
     private function convertPrix($prix, $ref, $desc) {
         $coefPrix = 1;
         $constPrix = 0;
-        $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "ZD661", "ZK661");
+        $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
         
         $tabCas2 = array("SVC,IPOD", "Ipod nano");
         
         $tabCas3 = array("661", "Z661");
         $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");//design commence par
-        $tabCas36 = array("Ipad Pro", "Ipad mini");//design contient
+        $tabCas36 = array("Ipad Pro", "Ipad mini", "Apple Watc");//design contient
 
         $cas = 0;
         foreach ($tabCas1 as $val)
@@ -92,7 +92,7 @@ class partsCart {
             
             
         //Application double contraite    
-        if ($cas == 3){
+        if ($cas == 3){ 
             foreach ($tabCas35 as $val)
                 if (stripos($desc, $val) === 0)
                     $cas = 1;

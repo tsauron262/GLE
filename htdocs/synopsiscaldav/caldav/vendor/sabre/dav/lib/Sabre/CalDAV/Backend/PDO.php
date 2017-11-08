@@ -65,7 +65,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
     
-    public $uriTest = "5aef3ab-dd26-41b8-b361-f30dd6ff1bc4";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "m9ghvds3gb6ioell2d8723ido";//35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -81,6 +81,11 @@ global $conf;
         $this->pdo = $pdo;
         $this->calendarTableName = $calendarTableName;
         $this->calendarObjectTableName = $calendarObjectTableName;
+        
+        global $infoEvent;
+        $infoEvent = array();
+        
+        define("USER_EXTERNE_ID", 326);
     }
 
     /**
@@ -375,13 +380,19 @@ global $conf;
      * @return array|null
      */
     public function getCalendarObject($calendarId, $objectUri) {
-        $stmt = $this->pdo->prepare('SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
-       // dol_syslog("SELECT id, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM " . $this->calendarObjectTableName . " WHERE calendarid = '".$calendarId."' AND uri = '".$objectUri."'", 3);
+        global $db;
+        $stmt = $this->pdo->prepare('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
+        
         if (!$row)
             return null;
+        
+//        $sql = $db->query('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = "'.$calendarId.'" AND uri = "'.$objectUri.'"');
+//        if($db->num_rows($sql) < 1)
+//            return null;
+//        $row = $db->fetch_array($sql);
+
 
         global $db, $conf;
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
@@ -402,14 +413,17 @@ global $conf;
         /* Participant */
         $action->id = $row['id'];
         $action->fetch_userassigned();
-        $tabPartExtInt = explode(",", $row['participentExt']);
+        if($row['participentExt'] != "")
+            $tabPartExtInt = explode(",", $row['participentExt']);
+        else
+            $tabPartExtInt = array();
             //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
-            if (1 || $val['id'] != $calendarId) {
+            if ($val['id'] > 0 && $val["id"] != USER_EXTERNE_ID) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
-                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status']? 'ACCEPTED' : 'NEEDS-ACTION');
+                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1? 'ACCEPTED' : ($val['answer_status'] == -1? 'DECLINED' : 'NEEDS-ACTION'));
             }
         }
         if(count($tabPartExtInt) > 1){
@@ -423,12 +437,28 @@ global $conf;
                     if($row['organisateur'] == "")
                         $row['organisateur'] = $tmpMail;
                     
-                    $calendarData2[] = "ATTENDEE;".($tmpEtat == "ACCEPTED" ? "" : "RSVP=TRUE;")."PARTSTAT=".$tmpEtat.";ROLE=REQ-PARTICIPANT:mailto:" . $tmpMail;
+                    if($tmpMail == $row['organisateur']){
+                        $extra = ";ROLE=CHAIR";
+                        $tmpEtat = "ACCEPTED";
+                    }
+                    else
+                        $extra = ";ROLE=REQ-PARTICIPANT";
+                    $extra .= ($tmpEtat == "ACCEPTED" ? "" : ";RSVP=TRUE");
+                    
+                    $calendarData2[] = "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=".$tmpEtat.$extra.":mailto:" . $tmpMail;
+
                 }
                //iciattendee 
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
         }
+        
+	$action->fetch_optionals();
+        if (isset($action->array_options['options_conf']) && $action->array_options['options_conf'] == true) {
+            $calendarData2[] = 'CLASS:CONFIDENTIAL';
+        }
 
+        if($row['organisateur'] != "")
+        $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
 
         $calendarData2[] = 'SEQUENCE:'.$row['sequence'];
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
@@ -441,13 +471,17 @@ global $conf;
 
         $calData = $this->traiteIcsTab($calendarData2);
         
+        
+        
         $calendarData2['LAST-MODIFIED'] = $row['lastmodified'];
         $calendarData2['CREATED'] = $row['CREATED'];
         if($calendarData2['CREATED'] > $calendarData2['LAST-MODIFIED'])
             $calendarData2['LAST-MODIFIED'] = $calendarData2['CREATED'];
-        
+                
         date_default_timezone_set('UTC');
-        $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
+        //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
+        if($row['dtstamp'] != "" && $row['dtstamp'] != "0")
+        $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$row['dtstamp'], $calData);
         date_default_timezone_set("Europe/Paris");
         
 
@@ -461,7 +495,7 @@ global $conf;
             'calendardata' => $calData,
         );
         if(stripos($objectUri, $this->uriTest) > 0)
-dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
+dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
     }
@@ -484,7 +518,7 @@ dol_syslog("GET OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($ret
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
         if(stripos($objectUri, $this->uriTest) > 0)
-dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
+dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //
@@ -504,6 +538,9 @@ dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($cale
 //        $stmt->execute(array($calendarId));
 //
 //        return '"' . $extraData['etag'] . '"';
+//        
+//        
+//        
         //Verif quil existe pas
         $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, participentExt, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE uri = ?');
         $stmt->execute(array($objectUri));
@@ -528,19 +565,28 @@ dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($cale
             require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
             $action = new \ActionComm($db);
 
-            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
-                date_default_timezone_set("GMT");
-                $action->fulldayevent = true;
-                $extraData['lastOccurence'] -= 60;
-            } else
+            
                 date_default_timezone_set("Europe/Paris");
+            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
+                //date_default_timezone_set("GMT");
+                $action->fulldayevent = true;
+                $extraData['firstOccurence'] -= 0;
+                $extraData['lastOccurence'] -= 7260;
+            } //else
+                //date_default_timezone_set("Europe/Paris");
+            
+            
+            
+            $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            foreach($extraData as $clef => $val)
+                $extraData[$clef] = str_replace($tabR, "", $val);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = $calendarData2['SUMMARY'];
+                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = $calendarData2['DESCRIPTION'];
+                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))
                 $action->location = $calendarData2['LOCATION'];
 
@@ -548,14 +594,17 @@ dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($cale
             $user = $this->getUser($calendarId);
 
             $action->type_id = 5;
-            global $objectUriTemp, $objectEtagTemp, $objectDataTemp;
-            $objectDataTemp = $calendarData;
-            $objectEtagTemp = $extraData['etag'];
-            $objectUriTemp = $objectUri;
+            
+            
+            
+        global $infoEvent;
+        $infoEvent["data"] = $calendarData;
+        $infoEvent["etag"] = $extraData['etag'];
+        $infoEvent["uri"] = $objectUri;
 
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
-            $action->userownerid = $calendarId;
+            //$action->userownerid = $calendarId;
             $action->percentage = -1;
             if ($action->add($user) < 1)
                 $this->forbiden();
@@ -586,6 +635,8 @@ dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($cale
         if (is_object($user))
             $user = $user->id;
         $sequence = 0;
+        
+        $action->array_options['options_conf'] = false;
         foreach ($calendarData2 as $nom => $ligne) {
             
             $tab = array( CHR(13) => "", CHR(10) => "", " " => "" ); 
@@ -593,6 +644,9 @@ dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($cale
             //$ligne = str_replace("\r", "", $ligne);
             if (stripos($nom, "SEQUENCE") !== false) {
                 $sequence = $ligne;
+            }
+            if (stripos($ligne, "CONFIDENTIAL") !== false) {
+                $action->array_options['options_conf'] = true;
             }
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:","",$ligne);
@@ -602,14 +656,17 @@ dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($cale
                 if(preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                         $stat = $retour[1];
                 $tabT = explode("mailto:", $ligne);
-                if (isset($tabT[1]))
-                    $tabMail[] = array(str_replace(" ", "", $tabT[1]), $stat);
+                if (isset($tabT[1])){
+                    $mailT = str_replace(" ", "", $tabT[1]);
+                    $tabMail[$mailT] = array($mailT, $stat);
+                }
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
                 if (isset($tabT[1])){
-                    $organisateur = $tabT[1];
-                    //$tabMail[] = array(str_replace(" ", "", $tabT[1]), "ACCEPTED");//Pour forcer l'organiser a etre invité
+                    $mailT = str_replace(" ", "", $tabT[1]);
+                    $organisateur = $mailT;
+                    $tabMail[$mailT] = array($mailT, "ACCEPTED");//Pour forcer l'organiser a etre invité
                 } 
             }
         }
@@ -622,8 +679,13 @@ dol_syslog("Create : ".$this->uriTest."    |   ".$objectUri."   |".print_r($cale
 
         $tabMailInc = array();
         $action->userassigned = array($user => array('id' => $user));
+        if(count($tabMail) > 1)
+            $action->userownerid = USER_EXTERNE_ID;
+        else
+            $action->userownerid = $user;
         foreach ($tabMail as $tmp) {
             $mail = $tmp[0];
+            $statut = (isset($tmp[1])? $tmp[1] : "NEEDS-ACTION");
             
             $sql = $db->query("SELECT rowid 
 FROM  `" . MAIN_DB_PREFIX . "user` 
@@ -634,32 +696,41 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 
                 if($organisateur == $mail){
                     $action->userdoneid = $ligne->rowid;
-                    $tmp[1] = "ACCEPTED";
+                    $action->userownerid = $ligne->rowid;
+                    $statut = "ACCEPTED";
                 }
                 
                 
+                $statutId = ($statut == "ACCEPTED" ? 1 : ($statut == "DECLINED" ? -1 : 0));
                 $action->userassigned[$ligne->rowid] = array('id' => $ligne->rowid,
-                    'answer_status' => ($tmp[1] == "ACCEPTED"));
+                    'answer_status' => $statutId);
                 
-                
-                
-                //dol_syslog("action ".$action->id." invit int : ".print_r($tmp,1),3);
             } else {
-                $tabMailInc[] = $tmp[0]."|".$tmp[1];
+                $tabMailInc[] = $mail."|".$statut;
             }
         }
+        
+        
+        global $infoEvent;
+        $infoEvent["dtstamp"] = $DTSTAMP;
+        $infoEvent["sequence"] = $sequence;
+        $infoEvent["organisateur"] = $organisateur;
+        $infoEvent["participentExt"] = implode(",", $tabMailInc);
+        
+        
         if ($action->id > 0) {
                 //dol_syslog("action ".$action->id." invit ext : ".print_r($tabMailInc,1),3);
-            $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
-            $sql = $db->query($req);
+            /*$req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
+            $sql = $db->query($req);*/
             
-            if(!isset($calendarData2['LAST-MODIFIED']) || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
+            if(!isset($calendarData2['LAST-MODIFIED']))// || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
                 $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
             
-            //date_default_timezone_set("Europe/Paris");
+            //date_default_timezone_set("GMT");
             $sql = "UPDATE `".MAIN_DB_PREFIX."actioncomm` SET ".(isset($calendarData2['CREATED'])? "`datec` = '".$db->idate(strtotime($calendarData2['CREATED']))."'," : "")." `tms` = '".$db->idate(strtotime($calendarData2['LAST-MODIFIED']))."' WHERE `id` = ".$action->id.";";
+
             $db->query($sql);
-            //date_default_timezone_set();
+            //date_default_timezone_set("Europe/Paris");
         }
     }
 
@@ -688,9 +759,9 @@ WHERE  `email` LIKE  '" . $mail . "'");
      * @return string|null
      */
     public function getRappel($data) {
-        global $objectRappel;
+        global $infoEvent;
         if (isset($data["TRIGGER"]) && stripos($data["TRIGGER"], "VALUE=DURATION"))
-            $objectRappel = 15;
+            $infoEvent["rappel"] = 15;
         return 0;
     }
 
@@ -698,7 +769,6 @@ WHERE  `email` LIKE  '" . $mail . "'");
         if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 
-//dol_syslog("Update : ".print_r($calendarData,1),3);
         $extraData = $this->getDenormalizedData($calendarData);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
@@ -707,9 +777,8 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
 //        $stmt->execute(array($calendarId));
 
 
-        global $objectEtagTemp;
-        $objectEtagTemp = $extraData['etag'];
-
+        global $infoEvent;
+        $infoEvent["etag"] = $extraData['etag'];
 //        $this->getRappel($extraData);
 //        $this->userIdCaldavPlus($calendarId);
 
@@ -729,23 +798,31 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             $action->fetch($ligne->fk_object);
 
 
-            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
-                date_default_timezone_set("GMT");
-                $action->fulldayevent = true;
-                $extraData['lastOccurence'] -= 60;
-            } else {
                 date_default_timezone_set("Europe/Paris");
+            if (isset($calendarData2) && isset($calendarData2['DTSTART']) && stripos($calendarData2['DTSTART'], "DATE:") !== false) {
+                //date_default_timezone_set("GMT");
+                $action->fulldayevent = true;
+                $extraData['firstOccurence'] -= 0;
+                $extraData['lastOccurence'] -= 7260;
+            } else {
+                //date_default_timezone_set("Europe/Paris");
                 $action->fulldayevent = false;
             }
 
+            $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
+            if(is_array($calendarData))
+                foreach($calendarData as $clef => $val)
+                    $calendarData[$clef] = str_replace($tabR, "", $val);
+            else
+                $calendarData = str_replace($tabR, "", $calendarData);
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
-                $action->label = $calendarData2['SUMMARY'];
+                $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = $calendarData2['DESCRIPTION'];
+                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
             if (isset($calendarData2['LOCATION']))
-                $action->location = $calendarData2['LOCATION'];
+                $action->location = str_replace($tabR, "", $calendarData2['LOCATION']);
 
             //$action->userownerid = $calendarId;
 
@@ -763,7 +840,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
         }
 
-        return '"' . $extraData['etag'] . '"';
+        return '' . $extraData['etag'] . '';
     }
 
     function traiteTabIcs($tab, $tabResult = array()) {
@@ -783,8 +860,13 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
         $tabCore = $tabHead = $tabHead2 = array();
         foreach ($tabResult as $clef => $val) {
             //Pour ce tour
-            if (stripos($val, "PARTICIPANT") > -1)
+            if (stripos($val, "CUTYPE=INDIVIDUAL") > -1)
                 $position = 'core';
+            if (stripos($val, "CONFIDENTIAL") > -1)
+                $position = 'core';
+            
+            if (stripos($val, "X-OWNER") > -1)
+                $position = 'header';
 
             //pour le tour d'apres
             if (stripos($val, "BEGIN:VCALENDAR") > -1)
@@ -842,9 +924,12 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => " ", CHR(10) => " ");
+            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION");
             $ligne = strtr($ligne, $tabR);
+            if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
+                $ligne = substr($ligne,0,2000);
             if (!is_integer($clef)) {
-                if (stripos($ligne, "=") !== false && $clef != "URL")
+                if (stripos($ligne, "=") !== false && !in_array($clef,  $tabException))
                     $tab2[] = $clef . ";" . $ligne;
                 else
                     $tab2[] = $clef . ":" . $ligne;

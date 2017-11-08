@@ -546,7 +546,7 @@ class Synopsis_OrderLine extends OrderLine {
 
     function fetch($id) {
         $return = parent::fetch($id);
-        if ($id > 0) {
+        if ($id > 0 && $this->qty > 0) {
             $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commandedet WHERE rowid = " . $id);
             if (!$this->db->num_rows($sql) > 0) {
                 $this->db->query("INSERT INTO  " . MAIN_DB_PREFIX . "Synopsis_commandedet (rowid) VALUES (" . $this->rowid . ")");

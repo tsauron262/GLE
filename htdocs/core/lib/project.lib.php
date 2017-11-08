@@ -589,6 +589,7 @@ function projectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$projectsr
 	}
 
     //dol_syslog('projectLinesPerDay inc='.$inc.' preselectedday='.$preselectedday.' task parent id='.$parent.' level='.$level." count(lines)=".$numlines." count(lineswithoutlevel0)=".count($lineswithoutlevel0));
+
 	for ($i = 0 ; $i < $numlines ; $i++)
 	{
 		if ($parent == 0) $level = 0;
@@ -640,12 +641,6 @@ function projectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$projectsr
 				print $projectstatic->getNomUrl(1,'',0,$langs->transnoentitiesnoconv("YourRole").': '.$projectsrole[$lines[$i]->fk_project]);
 				print "</td>";
 
-				// Ref
-				print '<td>';
-				$taskstatic->ref=($lines[$i]->ref?$lines[$i]->ref:$lines[$i]->id);
-				print $taskstatic->getNomUrl(1,'withproject');
-				print '</td>';
-
 				if (! empty($conf->global->PROJECT_LINES_PERDAY_SHOW_THIRDPARTY))
 				{
 				    // Thirdparty
@@ -656,6 +651,12 @@ function projectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$projectsr
 				    print '</td>';
 				}
 
+				// Ref
+				print '<td>';
+				$taskstatic->ref=($lines[$i]->ref?$lines[$i]->ref:$lines[$i]->id);
+				print $taskstatic->getNomUrl(1, 'withproject', 'time');
+				print '</td>';
+
 				// Label task
 				print "<td>";
 				for ($k = 0 ; $k < $level ; $k++) print "&nbsp;&nbsp;&nbsp;";
@@ -663,7 +664,7 @@ function projectLinesPerDay(&$inc, $parent, $fuser, $lines, &$level, &$projectsr
 				$taskstatic->ref=$lines[$i]->label;
 				$taskstatic->date_start=$lines[$i]->date_start;
 				$taskstatic->date_end=$lines[$i]->date_end;
-				print $taskstatic->getNomUrl(0,'withproject');
+				print $taskstatic->getNomUrl(0, 'withproject', 'time');
 				//print "<br>";
 				//for ($k = 0 ; $k < $level ; $k++) print "&nbsp;&nbsp;&nbsp;";
 				//print get_date_range($lines[$i]->date_start,$lines[$i]->date_end,'',$langs,0);

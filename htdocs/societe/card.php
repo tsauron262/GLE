@@ -2021,10 +2021,13 @@ else
     	print $object->getLibCustProspStatut();
     	print '</td></tr>';
 
-    	// Prospect/Customer
-    	print '<tr><td>'.$langs->trans('Supplier').'</td><td>';
-    	print yn($object->fournisseur);
-    	print '</td></tr>';
+    	// Supplier
+    	if (! empty($conf->fournisseur->enabled))
+    	{
+    		print '<tr><td>'.$langs->trans('Supplier').'</td><td>';
+    		print yn($object->fournisseur);
+    		print '</td></tr>';
+    	}
 
     	// Prefix
         if (! empty($conf->global->SOCIETE_USEPREFIX))  // Old not used prefix field
@@ -2574,8 +2577,8 @@ else
 	             */
 	            $filedir=$conf->societe->multidir_output[$object->entity].'/'.$object->id;
 	            $urlsource=$_SERVER["PHP_SELF"]."?socid=".$object->id;
-	            $genallowed=$user->rights->societe->creer;
-	            $delallowed=$user->rights->societe->supprimer;
+	            $genallowed=$user->rights->societe->lire;
+	            $delallowed=$user->rights->societe->creer;
 
 	            $var=true;
 

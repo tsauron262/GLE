@@ -326,12 +326,20 @@ if (empty($reshook))
 									{
 										$label = $lines[$i]->product_label;
 									}
-
-									$desc .= ($lines[$i]->desc && $lines[$i]->desc!=$lines[$i]->libelle)?dol_htmlentitiesbr($lines[$i]->desc):'';
+									$desc = ($lines[$i]->desc && $lines[$i]->desc!=$lines[$i]->libelle)?dol_htmlentitiesbr($lines[$i]->desc):'';
 								}
 								else {
 								    $desc = dol_htmlentitiesbr($lines[$i]->desc);
 						        }
+
+								// Extrafields
+								$array_options = array();
+								if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) 							// For avoid conflicts if
+								// trigger used
+								{
+									$lines[$i]->fetch_optionals($lines[$i]->rowid);
+									$array_options = $lines[$i]->array_options;
+								}
 
 								$txtva = $lines[$i]->vat_src_code ? $lines[$i]->tva_tx . ' (' .  $lines[$i]->vat_src_code . ')' : $lines[$i]->tva_tx;
 
@@ -355,7 +363,7 @@ if (empty($reshook))
 					                $lines[$i]->info_bits,
 				                    $lines[$i]->fk_fournprice,
 				                    $lines[$i]->pa_ht,
-			                        array(),
+			                        $array_options,
 				                    $lines[$i]->fk_unit
 			                    );
 
@@ -2112,17 +2120,17 @@ else
     		$filename = dol_sanitizeFileName($object->ref);
     		$filedir = $conf->contrat->dir_output . "/" . dol_sanitizeFileName($object->ref);
     		$urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
-    		$genallowed = $user->rights->contrat->creer;
-    		$delallowed = $user->rights->contrat->supprimer;
+    		$genallowed = $user->rights->contrat->lire;
+    		$delallowed = $user->rights->contrat->creer;
 
     		$var = true;
 
     		print $formfile->showdocuments('contract', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);
 
 
-    			// Show links to link elements
-    			$linktoelem = $form->showLinkToObjectBlock($object, null, array('contrat'));
-    			$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
+    		// Show links to link elements
+    		$linktoelem = $form->showLinkToObjectBlock($object, null, array('contrat'));
+    		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
 
 
     		print '</div><div class="fichehalfright"><div class="ficheaddleft">';
@@ -2259,6 +2267,40 @@ else
     }
 }
 
+
+/*moddrsi*/
+        $header .= '<script>
+                    userId = "' . $user->id . '";
+                        idContratCurrent = "' . $id . '";
+                    $(document).ready(function(){ 
+                    var z = 0;
+                        $(\'img[title="Supprimer"]\').each(function(){
+                            z++;
+                            var j = z;
+                            var id = $(this).parent().attr("href");
+                            var nId = id;
+                            id = id.split("&");
+                            id2 = id[0].split("?id=");
+                            idCt = id2[1];
+                            for ( var i=0;i<id.length;i++) 
+                                if(id[i].indexOf("ligne") > -1 || id[i].indexOf("rowid") > -1)
+                                    nId = id[i].split("=")[1];
+                            elem = $(this).parent().parent().parent().parent().children("tr.liste_titre").children("td").first();
+                            elem.html("<p class=\'fl\'>"+elem.html()+"</p>"+"<p class=\'fl\'>&nbsp;</p>");
+                            /*elem.html(elem.html()+"<p class=\'mod fl cp\'>Modifier</p>");*/
+                            elem.html(elem.html()+"<p class=\'detail fl cp\'>Detail</p>");
+//                            elem.click(function(){
+//                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
+//                            });
+                            elem.find(".mod").click(function(){
+                                editLine(this, ' . $id . ', nId);
+                            });
+                            elem.find(".detail").click(function(){
+                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
+                            });
+                        });
+            });</script>'; echo $header;
+/*fmoddrsi*/
 
 llxFooter();
 

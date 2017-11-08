@@ -174,7 +174,7 @@ class modSynopsisFicheinter extends DolibarrModules {
         // Top menu
         $this->menu[$r] = array('fk_menu' => 0,
             'type' => 'top',
-            'titre' => 'Fiche inter',
+            'titre' => 'Interventions',
             'mainmenu' => 'synopsisficheinter',
             'leftmenu' => '1', // To say if we can overwrite leftmenu
             'url' => '/synopsisdemandeinterv/index.php?leftmenu=ficheinter&filtreUser=true',

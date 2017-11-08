@@ -485,7 +485,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
     }
 
 
-    $textSuivie = "\n <a href='/bimp/synopsis_chrono_public/page.php?back_serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
+    $textSuivie = "\n <a href='".DOL_MAIN_URL_ROOT."/synopsis_chrono_public/page.php?back_serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
 
 
     if ($type == "Facture") {

@@ -441,7 +441,7 @@ class Ldap
 			$this->ldapErrorCode = @ldap_errno($this->connection);
 			$this->ldapErrorText = @ldap_error($this->connection);
 			$this->error=$this->ldapErrorCode." ".$this->ldapErrorText;
-			dol_syslog(get_class($this)."::add failed: ".$this->error, LOG_ERR);
+			//dol_syslog(get_class($this)."::add failed: ".$this->error, LOG_ERR);
 			return -1;
 		}
 	}

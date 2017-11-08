@@ -64,6 +64,7 @@ $holidaystatic = new SynopsisHoliday($db);
 $search_ref = GETPOST('search_ref');
 $month_create = GETPOST('month_create');
 $year_create = GETPOST('year_create');
+$type_conges = isset($_REQUEST['type_conges'])? $_REQUEST['type_conges'] : -1;
 $month_start = GETPOST('month_start');
 $year_start = GETPOST('year_start');
 $month_end = GETPOST('month_end');
@@ -125,6 +126,11 @@ $order = $db->order($sortfield, $sortorder) . $db->plimit($conf->liste_limit + 1
 // WHERE
 if (!empty($search_ref)) {
     $filter.= " AND cp.rowid LIKE '%" . $db->escape($search_ref) . "%'\n";
+}
+
+
+if ($type_conges > -1) {
+    $filter.= " AND cp.type_conges = '" . $db->escape($type_conges) . "'\n";
 }
 
 // DATE START
@@ -314,6 +320,7 @@ print '<table class="noborder" width="100%;">';
 print "<tr class=\"liste_titre\">";
 print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "cp.rowid", "", '', '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("DateCreateCP"), $_SERVER["PHP_SELF"], "cp.date_create", "", '', 'align="center"', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Type"), $_SERVER["PHP_SELF"], "cp.type_conges", "", '', 'align="center"', $sortfield, $sortorder);
 if (!$showGroups)
     print_liste_field_titre($langs->trans("Employe"), $_SERVER["PHP_SELF"], "cp.fk_user", "", '', '', $sortfield, $sortorder);
 else
@@ -336,6 +343,15 @@ print '</td>';
 print '<td class="liste_titre" colspan="1" align="center">';
 print '<input class="flat" type="text" size="1" maxlength="2" name="month_create" value="' . $month_create . '">';
 $formother->select_year($year_create, 'year_create', 1, $min_year, 0);
+print '</td>';
+
+$tabType = array(-1 => "", 0 => "Congés", 1=>"Exceptionels", 2=> "Rtt");
+// TYPE
+print '<td class="liste_titre" colspan="1" align="center">';
+print '<select name="type_conges">';
+foreach($tabType as $idT => $type)
+    print '<option value="'.$idT.'"'.($idT == $type_conges? "selected" : "").">".$type."</option>";
+print '</select>';
 print '</td>';
 
 // UTILISATEUR
@@ -427,6 +443,11 @@ if (!empty($holiday->holiday)) {
         print '</td>';
         print '<td style="text-align: center;">' . dol_print_date($date, 'day') . '</td>';
         print '<td>';
+        
+        
+        print $tabType[$infos_CP["type_conges"]] . '</td>';
+        print '<td>';
+        
         if (!$showGroups)
             print $userstatic->getNomUrl('1');
         else

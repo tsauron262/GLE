@@ -67,7 +67,7 @@ if (! empty($conf->societe->enabled) && empty($conf->global->MAIN_SEARCHFORM_CON
 if (((! empty($conf->product->enabled) && $user->rights->produit->lire) || (! empty($conf->service->enabled) && $user->rights->service->lire))
 && empty($conf->global->MAIN_SEARCHFORM_PRODUITSERVICE_DISABLED))
 {
-	$arrayresult['searchintoproduct']=array('img'=>'object_product', 'label'=>$langs->trans("SearchIntoProductsOrServices", $search_boxvalue),'text'=>img_picto('','object_product').' '.$langs->trans("SearchIntoProductsOrServices", $search_boxvalue), 'url'=>DOL_URL_ROOT.'/product/list.php?sall='.urlencode($search_boxvalue));
+	$arrayresult['searchintoproduct']=array('img'=>'object_product', 'label'=>$langs->trans("SearchIntoProductsOrServices", $search_boxvalue),'text'=>img_picto('','object_product').' '.$langs->trans("SearchIntoProductsOrServices", $search_boxvalue), 'url'=>DOL_URL_ROOT.'/product/list.php?type=2&sall='.urlencode($search_boxvalue));
 }
 
 if (! empty($conf->projet->enabled) && empty($conf->global->MAIN_SEARCHFORM_PROJECT_DISABLED) && $user->rights->projet->lire)

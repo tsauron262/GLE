@@ -59,8 +59,8 @@ class curlRequest
 
         $headers = array(
             'Accept: application/json',
-            'Content-Type: application/json',
-            'X-PARTNER-SOLDTO : ' . $this->soldTo
+            'Content-type: application/json',
+            'X-PARTNER-SOLDTO: ' . $this->soldTo
         );
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);

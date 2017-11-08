@@ -29,7 +29,7 @@ dol_fiche_head('', 'SynopsisTools', $langs->trans("Maj vers 6"));
     include_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
         $extrafields = new ExtraFields($db);
     
-$tabModuleReactive = array("modSynopsistools", "modSynopsisChrono", "modSynopsisApple", "modNdfp", "modSynopsisFicheinter", "modSynopsisCaldav", "modSynopsisContrat");
+$tabModuleReactive = array("modSynopsistools", "modSynopsisChrono", "modSynopsisApple", "modNdfp", "modSynopsisFicheinter", "modSynopsisCaldav", "modSynopsisContrat", "modSynopsisPrepaCommande");
     
 if (isset($_REQUEST['ok'])) {
     foreach($tabModuleReactive as $mod){
@@ -65,7 +65,7 @@ elseif (isset($_REQUEST['ok2'])) {
     
     test($db, "Correction gmao contradet ok");
 
-    $db->query("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` pe SET `type2` = (SELECT fk_product_type FROM " . MAIN_DB_PREFIX . "product p WHERE pe.`fk_object` = p.rowid)");
+    $db->query("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` pe SET `type2` = (SELECT fk_product_type FROM " . MAIN_DB_PREFIX . "product p WHERE pe.`fk_object` = p.rowid) WHERE type2 < 1 || type2 IS NULL");
     $db->query("UPDATE `" . MAIN_DB_PREFIX . "product` SET fk_product_type = 1 WHERE fk_product_type IN (2,3,4)");
 
     test($db, "Correction product type");

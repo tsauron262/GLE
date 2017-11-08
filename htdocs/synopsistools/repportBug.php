@@ -16,7 +16,7 @@ require_once('../main.inc.php');
 
 $mainmenu = isset($_GET["mainmenu"]) ? $_GET["mainmenu"] : "";
 llxHeader("", "Signaler un bug");
-print load_fiche_titre($langs->trans("Signaler un bug"));
+print load_fiche_titre($langs->trans("Signaler un bug"), '', "title_bug@synopsistools");
 
 if (isset($_POST['action']) && $_POST['action'] == "send") {
     bug($user, $_POST['text'], $_POST['oldUrl']);
@@ -165,7 +165,7 @@ function bug($user, $text, $adresse) {
 print '<form method="post">
     <input type="hidden" name="action" value="send"/>
     <input type="hidden" name="oldUrl" value="' . str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $_SERVER["HTTP_REFERER"]) . '"/>
-     Décrivez brièvement le problème rencontré lors de votre navigation <br/><br/>
+     Décrivez brièvement le problème rencontré lors de votre navigation. <br/><br/>
 
 
 

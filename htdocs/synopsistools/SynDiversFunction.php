@@ -655,7 +655,7 @@ function asPosition($str) {
 }
 
 function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '') {
-    global $dolibarr_main_url_root;
+    global $dolibarr_main_url_root, $conf;
 
     $subject = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $subject);
     $msg = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $msg);
@@ -666,7 +666,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     $mailOk = true;
 
     if ($from == '')
-        $from = 'Application BIMP-ERP ' . MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", MAIN_INFO_SOCIETE_NOM)) . '.fr>';
+        $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr>';
 
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";
@@ -685,7 +685,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
 //    if (!$headers) {
 //        $headers = 'MIME-Version: 1.0' . "\r\n";
 //        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-//        $headers .= 'From: Application BIMP-ERP ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>' . "\r\n";
+//        $headers .= 'From: Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>' . "\r\n";
 //        $headers .= 'Cc: ' . $addr_cc . "\r\n";
 //        $headers .= 'Reply-To: ' . $toReplay . "\r\n";
 //    }

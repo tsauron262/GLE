@@ -214,9 +214,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 $accesGrTech = userInGroupe(64, $user->id);
 if (!($user->admin || $accesGrTech) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
     if (isset($_REQUEST['id']) && stripos($_SERVER['REQUEST_URI'], "?") === false)
-        header('Location: ' . str_replace("card.php", "ficheFast.php?id=" . $_REQUEST['id'], "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        header('Location: ' . str_replace("card.php", "../synopsisfichinter/ficheFast.php?id=" . $_REQUEST['id'], "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
     else
-        header('Location: ' . str_replace("card.php", "ficheFast.php", "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+        header('Location: ' . str_replace("card.php", "../synopsisfichinter/ficheFast.php", "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
 
 
 if (isset($_POST["action"]) && $_POST["action"] == 'update') {

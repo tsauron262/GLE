@@ -61,7 +61,7 @@ if (isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0 && isset($_REQUEST['cont
 $form = new form($db);
 $echo .= "<h1 font size='20' align='center' ><B> Fiche Rapide </B></h1>";
 $socid = (isset($_REQUEST['socid']) ? $_REQUEST['socid'] : "");
-$NoMachine = (isset($_POST['NoMachine']) ? $_POST['NoMachine'] : "");
+$NoMachine = (isset($_POST['NoMachine']) ? strtoupper($_POST['NoMachine']) : "");
 $machine = (isset($_POST['Machine']) ? $_POST['Machine'] : "");
 $numExt = (isset($_POST['NumExt']) ? $_POST['NumExt'] : "");
 $systeme = (isset($_POST['systeme']) ? $_POST['systeme'] : "");
@@ -221,8 +221,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             $discount->amount_tva = $acompte - ($acompte / 1.2);
                             $discount->tva_tx = 20;
                             $discount->create($user);
-//                $propal->addline("Acompte", -$acompte, 1, 0, 0, 0, 0, 0, 0, -$acompte);
-                            $propal->insert_discount($discount->id);
+                $propal->addline("Acompte", -$discount->amount_ht, 1, 20, 0, 0, 0, 0, 'HT', -$acompte, 0,1,0,0,0,0,-$discount->amount_ht, null, null, null, null, null, null, null, null, $discount->id);
+                            //$propal->insert_discount($discount->id);
                         }
 
                         if ($prio) {
@@ -396,8 +396,8 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     echo "<tr>";*/
     echo "<th class='ui-state-default ui-widget-header'>N° de série de la machine.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='NoMachine' class='required' disabled/>";
-    echo " <input type='hidden' name='NoMachine' value='" . $NoMachine . "' id='NoMachine'/>";
+    echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='NoMachine' class='required'/>";
+//    echo " <input type='hidden' name='NoMachine' value='" . $NoMachine . "' id='NoMachine'/>";
     echo "<span id='patientez' style='display:none; margin-left:15px;'>";
     echo "<img src='" . DOL_URL_ROOT . "/synopsistools/img/load.gif' title='Chargement des informations GSX en cours' alt='Chargement des informations GSX en cours'/>";
     echo "</span>";

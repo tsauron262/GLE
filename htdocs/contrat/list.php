@@ -296,7 +296,7 @@ $sql.=$hookmanager->resPrint;
 
 if ($dfyear > 0)
 {
-    $sql.= " HAVING first_date_fin_validite ".$filter_op2df."= '".$db->idate(($filter_op2df == "<" ? dol_get_last_day($dfyear,$dfmonth,false) : dol_get_first_day($dfyear,$dfmonth,false)))."'";
+    $sql.= " HAVING first_date_fin_validite ".$filter_op2df."= '". dol_print_date(($filter_op2df == "<" ? dol_get_last_day($dfyear,$dfmonth,false) : dol_get_first_day($dfyear,$dfmonth,false)),"%Y-%m-%d %H:%M:%S")."'";
 }
 
 $sql.= $db->order($sortfield,$sortorder);
@@ -342,6 +342,7 @@ if ($resql)
     if ($search_sale != '')         $param.='&search_sale=' .$search_sale;
     if ($show_files)                $param.='&show_files=' .$show_files;
     if ($optioncss != '')           $param.='&optioncss='.$optioncss;
+    if ($dfyear > 0)                $param.='&dfyear='.$dfyear."&dfmonth=".$dfmonth."&filter_op2df=".$filter_op2df;
     // Add $param from extra fields
     foreach ($search_array_options as $key => $val)
     {

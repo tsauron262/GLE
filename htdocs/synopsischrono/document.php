@@ -127,12 +127,14 @@ if ($_REQUEST['SynAction'] == 'dlZip') {
 if ($_POST["sendit"]) {
     if (!is_dir($upload_dir))
         dol_mkdir($upload_dir);
-
-    if (is_dir($upload_dir) && $_FILES['userfile']['name'] != '') {
-        $tmpName = $_FILES['userfile']['name'];
+    
+    if(is_array($_FILES['userfile']['name']))
+        $file = $_FILES['userfile']['name'][0];
+    if(is_array($_FILES['userfile']['tmp_name']))
+        $_FILES['userfile']['tmp_name'] = $_FILES['userfile']['tmp_name'][0];
+    if (is_dir($upload_dir) && $file != '') {
         //decode decimal HTML entities added by web browser
-        $tmpName = dol_unescapefile($tmpName);
-
+        $tmpName = dol_unescapefile($file);
         $result = dol_move_uploaded_file($_FILES['userfile']['tmp_name'], $upload_dir . "/" . $tmpName, 0, 0, $_FILES['userfile']['error']);
         if ($result > 0) {
             $Chrono = new Chrono($db);

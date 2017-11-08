@@ -98,6 +98,8 @@ class CalendarObject extends \Sabre\DAV\File implements ICalendarObject, \Sabre\
      */
     function put($calendarData) {
 
+        if(stripos($objectUri, $this->uriTest) > 0)
+dol_syslog("PUT OBJECT : ".$this->calendarInfo['id']."    |   ".$this->objectData['uri']."   |".print_r($calendarData,1),3, 0, "_caldavLog");
         if (is_resource($calendarData)) {
             $calendarData = stream_get_contents($calendarData);
         }

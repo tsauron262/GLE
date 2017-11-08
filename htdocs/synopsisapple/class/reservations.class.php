@@ -150,7 +150,7 @@ class Reservations
 
         $sql = 'SELECT u.`rowid` as id, u.email, ue.apple_techid as techid, ue.apple_centre as centre_sav FROM ' . MAIN_DB_PREFIX . 'user u';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user_extrafields ue ON u.rowid = ue.fk_object';
-        $sql .= ' WHERE ue.apple_shipto = ' . $shipTo . ' AND ue.apple_techid IS NOT NULL AND u.statut = 1';
+        $sql .= ' WHERE ue.apple_shipto = ' . $shipTo . ' AND ue.apple_techid IS NOT NULL AND u.statut = 1 AND ue.gsxresa = 1';
 
         $result = $this->db->query($sql);
         if ($result) {
@@ -216,9 +216,10 @@ class Reservations
         $client->client = 1;
         $client->code_client = -1;
         $client->status = 1;
+        $client->tva_assuj = 1;
 
         if (isset($customer->firstName) && !empty($customer->firstName))
-            $client->name = $customer->firstName . ((isset($customer->lastName) && !empty($customer->lastName)) ? ' ' . $customer->lastName : '');
+            $client->name = ((isset($customer->lastName) && !empty($customer->lastName)) ? $customer->lastName.' ' : '').$customer->firstName;
         if (isset($customer->phoneNumber) && !empty($customer->phoneNumber))
             $client->phone = $customer->phoneNumber;
         if (isset($customer->addressLine1) && !empty($customer->addressLine1))
@@ -405,6 +406,9 @@ class Reservations
         foreach ($users as $u)
             $usersAssigned[] = array('id' => $u['id'], 'transparency' => 1);
         $ac->userassigned = $usersAssigned;
+        if(!isset($usersAssigned[0]))
+            return false;
+        $ac->userownerid = $usersAssigned[0]['id'];
 
         $note_text = '';
         if (count($resa->notes)) {
@@ -461,6 +465,10 @@ class Reservations
             $message .= "\t" . '' . $customer->getNomUrl(1) . "\n";
         }
 
+        if (isset($chrono) && $chrono->id > 0) {
+            $message .= "\t" . 'SAV : ' . $chrono->getNomUrl(1)  . "\n";
+        }
+
         if (count($resa->notes)) {
             $message .= "\n";
             $message .= "\t" . 'Notes:' . "\n";
@@ -502,9 +510,9 @@ Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre 
  
 Conditions particulières aux iPhones
  
--        Vous devez désactiver l’option de Géolocalisation de votre téléphone avec votre mot de passe iCloud.
+-        Vous devez désactiver la fonction « localiser mon iPhone » dans le menu iCloud de votre téléphone avec votre mot de passe iCloud.
 
--        Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si vous êtes intéressé, merci de vous munir d’un chèque de caution.
+-        Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.
 
 -        Les réparations d’écrans d’iPhones sont directement envoyées chez Apple pour calibrer correctement votre iPhone et nécessitent donc un délai moyen de 10 jours ouvrés.
 

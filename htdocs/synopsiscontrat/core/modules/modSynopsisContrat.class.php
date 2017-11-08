@@ -58,7 +58,8 @@ class modSynopsisContrat extends DolibarrModules {
         
         $this->module_parts = array(
             'models' => 1,
-            'triggers' => 1
+            'triggers' => 1,
+            'hooks' => array('contractcard')
         );
         
         $r = 0;

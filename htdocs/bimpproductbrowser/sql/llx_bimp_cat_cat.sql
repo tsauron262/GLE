@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS `llx_bimp_cat_cat`;
 
 CREATE TABLE `llx_bimp_cat_cat` (
 	`rowid`			INTEGER AUTO_INCREMENT PRIMARY KEY,
+	`label`			VARCHAR(255), -- The name of the filter --
 	`entity`		INTEGER default 1,
 	`date_creation` DATETIME,
 	`tms`           TIMESTAMP,

@@ -141,8 +141,9 @@ if ($action == 'list')
 }
 
 $pb = new ProductBrowser($db);
-$pb->fetch(1);
-print $pb->id_child;
+$pb->fetchAllFromRoot(111);
+
+$pb->toString(0);
 
 // End of page
 

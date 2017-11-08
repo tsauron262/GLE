@@ -24,14 +24,21 @@
  * 	\ingroup    bimpproductbrowser
  * 	\brief      File to filter and display products using categories
  */
-require_once DOL_DOCUMENT_ROOT .'/core/class/commonobject.class.php';
-require_once DOL_DOCUMENT_ROOT .'/core/class/commonobjectline.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
+
+// include_once DOL_DOCUMENT_ROOT.'/categories/class/categories.class.php'; 
+// include_once DOL_DOCUMENT_ROOT.'/categories/class/api_categories.class.php'; 
 
 class ProductBrowser extends CommonObject
 {
-	public $id='rowid';
+	public $id;						// id of the parent ctegorie
+	public $label;
 	public $id_parent=array();
 	public $id_child=array();
+	public $child=array();
+	public $is_a_leaf=false;
+	public $ref_product=array();
 
 	/**
 	 *	Constructor
@@ -58,7 +65,6 @@ class ProductBrowser extends CommonObject
 		$langs->load('categories');
 
 		$error=0;
-		print 'Class OK' ;
 		dol_syslog(get_class($this).'::create', LOG_DEBUG);
 
 	}
@@ -71,9 +77,9 @@ class ProductBrowser extends CommonObject
 	 */
 	function fetch($id)
 	{
-		$sql = 'SELECT rowid, fk_parent_cat, fk_child_cat';
+		$sql = 'SELECT fk_parent_cat, label, fk_child_cat';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
-		$sql.= ' WHERE rowid = '.$id;
+		$sql.= ' WHERE fk_parent_cat = '.$id;
 
 		dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
 		$result = $this->db->query($sql);
@@ -82,9 +88,14 @@ class ProductBrowser extends CommonObject
 			$obj = $this->db->fetch_object($result);
 			if ($obj)
 			{
-				$this->id			= $obj->rowid;
-				$this->id_parent	= $obj->fk_parent_cat;
-				$this->id_child		= $obj->fk_child_cat;
+				$this->id			= $obj->fk_parent_cat;
+				$this->label 		= $obj->label;
+				$this->id_child[]	= $obj->fk_child_cat;
+				while ($obj = $result->fetch_object())
+				{
+					$this->id_child[]	= $obj->fk_child_cat;
+
+				}
 				return 1;
 			}
 			else
@@ -97,6 +108,100 @@ class ProductBrowser extends CommonObject
 		{
 			dol_print_error($this->db);
 			return -3;
+		}
+	}
+
+
+		/**
+	 *  Load an import profil from database
+	 *
+	 *  @param		int		$id		Id of profil to load
+	 *  @return		int				<0 if KO, >0 if OK
+	 */
+	function fetchAllFromRoot($id, $ind=0)
+	{
+//	print "Début ".$id."<br>" ;
+		$sql = 'SELECT fk_parent_cat, label, fk_child_cat';
+		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
+		$sql.= ' WHERE fk_parent_cat = '.$id;
+
+		dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
+		$result = $this->db->query($sql);
+		if ($result)
+		{
+			if (mysqli_num_rows ($result) >= 1)	// is a node
+			{
+				$i=0;
+				while ($obj = $result->fetch_object())
+				{
+					$this->id			= $obj->fk_parent_cat;
+					$this->label 		= $obj->label;
+					$this->id_child[]	= $obj->fk_child_cat;
+
+					$newChild = new ProductBrowser($this->db);
+					$newChild->id = $this->id_child[$i];
+					$newChild->id_parent = $this->id;
+					if($newChild->fetchAllFromRoot($newChild->id, $ind) ==2) {
+						++$ind;
+					}
+					array_push($this->child, $newChild);
+					++$i;
+				}
+				return 1;
+			}
+			else // is a leaf
+			{
+				$this->ref_product = 'TODO';
+				$this->is_a_leaf = true;
+				$sql = 'SELECT rowid, label';
+				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
+				$sql.= ' WHERE fk_parent = '.$this->id_parent;
+				$sql.= ' LIMIT '.$ind.',1';
+
+				dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
+				$result = $this->db->query($sql);
+
+				if ($result)
+				$i=0;
+				while ($obj = $result->fetch_object())
+				{
+					$this->id			= $obj->rowid;
+					$this->label 		= $obj->label;
+					++$i;
+				}
+				return 2;	
+			}
+		}
+		else // not results
+		{
+		// dol_print_error($this->db);
+		// return -3;
+			return -3;
+		}
+	}
+
+
+
+	function print_spaces ($depth)
+	{
+		for ($i=0; $i<$depth; $i++)
+		{
+			print "----";
+		}
+	}
+
+	function toString ($depth=0)
+	{
+		$this->print_spaces($depth);
+		print $this->label . "<br>";
+		foreach ($this->child as $child){
+			if ($child->is_a_leaf)
+			{
+				$child->print_spaces($depth+1);
+				print $child->label.'<br>';
+			}
+			else
+				$child->toString(++$depth);
 		}
 	}
 }

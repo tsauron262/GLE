@@ -13,10 +13,14 @@ class Actionssynopsiscontrat {
 
 
     function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager) {
-        echo $object->statut;
-        if($object->statut == 1)
-//        echo '<div class="inline-block divButAction"><a class="butAction" href="'.DOL_URL_ROOT.'/contrat/card.php?id='.$object->id.'&action=activerAll">Activer tous les services</a></div>';  
-        echo '<div class="inline-block divButAction"><a class="butAction" href="'.DOL_URL_ROOT.'/synopsiscontrat/request.php?id='.$object->id.'&action=activerAll">Activer tous les services</a></div>';  
+        if(get_class($object) == "Contrat" && $object->statut == 1){
+            $afficher = false;
+            foreach($object->lines as $ligne)
+                if($ligne->statut != 1)
+                    $afficher = true;
+            if($afficher)    
+            echo '<div class="inline-block divButAction"><a class="butAction" href="'.DOL_URL_ROOT.'/synopsiscontrat/request.php?id='.$object->id.'&action=activerAll">Activer tous les services</a></div>';  
+        }
     }
 
 }

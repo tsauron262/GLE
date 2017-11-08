@@ -465,6 +465,10 @@ class Reservations
             $message .= "\t" . '' . $customer->getNomUrl(1) . "\n";
         }
 
+        if (isset($chrono) && $chrono->id > 0) {
+            $message .= "\t" . 'SAV : ' . $chrono->getNomUrl(1)  . "\n";
+        }
+
         if (count($resa->notes)) {
             $message .= "\n";
             $message .= "\t" . 'Notes:' . "\n";

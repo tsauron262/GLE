@@ -54,7 +54,7 @@ function bimp_display_msg(msg, $container, className) {
     }
     var html = '<p';
     if (typeof (className) !== 'undefined') {
-        html += ' class="alert alert-' + className + '"';
+        html += ' class="alert alert-' + className + ' alert-dismissible"';
     }
     html += '>' + msg + '</p>';
     $container.html(html).slideDown(250);

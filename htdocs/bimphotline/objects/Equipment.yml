@@ -1,0 +1,243 @@
+table: bh_equipment
+controller: equipment
+
+labels:
+    name: équipement
+
+fields: 
+    id_product: 
+        label: Produit
+        type: id_object
+        required: 1
+        search: 1
+        object:
+            instance:
+                dol_object: product
+                fetch:
+                    id:
+                        field_value: id_product
+            join:
+                table: product
+                field_on: rowid
+        input:
+            type: search_product
+            help: Entrez la référence ou le nom d'un produit
+        display:
+            default:
+                type: field_value
+            nom_url: 
+                type: nom_url
+            nom:
+                type: nom
+            card:
+                type: card
+                card: 
+                    title:
+                        object_prop: label
+                    image: 
+                        callback: 
+                            method: getProductImageUrl
+                            params: 
+                                id_product:
+                                    field_value: id_product
+                            instance: BimpTools
+                            is_static: 1
+                    fields:
+                        Réf.:
+                            object_prop: ref
+                    view_btn: 1
+                    
+        sortable: 1
+        sort_options:
+            default:
+                label: référence
+                join_field: ref
+            id:
+                label: id du produit
+            label:
+                label: nom
+                join_field: label
+                
+    id_soc:
+        label: Client
+        type: id_object
+        object:
+            instance:
+                dol_object: societe
+                fetch:
+                    id:
+                        field_value: id_soc
+            join:
+                table: societe
+                field_on: rowid
+        input: 
+            type: search_societe
+            help: Entrez une référence ou un nom pour rechecher le client
+        required: 1
+        default_value: 0
+        display: 
+            default:
+                type: field_value
+            nom_url: 
+                type: nom_url
+            nom:
+                type: nom
+            card:
+                type: card
+                card:
+                    title:
+                        object_prop: nom
+                    fields:
+                        Réf.:
+                            object_prop: ref
+                        Code client: 
+                            object_prop: code_client
+                    view_btn: 1
+        search: 1
+        sortable: 1
+        sort_options:
+            default: 
+                label: code client
+                join_field: code_client
+            nom:
+                label: nom du client
+                join_field: nom
+            id:
+                label: id du client
+    id_contrat:
+        label: Contrat
+        type: id_object
+        required: 0
+        default_value: 0
+        object: 
+            instance: 
+                dol_object: contrat
+                fetch:
+                    id:
+                        field_value: id_contrat
+            join:
+                table: contrat
+                field_on: rowid                        
+        input: 
+            type: select
+            options: 
+                array: contrats
+            display_if: 
+                input_name: id_soc
+                hide_values: 0,''
+        depends_on: id_soc
+        display:
+            default:
+                type: array_value
+                values:
+                    array: contrats
+            nom_url: 
+                type: nom_url
+            card:
+                type: card
+                card: 
+                    title: 
+                        object_prop: ref
+                    view_btn: 1
+        search:
+            type: value_part
+            search_on_key_up: 1
+            input:
+                type: text
+            values:
+                - field_value
+                - join:
+                    table: contrat
+                    field_value: ref
+                    field_on: rowid
+        sortable: 1      
+        sort_options:
+            default:
+                label: référence
+                join_value: ref       
+    serial: 
+        label: Numéro de série
+        type: string
+        size: 128
+        input: 
+            type: text
+        required: 1
+        search:
+            type: value_part
+            part_type: beginning
+            search_on_key_up: 1
+            min_chars: 0
+        sortable: 1
+
+views:
+    default:
+        title: nom
+        edit_btn: 1
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: rows
+                    col_lg: 3
+                    col_sm: 12
+                    rows: common_fields
+                  - type: table
+                    col_lg: 9
+                    rows:
+                        - field: id_product
+                          display: card
+                        - field: id_soc
+                          display: card
+                        - field: id_contrat
+                          display: card
+                        - field: serial
+            
+list:
+    checkboxes: 1
+    bulk_actions: 
+        - label: Supprimer les équipements sélectionnés
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: product
+    sort_way: asc
+    n: 3
+    cols:
+        id:
+            label: ID
+            field: id
+        date_create:
+            label: Date d'ajout
+            field: date_create
+        product: 
+            field: id_product
+            display: nom_url
+        soc:
+            field: id_soc
+            display: nom_url
+        contrat: 
+            field: id_contrat
+            display: default
+        serial:
+            field: serial
+            edit: 1
+    add_btn: 1
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1
+    view_btn: 1
+    page_btn: 1
+          
+#associations:
+#    asso_name: 
+#        table: table_name
+#        same_parent: 1
+#        self_key: key
+#        associate_key: key
+#        bimp_object: 
+#            module: bimphotline
+#            name: obj_class_name
+#        dol_object:
+#            module: mod
+#            file: file
+#            class: class
+#            parent_field: field_name

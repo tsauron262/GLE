@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessMatchingValues extends BimpObject
+class BDSProcessMatchingValues extends BDSObject
 {
 
     public static $table = 'bds_process_matching_values';
@@ -243,7 +243,7 @@ class BDSProcessMatchingValues extends BimpObject
     public static function createInstanceByName($id_process, $name)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $where = '`id_process` = ' . (int) $id_process;
         $where .= ' AND `name` = \'' . $name . '\'';

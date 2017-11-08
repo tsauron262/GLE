@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/cron/class/cronjob.class.php';
 
-class BDSProcessCron extends BimpObject
+class BDSProcessCron extends BDSObject
 {
 
     public static $table = 'bds_process_cron';
@@ -322,7 +322,7 @@ class BDSProcessCron extends BimpObject
         $operations = array();
         if (!is_null($id_parent)) {
             global $db;
-            $bdb = new BimpDb($db);
+            $bdb = new BDSDb($db);
 
             $rows = BDSProcessOperation::getListData($bdb, $id_parent);
             if (!is_null($rows)) {
@@ -357,7 +357,7 @@ class BDSProcessCron extends BimpObject
     public static function checkAllOptions($id_process)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $crons = static::getListData($bdb, $id_process);
 

@@ -1,0 +1,21 @@
+table: bimp_list_config
+label:
+    name: configuration de liste
+    name_plur: configurations de liste
+    is_female: 1
+
+fields:
+    module_name:
+        type: string
+        required: 1
+    object_name:
+        type: string
+        required: 1
+    list_name:
+        type: string
+        required: 1
+        default_value: default
+    id_user: 
+        type: id_object
+        dol_object: user
+        required: 1

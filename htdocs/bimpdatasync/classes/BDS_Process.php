@@ -53,7 +53,7 @@ abstract class BDS_Process
             ini_set('display_errors', 0);
         }
 
-        $this->db = new BimpDb($db);
+        $this->db = new BDSDb($db);
         $this->langs = $langs;
         $this->langs->load("errors");
 
@@ -895,7 +895,7 @@ abstract class BDS_Process
     public static function createProcessByName($fuser, $processName, &$error, $params = null)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $where = '`name` = \'' . $processName . '\'';
         $id_process = $bdb->getValue('bds_process', 'id', $where);
@@ -940,7 +940,7 @@ abstract class BDS_Process
     public static function getClassByProcessId($id_process)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $className = null;
 
@@ -964,7 +964,7 @@ abstract class BDS_Process
     public static function getObjectProcessesData($id_object, $object_name)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $processes = BDSProcess::getListData($bdb);
 
@@ -1011,7 +1011,7 @@ abstract class BDS_Process
     public function addProcessParameters($parameters)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $errors = array();
 
@@ -1036,7 +1036,7 @@ abstract class BDS_Process
     public function addProcessOptions($options)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $errors = array();
 
@@ -1063,7 +1063,7 @@ abstract class BDS_Process
     public function addProcessTriggerActions($actions)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $errors = array();
 

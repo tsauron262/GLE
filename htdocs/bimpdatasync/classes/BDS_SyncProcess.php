@@ -1228,7 +1228,7 @@ class BDS_SyncProcess extends BDS_Process
         $data = array();
 
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $where = '`loc_id_process` = ' . (int) $id_process;
 
@@ -1262,7 +1262,7 @@ class BDS_SyncProcess extends BDS_Process
     public static function renderProcessObjectsList($process)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $sort_by = BDS_Tools::getValue('sort_by', 'date_update');
         $sort_way = BDS_Tools::getValue('sort_way', 'desc');

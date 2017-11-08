@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessTriggerAction extends BimpObject
+class BDSProcessTriggerAction extends BDSObject
 {
 
     public static $table = 'bds_process_trigger_action';
@@ -89,7 +89,7 @@ class BDSProcessTriggerAction extends BimpObject
     public static function getTriggerActionProcesses($action)
     {
         global $db, $user;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $sql = 'SELECT p.id FROM ' . MAIN_DB_PREFIX . 'bds_process p ';
         $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . self::$table . ' a ON p.id = a.id_process ';

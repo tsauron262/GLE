@@ -3,6 +3,7 @@
 class BimpTools
 {
 
+    // Gestion GET / POST
     public static function isSubmit($key)
     {
         return (isset($_POST[$key]) || isset($_GET[$key]));
@@ -18,7 +19,43 @@ class BimpTools
 
         return $value;
     }
+    
+    public static function getDateTimeFromForm($name, $default_date = '')
+    {
+        if (self::isSubmit($name)) {
+            $year = '' . self::getValue($name . 'year', '0000');
+            $month = (int) self::getValue($name . 'month', 0);
+            if ($month < 10) {
+                $month = '0' . $month;
+            } else {
+                $month = '' . $month;
+            }
+            $day = (int) self::getValue($name . 'day', 0);
+            if ($day < 10) {
+                $day = '0' . $day;
+            } else {
+                $day = '' . $day;
+            }
+            $hour = (int) self::getValue($name . 'hour', 0);
+            if ($hour < 10) {
+                $hour = '0' . $hour;
+            } else {
+                $hour = '' . $hour;
+            }
+            $min = (int) self::getValue($name . 'min', 0);
+            if ($min < 10) {
+                $min = '0' . $min;
+            } else {
+                $min = '' . $min;
+            }
 
+            return $year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':00';
+        }
+        return $default_date;
+    }
+
+    // Gestion fichiers:
+    
     public static function makeDirectories($dir_tree, $root_dir = null)
     {
         if (is_null($root_dir)) {
@@ -56,40 +93,6 @@ class BimpTools
         return 0;
     }
 
-    public static function getDateTimeFromForm($name, $default_date = '')
-    {
-        if (self::isSubmit($name)) {
-            $year = '' . self::getValue($name . 'year', '0000');
-            $month = (int) self::getValue($name . 'month', 0);
-            if ($month < 10) {
-                $month = '0' . $month;
-            } else {
-                $month = '' . $month;
-            }
-            $day = (int) self::getValue($name . 'day', 0);
-            if ($day < 10) {
-                $day = '0' . $day;
-            } else {
-                $day = '' . $day;
-            }
-            $hour = (int) self::getValue($name . 'hour', 0);
-            if ($hour < 10) {
-                $hour = '0' . $hour;
-            } else {
-                $hour = '' . $hour;
-            }
-            $min = (int) self::getValue($name . 'min', 0);
-            if ($min < 10) {
-                $min = '0' . $min;
-            } else {
-                $min = '' . $min;
-            }
-
-            return $year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':00';
-        }
-        return $default_date;
-    }
-
     public static function renameFile($dir, $old_name, $new_name)
     {
         if (!preg_match('/.+\/$/', $dir)) {
@@ -121,5 +124,17 @@ class BimpTools
             }
         }
         return true;
+    }
+    
+    // Gestion Logs: 
+    
+    public static function logTechnicalError($object, $method, $msg)
+    {
+        if (is_object($object)) {
+            $object = get_class($object);
+        }
+        
+        $message = '[ERREUR TECHNIQUE] '.$object.'::'.$method.'() - '.$msg;
+        dol_syslog($message, LOG_ERR);
     }
 }

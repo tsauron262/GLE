@@ -1,8 +1,8 @@
 <?php
 
-include_once __DIR__ . '/BimpObject.php';
+include_once __DIR__ . '/BDSObject.php';
 
-class BDSProcess extends BimpObject
+class BDSProcess extends BDSObject
 {
 
     public static $table = 'bds_process';
@@ -121,7 +121,7 @@ class BDSProcess extends BimpObject
     public static function getProcessesQuery()
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $processes = array();
         $rows = $bdb->getRows(self::$table);
@@ -141,7 +141,7 @@ class BDSProcess extends BimpObject
     public static function renderListRows($id_parent = null)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
         $processes = self::getListData($bdb);
         $html = '';
         if (count($processes)) {

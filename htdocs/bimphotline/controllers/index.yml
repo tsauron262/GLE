@@ -1,0 +1,21 @@
+bootstrap: 1
+title: Bimp HotLine
+
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Tickets
+            sections:
+                - type: list
+                  object:
+                      instance: 
+                          bimp_object: BH_Ticket
+            
+        equipments:
+            label: Equipements
+            sections:
+                - type: list
+                  object:
+                      instance: 
+                          bimp_object: Equipment

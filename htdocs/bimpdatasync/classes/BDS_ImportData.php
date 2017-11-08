@@ -18,7 +18,7 @@ class BDS_ImportData
     public function __construct()
     {
         global $db;
-        $this->db = new BimpDb($db);
+        $this->db = new BDSDb($db);
     }
 
     public function fetch($id)
@@ -215,17 +215,17 @@ class BDS_ImportData
         return '`id` = ' . (int) $id;
     }
 
-    public static function getObjectIdByImportReference(BimpDb $db, $id_process, $object_name, $import_reference)
+    public static function getObjectIdByImportReference(BDSDb $db, $id_process, $object_name, $import_reference)
     {
         return $db->getValue(self::$table, 'id_object', self::whereObjectReference($id_process, $object_name, $import_reference));
     }
 
-    public static function getObjectImportReferenceById(BimpDb $db, $id_process, $object_name, $id_object)
+    public static function getObjectImportReferenceById(BDSDb $db, $id_process, $object_name, $id_object)
     {
         return $db->getValue(self::$table, 'import_reference', self::whereObjectId($id_process, $object_name, $id_object));
     }
 
-    public static function getObjectsIds(BimpDb $db, $id_process, $object_name)
+    public static function getObjectsIds(BDSDb $db, $id_process, $object_name)
     {
         $where = '`id_process` = ' . (int) $id_process;
         $where .= ' AND `object_name` = \'' . $object_name . '\'';
@@ -238,7 +238,7 @@ class BDS_ImportData
         return $rows;
     }
 
-    public static function getObjectsImportReferences(BimpDb $db, $id_process, $object_name)
+    public static function getObjectsImportReferences(BDSDb $db, $id_process, $object_name)
     {
         $where = '`id_process` = ' . (int) $id_process;
         $where .= ' AND `object_name` = \'' . $object_name . '\'';
@@ -251,7 +251,7 @@ class BDS_ImportData
         return $rows;
     }
 
-    public static function getAllObjectsList(BimpDb $db, $id_process, $order_by = 'date_update', $order_way = 'desc')
+    public static function getAllObjectsList(BDSDb $db, $id_process, $order_by = 'date_update', $order_way = 'desc')
     {
         $where = '';
         if (!is_null($id_process)) {

@@ -1,0 +1,135 @@
+table: bh_ticket
+controller: ticket
+
+labels: 
+    name: ticket
+
+fields: 
+    id_contrat:
+        label: Contrat
+        type: id_object
+        required: 1
+        search: 1
+        sortable: 1
+        object:
+            instance:
+                dol_object: contrat
+                fetch:
+                    id:
+                        field_value: id_contrat
+        input: 
+            type: search_list
+            search_list:
+                table: contrat c
+                field_return_value: c.rowid
+                field_return_label: c.ref
+                join: societe s
+                join_on: c.fk_soc s.rowid
+                join_return_label: s.nom
+                options:    
+                    default:
+                        label: Recherche par référence contrat
+                        fields_search: c.ref,c.rowid
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez la référence ou l'ID d'un contrat
+                    by_client:
+                        label: Recherche par client
+                        fields_search: s.nom,s.code_client
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez le nom ou le code d'un client
+        display:
+            nom_url: 
+                type: nom_url
+            card:
+                type: card
+                card: 
+                    title: 
+                        object_prop: ref
+                    view_btn: 1
+        sort_options:
+            by_ref: 
+                label: référence
+                value:
+                    join:
+                        table: contrat
+                        field_value: ref
+                        field_on: rowid
+            
+    ticket_number:
+        label: N° ticket
+        type: string
+        required: 0
+        search:
+            type: value_part
+            search_on_key_up: 1
+            input:
+                type: text
+        sortable: 1
+        input: 
+            type: hidden
+        display: field_value
+
+objects: 
+    interventions:
+        object: 
+            instance: 
+                bimp_object: BH_Inter
+        delete: 1
+        
+    notes:
+        object:
+            instance:
+                bimp_object: BH_Note
+        delete: 1
+        
+views:
+    default:
+        title: nom
+        edit_btn: 1
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: rows
+                    col_lg: 3
+                    col_sm: 12
+                    rows: common_fields
+                  - type: table
+                    col_lg: 9
+                    rows:
+                        - field: ticket_number
+                        - field: id_contrat
+                          display: card
+            
+list:
+    checkboxes: 1
+    bulk_actions:
+        - label: supprimer les tickets sélectionnés
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this))
+            
+    sort_col: date_create
+    sort_way: desc
+    n: 10
+    cols:
+        id:
+            label: ID
+            field: id
+        user_create:
+            label: Créé par
+            field: user_create
+        date_create:
+            label: Début
+            field: date_create
+        contrat:
+            field: id_contrat
+            display: nom_url
+        ticket:
+            field: ticket_number
+            
+    add_btn: 1
+    delete_btn: 1
+    view_btn: 1

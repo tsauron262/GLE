@@ -1,0 +1,193 @@
+table: bh_inter
+parent_id_property: id_ticket
+parent_object: BH_Ticket
+
+labels:
+    name: intervention
+    is_female: 1
+
+fields:
+    id_ticket:
+        label: Ticket
+        type: id_parent
+        input: 
+            type: hidden
+        required: 1
+        sortable: 1
+        display: 
+            default: 
+                type: nom_url
+            id: 
+                type: field_value
+            number: 
+                type: object_field
+                field: ticket_number
+        sort_options: 
+            default: ticket_number
+            id: id
+            
+    tech_id_user:
+        label: Technicien
+        type: id_object
+        input: 
+            type: search_user
+        object: 
+            instance: 
+                dol_object: user
+                fetch:
+                    id:
+                        field_value: tech_id_user
+            join: 
+                table: user
+                field_on: rowid
+        required: 0
+        sortable: 1
+        search: 1
+        display: 
+            default: 
+                type: nom_url
+            id: 
+                type: field_value
+            card: 
+                type: card
+                card:
+                    title:
+                        callback:
+                            method: getNomUrl
+                            params: 
+                                - 1
+                    fields:
+                        E-mail:
+                            object_prop: email
+                        Tél. pro: 
+                            object_prop: office_phone
+                        Tél. portable:
+                            object_prop: user_mobile
+                    view_btn: 1
+        sort_option: 
+            default: 
+                label: nom utilisateur
+                join_field: lastname
+                
+    timer:
+        label: Durée
+        type: time_last
+        input: 
+            type: hidden
+        default_value: 0
+        display: 
+            default: 
+                type: timer
+        sortable: 1
+        search: 0
+        
+    priority:
+        label: Priorité
+        type: int
+        required: 1
+        input: 
+            type: select
+            options:
+                array: priorities
+        display:
+            default: 
+                type: array_value
+                values:
+                    array: priorities
+        sortable: 1
+        search: 1
+    
+    status: 
+        label: Statut
+        type: int
+        input: 
+            type: select
+            options:
+                array: status
+        required: 1
+        display: 
+            default: 
+                type: array_value
+                values: 
+                    array: status
+        sortable: 1
+        search: 1
+                    
+    description:
+        label: Description
+        type: string
+        input:
+            type: textarea
+        sortable: 0
+        search: 0
+    
+list:
+    title: Interventions
+    checkboxes: 1
+    bulk_actions: 
+        - label: Supprimer les interventions sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: id
+    sort_way: desc
+    n: 10
+    cols:
+        id:
+            label: ID
+            field: id
+        user_create:
+            label: Créé par
+            field: user_create
+        date_create:
+            label: Début
+            field: date_create
+        tech_user: 
+            label: Technicien
+            field: tech_id_user
+        duree:
+            field: timer
+        priorite:
+            field: priority
+        status:
+            field: status
+    add_btn: 1
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1
+    view_btn: 1
+    page_btn: 1
+    
+views:
+    default: 
+        title: nom
+        edit_btn: 1
+        delete_btn: 1
+        buttons:
+            - label: Fermer
+              icon_before: times
+              classes: btn,btn-default
+              attr:
+                  onclick: closeInterView($(this));
+        rows:
+            - cols:
+                  - type: custom
+                    col_lg: 3
+                    col_sm: 12
+                    content: 
+                        callback:
+                            method: renderTimer
+                  - type: rows
+                    col_lg: 3
+                    col_sm: 12
+                    rows: common_fields
+                  - type: table
+                    col_lg: 6
+                    col_sm: 12
+                    rows:
+                        - field: tech_id_user
+                          display: card
+                        - field: timer
+                        - field: priority
+                        - field: status
+                        - field: description

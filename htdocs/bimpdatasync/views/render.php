@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 function renderReportContent(BDS_Report $report)
 {
     global $db;
-    $bdb = new BimpDb($db);
+    $bdb = new BDSDb($db);
 
     $infos = array();
 
@@ -341,7 +341,7 @@ function renderProcessesRecentActivity($processes_data)
     $html .= '</a>';
     $html .= '</div>';
     global $db;
-    $bdb = new BimpDb($db);
+    $bdb = new BDSDb($db);
     foreach ($processes_data as $id_process => $data) {
         $html .= '<table class="noborder" width="100%">';
 

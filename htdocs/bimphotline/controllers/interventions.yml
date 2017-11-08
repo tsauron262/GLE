@@ -1,0 +1,17 @@
+bootstrap: 1
+title: Bimp hotline - Interventions
+
+sections:
+    - type: list
+      object:
+          instance: 
+              bimp_object: Intervention
+              
+    - type: buttons
+      buttons:
+          - label: Accueil Hotline
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

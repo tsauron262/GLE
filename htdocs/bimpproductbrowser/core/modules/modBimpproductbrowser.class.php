@@ -34,7 +34,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 /**
  *  Description and activation class for module MyModule
  */
-class modProductBrowser extends DolibarrModules
+class modBimpproductbrowser extends DolibarrModules
 {
 	// @codingStandardsIgnoreEnd
 	/**
@@ -69,7 +69,6 @@ class modProductBrowser extends DolibarrModules
 		// Used only if file README.md and README-LL.md not found.
 		$this->descriptionlong = "Allow the user to browse in product using categories on a single page. It require ajax to be user friendly";
 
-		$this->editor_name = 'Romain';
 		$this->editor_url = 'https://www.example.com';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
@@ -152,7 +151,8 @@ class modProductBrowser extends DolibarrModules
 		// 'stock'            to add a tab in stock view
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
-        $this->tabs = array();
+			$this->tabs = array(
+			'categories_0:+recherchefiltree:Recherche Filtrée:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/index.php?id=__ID__');
 
 		if (! isset($conf->modProductBrowser) || ! isset($conf->modProductBrowser->enabled))
         {
@@ -247,8 +247,8 @@ class modProductBrowser extends DolibarrModules
 		// Example to declare a Left Menu entry into an existing Top menu entry:
 		/* BEGIN MODULEBUILDER LEFTMENU MYOBJECT */
 
-		$r=1;
-/*		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=cat',
+/*		$r=1;
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=cat',
 					'type'=>'left',	
 					'titre'=>'Recherche',
 					'mainmenu'=>'cat',
@@ -259,7 +259,7 @@ class modProductBrowser extends DolibarrModules
 					'perms'=>'1',
 					'target'=>'', 'user'=>2);
 		$r++;
-*/		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products,fk_leftmenu=cat',
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products,fk_leftmenu=cat',
 					'type'=>'left',
 					'titre'=>'Rechercher',
 					'mainmenu'=>'products', 'leftmenu'=>'cat',
@@ -268,7 +268,7 @@ class modProductBrowser extends DolibarrModules
 					'position'=>110, 'enabled'=>'1',
 					'perms'=>'1',
 					'target'=>'', 'user'=>2);
-
+*/
 		// END MODULEBUILDER LEFTMENU MYOBJECT */
 
 

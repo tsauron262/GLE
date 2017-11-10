@@ -103,7 +103,7 @@ include("./rapport2.php");die();
 //	    SUM(f.total_ht) as total,
 //            COUNT(f.rowid) as nbLignes";
 //$sql = " FROM " . MAIN_DB_PREFIX . "societe as s,
-//            " . MAIN_DB_PREFIX . "Synopsis_fichinter as f ";
+//            " . MAIN_DB_PREFIX . "synopsis_fichinter as f ";
 //$sql .= " WHERE f.fk_soc = s.rowid";
 //
 //if ($filterUser) {

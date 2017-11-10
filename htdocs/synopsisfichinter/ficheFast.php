@@ -202,7 +202,7 @@ if ($_REQUEST["id"] > 0) {
             $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
         }
     }
-    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter WHERE rowid =" . $fichinter->id);
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsis_fichinter WHERE rowid =" . $fichinter->id);
     $resultG = $db->fetch_object($sql);
 
 
@@ -594,7 +594,7 @@ function saveForm() {
     for ($i = 1; $i < 5; $i++) {
         $_POST['date' . $i] = traiteHeure($_POST['date' . $i]);
     }
-//    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
+//    $req = "SELECT * FROM ".MAIN_DB_PREFIX."synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);
 //    $oldData = mysql_fetch_object($req);
     $req = "UPDATE `" . MAIN_DB_PREFIX . "fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`note_private` =  '" . $_POST['descP'] . "',`description` =  '" . $_POST['desc'] . "'

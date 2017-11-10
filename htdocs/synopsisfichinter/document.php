@@ -43,7 +43,7 @@ $action = GETPOST('action','alpha');
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'ficheinter', $id, 'Synopsis_fichinter');
+$result = restrictedArea($user, 'ficheinter', $id, 'synopsis_fichinter');
 
 
 // Get parameters

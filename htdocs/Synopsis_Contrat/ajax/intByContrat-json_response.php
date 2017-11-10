@@ -32,7 +32,7 @@ if(!$sidx) $sidx =1;
 $typeObj = (isset($_REQUEST['type'])? $_REQUEST['type'] : "FI");
 if($typeObj == "FI"){
         $fi = new Fichinter($db);
-        $table = "Synopsis_fichinter";
+        $table = "synopsis_fichinter";
 }
 else{
         $fi = new Synopsisdemandeinterv($db);
@@ -130,7 +130,7 @@ else{
        require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/SAV.class.php");
         $result = $db->query("SELECT count(*) as count
                                 FROM ".MAIN_DB_PREFIX."".$table."det
-                               WHERE fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = ".$id);
+                               WHERE fk_".($table == "synopsis_fichinter" ? "fichinter" : $table)." = ".$id);
         $row = $db->fetch_object($result);
         $count = $row->count;
         if( $count >0 )
@@ -148,7 +148,7 @@ else{
         $SQL = "SELECT t.label as type, fd.rowid as id, t.isDeplacement, fd.date, fd.description, fd.total_ht, ".($typeObj=="FI" ?"fk_depProduct, " : "")."fd.fk_typeinterv, fd.duree
                   FROM ".MAIN_DB_PREFIX."".$table."det as fd
              LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
-                 WHERE fd.fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = ".$id."
+                 WHERE fd.fk_".($table == "synopsis_fichinter" ? "fichinter" : $table)." = ".$id."
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";
 //print $SQL;

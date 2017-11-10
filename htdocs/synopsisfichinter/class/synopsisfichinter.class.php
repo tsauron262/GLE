@@ -49,7 +49,7 @@ class Synopsisfichinter extends Fichinter {
 
     public $db;
     public $element = 'synopsisfichinter';
-    public $table_element = 'Synopsis_fichinter';
+    public $table_element = 'synopsis_fichinter';
     public $fk_element = 'fk_fichinter';
     public $table_element_line = 'synopsis_fichinterdet';
     public $id;
@@ -427,7 +427,7 @@ class Synopsisfichinter extends Fichinter {
      */
       function verifyNumRef($soc)
       {
-      $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_fichinter";
+      $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."synopsis_fichinter";
       $sql.= " WHERE ref = '".$this->ref."'";
 
       $result = $this->db->query($sql);
@@ -748,7 +748,7 @@ class Synopsisfichinter extends Fichinter {
         global $langs, $conf;
         $this->update_note($description, "_private");
 //        if ($user->rights->synopsisficheinter->creer) {
-//            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_fichinter ";
+//            $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsis_fichinter ";
 //            $sql.= " SET note_private = '" . addslashes($description) . "'";
 //            $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 //
@@ -1251,7 +1251,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
     }
 
     /**
-     *      \brief         Mise a jour duree total dans table ".MAIN_DB_PREFIX."Synopsis_fichinter
+     *      \brief         Mise a jour duree total dans table ".MAIN_DB_PREFIX."synopsis_fichinter
      *        \return        int        <0 si ko, >0 si ok
      */
     function update_total() {
@@ -1268,7 +1268,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
           $total_duration=0;
           if ($obj) $total_duration = $obj->total_duration;
 
-          $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter";
+          $sql = "UPDATE ".MAIN_DB_PREFIX."synopsis_fichinter";
           $sql.= " SET duree = ".$total_duration;
           $sql.= " WHERE rowid = ".$this->fk_fichinter;
 

@@ -27,13 +27,12 @@
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 
-// include_once DOL_DOCUMENT_ROOT.'/categories/class/categories.class.php'; 
-// include_once DOL_DOCUMENT_ROOT.'/categories/class/api_categories.class.php'; 
+include_once DOL_DOCUMENT_ROOT.'/categories/class/categories.class.php'; 
+
 
 class ProductBrowser extends CommonObject
 {
 	public $id;						// id of the parent ctegorie
-	public $label;
 	public $id_parent=array();
 	public $id_child=array();
 	public $child=array();
@@ -77,7 +76,7 @@ class ProductBrowser extends CommonObject
 	 */
 	function fetch($id)
 	{
-		$sql = 'SELECT fk_parent_cat, label, fk_child_cat';
+		$sql = 'SELECT fk_parent_cat, fk_child_cat';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
 		$sql.= ' WHERE fk_parent_cat = '.$id;
 
@@ -89,7 +88,6 @@ class ProductBrowser extends CommonObject
 			if ($obj)
 			{
 				$this->id			= $obj->fk_parent_cat;
-				$this->label 		= $obj->label;
 				$this->id_child[]	= $obj->fk_child_cat;
 				while ($obj = $result->fetch_object())
 				{
@@ -121,7 +119,7 @@ class ProductBrowser extends CommonObject
 	function fetchAllFromRoot($id, $ind=0)
 	{
 //	print "Début ".$id."<br>" ;
-		$sql = 'SELECT fk_parent_cat, label, fk_child_cat';
+		$sql = 'SELECT fk_parent_cat, fk_child_cat';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
 		$sql.= ' WHERE fk_parent_cat = '.$id;
 
@@ -135,7 +133,6 @@ class ProductBrowser extends CommonObject
 				while ($obj = $result->fetch_object())
 				{
 					$this->id			= $obj->fk_parent_cat;
-					$this->label 		= $obj->label;
 					$this->id_child[]	= $obj->fk_child_cat;
 
 					$newChild = new ProductBrowser($this->db);
@@ -153,7 +150,7 @@ class ProductBrowser extends CommonObject
 			{
 				$this->ref_product = 'TODO';
 				$this->is_a_leaf = true;
-				$sql = 'SELECT rowid, label';
+				$sql = 'SELECT rowid';
 				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
 				$sql.= ' WHERE fk_parent = '.$this->id_parent;
 				$sql.= ' LIMIT '.$ind.',1';
@@ -166,7 +163,6 @@ class ProductBrowser extends CommonObject
 				while ($obj = $result->fetch_object())
 				{
 					$this->id			= $obj->rowid;
-					$this->label 		= $obj->label;
 					++$i;
 				}
 				return 2;	
@@ -193,12 +189,12 @@ class ProductBrowser extends CommonObject
 	function toString ($depth=0)
 	{
 		$this->print_spaces($depth);
-		print $this->label . "<br>";
+		print $this->id . "<br>";
 		foreach ($this->child as $child){
 			if ($child->is_a_leaf)
 			{
 				$child->print_spaces($depth+1);
-				print $child->label.'<br>';
+				print $child->id.'<br>';
 			}
 			else
 				$child->toString(++$depth);

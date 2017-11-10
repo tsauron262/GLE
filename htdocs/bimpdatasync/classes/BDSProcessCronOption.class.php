@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessCronOption extends BimpObject
+class BDSProcessCronOption extends BDSObject
 {
 
     public static $table = 'bds_process_cron_option';
@@ -96,7 +96,7 @@ class BDSProcessCronOption extends BimpObject
     public static function getOptionsNamesQueryArray($id_parent = null)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $where = '`id` IN (SELECT `id_option` FROM ' . MAIN_DB_PREFIX . self::$table;
         $where .= ' WHERE `id_process_cron` = ' . (int) $id_parent . ')';
@@ -120,7 +120,7 @@ class BDSProcessCronOption extends BimpObject
     public static function setValueColInputParams(&$col, $row)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $type = $bdb->getValue(BDSProcessOption::$table, 'type', '`id` = ' . (int) $row['id_option']);
 

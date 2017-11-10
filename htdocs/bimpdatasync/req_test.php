@@ -70,7 +70,7 @@ function testFournPrice()
     $pa_ht = 0;
 
     global $db;
-    $bdb = new BimpDb($db);
+    $bdb = new BDSDb($db);
 
     $where = '`fk_product` = 6375';
     $rows = $bdb->getRows('product_fournisseur_price', $where, null, 'object', array(

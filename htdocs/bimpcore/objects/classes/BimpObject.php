@@ -3,144 +3,173 @@
 class BimpObject
 {
 
-    public static $table = '';
-    public static $parent_object_name = '';
-    public static $parent_id_property = '';
-    public static $fields = array();
-    protected static $labels = array();
-    public static $objects = array();
-    public static $associations = array();
-    public static $list_params = null;
-    public static $form_params = null;
-    public $id = null;
     public $db = null;
+    public $module = '';
+    public $objectName = '';
+    public $config = null;
+    public $id = null;
+    protected $data = array();
 
-    public function __construct()
+    public static function getInstance($module, $object_name)
     {
-        if (!class_exists('BimpDb')) {
-            require_once __DIR__ . '/BimpDb.php';
+        $file = DOL_DOCUMENT_ROOT . $module . '/objects/' . $object_name . '.class.php';
+        if (file_exists($file)) {
+            if (!class_exists($object_name)) {
+                require_once $file;
+            }
+            return new $object_name($module, $object_name);
         }
-        global $db;
-        $this->db = new BimpDb($db);
+
+        return new BimpObject($module, $object_name);
     }
 
-    public static function getClass()
+    public function __construct($module, $object_name)
     {
-        return 'BimpObject';
+        global $db;
+
+        $this->db = new BimpDb($db);
+        $this->module = $module;
+        $this->object_name = $object_name;
+        $this->config = self::loadConfig($module, $object_name);
+
+        $this->checkConfig($this->config, array('table', 'fields', 'labels'));
+    }
+
+    // Gestion des données:
+
+    public function get($field)
+    {
+        if (!isset($this->config['fields'][$field])) {
+            return null;
+        }
+
+        if (isset($this->data[$field])) {
+            return $this->data[$field];
+        }
+
+        if (isset($this->config['fields'][$field]['default_value'])) {
+            return $this->config['fields'][$field]['default_value'];
+        }
+        return null;
+    }
+
+    public function set($field, $value)
+    {
+        return $this->validateValue($field, $value);
     }
 
     // Validation des champs:
 
-    public function validateForm()
+    public function validatePost()
     {
-        if (!isset($this::$fields)) {
+        if (!isset($this->config['fields'])) {
             return array();
         }
 
         $errors = array();
-        foreach ($this::$fields as $name => $params) {
+        foreach ($this->config['fields'] as $field => $params) {
             $value = null;
-            if (BDS_Tools::isSubmit($name)) {
+            if (BimpTools::isSubmit($field)) {
                 if ($params['type'] === 'datetime') {
-                    $value = BDS_Tools::getDateTimeFromForm($name);
+                    $value = BimpTools::getDateTimeFromForm($field);
                 } else {
-                    $value = BDS_Tools::getValue($name);
+                    $value = BimpTools::getValue($field);
                 }
-            } elseif (isset($this->{$name})) {
-                $value = $this->{$name};
+            } elseif (isset($this->data[$field])) {
+                $value = $this->data[$field];
+            } elseif (isset($params['default_value'])) {
+                $value = $params['default_value'];
             }
 
-            $value_errors = $this->validateValue($name, $value);
-            $errors = array_merge($errors, $value_errors);
+            $errors = array_merge($errors, $this->validateValue($field, $value));
         }
         return $errors;
     }
 
     public function validateArray(Array $values)
     {
-        if (!isset($this::$fields)) {
+        if (!isset($this->config['fields'])) {
             return array();
         }
 
         $errors = array();
-        foreach ($this::$fields as $name => $params) {
+        foreach ($this->config['fields'] as $field => $params) {
             $value = null;
-            if (isset($values[$name])) {
-                $value = $values[$name];
-            } elseif (isset($this->{$name})) {
-                $value = $this->{$name};
+            if (isset($values[$field])) {
+                $value = $values[$field];
+            } elseif (isset($this->data[$field])) {
+                $value = $this->data[$field];
+            } elseif (isset($params['default_value'])) {
+                $value = $params['default_value'];
             }
 
-            $value_errors = $this->validateValue($name, $value);
-            $errors = array_merge($errors, $value_errors);
+            $errors = array_merge($errors, $this->validateValue($field, $value));
         }
         return $errors;
     }
 
-    public function validateValue($name, $value)
+    public function validateValue($field, $value)
     {
         $errors = array();
 
-        if (!property_exists($this, $name)) {
-            $errors[] = 'La propriété "' . $name . '" n\'existe pas';
-        } elseif (!isset($this::$fields[$name])) {
-            $errors[] = 'Paramètres de validation absents pour la propriété "' . $name . '"';
+        if (!isset($this->config['fields'][$field])) {
+            $errors[] = 'Le champ "' . $field . '" n\'existe pas';
         } else {
-            $validation = $this::$fields[$name];
+            $params = $this->config['fields'][$field];
 
             if (is_null($value) || ($value === '')) {
                 $missing = false;
-                if (isset($validation['required']) && $validation['required']) {
+                if (isset($params['required']) && $params['required']) {
                     $missing = true;
-                } elseif (isset($validation['required_if'])) {
-                    $required_if = explode('=', $validation['required_if']);
+                } elseif (isset($params['required_if'])) {
+                    $required_if = explode('=', $params['required_if']);
                     $property = $required_if[0];
-                    if (isset($this->$property)) {
-                        if ($this->$property == $required_if[1]) {
+                    if (isset($this->data[$property])) {
+                        if ($this->data[$property] == $required_if[1]) {
                             $missing = true;
                         }
                     }
                 }
                 if ($missing) {
-                    $errors[] = 'Valeur obligatoire manquante : "' . $validation['label'] . '"';
+                    $errors[] = 'Valeur obligatoire manquante : "' . $params['label'] . '"';
                 }
             } else {
                 $validate = true;
-                if ($validation['type'] === 'datetime') {
+                if ($params['type'] === 'datetime') {
                     if (!preg_match('/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
                         $validate = false;
-                        if (!isset($validation['invalid_msg'])) {
-                            $validation['invalid_msg'] = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
+                        if (!isset($params['invalid_msg'])) {
+                            $params['invalid_msg'] = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
                         }
                     }
                 }
 
-                if (!count($errors) && isset($validation['regexp'])) {
-                    if (!preg_match('/' . $validation['regexp'] . '/', $value)) {
+                if (!count($errors) && isset($params['regexp'])) {
+                    if (!preg_match('/' . $params['regexp'] . '/', $value)) {
                         $validate = false;
                     }
                 }
-                if (!count($errors) && isset($validation['is_key_array']) && is_array($validation['is_key_array'])) {
-                    if (!array_key_exists($value, $validation['is_key_array'])) {
+                if (!count($errors) && isset($params['is_key_array']) && is_array($params['is_key_array'])) {
+                    if (!array_key_exists($value, $params['is_key_array'])) {
                         $validate = false;
                     }
                 }
-                if (!count($errors) && isset($validation['in_array']) && is_array($validation['in_array'])) {
-                    if (!in_array($value, $validation['in_array'])) {
+                if (!count($errors) && isset($params['in_array']) && is_array($params['in_array'])) {
+                    if (!in_array($value, $params['in_array'])) {
                         $validate = false;
                     }
                 }
 
                 if (!$validate) {
-                    $msg = '"' . $validation['label'] . '": valeur invalide';
-                    if (isset($validation['invalid_msg'])) {
-                        $msg .= ' (' . $validation['invalid_msg'] . ')';
+                    $msg = '"' . $params['label'] . '": valeur invalide';
+                    if (isset($params['invalid_msg'])) {
+                        $msg .= ' (' . $params['invalid_msg'] . ')';
                     }
                     $errors[] = $msg;
                 }
 
                 if (!count($errors)) {
-                    $this->{$name} = $value;
+                    $this->data[$field] = $value;
                 }
             }
         }
@@ -149,11 +178,13 @@ class BimpObject
 
     public function validate()
     {
+        if (!isset($this->config['fields'])) {
+            return array();
+        }
+
         $errors = array();
-        foreach (static::$fields as $name => $params) {
-            if (property_exists($this, $name)) {
-                $errors = array_merge($errors, $this->validateValue($name, $this->{$name}));
-            }
+        foreach ($this->config['fields'] as $field => $params) {
+            $errors = array_merge($errors, $this->validateValue($field, isset($this->data[$field]) ? $this->data[$field] : null));
         }
         return $errors;
     }
@@ -162,11 +193,46 @@ class BimpObject
 
     public function fetch($id)
     {
-        $row = $this->db->getRow(static::$table, '`id` = ' . (int) $id);
+        if (!self::checkConfig($this->config, array('table', 'fields'))) {
+            return false;
+        }
+
+        $row = $this->db->getRow($this->config['table'], '`id` = ' . (int) $id);
+        if (!is_null($row)) {
+            foreach ($row as $field => $value) {
+                if (isset($this->config['fields'][$field])) {
+                    $this->data[$field] = $value;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function fetchBy($field, $value)
+    {
+        if (!self::checkConfig($this->config, array('table', 'fields'))) {
+            return false;
+        }
+
+        if (!isset($this->config['fields'][$field])) {
+            BimpTools::logTechnicalError($this, 'fetchBy', 'Le champ "' . $field . '" n\'existe pas');
+            return false;
+        }
+
+        if ($this->config['fields'][$field]['type'] !== 'id') {
+            BimpTools::logTechnicalError($this, 'fetchBy', 'Le champ "' . $field . '" doit être de type "id"');
+            return false;
+        }
+
+        $where = '`' . $field . '` = ' . is_string($value) ? '\'' . $value . '\'' : $value;
+
+        $row = $this->db->getRow($this->config['table'], $where);
+
         if (!is_null($row)) {
             foreach ($row as $property => $value) {
-                if (property_exists($this, $property)) {
-                    $this->{$property} = $value;
+                if (isset($this->config['fields'][$property])) {
+                    $this->data[$property] = $value;
                 }
             }
             return true;
@@ -176,6 +242,10 @@ class BimpObject
 
     public function update()
     {
+        if (!self::checkConfig($this->config, array('table', 'fields'))) {
+            return array('Fichier de configuration invalide');
+        }
+
         $errors = array();
         if (is_null($this->id) || !$this->id) {
             return array('ID Absent');
@@ -183,8 +253,7 @@ class BimpObject
         $errors = $this->validate();
 
         if (!count($errors)) {
-            $data = $this->getDataArray();
-            $result = $this->db->update(static::$table, $data, '`id` = ' . (int) $this->id);
+            $result = $this->db->update($this->config['table'], $this->data, '`id` = ' . (int) $this->id);
             if ($result <= 0) {
                 $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
                 $sqlError = $this->db->db->error();
@@ -200,11 +269,14 @@ class BimpObject
 
     public function create()
     {
+        if (!self::checkConfig($this->config, array('table', 'fields'))) {
+            return array('Fichier de configuration invalide');
+        }
+
         $errors = $this->validate();
 
         if (!count($errors)) {
-            $data = $this->getDataArray();
-            $result = $this->db->insert(static::$table, $data, true);
+            $result = $this->db->insert($this->config['table'], $this->data, true);
             if ($result > 0) {
                 $this->id = $result;
             } else {
@@ -222,40 +294,49 @@ class BimpObject
 
     public function delete()
     {
+        if (!self::checkConfig($this->config, array('table'))) {
+            return array('Fichier de configuration invalide');
+        }
+
         if (is_null($this->id) || !$this->id) {
             return array('ID absent');
         }
+
         $errors = array();
-        $result = $this->db->delete(static::$table, '`id` = ' . (int) $this->id);
+        $result = $this->db->delete($this->config['table'], '`id` = ' . (int) $this->id);
         if ($result <= 0) {
-            $msg = 'Echec de la suppression';
+            $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
             $sqlError = $this->db->db->error();
             if ($sqlError) {
                 $msg .= ' - Erreur SQL: ' . $sqlError;
             }
             $errors[] = $msg;
         } else {
-            foreach (static::$objects as $name => $params) {
-                if (isset($params['delete']) && $params['delete']) {
-                    $class_name = $params['class_name'];
-                    if (class_exists($class_name)) {
-                        if (method_exists($class_name, 'deleteByParent')) {
-                            if (!$class_name::deleteByParent($this->db, $this->id)) {
-                                $msg = 'Des erreurs sont survenues lors de la tentative de suppresion ';
-                                $msg += 'des ' . $class_name::getLabel('name_plur');
-                                $errors[] = $msg;
-                            }
+            if (isset($this->config['objects'])) {
+                foreach ($this->config['objects'] as $name => $params) {
+                    if (isset($params['delete']) && $params['delete']) {
+                        $object_name = $params['object_name'];
+                        $module = isset($params['module']) ? $params['module'] : $this->module;
+                        $instance = self::getInstance($module, $object_name);
+                        if (!$instance->deleteByParent($this->db, $this->id)) {
+                            $msg = 'Des erreurs sont survenues lors de la tentative de suppresion ';
+                            $msg += 'des ' . $instance->getLabel('name_plur');
+                            $errors[] = $msg;
                         }
                     }
                 }
             }
-            foreach (static::$associations as $name => $params) {
-                $where = '`' . $params['self_key'] . '` = ' . (int) $this->id;
-                $result = $this->db->delete($params['table'], $where);
-                if ($result <= 0) {
-                    $asso_class = $params['class_name'];
-                    $msg = 'Echec de la suppression des associations avec les ' . $asso_class::getLabel('name_plur');
-                    $errors[] = $msg;
+
+            if (isset($this->config['associations'])) {
+                foreach ($this->config['associations'] as $name => $params) {
+                    $where = '`' . $params['self_key'] . '` = ' . (int) $this->id;
+                    $result = $this->db->delete($params['table'], $where);
+                    if ($result <= 0) {
+                        $asso_module = isset($params['module']) ? $params['module'] : $this->module;
+                        $asso_instance = self::getInstance($asso_module, $params['object_name']);
+                        $msg = 'Echec de la suppression des associations avec les ' . $asso_instance->getLabel('name_plur');
+                        $errors[] = $msg;
+                    }
                 }
             }
         }
@@ -265,12 +346,18 @@ class BimpObject
 
     public function getDataArray($include_id = false)
     {
+        if (!$this->checkConfig($this->config, array('fields'))) {
+            return array();
+        }
+
         $data = array();
-        foreach (static::$fields as $name => $params) {
-            if (property_exists($this, $name)) {
-                if (!is_null($this->{$name})) {
-                    $data[$name] = $this->{$name};
-                }
+        foreach ($this->config['fields'] as $field => $params) {
+            if (isset($this->data[$field])) {
+                $data[$field] = $this->data[$field];
+            } elseif (isset($this->config['fields'][$field]['default_value'])) {
+                $data[$field] = $this->config['fields'][$field]['default_value'];
+            } else {
+                $data[$field] = null;
             }
         }
         if ($include_id) {
@@ -283,37 +370,75 @@ class BimpObject
         return $data;
     }
 
-    public static function deleteByParent(BimpDb $bdb, $id_parent)
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null)
     {
-        if (is_null($id_parent) || !$id_parent) {
-            return false;
+        if (!$this->checkConfig($this->config, array('table'))) {
+            return array();
         }
 
-        if (!static::$parent_id_property) {
-            return false;
+        $sql = 'SELECT ';
+
+        if (!is_null($return_fields)) {
+            $first_loop = true;
+            foreach ($return_fields as $field) {
+                if (!$first_loop) {
+                    $sql .= ', ';
+                } else {
+                    $first_loop = false;
+                }
+                $sql .= '`' . $field . '`';
+            }
+        } else {
+            $sql .= '*';
         }
 
-        $where = '`' . static::$parent_id_property . '` = ' . (int) $id_parent;
-        $result = $bdb->delete(static::$table, $where);
-        if ($result <= 0) {
-            return false;
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->config['table'];
+
+        if (count($filters)) {
+            $sql .= ' WHERE ';
+            $first_loop = true;
+            foreach ($filters as $field => $value) {
+                if (!$first_loop) {
+                    $sql .= ' AND ';
+                } else {
+                    $first_loop = false;
+                }
+
+                $sql .= '`' . $field . '` = ' . is_string($value) ? '\'' . $value . '\'' : $value;
+            }
         }
-        return true;
+
+        $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
+
+        if (!is_null($n)) {
+            if (is_null($p)) {
+                $p = 1;
+            }
+
+            if ($p > 1) {
+                $offset = (($n * ($p - 1)) - 1);
+            } else {
+                $offset = 0;
+            }
+            $sql .= ' LIMIT ' . $offset . ', ' . $n;
+        }
+
+        $rows = $this->db->executeS($sql, $return);
+
+        if (is_null($rows)) {
+            $rows = array();
+        }
+
+        return $rows;
     }
 
-    public static function getListData(BimpDb $bdb, $id_parent = null)
+    public function getListByParent($id_parent, $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array')
     {
-        if (!is_null($id_parent)) {
-            $where = '`' . static::$parent_id_property . '` = ' . (int) $id_parent;
-        } else {
-            $where = '1';
+        if ($this->checkConfig(array('table', 'parent_id_property'))) {
+            return self::getList(array(
+                        $this->config['parent_id_property'] => $id_parent
+                            ), $n, $p, $order_by, $order_way, $return);
         }
-        $rows = $bdb->getRows(static::$table, $where, null, 'array');
-
-        if (!is_null($rows)) {
-            return $rows;
-        }
-
         return array();
     }
 
@@ -321,12 +446,12 @@ class BimpObject
     {
         $errors = array();
 
-        if (!isset(static::$associations[$association])) {
+        if (!isset($this->config['associations'][$association])) {
             $errors[] = 'le type d\'association "' . $association . '" n\'est pas valide';
         } elseif (is_null($this->id) || !$this->id) {
             $errors[] = 'ID Absent';
         } else {
-            $params = static::$associations[$association];
+            $params = $this->config['associations'][$association];
             $result = $this->db->delete($params['table'], '`' . $params['self_key'] . '` = ' . (int) $this->id);
             if ($result <= 0) {
                 $msg = 'Echec de la suppression des associations existantes';
@@ -336,8 +461,9 @@ class BimpObject
                 }
                 $errors[] = $msg;
             } else {
-                $class_name = $params['class_name'];
-                $label = $class_name::getLabel('the');
+                $module = isset($params['module']) ? $params['module'] : $this->module;
+                $instance = self::getInstance($module, $params['object_name']);
+                $label = $instance->getLabel('the');
                 foreach ($list as $id) {
                     $data = array();
                     $data[$params['self_key']] = (int) $this->id;
@@ -361,15 +487,28 @@ class BimpObject
     {
         $list = array();
 
-        if (!isset(static::$associations[$association])) {
+        if (!isset($this->config['associations'][$association])) {
             return $list;
         }
 
-        $params = static::$associations[$association];
-        $class_name = $params['class_name'];
+        $params = $this->config['associations'][$association];
+        $module = isset($params['module']) ? $params['module'] : $this->module;
+        $instance = self::getInstance($module, $params['object_name']);
 
-        $id_parent = (isset($params['same_parent']) && $params['same_parent']) ? $this->{static::$parent_id_property} : null;
-        return $class_name::getListData($this->db, $id_parent);
+        $id_parent = null;
+        if (isset($params['same_parent']) && $params['same_parent']) {
+            if (isset($this->config['parent_id_property']) &&
+                    isset($this->data[$this->config['parent_id_property']]) &&
+                    $this->data[$this->config['parent_id_property']]) {
+                $id_parent = $this->data[$this->config['parent_id_property']];
+            }
+        }
+
+        if (!is_null($id_parent)) {
+            return $instance->getListByParent($id_parent);
+        }
+
+        return $instance->getList();
     }
 
     public function getAssociatedObjectsIds($association)
@@ -378,11 +517,11 @@ class BimpObject
             return array();
         }
 
-        if (!isset(static::$associations[$association])) {
+        if (!isset($this->config['associations'][$association])) {
             return array();
         }
 
-        $params = static::$associations[$association];
+        $params = $this->config['associations'][$association];
         $sql = 'SELECT `' . $params['associate_key'] . '` as id FROM ' . MAIN_DB_PREFIX . $params['table'];
         $sql .= ' WHERE `' . $params['self_key'] . '` = ' . (int) $this->id;
 
@@ -401,214 +540,46 @@ class BimpObject
         return array();
     }
 
-    // Gestion des intitulés (labels) : 
-
-    public static function getLabels()
+    public function deleteByParent($id_parent)
     {
-        $labels = static::$labels;
-
-        if (isset($labels['name'])) {
-            $objectName = $labels['name'];
-        } else {
-            $objectName = 'objet';
+        if (is_null($id_parent) || !$id_parent) {
+            return false;
         }
 
-        $vowel_first = false;
-        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $objectName)) {
-            $vowel_first = true;
+        if ($this->checkConfig('parent_id_property')) {
+            return self::deleteBy($this->config['table'], array(
+                        $this->config['parent_id_property'] => $id_parent
+            ));
         }
-
-        if (!isset($labels['name_plur'])) {
-            if (preg_match('/^.*[ao]u$/', $objectName)) {
-                $labels['name_plur'] = $objectName . 'x';
-            } elseif (preg_match('/^.*ou$/', $objectName)) {
-                $labels['name_plur'] = $objectName . 'x';
-            } elseif (!preg_match('/^.*s$/', $objectName)) {
-                $labels['name_plur'] = $objectName . 's';
-            } else {
-                $labels['name_plur'] = $objectName;
-            }
-        }
-
-        if (isset($labels['isFemale'])) {
-            $isFemale = $labels['isFemale'];
-        } else {
-            $isFemale = false;
-        }
-        $labels['isFemale'] = $isFemale;
-
-        if (!isset($labels['name'])) {
-            $labels['name'] = 'object';
-        }
-
-        if (!isset($labels['the'])) {
-            if ($vowel_first) {
-                $labels['the'] = 'l\'';
-            } elseif ($isFemale) {
-                $labels['the'] = 'la';
-            } else {
-                $labels['the'] = 'le';
-            }
-        }
-
-        if (!isset($labels['a'])) {
-            if ($isFemale) {
-                $labels['a'] = 'une';
-            } else {
-                $labels['a'] = 'un';
-            }
-        }
-
-        if (!isset($labels['this'])) {
-            if ($isFemale) {
-                $labels['this'] = 'cette';
-            } elseif ($vowel_first) {
-                $labels['this'] = 'cet';
-            } else {
-                $labels['this'] = 'ce';
-            }
-        }
-
-        if (!isset($labels['of_a'])) {
-            if ($isFemale) {
-                $labels['of_the'] = 'd\'une';
-            } else {
-                $labels['of_the'] = 'd\'un';
-            }
-        }
-
-        if (!isset($labels['of_the'])) {
-            if ($vowel_first) {
-                $labels['of_the'] = 'de l\'';
-            } elseif ($isFemale) {
-                $labels['of_the'] = 'de la';
-            } else {
-                $labels['of_the'] = 'du';
-            }
-        }
-
-        if (!isset($labels['of_this'])) {
-            if ($isFemale) {
-                $labels['of_this'] = 'de cette';
-            } elseif ($vowel_first) {
-                $labels['of_this'] = 'de cet';
-            } else {
-                $labels['of_this'] = 'de ce';
-            }
-        }
-
-        if (!isset($labels['of_those'])) {
-            $labels['of_those'] = 'de ces';
-        }
-
-        return $labels;
     }
 
-    public static function getLabel($type = '')
+    public static function deleteBy($filters)
     {
-        $labels = static::$labels;
-
-        if (isset($labels['name'])) {
-            $objectName = $labels['name'];
-        } else {
-            $objectName = 'objet';
+        if (is_null($filters) || !count($filters)) {
+            return false;
+        }
+        
+        if ($this->checkConfig('table')) {
+            return false;
         }
 
-        $vowel_first = false;
-        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $objectName)) {
-            $vowel_first = true;
-        }
-
-        $name_plur = '';
-
-        if (!isset($labels['name_plur'])) {
-            if (preg_match('/^.*[ao]u$/', $objectName)) {
-                $name_plur = $objectName . 'x';
-            } elseif (preg_match('/^.*ou$/', $objectName)) {
-                $name_plur = $objectName . 'x';
-            } elseif (!preg_match('/^.*s$/', $objectName)) {
-                $name_plur = $objectName . 's';
+        $first_loop = true;
+        $where = '';
+        foreach ($filters as $key => $value) {
+            if (!$first_loop) {
+                $where .= ' AND ';
+            } else {
+                $first_loop = false;
             }
-        } else {
-            $name_plur = $labels['name_plur'];
+
+            $where .= '`' . $key . '` = ' . is_string($value) ? '\'' . $value . '\'' : $value;
         }
 
-        if (isset($labels['isFemale'])) {
-            $isFemale = $labels['isFemale'];
-        } else {
-            $isFemale = false;
+        $result = $this->db->delete($this->config['table'], $where);
+        if ($result <= 0) {
+            return false;
         }
-
-        switch ($type) {
-            case '':
-                return $objectName;
-
-            case 'name_plur':
-                return $name_plur;
-
-            case 'the':
-                if ($vowel_first) {
-                    return 'l\'' . $objectName;
-                } elseif ($isFemale) {
-                    return 'la ' . $objectName;
-                } else {
-                    return 'le ' . $objectName;
-                }
-
-            case 'a':
-                if ($isFemale) {
-                    return 'une ' . $objectName;
-                } else {
-                    return 'un ' . $objectName;
-                }
-
-            case 'this':
-                if ($isFemale) {
-                    return 'cette ' . $objectName;
-                } elseif ($vowel_first) {
-                    return 'cet ' . $objectName;
-                } else {
-                    return 'ce ' . $objectName;
-                }
-
-            case 'of_a':
-                if ($isFemale) {
-                    return 'd\'une ' . $objectName;
-                } else {
-                    return 'd\'un ' . $objectName;
-                }
-
-            case 'of_the':
-                if ($vowel_first) {
-                    return 'de l\'' . $objectName;
-                } elseif ($isFemale) {
-                    return 'de la ' . $objectName;
-                } else {
-                    return 'du ' . $objectName;
-                }
-
-            case 'of_this':
-                if ($isFemale) {
-                    return 'de cette ' . $objectName;
-                } elseif ($vowel_first) {
-                    return 'de cet ' . $objectName;
-                } else {
-                    return 'de ce ' . $objectName;
-                }
-
-            case 'of_those':
-                return 'de ces ' . $name_plur;
-        }
-
-        return $objectName;
-    }
-
-    public static function isLabelFemale()
-    {
-        if (isset(static::$labels['isFemale'])) {
-            return static::$labels['isFemale'];
-        }
-        return false;
+        return true;
     }
 
     // Générations HTML: 
@@ -749,7 +720,7 @@ class BimpObject
         return $html;
     }
 
-    public static function renderCreateForm($id_parent = null)
+    public function renderCreateForm($id_parent = null)
     {
 
         $html .= '<table class="noborder" width="100%">';
@@ -762,9 +733,7 @@ class BimpObject
         $html .= '<tr>';
         $html .= '<td>';
 
-        $class_name = static::getClass();
-        $object = new $class_name();
-        $html .= $object->renderForm($id_parent);
+        $html .= $this->renderForm($id_parent);
 
         $html .= '</td/>';
         $html .= '</tr/>';
@@ -889,333 +858,6 @@ class BimpObject
         return $html;
     }
 
-    public static function renderList($id_parent = null)
-    {
-        global $db;
-        $form = new Form($db);
-
-        if (isset(static::$list_params)) {
-            $params = static::$list_params;
-        } else {
-            $params = array();
-        }
-
-        $html = '<script type="text/javascript">';
-        $html .= 'var object_labels = ' . json_encode(static::getLabels());
-        $html .= '</script>';
-
-        $html .= '<div id="' . static::getClass() . '_listContainer">';
-
-        $html .= '<table class="noborder" width="100%">';
-
-        $html .= '<tr class="liste_titre">';
-        $html .= '<td>';
-        if (isset($params['title'])) {
-            $html .= $params['title'];
-        } else {
-            $html .= 'Liste des ' . static::getLabel('name_plur');
-        }
-        $html .= '</td>';
-        $html .= '</tr>';
-
-        $html .= '<tr>';
-        $html .= '<td>';
-
-        $html .= '<div id="' . static::getClass() . '_list_table" class="objectListTable">';
-        if (!is_null($id_parent)) {
-            $html .= '<input type="hidden" id="' . static::getClass() . '_id_parent" value="' . $id_parent . '"/>';
-        }
-        $html .= '<table class="noborder" style="border: none" width="100%">';
-
-        $nHeaders = 0;
-        if (isset($params['headers'])) {
-            $html .= '<thead>';
-            $html .= '<tr>';
-
-            if (isset($params['checkboxes']) && $params['checkboxes']) {
-                $html .= '<th width="5%" style="text-align: center">';
-                $html .= '<input type="checkbox" id="' . static::getClass() . '_checkall" onchange="toggleCheckAll(\'' . static::getClass() . '\', $(this));"/>';
-                $html .= '</th>';
-                $nHeaders++;
-            }
-
-            foreach ($params['headers'] as $header) {
-                $html .= '<th' . (isset($header['width']) ? ' width="' . $header['width'] . '%"' : '' ) . '>';
-                if (isset($header['label'])) {
-                    $html .= $header['label'];
-                }
-                $html .= '</th>';
-                $nHeaders++;
-            }
-
-            $html .= '</tr>';
-            $html .= '</thead>';
-        }
-
-        $html .= '<tbody>';
-
-        $html .= static::renderListRows($id_parent);
-
-        if (isset($params['row_form_inputs'])) {
-            $html .= '<tr id="' . static::getClass() . '_listInputsRow" class="inputsRow">';
-            if (isset($params['checkboxes']) && $params['checkboxes']) {
-                $html .= '<td></td>';
-            }
-            if (!is_null($id_parent)) {
-                $html .= '<td style="display: none">';
-                $html .= '<input typê="hidden" class="objectListRowInput" name="' . static::$parent_id_property . '" ';
-                $html .= 'value="' . $id_parent . '" data-default_value="' . $id_parent . '"/>';
-                $html .= '</td>';
-            }
-            foreach ($params['row_form_inputs'] as $input) {
-                $html .= '<td' . (($input['type'] === 'hidden') ? ' style="display: none"' : '') . '>';
-                if ($input['type'] !== 'empty') {
-                    if ($input['type'] === 'switch') {
-                        $defVal = 1;
-                        $html .= '<select id="rowInput_' . static::getClass() . '_' . $input['id'] . '" class="switch objectListRowInput" name="' . $input['name'] . '"';
-                        if (isset($input['default_value'])) {
-                            $html .= ' data-default_value="' . $input['default_value'] . '"';
-                            $defVal = (int) $input['default_value'];
-                        }
-                        $html .= '>';
-                        $html .= '<option value="1"' . (($defVal === 1) ? ' selected' : '') . '>OUI</option>';
-                        $html .= '<option value="0"' . (($defVal === 0) ? ' selected' : '') . '>NON</option>';
-                        $html .= '</select>';
-                    } elseif ($input['type'] === 'datetime') {
-                        if (isset($input['default_value'])) {
-                            $defVal = $input['default_value'];
-                        } else {
-                            $defVal = '0000-00-00 00:00';
-                        }
-                        $DT = new DateTime($defVal);
-                        $html .= $form->select_date($DT->getTimestamp(), $input['name'], 1, 1);
-                        unset($DT);
-                    } else {
-                        $html .= '<input type="' . $input['type'] . '" name="' . $input['name'] . '" ';
-                        $html .= 'class="objectListRowInput" id="rowInput_' . static::getClass() . '_' . $input['id'] . '"';
-                        $html .= 'value="';
-                        if (isset($input['default_value'])) {
-                            $html .= $input['default_value'] . '" data-default_value="' . $input['default_value'];
-                        }
-                        $html .= '"/>';
-                    }
-                }
-                $html .= '</td>';
-            }
-            $html .= '<td>';
-            $html .= '<span class="butAction" onclick="addObjectFromListInputsRow(\'' . static::getClass() . '\', $(this))">Ajouter</span>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        $html .= '</tbody>';
-        $html .= '</table>';
-        $html .= '<div class="ajaxResultContainer" id="' . static::getClass() . '_listResultContainer"></div>';
-        $html .= '</div>';
-        $html .= '</td>';
-        $html .= '</tr>';
-
-        if (isset($params['bulk_actions'])) {
-            $html .= '<tr>';
-            $html .= '<td style="padding: 15px 10px">';
-            foreach ($params['bulk_actions'] as $action) {
-                $html .= '<span class="butAction';
-                if (isset($action['btn_class'])) {
-                    $html .= ' ' . $action['btn_class'];
-                }
-                $html .= '" onclick="' . $action['onclick'] . '">';
-                $html .= $action['label'];
-                $html .= '</span>';
-            }
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        $html .= '</table>';
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    public static function renderListRows($id_parent = null)
-    {
-        if (isset(static::$list_params)) {
-            $params = static::$list_params;
-        } else {
-            $params = array();
-        }
-        global $db;
-        $bdb = new BimpDb($db);
-        $form = new Form($db);
-        $rows = static::getListData($bdb, $id_parent);
-
-        $html = '';
-
-        if (count($rows)) {
-            foreach ($rows as $r) {
-                $html .= '<tr class="' . static::getClass() . '_row" id="' . static::getClass() . '_row_' . $r['id'] . '">';
-                if (!is_null($id_parent)) {
-                    $html .= '<td style="display: none">';
-                    $html .= '<input type="hidden" class="objecRowEditInput" value="' . $id_parent . '" name="';
-                    if (!is_null(static::$parent_id_property)) {
-                        $html .= static::$parent_id_property;
-                    } else {
-                        $html .= 'id_parent';
-                    }
-                    $html .= '">';
-                    $html .= '</td>';
-                }
-
-                if (isset($params['checkboxes']) && $params['checkboxes']) {
-                    $html .= '<td style="text-align: center">';
-                    $html .= '<input type="checkbox" id_="' . static::getClass() . '_check_' . $r['id'] . '"';
-                    $html .= ' name="' . static::getClass() . '_check"';
-                    $html .= ' class="item_check"';
-                    $html .= ' data-id_object="' . $r['id'] . '"';
-                    $html .= '</td>';
-                }
-
-                if (isset($params['cols'])) {
-                    foreach ($params['cols'] as $col) {
-                        if (isset($col['params_callback'])) {
-                            if (method_exists(static::getClass(), $col['params_callback'])) {
-                                static::{$col['params_callback']}($col, $r);
-                            }
-                        }
-                        $html .= '<td' . (isset($col['hidden']) && $col['hidden'] ? ' style="display: none"' : '') . '>';
-                        if (isset($col['input'])) {
-                            if ($col['input'] === 'text') {
-                                $html .= '<input type="text" class="objecRowEditInput" name="' . $col['name'] . '" value="';
-                                if (isset($r[$col['name']])) {
-                                    $html .= $r[$col['name']];
-                                }
-                                $html .= '"/>';
-                            } elseif ($col['input'] === 'switch') {
-                                $val = 0;
-                                if (isset($r[$col['name']])) {
-                                    $val = (int) $r[$col['name']];
-                                }
-                                $html .= '<select class="switch objecRowEditInput" name="' . $col['name'] . '">';
-                                $html .= '<option value="1"' . (((int) $val !== 0) ? ' selected' : '') . '>OUI</option>';
-                                $html .= '<option value="0"' . (((int) $val === 0) ? ' selected' : '') . '>NON</option>';
-                                $html .= '</select>';
-                            } elseif ($col['input'] === 'datetime') {
-                                if (isset($r[$col['name']])) {
-                                    $val = $r[$col['name']];
-                                } else {
-                                    $val = '0000-00-00 00:00';
-                                }
-                                $DT = new DateTime($val);
-                                $html .= $form->select_date($DT->getTimestamp(), $col['name'], 1, 1);
-                                unset($DT);
-                            } elseif ($col['input'] === 'select') {
-                                $html .= '<select class="objecRowEditInput" name="' . $col['name'] . '">';
-                                if (isset($col['options'])) {
-                                    $options = array();
-                                    if (is_array($col['options'])) {
-                                        $options = $col['options'];
-                                    } elseif (property_exists(static::getClass(), $col['options'])) {
-                                        $options = static::${$col['options']};
-                                    } else {
-                                        $method_name = 'get' . ucfirst($col['options']) . 'QueryArray';
-                                        if (method_exists(static::getClass(), $method_name)) {
-                                            $options = static::{$method_name}($id_parent);
-                                        }
-                                    }
-                                    foreach ($options as $value => $label) {
-                                        $html .= '<option value="' . $value . '">' . $label . '</option>';
-                                    }
-                                }
-                                $html .= '</select>';
-                            }
-                        } elseif (isset($col['data_type'])) {
-                            switch ($col['data_type']) {
-                                case 'bool':
-                                    if ((int) $r[$col['name']] === 1) {
-                                        $html .= '<span class="success">OUI</span>';
-                                    } else {
-                                        $html .= '</span class="danger">NON</span>';
-                                    }
-                                    break;
-
-                                case 'array_value':
-                                    if (isset($col['array_name'])) {
-                                        $array = array();
-                                        $array_value = '';
-                                        if (property_exists(static::getClass(), $col['array_name'])) {
-                                            $array = static::${$col['array_name']};
-                                        } else {
-                                            $method_name = 'get' . ucfirst($col['array_name']) . 'QueryArray';
-                                            if (method_exists(static::getClass(), $method_name)) {
-                                                $array = static::{$method_name}($id_parent);
-                                            }
-                                        }
-                                        if (array_key_exists($r[$col['name']], $array)) {
-                                            $array_value = $array[$r[$col['name']]];
-                                        }
-                                    }
-                                    if (!$array_value) {
-                                        $array_value = $r[$col['name']];
-                                    }
-                                    $html .= $array_value;
-                                    break;
-
-                                case 'datetime':
-                                    $date = new DateTime($r[$col['name']]);
-                                    $html .= $date->format('d / m / Y H:i');
-                                    break;
-
-                                case 'string':
-                                default:
-                                    $html .= $r[$col['name']];
-                                    break;
-                            }
-                        }
-                        $html .= '</td>';
-                    }
-                }
-                $html .= '<td>';
-                if (isset($params['update_btn']) && $params['update_btn']) {
-                    $html .= '<span class="butAction" onclick="updateObjectFromRow(\'' . static::getClass() . '\', ' . $r['id'] . ', $(this))">';
-                    $html .= 'Mettre à jour';
-                    $html .= '</span>';
-                }
-                if (isset($params['edit_btn']) && $params['edit_btn']) {
-                    $html .= '<span class="butAction" onclick="openObjectForm(\'' . static::getClass() . '\', ' . $id_parent . ', ' . $r['id'] . ')">';
-                    $html .= 'Editer';
-                    $html .= '</span>';
-                }
-                if (isset($params['delete_btn']) && $params['delete_btn']) {
-                    $html .= '<span class="butActionDelete" onclick="deleteObjects(\'' . static::getClass() . '\', [' . $r['id'] . '], $(this), ';
-                    $html .= '$(\'#' . static::getClass() . '_listResultContainer\'))">';
-                    $html .= 'Supprimer';
-                    $html .= '</span>';
-                }
-                $html .= '</td>';
-                $html .= '</tr>';
-            }
-        } else {
-            if (isset($params['headers'])) {
-                $nHeaders = count($params['headers']);
-                if (isset($params['checkboxes']) && $params['checkboxes']) {
-                    $nHeaders++;
-                }
-            } else {
-                $nHeaders = 1;
-            }
-            $html .= '<tr>';
-            $html .= '<td  colspan="' . $nHeaders . '" style="text-align: center">';
-            $html .= '<p class="alert alert-info">';
-            $html .= 'Aucun' . (static::$labels['isFemale'] ? 'e' : '') . ' ' . static::$labels['name'];
-            $html .= ' enregistré' . (static::$labels['isFemale'] ? 'e' : '') . ' pour le moment';
-            $html .= '</p>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        return $html;
-    }
-
     public static function renderFormAndList()
     {
         $html = '';
@@ -1236,26 +878,6 @@ class BimpObject
         $html .= '</div>';
 
         return $html;
-    }
-
-    public function renderObjectsList($object_name)
-    {
-        if (is_null($this->id) || !$this->id) {
-            return '';
-        }
-
-        if (isset(static::$objects[$object_name])) {
-            $className = static::$objects[$object_name]['class_name'];
-            if (!class_exists($className)) {
-                require_once __DIR__ . '/' . $className . '.class.php';
-            }
-
-            if (class_exists($className)) {
-                return $className::renderList($this->id);
-            }
-        }
-
-        return '';
     }
 
     public function renderObjectFormAndList($object_name)
@@ -1295,5 +917,269 @@ class BimpObject
         }
 
         return $html;
+    }
+
+    // Gestion du fichier de configuration: 
+
+    public static function loadConfig($module, $object_name)
+    {
+        $file = DOL_DOCUMENT_ROOT . $module . '/objects/' . $object_name . '.yml';
+        if (!file_exists($file)) {
+            self::logConfigError($object_name, 'Fichier de configuration "' . $file . '" absent');
+            return false;
+        }
+
+        return spyc_load_file($file);
+    }
+
+    public static function checkConfig($config, $properties)
+    {
+        if (is_null($config)) {
+            return false;
+        }
+
+        if (!is_array($properties)) {
+            $properties = array($properties);
+        }
+
+        $check = true;
+        foreach ($properties as $property) {
+            if (!isset($config[$property])) {
+                self::logConfigUndefinedValue($this->object_name, $property);
+                $check = false;
+            }
+        }
+        return true;
+    }
+
+    public static function logConfigUndefinedValue($object_name, $property)
+    {
+        self::logConfigError($object_name, '"' . $property . '" non défini');
+    }
+
+    public static function logConfigError($object_name, $msg)
+    {
+        $message = 'Erreur de configuration pour l\'objet "' . $object_name . '" - ' . $msg;
+        dol_syslog($message, LOG_ERR);
+    }
+
+    // Gestion des intitulés (labels) : 
+
+    public function getLabels()
+    {
+        if (!$this->checkConfig('labels')) {
+            return array();
+        }
+
+        $labels = $this->config['labels'];
+
+        if (isset($labels['name'])) {
+            $objectName = $labels['name'];
+        } else {
+            $objectName = 'objet';
+        }
+
+        $vowel_first = false;
+        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $objectName)) {
+            $vowel_first = true;
+        }
+
+        if (!isset($labels['name_plur'])) {
+            if (preg_match('/^.*[ao]u$/', $objectName)) {
+                $labels['name_plur'] = $objectName . 'x';
+            } elseif (preg_match('/^.*ou$/', $objectName)) {
+                $labels['name_plur'] = $objectName . 'x';
+            } elseif (!preg_match('/^.*s$/', $objectName)) {
+                $labels['name_plur'] = $objectName . 's';
+            } else {
+                $labels['name_plur'] = $objectName;
+            }
+        }
+
+        if (isset($labels['isFemale'])) {
+            $isFemale = $labels['isFemale'];
+        } else {
+            $isFemale = false;
+        }
+        $labels['isFemale'] = $isFemale;
+
+        if (!isset($labels['name'])) {
+            $labels['name'] = 'object';
+        }
+
+        if (!isset($labels['the'])) {
+            if ($vowel_first) {
+                $labels['the'] = 'l\'';
+            } elseif ($isFemale) {
+                $labels['the'] = 'la';
+            } else {
+                $labels['the'] = 'le';
+            }
+        }
+
+        if (!isset($labels['a'])) {
+            if ($isFemale) {
+                $labels['a'] = 'une';
+            } else {
+                $labels['a'] = 'un';
+            }
+        }
+
+        if (!isset($labels['this'])) {
+            if ($isFemale) {
+                $labels['this'] = 'cette';
+            } elseif ($vowel_first) {
+                $labels['this'] = 'cet';
+            } else {
+                $labels['this'] = 'ce';
+            }
+        }
+
+        if (!isset($labels['of_a'])) {
+            if ($isFemale) {
+                $labels['of_the'] = 'd\'une';
+            } else {
+                $labels['of_the'] = 'd\'un';
+            }
+        }
+
+        if (!isset($labels['of_the'])) {
+            if ($vowel_first) {
+                $labels['of_the'] = 'de l\'';
+            } elseif ($isFemale) {
+                $labels['of_the'] = 'de la';
+            } else {
+                $labels['of_the'] = 'du';
+            }
+        }
+
+        if (!isset($labels['of_this'])) {
+            if ($isFemale) {
+                $labels['of_this'] = 'de cette';
+            } elseif ($vowel_first) {
+                $labels['of_this'] = 'de cet';
+            } else {
+                $labels['of_this'] = 'de ce';
+            }
+        }
+
+        if (!isset($labels['of_those'])) {
+            $labels['of_those'] = 'de ces';
+        }
+
+        return $labels;
+    }
+
+    public function getLabel($type = '')
+    {
+        if (!$this->checkConfig('labels')) {
+            return '';
+        }
+
+        $labels = $this->config['labels'];
+
+        if (isset($labels['name'])) {
+            $objectName = $labels['name'];
+        } else {
+            $objectName = 'objet';
+        }
+
+        $vowel_first = false;
+        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $objectName)) {
+            $vowel_first = true;
+        }
+
+        $name_plur = '';
+
+        if (!isset($labels['name_plur'])) {
+            if (preg_match('/^.*[ao]u$/', $objectName)) {
+                $name_plur = $objectName . 'x';
+            } elseif (preg_match('/^.*ou$/', $objectName)) {
+                $name_plur = $objectName . 'x';
+            } elseif (!preg_match('/^.*s$/', $objectName)) {
+                $name_plur = $objectName . 's';
+            }
+        } else {
+            $name_plur = $labels['name_plur'];
+        }
+
+        if (isset($labels['isFemale'])) {
+            $isFemale = $labels['isFemale'];
+        } else {
+            $isFemale = false;
+        }
+
+        switch ($type) {
+            case '':
+                return $objectName;
+
+            case 'name_plur':
+                return $name_plur;
+
+            case 'the':
+                if ($vowel_first) {
+                    return 'l\'' . $objectName;
+                } elseif ($isFemale) {
+                    return 'la ' . $objectName;
+                } else {
+                    return 'le ' . $objectName;
+                }
+
+            case 'a':
+                if ($isFemale) {
+                    return 'une ' . $objectName;
+                } else {
+                    return 'un ' . $objectName;
+                }
+
+            case 'this':
+                if ($isFemale) {
+                    return 'cette ' . $objectName;
+                } elseif ($vowel_first) {
+                    return 'cet ' . $objectName;
+                } else {
+                    return 'ce ' . $objectName;
+                }
+
+            case 'of_a':
+                if ($isFemale) {
+                    return 'd\'une ' . $objectName;
+                } else {
+                    return 'd\'un ' . $objectName;
+                }
+
+            case 'of_the':
+                if ($vowel_first) {
+                    return 'de l\'' . $objectName;
+                } elseif ($isFemale) {
+                    return 'de la ' . $objectName;
+                } else {
+                    return 'du ' . $objectName;
+                }
+
+            case 'of_this':
+                if ($isFemale) {
+                    return 'de cette ' . $objectName;
+                } elseif ($vowel_first) {
+                    return 'de cet ' . $objectName;
+                } else {
+                    return 'de ce ' . $objectName;
+                }
+
+            case 'of_those':
+                return 'de ces ' . $name_plur;
+        }
+
+        return $objectName;
+    }
+
+    public function isLabelFemale()
+    {
+        if ($this->checkConfig('labels')) {
+            if (isset($this->config['labels']['isFemale'])) {
+                return (int) $this->config['labels']['isFemale'];
+            }
+        }
+        return false;
     }
 }

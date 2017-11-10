@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessCronOption extends BimpObject
+class BDSProcessCronOption extends BDSObject
 {
 
     public static $table = 'bds_process_cron_option';

@@ -1,0 +1,35 @@
+bootstrap: 1
+object:
+    instance: 
+        bimp_object: Equipment
+
+sections:
+    - type: tabs
+      tabs:
+          default:
+              label: Fiche
+              sections:
+                  - type: view
+          history:
+              label: Historique
+              sections:
+                  - type: list
+                    object:
+                        instance: 
+                            bimp_object: EquipementHistory
+    - type: buttons
+      buttons:
+          - label: Accueil Hotline
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary
+          - label: Liste des équipements
+            url:
+                controller: index
+                url_params:
+                    tab: equipments
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

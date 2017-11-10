@@ -1,0 +1,100 @@
+table: bh_note
+parent_id_property: id_ticket
+parent_object: BH_Ticket
+
+labels: 
+    name: note
+    is_female: 1
+
+fields:
+    id_ticket: 
+        label: Ticket
+        type: id_parent
+        input: 
+            type: hidden
+        display:
+            default: 
+                type: nom
+        required: 1
+        sortable: 1
+    
+    id_inter:
+        label: Intervention
+        type: id_object
+        object: 
+            instance: 
+                bimp_object: BH_Inter
+                fetch:
+                    id: 
+                        field_value: id_inter
+        input: 
+            type: select
+            options:
+                array: interventions
+        required: 0
+        default_value: 0
+        sortable: 1
+        search: 1
+        display: 
+            default: 
+                type: array_value
+                values: 
+                    array: interventions
+                    
+    visibility:
+        label: Visibilité
+        type: int
+        input: 
+            type: select
+            options:
+                array: visibilities
+        search: 1
+        sortable: 1
+        display: 
+            default: 
+                type: array_value
+                values: 
+                    array: visibilities
+                    
+    content: 
+        label: Contenu
+        type: string
+        input:
+            type: textarea
+        sortable: 0
+        
+list:
+    title: Notes
+    checkboxes: 1
+    bulk_actions: 
+        - label: Supprimer les notes sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: date_create
+    sort_way: desc
+    n: 50
+    cols:
+        date_create:
+            label: Date
+            field: date_create
+        user_create:
+            label: Auteur
+            field: user_create
+        inter:
+            label: Intervention
+            field: id_inter
+            edit: 1
+        visibilite:
+            label: Visibilité
+            field: visibility
+            edit: 1
+        contenu:
+            label: Contenu
+            field: content
+            edit: 1
+            min_width: 350px
+    add_btn: 1
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1

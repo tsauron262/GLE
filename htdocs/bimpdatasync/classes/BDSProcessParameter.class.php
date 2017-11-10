@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessParameter extends BimpObject
+class BDSProcessParameter extends BDSObject
 {
 
     public static $table = 'bds_process_parameter';
@@ -103,7 +103,7 @@ class BDSProcessParameter extends BimpObject
         return 'BDSProcessParameter';
     }
 
-    public static function getParameterLabel(BimpDb $bdb, $id_process, $name)
+    public static function getParameterLabel(BDSDb $bdb, $id_process, $name)
     {
         $where = '`id_process` = ' . (int) $this->processDefinition->id;
         $where .= ' AND `name` = \'' . $name . '\'';

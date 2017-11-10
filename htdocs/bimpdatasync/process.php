@@ -31,9 +31,10 @@ if (!$id_process) {
 
     $date = new DateTime();
     $to = $date->format('Ymd-His');
-    $date->sub(new DateInterval('P15D'));
+    $date->sub(new DateInterval('P5D'));
     $from = $date->format('Ymd-His');
     $data = BDS_Report::getReportsDetails($from, $to);
+    ini_set('display_errors', 1);
     echo renderProcessesRecentActivity($data);
 } else {
     $process = new BDSProcess();
@@ -48,7 +49,7 @@ if (!$id_process) {
     print load_fiche_titre($process->title, '', 'title_generic.png');
 
     global $db;
-    $bdb = new BimpDb($db);
+    $bdb = new BDSDb($db);
 
     $head = process_prepare_head($process);
     $tab = BDS_Tools::getValue('tab', 'general');

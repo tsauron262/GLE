@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessOption extends BimpObject
+class BDSProcessOption extends BDSObject
 {
 
     public static $table = 'bds_process_option';

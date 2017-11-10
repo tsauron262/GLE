@@ -28,11 +28,11 @@
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/treeview.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/treeviewbrowser.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
 
-$arrayofjs=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.js', '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js');
+$arrayofjs=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.js', '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js', '/bimpproductbrowser/js/checkboxManager.js');
 $arrayofcss=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css');
 
 $langs->load("categories");
@@ -174,8 +174,7 @@ if ($nbofentries > 0)
 {
     print '<tr class="pair"><td colspan="3">';
     tree_recur_checkbox($data,$data[0],0);
-/*    tree_recur($data,$data[0],0);*/
-    print '</td></tr>';
+    print '</td></tr></form>';
 }
 else
 {

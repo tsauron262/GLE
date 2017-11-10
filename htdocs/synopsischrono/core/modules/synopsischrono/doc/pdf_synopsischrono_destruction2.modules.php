@@ -216,7 +216,7 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
 
                 //centre
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                $pdf->SetXY('53', '178.6');
+                $pdf->SetXY('47', '178.6');
                 $pdf->MultiCell(100, 6, "BIMP ".$chrono->valuesPlus[1060]->valueStr, 0, 'L');
                 
                 $adresseDest = "Palais de justice «  Novarina »
@@ -224,7 +224,7 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
 BP 2321
 74011 Annecy le vieux";
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->SetXY('112', '75.5');
+                $pdf->SetXY('95', '55');
                 $pdf->MultiCell(100, 6, $adresseDest, 0, 'L');
 //                $pdf->SetXY('142', '51');
 //                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][1], 0, 'L');

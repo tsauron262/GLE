@@ -51,7 +51,7 @@ class Synopsisfichinter extends Fichinter {
     public $element = 'synopsisfichinter';
     public $table_element = 'Synopsis_fichinter';
     public $fk_element = 'fk_fichinter';
-    public $table_element_line = 'Synopsis_fichinterdet';
+    public $table_element_line = 'synopsis_fichinterdet';
     public $id;
     public $socid;        // Id client
     public $client;        // Objet societe client (a charger par fetch_client)
@@ -969,7 +969,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
 
     public $db;
     public $error;
-    // From ".MAIN_DB_PREFIX."Synopsis_fichinterdet
+    // From ".MAIN_DB_PREFIX."synopsis_fichinterdet
     public $rowid;
     public $fk_fichinter;
     public $desc;              // Description ligne
@@ -1002,7 +1002,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $sql = 'SELECT ft.rowid, ft.fk_fichinter, ft.description, ft.duree, ft.rang, ft.fk_typeinterv, f.label as typeinterv ';
         $sql .= ',`tx_tva`,`pu_ht` ,`qte`,`total_ht`,`total_tva`,`total_ttc`,`fk_contratdet`,`fk_commandedet`,`isForfait`';
         $sql.= ' ,ft.date as datei,fk_depProduct,f.isDeplacement';
-        $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as ft";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet as ft";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv";
 
         
@@ -1257,7 +1257,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
     function update_total() {
         global $user, $langs, $conf;
         /*        $sql = "SELECT SUM(duree) as total_duration";
-          $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet";
+          $sql.= " FROM ".MAIN_DB_PREFIX."synopsis_fichinterdet";
           $sql.= " WHERE fk_fichinter=".$this->fk_fichinter;
 
           dol_syslog("FichinterLigne::update_total sql=".$sql);
@@ -1306,7 +1306,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
                                    sum(total_tva) as stva,
                                    sum(total_ttc) as sttc,
                                    sum(duree) as sdur
-                              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet
+                              FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet
                              WHERE fk_fichinter = " . $this->fk_fichinter;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);

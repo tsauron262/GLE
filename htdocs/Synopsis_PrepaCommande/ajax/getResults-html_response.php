@@ -83,7 +83,7 @@ if ($com->id > 0) {
     $requete = "SELECT SUM(interdet.duree) as durTot ,
                    SUM(interdet.total_ht) as totHT
               FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter inter,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinterdet interdet,
+                   " . MAIN_DB_PREFIX . "synopsis_fichinterdet interdet,
                    " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv t
              WHERE t.id=interdet.fk_typeinterv
                AND interdet.fk_fichinter = inter.rowid
@@ -159,7 +159,7 @@ if ($com->id > 0) {
 //table avec le dispatch
     $requete = "SELECT SUM(dt.total_ht) as tht, t.label
               FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter as d,
-                  " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as dt,
+                  " . MAIN_DB_PREFIX . "synopsis_fichinterdet as dt,
                   " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as t
              WHERE d.fk_commande  IN (" . join(',', $arrGrpCom) . ") " .
             " AND t.id = dt.fk_typeinterv

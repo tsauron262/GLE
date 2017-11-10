@@ -1533,7 +1533,7 @@ EOF;
                    fk_contratdet,
                    isForfait';
     $sql.= ', ft.date as date_intervention';
-    $sql.= ' FROM ' . MAIN_DB_PREFIX . 'Synopsis_fichinterdet as ft';
+    $sql.= ' FROM ' . MAIN_DB_PREFIX . 'synopsis_fichinterdet as ft';
     $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv ";
     $sql.= ' WHERE ft.fk_fichinter = ' . $fichinterid;
     $sql.= ' ORDER BY ft.rang ASC, ft.rowid';
@@ -1891,7 +1891,7 @@ EOF;
         print '<td align="center" valign="middle" colspan="4"><input type="submit" class="button" value="' . $langs->trans('Add') . '" name="addligne"></td>';
         print '</tr>';
         if ($fichinter->fk_contrat > 0 && $afficherLigneContrat) {
-            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
             $sql = $db->query($requete);
             $arrTmp = array();
             while ($res = $db->fetch_object($sql)) {

@@ -426,7 +426,7 @@ include("./rapport2.php");die();
 //
 //function afficheParType($tabIdFi) {
 //    global $db, $additionP;
-//    $requeteType2 = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(fdet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv` ;";
+//    $requeteType2 = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(fdet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv` ;";
 //    $result2 = $db->query($requeteType2);
 //    $tabResult = array();
 //    while ($ligne = $db->fetch_object($result2)) {
@@ -485,7 +485,7 @@ include("./rapport2.php");die();
 //    }
 //
 //
-//    $requeteType4 = "SELECT SUM(cdet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "commandedet cdet, " . MAIN_DB_PREFIX . "Synopsis_fichinterdet  fdet  WHERE fdet.fk_commandedet = cdet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet IS NULL || fk_contratdet = 0) GROUP BY  `fk_typeinterv`;";
+//    $requeteType4 = "SELECT SUM(cdet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "commandedet cdet, " . MAIN_DB_PREFIX . "synopsis_fichinterdet  fdet  WHERE fdet.fk_commandedet = cdet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet IS NULL || fk_contratdet = 0) GROUP BY  `fk_typeinterv`;";
 //    $result4 = $db->query($requeteType4);
 //    while ($ligne = $db->fetch_object($result4)) {
 //        if ($tabResult[$ligne->ty][3] > 0 && $tabResult[$ligne->ty][10] > 0 && $tabResult[$ligne->ty][3] < $tabResult[$ligne->ty][10])
@@ -496,7 +496,7 @@ include("./rapport2.php");die();
 ////            echo "|||".$coef."|";
 //        $tabResult[$ligne->ty][4] = $ligne->prix * $coef;
 //    }
-//    $requeteType5 = "SELECT SUM(codet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "contratdet codet, " . MAIN_DB_PREFIX . "Synopsis_fichinterdet  fdet  WHERE fdet.fk_contratdet = codet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv`;";
+//    $requeteType5 = "SELECT SUM(codet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "contratdet codet, " . MAIN_DB_PREFIX . "synopsis_fichinterdet  fdet  WHERE fdet.fk_contratdet = codet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv`;";
 //    $result5 = $db->query($requeteType5);
 //    while ($ligne = $db->fetch_object($result5)) {
 //        if ($tabResult[$ligne->ty][3] > 0 && $tabResult[$ligne->ty][10] > 0 && $tabResult[$ligne->ty][3] < $tabResult[$ligne->ty][10])
@@ -560,7 +560,7 @@ include("./rapport2.php");die();
 //
 //
 //    if ($tabResult[0][2] != 0) {
-//        $requeteType7 = "SELECT fk_fichinter FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
+//        $requeteType7 = "SELECT fk_fichinter FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
 //        $result7 = $db->query($requeteType7);
 //        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][2]) . "€ (" . price($tabResult[0][0] / 3600) . "h ) sur le réalisé due aux " . $db->num_rows($result7) . " interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
 //        $i = 0;
@@ -594,7 +594,7 @@ include("./rapport2.php");die();
 //
 //
 //
-//    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet is NULL || fk_contratdet = 0 ) AND (fk_commandedet is NULL || fk_commandedet = 0 ) AND (fk_depProduct is NULL || fk_depProduct = 0 ) Group BY fk_fichinter";
+//    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet is NULL || fk_contratdet = 0 ) AND (fk_commandedet is NULL || fk_commandedet = 0 ) AND (fk_depProduct is NULL || fk_depProduct = 0 ) Group BY fk_fichinter";
 //    $resultPasDeDI = $db->query($requetePasDeDI);
 //    if ($db->num_rows($resultPasDeDI) > 0) {
 //        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le vendue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans référence à un contrat ou à une commande dont les dix premières sont listées ci dessous<br/>";
@@ -611,7 +611,7 @@ include("./rapport2.php");die();
 //    }
 //
 //
-//    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `" . MAIN_DB_PREFIX . "element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
+//    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `" . MAIN_DB_PREFIX . "element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
 //    $resultPasDeDI = $db->query($requetePasDeDI);
 //    if ($db->num_rows($resultPasDeDI) > 0) {
 //        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les dix premières sont listées ci dessous<br/>";

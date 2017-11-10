@@ -168,7 +168,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $propal->addline(/*"Prise en charge :  : " . $chrono->ref .*/
                     "\n" . "Machine : " . $nomMachine .
                     "\n" . "Frais de gestion devis refusé.
-", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 0, $chrono->societe->remise_percent, 'HT', null, null, 1);
+", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 3470, $chrono->societe->remise_percent, 'HT', null, null, 1);
 
 
 

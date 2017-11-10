@@ -242,7 +242,7 @@ class Synopsisfichinter extends Fichinter {
         
         $sql = "SELECT ref, description, fk_soc, fk_user_author, fk_statut, fk_contrat, fk_commande, total_ht, total_tva, total_ttc,";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf, natureInter";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "synopsis_fichinter";
         $sql.= " WHERE rowid=" . $rowid;
 
 //        dol_syslog("Fichinter::fetch sql=".$sql);

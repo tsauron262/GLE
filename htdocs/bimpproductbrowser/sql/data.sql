@@ -54,7 +54,7 @@ INSERT INTO llx_categorie_product (fk_categorie, fk_product) VALUES (24, 6);
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Adding link between categories and caregories --
-INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (1, 111, 1);
+/*INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (1, 111, 1);
 INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (2, 1, 2);
 INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (3, 2, 3);
 INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (4, 3, 4);
@@ -63,4 +63,4 @@ INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (6, 3, 
 INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (7, 2, 7);
 INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (8, 1, 8);
 INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (9, 8, 9);
-INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (10, 8, 10);
+INSERT INTO llx_bimp_cat_cat (rowid, fk_parent_cat, fk_child_cat) VALUES (10, 8, 10);*/

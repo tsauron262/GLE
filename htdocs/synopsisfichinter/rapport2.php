@@ -437,6 +437,10 @@ if (count($tabIdFi) > 0) {
 
 $db->close();
 
+
+global $logLongTime;
+$logLongTime = false;
+
 llxFooter("<em>Derni&egrave;re modification: 2007/06/22 08:44:46 $ r&eacute;vision: 1.12 $</em>");
 
 function afficheParType($tabIdFi, $secondFois = false) {

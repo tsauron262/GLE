@@ -152,7 +152,7 @@ class modBimpproductbrowser extends DolibarrModules
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
 			$this->tabs = array(
-			'categories_0:+recherchefiltree:Recherche Filtrée:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/index.php?id=__ID__');
+			'categories_0:+recherchefiltree:Recherche Filtrée:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__');
 
 		if (! isset($conf->modProductBrowser) || ! isset($conf->modProductBrowser->enabled))
         {

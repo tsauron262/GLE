@@ -1,0 +1,11 @@
+#submitTreedda {
+    background-color: white;
+    color: black;
+    border: 2px solid  #b3b3ff;
+	border-radius: 8px;
+	font-size: 16px;
+}
+
+#submitTreesas:hover {
+    background-color:   #b3b3ff;
+}

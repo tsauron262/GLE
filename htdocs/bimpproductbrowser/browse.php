@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
 
 $arrayofjs=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.js', '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js', '/bimpproductbrowser/js/checkboxManager.js');
-$arrayofcss=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css');
+$arrayofcss=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css', '/synopsiscaldav/caldav/Core/Frameworks/TwitterBootstrap/css/bootstrap.css');
 
 $langs->load("categories");
 
@@ -193,7 +193,7 @@ else
     print '</div>';
 }
 
-
+print '<div id="placeforalert"><br></div>';
 
 llxFooter();
 

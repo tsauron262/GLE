@@ -231,7 +231,7 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
     $valfinance->propal_id = $object->id;
     $valfinance->location = $location;
     $valfinance->duree_degr = $duree_degr;
-    $valfinance->pourcent_degr = $pourcent_degr;
+    $valfinance->pourcent_degr = ($valfinance->mode3? 100 : $pourcent_degr);
     $valfinance->coef = $coef;
 
     if ($valfinance->id > 0)
@@ -250,8 +250,9 @@ if (isset($_POST['form1']) && !$valfinance->contrat_id > 0) {
         }
     }
 
-    require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
-    $result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $langs, $hidedetails, $hidedesc, $hideref); //génération auto
+    //require_once DOL_DOCUMENT_ROOT . '/core/modules/propale/modules_propale.php';
+    //$result = propale_pdf_create($db, $object, (GETPOST('model') ? GETPOST('model') : "azurFinanc"), $langs, $hidedetails, $hidedesc, $hideref); //génération auto
+	$object->generateDocument($modele, $outputlangs, $hidedetails, $hidedesc, $hideref);
 }
 //    $valfinance->calcul();
 $message = array();
@@ -347,7 +348,7 @@ if (isset($_POST["form2"]) && $_POST["datesign"]!="") {
 
 
 
-        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+        require_once(DOL_DOCUMENT_ROOT . "/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
         contrat_pdf_create($db, $contract->id, "contratFinanc");
     }
 }
@@ -378,7 +379,7 @@ if ($user->rights->synopsisFinanc->write) {
 
     require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
     $form = new Form($db);
-    echo "Entreprise de l'apporteur:" . $form->select_thirdparty($socid, "socid") . "<br/>Nom de l'apporteur:";
+    echo "Entreprise de l'apporteur:" . $form->select_company($socid, "socid") . "<br/>Nom de l'apporteur:";
     if ($socid > 0)
         echo $form->selectcontacts($socid, $idcontact, "contactid", 1);
     else
@@ -536,7 +537,7 @@ $somethingshown = $formfile->show_documents('propal', $filename, $filedir, $urls
 echo "</div>";
 
 echo "<div class='fichehalfright'>";
-$somethingshown = $object->showLinkedObjectBlock();
+$somethingshown = $form->showLinkedObjectBlock($object);
 
 
 

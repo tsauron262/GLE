@@ -174,7 +174,10 @@ if ($nbofentries > 0)
 {
     print '<tr class="pair"><td colspan="3">';
     tree_recur_checkbox($data,$data[0],0);
-    print '</td></tr></form>';
+    print '</td></tr>';
+    print "</table>";
+    print '</div>';
+    print '<input id="submitTree" class="button" type="button" value="Créer lien">';
 }
 else
 {
@@ -186,11 +189,11 @@ else
     print '<td>&nbsp;</td>';
     print '</table></td>';
     print '</tr>';
+    print "</table>";
+    print '</div>';
 }
 
-print "</table>";
 
-print '</div>';
 
 llxFooter();
 

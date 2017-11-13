@@ -1514,11 +1514,12 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<td class="fieldrequired">' . $langs->trans("ReviewedByCP") . '</td>';
         // Liste des utiliseurs du groupe choisi dans la config
         $validator = new UserGroup($db);
+//        $validator->id = "60";
         $excludefilter = $user->admin ? '' : 'u.rowid <> ' . $user->id;
-        $valideurobjects = $validator->listUsersForGroup($excludefilter);
+        $valideurobjects = $validator->listUsersForGroup($excludefilter, 1);
         $valideurarray = array();
         foreach ($valideurobjects as $val)
-            $valideurarray[$val->id] = $val->id;
+            $valideurarray[$val] = $val;
         print '<td>';
         print $form->select_dolusers($user->fk_user, "valideur", 1, "", 0, $valideurarray); // By default, hierarchical parent
         print '</td>';

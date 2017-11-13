@@ -47,7 +47,7 @@ llxHeader(array(),$langs->trans('CPTitreMenu'));
 
 $cp = new SynopsisHoliday($db);
 // Recent changes are more important than old changes
-$log_holiday = $cp->fetchLog('ORDER BY cpl.rowid DESC','');
+$log_holiday = $cp->fetchLog('ORDER BY cpl.rowid DESC LIMIT 0,1000','');
 
 print_fiche_titre($langs->trans('LogCP'));
 
@@ -70,11 +70,13 @@ foreach($cp->logs as $logs_CP)
 {
    	$var=!$var;
 
-   	$user_action = new User($db);
-   	$user_action->fetch($logs_CP['fk_user_action']);
+//   	$user_action = new User($db);
+//   	$user_action->fetch($logs_CP['fk_user_action']);
+        $user_action = userCache($logs_CP['fk_user_action']);
 
-   	$user_update = new User($db);
-   	$user_update->fetch($logs_CP['fk_user_update']);
+//   	$user_update = new User($db);
+//   	$user_update->fetch($logs_CP['fk_user_update']);
+        $user_update = userCache($logs_CP['fk_user_update']);
 
    	print '<tr '.$bc[$var].'>';
    	print '<td>'.$logs_CP['rowid'].'</td>';
@@ -86,6 +88,19 @@ foreach($cp->logs as $logs_CP)
    	print '<td style="text-align: right;">'.$logs_CP['new_solde'].' '.$langs->trans('days').'</td>';
    	print '</tr>'."\n";
 
+}
+
+global $cacheU;
+$cacheU = array();
+function userCache($id){
+    global $cacheU, $db;
+    if(!isset($cacheU[$id])){
+        $userU = new User($db);
+        $userU->fetch($id);
+        $cacheU[$id] = $userU;
+    }
+    
+    return $cacheU[$id];
 }
 
 if($log_holiday == '2')

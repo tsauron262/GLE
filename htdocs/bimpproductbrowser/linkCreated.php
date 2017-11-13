@@ -21,12 +21,25 @@
  */
 
 /**
- *      \file       htdocs/categories/index.php
- *      \ingroup    category
- *      \brief      Home page of category area
+ *      \file       bimpproductbrowser/linkCreated.php
+ *      \ingroup    bimpproductbrowser
+ *      \brief      Create link, in the database, between category and (category or product)
  */
 
 require '../main.inc.php';
+
+
+
+$arrayofid = GETPOST ('ids');
+
+$fp = fopen('/tmp/test.txt','w');
+
+foreach ($arrayofid as $id ){
+	fwrite($fp, $id.' ');
+}
+
+fclose($fp);
+
 /*
 $db->begin();
 $sql=''

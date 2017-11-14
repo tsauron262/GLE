@@ -33,6 +33,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
 
 
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+
+
+
 
 /**
  *	Class to generate PDF Azur bimpcesu
@@ -922,13 +926,41 @@ class pdf_bimpcesu extends ModeleBimpcesu
 	 *  @param  Translate	$outputlangs	Object lang for output
 	 *  @return	void
 	 */
+        
+        
+        
 	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
 	{
-		global $conf,$langs;
+		global $conf,$langs,$db;
 
-	
+	$facturestatic = new Facture($db);
         
-        $total = "Error"; // Inconnu pour le moment       
+        $sql = 'SELECT f.rowid as facid, f.facnumber, f.type, f.amount';
+        $sql .= ', f.total as total_ht';
+        $sql .= ', f.tva as total_tva';
+        $sql .= ', f.total_ttc';
+        $sql .= ', f.datef as df, f.datec as dc, f.paye as paye, f.fk_statut as statut';
+        $sql .= ', s.nom, s.rowid as socid';
+        $sql .= ', SUM(pf.amount) as am';
+        $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s," . MAIN_DB_PREFIX . "facture as f";
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture as pf ON f.rowid=pf.fk_facture';
+        $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
+        $sql .= " AND f.entity = " . $conf->entity;
+        $sql .= " GROUP BY f.rowid";
+        $sql .= " ORDER BY f.datef DESC, f.datec DESC";
+        
+        $resql = $db->query($sql);
+        
+        $objp = $db->fetch_object($resql);
+                
+        $facturestatic->id = $objp->facid;
+        $facturestatic->ref = $objp->facnumber;
+        $facturestatic->type = $objp->type;
+        $facturestatic->total_ht = $objp->total_ht;
+        $facturestatic->total_tva = $objp->total_tva;
+        $facturestatic->total_ttc = $objp->total_ttc;
+        
+        $total = $objp->total_ttc; // Inconnu pour le moment       
         $totalcesu = "Error"; // Inconnu pour le moment       
         $npref = "Error"; // Inconnu pour le moment
         $diri = "Christian CONSTANTIN BERTIN";

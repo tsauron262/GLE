@@ -67,7 +67,7 @@ echo "</select>";
 
 echo "<select name='typeAff'>";
 echo "<option value=''></option>";
-foreach (array("parTypeMat" => "Par materiel", "parTypeGar" => "Par type de garantie", "parCentre" => "Par centre") as $val => $label) {
+foreach (array("parTypeMat" => "Par materiel", "parTypeMat2" => "Par materiel + Garentie", "parTypeGar" => "Par type de garantie", "parCentre" => "Par centre") as $val => $label) {
     $valSelect = $typeAff;
     echo "<option value='" . $val . "' " . ($val == $valSelect ? "selected='selected'" : "") . ">" . $label . "</option>";
 }

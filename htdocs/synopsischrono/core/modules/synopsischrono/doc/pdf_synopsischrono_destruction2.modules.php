@@ -224,7 +224,7 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
 BP 2321
 74011 Annecy le vieux";
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->SetXY('95', '55');
+                $pdf->SetXY('100', '55');
                 $pdf->MultiCell(100, 6, $adresseDest, 0, 'L');
 //                $pdf->SetXY('142', '51');
 //                $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][1], 0, 'L');

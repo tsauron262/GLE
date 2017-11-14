@@ -216,7 +216,7 @@ class pdf_synopsischrono_destruction2 extends ModeleSynopsischrono {
 
                 //centre
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                $pdf->SetXY('47', '178.6');
+                $pdf->SetXY('49', '171.4');
                 $pdf->MultiCell(100, 6, "BIMP ".$chrono->valuesPlus[1060]->valueStr, 0, 'L');
                 
                 $adresseDest = "Palais de justice «  Novarina »
@@ -246,9 +246,9 @@ BP 2321
                 if ($contact != "" && $contact != $chrono->societe->name)
                     $address .= "\n" . $contact;
 
-              //  $address .= "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
+                $address .= "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
 
-                $pdf->SetXY('40', '170.5');
+                $pdf->SetXY('40', '179.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, $address, 0, 'L');
 

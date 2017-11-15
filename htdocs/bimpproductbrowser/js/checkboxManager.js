@@ -9,13 +9,13 @@ $(document).ready(function()
 		$.ajax(
 		{
 			type: "POST",
-			url: "linkCreated.php",
-			data: {ids : checkedValues},
+			url: DOL_URL_ROOT + "/bimpproductbrowser/browse.php?id=1",
+			data: {ids : checkedValues, action: 'filldb'},
 			cache: false,
 			success: function(result)
 			{
-				showalert("<strong>Succès !</strong> Liens créé", 'alert-success');
-			},
+				showalert("<strong>Succès !</strong> Restriction ajoutée ", 'alert-success');
+			},	
 			error: function() {
 				showalert("<strong>Erreur !</strong> Une erreur inconnu est survenue, merci de le signaler à l\'adresse suivante : r.PELEGRIN@bimp.fr", 'alert-error');
 			}

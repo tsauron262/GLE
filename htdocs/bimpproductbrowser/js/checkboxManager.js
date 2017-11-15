@@ -9,7 +9,7 @@ $(document).ready(function()
 		$.ajax(
 		{
 			type: "POST",
-			url: DOL_URL_ROOT + "/bimpproductbrowser/browse.php?id="+findGetParameter('id'),		// TODO id à changer
+			url: DOL_URL_ROOT + "/bimpproductbrowser/addLink.php?id="+findGetParameter('id'),		// TODO id à changer
 			data: {ids : checkedValues, action: 'filldb'},
 			cache: false,
 			success: function(result)

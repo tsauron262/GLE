@@ -167,6 +167,24 @@ class ProductBrowser extends CommonObject
 	}
 
 
+	function addRestrictions ($arrayofid)
+	{
+
+	    $sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+	    $sql.='VALUES ('.$arrayofid[0].', '.$arrayofid[1].');';
+
+	    try
+	    {
+	        echo '<script>console.log("'.$sql.'")</script>';
+	        $this->db->query($sql);
+	        $this->db->commit();
+	    }
+	    catch(Exception $e)
+	    {
+	        echo 'ERROR:'.$e->getMessage();
+	        $this->db->rollback();
+	    }
+	}
 
 	function print_spaces ($depth)
 	{

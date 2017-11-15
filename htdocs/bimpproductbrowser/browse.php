@@ -32,6 +32,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/treeview.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/class/productBrowser.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
@@ -43,16 +44,8 @@ $arrayofcss=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css')
 
 $langs->load("categories");
 
+
 if (! $user->rights->categorie->lire) accessforbidden();
-
-
-// $id=GETPOST('id','int');
-// $label=GETPOST('label');
-// $type=GETPOST('type');
-// $action=GETPOST('action','aZ09');
-// $confirm=GETPOST('confirm');
-// $removeelem = GETPOST('removeelem','int');
-// $elemid=GETPOST('elemid');
 
 $id=GETPOST('id','int');
 $type=(GETPOST('type','aZ09') ? GETPOST('type','aZ09') : Categorie::TYPE_PRODUCT);
@@ -79,51 +72,9 @@ $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 
 $hookmanager->initHooks(array('categorycard'));
 
-
-/*
- * Functions
- */ 
-
-
-function createRestriction ($db)
-{
-    $arrayofid = GETPOST ('ids');
-    echo '<script>console.log("OHHHH '.$arrayofid.'")</script>';
-    print_r($arrayofid);
-    $db->begin();
-    $sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
-    $sql.='VALUES ('.$arrayofid[0].', '.$arrayofid[1].');';
-
-    try
-    {
-        echo '<script>console.log("'.$sql.'")</script>';
-        $db->query($sql);
-        $db->commit();
-    }
-    catch(Exception $e)
-    {
-        echo 'ERROR:'.$e->getMessage();
-        $db->rollback();
-    }
-}
-
 /*
  * Action
- */ 
-
-//echo '<script>console.log("GETPOST('action') '.GETPOST('action').'")</script>';
-
-
-
-switch (GETPOST('action'))
-{
-    case 'filldb':
-    {
-        createRestriction($db);
-        break;
-    }
-    default: break;
-}
+ */
 
 
 /*

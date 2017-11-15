@@ -337,6 +337,10 @@ class Synopsisfichinter extends Fichinter {
      */
     function valid($user, $outputdir) {
         $this->setValid($user);
+        
+        
+        if($this->total_ttc > 0)
+        mailSyn2("FI Validé", "tommy@drsi.fr", null, "Bonjour, la FI ".$this->getNomUrl(1)." a été validé pour facturation (".$this->total_ttc." €)");
 //        global $langs, $conf;
 //        $this->db->begin();
 //

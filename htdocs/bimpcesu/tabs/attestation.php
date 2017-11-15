@@ -123,9 +123,7 @@ if ($socid > 0) {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture as pf ON f.rowid=pf.fk_facture';
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
         $sql .= " AND f.entity = " . $conf->entity;
-        $sql .= ' GROUP BY f.rowid, f.facnumber, f.type, f.amount, f.total, f.tva, f.total_ttc,';
-        $sql .= ' f.datef, f.datec, f.paye, f.fk_statut,';
-        $sql .= ' s.nom, s.rowid';
+        $sql .= " GROUP BY f.rowid";
         $sql .= " ORDER BY f.datef DESC, f.datec DESC";
 
         $resql = $db->query($sql);
@@ -137,7 +135,7 @@ if ($socid > 0) {
                 print '<table class="noborder" width="100%">';
 
                 print '<tr class="liste_titre">';
-                print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernieres factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
+                print '<td colspan="5" id="derniereFacture"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernieres factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
                 print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
                 print '</tr></table></td>';
                 print '</tr>';
@@ -216,7 +214,7 @@ echo '<br />';
 echo '<br />';
 echo '<br />';
 
-print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3">';
+print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3" id="nomInt">';
 print_r ($conf->global->MAIN_INFO_SOCIETE_NOM);
 print "</td></tr>";
 
@@ -243,7 +241,7 @@ if ($socid > 0)
 if (empty($conf->global->SOCIETE_DISABLE_CONTACTS)) {
     if ($socid > 0) {
         print '<tr><td><label for="socid">' . $langs->trans("Client : ") . '</label></td>';
-        print '<td colspan="3" class="maxwidthonsmartphone">';
+        print '<td colspan="3" class="maxwidthonsmartphone nomClient">';
         print $objsoc->getNomUrl(1);
         print '</td>';
         print '<input type="hidden" name="socid" id="socid" value="' . $objsoc->id . '">';

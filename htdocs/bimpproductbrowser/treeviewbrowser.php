@@ -20,7 +20,7 @@
 function tree_recur_checkbox($tab, $pere, $rang, $iddivjstree='iddivjstree', $donoresetalreadyloaded=0, $showfk=0)
 {
     global $tree_recur_alreadyadded;
-
+print $tab[0]['entry'];
     if ($rang == 0 && empty($donoresetalreadyloaded)) $tree_recur_alreadyadded=array();
 
     if ($rang == 0)
@@ -81,8 +81,7 @@ function tree_recur_checkbox($tab, $pere, $rang, $iddivjstree='iddivjstree', $do
 			}
 			else
 			{
-//				print str_replace('</a> <a href=', '</a> <input type="checkbox"> <a href=', $tab[$x]['entry']);
-				print str_replace('style="background: #aaa"><a href="', 'style="background: #aaa"> <input type="checkbox" id='.$tab[$x]['rowid'].'> <a href="', $tab[$x]['entry']);
+				print $tab[$x]['entry'];
 			}
 			//print ' -> A '.$tab[$x]['rowid'].' mainmenu='.$tab[$x]['mainmenu'].' leftmenu='.$tab[$x]['leftmenu'].' fk_mainmenu='.$tab[$x]['fk_mainmenu'].' fk_leftmenu='.$tab[$x]['fk_leftmenu'].'<br>'."\n";
 		    $tree_recur_alreadyadded[$tab[$x]['rowid']]=($rang + 1);

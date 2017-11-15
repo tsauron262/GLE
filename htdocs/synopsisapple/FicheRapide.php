@@ -103,7 +103,7 @@ $modeP = (isset($_REQUEST['paiementtype']) ? $_REQUEST['paiementtype'] : "");
 $descr = (isset($_POST['Descr']) ? $_POST['Descr'] : "");
 $acompte = (isset($_POST['acompte']) ? $_POST['acompte'] : "");
 $centre = (isset($_POST['centre']) ? $_POST['centre'] : null);
-$typeGarantie = (isset($_POST["typeGarantie"]) ? $_POST["typeGarantie"] : "");
+$typeGarantie = (isset($_POST["typeGarantie"]) ? $_POST["typeGarantie"] : "Hors garantie");
 
 //die($_REQUEST['socid']);
 

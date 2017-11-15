@@ -10,8 +10,8 @@ class object {
 class synopsisHook {//FA1506-0369
 
     static $timeDeb = 0;
-    private static $MAX_TIME_LOG = 3;
-    private static $MAX_REQ_LOG = 600;
+    private static $MAX_TIME_LOG = 5;
+    private static $MAX_REQ_LOG = 1000;
     private static $reload = false;
 
     function synopsisHook() {

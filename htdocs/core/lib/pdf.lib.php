@@ -902,12 +902,12 @@ function pdf_pagefoot(&$pdf,$outputlangs,$paramfreetext,$fromcompany,$marge_bass
 		// Phone
 		if ($fromcompany->phone)
 		{
-			$line2.=($line2?" - ":"").$outputlangs->transnoentities("Phone").": ".$fromcompany->phone;
+			$line2.=($line2?" - ":"").$fromcompany->phone;
 		}
 		// Fax
 		if ($fromcompany->fax)
 		{
-			$line2.=($line2?" - ":"").$outputlangs->transnoentities("Fax").": ".$fromcompany->fax;
+			$line2.=($line2?" - ":"").$fromcompany->fax;
 		}
 
 		// URL

@@ -31,6 +31,12 @@ require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/treeviewbrowser.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+
+require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 
 $arrayofjs=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.js', '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js', '/bimpproductbrowser/js/checkboxManager.js');
 $arrayofcss=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css', '/synopsiscaldav/caldav/Core/Frameworks/TwitterBootstrap/css/bootstrap.css');
@@ -72,6 +78,54 @@ $extrafields = new ExtraFields($db);
 $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 
 $hookmanager->initHooks(array('categorycard'));
+
+
+/*
+ * Functions
+ */ 
+
+
+function createRestriction ($db)
+{
+    $arrayofid = GETPOST ('ids');
+    echo '<script>console.log("OHHHH '.$arrayofid.'")</script>';
+    print_r($arrayofid);
+    $db->begin();
+    $sql ='INSERT INTO llx_bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+    $sql.='VALUES ('.$arrayofid[0].', '.$arrayofid[1].');';
+
+    try
+    {
+        echo '<script>console.log("'.$sql.'")</script>';
+        $db->query($sql);
+        $db->commit();
+    }
+    catch(Exception $e)
+    {
+        echo 'ERROR:'.$e->getMessage();
+        $db->rollback();
+    }
+}
+
+
+/*
+ * Action
+ */ 
+
+//echo '<script>console.log("GETPOST('action') '.GETPOST('action').'")</script>';
+
+
+
+switch (GETPOST('action'))
+{
+    case 'filldb':
+    {
+        createRestriction($db);
+        break;
+    }
+    default: break;
+}
+
 
 /*
  * View
@@ -149,7 +203,7 @@ foreach($fulltree as $key => $val)
     $data[] = array(
     'rowid'=>$val['rowid'],
     'fk_menu'=>$val['fk_parent'],
-    'entry'=>'<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" '.($categstatic->color?' style="background: #'.$categstatic->color.';"':' style="background: #aaa"').'>'.$li.'</span></td>'.
+    'entry'=>'<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" '.($categstatic->color?' style="background: #'.$categstatic->color.';"':' style="background: #aaa"').'><input type="checkbox" id='.$val['rowid'].'>'.$li.'</span></td>'.
     //'<td width="50%">'.dolGetFirstLineOfText($desc).'</td>'.
     '<td align="right" width="20px;"><a href="'.DOL_URL_ROOT.'/categories/viewcat.php?id='.$val['id'].'&type='.$type.'">'.img_view().'</a></td>'.
     '</tr></table>'
@@ -167,9 +221,6 @@ print '</td></tr>';
 
 $nbofentries=(count($data) - 1);
 
-//$pb= new ProductBrowser(111);
-
-
 if ($nbofentries > 0)
 {
     print '<tr class="pair"><td colspan="3">';
@@ -177,7 +228,7 @@ if ($nbofentries > 0)
     print '</td></tr>';
     print "</table>";
     print '</div>';
-    print '<input id="submitTree" class="button" type="button" value="Créer lien">';
+    print '<input id="submitTree" class="button" type="button" value="Valider">';
 }
 else
 {

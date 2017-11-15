@@ -19,3 +19,9 @@ ActionRunningShort=_
 
 
 PaymentByChequeOrderedTo=Règlement TTC à l'ordre de %s envoyé à
+
+
+ProfId3FR=Id. prof. 3 (NAF)
+ProfId4FR=Id. prof. 4 (RCS)
+ProfId2FR=Id. prof. 2 (N° de déclaration d’activité)
+VATIntraShort=TVA intracommunautaire

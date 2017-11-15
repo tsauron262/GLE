@@ -1723,14 +1723,12 @@ class pdf_crabe extends ModelePDFFactures
 			// On peut utiliser le nom de la societe du contact
 			if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
 				$thirdparty = $object->contact;
-                                /*mod drsi*/
-                                $carac_client_name= "";
 			} else {
 				$thirdparty = $object->thirdparty;
-                                $carac_client_name= pdfBuildThirdpartyName($thirdparty, $outputlangs);
 			}
 
-                        /* f mod drsi*/
+			$carac_client_name= pdfBuildThirdpartyName($thirdparty, $outputlangs);
+
 			$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->thirdparty,($usecontact?$object->contact:''),$usecontact,'target',$object);
 
 			// Show recipient

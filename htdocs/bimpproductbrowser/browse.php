@@ -28,10 +28,10 @@
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/treeviewbrowser.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/treeview.lib.php';
 
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
@@ -39,7 +39,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 
 $arrayofjs=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.js', '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js', '/bimpproductbrowser/js/checkboxManager.js');
-$arrayofcss=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css', '/synopsiscaldav/caldav/Core/Frameworks/TwitterBootstrap/css/bootstrap.css');
+$arrayofcss=array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css');
 
 $langs->load("categories");
 
@@ -91,7 +91,7 @@ function createRestriction ($db)
     echo '<script>console.log("OHHHH '.$arrayofid.'")</script>';
     print_r($arrayofid);
     $db->begin();
-    $sql ='INSERT INTO llx_bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+    $sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
     $sql.='VALUES ('.$arrayofid[0].', '.$arrayofid[1].');';
 
     try
@@ -106,7 +106,6 @@ function createRestriction ($db)
         $db->rollback();
     }
 }
-
 
 /*
  * Action
@@ -224,7 +223,7 @@ $nbofentries=(count($data) - 1);
 if ($nbofentries > 0)
 {
     print '<tr class="pair"><td colspan="3">';
-    tree_recur_checkbox($data,$data[0],0);
+    tree_recur($data,$data[0],0);
     print '</td></tr>';
     print "</table>";
     print '</div>';

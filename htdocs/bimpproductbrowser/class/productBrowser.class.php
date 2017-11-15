@@ -84,23 +84,13 @@ class ProductBrowser extends CommonObject
 		$result = $this->db->query($sql);
 		if ($result)
 		{
-			$obj = $this->db->fetch_object($result);
-			if ($obj)
-			{
-				$this->id			= $obj->fk_parent_cat;
-				$this->id_child[]	= $obj->fk_child_cat;
-				while ($obj = $result->fetch_object())
+				$this->id			= $id;
+				$this->id_child 	= array();
+				while ($obj = $result->fetch_object($result))		// TODO ne pas recréer
 				{
 					$this->id_child[]	= $obj->fk_child_cat;
-
 				}
 				return 1;
-			}
-			else
-			{
-				$this->error="Model not found";
-				return -2;
-			}
 		}
 		else
 		{

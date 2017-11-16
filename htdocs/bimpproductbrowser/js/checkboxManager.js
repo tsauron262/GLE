@@ -6,18 +6,19 @@ $(document).ready(function()
 			{
 				return this.id;
 			}).get();
+		var urlRequest = DOL_URL_ROOT + "/bimpproductbrowser/addLink.php";//?id="+findGetParameter('id');
 		$.ajax(
 		{
 			type: "POST",
-			url: DOL_URL_ROOT + "/bimpproductbrowser/addLink.php?id="+findGetParameter('id'),		// TODO id à changer
+			url: urlRequest,
 			data: {ids : checkedValues, action: 'filldb'},
 			cache: false,
-			success: function(result)
+			success: function()
 			{
 				showalert("<strong>Succès !</strong> Restriction ajoutée ", 'no_error');
 			},	
 			error: function() {
-				showalert("<strong>Erreur !</strong> Une erreur inconnu est survenue, merci de le signaler à l\'adresse suivante : r.PELEGRIN@bimp.fr", 'error');
+				showalert("<strong>Erreur !</strong> URL inconnu :"+urlRequest, 'error');
 			}
 		})
 	return false;

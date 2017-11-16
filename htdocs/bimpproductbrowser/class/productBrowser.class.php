@@ -33,7 +33,7 @@ include_once DOL_DOCUMENT_ROOT.'/categories/class/categories.class.php';
 class ProductBrowser extends CommonObject
 {
 	public $id;						// id of the parent ctegorie
-	public $id_parent=array();
+	public $id_parent;
 	public $id_child=array();
 	public $child=array();
 	public $is_a_leaf=false;
@@ -84,13 +84,11 @@ class ProductBrowser extends CommonObject
 		$result = $this->db->query($sql);
 		if ($result)
 		{
-				$this->id			= $id;
-				$this->id_child 	= array();
-				while ($obj = $result->fetch_object($result))		// TODO ne pas recréer
-				{
-					$this->id_child[]	= $obj->fk_child_cat;
-				}
-				return 1;
+			$this->id			= $id;
+			$this->id_child 	= array();
+			$obj=$result2->fetch_object($result);
+			array_push($this->id_child, $obj->fk_child_cat);
+			return 1;
 		}
 		else
 		{
@@ -106,7 +104,7 @@ class ProductBrowser extends CommonObject
 	 *  @param		int		$id		Id of profil to load
 	 *  @return		int				<0 if KO, >0 if OK
 	 */
-	function fetchAllFromRoot($id, $ind=0)
+/*	function fetchAllFromRoot($id, $ind=0)
 	{
 //	print "Début ".$id."<br>" ;
 		$sql = 'SELECT fk_parent_cat, fk_child_cat';
@@ -165,25 +163,74 @@ class ProductBrowser extends CommonObject
 			return -3;
 		}
 	}
-
+*/
 
 	function addRestrictions ($arrayofid)
 	{
 
-	    $sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
-	    $sql.='VALUES ('.$arrayofid[0].', '.$arrayofid[1].');';
+		for ($i=0 ; $i<sizeof($arrayofid) ; $i++)
+		{
+			$id1 = $arrayofid[$i];
+			for ($j=$i+1 ; $j<sizeof($arrayofid) ; $j++)
+			{
+				$id2 = $arrayofid[$j];
+				$sql = 'SELECT *';
+				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
+				$sql.= ' WHERE rowid = '.$id2;
+				$sql.= ' AND fk_parent = '.$id1;
+				// $sql.= ' LIMIT 1';
+				$result = $this->db->query($sql);
 
-	    try
-	    {
-	        echo '<script>console.log("'.$sql.'")</script>';
-	        $this->db->query($sql);
-	        $this->db->commit();
-	    }
-	    catch(Exception $e)
-	    {
-	        echo 'ERROR:'.$e->getMessage();
-	        $this->db->rollback();
-	    }
+				if (mysqli_num_rows ($result) == 1)
+				{// true = $id1 parent of $id2
+					echo $sql."\n";
+
+					$sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+				    $sql.='VALUES ('.$id1.', '.$id2.');';
+
+				    try
+				    {
+				        echo $sql."\n";
+				        $this->db->query($sql);
+				        $this->db->commit();
+				    }
+				    catch(Exception $e)
+				    {
+				        echo 'ERROR:'.$e->getMessage();
+				        $this->db->rollback();
+				    }
+				}
+			}
+		}
+/*		foreach ($arrayofid as $id1) {
+			foreach ($arrayofid as $id2) {
+				$sql = 'SELECT *';
+				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
+				$sql.= ' WHERE rowid = '.$id2;
+				$sql.= ' AND fk_parent = '.$id1;
+				// $sql.= ' LIMIT 1';
+				$result = $this->db->query($sql);
+
+				if ($result) {		// true = $id1 parent of $id2
+					echo $sql."\n";
+
+					$sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+				    $sql.='VALUES ('.$id1.', '.$id2.');';
+
+				    try
+				    {
+				        echo $sql."\n";
+				        $this->db->query($sql);
+				        $this->db->commit();
+				    }
+				    catch(Exception $e)
+				    {
+				        echo 'ERROR:'.$e->getMessage();
+				        $this->db->rollback();
+				    }
+				}
+			}
+		}*/
 	}
 
 	function print_spaces ($depth)

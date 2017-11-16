@@ -165,32 +165,33 @@ class ProductBrowser extends CommonObject
 	}
 */
 
-	function addRestrictions ($arrayofid)
+	function changeRestrictions ($idChecked, $idUnchecked)
 	{
 
-		for ($i=0 ; $i<sizeof($arrayofid) ; $i++)
+		for ($i=0 ; $i<sizeof($idChecked) ; $i++)
 		{
-			$id1 = $arrayofid[$i];
-			for ($j=$i+1 ; $j<sizeof($arrayofid) ; $j++)
+			$id1 = $idChecked[$i];
+			for ($j=$i+1 ; $j<sizeof($idChecked) ; $j++)
 			{
-				$id2 = $arrayofid[$j];
+				$id2 = $idChecked[$j];
 				$sql = 'SELECT *';
 				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
 				$sql.= ' WHERE rowid = '.$id2;
 				$sql.= ' AND fk_parent = '.$id1;
-				// $sql.= ' LIMIT 1';
-				$result = $this->db->query($sql);
+				$result1 = $this->db->query($sql);
 
-				if (mysqli_num_rows ($result) == 1)
-				{// true = $id1 parent of $id2
-					echo $sql."\n";
+				$sql = 'SELECT *';
+				$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
+				$sql.= ' WHERE fk_child_cat = '.$id2;
+				$sql.= ' AND fk_parent_cat = '.$id1;
+				$result2 = $this->db->query($sql);
 
-					$sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+				if (mysqli_num_rows ($result1) == 1 && mysqli_num_rows ($result2) == 0) // true = $id1 parent of $id2
+				{
+					$sql ='INSERT IGNORE INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
 				    $sql.='VALUES ('.$id1.', '.$id2.');';
-
 				    try
 				    {
-				        echo $sql."\n";
 				        $this->db->query($sql);
 				        $this->db->commit();
 				    }
@@ -202,6 +203,28 @@ class ProductBrowser extends CommonObject
 				}
 			}
 		}
+		for ($i=0 ; $i<sizeof($idUnchecked) ; $i++)
+		{
+			$id1 = $idUnchecked[$i];
+			for ($j=$i+1 ; $j<sizeof($idUnchecked) ; $j++)
+			{
+				$id2 = $idUnchecked[$j];
+				echo '$id1 ='.$id1.' $id2 ='.$id2.' $i='.$i.' $j='.$j."\n";
+				$sql = 'DELETE';
+				$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
+				$sql.= ' WHERE fk_child_cat = '.$id2;
+				$sql.= ' AND fk_parent_cat = '.$id1;
+				try
+				{
+					$this->db->query($sql);
+				} catch(Exception $e)
+			    {
+			        echo 'ERROR:'.$e->getMessage();
+			        $this->db->rollback();
+				}
+			}
+		}
+	}
 /*		foreach ($arrayofid as $id1) {
 			foreach ($arrayofid as $id2) {
 				$sql = 'SELECT *';
@@ -231,7 +254,7 @@ class ProductBrowser extends CommonObject
 				}
 			}
 		}*/
-	}
+
 
 	function print_spaces ($depth)
 	{

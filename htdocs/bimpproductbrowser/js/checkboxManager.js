@@ -6,16 +6,20 @@ $(document).ready(function()
 			{
 				return this.id;
 			}).get();
+		var uncheckedValues = $('input:checkbox:not(:checked)').map(function()
+			{
+				return this.id;
+			}).get();
 		var urlRequest = DOL_URL_ROOT + "/bimpproductbrowser/addLink.php";//?id="+findGetParameter('id');
 		$.ajax(
 		{
 			type: "POST",
 			url: urlRequest,
-			data: {ids : checkedValues, action: 'filldb'},
+			data: {checked : checkedValues, unchecked : uncheckedValues, action: 'filldb'},
 			cache: false,
 			success: function()
 			{
-				showalert("<strong>Succès !</strong> Restriction ajoutée ", 'no_error');
+				showalert("<strong>Succès !</strong> Formulaire soumis ", 'no_error');
 			},	
 			error: function() {
 				showalert("<strong>Erreur !</strong> URL inconnu :"+urlRequest, 'error');

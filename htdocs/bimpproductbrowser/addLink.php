@@ -35,7 +35,7 @@ switch (GETPOST('action'))
 {
 	case 'filldb':
 	{
-		$pb->addRestrictions(GETPOST('ids'));
+		$pb->changeRestrictions(GETPOST('checked'), GETPOST('unchecked'));
 		break;
 	}
     default: break;

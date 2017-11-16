@@ -1,21 +1,33 @@
 $(document).ready(function()
 	{
+		var cb;
 	$("#submitTree").click(function()
 		{
-		var checkedValues = $('input:checkbox:checked').map(function()
-			{
-				return this.id;
-			}).get();
-		var uncheckedValues = $('input:checkbox:not(:checked)').map(function()
-			{
-				return this.id;
-			}).get();
+		// var checkedValues = $('input:checkbox:checked').map(function()
+		// 	{
+		// 		return this.id;
+		// 	}).get();
+		// var uncheckedValues = $('input:checkbox:not(:checked)').map(function()
+		// 	{
+		// 		return this.id;
+		// 	}).get();
+		var allInputs = document.getElementsByTagName("input");
+		var checkboxs = [];
+		for (var i = 0, max = allInputs.length; i < max; i++)
+		{
+    		if (allInputs[i].type === 'checkbox') 
+    			checkboxs.push({
+    				id: allInputs[i].id,
+    				val: allInputs[i].checked
+    			})
+		}
+		console.log(checkboxs);
 		var urlRequest = DOL_URL_ROOT + "/bimpproductbrowser/addLink.php";//?id="+findGetParameter('id');
 		$.ajax(
 		{
 			type: "POST",
 			url: urlRequest,
-			data: {checked : checkedValues, unchecked : uncheckedValues, action: 'filldb'},
+			data: {checked : checkboxs, action: 'filldb'},
 			cache: false,
 			success: function()
 			{

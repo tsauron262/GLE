@@ -21,9 +21,9 @@
  */
 
 /**
- *      \file       htdocs/categories/index.php
- *      \ingroup    category
- *      \brief      Home page of category area
+ *      \file       /bimpproductbrowser/addLink.php
+ *      \ingroup    bimpproductbrowser
+ *      \brief      Page without view, it just retrieve POST data and call ProductBrowser class
  */
 
 require '../main.inc.php';

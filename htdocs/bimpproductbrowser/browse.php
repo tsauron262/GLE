@@ -64,13 +64,6 @@ $type=$object->type;
 $extrafields = new ExtraFields($db);
 $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 
-$hookmanager->initHooks(array('categorycard'));
-
-/*
- * Action
- */
-
-
 /*
  * View
  */ 
@@ -95,6 +88,7 @@ $head = categories_prepare_head($object,$type);
 
 dol_fiche_head($head, 'recherchefiltree', $title, -1, 'category');
 
+// Get the path to that categ
 $linkback = '<a href="'.DOL_URL_ROOT.'/categories/index.php?leftmenu=cat&type='.$type.'">'.$langs->trans("BackToList").'</a>';
 $object->next_prev_filter=" type = ".$object->type;
 $object->ref = $object->label;

@@ -20,6 +20,7 @@ class synopsisexport {
     }
 
     public function exportFactureSav($print = true) {
+        if($print)
         echo "Debut export : <br/>";
 //        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 //, email , total, total_ttc, id8Sens FROM  `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "societe soc
@@ -70,6 +71,7 @@ class synopsisexport {
             else 
                 echo "Export de " . $ligne->facnumber . " annule.</br>";
         }
+        if($print)
         echo "Fin export : <br/>";
     }
 

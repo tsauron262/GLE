@@ -85,7 +85,7 @@ elseif ($type == Categorie::TYPE_ACCOUNT)   { $title=$langs->trans("AccountsCate
 elseif ($type == Categorie::TYPE_PROJECT)   { $title=$langs->trans("ProjectsCategoriesShort");  $typetext='project'; }
 else                                        { $title=$langs->trans("Category");          $typetext='unknown'; }
 
-llxHeader('','','','',0,0,$arrayofjs,$arrayofcss);
+llxHeader('','Recherche Filtrée','','',0,0,$arrayofjs,$arrayofcss);
 
 $head = categories_prepare_head($object,$type);
 

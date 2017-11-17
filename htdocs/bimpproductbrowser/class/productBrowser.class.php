@@ -128,20 +128,18 @@ class ProductBrowser extends CommonObject
 
 	function insertRow ($id_parent, $id_child)
 	{
-
-			$sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
-		    $sql.='VALUES ('.$id_parent.', '.$id_child.');';
-		    try
-		    {
-		        $this->db->query($sql);
-		        $this->db->commit();
-		    }
-		    catch(Exception $e)
-		    {
-		        echo 'ERROR:'.$e->getMessage();
-		        $this->db->rollback();
-		    }
-
+		$sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+	    $sql.='VALUES ('.$id_parent.', '.$id_child.');';
+	    try
+	    {
+	        $this->db->query($sql);
+	        $this->db->commit();
+	    }
+	    catch(Exception $e)
+	    {
+	        echo 'ERROR:'.$e->getMessage();
+	        $this->db->rollback();
+	    }
 	}
 
 	function deleteRow ($id_parent, $id_child)

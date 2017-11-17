@@ -21,7 +21,6 @@ $(document).ready(function()
     				val: allInputs[i].checked
     			})
 		}
-		console.log(checkboxs);
 		var urlRequest = DOL_URL_ROOT + "/bimpproductbrowser/addLink.php";//?id="+findGetParameter('id');
 		$.ajax(
 		{

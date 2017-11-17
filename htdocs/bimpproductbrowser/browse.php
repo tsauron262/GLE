@@ -83,6 +83,7 @@ $hookmanager->initHooks(array('categorycard'));
 
 $categstatic = new Categorie($db);
 $form = new Form($db);
+$pb = new productBrowser($db);
 
 if ($type == Categorie::TYPE_PRODUCT)       { $title=$langs->trans("ProductsCategoryShort");  $typetext='product'; }
 elseif ($type == Categorie::TYPE_SUPPLIER)  { $title=$langs->trans("SuppliersCategoryShort"); $typetext='supplier'; }
@@ -149,11 +150,14 @@ foreach($fulltree as $key => $val)
     $categstatic->type=$type;
     $li=$categstatic->getNomUrl(1,'',60);
     $desc=dol_htmlcleanlastbr($val['description']);
-
+    if($pb->restrictionExistsParentOnly($val['rowid']) or $pb->restrictionExistsChildOnly($val['rowid']))
+        $checked = ' checked';
+    else
+        $checked = '';
     $data[] = array(
     'rowid'=>$val['rowid'],
     'fk_menu'=>$val['fk_parent'],
-    'entry'=>'<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" '.($categstatic->color?' style="background: #'.$categstatic->color.';"':' style="background: #aaa"').'><input type="checkbox" id='.$val['rowid'].'>'.$li.'</span></td>'.
+    'entry'=>'<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" '.($categstatic->color?' style="background: #'.$categstatic->color.';"':' style="background: #aaa"').'><input type="checkbox" id='.$val['rowid'].$checked.'>'.$li.'</span></td>'.
     //'<td width="50%">'.dolGetFirstLineOfText($desc).'</td>'.
     '<td align="right" width="20px;"><a href="'.DOL_URL_ROOT.'/categories/viewcat.php?id='.$val['id'].'&type='.$type.'">'.img_view().'</a></td>'.
     '</tr></table>'

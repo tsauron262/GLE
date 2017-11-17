@@ -164,21 +164,53 @@ class ProductBrowser extends CommonObject
 		}
 	}
 */
+
+	function restrictionExistsChildOnly ($id_child)
+	{
+		$sql = 'SELECT *';
+		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
+		$sql.= ' WHERE fk_child_cat = '.$id_child;
+		$result = $this->db->query($sql);
+		if(mysqli_num_rows ($result) >= 1)
+			return true;
+		else
+			return false;
+	}
+
+	function restrictionExistsParentOnly ($id_parent)
+	{
+		$sql = 'SELECT *';
+		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
+		$sql.= ' WHERE fk_parent_cat = '.$id_parent;
+		$result = $this->db->query($sql);
+		if(mysqli_num_rows ($result) >= 1)
+			return true;
+		else
+			return false;
+	}
+
+	function restrictionExists ($id_parent, $id_child)
+	{
+		$sql = 'SELECT *';
+		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
+		$sql.= ' WHERE fk_child_cat = '.$id_child;
+		$sql.= ' AND fk_parent_cat = '.$id_parent;
+		$result = $this->db->query($sql);
+		if(mysqli_num_rows ($result) == 1)
+			return true;
+		else
+			return false;
+	}
+
 	function insertRow ($id_parent, $id_child)
 	{
-		echo "Début insert\n";
 		$sql = 'SELECT *';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
 		$sql.= ' WHERE rowid = '.$id_child;
 		$sql.= ' AND fk_parent = '.$id_parent;
 		$result1 = $this->db->query($sql);
 
-		$sql = 'SELECT *';
-		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
-		$sql.= ' WHERE fk_child_cat = '.$id_child;
-		$sql.= ' AND fk_parent_cat = '.$id_parent;
-		$result2 = $this->db->query($sql);
-		if (mysqli_num_rows ($result1) == 1 && mysqli_num_rows ($result2) == 0) // true = $id1 parent of $id2
+		if (mysqli_num_rows ($result1) == 1 and !$this->restrictionExists ($id_parent, $id_child)) // true = $id1 parent of $id2
 		{
 			$sql ='INSERT IGNORE INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
 		    $sql.='VALUES ('.$id_parent.', '.$id_child.');';

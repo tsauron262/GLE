@@ -935,40 +935,81 @@ class pdf_bimpcesu extends ModeleBimpcesu
 
 	$facturestatic = new Facture($db);
         
-        $sql = 'SELECT f.rowid as facid, f.facnumber, f.type, f.amount';
-        $sql .= ', f.total as total_ht';
-        $sql .= ', f.tva as total_tva';
-        $sql .= ', f.total_ttc';
-        $sql .= ', f.datef as df, f.datec as dc, f.paye as paye, f.fk_statut as statut';
-        $sql .= ', s.nom, s.rowid as socid';
-        $sql .= ', SUM(pf.amount) as am';
+        $sql = 'SELECT f.rowid as facid, f.fk_mode_reglement as mr';
+        //$sql .= ', f.total as total_ht';
+        //$sql .= ', f.tva as total_tva';
+        $sql .= ', f.total_ttc as total_ttc';
+        //$sql .= ', f.datef as df, f.datec as dc';
+        //$sql .= ', s.nom, s.rowid as socid';
+        //$sql .= ', SUM(f.total_ttc) as total_ttc';
         $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s," . MAIN_DB_PREFIX . "facture as f";
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture as pf ON f.rowid=pf.fk_facture';
+        //$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture as pf ON f.rowid=pf.fk_facture';
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
-        $sql .= " AND f.entity = " . $conf->entity;
+        //$sql .= " AND f.entity = " . $conf->entity;
         $sql .= " GROUP BY f.rowid";
-        $sql .= " ORDER BY f.datef DESC, f.datec DESC";
+        //$sql .= " ORDER BY f.datef DESC, f.datec DESC";
+
         
         $resql = $db->query($sql);
         
-        $objp = $db->fetch_object($resql);
-                
-        $facturestatic->id = $objp->facid;
-        $facturestatic->ref = $objp->facnumber;
-        $facturestatic->type = $objp->type;
-        $facturestatic->total_ht = $objp->total_ht;
-        $facturestatic->total_tva = $objp->total_tva;
-        $facturestatic->total_ttc = $objp->total_ttc;
-        
-        $total = $objp->total_ttc; // Inconnu pour le moment       
-        $totalcesu = "Error"; // Inconnu pour le moment       
-        $npref = "Error"; // Inconnu pour le moment
-        $diri = "Christian CONSTANTIN BERTIN";
-        $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
-        $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
-        $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
-        $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
+        if ($resql) {
+          //$var = true;
+          $num = $db->num_rows($resql);
+          $i = 0;
 
+          $array_total = array();//déclaration du tableau en variable globale
+          $array_total_cesu = array();
+      
+           while ($i < $num) {
+              $objp = $db->fetch_object($resql);
+              //$var = !$var;
+              
+              $facturestatic->id = $objp->facid;
+              $facturestatic->ref = $objp->facnumber;
+              $facturestatic->type = $objp->type;
+              $facturestatic->total_ht = $objp->total_ht;
+              $facturestatic->total_tva = $objp->total_tva;
+              $facturestatic->total_ttc = $objp->total_ttc;
+              $facturestatic->am = $objp->am;
+              $facturstatic->mr = $objp->mr;
+              
+              if($objp->mr == 150){
+                  
+                  $array_total_cesu[] = $objp->total_ttc;
+                  $array_total[] = $objp->total_ttc;//push du tableau
+                  
+              } else {
+                  
+                  $array_total[] = $objp->total_ttc;//push du tableau
+              }
+              
+              
+              
+              $i++;
+              
+              
+          }
+          //$db->free($resql);
+      
+      
+            $total = array_sum ($array_total); // Inconnu pour le moment     
+            
+            $totalcesu = array_sum ($array_total_cesu); // Inconnu pour le moment       
+            
+            $npref = "Error"; // Inconnu pour le moment
+            $diri = "Christian CONSTANTIN BERTIN";
+            $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
+            $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
+            $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
+            $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
+            
+        } else {
+            
+            print "pas de factures";
+            
+        }
+        
+        
        // $object = new Societe($db);
         $bene = $object->nom;
         $beneadd = $object->address; // Inconnu pour le moment

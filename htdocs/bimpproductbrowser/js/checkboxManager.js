@@ -3,14 +3,6 @@ $(document).ready(function()
 		var cb;
 	$("#submitTree").click(function()
 		{
-		// var checkedValues = $('input:checkbox:checked').map(function()
-		// 	{
-		// 		return this.id;
-		// 	}).get();
-		// var uncheckedValues = $('input:checkbox:not(:checked)').map(function()
-		// 	{
-		// 		return this.id;
-		// 	}).get();
 		var allInputs = document.getElementsByTagName("input");
 		var checkboxs = [];
 		for (var i = 0, max = allInputs.length; i < max; i++)
@@ -21,7 +13,7 @@ $(document).ready(function()
     				val: allInputs[i].checked
     			})
 		}
-		var urlRequest = DOL_URL_ROOT + "/bimpproductbrowser/addLink.php";//?id="+findGetParameter('id');
+		var urlRequest = DOL_URL_ROOT + "/bimpproductbrowser/addLink.php";
 		$.ajax(
 		{
 			type: "POST",
@@ -58,18 +50,4 @@ function showalert(message, alerttype)
 	{
 		$("#alertdiv").remove();
 	}, time);
-}
-
-function findGetParameter(parameterName)
-{
-    var result = null,
-        tmp = [];
-    location.search
-        .substr(1)
-        .split("&")
-        .forEach(function (item) {
-          tmp = item.split("=");
-          if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-        });
-    return result;
 }

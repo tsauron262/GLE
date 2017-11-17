@@ -60,8 +60,8 @@ INSERT INTO llx_product_price(price_level,date_price, fk_product, fk_user_author
 INSERT INTO llx_product_extrafields (fk_object,longdescript) VALUES (422,null);
 INSERT INTO llx_categorie_product (fk_categorie, fk_product) VALUES (194, 422);
 
-
+-- Adding link between categories and caregories --
+INSERT INTO llx_bimp_cat_cat (fk_parent_cat, fk_child_cat) VALUES (186, 189);
+INSERT INTO llx_bimp_cat_cat (fk_parent_cat, fk_child_cat) VALUES (186, 188);
 
 SET FOREIGN_KEY_CHECKS = 1;
-
--- Adding link between categories and caregories --

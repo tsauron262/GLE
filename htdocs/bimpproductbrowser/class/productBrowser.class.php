@@ -30,8 +30,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 class ProductBrowser extends CommonObject
 {
 	public $id;						// id of the parent ctegorie
-	public $id_child=array();
-	public $child=array();
+	public $id_childs=array();
 	public $is_a_leaf=false;
 	public $ref_product=array();
 
@@ -65,19 +64,20 @@ class ProductBrowser extends CommonObject
 	 */
 	function fetch($id)
 	{
-		$sql = 'SELECT fk_parent_cat, fk_child_cat';
+		$sql = 'SELECT fk_child_cat';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
 		$sql.= ' WHERE fk_parent_cat = '.$id;
 
 		dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
 		$result = $this->db->query($sql);
+		$this->id = $id;
+		$this->id_childs = array();
 		if ($result)
 		{
-			$this->id			= $id;
-			$this->id_child 	= array();
-			$obj=$result2->fetch_object($result);
-			array_push($this->id_child, $obj->fk_child_cat);
-			print_r($this->id_child);
+			while($obj=$this->db->fetch_object($result))
+			{
+				array_push($this->id_childs, $obj->fk_child_cat);
+			}
 			return 1;
 		}
 		else
@@ -120,7 +120,7 @@ class ProductBrowser extends CommonObject
 		$sql.= ' WHERE fk_child_cat = '.$id_child;
 		$sql.= ' AND fk_parent_cat = '.$id_parent;
 		$result = $this->db->query($sql);
-		if(mysqli_num_rows ($result) == 1)
+		if(mysqli_num_rows ($result) > 0)
 			return true;
 		else
 			return false;
@@ -128,15 +128,8 @@ class ProductBrowser extends CommonObject
 
 	function insertRow ($id_parent, $id_child)
 	{
-		$sql = 'SELECT *';
-		$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
-		$sql.= ' WHERE rowid = '.$id_child;
-		$sql.= ' AND fk_parent = '.$id_parent;
-		$result1 = $this->db->query($sql);
 
-		if (mysqli_num_rows ($result1) == 1 and !$this->restrictionExists ($id_parent, $id_child)) // true = $id1 parent of $id2
-		{
-			$sql ='INSERT IGNORE INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
+			$sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
 		    $sql.='VALUES ('.$id_parent.', '.$id_child.');';
 		    try
 		    {
@@ -148,12 +141,11 @@ class ProductBrowser extends CommonObject
 		        echo 'ERROR:'.$e->getMessage();
 		        $this->db->rollback();
 		    }
-		}
+
 	}
 
 	function deleteRow ($id_parent, $id_child)
 	{
-		echo "Début delete\n";
 		$sql = 'DELETE';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
 		$sql.= ' WHERE fk_child_cat = '.$id_child;
@@ -169,22 +161,19 @@ class ProductBrowser extends CommonObject
 	}
 
 	function changeRestrictions ($checkboxs)
-	{
+	{	
 		for ($i=0 ; $i<sizeof($checkboxs) ; $i++){
 			echo '$i = '.$i.' = '.$checkboxs[$i]['id'].' = '.$checkboxs[$i]['val']."\n";
-			$id1 = $checkboxs[$i]['id'];
+			$id_f= $checkboxs[$i]['id'];
 			$val1 = $checkboxs[$i]['val'];
-			for ($j=$i+1 ; $j<sizeof($checkboxs) ; $j++)
+			if ($val1 == 'true' and $this->id != $id_f and !in_array($id_f, $this->id_childs))
 			{
-				echo '    $j ='.$j.' = '.$checkboxs[$j]['id'].' = '.$checkboxs[$j]['val']."\n";
-				$id2 = $checkboxs[$j]['id'];
-				$val2 = $checkboxs[$j]['val'];
-				if ($val1 == 'true' and $val2 == 'true') {
-					$this->insertRow($id1, $id2);
-				} else 
-				{
-					$this->deleteRow($id1, $id2);
-				}
+				echo "Insertion\n";
+				$this->insertRow($this->id, $id_f);
+			} elseif ($val1 == 'false' and in_array($id_f, $this->id_childs))
+			{
+				echo "Délétion\n";
+				$this->deleteRow($this->id, $id_f);
 			}
 		}
 	}

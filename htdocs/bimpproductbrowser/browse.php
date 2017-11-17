@@ -59,6 +59,7 @@ if ($result <= 0)
     exit;
 }
 
+
 $type=$object->type;
 
 $extrafields = new ExtraFields($db);
@@ -71,6 +72,9 @@ $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 $categstatic = new Categorie($db);
 $form = new Form($db);
 $pb = new productBrowser($db);
+
+$pb->fetch($object->id);
+
 
 if ($type == Categorie::TYPE_PRODUCT)       { $title=$langs->trans("ProductsCategoryShort");  $typetext='product'; }
 elseif ($type == Categorie::TYPE_SUPPLIER)  { $title=$langs->trans("SuppliersCategoryShort"); $typetext='supplier'; }
@@ -121,6 +125,7 @@ print '</div></div></div>';
 print '<div class="fichecenter"><br>';
 
 
+print '<input type="hidden" name="id_oject" id="id_oject" value="'.$object->id.'"/>';
 // Charge tableau des categories
 $cate_arbo = $categstatic->get_full_arbo($typetext);
 
@@ -138,7 +143,7 @@ foreach($fulltree as $key => $val)
     $categstatic->type=$type;
     $li=$categstatic->getNomUrl(1,'',60);
     $desc=dol_htmlcleanlastbr($val['description']);
-    if($pb->restrictionExistsParentOnly($val['rowid']) or $pb->restrictionExistsChildOnly($val['rowid']))
+    if(in_array($val['rowid'], $pb->id_childs))
         $checked = ' checked';
     else
         $checked = '';

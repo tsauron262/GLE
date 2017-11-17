@@ -18,7 +18,7 @@ $(document).ready(function()
 		{
 			type: "POST",
 			url: urlRequest,
-			data: {checked : checkboxs, action: 'filldb'},
+			data: {id_oject : $('#id_oject').val() , checked : checkboxs, action: 'filldb'},
 			cache: false,
 			success: function()
 			{

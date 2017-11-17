@@ -30,6 +30,8 @@ require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/class/productBrowser.class.php';
 
 $pb = new ProductBrowser($db);
+$id = GETPOST('id_oject');
+$pb->fetch($id);
 
 switch (GETPOST('action'))
 {

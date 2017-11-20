@@ -1,4 +1,4 @@
-high<?php
+<?php
 /* Copyright (C) 2004-2017	Laurent Destailleur		<eldy@users.sourceforge.net>
  * Copyright (C) 2006		Rodolphe Quiedeville	<rodolphe@quiedeville.org>
  * Copyright (C) 2007-2017	Regis Houssin			<regis.houssin@capnetworks.com>
@@ -1150,23 +1150,7 @@ div.arearefnobottom {
 }
 div.heightref {
 	min-height: 80px;
-        background-color: aliceblue;
 }
-/*________________Modif perso_______________________*/
-.nomClient {
-        text-transform: uppercase;
-        background-color: aliceblue !important;
-}
-
-#nomInt {
-        text-transform: uppercase;
-        background-color: beige;
-}
-
-#derniereFacture{
-        background-color: gainsboro;
-}
-/*____________________________________________________*/
 div.divphotoref {
 	padding-right: 20px;
 }
@@ -2099,8 +2083,6 @@ a.tab:link, a.tab:visited, a.tab:hover, a.tab#active {
 	color: #<?php echo $colortextbacktab; ?> !important;
 	background: rgb(<?php echo $colorbacktabcard1; ?>) !important;
 	margin: 0 0.2em 0 0.2em !important;
-        text-transform: uppercase !important;
-        background-color: aliceblue !important;
 
 	border-right: 1px solid #AAA !important;
 	border-left: 1px solid #AAA !important;
@@ -4689,13 +4671,11 @@ div.tabsElem a.tab {
 	<?php } ?>
 	}
 	div#tmenu_tooltip {
-                
 	<?php if (GETPOST('optioncss','aZ09') == 'print') {  ?>
 		display:none;
 	<?php } else { ?>
 		padding-<?php echo $right; ?>: 0;
 	<?php } ?>
-               
 	}
 	div.login_block_user {
 		min-width: 0;

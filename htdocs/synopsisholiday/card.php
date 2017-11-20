@@ -2017,7 +2017,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         print '<tr>';
                         print '<td width="50%">Remplaçant</td>' . "\n";
                         print '<td>' . "\n";
-                        $form->select_users((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, array($cp->fk_user));
+                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, array($cp->fk_user), null, null, null, null, null, null, null, null, null, null,1);
                         print '</td>' . "\n";
                         print '<td><input type="submit" value="Enregistrer" class="butAction"></td>';
                         print '</tr>' . "\n";

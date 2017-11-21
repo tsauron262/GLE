@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2005       Matthieu Valleton   <mv@seeschloss.org>
  * Copyright (C) 2005       Eric Seigne         <eric.seigne@ryxeo.com>
  * Copyright (C) 2006-2016  Laurent Destailleur <eldy@users.sourceforge.net>
@@ -25,41 +26,27 @@
  *      \ingroup    bimpproductbrowser
  *      \brief      Page without view, it just manage POST request
  */
-
 require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/class/productBrowser.class.php';
-require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpproductbrowser/class/productBrowser.class.php';
 
-$pb = new ProductBrowser($db);
 $id = GETPOST('id_prod');
-$currentCateg = new Categorie($db);
 
 //$pb->fetch($id);
 
-switch (GETPOST('action'))
-{
-    case 'searchCategory':
-    {
-        if (GETPOST('id_categ')){
-            $currentCateg->fetch(GETPOST('id_categ'));
-            $tabCateg=$currentCateg->get_filles();
-            $objOut->tabIdChild=array();
-            $objOut->tabNameChild=array();
-            $objOut->id=$currentCateg->id;
-            foreach($tabCateg as $categ) {
-                array_push($objOut->tabIdChild, $categ->id);
-                array_push($objOut->tabNameChild, $categ->label);
+switch (GETPOST('action')) {
+    case 'searchCategory': {
+            if (GETPOST('id_categ')) {
+                $pb = new ProductBrowser($db);
+                $objOut = $pb->getChildCategory(GETPOST('id_categ'));
+                echo json_encode($objOut);
+            } else {
+                $objOut->id = 0;
+                $objOut->tabIdChild = array(183, 193);
+                $objOut->tabNameChild = array("Iphone", "Mac");
+                echo json_encode($objOut);
             }
-            echo json_encode($objOut);
-        } else
-        {
-            $objOut->id=0;
-            $objOut->tabIdChild=array(183, 193);
-            $objOut->tabNameChild=array("Iphone", "Mac");
-            echo json_encode($objOut);
+            break;
         }
-     break;
-    }
     default: break;
 }
 

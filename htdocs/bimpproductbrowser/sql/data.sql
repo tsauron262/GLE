@@ -21,7 +21,7 @@ INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible,
 INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (189,186,'Loisir','Desc loisir','d8b8f9','0',0,null,1);
 INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (190,186,'gamer','Desc gamer','ffbfde','0',0,null,1);
 INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (191,185,'9p','Desc 9p','e5e5a9','0',0,null,1);
-INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (192,185,'10p','Là c\'est plutôt une tablette ...','d8a270','0',0,null,1);
+INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (192,185,'10p','Là on dirait plutôt une tablette ...','d8a270','0',0,null,1);
 INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (193,0,'Mac','Desc Mac','ff5656','0',0,null,1);
 INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (194,193,'Graphiste','Desc graphiste','5f9edd','0',0,null,1);
 INSERT INTO llx_categorie (rowid, fk_parent, label, description, color, visible, type, import_key, entity) VALUES (195,193,'Développeur','Desc dev','7bbf37','0',0,null,1);

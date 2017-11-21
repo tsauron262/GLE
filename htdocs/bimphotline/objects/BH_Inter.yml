@@ -6,6 +6,26 @@ labels:
     name: intervention
     is_female: 1
 
+objects: 
+    tech_user: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: user
+            id_object: 
+                field_value: tech_id_user
+        cards:
+            default:
+                title: nom
+                fields:
+                    E-mail:
+                        object_prop: email
+                    Tél. pro: 
+                        object_prop: office_phone
+                    Tél. portable:
+                        object_prop: user_mobile
+                view_btn: 1
+                
 fields:
     id_ticket:
         label: Ticket
@@ -22,6 +42,16 @@ fields:
             number: 
                 type: object_field
                 field: ticket_number
+            card:
+                type: card
+                card: 
+                    title: nom
+                    fields: 
+                        N°: ticket_number
+                        Contrat: 
+                            field: id_contrat
+                            display: nom_url
+                    view_btn: 1
         sort_options: 
             default: ticket_number
             id: id
@@ -31,15 +61,7 @@ fields:
         type: id_object
         input: 
             type: search_user
-        object: 
-            instance: 
-                dol_object: user
-                fetch:
-                    id:
-                        field_value: tech_id_user
-            join: 
-                table: user
-                field_on: rowid
+        object: tech_user
         required: 0
         sortable: 1
         search: 1
@@ -50,20 +72,7 @@ fields:
                 type: field_value
             card: 
                 type: card
-                card:
-                    title:
-                        callback:
-                            method: getNomUrl
-                            params: 
-                                - 1
-                    fields:
-                        E-mail:
-                            object_prop: email
-                        Tél. pro: 
-                            object_prop: office_phone
-                        Tél. portable:
-                            object_prop: user_mobile
-                    view_btn: 1
+                card: default
         sort_option: 
             default: 
                 label: nom utilisateur
@@ -73,7 +82,7 @@ fields:
         label: Durée
         type: time_last
         input: 
-            type: hidden
+            type: timer
         default_value: 0
         display: 
             default: 
@@ -118,6 +127,8 @@ fields:
         type: string
         input:
             type: textarea
+            rows: 3
+            auto_expand: 1
         sortable: 0
         search: 0
     
@@ -149,8 +160,10 @@ list:
             field: timer
         priorite:
             field: priority
+            edit: 1
         status:
             field: status
+            edit: 1
     add_btn: 1
     edit_btn: 1
     update_btn: 1
@@ -159,35 +172,84 @@ list:
     page_btn: 1
     
 views:
-    default: 
+    default:
         title: nom
-        edit_btn: 1
+        edit_form: default
         delete_btn: 1
+        no_reload: 1
         buttons:
             - label: Fermer
               icon_before: times
               classes: btn,btn-default
               attr:
                   onclick: closeInterView($(this));
+        rows: 
+            - cols:
+                - type: view
+                  col_lg: 5
+                  col_md: 8
+                  col_sm: 12
+                  view: 
+                      name: chrono
+                      panel: 0
+                      
+                - type: view
+                  col_lg: 7
+                  col_md: 12
+                  col_sm: 12
+                  view: 
+                      name: data
+                      panel: 0
+                      
+    chrono: 
+        no_reload: 1
         rows:
             - cols:
-                  - type: custom
-                    col_lg: 3
+                - type: custom
+                  custom:
+                      callback: renderChronoView
+                      
+    data: 
+        rows:
+            - cols:
+                  - type: object_common_fields
+                    col_lg: 4
                     col_sm: 12
-                    content: 
-                        callback:
-                            method: renderTimer
-                  - type: rows
-                    col_lg: 3
+                  - type: fields_table
+                    col_lg: 8
                     col_sm: 12
-                    rows: common_fields
-                  - type: table
-                    col_lg: 6
-                    col_sm: 12
-                    rows:
-                        - field: tech_id_user
-                          display: card
-                        - field: timer
-                        - field: priority
-                        - field: status
-                        - field: description
+                    fields_table:
+                        rows:
+                            - field: tech_id_user
+                              display: card
+                            - field: timer
+                            - field: priority
+                            - field: status
+                            - field: description
+
+    card:
+        rows:
+            - cols:
+                  - type: fields_table
+                    col_lg: 12
+                    fields_table:
+                        rows:
+                            - field: id_ticket
+                              display: card
+                            - field: timer
+                            - field: priority
+                            - field: status
+                            - field: description
+        
+views_lists: 
+    user_currents:
+        title: Vos interventions en cours
+        view: card
+        view_btn: 1
+        add_btn: 0
+        edit_form: default
+        item_col_lg: 4
+        item_col_md: 6
+        item_modal_view: data
+        item_inline_view: default
+        

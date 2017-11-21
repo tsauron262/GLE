@@ -1,22 +1,38 @@
 table: bh_ticket
 controller: ticket
 
-labels: 
+labels:
     name: ticket
 
+objects:
+    contrat:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: contrat
+            id_object:
+                field_value: id_contrat
+                
+    inters:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BH_Inter
+        
+    notes:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object: BH_Note
+        
 fields: 
     id_contrat:
         label: Contrat
         type: id_object
+        object: contrat
         required: 1
         search: 1
-        sortable: 1
-        object:
-            instance:
-                dol_object: contrat
-                fetch:
-                    id:
-                        field_value: id_contrat
+        sortable: 1            
         input: 
             type: search_list
             search_list:
@@ -72,37 +88,29 @@ fields:
         input: 
             type: hidden
         display: field_value
-
-objects: 
-    interventions:
-        object: 
-            instance: 
-                bimp_object: BH_Inter
-        delete: 1
-        
-    notes:
-        object:
-            instance:
-                bimp_object: BH_Note
-        delete: 1
         
 views:
     default:
         title: nom
-        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        
+    main:
+        title: nom
+        edit_form: default
         delete_btn: 1
         rows:
             - cols: 
-                  - type: rows
+                  - type: object_common_fields
                     col_lg: 3
                     col_sm: 12
-                    rows: common_fields
-                  - type: table
+                  - type: fields_table
                     col_lg: 9
-                    rows:
-                        - field: ticket_number
-                        - field: id_contrat
-                          display: card
+                    fields_table:
+                        rows:
+                            - field: ticket_number
+                            - field: id_contrat
+                              display: card
             
 list:
     checkboxes: 1

@@ -61,10 +61,14 @@ fields:
         type: string
         input:
             type: textarea
+            note: 1
+            auto_expand: 1
+            rows: 2
         sortable: 0
         
 list:
     title: Notes
+    icon: file-text
     checkboxes: 1
     bulk_actions: 
         - label: Supprimer les notes sélectionnées
@@ -93,7 +97,7 @@ list:
             label: Contenu
             field: content
             edit: 1
-            min_width: 350px
+            min_width: 40%
     add_btn: 1
     edit_btn: 1
     update_btn: 1

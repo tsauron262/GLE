@@ -11,9 +11,11 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpConfig.php';
     require_once $dir . 'BimpInput.php';
     require_once $dir . 'BimpRender.php';
+    require_once $dir . 'BimpStruct.php';
     require_once $dir . 'BimpList.php';
     require_once $dir . 'BimpForm.php';
     require_once $dir . 'BimpView.php';
+    require_once $dir . 'BimpViewsList.php';
     require_once $dir . 'BimpObject.php';
     require_once $dir . 'BimpController.php';
 }

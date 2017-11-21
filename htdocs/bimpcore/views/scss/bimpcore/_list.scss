@@ -1,19 +1,13 @@
-.listContainer {
-    .objectViewContainer,
-    .objectFormContainer {
-        margin: 15px 0;
-    }
-}
 .objectList  {
-    table {
+    table.objectlistTable {
         border: none;
         box-shadow: none;
 
-        thead tr th {
+        & > thead > tr > th {
             padding: 10px 6px;
             margin-bottom: 8px;
             color: #fff;
-            background-color: #EF7D00;
+            background-color: $primary;
             text-align: left;
             font-weight: bold;
         }
@@ -197,6 +191,10 @@
     background-color: #fff;
 }
 .listPagination {
+    &:empty {
+        display: none;
+    }
+    
     text-align: center;
     background-color: #fff;
     padding: 10px;

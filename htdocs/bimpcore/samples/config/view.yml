@@ -1,0 +1,68 @@
+url:
+
+controller:
+
+module:
+
+object:
+
+field:
+    
+input:
+    
+display: 
+    
+card:
+   
+sort_option:
+    
+search_option:
+
+button:
+    
+panel:
+    foldable: bool
+    header: 
+        title: string
+        icon: string
+        buttons: button_list
+    content:
+        callback: callback_def
+        #OR
+        view: view_name
+        object: object_name or instance_def
+        #OR
+        rows: rows_def
+    footer:
+        buttons: button_list
+
+fields_table:
+    caption:
+        foldable: 1/0
+        title: string
+        icon: string
+        buttons: buttons_list
+    rows:
+        - field: ...
+          edit: 1/0 
+          #OR
+          value: value_def
+          label: fac, string
+          display: fac, display_name
+row:
+    
+col:
+    
+view:
+    name: view_name
+    object: objet_name OR object_def
+    panel: bool
+    #OR
+    rows:
+        - cols:       
+            - type: fields_table
+              fields_table: fields_table_def
+            - col_xx: 12
+              #<tag_params>
+              type: struct
+              struct: struct_def

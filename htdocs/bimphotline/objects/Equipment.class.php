@@ -3,6 +3,12 @@
 class Equipment extends BimpObject
 {
 
+    public static $warranty_types = array(
+        0 => ' - ',
+        1 => 'Type 1',
+        2 => 'Type 2'
+    );
+    
     public function getContratsArray()
     {
         $id_soc = isset($this->data['id_soc']) ? $this->data['id_soc'] : 0;

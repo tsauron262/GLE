@@ -1,7 +1,37 @@
+[id$="_view_panel"] {
+    .panel-secondary {
+        /*border-color: #c8c8c8;*/
+        .panel-heading {
+            background-color: #c8c8c8;
+            color: $gray_darker;
+            border-color: #c8c8c8
+        }
+    }
+}
+
+
+.object_view_content {
+    padding: 0!important;
+
+    .row:not(:first-child) {
+        margin-top: 30px;
+    }
+}
+
 .objectViewtable {
     border: 1px solid $gray-light;
     width: 100%;
+    margin: 5px 0;
 
+    thead tr th {
+        padding: 8px 12px;
+        background-color: $primary;
+        color: #fff;
+        font-weight: bold;
+        border-bottom: 1px solid #fff;
+        font-size: 16px;
+        font-weight: normal;
+    }
     tbody tr {
         th, td {
             padding: 5px 10px;
@@ -45,10 +75,8 @@
     }
 }
 .object_common_fields {
-    padding: 10px;
+    margin: 5px 0;
     background-color: $gray-lighter;
-    border: 1px solid darken($gray-lighter, 10%);
-    border-radius: 4px;
 
     table {
         width: 100%;
@@ -56,17 +84,26 @@
 
         tbody tr {
             th, td {
-                padding: 0 5px;                
-                color: $gray-darker;
+                padding: 3px 5px;                
                 font-size: 12px;
+                border-bottom: 1px solid #fff;
             }
 
             th {
-                font-weight: bold;
+                font-weight: normal;
+                color: $gray-light;
+                border-bottom: 1px solid $gray-light;;
                 width: 30%;
                 min-width: 90px;
                 text-align: right;
                 vertical-align: top;
+                background-color: $secondary;
+            }
+
+            td {
+                color: $gray-darker;
+                border-bottom: 1px solid $gray-light;
+                vertical-align: middle;
             }
         }
     }

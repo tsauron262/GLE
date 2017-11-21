@@ -15,7 +15,9 @@ class BimpObject
         'user_create',
         'user_update'
     );
+    public $use_commom_fields = true;
     protected $data = array();
+    protected $associations = array();
 
     public static function getInstance($module, $object_name)
     {
@@ -60,24 +62,6 @@ class BimpObject
         return null;
     }
 
-    public function getAssociateInstance($params)
-    {
-        if (isset($params['bimp_object'])) {
-            if (is_string($params['bimp_object'])) {
-                $module = $this->module;
-                $name = $params['bimp_object'];
-            } else {
-                $module = isset($params['bimp_objet']['module']) ? $params['bimp_objet']['module'] : $this->module;
-                $name = $params['bimp_objet']['name'];
-            }
-            return self::getInstance($module, $name);
-        } elseif (isset($params['dol_object'])) {
-            return self::getDolInstance($params['dol_object']);
-        }
-
-        return null;
-    }
-
     public function __construct($module, $object_name)
     {
         global $db;
@@ -85,17 +69,18 @@ class BimpObject
         $this->db = new BimpDb($db);
         $this->module = $module;
         $this->object_name = $object_name;
-        $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . $module . '/objects/', $object_name);
+        $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
+        $this->use_commom_fields = $this->getConf('common_fields', 1, false, 'bool');
     }
 
     public function getConf($path, $default_value = null, $required = false, $data_type = 'string')
     {
-        return $this->config->get($path, $this, $default_value, $required, $data_type);
+        return $this->config->get($path, $default_value, $required, $data_type);
     }
 
     public function getCurrentConf($path, $default_value = null, $required = false, $data_type = 'string')
     {
-        return $this->config->getFromCurrentPath($path, $this, $default_value, $required, $data_type);
+        return $this->config->getFromCurrentPath($path, $default_value, $required, $data_type);
     }
 
     public function getPrimary()
@@ -129,6 +114,29 @@ class BimpObject
         return $this->getConf('parent_object', '');
     }
 
+    public function getParentModule()
+    {
+        return $this->getConf('parent_module', $this->module);
+    }
+
+    public function getParentInstance()
+    {
+        $id_property = $this->getParentIdProperty();
+        $module = $this->getParentModule();
+        $object = $this->getParentObjectName();
+        if ($module && $object) {
+            $instance = self::getInstance($module, $object);
+            if (!is_null($instance) && $instance && !is_null($id_property)) {
+                $id = $this->getData($id_property);
+                if (!is_null($id) && $id) {
+                    $instance->fetch($id);
+                }
+            }
+            return $instance;
+        }
+        return null;
+    }
+
     // Gestion des données:
 
     public function getData($field)
@@ -140,12 +148,60 @@ class BimpObject
         if ($this->config->isDefined('fields/' . $field)) {
             return $this->getConf('fields/' . $field . '/default_value');
         }
+
+        if ($this->config->isDefined('associations/' . $field)) {
+            return $this->getAssociatedList($field);
+        }
         return null;
+    }
+
+    public function getAssociatedList($association)
+    {
+        if (isset($this->associations[$association])) {
+            return $this->associations[$association];
+        }
+
+        $this->associations[$association] = array();
+
+        if (!isset($this->id) || !$this->id) {
+            return array();
+        }
+
+        $prev_path = $this->config->current_path;
+
+        if ($this->config->setCurrentPath('associations/' . $association)) {
+            $table = $this->getCurrentConf('table', '', true);
+            if ($table) {
+                $where = '`id_object` = ' . (int) $this->id;
+                $list = $this->db->getValues($table, 'id_associate', $where);
+                $this->associations[$association] = $list;
+            }
+        }
+
+        $this->config->setCurrentPath($prev_path);
+
+        return $this->associations[$association];
     }
 
     public function set($field, $value)
     {
+        if ($this->config->isDefined('associations/' . $field)) {
+            return $this->setAssociatedList($field, $value);
+        }
+
         return $this->validateValue($field, $value);
+    }
+
+    public function setAssociatedList($association, $list)
+    {
+        if (!is_array($list)) {
+            $list = array($list);
+        }
+        if ($this->config->isDefined('associations/' . $association)) {
+            $this->associations[$association] = $list;
+        }
+
+        return true;
     }
 
     public function setIdParent($id_parent)
@@ -157,7 +213,9 @@ class BimpObject
     public function reset()
     {
         $this->data = array();
+        $this->associations = array();
         $this->id = null;
+        $this->config->resetObjects();
     }
 
     public function checkFieldValueType($field, &$value)
@@ -184,12 +242,14 @@ class BimpObject
         return false;
     }
 
-    public function getSearchFilters()
+    public function getSearchFilters($fields = null)
     {
         $filters = array();
 
-        if (BimpTools::isSubmit('search_fields')) {
-            $fields = BimpTools::getValue('search_fields', array());
+        if (is_null($fields) && BimpTools::isSubmit('search_fields')) {
+            $fields = BimpTools::getValue('search_fields', null);
+        }
+        if (!is_null($fields)) {
             $prev_path = $this->config->current_path;
             foreach ($fields as $field_name => $value) {
                 if ($value === '') {
@@ -235,24 +295,18 @@ class BimpObject
                         }
 
                         switch ($search_type) {
+                            case 'time_range':
                             case 'date_range':
-                                if (!is_array($value)) {
-                                    $value = array(
-                                        'from' => '',
-                                        'to'   => ''
-                                    );
-                                }
-                                if (!isset($value['to']) || !$value['to']) {
-                                    $value['to'] = date('Y-m-d H:i:s');
-                                }
-                                if (!isset($value['from']) || !$value['from']) {
-                                    $value['from'] = '0000-00-00 00:00:00';
-                                }
-                                if (isset($value['from']) && isset($value['to'])) {
-                                    $filters[$field_name] = array(
-                                        'min' => $value['from'],
-                                        'max' => $value['to']
-                                    );
+                            case 'datetime_range':
+                                if (is_array($value) &&
+                                        isset($value['to']) && $value['to'] &&
+                                        isset($value['from']) && $value['from']) {
+                                    if ($value['from'] <= $value['to']) {
+                                        $filters[$field_name] = array(
+                                            'min' => $value['from'],
+                                            'max' => $value['to']
+                                        );
+                                    }
                                 }
                                 break;
 
@@ -282,15 +336,12 @@ class BimpObject
             $this->config->setCurrentPath($prev_path);
         }
 
-//        echo '<pre>';
-//        print_r($filters);
-//        exit;
         return $filters;
     }
 
     // Affichage des données:
 
-    public function displayData($field, $display_name = 'default')
+    public function displayData($field, $display_name = 'default', $item = null)
     {
         if (is_null($display_name) || ($display_name === '')) {
             $display_name = 'default';
@@ -342,7 +393,52 @@ class BimpObject
                     $display_name = '';
                 }
             }
+            $value = $this->getData($field);
+            if (is_array($value)) {
+                if (!is_null($item) && in_array($item, $value)) {
+                    $value = $item;
+                } else {
+                    $value = implode(',', $value);
+                }
+            }
             $html .= $this->displayValue($this->data[$field], 'fields/' . $field . '/display' . ($display_name ? '/' . $display_name : ''), $field);
+        } elseif ($this->config->isDefined('associations/' . $field)) {
+            $association = $field;
+            $list = $this->getAssociatedList($field);
+            if (!is_null($item) && in_array($item, $list)) {
+                if (($display_name === 'default' && !$this->config->isDefined('associations/' . $association . '/display/default')) ||
+                        ($display_name && !$this->config->isDefined('associations/' . $association . '/display/' . $display_name))) {
+                    if ($this->config->isDefined('associations/' . $association . '/display/type')) {
+                        $display_name = '';
+                    }
+                }
+
+                $instance = $this->config->getObject('associations/' . $association . '/object');
+                if (!is_null($instance)) {
+                    if ($instance->fetch($item)) {
+                        $display = $this->getConf('associations/' . $association . '/display/' . $display_name, '', false, 'any');
+                        if ($display) {
+                            if (isset($display['object_prop'])) {
+                                $object_prop = $this->getConf('associations/' . $association . '/display/' . $display_name . '/object_prop', '');
+                                if ($object_prop) {
+                                    if (property_exists($instance, $object_prop)) {
+                                        $html .= $instance->{$object_prop};
+                                    }
+                                }
+                            }
+                        }
+                        if (!$html) {
+                            $html .= self::getInstanceLabel('name') . ' ' . $item;
+                        }
+                    } else {
+                        $html .= BimpRender::renderAlerts(self::getInstanceLabel('name') . ' d\'ID ' . $item . ' non trouvé(e)');
+                    }
+                } else {
+                    $html .= BimpRender::renderAlerts('Erreur de configuration : Instance invalide');
+                }
+            } else {
+                $html .= BimpRender::renderAlerts('inconnu');
+            }
         } else {
             $html = '<p class="alert alert-danger">Champ "' . $field . '" non défini</p>';
         }
@@ -358,6 +454,12 @@ class BimpObject
         if ($this->config->setCurrentPath($display_path)) {
             $display_type = $this->getCurrentConf('type', 'string');
             switch ($display_type) {
+                case 'syntaxe':
+                    $syntaxe = $this->getCurrentConf('syntaxe', '<value>');
+                    $syntaxe = str_replace('<value>', $value, $syntaxe);
+                    $html .= $syntaxe;
+                    break;
+
                 case 'nom':
                 case 'nom_url':
                 case 'card':
@@ -365,8 +467,10 @@ class BimpObject
                         $html .= '<span class="warning">Aucun</span>';
                     } else {
                         if ($field) {
-                            if ($this->config->isDefined('fields/' . $field . '/object')) {
-                                $instance = $this->getConf('fields/' . $field . '/object', null, false, 'object');
+                            if ($field === $this->getParentIdProperty()) {
+                                $instance = $this->getParentInstance();
+                            } elseif ($this->config->isDefined('fields/' . $field . '/object')) {
+                                $instance = $this->config->getObject('fields/' . $field . '/object');
                             } else {
                                 $instance = $this;
                             }
@@ -386,7 +490,15 @@ class BimpObject
                                         $this->config->setCurrentPath($display_path . '/card');
                                         $html .= BimpRender::renderObjectCard($instance, $this->config);
                                     } elseif (is_string($card)) {
-                                        if (is_a($instance, 'BimpObject')) {
+                                        if ($field && $this->config->isDefined('fields/' . $field . '/object')) {
+                                            $object_name = $this->config->get('fields/' . $field . '/object', '', false, 'any');
+                                            if ($object_name && is_string($object_name)) {
+                                                if ($this->config->isDefined('objects/' . $object_name . '/cards/' . $card)) {
+                                                    $this->config->setCurrentPath('objects/' . $object_name . '/cards/' . $card);
+                                                    $html .= BimpRender::renderObjectCard($instance, $this->config);
+                                                }
+                                            }
+                                        } elseif (is_a($instance, 'BimpObject')) {
                                             if ($instance->config->isDefined('cards/' . $card)) {
                                                 $instance->config->setCurrentPath('cards/' . $card);
                                                 $html .= BimpRender::renderObjectCard($instance, $instance->config);
@@ -514,8 +626,8 @@ class BimpObject
 
             case 'date_create':
             case 'date_update':
-                $input_type = 'date_range';
-                $search_type = 'date_range';
+                $input_type = 'datetime_range';
+                $search_type = 'datetime_range';
                 break;
         }
 
@@ -538,34 +650,31 @@ class BimpObject
 
     public function validatePost()
     {
-
-        $fields = $this->getConf('fields', null, true, 'array');
-
-        if (is_null($fields)) {
-            return array();
-        }
-
         $errors = array();
-
         $prev_path = $this->config->current_path;
+
+        $fields = $this->getConf('fields', array(), true, 'array');
 
         foreach ($fields as $field => $params) {
             $this->config->setCurrentPath('fields/' . $field);
             $value = null;
             if (BimpTools::isSubmit($field)) {
-                $type = $this->getCurrentConf('type', '');
-                if ($type === 'datetime') {
-                    $value = BimpTools::getDateTimeFromForm($field);
-                } else {
-                    $value = BimpTools::getValue($field);
-                }
+                $value = BimpTools::getValue($field);
             } elseif (isset($this->data[$field])) {
-                $value = $this->data[$field];
+                $value = $this->getData($field);
             } else {
                 $value = $this->getCurrentConf('default_value', null);
             }
 
             $errors = array_merge($errors, $this->validateValue($field, $value));
+        }
+
+        $associations = $this->getConf('associations', array(), false, 'array');
+
+        foreach ($associations as $asso_name => $params) {
+            if (BimpTools::isSubmit($asso_name)) {
+                $this->set($asso_name, BimpTools::getValue($asso_name));
+            }
         }
 
         $this->config->setCurrentPath($prev_path);
@@ -639,19 +748,21 @@ class BimpObject
                 if ($type) {
                     if (is_null($invalid_msg)) {
                         switch ($type) {
-                            case 'datetime':
-                                $invalid_msg = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
-                                break;
-
                             case 'time':
                                 $invalid_msg = 'Format attendu: HH:MM:SS';
                                 break;
 
                             case 'date':
                                 $invalid_msg = 'Format attendu: AAAA-MM-JJ';
+                                break;
+
+                            case 'datetime':
+                                $invalid_msg = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
+                                break;
 
                             case 'id_object':
                                 $invalid_msg = 'La valeur doit être un nombre entier positif';
+                                break;
 
                             default:
                                 $invalid_msg = 'La valeur doit être de type "' . $type . '"';
@@ -731,7 +842,6 @@ class BimpObject
         $first = true;
         foreach ($filters as $field_name => $value) {
             if ($first) {
-                $where .= 'WHERE ';
                 $first = false;
             } else {
                 $where .= ' AND ';
@@ -745,12 +855,12 @@ class BimpObject
             return false;
         }
 
-        $this->fetch($id_object);
-        return true;
+        return $this->fetch($id_object);
     }
 
     public function fetch($id)
     {
+        $this->reset();
         $table = $this->getTable();
         $primary = $this->getPrimary();
 
@@ -823,7 +933,7 @@ class BimpObject
         $primary = $this->getPrimary();
 
         if (is_null($table)) {
-            return array('Fichier de configuration invalide');
+            return array('Fichier de configuration invalide (table non renseignée)');
         }
 
         $errors = array();
@@ -833,12 +943,14 @@ class BimpObject
         $errors = $this->validate();
 
         if (!count($errors)) {
-            $this->data['date_update'] = date('Y-m-d H:i:s');
-            global $user;
-            if (isset($user->id)) {
-                $this->data['user_update'] = (int) $user->id;
-            } else {
-                $this->data['user_update'] = 0;
+            if ($this->use_commom_fields) {
+                $this->data['date_update'] = date('Y-m-d H:i:s');
+                global $user;
+                if (isset($user->id)) {
+                    $this->data['user_update'] = (int) $user->id;
+                } else {
+                    $this->data['user_update'] = 0;
+                }
             }
 
             foreach ($this->data as $field => &$value) {
@@ -856,6 +968,50 @@ class BimpObject
             }
         }
 
+        $errors = array_merge($errors, $this->updateAssociations());
+        return $errors;
+    }
+
+    public function updateAssociations()
+    {
+        $errors = array();
+        if (!isset($this->id) || !$this->id) {
+            $errors[] = 'Mise à jour des associations impossible - ID absent';
+            return $errors;
+        }
+        $prev_path = $this->config->current_path;
+
+        $associations = $this->getConf('associations', array(), false, 'array');
+        foreach ($associations as $association => $params) {
+            if (isset($this->associations[$association])) {
+                $this->config->setCurrentPath('associations/' . $association);
+                $table = $this->getCurrentConf('table', '', true);
+                if ($table) {
+                    $instance = $this->config->getObject('associations/' . $association . '/object', null, true, 'object');
+                    if (is_null($instance)) {
+                        $errors[] = 'Echec de la mise à jour des associations de type "' . $association . '". Instance associée invalide.';
+                    }
+                    $where = '`id_object` = ' . (int) $this->id;
+                    if (($del_res = (int) $this->db->delete($table, $where)) <= 0) {
+                        $errors[] = 'Impossible de mettre à jour les associations de type "' . $association . '" - Echec de la suppression des associations précédentes';
+                    }
+                    foreach ($this->associations[$association] as $item_id) {
+                        if (is_int((int) $item_id)) {
+                            if ($result = $this->db->insert($table, array(
+                                        'id_object'    => (int) $this->id,
+                                        'id_associate' => (int) $item_id
+                                    )) <= 0) {
+                                $errors[] = 'Echec de l\'enregistrement ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' associé(e) d\'id ' . $item_id;
+                            }
+                        } else {
+                            $errors[] = 'Format de l\'id ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' associé(e) invalide (' . $item_id . ')';
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->config->setCurrentPath($prev_path);
         return $errors;
     }
 
@@ -864,18 +1020,23 @@ class BimpObject
         $table = $this->getTable();
 
         if (is_null($table)) {
-            return array('Fichier de configuration invalide');
+            echo '<pre>';
+            print_r($this);
+            exit;
+            return array('Fichier de configuration invalide (table non renseignée)');
         }
 
         $errors = $this->validate();
 
         if (!count($errors)) {
-            $this->data['date_create'] = date('Y-m-d H:i:s');
-            global $user;
-            if (isset($user->id)) {
-                $this->data['user_create'] = (int) $user->id;
-            } else {
-                $this->data['user_create'] = 0;
+            if ($this->use_commom_fields) {
+                $this->data['date_create'] = date('Y-m-d H:i:s');
+                global $user;
+                if (isset($user->id)) {
+                    $this->data['user_create'] = (int) $user->id;
+                } else {
+                    $this->data['user_create'] = 0;
+                }
             }
 
             foreach ($this->data as $field => &$value) {
@@ -904,7 +1065,7 @@ class BimpObject
         $primary = $this->getPrimary();
 
         if (is_null($table)) {
-            return array('Fichier de configuration invalide');
+            return array('Fichier de configuration invalide (table non renseignée)');
         }
         if (is_null($this->id) || !$this->id) {
             return array('ID absent');
@@ -926,7 +1087,7 @@ class BimpObject
                 foreach ($objects as $name => $params) {
                     $this->config->setCurrentPath('objects/' . $name);
                     if ((int) $delete = $this->getCurrentConf('delete', 0, false, 'bool')) {
-                        $instance = $this->getCurrentConf('object', null, true, 'object');
+                        $instance = $this->config->getObject('', $name);
                         if (!is_null($instance)) {
                             if (!$instance->deleteByParent($this->id)) {
                                 $msg = 'Des erreurs sont survenues lors de la tentative de suppresion des ';
@@ -1016,6 +1177,8 @@ class BimpObject
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
+//        echo $sql; exit;
+
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -1063,140 +1226,6 @@ class BimpObject
                         ), $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
     }
 
-    public function saveAssociations($association, $list)
-    {
-        $errors = array();
-        $prev_path = $this->config->current_path;
-
-        if (!$this->config->setCurrentPath('associations/' . $association)) {
-            $errors[] = 'le type d\'association "' . $association . '" n\'est pas valide';
-        } elseif (is_null($this->id) || !$this->id) {
-            $errors[] = 'ID Absent';
-        } else {
-            $self_key = $this->getCurrentConf('self_key', null, true);
-            $associate_key = $this->getCurrentConf('associate_key', null, true);
-            $table = $this->getCurrentConf('table', null, true);
-
-            if (is_null($table) || is_null($self_key) || is_null($associate_key)) {
-                $errors[] = 'Configuration invalide pour l\'association "' . $association . '"';
-            } else {
-                $result = $this->db->delete($table, '`' . $self_key . '` = ' . (int) $this->id);
-                if ($result <= 0) {
-                    $msg = 'Echec de la suppression des associations existantes';
-                    $sqlError = $this->db->db->error();
-                    if ($sqlError) {
-                        $msg .= ' - Erreur SQL: ' . $sqlError;
-                    }
-                    $errors[] = $msg;
-                } else {
-                    foreach ($list as $id) {
-                        $data = array();
-                        $data[$self_key] = (int) $this->id;
-                        $data[$associate_key] = (int) $id;
-                        if (!$this->db->insert($table, $data)) {
-                            $instance = $this->getCurrentConf('associate_object', null, true, 'object');
-                            if (!is_null($instance)) {
-                                $label = $this->getInstanceLabel($instance, 'the');
-                            } else {
-                                $label = 'l\'objet associé';
-                            }
-                            unset($instance);
-                            $msg = 'Echec de l\'enregistrement de l\'association avec ' . $this->getInstanceLabel($instance, 'the') . ' d\'ID ' . $id;
-                            $sqlError = $this->db->db->error();
-                            if ($sqlError) {
-                                $msg .= ' - Erreur SQL: ' . $sqlError;
-                            }
-                            $errors[] = $msg;
-                        }
-                    }
-                }
-            }
-        }
-
-        $this->config->setCurrentPath($prev_path);
-        return $errors;
-    }
-
-    public function getAssociationList($association)
-    {
-        $list = array();
-
-        $prev_path = $this->config->current_path;
-
-        if (!$this->config->setCurrentPath('associations/' . $association)) {
-            return $list;
-        }
-
-        $instance = $this->getCurrentConf('associate_object', null, true, 'object');
-
-        if (!is_null($instance)) {
-            $id_parent = null;
-            if ((int) $same_parent = $this->getCurrentConf('same_parent', 0, false, 'bool')) {
-                $parent_id_property = $this->getParentIdProperty();
-                if (!is_null($parent_id_property) && isset($this->data[$parent_id_property]) && $this->data[$parent_id_property]) {
-                    $id_parent = $this->data[$parent_id_property];
-                }
-            }
-
-            if (is_a($instance, 'BimpObject')) {
-                if (!is_null($id_parent)) {
-                    $list = $instance->getListByParent($id_parent);
-                } else {
-                    $list = $instance->getList();
-                }
-            } else {
-                $filters = array();
-                if (!is_null($id_parent)) {
-                    $associate_parent_id_property = $this->getCurrentConf('associate_object/parent_id_property');
-                    if (!is_null($associate_parent_id_property)) {
-                        $filters[$associate_parent_id_property] = $id_parent;
-                    }
-                }
-
-                $list = BimpTools::getDolObjectList($instance, $filters);
-            }
-        }
-
-        $this->config->setCurrentPath($prev_path);
-        return $list;
-    }
-
-    public function getAssociatedObjectsIds($association)
-    {
-        if (is_null($this->id) || !$this->id) {
-            return array();
-        }
-
-        $prev_path = $this->config->current_path;
-        if (!$this->config->setCurrentPath('associations/' . $association)) {
-            return array();
-        }
-
-        $ids = array();
-
-        $associate_key = $this->getCurrentConf('associate_key', null, true);
-        $self_key = $this->getCurrentConf('self_key', null, true);
-        $table = $this->getCurrentConf('table', null, true);
-
-        if (!is_null($associate_key) && !is_null($self_key) && !is_null($table)) {
-            $sql = 'SELECT `' . $associate_key . '` as id FROM ' . MAIN_DB_PREFIX . $table;
-            $sql .= ' WHERE `' . $self_key . '` = ' . (int) $this->id;
-
-            $rows = $this->db->executeS($sql, 'array');
-
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    if (!in_array($r['id'], $ids)) {
-                        $ids[] = $r['id'];
-                    }
-                }
-            }
-        }
-
-        $this->config->setCurrentPath($prev_path);
-        return $ids;
-    }
-
     public function deleteByParent($id_parent)
     {
         if (is_null($id_parent) || !$id_parent) {
@@ -1240,6 +1269,103 @@ class BimpObject
             return false;
         }
         return true;
+    }
+
+    // Rendus HTML
+
+    public function renderView($view_name = 'default', $panel = false)
+    {
+        if (!isset($this->id) || !$this->id) {
+            $msg = ucfirst($this->getLabel('this')) . ' n\'existe plus';
+            return BimpRender::renderAlerts($msg);
+        }
+        $view = new BimpView($this, $view_name);
+        return $view->render($panel);
+    }
+
+    public function renderList($list_name = 'default', $panel = false)
+    {
+        $list = new BimpList($this, $list_name);
+        return $list->render($panel);
+    }
+
+    public function renderForm($form_name = 'default', $panel = false)
+    {
+        $form = new BimpForm($this, $form_name);
+        if ($panel) {
+            return $form->renderPanel();
+        }
+        return $form->render();
+    }
+
+    public function renderViewsList($views_list_name = 'default', $panel = false)
+    {
+        $viewsList = new BimpViewsList($this, $views_list_name);
+        return $viewsList->render($panel);
+    }
+
+    public function renderCommonFields()
+    {
+        $html = '';
+
+        if (!$this->use_commom_fields) {
+            return $html;
+        }
+
+        $html .= '<div class="object_common_fields">';
+        $html .= '<table>';
+        $html .= '<thead></thead>';
+        $html .= '<tbody>';
+
+        $html .= '<tr>';
+        $html .= '<th>ID</th>';
+        $html .= '<td>' . $this->id . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>Créé le</th>';
+        $html .= '<td>' . $this->displayData('date_create') . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>Par</th>';
+        $html .= '<td>' . $this->displayData('user_create') . '</td>';
+        $html .= '</tr>';
+
+        $user_update = $this->getData('user_update');
+        if (!is_null($user_update) && $user_update) {
+            $html .= '<tr>';
+            $html .= '<th>Dernière mise à jour le</th>';
+            $html .= '<td>' . $this->displayData('date_update') . '</td>';
+            $html .= '</tr>';
+
+            $html .= '<tr>';
+            $html .= '<th>Par</th>';
+            $html .= '<td>' . $this->displayData('user_update') . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderChildrenList($children_object, $list_name = 'default', $panel = false)
+    {
+        $children_instance = $this->config->getObject('', $children_object);
+        if (!isset($this->id) || !$this->id) {
+            $msg = 'Impossible d\'afficher la liste des ' . $children_instance->getLabel('name_plur');
+            $msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
+            return BimpRender::renderAlerts($msg);
+        }
+        if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
+            $list = new BimpList($children_instance, $list_name, $this->id);
+            return $list->render($panel);
+        }
+        $msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');
+        return BimpRender::renderAlerts($msg);
     }
 
     // Gestion des intitulés (labels):
@@ -1464,7 +1590,7 @@ class BimpObject
                 isset($this->data['name']) && $this->data['name']) {
             return $this->data['name'];
         } elseif (isset($this->id) && $this->id) {
-            return $this->getLabel() . ' n° ' . $this->id;
+            return $this->getLabel() . ' ' . $this->id;
         }
 
         return ucfirst($this->getLabel());
@@ -1524,7 +1650,12 @@ class BimpObject
 
     public static function getInstanceNom($instance)
     {
-        return '<span class="objectName">Nom d\'une instance</span>';
+        if (is_a($instance, 'BimpObject')) {
+            return $instance->getInstanceName();
+        } elseif (is_a($instance, 'user')) {
+            return $instance->lastname . ' ' . $instance->firstname;
+        }
+        return '';
     }
 
     public static function getInstanceNomUrl($instance)

@@ -1,0 +1,31 @@
+bootstrap: 1
+objects:
+    demande: 
+        instance: 
+            bimp_object: BF_Demande
+            id_object: 
+                request: id
+                
+sections:
+    - type: buttons
+      buttons:
+          - label: Liste des demandes de financement
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary
+                
+    - type: view
+      view:
+          panel: 1
+          object: demande
+          
+    - type: buttons
+      buttons:
+          - label: Liste des demandes de financement
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

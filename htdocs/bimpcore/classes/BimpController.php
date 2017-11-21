@@ -7,7 +7,6 @@ class BimpController
     public $controller = '';
     public $current_tab = '';
     public $config = null;
-    public $object = null;
     public $errors = array();
     protected $jsFiles = array();
     protected $cssFiles = array();
@@ -36,17 +35,9 @@ class BimpController
 
         $this->current_tab = BimpTools::getValue('tab', 'default');
 
-        $this->config = new BimpConfig($dir, $this->controller);
+        $this->config = new BimpConfig($dir, $this->controller, $this);
 
-        if (!$this->config->errors) {
-            $this->object = $this->getConf('object', null, false, 'object');
-            $id = BimpTools::getValue('id', 0);
-            if ($id) {
-                if (!$this->object->fetch($id)) {
-                    $this->errors[] = BimpTools::ucfirst($this->object->getLabel()) . ' d\'ID ' . $id . ' non trouvé';
-                }
-            }
-        } else {
+        if ($this->config->errors) {
             $this->errors = array_merge($this->errors, $this->config->errors);
         }
 
@@ -82,12 +73,12 @@ class BimpController
 
     public function getConf($path, $default_value = null, $required = false, $data_type = 'string')
     {
-        return $this->config->get($path, $this, $default_value, $required, $data_type);
+        return $this->config->get($path, $default_value, $required, $data_type);
     }
 
     public function getCurrentConf($path, $default_value = null, $required = false, $data_type = 'string')
     {
-        return $this->config->getFromCurrentPath($path, $this, $default_value, $required, $data_type);
+        return $this->config->getFromCurrentPath($path, $default_value, $required, $data_type);
     }
 
     public function addJsFile($file)
@@ -113,27 +104,99 @@ class BimpController
             return;
         }
 
-        llxHeader('', '', '', false, false, false, $this->jsFiles);
+        if (!defined('BIMP_CONTROLLER_INIT')) {
+            define('BIMP_CONTROLLER_INIT', 1);
+            global $main_controller;
+            $main_controller = $this;
+            llxHeader('', '', '', false, false, false, $this->jsFiles);
 
-        echo '<script type="text/javascript">';
-        echo 'ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . '\';';
-        echo '</script>';
+            echo '<script type="text/javascript">';
+            echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
+            echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . '\';';
+            echo '</script>';
 
-        foreach ($this->cssFiles as $url) {
-            echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $url . '"/>';
-        }
+            foreach ($this->cssFiles as $url) {
+                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $url . '"/>';
+            }
 
-        if (count($this->errors)) {
-            echo BimpRender::renderAlerts($this->errors);
+            if (count($this->errors)) {
+                echo BimpRender::renderAlerts($this->errors);
+            } else {
+                $title = $this->getConf('title', '');
+                if ($title) {
+                    print load_fiche_titre($title, '', 'title_generic.png');
+                }
+                echo $this->renderSections('sections');
+            }
+
+            echo BimpRender::renderAjaxModal('page_modal');
+            llxFooter();
         } else {
-            $title = $this->getConf('title', '');
-            if ($title) {
-                print load_fiche_titre($title, '', 'title_generic.png');
+            global $main_controller;
+            $cssFiles = $this->getConf('css', array(), false, 'array');
+            foreach ($cssFiles as $cssFile) {
+                if (!is_null($main_controller) && is_a($main_controller, 'BimpController')) {
+                    if (in_array($cssFile, $main_controller->cssFiles)) {
+                        continue;
+                    }
+                }
+                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $cssFile . '"/>';
+            }
+
+            $jsFiles = $this->getConf('js', array(), false, 'array');
+            foreach ($jsFiles as $jsFile) {
+                if (!is_null($main_controller) && is_a($main_controller, 'BimpController')) {
+                    if (in_array($jsFile, $main_controller->jsFiles)) {
+                        continue;
+                    }
+                }
+                echo '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsFile . '">';
             }
             echo $this->renderSections('sections');
         }
+    }
 
-        llxFooter();
+    protected function renderSections($sections_path)
+    {
+        $html = '';
+        $sections = $this->getConf($sections_path, null, false, 'array');
+
+        if (!is_null($sections)) {
+            $prev_path = $this->config->current_path;
+
+            foreach ($sections as $idx => $section) {
+                if ($this->config->setCurrentPath($sections_path . '/' . $idx)) {
+                    $html .= $this->renderCurrentSection();
+                }
+            }
+
+            $this->config->setCurrentPath($prev_path);
+        }
+
+        return $html;
+    }
+
+    protected function renderCurrentSection()
+    {
+        $html = '';
+
+        $type = $this->getCurrentConf('type', '');
+
+        switch ($type) {
+            case 'tabs':
+                $html .= $this->renderTabsSection();
+                break;
+
+            case 'buttons':
+                $html .= $this->renderButtonsSection();
+                break;
+
+            default:
+                $html .= BimpStruct::renderStruct($this->config, $this->config->current_path);
+                break;
+        }
+
+        return $html;
     }
 
     protected function renderTabsSection()
@@ -229,74 +292,6 @@ class BimpController
         echo $html;
     }
 
-    protected function renderSections($sections_path, $object = null)
-    {
-        $html = '';
-        $sections = $this->getConf($sections_path, null, false, 'array');
-
-        if (!is_null($sections)) {
-            $prev_path = $this->config->current_path;
-
-            foreach ($sections as $idx => $section) {
-                if ($this->config->setCurrentPath($sections_path . '/' . $idx)) {
-                    $html .= $this->renderCurrentSection($object);
-                }
-            }
-
-            $this->config->setCurrentPath($prev_path);
-        }
-
-        return $html;
-    }
-
-    protected function renderCurrentSection($object = null)
-    {
-        $html = '';
-        $object = $this->getCurrentConf('object', null, false, 'object');
-
-        $id_parent = null;
-
-        if (!is_null($object)) {
-            $parent_object_name = $object->getParentObjectName();
-            if ($parent_object_name && !is_null($this->object) && ($parent_object_name === $this->object->object_name)) {
-                if (isset($this->object->id)) {
-                    $id_parent = $this->object->id;
-                    $object->setIdParent($id_parent);
-                }
-            }
-        }
-
-        if (is_null($object) && !is_null($this->object)) {
-            $object = $this->object;
-        }
-
-        $type = $this->getCurrentConf('type', '');
-
-        switch ($type) {
-            case 'tabs':
-                $html .= $this->renderTabsSection();
-                break;
-
-            case 'buttons':
-                $html .= $this->renderButtonsSection();
-                break;
-
-            case 'list':
-                $html .= $this->renderObjectListSection($object, $id_parent);
-                break;
-
-            case 'view':
-                $html .= $this->renderObjectViewSection($object, $id_parent);
-                break;
-
-            case 'form':
-                $html .= $this->renderObjectFormSection($object, $id_parent);
-                break;
-        }
-
-        return $html;
-    }
-
     protected function renderButtonsSection()
     {
         $section_path = $this->config->current_path;
@@ -346,31 +341,6 @@ class BimpController
         $this->config->setCurrentPath($section_path);
 
         return $html;
-    }
-
-    protected function renderObjectListSection($object, $id_parent)
-    {
-        if (is_null($object)) {
-            return '';
-        }
-        $list_name = $this->getCurrentConf('list', 'default');
-        $bimplist = new BimpList($object, $list_name, $id_parent);
-        return $bimplist->render();
-    }
-
-    protected function renderObjectViewSection($object, $id_parent)
-    {
-        if (is_null($object)) {
-            return '';
-        }
-        $view_name = $this->getCurrentConf('view', 'default');
-        $bimpView = new BimpView($object, $view_name);
-        return $bimpView->render();
-    }
-
-    protected function renderobjectFormSection($object, $id_parent)
-    {
-        return '';
     }
 
     // Traitements Ajax :
@@ -619,6 +589,46 @@ class BimpController
         )));
     }
 
+    protected function ajaxProcessLoadObjectFieldValue()
+    {
+        $errors = array();
+        $value = null;
+
+        $object_name = BimpTools::getValue('object_name');
+        $id_object = BimpTools::getValue('id_object', 0);
+        $object_module = BimpTools::getValue('object_module', $this->module);
+        $field = BimpTools::getValue('field', $this->module);
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type de l\'objet absent';
+        }
+        if (is_null($id_object) || !$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+        if (is_null($field) || !$field) {
+            $errors[] = 'Nom du champ absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($object_module, $object_name);
+            if (!$object->fetch($id_object)) {
+                $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé' . ($object->isLabelFemale() ? 'e' : '');
+            }
+
+            if (!count($errors)) {
+                $value = $object->getData($field);
+                if (is_null($value)) {
+                    $errors[] = 'Echec de la récupération de la valeur "' . $field . '" pour ' . $object->getLabel('this');
+                }
+            }
+        }
+
+        die(json_encode(array(
+            'errors' => $errors,
+            'value'  => $value
+        )));
+    }
+
     protected function ajaxProcessLoadObjectForm()
     {
         $errors = array();
@@ -796,7 +806,7 @@ class BimpController
             if ($content_only) {
                 $html = $view->renderViewContent();
             } else {
-                $html = $view->render();
+                $html = $view->render(true);
             }
         }
 

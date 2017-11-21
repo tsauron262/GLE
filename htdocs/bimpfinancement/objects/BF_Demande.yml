@@ -1,0 +1,247 @@
+table: bf_demande
+controller: demande
+
+labels:
+    name: demande de financement
+    name_plur: demandes de financement
+    is_female: 1
+
+objects:
+    supplier:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object:
+                field_value: id_supplier
+    supplier_contact:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: contact
+            id_object:
+                field_value: id_supplier_contact
+    comments:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BF_Comment
+            
+    refinanceurs:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_Refinanceur
+            
+fields:
+    duration:
+        label: Durée
+        type: int
+        input:
+            type: select
+            options:
+                array: durations
+        display:
+            default:
+                type: array_value
+                values: 
+                    array: durations
+        search: 1
+        
+    periodicity: 
+        label: Périodicité
+        type: int
+        input: 
+            type: select
+            options:
+                array: periodicities
+        display:
+            default:
+                type: array_value
+                values: 
+                    array: periodicities
+        search: 1
+                
+    vr: 
+        label: VR demandée
+        type: int
+        required: 1
+        input: 
+            type: text
+            addon_right:
+                text: %
+        display:
+            default:
+                type: syntaxe
+                syntaxe: <value> %
+    insurance:
+        label: Assurance
+        type: bool
+        input: 
+            type: switch
+        display: 
+            type: yes_no
+        default_value: 0
+        search: 1
+        sortable: 1
+        
+    annexe: 
+        label: Annexes
+        type: int
+        input:
+            type: select
+            options:
+                array: annexes
+        display: 
+            type: array_value
+            values: 
+                array: annexes
+        default_value: 0
+        sortable: 1
+        search: 1
+        
+    ca_prevu: 
+        label: CA prévu
+        type: float
+        input:
+            type: text
+            addon_right: 
+                icon: euro
+        display:
+            type: syntaxe
+            syntaxe: <value> &euro;
+        required: 0
+        
+    pba_prevu:
+        label: PBA prévu
+        type: float
+        input:
+            type: text
+            addon_right:
+                icon: euro
+        display: 
+            type: syntaxe
+            syntaxe: <value> &euro;
+        required: 0
+        
+    date_livraison:
+        label: Date de livraison
+        type: date
+        input:
+            type: date
+        display: 
+            type: date
+        required: 0
+        search:
+            type: date_range
+            
+    date_loyer:
+        label: Date de mise en loyer
+        type: date
+        input: 
+            type: date
+        display: 
+            type: date
+        required: 0
+        search:
+            type: date_range
+        
+    id_supplier:
+        label: Apporteur
+        type: id_object
+        object: supplier
+        input: 
+            type: search_societe
+        display:
+            nom_url: 
+                type: nom_url
+        
+    id_supplier_contact:
+        label: Contact apporteur
+        type: id_object
+        object: supplier_contact
+        input: 
+            type: select
+            options:
+                array: supplier_contacts
+            display_if: 
+                input_name: id_supplier
+                hide_values: 0,''
+        display: 
+            nom_url: 
+                type: nom_url
+        depends_on: id_supplier
+        
+lists:
+    default:
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les demandes de fincancement sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_col: date_create
+        sort_way: desc
+        n: 10
+        add_btn: 1
+        delete_btn: 1
+        view_btn: 1
+        cols:
+            id:
+                label: ID
+                field: id
+            date_create:
+                label: Créée le
+                field: date_create
+            duration:
+                label: Durée
+                field: duration
+            periodicity:
+                label: Périodicité
+                field: periodicity
+            vr:
+                label: VR demandée
+                field: vr
+                
+views: 
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: object_common_fields
+                    col_lg: 4
+                    col_sm: 12
+                  - type: fields_table
+                    col_lg: 8
+                    fields_table:
+                        caption:
+                            label: Contrat
+                            icon: file-text
+                        rows:
+                            - field: duration
+                            - field: periodicity
+                            - field: vr
+                            - field: insurance
+                            - field: annexe
+                            - field: ca_prevu
+                            - field: pba_prevu
+                            - field: date_livraison
+                            - field: date_loyer
+                            - field: id_supplier
+                              display: nom_url
+                            - field: id_supplier_contact
+                              display: nom_url   
+            - cols:
+                  - type: list
+                    col_lg: 12
+                    list:
+                        children: comments
+                        panel: 0
+                        
+            - cols:
+                  - type: list
+                    col_lg: 12
+                    list: 
+                        children: refinanceurs
+                        panel: 0

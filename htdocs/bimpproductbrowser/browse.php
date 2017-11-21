@@ -105,6 +105,7 @@ foreach ($ways as $way)
 $morehtmlref.='</div>';
 
 dol_banner_tab($object, 'label', $linkback, ($user->societe_id?0:1), 'label', 'label', $morehtmlref, '', 0, '', '', 1);
+print '<div id="placeforalert"><br></div>';
 
 //print load_fiche_titre($title);
 
@@ -190,8 +191,6 @@ else
     print "</table>";
     print '</div>';
 }
-
-print '<div id="placeforalert"><br></div>';
 
 llxFooter();
 

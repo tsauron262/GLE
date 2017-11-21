@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 
 
 
-$siret = GETPOST("siren");// "403 554 181";//"320387483";   
+$siret = GETPOST("siren");// "403554181";//"320387483";   
 
 
 
@@ -39,21 +39,34 @@ else{
 
     $summary = $result->xmlresponse->body->company->summary;
 
-
-    if($summary->rating == "" || $summary->rating < 1){
-        if($summary->rating2013 > 0)
-            $note = $summary->rating2013 ." (attention note de 2013)";
-        else
-            $note = " aucune note trouvée.";
+    foreach(array("", "2013") as $annee){
+        if($note != "")
+            $note .= "\n";
+        $champ = "rating".$annee;
+        if($summary->$champ > 0){
+            if($annee != "")
+                $note .= "[Attention note de ".$annee."]";
+            foreach(array("", "desc1", "desc2") as $champ2){
+                $champT = $champ.$champ2;
+                if(isset($summary->$champT))
+                    $note .= " ". $summary->$champT;
+            }
+        }
     }
-    else
-        $note = intval ($summary->rating);
+    
+    $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
 
+     // echo json_encode($summary);die;
 
 
     $return = array("Nom" => "".$summary->companyname,
+        "Tva" => "".$summary->safenumber,
+        "Tel" => "".$summary->telephone,
+        "Naf" => "".$summary->activitycode,
         "Note" => $note,
-        "Adresse" => $summary->postaladdress->address."\n".$summary->postaladdress->distributionline,
+        "Adresse" => "".$summary->postaladdress->address." ".$summary->postaladresse->additiontoaddress,
+        "CodeP" => $tabCodeP[0],
+        "Ville" => str_replace($tabCodeP[0]." ","",$summary->postaladdress->distributionline),
         "Capital" => "".str_replace(" Euros", "", $summary->sharecapital));
     echo json_encode($return);
 }

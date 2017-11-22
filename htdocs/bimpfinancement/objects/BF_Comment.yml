@@ -35,7 +35,7 @@ list:
     sort_col: date_create
     sort_way: desc
     n: 10
-    add_btn: 1
+    add_object_row: 1
     delete_btn: 1
     update_btn: 1
     cols:

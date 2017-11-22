@@ -422,6 +422,12 @@ class BimpForm
                 $html .= BimpInput::renderSearchListInput($object, $config_path, $field_name, $value, $option);
                 break;
 
+            case 'toggle':
+                
+                $options['toggle_on'] = $object->getCurrentConf('input/toggle_on', 'OUI', false, 'string');
+                $options['toggle_off'] = $object->getCurrentConf('input/toggle_off', 'NON', false, 'string');
+                break;
+            
             case 'custom':
                 $content = $object->getCurrentConf('input/html', null, true);
                 if (is_null($content)) {

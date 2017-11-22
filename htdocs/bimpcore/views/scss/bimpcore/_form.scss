@@ -94,7 +94,11 @@
 .auto_expand {
     overflow: hidden;
 }
-
+.input-group {
+    input {
+        padding-bottom: 5px;
+    }
+}
 .object_view_content textarea.note,
 .objectlistTable textarea.note {
     background-color: #FFFFE1;
@@ -122,6 +126,89 @@ select.switch {
 
     input {
         margin: 0 5px;
+    }
+}
+.toggle {
+    display: none;
+    
+    & + span,
+    & + span + label + span {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: bold;
+        vertical-align: top;
+        line-height: 20px;
+        margin: 0 6px;
+        color: $gray;
+        @include transition(all 0.5s ease);
+    }
+    
+    & + span {
+        color: $gray-dark;
+    }
+    
+    & + span + .toggle-slider {
+        position: relative; 
+        display: inline-block;
+        width: 40px; 
+        height: 20px;
+        cursor: pointer;
+        border-radius: 1.5em;
+        @include transition(350ms);
+        background: linear-gradient(rgba(#000,0.07),rgba(#fff,0)),#ddd;
+        box-shadow:
+            0 0.07em 0.1em -0.1em rgba(#000,.4) inset,
+            0 0.05em 0.08em -0.01em rgba(#fff,.7);
+
+        &:after {
+            position: absolute; 
+            content:'';
+            width: 16px; 
+            height: 16px;
+            top: 2px; 
+            left: 2px;
+            border-radius: 50%;
+            @include transition(250ms ease-in-out);
+            background: linear-gradient(#f5f5f5 10%,#eee);
+            box-shadow:
+                0 0.1em 0.15em -0.05em rgba(#fff,.9
+                ) inset,
+                0 0.2em 0.2em -0.12em rgba(#000,.5);    
+        }
+
+        &:before {
+            position: absolute; content:'';
+            width: 32px; 
+            height: 12px;
+            top: 4px; 
+            left: 4px;
+            border-radius: 0.75em;
+            @include transition(250ms ease-in-out);
+            background: linear-gradient(rgba(#000,0.07),rgba(#fff,0.1)),#d0d0d0;
+            box-shadow:
+                0 0.08em 0.15em -0.1em rgba(#000,.5) inset,
+                0 0.05em 0.08em -0.01em rgba(#fff,.7),
+                0 0 0 0 rgba(#4c6,.7) inset;
+        }
+    }
+    &:checked {
+        & + span {
+            color: $gray;
+        }
+        & + span + label + span {
+            color: #2fa04b;
+        }
+        & + span + .toggle-slider {
+            &:before {
+                box-shadow:
+                    0 0.08em 0.15em -0.1em rgba(#000,.5) inset,
+                    0 0.05em 0.08em -0.01em rgba(#fff,.7),
+                    3em 0 0 0 rgba(#4c6,.7) inset;        
+            }  
+            &:after {
+                left: 22px
+            }
+        }
     }
 }
 .search_input_results {

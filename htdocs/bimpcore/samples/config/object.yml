@@ -1,72 +1,78 @@
-table: string
-primary: string
-controller: string
+table: 
+primary: 
+controller: 
+
+parent_id_property: 
+parent_object: 
 
 labels: 
-    name: string
-    name_plur: string
-    isFemale: bool
+    name: 
+    name_plur: 
+    isFemale: 
 
+objects:
+    nom_objet:
+        relation: 
+        delete: 
+        instance:
+                
+associations:
+    nom_asso:
+        object: 
+        table: 
+        display:   
+                
 fields: 
     nom_champ:
-        label: string
-        type: string
-        required: bool
-        search: bool or search_def
-        sortable: bool
-        default_value: value
-        object: instance
-        input: input_def
+        label: 
+        type: 
+        required: 
+        default_value:
+        input:
+            type:
         display:
-            nom_display: display_def
+            type:        
+        search: 
+        sortable:
         sort_options:
-            nom_sort_option: sort_option_def
-                
-    serial: 
-        label: Numéro de série
-        type: string
-        size: 128
-        input: 
-            type: text
-        required: 1
-        search:
-            type: value_part
-            part_type: beginning
-            search_on_key_up: 1
-            min_chars: 0
-        sortable: 1
 
 views:
-    view_name:
-        title: string
-        edit_btn: bool
-        delete_btn: bool
-        content: value
+    nom_vue:
+        title:
+        edit_btn:
+        delete_btn:
         rows:
             - cols: 
-                  - type: string
-                    col_lg: int
-                    col_sm: int
-                    rows: rows_def
+                  - type:
+                    col_lg:
+                    col_md:
+                    col_sm:
+                    col_xs:
+lists:
+    nom_list:
+        checkboxes: 
+        title: 
+        icon: 
+        bulk_actions: 
+        sort_col: 
+        sort_way: 
+        n: 
+        cols:
+            col_name:
+                label: 
+                value: 
+                field: 
+                edit: 
+                display: 
+        add_btn: 
+        edit_btn: 
+        update_btn: 
+        delete_btn: 
+        view_btn: 
             
-list:
-    checkboxes: 1
-    bulk_actions: list button_def
-            
-    sort_col: string
-    sort_way: string
-    n: int
-    cols:
-        col_name:
-            label: string
-            value: value
-            field: string
-            edit: bool
-            display: field_display_name or display_def
-            
-    add_btn: bool
-    edit_btn: bool
-    update_btn: bool
-    delete_btn: bool
-    view_btn: bool
-    page_btn: bool
+forms:
+    nom_form:
+        - field:
+        - field:
+          label:
+          input:

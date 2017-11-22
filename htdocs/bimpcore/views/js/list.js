@@ -77,15 +77,7 @@ function reloadObjectList(list_id, callback) {
 
     bimp_json_ajax('loadObjectList', data, 0, function (result) {
         if (result.rows_html) {
-            var $addRow = $('#' + list_id + '_addObjectRow');
-            var addRowHtml = '';
-            if ($addRow.length) {
-                resetListAddObjectRow(list_id);
-                addRowHtml = '<tr class="inputsRow" id="' + list_id + '_addObjectRow">';
-                addRowHtml += $addRow.html();
-                addRowHtml += '</tr>';
-            }
-            $list.find('tbody.listRows').html(result.rows_html + addRowHtml);
+            $list.find('tbody.listRows').html(result.rows_html);
             $list.find('tbody.listRows').find('a').each(function () {
                 $(this).attr('target', '_blank');
             });
@@ -205,7 +197,12 @@ function addObjectFromList(list_id, $button) {
 
     $button.addClass('disabled');
 
-    var data = {};
+    var data = {
+        'list_name': $list.data('list_name'),
+        'module_name': $list.data('module_name'),
+        'object_name': $list.data('object_name'),
+        'id_object': 0
+    };
 
     $row.find('.inputContainer').each(function () {
         var field_name = $(this).data('field_name');
@@ -217,7 +214,7 @@ function addObjectFromList(list_id, $button) {
 
     bimp_json_ajax('saveObject', data, $result, function (result) {
         if (!result.errors.length) {
-            resetListRowInputs(list_id);
+            resetListAddObjectRow(list_id);
             $button.removeClass('disabled');
             reloadObjectList(list_id);
         }
@@ -454,6 +451,18 @@ function setListEvents($list) {
                     $(this).removeClass('action-open').addClass('action-close');
                 } else {
                     $searchRow.stop().fadeOut(150);
+                    $(this).removeClass('action-close').addClass('action-open');
+                }
+            }
+        });
+        $tools.find('.openAddObjectRowButton').click(function () {
+            var $addRow = $list.find('.addObjectRow');
+            if ($addRow.length) {
+                if ($(this).hasClass('action-open')) {
+                    $addRow.stop().fadeIn(150);
+                    $(this).removeClass('action-open').addClass('action-close');
+                } else {
+                    $addRow.stop().fadeOut(150);
                     $(this).removeClass('action-close').addClass('action-open');
                 }
             }

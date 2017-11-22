@@ -328,8 +328,6 @@ function reloadObjectInput(form_id, input_name, fields) {
         return;
     }
 
-    var $input = $container.find('[name=' + input_name + ']');
-
     var data = {
         object_module: object_module,
         object_name: object_name,
@@ -339,10 +337,12 @@ function reloadObjectInput(form_id, input_name, fields) {
 
     bimp_json_ajax('loadObjectInput', data, $container, function (result) {
         if (typeof (result.html) !== 'undefined') {
-            $container.html(result.html).slideDown(250);
-            if ($input.length) {
-                setInputEvents($form, $input);
-            }
+            $container.html(result.html).slideDown(250, function () {
+                var $input = $container.find('[name=' + input_name + ']');
+                if ($input.length) {
+                    setInputEvents($container, $input);
+                }
+            });
         }
     }, 'Echec du chargement du champ');
 }
@@ -549,6 +549,9 @@ function setInputsEvents($container) {
     $container.find('.switch').each(function () {
         setSwitchInputEvents($(this));
     });
+    $container.find('.toggle_value').each(function () {
+        setToggleInputEvent($(this));
+    });
     $container.find('.searchListOptions').each(function () {
         setSearchListOptionsEvents($(this));
     });
@@ -561,6 +564,10 @@ function setInputEvents($form, $input) {
 
     if ($input.hasClass('switch')) {
         setSwitchInputEvents($input);
+    }
+
+    if ($input.hasClass('.toggle_value')) {
+        setToggleInputEvent($input);
     }
 
     var input_name = $input.attr('name');
@@ -608,6 +615,17 @@ function setSwitchInputEvents($input) {
                 'color': '#B4B4B4',
                 'border-bottom-color': '#B4B4B4'
             });
+        }
+    });
+}
+
+function setToggleInputEvent($input) {
+    var $toggle = $input.parent().find('.toggle');
+    $toggle.change(function () {
+        if ($(this).prop('checked')) {
+            $input.val(1);
+        } else {
+            $input.val(0);
         }
     });
 }

@@ -130,7 +130,7 @@ list:
             label: Créé par
             field: user_create
         date_create:
-            label: Début
+            label: Créé le
             field: date_create
         contrat:
             field: id_contrat

@@ -33,6 +33,12 @@ objects:
         instance: 
             bimp_object: BF_Refinanceur
             
+    rents:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BF_Rent
+            
 fields:
     duration:
         label: Durée
@@ -78,7 +84,7 @@ fields:
         label: Assurance
         type: bool
         input: 
-            type: switch
+            type: toggle
         display: 
             type: yes_no
         default_value: 0
@@ -209,9 +215,26 @@ views:
         delete_btn: 1
         rows:
             - cols: 
-                  - type: object_common_fields
+                  - type: rows
                     col_lg: 4
                     col_sm: 12
+                    rows: 
+                        - cols:
+                              - type: object_common_fields
+                                col_lg: 12
+                              - type: fields_table
+                                col_lg: 12
+                                fields_table:
+                                    caption:
+                                        label: Apporteur
+                                        icon: user
+                                    rows:
+                                        - field: id_supplier
+                                          label: Société
+                                          display: nom_url
+                                        - field: id_supplier_contact
+                                          label: Contact
+                                          display: nom_url
                   - type: fields_table
                     col_lg: 8
                     fields_table:
@@ -227,21 +250,23 @@ views:
                             - field: ca_prevu
                             - field: pba_prevu
                             - field: date_livraison
-                            - field: date_loyer
-                            - field: id_supplier
-                              display: nom_url
-                            - field: id_supplier_contact
-                              display: nom_url   
+                            - field: date_loyer      
             - cols:
                   - type: list
-                    col_lg: 12
-                    list:
-                        children: comments
+                    col_lg: 6
+                    col_md: 12
+                    list: 
+                        children: rents
                         panel: 0
-                        
+                  - type: list
+                    col_lg: 6
+                    col_md: 12
+                    list:
+                        children: refinanceurs
+                        panel: 0
             - cols:
                   - type: list
                     col_lg: 12
                     list: 
-                        children: refinanceurs
+                        children: comments
                         panel: 0

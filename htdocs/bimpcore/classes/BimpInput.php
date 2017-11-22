@@ -66,6 +66,20 @@ class BimpInput
                 $html .= '</select>';
                 break;
 
+            case 'toggle':
+                if (!isset($options['toggle_on']) || !$options['toggle_on']) {
+                    $options['toggle_on'] = 'OUI';
+                }
+                if (!isset($options['toggle_off']) || !$options['toggle_off']) {
+                    $options['toggle_off'] = 'NON';
+                }
+                $html .= '<input type="hidden" class="toggle_value" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"/>';
+                $html .= '<input type="checkbox" class="toggle" id="' . $input_id . '_toggle" ' . ($value ? ' checked' : '') . '/>';
+                $html .= '<span class="toggle-label-on">' . $options['toggle_off'] . '</span>';
+                $html .= '<label class="toggle-slider" for="' . $input_id . '_toggle"></label>';
+                $html .= '<span class="toggle-label-on">' . $options['toggle_on'] . '</span>';
+                break;
+
             case 'select':
                 if (is_null($options['options']) || !is_array($options['options'])) {
                     $options['options'] = array();

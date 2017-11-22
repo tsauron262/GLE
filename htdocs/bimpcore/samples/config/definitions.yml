@@ -1,0 +1,58 @@
+# ***** Recherce de valeurs *****
+
+field_value:
+    
+prop: 
+    
+array:
+    
+array_value: 
+    
+callback:
+    
+global: 
+    
+request:
+
+# ***** Définitions *****
+
+#input_def:
+input: 
+    type: string
+    help: string
+    options: array
+    display_if:
+        input_name: string
+        show_values: array
+        hide_values: array
+
+#display_def:
+display:
+    type: string
+    format: string
+    values: array
+    
+#sort_option_def
+sort_option:
+    label: string
+    value: 
+        join:
+            table: string
+            field_value: string
+            field_on: string
+            
+#button_def
+button:
+    label: string
+    icon_before: string
+    icon_after: string
+    onclick: string;
+    classes: array
+    data: array
+    tag: string
+    
+# ***** Structures *****
+
+# ***** Objet *****
+
+# ***** Controller *****

@@ -64,6 +64,7 @@ list:
     cols:
         name: 
             field: name
+            edit: 1
         status: 
             field: status
             edit: 1
@@ -71,7 +72,7 @@ list:
             field: comment
             edit: 1
             min_width: 40%
-    add_btn: 1
+    add_object_row: 1
     edit_btn: 1
     update_btn: 1
     delete_btn: 1

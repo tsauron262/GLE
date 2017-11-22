@@ -1,4 +1,6 @@
 .objectList  {
+    overflow-x: auto;
+    
     table.objectlistTable {
         border: none;
         box-shadow: none;
@@ -62,6 +64,7 @@
         }
     }
     .listSearchRow {
+        display: none;
         background-color: #DCDCDC;
 
         i.fa-search {
@@ -90,6 +93,29 @@
 
             .search_list_input {
                 width: 80%
+            }
+        }
+    }
+    .addObjectRow {
+        display: none;
+        background-color: #A0A0A0;
+
+        td:first-child {
+            text-align: center;
+            
+            i.fa-plus-circle {
+                font-size: 20px;
+                font-weight: normal;
+                color: #DCDCDC;
+            }
+        }
+        .inputHelp {
+            display: none;
+        }
+        
+        .inputContainer {
+            input, select, textarea {
+                width: 100%;
             }
         }
     }
@@ -126,6 +152,9 @@
         }
         .openSearchRowButton:before {
             content: '\f002';
+        }
+        .openAddObjectRowButton:before {
+            content: '\f055';
         }
         .openBulkActionsPopupButton:before {
             content: '\f046';
@@ -194,7 +223,7 @@
     &:empty {
         display: none;
     }
-    
+
     text-align: center;
     background-color: #fff;
     padding: 10px;

@@ -19,14 +19,13 @@
 }
 
 .objectViewtable {
-    border: 1px solid $gray-light;
     width: 100%;
     margin: 5px 0;
 
     thead tr th {
         padding: 8px 12px;
-        background-color: $primary;
-        color: #fff;
+        background-color: #c8c8c8;
+        color: $gray_darker;
         font-weight: bold;
         border-bottom: 1px solid #fff;
         font-size: 16px;

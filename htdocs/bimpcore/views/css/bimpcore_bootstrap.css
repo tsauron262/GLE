@@ -1940,7 +1940,7 @@ p {
   font-weight: 300;
   line-height: 1.4;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 62, ../scss/bootstrap/_type.scss */
   .lead {
     font-size: 19.5px;
@@ -2191,7 +2191,7 @@ dd {
 .dl-horizontal dd:after {
   clear: both;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 211, ../scss/bootstrap/_type.scss */
   .dl-horizontal dt {
     float: left;
@@ -2364,19 +2364,19 @@ pre code {
 .container:after {
   clear: both;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 10, ../scss/bootstrap/_grid.scss */
   .container {
     width: 732px;
   }
 }
-@media (min-width: 992px) {
+@media (min-width: 1280px) {
   /* line 10, ../scss/bootstrap/_grid.scss */
   .container {
     width: 952px;
   }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1680px) {
   /* line 10, ../scss/bootstrap/_grid.scss */
   .container {
     width: 1152px;
@@ -2683,7 +2683,7 @@ pre code {
   margin-left: 100%;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 27, ../scss/bootstrap/mixins/_grid-framework.scss */
   .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
     float: left;
@@ -2944,7 +2944,7 @@ pre code {
     margin-left: 100%;
   }
 }
-@media (min-width: 992px) {
+@media (min-width: 1280px) {
   /* line 27, ../scss/bootstrap/mixins/_grid-framework.scss */
   .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
     float: left;
@@ -3205,7 +3205,7 @@ pre code {
     margin-left: 100%;
   }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1680px) {
   /* line 27, ../scss/bootstrap/mixins/_grid-framework.scss */
   .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
     float: left;
@@ -3684,7 +3684,7 @@ table th[class*="col-"] {
   overflow-x: auto;
   min-height: 0.01%;
 }
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 991px) {
   /* line 171, ../scss/bootstrap/_tables.scss */
   .table-responsive {
     width: 100%;
@@ -4299,7 +4299,7 @@ select[multiple].input-lg,
   color: #8b8b8b;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 478, ../scss/bootstrap/_forms.scss */
   .form-inline .form-group {
     display: inline-block;
@@ -4389,7 +4389,7 @@ select[multiple].input-lg,
 .form-horizontal .form-group:after {
   clear: both;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 582, ../scss/bootstrap/_forms.scss */
   .form-horizontal .control-label {
     text-align: right;
@@ -4401,14 +4401,14 @@ select[multiple].input-lg,
 .form-horizontal .has-feedback .form-control-feedback {
   right: 6px;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 603, ../scss/bootstrap/_forms.scss */
   .form-horizontal .form-group-lg .control-label {
     padding-top: 11px;
     font-size: 17px;
   }
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 611, ../scss/bootstrap/_forms.scss */
   .form-horizontal .form-group-sm .control-label {
     padding-top: 6px;
@@ -5373,7 +5373,7 @@ tbody.collapse.in {
   margin-bottom: 2px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 207, ../scss/bootstrap/_dropdowns.scss */
   .navbar-right .dropdown-menu {
     right: 0;
@@ -5906,7 +5906,7 @@ tbody.collapse.in {
   top: auto;
   left: auto;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 177, ../scss/bootstrap/_navs.scss */
   .nav-justified > li, .nav-tabs.nav-justified > li {
     display: table-cell;
@@ -5935,7 +5935,7 @@ tbody.collapse.in {
 .nav-tabs.nav-justified > .active > a:focus {
   border: 1px solid #dddddd;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 206, ../scss/bootstrap/_navs.scss */
   .nav-tabs-justified > li > a, .nav-tabs.nav-justified > li > a {
     border-bottom: 1px solid #dddddd;
@@ -5983,7 +5983,7 @@ tbody.collapse.in {
 .navbar:after {
   clear: both;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 11, ../scss/bootstrap/_navbar.scss */
   .navbar {
     border-radius: 0;
@@ -5999,7 +5999,7 @@ tbody.collapse.in {
 .navbar-header:after {
   clear: both;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 31, ../scss/bootstrap/_navbar.scss */
   .navbar-header {
     float: left;
@@ -6028,7 +6028,7 @@ tbody.collapse.in {
 .navbar-collapse.in {
   overflow-y: auto;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 50, ../scss/bootstrap/_navbar.scss */
   .navbar-collapse {
     width: auto;
@@ -6058,7 +6058,7 @@ tbody.collapse.in {
 .navbar-fixed-bottom .navbar-collapse {
   max-height: 340px;
 }
-@media (max-device-width: 480px) and (orientation: landscape) {
+@media (max-device-width: 768px) and (orientation: landscape) {
   /* line 92, ../scss/bootstrap/_navbar.scss */
   .navbar-fixed-top .navbar-collapse,
   .navbar-fixed-bottom .navbar-collapse {
@@ -6074,7 +6074,7 @@ tbody.collapse.in {
   margin-right: -6px;
   margin-left: -6px;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 109, ../scss/bootstrap/_navbar.scss */
   .container > .navbar-header,
   .container > .navbar-collapse,
@@ -6090,7 +6090,7 @@ tbody.collapse.in {
   z-index: 1000;
   border-width: 0 0 1px;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 128, ../scss/bootstrap/_navbar.scss */
   .navbar-static-top {
     border-radius: 0;
@@ -6105,7 +6105,7 @@ tbody.collapse.in {
   left: 0;
   z-index: 1030;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 139, ../scss/bootstrap/_navbar.scss */
   .navbar-fixed-top,
   .navbar-fixed-bottom {
@@ -6142,7 +6142,7 @@ tbody.collapse.in {
 .navbar-brand > img {
   display: block;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 181, ../scss/bootstrap/_navbar.scss */
   .navbar > .container .navbar-brand, .navbar > .container-fluid .navbar-brand {
     margin-left: -6px;
@@ -6177,7 +6177,7 @@ tbody.collapse.in {
 .navbar-toggle .icon-bar + .icon-bar {
   margin-top: 4px;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 193, ../scss/bootstrap/_navbar.scss */
   .navbar-toggle {
     display: none;
@@ -6194,7 +6194,7 @@ tbody.collapse.in {
   padding-bottom: 10px;
   line-height: 18px;
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 243, ../scss/bootstrap/_navbar.scss */
   .navbar-nav .open .dropdown-menu {
     position: static;
@@ -6219,7 +6219,7 @@ tbody.collapse.in {
     background-image: none;
   }
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 232, ../scss/bootstrap/_navbar.scss */
   .navbar-nav {
     float: left;
@@ -6248,7 +6248,7 @@ tbody.collapse.in {
   margin-top: 9px;
   margin-bottom: 9px;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 478, ../scss/bootstrap/_forms.scss */
   .navbar-form .form-group {
     display: inline-block;
@@ -6309,7 +6309,7 @@ tbody.collapse.in {
     top: 0;
   }
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 298, ../scss/bootstrap/_navbar.scss */
   .navbar-form .form-group {
     margin-bottom: 5px;
@@ -6319,7 +6319,7 @@ tbody.collapse.in {
     margin-bottom: 0;
   }
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 286, ../scss/bootstrap/_navbar.scss */
   .navbar-form {
     width: auto;
@@ -6370,7 +6370,7 @@ tbody.collapse.in {
   margin-top: 16px;
   margin-bottom: 16px;
 }
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 359, ../scss/bootstrap/_navbar.scss */
   .navbar-text {
     float: left;
@@ -6379,7 +6379,7 @@ tbody.collapse.in {
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 379, ../scss/bootstrap/_navbar.scss */
   .navbar-left {
     float: left !important;
@@ -6454,7 +6454,7 @@ tbody.collapse.in {
   background-color: #e7e7e7;
   color: #555555;
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 473, ../scss/bootstrap/_navbar.scss */
   .navbar-default .navbar-nav .open .dropdown-menu > li > a {
     color: #777777;
@@ -6555,7 +6555,7 @@ tbody.collapse.in {
   background-color: #090909;
   color: white;
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 607, ../scss/bootstrap/_navbar.scss */
   .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {
     border-color: #090909;
@@ -6964,7 +6964,7 @@ a.badge:hover, a.badge:focus {
 .jumbotron .container {
   max-width: 100%;
 }
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 992px) {
   /* line 6, ../scss/bootstrap/_jumbotron.scss */
   .jumbotron {
     padding-top: 48px;
@@ -8111,19 +8111,19 @@ button.close {
   padding: 4px;
   width: 19em;
 }
-@media (min-width: 768px) {
-  /* line 25, ../scss/bootstrap/_datetimepicker.scss */
-  .bootstrap-datetimepicker-widget.dropdown-menu.timepicker-sbs {
-    width: 38em;
-  }
-}
 @media (min-width: 992px) {
   /* line 25, ../scss/bootstrap/_datetimepicker.scss */
   .bootstrap-datetimepicker-widget.dropdown-menu.timepicker-sbs {
     width: 38em;
   }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
+  /* line 25, ../scss/bootstrap/_datetimepicker.scss */
+  .bootstrap-datetimepicker-widget.dropdown-menu.timepicker-sbs {
+    width: 38em;
+  }
+}
+@media (min-width: 1680px) {
   /* line 25, ../scss/bootstrap/_datetimepicker.scss */
   .bootstrap-datetimepicker-widget.dropdown-menu.timepicker-sbs {
     width: 38em;
@@ -8578,7 +8578,7 @@ button.close {
   overflow: scroll;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   /* line 140, ../scss/bootstrap/_modals.scss */
   .modal-dialog {
     width: 600px;
@@ -8596,7 +8596,7 @@ button.close {
     width: 300px;
   }
 }
-@media (min-width: 992px) {
+@media (min-width: 1280px) {
   /* line 153, ../scss/bootstrap/_modals.scss */
   .modal-lg {
     width: 960px;
@@ -9122,7 +9122,7 @@ button.close {
   text-shadow: none;
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 992px) {
   /* line 243, ../scss/bootstrap/_carousel.scss */
   .carousel-control .glyphicon-chevron-left,
   .carousel-control .glyphicon-chevron-right,
@@ -9259,7 +9259,7 @@ button.close {
   display: none !important;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 7, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .visible-xs {
     display: block !important;
@@ -9281,28 +9281,28 @@ button.close {
     display: table-cell !important;
   }
 }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 54, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-xs-block {
     display: block !important;
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 59, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-xs-inline {
     display: inline !important;
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 64, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-xs-inline-block {
     display: inline-block !important;
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 992px) and (max-width: 1279px) {
   /* line 7, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .visible-sm {
     display: block !important;
@@ -9324,28 +9324,28 @@ button.close {
     display: table-cell !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 992px) and (max-width: 1279px) {
   /* line 73, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-sm-block {
     display: block !important;
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 992px) and (max-width: 1279px) {
   /* line 78, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-sm-inline {
     display: inline !important;
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 992px) and (max-width: 1279px) {
   /* line 83, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-sm-inline-block {
     display: inline-block !important;
   }
 }
 
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 1280px) and (max-width: 1679px) {
   /* line 7, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .visible-md {
     display: block !important;
@@ -9367,28 +9367,28 @@ button.close {
     display: table-cell !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 1280px) and (max-width: 1679px) {
   /* line 92, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-md-block {
     display: block !important;
   }
 }
 
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 1280px) and (max-width: 1679px) {
   /* line 97, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-md-inline {
     display: inline !important;
   }
 }
 
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 1280px) and (max-width: 1679px) {
   /* line 102, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-md-inline-block {
     display: inline-block !important;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1680px) {
   /* line 7, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .visible-lg {
     display: block !important;
@@ -9410,46 +9410,46 @@ button.close {
     display: table-cell !important;
   }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1680px) {
   /* line 111, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-lg-block {
     display: block !important;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1680px) {
   /* line 116, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-lg-inline {
     display: inline !important;
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1680px) {
   /* line 121, ../scss/bootstrap/_responsive-utilities.scss */
   .visible-lg-inline-block {
     display: inline-block !important;
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   /* line 18, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .hidden-xs {
     display: none !important;
   }
 }
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 992px) and (max-width: 1279px) {
   /* line 18, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .hidden-sm {
     display: none !important;
   }
 }
-@media (min-width: 992px) and (max-width: 1199px) {
+@media (min-width: 1280px) and (max-width: 1679px) {
   /* line 18, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .hidden-md {
     display: none !important;
   }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1680px) {
   /* line 18, ../scss/bootstrap/mixins/_responsive-visibility.scss */
   .hidden-lg {
     display: none !important;
@@ -9954,7 +9954,7 @@ i.iconRight {
   width: 450px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   /* line 38, ../scss/bimpcore/_form.scss */
   .fieldRow {
     display: block;
@@ -10024,7 +10024,12 @@ i.iconRight {
   overflow: hidden;
 }
 
-/* line 99, ../scss/bimpcore/_form.scss */
+/* line 98, ../scss/bimpcore/_form.scss */
+.input-group input {
+  padding-bottom: 5px;
+}
+
+/* line 103, ../scss/bimpcore/_form.scss */
 .object_view_content textarea.note,
 .objectlistTable textarea.note {
   background-color: #FFFFE1;
@@ -10034,30 +10039,112 @@ i.iconRight {
   box-shadow: 0 0 2px #787878;
 }
 
-/* line 107, ../scss/bimpcore/_form.scss */
+/* line 111, ../scss/bimpcore/_form.scss */
 select.switch {
   width: 75px;
   font-weight: bold;
 }
-/* line 111, ../scss/bimpcore/_form.scss */
+/* line 115, ../scss/bimpcore/_form.scss */
 select.switch option[value='1'] {
   color: #3b6ea0;
 }
-/* line 114, ../scss/bimpcore/_form.scss */
+/* line 118, ../scss/bimpcore/_form.scss */
 select.switch option[value='0'] {
   color: #8C8C8C;
 }
 
-/* line 119, ../scss/bimpcore/_form.scss */
+/* line 123, ../scss/bimpcore/_form.scss */
 .formSwitch label {
   margin-right: 20px;
 }
-/* line 123, ../scss/bimpcore/_form.scss */
+/* line 127, ../scss/bimpcore/_form.scss */
 .formSwitch input {
   margin: 0 5px;
 }
 
-/* line 127, ../scss/bimpcore/_form.scss */
+/* line 131, ../scss/bimpcore/_form.scss */
+.toggle {
+  display: none;
+}
+/* line 135, ../scss/bimpcore/_form.scss */
+.toggle + span, .toggle + span + label + span {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: bold;
+  vertical-align: top;
+  line-height: 20px;
+  margin: 0 6px;
+  color: #b4b4b4;
+  -webkit-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+/* line 146, ../scss/bimpcore/_form.scss */
+.toggle + span {
+  color: #636363;
+}
+/* line 150, ../scss/bimpcore/_form.scss */
+.toggle + span + .toggle-slider {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  cursor: pointer;
+  border-radius: 1.5em;
+  -webkit-transition: 350ms;
+  -o-transition: 350ms;
+  transition: 350ms;
+  background: linear-gradient(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0)), #dddddd;
+  box-shadow: 0 0.07em 0.1em -0.1em rgba(0, 0, 0, 0.4) inset, 0 0.05em 0.08em -0.01em rgba(255, 255, 255, 0.7);
+}
+/* line 163, ../scss/bimpcore/_form.scss */
+.toggle + span + .toggle-slider:after {
+  position: absolute;
+  content: '';
+  width: 16px;
+  height: 16px;
+  top: 2px;
+  left: 2px;
+  border-radius: 50%;
+  -webkit-transition: 250ms ease-in-out;
+  -o-transition: 250ms ease-in-out;
+  transition: 250ms ease-in-out;
+  background: linear-gradient(#f5f5f5 10%, #eeeeee);
+  box-shadow: 0 0.1em 0.15em -0.05em rgba(255, 255, 255, 0.9) inset, 0 0.2em 0.2em -0.12em rgba(0, 0, 0, 0.5);
+}
+/* line 179, ../scss/bimpcore/_form.scss */
+.toggle + span + .toggle-slider:before {
+  position: absolute;
+  content: '';
+  width: 32px;
+  height: 12px;
+  top: 4px;
+  left: 4px;
+  border-radius: 0.75em;
+  -webkit-transition: 250ms ease-in-out;
+  -o-transition: 250ms ease-in-out;
+  transition: 250ms ease-in-out;
+  background: linear-gradient(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.1)), #d0d0d0;
+  box-shadow: 0 0.08em 0.15em -0.1em rgba(0, 0, 0, 0.5) inset, 0 0.05em 0.08em -0.01em rgba(255, 255, 255, 0.7), 0 0 0 0 rgba(68, 204, 102, 0.7) inset;
+}
+/* line 195, ../scss/bimpcore/_form.scss */
+.toggle:checked + span {
+  color: #b4b4b4;
+}
+/* line 198, ../scss/bimpcore/_form.scss */
+.toggle:checked + span + label + span {
+  color: #2fa04b;
+}
+/* line 202, ../scss/bimpcore/_form.scss */
+.toggle:checked + span + .toggle-slider:before {
+  box-shadow: 0 0.08em 0.15em -0.1em rgba(0, 0, 0, 0.5) inset, 0 0.05em 0.08em -0.01em rgba(255, 255, 255, 0.7), 3em 0 0 0 rgba(68, 204, 102, 0.7) inset;
+}
+/* line 208, ../scss/bimpcore/_form.scss */
+.toggle:checked + span + .toggle-slider:after {
+  left: 22px;
+}
+
+/* line 214, ../scss/bimpcore/_form.scss */
 .search_input_results {
   position: absolute;
   z-index: 99999;
@@ -10066,36 +10153,36 @@ select.switch option[value='0'] {
   box-shadow: 4px 4px 4px #505050;
   padding: 0 15px;
 }
-/* line 135, ../scss/bimpcore/_form.scss */
+/* line 222, ../scss/bimpcore/_form.scss */
 .search_input_results button {
   display: block;
   width: 100%;
   text-align: left;
 }
 
-/* line 142, ../scss/bimpcore/_form.scss */
+/* line 229, ../scss/bimpcore/_form.scss */
 .switchOption.selected {
   color: white !important;
   background-color: #ef7d00 !important;
   border-color: #ef7d00 !important;
 }
 
-/* line 149, ../scss/bimpcore/_form.scss */
+/* line 236, ../scss/bimpcore/_form.scss */
 .timer_input input, .timer_input select {
   width: 45px !important;
 }
-/* line 152, ../scss/bimpcore/_form.scss */
+/* line 239, ../scss/bimpcore/_form.scss */
 .timer_input span {
   display: inline-block;
   font-weight: bold !important;
   margin: 8px;
 }
 
-/* line 158, ../scss/bimpcore/_form.scss */
+/* line 245, ../scss/bimpcore/_form.scss */
 .optionsContainer {
   text-align: right;
 }
-/* line 161, ../scss/bimpcore/_form.scss */
+/* line 248, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton {
   display: inline-block;
   margin: 5px;
@@ -10109,16 +10196,16 @@ select.switch option[value='0'] {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 175, ../scss/bimpcore/_form.scss */
+/* line 262, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton:hover {
   color: #fff;
   background-color: #ef7d00;
 }
-/* line 179, ../scss/bimpcore/_form.scss */
+/* line 266, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton:hover:before {
   color: #fff;
 }
-/* line 184, ../scss/bimpcore/_form.scss */
+/* line 271, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton:before {
   font-size: 14px;
   color: #ef7d00;
@@ -10127,21 +10214,25 @@ select.switch option[value='0'] {
   margin-right: 8px;
 }
 
-/* line 194, ../scss/bimpcore/_form.scss */
+/* line 281, ../scss/bimpcore/_form.scss */
 .inputMultipleValues table tbody tr {
   border: 1px solid #b4b4b4;
 }
-/* line 197, ../scss/bimpcore/_form.scss */
+/* line 284, ../scss/bimpcore/_form.scss */
 .inputMultipleValues table tbody tr td {
   padding: 6px 12px;
 }
 
-/* line 2, ../scss/bimpcore/_list.scss */
+/* line 1, ../scss/bimpcore/_list.scss */
+.objectList {
+  overflow-x: auto;
+}
+/* line 4, ../scss/bimpcore/_list.scss */
 .objectList table.objectlistTable {
   border: none;
   box-shadow: none;
 }
-/* line 6, ../scss/bimpcore/_list.scss */
+/* line 8, ../scss/bimpcore/_list.scss */
 .objectList table.objectlistTable > thead > tr > th {
   padding: 10px 6px;
   margin-bottom: 8px;
@@ -10150,19 +10241,19 @@ select.switch option[value='0'] {
   text-align: left;
   font-weight: bold;
 }
-/* line 15, ../scss/bimpcore/_list.scss */
+/* line 17, ../scss/bimpcore/_list.scss */
 .objectList table.objectlistTable td {
   padding: 5px 6px;
 }
-/* line 19, ../scss/bimpcore/_list.scss */
+/* line 21, ../scss/bimpcore/_list.scss */
 .objectList table.objectlistTable td .editInputContainer input, .objectList table.objectlistTable td .editInputContainer textarea, .objectList table.objectlistTable td .editInputContainer select {
   width: 100%;
 }
-/* line 26, ../scss/bimpcore/_list.scss */
+/* line 28, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle {
   cursor: pointer;
 }
-/* line 29, ../scss/bimpcore/_list.scss */
+/* line 31, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle:after {
   font-family: 'FontAwesome';
   margin-left: 8px;
@@ -10171,83 +10262,107 @@ select.switch option[value='0'] {
   transition: all 0.15s ease;
   -webkit-transition: all 0.15s ease;
 }
-/* line 38, ../scss/bimpcore/_list.scss */
+/* line 40, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle:hover, .objectList .sortTitle.active {
   text-decoration: none !important;
 }
-/* line 40, ../scss/bimpcore/_list.scss */
+/* line 42, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle:hover:after, .objectList .sortTitle.active:after {
   opacity: 1;
 }
-/* line 45, ../scss/bimpcore/_list.scss */
+/* line 47, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle.sorted-asc:after {
   content: '\f0d7';
 }
-/* line 48, ../scss/bimpcore/_list.scss */
+/* line 50, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle.sorted-desc:after {
   content: '\f0d8';
 }
-/* line 51, ../scss/bimpcore/_list.scss */
+/* line 53, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle.active.sorted-asc:after {
   content: '\f0d8';
 }
-/* line 54, ../scss/bimpcore/_list.scss */
+/* line 56, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle.active.sorted-desc:after {
   content: '\f0d7';
 }
-/* line 57, ../scss/bimpcore/_list.scss */
+/* line 59, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle.active.sorted-asc:hover:after {
   content: '\f0d7';
 }
-/* line 60, ../scss/bimpcore/_list.scss */
+/* line 62, ../scss/bimpcore/_list.scss */
 .objectList .sortTitle.active.sorted-desc:hover:after {
   content: '\f0d8';
 }
-/* line 64, ../scss/bimpcore/_list.scss */
+/* line 66, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow {
+  display: none;
   background-color: #DCDCDC;
 }
-/* line 67, ../scss/bimpcore/_list.scss */
+/* line 70, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow i.fa-search {
   font-size: 16px;
   font-weight: bold;
   color: #787878;
 }
-/* line 72, ../scss/bimpcore/_list.scss */
+/* line 75, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow .inputHelp {
   display: none;
 }
-/* line 76, ../scss/bimpcore/_list.scss */
+/* line 79, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow #search_id {
   max-width: 45px;
 }
-/* line 79, ../scss/bimpcore/_list.scss */
+/* line 82, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow td.searchTools {
   text-align: right;
 }
-/* line 83, ../scss/bimpcore/_list.scss */
+/* line 86, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow .searchInputContainer {
   width: 100%;
   padding: 5px 15px 5px 0;
 }
-/* line 87, ../scss/bimpcore/_list.scss */
+/* line 90, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow .searchInputContainer input, .objectList .listSearchRow .searchInputContainer select, .objectList .listSearchRow .searchInputContainer .input-group {
   width: 100%;
 }
-/* line 91, ../scss/bimpcore/_list.scss */
+/* line 94, ../scss/bimpcore/_list.scss */
 .objectList .listSearchRow .searchInputContainer .search_list_input {
   width: 80%;
 }
-/* line 96, ../scss/bimpcore/_list.scss */
+/* line 99, ../scss/bimpcore/_list.scss */
+.objectList .addObjectRow {
+  display: none;
+  background-color: #A0A0A0;
+}
+/* line 103, ../scss/bimpcore/_list.scss */
+.objectList .addObjectRow td:first-child {
+  text-align: center;
+}
+/* line 106, ../scss/bimpcore/_list.scss */
+.objectList .addObjectRow td:first-child i.fa-plus-circle {
+  font-size: 20px;
+  font-weight: normal;
+  color: #DCDCDC;
+}
+/* line 112, ../scss/bimpcore/_list.scss */
+.objectList .addObjectRow .inputHelp {
+  display: none;
+}
+/* line 117, ../scss/bimpcore/_list.scss */
+.objectList .addObjectRow .inputContainer input, .objectList .addObjectRow .inputContainer select, .objectList .addObjectRow .inputContainer textarea {
+  width: 100%;
+}
+/* line 122, ../scss/bimpcore/_list.scss */
 .objectList th.th_tools {
   margin-right: 25px;
 }
-/* line 100, ../scss/bimpcore/_list.scss */
+/* line 126, ../scss/bimpcore/_list.scss */
 .objectList .headerTools {
   text-align: right;
   height: 100%;
 }
-/* line 104, ../scss/bimpcore/_list.scss */
+/* line 130, ../scss/bimpcore/_list.scss */
 .objectList .headerTools .headerButton {
   display: inline-block;
   margin: 5px;
@@ -10261,33 +10376,37 @@ select.switch option[value='0'] {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 118, ../scss/bimpcore/_list.scss */
+/* line 144, ../scss/bimpcore/_list.scss */
 .objectList .headerTools .headerButton:hover {
   color: #EF7D00;
   background-color: #fff;
 }
-/* line 123, ../scss/bimpcore/_list.scss */
+/* line 149, ../scss/bimpcore/_list.scss */
 .objectList .headerTools .headerButton:before, .objectList .headerTools .headerButton:after {
   font-family: 'FontAwesome';
 }
-/* line 127, ../scss/bimpcore/_list.scss */
+/* line 153, ../scss/bimpcore/_list.scss */
 .objectList .headerTools .openSearchRowButton:before {
   content: '\f002';
 }
-/* line 130, ../scss/bimpcore/_list.scss */
+/* line 156, ../scss/bimpcore/_list.scss */
+.objectList .headerTools .openAddObjectRowButton:before {
+  content: '\f055';
+}
+/* line 159, ../scss/bimpcore/_list.scss */
 .objectList .headerTools .openBulkActionsPopupButton:before {
   content: '\f046';
 }
-/* line 133, ../scss/bimpcore/_list.scss */
+/* line 162, ../scss/bimpcore/_list.scss */
 .objectList .headerTools .openParametersPopupButton:before {
   content: '\f013';
 }
-/* line 137, ../scss/bimpcore/_list.scss */
+/* line 166, ../scss/bimpcore/_list.scss */
 .objectList td.buttons {
   text-align: right;
   min-width: 160px;
 }
-/* line 141, ../scss/bimpcore/_list.scss */
+/* line 170, ../scss/bimpcore/_list.scss */
 .objectList .rowButton {
   color: #636363;
   text-align: center;
@@ -10303,50 +10422,50 @@ select.switch option[value='0'] {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 157, ../scss/bimpcore/_list.scss */
+/* line 186, ../scss/bimpcore/_list.scss */
 .objectList .rowButton:hover {
   color: #fff;
   background-color: #EF7D00;
   text-decoration: none;
 }
-/* line 162, ../scss/bimpcore/_list.scss */
+/* line 191, ../scss/bimpcore/_list.scss */
 .objectList .rowButton:before {
   font-family: 'FontAwesome';
 }
-/* line 165, ../scss/bimpcore/_list.scss */
+/* line 194, ../scss/bimpcore/_list.scss */
 .objectList .rowButton.editButton:before {
   content: '\f044';
 }
-/* line 168, ../scss/bimpcore/_list.scss */
+/* line 197, ../scss/bimpcore/_list.scss */
 .objectList .rowButton.updateButton:before {
   content: '\f0c7';
 }
-/* line 171, ../scss/bimpcore/_list.scss */
+/* line 200, ../scss/bimpcore/_list.scss */
 .objectList .rowButton.deleteButton:before {
   content: '\f1f8';
 }
-/* line 174, ../scss/bimpcore/_list.scss */
+/* line 203, ../scss/bimpcore/_list.scss */
 .objectList .rowButton.viewButton:before {
   content: '\f06e';
 }
-/* line 179, ../scss/bimpcore/_list.scss */
+/* line 208, ../scss/bimpcore/_list.scss */
 .objectList .select2-container {
   max-width: 160px !important;
 }
 
-/* line 183, ../scss/bimpcore/_list.scss */
+/* line 212, ../scss/bimpcore/_list.scss */
 .ajaxResultContainer {
   display: none;
   margin: 20px 15px;
 }
 
 /*Pagination*/
-/* line 190, ../scss/bimpcore/_list.scss */
+/* line 219, ../scss/bimpcore/_list.scss */
 .paginationContainer td {
   background-color: #fff;
 }
 
-/* line 193, ../scss/bimpcore/_list.scss */
+/* line 222, ../scss/bimpcore/_list.scss */
 .listPagination {
   text-align: center;
   background-color: #fff;
@@ -10354,11 +10473,11 @@ select.switch option[value='0'] {
   margin-top: 20px;
   border-top: 1px solid gainsboro;
 }
-/* line 194, ../scss/bimpcore/_list.scss */
+/* line 223, ../scss/bimpcore/_list.scss */
 .listPagination:empty {
   display: none;
 }
-/* line 204, ../scss/bimpcore/_list.scss */
+/* line 233, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton {
   font-size: 13px;
   margin: 0 5px;
@@ -10372,48 +10491,48 @@ select.switch option[value='0'] {
   line-height: 16px;
   vertical-align: middle;
 }
-/* line 217, ../scss/bimpcore/_list.scss */
+/* line 246, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:hover {
   color: #EF7D00;
 }
-/* line 221, ../scss/bimpcore/_list.scss */
+/* line 250, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:before, .listPagination span.navButton:after {
   font-family: 'FontAwesome';
   font-size: 12px;
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 228, ../scss/bimpcore/_list.scss */
+/* line 257, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton.disabled, .listPagination span.navButton.disabled:hover {
   color: #C8C8C8;
   cursor: default;
 }
-/* line 233, ../scss/bimpcore/_list.scss */
+/* line 262, ../scss/bimpcore/_list.scss */
 .listPagination span.prevButton:before {
   content: '\f053';
   margin-right: 8px;
 }
-/* line 237, ../scss/bimpcore/_list.scss */
+/* line 266, ../scss/bimpcore/_list.scss */
 .listPagination span.nextButton:after {
   content: '\f054';
   margin-left: 8px;
 }
-/* line 241, ../scss/bimpcore/_list.scss */
+/* line 270, ../scss/bimpcore/_list.scss */
 .listPagination .pages {
   display: inline-block;
   margin: 0 50px;
   color: #A0A0A0;
 }
-/* line 246, ../scss/bimpcore/_list.scss */
+/* line 275, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn {
   font-weight: bold;
   cursor: pointer;
 }
-/* line 249, ../scss/bimpcore/_list.scss */
+/* line 278, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn:hover {
   color: #505050;
 }
-/* line 253, ../scss/bimpcore/_list.scss */
+/* line 282, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn.active, .listPagination .pages .pageBtn.active:hover {
   color: #EF7D00;
   cursor: default;
@@ -10441,25 +10560,24 @@ select.switch option[value='0'] {
 
 /* line 21, ../scss/bimpcore/_view.scss */
 .objectViewtable {
-  border: 1px solid gainsboro;
   width: 100%;
   margin: 5px 0;
 }
-/* line 26, ../scss/bimpcore/_view.scss */
+/* line 25, ../scss/bimpcore/_view.scss */
 .objectViewtable thead tr th {
   padding: 8px 12px;
-  background-color: #ef7d00;
-  color: #fff;
+  background-color: #c8c8c8;
+  color: #282828;
   font-weight: bold;
   border-bottom: 1px solid #fff;
   font-size: 16px;
   font-weight: normal;
 }
-/* line 36, ../scss/bimpcore/_view.scss */
+/* line 35, ../scss/bimpcore/_view.scss */
 .objectViewtable tbody tr th, .objectViewtable tbody tr td {
   padding: 5px 10px;
 }
-/* line 39, ../scss/bimpcore/_view.scss */
+/* line 38, ../scss/bimpcore/_view.scss */
 .objectViewtable tbody tr th {
   width: 20%;
   min-width: 90px;
@@ -10470,17 +10588,17 @@ select.switch option[value='0'] {
   text-align: right;
   border-bottom: 1px solid #fff;
 }
-/* line 49, ../scss/bimpcore/_view.scss */
+/* line 48, ../scss/bimpcore/_view.scss */
 .objectViewtable tbody tr td {
   border-bottom: 1px solid gainsboro;
 }
 
-/* line 56, ../scss/bimpcore/_view.scss */
+/* line 55, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr th, .object_card_table tbody tr td {
   padding: 0 5px;
   border-bottom: 1px solid #fff;
 }
-/* line 61, ../scss/bimpcore/_view.scss */
+/* line 60, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr th {
   width: 30%;
   min-width: 120px;
@@ -10490,29 +10608,29 @@ select.switch option[value='0'] {
   background-color: #fff;
   color: #282828;
 }
-/* line 71, ../scss/bimpcore/_view.scss */
+/* line 70, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr td {
   color: #282828;
   background-color: #fff;
 }
 
-/* line 77, ../scss/bimpcore/_view.scss */
+/* line 76, ../scss/bimpcore/_view.scss */
 .object_common_fields {
   margin: 5px 0;
   background-color: whitesmoke;
 }
-/* line 81, ../scss/bimpcore/_view.scss */
+/* line 80, ../scss/bimpcore/_view.scss */
 .object_common_fields table {
   width: 100%;
   border: none;
 }
-/* line 86, ../scss/bimpcore/_view.scss */
+/* line 85, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr th, .object_common_fields table tbody tr td {
   padding: 3px 5px;
   font-size: 12px;
   border-bottom: 1px solid #fff;
 }
-/* line 92, ../scss/bimpcore/_view.scss */
+/* line 91, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr th {
   font-weight: normal;
   color: gainsboro;
@@ -10523,7 +10641,7 @@ select.switch option[value='0'] {
   vertical-align: top;
   background-color: #636363;
 }
-/* line 103, ../scss/bimpcore/_view.scss */
+/* line 102, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr td {
   color: #282828;
   border-bottom: 1px solid gainsboro;

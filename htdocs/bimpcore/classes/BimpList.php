@@ -17,6 +17,7 @@ class BimpList
     protected $bulk_actions = array();
     protected $checkboxes = false;
     protected $search = false;
+    protected $addobjectRow = false;
     protected $sort_col = null;
     protected $sort_way = 'desc';
     protected $sort_option = '';
@@ -54,6 +55,7 @@ class BimpList
         if (!count($this->errors) && !is_null($this->list_path)) {
             $this->listIdentifier = $this->object->object_name . '_' . $list_name . '_list';
             $this->checkboxes = (int) $this->object->getCurrentConf('checkboxes', 0, false, 'bool');
+            $this->addobjectRow = (int) $this->object->getCurrentConf('add_object_row', 0, false, 'bool');
             $this->fetchCols();
             $this->colspan = 2 + count($this->cols);
             $this->fetchlistParams();
@@ -287,12 +289,12 @@ class BimpList
 
         $content .= $this->renderHeaderRow();
         $content .= $this->renderSearchRow();
+        $content .= $this->renderAddObjectRow();
 
         $content .= '</thead>';
         $content .= '<tbody class="listRows">';
 
         $content .= $this->renderRows();
-        $content .= $this->renderAddObjectRow();
 
         $content .= '</tbody>';
 
@@ -406,6 +408,9 @@ class BimpList
             if ($this->search) {
                 $html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
             }
+            if ($this->addobjectRow) {
+                $html .= '<span class="headerButton openAddObjectRowButton open-close action-open"></span>';
+            }
             $html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
             $html .= ' data-popup_id="' . $this->listIdentifier . '_bulkActionsPopup"></span>';
             $html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
@@ -437,8 +442,7 @@ class BimpList
         $html .= '<tr id="' . $this->listIdentifier . '_searchRow" class="listSearchRow"';
         $html .= ' data-list_name="' . $this->list_name . '"';
         $html .= ' data-module_name="' . $this->object->module . '"';
-        $html .= ' data-object_name="' . $this->object->object_name . '"';
-        $html .= ' style="display: none">';
+        $html .= ' data-object_name="' . $this->object->object_name . '">';
 
         $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
 
@@ -503,49 +507,48 @@ class BimpList
     {
         $html = '';
 
-        if (!is_null($this->list_path)) {
-            if ((int) $this->object->getCurrentConf('add_object_row', 0, false, 'bool')) {
-                $html .= '<tr id="' . $this->listIdentifier . '_addObjectRow" class="inputsRow">';
-                $html .= '<td></td>';
+        if ((int) $this->addobjectRow && !is_null($this->list_path)) {
+            $html .= '<tr id="' . $this->listIdentifier . '_addObjectRow" class="addObjectRow inputsRow">';
+            $html .= '<td><i class="fa fa-plus-circle"></i></td>';
 
-                if (!is_null($this->id_parent)) {
-                    $parent_id_property = $this->object->getParentIdProperty();
-                    if (!is_null($parent_id_property)) {
-                        $html .= '<td style="display: none">';
-                        $html .= '<div class="inputContainer" data-field_name="' . $parent_id_property . '"';
-                        $html .= ' data-default_value="' . $this->id_parent . '"';
-                        $html .= ' id="' . $this->object->object_name . '_' . $parent_id_property . '_addInputContainer">';
-                        $html .= '<input type="hidden" name="' . $parent_id_property . '" ';
-                        $html .= 'value="' . $this->id_parent . '"/>';
-                        $html .= '</div>';
-                        $html .= '</td>';
-                    }
+            if (!is_null($this->id_parent)) {
+                $parent_id_property = $this->object->getParentIdProperty();
+                if (!is_null($parent_id_property)) {
+                    $html .= '<td style="display: none">';
+                    $html .= '<div class="inputContainer" data-field_name="' . $parent_id_property . '"';
+                    $html .= ' data-default_value="' . $this->id_parent . '"';
+                    $html .= ' id="' . $this->object->object_name . '_' . $parent_id_property . '_addInputContainer">';
+                    $html .= '<input type="hidden" name="' . $parent_id_property . '" ';
+                    $html .= 'value="' . $this->id_parent . '"/>';
+                    $html .= '</div>';
+                    $html .= '</td>';
                 }
-
-                foreach ($this->cols as $col_name => $col_params) {
-                    $this->setConfPath('cols/' . $col_name);
-                    $field = $this->object->getCurrentConf('field', '');
-
-                    if (!$field) {
-                        $html .= '<td></td>';
-                    } else {
-                        $input_type = $this->object->getConf('fields/' . $field . '/input/type', '');
-                        $default_value = $this->object->getConf('fields/' . $field . '/default_value', '', false);
-                        $html .= '<td' . (($input_type === 'hidden') ? ' style="display: none"' : '') . '>';
-                        $html .= '<div class="inputContainer" id="' . $this->object->object_name . '_' . $field . '_addInputContainer"';
-                        $html .= ' data-field_name="' . $field . '">';
-                        $html .= ' data-default_value="' . $default_value . '"';
-                        $html .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $default_value, $this->id_parent);
-                        $html .= '</div>';
-                        $html .= '</td>';
-                    }
-                }
-
-                $html .= '<td>';
-                $html .= '<span class="butAction" onclick="addObjectFromList(\'' . $this->listIdentifier . '\', $(this))">Ajouter</span>';
-                $html .= '</td>';
-                $html .= '</tr>';
             }
+
+            foreach ($this->cols as $col_name => $col_params) {
+                $this->setConfPath('cols/' . $col_name);
+                $field = $this->object->getCurrentConf('field', '');
+
+                if (!$field || in_array($field, BimpObject::$common_fields)) {
+                    $html .= '<td></td>';
+                } else {
+                    $input_type = $this->object->getConf('fields/' . $field . '/input/type', '');
+                    $default_value = $this->object->getConf('fields/' . $field . '/default_value', '', false);
+                    $html .= '<td' . (($input_type === 'hidden') ? ' style="display: none"' : '') . '>';
+                    $html .= '<div class="inputContainer" id="' . $this->object->object_name . '_' . $field . '_addInputContainer"';
+                    $html .= ' data-field_name="' . $field . '"';
+                    $html .= ' data-default_value="' . $default_value . '">';
+                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $default_value, $this->id_parent);
+                    $html .= '</div>';
+                    $html .= '</td>';
+                }
+            }
+
+            $html .= '<td class="buttons">';
+            $html .= '<button class="btn btn-default" onclick="addObjectFromList(\'' . $this->listIdentifier . '\', $(this))">';
+            $html .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
+            $html .= '</td>';
+            $html .= '</tr>';
         }
         $this->setConfPath();
         return $html;

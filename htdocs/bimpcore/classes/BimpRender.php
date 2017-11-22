@@ -71,12 +71,12 @@ class BimpRender
         return $html;
     }
 
-    public static function renderButtonFromConfig(BimpConfig $config, $path, $instance, $extra_params, $tag = 'span')
+    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params, $tag = 'span')
     {
-        $label = $config->get($path . '/label', $instance, '');
-        $icon_before = $config->get($path . '/icon_before', $instance, '');
-        $icon_after = $config->get($path . '/icon_after', $instance, '');
-        $configTag = $config->get($path . '/tag', $instance, '');
+        $label = $config->get($path . '/label', '');
+        $icon_before = $config->get($path . '/icon_before', '');
+        $icon_after = $config->get($path . '/icon_after', '');
+        $configTag = $config->get($path . '/tag', '');
 
         $params = $extra_params;
         if ($label) {
@@ -92,11 +92,11 @@ class BimpRender
             $tag = $configTag;
         }
 
-        $id = $config->get($path . '/id', $instance, '');
+        $id = $config->get($path . '/id', '');
         if ($id) {
             $params['id'] = $id;
         }
-        $classes = $config->get($path . '/classes', $instance, array(), false, 'array');
+        $classes = $config->get($path . '/classes', array(), false, 'array');
         if (count($classes)) {
             if (isset($params['classes'])) {
                 $params['classes'] = array_merge($params['classes'], $classes);
@@ -104,7 +104,7 @@ class BimpRender
                 $params['classes'] = $classes;
             }
         }
-        $data = $config->get($path . '/data', $instance, array(), false, 'array');
+        $data = $config->get($path . '/data', array(), false, 'array');
         if (count($data)) {
             if (isset($params['data'])) {
                 $params['data'] = array_merge($params['data'], $data);
@@ -112,7 +112,7 @@ class BimpRender
                 $params['data'] = $data;
             }
         }
-        $attr = $config->get($path . '/attr', $instance, array(), false, 'array');
+        $attr = $config->get($path . '/attr', array(), false, 'array');
         if (count($attr)) {
             if (isset($params['attr'])) {
                 $params['attr'] = array_merge($params['attr'], $attr);
@@ -120,7 +120,7 @@ class BimpRender
                 $params['attr'] = $attr;
             }
         }
-        $styles = $config->get($path . '/styles', $instance, array(), false, 'array');
+        $styles = $config->get($path . '/styles', array(), false, 'array');
         if (count($styles)) {
             if (isset($params['styles'])) {
                 $params['styles'] = array_merge($params['styles'], $styles);
@@ -128,7 +128,7 @@ class BimpRender
                 $params['styles'] = $styles;
             }
         }
-        
+
         return self::renderButton($params, $tag);
     }
 
@@ -137,7 +137,11 @@ class BimpRender
         if (!isset($params['type'])) {
             $params['type'] = 'default';
         }
-        $html = '<div class="btn-group">';
+        $html = '<div class="btn-group';
+        if (isset($params['drop_up']) && $params['drop_up']) {
+            $html .= ' dropup';
+        }
+        $html .= '">';
         $html .= '<button type="button" class="btn btn-' . $params['type'] . ' dropdown-toggle"';
         $html .= ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
         if (isset($params['icon'])) {
@@ -166,12 +170,12 @@ class BimpRender
     {
         $html = '';
 
-        if (!isset($params['type'])) {
+        if (!isset($params['type']) || !$params['type']) {
             $params['type'] = 'default';
         }
 
         $html .= '<div class="panel panel-' . $params['type'] . '"';
-        if (isset($params['panel_id'])) {
+        if (isset($params['panel_id']) && $params['panel_id']) {
             $html .= ' id="' . $params['panel_id'] . '"';
         }
         $html .= '>';
@@ -179,14 +183,14 @@ class BimpRender
 
         // Titre:
         $html .= '<div class="panel-title">';
-        if (isset($params['icon'])) {
+        if (isset($params['icon']) && $params['icon']) {
             $html .= self::renderIcon($params['icon'], 'iconLeft');
         }
         $html .= $title;
         $html .= '</div>';
 
         // Bouttons en en-tête:
-        if (isset($params['header_buttons'])) {
+        if (isset($params['header_buttons']) && is_array($params['header_buttons']) && count($params['header_buttons'])) {
             $html .= '<div class="header_buttons">';
             foreach ($params['header_buttons'] as $button) {
                 $button['classes'][] = 'headerBtn';
@@ -224,18 +228,40 @@ class BimpRender
             }
             return self::renderAlerts($msg, 'warning');
         }
-        $title = $config->getFromCurrentPath('title', $object, null, false, 'any');
-        $image_url = $config->getFromCurrentPath('image', $object, null);
-        $view_btn = $config->getFromCurrentPath('view_btn', $object, false, false, 'bool');
+
+        if (is_a($object, 'BimpObject')) {
+            $object_name = $object->object_name;
+        } else {
+            $object_name = get_class($object);
+        }
+
+        $card_identifier = $object_name . '_' . $object->id . '_card';
+
+        $title = $config->getFromCurrentPath('title', null, false, 'any');
+        $image_url = $config->getFromCurrentPath('image', null);
+        $view_btn = $config->getFromCurrentPath('view_btn', false, false, 'bool');
 
         $fields = array();
-        foreach ($config->getFromCurrentPath('fields', $object, array(), false, 'array') as $label => $params) {
+        foreach ($config->getFromCurrentPath('fields', array(), false, 'array') as $label => $params) {
             if (isset($params['object_prop'])) {
                 if (isset($object->{$params['object_prop']})) {
                     $fields[$label] = $object->{$params['object_prop']};
                 } else {
                     $fields[$label] = '<span class="danger">Inconnu</span>';
                 }
+            } elseif (is_a($object, 'BimpObject')) {
+                if (is_string($params)) {
+                    $fields[$label] = $object->displayData($params);
+                } elseif (is_array($params)) {
+                    $field = $config->getFromCurrentPath('fields/' . $label . '/field', '');
+                    if ($field) {
+                        $display = $config->getFromCurrentPath('fields/' . $label . '/display', 'default');
+                        $fields[$label] = $object->displayData($field, $display);
+                    }
+                }
+            }
+            if (!isset($fields[$label])) {
+                $fields[$label] = BimpRender::renderAlerts('erreur de configuration pour ce champ', 'warning');
             }
         }
 
@@ -256,6 +282,9 @@ class BimpRender
                 }
             }
             if (is_string($title)) {
+                if ($title === 'nom') {
+                    $title = BimpObject::getInstanceNom($object);
+                }
                 $html .= '<h4 class="media-heading">' . $title . '</h4>';
             }
         }
@@ -272,12 +301,42 @@ class BimpRender
         $html .= '</table>';
         if ($view_btn) {
             $url = BimpObject::getInstanceUrl($object);
-            if ($url) {
+            $file = '';
+            $params = array();
+            if (is_a($object, 'BimpObject')) {
+                $file = $object->module . '/index.php';
+                $params['fc'] = $object->controller;
+                $params['id'] = $object->id;
+            } else {
+                $file = strtolower(get_class($object)) . '/card.php';
+                if (is_a($object, 'Societe')) {
+                    $params['socid'] = $object->id;
+                } else {
+                    $params['id'] = $object->id;
+                }
+            }
+            if (!file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                $file = '';
+            }
+
+            if ($url || $file) {
                 $html .= '<div style="text-align: right; margin-top: 15px">';
-                $html .= '<a href="' . $url . '" class="btn btn-default" target="_blanck">';
-                $html .= '<i class="fa fa-file-o iconLeft"></i>';
-                $html .= 'Afficher';
-                $html .= '</a>';
+                $html .= '<div class="btn-group">';
+                if ($file) {
+                    $html .= '<button type="button" class="btn btn-default" ';
+                    $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities($title, ENT_QUOTES) . '\')">';
+                    $html .= '<i class="fa fa-file-o iconLeft"></i>';
+                    $html .= 'Afficher</button>';
+                }
+                if ($url) {
+                    $html .= '<a href="' . $url . '" class="btn btn-default" target="_blank" title="Afficher dans une nouvel onglet">';
+                    $html .= '<i class="fa fa-external-link"></i>';
+                    if (!$file) {
+                        $html .= '&nbsp;&nbsp;Afficher';
+                    }
+                    $html .= '</a>';
+                }
+                $html .= '</div>';
                 $html .= '</div>';
             }
         }
@@ -320,84 +379,6 @@ class BimpRender
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-
-        return $html;
-    }
-
-    public static function renderBimpTimer($object, $object_time_field)
-    {
-        if (!isset($object->id) || !$object->id) {
-            return '';
-        }
-
-        $time_sec = $object->getData($object_time_field);
-        if (is_null($time_sec)) {
-            $time_sec = 0;
-        }
-
-        $timer = BimpTools::getTimeDataFromSeconds($time_sec);
-
-        $timer_id = $object->object_name . '_' . $object->id . '_timer';
-
-        $html = '';
-        $html .= '<div id="' . $timer_id . '" class="bimp_timer">';
-
-        $html .= '<div class="bimp_timer_header">';
-        $html .= '<h4 class="title">Chrono intervention</h4>';
-        $html .= '</div>';
-
-        $html .= '<div class="bimp_timer_total_time bimp_timer_time">';
-        $html .= '<div class="title">Durée totale intervention:</div>';
-        $html .= '<span class="bimp_timer_days bimp_timer_value">' . $timer['days'] . '</span>';
-        $html .= '<span class="bimp_timer_label">j</span>';
-        $html .= '<span class="bimp_timer_hours bimp_timer_value">' . $timer['hours'] . '</span>';
-        $html .= '<span class="bimp_timer_label">h</span>';
-        $html .= '<span class="bimp_timer_minutes bimp_timer_value">' . $timer['minutes'] . '</span>';
-        $html .= '<span class="bimp_timer_label">min</span>';
-        $html .= '<span class="bimp_timer_secondes bimp_timer_value">' . $timer['secondes'] . '</span>';
-        $html .= '<span class="bimp_timer_label">sec</span>';
-        $html .= '</div>';
-
-        $html .= '<div class="bimp_timer_current_time bimp_timer_time">';
-        $html .= '<div class="title">Durée session:</div>';
-        $html .= '<span class="bimp_timer_days bimp_timer_value">0</span>';
-        $html .= '<span class="bimp_timer_label">j</span>';
-        $html .= '<span class="bimp_timer_hours bimp_timer_value">0</span>';
-        $html .= '<span class="bimp_timer_label">h</span>';
-        $html .= '<span class="bimp_timer_minutes bimp_timer_value">0</span>';
-        $html .= '<span class="bimp_timer_label">min</span>';
-        $html .= '<span class="bimp_timer_secondes bimp_timer_value">0</span>';
-        $html .= '<span class="bimp_timer_label">sec</span>';
-        $html .= '</div>';
-
-        $html .= '<div class="bimp_timer_footer">';
-
-        $buttons = array();
-        $button = '<button type="button" class="btn btn-light-default bimp_timer_save_btn" onclick="$' . $timer_id . '.save();">';
-        $button .= '<i class="fa fa-save iconLeft"></i>Enregistrer la durée courante</button>';
-        $buttons[] = $button;
-        $button = '<button type="button" class="btn btn-light-default bimp_timer_reset_current_btn" onclick="$' . $timer_id . '.resetCurrent();">';
-        $button .= '<i class="fa fa-history iconLeft"></i>Réinitialiser la durée de la session</button>';
-        $buttons[] = $button;
-        $button = '<button type="button" class="btn btn-light-default bimp_timer_reset_total_btn" onclick="$' . $timer_id . '.resetTotal();">';
-        $button .= '<i class="fa fa-history iconLeft"></i>Réinitialiser la durée totale de l\'intervention</button>';
-        $buttons[] = $button;
-        $button = '<button type="button" class="btn btn-light-default bimp_timer_cancel_reset_btn"';
-        $button .= ' style="display: none" onclick="$' . $timer_id . '.cancelLastReset();">';
-        $button .= '<i class="fa fa-times iconLeft"></i>Réinitialiser la durée totale de l\'intervention</button>';
-        $buttons[] = $button;
-
-        $html .= BimpRender::renderDropDownButton('Actions', $buttons, array('icon' => 'cogs'));
-
-        $html .= '<button type="button" class="btn btn-success bimp_timer_start_btn" onclick="$' . $timer_id . '.start();"><i class="fa fa-play iconLeft"></i>Démarrer</button>';
-        $html .= '<button type="button" class="btn btn-warning bimp_timer_pause_btn" style="display: none" onclick="$' . $timer_id . '.pause();"><i class="fa fa-pause iconLeft"></i>Suspendre</button>';
-
-        $html .= '</div>';
-        $html .= '</div>';
-
-        $html .= '<script type="text/javascript">';
-        $html .= 'var $' . $timer_id . ' = new BimpTimer(\'' . $timer_id . '\', \'' . $object->module . '\', \'' . $object->object_name . '\', ' . $object->id . ', \'' . $object_time_field . '\', ' . $time_sec . ', 0);';
-        $html .= '</script>';
 
         return $html;
     }

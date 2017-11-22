@@ -62,7 +62,36 @@ function saveObjectFromForm(form_id, $button, success_callback) {
     });
 }
 
-function saveObjectField(module, object_name, id_object, field, value, $resultContainer, successCallBack) {
+function saveObject(module, object_name, id_object, fields, $resultContainer, successCallback) {
+    var data = fields;
+
+    data['object_module'] = module;
+    data['object_name'] = object_name;
+    data['id_object'] = id_object;
+
+    bimp_json_ajax('saveObject', data, $resultContainer, function (result) {
+        var $lists = $('.' + object_name + '_list');
+        if ($lists.length) {
+            $lists.each(function () {
+                reloadObjectList($(this).attr('id'));
+            });
+        }
+        var $views = $('.' + object_name + '_view');
+        if ($views.length) {
+            $views.each(function () {
+                reloadObjectView($(this).attr('id'));
+            });
+        }
+
+        if (typeof (successCallback) !== 'undefined') {
+            if (typeof (successCallback) === 'function') {
+                successCallback(result);
+            }
+        }
+    });
+}
+
+function saveObjectField(module, object_name, id_object, field, value, $resultContainer, successCallback) {
     var data = {
         module: module,
         object_name: object_name,
@@ -84,8 +113,8 @@ function saveObjectField(module, object_name, id_object, field, value, $resultCo
                 reloadObjectView($(this).attr('id'));
             });
         }
-        if (typeof (successCallBack) !== 'undefined') {
-            successCallBack(result);
+        if (typeof (successCallback) === 'function') {
+            successCallback(result);
         }
     });
 }
@@ -165,7 +194,7 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
                     $(this).html(html);
                 });
             }
-            if (typeof(successCallBack) === 'function') {
+            if (typeof (successCallBack) === 'function') {
                 successCallBack(result);
             }
         }, function (result) {
@@ -174,7 +203,7 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
     }
 }
 
-function loadModalForm(modal_id, $button, module_name, object_name, form_name, id_object, id_parent) {
+function loadModalForm($button, module_name, object_name, form_name, id_object, id_parent) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -185,7 +214,7 @@ function loadModalForm(modal_id, $button, module_name, object_name, form_name, i
         id_object = 0;
     }
 
-    var $modal = $('#' + modal_id);
+    var $modal = $('#page_modal');
     var $resultContainer = $modal.find('.modal-ajax-content');
     $resultContainer.html('').hide();
 
@@ -267,6 +296,21 @@ function loadModalForm(modal_id, $button, module_name, object_name, form_name, i
     });
 }
 
+function loadObjectFieldValue(module, object_name, id_object, field, $resultContainer, successCallback) {
+    var data = {
+        object_module: module,
+        object_name: object_name,
+        id_object: id_object,
+        field: field
+    };
+
+    bimp_json_ajax('loadObjectFieldValue', data, $resultContainer, function (result) {
+        if (typeof (successCallback) === 'function') {
+            successCallback(result);
+        }
+    });
+}
+
 // Gestion des formulaires objets: 
 
 function reloadObjectInput(form_id, input_name, fields) {
@@ -338,6 +382,10 @@ function searchObjectList($input) {
                     $result.append(html);
                 }
                 var field_name = $container.data('field_name');
+                var multiple = parseInt($container.data('multiple'));
+                if (multiple) {
+                    field_name += '_add_value';
+                }
                 var $field_input = $container.find('[name=' + field_name + ']');
                 $result.find('button').click(function () {
                     $field_input.val($(this).data('value')).change();
@@ -371,6 +419,36 @@ function getFieldValue($form, field_name) {
         return $input.val();
     }
     return '';
+}
+
+function addMultipleInputCurrentValue($button, value_input_name, label_input_name) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $container = $button.parent('div').parent('div.inputMultipleValuesContainer').parent();
+    var $value_input = $container.find('[name=' + value_input_name + ']');
+    var $label_input = $container.find('[name=' + label_input_name + ']');
+    var value = $value_input.val();
+    var label = $label_input.val();
+    if (typeof (value) !== 'undefined' && value !== '') {
+        if (!label) {
+            label = value;
+        }
+        var field_name = $container.data('field_name');
+        var html = '<tr>';
+        html += '<td style="display: none"><input type="hidden" value="' + value + '" name="' + field_name + '[]"/></td>';
+        html += '<td>' + label + '</td>';
+        html += '<td><button type="button" class="btn btn-light-danger iconBtn"';
+        html += ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();"';
+        html += '><i class="fa fa-trash"></i></button></td>';
+        html += '</tr>';
+
+        $container.find('div.inputMultipleValuesContainer').find('table').find('tbody').append(html);
+
+        $value_input.val('');
+        $label_input.val('');
+    }
 }
 
 // Gestion de l'affichage conditionnel des champs: 
@@ -587,7 +665,7 @@ function setSearchListOptionsEvents($container) {
                 $input.data('join_return_label', join_return_label);
                 if (help) {
                     if (!$parent.find('.help').length) {
-                        $parent.append('<p class="help">' + help + '</p>');
+                        $input.after('<p class="help">' + help + '</p>');
                     } else {
                         $parent.find('.help').text(help);
                     }

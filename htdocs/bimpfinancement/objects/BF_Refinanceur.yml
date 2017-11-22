@@ -1,0 +1,82 @@
+table: bf_refinanceur
+parent_object: BF_Demande
+parent_id_property: id_demande
+
+labels:
+    name: Refinanceur
+    
+fields: 
+    id_demande: 
+        label: Demande
+        type: id_parent
+        input: 
+            type: hidden
+    name: 
+        label: Nom
+        type: int
+        input: 
+            type: select
+            options:
+                array: names
+        display: 
+            type: array_value
+            values:
+                array: names
+        required: 1
+        sortable: 1
+        
+    status:
+        label: Statut
+        type: int
+        input: 
+            type: select
+            options: 
+                array: status_list
+        display:
+            type: array_value
+            values:
+                array: status_list
+        required: 1
+        sortable: 1
+        
+    comment:
+        label: Commentaire
+        type: string
+        input:
+            type: textarea
+            rows: 1
+            auto_expand: 1
+        required: 0
+        sortable: 0
+        
+list:
+    checkboxes: 1
+    title: Refinanceurs consultés
+    icon: bank
+    bulk_actions: 
+        - label: Supprimer les lignes sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: date_create
+    sort_way: desc
+    n: 10
+    cols:
+        name: 
+            field: name
+        status: 
+            field: status
+            edit: 1
+        comment:
+            field: comment
+            edit: 1
+            min_width: 40%
+    add_btn: 1
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1
+        
+            
+            
+        
+            

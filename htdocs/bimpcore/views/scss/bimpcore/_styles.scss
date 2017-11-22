@@ -21,6 +21,18 @@
 }
 
 /*Styles génériques*/
+#id-right {
+    background-color: $gray-light;
+}
+
+div.tabBar {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.section {
+    margin-bottom: 30px;
+}
 .ajaxResultContainer {
     margin: 15px;
 }
@@ -72,7 +84,12 @@
         opacity: 1;
     }
 }
-/*Bouttons*/
+
+.bold {
+    font-weight: bold;
+}
+
+/*Boutons*/
 
 .btn {
     i {
@@ -99,10 +116,10 @@
     }
 }
 i.iconLeft {
-    margin-right: 12px;
+    margin-right: 8px;
 }
 i.iconRight {
-    margin-left: 12px;
+    margin-left: 8px;
 }
 .buttonsContainer {
     margin: 15px 0;
@@ -124,7 +141,14 @@ i.iconRight {
 }
 .panel-footer {
     .btn, .button, button {
-        margin: 0 8px;
+        margin: 2px 4px;
+    }
+    
+    .btn-group {
+        margin: 2px 8px;
+        .btn {
+            margin: 0;
+        }
     }
 }
 .modal {
@@ -216,6 +240,7 @@ i.iconRight {
     position: absolute;
     text-align: left;
     right: 0;
+    z-index: 9999;
 
     transition: all 0.3s ease;
     -webkit-transition: all 0.3s ease;
@@ -303,7 +328,13 @@ i.iconRight {
         text-align: right;
 
         button {
-            margin: 0 5px;
+            margin: 2px 3px;
         }
+    }
+}
+
+.fixe_tab_content {
+    .bimp_timer {
+        display: inline-block;
     }
 }

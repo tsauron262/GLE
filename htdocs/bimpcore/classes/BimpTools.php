@@ -21,40 +21,6 @@ class BimpTools
         return $value;
     }
 
-    public static function getDateTimeFromForm($name, $default_date = '')
-    {
-        if (self::isSubmit($name)) {
-            $year = '' . self::getValue($name . 'year', '0000');
-            $month = (int) self::getValue($name . 'month', 0);
-            if ($month < 10) {
-                $month = '0' . $month;
-            } else {
-                $month = '' . $month;
-            }
-            $day = (int) self::getValue($name . 'day', 0);
-            if ($day < 10) {
-                $day = '0' . $day;
-            } else {
-                $day = '' . $day;
-            }
-            $hour = (int) self::getValue($name . 'hour', 0);
-            if ($hour < 10) {
-                $hour = '0' . $hour;
-            } else {
-                $hour = '' . $hour;
-            }
-            $min = (int) self::getValue($name . 'min', 0);
-            if ($min < 10) {
-                $min = '0' . $min;
-            } else {
-                $min = '' . $min;
-            }
-
-            return $year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $min . ':00';
-        }
-        return $default_date;
-    }
-
     // Gestion des objects Dolibarr:
 
     public static function getDolObjectList($instance, $filters = array())
@@ -74,6 +40,64 @@ class BimpTools
             return DOL_URL_ROOT . '/' . $file . (isset($object->id) && $object->id ? '?' . $primary . '=' . $object->id : '');
         }
         return '';
+    }
+
+    // Gestion générique des objets: 
+
+    public static function getObjectTable(BimpObject $parent, $id_object_field, $object = null)
+    {
+        if (is_null($parent) || !$parent) {
+            return null;
+        }
+
+        if (is_null($object) || !$object || !is_object($object)) {
+            $object = $parent->config->getObject('fields/' . $id_object_field . '/object', null, true, 'object');
+            if (is_null($object) || !is_object($object)) {
+                return null;
+            }
+        }
+
+        if (is_a($object, 'BimpObject')) {
+            return $object->getTable();
+        }
+
+        if (property_exists($object, 'table_element')) {
+            return $object->table_element;
+        }
+
+        $instance = $parent->getConf('fields/' . $id_object_field . '/object', null, true, 'any');
+        if (is_string($instance)) {
+            return $parent->getConf('objects/' . $instance . '/table', null, false);
+        }
+        return $parent->getConf('fields/' . $id_object_field . '/object/table', null, false);
+    }
+
+    public static function getObjectPrimary(BimpObject $parent, $id_object_field, $object = null)
+    {
+        if (is_null($parent) || !$parent) {
+            return null;
+        }
+
+        if (is_null($object) || !$object || !is_object($object)) {
+            $object = $parent->config->getObject('fields/' . $id_object_field . '/object', null, true, 'object');
+            if (is_null($object) || !is_object($object)) {
+                return null;
+            }
+        }
+
+        if (is_a($object, 'BimpObject')) {
+            return $object->getPrimary();
+        }
+
+        if (property_exists($object, 'id')) {
+            return 'rowid';
+        }
+
+        $instance = $parent->getConf('fields/' . $id_object_field . '/object', null, true, 'any');
+        if (is_string($instance)) {
+            return $parent->getConf('objects/' . $instance . '/primary', null, false);
+        }
+        return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
 
     // Gestion fichiers:
@@ -224,47 +248,69 @@ class BimpTools
                     $first_loop = false;
                 }
 
-                if (preg_match('/\./', $field)) {
-                    $sql .= $field;
-                } elseif (!is_null($default_alias) && $default_alias) {
-                    $sql .= $default_alias . '.' . $field;
+                $sql .= self::getSqlFilter($field, $filter, $default_alias);
+            }
+        }
+        return $sql;
+    }
+
+    public static function getSqlFilter($field, $filter, $default_alias)
+    {
+        $sql = '';
+
+        if (is_array($filter) && isset($filter['or'])) {
+            $sql .= ' (';
+            $fl = true;
+            foreach ($filter['or'] as $or_field => $or_filter) {
+                if (!$fl) {
+                    $sql .= ' OR ';
                 } else {
-                    $sql .= '`' . $field . '`';
+                    $fl = false;
                 }
+                $sql .= self::getSqlFilter($or_field, $or_filter, $default_alias);
+            }
+            $sql .= ')';
+        } else {
+            if (preg_match('/\./', $field)) {
+                $sql .= $field;
+            } elseif (!is_null($default_alias) && $default_alias) {
+                $sql .= $default_alias . '.' . $field;
+            } else {
+                $sql .= '`' . $field . '`';
+            }
 
-                if (is_array($filter)) {
-                    if (isset($filter['min']) && isset($filter['max'])) {
-                        $sql .= ' BETWEEN ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
-                        $sql .= ' AND ' . (is_string($filter['max']) ? '\'' . $filter['max'] . '\'' : $filter['max']);
-                    } elseif (isset($filter['operator']) && isset($filter['value'])) {
-                        $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
-                    } elseif (isset($filter['part_type']) && isset($filter['part'])) {
-                        $sql .= ' LIKE \'';
-                        switch ($filter['part_type']) {
-                            case 'beginning':
-                                $sql .= $filter['part'] . '%';
-                                break;
+            if (is_array($filter)) {
+                if (isset($filter['min']) && isset($filter['max'])) {
+                    $sql .= ' BETWEEN ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
+                    $sql .= ' AND ' . (is_string($filter['max']) ? '\'' . $filter['max'] . '\'' : $filter['max']);
+                } elseif (isset($filter['operator']) && isset($filter['value'])) {
+                    $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
+                } elseif (isset($filter['part_type']) && isset($filter['part'])) {
+                    $sql .= ' LIKE \'';
+                    switch ($filter['part_type']) {
+                        case 'beginning':
+                            $sql .= $filter['part'] . '%';
+                            break;
 
-                            case 'end':
-                                $sql .= '%' . $filter['part'];
-                                break;
+                        case 'end':
+                            $sql .= '%' . $filter['part'];
+                            break;
 
-                            default:
-                            case 'middle':
-                                $sql .= '%' . $filter['part'] . '%';
-                                break;
-                        }
-                        $sql .= '\'';
-                    } else {
-                        $sql .= ' IN (' . implode(',', $filter) . ')';
+                        default:
+                        case 'middle':
+                            $sql .= '%' . $filter['part'] . '%';
+                            break;
                     }
-                } elseif ($filter === 'IS_NULL') {
-                    $sql .= ' IS NULL';
-                } elseif ($filter === 'IS_NOT_NULL') {
-                    $sql .= ' IS NOT NULL';
+                    $sql .= '\'';
                 } else {
-                    $sql .= ' = ' . (is_string($filter) ? '\'' . $filter . '\'' : $filter);
+                    $sql .= ' IN (' . implode(',', $filter) . ')';
                 }
+            } elseif ($filter === 'IS_NULL') {
+                $sql .= ' IS NULL';
+            } elseif ($filter === 'IS_NOT_NULL') {
+                $sql .= ' IS NOT NULL';
+            } else {
+                $sql .= ' = ' . (is_string($filter) ? '\'' . $filter . '\'' : $filter);
             }
         }
         return $sql;
@@ -429,21 +475,21 @@ class BimpTools
         } else {
             $return['secondes'] = $total_seconds;
         }
-        
+
         if ($return['total_minutes'] >= 60) {
             $return['total_hours'] = (int) floor($return['total_minutes'] / 60);
             $return['minutes'] = (int) ($return['total_minutes'] - ($return['total_hours'] * 60));
         } else {
             $return['minutes'] = $return['total_minutes'];
         }
-        
+
         if ($return['total_hours'] >= 24) {
             $return['total_days'] = (int) floor($return['total_hours'] / 24);
             $return['hours'] = (int) ($return['total_hours'] - ($return['total_days'] * 24));
         } else {
             $return['hours'] = $return['total_hours'];
         }
-        
+
         $return['days'] = $return['total_days'];
 
         return $return;

@@ -132,7 +132,7 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         id_object = 0;
     }
 
-    loadModalForm(list_id + '_modal', $button, $list.data('module_name'), $list.data('object_name'), form_name, id_object, id_parent);
+    loadModalForm($button, $list.data('module_name'), $list.data('object_name'), form_name, id_object, id_parent);
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {

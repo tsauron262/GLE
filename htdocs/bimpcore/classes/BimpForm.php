@@ -4,9 +4,9 @@ class BimpForm
 {
 
     protected $object = null;
-    protected $id_parent = null;
-    protected $form_name = null;
-    protected $form_path = null;
+    public $id_parent = null;
+    public $form_name = null;
+    public $form_path = null;
     public $form_identifier = null;
     public $errors = array();
 
@@ -80,7 +80,7 @@ class BimpForm
             return $html;
         }
 
-        $html .= '<div id="' . $this->form_identifier . '_container" class="container-fluid formContainer ' . $this->object->object_name . '_formContainer">';
+        $html .= '<div id="' . $this->form_identifier . '_container" class="section container-fluid formContainer ' . $this->object->object_name . '_formContainer">';
         $html .= '<form id="' . $this->form_identifier . '" class="objectForm"';
         $html .= ' data-form_identifier="' . $this->form_identifier . '"';
         $html .= ' data-form_name="' . $this->form_name . '"';
@@ -102,7 +102,23 @@ class BimpForm
         }
 
         if (!is_null($this->form_path) && $this->form_path) {
-            
+            $this->setConfPath();
+            $fields = $this->object->getCurrentConf('fields', array(), true, 'array');
+            foreach ($fields as $idx => $field_params) {
+                $this->setConfPath('fields/' . $idx);
+                $field = $this->object->getCurrentConf('field', '', true);
+                $input = $this->object->getCurrentConf('input', null, false, 'any');
+
+                if ($field) {
+                    if ($parent_id_property && ($field === $parent_id_property)) {
+                        continue;
+                    }
+                    if (is_null($input)) {
+                        $this->object->config->setCurrentPath('fields/' . $field);
+                    }
+                    $html .= $this->renderField($field);
+                }
+            }
         } else {
             $fields = $this->object->getConf('fields', array(), true, 'array');
             foreach ($fields as $field => $field_params) {
@@ -132,13 +148,13 @@ class BimpForm
 
         $html = '';
 
+        $multiple = $this->object->getCurrentConf('input/multiple', false, false, 'bool');
         $type = $this->object->getCurrentConf('input/type', '', true);
         $label = $this->object->getCurrentConf('label', '', true);
         $value = $this->object->getData($field);
         if (is_null($value)) {
             $value = $this->object->getCurrentConf('default_value');
         }
-
         $display_if = $this->object->config->isDefinedCurrent('input/display_if');
 
         $html .= '<div class="row fieldRow' . (($type === 'hidden') ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
@@ -150,10 +166,34 @@ class BimpForm
         $html .= '<div class="inputLabel col-xs-12 col-sm-6 col-md-' . (int) $label_cols . '">';
         $html .= $label;
         $html .= '</div>';
-        $html .= '<div id="' . $this->form_identifier . '_' . $field . '" class="inputContainer col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '"';
-        $html .= ' data-field_name="' . $field . '">';
-        $html .= self::renderInput($this->object, $this->object->config->current_path, $field, $value);
+        
+        $html .= '<div class="fieldRowInput fieldcol-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div id="' . $this->form_identifier . '_' . $field . '" class="inputContainer"';
+        $html .= ' data-field_name="' . $field . '" data-multiple="' . ($multiple ? '1' : '0') . '">';
+        
+        $html .= self::renderInput($this->object, $this->object->config->current_path, $field . ($multiple ? '_add_value' : ''), ($multiple ? '' : $value));
+        
+        if ($multiple) {
+            $values = array();
+            if (is_array($value)) {
+                foreach ($value as $item) {
+                    if ($item) {
+                        $values[$item] = $this->object->displayData($field, 'default', $item);
+                    }
+                }
+            } elseif ($value) {
+                $values[] = $value;
+            }
+            if ($type === 'search_list') {
+                $label_field_name = $field . '_add_value_search';
+            } else {
+                $label_field_name = $field;
+            }
+            $html .= BimpInput::renderMultipleValuesList($field, $values, $label_field_name);
+        }
         $html .= '</div>';
+        $html .= '</div>';
+        
         if ($this->object->config->isDefinedCurrent('depends_on')) {
             $html .= $this->renderDependsOnScript($field);
         }
@@ -338,18 +378,40 @@ class BimpForm
         }
 
         $html = '';
-        $type = $object->getCurrentConf('input/type', '');
         $options = array();
+        
+        $type = $object->getCurrentConf('input/type', '');
+        $addon_right = $object->getCurrentConf('input/addon_right', null, false, 'array');
+        $addon_left = $object->getCurrentConf('input/addon_left', null, false, 'array');
+        
+        if (!is_null($addon_right)) {
+            if (isset($addon_right['text'])) {
+                $options['addon_right'] = $object->getCurrentConf('input/addon_right/text', '');
+            } elseif (isset($addon_right['icon'])) {
+                $options['addon_right'] = '<i class="fa fa-'.$object->getCurrentConf('input/addon_right/icon').'"></i>';
+            }
+        }
+        
+        if (!is_null($addon_left)) {
+            if (isset($addon_left['text'])) {
+                $options['addon_left'] = $object->getCurrentConf('input/addon_left/text', '');
+            } elseif (isset($addon_left['icon'])) {
+                $options['addon_left'] = '<i class="fa fa-'.$object->getCurrentConf('input/addon_left/icon').'"></i>';
+            }
+        }
+        
+        
         switch ($type) {
+            case 'time':
+            case 'date':
             case 'datetime':
-                if (!$value) {
-                    $value = date('Y-m-d H:i:s');
-                }
                 $options['display_now'] = $object->getCurrentConf('input/display_now', 0, false, 'bool');
                 break;
 
             case 'textarea':
                 $options['rows'] = $object->getCurrentConf('input/rows', 3, false, 'int');
+                $options['auto_expand'] = $object->getCurrentConf('input/auto_expand', 0, false, 'bool');
+                $options['note'] = $object->getCurrentConf('input/note', 0, false, 'bool');
                 break;
 
             case 'select':

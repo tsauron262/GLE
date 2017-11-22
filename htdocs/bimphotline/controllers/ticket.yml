@@ -1,12 +1,15 @@
 bootstrap: 1
 js:
-    - /bimpcore/views/js/bimp_timer.js
+    - /bimpcore/views/js/BimpTimer.js
     - /bimphotline/views/js/ticket.js
     
-object:
-    instance: 
-        bimp_object: BH_Ticket
-
+objects:
+    ticket: 
+        instance: 
+            bimp_object: BH_Ticket
+            id_object:
+                request: id
+        
 sections:
     - type: buttons
       buttons:
@@ -18,16 +21,22 @@ sections:
                 array: btn,btn-primary
                 
     - type: view
+      view:
+          name: main
+          panel: 1
+          object: ticket
     
     - type: list
-      object: 
-        instance: 
-            bimp_object: BH_Inter
+      list: 
+          panel: 1
+          object: ticket
+          children: inters
             
     - type: list
-      object:
-          instance: 
-              bimp_object: BH_Note
+      list: 
+          panel: 1
+          object: ticket
+          children: notes
               
     - type: buttons
       buttons:

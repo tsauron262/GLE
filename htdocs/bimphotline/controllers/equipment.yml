@@ -1,7 +1,10 @@
 bootstrap: 1
-object:
-    instance: 
-        bimp_object: Equipment
+objects:
+    equipment:
+        instance: 
+            bimp_object: Equipment
+            id_object:
+                request: id
 
 sections:
     - type: tabs
@@ -10,13 +13,9 @@ sections:
               label: Fiche
               sections:
                   - type: view
-          history:
-              label: Historique
-              sections:
-                  - type: list
-                    object:
-                        instance: 
-                            bimp_object: EquipementHistory
+                    view:
+                        panel: 1
+                        object: equipment
     - type: buttons
       buttons:
           - label: Accueil Hotline

@@ -176,6 +176,20 @@ function setCommonEvents($container) {
     $container.find('.displayPopupButton').each(function () {
         setDisplayPopupButtonEvents($(this));
     });
+    $container.one('focus.auto_expand', 'textarea.auto_expand', function () {
+        var savedValue = this.value;
+        this.value = '';
+        this.baseScrollHeight = this.scrollHeight;
+        this.value = savedValue;
+    }).on('input.auto_expand', 'textarea.auto_expand', function () {
+        var minRows = $(this).data('min_rows'), rows;
+        if (!minRows) {
+            minRows = 3;
+        }
+        this.rows = minRows;
+        rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
+        this.rows = rows + minRows;
+    });
 }
 
 function setDisplayPopupButtonEvents($button) {
@@ -193,6 +207,7 @@ function setDisplayPopupButtonEvents($button) {
 }
 
 // Rendus HTML 
+
 function renderLoading(msg, id_container) {
     var html = '<div class="content-loading"';
     if (id_container) {
@@ -222,3 +237,19 @@ function selectSwitchOption($button) {
     });
     $button.addClass('selected');
 }
+
+function updateTimerInput($input, input_name) {
+    var $container = $input.parent('div.timer_input');
+    var days = $container.find('[name=' + input_name + '_days]').val();
+    if (!/^[0-9]+$/.test(days)) {
+        days = 0;
+        $container.find('[name=' + input_name + '_days]').val(days);
+    }
+    days = parseInt(days);
+    var hours = parseInt($container.find('[name=' + input_name + '_hours]').val());
+    var minutes = parseInt($container.find('[name=' + input_name + '_minutes]').val());
+    var secondes = parseInt($container.find('[name=' + input_name + '_secondes]').val());
+    var total_secs = secondes + (minutes * 60) + (hours * 3600) + (days * 86400);
+    $container.find('input[name=' + input_name + ']').val(total_secs).change();
+}
+

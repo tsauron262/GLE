@@ -1,0 +1,24 @@
+table: bimp_timer
+
+label: 
+    name: timer
+    
+common_fields: 0
+
+fields:
+    obj_module:
+        type: string
+    obj_name:
+        type: string
+    id_obj:
+        type: int
+    field_name: 
+        type: string
+    time_session:
+        type: int
+        default_value: 0
+    session_start:
+        type: int
+    id_user:
+        type: int
+    

@@ -5,6 +5,9 @@ class BimpInput
 
     public static function renderInput($type, $field_name, $value = '', $options = array(), $form = null, $option = null, $input_id = null)
     {
+        if (is_null($input_id)) {
+            $input_id = $field_name;
+        }
         $html = '';
         if (is_null($form)) {
             global $db;
@@ -16,14 +19,44 @@ class BimpInput
                 break;
 
             case 'text':
-                $html .= '<input type="text" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '"/>';
+                if ((isset($options['addon_left']) && $options['addon_left']) ||
+                        (isset($options['addon_right']) && $options['addon_right'])) {
+                    $html .= '<div style="display: inline-block">';
+                    $html .= '<div class="input-group">';
+
+                    if (isset($options['addon_left']) && $options['addon_left']) {
+                        $html .= '<span class="input-group-addon">' . $options['addon_left'] . '</span>';
+                    }
+
+                    $html .= '<input type="text" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '"/>';
+
+                    if (isset($options['addon_right']) && $options['addon_right']) {
+                        $html .= '<span class="input-group-addon">' . $options['addon_right'] . '</span>';
+                    }
+
+                    $html .= '</div>';
+                    $html .= '</div>';
+                } else {
+                    $html .= '<input type="text" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '"/>';
+                }
                 break;
 
             case 'textarea':
                 if (!isset($options['rows'])) {
                     $options['rows'] = 3;
                 }
-                $html .= '<textarea id="' . $field_name . '" rows="' . $options['rows'] . '" name="' . $field_name . '">' . $value . '</textarea>';
+                if (!isset($options['auto_expand'])) {
+                    $options['auto_expand'] = false;
+                }
+                if (!isset($options['note'])) {
+                    $options['note'] = false;
+                }
+                $html .= '<textarea id="' . $field_name . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
+                if ($options['auto_expand'] || $options['note']) {
+                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . '"';
+                    $html .= ' data-min_rows="' . $options['rows'] . '"';
+                }
+                $html .= '>' . $value . '</textarea>';
                 break;
 
             case 'switch':
@@ -79,20 +112,38 @@ class BimpInput
                 $html .= $form->select_dolusers((int) $value, $field_name, 0);
                 break;
 
+            case 'time':
             case 'date':
             case 'datetime':
+            case 'time_range':
             case 'date_range':
+            case 'datetime_range':
                 if (isset($options['format'])) {
                     $format = $options['format'];
                 } else {
-                    $format = 'Y-m-d H:i';
+                    switch ($type) {
+                        case 'time':
+                        case 'time_range':
+                            $format = 'H:i:s';
+                            break;
+
+                        case 'date':
+                        case 'date_range':
+                            $format = 'Y-m-d';
+                            break;
+
+                        case 'datetime':
+                        case 'datetime_range':
+                            $format = 'Y-m-d H:i:s';
+                            break;
+                    }
                 }
 
                 if (is_null($value)) {
                     $value = '';
                 }
 
-                if ($type === 'date_range') {
+                if (in_array($type, array('time_range', 'date_range', 'datetime_range'))) {
                     if (!is_array($value)) {
                         $value = array(
                             'from' => '',
@@ -105,7 +156,16 @@ class BimpInput
                             if (isset($value['to_interval'])) {
                                 $DT->add($value['to_interval']);
                             } else {
-                                $DT->add(new DateInterval('P1D'));
+                                switch ($type) {
+                                    case 'time_range':
+                                        $DT->add(new DateInterval('PT1H'));
+                                        break;
+
+                                    case 'date_range':
+                                    case 'datetime_range':
+                                        $DT->add(new DateInterval('P1D'));
+                                        break;
+                                }
                             }
                             $value['to'] = $DT->format($format);
                             unset($DT);
@@ -125,16 +185,59 @@ class BimpInput
 
                     $html .= '<div class="input-group">';
                     $html .= '<span class="input-group-addon">Du</span>';
-                    $html .= self::renderDatePickerInput($field_name . '_from', $value['from'], $options, $input_id.'_from');
+                    $html .= self::renderDatePickerInput($field_name . '_from', $value['from'], $options, $input_id . '_from', str_replace('_range', '', $type));
                     $html .= '</div>';
 
                     $html .= '<div class="input-group">';
                     $html .= '<span class="input-group-addon">Au</span>';
-                    $html .= self::renderDatePickerInput($field_name . '_to', $value['to'], $options, $input_id.'_to');
+                    $html .= self::renderDatePickerInput($field_name . '_to', $value['to'], $options, $input_id . '_to', str_replace('_range', '', $type));
                     $html .= '</div>';
                 } else {
-                    $html .= self::renderDatePickerInput($field_name, $value, $options);
+                    $html .= self::renderDatePickerInput($field_name, $value, $options, $input_id, $type);
                 }
+                break;
+
+            case 'timer':
+                if (is_null($value)) {
+                    $value = 0;
+                }
+                $timer = BimpTools::getTimeDataFromSeconds((int) $value);
+
+                $html .= '<div class="timer_input">';
+                $html .= '<input type="hidden" name="' . $field_name . '" id="' . $input_id . '" value="' . $value . '"/>';
+
+                $html .= '<input type="text" class="' . $field_name . '_time_value time_input_value" value="' . (int) $timer['days'] . '" name="' . $field_name . '_days"/>';
+                $html .= '<span>j</span>';
+
+                $html .= '<select name="' . $field_name . '_hours" class="' . $field_name . '_time_value time_input_value">';
+                for ($i = 0; $i < 24; $i++) {
+                    $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['hours']) ? ' selected' : '') . '>' . $i . '</option>';
+                }
+                $html .= '</select>';
+                $html .= '<span>h</span>';
+
+                $html .= '<select name="' . $field_name . '_minutes" class="' . $field_name . '_time_value time_input_value">';
+                for ($i = 0; $i < 60; $i++) {
+                    $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['minutes']) ? ' selected' : '') . '>' . $i . '</option>';
+                }
+                $html .= '</select>';
+                $html .= '<span>min</span>';
+
+                $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value">';
+                for ($i = 0; $i < 60; $i++) {
+                    $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
+                }
+                $html .= '</select>';
+                $html .= '<span>sec</span>';
+                $html .= '</div>';
+
+                $html .= '<script type="text/javascript">';
+                $html .= '$(\'.' . $field_name . '_time_value\').each(function() {';
+                $html .= '$(this).change(function() {';
+                $html .= 'updateTimerInput($(this), \'' . $field_name . '\');';
+                $html .= '});';
+                $html .= '});';
+                $html .= '</script>';
                 break;
 
             default:
@@ -144,31 +247,70 @@ class BimpInput
         return $html;
     }
 
-    public static function renderDatePickerInput($input_name, $value = '', $options = array(), $input_id = null)
+    public static function renderDatePickerInput($input_name, $value = '', $options = array(), $input_id = null, $type = "datetime")
     {
         if (is_null($input_id)) {
             $input_id = $input_name;
         }
 
-        if ($value) {
-            if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})?$/', $value)) {
-                $DT = new DateTime($value);
-                $value = $DT->format('d/m/Y H:i');
-            }
+        $display_js_format = '';
+        $js_format = '';
+        $php_format = '';
+        $dt_value = null;
+        switch ($type) {
+            case 'time':
+                $display_js_format = 'HH:mm:ss';
+                $js_format = 'HH:mm:ss';
+                $php_format = 'H:i:s';
+                if ($value) {
+                    if (preg_match('(\d{2}):(\d{2}):(\d{2})?$/', $value)) {
+                        $dt_value = new DateTime($value);
+                    }
+                }
+                break;
+
+            case 'date':
+                $display_js_format = 'Do MMMM YYYY';
+                $js_format = 'YYYY-MM-DD';
+                $php_format = 'Y-m-d';
+                if ($value) {
+                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})$/', $value)) {
+                        $dt_value = new DateTime($value);
+                    }
+                }
+                break;
+
+            case 'datetime':
+                $display_js_format = 'Do MMMM YYYY HH:mm:ss';
+                $js_format = 'YYYY-MM-DD HH:mm:ss';
+                $php_format = 'Y-m-d H:i:s';
+                if ($value) {
+                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})?$/', $value)) {
+                        $dt_value = new DateTime($value);
+                    }
+                }
+                break;
         }
         $html = '';
 
-        $html .= '<input type="hidden" class="datepicker_value" id="' . $input_id . '" name="' . $input_name . '" value="' . $value . '"/>';
+        $html .= '<input type="hidden" class="datepicker_value" id="' . $input_id . '" name="' . $input_name . '" value="';
+        if (!is_null($dt_value)) {
+            $html .= $dt_value->format($php_format);
+        }
+        $html .= '"/>';
         $html .= '<input type="text" class="form-control bs_datetimepicker" id="' . $input_id . '_bs_dt_picker" name="' . $input_name . '_picker"/>';
         $html .= '<script type="text/javascript">';
         $html .= "$('#" . $input_id . "_bs_dt_picker').datetimepicker({";
         $html .= "locale: 'fr',";
-        $html .= "format: 'Do MMMM YYYY HH:mm:ss',";
-        $html .= "showTodayButton: true,";
+        $html .= "format: '" . $display_js_format . "',";
+        if (!is_null($dt_value)) {
+            $html .= "defaultDate: '" . $dt_value->format($php_format) . "',";
+        }
+        $html .= "showTodayButton: " . (isset($options['display_now']) && $options['display_now'] ? "true" : "false") . ",";
         $html .= "}); ";
         $html .= "$('#" . $input_id . "_bs_dt_picker').on('dp.change', function(e) {";
         $html .= "if (e.date) {";
-        $html .= "$('#" . $input_id . "').val(e.date.format('YYYY-MM-DD HH:mm:ss')).change();";
+        $html .= "$('#" . $input_id . "').val(e.date.format('" . $js_format . "')).change();";
         $html .= "} else {";
         $html .= "$('#" . $input_id . "').val('').change();";
         $html .= "}";
@@ -286,7 +428,7 @@ class BimpInput
                     $fields_search = implode(',', $fields_search);
                 }
                 $html .= '<input type="hidden" name="' . $field_name . '" value="' . $value . '"/>';
-                $html .= '<input type="text" class="search_list_input" value="' . $search . '" onkeyup="searchObjectList($(this));"';
+                $html .= '<input type="text" name="' . $field_name . '_search" class="search_list_input" value="' . $search . '" onkeyup="searchObjectList($(this));"';
                 $html .= ' data-table="' . $table . '"';
                 $html .= ' data-join="' . $join . '"';
                 $html .= ' data-join_on="' . $join_on . '"';
@@ -299,6 +441,59 @@ class BimpInput
                 $html .= '<div class="search_input_results"></div>';
             }
         }
+        return $html;
+    }
+
+    public static function renderMultipleValuesList($field_name, $values, $label_input_name = null)
+    {
+        if (!is_array($values)) {
+            $value = $values;
+            $values = array();
+            if (is_string($value)) {
+                $items = explode(',', $value);
+                foreach ($items as $item) {
+                    $values[$item] = $item;
+                }
+            } else {
+                $values[$value] = $value;
+            }
+        }
+
+        $value_input_name = $field_name . '_add_value';
+        if (is_null($label_input_name)) {
+            $label_input_name = $value_input_name;
+        }
+
+        $html .= '<div class="inputMultipleValuesContainer">';
+
+        $html .= '<div style="text-align: right">';
+        $html .= '<button type="button" class="addValueBtn btn btn-primary" onclick="addMultipleInputCurrentValue($(this), \'' . $value_input_name . '\', \'' . $label_input_name . '\')">';
+        $html .= '<i class="fa fa-plus-circle iconLeft"></i>';
+        $html .= 'Ajouter';
+        $html .= '</button>';
+        $html .= '</div>';
+
+        $html .= '<div class="inputMultipleValues">';
+        $html .= '<table>';
+        $html .= '<thead></thead>';
+        $html .= '<tbody>';
+        foreach ($values as $value => $label) {
+            $html .= '<tr>';
+            $html .= '<td style="display: none">';
+            $html .= '<input type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
+            $html .= '</td>';
+            $html .= '<td>' . $label . '</td>';
+            $html .= '<td><button type="button" class="btn btn-light-danger iconBtn"';
+            $html .= ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();"';
+            $html .= '><i class="fa fa-trash"></i></button></td>';
+            $html .= '</tr>';
+        }
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+
+        $html .= '</div>';
+
         return $html;
     }
 }

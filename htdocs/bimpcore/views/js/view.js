@@ -6,6 +6,10 @@ function reloadObjectView(view_id) {
         return;
     }
 
+    if ($view.hasClass('no_reload')) {
+        return;
+    }
+
     var data = {
         'module_name': $view.data('module_name'),
         'object_name': $view.data('object_name'),
@@ -17,7 +21,7 @@ function reloadObjectView(view_id) {
     bimp_json_ajax('loadObjectView', data, null, function (result) {
         if (typeof (result.html) !== 'undefined') {
             if (result.html) {
-                $view.find('#' + view_id + '_panel').find('.panel-body').stop().fadeOut(250, function () {
+                $view.find('.object_view_content').stop().fadeOut(250, function () {
                     $(this).html(result.html);
                     $(this).fadeIn(250);
                 });
@@ -31,7 +35,86 @@ function loadModalFormFromView(view_id, form_name, $button) {
     if (!$view.length) {
         return;
     }
-    loadModalForm(view_id + '_modal', $button, $view.data('module_name'), $view.data('object_name'), form_name, $view.data('id_object'));
+    loadModalForm($button, $view.data('module_name'), $view.data('object_name'), form_name, $view.data('id_object'));
+}
+
+function loadModalView(view_id, view_name, $button) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+    
+    $button.addClass('disabled');
+    
+    var $view = $('#'+view_id);
+    if (!$view.length) {
+        return;
+    }
+    
+    var id_object = $view.data('id_object');
+    var object_name = $view.data('object_name');
+    
+    var $modal = $('#page_modal');
+    var $resultContainer = $modal.find('.modal-ajax-content');
+    $resultContainer.html('').hide();
+
+    var title = '';
+
+    if (id_object) {
+        title = '<i class="fa fa-file-o iconLeft"></i>';
+        if (typeof (object_labels[object_name].name) !== 'undefined') {
+            title += object_labels[object_name].name;
+        } else {
+            title += 'Objet "' + object_name + '"';
+        }
+        title += ' n°' + id_object;
+    }
+
+    $modal.find('.modal-title').html(title);
+    $modal.find('.loading-text').text('Chargement');
+    $modal.find('.content-loading').show();
+    $modal.modal('show');
+
+    var isCancelled = false;
+
+    $modal.on('hide.bs.modal', function (e) {
+        $modal.find('.extra_button').remove();
+        $modal.find('.content-loading').hide();
+        isCancelled = true;
+        $button.removeClass('disabled');
+    });
+
+    var data = {
+        'object_module': $view.data('module'),
+        'object_name': object_name,
+        'view_name': view_name,
+        'id_object': id_object,
+        'content_only': 1
+    };
+
+    bimp_json_ajax('loadObjectView', data, null, function (result) {
+        $modal.find('.content-loading').hide();
+        if (!isCancelled) {
+            if (!bimp_display_result_errors(result, $resultContainer)) {
+                if (typeof (result.html) !== 'undefined') {
+                    $resultContainer.html(result.html).slideDown(250);
+                    var $new_view = $resultContainer.find('.objectView');
+                    if ($new_view.length) {
+                        $new_view.each(function () {
+                            onViewLoaded($new_view);
+                        });
+                    }
+                }
+            }
+            $modal.modal('handleUpdate');
+        }
+
+    }, function (result) {
+        $modal.find('.content-loading').hide();
+        if (!bimp_display_result_errors(result, $resultContainer)) {
+            bimp_display_msg('Echec du chargement du contenu', $resultContainer, 'danger');
+        }
+        $modal.modal('handleUpdate');
+    });
 }
 
 function deleteObjectFromView(view_id, $button) {
@@ -102,6 +185,30 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
             }
         }
     }, null, false);
+}
+
+function loadModalObjectPage($button, url, modal_id, title) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var $modal = $('#' + modal_id);
+    var $resultContainer = $modal.find('.modal-ajax-content');
+    $resultContainer.html('').hide();
+
+    $modal.find('.modal-title').html(title);
+    $modal.modal('show');
+
+    $modal.on('hide.bs.modal', function (e) {
+        $modal.find('.extra_button').remove();
+        $modal.find('.content-loading').hide();
+        $button.removeClass('disabled');
+    });
+
+    var html = '<div style="overflow: hidden"><iframe frameborder="0" style="margin-top: -52px" src="' + url + '" width="100%" height="800px"></iframe></div>';
+    $resultContainer.html(html).slideDown(250);
 }
 
 // Gestion des événements

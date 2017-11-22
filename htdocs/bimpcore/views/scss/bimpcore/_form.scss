@@ -18,18 +18,18 @@
         vertical-align: middle;
     }
 
-    .inputContainer {
+    .fieldRowInput {
         color: $secondary;
         background-color: #fff;
         border-bottom: 1px solid $gray_light;
 
-        input {
-            width: 100%;
-            max-width: 350px;
-        }
-        textarea {
-            width: 100%;
-            max-width: 450px;
+        .inputContainer {            
+            input {
+                width: 350px;
+            }
+            textarea {
+                width: 450px;
+            }
         }
     }
 }
@@ -91,6 +91,18 @@
 }
 
 /*Inputs*/
+.auto_expand {
+    overflow: hidden;
+}
+
+.object_view_content textarea.note,
+.objectlistTable textarea.note {
+    background-color: #FFFFE1;
+    border-color: #FFFFE1;
+    padding: 6px 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 2px #787878;
+}
 
 select.switch {
     width: 75px;
@@ -133,7 +145,16 @@ select.switch {
         border-color: $primary!important;
     }
 }
-
+.timer_input {
+    input, select {
+        width: 45px!important;
+    }
+    span {
+        display: inline-block;
+        font-weight: bold!important;
+        margin: 8px;
+    }
+}
 .optionsContainer {
     text-align: right;
 
@@ -154,7 +175,7 @@ select.switch {
         &:hover {
             color: #fff;
             background-color: $primary;
-            
+
             &:before {
                 color: #fff;
             }
@@ -166,6 +187,15 @@ select.switch {
             font-family: 'FontAwesome';
             content: '\f013';
             margin-right: 8px;
+        }
+    }
+}
+.inputMultipleValues {
+    table tbody tr {
+        border: 1px solid $gray;
+
+        td {
+            padding: 6px 12px;
         }
     }
 }

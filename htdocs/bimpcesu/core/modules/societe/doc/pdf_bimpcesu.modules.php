@@ -991,10 +991,10 @@ class pdf_bimpcesu extends ModeleBimpcesu
           }
           //$db->free($resql);
       
-      
-            $total = array_sum ($array_total); // Inconnu pour le moment     
+           
+            $total = array_sum ($array_total); // Montant total facture     
             
-            $totalcesu = array_sum ($array_total_cesu); // Inconnu pour le moment       
+            $totalcesu = array_sum ($array_total_cesu); // Montant total CESU       
             
             $npref = "Error"; // Inconnu pour le moment
             $diri = "Christian CONSTANTIN BERTIN";
@@ -1185,14 +1185,14 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
                         $pdf->MultiCell(600, 3, "$bene", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+45); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$beneadd Error", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->MultiCell(100, 3, "$beneadd", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+50); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$benezip Error - $beneville Error", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(100, 3, "$benezip - $beneville", 0, 'L'); // imprime du texte
                         
                         // LIGNES DATE
                         $pdf->SetXY($posx+150,$posy+60); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
-                        $pdf->MultiCell(100, 3, "Lieu, le $date02$date03", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(100, 3, "$orgaville, le $date02$date03", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 1
                         $pdf->SetXY($posx+2,$posy+70); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR

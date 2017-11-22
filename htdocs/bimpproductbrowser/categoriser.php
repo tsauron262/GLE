@@ -29,9 +29,12 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+///bimpcore/views/css/bimpcore_bootstrap.css
+///bimpcore/views/js/bootstrap.min.js
 
 $arrayofjs = array('/bimpproductbrowser/js/ajax.js');
-
+$arrayofcss = array('/bimpproductbrowser/css/modProductBrowser.css');
+        
 $langs->load("companies");
 
 $id = GETPOST('id', 'int');
@@ -82,8 +85,7 @@ if (GETPOST("type") == '1' || ($object->type == Product::TYPE_SERVICE)) {
     $helpurl = 'EN:Module_Services_En|FR:Module_Services|ES:M&oacute;dulo_Servicios';
 }
 
-llxHeader('', 'Catégoriser', $help_url, '', 0, 0, $arrayofjs, '');
-// llxHeader('','Recherche Filtrée','','',0,0,$arrayofjs,$arrayofcss);
+llxHeader('', 'Catégoriser', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
 if ($id > 0 || !empty($ref)) {
     /*
@@ -113,8 +115,6 @@ if ($id > 0 || !empty($ref)) {
     //if ($action == 'editnote_public') $cssclass='titlefieldcreate';
     //if ($action == 'editnote_private') $cssclass='titlefieldcreate';
     //print '<div class="fichecenter">';
-
-    print '<div class="underbanner clearboth"></div>';
 
     dol_fiche_end();
 }

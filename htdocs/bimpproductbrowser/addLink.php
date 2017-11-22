@@ -37,7 +37,8 @@ switch (GETPOST('action'))
 {
 	case 'filldb':
 	{
-		$pb->changeRestrictions(GETPOST('checked'));
+		$objOut = $pb->changeRestrictions(GETPOST('checked'));
+                echo json_encode($objOut);
 		break;
 	}
     default: break;

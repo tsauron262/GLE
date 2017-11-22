@@ -140,18 +140,22 @@ class ProductBrowser extends CommonObject {
     }
 
     function changeRestrictions($checkboxs) {
+        $cntInsertion = 0;
+        $cntDeletion = 0;
         for ($i = 0; $i < sizeof($checkboxs); $i++) {
-            echo '$i = ' . $i . ' = ' . $checkboxs[$i]['id'] . ' = ' . $checkboxs[$i]['val'] . "\n";
             $id_f = $checkboxs[$i]['id'];
             $val1 = $checkboxs[$i]['val'];
             if ($val1 == 'true' and $this->id != $id_f and ! in_array($id_f, $this->id_childs)) {
-                echo "Insertion\n";
                 $this->insertRow($this->id, $id_f);
+                ++$cntInsertion;
             } elseif ($val1 == 'false' and in_array($id_f, $this->id_childs)) {
-                echo "Délétion\n";
                 $this->deleteRow($this->id, $id_f);
+                ++$cntDeletion;
             }
         }
+        $objOut->insertion = $cntInsertion;
+        $objOut->deletion  = $cntDeletion;
+        return  $objOut;
     }
 
     function print_spaces($depth) {

@@ -3,7 +3,11 @@ $(function () {
 });
 
 $(document).on('change', '.drop', function () {
-    searchCateg($(this).val(), $(this).attr('id'), $(this).attr('name'));
+    if($(this).val() !== '0')
+        searchCateg($(this).val(), $(this).attr('id'), $(this).attr('name'));
+    else
+        deleteNextDropDown($(this).attr('id'));
+
 });
 
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -38,7 +42,10 @@ function searchCateg(id_categ, id_drop_down) {
         success: function ($objOut) {
             obj = JSON.parse($objOut);
             deleteNextDropDown(id_drop_down);
-            addNextDropDown(++id_drop_down, obj);
+            if(obj.tabIdChild.length !== 0)
+                addNextDropDown(++id_drop_down, obj);
+            else
+                addEnd(++id_drop_down);
         }
     });
 }
@@ -49,6 +56,7 @@ function deleteNextDropDown(id_drop_down) {
 }
 
 function addNextDropDown(id_drop_down, obj) {
+    place_for_arrow = "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
     var select = $('<select></select>')
             .attr("id", id_drop_down)
             .attr("class", "drop")
@@ -58,14 +66,27 @@ function addNextDropDown(id_drop_down, obj) {
     $('#' + id_drop_down)
             .append($("<option></option>")
                     .attr("value", 0)
-                    .text("Choisir catégorie"));
+                    .text("Choisir" + place_for_arrow));
 
     for (i = 0; i < obj.tabIdChild.length; i++) {
         $('#' + id_drop_down)
                 .append($("<option></option>")
                         .attr("value", obj.tabIdChild[i])
                         .attr("name", i + 1)
-                        .text(obj.tabNameChild[i]));
+                        .text(obj.tabNameChild[i] + place_for_arrow));
 
     }
+}
+
+function addEnd(id_drop_down) {
+    var select = $('<select></select>')
+            .attr("id", id_drop_down)
+            .attr("class", "unselectable")
+            .attr("name", "fin")
+            .appendTo('.fiche');
+    
+        $('#' + id_drop_down)
+            .append($("<option></option>")
+                    .attr("value", 0)
+                    .text("FIN"));
 }

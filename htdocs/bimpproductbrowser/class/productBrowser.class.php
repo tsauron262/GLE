@@ -154,8 +154,8 @@ class ProductBrowser extends CommonObject {
             }
         }
         $objOut->insertion = $cntInsertion;
-        $objOut->deletion  = $cntDeletion;
-        return  $objOut;
+        $objOut->deletion = $cntDeletion;
+        return $objOut;
     }
 
     function print_spaces($depth) {
@@ -172,7 +172,7 @@ class ProductBrowser extends CommonObject {
                 $child->print_spaces($depth + 1);
                 print $child->id . '<br>';
             } else {
-                $child->toString(++$depth);
+                $child->toString( ++$depth);
             }
         }
     }
@@ -182,17 +182,14 @@ class ProductBrowser extends CommonObject {
     function getChildCategory($id) {
         $this->fetch($id);
         $objOut = null;
-        $currentCateg = new Categorie($this->db);
-        $currentCateg->fetch($id);
-        $tabCateg = $currentCateg->get_filles();
         $objOut->tabIdChild = array();
         $objOut->tabNameChild = array();
-        $objOut->id = $currentCateg->id;
-        foreach ($tabCateg as $categ) {
-            if (in_array($categ->id, $this->id_childs)){
-                array_push($objOut->tabIdChild, $categ->id);
-                array_push($objOut->tabNameChild, $categ->label);
-            }
+        $objOut->id = $id;
+        foreach ($this->id_childs as $id_child) {
+            $childCat = new Categorie($this->db);
+            $childCat->fetch($id_child);
+            array_push($objOut->tabIdChild, $id_child);
+            array_push($objOut->tabNameChild, $childCat->label);
         }
         return $objOut;
     }

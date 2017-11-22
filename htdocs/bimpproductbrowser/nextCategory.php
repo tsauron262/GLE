@@ -35,16 +35,17 @@ $id = GETPOST('id_prod');
 
 switch (GETPOST('action')) {
     case 'searchCategory': {
+            $pb = new ProductBrowser($db);
+
             if (GETPOST('id_categ')) {
-                $pb = new ProductBrowser($db);
                 $objOut = $pb->getChildCategory(GETPOST('id_categ'));
-                echo json_encode($objOut);
-            } else {
+            } else {        // TODO ! find how to get root restrictions (init in module ?)
                 $objOut->id = 0;
                 $objOut->tabIdChild = array(183, 193);
                 $objOut->tabNameChild = array("Iphone", "Mac");
-                echo json_encode($objOut);
             }
+            echo json_encode($objOut);
+
             break;
         }
     default: break;

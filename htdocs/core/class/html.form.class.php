@@ -1085,6 +1085,10 @@ class Form
         	{
         		$sql .= " OR s.barcode LIKE '".$this->db->escape($filterkey)."%'";
         	}
+                /*moddrsi pour recherche SIREN/SIRET*/
+        		$sql .= " OR s.siren LIKE '".str_replace(" ", "", $this->db->escape($filterkey))."%'";
+        		$sql .= " OR s.siret LIKE '".str_replace(" ", "", $this->db->escape($filterkey))."%'";
+                        /*fmod drsi*/
         	$sql.=")";
         }
         $sql.=$this->db->order("nom","ASC");

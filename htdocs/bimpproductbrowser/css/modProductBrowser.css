@@ -23,9 +23,27 @@ select {
     height: 32px;
     pointer-events: none;
     cursor: default;
-   -moz-user-select: none;
-   -khtml-user-select: none;
-   -webkit-user-select: none;
-   -ms-user-select: none;
-   user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.arr {
+    border-width:3px; 
+    border-style:solid; 
+    border-color:black;
+    width:auto;
+}
+
+.line {
+    height:30px;    
+}
+
+.cell { 
+    border-width:3px;
+    border-style:solid; 
+    border-color:black;
+    width:auto;
 }

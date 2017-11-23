@@ -29,11 +29,9 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-///bimpcore/views/css/bimpcore_bootstrap.css
-///bimpcore/views/js/bootstrap.min.js
 
-$arrayofjs = array('/bimpproductbrowser/js/ajax.js');
-$arrayofcss = array('/bimpproductbrowser/css/modProductBrowser.css');
+$arrayofjs = array('/bimpproductbrowser/js/ajax.js');//, 'bimpcore/views/js/bootstrap.min.js');
+$arrayofcss = array('/bimpproductbrowser/css/modProductBrowser.css');//, 'bimpcore/views/css/bimpcore_bootstrap.css');
         
 $langs->load("companies");
 

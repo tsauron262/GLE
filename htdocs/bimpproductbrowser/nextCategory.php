@@ -38,11 +38,9 @@ switch (GETPOST('action')) {
             $pb = new ProductBrowser($db);
 
             if (GETPOST('id_categ')) {
-                $objOut = $pb->getChildCategory(GETPOST('id_categ'));
-            } else {        // TODO ! find how to get root restrictions (init in module ?)
-                $objOut->id = 0;
-                $objOut->tabIdChild = array(183, 193);
-                $objOut->tabNameChild = array("Iphone", "Mac");
+                $objOut = $pb->getNextCategory(GETPOST('id_categ'));
+            } else {
+                $objOut = $pb->getNextCategory(0);
             }
             echo json_encode($objOut);
 

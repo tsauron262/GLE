@@ -1,3 +1,5 @@
+/* global DOL_URL_ROOT */
+
 $(document).ready(function()
 	{
 		var cb;
@@ -41,7 +43,7 @@ $(document).ready(function()
                                 showalert("<strong>Succès !</strong> Vous avez supprimé " + obj.deletion 
                                         + " restriction"  + multipleDeletion + ".<br>Raffraichissez la page pour observer le changement.", 'no_error');
                             } else {
-                                showalert("<strong>Attention !</strong> Aucune modification n'a été prise en compte, vérifiez de bien avoir cocher et/ou décocher des cases", 'error');
+                                showalert("<strong>Attention !</strong> Aucune modification n'a été prise en compte, vérifiez de bien avoir coché et/ou décoché au moins une case", 'error');
                             }
 			},	
 			error: function() {

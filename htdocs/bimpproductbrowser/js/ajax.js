@@ -1,10 +1,24 @@
+/* global DOL_URL_ROOT */
+
+var arrIdCell = []; // the working id, each row correspond to a line
+place_for_arrow = "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+
 $(function () {
-    searchCateg(null, 0);
+    arrIdCell[0] = 0;
+    $('<table></table>')
+            .attr("id", 'invisibleTable')
+            .attr("class", "arr")
+            .appendTo('.fiche');
+    $('<tr></tr>')
+            .attr("id", 'a')
+            .attr("class", "line")
+            .appendTo('table.arr');
+    searchCateg(0, 0, 0);
 });
 
 $(document).on('change', '.drop', function () {
-    if($(this).val() !== '0')
-        searchCateg($(this).val(), $(this).attr('id'), $(this).attr('name'));
+    if ($(this).val() !== '0')
+        searchCateg($(this).val(), $(this).attr('id'));
     else
         deleteNextDropDown($(this).attr('id'));
 
@@ -42,12 +56,26 @@ function searchCateg(id_categ, id_drop_down) {
         success: function ($objOut) {
             obj = JSON.parse($objOut);
             deleteNextDropDown(id_drop_down);
-            if(obj.tabIdChild.length !== 0)
-                addNextDropDown(++id_drop_down, obj);
-            else
-                addEnd(++id_drop_down);
+            id_drop_down += 1;
+            setArrIdCell(id_drop_down);
+            if (obj.tabRestr.length === 0)
+                addEnd(id_drop_down);
+            else {
+                for (i = 0; i < obj.tabRestr.length; i++)
+                    addNextDropDown(id_drop_down, i, obj);
+
+            }
+
         }
     });
+}
+
+function setArrIdCell(id) {
+    line = 0;
+    for (i = 0; i < 10000; i += 100, line++) {
+        if (i <= id && id <= i + 100)
+            arrIdCell[line] = id;
+    }
 }
 
 function deleteNextDropDown(id_drop_down) {
@@ -55,38 +83,49 @@ function deleteNextDropDown(id_drop_down) {
 
 }
 
-function addNextDropDown(id_drop_down, obj) {
-    place_for_arrow = "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
-    var select = $('<select></select>')
+function addNextDropDown(id_drop_down, id_restr, obj) {
+    alert(id_drop_down+"\n"+id_restr+"\n"+obj);
+    $('<td></td>')
+            .attr("id", 999)
+            .attr("class", "cell")
+            .text("WOOOOOOOOOOOOOOOOOOOOO")
+            .appendTo('tr.line' + id_drop_down);
+
+
+
+/*    $('<select></select>')
             .attr("id", id_drop_down)
             .attr("class", "drop")
-            .attr("name", "ok")
-            .appendTo('.fiche');
+            .appendTo('td#' + id_drop_down);
 
-    $('#' + id_drop_down)
+    $('select#' + id_drop_down)
             .append($("<option></option>")
-                    .attr("value", 0)
-                    .text("Choisir" + place_for_arrow));
+                    .attr("disabled", "disabled")
+                    .text(obj.tabRestr[id_restr].label + place_for_arrow));
 
-    for (i = 0; i < obj.tabIdChild.length; i++) {
-        $('#' + id_drop_down)
+    for (i = 0; i < obj.tabRestr[id_restr].tabIdChild.length; i++) {
+        $(select'#' + id_drop_down)
                 .append($("<option></option>")
-                        .attr("value", obj.tabIdChild[i])
-                        .attr("name", i + 1)
-                        .text(obj.tabNameChild[i] + place_for_arrow));
-
-    }
+                        .attr("value", obj.tabRestr[id_restr].tabIdChild[i])
+                        .text(obj.tabRestr[id_restr].tabNameChild[i] + place_for_arrow));
+    }*/
 }
 
 function addEnd(id_drop_down) {
     var select = $('<select></select>')
             .attr("id", id_drop_down)
             .attr("class", "unselectable")
-            .attr("name", "fin")
             .appendTo('.fiche');
-    
-        $('#' + id_drop_down)
+
+    $('#' + id_drop_down)
             .append($("<option></option>")
                     .attr("value", 0)
                     .text("FIN"));
+
+//    var end = $('<button></button>')
+//            .attr("type", "button")
+//            .attr("class", "btn-primary")
+//            .text("FIN")
+//            .appendTo('.fiche');
+
 }

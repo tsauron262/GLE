@@ -172,24 +172,30 @@ class ProductBrowser extends CommonObject {
                 $child->print_spaces($depth + 1);
                 print $child->id . '<br>';
             } else {
-                $child->toString( ++$depth);
+                $child->toString(++$depth);
             }
         }
     }
 
     /* @var $id type */
 
-    function getChildCategory($id) {
+    function getNextCategory($id) {
         $this->fetch($id);
-        $objOut = null;
-        $objOut->tabIdChild = array();
-        $objOut->tabNameChild = array();
-        $objOut->id = $id;
-        foreach ($this->id_childs as $id_child) {
-            $childCat = new Categorie($this->db);
-            $childCat->fetch($id_child);
-            array_push($objOut->tabIdChild, $id_child);
-            array_push($objOut->tabNameChild, $childCat->label);
+        $objOut->tabRestr = array();
+        for ($i = 0; $i < count($this->id_childs); $i++) {
+            $currentCat = new Categorie($this->db);
+            $currentCat->fetch($this->id_childs[$i]);
+            $objOut->tabRestr[$i]->label = $currentCat->label;
+            $objOut->tabRestr[$i]->tabIdChild = array();
+            $objOut->tabRestr[$i]->tabNameChild = array();
+
+
+//            TODO remplacer par $currentCat->cats si possible (éviter requête SQL) 
+            $arrChildCat = $currentCat->get_filles();
+            for ($j = 0; $j < count($arrChildCat); $j++) {
+                $objOut->tabRestr[$i]->tabIdChild[$j] = $arrChildCat[$j]->id;
+                $objOut->tabRestr[$i]->tabNameChild[$j] = $arrChildCat[$j]->label;
+            }
         }
         return $objOut;
     }

@@ -126,6 +126,8 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
         $echo .= "Renseignez l'état de la sauvegarde";
     elseif (!isset($_POST['Etat']) || $_POST['Etat'] == "")
         $echo .= "Renseignez l'état de la machine";
+    elseif (isset($_POST['acompte']) && $_POST['acompte'] > 0 && (!isset($_POST['paiementtype']) || $_POST['paiementtype'] < 1))
+        $echo .= "Choisir type de paiement";
     else {
         $chronoProd = new Chrono($db);
 

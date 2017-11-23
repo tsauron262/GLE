@@ -21,7 +21,7 @@ class BimpObject
 
     public static function getInstance($module, $object_name)
     {
-        $file = DOL_DOCUMENT_ROOT . $module . '/objects/' . $object_name . '.class.php';
+        $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
         if (file_exists($file)) {
             if (!class_exists($object_name)) {
                 require_once $file;
@@ -48,7 +48,7 @@ class BimpObject
         }
 
         if (!class_exists($className)) {
-            $file_path = DOL_DOCUMENT_ROOT . $module . '/class/' . $file . '.class.php';
+            $file_path = DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php';
             if (file_exists($file_path)) {
                 require_once $file_path;
             }

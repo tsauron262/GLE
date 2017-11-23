@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 
 //echo '<input type="hidden" id="begin_time" value="'.date('H:i:s').'"/>';
 
-require_once DOL_DOCUMENT_ROOT . 'bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $controller = BimpController::getInstance('bimphotline');
 $controller->display();
 

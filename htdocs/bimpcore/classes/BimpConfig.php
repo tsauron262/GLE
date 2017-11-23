@@ -294,7 +294,7 @@ class BimpConfig
                 }
                 if (!is_null($module) && !is_null($file) && !is_null($className)) {
                     if (!class_exists($className)) {
-                        $file_path = DOL_DOCUMENT_ROOT . $module . '/class/' . $file . '.class.php';
+                        $file_path = DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php';
                         if (file_exists($file_path)) {
                             require_once $file_path;
                         }
@@ -323,7 +323,7 @@ class BimpConfig
                     }
 
                     if (file_exists($class_path)) {
-                        require_once DOL_DOCUMENT_ROOT . $class_path;
+                        require_once DOL_DOCUMENT_ROOT . '/' . $class_path;
                     }
 
                     if (!class_exists($class_name)) {

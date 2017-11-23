@@ -36,7 +36,7 @@ class BimpTools
         if (is_a($object, 'Societe')) {
             $primary = 'socid';
         }
-        if (file_exists(DOL_DOCUMENT_ROOT . $file)) {
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
             return DOL_URL_ROOT . '/' . $file . (isset($object->id) && $object->id ? '?' . $primary . '=' . $object->id : '');
         }
         return '';

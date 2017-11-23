@@ -13,7 +13,7 @@ class BimpController
 
     public static function getInstance($module)
     {
-        $dir = DOL_DOCUMENT_ROOT . $module . '/';
+        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/';
         $controller = BimpTools::getValue('fc', 'index');
         $controllerClass = $controller . 'Controller';
 
@@ -31,7 +31,7 @@ class BimpController
         $this->module = $module;
         $this->controller = $controller;
 
-        $dir = DOL_DOCUMENT_ROOT . $module . '/controllers/';
+        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         $this->current_tab = BimpTools::getValue('tab', 'default');
 

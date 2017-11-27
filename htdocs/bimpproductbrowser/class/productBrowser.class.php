@@ -28,6 +28,7 @@
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobjectline.class.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class ProductBrowser extends CommonObject {
 
@@ -172,7 +173,7 @@ class ProductBrowser extends CommonObject {
                 $child->print_spaces($depth + 1);
                 print $child->id . '<br>';
             } else {
-                $child->toString(++$depth);
+                $child->toString( ++$depth);
             }
         }
     }
@@ -180,11 +181,13 @@ class ProductBrowser extends CommonObject {
     /* @var $id type */
 
     function getNextCategory($id) {
+        $objOut = null;
         $this->fetch($id);
         $objOut->tabRestr = array();
         for ($i = 0; $i < count($this->id_childs); $i++) {
             $currentCat = new Categorie($this->db);
             $currentCat->fetch($this->id_childs[$i]);
+            $objOut->tabRestr[$i]->idParent = $id;
             $objOut->tabRestr[$i]->label = $currentCat->label;
             $objOut->tabRestr[$i]->tabIdChild = array();
             $objOut->tabRestr[$i]->tabNameChild = array();
@@ -198,6 +201,48 @@ class ProductBrowser extends CommonObject {
             }
         }
         return $objOut;
+    }
+
+    function addProdToCat($id_prod, $id_categ) {
+        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'categorie_product (fk_categorie, fk_product)';
+        $sql.= 'VALUES (' . $id_categ . ',' . $id_prod . ')';
+        try {
+            $this->db->query($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            echo 'ERROR:' . $e->getMessage();
+            $this->db->rollback();
+        }
+    }
+
+    function deleteProdCateg($id_prod) {
+        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'categorie_product ';
+        $sql.= 'WHERE fk_product =' . $id_prod;
+        try {
+            $this->db->query($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            echo 'ERROR:' . $e->getMessage();
+            $this->db->rollback();
+        }
+    }
+
+    //            $pb->deleteSomecateg(GETPOST('id_prod'), GETPOST('id_cat_out'));
+
+    function deleteSomecateg($id_prod, $id_cat_out) {
+
+        foreach ($id_cat_out as $id_cat) {
+            $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'categorie_product';
+            $sql.= ' WHERE fk_product =' . $id_prod . ' AND';
+            $sql.= ' fk_categorie=' . $id_cat ;
+            try {
+                $this->db->query($sql);
+                $this->db->commit();
+            } catch (Exception $e) {
+                echo 'ERROR:' . $e->getMessage();
+                $this->db->rollback();
+            }
+        }
     }
 
 }

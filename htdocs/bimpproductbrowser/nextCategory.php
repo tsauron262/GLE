@@ -28,27 +28,30 @@
  */
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpproductbrowser/class/productBrowser.class.php';
-
-$id = GETPOST('id_prod');
+$pb = new ProductBrowser($db);
 
 //$pb->fetch($id);
 
 switch (GETPOST('action')) {
-    case 'searchCategory': {
-            $pb = new ProductBrowser($db);
-
-            if (GETPOST('id_categ')) {
-                $objOut = $pb->getNextCategory(GETPOST('id_categ'));
-            } else {
-                $objOut = $pb->getNextCategory(0);
-            }
-            echo json_encode($objOut);
-
+    case 'delAll': {
+            $pb->deleteProdCateg(GETPOST('id_prod'));
             break;
         }
+    case 'searchCategory': {
+            $objOut = $pb->getNextCategory(GETPOST('id_categ'));
+            echo json_encode($objOut);
+            break;
+        }
+    case 'addCategory': {
+            $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'));
+            break;
+        }
+    case 'delSomeCateg': {
+            $pb->deleteSomecateg(GETPOST('id_prod'), GETPOST('id_cat_out'));
+        }
     default: break;
+//        setCategories($categories)
 }
-
 
 $db->close();
 

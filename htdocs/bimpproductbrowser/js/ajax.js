@@ -1,45 +1,67 @@
 /* global DOL_URL_ROOT */
+var objs = [];
+var cnt = 0;
+var cntRestr = [];
+var catArr = [];
 
-var arrIdCell = []; // the working id, each row correspond to a line
-place_for_arrow = "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+function deleteAllCateg() {
+    id_prod = getUrlParameter('id');
 
-$(function () {
-    arrIdCell[0] = 0;
-    $('<table></table>')
-            .attr("id", 'invisibleTable')
-            .attr("class", "arr")
-            .appendTo('.fiche');
-    $('<tr></tr>')
-            .attr("id", 'a')
-            .attr("class", "line")
-            .appendTo('table.arr');
-    searchCateg(0, 0, 0);
-});
-
-$(document).on('change', '.drop', function () {
-    if ($(this).val() !== '0')
-        searchCateg($(this).val(), $(this).attr('id'));
-    else
-        deleteNextDropDown($(this).attr('id'));
-
-});
-
-var getUrlParameter = function getUrlParameter(sParam) {
-    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-            sURLVariables = sPageURL.split('&'),
-            sParameterName,
-            i;
-
-    for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : sParameterName[1];
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
+        data: {
+            id_prod: id_prod,
+            action: 'delAll'
+        },
+        error: function () {
+            alert("Error");
         }
-    }
-};
+    });
+}
 
-function searchCateg(id_categ, id_drop_down) {
+function deleteCateg(catOut) {
+    id_prod = getUrlParameter('id');
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
+        data: {
+            id_prod: id_prod,
+            id_cat_out: catOut,
+            action: 'delSomeCateg'
+        },
+        error: function () {
+            alert("Error");
+        }
+    });
+}
+
+function addRestr(id_categ) {
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
+        data: {
+            id_categ: id_categ,
+            action: 'searchCategory'
+        },
+        async: false,
+        error: function () {
+            alert("Error");
+        },
+        success: function (objOut) {
+            obj = JSON.parse(objOut);
+            cntRestr[cnt] = 0;
+            for (i = 0; i < obj.tabRestr.length; i++) {
+                objs.push(obj.tabRestr[i]);
+                cntRestr[cnt]++;
+            }
+        }
+    });
+}
+
+function addCatInProd(id_categ) {
     id_prod = getUrlParameter('id');
 
     $.ajax({
@@ -48,84 +70,99 @@ function searchCateg(id_categ, id_drop_down) {
         data: {
             id_prod: id_prod,
             id_categ: id_categ,
-            action: 'searchCategory'
+            action: 'addCategory'
         },
         error: function () {
             alert("Error");
-        },
-        success: function ($objOut) {
-            obj = JSON.parse($objOut);
-            deleteNextDropDown(id_drop_down);
-            id_drop_down += 1;
-            setArrIdCell(id_drop_down);
-            if (obj.tabRestr.length === 0)
-                addEnd(id_drop_down);
-            else {
-                for (i = 0; i < obj.tabRestr.length; i++)
-                    addNextDropDown(id_drop_down, i, obj);
-
-            }
-
         }
     });
 }
 
-function setArrIdCell(id) {
-    line = 0;
-    for (i = 0; i < 10000; i += 100, line++) {
-        if (i <= id && id <= i + 100)
-            arrIdCell[line] = id;
+$(document).ready(function () {
+
+    $('<div id="navContainer" class="customBody"></div>').appendTo('.fiche');
+    $('<div class="underbanner clearboth"><div>').appendTo('.fiche');
+    $('<div id="mainContainer" class="customBody"></div>').appendTo('.fiche');
+
+    deleteAllCateg();
+    addRestr(0);
+    addDivs();
+}
+);
+$(document).ready(function () {
+    $(document).on("click", ".divClikable", function () {
+        if ($(this).attr('id') === 'divEnd') {
+            location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
+        } else if ($(this).hasClass('navDiv')) {
+            deleteFrom($(this).attr('id'), $(this).attr('name'));
+        } else {
+            catArr.push($(this).attr('id'));
+            addCatInProd($(this).attr('id'));
+            addRestr($(this).attr('id'));
+            deleteAllDivs();
+            addDivs();
+        }
+    });
+});
+
+function deleteFrom(id_div, name) {
+    
+    var restrToKeep = 0;
+    str = '';
+
+    for (i = cnt; i >= id_div; i--)
+        $("#navContainer").children("div").eq(i).remove();
+    for (i = 0; i <= id_div; i++) {
+        restrToKeep += cntRestr[i];
+    }
+    
+    catOut = catArr.slice(id_div);
+    objs.length = restrToKeep;
+    cntRestr.length = restrToKeep;
+    cnt = id_div;
+    deleteAllDivs();
+    catArr.length=id_div;
+    deleteCateg(catOut);
+    addDivs();
+}
+
+function addDivs() {
+    if (cnt >= objs.length) {
+        $('<div  class="customDiv divClikable"><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>').
+                attr("id", 'divEnd').
+                appendTo('#mainContainer');
+    } else {
+        $('<div  class="customDiv divClikable navDiv">' + objs[cnt].label + '</div>').
+                attr("id", cnt).
+                attr("name", objs[cnt].idParent).
+                appendTo('#navContainer');
+        $('<div  class="customDiv fixDiv">' + objs[cnt].label + '</div><br>').
+                attr("id", objs[cnt].id).
+                appendTo('#mainContainer');
+        for (var i = 0; i < objs[cnt].tabIdChild.length; i++) {
+            $('<div  class="customDiv divClikable">' + objs[cnt].tabNameChild[i] + '<a class="fillTheDiv" href=""></a></div>').
+                    attr("id", objs[cnt].tabIdChild[i]).
+                    appendTo('#mainContainer');
+        }
+        ++cnt;
     }
 }
 
-function deleteNextDropDown(id_drop_down) {
-    $('#' + id_drop_down).nextAll('select').remove();
 
+
+function deleteAllDivs() {
+    $("#mainContainer").empty();
 }
 
-function addNextDropDown(id_drop_down, id_restr, obj) {
-    alert(id_drop_down+"\n"+id_restr+"\n"+obj);
-    $('<td></td>')
-            .attr("id", 999)
-            .attr("class", "cell")
-            .text("WOOOOOOOOOOOOOOOOOOOOO")
-            .appendTo('tr.line' + id_drop_down);
-
-
-
-/*    $('<select></select>')
-            .attr("id", id_drop_down)
-            .attr("class", "drop")
-            .appendTo('td#' + id_drop_down);
-
-    $('select#' + id_drop_down)
-            .append($("<option></option>")
-                    .attr("disabled", "disabled")
-                    .text(obj.tabRestr[id_restr].label + place_for_arrow));
-
-    for (i = 0; i < obj.tabRestr[id_restr].tabIdChild.length; i++) {
-        $(select'#' + id_drop_down)
-                .append($("<option></option>")
-                        .attr("value", obj.tabRestr[id_restr].tabIdChild[i])
-                        .text(obj.tabRestr[id_restr].tabNameChild[i] + place_for_arrow));
-    }*/
-}
-
-function addEnd(id_drop_down) {
-    var select = $('<select></select>')
-            .attr("id", id_drop_down)
-            .attr("class", "unselectable")
-            .appendTo('.fiche');
-
-    $('#' + id_drop_down)
-            .append($("<option></option>")
-                    .attr("value", 0)
-                    .text("FIN"));
-
-//    var end = $('<button></button>')
-//            .attr("type", "button")
-//            .attr("class", "btn-primary")
-//            .text("FIN")
-//            .appendTo('.fiche');
-
-}
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};

@@ -78,6 +78,8 @@ class ProductBrowser extends CommonObject {
         }
     }
 
+    /* Try not to use it in big process */
+
     function restrictionExistsChildOnly($id_child) {
         $sql = 'SELECT *';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
@@ -90,6 +92,8 @@ class ProductBrowser extends CommonObject {
         }
     }
 
+    /* Try not to use it in big process */
+
     function restrictionExistsParentOnly($id_parent) {
         $sql = 'SELECT *';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
@@ -101,6 +105,8 @@ class ProductBrowser extends CommonObject {
             return false;
         }
     }
+
+    /* Try not to use it in big process */
 
     function restrictionExists($id_parent, $id_child) {
         $sql = 'SELECT *';
@@ -141,6 +147,7 @@ class ProductBrowser extends CommonObject {
     }
 
     function changeRestrictions($checkboxs) {
+        $objOut = null;
         $cntInsertion = 0;
         $cntDeletion = 0;
         for ($i = 0; $i < sizeof($checkboxs); $i++) {
@@ -159,25 +166,6 @@ class ProductBrowser extends CommonObject {
         return $objOut;
     }
 
-    function print_spaces($depth) {
-        for ($i = 0; $i < $depth; $i++) {
-            print "----";
-        }
-    }
-
-    function toString($depth = 0) {
-        $this->print_spaces($depth);
-        print $this->id . "<br>";
-        foreach ($this->child as $child) {
-            if ($child->is_a_leaf) {
-                $child->print_spaces($depth + 1);
-                print $child->id . '<br>';
-            } else {
-                $child->toString( ++$depth);
-            }
-        }
-    }
-
     /* @var $id type */
 
     function getNextCategory($id) {
@@ -192,8 +180,6 @@ class ProductBrowser extends CommonObject {
             $objOut->tabRestr[$i]->tabIdChild = array();
             $objOut->tabRestr[$i]->tabNameChild = array();
 
-
-//            TODO remplacer par $currentCat->cats si possible (éviter requête SQL) 
             $arrChildCat = $currentCat->get_filles();
             for ($j = 0; $j < count($arrChildCat); $j++) {
                 $objOut->tabRestr[$i]->tabIdChild[$j] = $arrChildCat[$j]->id;
@@ -227,14 +213,12 @@ class ProductBrowser extends CommonObject {
         }
     }
 
-    //            $pb->deleteSomecateg(GETPOST('id_prod'), GETPOST('id_cat_out'));
-
     function deleteSomecateg($id_prod, $id_cat_out) {
 
         foreach ($id_cat_out as $id_cat) {
             $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'categorie_product';
             $sql.= ' WHERE fk_product =' . $id_prod . ' AND';
-            $sql.= ' fk_categorie=' . $id_cat ;
+            $sql.= ' fk_categorie=' . $id_cat;
             try {
                 $this->db->query($sql);
                 $this->db->commit();
@@ -244,162 +228,4 @@ class ProductBrowser extends CommonObject {
             }
         }
     }
-
 }
-
-/*
-		for ($i=0 ; $i<sizeof($idChecked) ; $i++)
-		{
-			$id1 = $idChecked[$i];
-			for ($j=$i+1 ; $j<sizeof($idChecked) ; $j++)
-			{
-				$id2 = $idChecked[$j];
-				$sql = 'SELECT *';
-				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
-				$sql.= ' WHERE rowid = '.$id2;
-				$sql.= ' AND fk_parent = '.$id1;
-				$result1 = $this->db->query($sql);
-
-				$sql = 'SELECT *';
-				$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
-				$sql.= ' WHERE fk_child_cat = '.$id2;
-				$sql.= ' AND fk_parent_cat = '.$id1;
-				$result2 = $this->db->query($sql);
-
-				if (mysqli_num_rows ($result1) == 1 && mysqli_num_rows ($result2) == 0) // true = $id1 parent of $id2
-				{
-					$sql ='INSERT IGNORE INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
-				    $sql.='VALUES ('.$id1.', '.$id2.');';
-				    try
-				    {
-				        $this->db->query($sql);
-				        $this->db->commit();
-				    }
-				    catch(Exception $e)
-				    {
-				        echo 'ERROR:'.$e->getMessage();
-				        $this->db->rollback();
-				    }
-				}
-			}
-		}
-		for ($i=0 ; $i<sizeof($idUnchecked) ; $i++)
-		{
-			$id1 = $idUnchecked[$i];
-			for ($j=$i+1 ; $j<sizeof($idUnchecked) ; $j++)
-			{
-				$id2 = $idUnchecked[$j];
-				echo '$id1 ='.$id1.' $id2 ='.$id2.' $i='.$i.' $j='.$j."\n";
-				$sql = 'DELETE';
-				$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
-				$sql.= ' WHERE fk_child_cat = '.$id2;
-				$sql.= ' AND fk_parent_cat = '.$id1;
-				try
-				{
-					$this->db->query($sql);
-				} catch(Exception $e)
-			    {
-			        echo 'ERROR:'.$e->getMessage();
-			        $this->db->rollback();
-				}
-			}
-		}
-	}
-*/
-/*		foreach ($arrayofid as $id1) {
-			foreach ($arrayofid as $id2) {
-				$sql = 'SELECT *';
-				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
-				$sql.= ' WHERE rowid = '.$id2;
-				$sql.= ' AND fk_parent = '.$id1;
-				// $sql.= ' LIMIT 1';
-				$result = $this->db->query($sql);
-
-				if ($result) {		// true = $id1 parent of $id2
-					echo $sql."\n";
-
-					$sql ='INSERT INTO '.MAIN_DB_PREFIX.'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
-				    $sql.='VALUES ('.$id1.', '.$id2.');';
-
-				    try
-				    {
-				        echo $sql."\n";
-				        $this->db->query($sql);
-				        $this->db->commit();
-				    }
-				    catch(Exception $e)
-				    {
-				        echo 'ERROR:'.$e->getMessage();
-				        $this->db->rollback();
-				    }
-				}
-			}
-		}*/
-
-
-				/**
-	 *  Load an import profil from database
-	 *
-	 *  @param		int		$id		Id of profil to load
-	 *  @return		int				<0 if KO, >0 if OK
-	 */
-/*	function fetchAllFromRoot($id, $ind=0)
-	{
-//	print "Début ".$id."<br>" ;
-		$sql = 'SELECT fk_parent_cat, fk_child_cat';
-		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
-		$sql.= ' WHERE fk_parent_cat = '.$id;
-
-		dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
-		$result = $this->db->query($sql);
-		if ($result)
-		{
-			if (mysqli_num_rows ($result) >= 1)	// is a node
-			{
-				$i=0;
-				while ($obj = $result->fetch_object())
-				{
-					$this->id			= $obj->fk_parent_cat;
-					$this->id_child[]	= $obj->fk_child_cat;
-
-					$newChild = new ProductBrowser($this->db);
-					$newChild->id = $this->id_child[$i];
-					$newChild->id_parent = $this->id;
-					if($newChild->fetchAllFromRoot($newChild->id, $ind) ==2) {
-						++$ind;
-					}
-					array_push($this->child, $newChild);
-					++$i;
-				}
-				return 1;
-			}
-			else // is a leaf
-			{
-				$this->ref_product = 'TODO';
-				$this->is_a_leaf = true;
-				$sql = 'SELECT rowid';
-				$sql.= ' FROM '.MAIN_DB_PREFIX.'categorie';
-				$sql.= ' WHERE fk_parent = '.$this->id_parent;
-				$sql.= ' LIMIT '.$ind.',1';
-
-				dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
-				$result = $this->db->query($sql);
-
-				if ($result)
-				$i=0;
-				while ($obj = $result->fetch_object())
-				{
-					$this->id			= $obj->rowid;
-					++$i;
-				}
-				return 2;	
-			}
-		}
-		else // not results
-		{
-		// dol_print_error($this->db);
-		// return -3;
-			return -3;
-		}
-	}
-*/

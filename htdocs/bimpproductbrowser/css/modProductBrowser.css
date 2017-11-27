@@ -20,7 +20,6 @@ strong {
 
 .fixDiv {
     margin-top: 20px;
-
 }
 
 .divClikable {
@@ -44,22 +43,9 @@ strong {
 }
 
 #navContainer {
-    /*    height:30px;*/
+
 }
 
 #mainContainer {
     text-align:center;
 }
-
-/*
-.linkHref {
-    float: left;
-    font-size: 16px;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-.linkHref:hover {
-    background-color: red;
-}*/

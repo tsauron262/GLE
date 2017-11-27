@@ -4,6 +4,11 @@ var cnt = 0;
 var cntRestr = [];
 var catArr = [];
 
+
+/*
+ *  AJAX requests
+ */
+
 function deleteAllCateg() {
     id_prod = getUrlParameter('id');
 
@@ -78,18 +83,28 @@ function addCatInProd(id_categ) {
     });
 }
 
-$(document).ready(function () {
 
-    $('<div id="navContainer" class="customBody"></div>').appendTo('.fiche');
-    $('<div class="underbanner clearboth"><div>').appendTo('.fiche');
-    $('<div id="mainContainer" class="customBody"></div>').appendTo('.fiche');
+/*
+ *  When the document is loaded
+ */
+
+$(document).ready(function () {
+    $('<div></div>')
+            .attr('id', 'navContainer')
+            .attr('class', 'customBody')
+            .appendTo('.fiche');
+    $('<div><div>')
+            .attr('class', 'underbanner clearboth')
+            .appendTo('.fiche');
+    $('<div></div>')
+            .attr('id', 'mainContainer')
+            .attr('class', 'customBody')
+            .appendTo('.fiche');
 
     deleteAllCateg();
     addRestr(0);
     addDivs();
-}
-);
-$(document).ready(function () {
+
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -105,8 +120,13 @@ $(document).ready(function () {
     });
 });
 
-function deleteFrom(id_div, name) {
-    
+
+/*
+ *  Annexe functions
+ */
+
+function deleteFrom(id_div) {
+
     var restrToKeep = 0;
     str = '';
 
@@ -115,40 +135,49 @@ function deleteFrom(id_div, name) {
     for (i = 0; i <= id_div; i++) {
         restrToKeep += cntRestr[i];
     }
-    
+
     catOut = catArr.slice(id_div);
     objs.length = restrToKeep;
     cntRestr.length = restrToKeep;
     cnt = id_div;
     deleteAllDivs();
-    catArr.length=id_div;
+    catArr.length = id_div;
     deleteCateg(catOut);
     addDivs();
 }
 
 function addDivs() {
     if (cnt >= objs.length) {
-        $('<div  class="customDiv divClikable"><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>').
-                attr("id", 'divEnd').
-                appendTo('#mainContainer');
+        if (objs.length === 1) {
+            $('<div><strong><br>Merci</strong><br><br> Aucune catégorie n\'a été créer pour ce produit<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
+                    .attr('class', 'customDiv divClikable')
+                    .attr('id', 'divEnd')
+                    .appendTo('#mainContainer');
+        } else {
+            $('<div><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
+                    .attr('class', 'customDiv divClikable')
+                    .attr('id', 'divEnd')
+                    .appendTo('#mainContainer');
+        }
     } else {
-        $('<div  class="customDiv divClikable navDiv">' + objs[cnt].label + '</div>').
-                attr("id", cnt).
-                attr("name", objs[cnt].idParent).
-                appendTo('#navContainer');
-        $('<div  class="customDiv fixDiv">' + objs[cnt].label + '</div><br>').
-                attr("id", objs[cnt].id).
-                appendTo('#mainContainer');
+        $('<div>' + objs[cnt].label + '</div>')
+                .attr('id', cnt)
+                .attr('class', 'customDiv divClikable navDiv')
+                .appendTo('#navContainer');
+        $('<div></div><br>')
+                .attr("id", objs[cnt].id)
+                .attr('class', 'customDiv fixDiv')
+                .text(objs[cnt].label)
+                .appendTo('#mainContainer');
         for (var i = 0; i < objs[cnt].tabIdChild.length; i++) {
-            $('<div  class="customDiv divClikable">' + objs[cnt].tabNameChild[i] + '<a class="fillTheDiv" href=""></a></div>').
-                    attr("id", objs[cnt].tabIdChild[i]).
-                    appendTo('#mainContainer');
+            $('<div>' + objs[cnt].tabNameChild[i] + '<a class="fillTheDiv" href=""></a></div>')
+                    .attr("id", objs[cnt].tabIdChild[i])
+                    .attr('class', 'customDiv divClikable')
+                    .appendTo('#mainContainer');
         }
         ++cnt;
     }
 }
-
-
 
 function deleteAllDivs() {
     $("#mainContainer").empty();

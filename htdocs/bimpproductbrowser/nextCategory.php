@@ -30,8 +30,6 @@ require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpproductbrowser/class/productBrowser.class.php';
 $pb = new ProductBrowser($db);
 
-//$pb->fetch($id);
-
 switch (GETPOST('action')) {
     case 'delAll': {
             $pb->deleteProdCateg(GETPOST('id_prod'));
@@ -50,7 +48,6 @@ switch (GETPOST('action')) {
             $pb->deleteSomecateg(GETPOST('id_prod'), GETPOST('id_cat_out'));
         }
     default: break;
-//        setCategories($categories)
 }
 
 $db->close();

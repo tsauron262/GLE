@@ -113,7 +113,9 @@ if ($id > 0 || !empty($ref)) {
     //if ($action == 'editnote_public') $cssclass='titlefieldcreate';
     //if ($action == 'editnote_private') $cssclass='titlefieldcreate';
     //print '<div class="fichecenter">';
-
+    print '<div style="clear: both;"></div>';
+    print '<div class="underbanner clearboth"><div>';
+    
     dol_fiche_end();
 }
 

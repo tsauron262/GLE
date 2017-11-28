@@ -73,7 +73,6 @@ list:
             edit: 1
             min_width: 40%
     add_object_row: 1
-    edit_btn: 1
     update_btn: 1
     delete_btn: 1
         

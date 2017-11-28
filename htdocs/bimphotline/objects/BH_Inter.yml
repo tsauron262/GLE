@@ -14,17 +14,6 @@ objects:
             dol_object: user
             id_object: 
                 field_value: tech_id_user
-        cards:
-            default:
-                title: nom
-                fields:
-                    E-mail:
-                        object_prop: email
-                    Tél. pro: 
-                        object_prop: office_phone
-                    Tél. portable:
-                        object_prop: user_mobile
-                view_btn: 1
                 
 fields:
     id_ticket:
@@ -44,14 +33,7 @@ fields:
                 field: ticket_number
             card:
                 type: card
-                card: 
-                    title: nom
-                    fields: 
-                        N°: ticket_number
-                        Contrat: 
-                            field: id_contrat
-                            display: nom_url
-                    view_btn: 1
+                card: default
         sort_options: 
             default: ticket_number
             id: id
@@ -72,7 +54,7 @@ fields:
                 type: field_value
             card: 
                 type: card
-                card: default
+                card: user_card
         sort_option: 
             default: 
                 label: nom utilisateur

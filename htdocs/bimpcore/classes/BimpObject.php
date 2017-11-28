@@ -137,6 +137,11 @@ class BimpObject
         return null;
     }
 
+    public function getChildObject($object_name)
+    {
+        return $this->config->getObject('', $object_name);
+    }
+
     // Gestion des données:
 
     public function getData($field)
@@ -448,156 +453,175 @@ class BimpObject
 
     public function displayValue($value, $display_path, $field = '')
     {
-        $prev_path = $this->config->current_path;
         $html = '';
 
-        if ($this->config->setCurrentPath($display_path)) {
-            $display_type = $this->getCurrentConf('type', 'string');
-            switch ($display_type) {
-                case 'syntaxe':
-                    $syntaxe = $this->getCurrentConf('syntaxe', '<value>');
-                    $syntaxe = str_replace('<value>', $value, $syntaxe);
-                    $html .= $syntaxe;
+        $display_type = $display_type = $this->getConf($display_path . '/type', '');
+
+        if (!$display_type && $field) {
+            $data_type = $this->getConf('fields/' . $field . '/type', '');
+            switch ($data_type) {
+                case 'time':
+                case 'date':
+                case 'datetime':
+                    $display_type = $data_type;
                     break;
 
-                case 'nom':
-                case 'nom_url':
-                case 'card':
-                    if (!$value) {
-                        $html .= '<span class="warning">Aucun</span>';
-                    } else {
-                        if ($field) {
-                            if ($field === $this->getParentIdProperty()) {
-                                $instance = $this->getParentInstance();
-                            } elseif ($this->config->isDefined('fields/' . $field . '/object')) {
-                                $instance = $this->config->getObject('fields/' . $field . '/object');
-                            } else {
-                                $instance = $this;
-                            }
-                        } else {
-                            $instance = $this->getCurrentConf('object', null, true, 'object');
-                        }
+                default:
+                    $display_type = 'string';
+                    break;
+            }
+        }
 
-                        if (!is_null($instance)) {
-                            if ($display_type === 'nom') {
-                                $html .= BimpObject::getInstanceNom($instance);
-                            } elseif ($display_type === 'nom_url') {
-                                $html .= BimpObject::getInstanceNomUrl($instance);
-                            } elseif ($display_type === 'card') {
-                                $card = $this->getCurrentConf('card', null, true, 'any');
-                                if (!is_null($card)) {
-                                    if (is_array($card)) {
-                                        $this->config->setCurrentPath($display_path . '/card');
-                                        $html .= BimpRender::renderObjectCard($instance, $this->config);
-                                    } elseif (is_string($card)) {
-                                        if ($field && $this->config->isDefined('fields/' . $field . '/object')) {
-                                            $object_name = $this->config->get('fields/' . $field . '/object', '', false, 'any');
-                                            if ($object_name && is_string($object_name)) {
-                                                if ($this->config->isDefined('objects/' . $object_name . '/cards/' . $card)) {
-                                                    $this->config->setCurrentPath('objects/' . $object_name . '/cards/' . $card);
-                                                    $html .= BimpRender::renderObjectCard($instance, $this->config);
-                                                }
-                                            }
-                                        } elseif (is_a($instance, 'BimpObject')) {
-                                            if ($instance->config->isDefined('cards/' . $card)) {
-                                                $instance->config->setCurrentPath('cards/' . $card);
-                                                $html .= BimpRender::renderObjectCard($instance, $instance->config);
+        switch ($display_type) {
+            case 'syntaxe':
+                $syntaxe = $this->getConf($display_path . '/syntaxe', '<value>');
+                $syntaxe = str_replace('<value>', $value, $syntaxe);
+                $html .= $syntaxe;
+                break;
+
+            case 'nom':
+            case 'nom_url':
+            case 'card':
+                if (!$value) {
+                    $html .= '<span class="warning">Aucun</span>';
+                } else {
+                    if ($field) {
+                        if ($field === $this->getParentIdProperty()) {
+                            $instance = $this->getParentInstance();
+                        } elseif ($this->config->isDefined('fields/' . $field . '/object')) {
+                            $instance = $this->config->getObject('fields/' . $field . '/object');
+                        } else {
+                            $instance = $this;
+                        }
+                    } else {
+                        $instance = $this->config->getObject($display_path . '/object');
+                    }
+
+                    if (!is_null($instance)) {
+                        if ($display_type === 'nom') {
+                            $html .= BimpObject::getInstanceNom($instance);
+                        } elseif ($display_type === 'nom_url') {
+                            $html .= BimpObject::getInstanceNomUrl($instance);
+                        } elseif ($display_type === 'card') {
+                            $card = $this->getConf($display_path . '/card', null, true, 'any');
+                            if (!is_null($card)) {
+                                $card_path = $display_path . '/card';
+                                if (is_string($card)) {
+                                    if (is_a($instance, 'BimpObject')) {
+                                        if ($instance->config->isDefined('cards/' . $card)) {
+                                            $instance_prev_path = $instance->config->current_path;
+                                            $instance->config->setCurrentPath('cards/' . $card);
+                                            $bimpCard = new BimpCard($instance, $instance->config, 'cards/' . $card);
+                                            $html = $bimpCard->render();
+                                            $instance->config->setCurrentPath($instance_prev_path);
+                                            return $html;
+                                        }
+                                    }
+
+                                    if ($field && $this->config->isDefined('fields/' . $field . '/object')) {
+                                        $object_name = $this->config->get('fields/' . $field . '/object', '', false, 'any');
+                                        if ($object_name && is_string($object_name)) {
+                                            if ($this->config->isDefined('objects/' . $object_name . '/cards/' . $card)) {
+                                                $card_path = 'objects/' . $object_name . '/cards/' . $card;
                                             }
                                         }
                                     }
                                 }
+                                $bimpCard = new BimpCard($instance, $this->config, $card_path);
+                                return $bimpCard->render();
                             }
                         }
-                        if (!$html) {
-                            $html .= 'Objet: ' . $value;
-                        }
                     }
-                    break;
-
-                case 'check':
-                    if ((int) $value) {
-                        $html .= '<span class="check_on"></span>';
-                    } else {
-                        $html .= '</span class="check_off"></span>';
+                    if (!$html) {
+                        $html .= 'Objet: ' . $value;
                     }
-                    break;
+                }
+                break;
 
-                case 'yes_no':
-                    if ((int) $value) {
-                        $html .= '<span class="success">OUI</span>';
-                    } else {
-                        $html .= '</span class="danger">NON</span>';
-                    }
-                    break;
+            case 'check':
+                if ((int) $value) {
+                    $html .= '<span class="check_on"></span>';
+                } else {
+                    $html .= '</span class="check_off"></span>';
+                }
+                break;
 
-                case 'array_value':
-                    $array = $this->getConf($display_path . '/values', array(), true, 'array');
+            case 'yes_no':
+                if ((int) $value) {
+                    $html .= '<span class="success">OUI</span>';
+                } else {
+                    $html .= '</span class="danger">NON</span>';
+                }
+                break;
 
-                    $check = false;
-                    if (isset($array[$value])) {
-                        if (is_array($array[$value])) {
-                            if (isset($array[$value]['label'])) {
-                                $html = '<span';
-                                $html .= BimpRender::displayTagAttrs($array[$value]);
-                                $html .= '>' . $array[$value]['label'] . '</span>';
-                                $check = true;
-                            }
-                        } else {
-                            $html .= $array[$value];
+            case 'array_value':
+                $array = $this->getConf($display_path . '/values', array(), true, 'array');
+
+                $check = false;
+                if (isset($array[$value])) {
+                    if (is_array($array[$value])) {
+                        if (isset($array[$value]['label'])) {
+                            $html = '<span';
+                            $html .= BimpRender::displayTagAttrs($array[$value]);
+                            $html .= '>' . $array[$value]['label'] . '</span>';
                             $check = true;
                         }
+                    } else {
+                        $html .= $array[$value];
+                        $check = true;
                     }
+                }
 
-                    if (!$check) {
-                        $html .= '<p class="alert alert-warning">valeur non trouvée pour l\'identifiant "' . $value . '"</p>';
-                    }
-                    break;
+                if (!$check) {
+                    $html .= '<p class="alert alert-warning">valeur non trouvée pour l\'identifiant "' . $value . '"</p>';
+                }
+                break;
 
-                case 'date':
-                    $date = new DateTime($value);
-                    $format = $this->getConf($display_path . '/format', 'd / m / Y', false);
-                    $html .= '<span class="data">' . $date->format($format) . '</span>';
-                    break;
+            case 'time':
+                $time = new DateTime($value);
+                $format = $this->getConf($display_path . '/format', 'H:i:s', false);
+                $html .= '<span class="time">' . $time->format($format) . '</span>';
+                break;
 
-                case 'time':
-                    $time = new DateTime($value);
-                    $format = $this->getConf($display_path . '/format', 'H:i:s', false);
-                    $html .= '<span class="time">' . $time->format($format) . '</span>';
-                    break;
+            case 'date':
+                $date = new DateTime($value);
+                $format = $this->getConf($display_path . '/format', 'd / m / Y', false);
+                $html .= '<span class="data">' . $date->format($format) . '</span>';
+                break;
 
-                case 'datetime':
-                    $date = new DateTime($value);
-                    $format = $this->getConf($display_path . '/format', 'd / m / Y H:i:s', false);
-                    $html .= '<span class="datetime">' . $date->format($format) . '</span>';
-                    break;
+            case 'datetime':
+                $date = new DateTime($value);
+                $format = $this->getConf($display_path . '/format', 'd / m / Y H:i:s', false);
+                $html .= '<span class="datetime">' . $date->format($format) . '</span>';
+                break;
 
-                case 'timer':
-                    $timer = BimpTools::getTimeDataFromSeconds((int) $value);
-                    $html .= '<span class="timer">';
-                    if ($timer['days'] > 0) {
-                        $html .= $timer['days'] . ' j ';
-                        $html .= $timer['hours'] . ' h ';
-                        $html .= $timer['minutes'] . ' min ';
-                    } elseif ($timer['hours'] > 0) {
-                        $html .= $timer['hours'] . ' h ';
-                        $html .= $timer['minutes'] . ' min ';
-                    } elseif ($timer['minutes'] > 0) {
-                        $html .= $timer['minutes'] . ' min ';
-                    }
-                    $html .= $timer['secondes'] . ' sec ';
-                    $html .= '</span>';
-                    break;
+            case 'timer':
+                $timer = BimpTools::getTimeDataFromSeconds((int) $value);
+                $html .= '<span class="timer">';
+                if ($timer['days'] > 0) {
+                    $html .= $timer['days'] . ' j ';
+                    $html .= $timer['hours'] . ' h ';
+                    $html .= $timer['minutes'] . ' min ';
+                } elseif ($timer['hours'] > 0) {
+                    $html .= $timer['hours'] . ' h ';
+                    $html .= $timer['minutes'] . ' min ';
+                } elseif ($timer['minutes'] > 0) {
+                    $html .= $timer['minutes'] . ' min ';
+                }
+                $html .= $timer['secondes'] . ' sec ';
+                $html .= '</span>';
+                break;
 
-                case 'string':
-                default:
-                    $html .= $value;
-                    break;
-            }
-        } else {
+            case 'string':
+            default:
+                $html .= $value;
+                break;
+        }
+
+        if (!$html) {
             $html = $value;
         }
 
-        $this->config->setCurrentPath($prev_path);
         return $html;
     }
 
@@ -958,6 +982,7 @@ class BimpObject
             }
 
             $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
+
             if ($result <= 0) {
                 $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
                 $sqlError = $this->db->db->error();
@@ -1020,9 +1045,6 @@ class BimpObject
         $table = $this->getTable();
 
         if (is_null($table)) {
-            echo '<pre>';
-            print_r($this);
-            exit;
             return array('Fichier de configuration invalide (table non renseignée)');
         }
 
@@ -1366,6 +1388,42 @@ class BimpObject
         }
         $msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');
         return BimpRender::renderAlerts($msg);
+    }
+
+    public function renderChildCard($object_name, $card_name = '', $card_path = '')
+    {
+        $object = $this->getChildObject($object_name);
+
+        if (is_null($object)) {
+            return '';
+        }
+
+        $config = $this->config;
+
+        if (!$card_path) {
+            if ($card_name) {
+                if ($this->config->isDefined('objects/' . $object_name . '/cards/' . $card_name)) {
+                    $card_path = 'objects/' . $object_name . '/cards/' . $card_name;
+                } elseif (($card_name === 'default') && $this->config->isDefined('objects/' . $object_name . '/card')) {
+                    $card_path = 'objects/' . $object_name . '/card';
+                } elseif (is_a($object, 'BimpObject')) {
+                    if ($object->config->is_defined('cards/' . $card_name)) {
+                        $config = $object->config;
+                        $card_path = 'cards/' . $card_name;
+                    } elseif (($card_name === 'default') && $object->config->isDefined('card')) {
+                        $config = $object->config;
+                        $card_path = $object->config;
+                    }
+                }
+            }
+        }
+
+        if ($card_path) {
+            $card = new BimpCard($object, $config, $card_path);
+            return $card->render();
+        }
+
+        return '';
     }
 
     // Gestion des intitulés (labels):

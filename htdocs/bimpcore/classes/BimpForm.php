@@ -152,6 +152,7 @@ class BimpForm
         $type = $this->object->getCurrentConf('input/type', '', true);
         $label = $this->object->getCurrentConf('label', '', true);
         $value = $this->object->getData($field);
+
         if (is_null($value)) {
             $value = $this->object->getCurrentConf('default_value');
         }
@@ -159,41 +160,23 @@ class BimpForm
 
         $html .= '<div class="row fieldRow' . (($type === 'hidden') ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
         if ($display_if) {
-            $html .= $this->renderDisplayIfData();
+            $html .= self::renderDisplayIfData($this->object, $this->object->config->current_path . 'input/display_if');
         }
         $html .= '>';
 
         $html .= '<div class="inputLabel col-xs-12 col-sm-6 col-md-' . (int) $label_cols . '">';
         $html .= $label;
         $html .= '</div>';
-        
+
         $html .= '<div class="fieldRowInput fieldcol-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
         $html .= '<div id="' . $this->form_identifier . '_' . $field . '" class="inputContainer"';
         $html .= ' data-field_name="' . $field . '" data-multiple="' . ($multiple ? '1' : '0') . '">';
-        
-        $html .= self::renderInput($this->object, $this->object->config->current_path, $field . ($multiple ? '_add_value' : ''), ($multiple ? '' : $value));
-        
-        if ($multiple) {
-            $values = array();
-            if (is_array($value)) {
-                foreach ($value as $item) {
-                    if ($item) {
-                        $values[$item] = $this->object->displayData($field, 'default', $item);
-                    }
-                }
-            } elseif ($value) {
-                $values[] = $value;
-            }
-            if ($type === 'search_list') {
-                $label_field_name = $field . '_add_value_search';
-            } else {
-                $label_field_name = $field;
-            }
-            $html .= BimpInput::renderMultipleValuesList($field, $values, $label_field_name);
-        }
+
+        $html .= self::renderInput($this->object, $this->object->config->current_path, $field, $value);
+
         $html .= '</div>';
         $html .= '</div>';
-        
+
         if ($this->object->config->isDefinedCurrent('depends_on')) {
             $html .= $this->renderDependsOnScript($field);
         }
@@ -202,14 +185,14 @@ class BimpForm
         return $html;
     }
 
-    public function renderDisplayIfData()
+    public static function renderDisplayIfData($object, $path)
     {
         $html = '';
-        $input_name = $this->object->getCurrentConf('input/display_if/input_name', '');
+        $input_name = $object->getConf($path . '/input_name', '');
         if ($input_name) {
             $html .= ' data-input_name="' . $input_name . '"';
 
-            $show_values = $this->object->getCurrentConf('input/display_if/show_values', null, false, 'array');
+            $show_values = $object->getConf($path . '/show_values', null, false, 'array');
 
             if (!is_null($show_values)) {
                 if (is_array($show_values)) {
@@ -218,7 +201,7 @@ class BimpForm
                 $html .= ' data-show_values="' . str_replace('"', "'", $show_values) . '"';
             }
 
-            $hide_values = $this->object->getCurrentConf('input/display_if/hide_values', null, false, 'array');
+            $hide_values = $object->getConf($path . '/hide_values', null, false, 'array');
 
             if (!is_null($hide_values)) {
                 if (is_array($hide_values)) {
@@ -379,28 +362,49 @@ class BimpForm
 
         $html = '';
         $options = array();
-        
+
         $type = $object->getCurrentConf('input/type', '');
         $addon_right = $object->getCurrentConf('input/addon_right', null, false, 'array');
         $addon_left = $object->getCurrentConf('input/addon_left', null, false, 'array');
-        
+        $multiple = $object->getCurrentConf('input/multiple', false, false, 'bool');
+
+        if (!$type) {
+            $data_type = $object->getCurrentConf('type', '');
+            switch ($data_type) {
+                case 'int':
+                case 'float':
+                case 'string':
+                    $type = 'text';
+                    break;
+
+                case 'text':
+                    $type = 'textarea';
+                    break;
+
+                case 'time':
+                case 'date':
+                case 'datetime':
+                    $type = $data_type;
+                    break;
+            }
+        }
+
         if (!is_null($addon_right)) {
             if (isset($addon_right['text'])) {
                 $options['addon_right'] = $object->getCurrentConf('input/addon_right/text', '');
             } elseif (isset($addon_right['icon'])) {
-                $options['addon_right'] = '<i class="fa fa-'.$object->getCurrentConf('input/addon_right/icon').'"></i>';
+                $options['addon_right'] = '<i class="fa fa-' . $object->getCurrentConf('input/addon_right/icon') . '"></i>';
             }
         }
-        
+
         if (!is_null($addon_left)) {
             if (isset($addon_left['text'])) {
                 $options['addon_left'] = $object->getCurrentConf('input/addon_left/text', '');
             } elseif (isset($addon_left['icon'])) {
-                $options['addon_left'] = '<i class="fa fa-'.$object->getCurrentConf('input/addon_left/icon').'"></i>';
+                $options['addon_left'] = '<i class="fa fa-' . $object->getCurrentConf('input/addon_left/icon') . '"></i>';
             }
         }
-        
-        
+
         switch ($type) {
             case 'time':
             case 'date':
@@ -419,15 +423,15 @@ class BimpForm
                 break;
 
             case 'search_list':
-                $html .= BimpInput::renderSearchListInput($object, $config_path, $field_name, $value, $option);
+                $html .= BimpInput::renderSearchListInput($object, $config_path, $field_name . ($multiple ? '_add_value' : ''), ($multiple ? '' : $value), $option);
                 break;
 
             case 'toggle':
-                
+
                 $options['toggle_on'] = $object->getCurrentConf('input/toggle_on', 'OUI', false, 'string');
                 $options['toggle_off'] = $object->getCurrentConf('input/toggle_off', 'NON', false, 'string');
                 break;
-            
+
             case 'custom':
                 $content = $object->getCurrentConf('input/html', null, true);
                 if (is_null($content)) {
@@ -439,18 +443,39 @@ class BimpForm
             default:
                 $method = 'get' . ucfirst($field_name) . 'Input';
                 if (method_exists($object, $method)) {
-                    $html .= $object->{$method}($value);
+                    $html .= $object->{$method}($multiple ? '' : $value);
                 }
                 break;
         }
 
         if (!$html) {
-            $html = BimpInput::renderInput($type, $field_name, $value, $options, $form, $option = null, $input_id);
+            $html = BimpInput::renderInput($type, ($field_name . ($multiple ? '_add_value' : '')), ($multiple ? '' : $value), $options, $form, $option = null, $input_id);
         }
+
         $help = $object->getCurrentConf('input/help', '');
         if ($help) {
             $html .= '<p class="inputHelp">' . $help . '</p>';
         }
+
+        if ($multiple) {
+            $values = array();
+            if (is_array($value)) {
+                foreach ($value as $item) {
+                    if ($item) {
+                        $values[$item] = $object->displayData($field_name, 'default', $item);
+                    }
+                }
+            } elseif ($value) {
+                $values[] = $value;
+            }
+            if ($type === 'search_list') {
+                $label_field_name = $field_name . '_add_value_search';
+            } else {
+                $label_field_name = $field_name;
+            }
+            $html .= BimpInput::renderMultipleValuesList($field_name, $values, $label_field_name);
+        }
+
         $object->config->setCurrentPath($prev_path);
         return $html;
     }

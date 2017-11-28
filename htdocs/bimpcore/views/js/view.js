@@ -23,7 +23,16 @@ function reloadObjectView(view_id) {
             if (result.html) {
                 $view.find('.object_view_content').stop().fadeOut(250, function () {
                     $(this).html(result.html);
-                    $(this).fadeIn(250);
+                    $(this).fadeIn(250, function () {
+                        onViewLoaded($view);
+                        $view.find('.objectList').each(function () {
+                            onListLoaded($(this));
+                        });
+
+                        $view.find('.objectForm').each(function () {
+                            onFormLoaded($(this));
+                        });
+                    });
                 });
             }
         }
@@ -42,17 +51,17 @@ function loadModalView(view_id, view_name, $button) {
     if ($button.hasClass('disabled')) {
         return;
     }
-    
+
     $button.addClass('disabled');
-    
-    var $view = $('#'+view_id);
+
+    var $view = $('#' + view_id);
     if (!$view.length) {
         return;
     }
-    
+
     var id_object = $view.data('id_object');
     var object_name = $view.data('object_name');
-    
+
     var $modal = $('#page_modal');
     var $resultContainer = $modal.find('.modal-ajax-content');
     $resultContainer.html('').hide();
@@ -158,6 +167,53 @@ function saveObjectFromViewModalForm(view_id, $button) {
         }, function () {
             $button.removeClass('disabled');
         });
+    }
+}
+
+function saveObjectfromFieldsTable(table_id, $button) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var $table = $('#' + table_id);
+    if ($table.length) {
+        var $view = $table.parent();
+        while (1) {
+            if ($view.hasClass('objectView')) {
+                break;
+            }
+            if (!$view.length) {
+                break;
+            }
+            $view = $view.parent();
+        }
+
+        if ($view.length) {
+            var $resultContainer = $table.find('.ajaxResultsContainer');
+
+            $resultContainer.parent('td').parent('tr').show();
+            var data = {
+                'object_module': $view.data('module_name'),
+                'object_name': $view.data('object_name'),
+                'id_object': $view.data('id_object')
+            };
+
+            $table.find('.inputContainer').each(function () {
+                var field = $(this).data('field_name');
+                var $input = $(this).find('[name="' + field + '"]');
+                if ($input.length) {
+                    data[field] = $input.val();
+                }
+            });
+            bimp_json_ajax('saveObject', data, $resultContainer, function () {
+                $button.removeClass('disabled');
+                reloadObjectView($view.data('view_id'));
+            }, function () {
+                $button.removeClass('disabled');
+            });
+        }
     }
 }
 

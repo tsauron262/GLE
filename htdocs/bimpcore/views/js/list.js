@@ -32,22 +32,27 @@ function reloadObjectList(list_id, callback) {
             var search_type = $(this).data('search_type');
             var field_name = $(this).data('field_name');
             if (field_name) {
-                var field = field_name.replace(/^search_(.+)$/, '$1')
-                if (search_type === 'date_range') {
-                    var $from = $(this).find('[name=' + field_name + '_from]');
-                    var $to = $(this).find('[name=' + field_name + '_to]');
-                    data['search_fields'][field] = {};
-                    if ($from.length) {
-                        data['search_fields'][field]['from'] = $from.val();
-                    }
-                    if ($to.length) {
-                        data['search_fields'][field]['to'] = $to.val();
-                    }
-                } else {
-                    var $input = $(this).find('[name=' + field_name + ']');
-                    if ($input.length) {
-                        data['search_fields'][field] = $input.val();
-                    }
+                var field = field_name.replace(/^search_(.+)$/, '$1');
+                switch (search_type) {
+                    case 'time_range':
+                    case 'date_range':
+                    case 'datetime_range':
+                        var $from = $(this).find('[name=' + field_name + '_from]');
+                        var $to = $(this).find('[name=' + field_name + '_to]');
+                        data['search_fields'][field] = {};
+                        if ($from.length) {
+                            data['search_fields'][field]['from'] = $from.val();
+                        }
+                        if ($to.length) {
+                            data['search_fields'][field]['to'] = $to.val();
+                        }
+                        break;
+
+                    default:
+                        var $input = $(this).find('[name=' + field_name + ']');
+                        if ($input.length) {
+                            data['search_fields'][field] = $input.val();
+                        }
                 }
             }
         });
@@ -82,10 +87,12 @@ function reloadObjectList(list_id, callback) {
                 $(this).attr('target', '_blank');
             });
             $list.find('input[name=p]').val('');
+            setCommonEvents($list.find('tbody.listRows'));
+            setInputsEvents($list.find('tbody.listRows'));
+
             var $container = $('#' + $list.attr('id') + '_container');
             if ($container.length) {
                 if (result.pagination_html) {
-
                     $container.find('.listPagination').each(function () {
                         $(this).html(result.pagination_html).parent('td').parent('tr.paginationContainer').show();
                     });
@@ -392,6 +399,13 @@ function resetListAddObjectRow(list_id) {
 
         });
         $row.find('.ui-autocomplete-input').val('');
+        $row.find('.search_list_input').val('');
+        $row.find('.select2-chosen').text('');
+        $row.find('.bs_datetimepicker').each(function () {
+            $(this).data('DateTimePicker').clear();
+            $(this).parent().find('.datepicker_value').val('');
+        });
+        $row.find('.ui-autocomplete-input').val('');
     }
 }
 
@@ -508,7 +522,9 @@ function setSearchInputsEvents($list) {
                         }
                         break;
 
+                    case 'time_range':
                     case 'date_range':
+                    case 'datetime_range':
                         setDateRangeEvents($(this), field_name);
                         var $from = $(this).find('[name=' + field_name + '_from]');
                         var $to = $(this).find('[name=' + field_name + '_to]');

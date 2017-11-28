@@ -205,8 +205,9 @@ class BimpList
                         if ($edit) {
                             if ($field) {
                                 $value = $this->object->getData($field);
+                                $input_id = $this->object->object_name . '_' . $item[$primary] . '_' . $field;
                                 $input = '<div class="editInputContainer" data-field_name="' . $field . '">';
-                                $input .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $value, $this->id_parent);
+                                $input .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $value, $this->id_parent, null, null, $input_id);
                                 $input .= '</div>';
                                 $row[$col_name] = $input;
                                 continue;
@@ -533,12 +534,13 @@ class BimpList
                     $html .= '<td></td>';
                 } else {
                     $input_type = $this->object->getConf('fields/' . $field . '/input/type', '');
+                    $input_id = $this->object->object_name . '_' . $field . '_add';
                     $default_value = $this->object->getConf('fields/' . $field . '/default_value', '', false);
                     $html .= '<td' . (($input_type === 'hidden') ? ' style="display: none"' : '') . '>';
                     $html .= '<div class="inputContainer" id="' . $this->object->object_name . '_' . $field . '_addInputContainer"';
                     $html .= ' data-field_name="' . $field . '"';
                     $html .= ' data-default_value="' . $default_value . '">';
-                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $default_value, $this->id_parent);
+                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $default_value, $this->id_parent, null, null, $input_id);
                     $html .= '</div>';
                     $html .= '</td>';
                 }

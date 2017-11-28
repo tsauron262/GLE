@@ -117,6 +117,18 @@ class BimpDb
         return $rows;
     }
 
+    public function executeFile($file)
+    {
+        if (file_exists($file)) {
+            $sql = file_get_contents($file);
+            if ($sql) {
+                $result = $this->execute($sql);
+                return ($result > 0) ? true : false;
+            }
+        }
+        return false;
+    }
+
     public function getRows($table, $where = '1', $limit = null, $return = 'object', $fields = null)
     {
         $sql = 'SELECT ';

@@ -7,6 +7,20 @@ labels:
     is_female: 1
 
 objects:
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object: 
+                field_value: id_client
+    client_contact: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: contact
+            id_object:
+                field_value: id_client_contact
     supplier:
         relation: hasOne
         delete: 0
@@ -26,20 +40,79 @@ objects:
         delete: 1
         instance:
             bimp_object: BF_Comment
-            
     refinanceurs:
         relation: hasMany
         delete: 1
         instance: 
             bimp_object: BF_Refinanceur
-            
     rents:
         relation: hasMany
         delete: 1
         instance:
             bimp_object: BF_Rent
             
+    rents_except: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_RentExcept
+            
+    frais_divers:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_FraisDivers
+            
+    frais_fournisseur:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_FraisFournisseur
+            
 fields:
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        input:
+            type: search_societe
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: societe_card
+        sortable: 1
+        search: 1
+        sort_options:
+            by_ref: 
+                label: référence
+                value:
+                    join:
+                        table: societe
+                        field_value: ref
+                        field_on: rowid
+    
+    id_client_contact:
+        label: Contact client
+        type: id_object
+        object: client_contact
+        depends_on: id_client
+        input: 
+            type: select
+            options: 
+                array: client_contacts
+            display_if:
+                input_name: id_client
+                hide_values:
+                    array: 0,''
+        display: 
+            default: 
+                type: nom_url
+            card: 
+                type: card
+                card: contact_card
+                    
     duration:
         label: Durée
         type: int
@@ -48,10 +121,9 @@ fields:
             options:
                 array: durations
         display:
-            default:
-                type: array_value
-                values: 
-                    array: durations
+            type: array_value
+            values: 
+                array: durations
         search: 1
         
     periodicity: 
@@ -67,19 +139,118 @@ fields:
                 values: 
                     array: periodicities
         search: 1
-                
-    vr: 
-        label: VR demandée
-        type: int
-        required: 1
+        
+    montant_materiels:
+        label: Montant matériels
+        type: float
         input: 
             type: text
             addon_right:
-                text: %
+                icon: euro
+        default_value: 0
+        display:
+            default:
+                type: syntaxe
+                syntaxe: <value> &euro;
+        
+    montant_services:
+        label: Montant services
+        type: float
+        input: 
+            type: text
+            addon_right:
+                icon: euro
+        default_value: 0
+        display:
+            default:
+                type: syntaxe
+                syntaxe: <value> &euro;
+                
+    montant_logiciels:
+        label: Montant logiciels
+        type: float
+        input: 
+            type: text
+            addon_right:
+                icon: euro
+        default_value: 0
+        display:
+            default:
+                type: syntaxe
+                syntaxe: <value> &euro;
+    
+    commission_commerciale:
+        label: Commission commerciale
+        type: float
+        default_value: 0
+        input:
+            type: text
+            addon_right: 
+                icon: percent
         display:
             default:
                 type: syntaxe
                 syntaxe: <value> %
+                
+    commission_financiere:
+        label: Commission financière
+        type: float
+        default_value: 0
+        input:
+            type: text
+            addon_right: 
+                icon: percent
+        display:
+            default:
+                type: syntaxe
+                syntaxe: <value> %
+                
+    vr: 
+        label: VR demandée
+        type: float
+        required: 1
+        input: 
+            type: text
+            addon_right:
+                icon: percent
+        display:
+            default:
+                type: syntaxe
+                syntaxe: <value> %
+                
+    terme_paiement:
+        label: Paiement
+        type: int
+        default_value: 2
+        input: 
+            type: select
+            options: 
+                array: termes_paiement
+        display:
+            type: array_value
+            values:
+                array: termes_paiement
+                
+    status:
+        label: Statut
+        type: int
+        input: 
+            type: select
+            options: 
+                array: status_list
+        display:
+            type: array_value
+            values: 
+                array: status_list
+                
+    accepted:
+        label: Acceptation définitive de la banque
+        type: bool
+        input:
+            type: toggle
+        display: 
+            type: yes_no
+                
     insurance:
         label: Assurance
         type: bool
@@ -161,6 +332,9 @@ fields:
         display:
             nom_url: 
                 type: nom_url
+            card: 
+                type: card
+                card: societe_card
         
     id_supplier_contact:
         label: Contact apporteur
@@ -176,6 +350,9 @@ fields:
         display: 
             nom_url: 
                 type: nom_url
+            card: 
+                type: card
+                card: contact_card
         depends_on: id_supplier
         
 lists:
@@ -198,6 +375,9 @@ lists:
             date_create:
                 label: Créée le
                 field: date_create
+            client: 
+                label: Client
+                field: id_client
             duration:
                 label: Durée
                 field: duration
@@ -216,41 +396,105 @@ views:
         rows:
             - cols: 
                   - type: rows
-                    col_lg: 4
+                    col_lg: 5
                     col_sm: 12
                     rows: 
                         - cols:
                               - type: object_common_fields
                                 col_lg: 12
+                        - cols:
+                              - type: fields_table
+                                col_lg: 12
+                                fields_table: 
+                                    caption:
+                                        label: Contrat
+                                        icon: file-text
+                                    rows:
+                                        - field: status
+                                        - field: accepted
+                                        - field: insurance
+                                        - field: annexe
+                                        - field: date_livraison
+                                        - field: date_loyer      
+                                        - field: terme_paiement
+                  - type: rows
+                    col_lg: 7
+                    col_sm: 12
+                    rows: 
+                        - cols:
                               - type: fields_table
                                 col_lg: 12
                                 fields_table:
                                     caption:
-                                        label: Apporteur
-                                        icon: user
+                                        label: Options
+                                        icon: check-square-o
                                     rows:
-                                        - field: id_supplier
-                                          label: Société
-                                          display: nom_url
-                                        - field: id_supplier_contact
-                                          label: Contact
-                                          display: nom_url
+                                        - field: duration
+                                          edit: 1
+                                        - field: periodicity
+                                          edit: 1
+                                        - field: insurance
+                                          edit: 1
+                                        
+                              - type: fields_table
+                                col_lg: 12
+                                fields_table:
+                                    caption:
+                                        label: Montants
+                                        icon: euro
+                                    rows:
+                                        - field: montant_materiels
+                                          edit: 1
+                                        - field: montant_services
+                                          edit: 1
+                                        - field: montant_logiciels
+                                          edit: 1
+                                        - label: Montant total
+                                          value: <span id="montant_total"></span>
+                                        - field: commission_commerciale
+                                          edit: 1
+                                        - field: commission_financiere
+                                          edit: 1
+                                        - field: vr
+                                          edit: 1
+                                        - field: ca_prevu
+                                          edit: 1
+                                        - field: pba_prevu
+                                          edit: 1
+                                        
+            - cols: 
                   - type: fields_table
-                    col_lg: 8
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
                     fields_table:
                         caption:
-                            label: Contrat
-                            icon: file-text
+                            label: Client
+                            icon: user
                         rows:
-                            - field: duration
-                            - field: periodicity
-                            - field: vr
-                            - field: insurance
-                            - field: annexe
-                            - field: ca_prevu
-                            - field: pba_prevu
-                            - field: date_livraison
-                            - field: date_loyer      
+                            - field: id_client
+                              label: Société
+                              display: card
+                            - field: id_client_contact
+                              label: Contact
+                              display: card
+                              
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    fields_table:
+                        caption:
+                            label: Apporteur
+                            icon: handshake-o
+                        rows:
+                            - field: id_supplier
+                              label: Société
+                              display: card
+                            - field: id_supplier_contact
+                              label: Contact
+                              display: card
+                              
             - cols:
                   - type: list
                     col_lg: 6
@@ -258,15 +502,45 @@ views:
                     list: 
                         children: rents
                         panel: 0
+                        
+                  - type: list
+                    col_lg: 6
+                    col_md: 12
+                    list: 
+                        children: rents_except
+                        panel: 0
+                        
+            - cols: 
+                  - type: list
+                    col_lg: 6
+                    col_md: 12
+                    list: 
+                        children: frais_fournisseur
+                        panel: 0
+                  - type: list
+                    col_lg: 6
+                    col_md: 12
+                    list: 
+                        children: frais_divers
+                        panel: 0
+                        
+            - cols:
+                  - type: list
+                    col_lg: 6
+                    col_md: 12
+                    list: 
+                        children: refinanceurs
+                        panel: 0
+                        
                   - type: list
                     col_lg: 6
                     col_md: 12
                     list:
-                        children: refinanceurs
-                        panel: 0
-            - cols:
-                  - type: list
-                    col_lg: 12
-                    list: 
                         children: comments
                         panel: 0
+                
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderViewLoadedScript
+                  

@@ -324,7 +324,7 @@ class BimpRender
                 $html .= '<div class="btn-group">';
                 if ($file) {
                     $html .= '<button type="button" class="btn btn-default" ';
-                    $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities($title, ENT_QUOTES) . '\')">';
+                    $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities(addslashes($title)) . '\')">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>';
                     $html .= 'Afficher</button>';
                 }

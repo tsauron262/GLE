@@ -59,6 +59,7 @@ class BimpView
         $no_reload = $this->object->getCurrentConf('no_reload', false, false, 'bool');
 
         $html .= '<div id="' . $this->view_identifier . '" class="' . ($panel ? 'section ' : '') . 'objectView ' . $this->object->object_name . '_view' . ($no_reload ? ' no_reload' : '') . '"';
+        $html .= ' data-view_id="' . $this->view_identifier . '"';
         $html .= ' data-module_name="' . $this->object->module . '"';
         $html .= ' data-object_name="' . $this->object->object_name . '"';
         $html .= ' data-view_name="' . $this->view_name . '"';

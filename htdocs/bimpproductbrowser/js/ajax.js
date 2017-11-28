@@ -115,6 +115,7 @@ $(document).ready(function () {
             addCatInProd($(this).attr('id'));
             addRestr($(this).attr('id'));
             deleteAllDivs();
+            changeNavDiv($(this).text());
             addDivs();
         }
     });
@@ -148,17 +149,10 @@ function deleteFrom(id_div) {
 
 function addDivs() {
     if (cnt >= objs.length) {
-        if (objs.length === 1) {
-            $('<div><strong><br>Merci</strong><br><br> Aucune catégorie n\'a été créer pour ce produit<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
-                    .attr('class', 'customDiv divClikable')
-                    .attr('id', 'divEnd')
-                    .appendTo('#mainContainer');
-        } else {
-            $('<div><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
-                    .attr('class', 'customDiv divClikable')
-                    .attr('id', 'divEnd')
-                    .appendTo('#mainContainer');
-        }
+        $('<div><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
+                .attr('class', 'customDiv divClikable')
+                .attr('id', 'divEnd')
+                .appendTo('#mainContainer');
     } else {
         $('<div>' + objs[cnt].label + '</div>')
                 .attr('id', cnt)
@@ -178,6 +172,11 @@ function addDivs() {
         ++cnt;
     }
 }
+
+function changeNavDiv(text) {
+        $("#navContainer").find('#'+(cnt-1).toString()).append(':<br>'+text);
+}
+
 
 function deleteAllDivs() {
     $("#mainContainer").empty();

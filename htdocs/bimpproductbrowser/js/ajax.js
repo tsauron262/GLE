@@ -42,14 +42,16 @@ function deleteCateg(catOut) {
     });
 }
 
-function addRestr(id_categ) {
+function addCatInProd(id_categ) {
+    id_prod = getUrlParameter('id');
 
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
         data: {
+            id_prod: id_prod,
             id_categ: id_categ,
-            action: 'searchCategory'
+            action: 'addCategory'
         },
         async: false,
         error: function () {
@@ -62,23 +64,6 @@ function addRestr(id_categ) {
                 objs.push(obj.tabRestr[i]);
                 cntRestr[cnt]++;
             }
-        }
-    });
-}
-
-function addCatInProd(id_categ) {
-    id_prod = getUrlParameter('id');
-
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
-        data: {
-            id_prod: id_prod,
-            id_categ: id_categ,
-            action: 'addCategory'
-        },
-        error: function () {
-            alert("Error");
         }
     });
 }
@@ -102,7 +87,7 @@ $(document).ready(function () {
             .appendTo('.fiche');
 
     deleteAllCateg();
-    addRestr(0);
+    addCatInProd(0);
     addDivs();
 
     $(document).on("click", ".divClikable", function () {
@@ -113,7 +98,6 @@ $(document).ready(function () {
         } else {
             catArr.push($(this).attr('id'));
             addCatInProd($(this).attr('id'));
-            addRestr($(this).attr('id'));
             deleteAllDivs();
             changeNavDiv($(this).text());
             addDivs();
@@ -174,7 +158,7 @@ function addDivs() {
 }
 
 function changeNavDiv(text) {
-        $("#navContainer").find('#'+(cnt-1).toString()).append(':<br>'+text);
+    $("#navContainer").find('#' + (cnt - 1).toString()).append(':<br>' + text);
 }
 
 

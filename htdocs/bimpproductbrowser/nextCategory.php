@@ -35,13 +35,9 @@ switch (GETPOST('action')) {
             $pb->deleteProdCateg(GETPOST('id_prod'));
             break;
         }
-    case 'searchCategory': {
-            $objOut = $pb->getNextCategory(GETPOST('id_categ'));
-            echo json_encode($objOut);
-            break;
-        }
     case 'addCategory': {
-            $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'));
+            $objOut = $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'));
+            echo json_encode($objOut);
             break;
         }
     case 'delSomeCateg': {

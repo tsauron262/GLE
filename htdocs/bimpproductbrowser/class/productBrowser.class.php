@@ -190,15 +190,34 @@ class ProductBrowser extends CommonObject {
     }
 
     function addProdToCat($id_prod, $id_categ) {
-        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'categorie_product (fk_categorie, fk_product)';
-        $sql.= 'VALUES (' . $id_categ . ',' . $id_prod . ')';
-        try {
-            $this->db->query($sql);
-            $this->db->commit();
-        } catch (Exception $e) {
-            echo 'ERROR:' . $e->getMessage();
-            $this->db->rollback();
+        $objOut = null;
+        $this->fetch($id_categ);
+        $objOut->tabRestr = array();
+        for ($i = 0; $i < count($this->id_childs); $i++) {
+            $currentCat = new Categorie($this->db);
+            $currentCat->fetch($this->id_childs[$i]);
+            $objOut->tabRestr[$i]->idParent = $id_categ;
+            $objOut->tabRestr[$i]->label = $currentCat->label;
+            $objOut->tabRestr[$i]->tabIdChild = array();
+            $objOut->tabRestr[$i]->tabNameChild = array();
+            $arrChildCat = $currentCat->get_filles();
+            for ($j = 0; $j < count($arrChildCat); $j++) {
+                $objOut->tabRestr[$i]->tabIdChild[$j] = $arrChildCat[$j]->id;
+                $objOut->tabRestr[$i]->tabNameChild[$j] = $arrChildCat[$j]->label;
+            }
         }
+        if ($id_categ != 0) {
+            $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'categorie_product (fk_categorie, fk_product)';
+            $sql.= 'VALUES (' . $id_categ . ',' . $id_prod . ')';
+            try {
+                $this->db->query($sql);
+                $this->db->commit();
+            } catch (Exception $e) {
+                echo 'ERROR:' . $e->getMessage();
+                $this->db->rollback();
+            }
+        }
+        return $objOut;
     }
 
     function deleteProdCateg($id_prod) {
@@ -228,4 +247,5 @@ class ProductBrowser extends CommonObject {
             }
         }
     }
+
 }

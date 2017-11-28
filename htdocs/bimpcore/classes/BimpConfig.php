@@ -196,7 +196,7 @@ class BimpConfig
         }
         return $value;
     }
-    
+
     public function getObject($path = '', $object_name = null)
     {
 
@@ -294,7 +294,7 @@ class BimpConfig
                 }
                 if (!is_null($module) && !is_null($file) && !is_null($className)) {
                     if (!class_exists($className)) {
-                        $file_path = DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php';
+                        $file_path = DOL_DOCUMENT_ROOT . '/'. $module . '/class/' . $file . '.class.php';
                         if (file_exists($file_path)) {
                             require_once $file_path;
                         }
@@ -323,7 +323,7 @@ class BimpConfig
                     }
 
                     if (file_exists($class_path)) {
-                        require_once DOL_DOCUMENT_ROOT . '/' . $class_path;
+                        require_once DOL_DOCUMENT_ROOT . '/'. $class_path;
                     }
 
                     if (!class_exists($class_name)) {
@@ -345,7 +345,8 @@ class BimpConfig
                     $args .= '$construct_params[' . $key . ']';
                 }
 
-                eval('$instance = new $class_name(' . $args . ');');
+                eval('$instance = new $class_name(' . $args . ');
+                        ');
             } else {
                 $instance = null;
                 $this->logConfigUndefinedValue($path);
@@ -359,21 +360,21 @@ class BimpConfig
                                     $instance, 'fetch'
                                         ), $fetch_params) <= 0) {
                             $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - Paramètres: <pre>' . print_r($fetch_params, 1) . '</pre>');
-                        }
                     }
-                } elseif (isset($params['id_object'])) {
-                    $id_object = $this->get($path . '/id_object', null, true, 'int');
-                    if (!is_null($id_object)) {
-                        if (method_exists($instance, 'fetch')) {
-                            if ($result = $instance->fetch((int) $id_object) <= 0) {
-                                $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - ID: ' . $id_object);
-                            }
-                        } else {
-                            $this->logConfigError('La méthode "fetch()" n\'existe pas pour l\'objet "' . get_class($instance) . '"');
+                }
+            } elseif (isset($params['id_object'])) {
+                $id_object = $this->get($path . '/id_object', null, true, 'int');
+                if (!is_null($id_object)) {
+                    if (method_exists($instance, 'fetch')) {
+                        if ($result = $instance->fetch((int) $id_object) <= 0) {
+                            $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - ID: ' . $id_object);
                         }
+                    } else {
+                        $this->logConfigError('La méthode "fetch()" n\'existe pas pour l\'objet "' . get_class($instance) . '"');
                     }
                 }
             }
+        }
         }
 
         return $instance;
@@ -405,11 +406,15 @@ class BimpConfig
             $prop_name = $prop;
         } elseif (is_array($prop)) {
             $prop_name = $this->get($path . '/name', null, true);
-            $instance = $this->get($path . '/instance', $this->instance, false, 'object');
+            if ($this->isDefined($path.'/object')) {
+                $object = $this->getObject($path . '/object');
+            } else {
+                $object = $this->instance;
+            }
             $is_static = $this->get($path . '/is_static', false, false, 'bool');
         }
 
-        if (is_null($instance)) {
+        if (is_null($object)) {
             if (!is_null($prop_name)) {
                 $msg = 'Impossible d\'obtenir la propriété "' . $prop_name . '" - Instance invalide';
                 $this->logConfigError($msg);
@@ -418,14 +423,14 @@ class BimpConfig
         }
 
         if (!is_null($prop_name)) {
-            if (property_exists($instance, $prop_name)) {
+            if (property_exists($object, $prop_name)) {
                 if ($is_static) {
-                    return $instance::${$prop_name};
+                    return $object::${$prop_name};
                 } else {
-                    return $instance->{$prop_name};
+                    return $object->{$prop_name};
                 }
             } else {
-                $msg = 'La propriété "' . $prop_name . '" n\existe pas dans la classe "' . get_class($instance) . '"';
+                $msg = 'La propriété "' . $prop_name . '" n\existe pas dans la classe "' . get_class($object) . '"';
                 $this->logConfigError($msg);
             }
         }
@@ -528,7 +533,12 @@ class BimpConfig
             }
         } elseif (is_array($callback)) {
             $method = $this->get($path . '/method', null, true);
-            $instance = $this->get($path . '/object', $this->instance, true, 'object');
+            if ($this->isDefined($path . '/object')) {
+                $instance = $this->getObject($path . '/object', null, false, 'object');
+            } else {
+                $instance = $this->instance;
+            }
+            
             $is_static = $this->get($path . '/is_static', false, false, 'bool');
 
             if (is_null($method) || is_null($instance)) {

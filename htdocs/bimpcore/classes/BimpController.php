@@ -31,7 +31,7 @@ class BimpController
         $this->module = $module;
         $this->controller = $controller;
 
-        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
+        $dir = DOL_DOCUMENT_ROOT . '/'. $module . '/controllers/';
 
         $this->current_tab = BimpTools::getValue('tab', 'default');
 
@@ -52,6 +52,15 @@ class BimpController
         $this->addJsFile('/bimpcore/views/js/form.js');
         $this->addJsFile('/bimpcore/views/js/view.js');
         $this->addJsFile('/bimpcore/views/js/controller.js');
+        
+        if (file_exists(DOL_DOCUMENT_ROOT.'/'.$module.'/views/js/'.$controller.'.js')) {
+            $this->addJsFile('/'.$module.'/views/js/'.$controller.'.js');
+        }
+        
+        $jsFiles = $this->getConf('js', array(), false, 'array');
+        foreach ($jsFiles as $jsFile) {
+            $this->addJsFile($jsFile);
+        }
 
         $this->addCssFile('/bimpcore/views/css/font-awesome.css');
 
@@ -60,11 +69,11 @@ class BimpController
         } else {
             $this->addCssFile('/bimpcore/views/css/bimpcore.css');
         }
-
-        $jsFiles = $this->getConf('js', array(), false, 'array');
-        foreach ($jsFiles as $jsFile) {
-            $this->addJsFile($jsFile);
+        
+        if (file_exists(DOL_DOCUMENT_ROOT.'/'.$module.'/views/css/'.$controller.'.css')) {
+            $this->addCssFile('/'.$module.'/views/css/'.$controller.'.css');
         }
+        
         $cssFiles = $this->getConf('css', array(), false, 'array');
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);

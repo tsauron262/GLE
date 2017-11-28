@@ -12,6 +12,17 @@ objects:
             dol_object: contrat
             id_object:
                 field_value: id_contrat
+    
+    client:
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object:
+                prop:
+                    object: contrat
+                    name: socid
+        card: societe_card
                 
     inters:
         relation: hasMany
@@ -111,7 +122,9 @@ views:
                             - field: ticket_number
                             - field: id_contrat
                               display: card
-            
+                            - label: Client
+                              card: 
+                                  object: client
 list:
     checkboxes: 1
     bulk_actions:
@@ -141,3 +154,19 @@ list:
     add_btn: 1
     delete_btn: 1
     view_btn: 1
+    
+cards:
+    default:
+        title: nom
+        fields: 
+            - label: Contrat
+              field: id_contrat
+              display: nom_url
+            - label: Client
+              value: 
+                  callback: 
+                      method: getNomUrl
+                      params: 
+                          - 1
+                      object: client
+        view_btn: 1

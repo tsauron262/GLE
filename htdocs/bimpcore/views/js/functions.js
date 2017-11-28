@@ -176,12 +176,7 @@ function setCommonEvents($container) {
     $container.find('.displayPopupButton').each(function () {
         setDisplayPopupButtonEvents($(this));
     });
-    $container.one('focus.auto_expand', 'textarea.auto_expand', function () {
-        var savedValue = this.value;
-        this.value = '';
-        this.baseScrollHeight = this.scrollHeight;
-        this.value = savedValue;
-    }).on('input.auto_expand', 'textarea.auto_expand', function () {
+    $container.on('input.auto_expand', 'textarea.auto_expand', function () {
         var minRows = $(this).data('min_rows'), rows;
         if (!minRows) {
             minRows = 3;
@@ -189,6 +184,21 @@ function setCommonEvents($container) {
         this.rows = minRows;
         rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
         this.rows = rows + minRows;
+    });
+    $container.find('textarea.auto_expand').each(function () {
+        if (typeof (this.baseScrollHeight) === 'undefined') {
+            var minRows = parseInt($(this).data('min_rows')), rows;
+            if (!minRows) {
+                minRows = 3;
+            }
+            this.baseScrollHeight = minRows * 16;
+
+            this.rows = minRows;
+            if (this.scrollHeight) {
+                rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
+                this.rows = rows + minRows;
+            }
+        }
     });
 }
 
@@ -253,3 +263,70 @@ function updateTimerInput($input, input_name) {
     $container.find('input[name=' + input_name + ']').val(total_secs).change();
 }
 
+// Affichages: 
+
+function displayMoneyValue(value, $container, currency) {
+    if (!$container.length) {
+        return;
+    }
+
+    if (typeof (currency) === 'undefined') {
+        currency = '&euro;';
+    }
+
+    value = parseFloat(value);
+
+    if (value === null || isNaN(value)) {
+        value = '0,00';
+    } else {
+        value = Math.round10(value, -2);
+        value = '' + value;
+        if (!/^[0-9]+\.[0-9]+/.test(value)) {
+            value += '.0';
+        }
+        if (!/^[0-9]+\.[0-9]{2}$/.test(value)) {
+            value += '0';
+        }
+    }
+
+    value = value.replace(/^([0-9]+)\.?([0-9]?)([0-9]?)$/, '$1,$2$3');
+    $container.html(value + ' ' + currency);
+}
+
+// Math:
+
+(function () {
+    function decimalAdjust(type, value, exp) {
+        if (typeof exp === 'undefined' || +exp === 0) {
+            return Math[type](value);
+        }
+        value = +value;
+        exp = +exp;
+        if (value === null || isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+            return NaN;
+        }
+        if (value < 0) {
+            return -decimalAdjust(type, -value, exp);
+        }
+        value = value.toString().split('e');
+        value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+        value = value.toString().split('e');
+        return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+    }
+
+    if (!Math.round10) {
+        Math.round10 = function (value, exp) {
+            return decimalAdjust('round', value, exp);
+        };
+    }
+    if (!Math.floor10) {
+        Math.floor10 = function (value, exp) {
+            return decimalAdjust('floor', value, exp);
+        };
+    }
+    if (!Math.ceil10) {
+        Math.ceil10 = function (value, exp) {
+            return decimalAdjust('ceil', value, exp);
+        };
+    }
+})();

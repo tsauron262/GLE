@@ -138,7 +138,7 @@ class BimpStruct
                 $object = $config->instance;
             }
         }
-        
+
         if (!is_null($object)) {
             $name = $config->getFromCurrentPath('name', 'default');
             $panel = $config->getFromCurrentPath('panel', 0, false, 'bool');
@@ -204,7 +204,9 @@ class BimpStruct
 
         $caption = $config->getFromCurrentPath('caption', null, false, 'any');
 
-        $html = '<table class="objectViewtable">';
+        $table_id = 'objectViewTable_' . rand(0, 999999);
+        $html .= '<div class="objectViewTableContainer">';
+        $html .= '<table class="objectViewtable" id="' . $table_id . '">';
         $html .= '<thead>';
         if ($caption) {
             if (is_array($caption)) {
@@ -227,32 +229,104 @@ class BimpStruct
         $html .= '<tbody>';
 
         $rows = $config->getFromCurrentPath('rows', array(), true, 'array');
+        $edit = false;
         foreach ($rows as $idx => $row) {
             $row_path = $path . '/rows/' . $idx;
             $config->setCurrentPath($row_path);
-
             $field = $config->getFromCurrentPath('field', '');
-            $html .= '<tr>';
-            if ($field) {
-                $html .= '<th>';
-                $html .= $object->getConf('fields/' . $field . '/label', '');
-                $html .= '</th>';
-                $display = $object->getConf($row_path . '/display', 'default');
-                $html .= '<td>';
-                $html .= $object->displayData($field, $display);
-                $html .= '</td>';
-            } else {
-                $label = $object->getConf($row_path . '/label', '', true);
-                $value = $object->getConf($row_path . '/value', '', true);
-                if ($label && $value) {
-                    $html .= '<th>' . $label . '</th>';
-                    $html .= '<td>' . $value . '</td>';
+            $edit_field = $config->getFromCurrentPath('edit', false, false, 'bool');
+
+            if ($field && $edit_field && $config->isDefined('fields/' . $field)) {
+                $edit = true;
+                $multiple = $object->getConf('fields/' . $field . '/input/multiple', false, false, 'bool');
+                $type = $object->getConf('fields/' . $field . '/input/type', '', true);
+                $value = $object->getData($field);
+                if (is_null($value)) {
+                    $value = $object->getConf('fields/' . $field . '/default_value');
                 }
+                $display_if = $object->getConf('fields/' . $field . '/input/display_if');
+
+                $html .= '<tr class="' . (($type === 'hidden') ? 'hidden ' : '') . ($display_if ? 'display_if' : '') . '"';
+                if ($display_if) {
+                    $html .= BimpForm::renderDisplayIfData($object, 'fields/' . $field . '/input/display_if');
+                }
+                $html .= '>';
+
+                $html .= '<th>';
+                $html .= $config->getFromCurrentPath('label', $object->getConf('fields/' . $field . '/label', ''));
+                $html .= '</th>';
+
+                $html .= '<td>';
+                $html .= '<div class="inputContainer" id="' . $field . '_inputContainer"';
+                $html .= ' data-field_name="' . $field . '"';
+                $html .= '>';
+
+                $html .= BimpForm::renderInput($object, 'fields/' . $field, $field, $value);
+
+                $html .= '</div>';
+                $html .= '</td>';
+
+                $html .= '</tr>';
+            } else {
+                $html .= '<tr>';
+                if ($field) {
+                    $html .= '<th>';
+                    $html .= $config->getFromCurrentPath('label', $object->getConf('fields/' . $field . '/label', ''));
+                    $html .= '</th>';
+                    $html .= '<td>';
+                    $html .= $object->displayData($field, $config->getFromCurrentPath('display', 'default'));
+                    $html .= '</td>';
+                } else {
+                    $label = $config->getFromCurrentPath('label', '', true);
+
+                    $value = '';
+                    if ($config->isDefined($row_path . '/value')) {
+                        $value = $config->getFromCurrentPath('value', '', true);
+                    } elseif ($config->isDefined($row_path . '/card')) {
+                        $object_name = $config->getFromCurrentPath('card/object', '', true);
+                        $card_name = $config->getFromCurrentPath('card/name', 'default');
+                        if ($object_name) {
+                            $value = $object->renderChildCard($object_name, $card_name);
+                        }
+                    }
+                    if ($value) {
+                        $html .= '<th>' . ($label ? $label : '') . '</th>';
+                        $html .= '<td>' . $value . '</td>';
+                    }
+                }
+                $html .= '</tr>';
             }
+        }
+
+        if ($edit) {
+            $html .= '<tr style="display: none">';
+            $html .= '<td colspan="2">';
+            $html .= '<div class="ajaxResultsContainer" style="display: none">';
+            $html .= '</div>';
+            $html .= '</td>';
             $html .= '</tr>';
         }
 
-        $html .= '</tbody></table>';
+        $html .= '</tbody>';
+        if ($edit) {
+            $html .= '<tfoot>';
+            $html .= '<tr>';
+            $html .= '<td colspan="2" style="text-align: right">';
+
+            $html .= '<button type="button" class="btn btn-primary" onclick="saveObjectfromFieldsTable(\'' . $table_id . '\', $(this));">';
+            $html .= '<i class="fa fa-save iconLeft"></i>Enregistrer';
+            $html .= '</button>';
+
+            $html .= '</td>';
+            $html .= '</tr>';
+            $html .= '</tfoot>';
+        }
+        $html .= '</table>';
+
+        if ($edit) {
+            $html .= '<script type="text/javascript">setInputsEvents($(\'#' . $table_id . '\'));</script>';
+        }
+        $html .= '</div>';
 
         $config->setCurrentPath($prev_path);
         return $html;

@@ -91,8 +91,19 @@
 }
 
 /*Inputs*/
+input {
+    padding-bottom: 5px!important;
+}
+.inputContainer {
+    vertical-align: top;
+}
+.inputGroupContainer {
+    display: inline-block;
+    vertical-align: middle;
+}
 .auto_expand {
     overflow: hidden;
+    line-height: 16px !important;
 }
 .input-group {
     input {
@@ -130,7 +141,7 @@ select.switch {
 }
 .toggle {
     display: none;
-    
+
     & + span,
     & + span + label + span {
         display: inline-block;
@@ -142,11 +153,11 @@ select.switch {
         color: $gray;
         @include transition(all 0.5s ease);
     }
-    
+
     & + span {
         color: $gray-dark;
     }
-    
+
     & + span + .toggle-slider {
         position: relative; 
         display: inline-block;

@@ -951,6 +951,6 @@ function afficherMargeReduc(){
         pA = zone.find("#buying_price").val().replace(",",".");
         reducP = pHt*reduc/100;
         prixVenteR = pHt - reducP;
-        $("#zoneR").html("Total = " + (Math.round((qte*prixVenteR)*100)/100) + " Reduc = " + (Math.round((qte*reducP)*100)/100) + " Marge = " + Math.round((qte*(prixVenteR-pA))*100)/100 + " Taux de marge = " + Math.round((qte*(prixVenteR-pA))*100)/prixVenteR + " %");
+        $("#zoneR").html("Total = " + (Math.round((qte*prixVenteR)*100)/100) + " Reduc = " + (Math.round((qte*reducP)*100)/100) + " Marge = " + Math.round((qte*(prixVenteR-pA))*100)/100 + " Taux de marge = " + Math.round((qte*(prixVenteR-pA))*100*100/prixVenteR)/100 + " %");
     });
 }

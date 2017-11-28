@@ -945,12 +945,12 @@ function afficherMargeReduc(){
             zone.append("<div id='zoneR'></div>");
             enPlace = true;
         }
-        pHt = $("#price_ht").val();
-        qte = zone.find("#qty").val();
-        reduc = zone.find("#remise_percent").val();
-        pA = zone.find("#buying_price").val();
+        pHt = $("#price_ht").val().replace(",",".");
+        qte = zone.find("#qty").val().replace(",",".");
+        reduc = zone.find("#remise_percent").val().replace(",",".");
+        pA = zone.find("#buying_price").val().replace(",",".");
         reducP = pHt*reduc/100;
         prixVenteR = pHt - reducP;
-        $("#zoneR").html("Total = " + (Math.round((qte*prixVenteR)*100)/100) + " Reduc = " + (Math.round((qte*reducP)*100)/100) + " Marge = " + Math.round((qte*(prixVenteR-pA))*100)/100);
+        $("#zoneR").html("Total = " + (Math.round((qte*prixVenteR)*100)/100) + " Reduc = " + (Math.round((qte*reducP)*100)/100) + " Marge = " + Math.round((qte*(prixVenteR-pA))*100)/100 + " Taux de marge = " + Math.round((qte*(prixVenteR-pA))*100)/prixVenteR + " %");
     });
 }

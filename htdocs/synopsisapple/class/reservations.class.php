@@ -217,6 +217,7 @@ class Reservations
         $client->code_client = -1;
         $client->status = 1;
         $client->tva_assuj = 1;
+        $client->country_id = 1;
 
         if (isset($customer->firstName) && !empty($customer->firstName))
             $client->name = ((isset($customer->lastName) && !empty($customer->lastName)) ? $customer->lastName.' ' : '').$customer->firstName;

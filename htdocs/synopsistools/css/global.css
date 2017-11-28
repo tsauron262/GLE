@@ -464,3 +464,13 @@ table.tabBorder100 td{
 }
 
 
+#zoneR{
+    position: fixed;
+    right: 40px;
+    top: 20px;
+    width: auto;
+    background: white;
+    padding: 19px;
+    border: black solid;
+    border-radius: 13px;
+}

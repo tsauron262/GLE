@@ -4,6 +4,9 @@ $(window).on("load", function () {
     
     cacherMenuConge();
     
+    
+    afficherMargeReduc();
+    
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if ($("div.tmenudiv").is(':visible') && activeScroll) {
         $(window).resize(function () {
@@ -930,5 +933,24 @@ function traiteLien() {
                 }
             }
         }
+    });
+}
+
+
+function afficherMargeReduc(){
+    var enPlace = false;
+    $("#price_ht, #qty, #remise_percent, #buying_price").keyup(function(){
+        zone = $("#price_ht").parent().parent();
+        if(!enPlace){
+            zone.append("<div id='zoneR'></div>");
+            enPlace = true;
+        }
+        pHt = $("#price_ht").val();
+        qte = zone.find("#qty").val();
+        reduc = zone.find("#remise_percent").val();
+        pA = zone.find("#buying_price").val();
+        reducP = pHt*reduc/100;
+        prixVenteR = pHt - reducP;
+        $("#zoneR").html("Total = " + (Math.round((qte*prixVenteR)*100)/100) + " Reduc = " + (Math.round((qte*reducP)*100)/100) + " Marge = " + Math.round((qte*(prixVenteR-pA))*100)/100);
     });
 }

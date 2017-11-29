@@ -8,10 +8,10 @@ ADD `accepted` BOOLEAN NOT NULL DEFAULT FALSE AFTER `status`,
 ADD `id_client` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id`, 
 ADD `id_client_contact` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_client`,
 ADD `montant_materiels` FLOAT NOT NULL DEFAULT '0.00' AFTER `vr`, 
-ADD `montant_services` FLOAT NOT NULL DEFAULT '0.00' AFTER `montant_materiel`, 
-ADD `montant_logiciels` FLOAT NOT NULL DEFAULT '0.00' AFTER `montant_services`,
-ADD `commission_commerciale` FLOAT NOT NULL DEFAULT '0' AFTER `montant_logiciels`, 
-ADD `commission_financiere` FLOAT NOT NULL DEFAULT '0' AFTER `commission_commerciale`;
+ADD `montant_services` FLOAT NOT NULL DEFAULT '0.00', 
+ADD `montant_logiciels` FLOAT NOT NULL DEFAULT '0.00',
+ADD `commission_commerciale` FLOAT NOT NULL DEFAULT '0', 
+ADD `commission_financiere` FLOAT NOT NULL DEFAULT '0';
 
 CREATE TABLE IF NOT EXISTS `llx_bf_rent_except` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_rent_except` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_frais_divers` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_demande` int(10) UNSIGNED NOT NULL,
   `date` date NOT NULL DEFAULT '0000-00-00',
   `description` text NOT NULL,
@@ -35,12 +35,11 @@ CREATE TABLE IF NOT EXISTS `llx_bf_frais_divers` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD PRIMARY KEY (`id`)
+  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_frais_fournisseur` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_demande` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date` date NOT NULL DEFAULT '0000-00-00',
   `id_soc_supplier` int(10) UNSIGNED NOT NULL DEFAULT '0',
@@ -50,6 +49,5 @@ CREATE TABLE IF NOT EXISTS `llx_bf_frais_fournisseur` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD PRIMARY KEY (`id`)
+  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

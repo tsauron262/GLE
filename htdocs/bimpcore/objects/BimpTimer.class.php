@@ -130,15 +130,28 @@ class BimpTimer extends BimpObject
 
     public function renderTime($timer)
     {
+        $hideDays = false;
+        $hideHours = false;
+        $hideMinutes = false;
+
+        if (!isset($timer['days']) || !$timer['days']) {
+            $hideDays = true;
+            if (!isset($timer['hours']) || !$timer['hours']) {
+                $hideHours = true;
+                if (!isset($timer['minutes']) || !$timer['minutes']) {
+                    $hideMinutes = true;
+                }
+            }
+        }
         $html = '';
-        $html .= '<span class="bimp_timer_days bimp_timer_value">' . $timer['days'] . '</span>';
-        $html .= '<span class="bimp_timer_label">j</span>';
-        $html .= '<span class="bimp_timer_hours bimp_timer_value">' . $timer['hours'] . '</span>';
-        $html .= '<span class="bimp_timer_label">h</span>';
-        $html .= '<span class="bimp_timer_minutes bimp_timer_value">' . $timer['minutes'] . '</span>';
-        $html .= '<span class="bimp_timer_label">min</span>';
+        $html .= '<span class="bimp_timer_days bimp_timer_value"' . ($hideDays ? ' style="display: none"' : '') . '>' . $timer['days'] . '</span>';
+        $html .= '<span class="bimp_timer_label bimp_timer_days_label"' . ($hideDays ? ' style="display: none"' : '') . '>j</span>';
+        $html .= '<span class="bimp_timer_hours bimp_timer_value"' . ($hideHours ? ' style="display: none"' : '') . '>' . $timer['hours'] . '</span>';
+        $html .= '<span class="bimp_timer_label bimp_timer_hours_label"' . ($hideHours ? ' style="display: none"' : '') . '>h</span>';
+        $html .= '<span class="bimp_timer_minutes bimp_timer_value"' . ($hideMinutes ? ' style="display: none"' : '') . '>' . $timer['minutes'] . '</span>';
+        $html .= '<span class="bimp_timer_label bimp_timer_minutes_label' . ($hideMinutes ? ' style="display: none"' : '') . '">min</span>';
         $html .= '<span class="bimp_timer_secondes bimp_timer_value">' . $timer['secondes'] . '</span>';
-        $html .= '<span class="bimp_timer_label">sec</span>';
+        $html .= '<span class="bimp_timer_label bimp_timer_secondes_label">sec</span>';
         return $html;
     }
 }

@@ -1,6 +1,8 @@
 table: bf_rent
 parent_object: BF_Demande
 parent_id_property: id_demande
+positions: 1
+position_insert: before
 
 labels:
     name: loyer
@@ -18,6 +20,7 @@ fields:
         input: 
             type: text
         required: 1
+        sortable: 1
         
     amount_ht:
         label: Montant HT
@@ -30,6 +33,7 @@ fields:
             type: syntaxe
             syntaxe: <value> &euro;
         required: 1
+        sortable: 1
         
     payment:
         label: Règlement
@@ -39,7 +43,7 @@ fields:
             options: 
                 array: payments
         required: 0
-        sortable: 0
+        sortable: 1
         
 list:
     checkboxes: 1
@@ -50,9 +54,9 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: date_create
-    sort_way: desc
-    n: 25
+    sort_col: position
+    sort_way: asc
+    n: 10
     cols:
         quantity: 
             field: quantity
@@ -66,3 +70,4 @@ list:
     add_object_row: 1
     update_btn: 1
     delete_btn: 1
+    drag_n_drop: 1

@@ -122,8 +122,12 @@ class BimpDb
         if (file_exists($file)) {
             $sql = file_get_contents($file);
             if ($sql) {
-                $result = $this->execute($sql);
-                return ($result > 0) ? true : false;
+                $tabSql = explode(";", $sql);
+                foreach ($tabSql as $req)
+                    if ($req != "")
+                        if ($result = $this->execute($req) < 0)
+                            return false;
+                return true;
             }
         }
         return false;

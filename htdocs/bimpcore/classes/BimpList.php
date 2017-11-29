@@ -18,6 +18,7 @@ class BimpList
     protected $checkboxes = false;
     protected $search = false;
     protected $addobjectRow = false;
+    protected $use_positions = false;
     protected $sort_col = null;
     protected $sort_way = 'desc';
     protected $sort_option = '';
@@ -56,6 +57,7 @@ class BimpList
             $this->listIdentifier = $this->object->object_name . '_' . $list_name . '_list';
             $this->checkboxes = (int) $this->object->getCurrentConf('checkboxes', 0, false, 'bool');
             $this->addobjectRow = (int) $this->object->getCurrentConf('add_object_row', 0, false, 'bool');
+            $this->use_positions = (int) $this->object->getConf('positions', false, false, 'bool');
             $this->fetchCols();
             $this->colspan = 2 + count($this->cols);
             $this->fetchlistParams();
@@ -127,7 +129,9 @@ class BimpList
         $order_by = $primary;
 
         if (!is_null($this->sort_col)) {
-            if ($this->setConfPath('cols/' . $this->sort_col)) {
+            if ($this->sort_col === 'position') {
+                $order_by = 'position';
+            } elseif ($this->setConfPath('cols/' . $this->sort_col)) {
                 $field = $this->object->getCurrentConf('field', '');
                 if ($field) {
                     $order_by = '';
@@ -197,36 +201,43 @@ class BimpList
             $this->object->reset();
             $row = array();
             if ($this->object->fetch((int) $item[$primary])) {
+                if ($this->use_positions) {
+                    $row['position'] = $this->object->getData('position');
+                    if (is_null($row['position'])) {
+                        $row['position'] = 0;
+                    }
+                }
                 foreach ($this->cols as $col_name => $params) {
                     if ($this->setConfPath('cols/' . $col_name)) {
                         $field = $this->object->getCurrentConf('field', '');
                         $edit = (int) $this->object->getCurrentConf('edit', 0, false, 'bool');
 
-                        if ($edit) {
-                            if ($field) {
-                                $value = $this->object->getData($field);
-                                $input_id = $this->object->object_name . '_' . $item[$primary] . '_' . $field;
-                                $input = '<div class="editInputContainer" data-field_name="' . $field . '">';
-                                $input .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $value, $this->id_parent, null, null, $input_id);
-                                $input .= '</div>';
-                                $row[$col_name] = $input;
-                                continue;
-                            }
+                        if ($edit && $field) {
+                            $value = $this->object->getData($field);
+                            $input_id = $this->object->object_name . '_' . $item[$primary] . '_' . $field;
+                            $input = '<div class="editInputContainer" data-field_name="' . $field . '">';
+                            $input .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $value, $this->id_parent, null, null, $input_id);
+                            $input .= '</div>';
+                            $row[$col_name] = $input;
+                            continue;
                         }
 
-                        $value = '';
+                        $content = '';
                         if ($field) {
                             $display_name = $this->object->getCurrentConf('display', '');
-                            $value = $this->object->displayData($field, $display_name);
+                            $display = $this->object->displayData($field, $display_name);
+                            $value = $this->object->getData($field);
+                            $content = '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
+                            $content .= $display;
                         } else {
                             $value = $this->object->getCurrentConf('value', '', true);
                             if ($value) {
                                 if ($this->object->config->isDefined('cols/' . $col_name . '/display')) {
-                                    $value = $this->object->displayValue($value, 'cols/' . $col_name . '/display');
+                                    $content = $this->object->displayValue($value, 'cols/' . $col_name . '/display');
                                 }
                             }
                         }
-                        $row[$col_name] = $value;
+                        $row[$col_name] = $content;
                     }
                 }
                 $rows[$item[$primary]] = $row;
@@ -353,6 +364,10 @@ class BimpList
             }
             $html .= '</th>';
 
+            if ($this->use_positions) {
+                $html .= '<th class="positionHandle"></th>';
+            }
+
             foreach ($this->cols as $col_name => $col_params) {
                 if ($this->setConfPath('cols/' . $col_name)) {
                     $width = $this->object->getCurrentConf('width', null);
@@ -388,7 +403,7 @@ class BimpList
                         } else {
                             $html .= strtolower($default_sort_way);
                         }
-                        $html .= '" onclick="sortList(\'' . $this->listIdentifier . '\', \'' . $col_name . '\');">';
+                        $html .= '" onclick="if (!$(this).hasClass(\'deactivated\')) { sortList(\'' . $this->listIdentifier . '\', \'' . $col_name . '\'); }">';
 
                         $html .= $label . '</span>';
                     } else {
@@ -411,6 +426,9 @@ class BimpList
             }
             if ($this->addobjectRow) {
                 $html .= '<span class="headerButton openAddObjectRowButton open-close action-open"></span>';
+            }
+            if ($this->use_positions) {
+                $html .= '<span class="headerButton activatePositionsButton open-close action-open"></span>';
             }
             $html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
             $html .= ' data-popup_id="' . $this->listIdentifier . '_bulkActionsPopup"></span>';
@@ -446,6 +464,10 @@ class BimpList
         $html .= ' data-object_name="' . $this->object->object_name . '">';
 
         $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
+
+        if ($this->use_positions) {
+            $html .= '<td class="positionHandle"></td>';
+        }
 
         foreach ($this->cols as $col_name => $col_params) {
             if ($this->setConfPath('cols/' . $col_name)) {
@@ -511,6 +533,10 @@ class BimpList
         if ((int) $this->addobjectRow && !is_null($this->list_path)) {
             $html .= '<tr id="' . $this->listIdentifier . '_addObjectRow" class="addObjectRow inputsRow">';
             $html .= '<td><i class="fa fa-plus-circle"></i></td>';
+
+            if ($this->use_positions) {
+                $html .= '<td class="positionHandle"></td>';
+            }
 
             if (!is_null($this->id_parent)) {
                 $parent_id_property = $this->object->getParentIdProperty();
@@ -735,7 +761,12 @@ class BimpList
             $view_btn = (int) $this->object->getCurrentConf('view_btn', 0);
 
             foreach ($this->rows as $id_object => $row) {
-                $html .= '<tr class="' . $this->object->object_name . '_row" id="' . $this->object->object_name . '_row_' . $id_object . '">';
+                $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow" id="' . $this->object->object_name . '_row_' . $id_object . '"';
+                $html .= ' data-id_object="' . $id_object . '"';
+                if ($this->use_positions) {
+                    $html .= ' data-position="' . $row['position'] . '"';
+                }
+                $html .= '>';
 
                 $html .= '<td style="text-align: center">';
                 if ($this->checkboxes) {
@@ -745,6 +776,10 @@ class BimpList
                     $html .= ' data-id_object="' . $id_object . '"/>';
                 }
                 $html .= '</td>';
+
+                if ($this->use_positions) {
+                    $html .= '<td class="positionHandle"><span></span></td>';
+                }
 
                 $this->setConfPath('cols');
                 foreach ($this->cols as $col_name => $col_params) {

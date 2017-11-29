@@ -79,7 +79,11 @@ fields:
         required: 1
         sortable: 1
         
-    
+    paid:
+        label: Payé
+        type: bool
+        default_value: 0
+        sortable: 1
         
 list:
     checkboxes: 1
@@ -107,7 +111,11 @@ list:
             field: description
         amount: 
             field: amount
-            
+        paid:
+            field: paid
+            edit: 1
+            min_width: 125px
     add_btn: 1
     edit_btn: 1
+    update_btn: 1
     delete_btn: 1

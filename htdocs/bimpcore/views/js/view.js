@@ -131,7 +131,6 @@ function deleteObjectFromView(view_id, $button) {
         return;
     }
 
-
     var $view = $('#' + view_id);
 
     if (!$view.length) {
@@ -256,6 +255,7 @@ function loadModalObjectPage($button, url, modal_id, title) {
 
     $modal.find('.modal-title').html(title);
     $modal.modal('show');
+    $modal.find('.content-loading').show();
 
     $modal.on('hide.bs.modal', function (e) {
         $modal.find('.extra_button').remove();
@@ -263,8 +263,15 @@ function loadModalObjectPage($button, url, modal_id, title) {
         $button.removeClass('disabled');
     });
 
-    var html = '<div style="overflow: hidden"><iframe frameborder="0" style="margin-top: -52px" src="' + url + '" width="100%" height="800px"></iframe></div>';
-    $resultContainer.html(html).slideDown(250);
+    var html = '<div style="overflow: hidden"><iframe id="iframe" frameborder="0" src="' + url + '" width="100%" height="800px"></iframe></div>';
+    $resultContainer.html(html);
+
+    $('#iframe').on("load", function () {
+            var $head = $("iframe").contents().find("head");                
+            $head.append($("<link/>", {rel: "stylesheet", href: DOL_URL_ROOT + "/bimpcore/views/css/content_only.css", type: "text/css"}));
+        $modal.find('.content-loading').hide();
+        $resultContainer.slideDown(250);
+      });
 }
 
 // Gestion des événements

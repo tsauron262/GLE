@@ -291,7 +291,8 @@ $zindex-popover:           1060 !default;
 $zindex-tooltip:           1070 !default;
 $zindex-navbar-fixed:      1030 !default;
 $zindex-modal-background:  1040 !default;
-$zindex-modal:             1050 !default;
+$zindex-modal:             99999 !default;
+
 
 
 //== Media queries breakpoints
@@ -300,7 +301,7 @@ $zindex-modal:             1050 !default;
 
 // Extra small screen / phone
 //** Deprecated `$screen-xs` as of v3.0.1
-$screen-xs:                  768px !default;
+$screen-xs:                  480px !default;
 //** Deprecated `$screen-xs-min` as of v3.2.0
 $screen-xs-min:              $screen-xs !default;
 //** Deprecated `$screen-phone` as of v3.0.1
@@ -308,7 +309,7 @@ $screen-phone:               $screen-xs-min !default;
 
 // Small screen / tablet
 //** Deprecated `$screen-sm` as of v3.0.1
-$screen-sm:                  992px !default;
+$screen-sm:                  768px !default;
 $screen-sm-min:              $screen-sm !default;
 //** Deprecated `$screen-tablet` as of v3.0.1
 $screen-tablet:              $screen-sm-min !default;
@@ -627,9 +628,14 @@ $modal-header-border-color:   #e5e5e5 !default;
 //** Modal footer border color
 $modal-footer-border-color:   $modal-header-border-color !default;
 
-$modal-lg:                    960px !default;
-$modal-md:                    600px !default;
-$modal-sm:                    300px !default;
+$modal-large-lg:                    60% !default;
+$modal-medium-lg:                    40% !default;
+$modal-small-lg:                    20% !default;
+$modal-large-md:                    60% !default;
+$modal-medium-md:                    50% !default;
+$modal-small-md:                    40% !default;
+$modal-sm: 90%!default;
+$modal-xs: 100%!default;
 
 
 //== Alerts

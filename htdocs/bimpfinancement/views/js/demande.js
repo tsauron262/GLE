@@ -14,13 +14,18 @@ function onBFDemandeViewLoaded(id_demande) {
         });
         calculateMontantTotal($view);
     }
+
+    var $list = $('#BF_Rent_default_list');
+    $list.on('listRefresh', function () {
+        // ...
+    });
 }
 
 function calculateMontantTotal($view) {
     if (!$view.length) {
-        return;m    
+        return;
     }
-    
+
     var $montant_materiels = $view.find('[name="montant_materiels"]');
     var $montant_services = $view.find('[name="montant_services"]');
     var $montant_logiciels = $view.find('[name="montant_logiciels"]');

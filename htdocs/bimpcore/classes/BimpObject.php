@@ -13,7 +13,8 @@ class BimpObject
         'date_create',
         'date_update',
         'user_create',
-        'user_update'
+        'user_update',
+        'position'
     );
     public $use_commom_fields = true;
     protected $data = array();
@@ -385,6 +386,12 @@ class BimpObject
                 } else {
                     return '<span class="danger">Inconnu</span>';
                 }
+
+            case 'position':
+                if (isset($$this->data['position']) && $$this->data['position']) {
+                    return '<span class="object_position">' . $this->data['position'] . '</span>';
+                }
+                return '';
         }
 
         $html = '';
@@ -464,6 +471,10 @@ class BimpObject
                 case 'date':
                 case 'datetime':
                     $display_type = $data_type;
+                    break;
+
+                case 'bool':
+                    $display_type = 'yes_no';
                     break;
 
                 default:
@@ -555,8 +566,12 @@ class BimpObject
                 break;
 
             case 'array_value':
-                $array = $this->getConf($display_path . '/values', array(), true, 'array');
-
+                if ($this->config->isDefined($display_path . '/values')) {
+                    $array = $this->getConf($display_path . '/values', array(), true, 'array');
+                } else {
+                    $up_path = $this->config->getPathPrevLevel($display_path);
+                    $array = $this->getConf($up_path.'/values', array(), true, 'array');
+                }
                 $check = false;
                 if (isset($array[$value])) {
                     if (is_array($array[$value])) {
@@ -653,6 +668,10 @@ class BimpObject
                 $input_type = 'datetime_range';
                 $search_type = 'datetime_range';
                 break;
+
+            case 'position':
+                $input_type = 'values_range';
+                $search_type = 'values_range';
         }
 
         $html .= '<div class="searchInputContainer"';
@@ -858,97 +877,58 @@ class BimpObject
 
     // Gestion SQL:
 
-    public function find($filters)
+    public function create()
     {
-        $this->reset();
-
-        $where = '';
-        $first = true;
-        foreach ($filters as $field_name => $value) {
-            if ($first) {
-                $first = false;
-            } else {
-                $where .= ' AND ';
-            }
-            $where .= '`' . $field_name . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
-        }
-
-        $id_object = $this->db->getValue($this->getTable(), $this->getPrimary(), $where);
-
-        if (is_null($id_object) || !$id_object) {
-            return false;
-        }
-
-        return $this->fetch($id_object);
-    }
-
-    public function fetch($id)
-    {
-        $this->reset();
         $table = $this->getTable();
-        $primary = $this->getPrimary();
 
-        if (is_null($table) || !$table) {
-            return false;
+        if (is_null($table)) {
+            return array('Fichier de configuration invalide (table non renseignée)');
         }
 
-        $row = $this->db->getRow($table, '`' . $primary . '` = ' . (int) $id);
+        $errors = $this->validate();
 
-        if (!is_null($row)) {
-            foreach ($row as $field => $value) {
-                if ($field === $primary) {
-                    $this->id = $value;
-                } elseif (in_array($field, self::$common_fields) ||
-                        $this->config->isDefined('fields/' . $field)) {
-                    $this->checkFieldValueType($field, $value);
-                    $this->data[$field] = $value;
+        if (!count($errors)) {
+            if ($this->use_commom_fields) {
+                $this->data['date_create'] = date('Y-m-d H:i:s');
+                global $user;
+                if (isset($user->id)) {
+                    $this->data['user_create'] = (int) $user->id;
+                } else {
+                    $this->data['user_create'] = 0;
                 }
             }
-            return true;
-        }
-        return false;
-    }
 
-    public function fetchBy($field, $value)
-    {
-        $table = $this->getTable();
-        $primary = $this->getPrimary();
+            foreach ($this->data as $field => &$value) {
+                $this->checkFieldValueType($field, $value);
+            }
 
-        if (is_null($table) || !$table) {
-            return false;
-        }
+            $result = $this->db->insert($table, $this->data, true);
+            if ($result > 0) {
+                $this->id = $result;
 
-        $prev_path = $this->config->current_path;
+                if ($this->getConf('positions', false, false, 'bool')) {
+                    $insert_mode = $this->getConf('position_insert', 'before');
+                    switch ($insert_mode) {
+                        case 'before':
+                            $this->setPosition(1);
+                            break;
 
-        if (!$this->config->setCurrentPath('fields/' . $field)) {
-            BimpTools::logTechnicalError($this, 'fetchBy', 'Le champ "' . $field . '" n\'existe pas');
-            return false;
-        }
-
-        $type = $this->getCurrentConf('type', '');
-
-        if (!in_array($type, array('id', 'id_object'))) {
-            BimpTools::logTechnicalError($this, 'fetchBy', 'Le champ "' . $field . '" doit être un identifiant unique');
-        } else {
-            $where = '`' . $field . '` = ' . is_string($value) ? '\'' . $value . '\'' : $value;
-
-            $row = $this->db->getRow($table, $where);
-
-            if (!is_null($row)) {
-                foreach ($row as $property => $value) {
-                    if ($property === $primary) {
-                        $this->id = $value;
-                    } elseif (in_array($field, self::$common_fields) ||
-                            $this->config->isDefined('fields/' . $property)) {
-                        $this->data[$property] = $value;
+                        case 'after':
+                            $this->setPosition((int) $this->getNextPosition());
+                            break;
                     }
                 }
-                $this->config->setCurrentPath($prev_path);
-                return true;
+            } else {
+                $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
+                $sqlError = $this->db->db->error();
+                if ($sqlError) {
+                    $msg .= ' - Erreur SQL: ' . $sqlError;
+                }
+                $errors[] = $msg;
             }
         }
-        $this->config->setCurrentPath($prev_path);
-        return false;
+
+        return $errors;
     }
 
     public function update()
@@ -1040,113 +1020,90 @@ class BimpObject
         return $errors;
     }
 
-    public function create()
+    public function find($filters)
     {
-        $table = $this->getTable();
+        $this->reset();
 
-        if (is_null($table)) {
-            return array('Fichier de configuration invalide (table non renseignée)');
-        }
-
-        $errors = $this->validate();
-
-        if (!count($errors)) {
-            if ($this->use_commom_fields) {
-                $this->data['date_create'] = date('Y-m-d H:i:s');
-                global $user;
-                if (isset($user->id)) {
-                    $this->data['user_create'] = (int) $user->id;
-                } else {
-                    $this->data['user_create'] = 0;
-                }
-            }
-
-            foreach ($this->data as $field => &$value) {
-                $this->checkFieldValueType($field, $value);
-            }
-
-            $result = $this->db->insert($table, $this->data, true);
-            if ($result > 0) {
-                $this->id = $result;
+        $where = '';
+        $first = true;
+        foreach ($filters as $field_name => $value) {
+            if ($first) {
+                $first = false;
             } else {
-                $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
-                $sqlError = $this->db->db->error();
-                if ($sqlError) {
-                    $msg .= ' - Erreur SQL: ' . $sqlError;
-                }
-                $errors[] = $msg;
+                $where .= ' AND ';
             }
+            $where .= '`' . $field_name . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
         }
 
-        return $errors;
+        $id_object = $this->db->getValue($this->getTable(), $this->getPrimary(), $where);
+
+        if (is_null($id_object) || !$id_object) {
+            return false;
+        }
+
+        return $this->fetch($id_object);
     }
 
-    public function delete()
+    public function fetch($id)
     {
+        $this->reset();
         $table = $this->getTable();
         $primary = $this->getPrimary();
 
-        if (is_null($table)) {
-            return array('Fichier de configuration invalide (table non renseignée)');
-        }
-        if (is_null($this->id) || !$this->id) {
-            return array('ID absent');
+        if (is_null($table) || !$table) {
+            return false;
         }
 
-        $errors = array();
-        $result = $this->db->delete($table, '`' . $primary . '` = ' . (int) $this->id);
-        if ($result <= 0) {
-            $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
-            $sqlError = $this->db->db->error();
-            if ($sqlError) {
-                $msg .= ' - Erreur SQL: ' . $sqlError;
+        $row = $this->db->getRow($table, '`' . $primary . '` = ' . (int) $id);
+
+        if (!is_null($row)) {
+            foreach ($row as $field => $value) {
+                if ($field === $primary) {
+                    $this->id = $value;
+                } elseif (in_array($field, self::$common_fields) ||
+                        $this->config->isDefined('fields/' . $field)) {
+                    $this->checkFieldValueType($field, $value);
+                    $this->data[$field] = $value;
+                }
             }
-            $errors[] = $msg;
+            return true;
+        }
+        return false;
+    }
+
+    public function fetchBy($field, $value)
+    {
+        $this->reset();
+        $table = $this->getTable();
+        $primary = $this->getPrimary();
+
+        if (is_null($table) || !$table) {
+            return false;
+        }
+
+        $prev_path = $this->config->current_path;
+
+        if (!$this->config->setCurrentPath('fields/' . $field)) {
+            BimpTools::logTechnicalError($this, 'fetchBy', 'Le champ "' . $field . '" n\'existe pas');
+            return false;
+        }
+
+        $type = $this->getCurrentConf('type', '');
+
+        if (!in_array($type, array('id', 'id_object'))) {
+            BimpTools::logTechnicalError($this, 'fetchBy', 'Le champ "' . $field . '" doit être un identifiant unique');
         } else {
-            $objects = $this->getConf('objects', array(), true, 'array');
-            if (!is_null($objects)) {
-                $prev_path = $this->config->current_path;
-                foreach ($objects as $name => $params) {
-                    $this->config->setCurrentPath('objects/' . $name);
-                    if ((int) $delete = $this->getCurrentConf('delete', 0, false, 'bool')) {
-                        $instance = $this->config->getObject('', $name);
-                        if (!is_null($instance)) {
-                            if (!$instance->deleteByParent($this->id)) {
-                                $msg = 'Des erreurs sont survenues lors de la tentative de suppresion des ';
-                                $msg .= $this->getInstanceLabel($instance, 'name_plur');
-                                $errors[] = $msg;
-                            }
-                        }
-                    }
-                }
+            $where = '`' . $field . '` = ' . is_string($value) ? '\'' . $value . '\'' : $value;
+
+            $id_object = $this->db->getValue($table, $primary, $where);
+
+            if (!is_null($id_object)) {
                 $this->config->setCurrentPath($prev_path);
-            }
-
-            $associations = $this->getConf('associations', null, false, 'array');
-            if (!is_null($associations)) {
-                $prev_path = $this->config->current_path;
-                foreach ($associations as $name => $params) {
-                    $this->config->setCurrentPath('associations/' . $name);
-
-                    $self_key = $this->getCurrentConf('self_key', null, true);
-                    $asso_table = $this->getCurrentConf('table', null, true);
-
-                    if (is_null($self_key) || is_null($asso_table)) {
-                        $errors[] = 'Configuration invalide pour l\'association de type "' . $name . '"';
-                    } else {
-                        $where = '`' . $self_key . '` = ' . (int) $this->id;
-                        $result = $this->db->delete($asso_table, $where);
-                        if ($result <= 0) {
-                            $msg = 'Echec de la suppression des associations de type "' . $name . '".';
-                            $errors[] = $msg;
-                        }
-                    }
-                }
-                $this->config->setCurrentPath($prev_path);
+                return $this->fetch($id_object);
             }
         }
-
-        return $errors;
+        $this->config->setCurrentPath($prev_path);
+        return false;
     }
 
     public function getDataArray($include_id = false)
@@ -1210,6 +1167,24 @@ class BimpObject
         return $rows;
     }
 
+    public function getListByParent($id_parent, $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
+    {
+        if ($order_by === 'id') {
+            $order_by = $this->getPrimary();
+        }
+
+        $table = $this->getTable();
+        $parent_id_property = $this->getParentIdProperty();
+
+        if (is_null($table) ||  is_null($parent_id_property)) {
+            return array();
+        }
+
+        return $this->getList(array(
+                    $parent_id_property => $id_parent
+                        ), $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
+    }
+
     public function getListCount($filters = array(), $joins = null)
     {
         $table = $this->getTable();
@@ -1230,22 +1205,75 @@ class BimpObject
         return 0;
     }
 
-    public function getListByParent($id_parent, $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
+    public function delete()
     {
-        if ($order_by === 'id') {
-            $order_by = $this->getPrimary();
-        }
-
         $table = $this->getTable();
-        $parent_id_property = $this->getParentIdProperty();
+        $primary = $this->getPrimary();
 
-        if (is_null($table) ||  is_null($parent_id_property)) {
-            return array();
+        if (is_null($table)) {
+            return array('Fichier de configuration invalide (table non renseignée)');
+        }
+        if (is_null($this->id) || !$this->id) {
+            return array('ID absent');
         }
 
-        return $this->getList(array(
-                    $parent_id_property => $id_parent
-                        ), $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
+        $errors = array();
+        $result = $this->db->delete($table, '`' . $primary . '` = ' . (int) $this->id);
+        if ($result <= 0) {
+            $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
+            $sqlError = $this->db->db->error();
+            if ($sqlError) {
+                $msg .= ' - Erreur SQL: ' . $sqlError;
+            }
+            $errors[] = $msg;
+        } else {
+            if ($this->getConf('positions')) {
+                $this->resetPositions();
+            }
+            $objects = $this->getConf('objects', array(), true, 'array');
+            if (!is_null($objects)) {
+                $prev_path = $this->config->current_path;
+                foreach ($objects as $name => $params) {
+                    $this->config->setCurrentPath('objects/' . $name);
+                    if ((int) $delete = $this->getCurrentConf('delete', 0, false, 'bool')) {
+                        $instance = $this->config->getObject('', $name);
+                        if (!is_null($instance)) {
+                            if (!$instance->deleteByParent($this->id)) {
+                                $msg = 'Des erreurs sont survenues lors de la tentative de suppresion des ';
+                                $msg .= $this->getInstanceLabel($instance, 'name_plur');
+                                $errors[] = $msg;
+                            }
+                        }
+                    }
+                }
+                $this->config->setCurrentPath($prev_path);
+            }
+
+            $associations = $this->getConf('associations', null, false, 'array');
+            if (!is_null($associations)) {
+                $prev_path = $this->config->current_path;
+                foreach ($associations as $name => $params) {
+                    $this->config->setCurrentPath('associations/' . $name);
+
+                    $self_key = $this->getCurrentConf('self_key', null, true);
+                    $asso_table = $this->getCurrentConf('table', null, true);
+
+                    if (is_null($self_key) || is_null($asso_table)) {
+                        $errors[] = 'Configuration invalide pour l\'association de type "' . $name . '"';
+                    } else {
+                        $where = '`' . $self_key . '` = ' . (int) $this->id;
+                        $result = $this->db->delete($asso_table, $where);
+                        if ($result <= 0) {
+                            $msg = 'Echec de la suppression des associations de type "' . $name . '".';
+                            $errors[] = $msg;
+                        }
+                    }
+                }
+                $this->config->setCurrentPath($prev_path);
+            }
+        }
+
+        return $errors;
     }
 
     public function deleteByParent($id_parent)
@@ -1273,24 +1301,143 @@ class BimpObject
         if (is_null($table)) {
             return false;
         }
-
-        $first_loop = true;
-        $where = '';
-        foreach ($filters as $key => $value) {
-            if (!$first_loop) {
-                $where .= ' AND ';
-            } else {
-                $first_loop = false;
-            }
-
-            $where .= '`' . $key . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
-        }
-
-        $result = $this->db->delete($table, $where);
-        if ($result <= 0) {
+        $primary = $this->getPrimary();
+        if (is_null($primary)) {
             return false;
         }
-        return true;
+
+        $sql = BimpTools::getSqlSelect(array($primary));
+        $sql .= BimpTools::getSqlFrom($table);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $items = $this->db->executeS($sql);
+
+        $check = true;
+        if (!is_null($items)) {
+            foreach ($items as $item) {
+                $this->reset();
+                if ($this->fetch($item->id)) {
+                    if (!$this->delete()) {
+                        $check = false;
+                    }
+                }
+            }
+        }
+        return $check;
+    }
+
+    // Gestion des positions: 
+
+    public function resetPositions()
+    {
+        if ($this->getConf('positions', false, false, 'bool')) {
+            $filters = array();
+            $parent_id_property = $this->getParentIdProperty();
+            if (!is_null($parent_id_property)) {
+                $id_parent = $this->getData($parent_id_property);
+                if (is_null($id_parent) || !$id_parent) {
+                    return;
+                }
+                $filters[$parent_id_property] = $id_parent;
+            }
+
+            $table = $this->getTable();
+            $primary = $this->getPrimary();
+
+            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+            $i = 1;
+            foreach ($items as $item) {
+                if ((int) $item['position'] !== (int) $i) {
+                    $this->db->update($table, array(
+                        'position' => (int) $i
+                            ), '`' . $primary . '` = ' . (int) $item[$primary]);
+                }
+                $i++;
+            }
+        }
+    }
+
+    public function setPosition($position)
+    {
+        if (!isset($this->id) || !$this->id) {
+            return false;
+        }
+
+        if ($this->getConf('positions', false, false, 'bool')) {
+            $filters = array();
+            $parent_id_property = $this->getParentIdProperty();
+            if (!is_null($parent_id_property)) {
+                $id_parent = $this->getData($parent_id_property);
+                if (is_null($id_parent) || !$id_parent) {
+                    return;
+                }
+                $filters[$parent_id_property] = $id_parent;
+            }
+
+            $table = $this->getTable();
+            $primary = $this->getPrimary();
+
+            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+
+            $check = true;
+
+            if ($this->db->update($table, array(
+                        'position' => (int) $position
+                            ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
+                $check = false;
+            }
+
+            if ($check) {
+                $i = 1;
+                foreach ($items as $item) {
+                    if ($i === (int) $position) {
+                        $i++;
+                    }
+
+                    if ((int) $item[$primary] === (int) $this->id) {
+                        continue;
+                    }
+
+                    if ((int) $item['position'] !== (int) $i) {
+                        if ($this->db->update($table, array(
+                                    'position' => (int) $i
+                                        ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+                            $check = false;
+                        }
+                    }
+                    $i++;
+                }
+            }
+            return $check;
+        }
+
+        return false;
+    }
+
+    public function getNextPosition()
+    {
+        if ($this->getConf('positions', false, false, 'bool')) {
+            $filters = array();
+
+            $parent_id_property = $this->getParentIdProperty();
+            if (!is_null($parent_id_property)) {
+                $id_parent = $this->getData($parent_id_property);
+                if (is_null($id_parent) || !$id_parent) {
+                    return 0;
+                }
+                $filters[$parent_id_property] = $id_parent;
+            }
+
+            $sql = 'SELECT MAX(`position`) as max_pos';
+            $sql .= BimpTools::getSqlFrom($this->getTable());
+            $sql .= BimpTools::getSqlWhere($filters);
+
+            $result = $this->db->executeS($sql, 'array');
+            if (!is_null($result)) {
+                return (int) ((int) $result[0]['max_pos'] + 1);
+            }
+        }
+        return 1;
     }
 
     // Rendus HTML

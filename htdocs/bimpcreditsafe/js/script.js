@@ -113,15 +113,19 @@ function InfoSoc(elem,elem2) {
         if(this.isSiretSiren(siren)){
             datas = "siren=" + siren;
             jQuery.ajax({
-                url: DOL_URL_ROOT + "/bimpcreditsafe/test.php",
+                url: DOL_URL_ROOT + "/bimpcreditsafe/test2.php",
                 data: datas,
                 datatype: "json",
                 type: "POST",
                 cache: false,
                 success: function (msg) {
                     var result = JSON.parse(msg);
-                    if (typeof result.Erreur !== "undefined")
-                        alert("SIREN non reconnue par CREDIT SAFE");
+                    if (result.Erreur == "132")
+                        alert("Plus d'unité chez CREDIT SAFE");
+                    else if (result.Erreur == "171")
+                        alert("SIREN/SIRET non reconnue par CREDIT SAFE");
+                    else if (typeof result.Erreur !== "undefined")
+                        alert("Erreur inconnue code :" + result.Erreur);
                     else {
                         moi.insertValue(result);
                         moi.elem.val(siren.substring(0,9));

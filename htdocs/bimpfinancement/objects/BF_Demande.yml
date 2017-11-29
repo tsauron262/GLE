@@ -455,6 +455,16 @@ views:
                                           edit: 1
                                         - field: commission_financiere
                                           edit: 1
+                                        - label: Montant total
+                                          value: <span id="montant_total2"></span>
+                                        - label: Loyer intermediaire
+                                          value: <span id="loy_inter"></span>
+                                        - label: Frais Divers
+                                          value: <span id="frais_div"></span>
+                                        - label: CA Calculé
+                                          value: <span id="ca_calc"></span>
+                                        - label: Reste a payé Fournisseur
+                                          value: <span id="rest_fact"></span>
                                         - field: vr
                                           edit: 1
                                         - field: ca_prevu

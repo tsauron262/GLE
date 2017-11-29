@@ -41,6 +41,10 @@ $MAXLIST = 100;
 $langs->load("companies");
 $langs->load("other");
 
+//Récuperation date de début et de fin 
+$dateD = GETPOST("dateD");
+$dateF = GETPOST("dateF");
+
 // Security check
 $socid = GETPOST('socid', 'int');
 $action = GETPOST('action', 'alpha');
@@ -271,33 +275,52 @@ print "</td></tr></table>";
 //<-- ------------------- FORMULAIRE PERIOD START------------ -->
 
 
-    $dateDuJour = date("Y-m-d"); // recuperation date du jours
     
     $annee = date("Y"); //recuperation de l'annee en cours
-    $anneeInt = intval($annee); //conversion chaine en entier
-    $anneeAnterieur = $annee -1; //soustraction d'un an de l'annee en cours
-    $anneeStr = strval($anneeAnterieur); // conversion entier en chaine
-    
-    $jourMois = date("m-d"); //recuperation jour et mois en cours
-    
-    $dateAnterieur = $anneeStr."-".$jourMois; //concaténation annee anterieur et jour/mois
      
-    // chargement jquery et bootstrap (CDN)
-    echo '<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>';
+    // chargement bootstrap (CDN)
     echo '<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">';
     echo '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>';
+    
     
     // View Formulaire
     echo '<h3>Sélectionnez une periode de facturation</h3>';
     
-    echo '<form action="/gle/bimpcesu/core/modules/societe/doc/pdf_bimpcesu.modules.php" method="post"> <b>Du</b> <input type="date" name="dateDebut" value="'.$dateAnterieur.'"/>'; //valeur par defaut = date du jours il y a un an 
-    echo '<b>Au</b> <input type="date" name="dateFin" value="'.$dateDuJour.'"/>'; // valeur par defaut = date du jours
+    echo '<form> <b>Du</b> <input type="date" name="dateDebut" value="' .$annee. '-01-01"/>'; //valeur par defaut = 1er janvier de l'année en cours 
+    echo '<b>Au</b> <input type="date" name="dateFin" value="' .$annee. '-12-31"/>'; // valeur par defaut = 31 decembre de l'année en cours
     
-    echo '<button type="button" class="btn btn-primary">ok</button>';
+    echo '<button type="button" class="btn btn-success">ok</button></form>';
+        
+?>        
+<script>        
+    (function($){
+        
+        $(document).ready(function(){
+            $('#builddoc_generatebutton').hide();
+            //var dateDeDebut = NULL;
+            //var dateDeFin = NULL;
+        });
     
-    echo '<input type="submit" style="width:5em; height:3em; font-size:1em" value="ok"/></form>';
+        $('.btn-success').on('click', function(e){
+            
+            var dateDeDebut = $('input[name=dateDebut]').val();
+            var dateDeFin = $('input[name=dateFin]').val();
+            
+            $('<input type="hidden" name="dateD" value="'+dateDeDebut+'"/>').appendTo('#builddoc_form');                        
+            $('<input type="hidden" name="dateF" value="'+dateDeFin+'"/>').appendTo('#builddoc_form');
+            
+            //if (dateDeDebut !== NULL && dateDeFin !== NULL){
+                $('#builddoc_generatebutton').show();
+            //}
+            
+            alert('Vous allez sélectionner les fatcures à partir du : ' + $('input[name=dateD]').val() + ' jusqu\'au : ' + $('input[name=dateF]').val() );
+            
+        });
     
-    
+    })(jQuery);</script>
+<?php
+
+
 //<-- ------------------- FORMULAIRE PERIOD END------------ -->
 
 
@@ -314,6 +337,8 @@ print "</td></tr></table>";
 $upload_dir = $conf->bimpcesu->dir_output;
 $permissioncreate = $user->rights->bimpcesu->read;
 include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
+
+
 
 /*
  * Documents generes

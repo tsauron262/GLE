@@ -930,24 +930,17 @@ class pdf_bimpcesu extends ModeleBimpcesu
         
         
 	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
-	{
-		global $conf,$langs,$db;
+	{               
+		global $conf,$langs,$db,$dateD,$dateF;
 
 	$facturestatic = new Facture($db);
         
         $sql = 'SELECT f.rowid as facid, f.fk_mode_reglement as mr';
-        //$sql .= ', f.total as total_ht';
-        //$sql .= ', f.tva as total_tva';
         $sql .= ', f.total_ttc as total_ttc';
-        //$sql .= ', f.datef as df, f.datec as dc';
-        //$sql .= ', s.nom, s.rowid as socid';
-        //$sql .= ', SUM(f.total_ttc) as total_ttc';
         $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s," . MAIN_DB_PREFIX . "facture as f";
-        //$sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture as pf ON f.rowid=pf.fk_facture';
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
-        //$sql .= " AND f.entity = " . $conf->entity;
+        $sql .= " AND f.datef BETWEEN '" . $dateD . "' AND '" . $dateF ."'";
         $sql .= " GROUP BY f.rowid";
-        //$sql .= " ORDER BY f.datef DESC, f.datec DESC";
 
         
         $resql = $db->query($sql);
@@ -957,7 +950,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
           $num = $db->num_rows($resql);
           $i = 0;
 
-          $array_total = array();//déclaration du tableau en variable globale
+          $array_total = array();   //déclaration du tableau en variable globale
           $array_total_cesu = array();
       
            while ($i < $num) {
@@ -967,33 +960,24 @@ class pdf_bimpcesu extends ModeleBimpcesu
               $facturestatic->id = $objp->facid;
               $facturestatic->ref = $objp->facnumber;
               $facturestatic->type = $objp->type;
-              $facturestatic->total_ht = $objp->total_ht;
-              $facturestatic->total_tva = $objp->total_tva;
               $facturestatic->total_ttc = $objp->total_ttc;
-              $facturestatic->am = $objp->am;
-              $facturstatic->mr = $objp->mr;
+              $facturestatic->mr = $objp->mr;
               
               if($objp->mr == 150){
-                  
                   $array_total_cesu[] = $objp->total_ttc;
-                  $array_total[] = $objp->total_ttc;//push du tableau
+                  $array_total[] = $objp->total_ttc;    //push du tableau
                   
               } else {
-                  
-                  $array_total[] = $objp->total_ttc;//push du tableau
+                  $array_total[] = $objp->total_ttc;    //push du tableau
               }
-              
-              
-              
+                                          
               $i++;
               
-              
-          }
+            }
+            
           //$db->free($resql);
       
-           
             $total = array_sum ($array_total); // Montant total facture     
-            
             $totalcesu = array_sum ($array_total_cesu); // Montant total CESU       
             
             $npref = "Error"; // Inconnu pour le moment
@@ -1003,18 +987,19 @@ class pdf_bimpcesu extends ModeleBimpcesu
             $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
             $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
             
+        } elseif (empty($dateD) || empty($dateF)) {
+            echo 'Pas de dates selectionnées';
+            
         } else {
-            
-            print "pas de factures";
-            
+            echo 'Pas de fatcures';
         }
         
         
        // $object = new Societe($db);
         $bene = $object->nom;
-        $beneadd = $object->address; // Inconnu pour le moment
-        $benezip = $object->zip; // Inconnu pour le moment
-        $beneville = $object->town; // Inconnu pour le moment
+        $beneadd = $object->address; 
+        $benezip = $object->zip; 
+        $beneville = $object->town; 
 
         // Date & Date -1
         date_default_timezone_set('UTC+1');
@@ -1192,7 +1177,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         // LIGNES DATE
                         $pdf->SetXY($posx+150,$posy+60); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
-                        $pdf->MultiCell(100, 3, "$orgaville, le $date02$date03", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(100, 3, "$orgaville, le $date01", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 1
                         $pdf->SetXY($posx+2,$posy+70); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR

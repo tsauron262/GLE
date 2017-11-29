@@ -841,6 +841,7 @@ class UserGroup extends CommonObject
 		if (! empty($conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS))
 		{
 			$valueofldapfield=array();
+			//$valueofldapfield2=array();
 			foreach($this->members as $key=>$val)    // This is array of users for group into dolibarr database.
 			{
 				$muser=new User($this->db);
@@ -851,9 +852,11 @@ class UserGroup extends CommonObject
                                     $info2["mail"] = str_replace("FERME@", "", $info2["mail"]);
                                     if (!$conf->global->LDAP_KEY_USERS == 'mail' || !empty($info2["mail"]))
                                     $valueofldapfield[] = $muser->_load_ldap_dn($info2);
+                                    //$valueofldapfield[] = $muser->login;
                                 }
                                 /*fmod drsi*/
 			}
+//			$info[$conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS] = array((!empty($valueofldapfield)?$valueofldapfield:''), (!empty($valueofldapfield2)?$valueofldapfield2:''));
 			$info[$conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS] = (!empty($valueofldapfield)?$valueofldapfield:'');
 		}
                 
@@ -888,6 +891,7 @@ class UserGroup extends CommonObject
                     $info['shadowAddress'] = $arrAlias;
                 }
                 /*fmod drsi*/
+                //echo "<pre>"; print_r($info); die;
 		return $info;
 	}
 

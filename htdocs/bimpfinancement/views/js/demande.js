@@ -9,6 +9,11 @@ function onBFDemandeViewLoaded(id_demande) {
         });
         calculateMontantTotal($view);
     }
+
+    var $list = $('#BF_Rent_default_list');
+    $list.on('listRefresh', function () {
+        // ...
+    });
 }
 
 
@@ -27,9 +32,9 @@ function initEvents($view){
 
 function calculateMontantTotal($view) {
     if (!$view.length) {
-        return; 
+        return;
     }
-    
+
     var $montant_materiels = $view.find('[name="montant_materiels"]');
     var $montant_services = $view.find('[name="montant_services"]');
     var $montant_logiciels = $view.find('[name="montant_logiciels"]');
@@ -82,6 +87,25 @@ function calculateMontantTotal($view) {
     
     
     
+    //Total loyer
+    var totalLoyer = 0;
+    $view.find(".BF_Rent_row").each(function(){
+        totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
+    });
+    displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
+    
+    
+    
+    //Cout banque
+    var coupBanque = 3333;
+    displayMoneyValue(coupBanque, $view.find('#cout_banque'));
+    
+    
+    //Diff banque demande
+    var difBanqFinan = totalLoyer - coupBanque - total2;
+    displayMoneyValue(difBanqFinan, $view.find('#dif_banque_demande'));
+    
+    
     
     //Loyer intermediaire
     var totalLoyI = calculTotal('.BF_RentExcept_row input[name="amount"]');
@@ -95,14 +119,13 @@ function calculateMontantTotal($view) {
     
     
     //CA Calculé
-    var caCalc = commF + totalLoyI + totalFD;
+    var caCalc = commF + totalLoyI + totalFD + difBanqFinan;
     displayMoneyValue(caCalc, $view.find('#ca_calc'));
     
     
     //Reste a payé
     var restPaye = total - calculTotal('.BF_FraisFournisseur_row input[name="amount"]');;
     displayMoneyValue(restPaye, $view.find('#rest_fact'));
-    
     
 }
 

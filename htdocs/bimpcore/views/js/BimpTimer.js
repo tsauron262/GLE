@@ -118,6 +118,24 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
             $(this).find('.bimp_timer_minutes').text(currentMinutes);
             $(this).find('.bimp_timer_hours').text(currentHours);
             $(this).find('.bimp_timer_days').text(currentDays);
+
+            $(this).find('.bimp_timer_value').show();
+            $(this).find('.bimp_timer_label').show();
+
+            if (!currentDays) {
+                $(this).find('.bimp_timer_days').hide();
+                $(this).find('.bimp_timer_days_label').hide();
+
+                if (!currentHours) {
+                    $(this).find('.bimp_timer_hours').hide();
+                    $(this).find('.bimp_timer_hours_label').hide();
+                }
+
+                if (!currentMinutes) {
+                    $(this).find('.bimp_timer_minutes').hide();
+                    $(this).find('.bimp_timer_minutes_label').hide();
+                }
+            }
         });
 
         var totalSecondes = timer.time_total;
@@ -145,6 +163,21 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
             $(this).find('.bimp_timer_minutes').text(totalMinutes);
             $(this).find('.bimp_timer_hours').text(totalHours);
             $(this).find('.bimp_timer_days').text(totalDays);
+
+            if (!totalDays) {
+                $(this).find('.bimp_timer_days').hide();
+                $(this).find('.bimp_timer_days_label').hide();
+
+                if (!totalHours) {
+                    $(this).find('.bimp_timer_hours').hide();
+                    $(this).find('.bimp_timer_hours_label').hide();
+                }
+
+                if (!totalMinutes) {
+                    $(this).find('.bimp_timer_minutes').hide();
+                    $(this).find('.bimp_timer_minutes_label').hide();
+                }
+            }
         });
     };
 

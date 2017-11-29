@@ -60,6 +60,16 @@
         &.active.sorted-desc:hover:after {
             content: '\f0d8';
         }
+
+        &.deactivated,
+        &.deactivated:hover {
+            cursor: not-allowed;
+
+            &:after {
+                opacity: 0!important;
+            }
+
+        }
     }
     .listSearchRow {
         display: none;
@@ -100,7 +110,7 @@
 
         td:first-child {
             text-align: center;
-            
+
             i.fa-plus-circle {
                 font-size: 20px;
                 font-weight: normal;
@@ -110,7 +120,7 @@
         .inputHelp {
             display: none;
         }
-        
+
         .inputContainer {
             input, select, textarea {
                 width: 100%;
@@ -153,6 +163,9 @@
         }
         .openAddObjectRowButton:before {
             content: '\f055';
+        }
+        .activatePositionsButton:before {
+            content: '\f07d';
         }
         .openBulkActionsPopupButton:before {
             content: '\f046';
@@ -205,6 +218,28 @@
 
     .select2-container {
         max-width: 160px!important;
+    }
+
+    .positionHandle {
+        display: none;
+        text-align: center;
+    }
+
+    td.positionHandle {
+        span {
+            display: inline-block;
+            font-size: 15px;
+            margin: 0 6px;
+        }
+
+        span:before {
+            font-family: 'FontAwesome';
+            content: '\f07d';
+        }
+    }
+    
+    tbody td.positionHandle {
+        cursor: grab;
     }
 }
 .ajaxResultContainer {

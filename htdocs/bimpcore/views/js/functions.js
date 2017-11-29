@@ -144,12 +144,10 @@ function bimp_display_result_success(result, $container) {
 function toggleFoldableSection($caption) {
     var $section = $caption.parent('.foldable_section');
     if (!$section.length) {
-        alert('ici');
         return;
     }
     var $content = $section.children('.foldable_section_content');
     if (!$content.length) {
-        alert('la');
         return;
     }
 
@@ -170,12 +168,20 @@ function toggleFoldableSection($caption) {
 // Evenements: 
 
 function setCommonEvents($container) {
+    // foldable sections: 
     $container.find('.foldable_section_caption').click(function () {
         toggleFoldableSection($(this));
     });
+
+    // Popup
     $container.find('.displayPopupButton').each(function () {
         setDisplayPopupButtonEvents($(this));
     });
+
+    // bootstrap popover:
+    $container.find('.bs-popover').popover();
+
+    // Auto-expand: 
     $container.on('input.auto_expand', 'textarea.auto_expand', function () {
         var minRows = $(this).data('min_rows'), rows;
         if (!minRows) {

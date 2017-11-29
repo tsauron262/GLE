@@ -31,7 +31,7 @@ class BimpController
         $this->module = $module;
         $this->controller = $controller;
 
-        $dir = DOL_DOCUMENT_ROOT . '/'. $module . '/controllers/';
+        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         $this->current_tab = BimpTools::getValue('tab', 'default');
 
@@ -52,11 +52,11 @@ class BimpController
         $this->addJsFile('/bimpcore/views/js/form.js');
         $this->addJsFile('/bimpcore/views/js/view.js');
         $this->addJsFile('/bimpcore/views/js/controller.js');
-        
-        if (file_exists(DOL_DOCUMENT_ROOT.'/'.$module.'/views/js/'.$controller.'.js')) {
-            $this->addJsFile('/'.$module.'/views/js/'.$controller.'.js');
+
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/views/js/' . $controller . '.js')) {
+            $this->addJsFile('/' . $module . '/views/js/' . $controller . '.js');
         }
-        
+
         $jsFiles = $this->getConf('js', array(), false, 'array');
         foreach ($jsFiles as $jsFile) {
             $this->addJsFile($jsFile);
@@ -69,11 +69,11 @@ class BimpController
         } else {
             $this->addCssFile('/bimpcore/views/css/bimpcore.css');
         }
-        
-        if (file_exists(DOL_DOCUMENT_ROOT.'/'.$module.'/views/css/'.$controller.'.css')) {
-            $this->addCssFile('/'.$module.'/views/css/'.$controller.'.css');
+
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/views/css/' . $controller . '.css')) {
+            $this->addCssFile('/' . $module . '/views/css/' . $controller . '.css');
         }
-        
+
         $cssFiles = $this->getConf('css', array(), false, 'array');
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
@@ -545,6 +545,45 @@ class BimpController
 
                     $success .= 's effectué avec succès';
                 }
+            }
+        }
+
+        die(json_encode(array(
+            'errors'  => $errors,
+            'success' => $success
+        )));
+    }
+
+    protected function ajaxProcessSaveObjectPosition()
+    {
+        $errors = array();
+        $success = '';
+
+        $module_name = BimpTools::getValue('module_name', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $id_object = BimpTools::getValue('id_object');
+        $position = BimpTools::getValue('position');
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type de l\'objet absent';
+        }
+        if (is_null($id_object) || !$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+        if (is_null($position) || !$position) {
+            $errors[] = 'Position absente ou invalide';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module_name, $object_name);
+            if ($object->fetch((int) $id_object)) {
+                if ($object->setPosition($position)) {
+                    $success = 'Position ' . $object->getLabel('of_the') . ' ' . $id_object . ' mise à jour avec succès';
+                } else {
+                    $errors[] = 'Echec de la mise à jour de la position ' . $object->getLabel('of_the') . ' ' . $id_object;
+                }
+            } else {
+                $errors[] = BimpTools::ucfirst($object->getLabel()) . ' d\'ID ' . $id_object . ' non trouvé' . ($object->isLabelFemale() ? 'e' : '');
             }
         }
 

@@ -323,13 +323,20 @@ class BimpRender
                 $html .= '<div style="text-align: right; margin-top: 15px">';
                 $html .= '<div class="btn-group">';
                 if ($file) {
-                    $html .= '<button type="button" class="btn btn-default" ';
-                    $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities(addslashes($title)) . '\')">';
+                    $html .= '<button type="button" class="btn btn-default"';
+                    $html .= ' data-toggle="popover"';
+                    $html .= ' data-trigger="hover" ';
+                    $html .= ' data-content="Afficher dans une popup"';
+                    $html .= ' onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities(addslashes($title)) . '\')">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>';
                     $html .= 'Afficher</button>';
                 }
                 if ($url) {
-                    $html .= '<a href="' . $url . '" class="btn btn-default" target="_blank" title="Afficher dans une nouvel onglet">';
+                    $html .= '<a href="' . $url . '" class="btn btn-default" target="_blank" ';
+                    $html .= ' data-toggle="popover"';
+                    $html .= ' data-trigger="hover"';
+                    $html .= ' data-content="Afficher dans un nouvel onglet"';
+                    $html .= '>';
                     $html .= '<i class="fa fa-external-link"></i>';
                     if (!$file) {
                         $html .= '&nbsp;&nbsp;Afficher';

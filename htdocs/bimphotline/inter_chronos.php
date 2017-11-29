@@ -47,9 +47,15 @@ if (count($timers)) {
                                 $caption .= $timer->renderTime(BimpTools::getTimeDataFromSeconds($times['total']));
                                 $caption .= '</span>';
 
-                                $timer_title = 'Inter ' . $inter->id . ' - Ticket: <span class="bold">' . $ticket->getData('ticket_number') . '</span>';
+                                $timer_title = 'Inter ' . $inter->id;
                                 $ticket_url = DOL_URL_ROOT . '/bimphotline/index.php?fc=ticket&id=' . $ticket->id;
-                                $timer_title .= '&nbsp;&nbsp;<a class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+                                $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+
+                                $client = $ticket->getChildObject('client');
+                                if (!is_null($client) && isset($client->id) && $client->id) {
+                                    $timer_title .= '<br/>Client: <span class="bold">' . $client->nom . '</span>';
+                                }
+                                $timer_title .= '<br/>Ticket: <span class="bold">' . $ticket->getData('ticket_number') . '</span>';
                                 $content = $timer->render($timer_title, true);
 
                                 $bimp_fixe_tabs->addTab($id, $caption, $content);

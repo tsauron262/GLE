@@ -22,7 +22,7 @@ class BF_Demande extends BimpObject
         1 => 'OFC',
         2 => 'OA'
     );
-    public static $termes_paiement = array(
+    public static $calc_modes = array(
         0 => '-',
         1 => 'A terme échu',
         2 => 'A terme à échoir'

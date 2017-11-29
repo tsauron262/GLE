@@ -23,6 +23,10 @@
 /*Styles génériques*/
 #id-right {
     background-color: $gray-light;
+
+    @media (max-width: $screen-sm-max) {
+        z-index: 1050!important;
+    }
 }
 
 div.tabBar {
@@ -143,7 +147,7 @@ i.iconRight {
     .btn, .button, button {
         margin: 2px 4px;
     }
-    
+
     .btn-group {
         margin: 2px 8px;
         .btn {

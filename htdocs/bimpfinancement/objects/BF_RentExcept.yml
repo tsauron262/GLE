@@ -16,6 +16,8 @@ fields:
     date: 
         label: Date
         type: date
+        required: 1
+        sortable: 1
 
     amount:
         label: Montant HT
@@ -37,7 +39,7 @@ fields:
             options: 
                 array: payments
         required: 0
-        sortable: 0
+        sortable: 1
         
 list:
     checkboxes: 1
@@ -64,3 +66,4 @@ list:
     add_object_row: 1
     update_btn: 1
     delete_btn: 1
+    drag_n_drop: 1

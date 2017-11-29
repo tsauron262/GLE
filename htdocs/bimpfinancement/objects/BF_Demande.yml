@@ -14,6 +14,7 @@ objects:
             dol_object: societe
             id_object: 
                 field_value: id_client
+                
     client_contact: 
         relation: hasOne
         delete: 0
@@ -21,6 +22,7 @@ objects:
             dol_object: contact
             id_object:
                 field_value: id_client_contact
+                
     supplier:
         relation: hasOne
         delete: 0
@@ -28,6 +30,7 @@ objects:
             dol_object: societe
             id_object:
                 field_value: id_supplier
+                
     supplier_contact:
         relation: hasOne
         delete: 0
@@ -35,16 +38,19 @@ objects:
             dol_object: contact
             id_object:
                 field_value: id_supplier_contact
+                
     comments:
         relation: hasMany
         delete: 1
         instance:
             bimp_object: BF_Comment
+            
     refinanceurs:
         relation: hasMany
         delete: 1
         instance: 
             bimp_object: BF_Refinanceur
+            
     rents:
         relation: hasMany
         delete: 1
@@ -218,18 +224,16 @@ fields:
                 type: syntaxe
                 syntaxe: <value> %
                 
-    terme_paiement:
-        label: Paiement
+    mode_calcul:
+        label: Mode de calcul
         type: int
         default_value: 2
+        values: 
+            array: calc_modes
         input: 
             type: select
-            options: 
-                array: termes_paiement
         display:
             type: array_value
-            values:
-                array: termes_paiement
                 
     status:
         label: Statut
@@ -265,14 +269,12 @@ fields:
     annexe: 
         label: Annexes
         type: int
+        values: 
+            array: annexes
         input:
             type: select
-            options:
-                array: annexes
         display: 
             type: array_value
-            values: 
-                array: annexes
         default_value: 0
         sortable: 1
         search: 1
@@ -387,6 +389,9 @@ lists:
             vr:
                 label: VR demandée
                 field: vr
+            status:
+                label: Etat
+                field: status
                 
 views: 
     default:
@@ -411,12 +416,15 @@ views:
                                         icon: file-text
                                     rows:
                                         - field: status
+                                          edit: 1
                                         - field: accepted
-                                        - field: insurance
+                                          edit: 1
                                         - field: annexe
+                                          edit: 1
                                         - field: date_livraison
-                                        - field: date_loyer      
-                                        - field: terme_paiement
+                                          edit: 1
+                                        - field: date_loyer
+                                          edit: 1       
                   - type: rows
                     col_lg: 7
                     col_sm: 12
@@ -434,6 +442,8 @@ views:
                                         - field: periodicity
                                           edit: 1
                                         - field: insurance
+                                          edit: 1
+                                        - field: mode_calcul
                                           edit: 1
                                         
                               - type: fields_table
@@ -457,6 +467,12 @@ views:
                                           edit: 1
                                         - label: Montant total
                                           value: <span id="montant_total2"></span>
+                                        - label: Coût banque
+                                          value: <span id="cout_banque"></span>
+                                        - label: Total loyer
+                                          value: <span id="total_loyer"></span>
+                                        - label: Dif financement/demande
+                                          value: <span id="dif_banque_demande"></span>
                                         - label: Loyer intermediaire
                                           value: <span id="loy_inter"></span>
                                         - label: Frais Divers

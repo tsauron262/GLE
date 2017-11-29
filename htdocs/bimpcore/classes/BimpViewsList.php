@@ -293,7 +293,12 @@ class BimpViewsList
                             $item_footer .= 'displayObjectView($(\'#' . $this->views_list_identifier . '\').find(\'.objectViewContainer\'), ';
                             $item_footer .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_inline_view . '\', ' . $this->object->id;
                             $item_footer .= ');';
-                            $item_footer .= '"><i class="fa fa-file-o iconLeft"></i>Afficher</button>';
+                            $item_footer .= '"';
+                            $item_footer .= ' data-toggle="popover"';
+                            $item_footer .= ' data-trigger="hover"';
+                            $item_footer .= ' data-container="body"';
+                            $item_footer .= ' data-content="Afficher les données"';
+                            $item_footer .= '><i class="fa fa-file-o iconLeft"></i>Afficher</button>';
                         }
                         if ($item_modal_view) {
                             $item_footer .= '<button type="button" class="btn btn-default" onclick="';

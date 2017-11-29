@@ -30,7 +30,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 class ProductBrowser extends CommonObject
 {
 	public $id;						// id of the parent ctegorie
-	public $id_child=array();
+	public $id_childs=array();
 	public $child=array();
 	public $is_a_leaf=false;
 	public $ref_product=array();
@@ -65,7 +65,8 @@ class ProductBrowser extends CommonObject
 	 */
 	function fetch($id)
 	{
-		$sql = 'SELECT fk_parent_cat, fk_child_cat';
+            $this->id = $id;
+		$sql = 'SELECT fk_child_cat';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'bimp_cat_cat';
 		$sql.= ' WHERE fk_parent_cat = '.$id;
 
@@ -73,11 +74,9 @@ class ProductBrowser extends CommonObject
 		$result = $this->db->query($sql);
 		if ($result)
 		{
-			$this->id			= $id;
-			$this->id_child 	= array();
-			$obj=$result2->fetch_object($result);
-			array_push($this->id_child, $obj->fk_child_cat);
-			print_r($this->id_child);
+                    while ($object = $result->fetch_object($result)){
+                        $this->id_childs[] = $object->fk_child_cat;
+                    }
 			return 1;
 		}
 		else
@@ -120,7 +119,7 @@ class ProductBrowser extends CommonObject
 		$sql.= ' WHERE fk_child_cat = '.$id_child;
 		$sql.= ' AND fk_parent_cat = '.$id_parent;
 		$result = $this->db->query($sql);
-		if(mysqli_num_rows ($result) == 1)
+		if(mysqli_num_rows ($result) > 0)
 			return true;
 		else
 			return false;
@@ -170,22 +169,17 @@ class ProductBrowser extends CommonObject
 
 	function changeRestrictions ($checkboxs)
 	{
+            print_r($checkboxs);die;
 		for ($i=0 ; $i<sizeof($checkboxs) ; $i++){
 			echo '$i = '.$i.' = '.$checkboxs[$i]['id'].' = '.$checkboxs[$i]['val']."\n";
 			$id1 = $checkboxs[$i]['id'];
 			$val1 = $checkboxs[$i]['val'];
-			for ($j=$i+1 ; $j<sizeof($checkboxs) ; $j++)
-			{
-				echo '    $j ='.$j.' = '.$checkboxs[$j]['id'].' = '.$checkboxs[$j]['val']."\n";
-				$id2 = $checkboxs[$j]['id'];
-				$val2 = $checkboxs[$j]['val'];
 				if ($val1 == 'true' and $val2 == 'true') {
-					$this->insertRow($id1, $id2);
+					$this->insertRow($this->id, $id1);
 				} else 
 				{
-					$this->deleteRow($id1, $id2);
+					$this->deleteRow($this->id, $id1);
 				}
-			}
 		}
 	}
 

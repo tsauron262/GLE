@@ -164,11 +164,11 @@ class BimpForm
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-6 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
         $html .= $label;
         $html .= '</div>';
 
-        $html .= '<div class="fieldRowInput fieldcol-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="fieldRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
         $html .= '<div id="' . $this->form_identifier . '_' . $field . '" class="inputContainer"';
         $html .= ' data-field_name="' . $field . '" data-multiple="' . ($multiple ? '1' : '0') . '">';
 
@@ -381,6 +381,10 @@ class BimpForm
                     $type = 'textarea';
                     break;
 
+                case 'bool':
+                    $type = 'toggle';
+                    break;
+
                 case 'time':
                 case 'date':
                 case 'datetime':
@@ -419,7 +423,14 @@ class BimpForm
                 break;
 
             case 'select':
-                $options['options'] = $object->getCurrentConf('input/options', array(), true, 'array');
+                if ($object->config->isDefined($config_path . '/input/options')) {
+                    $options['options'] = $object->getCurrentConf('input/options', array(), true, 'array');
+                } elseif ($object->config->isDefined($config_path.'/values')) {
+                    $options['options'] = $object->getCurrentConf('values', array(), true, 'array');
+                } else {
+                    $options['options'] = array();
+                }
+
                 break;
 
             case 'search_list':

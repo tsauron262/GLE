@@ -36,12 +36,16 @@ switch (GETPOST('action')) {
             break;
         }
     case 'addCategory': {
-            $objOut = $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'));
+            $objOut = $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'), false);
             echo json_encode($objOut);
             break;
         }
     case 'delSomeCateg': {
-            $pb->deleteSomecateg(GETPOST('id_prod'), GETPOST('id_cat_out'));
+            $pb->deleteSomeCateg(GETPOST('id_prod'), GETPOST('id_cat_out'));
+        }
+    case 'getAllCategories': {
+            $objOut = $pb->getAllCategories(GETPOST('id_prod'));
+            echo json_encode($objOut);
         }
     default: break;
 }

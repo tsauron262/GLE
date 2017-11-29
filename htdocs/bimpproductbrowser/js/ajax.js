@@ -1,13 +1,42 @@
 /* global DOL_URL_ROOT */
-var objs = [];
+var objs = [];  /*
+ [
+ obj.idParent
+ obj.label
+ obj.tabIdChild = []
+ obj.tabNameChild = []
+ ]
+ */
+
 var cnt = 0;
 var cntRestr = [];
 var catArr = [];
 
+var objInit;   // existing categories before the execution
 
 /*
  *  AJAX requests
  */
+
+function getAllCateg() {
+    id_prod = getUrlParameter('id');
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
+        data: {
+            id_prod: id_prod,
+            action: 'getAllCategories'
+        },
+        async: false,
+        error: function () {
+            alert("Error");
+        },
+        success: function (objOut) {
+            objInit = JSON.parse(objOut);
+        }
+    });
+}
 
 function deleteAllCateg() {
     id_prod = getUrlParameter('id');
@@ -86,10 +115,11 @@ $(document).ready(function () {
             .attr('class', 'customBody')
             .appendTo('.fiche');
 
-    deleteAllCateg();
-    addCatInProd(0);
-    addDivs();
-
+    retrieveCateg();/*
+    console.log("objs " + objs);
+    console.log("cnt " + cnt);
+    console.log("cntRestr " + cntRestr);
+    console.log("catArr " + catArr);*/
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -109,6 +139,25 @@ $(document).ready(function () {
 /*
  *  Annexe functions
  */
+
+function retrieveCateg() {
+    getAllCateg();
+    cntRestr = objInit.tabRestrCounter;
+    cnt = objInit.cnt;
+    catArr = objInit.catArr;
+    k=0;
+    for (i = 0; i < objInit.tabRestr.length; i++) {
+        objs.push(objInit.tabRestr[i]);
+        cntRestr[cnt]++;
+        if (objInit.tabRestr[i].selectedLabel) {
+            addNavDivs(objInit.tabRestr[i], k);
+            k++;
+        }
+    }
+
+    addDivs();
+}
+
 
 function deleteFrom(id_div) {
 
@@ -155,6 +204,13 @@ function addDivs() {
         }
         ++cnt;
     }
+}
+
+function addNavDivs(restr, k) {
+    $('<div>' + restr.label + ':<br>' + restr.selectedLabel + '</div>')
+            .attr('id', k)
+            .attr('class', 'customDiv divClikable navDiv')
+            .appendTo('#navContainer');
 }
 
 function changeNavDiv(text) {

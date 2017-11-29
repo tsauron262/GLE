@@ -33,6 +33,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
 
 
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+
+
+
 
 /**
  *	Class to generate PDF Azur bimpcesu
@@ -922,26 +926,80 @@ class pdf_bimpcesu extends ModeleBimpcesu
 	 *  @param  Translate	$outputlangs	Object lang for output
 	 *  @return	void
 	 */
-	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
-	{
-		global $conf,$langs;
-
-	
         
-        $total = "Error"; // Inconnu pour le moment       
-        $totalcesu = "Error"; // Inconnu pour le moment       
-        $npref = "Error"; // Inconnu pour le moment
-        $diri = "Christian CONSTANTIN BERTIN";
-        $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
-        $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
-        $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
-        $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
+        
+        
+	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
+	{               
+		global $conf,$langs,$db,$dateD,$dateF;
 
+	$facturestatic = new Facture($db);
+        
+        $sql = 'SELECT f.rowid as facid, f.fk_mode_reglement as mr';
+        $sql .= ', f.total_ttc as total_ttc';
+        $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s," . MAIN_DB_PREFIX . "facture as f";
+        $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
+        $sql .= " AND f.datef BETWEEN '" . $dateD . "' AND '" . $dateF ."'";
+        $sql .= " GROUP BY f.rowid";
+
+        
+        $resql = $db->query($sql);
+        
+        if ($resql) {
+          //$var = true;
+          $num = $db->num_rows($resql);
+          $i = 0;
+
+          $array_total = array();   //déclaration du tableau en variable globale
+          $array_total_cesu = array();
+      
+           while ($i < $num) {
+              $objp = $db->fetch_object($resql);
+              //$var = !$var;
+              
+              $facturestatic->id = $objp->facid;
+              $facturestatic->ref = $objp->facnumber;
+              $facturestatic->type = $objp->type;
+              $facturestatic->total_ttc = $objp->total_ttc;
+              $facturestatic->mr = $objp->mr;
+              
+              if($objp->mr == 150){
+                  $array_total_cesu[] = $objp->total_ttc;
+                  $array_total[] = $objp->total_ttc;    //push du tableau
+                  
+              } else {
+                  $array_total[] = $objp->total_ttc;    //push du tableau
+              }
+                                          
+              $i++;
+              
+            }
+            
+          //$db->free($resql);
+      
+            $total = array_sum ($array_total); // Montant total facture     
+            $totalcesu = array_sum ($array_total_cesu); // Montant total CESU       
+            
+            $npref = "Error"; // Inconnu pour le moment
+            $diri = "Christian CONSTANTIN BERTIN";
+            $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
+            $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
+            $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
+            $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
+            
+        } elseif (empty($dateD) || empty($dateF)) {
+            echo 'Pas de dates selectionnées';
+            
+        } else {
+            echo 'Pas de fatcures';
+        }
+        
+        
        // $object = new Societe($db);
         $bene = $object->nom;
-        $beneadd = $object->address; // Inconnu pour le moment
-        $benezip = $object->zip; // Inconnu pour le moment
-        $beneville = $object->town; // Inconnu pour le moment
+        $beneadd = $object->address; 
+        $benezip = $object->zip; 
+        $beneville = $object->town; 
 
         // Date & Date -1
         date_default_timezone_set('UTC+1');
@@ -1112,14 +1170,14 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
                         $pdf->MultiCell(600, 3, "$bene", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+45); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$beneadd Error", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->MultiCell(100, 3, "$beneadd", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+50); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$benezip Error - $beneville Error", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(100, 3, "$benezip - $beneville", 0, 'L'); // imprime du texte
                         
                         // LIGNES DATE
                         $pdf->SetXY($posx+150,$posy+60); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
-                        $pdf->MultiCell(100, 3, "Lieu, le $date02$date03", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(100, 3, "$orgaville, le $date01", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 1
                         $pdf->SetXY($posx+2,$posy+70); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR

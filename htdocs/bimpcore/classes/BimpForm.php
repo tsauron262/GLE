@@ -343,7 +343,7 @@ class BimpForm
         return $html;
     }
 
-    public static function renderInput(BimpObject $object, $config_path, $field_name, $value = null, $id_parent = null, $form = null, $option = null, $input_id = null)
+    public static function renderInput(BimpObject $object, $config_path, $field_name, $value = null, $id_parent = null, $form = null, $option = null, $input_id = null, $input_name = null)
     {
         $prev_path = $object->config->current_path;
 
@@ -360,6 +360,14 @@ class BimpForm
             $form = new Form($db);
         }
 
+        if (is_null($input_name)) {
+            $input_name = $field_name;
+        }
+
+        if (is_null($input_id)) {
+            $input_id = $input_name;
+        }
+
         $html = '';
         $options = array();
 
@@ -367,29 +375,35 @@ class BimpForm
         $addon_right = $object->getCurrentConf('input/addon_right', null, false, 'array');
         $addon_left = $object->getCurrentConf('input/addon_left', null, false, 'array');
         $multiple = $object->getCurrentConf('input/multiple', false, false, 'bool');
+        $data_type = $object->getCurrentConf('type', 'string');
 
         if (!$type) {
-            $data_type = $object->getCurrentConf('type', '');
-            switch ($data_type) {
-                case 'int':
-                case 'float':
-                case 'string':
-                    $type = 'text';
-                    break;
+            if ($object->config->isDefined('fields/' . $field_name . '/values')) {
+                $type = 'select';
+            } else {
+                switch ($data_type) {
+                    case 'int':
+                    case 'float':
+                    case 'string':
+                    case 'percent':
+                    case 'money':
+                        $type = 'text';
+                        break;
 
-                case 'text':
-                    $type = 'textarea';
-                    break;
+                    case 'text':
+                        $type = 'textarea';
+                        break;
 
-                case 'bool':
-                    $type = 'toggle';
-                    break;
+                    case 'bool':
+                        $type = 'toggle';
+                        break;
 
-                case 'time':
-                case 'date':
-                case 'datetime':
-                    $type = $data_type;
-                    break;
+                    case 'time':
+                    case 'date':
+                    case 'datetime':
+                        $type = $data_type;
+                        break;
+                }
             }
         }
 
@@ -398,6 +412,17 @@ class BimpForm
                 $options['addon_right'] = $object->getCurrentConf('input/addon_right/text', '');
             } elseif (isset($addon_right['icon'])) {
                 $options['addon_right'] = '<i class="fa fa-' . $object->getCurrentConf('input/addon_right/icon') . '"></i>';
+            }
+        } else {
+            switch ($data_type) {
+                case 'money':
+                    $currency = $object->getCurrentConf('currency', 'EUR');
+                    $options['addon_right'] = '<i class="fa fa-' . BimpTools::getCurrencyIcon($currency) . '"></i>';
+                    break;
+
+                case 'percent':
+                    $options['addon_right'] = '<i class="fa fa-percent"></i>';
+                    break;
             }
         }
 
@@ -425,7 +450,7 @@ class BimpForm
             case 'select':
                 if ($object->config->isDefined($config_path . '/input/options')) {
                     $options['options'] = $object->getCurrentConf('input/options', array(), true, 'array');
-                } elseif ($object->config->isDefined($config_path.'/values')) {
+                } elseif ($object->config->isDefined($config_path . '/values')) {
                     $options['options'] = $object->getCurrentConf('values', array(), true, 'array');
                 } else {
                     $options['options'] = array();

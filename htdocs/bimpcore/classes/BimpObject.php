@@ -462,24 +462,32 @@ class BimpObject
     {
         $html = '';
 
-        $display_type = $display_type = $this->getConf($display_path . '/type', '');
+        $display_type = $this->getConf($display_path . '/type', '');
 
-        if (!$display_type && $field) {
-            $data_type = $this->getConf('fields/' . $field . '/type', '');
-            switch ($data_type) {
-                case 'time':
-                case 'date':
-                case 'datetime':
-                    $display_type = $data_type;
-                    break;
+        if ($field) {
+            $data_type = $this->getConf('fields/' . $field . '/type', 'string');
+            if (!$display_type) {
+                if ($this->config->isDefined('fields/' . $field . '/values')) {
+                    $display_type = 'array_value';
+                } else {
+                    switch ($data_type) {
+                        case 'time':
+                        case 'date':
+                        case 'datetime':
+                        case 'money':
+                        case 'percent':
+                            $display_type = $data_type;
+                            break;
 
-                case 'bool':
-                    $display_type = 'yes_no';
-                    break;
+                        case 'bool':
+                            $display_type = 'yes_no';
+                            break;
 
-                default:
-                    $display_type = 'string';
-                    break;
+                        default:
+                            $display_type = 'string';
+                            break;
+                    }
+                }
             }
         }
 
@@ -568,9 +576,10 @@ class BimpObject
             case 'array_value':
                 if ($this->config->isDefined($display_path . '/values')) {
                     $array = $this->getConf($display_path . '/values', array(), true, 'array');
+                } elseif ($field) {
+                    $array = $this->getConf('fields/' . $field . '/values', array(), true, 'array');
                 } else {
-                    $up_path = $this->config->getPathPrevLevel($display_path);
-                    $array = $this->getConf($up_path.'/values', array(), true, 'array');
+                    $array = array();
                 }
                 $check = false;
                 if (isset($array[$value])) {
@@ -626,6 +635,17 @@ class BimpObject
                 $html .= $timer['secondes'] . ' sec ';
                 $html .= '</span>';
                 break;
+
+            case 'money':
+                if ($field) {
+                    $currency = $this->getConf('fields/' . $field . '/currency', 'EUR');
+                } else {
+                    $currency = 'EUR';
+                }
+                return $value . ' ' . BimpTools::getCurrencyHtml($currency);
+
+            case 'percent':
+                return $value . ' %';
 
             case 'string':
             default:

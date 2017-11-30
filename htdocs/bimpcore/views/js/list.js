@@ -497,7 +497,7 @@ function onListLoaded($list) {
     });
 
     setListEvents($list);
-    setCommonEvents($list);
+    setCommonEvents($('#' + $list.attr('id') + '_container'));
 }
 
 function setListEvents($list) {

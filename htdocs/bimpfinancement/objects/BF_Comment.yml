@@ -16,9 +16,8 @@ fields:
         
     content:
         label: Commentaire
-        type: string
+        type: text
         input:
-            type: textarea
             auto_expand: 1
             note: 1
             rows: 2

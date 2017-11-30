@@ -173,6 +173,38 @@ function setCommonEvents($container) {
         toggleFoldableSection($(this));
     });
 
+    // foldable panels:
+    $container.find('.panel.foldable').each(function () {
+        var $panel = $(this);
+        $panel.children('.panel-heading').click(function () {
+            if ($panel.hasClass('open')) {
+                $panel.children('.panel-body, .panel-footer').slideUp(250, function () {
+                    $panel.removeClass('open').addClass('closed');
+                });
+            } else {
+                $panel.children('.panel-body, .panel-footer').slideDown(250, function () {
+                    $panel.removeClass('closed').addClass('open');
+                });
+            }
+        });
+    });
+
+    // foldable view tables:
+    $container.find('.objectViewtable.foldable').each(function () {
+        var $table = $(this);
+        $table.children('thead tr:first-child').click(function () {
+            if ($table.hasClass('open')) {
+                $table.children('tbody,tfoot').fadeOut(250, function () {
+                    $table.removeClass('open').addClass('closed');
+                });
+            } else {
+                $table.children('tbody,tfoot').fadeIn(250, function () {
+                    $table.removeClass('closed').addClass('open');
+                });
+            }
+        });
+    });
+
     // Popup
     $container.find('.displayPopupButton').each(function () {
         setDisplayPopupButtonEvents($(this));

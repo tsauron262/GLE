@@ -1,4 +1,5 @@
 // Traitements Ajax
+
 function reloadObjectView(view_id) {
     var $view = $('#' + view_id);
 
@@ -255,7 +256,7 @@ function loadModalObjectPage($button, url, modal_id, title) {
 
     $modal.find('.modal-title').html(title);
     $modal.modal('show');
-    $modal.find('.content-loading').show();
+    $modal.find('.content-loading').show().find('.loading-text').text('Chargement');
 
     $modal.on('hide.bs.modal', function (e) {
         $modal.find('.extra_button').remove();

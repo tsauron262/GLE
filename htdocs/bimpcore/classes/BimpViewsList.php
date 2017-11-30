@@ -173,7 +173,7 @@ class BimpViewsList
         $html .= '<div id="' . $this->views_list_identifier . '_container" class="' . ($panel ? 'section ' : '') . 'viewsListContainer ' . $this->object->object_name . '_viewsListContainer">';
 
         $content = '';
-        $content .= '<div id="' . $this->views_list_identifier . '" class="row objectViewslist ' . $this->object->object_name . '_views_list objectList ' . $this->object->object_name . '_list"';
+        $content .= '<div id="' . $this->views_list_identifier . '" class="row objectViewslist ' . $this->object->object_name . '_views_list ' . $this->object->object_name . '_list"';
         $content .= ' data-module_name="' . $this->object->module . '"';
         $content .= ' data-object_name="' . $this->object->object_name . '"';
         $content .= ' data-views_list_name="' . $this->views_list_name . '"';
@@ -191,7 +191,8 @@ class BimpViewsList
 
             $params = array(
                 'type' => 'secondary',
-                'icon' => $icon
+                'icon' => $icon,
+                'foldable' => 1
             );
 
             if ($add_btn) {
@@ -289,7 +290,7 @@ class BimpViewsList
                     if ($view_btn) {
                         $item_footer .= '<div class="btn-group">';
                         if ($item_inline_view) {
-                            $item_footer .= '<button type="button" class="btn btn-default" onclick="';
+                            $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="';
                             $item_footer .= 'displayObjectView($(\'#' . $this->views_list_identifier . '\').find(\'.objectViewContainer\'), ';
                             $item_footer .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_inline_view . '\', ' . $this->object->id;
                             $item_footer .= ');';
@@ -298,25 +299,25 @@ class BimpViewsList
                             $item_footer .= ' data-trigger="hover"';
                             $item_footer .= ' data-container="body"';
                             $item_footer .= ' data-content="Afficher les données"';
+                            $item_footer .= ' data-placement="top"';
                             $item_footer .= '><i class="fa fa-file-o iconLeft"></i>Afficher</button>';
                         }
                         if ($item_modal_view) {
-                            $item_footer .= '<button type="button" class="btn btn-default" onclick="';
-                            $item_footer .= 'loadModalView(\'' . $view->view_identifier . '\', \'' . $item_modal_view . '\', $(this));';
-                            $item_footer .= '"><i class="fa fa-eye iconleft"></i>';
-                            if (!$item_inline_view) {
-                                $html .= 'Afficher';
-                            }
-                            $html .= '</button>';
+                            $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="';
+                            $item_footer .= 'loadModalView(\'' . $view->view_identifier . '\', \'' . $item_modal_view . '\', $(this));"';
+                            $item_footer .= ' data-toggle="popover"';
+                            $item_footer .= ' data-trigger="hover"';
+                            $item_footer .= ' data-container="body"';
+                            $item_footer .= ' data-content="Vue rapide"';
+                            $item_footer .= ' data-placement="top"';
+                            $item_footer .= '><i class="fa fa-eye"></i>';
+                            $item_footer .= '</button>';
                         }
                         if ($controller) {
                             $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $this->object->id;
                             $item_footer .= '<a class="btn btn-default" href="' . $url . '" target="_blank" title="Afficher dans une nouvel onglet">';
                             $item_footer .= '<i class="fa fa-external-link"></i>';
-                            if (!$item_inline_view && !$item_modal_view) {
-                                $html .= 'Afficher';
-                            }
-                            $html .= '</a>';
+                            $item_footer .= '</a>';
                         }
                         $item_footer .= '</div>';
                     }

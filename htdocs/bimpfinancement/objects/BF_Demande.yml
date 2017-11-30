@@ -122,107 +122,47 @@ fields:
     duration:
         label: Durée
         type: int
-        input:
-            type: select
-            options:
-                array: durations
-        display:
-            type: array_value
-            values: 
-                array: durations
+        values: 
+            array: durations
         search: 1
         
     periodicity: 
         label: Périodicité
         type: int
-        input: 
-            type: select
-            options:
-                array: periodicities
-        display:
-            default:
-                type: array_value
-                values: 
-                    array: periodicities
+        values: 
+            array: periodicities
         search: 1
         
     montant_materiels:
         label: Montant matériels
-        type: float
-        input: 
-            type: text
-            addon_right:
-                icon: euro
+        type: money
         default_value: 0
-        display:
-            default:
-                type: syntaxe
-                syntaxe: <value> &euro;
         
     montant_services:
         label: Montant services
-        type: float
-        input: 
-            type: text
-            addon_right:
-                icon: euro
+        type: money
         default_value: 0
-        display:
-            default:
-                type: syntaxe
-                syntaxe: <value> &euro;
                 
     montant_logiciels:
         label: Montant logiciels
-        type: float
+        type: money
         input: 
-            type: text
-            addon_right:
-                icon: euro
         default_value: 0
-        display:
-            default:
-                type: syntaxe
-                syntaxe: <value> &euro;
     
     commission_commerciale:
         label: Commission commerciale
-        type: float
+        type: percent
         default_value: 0
-        input:
-            type: text
-            addon_right: 
-                icon: percent
-        display:
-            default:
-                type: syntaxe
-                syntaxe: <value> %
                 
     commission_financiere:
         label: Commission financière
-        type: float
+        type: percent
         default_value: 0
-        input:
-            type: text
-            addon_right: 
-                icon: percent
-        display:
-            default:
-                type: syntaxe
-                syntaxe: <value> %
                 
     vr: 
         label: VR demandée
-        type: float
+        type: percent
         required: 1
-        input: 
-            type: text
-            addon_right:
-                icon: percent
-        display:
-            default:
-                type: syntaxe
-                syntaxe: <value> %
                 
     mode_calcul:
         label: Mode de calcul
@@ -230,22 +170,14 @@ fields:
         default_value: 2
         values: 
             array: calc_modes
-        input: 
-            type: select
-        display:
-            type: array_value
                 
     status:
         label: Statut
         type: int
-        input: 
-            type: select
-            options: 
-                array: status_list
-        display:
-            type: array_value
-            values: 
-                array: status_list
+        values: 
+            array: status_list
+        search: 1
+        sortable: 1
                 
     accepted:
         label: Acceptation définitive de la banque
@@ -258,10 +190,6 @@ fields:
     insurance:
         label: Assurance
         type: bool
-        input: 
-            type: toggle
-        display: 
-            type: yes_no
         default_value: 0
         search: 1
         sortable: 1
@@ -271,45 +199,23 @@ fields:
         type: int
         values: 
             array: annexes
-        input:
-            type: select
-        display: 
-            type: array_value
         default_value: 0
         sortable: 1
         search: 1
         
     ca_prevu: 
         label: CA prévu
-        type: float
-        input:
-            type: text
-            addon_right: 
-                icon: euro
-        display:
-            type: syntaxe
-            syntaxe: <value> &euro;
+        type: money
         required: 0
         
     pba_prevu:
         label: PBA prévu
-        type: float
-        input:
-            type: text
-            addon_right:
-                icon: euro
-        display: 
-            type: syntaxe
-            syntaxe: <value> &euro;
+        type: money
         required: 0
         
     date_livraison:
         label: Date de livraison
         type: date
-        input:
-            type: date
-        display: 
-            type: date
         required: 0
         search:
             type: date_range
@@ -317,10 +223,6 @@ fields:
     date_loyer:
         label: Date de mise en loyer
         type: date
-        input: 
-            type: date
-        display: 
-            type: date
         required: 0
         search:
             type: date_range
@@ -380,6 +282,7 @@ lists:
             client: 
                 label: Client
                 field: id_client
+                display: nom_url
             duration:
                 label: Durée
                 field: duration
@@ -552,15 +455,14 @@ views:
                         
             - cols:
                   - type: list
-                    col_lg: 6
-                    col_md: 12
+                    col_lg: 12
                     list: 
                         children: refinanceurs
                         panel: 0
                         
+            - cols:
                   - type: list
-                    col_lg: 6
-                    col_md: 12
+                    col_lg: 12
                     list:
                         children: comments
                         panel: 0

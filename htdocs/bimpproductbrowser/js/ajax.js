@@ -128,10 +128,6 @@ $(document).ready(function () {
             .appendTo('.fiche');
 
     retrieveCateg();
-//    console.log("objs " + objs);
-//    console.log("cnt " + cnt);
-//    console.log("cntRestr " + cntRestr);
-//    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -144,10 +140,6 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
-//        console.log("objs " + objs);
-//        console.log("cnt " + cnt);
-//        console.log("cntRestr " + cntRestr);
-//        console.log("catArr " + catArr);
     });
 });
 
@@ -175,7 +167,6 @@ function retrieveCateg() {
 
 function addWays() {
     for (i = 0; i < objInit.ways.length; i++) {
-        console.log(i);
         $('<li></li>')
                 .attr('class', "noborderoncategories customLi")
                 .attr('style',  'background-color:#'+objInit.color[i])

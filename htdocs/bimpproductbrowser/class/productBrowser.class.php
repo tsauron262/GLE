@@ -30,7 +30,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobjectline.class.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-class ProductBrowser extends CommonObject {
+class BimpProductBrowser extends CommonObject {
 
     public $id;      // id of the parent ctegorie
     public $id_childs = array();
@@ -380,10 +380,7 @@ class ProductBrowser extends CommonObject {
         $obj->prodCateg = $this->getProdCateg($id_prod);
         $in->obj = $obj;
         $in->prod = $id_prod;
-
-
         $this->createObj($in, 0);
-
         $obj->ways = array();
         $obj->color = array();
         foreach ($obj->prodCateg as $cat) {

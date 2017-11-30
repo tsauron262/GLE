@@ -35,13 +35,13 @@ $(document).ready(function()
                                 showalert("<strong>Succès !</strong> Vous avez inséré " + obj.insertion 
                                         + " restriction"  + multipleInsertion 
                                         + " et supprimé " + obj.deletion 
-                                        + " restriction" + multipleDeletion + ".<br>Raffraichissez la page pour observer le changement.", 'no_error');
+                                        + " restriction" + multipleDeletion + ".", 'no_error');
                             } else if (obj.insertion !== 0) {
                                 showalert("<strong>Succès !</strong> Vous avez inséré " + obj.insertion 
-                                        + " restriction"  + multipleInsertion + ".<br>Raffraichissez la page pour observer le changement.", 'no_error');
+                                        + " restriction"  + multipleInsertion + ".", 'no_error');
                             } else if (obj.deletion !== 0) {
                                 showalert("<strong>Succès !</strong> Vous avez supprimé " + obj.deletion 
-                                        + " restriction"  + multipleDeletion + ".<br>Raffraichissez la page pour observer le changement.", 'no_error');
+                                        + " restriction"  + multipleDeletion + ".", 'no_error');
                             } else {
                                 showalert("<strong>Attention !</strong> Aucune modification n'a été prise en compte, vérifiez de bien avoir coché et/ou décoché au moins une case", 'error');
                             }
@@ -60,16 +60,17 @@ function showalert(message, alerttype)
 	var backgroundColor;
 	if (alerttype === 'no_error' )
 	{
-		time = 30000;
-		backgroundColor='#c4ff7a ';
+		time = 5000;
+		backgroundColor='#25891c ';
 	} else
 	{
-		time = 30000;
+		time = 10000;
 		backgroundColor='#ff887a ';
 	}
-	$('#placeforalert').hide().fadeIn(500).append('<div id="alertdiv" style="background-color: ' + backgroundColor + '">' + message + '</span></div>');
+	$('#placeforalert').hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin-right: 10px ; margin-top: 10px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
 	setTimeout(function()
 	{
-		$("#alertdiv").remove();
+		$("#alertdiv").fadeOut(100);
+                $("#alertdiv").remove();
 	}, time);
 }

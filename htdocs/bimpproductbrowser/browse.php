@@ -59,6 +59,7 @@ if ($result <= 0)
     exit;
 }
 
+
 $type=$object->type;
 
 $extrafields = new ExtraFields($db);
@@ -72,6 +73,9 @@ $categstatic = new Categorie($db);
 $form = new Form($db);
 $pb = new productBrowser($db);
 
+$pb->fetch($object->id);
+
+
 if ($type == Categorie::TYPE_PRODUCT)       { $title=$langs->trans("ProductsCategoryShort");  $typetext='product'; }
 elseif ($type == Categorie::TYPE_SUPPLIER)  { $title=$langs->trans("SuppliersCategoryShort"); $typetext='supplier'; }
 elseif ($type == Categorie::TYPE_CUSTOMER)  { $title=$langs->trans("CustomersCategoriesArea"); $typetext='customer'; }
@@ -81,7 +85,7 @@ elseif ($type == Categorie::TYPE_ACCOUNT)   { $title=$langs->trans("AccountsCate
 elseif ($type == Categorie::TYPE_PROJECT)   { $title=$langs->trans("ProjectsCategoriesShort");  $typetext='project'; }
 else                                        { $title=$langs->trans("Category");          $typetext='unknown'; }
 
-llxHeader('','','','',0,0,$arrayofjs,$arrayofcss);
+llxHeader('','Recherche Filtrée','','',0,0,$arrayofjs,$arrayofcss);
 
 $head = categories_prepare_head($object,$type);
 
@@ -101,6 +105,7 @@ foreach ($ways as $way)
 $morehtmlref.='</div>';
 
 dol_banner_tab($object, 'label', $linkback, ($user->societe_id?0:1), 'label', 'label', $morehtmlref, '', 0, '', '', 1);
+print '<div id="placeforalert"><br></div>';
 
 //print load_fiche_titre($title);
 
@@ -121,6 +126,7 @@ print '</div></div></div>';
 print '<div class="fichecenter"><br>';
 
 
+print '<input type="hidden" name="id_oject" id="id_oject" value="'.$object->id.'"/>';
 // Charge tableau des categories
 $cate_arbo = $categstatic->get_full_arbo($typetext);
 
@@ -138,7 +144,7 @@ foreach($fulltree as $key => $val)
     $categstatic->type=$type;
     $li=$categstatic->getNomUrl(1,'',60);
     $desc=dol_htmlcleanlastbr($val['description']);
-    if($pb->restrictionExistsParentOnly($val['rowid']) or $pb->restrictionExistsChildOnly($val['rowid']))
+    if(in_array($val['rowid'], $pb->id_childs))
         $checked = ' checked';
     else
         $checked = '';
@@ -185,8 +191,6 @@ else
     print "</table>";
     print '</div>';
 }
-
-print '<div id="placeforalert"><br></div>';
 
 llxFooter();
 

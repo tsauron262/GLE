@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2005       Matthieu Valleton   <mv@seeschloss.org>
  * Copyright (C) 2005       Eric Seigne         <eric.seigne@ryxeo.com>
  * Copyright (C) 2006-2016  Laurent Destailleur <eldy@users.sourceforge.net>
@@ -21,29 +22,33 @@
  */
 
 /**
- *      \file       /bimpproductbrowser/addLink.php
+ *      \file       /bimpproductbrowser/nextCategory.php
  *      \ingroup    bimpproductbrowser
- *      \brief      Page without view, it just retrieve POST data and call ProductBrowser class
+ *      \brief      Page without view, it just manage POST request
  */
-
 require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/class/productBrowser.class.php';
-
+require_once DOL_DOCUMENT_ROOT . '/bimpproductbrowser/class/productBrowser.class.php';
 $pb = new ProductBrowser($db);
-$id = GETPOST('id_oject');
-$pb->fetch($id);
 
-switch (GETPOST('action'))
-{
-	case 'filldb':
-	{
-		$objOut = $pb->changeRestrictions(GETPOST('checked'));
-                echo json_encode($objOut);
-		break;
-	}
+switch (GETPOST('action')) {
+    case 'delAll': {
+            $pb->deleteProdCateg(GETPOST('id_prod'));
+            break;
+        }
+    case 'addCategory': {
+            $objOut = $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'), false);
+            echo json_encode($objOut);
+            break;
+        }
+    case 'delSomeCateg': {
+            $pb->deleteSomeCateg(GETPOST('id_prod'), GETPOST('id_cat_out'));
+        }
+    case 'getAllCategories': {
+            $objOut = $pb->getAllCategories(GETPOST('id_prod'));
+            echo json_encode($objOut);
+        }
     default: break;
 }
-
 
 $db->close();
 

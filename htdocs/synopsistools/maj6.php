@@ -16,6 +16,7 @@
  */
 require_once('../main.inc.php');
 
+
 include_once("./class/maj.class.php");
 
 global $nbError;

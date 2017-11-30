@@ -115,11 +115,11 @@ $(document).ready(function () {
             .attr('class', 'customBody')
             .appendTo('.fiche');
 
-    retrieveCateg();/*
-    console.log("objs " + objs);
-    console.log("cnt " + cnt);
-    console.log("cntRestr " + cntRestr);
-    console.log("catArr " + catArr);*/
+    retrieveCateg();
+//    console.log("objs " + objs);
+//    console.log("cnt " + cnt);
+//    console.log("cntRestr " + cntRestr);
+//    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -132,6 +132,10 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
+//        console.log("objs " + objs);
+//        console.log("cnt " + cnt);
+//        console.log("cntRestr " + cntRestr);
+//        console.log("catArr " + catArr);
     });
 });
 
@@ -145,10 +149,9 @@ function retrieveCateg() {
     cntRestr = objInit.tabRestrCounter;
     cnt = objInit.cnt;
     catArr = objInit.catArr;
-    k=0;
+    k = 0;
     for (i = 0; i < objInit.tabRestr.length; i++) {
         objs.push(objInit.tabRestr[i]);
-        cntRestr[cnt]++;
         if (objInit.tabRestr[i].selectedLabel) {
             addNavDivs(objInit.tabRestr[i], k);
             k++;
@@ -169,16 +172,18 @@ function deleteFrom(id_div) {
     for (i = 0; i <= id_div; i++) {
         restrToKeep += cntRestr[i];
     }
-
     catOut = catArr.slice(id_div);
-    objs.length = restrToKeep;
-    cntRestr.length = restrToKeep;
+    if (objs.length >= restrToKeep) {
+        objs.length = restrToKeep;
+        cntRestr.length = restrToKeep;
+    }
     cnt = id_div;
     deleteAllDivs();
     catArr.length = id_div;
     deleteCateg(catOut);
     addDivs();
 }
+
 
 function addDivs() {
     if (cnt >= objs.length) {

@@ -342,27 +342,28 @@ class ProductBrowser extends CommonObject {
 //        return $in->obj;
 //    }
 
-    function createObj($in, $currentRestr, $cntTabRestr) {
+    function createObj($in, $currentRestr) {
         $out = $this->addProdToCat($in->prod, $currentRestr, true);
-        if ($in->obj->tabRestrCounter.length < $cntTabRestr) {
-            $in->obj->tabRestrCounter[$cntTabRestr]=0;
+        if ($in->obj->tabRestrCounter . length <= $in->obj->cnt) {
+            $in->obj->tabRestrCounter[$in->obj->cnt] = 0;
         }
+        $in->obj->tabRestrCounter[$in->obj->cnt]+=sizeof($out->tabRestr);
+
         $in->obj->tabRestr = array_merge($in->obj->tabRestr, $out->tabRestr);
         foreach ($out->tabRestr as $restr) {
-            foreach ($in->prodCateg as $categ) {            // pop categ after
+            foreach ($in->prodCateg as $categ) {            // TODO pop categ after
                 $index = array_search($categ->id, $restr->tabIdChild);
                 if ($index !== false) {
                     $id = $restr->tabIdChild[$index];
                     foreach ($in->obj->tabRestr as $restrObj) {
                         if ($restr->idParent === $restrObj->idParent &&
-                                $restr->label === $restrObj->label) {
-                            $restrObj->selectedLabel = $categ->label;      // TODO, check if dupliacte
-                            $in->obj->cnt++;        
-                            $in->obj->tabRestrCounter[$cntTabRestr]++;
+                            $restr->label === $restrObj->label) {
+                            $restrObj->selectedLabel = $categ->label;
                             array_push($in->obj->catArr, $id);
+                            $in->obj->cnt++;
                         }
                     }
-                    $this->createObj($in, $id, $cntTabRestr + 1);
+                    $this->createObj($in, $id);
                 }
             }
         }
@@ -374,15 +375,16 @@ class ProductBrowser extends CommonObject {
         $obj->tabRestr = array();
         $obj->tabRestrCounter = array();
         $obj->catArr = array();
-        $obj->cnt=0;
+        $obj->cnt = 0;
 //        $categRestr = $this->getCategRestrictions();
         $in->prodCateg = $this->getProdCateg($id_prod);
 //        $in->categRestr = $categRestr;
         $in->obj = $obj;
         $in->prod = $id_prod;
 
-        $this->createObj($in, 0, 0);
+        $this->createObj($in, 0);
 
         return $in->obj;
     }
+
 }

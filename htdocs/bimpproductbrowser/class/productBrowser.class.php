@@ -351,16 +351,17 @@ class ProductBrowser extends CommonObject {
 
         $in->obj->tabRestr = array_merge($in->obj->tabRestr, $out->tabRestr);
         foreach ($out->tabRestr as $restr) {
-            foreach ($in->prodCateg as $categ) {            // TODO pop categ after
+            foreach ($in->obj->prodCateg as $key => $categ) {            // TODO pop categ after
                 $index = array_search($categ->id, $restr->tabIdChild);
                 if ($index !== false) {
                     $id = $restr->tabIdChild[$index];
                     foreach ($in->obj->tabRestr as $restrObj) {
                         if ($restr->idParent === $restrObj->idParent &&
-                            $restr->label === $restrObj->label) {
+                                $restr->label === $restrObj->label) {
                             $restrObj->selectedLabel = $categ->label;
                             array_push($in->obj->catArr, $id);
                             $in->obj->cnt++;
+                            array_splice($in->obj->prodCateg, $key, 1);
                         }
                     }
                     $this->createObj($in, $id);
@@ -376,13 +377,19 @@ class ProductBrowser extends CommonObject {
         $obj->tabRestrCounter = array();
         $obj->catArr = array();
         $obj->cnt = 0;
-//        $categRestr = $this->getCategRestrictions();
-        $in->prodCateg = $this->getProdCateg($id_prod);
-//        $in->categRestr = $categRestr;
+        $obj->prodCateg = $this->getProdCateg($id_prod);
         $in->obj = $obj;
         $in->prod = $id_prod;
 
+
         $this->createObj($in, 0);
+
+        $obj->ways = array();
+        $obj->color = array();
+        foreach ($obj->prodCateg as $cat) {
+            $in->obj->ways[] = $cat->print_all_ways();
+            $in->obj->color[] = $cat->color;
+        }
 
         return $in->obj;
     }

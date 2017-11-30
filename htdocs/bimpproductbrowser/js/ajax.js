@@ -103,6 +103,16 @@ function addCatInProd(id_categ) {
  */
 
 $(document).ready(function () {
+    /* Nav bar */
+    $('<div></div>')
+            .attr('id', 'otherContainer')
+            .attr('class', 'customBody')
+            .appendTo('.fiche');
+    $('<div><div>')
+            .attr('class', 'underbanner clearboth')
+            .appendTo('.fiche');
+
+    /* Nav bar */
     $('<div></div>')
             .attr('id', 'navContainer')
             .attr('class', 'customBody')
@@ -110,6 +120,8 @@ $(document).ready(function () {
     $('<div><div>')
             .attr('class', 'underbanner clearboth')
             .appendTo('.fiche');
+
+    /* Main container */
     $('<div></div>')
             .attr('id', 'mainContainer')
             .attr('class', 'customBody')
@@ -157,10 +169,25 @@ function retrieveCateg() {
             k++;
         }
     }
-
+    addWays();
     addDivs();
 }
 
+function addWays() {
+    for (i = 0; i < objInit.ways.length; i++) {
+        console.log(i);
+        $('<li></li>')
+                .attr('class', "noborderoncategories customLi")
+                .attr('style',  'background-color:#'+objInit.color[i])
+                .attr('id', 'idOther'+i)
+                .html(objInit.ways[i])
+                .appendTo('#otherContainer');
+        $('<img>')
+                .attr('src', DOL_URL_ROOT+'/theme/eldy/img/object_category.png')
+                .attr('class', "inline-block valigntextbottom")
+                .prependTo('#idOther'+i);
+        }
+}
 
 function deleteFrom(id_div) {
 

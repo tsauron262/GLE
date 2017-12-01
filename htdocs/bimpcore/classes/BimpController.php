@@ -51,6 +51,7 @@ class BimpController
         $this->addJsFile('/bimpcore/views/js/list.js');
         $this->addJsFile('/bimpcore/views/js/form.js');
         $this->addJsFile('/bimpcore/views/js/view.js');
+        $this->addJsFile('/bimpcore/views/js/viewsList.js');
         $this->addJsFile('/bimpcore/views/js/controller.js');
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/views/js/' . $controller . '.js')) {

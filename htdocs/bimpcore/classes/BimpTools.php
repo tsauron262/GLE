@@ -3,6 +3,19 @@
 class BimpTools
 {
 
+    public static $currencies = array(
+        'EUR' => array(
+            'label' => 'euro',
+            'icon'  => 'euro',
+            'html'  => '&euro;'
+        ),
+        'USD' => array(
+            'label' => 'dollar',
+            'icon'  => 'dollar',
+            'html'  => '&#36;'
+        )
+    );
+
     // Gestion GET / POST
 
     public static function isSubmit($key)
@@ -36,7 +49,7 @@ class BimpTools
         if (is_a($object, 'Societe')) {
             $primary = 'socid';
         }
-        if (file_exists(DOL_DOCUMENT_ROOT . '/'. $file)) {
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
             return DOL_URL_ROOT . '/' . $file . (isset($object->id) && $object->id ? '?' . $primary . '=' . $object->id : '');
         }
         return '';
@@ -495,6 +508,26 @@ class BimpTools
         return $return;
     }
 
+    // Devises: 
+    
+    public static function getCurrencyIcon($currency)
+    {
+        if (array_key_exists(strtoupper($currency), self::$currencies)) {
+            return self::$currencies[$currency]['icon'];
+        }
+
+        return 'euro';
+    }
+    
+    public static function getCurrencyHtml($currency)
+    {
+        if (array_key_exists(strtoupper($currency), self::$currencies)) {
+            return self::$currencies[$currency]['html'];
+        }
+
+        return '&euro;';
+    }
+    
     // Divers:
 
     public static function ucfirst($str)

@@ -17,33 +17,28 @@ fields:
     quantity: 
         label: Nombre
         type: int
-        input: 
-            type: text
         required: 1
         sortable: 1
         
     amount_ht:
         label: Montant HT
-        type: float
-        input: 
-            type: text
-            addon_right: 
-                icon: euro
-        display:
-            type: syntaxe
-            syntaxe: <value> &euro;
+        type: money
         required: 1
         sortable: 1
         
     payment:
         label: Règlement
         type: int
-        input:
-            type: select
-            options: 
-                array: payments
+        values: 
+            array: payments
         required: 0
         sortable: 1
+        
+    periodicity:
+        label: Périodicité
+        type: int
+        values: 
+            array: periodicities
         
 list:
     checkboxes: 1
@@ -66,6 +61,9 @@ list:
             edit: 1
         payment:
             field: payment
+            edit: 1
+        periodicity:
+            field: periodicity
             edit: 1
     add_object_row: 1
     update_btn: 1

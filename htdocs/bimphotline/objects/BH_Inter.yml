@@ -75,40 +75,25 @@ fields:
     priority:
         label: Priorité
         type: int
+        values: 
+            array: priorities
         required: 1
-        input: 
-            type: select
-            options:
-                array: priorities
-        display:
-            default: 
-                type: array_value
-                values:
-                    array: priorities
         sortable: 1
         search: 1
     
     status: 
         label: Statut
         type: int
-        input: 
-            type: select
-            options:
-                array: status
+        values: 
+            array: status
         required: 1
-        display: 
-            default: 
-                type: array_value
-                values: 
-                    array: status
         sortable: 1
         search: 1
                     
     description:
         label: Description
-        type: string
+        type: text
         input:
-            type: textarea
             rows: 3
             auto_expand: 1
         sortable: 0
@@ -232,6 +217,5 @@ views_lists:
         edit_form: default
         item_col_lg: 4
         item_col_md: 6
-        item_modal_view: data
-        item_inline_view: default
+        item_modal_view: default
         

@@ -21,23 +21,14 @@ fields:
 
     amount:
         label: Montant HT
-        type: float
-        input: 
-            type: text
-            addon_right: 
-                icon: euro
-        display:
-            type: syntaxe
-            syntaxe: <value> &euro;
+        type: money
         required: 1
         
     payment:
         label: Règlement
         type: int
-        input:
-            type: select
-            options: 
-                array: payments
+        values: 
+            array: payments
         required: 0
         sortable: 1
         

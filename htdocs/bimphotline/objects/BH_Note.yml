@@ -6,6 +6,15 @@ labels:
     name: note
     is_female: 1
 
+objects: 
+    inter: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BH_Inter
+            id_object:
+                field_value: id_inter
+                
 fields:
     id_ticket: 
         label: Ticket
@@ -21,46 +30,26 @@ fields:
     id_inter:
         label: Intervention
         type: id_object
-        object: 
-            instance: 
-                bimp_object: BH_Inter
-                fetch:
-                    id: 
-                        field_value: id_inter
-        input: 
-            type: select
-            options:
-                array: interventions
+        object: inter
+        values: 
+            array: interventions
         required: 0
         default_value: 0
         sortable: 1
         search: 1
-        display: 
-            default: 
-                type: array_value
-                values: 
-                    array: interventions
                     
     visibility:
         label: Visibilité
         type: int
-        input: 
-            type: select
-            options:
-                array: visibilities
+        values: 
+            array: visibilities
         search: 1
         sortable: 1
-        display: 
-            default: 
-                type: array_value
-                values: 
-                    array: visibilities
                     
     content: 
         label: Contenu
-        type: string
+        type: text
         input:
-            type: textarea
             note: 1
             auto_expand: 1
             rows: 2

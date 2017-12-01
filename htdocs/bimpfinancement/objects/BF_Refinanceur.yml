@@ -14,40 +14,33 @@ fields:
     name: 
         label: Nom
         type: int
-        input: 
-            type: select
-            options:
-                array: names
-        display: 
-            type: array_value
-            values:
-                array: names
+        values: 
+            array: names
         required: 1
         sortable: 1
         
     status:
         label: Statut
         type: int
-        input: 
-            type: select
-            options: 
-                array: status_list
-        display:
-            type: array_value
-            values:
-                array: status_list
+        values:
+            array: status_list
         required: 1
         sortable: 1
         
+    rate:
+        label: taux
+        type: percent
+        
+    coef:
+        label: Coéficient
+        type: float
+        
     comment:
         label: Commentaire
-        type: string
+        type: text
         input:
-            type: textarea
             rows: 1
             auto_expand: 1
-        required: 0
-        sortable: 0
         
 list:
     checkboxes: 1
@@ -67,6 +60,12 @@ list:
             edit: 1
         status: 
             field: status
+            edit: 1
+        rate: 
+            field: rate
+            edit: 1
+        coef: 
+            field: coef
             edit: 1
         comment:
             field: comment

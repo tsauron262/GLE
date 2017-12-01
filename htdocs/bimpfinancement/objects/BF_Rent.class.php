@@ -9,5 +9,11 @@ class BF_Rent extends BimpObject
         2 => 'Virement',
         3 => 'Mandat administratif'
     );
+    public static $periodicities = array(
+        1  => 'Mensuelle',
+        3  => 'Trimestrielle',
+        6  => 'Semestrielle',
+        12 => 'Annuelle'
+    );
 
 }

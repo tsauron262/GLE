@@ -174,7 +174,7 @@ class BimpRender
             $params['type'] = 'default';
         }
 
-        $html .= '<div class="panel panel-' . $params['type'] . '"';
+        $html .= '<div class="panel panel-' . $params['type'] . (isset($params['foldable']) && $params['foldable'] ? ' foldable open' : '') . '"';
         if (isset($params['panel_id']) && $params['panel_id']) {
             $html .= ' id="' . $params['panel_id'] . '"';
         }
@@ -190,14 +190,19 @@ class BimpRender
         $html .= '</div>';
 
         // Bouttons en en-tête:
+
+        $html .= '<div class="header_buttons">';
         if (isset($params['header_buttons']) && is_array($params['header_buttons']) && count($params['header_buttons'])) {
-            $html .= '<div class="header_buttons">';
             foreach ($params['header_buttons'] as $button) {
                 $button['classes'][] = 'headerBtn';
                 $html .= self::renderButton($button);
             }
-            $html .= '</div>';
         }
+        
+        if (isset($params['foldable']) && $params['foldable']) {
+            $html .= '<span class="panel-caret"></span>';
+        }
+        $html .= '</div>';
 
         $html .= '</div>';
 

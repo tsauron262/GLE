@@ -10,6 +10,22 @@ objects:
             dol_object: product
             id_object:
                 field_value: id_product
+        cards: 
+            default:
+                title:
+                    object_prop: label
+                    image: 
+                        callback: 
+                            method: getProductImageUrl
+                            params: 
+                                id_product:
+                                    field_value: id_product
+                            instance: BimpTools
+                            is_static: 1
+                    fields:
+                        Réf.:
+                            object_prop: ref
+                    view_btn: 1
     client:
         instance:
             dol_object: societe
@@ -47,21 +63,7 @@ fields:
                 type: nom
             card:
                 type: card
-                card: 
-                    title:
-                        object_prop: label
-                    image: 
-                        callback: 
-                            method: getProductImageUrl
-                            params: 
-                                id_product:
-                                    field_value: id_product
-                            instance: BimpTools
-                            is_static: 1
-                    fields:
-                        Réf.:
-                            object_prop: ref
-                    view_btn: 1
+                card: default
                     
         sortable: 1
         sort_options:
@@ -78,8 +80,6 @@ fields:
         label: Numéro de série
         type: string
         size: 128
-        input: 
-            type: text
         required: 1
         search:
             type: value_part
@@ -91,10 +91,6 @@ fields:
     date_purchase: 
         label: Date d'achat
         type: date
-        input:
-            type: date
-        display: 
-            type: date
         required: 0
         search:
             type: date_range
@@ -103,10 +99,6 @@ fields:
     date_warranty_end: 
         label: Date de fin de garantie
         type: date
-        input:
-            type: date
-        display: 
-            type: date
         required: 0
         search:
             type: date_range
@@ -115,14 +107,8 @@ fields:
     warranty_type: 
         label: Type de garantie
         type: string
-        input: 
-            type: select
-            options: 
-                array: warranty_types
-        display: 
-            type: array_value
-            values:
-                array: warranty_types
+        values: 
+            array: warranty_types
         search: 1
         sortable: 1
                 
@@ -130,8 +116,6 @@ fields:
         label: Login admin
         type: string
         size: 128
-        input: 
-            type: text
         required: 0
         sortable: 1
         search: 0
@@ -140,18 +124,14 @@ fields:
         label: Mot de passe admin
         type: string
         size: 128
-        input: 
-            type: text
         required: 0
         sortable: 1
         search: 0        
         
     note:
         label: Note
-        type: string
+        type: text
         size: 800
-        input:
-            type: textarea
         required: 0
         sortable: 0
         search: 0

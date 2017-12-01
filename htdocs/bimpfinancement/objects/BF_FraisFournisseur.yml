@@ -62,20 +62,12 @@ fields:
     
     description:
         label: Libellé
-        type: string
         required: 1
         sortable: 1
         
     amount:
         label: Montant HT
-        type: float
-        input: 
-            type: text
-            addon_right: 
-                icon: euro
-        display:
-            type: syntaxe
-            syntaxe: <value> &euro;
+        type: money
         required: 1
         sortable: 1
         

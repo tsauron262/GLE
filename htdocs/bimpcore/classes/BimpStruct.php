@@ -206,9 +206,9 @@ class BimpStruct
 
         $table_id = 'objectViewTable_' . rand(0, 999999);
         $html .= '<div class="objectViewTableContainer">';
-        $html .= '<table class="objectViewtable" id="' . $table_id . '">';
+        $html .= '<table class="objectViewtable' . (!is_null($caption) ? ' foldable open' : '') . '" id="' . $table_id . '">';
         $html .= '<thead>';
-        if ($caption) {
+        if (!is_null($caption)) {
             if (is_array($caption)) {
                 $label = $config->getFromCurrentPath('caption/label', '');
                 $icon = $config->getFromCurrentPath('caption/icon', '');
@@ -223,6 +223,7 @@ class BimpStruct
             if ($label) {
                 $html .= $label;
             }
+            $html .= '<span class="foldable-caret"></span>';
             $html .= '</th></tr>';
         }
         $html .= '</thead>';

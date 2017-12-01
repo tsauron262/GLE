@@ -323,8 +323,9 @@ class BimpList
         }
 
         $params = array(
-            'type' => 'secondary',
-            'icon' => $icon
+            'type'     => 'secondary',
+            'icon'     => $icon,
+            'foldable' => true
         );
 
         if ($add_btn) {
@@ -493,9 +494,9 @@ class BimpList
                             case 'field_input':
                             case 'value_part':
                                 if ($this->object->config->isDefined('fields/' . $field . '/search/input')) {
-                                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field . '/search', 'search_' . $field, null, $this->id_parent, null, 'default', $input_id);
+                                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field . '/search', $field, null, $this->id_parent, null, 'default', $input_id, 'search_' . $field);
                                 } elseif ($this->object->config->isDefined('fields/' . $field)) {
-                                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field, 'search_' . $field, null, $this->id_parent, null, 'default', $input_id);
+                                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, null, $this->id_parent, null, 'default', $input_id, 'search_' . $field);
                                 }
                                 break;
 

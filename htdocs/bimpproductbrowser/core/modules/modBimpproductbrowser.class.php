@@ -101,7 +101,7 @@ class modBimpproductbrowser extends DolibarrModules {
         $this->dirs = array();
 
         // Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
-        $this->config_page_url = array("setup.php@mymodule");
+        $this->config_page_url = array("bimpproductbrowser.php");
 
         // Dependencies
         $this->hidden = false;   // A condition to hide module

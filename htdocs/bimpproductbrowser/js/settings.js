@@ -11,7 +11,7 @@ $(document).ready(function ()
         } else if (inputChecked == 0) {
             showalert("<strong>Attention !</strong> Sélectionnez au moins une catégorie. Aucune modification n'a été prise en compte.", 'error');
         } else {
-            showalert("<strong>Bien !</strong> ", 'no_error');
+            
         }
 //        $.ajax(
 //                {
@@ -30,18 +30,7 @@ $(document).ready(function ()
 
 function showalert(message, alerttype)
 {
-    var time;
-    var backgroundColor;
-    if (alerttype === 'no_error')
-    {
-        time = 5000;
-        backgroundColor = '#25891c ';
-    } else
-    {
-        time = 10000;
-        backgroundColor = '#ff887a ';
-    }
-    $('#placeforalert').hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
+     $('#placeforalert').hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: #ff887a ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
     setTimeout(function ()
     {
         $("#alertdiv").fadeOut(1000);
@@ -49,5 +38,5 @@ function showalert(message, alerttype)
         {
             $("#alertdiv").remove();
         }, 1000);
-    }, time);
+    }, 10000);
 }

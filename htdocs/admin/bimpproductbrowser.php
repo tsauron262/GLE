@@ -46,13 +46,15 @@ if (!$user->admin) accessforbidden();
  * Actions
  */
 
+$action = GETPOST('action','alpha');
+
 if($action)
 {
 	$db->begin();
 
-	if ($action == 'STOCK_USERSTOCK_AUTOCREATE')
+	if ($action == 'BIMP_ROOT_CATEGORY')
 	{
-		$res = dolibarr_set_const($db, "STOCK_USERSTOCK_AUTOCREATE", GETPOST('STOCK_USERSTOCK_AUTOCREATE','alpha'),'chaine',0,'',$conf->entity);
+		$res = dolibarr_set_const($db, "BIMP_ROOT_CATEGORY", GETPOST('BIMP_ROOT_CATEGORY'),'chaine',0,'',$conf->entity);
 	}
 	if (! $res > 0) $error++;
 
@@ -89,10 +91,6 @@ print '</table>';
 
 
 if (!$user->admin) accessforbidden();
-
-/*
- * View
- */ 
 
 $categstatic = new Categorie($db);
 

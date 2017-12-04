@@ -128,10 +128,6 @@ $(document).ready(function () {
             .appendTo('.fiche');
 
     retrieveCateg();
-//    console.log("objs " + objs);
-//    console.log("cnt " + cnt);
-//    console.log("cntRestr " + cntRestr);
-//    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -144,10 +140,6 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
-//        console.log("objs " + objs);
-//        console.log("cnt " + cnt);
-//        console.log("cntRestr " + cntRestr);
-//        console.log("catArr " + catArr);
     });
 });
 
@@ -158,6 +150,10 @@ $(document).ready(function () {
 
 function retrieveCateg() {
     getAllCateg();
+    if (objInit.ROOT_CATEGORY === null) {
+        addErrorDivs();
+    }
+    console.log(objInit.ROOT_CATEGORY);
     cntRestr = objInit.tabRestrCounter;
     cnt = objInit.cnt;
     catArr = objInit.catArr;
@@ -174,19 +170,25 @@ function retrieveCateg() {
 }
 
 function addWays() {
+    $('<p></p><br>')
+            .attr('style', 'margin-bottom:-15px ; margin-top: -5px')
+            .text('Catégories hors module ')
+            .appendTo('#otherContainer');
     for (i = 0; i < objInit.ways.length; i++) {
-        console.log(i);
+        if (objInit.color[i] == undefined) {
+            objInit.color[i] = 'aaa';
+        }
         $('<li></li>')
                 .attr('class', "noborderoncategories customLi")
-                .attr('style',  'background-color:#'+objInit.color[i])
-                .attr('id', 'idOther'+i)
+                .attr('style', 'background-color:#' + objInit.color[i])
+                .attr('id', 'idOther' + i)
                 .html(objInit.ways[i])
                 .appendTo('#otherContainer');
         $('<img>')
-                .attr('src', DOL_URL_ROOT+'/theme/eldy/img/object_category.png')
+                .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')
                 .attr('class', "inline-block valigntextbottom")
-                .prependTo('#idOther'+i);
-        }
+                .prependTo('#idOther' + i);
+    }
 }
 
 function deleteFrom(id_div) {
@@ -236,6 +238,13 @@ function addDivs() {
         }
         ++cnt;
     }
+}
+
+function addErrorDivs() {
+    $('<div></div><br>')
+            .attr('class', 'customDiv fixDiv errorDiv')
+            .text("Erreur : La catégorie racine n'est pas définie, veuillez conctactez l'administrateur pour qu'il en désigne une.")
+            .appendTo('#mainContainer');
 }
 
 function addNavDivs(restr, k) {

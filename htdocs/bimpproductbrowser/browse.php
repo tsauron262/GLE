@@ -70,8 +70,7 @@ $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
  */ 
 
 $categstatic = new Categorie($db);
-$form = new Form($db);
-$pb = new productBrowser($db);
+$pb = new BimpProductBrowser($db);
 
 $pb->fetch($object->id);
 
@@ -105,7 +104,7 @@ foreach ($ways as $way)
 $morehtmlref.='</div>';
 
 dol_banner_tab($object, 'label', $linkback, ($user->societe_id?0:1), 'label', 'label', $morehtmlref, '', 0, '', '', 1);
-print '<div id="placeforalert"><br></div>';
+print '<div id="placeforalert" style="margin-top : 10px ; margin-bottom : -50px ; height: 55px;"></div>';
 
 //print load_fiche_titre($title);
 

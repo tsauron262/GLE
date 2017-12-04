@@ -9,10 +9,9 @@ $(document).ready(function ()
         var checkboxs = [];
         for (var i = 0, max = allInputs.length; i < max; i++)
         {
-            if (allInputs[i].type === 'checkbox')
+            if (allInputs[i].type === 'checkbox' && allInputs[i].checked == true)
                 checkboxs.push({
-                    id: allInputs[i].id,
-                    val: allInputs[i].checked
+                    id: allInputs[i].id
                 });
         }
         var urlRequest = DOL_URL_ROOT + "/bimpproductbrowser/addLink.php";

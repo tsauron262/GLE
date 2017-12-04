@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS `llx_bimp_cat_cat`;
-
-CREATE TABLE `llx_bimp_cat_cat` (
+CREATE TABLE IF NOT EXISTS `llx_bimp_cat_cat` (
     `rowid`         INTEGER AUTO_INCREMENT PRIMARY KEY,
     `entity`        INTEGER default 1,
     `datec`         DATETIME,

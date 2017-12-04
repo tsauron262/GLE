@@ -41,6 +41,9 @@ strong {
 .fixDiv {
     margin-top: 20px;
 }
+.errorDiv {
+    background-color: #ff887a;
+}
 
 .divClikable {
     background-color:#75aaff;

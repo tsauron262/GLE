@@ -32,7 +32,7 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class BimpProductBrowser extends CommonObject {
 
-    public $id;      // id of the parent ctegorie
+    public $id;      // id of the parent category
     public $id_childs = array();
 
     /**
@@ -41,6 +41,7 @@ class BimpProductBrowser extends CommonObject {
      *  @param		DoliDB		$db     Database handler
      */
     function __construct($db) {
+        global $conf;
         $this->db = $db;
     }
 
@@ -48,7 +49,6 @@ class BimpProductBrowser extends CommonObject {
      * 	Add link into database
      */
     function create() {
-
         dol_syslog(get_class($this) . '::create', LOG_DEBUG);
     }
 
@@ -150,14 +150,24 @@ class BimpProductBrowser extends CommonObject {
         $objOut = null;
         $cntInsertion = 0;
         $cntDeletion = 0;
+
+
         for ($i = 0; $i < sizeof($checkboxs); $i++) {
             $id_f = $checkboxs[$i]['id'];
-            $val1 = $checkboxs[$i]['val'];
-            if ($val1 == 'true' and $this->id != $id_f and ! in_array($id_f, $this->id_childs)) {
+            if ($this->id != $id_f and !in_array($id_f, $this->id_childs) and $id_f !== '') {
                 $this->insertRow($this->id, $id_f);
                 ++$cntInsertion;
-            } elseif ($val1 == 'false' and in_array($id_f, $this->id_childs)) {
-                $this->deleteRow($this->id, $id_f);
+            }
+        }
+        foreach ($this->id_childs as $child ) {
+            $cocher = false;
+            foreach ($checkboxs as $checkbox) {
+                if ($child == $checkbox['id']) {
+                    $cocher = true;
+                }
+            }
+            if (!$cocher) {
+                $this->deleteRow($this->id, $child);
                 ++$cntDeletion;
             }
         }
@@ -371,7 +381,12 @@ class BimpProductBrowser extends CommonObject {
     }
 
     function getAllCategories($id_prod) {
+        global $conf;
         $in = null;
+        $obj->ROOT_CATEGORY = $conf->global->BIMP_ROOT_CATEGORY;
+        if ($obj->ROOT_CATEGORY === null) {
+            return $obj;
+        }
         $obj = new stdClass();
         $obj->tabRestr = array();
         $obj->tabRestrCounter = array();
@@ -380,7 +395,7 @@ class BimpProductBrowser extends CommonObject {
         $obj->prodCateg = $this->getProdCateg($id_prod);
         $in->obj = $obj;
         $in->prod = $id_prod;
-        $this->createObj($in, 0);
+        $this->createObj($in, $conf->global->BIMP_ROOT_CATEGORY);
         $obj->ways = array();
         $obj->color = array();
         foreach ($obj->prodCateg as $cat) {

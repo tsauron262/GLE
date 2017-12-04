@@ -55,7 +55,29 @@ $result = restrictedArea($user, 'societe', $socid, '&societe');
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('infothirdparty'));
 
+
 $object = new Societe($db);
+
+if ($socid > 0) {
+    $result = $object->fetch($socid);
+    if (!$result) {
+        $langs->load("errors");
+        print $langs->trans("ErrorRecordNotFound");
+
+        llxFooter();
+        $db->close();
+
+        exit;
+
+    }
+    else
+    $object->info($socid);
+}
+
+// Actions to build doc
+$upload_dir = $conf->bimpcesu->dir_output;
+$permissioncreate = $user->rights->bimpcesu->read;
+include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
 
 
 /*
@@ -86,24 +108,13 @@ llxHeader('', $title, $help_url);
 
 
 if ($socid > 0) {
-    $result = $object->fetch($socid);
-    if (!$result) {
-        $langs->load("errors");
-        print $langs->trans("ErrorRecordNotFound");
-
-        llxFooter();
-        $db->close();
-
-        exit;
-    }
+    
 
     $head = societe_prepare_head($object);
 
     dol_fiche_head($head, 'attestation', $langs->trans("ThirdParty"), 0, 'company');
 
     dol_banner_tab($object, 'socid', '', ($user->societe_id ? 0 : 1), 'rowid', 'nom');
-
-    $object->info($socid);
 
 
 
@@ -297,8 +308,6 @@ print "</td></tr></table>";
         
         $(document).ready(function(){
             $('#builddoc_generatebutton').hide();
-            //var dateDeDebut = NULL;
-            //var dateDeFin = NULL;
         });
     
         $('.btn-success').on('click', function(e){
@@ -309,12 +318,22 @@ print "</td></tr></table>";
             $('<input type="hidden" name="dateD" value="'+dateDeDebut+'"/>').appendTo('#builddoc_form');                        
             $('<input type="hidden" name="dateF" value="'+dateDeFin+'"/>').appendTo('#builddoc_form');
             
-            //if (dateDeDebut !== NULL && dateDeFin !== NULL){
+            var regTiret = new RegExp('-', 'gi');
+            
+            var dateDSansTiret = dateDeDebut.replace(regTiret, '');
+            var dateFSansTiret = dateDeFin.replace(regTiret, '');
+            
+            var dateDtoInt = parseInt(dateDSansTiret);
+            var dateFtoInt = parseInt(dateFSansTiret);
+            
+            
+            if (dateDtoInt > dateFtoInt){                
+                alert('Veuillez sélectionner une date de début anterieur à la date de fin');
+                
+            }else {
                 $('#builddoc_generatebutton').show();
-            //}
             
-            alert('Vous allez sélectionner les fatcures à partir du : ' + $('input[name=dateD]').val() + ' jusqu\'au : ' + $('input[name=dateF]').val() );
-            
+            }
         });
     
     })(jQuery);</script>
@@ -322,23 +341,6 @@ print "</td></tr></table>";
 
 
 //<-- ------------------- FORMULAIRE PERIOD END------------ -->
-
-
-
-
-
-
-
-
-//<--- -------------- GENE PDF START --------------- --->
-
-
-    // Actions to build doc
-$upload_dir = $conf->bimpcesu->dir_output;
-$permissioncreate = $user->rights->bimpcesu->read;
-include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
-
-
 
 /*
  * Documents generes

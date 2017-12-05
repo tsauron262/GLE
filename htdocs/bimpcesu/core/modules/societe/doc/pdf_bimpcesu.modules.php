@@ -936,8 +936,9 @@ class pdf_bimpcesu extends ModeleBimpcesu
 	$facturestatic = new Facture($db);
         
         $sql = 'SELECT f.rowid as facid, f.fk_mode_reglement as mr';
+        //$sql .= ', facturedet.description';
         $sql .= ', f.total_ttc as total_ttc';
-        $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s," . MAIN_DB_PREFIX . "facture as f";
+        $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s," . MAIN_DB_PREFIX . "facture as f";//," . MAIN_DB_PREFIX . "facturedet";
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
         $sql .= " AND f.datef BETWEEN '" . $dateD . "' AND '" . $dateF ."'";
         $sql .= " GROUP BY f.rowid";
@@ -962,6 +963,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
               $facturestatic->type = $objp->type;
               $facturestatic->total_ttc = $objp->total_ttc;
               $facturestatic->mr = $objp->mr;
+              $facturestatic->description = $objp->description;
               
               if($objp->mr == 150){
                   $array_total_cesu[] = $objp->total_ttc;
@@ -979,6 +981,8 @@ class pdf_bimpcesu extends ModeleBimpcesu
       
             $total = array_sum ($array_total); // Montant total facture     
             $totalcesu = array_sum ($array_total_cesu); // Montant total CESU       
+            
+            $description = $objp->description;
             
             $npref = "Error"; // Inconnu pour le moment
             $diri = "Christian CONSTANTIN BERTIN";
@@ -1008,7 +1012,25 @@ class pdf_bimpcesu extends ModeleBimpcesu
         $date03 = date('Y')-1;
         $date04 = date('Y')+1;
         
-
+        // Remise en ordre des dates début et fin (jours/mois/annee)
+        $anneeD = substr($dateD,   0,  4);
+        $moisD = substr($dateD,  4, 4);
+        $jourD = substr($dateD,  8,  2);
+        $dateDOrdre = $jourD.$moisD.$anneeD;
+        
+        $anneeF = substr($dateF,  0,  4);
+        $moisF = substr($dateF,  4, 4);
+        $jourF = substr($dateF,  8,  2);
+        $dateFOrdre = $jourF.$moisF.$anneeF;
+        
+        /*var_dump($dateD);
+        var_dump($dateF);
+        var_dump($moisD);
+        var_dump($moisF);
+        var_dump($jourD);
+        var_dump($jourF);
+        die;*/
+        
 
         $outputlangs->load("main");
 		$outputlangs->load("bills");
@@ -1181,15 +1203,15 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         
                         // LIGNES CONTENUS 1
                         $pdf->SetXY($posx+2,$posy+70); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(182, 3, "Je soussigné(e) M. $diri, de $orga certifie que M. $bene a bénéficié(e) de services à la personne (préciser la nature du service). ", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(182, 3, "Je soussigné(e) M. $diri, de $orga certifie que M. $bene a bénéficié(e) de services à la personne ($description). ", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 2
                         $pdf->SetXY($posx+2,$posy+85); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(182, 3, "En $date03, sa participation représente une somme totale de : $total €, dont $totalcesu € au titre du Cesu.", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(182, 3, "Du $dateDOrdre au $dateFOrdre, sa participation représente une somme totale de : $total €, dont $totalcesu € au titre du Cesu.", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 3
                         $pdf->SetXY($posx+2,$posy+100); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(182, 3, "Montant total des factures $date03 : $total €", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(182, 3, "Montant total des factures Du $dateDOrdre au $dateFOrdre : $total €", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 4
                         $pdf->SetXY($posx+2,$posy+105); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR

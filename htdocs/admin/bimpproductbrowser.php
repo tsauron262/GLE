@@ -48,24 +48,31 @@ if (!$user->admin)
  * Actions
  */
 
-$idRootCateg = GETPOST('categMere', 'int');
+$idRootCateg = GETPOST('categMere');
+$forceCategorization = GETPOST('forceCat');
+
+$db->begin();
 
 if ($idRootCateg) {
-    $db->begin();
 
     $res = dolibarr_set_const($db, "BIMP_ROOT_CATEGORY", $idRootCateg, 'chaine', 0, '', $conf->entity);
-    
     if (!$res > 0)
         $error++;
-
-    if (!$error) {
-        $db->commit();
-        setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
-    } else {
-        $db->rollback();
-        setEventMessages($langs->trans("Error"), null, 'errors');
-    }
 }
+if ($forceCategorization != $conf->global->BIMP_FORCE_CATEGORIZATION) {
+    $res = dolibarr_set_const($db, "BIMP_FORCE_CATEGORIZATION", $forceCategorization, 'chaine', 0, '', $conf->entity);
+    if (!$res > 0)
+        $error++;
+}
+
+if (!$error) {
+    $db->commit();
+    setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
+} else {
+    $db->rollback();
+    setEventMessages($langs->trans("Error"), null, 'errors');
+}
+
 
 
 /*
@@ -133,14 +140,14 @@ foreach ($fulltree as $key => $val) {
     $categstatic->type = $type;
     $li = $categstatic->getNomUrl(1, '', 60);
     $desc = dol_htmlcleanlastbr($val['description']);
-    if($val['rowid'] == $conf->global->BIMP_ROOT_CATEGORY)
+    if ($val['rowid'] == $conf->global->BIMP_ROOT_CATEGORY)
         $checked = ' checked';
     else
         $checked = '';
     $data[] = array(
         'rowid' => $val['rowid'],
         'fk_menu' => $val['fk_parent'],
-        'entry' => '<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" ' . ($categstatic->color ? ' style="background: #' . $categstatic->color . ';"' : ' style="background: #aaa"') . '><input type="radio" value=' . $val['rowid'] . ' name="categMere"'.$checked.'>' . $li . '</span></td>' .
+        'entry' => '<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" ' . ($categstatic->color ? ' style="background: #' . $categstatic->color . ';"' : ' style="background: #aaa"') . '><input type="radio" value=' . $val['rowid'] . ' name="categMere"' . $checked . '>' . $li . '</span></td>' .
         '<td align="right" width="20px;"><a href="' . DOL_URL_ROOT . '/categories/viewcat.php?id=' . $val['id'] . '&type=' . $type . '">' . img_view() . '</a></td>' .
         '</tr></table>'
     );
@@ -176,10 +183,21 @@ if ($nbofentries > 0) {
     print "</table>";
     print '</div>';
 }
-print '<input type="submit" class="button" type="button" value="Valider">';
+
+print '<label>Forcer la page catégorisé</label><br>';
+if($conf->global->BIMP_FORCE_CATEGORIZATION == 1 ){
+    print 'Oui <input type="radio" name="forceCat" value="1" checked>';
+} else {
+    print 'Oui <input type="radio" name="forceCat" value="1">';
+}
+if($conf->global->BIMP_FORCE_CATEGORIZATION == 0 ){
+    print 'Non <input type="radio" value="0" name="forceCat" checked><br>';
+} else {
+    print 'Non <input type="radio" value="0" name="forceCat"><br>';
+}
+print '<input type="submit" class="button" value="Valider">';
 
 print '</form>';
-
 
 llxFooter();
 

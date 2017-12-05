@@ -87,7 +87,7 @@ print load_fiche_titre('Configuration du module de catégorisation', $linkback, 
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
-print "  <td>Veuillez sélectionner la catégorie qui sera utilisée comme racine    </td>\n";
+print "  <td>Veuillez sélectionner la catégorie qui sera utilisée comme racine.</td>\n";
 print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
 print '</tr>' . "\n";
 
@@ -170,7 +170,6 @@ if ($nbofentries > 0) {
     tree_recur($data, $data[0], 0);
     print '</td></tr>';
     print "</table>";
-    print '</div>';
 } else {
     print '<tr class="pair">';
     print '<td colspan="3"><table class="nobordernopadding"><tr class="nobordernopadding"><td>' . img_picto_common('', 'treemenu/branchbottom.gif') . '</td>';
@@ -181,10 +180,16 @@ if ($nbofentries > 0) {
     print '</table></td>';
     print '</tr>';
     print "</table>";
-    print '</div>';
 }
 
-print '<label>Forcer la page catégorisé</label><br>';
+
+print '<br><table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print "  <td>Souhaitez-vous forcer les utilisateurs à catégoriser les produits ?</td>\n";
+print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
+print '</tr>' . "\n";
+print '</table>';
+
 if($conf->global->BIMP_FORCE_CATEGORIZATION == 1 ){
     print 'Oui <input type="radio" name="forceCat" value="1" checked>';
 } else {
@@ -195,7 +200,9 @@ if($conf->global->BIMP_FORCE_CATEGORIZATION == 0 ){
 } else {
     print 'Non <input type="radio" value="0" name="forceCat"><br>';
 }
-print '<input type="submit" class="button" value="Valider">';
+
+print '<br><input type="submit" class="button" value="Valider">';
+print '</div>';
 
 print '</form>';
 

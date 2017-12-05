@@ -289,18 +289,14 @@ print "</td></tr></table>";
     
     $annee = date("Y"); //recuperation de l'annee en cours
      
-    // chargement bootstrap (CDN)
-    echo '<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">';
-    echo '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>';
-    
-    
+   
     // View Formulaire
     echo '<h3>Sélectionnez une periode de facturation</h3>';
     
     echo '<form> <b>Du</b> <input type="date" name="dateDebut" value="' .$annee. '-01-01"/>'; //valeur par defaut = 1er janvier de l'année en cours 
     echo '<b>Au</b> <input type="date" name="dateFin" value="' .$annee. '-12-31"/>'; // valeur par defaut = 31 decembre de l'année en cours
     
-    echo '<button type="button" class="btn btn-success">ok</button></form>';
+    echo '<button type="button" class="button" id="boutondate">ok</button></form>';
         
 ?>        
 <script>        
@@ -310,7 +306,7 @@ print "</td></tr></table>";
             $('#builddoc_generatebutton').hide();
         });
     
-        $('.btn-success').on('click', function(e){
+        $('#boutondate').on('click', function(e){
             
             var dateDeDebut = $('input[name=dateDebut]').val();
             var dateDeFin = $('input[name=dateFin]').val();
@@ -331,12 +327,13 @@ print "</td></tr></table>";
                 alert('Veuillez sélectionner une date de début anterieur à la date de fin');
                 
             }else {
-                $('#builddoc_generatebutton').show();
-            
+                //$('#builddoc_generatebutton').show();
+                $('#builddoc_generatebutton').click();
             }
         });
     
-    })(jQuery);</script>
+    })(jQuery);
+</script>
 <?php
 
 

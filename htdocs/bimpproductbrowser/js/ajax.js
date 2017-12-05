@@ -202,7 +202,7 @@ function deleteFrom(id_div) {
 
 
 function addDivs() {
-    if (cnt === 0) {
+    if (objs.length === 0) {
         $('<div>Aucune catégorie faisant partie de ce module n\'a été définie.<br> Cliquez ici pour en créer une.<a class="fillTheDiv" href=""></a></div>')
                 .attr('class', 'customDiv divClikable')
                 .attr('id', 'divToBrowse')

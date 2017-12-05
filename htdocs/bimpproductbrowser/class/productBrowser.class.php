@@ -154,12 +154,12 @@ class BimpProductBrowser extends CommonObject {
 
         for ($i = 0; $i < sizeof($checkboxs); $i++) {
             $id_f = $checkboxs[$i]['id'];
-            if ($this->id != $id_f and !in_array($id_f, $this->id_childs) and $id_f !== '') {
+            if ($this->id != $id_f and ! in_array($id_f, $this->id_childs) and $id_f !== '') {
                 $this->insertRow($this->id, $id_f);
                 ++$cntInsertion;
             }
         }
-        foreach ($this->id_childs as $child ) {
+        foreach ($this->id_childs as $child) {
             $cocher = false;
             foreach ($checkboxs as $checkbox) {
                 if ($child == $checkbox['id']) {
@@ -381,13 +381,14 @@ class BimpProductBrowser extends CommonObject {
     }
 
     function getAllCategories($id_prod) {
-        global $conf;
         $in = null;
+        global $conf;
+        $obj = new stdClass();
+
         $obj->ROOT_CATEGORY = $conf->global->BIMP_ROOT_CATEGORY;
         if ($obj->ROOT_CATEGORY === null) {
             return $obj;
         }
-        $obj = new stdClass();
         $obj->tabRestr = array();
         $obj->tabRestrCounter = array();
         $obj->catArr = array();

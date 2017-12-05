@@ -68,7 +68,7 @@ function InfoSoc(elem,elem2) {
         var siren = window.prompt("Numéro de SIREN/SIRET ou p pour un PARTICULIER \n "+this.erreur, textDef);
         if(siren == null)
             siren = "";
-        siren = siren.replace(" ", "").replace(" ", "").replace("	", "").replace("   ", "");
+        siren = siren.replace(" ", "").replace(" ", "").replace(" ", "").replace(" ", "").replace("	", "").replace("   ", "");
         if(siren == "PARTICULIER" || siren == "P" || siren == "p"){
             this.typeTier.val(8);
             return "";

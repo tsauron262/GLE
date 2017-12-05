@@ -282,7 +282,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1015]->value, 0, 'L');
 
                 //etat
-                $pdf->SetXY('131.5', '95.8');
+                $pdf->SetXY(130, 91.6);
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1040]->valueStr . "    " . $chrono->description, 0, 'L');
 
                 //accessoire
@@ -290,7 +290,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1041]->valueStr, 0, 'L');
 
                 //Systeme
-                $pdf->SetXY(130, 91.6);
+                $pdf->SetXY(126, 108.5);
                 $pdf->MultiCell(80, 6, $chrono2->valuesPlus[1067]->valueStr, 0, '');
 
                 //symptom et sauv

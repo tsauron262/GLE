@@ -359,13 +359,8 @@ $delallowed = $user->rights->bimpcesu->read;
         if ($resql) {
             $var = true;
             $formfile = new FormFile($db);
-            $num = $db->num_rows($resql);
-            $i = 0;
-            if ($num > 0) {
                 $somethingshown = $formfile->show_documents('bimpcesu', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);                
-            }
-            else
-                echo "";
+            
         }
     }
 

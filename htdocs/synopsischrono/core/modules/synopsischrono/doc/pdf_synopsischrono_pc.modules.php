@@ -286,7 +286,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1040]->valueStr . "    " . $chrono->description, 0, 'L');
 
                 //accessoire
-                $pdf->SetXY('143', '108.9');
+                $pdf->SetXY('142.8', '104.8');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1041]->valueStr, 0, 'L');
 
                 //Systeme

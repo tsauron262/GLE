@@ -963,7 +963,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
               $facturestatic->type = $objp->type;
               $facturestatic->total_ttc = $objp->total_ttc;
               $facturestatic->mr = $objp->mr;
-              $facturestatic->description = $objp->description;
+              //$facturestatic->description = $objp->description;
               
               if($objp->mr == 150){
                   $array_total_cesu[] = $objp->total_ttc;
@@ -982,7 +982,6 @@ class pdf_bimpcesu extends ModeleBimpcesu
             $total = array_sum ($array_total); // Montant total facture     
             $totalcesu = array_sum ($array_total_cesu); // Montant total CESU       
             
-            $description = $objp->description;
             
             $npref = "Error"; // Inconnu pour le moment
             $diri = "Christian CONSTANTIN BERTIN";
@@ -996,8 +995,38 @@ class pdf_bimpcesu extends ModeleBimpcesu
             
         } else {
             echo 'Pas de fatcures';
+            
         }
         
+        
+        
+        $facturestatic2 = new Facture($db);
+        
+        $sql2 = 'SELECT  fdet.description as description';
+        $sql2 .= " FROM " . MAIN_DB_PREFIX . "facturedet as fdet";
+        //$sql2 .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
+        //$sql2 .= " GROUP BY f.rowid";
+
+        $resql2 = $db->query($sql2);
+        
+        if ($resql2) {
+          $num = $db->num_rows($resql);
+          $i = 0;
+
+          //$array_total = array();   //déclaration du tableau en variable globale
+      
+           while ($i < $num) {
+              $objp = $db->fetch_object($resql2);
+              
+              $facturestatic2->description = $objp->description;
+              
+              $i++;
+            } 
+        } else {
+            $description = "pas de nature renseigné";
+        }
+        
+        $description = $objp->description;
         
        // $object = new Societe($db);
         $bene = $object->nom;

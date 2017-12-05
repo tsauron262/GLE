@@ -30,9 +30,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobjectline.class.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-class ProductBrowser extends CommonObject {
+class BimpProductBrowser extends CommonObject {
 
-    public $id;      // id of the parent ctegorie
+    public $id;      // id of the parent category
     public $id_childs = array();
 
     /**
@@ -41,6 +41,7 @@ class ProductBrowser extends CommonObject {
      *  @param		DoliDB		$db     Database handler
      */
     function __construct($db) {
+        global $conf;
         $this->db = $db;
     }
 
@@ -48,7 +49,6 @@ class ProductBrowser extends CommonObject {
      * 	Add link into database
      */
     function create() {
-
         dol_syslog(get_class($this) . '::create', LOG_DEBUG);
     }
 
@@ -150,14 +150,24 @@ class ProductBrowser extends CommonObject {
         $objOut = null;
         $cntInsertion = 0;
         $cntDeletion = 0;
+
+
         for ($i = 0; $i < sizeof($checkboxs); $i++) {
             $id_f = $checkboxs[$i]['id'];
-            $val1 = $checkboxs[$i]['val'];
-            if ($val1 == 'true' and $this->id != $id_f and ! in_array($id_f, $this->id_childs)) {
+            if ($this->id != $id_f and ! in_array($id_f, $this->id_childs) and $id_f !== '') {
                 $this->insertRow($this->id, $id_f);
                 ++$cntInsertion;
-            } elseif ($val1 == 'false' and in_array($id_f, $this->id_childs)) {
-                $this->deleteRow($this->id, $id_f);
+            }
+        }
+        foreach ($this->id_childs as $child) {
+            $cocher = false;
+            foreach ($checkboxs as $checkbox) {
+                if ($child == $checkbox['id']) {
+                    $cocher = true;
+                }
+            }
+            if (!$cocher) {
+                $this->deleteRow($this->id, $child);
                 ++$cntDeletion;
             }
         }
@@ -351,16 +361,17 @@ class ProductBrowser extends CommonObject {
 
         $in->obj->tabRestr = array_merge($in->obj->tabRestr, $out->tabRestr);
         foreach ($out->tabRestr as $restr) {
-            foreach ($in->prodCateg as $categ) {            // TODO pop categ after
+            foreach ($in->obj->prodCateg as $key => $categ) {            // TODO pop categ after
                 $index = array_search($categ->id, $restr->tabIdChild);
                 if ($index !== false) {
                     $id = $restr->tabIdChild[$index];
                     foreach ($in->obj->tabRestr as $restrObj) {
                         if ($restr->idParent === $restrObj->idParent &&
-                            $restr->label === $restrObj->label) {
+                                $restr->label === $restrObj->label) {
                             $restrObj->selectedLabel = $categ->label;
                             array_push($in->obj->catArr, $id);
                             $in->obj->cnt++;
+                            array_splice($in->obj->prodCateg, $key, 1);
                         }
                     }
                     $this->createObj($in, $id);
@@ -371,18 +382,27 @@ class ProductBrowser extends CommonObject {
 
     function getAllCategories($id_prod) {
         $in = null;
+        global $conf;
         $obj = new stdClass();
+
+        $obj->ROOT_CATEGORY = $conf->global->BIMP_ROOT_CATEGORY;
+        if ($obj->ROOT_CATEGORY === null) {
+            return $obj;
+        }
         $obj->tabRestr = array();
         $obj->tabRestrCounter = array();
         $obj->catArr = array();
         $obj->cnt = 0;
-//        $categRestr = $this->getCategRestrictions();
-        $in->prodCateg = $this->getProdCateg($id_prod);
-//        $in->categRestr = $categRestr;
+        $obj->prodCateg = $this->getProdCateg($id_prod);
         $in->obj = $obj;
         $in->prod = $id_prod;
-
-        $this->createObj($in, 0);
+        $this->createObj($in, $conf->global->BIMP_ROOT_CATEGORY);
+        $obj->ways = array();
+        $obj->color = array();
+        foreach ($obj->prodCateg as $cat) {
+            $in->obj->ways[] = $cat->print_all_ways();
+            $in->obj->color[] = $cat->color;
+        }
 
         return $in->obj;
     }

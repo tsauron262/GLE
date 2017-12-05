@@ -70,8 +70,7 @@ $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
  */ 
 
 $categstatic = new Categorie($db);
-$form = new Form($db);
-$pb = new productBrowser($db);
+$pb = new BimpProductBrowser($db);
 
 $pb->fetch($object->id);
 
@@ -105,7 +104,7 @@ foreach ($ways as $way)
 $morehtmlref.='</div>';
 
 dol_banner_tab($object, 'label', $linkback, ($user->societe_id?0:1), 'label', 'label', $morehtmlref, '', 0, '', '', 1);
-print '<div id="placeforalert"><br></div>';
+print '<div id="placeforalert" style="margin-top : 10px ; margin-bottom : -50px ; height: 55px;"></div>';
 
 //print load_fiche_titre($title);
 
@@ -143,6 +142,7 @@ foreach($fulltree as $key => $val)
     $categstatic->color=$val['color'];
     $categstatic->type=$type;
     $li=$categstatic->getNomUrl(1,'',60);
+    $li = str_replace("categories/viewcat.php?", "bimpproductbrowser/browse.php?", $li);
     $desc=dol_htmlcleanlastbr($val['description']);
     if(in_array($val['rowid'], $pb->id_childs))
         $checked = ' checked';
@@ -153,7 +153,7 @@ foreach($fulltree as $key => $val)
     'fk_menu'=>$val['fk_parent'],
     'entry'=>'<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" '.($categstatic->color?' style="background: #'.$categstatic->color.';"':' style="background: #aaa"').'><input type="checkbox" id='.$val['rowid'].$checked.'>'.$li.'</span></td>'.
     //'<td width="50%">'.dolGetFirstLineOfText($desc).'</td>'.
-    '<td align="right" width="20px;"><a href="'.DOL_URL_ROOT.'/categories/viewcat.php?id='.$val['id'].'&type='.$type.'">'.img_view().'</a></td>'.
+    '<td align="right" width="20px;"><a href="'.DOL_DOCUMENT_ROOT.'/bimpproductbrowser/browse.php?id='.$val['id'].'"></a></td>'.
     '</tr></table>'
     );
 }

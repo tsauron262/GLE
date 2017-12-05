@@ -342,11 +342,12 @@ class pdf_bimpcesu extends ModeleBimpcesu
         
         $sql = 'SELECT f.rowid as facid, f.fk_mode_reglement as mr';
         $sql .= ', fd.description';
-        $sql .= ', f.total_ttc as total_ttc';
+        $sql .= ', fd.total_ttc as total_ttc';
         $sql .= " FROM " . MAIN_DB_PREFIX . "societe s," . MAIN_DB_PREFIX . "facture f," . MAIN_DB_PREFIX . "facturedet fd";
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
         $sql .= " AND f.datef BETWEEN '" . $dateD . "' AND '" . $dateF ."'";
         $sql .= " AND fd.fk_facture = f.rowid ";
+        $sql .=  "AND fd.product_type = 1";
         //$sql .= " GROUP BY f.rowid";
 
         $resql = $db->query($sql);
@@ -427,15 +428,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
         $moisF = substr($dateF,  4, 4);
         $jourF = substr($dateF,  8,  2);
         $dateFOrdre = $jourF.$moisF.$anneeF;
-        
-        /*var_dump($dateD);
-        var_dump($dateF);
-        var_dump($moisD);
-        var_dump($moisF);
-        var_dump($jourD);
-        var_dump($jourF);
-        die;*/
-        
+                
 
         $outputlangs->load("main");
 		$outputlangs->load("bills");
@@ -611,7 +604,6 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         $pdf->MultiCell(182, 3, "Je soussigné(e) M. $diri, de $orga certifie que M. $bene a bénéficié(e) de services à la personne ($description). ", 0, 'L'); // imprime du texte
                         
                         
-                        $p = $pdf->getY();
                         if($pdf->getY() > 200){
                             $this->_pagefoot($pdf,$object,$outputlangs);
                             $pdf->AddPage();
@@ -625,7 +617,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         
                         // LIGNES CONTENUS 3                        
                         //$pdf->SetXY($posx+2,$posy+100); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(182, 3,  $p."Montant total des factures Du $dateDOrdre au $dateFOrdre : $total €", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(182, 3,  "Montant total des factures Du $dateDOrdre au $dateFOrdre : $total €", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 4
                         //$pdf->SetXY($posx+2,$posy+105); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR

@@ -38,22 +38,6 @@ function getAllCateg() {
     });
 }
 
-function deleteAllCateg() {
-    id_prod = getUrlParameter('id');
-
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
-        data: {
-            id_prod: id_prod,
-            action: 'delAll'
-        },
-        error: function () {
-            alert("Error");
-        }
-    });
-}
-
 function deleteCateg(catOut) {
     id_prod = getUrlParameter('id');
 
@@ -129,8 +113,11 @@ $(document).ready(function () {
 
     retrieveCateg();
     $(document).on("click", ".divClikable", function () {
+        console.log()
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
+        } else if ($(this).attr('id') === 'divToBrowse') {
+            location.href = DOL_URL_ROOT + '/bimpproductbrowser/browse.php?id=' + objInit.ROOT_CATEGORY;
         } else if ($(this).hasClass('navDiv')) {
             deleteFrom($(this).attr('id'), $(this).attr('name'));
         } else {
@@ -150,10 +137,10 @@ $(document).ready(function () {
 
 function retrieveCateg() {
     getAllCateg();
-    if (objInit.ROOT_CATEGORY === null) {
+    if (objInit.ROOT_CATEGORY === null || objInit.ROOT_CATEGORY === undefined) {
         addErrorDivs();
+        return;
     }
-    console.log(objInit.ROOT_CATEGORY);
     cntRestr = objInit.tabRestrCounter;
     cnt = objInit.cnt;
     catArr = objInit.catArr;
@@ -175,12 +162,12 @@ function addWays() {
             .text('Catégories hors module ')
             .appendTo('#otherContainer');
     for (i = 0; i < objInit.ways.length; i++) {
-        if (objInit.color[i] == undefined) {
-            objInit.color[i] = 'aaa';
-        }
+//        if (objInit.color[i] === undefined) {
+        objInit.color[i] = 'aaa';
+//        }
         $('<li></li>')
                 .attr('class', "noborderoncategories customLi")
-                .attr('style', 'background-color:#' + objInit.color[i])
+                .attr('style', 'margin-right:5px ; background-color:#' + objInit.color[i])
                 .attr('id', 'idOther' + i)
                 .html(objInit.ways[i])
                 .appendTo('#otherContainer');
@@ -215,7 +202,12 @@ function deleteFrom(id_div) {
 
 
 function addDivs() {
-    if (cnt >= objs.length) {
+    if (cnt === 0) {
+        $('<div>Aucune catégorie faisant partie de ce module n\'a été définie.<br> Cliquez ici pour en créer une.<a class="fillTheDiv" href=""></a></div>')
+                .attr('class', 'customDiv divClikable')
+                .attr('id', 'divToBrowse')
+                .appendTo('#mainContainer');
+    } else if (cnt >= objs.length) {
         $('<div><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
                 .attr('class', 'customDiv divClikable')
                 .attr('id', 'divEnd')

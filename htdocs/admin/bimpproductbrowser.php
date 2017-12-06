@@ -190,12 +190,12 @@ print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
 print '</tr>' . "\n";
 print '</table>';
 
-if($conf->global->BIMP_FORCE_CATEGORIZATION == 1 ){
+if($conf->global->BIMP_FORCE_CATEGORIZATION == 1 and isset($conf->global->BIMP_FORCE_CATEGORIZATION)){
     print 'Oui <input type="radio" name="forceCat" value="1" checked>';
 } else {
     print 'Oui <input type="radio" name="forceCat" value="1">';
 }
-if($conf->global->BIMP_FORCE_CATEGORIZATION == 0 ){
+if($conf->global->BIMP_FORCE_CATEGORIZATION == 0 and isset($conf->global->BIMP_FORCE_CATEGORIZATION)){
     print 'Non <input type="radio" value="0" name="forceCat" checked><br>';
 } else {
     print 'Non <input type="radio" value="0" name="forceCat"><br>';

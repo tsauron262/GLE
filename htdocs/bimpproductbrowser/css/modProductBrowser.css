@@ -2,11 +2,26 @@ strong {
     font-size:32px;
 }
 
+.deleteButton {
+    clear:both;
+    cursor:pointer;
+    width:90px;
+    height:30px;
+    border-radius: 4px;
+    background-color: #5CD2D2;
+    border:none;
+    text-align:center;
+    line-height:10px;
+    color:#FFFFFF;
+    font-size:11px;
+    font-family:Arial, Helvetica, sans-serif;
+    font-weight:bold;
+}
+
 .customDiv {
     border-radius: 8px;
     margin:5px;
-    margin-bottom: 20px;
-    padding: 10px;
+    padding: 15px;
     border:solid 1px;
     text-align: center;
     display: inline-block;
@@ -15,11 +30,19 @@ strong {
     background-color:white;
 }
 
+.customLi {
+    padding:3px;
+    display: inline;
+}
+
 .navDiv {
 }
 
 .fixDiv {
     margin-top: 20px;
+}
+.errorDiv {
+    background-color: #ff887a;
 }
 
 .divClikable {
@@ -42,8 +65,8 @@ strong {
     text-decoration: none;
 }
 
-#navContainer {
-
+#otherContainer {
+    margin-bottom: 18px;
 }
 
 #mainContainer {

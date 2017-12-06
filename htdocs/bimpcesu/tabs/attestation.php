@@ -55,7 +55,29 @@ $result = restrictedArea($user, 'societe', $socid, '&societe');
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('infothirdparty'));
 
+
 $object = new Societe($db);
+
+if ($socid > 0) {
+    $result = $object->fetch($socid);
+    if (!$result) {
+        $langs->load("errors");
+        print $langs->trans("ErrorRecordNotFound");
+
+        llxFooter();
+        $db->close();
+
+        exit;
+
+    }
+    else
+    $object->info($socid);
+}
+
+// Actions to build doc
+$upload_dir = $conf->bimpcesu->dir_output;
+$permissioncreate = $user->rights->bimpcesu->read;
+include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
 
 
 /*
@@ -86,24 +108,13 @@ llxHeader('', $title, $help_url);
 
 
 if ($socid > 0) {
-    $result = $object->fetch($socid);
-    if (!$result) {
-        $langs->load("errors");
-        print $langs->trans("ErrorRecordNotFound");
-
-        llxFooter();
-        $db->close();
-
-        exit;
-    }
+    
 
     $head = societe_prepare_head($object);
 
     dol_fiche_head($head, 'attestation', $langs->trans("ThirdParty"), 0, 'company');
 
     dol_banner_tab($object, 'socid', '', ($user->societe_id ? 0 : 1), 'rowid', 'nom');
-
-    $object->info($socid);
 
 
 
@@ -278,18 +289,14 @@ print "</td></tr></table>";
     
     $annee = date("Y"); //recuperation de l'annee en cours
      
-    // chargement bootstrap (CDN)
-    echo '<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">';
-    echo '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>';
-    
-    
+   
     // View Formulaire
     echo '<h3>Sélectionnez une periode de facturation</h3>';
     
     echo '<form> <b>Du</b> <input type="date" name="dateDebut" value="' .$annee. '-01-01"/>'; //valeur par defaut = 1er janvier de l'année en cours 
     echo '<b>Au</b> <input type="date" name="dateFin" value="' .$annee. '-12-31"/>'; // valeur par defaut = 31 decembre de l'année en cours
     
-    echo '<button type="button" class="btn btn-success">ok</button></form>';
+    echo '<button type="button" class="butAction" id="boutondate">Génerer</button></form>';
         
 ?>        
 <script>        
@@ -297,11 +304,9 @@ print "</td></tr></table>";
         
         $(document).ready(function(){
             $('#builddoc_generatebutton').hide();
-            //var dateDeDebut = NULL;
-            //var dateDeFin = NULL;
         });
     
-        $('.btn-success').on('click', function(e){
+        $('#boutondate').on('click', function(e){
             
             var dateDeDebut = $('input[name=dateDebut]').val();
             var dateDeFin = $('input[name=dateFin]').val();
@@ -309,36 +314,30 @@ print "</td></tr></table>";
             $('<input type="hidden" name="dateD" value="'+dateDeDebut+'"/>').appendTo('#builddoc_form');                        
             $('<input type="hidden" name="dateF" value="'+dateDeFin+'"/>').appendTo('#builddoc_form');
             
-            //if (dateDeDebut !== NULL && dateDeFin !== NULL){
-                $('#builddoc_generatebutton').show();
-            //}
+            var regTiret = new RegExp('-', 'gi');
             
-            alert('Vous allez sélectionner les fatcures à partir du : ' + $('input[name=dateD]').val() + ' jusqu\'au : ' + $('input[name=dateF]').val() );
+            var dateDSansTiret = dateDeDebut.replace(regTiret, '');
+            var dateFSansTiret = dateDeFin.replace(regTiret, '');
             
+            var dateDtoInt = parseInt(dateDSansTiret);
+            var dateFtoInt = parseInt(dateFSansTiret);
+            
+            
+            if (dateDtoInt > dateFtoInt){                
+                alert('Veuillez sélectionner une date de début anterieur à la date de fin');
+                
+            }else {
+                //$('#builddoc_generatebutton').show();
+                $('#builddoc_generatebutton').click();
+            }
         });
     
-    })(jQuery);</script>
+    })(jQuery);
+</script>
 <?php
 
 
 //<-- ------------------- FORMULAIRE PERIOD END------------ -->
-
-
-
-
-
-
-
-
-//<--- -------------- GENE PDF START --------------- --->
-
-
-    // Actions to build doc
-$upload_dir = $conf->bimpcesu->dir_output;
-$permissioncreate = $user->rights->bimpcesu->read;
-include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
-
-
 
 /*
  * Documents generes
@@ -357,13 +356,8 @@ $delallowed = $user->rights->bimpcesu->read;
         if ($resql) {
             $var = true;
             $formfile = new FormFile($db);
-            $num = $db->num_rows($resql);
-            $i = 0;
-            if ($num > 0) {
                 $somethingshown = $formfile->show_documents('bimpcesu', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);                
-            }
-            else
-                echo "";
+            
         }
     }
 

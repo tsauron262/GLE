@@ -99,6 +99,7 @@ $arrayfields=array(
     'u.datec'=>array('label'=>$langs->trans("DateCreation"), 'checked'=>0, 'position'=>500),
     'u.tms'=>array('label'=>$langs->trans("DateModificationShort"), 'checked'=>0, 'position'=>500),
     'u.statut'=>array('label'=>$langs->trans("Status"), 'checked'=>1, 'position'=>1000),
+    'u.job'=>array('label'=>$langs->trans("Job"), 'checked'=>1, 'position'=>1000),
 );
 // Extra fields
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label))
@@ -178,7 +179,7 @@ $user2=new User($db);
 
 $buttonviewhierarchy='<form action="'.DOL_URL_ROOT.'/user/hierarchy.php'.(($search_statut != '' && $search_statut >= 0) ? '?search_statut='.$search_statut : '').'" method="POST"><input type="submit" class="button" style="width:120px" name="viewcal" value="'.dol_escape_htmltag($langs->trans("HierarchicView")).'"></form>';
 
-$sql = "SELECT u.rowid, u.lastname, u.firstname, u.admin, u.fk_soc, u.login, u.email, u.accountancy_code, u.gender, u.employee, u.photo,";
+$sql = "SELECT u.rowid, u.lastname, u.job, u.firstname, u.admin, u.fk_soc, u.login, u.email, u.accountancy_code, u.gender, u.employee, u.photo,";
 $sql.= " u.datelastlogin, u.datepreviouslogin,";
 $sql.= " u.ldap_sid, u.statut, u.entity,";
 $sql.= " u.tms as date_update, u.datec as date_creation,";
@@ -245,7 +246,7 @@ if ($result)
 }
 
 $sql.= $db->plimit($limit+1, $offset);
-
+//die($sql);
 $result = $db->query($sql);
 if (! $result)
 {
@@ -422,6 +423,12 @@ if (! empty($arrayfields['u.statut']['checked']))
     print $form->selectarray('search_statut', array('-1'=>'','0'=>$langs->trans('Disabled'),'1'=>$langs->trans('Enabled')),$search_statut);
     print '</td>';
 }
+if (! empty($arrayfields['u.job']['checked']))
+{
+    // Date modification
+    print '<td class="liste_titre">';
+    print '</td>';
+}
 // Action column
 print '<td class="liste_titre" align="right">';
 $searchpicto=$form->showFilterAndCheckAddButtons(0);
@@ -465,6 +472,7 @@ print $hookmanager->resPrint;
 if (! empty($arrayfields['u.datec']['checked']))  print_liste_field_titre("DateCreationShort",$_SERVER["PHP_SELF"],"u.datec","",$param,'align="center" class="nowrap"',$sortfield,$sortorder);
 if (! empty($arrayfields['u.tms']['checked']))    print_liste_field_titre("DateModificationShort",$_SERVER["PHP_SELF"],"u.tms","",$param,'align="center" class="nowrap"',$sortfield,$sortorder);
 if (! empty($arrayfields['u.statut']['checked'])) print_liste_field_titre("Status",$_SERVER["PHP_SELF"],"u.statut","",$param,'align="center"',$sortfield,$sortorder);
+if (! empty($arrayfields['u.job']['checked'])) print_liste_field_titre("Job",$_SERVER["PHP_SELF"],"u.job","",$param,'align="center"',$sortfield,$sortorder);
 print_liste_field_titre($selectedfields, $_SERVER["PHP_SELF"],"",'','','align="center"',$sortfield,$sortorder,'maxwidthsearch ');
 print "</tr>\n";
 
@@ -670,8 +678,14 @@ while ($i < min($num,$limit))
     print '<td></td>';
     if (! $i) $totalarray['nbfield']++;
 
-    print "</tr>\n";
+    // Status
+    if (! empty($arrayfields['u.job']['checked']))
+    {
+       print '<td align="center">'.$obj->job.'</td>';
+       if (! $i) $totalarray['nbfield']++;
+    }
 
+    print "</tr>\n";
     $i++;
 }
 

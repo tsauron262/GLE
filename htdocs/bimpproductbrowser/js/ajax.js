@@ -38,22 +38,6 @@ function getAllCateg() {
     });
 }
 
-function deleteAllCateg() {
-    id_prod = getUrlParameter('id');
-
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
-        data: {
-            id_prod: id_prod,
-            action: 'delAll'
-        },
-        error: function () {
-            alert("Error");
-        }
-    });
-}
-
 function deleteCateg(catOut) {
     id_prod = getUrlParameter('id');
 
@@ -103,6 +87,16 @@ function addCatInProd(id_categ) {
  */
 
 $(document).ready(function () {
+    /* Nav bar */
+    $('<div></div>')
+            .attr('id', 'otherContainer')
+            .attr('class', 'customBody')
+            .appendTo('.fiche');
+    $('<div><div>')
+            .attr('class', 'underbanner clearboth')
+            .appendTo('.fiche');
+
+    /* Nav bar */
     $('<div></div>')
             .attr('id', 'navContainer')
             .attr('class', 'customBody')
@@ -110,19 +104,20 @@ $(document).ready(function () {
     $('<div><div>')
             .attr('class', 'underbanner clearboth')
             .appendTo('.fiche');
+
+    /* Main container */
     $('<div></div>')
             .attr('id', 'mainContainer')
             .attr('class', 'customBody')
             .appendTo('.fiche');
 
     retrieveCateg();
-//    console.log("objs " + objs);
-//    console.log("cnt " + cnt);
-//    console.log("cntRestr " + cntRestr);
-//    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
+        console.log()
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
+        } else if ($(this).attr('id') === 'divToBrowse') {
+            location.href = DOL_URL_ROOT + '/bimpproductbrowser/browse.php?id=' + objInit.ROOT_CATEGORY;
         } else if ($(this).hasClass('navDiv')) {
             deleteFrom($(this).attr('id'), $(this).attr('name'));
         } else {
@@ -132,10 +127,6 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
-//        console.log("objs " + objs);
-//        console.log("cnt " + cnt);
-//        console.log("cntRestr " + cntRestr);
-//        console.log("catArr " + catArr);
     });
 });
 
@@ -146,6 +137,10 @@ $(document).ready(function () {
 
 function retrieveCateg() {
     getAllCateg();
+    if (objInit.ROOT_CATEGORY === null || objInit.ROOT_CATEGORY === undefined) {
+        addErrorDivs();
+        return;
+    }
     cntRestr = objInit.tabRestrCounter;
     cnt = objInit.cnt;
     catArr = objInit.catArr;
@@ -157,10 +152,31 @@ function retrieveCateg() {
             k++;
         }
     }
-
+    addWays();
     addDivs();
 }
 
+function addWays() {
+    $('<p></p><br>')
+            .attr('style', 'margin-bottom:-15px ; margin-top: -5px')
+            .text('Catégories hors module ')
+            .appendTo('#otherContainer');
+    for (i = 0; i < objInit.ways.length; i++) {
+//        if (objInit.color[i] === undefined) {
+        objInit.color[i] = 'aaa';
+//        }
+        $('<li></li>')
+                .attr('class', "noborderoncategories customLi")
+                .attr('style', 'margin-right:5px ; background-color:#' + objInit.color[i])
+                .attr('id', 'idOther' + i)
+                .html(objInit.ways[i])
+                .appendTo('#otherContainer');
+        $('<img>')
+                .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')
+                .attr('class', "inline-block valigntextbottom")
+                .prependTo('#idOther' + i);
+    }
+}
 
 function deleteFrom(id_div) {
 
@@ -186,7 +202,12 @@ function deleteFrom(id_div) {
 
 
 function addDivs() {
-    if (cnt >= objs.length) {
+    if (objs.length === 0) {
+        $('<div>Aucune catégorie faisant partie de ce module n\'a été définie.<br> Cliquez ici pour en créer une.<a class="fillTheDiv" href=""></a></div>')
+                .attr('class', 'customDiv divClikable')
+                .attr('id', 'divToBrowse')
+                .appendTo('#mainContainer');
+    } else if (cnt >= objs.length) {
         $('<div><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
                 .attr('class', 'customDiv divClikable')
                 .attr('id', 'divEnd')
@@ -209,6 +230,13 @@ function addDivs() {
         }
         ++cnt;
     }
+}
+
+function addErrorDivs() {
+    $('<div></div><br>')
+            .attr('class', 'customDiv fixDiv errorDiv')
+            .text("Erreur : La catégorie racine n'est pas définie, veuillez conctactez l'administrateur pour qu'il en désigne une.")
+            .appendTo('#mainContainer');
 }
 
 function addNavDivs(restr, k) {

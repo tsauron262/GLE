@@ -1740,6 +1740,10 @@ class User extends CommonObject
 			$mesg.= $user->getFullName($outputlangs);	// Username that make then sending
 
 			dol_syslog(get_class($this)."::send_password changelater is off, url=".$url);
+
+                        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+                        $smsfile = new CSMSFile(traiteNumMobile($this->user_mobile), "BIMP - ERP", "Bonjour, votre nouveau MDP est ".$password);
+                        $return = $smsfile->sendfile();
 		}
 		else
 		{

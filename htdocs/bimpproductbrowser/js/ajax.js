@@ -113,7 +113,6 @@ $(document).ready(function () {
 
     retrieveCateg();
     $(document).on("click", ".divClikable", function () {
-        console.log()
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
         } else if ($(this).attr('id') === 'divToBrowse') {
@@ -129,7 +128,6 @@ $(document).ready(function () {
         }
     });
 });
-
 
 /*
  *  Annexe functions
@@ -180,18 +178,16 @@ function addWays() {
 
 function deleteFrom(id_div) {
 
-    var restrToKeep = 0;
-    str = '';
-
+    var objToKeep = 0;
     for (i = cnt; i >= id_div; i--)
         $("#navContainer").children("div").eq(i).remove();
     for (i = 0; i <= id_div; i++) {
-        restrToKeep += cntRestr[i];
+        objToKeep += cntRestr[i];
     }
+    cntRestr.length = parseInt(id_div)+1;
     catOut = catArr.slice(id_div);
-    if (objs.length >= restrToKeep) {
-        objs.length = restrToKeep;
-        cntRestr.length = restrToKeep;
+    if (objs.length >= objToKeep) {
+        objs.length = objToKeep;
     }
     cnt = id_div;
     deleteAllDivs();

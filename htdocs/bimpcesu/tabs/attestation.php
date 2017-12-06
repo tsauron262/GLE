@@ -296,7 +296,7 @@ print "</td></tr></table>";
     echo '<form> <b>Du</b> <input type="date" name="dateDebut" value="' .$annee. '-01-01"/>'; //valeur par defaut = 1er janvier de l'année en cours 
     echo '<b>Au</b> <input type="date" name="dateFin" value="' .$annee. '-12-31"/>'; // valeur par defaut = 31 decembre de l'année en cours
     
-    echo '<button type="button" class="button" id="boutondate">ok</button></form>';
+    echo '<button type="button" class="butAction" id="boutondate">Génerer</button></form>';
         
 ?>        
 <script>        

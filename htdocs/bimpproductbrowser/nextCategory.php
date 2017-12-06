@@ -31,12 +31,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpproductbrowser/class/productBrowser.class
 $pb = new BimpProductBrowser($db);
 
 switch (GETPOST('action')) {
-    case 'delAll': {
-            $pb->deleteProdCateg(GETPOST('id_prod'));
-            break;
-        }
     case 'addCategory': {
-            $objOut = $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'), false);
+            $objOut = $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'));
             echo json_encode($objOut);
             break;
         }

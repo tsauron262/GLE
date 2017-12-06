@@ -126,6 +126,10 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
+        console.log("objs" + objs);
+        console.log("cnt" + cnt);
+        console.log("cntRestr" + cntRestr);
+        console.log("catArr" + catArr);
     });
 });
 
@@ -178,20 +182,28 @@ function addWays() {
 
 function deleteFrom(id_div) {
 
+    catOutWithoutAnnexe = [];
     var objToKeep = 0;
     for (i = cnt; i >= id_div; i--)
         $("#navContainer").children("div").eq(i).remove();
     for (i = 0; i <= id_div; i++) {
         objToKeep += cntRestr[i];
     }
-    cntRestr.length = parseInt(id_div)+1;
+    cntRestr.length = parseInt(id_div) + 1;
     catOut = catArr.slice(id_div);
+//    console.log("Initialement suppression de : " + catOutWithoutAnnexe);
+//    for (i = 0; i<objs.length; i++) {
+//        if (catOut.indexOf(objs[i].idParent) > -1) {    // si existe dans le module
+//            catOutWithoutAnnexe.push(objs[i].idParent); // autoriser à l'enlever
+//        }
+//    }
     if (objs.length >= objToKeep) {
         objs.length = objToKeep;
     }
     cnt = id_div;
     deleteAllDivs();
     catArr.length = id_div;
+//    console.log("suppression de : " + catOutWithoutAnnexe);
     deleteCateg(catOut);
     addDivs();
 }

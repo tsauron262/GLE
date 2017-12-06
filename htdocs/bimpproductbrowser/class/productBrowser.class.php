@@ -78,21 +78,6 @@ class BimpProductBrowser extends CommonObject {
         }
     }
 
-    /* Try not to use it in big process */
-
-    function restrictionExists($id_parent, $id_child) {
-        $sql = 'SELECT *';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
-        $sql.= ' WHERE fk_child_cat = ' . $id_child;
-        $sql.= ' AND fk_parent_cat = ' . $id_parent;
-        $result = $this->db->query($sql);
-        if (mysqli_num_rows($result) > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     function insertRow($id_parent, $id_child) {
         $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
         $sql.= 'VALUES (' . $id_parent . ', ' . $id_child . ');';
@@ -191,7 +176,7 @@ class BimpProductBrowser extends CommonObject {
         }
         return $objOut;
     }
-        
+
     function addProdToCat($id_prod, $id_categ) {
         $objOut = $this->getTabRestr($id_categ);
         if ($id_categ != 0 && $runInit == false) {
@@ -206,18 +191,6 @@ class BimpProductBrowser extends CommonObject {
             }
         }
         return $objOut;
-    }
-
-    function deleteProdCateg($id_prod) {
-        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'categorie_product ';
-        $sql.= 'WHERE fk_product =' . $id_prod;
-        try {
-            $this->db->query($sql);
-            $this->db->commit();
-        } catch (Exception $e) {
-            echo 'ERROR:' . $e->getMessage();
-            $this->db->rollback();
-        }
     }
 
     function deleteSomeCateg($id_prod, $id_cat_out) {
@@ -294,54 +267,22 @@ class BimpProductBrowser extends CommonObject {
         return 'Parent inacessible';
     }
 
-//    function createObj($in, $currentRestr) {
-//        $indRestrChild = array_search($currentRestr, $in->categRestr->parent);
-//        $sizeCat = sizeof($in->prodCateg);
-//
-//        $change = true;
-//        while ($change === true) {
-//            $change = false;
-//            for ($i = 0; $i < $sizeCat; $i++) {
-//                if ($in->prodCateg[$i]->fk_parent === $in->categRestr->child[$indRestrChild]) {
-//                    array_push($in->obj->boolRestr, true);
-//                    array_push($in->obj->parentId, $in->prodCateg[$i]->fk_parent);
-//                    array_push($in->obj->parentLabel, $this->getParentLabel($in->prodCateg[$i]->fk_parent));
-//                    array_push($in->obj->label, $in->prodCateg[$i]->label);
-//                    array_push($in->obj->selectedId, $in->prodCateg[$i]->id);
-//                    $indRestrChild = array_search($in->prodCateg[$i]->id, $in->categRestr->parent);
-//                    unset($in->categRestr->child[$indRestrChild]);
-//                    unset($in->categRestr->parent[$indRestrChild]);
-//                    array_splice($in->prodCateg, $i, 1);
-//                    --$sizeCat;
-//                    $change = true;
-//                    break;
-//                }
-////                else if (empty($in->prodCateg[$i]->cats)) {
-////                    array_push($in->obj->boolRestr, false);
-////                    array_push($in->obj->parentId, $in->prodCateg[$i]->fk_parent);
-////                    array_push($in->obj->parentLabel, $this->getParentLabel($in->prodCateg[$i]->fk_parent));
-////                    array_push($in->obj->label, $in->prodCateg[$i]->label);
-////                    array_push($in->obj->selectedId, $in->prodCateg[$i]->id);
-////                    array_splice($in->prodCateg, $i, 1);
-////                    --$sizeCat;
-////                }
-//            }
-//        }
-//        return $in->obj;
-//    }
-
     function createObj($obj, $currentRestr) {
         $out = $this->getTabRestr($currentRestr);
         if ($obj->tabRestrCounter . length <= $obj->cnt) {
             $obj->tabRestrCounter[$obj->cnt] = 0;
         }
+//        echo "Catégorie : ";
+//        foreach ($obj->prodCateg as $catego) {
+//            echo $catego->label . " ";
+//        }
+//        echo "\n";
         $obj->tabRestrCounter[$obj->cnt]+=sizeof($out->tabRestr);
         $cntSister;
         $obj->tabRestr = array_merge($obj->tabRestr, $out->tabRestr);
         foreach ($out->tabRestr as $restr) {    // restriction
             $cntSister = 0;
             foreach ($obj->prodCateg as $key => $categ) {   // categ liées aux prod
-//                echo "label = " . $categ->label . " ";
                 $index = array_search($categ->id, $restr->tabIdChild); // cherche si la catégorie est fille de la restriction
                 if ($index !== false) { // la catégorie est fille de la restriction
                     $id = $restr->tabIdChild[$index];
@@ -353,19 +294,10 @@ class BimpProductBrowser extends CommonObject {
                     $this->createObj($obj, $id);
                 }
             }
-//            echo $restr->selectedLabel . " HHHHHHH " . $cntSister . "\n";
+//            echo "Selected = ".$restr->selectedLabel . " nombre de soeurs " . $cntSister . "\n";
         }
     }
-    
-//objs[object Object],[object Object],[object Object],[object Object],[object Object]
-//cnt5
-//cntRestr3,1,0,0,1
-//catArr933,914,840,1036
-//
-//cntRestr 3,1,1,0,0,0
-//ajax.js:117:5
-//catArr 933,1036,1047,914,840
-    
+
     function getAllCategories($id_prod) {
         global $conf;
         $obj = new stdClass();
@@ -385,8 +317,21 @@ class BimpProductBrowser extends CommonObject {
         foreach ($obj->prodCateg as $cat) {
             $obj->ways[] = $cat->print_all_ways();
             $obj->color[] = $cat->color;
-        }   // TODO ajouter warning si il rentre deux fois une catégorie 
+        }   // TODO ajouter warning si il rentre deux fois dans une catégorie 
         return $obj;
     }
 
+    function productIsCategorized($id_prod) {
+        $obj = $this->getAllCategories($id_prod);
+        $cnt = 0;
+        foreach ($obj->tabRestrCounter as $restrCounter) {
+            $cnt += $restrCounter;
+        }
+        if ($cnt == $obj->cnt)
+            return 1;
+        else if ($cnt > $obj->cnt)
+            return 0;
+        else
+            return -1;
+    }
 }

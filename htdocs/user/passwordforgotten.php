@@ -120,7 +120,7 @@ if ($action == 'buildnewpassword' && $username)
             }
             else
             {
-                $newpassword=$edituser->setPassword($user,'',1);
+                $newpassword=$edituser->setPassword($user,'',0);
                 if ($newpassword < 0)
                 {
                     // Failed
@@ -129,7 +129,7 @@ if ($action == 'buildnewpassword' && $username)
                 else
                 {
                     // Success
-                    if ($edituser->send_password($user,$newpassword,1) > 0)
+                    if ($edituser->send_password($user,$newpassword,0) > 0)
                     {
 
                         $message = '<div class="ok">'.$langs->trans("PasswordChangeRequestSent",$edituser->login,dolObfuscateEmail($edituser->email)).'</div>';

@@ -70,7 +70,7 @@ class BimpViewsList
 
     protected function fetchFilters()
     {
-        $this->filters = array();
+        $this->filters = $this->object->getCurrentConf('filters', array(), false, 'array');
     }
 
     protected function fetchItems()
@@ -173,7 +173,7 @@ class BimpViewsList
         $html .= '<div id="' . $this->views_list_identifier . '_container" class="' . ($panel ? 'section ' : '') . 'viewsListContainer ' . $this->object->object_name . '_viewsListContainer">';
 
         $content = '';
-        $content .= '<div id="' . $this->views_list_identifier . '" class="row objectViewslist ' . $this->object->object_name . '_views_list ' . $this->object->object_name . '_list"';
+        $content .= '<div id="' . $this->views_list_identifier . '" class="row objectViewslist ' . $this->object->object_name . '_views_list"';
         $content .= ' data-module_name="' . $this->object->module . '"';
         $content .= ' data-object_name="' . $this->object->object_name . '"';
         $content .= ' data-views_list_name="' . $this->views_list_name . '"';

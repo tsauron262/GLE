@@ -187,12 +187,15 @@ function setCommonEvents($container) {
                 });
             }
         });
+        $panel.children('.panel-heading').find('.headerBtn').click(function (e) {
+            e.stopPropagation();
+        });
     });
 
     // foldable view tables:
     $container.find('.objectViewtable.foldable').each(function () {
         var $table = $(this);
-        $table.children('thead tr:first-child').click(function () {
+        $table.children('thead').children('tr:first-child').click(function () {
             if ($table.hasClass('open')) {
                 $table.children('tbody,tfoot').fadeOut(250, function () {
                     $table.removeClass('open').addClass('closed');
@@ -244,7 +247,7 @@ function setDisplayPopupButtonEvents($button) {
     if (!$button.length) {
         return;
     }
-    var $popup = $('#' + $button.data('popup_id'));
+    var $popup = $button.parent().find('#' + $button.data('popup_id'));
     if ($popup.length) {
         $button.add($popup).mouseover(function () {
             $popup.show();

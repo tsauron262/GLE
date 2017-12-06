@@ -96,6 +96,14 @@ input {
 }
 .inputContainer {
     vertical-align: top;
+    
+    .help {
+    font-size: 12px;
+    font-style: italic;
+    color: $gray;
+    margin: 8px 0;
+    padding-left: 15px;
+}
 }
 .inputGroupContainer {
     display: inline-block;

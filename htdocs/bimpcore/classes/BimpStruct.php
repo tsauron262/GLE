@@ -235,6 +235,7 @@ class BimpStruct
             $row_path = $path . '/rows/' . $idx;
             $config->setCurrentPath($row_path);
             $field = $config->getFromCurrentPath('field', '');
+            $association = $config->getFromCurrentPath('association', '');
             $edit_field = $config->getFromCurrentPath('edit', false, false, 'bool');
 
             if ($field && $edit_field && $config->isDefined('fields/' . $field)) {
@@ -268,6 +269,31 @@ class BimpStruct
                 $html .= '</td>';
 
                 $html .= '</tr>';
+            } elseif ($association && $edit_field && $config->isDefined('associations/' . $association . '/add/input')) {
+                $label = $config->get('associations/' . $association . '/add/label', '');
+                if (!$label) {
+                    $instance = $config->getObject('associations/' . $association . '/object');
+                    if (!is_null($instance)) {
+                        $label = BimpTools::ucfirst(BimpObject::getInstanceLabel($instance, 'name_plur'));
+                    } else {
+                        $label = ucfirst($association);
+                    }
+                }
+                $item_display = $config->getFromCurrentPath('display');
+                $bimpAsso = new BimpAssociation($object, $association);
+
+                $html .= '<tr>';
+                $html .= '<th>';
+                $html .= $label;
+                $html .= '</th>';
+
+                $html .= '<td>';
+                $html .= $bimpAsso->renderAddAssociateInput($item_display, true);
+                $html .= '</td>';
+
+                $html .= '</tr>';
+
+                unset($bimpAsso);
             } else {
                 $html .= '<tr>';
                 if ($field) {
@@ -277,6 +303,8 @@ class BimpStruct
                     $html .= '<td>';
                     $html .= $object->displayData($field, $config->getFromCurrentPath('display', 'default'));
                     $html .= '</td>';
+                } elseif ($association) {
+                    
                 } else {
                     $label = $config->getFromCurrentPath('label', '', true);
 

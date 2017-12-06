@@ -151,7 +151,7 @@ list:
         ticket:
             field: ticket_number
             
-    add_btn: 1
+    add_form: default
     delete_btn: 1
     view_btn: 1
     

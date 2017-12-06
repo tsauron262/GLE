@@ -27,22 +27,11 @@ function saveObjectFromForm(form_id, $button, success_callback) {
         return;
     }
 
+    var module = $form.data('module_name');
     var object_name = $form.data('object_name');
     var data = $form.serialize();
 
     bimp_json_ajax('saveObject', data, $result, function (result) {
-        var $lists = $('.' + object_name + '_list');
-        if ($lists.length) {
-            $lists.each(function () {
-                reloadObjectList($(this).attr('id'));
-            });
-        }
-        var $views = $('.' + object_name + '_view');
-        if ($views.length) {
-            $views.each(function () {
-                reloadObjectView($(this).attr('id'));
-            });
-        }
         $button.removeClass('disabled');
 
         if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
@@ -57,6 +46,12 @@ function saveObjectFromForm(form_id, $button, success_callback) {
                 success_callback();
             }
         }
+
+        $('body').trigger($.Event('objectChange', {
+            module: module,
+            object_name: object_name,
+            id_object: result.id_object
+        }));
     }, function () {
         $button.removeClass('disabled');
     });
@@ -70,24 +65,16 @@ function saveObject(module, object_name, id_object, fields, $resultContainer, su
     data['id_object'] = id_object;
 
     bimp_json_ajax('saveObject', data, $resultContainer, function (result) {
-        var $lists = $('.' + object_name + '_list');
-        if ($lists.length) {
-            $lists.each(function () {
-                reloadObjectList($(this).attr('id'));
-            });
-        }
-        var $views = $('.' + object_name + '_view');
-        if ($views.length) {
-            $views.each(function () {
-                reloadObjectView($(this).attr('id'));
-            });
-        }
-
         if (typeof (successCallback) !== 'undefined') {
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
         }
+        $('body').trigger($.Event('objectChange', {
+            module: module,
+            object_name: object_name,
+            id_object: result.id_object
+        }));
     });
 }
 
@@ -101,21 +88,14 @@ function saveObjectField(module, object_name, id_object, field, value, $resultCo
     };
 
     bimp_json_ajax('saveObjectField', data, $resultContainer, function (result) {
-        var $lists = $('.' + object_name + '_list');
-        if ($lists.length) {
-            $lists.each(function () {
-                reloadObjectList($(this).attr('id'));
-            });
-        }
-        var $views = $('.' + object_name + '_view');
-        if ($views.length) {
-            $views.each(function () {
-                reloadObjectView($(this).attr('id'));
-            });
-        }
         if (typeof (successCallback) === 'function') {
             successCallback(result);
         }
+        $('body').trigger($.Event('objectChange', {
+            module: module,
+            object_name: object_name,
+            id_object: result.id_object
+        }));
     });
 }
 
@@ -197,13 +177,18 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
             if (typeof (successCallBack) === 'function') {
                 successCallBack(result);
             }
+            $('body').trigger($.Event('objectDelete', {
+                module: module,
+                object_name: object_name,
+                id_object: result.id_object
+            }));
         }, function (result) {
             $button.removeClass('disabled');
         });
     }
 }
 
-function loadModalForm($button, module_name, object_name, form_name, id_object, id_parent) {
+function loadModalForm($button, module_name, object_name, form_name, id_object, id_parent, values) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -260,6 +245,10 @@ function loadModalForm($button, module_name, object_name, form_name, id_object, 
         'full_panel': 0
     };
 
+    if (typeof (values) !== 'undefined') {
+        data['values'] = values;
+    }
+
     bimp_json_ajax('loadObjectForm', data, null, function (result) {
         $modal.find('.content-loading').hide();
         if (!isCancelled) {
@@ -307,6 +296,70 @@ function loadObjectFieldValue(module, object_name, id_object, field, $resultCont
     bimp_json_ajax('loadObjectFieldValue', data, $resultContainer, function (result) {
         if (typeof (successCallback) === 'function') {
             successCallback(result);
+        }
+    });
+}
+
+function addObjectMultipleValuesItem(module, object_name, id_object, field, item_value, $resultContainer, successCallback) {
+    var data = {
+        module: module,
+        object_name: object_name,
+        id_object: id_object,
+        field: field,
+        item_value: item_value
+    };
+
+    bimp_json_ajax('addObjectMultipleValuesItem', data, $resultContainer, function (result) {
+        if (typeof (successCallback) === 'function') {
+            successCallback(result);
+        }
+
+        $('body').trigger($.Event('objectChange', {
+            module: module,
+            object_name: object_name,
+            id_object: id_object
+        }));
+    });
+}
+
+function deleteObjectMultipleValuesItem(module, object_name, id_object, field, item_value, $resultContainer, successCallback) {
+    var data = {
+        module: module,
+        object_name: object_name,
+        id_object: id_object,
+        field: field,
+        item_value: item_value
+    };
+
+    bimp_json_ajax('deleteObjectMultipleValuesItem', data, $resultContainer, function (result) {
+        if (typeof (successCallback) === 'function') {
+            successCallback(result);
+        }
+
+        $('body').trigger($.Event('objectChange', {
+            module: module,
+            object_name: object_name,
+            id_object: id_object
+        }));
+    });
+}
+
+function saveAssociations(operation, associations, $resultContainer, successCallBack) {
+    var data = {
+        operation: operation,
+        associations: associations
+    };
+
+    bimp_json_ajax('saveAssociations', data, $resultContainer, function (result) {
+        if (typeof (successCallBack) === 'function') {
+            successCallBack(result);
+        }
+        for (var i in result.done) {
+            $('body').trigger($.Event('objectChange', {
+                module: associations[result.done[i]].module,
+                object_name: associations[result.done[i]].object_name,
+                id_object: associations[result.done[i]].id_object
+            }));
         }
     });
 }
@@ -421,33 +474,58 @@ function getFieldValue($form, field_name) {
     return '';
 }
 
-function addMultipleInputCurrentValue($button, value_input_name, label_input_name) {
+function addMultipleInputCurrentValue($button, value_input_name, label_input_name, ajax_save) {
+    if (typeof (ajax_save) === 'undefined') {
+        ajax_save = false;
+    }
+
     if ($button.hasClass('disabled')) {
         return;
     }
 
-    var $container = $button.parent('div').parent('div.inputMultipleValuesContainer').parent();
-    var $value_input = $container.find('[name=' + value_input_name + ']');
-    var $label_input = $container.find('[name=' + label_input_name + ']');
+    var $container = $button.parent('div').parent('div.inputMultipleValuesContainer');
+    if (!$container.length) {
+        return;
+    }
+    var $inputContainer = $container.parent('.inputContainer');
+    if (!$inputContainer.length) {
+        return;
+    }
+    var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
+    var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
     var value = $value_input.val();
     var label = $label_input.val();
     if (typeof (value) !== 'undefined' && value !== '') {
         if (!label) {
             label = value;
         }
-        var field_name = $container.data('field_name');
+        var field_name = $inputContainer.data('field_name');
         var html = '<tr>';
         html += '<td style="display: none"><input type="hidden" value="' + value + '" name="' + field_name + '[]"/></td>';
         html += '<td>' + label + '</td>';
         html += '<td><button type="button" class="btn btn-light-danger iconBtn"';
-        html += ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();"';
-        html += '><i class="fa fa-trash"></i></button></td>';
+        html += ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();';
+        if (ajax_save) {
+            html += 'var $button = $(this); deleteObjectMultipleValuesItem(\'' + $container.data('module') + '\', ';
+            html += '\'' + $container.data('object_name') + '\', ';
+            html += $container.data('id_object') + ', \'' + field_name + '\', \'' + value + '\', null, ';
+            html += 'function(){$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();})});';
+        } else {
+            html += '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove()});';
+        }
+        html += '"><i class="fa fa-trash"></i></button></td>';
         html += '</tr>';
-
-        $container.find('div.inputMultipleValuesContainer').find('table').find('tbody').append(html);
 
         $value_input.val('');
         $label_input.val('');
+
+        if (ajax_save) {
+            addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), field_name, value, null, function () {
+                $container.find('div.inputMultipleValuesContainer').find('table').find('tbody').append(html);
+            });
+        } else {
+            $container.find('table').find('tbody').append(html);
+        }
     }
 }
 
@@ -505,6 +583,8 @@ function resetInputDisplay($form) {
 function onFormLoaded($form) {
     setFormEvents($form);
     setCommonEvents($form);
+
+
 }
 
 function setFormEvents($form) {
@@ -699,5 +779,14 @@ $(document).ready(function () {
     $('.objectForm').each(function () {
         onFormLoaded($(this));
     });
+
     $.datepicker.setDefaults($.datepicker.regional[ "fr" ]);
+
+    $('body').on('controllerTabLoaded', function (e) {
+        if (e.$container.length) {
+            e.$container.find('.objectForm').each(function () {
+                onFormLoaded($(this));
+            });
+        }
+    });
 });

@@ -26,13 +26,7 @@ function reloadObjectView(view_id) {
                     $(this).html(result.html);
                     $(this).fadeIn(250, function () {
                         onViewLoaded($view);
-                        $view.find('.objectList').each(function () {
-                            onListLoaded($(this));
-                        });
-
-                        $view.find('.objectForm').each(function () {
-                            onFormLoaded($(this));
-                        });
+                        $view.trigger('viewRefresh');
                     });
                 });
             }
@@ -285,10 +279,52 @@ function onViewLoaded($view) {
     $view.find('.modal').modal();
 
     setCommonEvents($view);
+
+    if (!$view.data('object_change_event_init')) {
+        $('body').on('objectChange', function (e) {
+            if ((e.module === module) && (e.object_name === object_name)
+                    && parseInt(e.id_object) === parseInt(id_object)) {
+                reloadObjectView($view.attr('id'));
+            }
+        });
+        var module = $view.data('module_name');
+        var object_name = $view.data('object_name');
+        var id_object = $view.data('id_object');
+
+        $view.data('object_change_event_init', 1);
+    }
+
+
+    $view.find('.objectViewtable').each(function () {
+        setInputsEvents($(this));
+    });
+    $view.find('.objectList').each(function () {
+        onListLoaded($(this));
+    });
+
+    $view.find('.objectForm').each(function () {
+        onFormLoaded($(this));
+    });
+
+    $view.find('.objectView').each(function () {
+        onListLoaded($(this));
+    });
+
+    $view.find('.objectViewslist').each(function () {
+        onViewsListLoaded($(this));
+    });
 }
 
 $(document).ready(function () {
     $('.objectView').each(function () {
         onViewLoaded($(this));
+    });
+
+    $('body').on('controllerTabLoaded', function (e) {
+        if (e.$container.length) {
+            e.$container.find('.objectView').each(function () {
+                onViewLoaded($(this));
+            });
+        }
     });
 });

@@ -35,3 +35,10 @@ sections:
                       object:
                           instance: 
                               bimp_object: Equipment
+                              
+        test:
+            label: Tests Assos
+            sections:
+                - type: custom
+                  custom: 
+                      callback: renderTestAssos

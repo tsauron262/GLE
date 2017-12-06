@@ -24,7 +24,7 @@ class BH_Inter extends BimpObject
                     'obj_module' => $this->module,
                     'obj_name'   => $this->object_name,
                     'id_obj'     => (int) $this->id,
-                    'field_name'    => 'timer'
+                    'field_name' => 'timer'
                 ))) {
             if (!$timer->setObject($this, 'timer')) {
                 return BimpRender::renderAlerts('Echec de la création du timer');
@@ -38,5 +38,28 @@ class BH_Inter extends BimpObject
         $html = $timer->render('Chrono Intervention');
 
         return $html;
+    }
+
+    public function getUserCurrentIntersFilters()
+    {
+        global $user;
+        if (isset($user->id) && $user - id) {
+            return array(
+                'or_user' => array(
+                    'or' => array(
+                        'tech_id_user' => $user->id,
+                        'user_create'  => $user - id
+                    )
+                ),
+                'status'  => array(
+                    'operator' => '!=',
+                    'value'    => 2
+                )
+            );
+        }
+
+        return array(
+            'id' => 0
+        );
     }
 }

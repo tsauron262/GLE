@@ -11,6 +11,9 @@ class BimpConfig
     public $current_path = '';
     public $current = null;
     public $errors = array();
+    public static $keywords = array(
+        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request'
+    );
 
     public function __construct($dir, $file_name, $instance)
     {
@@ -44,6 +47,8 @@ class BimpConfig
         $this->logConfigError('Echec du chargement de la configuration depuis le fichier YAML "' . $file_name . '"');
         return false;
     }
+
+    // Gestion des chemins de configuration: 
 
     public function isDefined($path)
     {
@@ -106,6 +111,8 @@ class BimpConfig
         return implode('/', $path);
     }
 
+    // récupération des données de configuration: 
+
     public function get($full_path, $default_value = null, $required = false, $data_type = 'string')
     {
         if (is_null($full_path) || !$full_path) {
@@ -144,17 +151,62 @@ class BimpConfig
         return $value;
     }
 
-    public function getFromCurrentPath($path_from_current, $default_value = null, $required = true, $data_type = 'string')
+    public function getCompiledParams($path)
+    {
+        $params = $this->getParams($path);
+        return $this->compileParams($params, $path);
+    }
+
+    public function getParams($full_path)
+    {
+        if (is_null($full_path) || !$full_path) {
+            return array();
+        }
+
+        $path = explode('/', $full_path);
+
+        $current = $this->params;
+
+        foreach ($path as $key) {
+            if ($key === '') {
+                continue;
+            }
+            if (isset($current[$key])) {
+                $current = $current[$key];
+            } else {
+                return array();
+            }
+        }
+
+        return $current;
+    }
+
+    public function getFromCurrentPath($path_from_current = '', $default_value = null, $required = true, $data_type = 'string')
     {
         return $this->get($this->current_path . $path_from_current, $default_value, $required, $data_type);
     }
 
-    public function resetObjects()
+    public function getParamsfromCurrentPath($path_from_current = '')
     {
-        foreach ($this->objects as $name => &$object) {
-            unset($object);
+        return $this->getParams($this->current_path . $path_from_current);
+    }
+
+    protected function compileParams($params, $path)
+    {
+        if (is_array($params)) {
+            foreach ($params as $key => $value) {
+                if (in_array($key, self::$keywords)) {
+                    $params = $this->getvalue($params, $path);
+                    break;
+                } elseif ($key === 'object') {
+                    $params[$key] = $this->getObject($path . '/object');
+                } elseif (is_array($value)) {
+                    $params[$key] = $this->compileParams($params[$key], $path . '/' . $key);
+                }
+            }
         }
-        $this->objects = array();
+
+        return $params;
     }
 
     protected function getvalue($value, $path)
@@ -197,59 +249,6 @@ class BimpConfig
         return $value;
     }
 
-    public function getObject($path = '', $object_name = null)
-    {
-
-        if (is_null($object_name)) {
-            $object = $this->get($path, null, true, 'any');
-            if (is_object($object)) {
-                return $object;
-            } elseif (is_string($object)) {
-                $object_name = $object;
-            }
-        }
-
-        if ($object_name === 'default') {
-            return $this->instance;
-        }
-        if (!isset($this->objects[$object_name])) {
-            $up_path = $path;
-            $params = null;
-            $instance_path = '';
-            if (!$up_path) {
-                $up_path = '/';
-            }
-            while ($up_path) {
-                $up_path = $this->getPathPrevLevel($up_path);
-                if ($this->isDefined($up_path . '/object/name')) {
-                    $name = $this->get($up_path . '/object/name', '');
-                    if ($name && ($name === $object_name)) {
-                        $params = $this->get($up_path . '/instance', null, true, 'array');
-                        $instance_path = $up_path . '/instance';
-                        break;
-                    }
-                }
-
-                if ($this->isDefined($up_path . '/objects/' . $object_name)) {
-                    $params = $this->get($up_path . '/objects/' . $object_name . '/instance', null, true, 'array');
-                    $instance_path = $up_path . '/objects/' . $object_name . '/instance';
-                    break;
-                }
-            }
-            if (!is_null($params)) {
-                $instance = $this->getInstance($params, $instance_path);
-                if (!is_null($instance)) {
-                    $this->objects[$object_name] = $instance;
-                }
-            }
-        }
-        if (isset($this->objects[$object_name])) {
-            return $this->objects[$object_name];
-        }
-        $this->logConfigUndefinedValue($path);
-        return null;
-    }
-
     protected function getInstance($params, $path)
     {
         $instance = null;
@@ -269,7 +268,7 @@ class BimpConfig
                     $object_name = $params['bimp_object'];
                 } elseif (is_array($params['bimp_object'])) {
                     $module_name = $this->get($path . '/bimp_object/module', null, true);
-                    $object_name = $this->get($path . '/bimp_objct/object', null, true);
+                    $object_name = $this->get($path . '/bimp_object/name', null, true);
                 }
 
                 if (is_null($module_name) || is_null($object_name)) {
@@ -294,7 +293,7 @@ class BimpConfig
                 }
                 if (!is_null($module) && !is_null($file) && !is_null($className)) {
                     if (!class_exists($className)) {
-                        $file_path = DOL_DOCUMENT_ROOT . '/'. $module . '/class/' . $file . '.class.php';
+                        $file_path = DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php';
                         if (file_exists($file_path)) {
                             require_once $file_path;
                         }
@@ -323,7 +322,7 @@ class BimpConfig
                     }
 
                     if (file_exists($class_path)) {
-                        require_once DOL_DOCUMENT_ROOT . '/'. $class_path;
+                        require_once DOL_DOCUMENT_ROOT . '/' . $class_path;
                     }
 
                     if (!class_exists($class_name)) {
@@ -360,21 +359,21 @@ class BimpConfig
                                     $instance, 'fetch'
                                         ), $fetch_params) <= 0) {
                             $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - Paramètres: <pre>' . print_r($fetch_params, 1) . '</pre>');
-                    }
-                }
-            } elseif (isset($params['id_object'])) {
-                $id_object = $this->get($path . '/id_object', null, true, 'int');
-                if (!is_null($id_object)) {
-                    if (method_exists($instance, 'fetch')) {
-                        if ($result = $instance->fetch((int) $id_object) <= 0) {
-                            $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - ID: ' . $id_object);
                         }
-                    } else {
-                        $this->logConfigError('La méthode "fetch()" n\'existe pas pour l\'objet "' . get_class($instance) . '"');
+                    }
+                } elseif (isset($params['id_object'])) {
+                    $id_object = $this->get($path . '/id_object', null, true, 'int');
+                    if (!is_null($id_object)) {
+                        if (method_exists($instance, 'fetch')) {
+                            if ($result = $instance->fetch((int) $id_object) <= 0) {
+                                $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - ID: ' . $id_object);
+                            }
+                        } else {
+                            $this->logConfigError('La méthode "fetch()" n\'existe pas pour l\'objet "' . get_class($instance) . '"');
+                        }
                     }
                 }
             }
-        }
         }
 
         return $instance;
@@ -406,7 +405,7 @@ class BimpConfig
             $prop_name = $prop;
         } elseif (is_array($prop)) {
             $prop_name = $this->get($path . '/name', null, true);
-            if ($this->isDefined($path.'/object')) {
+            if ($this->isDefined($path . '/object')) {
                 $object = $this->getObject($path . '/object');
             } else {
                 $object = $this->instance;
@@ -538,7 +537,7 @@ class BimpConfig
             } else {
                 $instance = $this->instance;
             }
-            
+
             $is_static = $this->get($path . '/is_static', false, false, 'bool');
 
             if (is_null($method) || is_null($instance)) {
@@ -565,6 +564,220 @@ class BimpConfig
     {
         return BimpTools::checkValueByType($data_type, $value);
     }
+
+    // Gestion des objets: 
+
+    public function getObject($path = '', $object_name = null)
+    {
+        if (is_null($object_name)) {
+            if (!$path) {
+                return null;
+            }
+
+            $object = $this->get($path, null, true, 'any');
+            if (is_object($object)) {
+                return $object;
+            } elseif (is_string($object)) {
+                $object_name = $object;
+            }
+        }
+
+        if ($object_name === 'default') {
+            return $this->instance;
+        }
+        if (!isset($this->objects[$object_name])) {
+            $up_path = $path;
+            $params = null;
+            $instance_path = '';
+            if (!$up_path) {
+                $up_path = '/';
+            }
+            while ($up_path) {
+                $up_path = $this->getPathPrevLevel($up_path);
+                if ($this->isDefined($up_path . '/object/name')) {
+                    $name = $this->get($up_path . '/object/name', '');
+                    if ($name && ($name === $object_name)) {
+                        $params = $this->get($up_path . '/instance', null, true, 'array');
+                        $instance_path = $up_path . '/instance';
+                        break;
+                    }
+                }
+
+                if ($this->isDefined($up_path . '/objects/' . $object_name)) {
+                    $params = $this->get($up_path . '/objects/' . $object_name . '/instance', null, true, 'array');
+                    $instance_path = $up_path . '/objects/' . $object_name . '/instance';
+                    break;
+                }
+            }
+            if (!is_null($params)) {
+                $instance = $this->getInstance($params, $instance_path);
+                if (!is_null($instance)) {
+                    $this->objects[$object_name] = $instance;
+                }
+            }
+        }
+        if (isset($this->objects[$object_name])) {
+            return $this->objects[$object_name];
+        }
+        $this->logConfigUndefinedValue($path);
+        return null;
+    }
+
+    public function getObjectModuleFromInstancePath($instance_path)
+    {
+        $params = $this->getParams($instance_path);
+        if (isset($params['bimp_object'])) {
+            if (isset($params['bimp_object']['module'])) {
+                return $this->getvalue($params['bimp_object']['module'], $instance_path . '/bimp_object/module');
+            }
+            return $this->instance->module;
+        } elseif (isset($params['dol_object'])) {
+            if (is_string($params['dol_object'])) {
+                return $params['dol_object'];
+            }
+            if (isset($params['dol_object']['module'])) {
+                return $this->getvalue($params['dol_object']['module'], $instance_path . '/dol_object/module');
+            }
+        }
+        return '';
+    }
+
+    public function getObjectNameFromInstancePath($instance_path)
+    {
+        $params = $this->getParams($instance_path);
+        if (isset($params['bimp_object'])) {
+            if (is_string($params['bimp_object'])) {
+                return $params['bimp_object'];
+            }
+            if (isset($params['bimp_object']['name'])) {
+                return $this->getvalue($params['bimp_object']['name'], $instance_path . '/bimp_object/module');
+            }
+        } elseif (isset($params['dol_object'])) {
+            if (is_string($params['dol_object'])) {
+                return ucfirst($params['dol_object']);
+            }
+            if (isset($params['dol_object']['class'])) {
+                return $this->getvalue($params['dol_object']['class'], $instance_path . '/dol_object/class');
+            }
+            if (isset($params['dol_object']['file'])) {
+                return ucfirst($this->getvalue($params['dol_object']['file'], $instance_path . '/dol_object/file'));
+            }
+            if (isset($params['dol_object']['module'])) {
+                return ucfirst($this->getvalue($params['dol_object']['module'], $instance_path . '/dol_object/module'));
+            }
+        }
+        return '';
+    }
+
+    public function getObjectTypeFromInstancePath($instance_path)
+    {
+        $params = $this->getParams($instance_path);
+        if (isset($params['bimp_object'])) {
+            return 'bimp_object';
+        } elseif (isset($params['dol_object'])) {
+            return 'dol_object';
+        } elseif (isset($params['custom_object'])) {
+            return 'custom_object';
+        }
+        return '';
+    }
+
+    public function getObjectModule($path = '', $object_name = null)
+    {
+        if (is_null($object_name)) {
+            if (!$path) {
+                return '';
+            }
+
+            if ($this->isDefined($path . '/instance')) {
+                return $this->getObjectModuleFromInstancePath($path . '/instance');
+            } else {
+                $object_name = $this->get($path, '', true);
+                if (!$object_name) {
+                    return '';
+                }
+            }
+        }
+
+        if ($object_name === 'default') {
+            return $this->instance->module;
+        }
+
+        if ($this->isDefined('objects/' . $object_name . '/instance')) {
+            return $this->getObjectModuleFromInstancePath('objects/' . $object_name . '/instance');
+        }
+
+        return '';
+    }
+
+    public function getObjectName($path = '', $object_name = null)
+    {
+        if (is_null($object_name)) {
+            if (!$path) {
+                return '';
+            }
+
+            if ($this->isDefined($path . '/instance')) {
+                return $this->getObjectNameFromInstancePath($path . '/instance');
+            } else {
+                $object_name = $this->get($path, '', true);
+                if (!$object_name) {
+                    return '';
+                }
+            }
+        }
+
+        if ($object_name === 'default') {
+            if (is_a($this->instance, 'BimpObject')) {
+                return $this->instance->object_name;
+            }
+            return '';
+        }
+
+        if ($this->isDefined('objects/' . $object_name . '/instance')) {
+            return $this->getObjectNameFromInstancePath('objects/' . $object_name . '/instance');
+        }
+
+        return '';
+    }
+
+    public function getObjectType($path = '', $object_name = null)
+    {
+        if (is_null($object_name)) {
+            if (!$path) {
+                return '';
+            }
+
+            if ($this->isDefined($path . '/instance')) {
+                return $this->getObjectTypeFromInstancePath($path . '/instance');
+            } else {
+                $object_name = $this->get($path, '', true);
+                if (!$object_name) {
+                    return '';
+                }
+            }
+        }
+
+        if ($object_name === 'default') {
+            return 'bimp_object';
+        }
+
+        if ($this->isDefined('objects/' . $object_name . '/instance')) {
+            return $this->getObjectTypeFromInstancePath('objects/' . $object_name . '/instance');
+        }
+
+        return '';
+    }
+
+    public function resetObjects()
+    {
+        foreach ($this->objects as $name => &$object) {
+            unset($object);
+        }
+        $this->objects = array();
+    }
+
+    // Logs: 
 
     protected function logInvalideDataType($param_path, $data_type)
     {

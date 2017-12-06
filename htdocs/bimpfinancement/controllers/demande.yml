@@ -16,10 +16,49 @@ sections:
             classes: 
                 array: btn,btn-primary
                 
-    - type: view
-      view:
+    - type: tabs
+      tabs: 
+          default: 
+              label: Demande
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: demande
+                        object: demande
+                        
+          montants: 
+              label: Montants
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: montants
+                        object: demande
+          
+          fournisseurs: 
+              label: Factures fournisseurs
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: fournisseurs
+                        object: demande
+                        
+    - type: list
+      list:
           panel: 1
           object: demande
+          children: comments
           
     - type: buttons
       buttons:

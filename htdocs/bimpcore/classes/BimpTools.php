@@ -283,6 +283,16 @@ class BimpTools
                 $sql .= self::getSqlFilter($or_field, $or_filter, $default_alias);
             }
             $sql .= ')';
+        } elseif (is_array($filter) && isset($filter['and'])) {
+            $fl = true;
+            foreach ($filter['and'] as $and_filter) {
+                if (!$fl) {
+                    $sql .= ' AND ';
+                } else {
+                    $fl = false;
+                }
+                $sql .= self::getSqlFilter($field, $and_filter, $default_alias);
+            }
         } else {
             if (preg_match('/\./', $field)) {
                 $sql .= $field;
@@ -315,6 +325,18 @@ class BimpTools
                             break;
                     }
                     $sql .= '\'';
+                } elseif (isset($filter['in'])) {
+                    if (is_array($filter['in'])) {
+                        $sql .= ' IN (' . implode(',', $filter['in']) . ')';
+                    } else {
+                        $sql .= ' IN (' . $filter['in'] . ')';
+                    }
+                } elseif (isset($filter['not_in'])) {
+                    if (is_array($filter['not_in'])) {
+                        $sql .= ' NOT IN (' . implode(',', $filter['not_in']) . ')';
+                    } else {
+                        $sql .= ' NOT IN (' . $filter['not_in'] . ')';
+                    }
                 } else {
                     $sql .= ' IN (' . implode(',', $filter) . ')';
                 }
@@ -509,7 +531,7 @@ class BimpTools
     }
 
     // Devises: 
-    
+
     public static function getCurrencyIcon($currency)
     {
         if (array_key_exists(strtoupper($currency), self::$currencies)) {
@@ -518,7 +540,7 @@ class BimpTools
 
         return 'euro';
     }
-    
+
     public static function getCurrencyHtml($currency)
     {
         if (array_key_exists(strtoupper($currency), self::$currencies)) {
@@ -527,7 +549,7 @@ class BimpTools
 
         return '&euro;';
     }
-    
+
     // Divers:
 
     public static function ucfirst($str)

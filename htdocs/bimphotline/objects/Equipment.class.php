@@ -8,7 +8,7 @@ class Equipment extends BimpObject
         1 => 'Type 1',
         2 => 'Type 2'
     );
-    
+
     public function getContratsArray()
     {
         $id_soc = isset($this->data['id_soc']) ? $this->data['id_soc'] : 0;
@@ -32,5 +32,26 @@ class Equipment extends BimpObject
         }
 
         return $return;
+    }
+
+    public function defaultDisplayContratsItem($id_contrat)
+    {
+        $contrat = BimpObject::getDolInstance('contrat');
+        if ($contrat->fetch((int) $id_contrat) > 0) {
+            $label = $contrat->ref;
+            if (isset($contrat->societe) && is_a($contrat->societe, 'Societe')) {
+                $label .= ' (client: ' . $contrat->societe->nom . ')';
+            } elseif (isset($contrat->socid) && $contrat->socid) {
+                global $db;
+                $client = new Societe($db);
+                if ($client->fetch($contrat->socid) > 0) {
+                    $label .= ' (client: ' . $client->nom . ')';
+                }
+                unset($client);
+            }
+            unset($contrat);
+            return $label;
+        }
+        return BimpRender::renderAlerts('Le contrat d\'ID ' . $id_contrat . ' semble ne plus exister');
     }
 }

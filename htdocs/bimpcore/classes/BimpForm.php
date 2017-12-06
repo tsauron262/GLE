@@ -106,7 +106,7 @@ class BimpForm
             $fields = $this->object->getCurrentConf('fields', array(), true, 'array');
             foreach ($fields as $idx => $field_params) {
                 $this->setConfPath('fields/' . $idx);
-                $field = $this->object->getCurrentConf('field', '', true);
+                $field = $this->object->getCurrentConf('field', '');
                 $input = $this->object->getCurrentConf('input', null, false, 'any');
 
                 if ($field) {
@@ -117,6 +117,14 @@ class BimpForm
                         $this->object->config->setCurrentPath('fields/' . $field);
                     }
                     $html .= $this->renderField($field);
+                } else {
+                    $association = $this->object->getCurrentConf('association', '');
+                    if ($association) {
+                        if (is_null($input) && $this->object->config->isDefined('associations/' . $association . '/add/input')) {
+                            $this->object->config->setCurrentPath('associations/' . $association . '/add');
+                        }
+                        $html .= $this->renderAddAssociation($association);
+                    }
                 }
             }
         } else {
@@ -179,6 +187,65 @@ class BimpForm
 
         if ($this->object->config->isDefinedCurrent('depends_on')) {
             $html .= $this->renderDependsOnScript($field);
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderAddAssociation($association, $label_cols = 3)
+    {
+        $html = '';
+
+        $type = $this->object->getCurrentConf('input/type', '', true);
+        $label = $this->object->getCurrentConf('label', '', true);
+        $associates = $this->object->getAssociatesList($association);
+
+        $display_if = $this->object->config->isDefinedCurrent('input/display_if');
+
+        $field_name = $association . '_add_value';
+
+        $html .= '<div class="row fieldRow' . (($type === 'hidden') ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
+        if ($display_if) {
+            $html .= self::renderDisplayIfData($this->object, $this->object->config->current_path . 'input/display_if');
+        }
+        $html .= '>';
+
+        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= $label;
+        $html .= '</div>';
+
+        $html .= '<div class="fieldRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div id="' . $this->form_identifier . '_' . $association . '" class="inputContainer"';
+        $html .= ' data-field_name="' . $association . '" data-multiple="1">';
+
+        if ($type === 'search_list') {
+            $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $association . '/add', $field_name, '');
+        } else {
+            $html .= BimpInput::renderInput($type, $field_name, '', array(), null, null, $this->form_identifier . '_' . $association);
+        }
+
+        $items = array();
+
+        if (!is_null($associates)) {
+            foreach ($associates as $id_associate) {
+                if ($id_associate) {
+                    $items[$id_associate] = $this->object->displayAssociate($association, 'default', $id_associate);
+                }
+            }
+        }
+        if ($type === 'search_list') {
+            $label_field_name = $field_name . '_search';
+        } else {
+            $label_field_name = $association;
+        }
+        $html .= BimpInput::renderMultipleValuesList($this->object, $association, $items, $label_field_name);
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        if ($this->object->config->isDefinedCurrent('depends_on')) {
+            $html .= $this->renderDependsOnScript($field_name);
         }
         $html .= '</div>';
 
@@ -378,7 +445,7 @@ class BimpForm
         $data_type = $object->getCurrentConf('type', 'string');
 
         if (!$type) {
-            if ($object->config->isDefined('fields/' . $field_name . '/values')) {
+            if ($object->config->isDefined($config_path. '/values')) {
                 $type = 'select';
             } else {
                 switch ($data_type) {
@@ -509,7 +576,7 @@ class BimpForm
             } else {
                 $label_field_name = $field_name;
             }
-            $html .= BimpInput::renderMultipleValuesList($field_name, $values, $label_field_name);
+            $html .= BimpInput::renderMultipleValuesList($object, $field_name, $values, $label_field_name);
         }
 
         $object->config->setCurrentPath($prev_path);

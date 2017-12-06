@@ -25,7 +25,7 @@
     background-color: $gray-light;
 
     @media (max-width: $screen-sm-max) {
-        z-index: 1050!important;
+        z-index: 9950!important;
     }
 }
 
@@ -35,10 +35,30 @@ div.tabBar {
 }
 
 .section {
-    margin-bottom: 30px;
 }
 .ajaxResultContainer {
     margin: 15px;
+}
+
+.modal {
+    .modal-dialog {
+        margin-top: 10%;
+    }
+}
+
+.content-loading {
+    display: none;
+    padding: 60px;
+    text-align: center;
+
+    .loading-spin {
+        font-size: 32px;
+        color: $info;
+        margin: 30px;
+    }
+    .loading-text {
+        font-size: 16px;
+    }
 }
 
 .ui-autocomplete {
@@ -155,26 +175,6 @@ i.iconRight {
         }
     }
 }
-.modal {
-    .modal-dialog {
-        margin-top: 10%;
-    }
-}
-
-.content-loading {
-    display: none;
-    padding: 60px;
-    text-align: center;
-
-    .loading-spin {
-        font-size: 32px;
-        color: $info;
-        margin: 30px;
-    }
-    .loading-text {
-        font-size: 16px;
-    }
-}
 
 /*Sections dépliables*/
 .foldable_section {
@@ -240,7 +240,7 @@ i.iconRight {
             font-size: 14px;
             display: inline-block;
             opacity: 0;
-            margin: 0 6px;
+            margin-left: 12px;
             line-height: 30px;
 
             &:before {

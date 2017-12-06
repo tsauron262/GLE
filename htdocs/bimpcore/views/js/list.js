@@ -80,6 +80,10 @@ function reloadObjectList(list_id, callback) {
         data['p'] = p;
     }
 
+    if ($list.find('input[name=associations_filters]')) {
+        data['associations_filters'] = $list.find('input[name=associations_filters]').val();
+    }
+
     bimp_json_ajax('loadObjectList', data, 0, function (result) {
         if (result.rows_html) {
             $list.find('tbody.listRows').html(result.rows_html);
@@ -126,7 +130,13 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         id_object = 0;
     }
 
-    loadModalForm($button, $list.data('module_name'), $list.data('object_name'), form_name, id_object, id_parent);
+    var values;
+    var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
+    if ($values_input.length) {
+        values = $values_input.val();
+    }
+
+    loadModalForm($button, $list.data('module_name'), $list.data('object_name'), form_name, id_object, id_parent, values);
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {
@@ -319,6 +329,43 @@ function saveObjectPosition(list_id, id_object, position) {
     });
 }
 
+function toggleSelectedItemsAssociation(list_id, operation, association, id_associate) {
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        return;
+    }
+
+    var $resultContainer = $('#' + list_id + '_result');
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+    var module = $list.data('module_name');
+    var object_name = $list.data('object_name');
+
+    if (!$selected.length) {
+        var msg = '';
+        if (object_labels[object_name]['is_female']) {
+            msg = 'Aucune ' + object_labels[object_name]['name'] + ' sélectionnée';
+        } else {
+            msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
+        }
+        bimp_display_msg(msg, $resultContainer, 'danger');
+    } else {
+        var associations = [];
+
+        $selected.each(function () {
+            associations.push({
+                module: module,
+                object_name: object_name,
+                association: association,
+                id_associate: id_associate,
+                id_object: parseInt($(this).data('id_object'))
+            });
+        });
+
+        saveAssociations(operation, associations, $resultContainer);
+    }
+}
+
 // Actions:
 
 function toggleCheckAll(list_id, $input) {
@@ -498,6 +545,19 @@ function onListLoaded($list) {
 
     setListEvents($list);
     setCommonEvents($('#' + $list.attr('id') + '_container'));
+
+    if (!$list.data('object_change_event_init')) {
+        var module = $list.data('module_name');
+        var object_name = $list.data('object_name');
+
+        $('body').on('objectChange', function (e) {
+            if ((e.module === module) && (e.object_name === object_name)) {
+                reloadObjectList($list.attr('id'));
+            }
+        });
+
+        $list.data('object_change_event_init', 1);
+    }
 }
 
 function setListEvents($list) {
@@ -732,5 +792,13 @@ function setPositionsHandlesEvents($list) {
 $(document).ready(function () {
     $('.objectList').each(function () {
         onListLoaded($(this));
+    });
+
+    $('body').on('controllerTabLoaded', function (e) {
+        if (e.$container.length) {
+            e.$container.find('.objectList').each(function () {
+                onListLoaded($(this));
+            });
+        }
     });
 });

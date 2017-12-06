@@ -39,11 +39,34 @@ objects:
 associations:
     contrats:
         object: contrat
-        table: bh_equipment_contrat
         display:
             default:
-                object_prop: ref                
-
+                type: callback
+        add:
+            label: Contrats
+            input:
+                type: search_list
+                multiple: 1
+                search_list:
+                    table: contrat c
+                    field_return_value: c.rowid
+                    field_return_label: c.ref
+                    options:
+                        default:
+                            label: Recherche par référence contrat
+                            fields_search: c.ref,c.rowid
+                            join: societe s
+                            join_on: c.fk_soc = s.rowid
+                            join_return_label: s.nom
+                            help: Entrez la référence ou l'ID d'un contrat
+                        by_client:
+                            label: Recherche par client
+                            fields_search: s.nom,s.code_client
+                            join: societe s
+                            join_on: c.fk_soc = s.rowid
+                            join_return_label: s.nom
+                            help: Entrez le nom ou le code d'un client
+                
 fields: 
     id_product: 
         label: Produit
@@ -159,6 +182,9 @@ views:
                             - field: admin_login
                             - field: admin_pword
                             - field: note
+                            - association: contrats
+                              edit: 1
+                              
 
 forms:
     default:
@@ -170,31 +196,7 @@ forms:
             - field: date_warranty_end
             - field: admin_login
             - field: admin_pword
-            - field: contrats
-              association: contrats
-              label: Contrats
-              input:
-                multiple: 1  
-                type: search_list
-                search_list:
-                    table: contrat c
-                    field_return_value: c.rowid
-                    field_return_label: c.ref
-                    options:
-                        default:
-                            label: Recherche par référence contrat
-                            fields_search: c.ref,c.rowid
-                            join: societe s
-                            join_on: c.fk_soc = s.rowid
-                            join_return_label: s.nom
-                            help: Entrez la référence ou l'ID d'un contrat
-                        by_client:
-                            label: Recherche par client
-                            fields_search: s.nom,s.code_client
-                            join: societe s
-                            join_on: c.fk_soc = s.rowid
-                            join_return_label: s.nom
-                            help: Entrez le nom ou le code d'un client
+            - association: contrats
 
 list:
     checkboxes: 1
@@ -205,7 +207,7 @@ list:
           btn_class: deleteSelectedObjects
     sort_col: product
     sort_way: asc
-    n: 25
+    n: 10
     cols:
         id:
             label: ID
@@ -221,10 +223,8 @@ list:
             field: warranty_type
         warranty_end:
             field: date_warranty_end
-            
-    add_btn: 1
+    add_form: default
     edit_btn: 1
-    update_btn: 1
     delete_btn: 1
     view_btn: 1
     page_btn: 1

@@ -110,7 +110,10 @@ class BimpView
             $html .= BimpRender::renderPanel($title, $content, $footer, array(
                         'panel_id' => $this->view_identifier . '_panel',
                         'icon'     => 'file-o',
-                        'type'     => 'secondary'));
+                        'type'     => 'secondary',
+                        'foldable' => 1
+                            )
+            );
         } else {
             $html .= $content;
         }

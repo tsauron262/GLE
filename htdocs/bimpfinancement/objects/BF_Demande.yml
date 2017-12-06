@@ -296,101 +296,56 @@ lists:
                 label: Etat
                 field: status
                 
-views: 
-    default:
+views:                         
+    demande: 
         title: nom
         edit_form: default
         delete_btn: 1
         rows:
             - cols: 
-                  - type: rows
-                    col_lg: 5
-                    col_sm: 12
-                    rows: 
-                        - cols:
-                              - type: object_common_fields
-                                col_lg: 12
-                        - cols:
-                              - type: fields_table
-                                col_lg: 12
-                                fields_table: 
-                                    caption:
-                                        label: Contrat
-                                        icon: file-text
-                                    rows:
-                                        - field: status
-                                          edit: 1
-                                        - field: accepted
-                                          edit: 1
-                                        - field: annexe
-                                          edit: 1
-                                        - field: date_livraison
-                                          edit: 1
-                                        - field: date_loyer
-                                          edit: 1       
-                  - type: rows
-                    col_lg: 7
-                    col_sm: 12
-                    rows: 
-                        - cols:
-                              - type: fields_table
-                                col_lg: 12
-                                fields_table:
-                                    caption:
-                                        label: Options
-                                        icon: check-square-o
-                                    rows:
-                                        - field: duration
-                                          edit: 1
-                                        - field: periodicity
-                                          edit: 1
-                                        - field: insurance
-                                          edit: 1
-                                        - field: mode_calcul
-                                          edit: 1
-                                        
-                              - type: fields_table
-                                col_lg: 12
-                                fields_table:
-                                    caption:
-                                        label: Montants
-                                        icon: euro
-                                    rows:
-                                        - field: montant_materiels
-                                          edit: 1
-                                        - field: montant_services
-                                          edit: 1
-                                        - field: montant_logiciels
-                                          edit: 1
-                                        - label: Montant total
-                                          value: <span id="montant_total"></span>
-                                        - field: commission_commerciale
-                                          edit: 1
-                                        - field: commission_financiere
-                                          edit: 1
-                                        - label: Montant total
-                                          value: <span id="montant_total2"></span>
-                                        - label: Coût banque
-                                          value: <span id="cout_banque"></span>
-                                        - label: Total loyer
-                                          value: <span id="total_loyer"></span>
-                                        - label: Dif financement/demande
-                                          value: <span id="dif_banque_demande"></span>
-                                        - label: Loyer intermediaire
-                                          value: <span id="loy_inter"></span>
-                                        - label: Frais Divers
-                                          value: <span id="frais_div"></span>
-                                        - label: CA Calculé
-                                          value: <span id="ca_calc"></span>
-                                        - label: Reste a payé Fournisseur
-                                          value: <span id="rest_fact"></span>
-                                        - field: vr
-                                          edit: 1
-                                        - field: ca_prevu
-                                          edit: 1
-                                        - field: pba_prevu
-                                          edit: 1
-                                        
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows: 
+                      - cols: 
+                          - type: object_common_fields
+                            col_lg: 12                            
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                caption:
+                                    label: Contrat
+                                    icon: file-text
+                                rows:
+                                  - field: status
+                                    edit: 1
+                                  - field: accepted
+                                    edit: 1
+                                  - field: annexe
+                                    edit: 1
+                                  - field: date_livraison
+                                    edit: 1
+                                  - field: date_loyer
+                                    edit: 1
+                          
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      caption:
+                          label: Options
+                          icon: check-square-o
+                      rows:
+                        - field: duration
+                          edit: 1
+                        - field: periodicity
+                          edit: 1
+                        - field: insurance
+                          edit: 1
+                        - field: mode_calcul
+                          edit: 1            
+                                      
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -423,8 +378,68 @@ views:
                             - field: id_supplier_contact
                               label: Contact
                               display: card
-                              
-            - cols:
+                
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderViewLoadedScript
+                  
+    montants:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols:  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        caption:
+                            label: Montants
+                            icon: euro
+                        rows:
+                          - field: montant_materiels
+                            edit: 1
+                          - field: montant_services
+                            edit: 1
+                          - field: montant_logiciels
+                            edit: 1
+                          - label: Montant total
+                            value: <span id="montant_total"></span>
+                          - field: commission_commerciale
+                            edit: 1
+                          - field: commission_financiere
+                            edit: 1
+                          - label: Montant total
+                            value: <span id="montant_total2"></span>
+                          - label: Coût banque
+                            value: <span id="cout_banque"></span>
+                          - label: Total loyer
+                            value: <span id="total_loyer"></span>
+                          - label: Dif financement/demande
+                            value: <span id="dif_banque_demande"></span>
+                          - label: Loyer intermediaire
+                            value: <span id="loy_inter"></span>
+                          - label: Frais Divers
+                            value: <span id="frais_div"></span>
+                          - label: CA Calculé
+                            value: <span id="ca_calc"></span>
+                          - label: Reste a payé Fournisseur
+                            value: <span id="rest_fact"></span>
+                          - field: vr
+                            edit: 1
+                          - field: ca_prevu
+                            edit: 1
+                          - field: pba_prevu
+                            edit: 1
+                            
+                  - type: list
+                    col_lg: 6
+                    col_md: 6
+                    list: 
+                        children: frais_divers
+                        panel: 0  
+                        
                   - type: list
                     col_lg: 6
                     col_md: 12
@@ -439,20 +454,6 @@ views:
                         children: rents_except
                         panel: 0
                         
-            - cols: 
-                  - type: list
-                    col_lg: 6
-                    col_md: 12
-                    list: 
-                        children: frais_fournisseur
-                        panel: 0
-                  - type: list
-                    col_lg: 6
-                    col_md: 12
-                    list: 
-                        children: frais_divers
-                        panel: 0
-                        
             - cols:
                   - type: list
                     col_lg: 12
@@ -460,15 +461,33 @@ views:
                         children: refinanceurs
                         panel: 0
                         
-            - cols:
-                  - type: list
-                    col_lg: 12
-                    list:
-                        children: comments
-                        panel: 0
-                
             - cols: 
                   - type: custom
                     custom: 
                         callback: renderViewLoadedScript
-                  
+    
+    fournisseurs:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 3
+                    col_md: 4
+                    col_sm: 12
+                    fields_table:
+                        caption:
+                            label: Montants
+                            icon: euro
+                        rows:
+                            - field: montant_materiels
+                            - field: montant_services
+                            - field: montant_logiciels
+                  - type: list
+                    col_lg: 9
+                    col_md: 8
+                    col_sm: 12
+                    list: 
+                        children: frais_fournisseur
+                        panel: 0

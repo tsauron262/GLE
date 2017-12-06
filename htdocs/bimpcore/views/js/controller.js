@@ -6,7 +6,7 @@ function loadTabContent(url, tab_name) {
     });
 
     $tabs.find('#' + tab_name).removeClass('tabunactive').addClass('tabactive');
-    
+
     if ($container.length) {
         $container.fadeOut(250, function () {
             var $content = $(this).find('#controllerTabContent');
@@ -22,23 +22,14 @@ function loadTabContent(url, tab_name) {
                 if (typeof (result.html) !== 'undefined') {
                     $container.find('.content-loading').hide();
                     $content.html(result.html).fadeIn(250);
-                    onTabLoaded($content);
+                    $('body').trigger($.Event('controllerTabLoaded', {
+                        $container: $container,
+                        tab_name: tab_name
+                    }));
                 }
             }, function (result) {
                 $(this).find('.content-loading').hide();
             }, false);
         });
     }
-}
-
-function onTabLoaded($container) {
-    $container.find('.objectList').each(function () {
-        onListLoaded($(this));
-    });
-    $container.find('.objectForm').each(function () {
-        onFormLoaded($(this));
-    });
-    $container.find('.objectView').each(function () {
-        onViewLoaded($(this));
-    });
 }

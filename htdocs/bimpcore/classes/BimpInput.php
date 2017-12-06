@@ -465,7 +465,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesList($field_name, $values, $label_input_name = null)
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false)
     {
         if (!is_array($values)) {
             $value = $values;
@@ -485,10 +485,22 @@ class BimpInput
             $label_input_name = $value_input_name;
         }
 
-        $html .= '<div class="inputMultipleValuesContainer">';
+        if ($autosave) {
+            if (!isset($object->id) || !$object->id) {
+                $autosave = false;
+            }
+        }
+
+        $html .= '<div class="inputMultipleValuesContainer"';
+        if ($autosave) {
+            $html .= ' data-module="' . $object->module . '"';
+            $html .= ' data-object_name="' . $object->object_name . '"';
+            $html .= ' data-id_object="' . $object->id . '"';
+        }
+        $html .= '>';
 
         $html .= '<div style="text-align: right">';
-        $html .= '<button type="button" class="addValueBtn btn btn-primary" onclick="addMultipleInputCurrentValue($(this), \'' . $value_input_name . '\', \'' . $label_input_name . '\')">';
+        $html .= '<button type="button" class="addValueBtn btn btn-primary" onclick="addMultipleInputCurrentValue($(this), \'' . $value_input_name . '\', \'' . $label_input_name . '\', ' . ($autosave ? 'true' : 'false') . ')">';
         $html .= '<i class="fa fa-plus-circle iconLeft"></i>';
         $html .= 'Ajouter';
         $html .= '</button>';
@@ -504,9 +516,15 @@ class BimpInput
             $html .= '<input type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
             $html .= '</td>';
             $html .= '<td>' . $label . '</td>';
-            $html .= '<td><button type="button" class="btn btn-light-danger iconBtn"';
-            $html .= ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();"';
-            $html .= '><i class="fa fa-trash"></i></button></td>';
+            $html .= '<td><button type="button" class="btn btn-light-danger iconBtn" onclick="';
+            if ($autosave) {
+                $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\''.$object->module.'\', \''.$object->object_name.'\', ';
+                $html .= $object->id . ', \''.$field_name.'\', \''.$value.'\', null, function() {';
+                $html .= '$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();});});';
+            } else {
+                $html .= '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();});"';
+            }
+            $html .= '"><i class="fa fa-trash"></i></button></td>';
             $html .= '</tr>';
         }
         $html .= '</tbody>';

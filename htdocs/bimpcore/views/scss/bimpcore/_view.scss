@@ -14,13 +14,12 @@
     padding: 0!important;
 
     .row:not(:first-child) {
-        margin-top: 30px;
+        margin-top: 15px;
     }
 }
 
 .objectViewTableContainer {
     width: 100%;
-    margin: 5px 0;
     border: 1px solid $secondary;
 }
 

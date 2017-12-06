@@ -347,7 +347,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
         $sql .= " AND f.datef BETWEEN '" . $dateD . "' AND '" . $dateF ."'";
         $sql .= " AND fd.fk_facture = f.rowid ";
-        $sql .=  "AND fd.product_type = 1";
+      //  $sql .=  "AND fd.product_type = 1";
         //$sql .= " GROUP BY f.rowid";
 
         $resql = $db->query($sql);
@@ -390,7 +390,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
             $totalcesu = array_sum ($array_total_cesu); // Montant total CESU       
             
             
-            $npref = "Error"; // Inconnu pour le moment
+            $npref = "SAP821320892"; // Inconnu pour le moment
             $diri = "Christian CONSTANTIN BERTIN";
             $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
             $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
@@ -575,11 +575,11 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         $pdf->SetXY($posx+2,$posy+10); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
                         $pdf->SetFont('','',$default_font_size); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
-                        $pdf->MultiCell(182, 3, "$orga agréé pour les services à la personne par arrêté préfectoral N°$npref en date du", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->MultiCell(182, 3, "$orga déclaré pour les services à la personne sous le N° $npref", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         
                         // LIGNES ORGANISATION
-                        $pdf->SetXY($posx+2,$posy+15); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$date01", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+//                        $pdf->SetXY($posx+2,$posy+15); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+//                        $pdf->MultiCell(100, 3, "$date01", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+20); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->MultiCell(100, 3, "$orgaadd", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+25); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
@@ -609,6 +609,9 @@ class pdf_bimpcesu extends ModeleBimpcesu
                             $pdf->AddPage();
                             $pdf->SetFont('','',$default_font_size);
                         }
+                        else
+                            $pdf->MultiCell(182, 3, "\n\n", 0, 'L'); // imprime du texte
+                            
                         
                         
                         // LIGNES CONTENUS 2

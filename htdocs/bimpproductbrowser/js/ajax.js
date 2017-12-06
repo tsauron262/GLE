@@ -126,10 +126,6 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
-        console.log("objs" + objs);
-        console.log("cnt" + cnt);
-        console.log("cntRestr" + cntRestr);
-        console.log("catArr" + catArr);
     });
 });
 
@@ -139,6 +135,11 @@ $(document).ready(function () {
 
 function retrieveCateg() {
     getAllCateg();
+    if (objInit.warning)
+        alert("Attention ! Ce produit appartient à au moins deux catégories de même niveau (" + objInit.warning + 
+            "). La catégorie sélectionnée est la suivante : " + objInit.warning[0] +
+            ".\nSi vous voulez que ce soit une autre catégorie qui soit prise en compte" +
+            " veuillez assigner cette valeur et recharger la page.\nCe procédé peut-être répété plusieurs fois.");
     if (objInit.ROOT_CATEGORY === null || objInit.ROOT_CATEGORY === undefined) {
         addErrorDivs();
         return;
@@ -164,12 +165,10 @@ function addWays() {
             .text('Catégories hors module ')
             .appendTo('#otherContainer');
     for (i = 0; i < objInit.ways.length; i++) {
-//        if (objInit.color[i] === undefined) {
-        objInit.color[i] = 'aaa';
-//        }
+
         $('<li></li>')
                 .attr('class', "noborderoncategories customLi")
-                .attr('style', 'margin-right:5px ; background-color:#' + objInit.color[i])
+                .attr('style', 'margin-right:5px ; background-color:#aaa')
                 .attr('id', 'idOther' + i)
                 .html(objInit.ways[i])
                 .appendTo('#otherContainer');

@@ -272,29 +272,35 @@ class BimpProductBrowser extends CommonObject {
         if ($obj->tabRestrCounter . length <= $obj->cnt) {
             $obj->tabRestrCounter[$obj->cnt] = 0;
         }
-//        echo "Catégorie : ";
-//        foreach ($obj->prodCateg as $catego) {
-//            echo $catego->label . " ";
-//        }
-//        echo "\n";
+        $tabIdSelected = array();
         $obj->tabRestrCounter[$obj->cnt]+=sizeof($out->tabRestr);
-        $cntSister;
         $obj->tabRestr = array_merge($obj->tabRestr, $out->tabRestr);
         foreach ($out->tabRestr as $restr) {    // restriction
             $cntSister = 0;
+            $sisterLabel = array();
             foreach ($obj->prodCateg as $key => $categ) {   // categ liées aux prod
                 $index = array_search($categ->id, $restr->tabIdChild); // cherche si la catégorie est fille de la restriction
                 if ($index !== false) { // la catégorie est fille de la restriction
-                    $id = $restr->tabIdChild[$index];
-                    $restr->selectedLabel = $categ->label;
-                    array_push($obj->catArr, $id);
-                    $obj->cnt++;
-                    array_splice($obj->prodCateg, $key, 1);
+                    $sisterLabel[] = $categ->label;
+                    if ($cntSister > 0) {   // si elle a des soeurs
+                        $obj->warning = $sisterLabel;   // signal à l'utilisateur
+                    } else {
+//                        $newRestr = $restr;
+//                        $newRestr->tabRestr = $categ->label;
+//                        array_push($out->tabRestr, $newRestr);
+                        $restr->selectedLabel = $categ->label;  // ajout du choix sélectionné antérieurement par l'utilisateur
+                        $id = $restr->tabIdChild[$index];
+                        array_push($obj->catArr, $id);
+                        array_splice($obj->prodCateg, $key, 1);
+                        $obj->cnt++;
+                    }
                     $cntSister++;
-                    $this->createObj($obj, $id);
+                    array_push($tabIdSelected, $id);
                 }
             }
-//            echo "Selected = ".$restr->selectedLabel . " nombre de soeurs " . $cntSister . "\n";
+            foreach ($tabIdSelected as $idSelected) {
+                $this->createObj($obj, $idSelected);
+            }
         }
     }
 
@@ -316,8 +322,7 @@ class BimpProductBrowser extends CommonObject {
         $obj->color = array();
         foreach ($obj->prodCateg as $cat) {
             $obj->ways[] = $cat->print_all_ways();
-            $obj->color[] = $cat->color;
-        }   // TODO ajouter warning si il rentre deux fois dans une catégorie 
+        }
         return $obj;
     }
 
@@ -334,4 +339,5 @@ class BimpProductBrowser extends CommonObject {
         else
             return -1;
     }
+
 }

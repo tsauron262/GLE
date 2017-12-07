@@ -120,11 +120,51 @@ class BimpInput
                 break;
 
             case 'search_societe':
-                $html .= $form->select_company((int) $value, $field_name, '', '', 0, 0, array(), 20);
+                $filter = '';
+                if (isset($options['type']) && $options['type']) {
+                    switch ($options['type']) {
+                        case 'customer':
+                            $filter = 's.client != 0';
+                            break;
+
+                        case 'supplier':
+                            $filter = 's.fournisseur != 0';
+                            break;
+                    }
+                }
+
+                $html .= $form->select_company((int) $value, $field_name, $filter, '', 0, 0, array(), 20);
                 break;
 
             case 'search_user':
                 $html .= $form->select_dolusers((int) $value, $field_name, 0);
+                break;
+
+            case 'check_list':
+                if (!isset($options['items']) || !count($options['items'])) {
+                    $html = BimpRender::renderAlerts('Aucun élément diponible', 'warning');
+                } else {
+                    if (!is_array($value)) {
+                        $value = array($value);
+                    }
+
+                    $html = '<div class="check_list_container">';
+                    $i = 1;
+                    foreach ($options['items'] as $item) {
+                        $i++;
+                        $html .= '<div class="check_list_item">';
+                        $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item['value'] . '" id="' . $input_id . '_' . $i . '"';
+                        if ($value == $item['value']) {
+                            $html .= ' checked="1"';
+                        }
+                        $html .= '/>';
+                        $html .= '<label for="' . $input_id . '_' . $i . '">';
+                        $html .= $item['label'];
+                        $html .= '</label>';
+                        $html .= '</div>';
+                    }
+                    $html .= '</div>';
+                }
                 break;
 
             case 'time':
@@ -518,8 +558,8 @@ class BimpInput
             $html .= '<td>' . $label . '</td>';
             $html .= '<td><button type="button" class="btn btn-light-danger iconBtn" onclick="';
             if ($autosave) {
-                $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\''.$object->module.'\', \''.$object->object_name.'\', ';
-                $html .= $object->id . ', \''.$field_name.'\', \''.$value.'\', null, function() {';
+                $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\'' . $object->module . '\', \'' . $object->object_name . '\', ';
+                $html .= $object->id . ', \'' . $field_name . '\', \'' . $value . '\', null, function() {';
                 $html .= '$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();});});';
             } else {
                 $html .= '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();});"';

@@ -82,6 +82,7 @@ fields:
         object: client
         input:
             type: search_societe
+            societe_type: customer
         display: 
             nom_url: 
                 type: nom_url
@@ -233,6 +234,7 @@ fields:
         object: supplier
         input: 
             type: search_societe
+            societe_type: supplier
         display:
             nom_url: 
                 type: nom_url
@@ -269,7 +271,7 @@ lists:
         sort_col: date_create
         sort_way: desc
         n: 10
-        add_btn: 1
+        add_form: default
         delete_btn: 1
         view_btn: 1
         cols:

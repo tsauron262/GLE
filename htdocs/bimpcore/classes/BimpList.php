@@ -982,7 +982,7 @@ class BimpList
                         $html .= 'window.location = \'' . $url . '\';';
                     } else {
                         $html .= 'displayObjectView($(\'#' . $this->listIdentifier . '_container\').find(\'.objectViewContainer\'), ';
-                        $html .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'default\', ' . $id_object;
+                        $html .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'default\', ' . $id_object.', \'default\'';
                         $html .= ');';
                     }
                     $html .= '"></span>';

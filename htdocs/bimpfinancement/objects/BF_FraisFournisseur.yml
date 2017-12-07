@@ -38,6 +38,7 @@ fields:
         object: supplier
         input: 
             type: search_societe
+            societe_type: supplier
             help: Entrez le nom ou la référence pour rechercher un fournisseur enregistré
         display: 
             nom_url: 

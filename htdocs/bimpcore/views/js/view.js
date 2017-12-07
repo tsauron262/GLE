@@ -25,8 +25,7 @@ function reloadObjectView(view_id) {
                 $view.find('.object_view_content').stop().fadeOut(250, function () {
                     $(this).html(result.html);
                     $(this).fadeIn(250, function () {
-                        onViewLoaded($view);
-                        $view.trigger('viewRefresh');
+                        onViewRefreshed($view);
                     });
                 });
             }
@@ -281,23 +280,24 @@ function onViewLoaded($view) {
     setCommonEvents($view);
 
     if (!$view.data('object_change_event_init')) {
-        $('body').on('objectChange', function (e) {
+        $view.on('objectChange', function (e) {
             if ((e.module === module) && (e.object_name === object_name)
                     && parseInt(e.id_object) === parseInt(id_object)) {
                 reloadObjectView($view.attr('id'));
             }
         });
-        var module = $view.data('module_name');
-        var object_name = $view.data('object_name');
-        var id_object = $view.data('id_object');
-
-        $view.data('object_change_event_init', 1);
     }
+    
+    $('body').trigger($.Event('viewLoaded', {
+        $view: $view
+    }));
+}
 
-
+function onViewRefreshed($view) {
     $view.find('.objectViewtable').each(function () {
         setInputsEvents($(this));
     });
+
     $view.find('.objectList').each(function () {
         onListLoaded($(this));
     });
@@ -313,6 +313,11 @@ function onViewLoaded($view) {
     $view.find('.objectViewslist').each(function () {
         onViewsListLoaded($(this));
     });
+
+    setCommonEvents($view);
+    $('body').trigger($.Event('viewRefresh', {
+        $view: $view
+    }));
 }
 
 $(document).ready(function () {

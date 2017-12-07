@@ -1,25 +1,29 @@
-function onBFDemandeViewLoaded(id_demande) {
-    var view_id = 'BF_Demande_' + id_demande + '_default_view';
-    var $view = $('#' + view_id);
+$(document).ready(function () {
+    $('body').on('viewLoaded', function (e) {
+        if (e.$view.hasClass('BF_Demande_view')) {
+            onBFDemandeViewLoaded(e.$view);
+        }
+    });
+    $('body').on('viewRefresh', function (e) {
+        if (e.$view.hasClass('BF_Demande_view')) {
+            onBFDemandeViewLoaded(e.$view);
+        }
+    });
+});
 
+function onBFDemandeViewLoaded($view) {
     if ($view.length) {
         initEvents($view);
-        $("body").on("listRefresh", function(event) {
+        $("body").on("listRefresh", function (event) {
             initEvents($view);
         });
         calculateMontantTotal($view);
     }
-
-    var $list = $('#BF_Rent_default_list');
-    $list.on('listRefresh', function () {
-        // ...
-    });
 }
 
-
-function initEvents($view){
-    var selecteur = '[name="montant_materiels"], [name="montant_services"], [name="montant_logiciels"],'+
-            '[name="commission_commerciale"], [name="commission_financiere"],'+
+function initEvents($view) {
+    var selecteur = '[name="montant_materiels"], [name="montant_services"], [name="montant_logiciels"],' +
+            '[name="commission_commerciale"], [name="commission_financiere"],' +
             '[name="amount"]';
     $view.find(selecteur).change(function () {
         calculateMontantTotal($view);
@@ -27,7 +31,7 @@ function initEvents($view){
     $view.find(selecteur).keyup(function () {
         calculateMontantTotal($view);
     });
-    
+
 }
 
 function calculateMontantTotal($view) {
@@ -38,14 +42,14 @@ function calculateMontantTotal($view) {
     var $montant_materiels = $view.find('[name="montant_materiels"]');
     var $montant_services = $view.find('[name="montant_services"]');
     var $montant_logiciels = $view.find('[name="montant_logiciels"]');
-    
+
     var $commission_commerciale = $view.find('[name="commission_commerciale"]');
     var $commission_financiere = $view.find('[name="commission_financiere"]');
 
     var montant_materiels = parseFloat($montant_materiels.val());
     var montant_services = parseFloat($montant_services.val());
     var montant_logiciels = parseFloat($montant_logiciels.val());
-    
+
     var commission_commerciale = parseFloat($commission_commerciale.val());
     var commission_financiere = parseFloat($commission_financiere.val());
 
@@ -59,82 +63,82 @@ function calculateMontantTotal($view) {
     if (montant_logiciels) {
         total += montant_logiciels;
     }
-    
+
     //On a le premier total
-    
+
     var commC = 0;
-    if(commission_commerciale > 0)
+    if (commission_commerciale > 0)
         commC = commission_commerciale * total / 100;
-    
+
     var commF = 0;
-    if(commission_financiere > 0)
+    if (commission_financiere > 0)
         commF = commission_financiere * (total + commC) / 100;
-    
+
     total2 = total + commC + commF;
-    
+
     //on a le deuxieme total
-    
+
     displayMoneyValue(total, $view.find('#montant_total'));
     displayMoneyValue(total2, $view.find('#montant_total2'));
-    
-    if($view.find('#commC').length < 1)
+
+    if ($view.find('#commC').length < 1)
         $commission_commerciale.parent().parent().parent().append("<span id='commC'></span>");
     displayMoneyValue(commC, $view.find('#commC'));
-    
-    if($view.find('#commF').length < 1)
+
+    if ($view.find('#commF').length < 1)
         $commission_financiere.parent().parent().parent().append("<span id='commF'></span>");
     displayMoneyValue(commF, $view.find('#commF'));
-    
-    
-    
+
+
+
     //Total loyer
     var totalLoyer = 0;
-    $view.find(".BF_Rent_row").each(function(){
+    $view.find(".BF_Rent_row").each(function () {
         totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
     });
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
-    
-    
-    
+
+
+
     //Cout banque
     var coupBanque = 3333;
     displayMoneyValue(coupBanque, $view.find('#cout_banque'));
-    
-    
+
+
     //Diff banque demande
     var difBanqFinan = totalLoyer - coupBanque - total2;
     displayMoneyValue(difBanqFinan, $view.find('#dif_banque_demande'));
-    
-    
-    
+
+
+
     //Loyer intermediaire
     var totalLoyI = calculTotal('.BF_RentExcept_row input[name="amount"]');
     displayMoneyValue(totalLoyI, $view.find('#loy_inter'));
-    
-    
+
+
     //Frais divers
     var totalFD = calculTotal('.BF_FraisDivers_row input[name="amount"]');
     displayMoneyValue(totalFD, $view.find('#frais_div'));
-    
-    
-    
+
+
+
     //CA Calculé
     var caCalc = commF + totalLoyI + totalFD + difBanqFinan;
     displayMoneyValue(caCalc, $view.find('#ca_calc'));
-    
-    
+
+
     //Reste a payé
-    var restPaye = total - calculTotal('.BF_FraisFournisseur_row input[name="amount"]');;
+    var restPaye = total - calculTotal('.BF_FraisFournisseur_row input[name="amount"]');
+    ;
     displayMoneyValue(restPaye, $view.find('#rest_fact'));
-    
+
 }
 
-
-function calculTotal(selecteur){
+function calculTotal(selecteur) {
     var totalLI = 0;
-    $(selecteur).each(function(){
+    $(selecteur).each(function () {
         var val = parseFloat($(this).val());
-        if(val > 0)
+        if (val > 0)
             totalLI += val;
     });
     return totalLI;

@@ -2,6 +2,9 @@ table: bf_refinanceur
 parent_object: BF_Demande
 parent_id_property: id_demande
 
+positions: 1
+position_insert: after
+
 labels:
     name: Refinanceur
     
@@ -51,8 +54,8 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: date_create
-    sort_way: desc
+    sort_col: position
+    sort_way: asc
     n: 10
     cols:
         name: 

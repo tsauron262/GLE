@@ -169,48 +169,65 @@ function toggleFoldableSection($caption) {
 
 function setCommonEvents($container) {
     // foldable sections: 
-    $container.find('.foldable_section_caption').click(function () {
-        toggleFoldableSection($(this));
+    $container.find('.foldable_section_caption').each(function () {
+        if (!parseInt($(this).data('foldable_event_init'))) {
+            $(this).click(function () {
+                toggleFoldableSection($(this));
+            });
+            $(this).data('foldable_event_init', 1);
+        }
     });
 
     // foldable panels:
     $container.find('.panel.foldable').each(function () {
-        var $panel = $(this);
-        $panel.children('.panel-heading').click(function () {
-            if ($panel.hasClass('open')) {
-                $panel.children('.panel-body, .panel-footer').slideUp(250, function () {
-                    $panel.removeClass('open').addClass('closed');
-                });
-            } else {
-                $panel.children('.panel-body, .panel-footer').slideDown(250, function () {
-                    $panel.removeClass('closed').addClass('open');
-                });
-            }
-        });
-        $panel.children('.panel-heading').find('.headerBtn').click(function (e) {
-            e.stopPropagation();
-        });
+        if (!parseInt($(this).data('foldable_event_init'))) {
+            var $panel = $(this);
+            $panel.children('.panel-heading').click(function () {
+
+                if ($panel.hasClass('open')) {
+                    $panel.children('.panel-body, .panel-footer').slideUp(250, function () {
+                        $panel.removeClass('open').addClass('closed');
+                    });
+                } else {
+                    $panel.children('.panel-body, .panel-footer').slideDown(250, function () {
+                        $panel.removeClass('closed').addClass('open');
+                    });
+                }
+            });
+            $panel.children('.panel-heading').find('.headerBtn').click(function (e) {
+                e.stopPropagation();
+            });
+            $(this).data('foldable_event_init', 1);
+        }
     });
 
     // foldable view tables:
     $container.find('.objectViewtable.foldable').each(function () {
         var $table = $(this);
-        $table.children('thead').children('tr:first-child').click(function () {
-            if ($table.hasClass('open')) {
-                $table.children('tbody,tfoot').fadeOut(250, function () {
-                    $table.removeClass('open').addClass('closed');
+        $table.children('thead').children('tr:first-child').each(function () {
+            if (!parseInt($(this).data('foldable_event_init'))) {
+                $(this).click(function () {
+                    if ($table.hasClass('open')) {
+                        $table.children('tbody,tfoot').fadeOut(250, function () {
+                            $table.removeClass('open').addClass('closed');
+                        });
+                    } else {
+                        $table.children('tbody,tfoot').fadeIn(250, function () {
+                            $table.removeClass('closed').addClass('open');
+                        });
+                    }
                 });
-            } else {
-                $table.children('tbody,tfoot').fadeIn(250, function () {
-                    $table.removeClass('closed').addClass('open');
-                });
+                $(this).data('foldable_event_init', 1);
             }
         });
     });
 
     // Popup
     $container.find('.displayPopupButton').each(function () {
-        setDisplayPopupButtonEvents($(this));
+        if (!parseInt($(this).data('event_init'))) {
+            setDisplayPopupButtonEvents($(this));
+            $(this).data('event_init', 1);
+        }
     });
 
     // bootstrap popover:
@@ -247,6 +264,11 @@ function setDisplayPopupButtonEvents($button) {
     if (!$button.length) {
         return;
     }
+
+    if (parseInt($button.data('event_init'))) {
+        return;
+    }
+
     var $popup = $button.parent().find('#' + $button.data('popup_id'));
     if ($popup.length) {
         $button.add($popup).mouseover(function () {
@@ -255,6 +277,7 @@ function setDisplayPopupButtonEvents($button) {
             $popup.hide();
         });
     }
+    $button.data('event_init', 1);
 }
 
 // Rendus HTML 

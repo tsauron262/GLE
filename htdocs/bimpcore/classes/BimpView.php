@@ -67,7 +67,9 @@ class BimpView
         $html .= '>';
 
         $content = '';
-        $content = $this->renderViewContent();
+        $content .= '<div class="container-fluid object_view_content">';
+        $content .= $this->renderViewContent();
+        $content .= '</div>';
         $content .= '<div class="ajaxResultContainer" id="' . $this->view_identifier . '_result" style="display: none"></div>';
 
 
@@ -125,12 +127,10 @@ class BimpView
 
     public function renderViewContent()
     {
-        $content = '<div class="container-fluid object_view_content">';
         if ($this->object->config->isDefined($this->view_path . '/rows')) {
-            $content .= BimpStruct::renderRows($this->object->config, $this->view_path . '/rows');
+            return BimpStruct::renderRows($this->object->config, $this->view_path . '/rows');
         }
-        $content .= '</div>';
-        return $content;
+        return '';
     }
 
     public function renderContent($content_path)

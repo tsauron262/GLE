@@ -52,6 +52,7 @@ function saveObjectFromForm(form_id, $button, success_callback) {
             object_name: object_name,
             id_object: result.id_object
         }));
+
     }, function () {
         $button.removeClass('disabled');
     });
@@ -611,6 +612,7 @@ function setFormEvents($form) {
             }
         }
     });
+
     resetInputDisplay($form);
     setInputsEvents($form);
 
@@ -627,18 +629,31 @@ function setFormEvents($form) {
 
 function setInputsEvents($container) {
     $container.find('.switch').each(function () {
-        setSwitchInputEvents($(this));
+        if (!parseInt($(this).data('event_init'))) {
+            setSwitchInputEvents($(this));
+            $(this).data('event_init', 1);
+        }
     });
     $container.find('.toggle_value').each(function () {
-        setToggleInputEvent($(this));
+        if (!parseInt($(this).data('event_init'))) {
+            setToggleInputEvent($(this));
+            $(this).data('event_init', 1);
+        }
     });
     $container.find('.searchListOptions').each(function () {
-        setSearchListOptionsEvents($(this));
+        if (!parseInt($(this).data('event_init'))) {
+            setSearchListOptionsEvents($(this));
+            $(this).data('event_init', 1);
+        }
     });
 }
 
 function setInputEvents($form, $input) {
     if (!$input.length) {
+        return;
+    }
+
+    if (parseInt($input.data('event_init'))) {
         return;
     }
 
@@ -670,9 +685,18 @@ function setInputEvents($form, $input) {
     }
 
     resetInputDisplay($form);
+    $input.data('event_init', 1);
 }
 
 function setSwitchInputEvents($input) {
+    if (!$input.length) {
+        return;
+    }
+
+    if (parseInt($input.data('event_init'))) {
+        return;
+    }
+
     if (parseInt($input.val()) === 1) {
         $input.css({
             'color': '#3b6ea0',
@@ -697,9 +721,19 @@ function setSwitchInputEvents($input) {
             });
         }
     });
+
+    $input.data('event_init', 1);
 }
 
 function setToggleInputEvent($input) {
+    if (!$input.length) {
+        return;
+    }
+
+    if (parseInt($input.data('event_init'))) {
+        return;
+    }
+
     var $toggle = $input.parent().find('.toggle');
     $toggle.change(function () {
         if ($(this).prop('checked')) {
@@ -708,28 +742,49 @@ function setToggleInputEvent($input) {
             $input.val(0);
         }
     });
+
+    $input.data('event_init', 1);
 }
 
 function setDateRangeEvents($container, input_name) {
     var $from = $container.find('[name=' + input_name + '_from_picker]');
     var $to = $container.find('[name=' + input_name + '_to_picker]');
 
-    $from.datetimepicker({
-        useCurrent: false //Important! See issue #1075
-    });
-    $from.on("dp.change", function (e) {
-        if (e.date) {
-            $to.data("DateTimePicker").minDate(e.date);
-        }
-    });
-    $to.on("dp.change", function (e) {
-        if (e.date) {
-            $from.data("DateTimePicker").maxDate(e.date);
-        }
-    });
+    if (!$from.length || !$to.length) {
+        return;
+    }
+
+    if (!parseInt($from.data('event_init'))) {
+        $from.data('event_init', 1);
+        $from.datetimepicker({
+            useCurrent: false //Important! See issue #1075
+        });
+        $from.on("dp.change", function (e) {
+            if (e.date) {
+                $to.data("DateTimePicker").minDate(e.date);
+            }
+        });
+    }
+
+    if (!parseInt($to.data('event_init'))) {
+        $to.data('event_init', 1);
+        $to.on("dp.change", function (e) {
+            if (e.date) {
+                $from.data("DateTimePicker").maxDate(e.date);
+            }
+        });
+    }
 }
 
 function setSearchListOptionsEvents($container) {
+    if (!$container.length) {
+        return;
+    }
+
+    if (parseInt($container.data('event_init'))) {
+        return;
+    }
+
     var $parent = $container.parent();
     var $switch = $container.find('.switchInputContainer');
     if ($switch.length) {
@@ -772,6 +827,7 @@ function setSearchListOptionsEvents($container) {
                 }
             }).change();
         }
+        $container.data('event_init', 1);
     }
 }
 

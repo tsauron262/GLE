@@ -316,7 +316,7 @@ class BimpProductBrowser extends CommonObject {
         //  $cat->prod : les catégories ratéchées au produit
         //  $cat->mothers : et les mères de ces catégories
         $cat = $this->getProdCateg($id_prod);
-
+        $obj->ways = array();
         $obj->catsToAdd = array();
         $remainingRestr = array();
         $remainingRestr[] = $restr;

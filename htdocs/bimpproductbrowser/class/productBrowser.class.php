@@ -348,6 +348,7 @@ class BimpProductBrowser extends CommonObject {
                     array_splice($cat->mothers, $ind, 1);             // et sa mère
                     $obj->cnt++;
                 } else {
+                    $obj->waysAnnexesCategories = $this->getAllWays($cat->prod);
 //                    echo "Toutes les restrictions ne sont pas satisfaites\n"; // TODO enlever
                     return $obj;    // Toutes les restrictions ne sont pas satisfaites
                 }

@@ -92,8 +92,8 @@ class modBimpproductbrowser extends DolibarrModules {
             'barcode' => 0, // Set this to 1 if module has its own barcode directory (core/modules/barcode)
             'models' => 0, // Set this to 1 if module has its own models directory (core/modules/xxx)
             // 'css' => array('/bimpproductbrowser/css/modProductBrowser.css'),	// Set this to relative path of css file if module has its own css file
-            'js' => array('/bimpproductbrowser/js/modProductBrowser.js.php'), // Set this to relative path of js file if module must load a js on all pages
-            'hooks' => array('hookcontext1', 'hookcontext2')  // Set here all hooks context managed by module. You can also set hook context 'all'
+            //'js' => array(), // Set this to relative path of js file if module must load a js on all pages
+            'hooks' => array('productcard')  // Set here all hooks context managed by module. You can also set hook context 'all'
         );
 
         // Data directories to create when module is enabled.
@@ -177,11 +177,11 @@ class modBimpproductbrowser extends DolibarrModules {
 
         // Boxes/Widgets
         // Add here list of php file(s) stored in mymodule/core/boxes that contains class to show a widget.
-        $this->boxes = array(
-            0 => array('file' => 'mymodulewidget1.php@mymodule', 'note' => 'Widget provided by MyModule', 'enabledbydefaulton' => 'Home'),
-                //1=>array('file'=>'mymodulewidget2.php@mymodule','note'=>'Widget provided by MyModule'),
-                //2=>array('file'=>'mymodulewidget3.php@mymodule','note'=>'Widget provided by MyModule')
-        );
+//        $this->boxes = array(
+//            0 => array('file' => 'mymodulewidget1.php@mymodule', 'note' => 'Widget provided by MyModule', 'enabledbydefaulton' => 'Home'),
+//                //1=>array('file'=>'mymodulewidget2.php@mymodule','note'=>'Widget provided by MyModule'),
+//                //2=>array('file'=>'mymodulewidget3.php@mymodule','note'=>'Widget provided by MyModule')
+//        );
 
 
         // Cronjobs (List of cron jobs entries to add when module is enabled)
@@ -281,27 +281,6 @@ class modBimpproductbrowser extends DolibarrModules {
           // $this->export_sql_order[$r] .=' ORDER BY t.ref';
           // $r++;
           END MODULEBUILDER EXPORT MYOBJECT */
-    }
-
-    private function initRestrictions() {
-
-        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX;
-        $sql.= ' categorie ()';
-        $sql.= ' VALUES ()';
-                           
-        $sql = 'SELECT rowid';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'categorie';
-        $sql.= ' WHERE fk_parent_cat = 0';
-
-        $result = $this->db->query($sql);
-        if ($result) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $sql = 'INSERT INTO ' . MAIN_DB_PREFIX;
-                $sql.= ' bimp_cat_cat (fk_parent_cat, fk_child_cat)';
-                $sql.= ' VALUES (0, ' . $obj->rowid . ')';
-                $this->db->query($sql);
-            }
-        }
     }
 
     /**

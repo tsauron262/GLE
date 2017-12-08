@@ -18,7 +18,7 @@ var objInit;   // existing categories before the execution
  *  AJAX requests
  */
 
-function getAllCateg() {
+function getOldWay() {
     id_prod = getUrlParameter('id');
 
     $.ajax({
@@ -26,11 +26,12 @@ function getAllCateg() {
         url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
         data: {
             id_prod: id_prod,
-            action: 'getAllCategories'
+            action: 'getOldWay'
         },
         async: false,
         error: function () {
-            alert("Error");
+//            alert("Error");
+            console.log(error);
         },
         success: function (objOut) {
             objInit = JSON.parse(objOut);
@@ -112,8 +113,11 @@ $(document).ready(function () {
             .appendTo('.fiche');
 
     retrieveCateg();
+    console.log("objs " + objs);
+    console.log("cnt " + cnt);
+    console.log("cntRestr " + cntRestr);
+    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
-        console.log()
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
         } else if ($(this).attr('id') === 'divToBrowse') {
@@ -127,28 +131,31 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
+        console.log("objs " + objs);
+        console.log("cnt " + cnt);
+        console.log("cntRestr " + cntRestr);
+        console.log("catArr " + catArr);
     });
 });
-
 
 /*
  *  Annexe functions
  */
 
 function retrieveCateg() {
-    getAllCateg();
+    getOldWay();
     if (objInit.ROOT_CATEGORY === null || objInit.ROOT_CATEGORY === undefined) {
         addErrorDivs();
         return;
     }
-    cntRestr = objInit.tabRestrCounter;
+    cntRestr = objInit.cntRestr;
     cnt = objInit.cnt;
     catArr = objInit.catArr;
     k = 0;
-    for (i = 0; i < objInit.tabRestr.length; i++) {
-        objs.push(objInit.tabRestr[i]);
-        if (objInit.tabRestr[i].selectedLabel) {
-            addNavDivs(objInit.tabRestr[i], k);
+    for (i = 0; i < objInit.catsToAdd.length; i++) {
+        objs.push(objInit.catsToAdd[i]);
+        if (objInit.catsToAdd[i].selectedLabel) {
+            addNavDivs(objInit.catsToAdd[i], k);
             k++;
         }
     }
@@ -161,15 +168,12 @@ function addWays() {
             .attr('style', 'margin-bottom:-15px ; margin-top: -5px')
             .text('Catégories hors module ')
             .appendTo('#otherContainer');
-    for (i = 0; i < objInit.ways.length; i++) {
-//        if (objInit.color[i] === undefined) {
-        objInit.color[i] = 'aaa';
-//        }
+    for (i = 0; i < objInit.waysAnnexesCategories.length; i++) {
         $('<li></li>')
                 .attr('class', "noborderoncategories customLi")
-                .attr('style', 'margin-right:5px ; background-color:#' + objInit.color[i])
+                .attr('style', 'margin-right:5px ; background-color:#aaa')
                 .attr('id', 'idOther' + i)
-                .html(objInit.ways[i])
+                .html(objInit.waysAnnexesCategories[i])
                 .appendTo('#otherContainer');
         $('<img>')
                 .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')
@@ -180,22 +184,28 @@ function addWays() {
 
 function deleteFrom(id_div) {
 
-    var restrToKeep = 0;
-    str = '';
-
+    catOutWithoutAnnexe = [];
+    var objToKeep = 0;
     for (i = cnt; i >= id_div; i--)
         $("#navContainer").children("div").eq(i).remove();
     for (i = 0; i <= id_div; i++) {
-        restrToKeep += cntRestr[i];
+        objToKeep += cntRestr[i];
     }
+    cntRestr.length = parseInt(id_div) + 1;
     catOut = catArr.slice(id_div);
-    if (objs.length >= restrToKeep) {
-        objs.length = restrToKeep;
-        cntRestr.length = restrToKeep;
+//    console.log("Initialement suppression de : " + catOutWithoutAnnexe);
+//    for (i = 0; i<objs.length; i++) {
+//        if (catOut.indexOf(objs[i].idParent) > -1) {    // si existe dans le module
+//            catOutWithoutAnnexe.push(objs[i].idParent); // autoriser à l'enlever
+//        }
+//    }
+    if (objs.length >= objToKeep) {
+        objs.length = objToKeep;
     }
     cnt = id_div;
     deleteAllDivs();
     catArr.length = id_div;
+//    console.log("suppression de : " + catOutWithoutAnnexe);
     deleteCateg(catOut);
     addDivs();
 }

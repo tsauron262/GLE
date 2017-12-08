@@ -30,9 +30,9 @@ require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-$arrayofjs = array('/bimpproductbrowser/js/ajax.js');//, 'bimpcore/views/js/bootstrap.min.js');
-$arrayofcss = array('/bimpproductbrowser/css/modProductBrowser.css');//, 'bimpcore/views/css/bimpcore_bootstrap.css');
-        
+$arrayofjs = array('/bimpproductbrowser/js/ajax.js'); //, 'bimpcore/views/js/bootstrap.min.js');
+$arrayofcss = array('/bimpproductbrowser/css/modProductBrowser.css'); //, 'bimpcore/views/css/bimpcore_bootstrap.css');
+
 $langs->load("companies");
 
 $id = GETPOST('id', 'int');
@@ -58,6 +58,12 @@ $permissionnote = $user->rights->produit->creer; // Used by the include of actio
 /*
  * Actions
  */
+
+$redirected = GETPOST('redirect', 'int');
+
+if ($redirected == 1) {
+    setEventMessages("Le produit n'a pas été complètement catégorisé. Vous avez été redirigé sur la page de catégorisation.", null, 'errors');
+}
 
 /*
  * 	View
@@ -115,7 +121,7 @@ if ($id > 0 || !empty($ref)) {
     //print '<div class="fichecenter">';
     print '<div style="clear: both;"></div>';
     print '<div class="underbanner clearboth"><div>';
-    
+
     dol_fiche_end();
 }
 

@@ -67,57 +67,13 @@ class BimpProductBrowser extends CommonObject {
         $result = $this->db->query($sql);
         $this->id = $id;
         $this->id_childs = array();
-        if ($result) {
+        if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
                 array_push($this->id_childs, $obj->fk_child_cat);
             }
             return 1;
         } else {
-            dol_print_error($this->db);
-            return -3;
-        }
-    }
-
-    /* Try not to use it in big process */
-
-    function restrictionExistsChildOnly($id_child) {
-        $sql = 'SELECT *';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
-        $sql.= ' WHERE fk_child_cat = ' . $id_child;
-        $result = $this->db->query($sql);
-        if (mysqli_num_rows($result) >= 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /* Try not to use it in big process */
-
-    function restrictionExistsParentOnly($id_parent) {
-        $sql = 'SELECT *';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
-        $sql.= ' WHERE fk_parent_cat = ' . $id_parent;
-        $result = $this->db->query($sql);
-        if (mysqli_num_rows($result) >= 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /* Try not to use it in big process */
-
-    function restrictionExists($id_parent, $id_child) {
-        $sql = 'SELECT *';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
-        $sql.= ' WHERE fk_child_cat = ' . $id_child;
-        $sql.= ' AND fk_parent_cat = ' . $id_parent;
-        $result = $this->db->query($sql);
-        if (mysqli_num_rows($result) > 0) {
-            return true;
-        } else {
-            return false;
+            return -1;
         }
     }
 
@@ -199,9 +155,10 @@ class BimpProductBrowser extends CommonObject {
         return $objOut;
     }
 
-    function addProdToCat($id_prod, $id_categ, $runInit) {
+    function getTabRestr($id_categ) {
         $objOut = null;
         $this->fetch($id_categ);
+        sort($this->id_childs);
         $objOut->tabRestr = array();
         for ($i = 0; $i < count($this->id_childs); $i++) {
             $currentCat = new Categorie($this->db);
@@ -216,6 +173,11 @@ class BimpProductBrowser extends CommonObject {
                 $objOut->tabRestr[$i]->tabNameChild[$j] = $arrChildCat[$j]->label;
             }
         }
+        return $objOut;
+    }
+
+    function addProdToCat($id_prod, $id_categ) {
+        $objOut = $this->getTabRestr($id_categ);
         if ($id_categ != 0 && $runInit == false) {
             $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'categorie_product (fk_categorie, fk_product)';
             $sql.= 'VALUES (' . $id_categ . ',' . $id_prod . ')';
@@ -228,18 +190,6 @@ class BimpProductBrowser extends CommonObject {
             }
         }
         return $objOut;
-    }
-
-    function deleteProdCateg($id_prod) {
-        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'categorie_product ';
-        $sql.= 'WHERE fk_product =' . $id_prod;
-        try {
-            $this->db->query($sql);
-            $this->db->commit();
-        } catch (Exception $e) {
-            echo 'ERROR:' . $e->getMessage();
-            $this->db->rollback();
-        }
     }
 
     function deleteSomeCateg($id_prod, $id_cat_out) {
@@ -259,7 +209,8 @@ class BimpProductBrowser extends CommonObject {
     }
 
     function getProdCateg($id_prod) {
-        $prodCateg = array();
+        $cat->prod = array();
+        $cat->mothers = array();
         $sql = 'SELECT fk_categorie';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'categorie_product';
         $sql.= ' WHERE fk_product = ' . $id_prod;
@@ -268,13 +219,16 @@ class BimpProductBrowser extends CommonObject {
             while ($obj = $this->db->fetch_object($result)) {
                 $categ = New Categorie($this->db);
                 $categ->fetch($obj->fk_categorie);
-                array_push($prodCateg, $categ);
+                $mother = New Categorie($this->db);
+                $mother->fetch($categ->fk_parent);
+                array_push($cat->prod, $categ);
+                array_push($cat->mothers, $mother);
             }
         } else {
             dol_print_error($this->db);
             return -3;
         }
-        return $prodCateg;
+        return $cat;
     }
 
     function getCategRestrictions() {
@@ -299,112 +253,133 @@ class BimpProductBrowser extends CommonObject {
         return $categRestr;
     }
 
-    function getParentLabel($fk_parent) {
-        $prodCateg = array();
-        $sql = 'SELECT label';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'categorie';
-        $sql.= ' WHERE rowid= ' . $fk_parent;
-        $result = $this->db->query($sql);
-        if ($result) {
-            $obj = $this->db->fetch_object($result);
-            echo $obj->label;
-            return $obj->label;
-        } else {
-            dol_print_error($this->db);
-            return -3;
+    function getAllWays($categs) {
+        $ways = array();
+        foreach ($categs as $categ) {
+            $ways[] = $categ->print_all_ways();
         }
-        return 'Parent inacessible';
+        return $ways;
     }
 
-//    function createObj($in, $currentRestr) {
-//        $indRestrChild = array_search($currentRestr, $in->categRestr->parent);
-//        $sizeCat = sizeof($in->prodCateg);
-//
-//        $change = true;
-//        while ($change === true) {
-//            $change = false;
-//            for ($i = 0; $i < $sizeCat; $i++) {
-//                if ($in->prodCateg[$i]->fk_parent === $in->categRestr->child[$indRestrChild]) {
-//                    array_push($in->obj->boolRestr, true);
-//                    array_push($in->obj->parentId, $in->prodCateg[$i]->fk_parent);
-//                    array_push($in->obj->parentLabel, $this->getParentLabel($in->prodCateg[$i]->fk_parent));
-//                    array_push($in->obj->label, $in->prodCateg[$i]->label);
-//                    array_push($in->obj->selectedId, $in->prodCateg[$i]->id);
-//                    $indRestrChild = array_search($in->prodCateg[$i]->id, $in->categRestr->parent);
-//                    unset($in->categRestr->child[$indRestrChild]);
-//                    unset($in->categRestr->parent[$indRestrChild]);
-//                    array_splice($in->prodCateg, $i, 1);
-//                    --$sizeCat;
-//                    $change = true;
-//                    break;
-//                }
-////                else if (empty($in->prodCateg[$i]->cats)) {
-////                    array_push($in->obj->boolRestr, false);
-////                    array_push($in->obj->parentId, $in->prodCateg[$i]->fk_parent);
-////                    array_push($in->obj->parentLabel, $this->getParentLabel($in->prodCateg[$i]->fk_parent));
-////                    array_push($in->obj->label, $in->prodCateg[$i]->label);
-////                    array_push($in->obj->selectedId, $in->prodCateg[$i]->id);
-////                    array_splice($in->prodCateg, $i, 1);
-////                    --$sizeCat;
-////                }
-//            }
-//        }
-//        return $in->obj;
-//    }
-
-    function createObj($in, $currentRestr) {
-        $out = $this->addProdToCat($in->prod, $currentRestr, true);
-        if ($in->obj->tabRestrCounter . length <= $in->obj->cnt) {
-            $in->obj->tabRestrCounter[$in->obj->cnt] = 0;
+    function searchInMotherById($id_child, $mothers) {
+        for ($i = 0; $i < sizeof($mothers); $i++) {
+            if ($mothers[$i]->id == $id_child)
+                return $i;
         }
-        $in->obj->tabRestrCounter[$in->obj->cnt]+=sizeof($out->tabRestr);
+        return -1;
+    }
 
-        $in->obj->tabRestr = array_merge($in->obj->tabRestr, $out->tabRestr);
-        foreach ($out->tabRestr as $restr) {
-            foreach ($in->obj->prodCateg as $key => $categ) {            // TODO pop categ after
-                $index = array_search($categ->id, $restr->tabIdChild);
-                if ($index !== false) {
-                    $id = $restr->tabIdChild[$index];
-                    foreach ($in->obj->tabRestr as $restrObj) {
-                        if ($restr->idParent === $restrObj->idParent &&
-                                $restr->label === $restrObj->label) {
-                            $restrObj->selectedLabel = $categ->label;
-                            array_push($in->obj->catArr, $id);
-                            $in->obj->cnt++;
-                            array_splice($in->obj->prodCateg, $key, 1);
-                        }
-                    }
-                    $this->createObj($in, $id);
-                }
+    function pushInCatsToAdd($catsToAdd, $newRestr) {
+        foreach ($newRestr->id_childs as $id_child) {
+            $i = sizeof($catsToAdd);
+            $catsToAdd[$i]->tabIdChild = array();
+            $catsToAdd[$i]->tabNameChild = array();
+            $categ = new Categorie($this->db);
+            $categ->fetch($id_child);
+            $catsToAdd[$i]->idParent = $categ->fk_parent;
+            $catsToAdd[$i]->label = $categ->label;
+            $filles = $categ->get_filles();
+            foreach ($filles as $fille ) {
+                $catsToAdd[$i]->tabIdChild[] = $fille->id;
+                $catsToAdd[$i]->tabNameChild[] = $fille->label;
             }
         }
+        return $catsToAdd;
     }
 
-    function getAllCategories($id_prod) {
-        $in = null;
+    /*    var objs = [];  
+      [
+      obj.idParent
+      obj.label
+      obj.tabIdChild = []
+      obj.tabNameChild = []
+      selectedLabel
+      ]
+
+
+      var cnt = 0;
+      var cntRestr = [];
+      var catArr = [];
+     */
+
+    function getOldWay($id_prod) {
         global $conf;
         $obj = new stdClass();
+        $restr = new BimpProductBrowser($this->db);         // Création et initialisation
+        $restr->fetch($conf->global->BIMP_ROOT_CATEGORY);   // de la premère erestriction
 
         $obj->ROOT_CATEGORY = $conf->global->BIMP_ROOT_CATEGORY;
         if ($obj->ROOT_CATEGORY === null) {
             return $obj;
         }
-        $obj->tabRestr = array();
-        $obj->tabRestrCounter = array();
-        $obj->catArr = array();
-        $obj->cnt = 0;
-        $obj->prodCateg = $this->getProdCateg($id_prod);
-        $in->obj = $obj;
-        $in->prod = $id_prod;
-        $this->createObj($in, $conf->global->BIMP_ROOT_CATEGORY);
-        $obj->ways = array();
-        $obj->color = array();
-        foreach ($obj->prodCateg as $cat) {
-            $in->obj->ways[] = $cat->print_all_ways();
-            $in->obj->color[] = $cat->color;
-        }
 
-        return $in->obj;
+        //  $cat->prod : les catégories ratéchées au produit
+        //  $cat->mothers : et les mères de ces catégories
+        $cat = $this->getProdCateg($id_prod);
+        $obj->waysAnnexesCategories = array();
+        $obj->catsToAdd = array();
+        $remainingRestr = array();
+        $remainingRestr[] = $restr;
+        $obj->catsToAdd = $this->pushInCatsToAdd($obj->catsToAdd, $restr);
+        $obj->cnt = 0;
+        $obj->cntRestr = array();
+        $obj->cntRestr[] = sizeof($restr->id_childs);
+        $obj->catArr = array();
+        $cntRestr = 0;                              // TODO enlever la condition ci-dessous ($cntRestr < 100)
+        while ($cntRestr < sizeof($remainingRestr) != 0 && $cntRestr < 100) {   // tant qu'il reste des restrictions à appliquer
+//            $remainingRestr[$cntRestr]->toString(); // TODO enlever
+            foreach ($remainingRestr[$cntRestr]->id_childs as $id_child) {      // pour chaque restriction imposées
+                $ind = $this->searchInMotherById($id_child, $cat->mothers);             // chercher si un catégorie est fille de la restriction
+                if ($ind >= 0) {                                            // si c'est le cas (donc si la restriction est satisfaite)
+                    $selectedCategId = $cat->prod[$ind]->id;                // on prend l'identifiant de cette catégorie
+                    $newRestr = new BimpProductBrowser($this->db);          // on initialise une nouvelle restriction
+                    $obj->catArr[] = $cat->prod[$ind]->id;
+                    $obj->catsToAdd[$obj->cnt]->selectedLabel = $cat->prod[$ind]->label ;
+                    if ($newRestr->fetch($selectedCategId) == 1) {          // on cherche si cette catégorie implique une restriction
+//                        echo 'Cette catégorie : (' . $cat->prod[$ind]->label . ") implique au moins une autre restriction\n";
+                        $obj->cntRestr[] = sizeof($newRestr->id_childs);
+                        $remainingRestr[] = $newRestr;                      // on ajoute la nouvelle restriction
+                        $obj->catsToAdd = $this->pushInCatsToAdd($obj->catsToAdd, $newRestr);
+                    } else {
+                        $obj->cntRestr[] = 0;
+                    }
+//                    echo "On enlève la catégorie " . $cat->prod[$ind]->label . " et sa mère " . $cat->mothers[$ind]->label . "\n";
+                    array_splice($cat->prod, $ind, 1);                  // on enlève la catégorie correspondante
+                    array_splice($cat->mothers, $ind, 1);             // et sa mère
+                    $obj->cnt++;
+                } else {
+                    $obj->waysAnnexesCategories = $this->getAllWays($cat->prod);
+//                    echo "Toutes les restrictions ne sont pas satisfaites\n"; // TODO enlever
+                    return $obj;    // Toutes les restrictions ne sont pas satisfaites
+                }
+            }
+            $cntRestr++;
+        }
+        $obj->waysAnnexesCategories = $this->getAllWays($cat->prod);
+        return $obj;
+    }
+
+    function productIsCategorized($id_prod) {
+        $obj = $this->getOldWay($id_prod);
+        $cnt = 0;
+        foreach ($obj->cntRestr as $count) {
+            $cnt += $count;
+        }
+        if ($cnt == $obj->cnt)
+            return 1;
+        else if ($cnt > $obj->cnt)
+            return 0;
+        else
+            return -1;
+    }
+
+    function toString() {
+        echo "id : " . $this->id . "\n";
+        echo "id_childs : ";
+        foreach ($this->id_childs as $child) {
+            echo $child . " ";
+        }
+        echo "\n";
     }
 
 }

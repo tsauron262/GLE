@@ -210,7 +210,7 @@ class BimpProductBrowser extends CommonObject {
 
     function getProdCateg($id_prod) {
         $cat->prod = array();
-        $cat->motherId = array();
+        $cat->mothers = array();
         $sql = 'SELECT fk_categorie';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'categorie_product';
         $sql.= ' WHERE fk_product = ' . $id_prod;
@@ -219,8 +219,10 @@ class BimpProductBrowser extends CommonObject {
             while ($obj = $this->db->fetch_object($result)) {
                 $categ = New Categorie($this->db);
                 $categ->fetch($obj->fk_categorie);
+                $mother = New Categorie($this->db);
+                $mother->fetch($categ->fk_parent);
                 array_push($cat->prod, $categ);
-                array_push($cat->motherId, $categ->fk_parent);
+                array_push($cat->mothers, $mother);
             }
         } else {
             dol_print_error($this->db);
@@ -321,14 +323,29 @@ class BimpProductBrowser extends CommonObject {
         }
         return $ways;
     }
-    
-    function searchInMotherId($id_child, $motherId) {
-        for ($i=0 ; $i < sizeof($motherId) ; $i++){
-            if ($motherId[$i] == $id_child)
+
+    function searchInMotherById($id_child, $mothers) {
+        for ($i = 0; $i < sizeof($mothers); $i++) {
+            echo $mothers[$i]->id."\n";
+            if ($mothers[$i]->id == $id_child)
                 return $i;
         }
         return -1;
     }
+
+    /*    var objs = [];  
+      [
+      obj.idParent
+      obj.label
+      obj.tabIdChild = []
+      obj.tabNameChild = []
+      ]
+
+
+      var cnt = 0;
+      var cntRestr = [];
+      var catArr = [];
+     */
 
     function getOldWay($id_prod) {
         global $conf;
@@ -342,25 +359,25 @@ class BimpProductBrowser extends CommonObject {
         }
 
         $cat = $this->getProdCateg($id_prod);
-        
+
         $remainingRestr = array();
         $remainingRestr[] = $restr;
-        
+
         $cntRestr = 0;
         while ($cntRestr < sizeof($remainingRestr) != 0 && $cntRestr < 100) {   // tant qu'il reste des restrictions à appliquer
             $remainingRestr[$cntRestr]->toString();
             foreach ($remainingRestr[$cntRestr]->id_childs as $id_child) {      // pour chaque restriction imposées
-                $ind = $this->searchInMotherId($id_child, $cat->motherId);             // chercher si un catégorie est fille de la restriction
+                $ind = $this->searchInMotherById($id_child, $cat->mothers);             // chercher si un catégorie est fille de la restriction
                 if ($ind >= 0) {                                            // si c'est le cas (donc si la restriction est satisfaite)
                     $selectedCategId = $cat->prod[$ind]->id;                // on prend l'identifiant de cette catégorie
                     $newRestr = new BimpProductBrowser($this->db);          // on initialise une nouvelle restriction
                     if ($newRestr->fetch($selectedCategId) == 1) {          // on cherche si cette catégorie implique une restriction
-//                        echo 'Cette catégorie : ('.$cat->prod[$ind]->label.") implique au moins une autre restriction\n";
+                        echo 'Cette catégorie : ('.$cat->prod[$ind]->label.") implique au moins une autre restriction\n";
                         $remainingRestr[] = $newRestr;
                     }
-//                    echo "On enlève la catégorie ".$cat->prod[$ind]->label." et sa mère ".$cat->motherId[$ind]."\n";
+                    echo "On enlève la catégorie ".$cat->prod[$ind]->label." et sa mère ".$cat->mothers[$ind]->label."\n";
                     array_splice($cat->prod, $ind, 1);                  // on enlève la catégorie correspondante
-                    array_splice($cat->motherId, $ind, 1);             // et sa mère
+                    array_splice($cat->mothers, $ind, 1);             // et sa mère
                 } else {
                     return $obj;    // Toutes les restrictions ne sont pas satisfaites
                 }
@@ -406,11 +423,12 @@ class BimpProductBrowser extends CommonObject {
     }
 
     function toString() {
-        echo "id : ".$this->id."\n";
+        echo "id : " . $this->id . "\n";
         echo "id_childs : ";
         foreach ($this->id_childs as $child) {
-            echo $child." ";
+            echo $child . " ";
         }
         echo "\n";
     }
+
 }

@@ -140,7 +140,7 @@ function retrieveCateg() {
         addErrorDivs();
         return;
     }
-    cntRestr = objInit.tabRestrCounter;
+    cntRestr = objInit.cntRestr;
     cnt = objInit.cnt;
     catArr = objInit.catArr;
     k = 0;

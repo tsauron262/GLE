@@ -18,7 +18,7 @@ var objInit;   // existing categories before the execution
  *  AJAX requests
  */
 
-function getAllCateg() {
+function getOldWay() {
     id_prod = getUrlParameter('id');
 
     $.ajax({
@@ -26,11 +26,12 @@ function getAllCateg() {
         url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
         data: {
             id_prod: id_prod,
-            action: 'getAllCategories'
+            action: 'getOldWay'
         },
         async: false,
         error: function () {
-            alert("Error");
+//            alert("Error");
+            console.log(error);
         },
         success: function (objOut) {
             objInit = JSON.parse(objOut);
@@ -134,12 +135,7 @@ $(document).ready(function () {
  */
 
 function retrieveCateg() {
-    getAllCateg();
-    if (objInit.warning)
-        alert("Attention ! Ce produit appartient à au moins deux catégories de même niveau (" + objInit.warning + 
-            "). La catégorie sélectionnée est la suivante : " + objInit.warning[0] +
-            ".\nSi vous voulez que ce soit une autre catégorie qui soit prise en compte" +
-            " veuillez assigner cette valeur et recharger la page.\nCe procédé peut-être répété plusieurs fois.");
+    getOldWay();
     if (objInit.ROOT_CATEGORY === null || objInit.ROOT_CATEGORY === undefined) {
         addErrorDivs();
         return;

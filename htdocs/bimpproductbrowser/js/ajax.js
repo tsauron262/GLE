@@ -168,13 +168,12 @@ function addWays() {
             .attr('style', 'margin-bottom:-15px ; margin-top: -5px')
             .text('Catégories hors module ')
             .appendTo('#otherContainer');
-    for (i = 0; i < objInit.ways.length; i++) {
-
+    for (i = 0; i < objInit.waysAnnexesCategories.length; i++) {
         $('<li></li>')
                 .attr('class', "noborderoncategories customLi")
                 .attr('style', 'margin-right:5px ; background-color:#aaa')
                 .attr('id', 'idOther' + i)
-                .html(objInit.ways[i])
+                .html(objInit.waysAnnexesCategories[i])
                 .appendTo('#otherContainer');
         $('<img>')
                 .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')

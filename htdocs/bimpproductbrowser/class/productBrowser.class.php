@@ -253,10 +253,10 @@ class BimpProductBrowser extends CommonObject {
         return $categRestr;
     }
 
-    function getAllWays($mothers) {
+    function getAllWays($categs) {
         $ways = array();
-        foreach ($mothers as $cat) {
-            $ways[] = $cat->print_all_ways();
+        foreach ($categs as $categ) {
+            $ways[] = $categ->print_all_ways();
         }
         return $ways;
     }
@@ -316,7 +316,7 @@ class BimpProductBrowser extends CommonObject {
         //  $cat->prod : les catégories ratéchées au produit
         //  $cat->mothers : et les mères de ces catégories
         $cat = $this->getProdCateg($id_prod);
-        $obj->ways = array();
+        $obj->waysAnnexesCategories = array();
         $obj->catsToAdd = array();
         $remainingRestr = array();
         $remainingRestr[] = $restr;
@@ -354,15 +354,15 @@ class BimpProductBrowser extends CommonObject {
             }
             $cntRestr++;
         }
-        $obj->ways = $this->getAllWays($cat->prod);
+        $obj->waysAnnexesCategories = $this->getAllWays($cat->prod);
         return $obj;
     }
 
     function productIsCategorized($id_prod) {
         $obj = $this->getOldWay($id_prod);
         $cnt = 0;
-        foreach ($obj->tabRestrCounter as $restrCounter) {
-            $cnt += $restrCounter;
+        foreach ($obj->cntRestr as $count) {
+            $cnt += $count;
         }
         if ($cnt == $obj->cnt)
             return 1;

@@ -279,12 +279,21 @@ class BimpProductBrowser extends CommonObject {
             $catsToAdd[$i]->idParent = $categ->fk_parent;
             $catsToAdd[$i]->label = $categ->label;
             $filles = $categ->get_filles();
-            foreach ($filles as $fille ) {
+            foreach ($filles as $fille) {
                 $catsToAdd[$i]->tabIdChild[] = $fille->id;
                 $catsToAdd[$i]->tabNameChild[] = $fille->label;
             }
         }
         return $catsToAdd;
+    }
+
+    function isSatisfied($cat) {
+        foreach ($this->id_childs as $id_child) {
+            $ind = $this->searchInMotherById($id_child, $cat->mothers);
+            if ($ind == -1)
+                return false;
+        }
+        return true;
     }
 
     /*    var objs = [];  
@@ -312,7 +321,6 @@ class BimpProductBrowser extends CommonObject {
         if ($obj->ROOT_CATEGORY === null) {
             return $obj;
         }
-
         //  $cat->prod : les catégories ratéchées au produit
         //  $cat->mothers : et les mères de ces catégories
         $cat = $this->getProdCateg($id_prod);
@@ -325,8 +333,9 @@ class BimpProductBrowser extends CommonObject {
         $obj->cntRestr = array();
         $obj->cntRestr[] = sizeof($restr->id_childs);
         $obj->catArr = array();
+        $remainingCat = array();
         $cntRestr = 0;                              // TODO enlever la condition ci-dessous ($cntRestr < 100)
-        while ($cntRestr < sizeof($remainingRestr) != 0 && $cntRestr < 100) {   // tant qu'il reste des restrictions à appliquer
+        while ($cntRestr < sizeof($remainingRestr) && $cntRestr < 100) {   // tant qu'il reste des restrictions à appliquer
 //            $remainingRestr[$cntRestr]->toString(); // TODO enlever
             foreach ($remainingRestr[$cntRestr]->id_childs as $id_child) {      // pour chaque restriction imposées
                 $ind = $this->searchInMotherById($id_child, $cat->mothers);             // chercher si un catégorie est fille de la restriction
@@ -334,7 +343,7 @@ class BimpProductBrowser extends CommonObject {
                     $selectedCategId = $cat->prod[$ind]->id;                // on prend l'identifiant de cette catégorie
                     $newRestr = new BimpProductBrowser($this->db);          // on initialise une nouvelle restriction
                     $obj->catArr[] = $cat->prod[$ind]->id;
-                    $obj->catsToAdd[$obj->cnt]->selectedLabel = $cat->prod[$ind]->label ;
+                    $obj->catsToAdd[$obj->cnt]->selectedLabel = $cat->prod[$ind]->label;
                     if ($newRestr->fetch($selectedCategId) == 1) {          // on cherche si cette catégorie implique une restriction
 //                        echo 'Cette catégorie : (' . $cat->prod[$ind]->label . ") implique au moins une autre restriction\n";
                         $obj->cntRestr[] = sizeof($newRestr->id_childs);
@@ -348,16 +357,36 @@ class BimpProductBrowser extends CommonObject {
                     array_splice($cat->mothers, $ind, 1);             // et sa mère
                     $obj->cnt++;
                 } else {
-                    $obj->waysAnnexesCategories = $this->getAllWays($cat->prod);
+                    $obj->waysAnnexesCategories = $this->getAllWays($remainingCat);
 //                    echo "Toutes les restrictions ne sont pas satisfaites\n"; // TODO enlever
                     return $obj;    // Toutes les restrictions ne sont pas satisfaites
                 }
             }
             $cntRestr++;
+            if ($cntRestr == sizeof($remainingRestr)) {                     // si on s'apprète à sortir de la boucle
+                foreach ($cat->prod as $key => $remainingCateg) {                    // on boucle sur les catégories restantes
+                    $newRestr = new BimpProductBrowser($this->db);          // on initialise une nouvelle restriction
+                    if ($newRestr->fetch($remainingCateg->id) == 1) {                // si une catégorie correspond à une restriction  and !$newRestr->isSatisfied($cat)
+                        $obj->cntRestr[] = sizeof($newRestr->id_childs);    // on ajouter le nombre de fils au tableau des compteur de restriction
+                        $remainingRestr[] = $newRestr;                      // on ajoute la nouvelle restriction
+                        $obj->catsToAdd = $this->pushInCatsToAdd($obj->catsToAdd, $newRestr);   // on remplie le tableau des catégories à traiter
+                        $remainingCat[] = $cat->prod[$key];                 // on ajoute la catégorie mère d'une restriction (pour qu'elle apparaissent dans les catégories annexes)
+                        array_splice($cat->prod, $key, 1);                  // on enlève la catégorie correspondante (car elles ne sont pas à afficher)
+                        array_splice($cat->mothers, $key, 1);               // et sa mère
+                    }
+                }
+            }
         }
-        $obj->waysAnnexesCategories = $this->getAllWays($cat->prod);
+        $obj->waysAnnexesCategories = $this->getAllWays($remainingCat);
         return $obj;
     }
+
+    /*
+      objs [object Object],[object Object],[object Object],[object Object],[object Object],[object Object]
+      cnt 6
+      cntRestr 2,1,0,2,0,0,1
+      catArr 933,914,1047,1036,840
+     */
 
     function productIsCategorized($id_prod) {
         $obj = $this->getOldWay($id_prod);

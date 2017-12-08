@@ -113,6 +113,10 @@ $(document).ready(function () {
             .appendTo('.fiche');
 
     retrieveCateg();
+    console.log("objs " + objs);
+    console.log("cnt " + cnt);
+    console.log("cntRestr " + cntRestr);
+    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -127,6 +131,10 @@ $(document).ready(function () {
             changeNavDiv($(this).text());
             addDivs();
         }
+        console.log("objs " + objs);
+        console.log("cnt " + cnt);
+        console.log("cntRestr " + cntRestr);
+        console.log("catArr " + catArr);
     });
 });
 
@@ -144,10 +152,10 @@ function retrieveCateg() {
     cnt = objInit.cnt;
     catArr = objInit.catArr;
     k = 0;
-    for (i = 0; i < objInit.tabRestr.length; i++) {
-        objs.push(objInit.tabRestr[i]);
-        if (objInit.tabRestr[i].selectedLabel) {
-            addNavDivs(objInit.tabRestr[i], k);
+    for (i = 0; i < objInit.catsToAdd.length; i++) {
+        objs.push(objInit.catsToAdd[i]);
+        if (objInit.catsToAdd[i].selectedLabel) {
+            addNavDivs(objInit.catsToAdd[i], k);
             k++;
         }
     }

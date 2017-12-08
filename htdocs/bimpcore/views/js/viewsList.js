@@ -1,8 +1,15 @@
 // Gestion des événements:
 
 function onViewsListLoaded($viewsList) {
-    setCommonEvents($('#' + $viewsList.attr('id') + '_container'));
-    
+    if (!$viewsList.length) {
+        return;
+    }
+
+    if (!parseInt($viewsList.data('loaded_event_processed'))) {
+        $viewsList.data('loaded_event_processed', 1);
+
+        setCommonEvents($('#' + $viewsList.attr('id') + '_container'));
+    }
 //    $('body').on('objectChange', function (e) {
 //        if ((e.module === module) && (e.object_name === object_name)) {
 //            reloadObjectView($view.attr('id'));
@@ -17,7 +24,7 @@ $(document).ready(function () {
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
-            e.$container.find('.objectForm').each(function () {
+            e.$container.find('.objectViewslist').each(function () {
                 onViewsListLoaded($(this));
             });
         }

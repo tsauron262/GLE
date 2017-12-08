@@ -164,6 +164,9 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
             $(this).find('.bimp_timer_hours').text(totalHours);
             $(this).find('.bimp_timer_days').text(totalDays);
 
+            $(this).find('.bimp_timer_value').show();
+            $(this).find('.bimp_timer_label').show();
+
             if (!totalDays) {
                 $(this).find('.bimp_timer_days').hide();
                 $(this).find('.bimp_timer_days_label').hide();

@@ -798,7 +798,7 @@ class BimpController
                         $object->set($field_name, $value);
                     }
                 }
-                
+
                 if (isset($values['associations'])) {
                     foreach ($values['associations'] as $association => $associates) {
                         $object->setAssociatesList($association, $associates);
@@ -882,7 +882,16 @@ class BimpController
                 if (count($object->errors)) {
                     $errors = $object->errors;
                 } else {
-                    $html = BimpForm::renderInput($object, 'fields/' . $field_name, $field_name);
+                    if ($object->config->isDefined('fields/' . $field_name)) {
+                        $html = BimpForm::renderInput($object, 'fields/' . $field_name, $field_name);
+                    } elseif ($object->config->isDefined('associations/' . $field_name)) {
+                        $bimpAsso = new BimpAssociation($object, $field_name);
+                        if (count($bimpAsso->errors)) {
+                            $html = BimpRender::renderAlerts($bimpAsso->errors);
+                        } else {
+                            $html = $bimpAsso->renderAssociatesCheckList();
+                        }
+                    }
                 }
             }
         }
@@ -929,6 +938,7 @@ class BimpController
     {
         $errors = array();
         $html = '';
+        $view_id = '';
 
         $id_parent = BimpTools::getValue('id_parent', null);
         if (!$id_parent) {
@@ -954,13 +964,16 @@ class BimpController
             if ($content_only) {
                 $html = $view->renderViewContent();
             } else {
-                $html = $view->render(true);
+                $panel_type = BimpTools::getValue('panel_type', 'secondary');
+                $html = $view->render(true, $panel_type);
             }
+            $view_id = $view->view_identifier;
         }
 
         die(json_encode(array(
-            'errors' => $errors,
-            'html'   => $html
+            'errors'  => $errors,
+            'html'    => $html,
+            'view_id' => $view_id
         )));
     }
 

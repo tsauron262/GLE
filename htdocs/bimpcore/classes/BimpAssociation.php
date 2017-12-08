@@ -51,6 +51,8 @@ class BimpAssociation
         $sql .= BimpTools::getSqlWhere(array(
                     'src_object_module' => $this->object->module,
                     'src_object_name'   => $this->object->object_name,
+                    'dest_object_module' => $this->object->config->getObjectModule($this->association_path . '/object'),
+                    'dest_object_name'   => $this->object->config->getObjectName($this->association_path . '/object'),
                     'src_id_object'     => (int) $id_object
         ));
 
@@ -84,8 +86,10 @@ class BimpAssociation
         $sql = BimpTools::getSqlSelect(array('src_id_object'));
         $sql .= BimpTools::getSqlFrom(self::$table);
         $sql .= BimpTools::getSqlWhere(array(
-                    'dest_object_module' => $this->object->module,
-                    'dest_object_name'   => $this->object->object_name,
+                    'src_object_module' => $this->object->module,
+                    'src_object_name'   => $this->object->object_name,
+                    'dest_object_module' => $this->object->config->getObjectModule($this->association_path . '/object'),
+                    'dest_object_name'   => $this->object->config->getObjectName($this->association_path . '/object'),
                     'dest_id_object'     => (int) $id_associate
         ));
 
@@ -587,6 +591,25 @@ class BimpAssociation
         $html .= '</div>';
 
         return $html;
+    }
+
+    public function renderAssociatesCheckList()
+    {
+        $associates = $this->getAssociatesList();
+        if ($this->object->config->isDefined($this->association_path . '/list')) {
+            $items_ids = $this->object->config->get($this->association_path . '/list', array(), false, 'array');
+        } else {
+            $items_ids = array(); // todo...
+        }
+
+        $items = array();
+        foreach ($items_ids as $id_item) {
+            $items[] = array(
+                'value' => $id_item,
+                'label' => $this->object->displayAssociate($this->association, 'default', $id_item)
+            );
+        }
+        return BimpInput::renderInput('check_list', $this->association, $associates, array('items' => $items));
     }
 
     // Gestion SQL : 

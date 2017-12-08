@@ -120,10 +120,12 @@ class BimpForm
                 } else {
                     $association = $this->object->getCurrentConf('association', '');
                     if ($association) {
-                        if (is_null($input) && $this->object->config->isDefined('associations/' . $association . '/add/input')) {
+                        if ($this->object->config->isDefined('associations/' . $association . '/add/input')) {
                             $this->object->config->setCurrentPath('associations/' . $association . '/add');
+                            $html .= $this->renderAddAssociation($association);
+                        } elseif ($this->object->config->isDefined('associations/' . $association . '/list')) {
+                            $html .= $this->renderAssociationCheckList($association);
                         }
-                        $html .= $this->renderAddAssociation($association);
                     }
                 }
             }
@@ -252,6 +254,48 @@ class BimpForm
         return $html;
     }
 
+    public function renderAssociationCheckList($association, $label_cols = 3)
+    {
+        $html = '';
+
+        $label = $this->object->getCurrentConf('label', '', true);
+        $display_if = $this->object->config->isDefinedCurrent('/display_if');
+
+        $html .= '<div class="row fieldRow' . ($display_if ? ' display_if' : '') . '"';
+        if ($display_if) {
+            $html .= self::renderDisplayIfData($this->object, $this->object->config->current_path . '/display_if');
+        }
+        $html .= '>';
+
+        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= $label;
+        $html .= '</div>';
+
+        $html .= '<div class="fieldRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div id="' . $this->form_identifier . '_' . $association . '" class="inputContainer"';
+        $html .= ' data-field_name="' . $association . '" data-multiple="1">';
+
+        $bimpAsso = new BimpAssociation($this->object, $association);
+
+        if ($bimpAsso->errors) {
+            $html .= BimpRender::renderAlerts($bimpAsso->errors);
+        } else {
+            $html .= $bimpAsso->renderAssociatesCheckList();
+        }
+
+        unset($bimpAsso);
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        if ($this->object->config->isDefinedCurrent('depends_on')) {
+            $html .= $this->renderDependsOnScript($association);
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public static function renderDisplayIfData($object, $path)
     {
         $html = '';
@@ -305,7 +349,7 @@ class BimpForm
                     $script .= '  var $form = $(\'#' . $this->form_identifier . '\');';
 
                     foreach ($dependances as $dep) {
-                        $script .= '  if ($form.find(\'#' . $dep . '\').length) {' . "\n";
+                        $script .= '  if ($form.find(\'[name=' . $dep . ']\').length) {' . "\n";
                         $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $dep . '\');' . "\n";
                         $script .= '  }' . "\n";
                     }
@@ -316,98 +360,6 @@ class BimpForm
             }
         }
         return $script;
-    }
-
-    public static function renderObjectAssociationForm(BimpObject $object, $association)
-    {
-        $prev_path = $object->config->current_path;
-
-        if (!$object->config->setCurrentPath('associations/' . $association)) {
-            return '<p class="alert alert-danger">Configuration non définie pour le type d\'association "' . $association . '"</p>';
-        }
-
-        $associate = $object->getCurrentConf('associate_object', null, true, 'object');
-
-        if (is_null($associate)) {
-            return '<p class="alert alert-danger">Erreur technique: Paramètres d\'instanciation des objets associés invalides</p>';
-        }
-
-        $list = array();
-        $method = 'get' . ucfirst($association) . 'AssociationList';
-
-        if (method_exists($object, $method)) {
-            $list = $object->{$method}();
-        } else {
-            $list = $object->getAssociationList($association);
-        }
-
-        $currents = $object->getAssociatedObjectsIds($association);
-
-        if (is_a($associate, 'BimpObject')) {
-            $label = $associate->getLabel('name_plur') . ' associé' . ($associate->isLabelFemale() ? 'e' : '') . 's';
-            $is_label_female = $associate->isLabelFemale();
-        } else {
-            $label = 'objets "' . get_class($associate) . '" associés';
-            $is_label_female = false;
-        }
-
-        $html .= '<div>';
-
-        $html .= '<table class="noborder" width="100%">';
-
-        $html .= '<tr class="liste_titre">';
-        $html .= '<td>';
-        $html .= ucfirst($label);
-        $html .= '</td>';
-        $html .= '</tr>';
-
-        $html .= '<tr>';
-        $html .= '<td>';
-        if (count($list)) {
-            $html .= '<div id="' . $object->object_name . '_' . $association . '_associations_list">';
-            foreach ($list as $item) {
-                $html .= '<div class="formRow">';
-                $html .= '<input type="checkbox" value="' . $item['id'] . '" id="' . $association . '_' . $item['id'] . '" name="' . $association . '[]"';
-                if (in_array($item['id'], $currents)) {
-                    $html .= ' checked';
-                }
-                $html .= '/>';
-                $html .= '<label for="' . $association . '_' . $item['id'] . '">';
-                if (isset($item['label'])) {
-                    $html .= $item['label'];
-                } elseif (isset($item['title'])) {
-                    $html .= $item['title'];
-                } elseif (isset($item['name'])) {
-                    $html .= $item['name'];
-                } else {
-                    $html .= ucfirst(BimpObject::getInstanceLabel($associate)) . ' n°' . $item['id'];
-                }
-                $html .= '</label>';
-                $html .= '</div>';
-            }
-            $html .= '</div>';
-        } else {
-            $html .= '<div class="alert alert-warning">';
-            $html .= 'Il n\'y a aucun' . ($is_label_female ? 'e' : '') . ' ' . BimpObject::getInstanceLabel($associate) . ' à associer';
-            $html .= '</div>';
-        }
-
-        $html .= '<div id="' . $object->object_name . '_' . $association . '_associatonsAjaxResult"></div>';
-
-        $html .= '<div class="formSubmit">';
-        $html .= '<span class="butAction" onclick="saveObjectAssociations(' . $object->id . ', \'' . $object->object_name . '\', \'' . $association . '\', $(this));">';
-        $html .= 'Enregistrer les ' . $label;
-        $html .= '</span>';
-        $html .= '</div>';
-        $html .= '</td/>';
-        $html .= '</tr/>';
-
-        $html .= '</table/>';
-
-        $html .= '</div>';
-
-        $object->config->setCurrentPath($prev_path);
-        return $html;
     }
 
     public static function renderInput(BimpObject $object, $config_path, $field_name, $value = null, $id_parent = null, $form = null, $option = null, $input_id = null, $input_name = null)
@@ -445,7 +397,7 @@ class BimpForm
         $data_type = $object->getCurrentConf('type', 'string');
 
         if (!$type) {
-            if ($object->config->isDefined($config_path. '/values')) {
+            if ($object->config->isDefined($config_path . '/values')) {
                 $type = 'select';
             } else {
                 switch ($data_type) {
@@ -525,14 +477,17 @@ class BimpForm
 
                 break;
 
+            case 'toggle':
+                $options['toggle_on'] = $object->getCurrentConf('input/toggle_on', 'OUI', false, 'string');
+                $options['toggle_off'] = $object->getCurrentConf('input/toggle_off', 'NON', false, 'string');
+                break;
+
             case 'search_list':
                 $html .= BimpInput::renderSearchListInput($object, $config_path, $field_name . ($multiple ? '_add_value' : ''), ($multiple ? '' : $value), $option);
                 break;
 
-            case 'toggle':
-
-                $options['toggle_on'] = $object->getCurrentConf('input/toggle_on', 'OUI', false, 'string');
-                $options['toggle_off'] = $object->getCurrentConf('input/toggle_off', 'NON', false, 'string');
+            case 'search_societe':
+                $options['type'] = $object->getCurrentConf('input/societe_type', '');
                 break;
 
             case 'custom':

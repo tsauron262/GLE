@@ -156,7 +156,11 @@ function saveObjectFromViewModalForm(view_id, $button) {
         }
         bimp_json_ajax('saveObject', data, $resultContainer, function () {
             $button.removeClass('disabled');
-            reloadObjectView(view_id);
+            $('body').trigger($.Event('objectChange', {
+                module: $view.data('module'),
+                object_name: $view.data('object_name'),
+                id_object: $view.data('id_object')
+            }));
         }, function () {
             $button.removeClass('disabled');
         });
@@ -202,7 +206,11 @@ function saveObjectfromFieldsTable(table_id, $button) {
             });
             bimp_json_ajax('saveObject', data, $resultContainer, function () {
                 $button.removeClass('disabled');
-                reloadObjectView($view.data('view_id'));
+                $('body').trigger($.Event('objectChange', {
+                    module: $view.data('module'),
+                    object_name: $view.data('object_name'),
+                    id_object: $view.data('id_object')
+                }));
             }, function () {
                 $button.removeClass('disabled');
             });
@@ -210,9 +218,13 @@ function saveObjectfromFieldsTable(table_id, $button) {
     }
 }
 
-function displayObjectView($container, module_name, object_name, view_name, id_object) {
+function displayObjectView($container, module_name, object_name, view_name, id_object, panel_type) {
     if (!$container.length) {
         return;
+    }
+
+    if (typeof (panel_type) === 'undefined') {
+        panel_type = 'secondary';
     }
 
     var data = {
@@ -220,7 +232,8 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,
-        'content_only': 0
+        'content_only': 0,
+        'panel_type': panel_type
     };
 
     $container.html(renderLoading('Chargement'));
@@ -231,6 +244,7 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
         if (typeof (result.html) !== 'undefined') {
             if (result.html) {
                 $container.html(result.html).show();
+                onViewLoaded($container.find('#' + result.view_id));
             }
         }
     }, null, false);
@@ -275,22 +289,45 @@ function onViewLoaded($view) {
         return;
     }
 
-    $view.find('.modal').modal();
+    if (!parseInt($view.data('loaded_event_processed'))) {
+        $view.data('loaded_event_processed', 1);
+        $view.find('.modal').modal();
 
-    setCommonEvents($view);
+        setCommonEvents($view);
 
-    if (!$view.data('object_change_event_init')) {
-        $view.on('objectChange', function (e) {
-            if ((e.module === module) && (e.object_name === object_name)
-                    && parseInt(e.id_object) === parseInt(id_object)) {
-                reloadObjectView($view.attr('id'));
-            }
+        $view.find('.objectViewtable').each(function () {
+            setInputsEvents($(this));
         });
+
+        $view.find('.objectList').each(function () {
+            onListLoaded($(this));
+        });
+
+        $view.find('.objectForm').each(function () {
+            onFormLoaded($(this));
+        });
+
+        $view.find('.objectView').each(function () {
+            onViewLoaded($(this));
+        });
+
+        $view.find('.objectViewslist').each(function () {
+            onViewsListLoaded($(this));
+        });
+
+        if (!$view.data('object_change_event_init')) {
+            $('body').on('objectChange', function (e) {
+                if ((e.module === $view.data('module_name')) && (e.object_name === $view.data('object_name'))
+                        && parseInt(e.id_object) === parseInt($view.data('id_object'))) {
+                    reloadObjectView($view.attr('id'));
+                }
+            });
+        }
+
+        $('body').trigger($.Event('viewLoaded', {
+            $view: $view
+        }));
     }
-    
-    $('body').trigger($.Event('viewLoaded', {
-        $view: $view
-    }));
 }
 
 function onViewRefreshed($view) {
@@ -307,7 +344,7 @@ function onViewRefreshed($view) {
     });
 
     $view.find('.objectView').each(function () {
-        onListLoaded($(this));
+        onViewLoaded($(this));
     });
 
     $view.find('.objectViewslist').each(function () {

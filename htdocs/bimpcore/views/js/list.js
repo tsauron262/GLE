@@ -183,7 +183,11 @@ function updateObjectFromRow(list_id, id_object, $button) {
 
     bimp_json_ajax('saveObject', data, $resultContainer, function (result) {
         $button.removeClass('disabled');
-        reloadObjectList(list_id);
+        $('body').trigger($.Event('objectChange', {
+            module: $list.data('module_name'),
+            object_name: object_name,
+            id_object: id_object
+        }));
     }, function (result) {
         $button.removeClass('disabled');
     });
@@ -230,7 +234,11 @@ function addObjectFromList(list_id, $button) {
         if (!result.errors.length) {
             resetListAddObjectRow(list_id);
             $button.removeClass('disabled');
-            reloadObjectList(list_id);
+            $('body').trigger($.Event('objectChange', {
+                module: $list.data('module_name'),
+                object_name: $list.data('object_name'),
+                id_object: result.id_object
+            }));
         }
     }, function (result) {
         $button.removeClass('disabled');
@@ -276,7 +284,13 @@ function deleteObjects(list_id, objects_list, $button) {
 
         bimp_json_ajax('deleteObjects', data, $resultContainer, function (result) {
             $button.removeClass('disabled');
-            reloadObjectList(list_id);
+            for (var i in objects_list) {
+                $('body').trigger($.Event('objectDelete', {
+                    module: $list.data('module_name'),
+                    object_name: $list.data('object_name'),
+                    id_object: objects_list[i]
+                }));
+            }
         }, function (result) {
             $button.removeClass('disabled');
         });
@@ -530,81 +544,98 @@ function resetListSearchInputs(list_id) {
 // Gestion des événements:
 
 function onListLoaded($list) {
-    $list.find('#' + $list.attr('id') + '_n').change(function () {
-        reloadObjectList($list.attr('id'));
-    });
-
-    var $tools = $list.find('.headerTools');
-    if ($tools.length) {
-        $tools.find('.openSearchRowButton').click(function () {
-            var $searchRow = $list.find('.listSearchRow');
-            if ($searchRow.length) {
-                if ($(this).hasClass('action-open')) {
-                    $searchRow.stop().fadeIn(150);
-                    $(this).removeClass('action-open').addClass('action-close');
-                } else {
-                    $searchRow.stop().fadeOut(150);
-                    $(this).removeClass('action-close').addClass('action-open');
-                }
-            }
-        });
-        $tools.find('.openAddObjectRowButton').click(function () {
-            var $addRow = $list.find('.addObjectRow');
-            if ($addRow.length) {
-                if ($(this).hasClass('action-open')) {
-                    $addRow.stop().fadeIn(150);
-                    $(this).removeClass('action-open').addClass('action-close');
-                } else {
-                    $addRow.stop().fadeOut(150);
-                    $(this).removeClass('action-close').addClass('action-open');
-                }
-            }
-        });
-        $tools.find('.activatePositionsButton').click(function () {
-            var $handles = $list.find('.positionHandle');
-            if ($handles.length) {
-                if ($(this).hasClass('action-open')) {
-                    $handles.show();
-                    $(this).removeClass('action-open').addClass('action-close');
-                    deactivateSorting($list);
-                    $list.find('input[name=p]').val('1');
-                    sortListByPosition($list.attr('id'), true);
-                } else {
-                    $handles.hide();
-                    $(this).removeClass('action-close').addClass('action-open');
-                    activateSorting($list);
-                }
-            }
-        });
+    if (!$list.length) {
+        return;
     }
 
-    $list.find('tr.listSearchRow').each(function () {
-        $(this).find('.searchInputContainer').each(function () {
-            var field_name = $(this).data('field_name');
-            if (field_name) {
-                $(this).find('[name=' + field_name + ']').val('');
-            }
-        });
-        $(this).find('.ui-autocomplete-input').val('');
-        setSearchInputsEvents($list);
-    });
+    if (!parseInt($list.data('loaded_event_processed'))) {
+        $list.data('loaded_event_processed', 1);
 
-    setCommonEvents($('#' + $list.attr('id') + '_container'));
-
-    if (!$list.data('object_change_event_init')) {
-        var module = $list.data('module_name');
-        var object_name = $list.data('object_name');
-
-        $('body').on('objectChange', function (e) {
-            if ((e.module === module) && (e.object_name === object_name)) {
-                reloadObjectList($list.attr('id'));
-            }
+        $list.find('#' + $list.attr('id') + '_n').change(function () {
+            reloadObjectList($list.attr('id'));
         });
 
-        $list.data('object_change_event_init', 1);
+        var $tools = $list.find('.headerTools');
+        if ($tools.length) {
+            $tools.find('.openSearchRowButton').click(function () {
+                var $searchRow = $list.find('.listSearchRow');
+                if ($searchRow.length) {
+                    if ($(this).hasClass('action-open')) {
+                        $searchRow.stop().fadeIn(150);
+                        $(this).removeClass('action-open').addClass('action-close');
+                    } else {
+                        $searchRow.stop().fadeOut(150);
+                        $(this).removeClass('action-close').addClass('action-open');
+                    }
+                }
+            });
+            $tools.find('.openAddObjectRowButton').click(function () {
+                var $addRow = $list.find('.addObjectRow');
+                if ($addRow.length) {
+                    if ($(this).hasClass('action-open')) {
+                        $addRow.stop().fadeIn(150);
+                        $(this).removeClass('action-open').addClass('action-close');
+                    } else {
+                        $addRow.stop().fadeOut(150);
+                        $(this).removeClass('action-close').addClass('action-open');
+                    }
+                }
+            });
+            $tools.find('.activatePositionsButton').click(function () {
+                var $handles = $list.find('.positionHandle');
+                if ($handles.length) {
+                    if ($(this).hasClass('action-open')) {
+                        $handles.show();
+                        $(this).removeClass('action-open').addClass('action-close');
+                        deactivateSorting($list);
+                        $list.find('input[name=p]').val('1');
+                        sortListByPosition($list.attr('id'), true);
+                    } else {
+                        $handles.hide();
+                        $(this).removeClass('action-close').addClass('action-open');
+                        activateSorting($list);
+                    }
+                }
+            });
+        }
+
+        $list.find('tr.listSearchRow').each(function () {
+            $(this).find('.searchInputContainer').each(function () {
+                var field_name = $(this).data('field_name');
+                if (field_name) {
+                    $(this).find('[name=' + field_name + ']').val('');
+                }
+            });
+            $(this).find('.ui-autocomplete-input').val('');
+            setSearchInputsEvents($list);
+        });
+
+        $list.find('tbody').find('a').each(function () {
+            $(this).attr('target', '_blank');
+        });
+
+        setCommonEvents($('#' + $list.attr('id') + '_container'));
+        setInputsEvents($list);
+        setPositionsHandlesEvents($list);
+
+        if (!$list.data('object_change_event_init')) {
+            var module = $list.data('module_name');
+            var object_name = $list.data('object_name');
+
+            $('body').on('objectChange', function (e) {
+                if ((e.module === module) && (e.object_name === object_name)) {
+                    reloadObjectList($list.attr('id'));
+                }
+            });
+            $('body').on('objectDelete', function (e) {
+                if ((e.module === module) && (e.object_name === object_name)) {
+                    reloadObjectList($list.attr('id'));
+                }
+            });
+
+            $list.data('object_change_event_init', 1);
+        }
     }
-
-    onListRefeshed($list);
 }
 
 function onListRefeshed($list) {

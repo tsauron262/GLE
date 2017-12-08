@@ -686,8 +686,7 @@ class BimpObject
     {
         $html = '';
         if ($this->config->isDefined('associations/' . $association)) {
-            $list = $this->getAssociatesList($association);
-            if (!is_null($id_associate) && in_array($id_associate, $list)) {
+            if (!is_null($id_associate)) {
                 if (($display_name === 'default' && !$this->config->isDefined('associations/' . $association . '/display/default')) ||
                         ($display_name && !$this->config->isDefined('associations/' . $association . '/display/' . $display_name))) {
                     if ($this->config->isDefined('associations/' . $association . '/display/type')) {

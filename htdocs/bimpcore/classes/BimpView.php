@@ -33,7 +33,7 @@ class BimpView
         return $this->object->config->setCurrentPath($this->view_path . '/' . $path);
     }
 
-    public function render($panel = false)
+    public function render($panel = false, $panel_type = 'secondary')
     {
         $html = '';
 
@@ -112,7 +112,7 @@ class BimpView
             $html .= BimpRender::renderPanel($title, $content, $footer, array(
                         'panel_id' => $this->view_identifier . '_panel',
                         'icon'     => 'file-o',
-                        'type'     => 'secondary',
+                        'type'     => $panel_type,
                         'foldable' => 1
                             )
             );

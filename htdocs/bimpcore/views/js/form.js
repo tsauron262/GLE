@@ -582,10 +582,16 @@ function resetInputDisplay($form) {
 // Gestion des évennements: 
 
 function onFormLoaded($form) {
-    setFormEvents($form);
-    setCommonEvents($form);
+    if (!$form.length) {
+        return;
+    }
 
+    if (!parseInt($form.data('loaded_event_processed'))) {
+        $form.data('loaded_event_processed', 1);
 
+        setFormEvents($form);
+        setCommonEvents($form);
+    }
 }
 
 function setFormEvents($form) {
@@ -619,7 +625,7 @@ function setFormEvents($form) {
     var form_id = $form.attr('id');
     for (var i in inputsEvents) {
         if (inputsEvents[i].form_id === form_id) {
-            var $input = $('#' + inputsEvents[i].input_name);
+            var $input = $form.find('[name=' + inputsEvents[i].input_name + ']');
             if ($input.length) {
                 $input.on(inputsEvents[i].event, inputsEvents[i].callback);
             }

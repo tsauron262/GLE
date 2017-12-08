@@ -13818,59 +13818,63 @@ i.iconRight {
   width: 350px;
 }
 /* line 30, ../scss/bimpcore/_form.scss */
+.fieldRow .fieldRowInput .inputContainer input[type=checkbox] {
+  width: auto;
+}
+/* line 34, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput .inputContainer textarea {
   width: 450px;
 }
 
 @media (max-width: 768px) {
-  /* line 38, ../scss/bimpcore/_form.scss */
+  /* line 42, ../scss/bimpcore/_form.scss */
   .fieldRow {
     display: block;
   }
-  /* line 41, ../scss/bimpcore/_form.scss */
+  /* line 45, ../scss/bimpcore/_form.scss */
   .fieldRow .inputLabel {
     text-align: left;
   }
 }
-/* line 47, ../scss/bimpcore/_form.scss */
+/* line 51, ../scss/bimpcore/_form.scss */
 .formRow {
   padding: 5px;
   width: 100%;
 }
-/* line 51, ../scss/bimpcore/_form.scss */
+/* line 55, ../scss/bimpcore/_form.scss */
 .formRow .formLabel {
   text-align: right;
   display: inline-block;
   width: 25%;
   padding-right: 15px;
 }
-/* line 58, ../scss/bimpcore/_form.scss */
+/* line 62, ../scss/bimpcore/_form.scss */
 .formRow .formInput {
   text-align: left;
   display: inline-block;
   width: 70%;
 }
-/* line 64, ../scss/bimpcore/_form.scss */
+/* line 68, ../scss/bimpcore/_form.scss */
 .formRow .formInput select.fullwidth,
 .formRow .formInput input.fullwidth {
   width: 100%;
 }
-/* line 69, ../scss/bimpcore/_form.scss */
+/* line 73, ../scss/bimpcore/_form.scss */
 .formRow input[type=checkbox] {
   margin-right: 12px;
 }
 
-/* line 73, ../scss/bimpcore/_form.scss */
+/* line 77, ../scss/bimpcore/_form.scss */
 .formSubmit {
   text-align: right;
   padding: 10px 20px;
 }
-/* line 76, ../scss/bimpcore/_form.scss */
+/* line 80, ../scss/bimpcore/_form.scss */
 .formSubmit .button {
   margin-left: 10px;
 }
 
-/* line 80, ../scss/bimpcore/_form.scss */
+/* line 84, ../scss/bimpcore/_form.scss */
 .inputHelp {
   font-size: 12px;
   font-style: italic;
@@ -13879,7 +13883,7 @@ i.iconRight {
   padding-left: 15px;
 }
 
-/* line 88, ../scss/bimpcore/_form.scss */
+/* line 92, ../scss/bimpcore/_form.scss */
 .objectToolbar,
 .toolBar {
   padding: 15px 0;
@@ -13887,16 +13891,16 @@ i.iconRight {
 }
 
 /*Inputs*/
-/* line 94, ../scss/bimpcore/_form.scss */
+/* line 98, ../scss/bimpcore/_form.scss */
 input {
   padding-bottom: 5px !important;
 }
 
-/* line 97, ../scss/bimpcore/_form.scss */
+/* line 101, ../scss/bimpcore/_form.scss */
 .inputContainer {
   vertical-align: top;
 }
-/* line 100, ../scss/bimpcore/_form.scss */
+/* line 104, ../scss/bimpcore/_form.scss */
 .inputContainer .help {
   font-size: 12px;
   font-style: italic;
@@ -13905,24 +13909,24 @@ input {
   padding-left: 15px;
 }
 
-/* line 108, ../scss/bimpcore/_form.scss */
+/* line 112, ../scss/bimpcore/_form.scss */
 .inputGroupContainer {
   display: inline-block;
   vertical-align: middle;
 }
 
-/* line 112, ../scss/bimpcore/_form.scss */
+/* line 116, ../scss/bimpcore/_form.scss */
 .auto_expand {
   overflow: hidden;
   line-height: 16px !important;
 }
 
-/* line 117, ../scss/bimpcore/_form.scss */
+/* line 121, ../scss/bimpcore/_form.scss */
 .input-group input {
   padding-bottom: 5px;
 }
 
-/* line 122, ../scss/bimpcore/_form.scss */
+/* line 126, ../scss/bimpcore/_form.scss */
 .object_view_content textarea.note,
 .objectlistTable textarea.note {
   background-color: #FFFFE1;
@@ -13932,34 +13936,34 @@ input {
   box-shadow: 0 0 2px #787878;
 }
 
-/* line 130, ../scss/bimpcore/_form.scss */
+/* line 134, ../scss/bimpcore/_form.scss */
 select.switch {
   width: 75px;
   font-weight: bold;
 }
-/* line 134, ../scss/bimpcore/_form.scss */
+/* line 138, ../scss/bimpcore/_form.scss */
 select.switch option[value='1'] {
   color: #3b6ea0;
 }
-/* line 137, ../scss/bimpcore/_form.scss */
+/* line 141, ../scss/bimpcore/_form.scss */
 select.switch option[value='0'] {
   color: #8C8C8C;
 }
 
-/* line 142, ../scss/bimpcore/_form.scss */
+/* line 146, ../scss/bimpcore/_form.scss */
 .formSwitch label {
   margin-right: 20px;
 }
-/* line 146, ../scss/bimpcore/_form.scss */
+/* line 150, ../scss/bimpcore/_form.scss */
 .formSwitch input {
   margin: 0 5px;
 }
 
-/* line 150, ../scss/bimpcore/_form.scss */
+/* line 154, ../scss/bimpcore/_form.scss */
 .toggle {
   display: none;
 }
-/* line 154, ../scss/bimpcore/_form.scss */
+/* line 158, ../scss/bimpcore/_form.scss */
 .toggle + span, .toggle + span + label + span {
   display: inline-block;
   font-size: 12px;
@@ -13972,11 +13976,11 @@ select.switch option[value='0'] {
   -o-transition: all 0.5s ease;
   transition: all 0.5s ease;
 }
-/* line 165, ../scss/bimpcore/_form.scss */
+/* line 169, ../scss/bimpcore/_form.scss */
 .toggle + span {
   color: #636363;
 }
-/* line 169, ../scss/bimpcore/_form.scss */
+/* line 173, ../scss/bimpcore/_form.scss */
 .toggle + span + .toggle-slider {
   position: relative;
   display: inline-block;
@@ -13990,7 +13994,7 @@ select.switch option[value='0'] {
   background: linear-gradient(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0)), #dddddd;
   box-shadow: 0 0.07em 0.1em -0.1em rgba(0, 0, 0, 0.4) inset, 0 0.05em 0.08em -0.01em rgba(255, 255, 255, 0.7);
 }
-/* line 182, ../scss/bimpcore/_form.scss */
+/* line 186, ../scss/bimpcore/_form.scss */
 .toggle + span + .toggle-slider:after {
   position: absolute;
   content: '';
@@ -14005,7 +14009,7 @@ select.switch option[value='0'] {
   background: linear-gradient(#f5f5f5 10%, #eeeeee);
   box-shadow: 0 0.1em 0.15em -0.05em rgba(255, 255, 255, 0.9) inset, 0 0.2em 0.2em -0.12em rgba(0, 0, 0, 0.5);
 }
-/* line 198, ../scss/bimpcore/_form.scss */
+/* line 202, ../scss/bimpcore/_form.scss */
 .toggle + span + .toggle-slider:before {
   position: absolute;
   content: '';
@@ -14020,24 +14024,24 @@ select.switch option[value='0'] {
   background: linear-gradient(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.1)), #d0d0d0;
   box-shadow: 0 0.08em 0.15em -0.1em rgba(0, 0, 0, 0.5) inset, 0 0.05em 0.08em -0.01em rgba(255, 255, 255, 0.7), 0 0 0 0 rgba(68, 204, 102, 0.7) inset;
 }
-/* line 214, ../scss/bimpcore/_form.scss */
+/* line 218, ../scss/bimpcore/_form.scss */
 .toggle:checked + span {
   color: #b4b4b4;
 }
-/* line 217, ../scss/bimpcore/_form.scss */
+/* line 221, ../scss/bimpcore/_form.scss */
 .toggle:checked + span + label + span {
   color: #2fa04b;
 }
-/* line 221, ../scss/bimpcore/_form.scss */
+/* line 225, ../scss/bimpcore/_form.scss */
 .toggle:checked + span + .toggle-slider:before {
   box-shadow: 0 0.08em 0.15em -0.1em rgba(0, 0, 0, 0.5) inset, 0 0.05em 0.08em -0.01em rgba(255, 255, 255, 0.7), 3em 0 0 0 rgba(68, 204, 102, 0.7) inset;
 }
-/* line 227, ../scss/bimpcore/_form.scss */
+/* line 231, ../scss/bimpcore/_form.scss */
 .toggle:checked + span + .toggle-slider:after {
   left: 22px;
 }
 
-/* line 233, ../scss/bimpcore/_form.scss */
+/* line 237, ../scss/bimpcore/_form.scss */
 .search_input_results {
   position: absolute;
   z-index: 99999;
@@ -14046,36 +14050,36 @@ select.switch option[value='0'] {
   box-shadow: 4px 4px 4px #505050;
   padding: 0 15px;
 }
-/* line 241, ../scss/bimpcore/_form.scss */
+/* line 245, ../scss/bimpcore/_form.scss */
 .search_input_results button {
   display: block;
   width: 100%;
   text-align: left;
 }
 
-/* line 248, ../scss/bimpcore/_form.scss */
+/* line 252, ../scss/bimpcore/_form.scss */
 .switchOption.selected {
   color: white !important;
   background-color: #ef7d00 !important;
   border-color: #ef7d00 !important;
 }
 
-/* line 255, ../scss/bimpcore/_form.scss */
+/* line 259, ../scss/bimpcore/_form.scss */
 .timer_input input, .timer_input select {
   width: 45px !important;
 }
-/* line 258, ../scss/bimpcore/_form.scss */
+/* line 262, ../scss/bimpcore/_form.scss */
 .timer_input span {
   display: inline-block;
   font-weight: bold !important;
   margin: 8px;
 }
 
-/* line 264, ../scss/bimpcore/_form.scss */
+/* line 268, ../scss/bimpcore/_form.scss */
 .optionsContainer {
   text-align: right;
 }
-/* line 267, ../scss/bimpcore/_form.scss */
+/* line 271, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton {
   display: inline-block;
   margin: 5px;
@@ -14089,16 +14093,16 @@ select.switch option[value='0'] {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 281, ../scss/bimpcore/_form.scss */
+/* line 285, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton:hover {
   color: #fff;
   background-color: #ef7d00;
 }
-/* line 285, ../scss/bimpcore/_form.scss */
+/* line 289, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton:hover:before {
   color: #fff;
 }
-/* line 290, ../scss/bimpcore/_form.scss */
+/* line 294, ../scss/bimpcore/_form.scss */
 .optionsContainer .optionsButton:before {
   font-size: 14px;
   color: #ef7d00;
@@ -14107,11 +14111,11 @@ select.switch option[value='0'] {
   margin-right: 8px;
 }
 
-/* line 300, ../scss/bimpcore/_form.scss */
+/* line 304, ../scss/bimpcore/_form.scss */
 .inputMultipleValues table tbody tr {
   border: 1px solid #b4b4b4;
 }
-/* line 303, ../scss/bimpcore/_form.scss */
+/* line 307, ../scss/bimpcore/_form.scss */
 .inputMultipleValues table tbody tr td {
   padding: 6px 12px;
 }

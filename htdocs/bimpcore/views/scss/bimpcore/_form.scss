@@ -26,6 +26,10 @@
         .inputContainer {            
             input {
                 width: 350px;
+                
+                &[type=checkbox] {
+                    width: auto;
+                }
             }
             textarea {
                 width: 450px;

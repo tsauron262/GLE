@@ -18,6 +18,7 @@ function onBFDemandeViewLoaded($view) {
             initEvents($view);
         });
     }
+    hideShowAvance(true);
 }
 
 function initEvents($view) {
@@ -25,17 +26,21 @@ function initEvents($view) {
             '[name="commission_commerciale"], [name="commission_financiere"],' +
             '[name="quantity"], [name="amount"], [name="amount_ht"],' +
             '[name="mode_calcul"],' +
-            '[name="mode_calcul"]';
+            '[name="rate"], [name="coef"],' +
+            '[name="periodicity"]';
     $view.find(selecteur).change(function () {
         calculateMontantTotal($view);
     });
     $view.find(selecteur).keyup(function () {
-        calculateMontantTotal($view);
+        calculateMontantTotal($view, this);
     });
     calculateMontantTotal($view);
 }
 
-function calculateMontantTotal($view) {
+function calculateMontantTotal($view, champ) {
+    if(champ != undefined)
+    $(champ).val($(champ).val().replace(",", ".").replace(" ", "").replace("€", ""));
+    
     if (!$view.length) {
         return;
     }
@@ -82,11 +87,11 @@ function calculateMontantTotal($view) {
     displayMoneyValue(total, $view.find('#montant_total'));
     displayMoneyValue(total2, $view.find('#montant_total2'));
 
-    if ($view.find('#commC').length < 1)
+    if ($view.find('input[name="commC"]').length < 1)
         $commission_commerciale.parent().parent().parent().append("<span id='commC'></span>");
     displayMoneyValue(commC, $view.find('#commC'));
 
-    if ($view.find('#commF').length < 1)
+    if ($view.find('input[name="commF"]').length < 1)
         $commission_financiere.parent().parent().parent().append("<span id='commF'></span>");
     displayMoneyValue(commF, $view.find('#commF'));
 
@@ -94,18 +99,19 @@ function calculateMontantTotal($view) {
 
     //Total loyer calculé
     var totalLoyer = 0;
+    var duree = 0;
     $view.find(".BF_Rent_row").each(function () {
         totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
+        duree += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
     });
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
 
 
-    var duree = calculTotal('.BF_Rent_row input[name="quantity"]');
     $view.find('#duree_total').html(duree+" mois");
     
     
     if(duree == 0)
-        duree = $view.find('#duration').val();
+        duree = $view.find('input[name="duration"]').val();
 
     //Cout banque
     var taux = 0;
@@ -121,17 +127,16 @@ function calculateMontantTotal($view) {
     if (coef < 1)
         coef = 1;
 
-
-    var echoir = ($view.find("#mode_calcul").val() == 2);
+    var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
+    var periodicity = $view.find('input[name="periodicity"]').val();
     var interet = calculInteret(total2, duree, taux, echoir);
-
 
     var coupBanque = (total2 * coef) - total2 + interet;
 
     displayMoneyValue(coupBanque, $view.find('#cout_banque'));
 
     //loyer théorique
-    displayMoneyValue((coupBanque + total2) / duree, $view.find('#loyer_the'));
+    displayMoneyValue((coupBanque + total2) / duree * periodicity, $view.find('#loyer_the'));
 
 //alert((coupBanque + total2) / duree    -    220791291.66);
 //alert((coupBanque + total2) / duree    -    233681881.07);
@@ -164,7 +169,10 @@ function calculateMontantTotal($view) {
 }
 
 
-function calculInteret(montant, duree, taux) {
+function calculInteret(montant, duree, taux, echoir) {
+    if(taux == 0)
+        return 0;
+    
     if (typeof (echoir) === 'undefined') {
         echoir = true;
     }
@@ -178,7 +186,7 @@ function calculInteret(montant, duree, taux) {
         //moins = 1 + taux/100 * duree / 432;//Pour 36
         moins = 1 + taux / 100 * 0.083333333333333;//Pour 36
     }
-
+    
     return ((montant) * (tauxPM / (1 - Math.pow((1 + tauxPM), -(duree)))) * duree) / moins - montant; //calcul du montant avec interet
 }
 
@@ -190,4 +198,27 @@ function calculTotal(selecteur) {
             totalLI += val;
     });
     return totalLI;
+}
+
+
+function hideShowAvance(hide){
+    if($("#ca_calc").length > 0){
+        var selecteur = "#montant_total, #montant_total2, #duree_total, #cout_banque, #loy_inter, #frais_div, #total_loyer,"
+                +"#periodicity_inputContainer, #mode_calcul_inputContainer, #duration_inputContainer";
+        var elems = $(selecteur).parent().parent();
+        var elem2 = elems.parent().parent().find(".btn-primary").parent();
+        var moreBut = "erreur";
+
+        $("#plusMoinsAvance").remove();
+        if(hide == true){
+            elems.hide();
+            moreBut = "onClick='hideShowAvance(false)'>Mode Avancé";
+        }
+        else{
+            elems.show();
+            moreBut = "onClick='hideShowAvance(true)'>Mode Normal";
+        }
+
+        elem2.prepend('<button type="button" id="plusMoinsAvance"  class="btn btn-primary" '+moreBut+'</button>');
+    }
 }

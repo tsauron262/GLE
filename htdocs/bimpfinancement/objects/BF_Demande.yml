@@ -163,7 +163,7 @@ fields:
                 
     vr: 
         label: VR demandée
-        type: percent
+        type: money
         default_value: 0
                 
     mode_calcul:
@@ -347,7 +347,13 @@ views:
                         - field: insurance
                           edit: 1
                         - field: mode_calcul
-                          edit: 1            
+                          edit: 1 
+                        - field: vr
+                          edit: 1    
+                        - field: ca_prevu
+                          edit: 1
+                        - field: pba_prevu
+                          edit: 1       
                                       
             - cols: 
                   - type: fields_table
@@ -419,12 +425,14 @@ views:
                             value: <span id="duree_total"></span>
                           - field: duration
                             label: Durée demandée
-                            edit: 1
                           - field: mode_calcul
-                            edit: 1
+                          - field: periodicity
+                            label: Périodicité demandé
                           - label: Coût banque
                             value: <span id="cout_banque"></span>
-                          - label: Total loyer
+                          - label: Loyer Théorique
+                            value: <span id="loyer_the"></span>
+                          - label: Total loyer Calculé
                             value: <span id="total_loyer"></span>
                           - label: Dif financement/demande
                             value: <span id="dif_banque_demande"></span>
@@ -434,14 +442,6 @@ views:
                             value: <span id="frais_div"></span>
                           - label: Marge Calculé
                             value: <span id="ca_calc"></span>
-                          - label: Reste a payé Fournisseur
-                            value: <span id="rest_fact"></span>
-                          - field: vr
-                            edit: 1
-                          - field: ca_prevu
-                            edit: 1
-                          - field: pba_prevu
-                            edit: 1
                             
                   - type: list
                     col_lg: 6
@@ -494,6 +494,8 @@ views:
                             - field: montant_materiels
                             - field: montant_services
                             - field: montant_logiciels
+                            - label: Reste a payé Fournisseur
+                              value: <span id="rest_fact"></span>
                   - type: list
                     col_lg: 9
                     col_md: 8

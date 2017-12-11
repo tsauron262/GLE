@@ -347,13 +347,15 @@ class BimpList
                             $display_name = $this->object->getCurrentConf('display', '');
                             $display = $this->object->displayData($field, $display_name);
                             $value = $this->object->getData($field);
-                            $content = '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
+                            $content .= '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
                             $content .= $display;
                         } else {
                             $value = $this->object->getCurrentConf('value', '', true);
                             if ($value) {
                                 if ($this->object->config->isDefined('cols/' . $col_name . '/display')) {
-                                    $content = $this->object->displayValue($value, 'cols/' . $col_name . '/display');
+                                    $content .= $this->object->displayValue($value, 'cols/' . $col_name . '/display');
+                                } else {
+                                    $content .= $value;
                                 }
                             }
                         }

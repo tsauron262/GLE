@@ -35,7 +35,22 @@ objects:
         delete: 0
         instance:
             bimp_object: BH_Note
-        
+
+    equipment: 
+        instance: 
+            bimp_object: Equipment
+            
+associations:
+    equipments:
+        object: equipment
+        depends_on: id_contrat
+        label: Equipements concernés
+        display: 
+            default: 
+                type: callback
+        list: 
+            array: equipments
+
 fields: 
     id_contrat:
         label: Contrat
@@ -100,6 +115,18 @@ fields:
             type: hidden
         display: field_value
         
+forms: 
+    default:
+        rows: 
+            - field: id_contrat
+            - association: equipments
+              label: Equipements concernés
+              input: 
+                display_if: 
+                    input_name: id_contrat
+                    hide_values:
+                        array: 0,
+                        
 views:
     default:
         title: nom
@@ -108,7 +135,6 @@ views:
         
     main:
         title: nom
-        edit_form: default
         delete_btn: 1
         rows:
             - cols: 
@@ -125,6 +151,10 @@ views:
                             - label: Client
                               card: 
                                   object: client
+                            - association: equipments
+                              label: Equipements concernés
+                              edit: 1
+                              
 list:
     checkboxes: 1
     bulk_actions:

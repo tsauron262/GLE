@@ -11,6 +11,9 @@ sections:
       tabs:
           default:
               label: Fiche
+              url_params:
+                  id: 
+                      request: id
               sections:
                   - type: view
                     view:

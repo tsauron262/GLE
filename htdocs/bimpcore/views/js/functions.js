@@ -343,8 +343,8 @@ function displayMoneyValue(value, $container, classCss, currency) {
     }
 
     value = parseFloat(value);
-    
-    if(value < 0){
+
+    if (value < 0) {
         negatif = true;
         value = -value;
     }
@@ -355,7 +355,7 @@ function displayMoneyValue(value, $container, classCss, currency) {
         value = Math.round10(value, -2);
         value = '' + value;
         if (!/^[0-9]+\.[0-9]+/.test(value)) {
-            value += '.0';
+            value += ',0';
         }
         if (!/^[0-9]+\.[0-9]{2}$/.test(value)) {
             value += '0';
@@ -364,28 +364,27 @@ function displayMoneyValue(value, $container, classCss, currency) {
 
     value = value.replace(/^([0-9]+)\.?([0-9]?)([0-9]?)$/, '$1,$2$3');
     value = lisibilite_nombre(value);
-    if(negatif)
-        value = "-"+value;
-    
-    $container.html('<span class="'+classCss+'">'+value + ' ' + currency+'</span>');
+    if (negatif)
+        value = "-" + value;
+
+    $container.html('<span class="' + classCss + '">' + value + ' ' + currency + '</span>');
 }
 
 function lisibilite_nombre(nbr)
 {
-    var nombre = ''+nbr;
+    var nombre = '' + nbr;
     var retour = '';
-    var count=0;
-    for(var i=nombre.length-1 ; i>=0 ; i--)
+    var count = 0;
+    for (var i = nombre.length - 1; i >= 0; i--)
     {
-            if(count!=0 && count % 3 == 0)
-                    retour = nombre[i]+' '+retour ;
-            else
-                    retour = nombre[i]+retour ;
-            count++;
+        if (count != 0 && count % 3 == 0)
+            retour = nombre[i] + ' ' + retour;
+        else
+            retour = nombre[i] + retour;
+        count++;
     }
     return retour.replace(" ,", ",");
 }
-
 // Math:
 
 (function () {

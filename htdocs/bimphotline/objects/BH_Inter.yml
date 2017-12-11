@@ -139,7 +139,7 @@ list:
     page_btn: 1
     
 views:
-    default:
+    default: 
         title: nom
         edit_form: default
         delete_btn: 1
@@ -150,6 +150,13 @@ views:
               classes: btn,btn-default
               attr:
                   onclick: closeInterView($(this));
+        rows: 
+            - cols:
+                - type: custom
+                  custom:
+                      callback: renderDefaultView
+    full:
+        no_reload: 1
         rows: 
             - cols:
                 - type: view

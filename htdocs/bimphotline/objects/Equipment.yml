@@ -6,6 +6,7 @@ labels:
 
 objects:
     product:
+        relation: hasOne
         instance:
             dol_object: product
             id_object:
@@ -26,12 +27,7 @@ objects:
                         Réf.:
                             object_prop: ref
                     view_btn: 1
-    client:
-        instance:
-            dol_object: societe
-            id_object:
-                field_value: id_soc
-                
+                    
     contrat:
         instance:
             dol_object: contrat
@@ -42,30 +38,30 @@ associations:
         display:
             default:
                 type: callback
-        add:
-            label: Contrats
-            input:
-                type: search_list
-                multiple: 1
-                search_list:
-                    table: contrat c
-                    field_return_value: c.rowid
-                    field_return_label: c.ref
-                    options:
-                        default:
-                            label: Recherche par référence contrat
-                            fields_search: c.ref,c.rowid
-                            join: societe s
-                            join_on: c.fk_soc = s.rowid
-                            join_return_label: s.nom
-                            help: Entrez la référence ou l'ID d'un contrat
-                        by_client:
-                            label: Recherche par client
-                            fields_search: s.nom,s.code_client
-                            join: societe s
-                            join_on: c.fk_soc = s.rowid
-                            join_return_label: s.nom
-                            help: Entrez le nom ou le code d'un client
+                
+        label: Contrats
+        input:
+            type: search_list
+            multiple: 1
+            search_list:
+                table: contrat c
+                field_return_value: c.rowid
+                field_return_label: c.ref
+                options:
+                    default:
+                        label: Recherche par référence contrat
+                        fields_search: c.ref,c.rowid
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez la référence ou l'ID d'un contrat
+                    by_client:
+                        label: Recherche par client
+                        fields_search: s.nom,s.code_client
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez le nom ou le code d'un client
                 
 fields: 
     id_product: 
@@ -185,10 +181,9 @@ views:
                             - association: contrats
                               edit: 1
                               
-
 forms:
     default:
-        fields: 
+        rows: 
             - field: id_product
             - field: serial
             - field: date_purchase

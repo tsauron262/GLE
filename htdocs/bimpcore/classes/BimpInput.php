@@ -152,13 +152,14 @@ class BimpInput
                     $i = 1;
                     foreach ($options['items'] as $item) {
                         $i++;
+                        $rand = rand(111111, 999999);
                         $html .= '<div class="check_list_item">';
-                        $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item['value'] . '" id="' . $input_id . '_' . $i . '"';
-                        if ($value == $item['value']) {
-                            $html .= ' checked="1"';
+                        $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item['value'] . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
+                        if (in_array($item['value'], $value)) {
+                            $html .= ' checked';
                         }
                         $html .= '/>';
-                        $html .= '<label for="' . $input_id . '_' . $i . '">';
+                        $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
                         $html .= $item['label'];
                         $html .= '</label>';
                         $html .= '</div>';
@@ -478,7 +479,11 @@ class BimpInput
                 if ($value) {
                     global $db;
                     $bdb = new BimpDb($db);
-                    $search = $bdb->getValue($table, $fields_search[0], '`' . $field_return_value . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value));
+                    if (!is_array($fields_search)) {
+                        $fields_search = explode(',', $fields_search);
+                    }
+                    $where = '`'. preg_replace('/^.*\.(.*)$/', '$1', $field_return_value) . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
+                    $search = $bdb->getValue(preg_replace('/^.*\.(.*)$/', '$1', $table), preg_replace('/^.*\.(.*)$/', '$1', $fields_search[0]), $where);
                     if (is_null($search)) {
                         $search = '';
                     }
@@ -488,6 +493,7 @@ class BimpInput
                 if (is_array($fields_search)) {
                     $fields_search = implode(',', $fields_search);
                 }
+                
                 $html .= '<input type="hidden" name="' . $field_name . '" value="' . $value . '"/>';
                 $html .= '<input type="text" name="' . $field_name . '_search" class="search_list_input" value="' . $search . '" onkeyup="searchObjectList($(this));"';
                 $html .= ' data-table="' . $table . '"';

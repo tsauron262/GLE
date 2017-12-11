@@ -213,6 +213,10 @@ class BimpAssociation
             $id_object = $this->object->id;
         }
 
+        if (!$associations) {
+            $associations = array();
+        }
+        
         $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
         $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
 
@@ -552,9 +556,9 @@ class BimpAssociation
             return BimpRender::renderAlerts('Erreur de configuration pour cette association');
         }
 
-        $input_type = $this->object->getConf($this->association_path . '/add/input/type', '', true);
+        $input_type = $this->object->getConf($this->association_path . '/input/type', '', true);
         if (is_null($item_display)) {
-            $item_display = $this->object->getConf($this->association_path . '/add/display', 'default');
+            $item_display = $this->object->getConf($this->association_path . '/display', 'default');
         }
 
         $display_if = $this->object->getConf($this->association_path . '/input/display_if');
@@ -567,7 +571,7 @@ class BimpAssociation
         $html .= ' data-field_name="' . $this->association . '" data-multiple="1">';
 
         if ($input_type === 'search_list') {
-            $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $this->association . '/add', $field_name, '');
+            $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $this->association . '/', $field_name, '');
         } else {
             $html .= BimpInput::renderInput($input_type, $field_name, '', array(), null, null);
         }
@@ -596,6 +600,7 @@ class BimpAssociation
     public function renderAssociatesCheckList()
     {
         $associates = $this->getAssociatesList();
+        
         if ($this->object->config->isDefined($this->association_path . '/list')) {
             $items_ids = $this->object->config->get($this->association_path . '/list', array(), false, 'array');
         } else {

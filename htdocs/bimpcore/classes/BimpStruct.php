@@ -259,6 +259,7 @@ class BimpStruct
                 $html .= '</th>';
 
                 $html .= '<td>';
+                $html .= '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
                 $html .= '<div class="inputContainer" id="' . $field . '_inputContainer"';
                 $html .= ' data-field_name="' . $field . '"';
                 $html .= '>';
@@ -269,8 +270,8 @@ class BimpStruct
                 $html .= '</td>';
 
                 $html .= '</tr>';
-            } elseif ($association && $edit_field && $config->isDefined('associations/' . $association . '/add/input')) {
-                $label = $config->get('associations/' . $association . '/add/label', '');
+            } elseif ($association && $edit_field) {
+                $label = $config->get('associations/' . $association . '/label', '');
                 if (!$label) {
                     $instance = $config->getObject('associations/' . $association . '/object');
                     if (!is_null($instance)) {
@@ -279,7 +280,7 @@ class BimpStruct
                         $label = ucfirst($association);
                     }
                 }
-                $item_display = $config->getFromCurrentPath('display');
+                $item_display = $config->getFromCurrentPath('display', 'default');
                 $bimpAsso = new BimpAssociation($object, $association);
 
                 $html .= '<tr>';
@@ -288,7 +289,18 @@ class BimpStruct
                 $html .= '</th>';
 
                 $html .= '<td>';
-                $html .= $bimpAsso->renderAddAssociateInput($item_display, true);
+
+                if ($config->isDefined('associations/' . $association . '/input')) {
+                    $html .= $bimpAsso->renderAddAssociateInput($item_display, true);
+                } elseif ($config->isDefined('associations/' . $association . '/list')) {
+                    $edit = true;
+                    $html .= '<div class="inputContainer" id="' . $association . '_inputContainer"';
+                    $html .= ' data-field_name="' . $association . '" data-multiple="1"';
+                    $html .= '>';
+                    $html .= $bimpAsso->renderAssociatesCheckList();
+                    $html .= '</div>';
+                }
+
                 $html .= '</td>';
 
                 $html .= '</tr>';

@@ -51,6 +51,11 @@
         }
         td {
             border-bottom: 1px solid $gray-light;
+            
+            .inputContainer,
+            .inputGroupContainer {
+                margin-right: 10px;
+            }
         }
     }
     

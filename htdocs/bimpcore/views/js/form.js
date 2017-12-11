@@ -402,6 +402,14 @@ function reloadObjectInput(form_id, input_name, fields) {
 }
 
 function searchObjectList($input) {
+    var $container = $input.parent('div');
+    var value = $input.val();
+    
+    if (!value) {
+        $container.find('[name=' + $container.data('field_name') + ']').val('0').change();
+        return;
+    }
+    
     var data = {
         'table': $input.data('table'),
         'fields_search': $input.data('fields_search'),
@@ -410,10 +418,9 @@ function searchObjectList($input) {
         'join': $input.data('join'),
         'join_on': $input.data('join_on'),
         'join_return_label': $input.data('join_return_label'),
-        'value': $input.val()
+        'value': value
     };
-
-    var $container = $input.parent('div');
+    
     var $spinner = $container.find('.loading');
     var $result = $container.find('.search_input_results');
 
@@ -473,6 +480,36 @@ function getFieldValue($form, field_name) {
         return $input.val();
     }
     return '';
+}
+
+function getInputsValues($container) {
+    var values = {};
+    $container.find('.inputContainer').each(function () {
+        var field = $(this).data('field_name');
+        var multiple = $(this).data('multiple');
+        if (multiple) {
+            var $inputs = $(this).find('[name="' + field + '[]"]');
+            values[field] = [];
+            $inputs.each(function () {
+                if ($(this).attr('type') === 'checkbox') {
+                    if ($(this).prop('checked')) {
+                        values[field].push($(this).val());
+                    }
+                } else {
+                    values[field].push($(this).val());
+                }
+            });
+            if (!values[field].length) {
+                values[field] = 0;
+            }
+        } else {
+            var $input = $(this).find('[name="' + field + '"]');
+            if ($input.length) {
+                values[field] = $input.val();
+            }
+        }
+    });
+    return values;
 }
 
 function addMultipleInputCurrentValue($button, value_input_name, label_input_name, ajax_save) {
@@ -795,6 +832,8 @@ function setSearchListOptionsEvents($container) {
     var $switch = $container.find('.switchInputContainer');
     if ($switch.length) {
         var input_name = $switch.data('input_name');
+        var $input = $parent.find('.search_list_input');
+        var current_value = $input.val();
         if (input_name) {
             $switch.find('[name=' + input_name + ']').change(function () {
                 var option = $(this).val();
@@ -815,8 +854,7 @@ function setSearchListOptionsEvents($container) {
                 if (typeof (join_return_label) === 'undefined') {
                     join_return_label = '';
                 }
-
-                var $input = $parent.find('.search_list_input');
+                
                 $input.val('');
                 $input.data('fields_search', fields_search);
                 $input.data('join', join);
@@ -832,7 +870,9 @@ function setSearchListOptionsEvents($container) {
                     $parent.find('.help').remove();
                 }
             }).change();
+            $input.val(current_value);
         }
+        
         $container.data('event_init', 1);
     }
 }

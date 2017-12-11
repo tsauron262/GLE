@@ -22,7 +22,7 @@ class BimpCard
             } else {
                 $msg = 'Aucun';
             }
-            return self::renderAlerts($msg, 'warning');
+            return BimpRender::renderAlerts($msg, 'warning');
         }
 
         $params = $this->config->get($this->config_path, null, true, 'any');

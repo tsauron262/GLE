@@ -12,6 +12,24 @@ class BH_Inter extends BimpObject
         2 => array('label' => 'Fermé', 'classes' => array('danger'))
     );
 
+    public function renderDefaultView()
+    {
+        $status = (int) $this->getData('status');
+
+        if ($status !== 2) {
+            $tech_id_user = (int) $this->getData('tech_id_user');
+            global $user;
+
+            if (isset($user->id) && $user->id && !is_null($tech_id_user) && $tech_id_user) {
+                if ($tech_id_user === (int) $user->id) {
+                    return $this->renderView('full', false);
+                }
+            }
+        }
+
+        return $this->renderView('data', false);
+    }
+
     public function renderChronoView()
     {
         if (!isset($this->id) || !$this->id) {
@@ -48,7 +66,7 @@ class BH_Inter extends BimpObject
                 'or_user' => array(
                     'or' => array(
                         'tech_id_user' => $user->id,
-                        'user_create'  => $user - id
+                        'user_create'  => $user->id
                     )
                 ),
                 'status'  => array(

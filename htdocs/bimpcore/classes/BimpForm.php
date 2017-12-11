@@ -9,6 +9,9 @@ class BimpForm
     public $form_path = null;
     public $form_identifier = null;
     public $errors = array();
+    public static $row_types = array(
+        'field', 'association'
+    );
 
     public function __construct(BimpObject $object, $form_name = 'default', $id_parent = null)
     {
@@ -95,39 +98,17 @@ class BimpForm
             $html .= '<input type="hidden" name="id_object" value="' . $this->object->id . '" data-default_value="' . $this->object->id . '"/>';
         }
 
-        $parent_id_property = '';
+
+        $parent_id_property = $this->object->getParentIdProperty();
         if (!is_null($this->id_parent)) {
-            $parent_id_property = $this->object->getParentIdProperty();
             $html .= '<input type="hidden" name="' . $parent_id_property . '" value="' . $this->id_parent . '"/>';
         }
 
+        $this->setConfPath();
         if (!is_null($this->form_path) && $this->form_path) {
-            $this->setConfPath();
-            $fields = $this->object->getCurrentConf('fields', array(), true, 'array');
-            foreach ($fields as $idx => $field_params) {
-                $this->setConfPath('fields/' . $idx);
-                $field = $this->object->getCurrentConf('field', '');
-                $input = $this->object->getCurrentConf('input', null, false, 'any');
-
-                if ($field) {
-                    if ($parent_id_property && ($field === $parent_id_property)) {
-                        continue;
-                    }
-                    if (is_null($input)) {
-                        $this->object->config->setCurrentPath('fields/' . $field);
-                    }
-                    $html .= $this->renderField($field);
-                } else {
-                    $association = $this->object->getCurrentConf('association', '');
-                    if ($association) {
-                        if ($this->object->config->isDefined('associations/' . $association . '/add/input')) {
-                            $this->object->config->setCurrentPath('associations/' . $association . '/add');
-                            $html .= $this->renderAddAssociation($association);
-                        } elseif ($this->object->config->isDefined('associations/' . $association . '/list')) {
-                            $html .= $this->renderAssociationCheckList($association);
-                        }
-                    }
-                }
+            $rows = $this->object->getCurrentConf('rows', array(), true, 'array');
+            foreach ($rows as $idx => $row) {
+                $html .= $this->renderFormRow($this->form_path . '/rows/' . $idx);
             }
         } else {
             $fields = $this->object->getConf('fields', array(), true, 'array');
@@ -135,9 +116,7 @@ class BimpForm
                 if ($parent_id_property && ($field === $parent_id_property)) {
                     continue;
                 }
-                if ($this->setConfPath('fields/' . $field)) {
-                    $html .= $this->renderField($field);
-                }
+                $html .= $this->renderFormRow('fields/' . $field, $field);
             }
         }
 
@@ -149,121 +128,48 @@ class BimpForm
         return $html;
     }
 
-    public function renderField($field, $label_cols = 3)
+    public function renderFormRow($conf_path, $identifier = '', $label_cols = 3)
     {
-        $parent_id_property = $this->object->getParentIdProperty();
-        if ($field === $parent_id_property) {
-            return '';
-        }
+        ;
+        $item_path = '';
+        $row_type = 'field';
 
-        $html = '';
-
-        $multiple = $this->object->getCurrentConf('input/multiple', false, false, 'bool');
-        $type = $this->object->getCurrentConf('input/type', '', true);
-        $label = $this->object->getCurrentConf('label', '', true);
-        $value = $this->object->getData($field);
-
-        if (is_null($value)) {
-            $value = $this->object->getCurrentConf('default_value');
-        }
-        $display_if = $this->object->config->isDefinedCurrent('input/display_if');
-
-        $html .= '<div class="row fieldRow' . (($type === 'hidden') ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
-        if ($display_if) {
-            $html .= self::renderDisplayIfData($this->object, $this->object->config->current_path . 'input/display_if');
-        }
-        $html .= '>';
-
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
-        $html .= $label;
-        $html .= '</div>';
-
-        $html .= '<div class="fieldRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
-        $html .= '<div id="' . $this->form_identifier . '_' . $field . '" class="inputContainer"';
-        $html .= ' data-field_name="' . $field . '" data-multiple="' . ($multiple ? '1' : '0') . '">';
-
-        $html .= self::renderInput($this->object, $this->object->config->current_path, $field, $value);
-
-        $html .= '</div>';
-        $html .= '</div>';
-
-        if ($this->object->config->isDefinedCurrent('depends_on')) {
-            $html .= $this->renderDependsOnScript($field);
-        }
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    public function renderAddAssociation($association, $label_cols = 3)
-    {
-        $html = '';
-
-        $type = $this->object->getCurrentConf('input/type', '', true);
-        $label = $this->object->getCurrentConf('label', '', true);
-        $associates = $this->object->getAssociatesList($association);
-
-        $display_if = $this->object->config->isDefinedCurrent('input/display_if');
-
-        $field_name = $association . '_add_value';
-
-        $html .= '<div class="row fieldRow' . (($type === 'hidden') ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
-        if ($display_if) {
-            $html .= self::renderDisplayIfData($this->object, $this->object->config->current_path . 'input/display_if');
-        }
-        $html .= '>';
-
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
-        $html .= $label;
-        $html .= '</div>';
-
-        $html .= '<div class="fieldRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
-        $html .= '<div id="' . $this->form_identifier . '_' . $association . '" class="inputContainer"';
-        $html .= ' data-field_name="' . $association . '" data-multiple="1">';
-
-        if ($type === 'search_list') {
-            $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $association . '/add', $field_name, '');
-        } else {
-            $html .= BimpInput::renderInput($type, $field_name, '', array(), null, null, $this->form_identifier . '_' . $association);
-        }
-
-        $items = array();
-
-        if (!is_null($associates)) {
-            foreach ($associates as $id_associate) {
-                if ($id_associate) {
-                    $items[$id_associate] = $this->object->displayAssociate($association, 'default', $id_associate);
+        if (!$identifier) {
+            foreach (self::$row_types as $rt) {
+                if ($this->object->config->isDefined($conf_path . '/' . $rt)) {
+                    $row_type = $rt;
+                    $identifier = $this->object->getConf($conf_path . '/' . $rt, '');
+                    break;
                 }
             }
         }
-        if ($type === 'search_list') {
-            $label_field_name = $field_name . '_search';
+
+        if ($this->object->config->isDefined($row_type . 's/' . $identifier)) {
+            $item_path = $row_type . 's/' . $identifier;
+        }
+
+        $parent_id_property = $this->object->getParentIdProperty();
+        if ($identifier === $parent_id_property) {
+            return '';
+        }
+
+        $input_path = '';
+        if ($this->object->config->isDefined($conf_path . '/input')) {
+            $input_path = $conf_path;
         } else {
-            $label_field_name = $association;
+            $input_path = $item_path;
         }
-        $html .= BimpInput::renderMultipleValuesList($this->object, $association, $items, $label_field_name);
 
-        $html .= '</div>';
-        $html .= '</div>';
+        $label = $this->object->getConf($conf_path . '/label', $this->object->getConf($item_path . '/label', '', true));
+        $input_type = $this->object->getConf($input_path . '/input/type', '');
+        $display_if = (bool) $this->object->config->isDefined($input_path . '/input/display_if');
+        $depends_on = (bool) $this->object->config->isDefined($item_path . '/depends_on');
 
-        if ($this->object->config->isDefinedCurrent('depends_on')) {
-            $html .= $this->renderDependsOnScript($field_name);
-        }
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    public function renderAssociationCheckList($association, $label_cols = 3)
-    {
         $html = '';
 
-        $label = $this->object->getCurrentConf('label', '', true);
-        $display_if = $this->object->config->isDefinedCurrent('/display_if');
-
-        $html .= '<div class="row fieldRow' . ($display_if ? ' display_if' : '') . '"';
+        $html .= '<div class="row formRow' . (($input_type === 'hidden') ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
         if ($display_if) {
-            $html .= self::renderDisplayIfData($this->object, $this->object->config->current_path . '/display_if');
+            $html .= self::renderDisplayIfData($this->object, $input_path . '/input/display_if');
         }
         $html .= '>';
 
@@ -271,29 +177,147 @@ class BimpForm
         $html .= $label;
         $html .= '</div>';
 
-        $html .= '<div class="fieldRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
-        $html .= '<div id="' . $this->form_identifier . '_' . $association . '" class="inputContainer"';
-        $html .= ' data-field_name="' . $association . '" data-multiple="1">';
+        $html .= '<div class="formRowInput ' . $row_type . ' col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
 
-        $bimpAsso = new BimpAssociation($this->object, $association);
+        switch ($row_type) {
+            case 'field':
+                $html .= $this->renderFormField($identifier, $input_path);
+                break;
 
-        if ($bimpAsso->errors) {
-            $html .= BimpRender::renderAlerts($bimpAsso->errors);
-        } else {
-            $html .= $bimpAsso->renderAssociatesCheckList();
+            case 'association':
+                $html .= $this->renderFormAssociation($identifier, $conf_path);
+                break;
+
+            default:
+                $html .= BimpRender::renderAlerts('Erreur de configuration - Champ non défini');
+                break;
         }
-
-        unset($bimpAsso);
 
         $html .= '</div>';
         $html .= '</div>';
 
-        if ($this->object->config->isDefinedCurrent('depends_on')) {
-            $html .= $this->renderDependsOnScript($association);
+        if ($depends_on) {
+            $html .= $this->renderDependsOnScript($identifier, $item_path . '/depends_on');
         }
+
+        return $html;
+    }
+
+    public function renderFormField($field, $input_path)
+    {
+        $html = '';
+
+        $multiple = (bool) $this->object->getConf($input_path . '/input/multiple', false, false, 'bool');
+        $value = $this->object->getData($field);
+
+        $html .= '<div id="' . $this->form_identifier . '_' . $field . '" class="inputContainer"';
+        $html .= ' data-field_name="' . $field . '" ';
+        $html .= ' data-multiple="' . ($multiple ? '1' : '0') . '">';
+
+        $html .= self::renderInput($this->object, $input_path, $field, $value, $this->id_parent);
+
         $html .= '</div>';
 
         return $html;
+    }
+
+    public function renderFormAssociation($association, $conf_path = '')
+    {
+        $html = '';
+
+        $html .= '<div id="' . $this->form_identifier . '_' . $association . '" class="inputContainer"';
+        $html .= ' data-field_name="' . $association . '" data-multiple="1">';
+
+        $input_path = '';
+        if ($this->object->config->isDefined($conf_path . '/input')) {
+            $input_path = $conf_path;
+        } elseif ($this->object->config->isDefined('associations/' . $association . '/input')) {
+            $input_path = 'associations/' . $association;
+        }
+
+        if ($this->object->config->isDefined('associations/' . $association . '/list')) {
+            $bimpAsso = new BimpAssociation($this->object, $association);
+
+            if ($bimpAsso->errors) {
+                $html .= BimpRender::renderAlerts($bimpAsso->errors);
+            } else {
+                $html .= $bimpAsso->renderAssociatesCheckList();
+            }
+
+            unset($bimpAsso);
+        } elseif ($input_path) {
+            $type = $this->object->getConf($input_path . '/input/type', '', true);
+            $associates = $this->object->getAssociatesList($association);
+            $field_name = $association . '_add_value';
+
+            if ($type === 'search_list') {
+                $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $association, $field_name, '');
+            } else {
+                $html .= BimpInput::renderInput($type, $field_name, '', array(), null, null, $this->form_identifier . '_' . $association);
+            }
+
+            $items = array();
+
+            if (!is_null($associates)) {
+                foreach ($associates as $id_associate) {
+                    if ($id_associate) {
+                        $items[$id_associate] = $this->object->displayAssociate($association, 'default', $id_associate);
+                    }
+                }
+            }
+            if ($type === 'search_list') {
+                $label_field_name = $field_name . '_search';
+            } else {
+                $label_field_name = $association;
+            }
+
+            $html .= BimpInput::renderMultipleValuesList($this->object, $association, $items, $label_field_name);
+        } else {
+            $html .= BimpRender::renderAlerts('Erreur de configuration - Champ non défini pour l\'association "' . $association . '"');
+        }
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderDependsOnScript($identifier, $path)
+    {
+        $script = '';
+        $depends_on = $this->object->getConf($path);
+        if (!is_null($depends_on)) {
+            if (is_array($depends_on)) {
+                $dependances = $depends_on;
+            } elseif (is_string($depends_on)) {
+                $dependances = explode(',', $depends_on);
+            }
+
+            foreach ($dependances as $key => $dependance) {
+                if (!$this->object->config->isDefined('fields/' . $dependance) &&
+                        !$this->object->config->isDefined('associations/' . $dependance)) {
+                    unset($dependances[$key]);
+                }
+            }
+
+            if (count($dependances)) {
+                $script .= '<script type="text/javascript">' . "\n";
+                foreach ($dependances as $dependance) {
+                    $script .= 'addInputEvent(\'' . $this->form_identifier . '\', \'' . $dependance . '\', \'change\', function() {' . "\n";
+                    $script .= '  var data = {};' . "\n";
+                    $script .= '  var $form = $(\'#' . $this->form_identifier . '\');';
+
+                    foreach ($dependances as $dep) {
+                        $script .= '  if ($form.find(\'[name=' . $dep . ']\').length) {' . "\n";
+                        $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $dep . '\');' . "\n";
+                        $script .= '  }' . "\n";
+                    }
+                    $script .= '  reloadObjectInput(\'' . $this->form_identifier . '\', \'' . $identifier . '\', data);' . "\n";
+                    $script .= '});' . "\n";
+                }
+                $script .= '</script>' . "\n";
+            }
+        }
+        return $script;
     }
 
     public static function renderDisplayIfData($object, $path)
@@ -322,44 +346,6 @@ class BimpForm
             }
         }
         return $html;
-    }
-
-    public function renderDependsOnScript($field)
-    {
-        $script = '';
-        $depends_on = $this->object->getCurrentConf('depends_on');
-        if (!is_null($depends_on)) {
-            if (is_array($depends_on)) {
-                $dependances = $depends_on;
-            } elseif (is_string($depends_on)) {
-                $dependances = explode(',', $depends_on);
-            }
-
-            foreach ($dependances as $key => $dependance) {
-                if (!$this->object->config->isDefined('fields/' . $dependance . '/input')) {
-                    unset($dependances[$key]);
-                }
-            }
-
-            if (count($dependances)) {
-                $script .= '<script type="text/javascript">' . "\n";
-                foreach ($dependances as $dependance) {
-                    $script .= 'addInputEvent(\'' . $this->form_identifier . '\', \'' . $dependance . '\', \'change\', function() {' . "\n";
-                    $script .= '  var data = {};' . "\n";
-                    $script .= '  var $form = $(\'#' . $this->form_identifier . '\');';
-
-                    foreach ($dependances as $dep) {
-                        $script .= '  if ($form.find(\'[name=' . $dep . ']\').length) {' . "\n";
-                        $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $dep . '\');' . "\n";
-                        $script .= '  }' . "\n";
-                    }
-                    $script .= '  reloadObjectInput(\'' . $this->form_identifier . '\', \'' . $field . '\', data);' . "\n";
-                    $script .= '});' . "\n";
-                }
-                $script .= '</script>' . "\n";
-            }
-        }
-        return $script;
     }
 
     public static function renderInput(BimpObject $object, $config_path, $field_name, $value = null, $id_parent = null, $form = null, $option = null, $input_id = null, $input_name = null)
@@ -391,6 +377,7 @@ class BimpForm
         $options = array();
 
         $type = $object->getCurrentConf('input/type', '');
+        
         $addon_right = $object->getCurrentConf('input/addon_right', null, false, 'array');
         $addon_left = $object->getCurrentConf('input/addon_left', null, false, 'array');
         $multiple = $object->getCurrentConf('input/multiple', false, false, 'bool');

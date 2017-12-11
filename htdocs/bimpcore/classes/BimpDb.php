@@ -210,7 +210,7 @@ class BimpDb
     public function getValue($table, $field, $where = '1')
     {
         $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where . ' LIMIT 1';
-
+        
         $result = $this->db->query($sql);
 
         if ($result && $this->db->num_rows($result)) {

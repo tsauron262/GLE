@@ -893,6 +893,10 @@ class BimpObject
                     }
                 }
             }
+            $type = $this->getCurrentConf('type', '');
+            if (is_null($value) || ($value === '') && in_array($type, array('id', 'id_parent', 'id_object'))) {
+                $value = 0;
+            }
             if (is_null($value) || ($value === '')) {
                 $missing = false;
                 if ($required) {
@@ -903,7 +907,6 @@ class BimpObject
                 }
             } else {
                 $validate = true;
-                $type = $this->getCurrentConf('type', '');
                 $invalid_msg = $this->getCurrentConf('invalid_msg');
 
                 if ($type) {
@@ -1410,7 +1413,8 @@ class BimpObject
             foreach ($items as $item) {
                 $this->reset();
                 if ($this->fetch($item->id)) {
-                    if (!$this->delete()) {
+                    $del_errors = $this->delete();
+                    if (count($del_errors)) {
                         $check = false;
                     }
                 }

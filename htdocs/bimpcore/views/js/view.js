@@ -191,19 +191,13 @@ function saveObjectfromFieldsTable(table_id, $button) {
             var $resultContainer = $table.find('.ajaxResultsContainer');
 
             $resultContainer.parent('td').parent('tr').show();
-            var data = {
-                'object_module': $view.data('module_name'),
-                'object_name': $view.data('object_name'),
-                'id_object': $view.data('id_object')
-            };
 
-            $table.find('.inputContainer').each(function () {
-                var field = $(this).data('field_name');
-                var $input = $(this).find('[name="' + field + '"]');
-                if ($input.length) {
-                    data[field] = $input.val();
-                }
-            });
+            var data = getInputsValues($table);
+            
+            data['object_module'] = $view.data('module_name');
+            data['object_name'] = $view.data('object_name');
+            data['id_object'] = $view.data('id_object');
+
             bimp_json_ajax('saveObject', data, $resultContainer, function () {
                 $button.removeClass('disabled');
                 $('body').trigger($.Event('objectChange', {

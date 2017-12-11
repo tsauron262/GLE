@@ -30,4 +30,36 @@ class BH_Ticket extends BimpObject
 
         return '';
     }
+
+    public function getEquipmentsArray()
+    {
+        $equipments = array();
+        $id_contrat = (int) $this->getData('id_contrat');
+        if (!is_null($id_contrat) && $id_contrat) {
+            $equipment = BimpObject::getInstance('bimphotline', 'Equipment');
+            $bimpAsso = new BimpAssociation($equipment, 'contrats');
+            $equipments = $bimpAsso->getObjectsList($id_contrat);
+        }
+
+        return $equipments;
+    }
+
+    public function defaultDisplayEquipmentsItem($id_equipment)
+    {
+        $equipment = BimpObject::getInstance('bimphotline', 'Equipment');
+        if ($equipment->fetch($id_equipment)) {
+            $label = '';
+            $product = $equipment->config->getObject('', 'product');
+            if (!is_null($product) && isset($product->id) && $product->id) {
+                $label = $product->label;
+            } else {
+                return BimpRender::renderAlerts('Equipement ' . $id_equipment . ': Produit associé non trouvé');
+            }
+
+            $label .= ' - N° série: ' . $equipment->getData('serial');
+
+            return $label;
+        }
+        return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
+    }
 }

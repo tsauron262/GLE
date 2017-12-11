@@ -259,7 +259,7 @@ class BimpStruct
                 $html .= '</th>';
 
                 $html .= '<td>';
-                $html .= '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
+                $html .= '<input type="hidden" name="old_' . $field . '" value="' . $value . '"/>';
                 $html .= '<div class="inputContainer" id="' . $field . '_inputContainer"';
                 $html .= ' data-field_name="' . $field . '"';
                 $html .= '>';

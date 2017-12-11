@@ -472,6 +472,7 @@ class BimpObject
                     $value = implode(',', $value);
                 }
             }
+            $html .= '<input type="hidden" name="'.$field.'" value="'.$value.'"/>';
             $html .= $this->displayValue($this->data[$field], 'fields/' . $field . '/display' . ($display_name ? '/' . $display_name : ''), $field);
         } else {
             $html = '<p class="alert alert-danger">Champ "' . $field . '" non défini</p>';

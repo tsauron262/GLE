@@ -418,6 +418,7 @@ views:
                             value: <span id="duree_total"></span>
                           - field: duration
                             label: Durée demandée
+                            edit: 1
                           - field: mode_calcul
                             edit: 1
                           - label: Coût banque

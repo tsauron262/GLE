@@ -25,7 +25,7 @@ function initEvents($view) {
             '[name="commission_commerciale"], [name="commission_financiere"],' +
             '[name="quantity"], [name="amount"], [name="amount_ht"],' +
             '[name="mode_calcul"],' +
-            '[name="rate"], [name="coef"]';
+            '[name="mode_calcul"]';
     $view.find(selecteur).change(function () {
         calculateMontantTotal($view);
     });
@@ -102,6 +102,10 @@ function calculateMontantTotal($view) {
 
     var duree = calculTotal('.BF_Rent_row input[name="quantity"]');
     $view.find('#duree_total').html(duree+" mois");
+    
+    
+    if(duree == 0)
+        duree = $view.find('#duration').val();
 
     //Cout banque
     var taux = 0;
@@ -163,6 +167,8 @@ function calculateMontantTotal($view) {
 
 
 function calculInteret(montant, duree, taux, echoir = true){
+       if(taux == 0)
+           return 0;
        var tauxPM = taux / 100 / 12;
        var moins = 1;
        if(echoir){

@@ -329,7 +329,8 @@ function updateTimerInput($input, input_name) {
 
 // Affichages: 
 
-function displayMoneyValue(value, $container, currency) {
+function displayMoneyValue(value, $container, classCss, currency) {
+    var negatif = false;
     if (!$container.length) {
         return;
     }
@@ -337,8 +338,16 @@ function displayMoneyValue(value, $container, currency) {
     if (typeof (currency) === 'undefined') {
         currency = '&euro;';
     }
+    if (typeof (classCss) === 'undefined') {
+        classCss = '';
+    }
 
     value = parseFloat(value);
+    
+    if(value < 0){
+        negatif = true;
+        value = -value;
+    }
 
     if (value === null || isNaN(value)) {
         value = '0,00';
@@ -354,7 +363,27 @@ function displayMoneyValue(value, $container, currency) {
     }
 
     value = value.replace(/^([0-9]+)\.?([0-9]?)([0-9]?)$/, '$1,$2$3');
-    $container.html(value + ' ' + currency);
+    value = lisibilite_nombre(value);
+    if(negatif)
+        value = "-"+value;
+    
+    $container.html('<span class="'+classCss+'">'+value + ' ' + currency+'</span>');
+}
+
+function lisibilite_nombre(nbr)
+{
+    var nombre = ''+nbr;
+    var retour = '';
+    var count=0;
+    for(var i=nombre.length-1 ; i>=0 ; i--)
+    {
+            if(count!=0 && count % 3 == 0)
+                    retour = nombre[i]+' '+retour ;
+            else
+                    retour = nombre[i]+retour ;
+            count++;
+    }
+    return retour.replace(" ,", ",");
 }
 
 // Math:

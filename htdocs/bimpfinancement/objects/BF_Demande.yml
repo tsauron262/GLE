@@ -415,6 +415,13 @@ views:
                             edit: 1
                           - label: Montant total
                             value: <span id="montant_total2"></span>
+                          - label: Durée Calculée
+                            value: <span id="duree_total"></span>
+                          - field: duration
+                            label: Durée demandée
+                            edit: 1
+                          - field: mode_calcul
+                            edit: 1
                           - label: Coût banque
                             value: <span id="cout_banque"></span>
                           - label: Total loyer
@@ -425,7 +432,7 @@ views:
                             value: <span id="loy_inter"></span>
                           - label: Frais Divers
                             value: <span id="frais_div"></span>
-                          - label: CA Calculé
+                          - label: Marge Calculé
                             value: <span id="ca_calc"></span>
                           - label: Reste a payé Fournisseur
                             value: <span id="rest_fact"></span>

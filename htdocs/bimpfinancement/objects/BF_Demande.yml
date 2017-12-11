@@ -432,7 +432,7 @@ views:
                             value: <span id="loy_inter"></span>
                           - label: Frais Divers
                             value: <span id="frais_div"></span>
-                          - label: CA Calculé
+                          - label: Marge Calculé
                             value: <span id="ca_calc"></span>
                           - field: vr
                             edit: 1

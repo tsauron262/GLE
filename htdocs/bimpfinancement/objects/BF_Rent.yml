@@ -15,7 +15,7 @@ fields:
             type: hidden
             
     quantity: 
-        label: Nombre
+        label: Durée
         type: int
         required: 1
         sortable: 1

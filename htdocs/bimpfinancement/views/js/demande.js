@@ -17,21 +17,22 @@ function onBFDemandeViewLoaded($view) {
         $("body").on("listRefresh", function (event) {
             initEvents($view);
         });
-        calculateMontantTotal($view);
     }
 }
 
 function initEvents($view) {
     var selecteur = '[name="montant_materiels"], [name="montant_services"], [name="montant_logiciels"],' +
             '[name="commission_commerciale"], [name="commission_financiere"],' +
-            '[name="amount"]';
+            '[name="quantity"], [name="amount"], [name="amount_ht"],' +
+            '[name="mode_calcul"],' +
+            '[name="rate"], [name="coef"]';
     $view.find(selecteur).change(function () {
         calculateMontantTotal($view);
     });
     $view.find(selecteur).keyup(function () {
         calculateMontantTotal($view);
     });
-
+    calculateMontantTotal($view);
 }
 
 function calculateMontantTotal($view) {
@@ -91,7 +92,7 @@ function calculateMontantTotal($view) {
 
 
 
-    //Total loyer
+    //Total loyer calculé
     var totalLoyer = 0;
     $view.find(".BF_Rent_row").each(function () {
         totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
@@ -99,15 +100,41 @@ function calculateMontantTotal($view) {
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
 
 
+    var duree = calculTotal('.BF_Rent_row input[name="quantity"]');
+    $view.find('#duree_total').html(duree+" mois");
 
     //Cout banque
-    var coupBanque = 3333;
+    var taux = 0;
+    var coef = 0;
+    var posTmp = 10000000;
+    $view.find(".BF_Refinanceur_row").each(function(){
+        if($(this).data("position") < posTmp){
+            posTmp = $(this).data("position");
+            taux = $(this).find("input[name=rate]").val();
+            coef = $(this).find("input[name=coef]").val();
+        }
+    });
+    if(coef < 1)
+        coef = 1;  
+    
+    
+    var echoir = ($view.find("#mode_calcul").val() == 2);
+    var interet = calculInteret(total2, duree, taux, echoir);
+    
+    
+    var coupBanque = (total2 * coef) - total2 + interet;
+    
     displayMoneyValue(coupBanque, $view.find('#cout_banque'));
+    
+    //loyer théorique
+    displayMoneyValue((coupBanque + total2) / duree, $view.find('#loyer_the'));
 
-
+//alert((coupBanque + total2) / duree    -    220791291.66);
+//alert((coupBanque + total2) / duree    -    233681881.07);
+//alert((coupBanque + total2) / duree    -    302705845.29);
     //Diff banque demande
     var difBanqFinan = totalLoyer - coupBanque - total2;
-    displayMoneyValue(difBanqFinan, $view.find('#dif_banque_demande'));
+    displayMoneyValue(difBanqFinan, $view.find('#dif_banque_demande'), (difBanqFinan < 0)? "redT" : "");
 
 
 
@@ -124,7 +151,7 @@ function calculateMontantTotal($view) {
 
     //CA Calculé
     var caCalc = commF + totalLoyI + totalFD + difBanqFinan;
-    displayMoneyValue(caCalc, $view.find('#ca_calc'));
+    displayMoneyValue(caCalc, $view.find('#ca_calc'), (caCalc < 0)? "redT" : "");
 
 
     //Reste a payé
@@ -132,6 +159,22 @@ function calculateMontantTotal($view) {
     ;
     displayMoneyValue(restPaye, $view.find('#rest_fact'));
 
+}
+
+
+function calculInteret(montant, duree, taux, echoir = true){
+       var tauxPM = taux / 100 / 12;
+       var moins = 1;
+       if(echoir){
+            //duree --;
+            //montant = montant - montant/duree * (tauxPM / (1 - Math.pow(1 + tauxPM, -1)))* (1 + taux/100*1.1710415);
+//            montant = montant - montant/duree * (tauxPM / (1 - Math.pow(1 + tauxPM, -1)))* (1 + taux/100*1.5473440);
+            //moins = 1 + taux/100 * duree / 576;//Pour 48
+            //moins = 1 + taux/100 * duree / 432;//Pour 36
+            moins = 1 + taux/100 * 0.083333333333333;//Pour 36
+        }
+       
+       return ((montant) * (tauxPM / (1 - Math.pow((1 + tauxPM), -(duree)))) * duree) / moins - montant; //calcul du montant avec interet
 }
 
 function calculTotal(selecteur) {

@@ -84,12 +84,12 @@ elseif ($type == Categorie::TYPE_ACCOUNT)   { $title=$langs->trans("AccountsCate
 elseif ($type == Categorie::TYPE_PROJECT)   { $title=$langs->trans("ProjectsCategoriesShort");  $typetext='project'; }
 else                                        { $title=$langs->trans("Category");          $typetext='unknown'; }
 
-llxHeader('','Recherche Filtrée','','',0,0,$arrayofjs,$arrayofcss);
+llxHeader('','Restreindre','','',0,0,$arrayofjs,$arrayofcss);
 
 $head = categories_prepare_head($object,$type);
 
 
-dol_fiche_head($head, 'recherchefiltree', $title, -1, 'category');
+dol_fiche_head($head, 'restreindre', $title, -1, 'category');
 
 // Get the path to that categ
 $linkback = '<a href="'.DOL_URL_ROOT.'/categories/index.php?leftmenu=cat&type='.$type.'">'.$langs->trans("BackToList").'</a>';

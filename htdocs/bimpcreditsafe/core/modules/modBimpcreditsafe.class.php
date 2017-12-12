@@ -33,7 +33,7 @@ class modBimpcreditsafe extends DolibarrModules {
      */
     function modBimpcreditsafe($DB) {
         $this->db = $DB;
-        $this->numero = 8000;
+        $this->numero = 8567;
 
         $this->family = "Synopsis";
         $this->name = "Credit Safe";

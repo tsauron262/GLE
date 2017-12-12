@@ -13,8 +13,6 @@
  */
 class ActionsBimpcreditsafe {
     
-    function doActions($parameters, &$object, &$action, $hookmanager) {
-    }
     
     
     function formObjectOptions($parameters, &$object, &$action, $hookmanager){

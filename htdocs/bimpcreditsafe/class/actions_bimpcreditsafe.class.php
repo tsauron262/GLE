@@ -19,5 +19,6 @@ class ActionsBimpcreditsafe {
         global $langs;
         if($object->element == "societe")
 		print '<script src="'.DOL_URL_ROOT.'/bimpcreditsafe/js/script.js"/>';
+        return 0;
     }
 }

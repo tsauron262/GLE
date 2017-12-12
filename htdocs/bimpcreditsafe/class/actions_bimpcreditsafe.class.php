@@ -14,11 +14,9 @@
 class ActionsBimpcreditsafe {
     
     
-    
     function formObjectOptions($parameters, &$object, &$action, $hookmanager){
         global $langs;
         if($object->element == "societe")
-		print '<script src="'.DOL_URL_ROOT.'/bimpcreditsafe/js/script.js"/>';
-        return 0;
+		echo '<script>'. file_get_contents(DOL_DOCUMENT_ROOT."/bimpcreditsafe/js/script.js").'</script>';
     }
 }

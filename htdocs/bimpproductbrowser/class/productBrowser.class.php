@@ -333,16 +333,15 @@ class BimpProductBrowser extends CommonObject {
 
     function fillChilds($obj, $allRestr) {
         $obj->child = array();
-        foreach ($obj->childsCat as $cat) {
-//            $mothers = $cat->get_meres();
-//            $mother = $mothers[0];
+        $newRestr = new BimpProductBrowser($this->db);          // on initialise une nouvelle restriction
+        $newCateg = new Categorie($this->db);
+        for ($i=0 ; $i<sizeof($obj->childsCat) ; $i++) {
             $child = new stdClass();
             $child->tabIdChild = array();
             $child->tabNameChild = array();
-//            $child->idParent = $cat->fk_parent;
-            $child->id = $cat->id;
-            $child->label = $cat->label;
-            $filles = $cat->get_filles();
+            $child->id = $obj->childsCat[$i]->id;
+            $child->label = $obj->childsCat[$i]->label;
+            $filles = $obj->childsCat[$i]->get_filles();
             foreach ($filles as $fille) {
                 foreach ($obj->selectedCat as $catSelected) {
                     if ($catSelected->id === $fille->id) {
@@ -354,13 +353,12 @@ class BimpProductBrowser extends CommonObject {
                 $child->tabIdChild[] = $fille->id;
                 $child->tabNameChild[] = $fille->label;
             }
-            $newRestr = new BimpProductBrowser($this->db);          // on initialise une nouvelle restriction
-            if ($newRestr->fetch($child->id) == 1) {          // on cherche si cette catégorie implique une restriction
-                $child->childRestr = $newRestr->id_childs;
+            if ($child->selectedId != null and $newRestr->fetch($child->selectedId) == 1) {
+                foreach ($newRestr->id_childs as $id_child_restr) {
+                    $newCateg->fetch($id_child_restr);
+                    array_push($obj->childsCat, $newCateg);
+                }
             }
-
-            if ($this->isImpliedInrestriction($mother->id, $allRestr))
-                $child->unremovable = true;
             $obj->child[] = $child;
         }
         return $obj;

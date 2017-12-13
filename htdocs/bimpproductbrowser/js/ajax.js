@@ -82,7 +82,9 @@ function addCatInProd(id_categ, isAnnexe) {
                 }
             } else {
                 for (i = 0; i < obj.tabRestr.length; i++) {
+                    obj.tabRestr[i].id = obj.tabRestr[i].idParent;
                     annexes.push(obj.tabRestr[i]);
+                    addImpliedNav(obj.tabRestr[i]);
                 }
             }
         }
@@ -177,7 +179,7 @@ $(document).ready(function () {
             changeAnnexeDivs($(this).attr('idMother'), $(this).text(), $(this).attr('id'));
             addCatInProd($(this).attr('id'), true);
             deleteAllDivs();
-            addNextDiv()
+            addNextDiv();
         } else {
             catArr.push($(this).attr('id'));
             addCatInProd($(this).attr('id'), false);
@@ -192,6 +194,16 @@ $(document).ready(function () {
  *  Annexe functions
  */
 
+function addImpliedNav(cat) {
+    $('<div>' + cat.label + '</div>')
+            .attr('id', cat.id)
+//                .attr('idDiv', i)
+            .attr('class', 'customDiv divClikable divNavAnnexe')
+            .attr('originalName', cat.label)
+            .attr('name', cat.selectedLabel)
+            .attr('value', cat.selectedLabel)
+            .appendTo('#impliedContainer');
+}
 
 function retrieveCateg() {
     getOldWay();
@@ -210,11 +222,10 @@ function retrieveCateg() {
         }
     }
     for (i = 0; i < objInit.child.length; i++) {
-        if (objInit.child[i].selected == undefined && startDefined != undefined) {
-            var start;
-            var startDefined = true;
-            start = child[i].id;
+        if (objInit.child[i].selectedId != undefined) {
+//            addImpliedNav(objInit.child[i].selectedId);
         }
+        console.log('ok ' + objInit.child[i].label);
         addAnnexeNavDivs(objInit.child[i], i);
     }
     addWays();
@@ -281,19 +292,12 @@ function deleteFrom(id_div) {
     }
     cntRestr.length = parseInt(id_div) + 1;
     catOut = catArr.slice(id_div);
-//    console.log("Initialement suppression de : " + catOutWithoutAnnexe);
-//    for (i = 0; i<objs.length; i++) {
-//        if (catOut.indexOf(objs[i].idParent) > -1) {    // si existe dans le module
-//            catOutWithoutAnnexe.push(objs[i].idParent); // autoriser à l'enlever
-//        }
-//    }
     if (objs.length >= objToKeep) {
         objs.length = objToKeep;
     }
     cnt = id_div;
     deleteAllDivs();
     catArr.length = id_div;
-//    console.log("suppression de : " + catOutWithoutAnnexe);
     deleteCateg(catOut);
     addNextDiv();
 }
@@ -369,7 +373,6 @@ function addAnnexeNavDivs(child, i) {
     if (child.unremovable === true)
         $('<div>' + child.label + val + '</div>')
                 .attr('id', child.id)
-//                .attr('idDiv', i)
                 .attr('class', 'customDiv divClikable divNavAnnexe unremovable')
                 .attr('originalName', child.label)
                 .attr('name', nameChild)
@@ -378,7 +381,6 @@ function addAnnexeNavDivs(child, i) {
     else
         $('<div>' + child.label + val + '</div>')
                 .attr('id', child.id)
-//                .attr('idDiv', i)
                 .attr('class', 'customDiv divClikable divNavAnnexe')
                 .attr('originalName', child.label)
                 .attr('name', nameChild)

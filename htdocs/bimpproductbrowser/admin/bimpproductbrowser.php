@@ -26,7 +26,7 @@
  * 	\ingroup    stock
  * 	\brief      Page d'administration/configuration du module de catégorisation
  */
-require '../main.inc.php';
+require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/categories.lib.php';
@@ -49,30 +49,31 @@ if (!$user->admin)
  */
 
 $idRootCateg = GETPOST('categMere');
-$forceCategorization = GETPOST('forceCat');
+if ($idRootCateg > 0) {
+    $forceCategorization = GETPOST('forceCat');
 
-$db->begin();
+    $db->begin();
 
-if ($idRootCateg) {
+    if ($idRootCateg) {
 
-    $res = dolibarr_set_const($db, "BIMP_ROOT_CATEGORY", $idRootCateg, 'chaine', 0, '', $conf->entity);
-    if (!$res > 0)
-        $error++;
+        $res = dolibarr_set_const($db, "BIMP_ROOT_CATEGORY", $idRootCateg, 'chaine', 0, '', $conf->entity);
+        if (!$res > 0)
+            $error++;
+    }
+    if ($forceCategorization != $conf->global->BIMP_FORCE_CATEGORIZATION) {
+        $res = dolibarr_set_const($db, "BIMP_FORCE_CATEGORIZATION", $forceCategorization, 'chaine', 0, '', $conf->entity);
+        if (!$res > 0)
+            $error++;
+    }
+
+    if (!$error) {
+        $db->commit();
+        setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
+    } else {
+        $db->rollback();
+        setEventMessages($langs->trans("Error"), null, 'errors');
+    }
 }
-if ($forceCategorization != $conf->global->BIMP_FORCE_CATEGORIZATION) {
-    $res = dolibarr_set_const($db, "BIMP_FORCE_CATEGORIZATION", $forceCategorization, 'chaine', 0, '', $conf->entity);
-    if (!$res > 0)
-        $error++;
-}
-
-if (!$error) {
-    $db->commit();
-    setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
-} else {
-    $db->rollback();
-    setEventMessages($langs->trans("Error"), null, 'errors');
-}
-
 
 
 /*
@@ -190,12 +191,12 @@ print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
 print '</tr>' . "\n";
 print '</table>';
 
-if($conf->global->BIMP_FORCE_CATEGORIZATION == 1 and isset($conf->global->BIMP_FORCE_CATEGORIZATION)){
+if (isset($conf->global->BIMP_FORCE_CATEGORIZATION) and $conf->global->BIMP_FORCE_CATEGORIZATION == 1) {
     print 'Oui <input type="radio" name="forceCat" value="1" checked>';
 } else {
     print 'Oui <input type="radio" name="forceCat" value="1">';
 }
-if($conf->global->BIMP_FORCE_CATEGORIZATION == 0 and isset($conf->global->BIMP_FORCE_CATEGORIZATION)){
+if (!isset($conf->global->BIMP_FORCE_CATEGORIZATION) or $conf->global->BIMP_FORCE_CATEGORIZATION != 1) {
     print 'Non <input type="radio" value="0" name="forceCat" checked><br>';
 } else {
     print 'Non <input type="radio" value="0" name="forceCat"><br>';

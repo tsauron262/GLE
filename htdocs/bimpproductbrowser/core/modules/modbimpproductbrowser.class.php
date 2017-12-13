@@ -101,7 +101,7 @@ class modBimpproductbrowser extends DolibarrModules {
         $this->dirs = array();
 
         // Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
-        $this->config_page_url = array("bimpproductbrowser.php");
+        $this->config_page_url = array("bimpproductbrowser.php@bimpproductbrowser");
 
         // Dependencies
         $this->hidden = false;   // A condition to hide module
@@ -119,7 +119,7 @@ class modBimpproductbrowser extends DolibarrModules {
         //                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
         // );
         $this->const = array(
-            1 => array('MYMODULE_MYCONSTANT', 'chaine', 'avalue', 'This is a constant to add', 1, 'allentities', 1)
+//            1 => array('MYMODULE_MYCONSTANT', 'chaine', 'avalue', 'This is a constant to add', 1, 'allentities', 1)
         );
 
         // Array to add new pages in new tabs
@@ -149,7 +149,7 @@ class modBimpproductbrowser extends DolibarrModules {
         // 'thirdparty'       to add a tab in third party view
         // 'user'             to add a tab in user view
         $this->tabs = array(
-            'categories_0:+recherchefiltree:Recherche Filtrée:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__',
+            'categories_0:+restreindre:Restreindre:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__',
             'product:+categoriser:Catégoriser:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/categoriser.php?id=__ID__');
 
         if (!isset($conf->modProductBrowser) || !isset($conf->modProductBrowser->enabled)) {
@@ -186,7 +186,6 @@ class modBimpproductbrowser extends DolibarrModules {
 
         // Cronjobs (List of cron jobs entries to add when module is enabled)
         $this->cronjobs = array(
-            0 => array('label' => 'MyJob label', 'jobtype' => 'method', 'class' => '/bimpproductbrowser/class/mymodulemyjob.class.php', 'objectname' => 'MyModuleMyJob', 'method' => 'myMethod', 'parameters' => '', 'comment' => 'Comment', 'frequency' => 2, 'unitfrequency' => 3600, 'status' => 0, 'test' => true)
         );
         // Example: $this->cronjobs=array(0=>array('label'=>'My label', 'jobtype'=>'method', 'class'=>'/dir/class/file.class.php', 'objectname'=>'MyClass', 'method'=>'myMethod', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true),
         //                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
@@ -196,24 +195,24 @@ class modBimpproductbrowser extends DolibarrModules {
 
         $r = 0;
         $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-        $this->rights[$r][1] = 'Read objects of My Module'; // Permission label
+        $this->rights[$r][1] = 'Read restrictions'; // Permission label
         $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
         $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
-        $r++;
-        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-        $this->rights[$r][1] = 'Create/Update objects of My Module'; // Permission label
-        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
-        $this->rights[$r][4] = 'create';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-
-        $r++;
-        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-        $this->rights[$r][1] = 'Delete objects of My Module'; // Permission label
-        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
-        $this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//        $r++;
+//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+//        $this->rights[$r][1] = 'Create/Update objects of My Module'; // Permission label
+//        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
+//        $this->rights[$r][4] = 'create';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//
+//        $r++;
+//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+//        $this->rights[$r][1] = 'Delete objects of My Module'; // Permission label
+//        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
+//        $this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         // Main menu entries
         $this->menu = array();   // List of menus to add
         $r = 1;

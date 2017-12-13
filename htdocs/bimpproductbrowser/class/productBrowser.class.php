@@ -346,8 +346,8 @@ class BimpProductBrowser extends CommonObject {
             foreach ($filles as $fille) {
                 foreach ($obj->selectedCat as $catSelected) {
                     if ($catSelected->id === $fille->id) {
-                        $child->selected->id = $fille->id;
-                        $child->selected->label = $fille->label;
+                        $child->selectedId = $fille->id;
+                        $child->selectedLabel = $fille->label;
                         $child->cnt++;
                     }
                 }

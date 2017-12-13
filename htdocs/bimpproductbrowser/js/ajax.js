@@ -157,10 +157,6 @@ function initPage() {
 $(document).ready(function () {
     initPage();
     retrieveCateg();
-//    console.log("objs " + objs);
-//    console.log("cnt " + cnt);
-//    console.log("cntRestr " + cntRestr);
-//    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -170,29 +166,25 @@ $(document).ready(function () {
             deleteFrom($(this).attr('id'), $(this).attr('name'));
         } else if ($(this).hasClass('divNavAnnexe')) {
 //            var tmp = $(this).text().replace($(this).attr("value"), '');
-var OG = $(this).attr('originalName');
+            var OG = $(this).attr('originalName');
             $(this).text(OG);
-            deleteAnnexe($(this).attr('name'));
+            deleteAnnexe($(this).attr('name'), $(this).attr('id'));
             $(this).removeAttr('name');
             $(this).removeAttr('value');
             deleteAllDivs();
-            addAnnexeDivs($(this).attr('id'));
+            addNextDiv();
         } else if ($(this).hasClass('divForAnnexe')) {
             changeAnnexeDivs($(this).attr('idMother'), $(this).text(), $(this).attr('id'));
             addCatInProd($(this).attr('id'), true);
             deleteAllDivs();
-            addDivs();
+            addNextDiv()
         } else {
             catArr.push($(this).attr('id'));
             addCatInProd($(this).attr('id'), false);
             deleteAllDivs();
             changeNavDiv($(this).text());
-            addDivs();
+            addNextDiv();
         }
-//        console.log("objs " + objs);
-//        console.log("cnt " + cnt);
-//        console.log("cntRestr " + cntRestr);
-//        console.log("catArr " + catArr);
     });
 });
 
@@ -226,16 +218,36 @@ function retrieveCateg() {
         addAnnexeNavDivs(objInit.child[i], i);
     }
     addWays();
-    if (start != undefined)
-        addAnnexeDivs(start);
-    else
+    addNextDiv();
+}
+
+/* Search if there are annexes categories which aren't filled, else 
+ * search if there are normals categories which aren't filled, then add divs */
+function addNextDiv() {
+    var id = -1;
+    for (var i = 0; i < annexes.length; i++) {
+        if (annexes[i].selectedId === undefined || annexes[i].selectedId === null) {
+            id = annexes[i].id;
+            break;
+        }
+    }
+    if (id != -1) {
+        addAnnexeDivs(id);
+    } else {
         addDivs();
+    }
 }
 
 function changeAnnexeDivs(idMother, label, id) {
     $("#impliedContainer").find('#' + idMother.toString()).append(':<br>' + label);
     $("#impliedContainer").find('#' + idMother.toString()).attr('name', id);
     $("#impliedContainer").find('#' + idMother.toString()).attr('value', label);
+
+    var cat = $.grep(annexes, function (elt) {
+        return elt.id == idMother;
+    })[0];
+    cat.selectedLabel = label;
+    cat.selectedId = id;
 }
 
 
@@ -283,7 +295,7 @@ function deleteFrom(id_div) {
     catArr.length = id_div;
 //    console.log("suppression de : " + catOutWithoutAnnexe);
     deleteCateg(catOut);
-    addDivs();
+    addNextDiv();
 }
 
 
@@ -332,18 +344,23 @@ function addNavDivs(restr, k) {
             .appendTo('#navContainer');
 }
 
-function deleteAnnexe(name) {
+function deleteAnnexe(name, id) {
     catToDelete = [];
     catToDelete.push(name);
     deleteCateg(catToDelete);
+    var cat = $.grep(annexes, function (elt) {
+        return elt.id == id;
+    })[0];
+    cat.selectedLabel = null;
+    cat.selectedId = null;
 }
 
 function addAnnexeNavDivs(child, i) {
     var nameChild;
     var val;
-    if (child.selected !== undefined) {
-        nameChild = child.selected.id;
-        val = ' :<br>' + child.selected.label;
+    if (child.selectedId !== undefined && child.selectedId !== null) {
+        nameChild = child.selectedId;
+        val = ' :<br>' + child.selectedLabel;
     } else {
         nameChild = 'NO_CHILD_SELECTED';
         val = '';
@@ -377,7 +394,7 @@ function addAnnexeDivs(id) {
     var cat = $.grep(annexes, function (elt) {
         return elt.id == id;
     })[0];
-    
+
     $('<div></div><br>')
             .attr('id', cat.id)
             .attr('class', 'customDiv fixDiv')

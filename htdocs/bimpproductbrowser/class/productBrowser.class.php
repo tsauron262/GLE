@@ -411,8 +411,99 @@ class BimpProductBrowser extends CommonObject {
       var cntRestr = [];
       var catArr = [];
      */
+    
+    function getRestriction($id_cat){
+        $sql = 'SELECT fk_child_cat';
+        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
+        $sql.= ' WHERE fk_parent_cat = ' . $id_cat;
+        
+        $tabResult = array();
+        $result = $this->db->query($sql);
+        if($this->db->num_rows($result) < 1)
+            return false;//pas de restriction
+        else{
+            while($ligne = $this->db->fetch_object($result))
+                $tabResult[] = $ligne->fk_child_cat;
+        }
+        return $tabResult;
+    }
+    
+    
+    function getStatut($id_prod){
+        global $conf;
+        $catsT = $this->getProdCateg($id_prod);
+        
+//        $prod = new Product($this->db);
+//        $prod->fetch($id_prod);
+//        $prod->getCate
+        $cats = array($conf->global->BIMP_ROOT_CATEGORY => array());
+        $catsRestr = array();
+        $catsNonRestr = array();
+        $idsCatObligatoir = array();
+        $idsRestrNonSatisfaite = array();
+        $catOK = array();
+        
+        $catT = new Categorie($this->db);
+        
+        foreach($catsT->prod as $cat){
+            $cats[$cat->id] = $cat;
+        }
+        foreach($cats as $catId => $cat){
+            $result = $this->getRestriction($catId);
+            if(!$result)
+                $catsNonRestr[$catId] =  $cat->print_all_ways();//array("nom"=>$cat->label,"id"=>$catId);
+            else{
+                $catsRestr[$catId] =  $catId;
+                foreach($result as $catOb)
+                    $idsCatObligatoir[$catOb] = $catOb;//Attention que des id
+            }
+        }
+        
+        foreach($idsCatObligatoir as $idCatObligatoir){//On parcoure les obligation et on en cherche une non satisfaite
+            $ok = false;
+            $catT->fetch($idCatObligatoir);
+            foreach($cats as $cat){
+                if($cat->fk_parent == $idCatObligatoir){
+                        $catOK[$idCatObligatoir] = array("nomMere"=>$catT->label,"idMere"=>$idCatObligatoir, "nomFille"=>$cat->label, "idFille"=>$cat->id);
+                        $ok =true;
+                        Unset($catsNonRestr[$cat->id]);
+                    break;
+                }
+            }
+            
+            if(!$ok){
+                $idsRestrNonSatisfaite[$idCatObligatoir] = array("nomMere"=>$catT->label,"idMere"=>$idCatObligatoir);
+            }
+        }
+        
+        
+        $result = array("ROOT_CATEGORY"=>$conf->global->BIMP_ROOT_CATEGORY, "catOk" => $catOK, "waysAnnexesCategories" => $catsNonRestr, "restrictionNonSatisfaite" => $idsRestrNonSatisfaite);
+        
+        
+        
+        
+        if(count($idsRestrNonSatisfaite) > 0){
+            $result["catAChoisir"] = array();
+            foreach($idsRestrNonSatisfaite as $idT => $inut){
+                $catT->fetch($idT);
+                $filles = $catT->get_filles();
+                foreach($filles as $catT2)
+                    $result["catAChoisir"][$catT2->id] =  array("nom"=>$catT2->label,"id"=>$catT2->id);
+                break;
+            }
+        }
+        
+        
+//        echo "<pre>";
+//        print_r($result);
+//        die;
+        
+        return $result;
+    }
 
     function getOldWay($id_prod) {
+        if(GETPOST("test") == "test")
+            return $this->getStatut($id_prod);
         global $conf;
         $obj = new stdClass();
         $obj->ROOT_CATEGORY = $conf->global->BIMP_ROOT_CATEGORY;

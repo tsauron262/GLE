@@ -11,6 +11,7 @@ var objs = [];  /*
 var cnt = 0;
 var cntRestr = [];
 var catArr = [];
+var annexes = [];
 
 var objInit;   // existing categories before the execution
 
@@ -56,7 +57,7 @@ function deleteCateg(catOut) {
     });
 }
 
-function addCatInProd(id_categ) {
+function addCatInProd(id_categ, isAnnexe) {
     id_prod = getUrlParameter('id');
 
     $.ajax({
@@ -73,6 +74,38 @@ function addCatInProd(id_categ) {
         },
         success: function (objOut) {
             obj = JSON.parse(objOut);
+            if (!isAnnexe) {
+                cntRestr[cnt] = 0;
+                for (i = 0; i < obj.tabRestr.length; i++) {
+                    objs.push(obj.tabRestr[i]);
+                    cntRestr[cnt]++;
+                }
+            } else {
+                for (i = 0; i < obj.tabRestr.length; i++) {
+                    annexes.push(obj.tabRestr[i]);
+                }
+            }
+        }
+    });
+}
+
+function addImpliedCatInProd(id_categ) {
+    id_prod = getUrlParameter('id');
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
+        data: {
+            id_prod: id_prod,
+            id_categ: id_categ,
+            action: 'addImpliedCategory'
+        },
+        async: false,
+        error: function () {
+            alert("Error");
+        },
+        success: function (objOut) {
+            obj = JSON.parse(objOut);
             cntRestr[cnt] = 0;
             for (i = 0; i < obj.tabRestr.length; i++) {
                 objs.push(obj.tabRestr[i]);
@@ -82,15 +115,23 @@ function addCatInProd(id_categ) {
     });
 }
 
-
 /*
  *  When the document is loaded
  */
 
-$(document).ready(function () {
-    /* Nav bar */
+function initPage() {
+    /* Annexes categories bar */
     $('<div></div>')
             .attr('id', 'otherContainer')
+            .attr('class', 'customBody')
+            .appendTo('.fiche');
+    $('<div><div>')
+            .attr('class', 'underbanner clearboth')
+            .appendTo('.fiche');
+
+    /* Annexes categories implied bar */
+    $('<div></div>')
+            .attr('id', 'impliedContainer')
             .attr('class', 'customBody')
             .appendTo('.fiche');
     $('<div><div>')
@@ -111,12 +152,15 @@ $(document).ready(function () {
             .attr('id', 'mainContainer')
             .attr('class', 'customBody')
             .appendTo('.fiche');
+}
 
+$(document).ready(function () {
+    initPage();
     retrieveCateg();
-    console.log("objs " + objs);
-    console.log("cnt " + cnt);
-    console.log("cntRestr " + cntRestr);
-    console.log("catArr " + catArr);
+//    console.log("objs " + objs);
+//    console.log("cnt " + cnt);
+//    console.log("cntRestr " + cntRestr);
+//    console.log("catArr " + catArr);
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
@@ -124,23 +168,38 @@ $(document).ready(function () {
             location.href = DOL_URL_ROOT + '/bimpproductbrowser/browse.php?id=' + objInit.ROOT_CATEGORY;
         } else if ($(this).hasClass('navDiv')) {
             deleteFrom($(this).attr('id'), $(this).attr('name'));
+        } else if ($(this).hasClass('divNavAnnexe')) {
+//            var tmp = $(this).text().replace($(this).attr("value"), '');
+var OG = $(this).attr('originalName');
+            $(this).text(OG);
+            deleteAnnexe($(this).attr('name'));
+            $(this).removeAttr('name');
+            $(this).removeAttr('value');
+            deleteAllDivs();
+            addAnnexeDivs($(this).attr('id'));
+        } else if ($(this).hasClass('divForAnnexe')) {
+            changeAnnexeDivs($(this).attr('idMother'), $(this).text(), $(this).attr('id'));
+            addCatInProd($(this).attr('id'), true);
+            deleteAllDivs();
+            addDivs();
         } else {
             catArr.push($(this).attr('id'));
-            addCatInProd($(this).attr('id'));
+            addCatInProd($(this).attr('id'), false);
             deleteAllDivs();
             changeNavDiv($(this).text());
             addDivs();
         }
-        console.log("objs " + objs);
-        console.log("cnt " + cnt);
-        console.log("cntRestr " + cntRestr);
-        console.log("catArr " + catArr);
+//        console.log("objs " + objs);
+//        console.log("cnt " + cnt);
+//        console.log("cntRestr " + cntRestr);
+//        console.log("catArr " + catArr);
     });
 });
 
 /*
  *  Annexe functions
  */
+
 
 function retrieveCateg() {
     getOldWay();
@@ -151,17 +210,34 @@ function retrieveCateg() {
     cntRestr = objInit.cntRestr;
     cnt = objInit.cnt;
     catArr = objInit.catArr;
-    k = 0;
+    annexes = objInit.child;
     for (i = 0; i < objInit.catsToAdd.length; i++) {
         objs.push(objInit.catsToAdd[i]);
         if (objInit.catsToAdd[i].selectedLabel) {
-            addNavDivs(objInit.catsToAdd[i], k);
-            k++;
+            addNavDivs(objInit.catsToAdd[i], i);
         }
     }
+    for (i = 0; i < objInit.child.length; i++) {
+        if (objInit.child[i].selected == undefined && startDefined != undefined) {
+            var start;
+            var startDefined = true;
+            start = child[i].id;
+        }
+        addAnnexeNavDivs(objInit.child[i], i);
+    }
     addWays();
-    addDivs();
+    if (start != undefined)
+        addAnnexeDivs(start);
+    else
+        addDivs();
 }
+
+function changeAnnexeDivs(idMother, label, id) {
+    $("#impliedContainer").find('#' + idMother.toString()).append(':<br>' + label);
+    $("#impliedContainer").find('#' + idMother.toString()).attr('name', id);
+    $("#impliedContainer").find('#' + idMother.toString()).attr('value', label);
+}
+
 
 function addWays() {
     $('<p></p><br>')
@@ -254,6 +330,67 @@ function addNavDivs(restr, k) {
             .attr('id', k)
             .attr('class', 'customDiv divClikable navDiv')
             .appendTo('#navContainer');
+}
+
+function deleteAnnexe(name) {
+    catToDelete = [];
+    catToDelete.push(name);
+    deleteCateg(catToDelete);
+}
+
+function addAnnexeNavDivs(child, i) {
+    var nameChild;
+    var val;
+    if (child.selected !== undefined) {
+        nameChild = child.selected.id;
+        val = ' :<br>' + child.selected.label;
+    } else {
+        nameChild = 'NO_CHILD_SELECTED';
+        val = '';
+    }
+
+    if (child.unremovable === true)
+        $('<div>' + child.label + val + '</div>')
+                .attr('id', child.id)
+//                .attr('idDiv', i)
+                .attr('class', 'customDiv divClikable divNavAnnexe unremovable')
+                .attr('originalName', child.label)
+                .attr('name', nameChild)
+                .attr('value', val.replace('<br>', ''))
+                .appendTo('#impliedContainer');
+    else
+        $('<div>' + child.label + val + '</div>')
+                .attr('id', child.id)
+//                .attr('idDiv', i)
+                .attr('class', 'customDiv divClikable divNavAnnexe')
+                .attr('originalName', child.label)
+                .attr('name', nameChild)
+                .attr('value', val.replace('<br>', ''))
+                .appendTo('#impliedContainer');
+}
+
+function addAnnexeDivs(id) {
+//    $('<div>' + objs[cntA].label + '</div>')
+//            .attr('id', cntA)
+//            .attr('class', 'customDiv divClikable navDiv')
+//            .appendTo('#navContainer');
+    var cat = $.grep(annexes, function (elt) {
+        return elt.id == id;
+    })[0];
+    
+    $('<div></div><br>')
+            .attr('id', cat.id)
+            .attr('class', 'customDiv fixDiv')
+            .text(cat.label)
+            .appendTo('#mainContainer');
+    for (var i = 0; i < cat.tabIdChild.length; i++) {
+        $('<div>' + cat.tabNameChild[i] + '<a class="fillTheDiv" href=""></a></div>')
+                .attr('id', cat.tabIdChild[i])
+                .attr('idMother', cat.id)
+                .attr('class', 'customDiv divClikable divForAnnexe')
+                .appendTo('#mainContainer');
+    }
+//    ++cnt;
 }
 
 function changeNavDiv(text) {

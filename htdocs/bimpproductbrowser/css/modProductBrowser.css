@@ -35,6 +35,10 @@ strong {
     display: inline;
 }
 
+.unremovable {
+    background-color:#8b9fbf;
+}
+
 .navDiv {
 }
 

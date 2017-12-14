@@ -54,6 +54,20 @@ sections:
                         name: fournisseurs
                         object: demande
                         
+          fichiers:
+              label: Fichiers
+              url_params:
+                  id: 
+                      request: id
+              sections:
+                  - type: list
+                    list: 
+                        title: Fichier joints
+                        name: default
+                        panel: 1
+                        object: demande
+                        association: files
+                        
     - type: list
       list:
           panel: 1

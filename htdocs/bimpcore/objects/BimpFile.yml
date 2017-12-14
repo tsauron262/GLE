@@ -1,0 +1,85 @@
+table: bimp_file
+
+labels: 
+    name: fichier
+    
+common_fields: 1
+
+fields:
+    files_dir:
+        label: Dossier de destination
+        type: string
+        input: 
+            type: hidden
+    file_name:
+        label: Nom
+        type: string
+        sortable: 1
+        search: 1
+        
+    file_size:
+        label: Taille
+        type: int
+        input: 
+            type: hidden
+        sortable: 1
+        search: 1
+            
+    file_type: 
+        label: Type
+        type: string
+        values: 
+            array: types
+        display:
+            icon: 
+                icon_only: 1
+        sortable: 1
+        search: 1
+                
+    description:
+        label: Description
+        type: text
+        input:
+            auto_expand: 1
+            rows: 1
+
+forms:
+    upload: 
+        rows:
+            - field: files_dir
+            - label: Fichier
+              input:
+                  name: file
+                  type: file_upload
+            - field: file_name
+              label: Nom à donner au fichier
+            - field: description
+
+lists:
+    default:
+        title: Fichiers
+        checkboxes: 1
+        add_form: upload
+        bulk_actions: 
+            - label: Supprimer les fichiers sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        sort_col: id
+        sort_way: desc
+        n: 10
+        cols:
+            type: 
+                field: file_type
+                display: icon
+            nom:
+                field: file_name
+            size: 
+                field: file_size
+            date:
+                label: Date
+                field: date_create
+            descripton: 
+                field: description
+                
+    

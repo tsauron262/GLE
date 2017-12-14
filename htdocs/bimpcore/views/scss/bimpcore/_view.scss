@@ -26,7 +26,7 @@
 .objectViewtable {
     width: 100%;
 
-    thead tr th {
+    & > thead > tr > th {
         padding: 8px 12px;
         background-color: #c8c8c8;
         color: $gray_darker;
@@ -34,41 +34,46 @@
         font-size: 16px;
         font-weight: normal;
     }
-    
-    tbody tr {
-        th, td {
-            padding: 5px 10px;
+
+    & > tbody {
+        & > tr:last-child {
+            & > th, & > td {
+                border-bottom: none;
+            }
         }
-        th {
-            width: 20%;
-            min-width: 90px;
-            background-color: $primary;
-            color: #fff;
-            font-weight: bold;
-            vertical-align: top;
-            text-align: right;
-            border-bottom: 1px solid #fff;
-        }
-        td {
-            border-bottom: 1px solid $gray-light;
-            
-            .inputContainer,
-            .inputGroupContainer {
-                margin-right: 10px;
+
+        & > tr {
+            & > th, & > td {
+                padding: 5px 10px;
+            }
+            & > th {
+                width: 20%;
+                min-width: 90px;
+                background-color: $primary;
+                color: #fff;
+                font-weight: bold;
+                vertical-align: top;
+                text-align: right;
+                border-bottom: 1px solid #fff;
+            }
+            & > td {
+                border-bottom: 1px solid $gray-light;
+
+                .inputContainer,
+                .inputGroupContainer {
+                    margin-right: 10px;
+                }
+                .form-control {
+                    width: auto!important;
+                }
             }
         }
     }
-    
-    tfoot tr td {
+
+    & > tfoot > tr > td {
         text-align: right;
         padding: 5px 10px;
         background-color: $gray-lighter;
-    }
-
-    tbody tr:last-child {
-        th, td {
-            border-bottom: none;
-        }
     }
 }
 .object_card_table {    

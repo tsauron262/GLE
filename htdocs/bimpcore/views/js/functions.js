@@ -3,8 +3,7 @@
 
 // Traitements Ajax:
 var ajaxRequestsUrl = './index.php';
-
-function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCallBack, display_processing) {
+function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCallBack, display_processing, ajax_params) {
     var display_result_errors_only = false;
     if ((typeof (successCallBack) === 'string') ||
             typeof (successCallBack) === 'function') {
@@ -19,13 +18,6 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
         bimp_display_msg('Traitement en cours', $resultContainer, 'info');
     }
 
-    if (typeof (data) === 'object') {
-        data.ajax = 1;
-        data.action = action;
-    } else if (typeof (data) === 'string') {
-        data += '&ajax=1&action=' + action;
-    }
-
     var ajaxRequestUrl = '';
     if (typeof (data.ajaxRequestUrl) !== 'undefined') {
         ajaxRequestUrl = data.ajaxRequestUrl;
@@ -33,12 +25,32 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
         ajaxRequestUrl = ajaxRequestsUrl;
     }
 
-    $.ajax({
-        type: "POST",
-        url: ajaxRequestUrl,
-        dataType: 'json',
-        data: data,
-        success: function (result) {
+    if (!/\?/.test(ajaxRequestUrl)) {
+        ajaxRequestUrl += '?';
+    } else {
+        ajaxRequestUrl += '&';
+    }
+    ajaxRequestUrl += 'ajax=1&action=' + action;
+
+    if (typeof (ajax_params) === 'undefined') {
+        var ajax_params = {};
+    }
+
+    if (typeof (ajax_params.type) === 'undefined') {
+        ajax_params.type = "POST";
+    }
+
+    if (typeof (ajax_params.url) === 'undefined') {
+        ajax_params.url = ajaxRequestUrl;
+    }
+    if (typeof (ajax_params.dataType) === 'undefined') {
+        ajax_params.dataType = 'json';
+    }
+    if (typeof (ajax_params.data) === 'undefined') {
+        ajax_params.data = data;
+    }
+    if (typeof (ajax_params.success) === 'undefined') {
+        ajax_params.success = function (result) {
             bimp_displayAjaxResult(result, $resultContainer, display_result_errors_only);
             if (!result.errors.length) {
                 if ((typeof (result.success) === 'string') && result.success) {
@@ -54,8 +66,10 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
                     errorCallBack(result);
                 }
             }
-        },
-        error: function () {
+        };
+    }
+    if (typeof (ajax_params.error) === 'undefined') {
+        ajax_params.error = function () {
             if (typeof (errorCallBack) === 'string') {
                 bimp_display_msg(errorCallBack, $resultContainer, 'danger');
             } else {
@@ -64,8 +78,10 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
             if (typeof (errorCallBack) === 'function') {
                 errorCallBack();
             }
-        }
-    });
+        };
+    }
+
+    $.ajax(ajax_params);
 }
 
 function bimp_display_msg(msg, $container, className) {
@@ -156,7 +172,6 @@ function toggleFoldableSection($caption) {
             $section.removeClass('open').addClass('closed');
             $(this).removeAttr('style');
         });
-
     } else {
         $content.stop().slideDown(250, function () {
             $section.removeClass('closed').addClass('open');
@@ -168,7 +183,7 @@ function toggleFoldableSection($caption) {
 // Evenements: 
 
 function setCommonEvents($container) {
-    // foldable sections: 
+// foldable sections: 
     $container.find('.foldable_section_caption').each(function () {
         if (!parseInt($(this).data('foldable_event_init'))) {
             $(this).click(function () {
@@ -177,7 +192,6 @@ function setCommonEvents($container) {
             $(this).data('foldable_event_init', 1);
         }
     });
-
     // foldable panels:
     $container.find('.panel.foldable').each(function () {
         if (!parseInt($(this).data('foldable_event_init'))) {
@@ -200,7 +214,6 @@ function setCommonEvents($container) {
             $(this).data('foldable_event_init', 1);
         }
     });
-
     // foldable view tables:
     $container.find('.objectViewtable.foldable').each(function () {
         var $table = $(this);
@@ -221,7 +234,6 @@ function setCommonEvents($container) {
             }
         });
     });
-
     // Popup
     $container.find('.displayPopupButton').each(function () {
         if (!parseInt($(this).data('event_init'))) {
@@ -229,10 +241,8 @@ function setCommonEvents($container) {
             $(this).data('event_init', 1);
         }
     });
-
     // bootstrap popover:
     $container.find('.bs-popover').popover();
-
     // Auto-expand: 
     $container.on('input.auto_expand', 'textarea.auto_expand', function () {
         var minRows = $(this).data('min_rows'), rows;
@@ -250,7 +260,6 @@ function setCommonEvents($container) {
                 minRows = 3;
             }
             this.baseScrollHeight = minRows * 16;
-
             this.rows = minRows;
             if (this.scrollHeight) {
                 rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
@@ -343,7 +352,6 @@ function displayMoneyValue(value, $container, classCss, currency) {
     }
 
     value = parseFloat(value);
-
     if (value < 0) {
         negatif = true;
         value = -value;
@@ -366,7 +374,6 @@ function displayMoneyValue(value, $container, classCss, currency) {
     value = lisibilite_nombre(value);
     if (negatif)
         value = "-" + value;
-
     $container.html('<span class="' + classCss + '">' + value + ' ' + currency + '</span>');
 }
 

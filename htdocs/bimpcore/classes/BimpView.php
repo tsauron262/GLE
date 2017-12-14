@@ -51,6 +51,7 @@ class BimpView
         }
 
         $labels = $this->object->getLabels();
+        $objects_change_reload = $this->object->getConf($this->view_path . '/objects_change_reload', '');
 
         $html .= '<script type="text/javascript">';
         $html .= 'object_labels[\'' . $this->object->object_name . '\'] = ' . json_encode($labels);
@@ -64,6 +65,7 @@ class BimpView
         $html .= ' data-object_name="' . $this->object->object_name . '"';
         $html .= ' data-view_name="' . $this->view_name . '"';
         $html .= ' data-id_object="' . $this->object->id . '"';
+        $html .= ' data-objects_change_reload="' . $objects_change_reload . '"';
         $html .= '>';
 
         $content = '';

@@ -10,7 +10,17 @@ class BimpList
     public $listIdentifier = null;
     public $title = null;
     public $icon = null;
-    protected $user_config = null;
+    public $user_config = null;
+    public $checkboxes = false;
+    public $search = false;
+    public $addobjectRow = false;
+    public $addForm = null;
+    public $use_positions = false;
+    public $sort_col = null;
+    public $sort_way = 'desc';
+    public $sort_option = '';
+    public $n = 1;
+    public $p = 1;
     protected $cols = null;
     protected $filters = array();
     protected $association_filters = array();
@@ -18,16 +28,6 @@ class BimpList
     protected $rows = null;
     protected $colspan = 0;
     protected $bulk_actions = array();
-    protected $checkboxes = false;
-    protected $search = false;
-    protected $addobjectRow = false;
-    protected $addForm = null;
-    protected $use_positions = false;
-    protected $sort_col = null;
-    protected $sort_way = 'desc';
-    protected $sort_option = '';
-    protected $n = 1;
-    protected $p = 1;
     protected $nbTotalPages = 1;
     protected $nbItems = null;
     public $errors = array();
@@ -140,12 +140,58 @@ class BimpList
                         'icon'    => 'unlink'
                     );
                     $this->association_filters[] = array(
-                        'type'          => 'in',
-                        'association'   => $association,
-                        'id_associate ' => $id_associate
+                        'type'         => 'in',
+                        'association'  => $association,
+                        'id_associate' => $id_associate
                     );
                 }
             }
+        }
+    }
+
+    public function addObjectAssociationFilter($object, $id_object, $association, $type = 'in')
+    {
+        $bimpAsso = new BimpAssociation($object, $association);
+        if (!count($bimpAsso->errors)) {
+            if (is_a($bimpAsso->associate, 'BimpObject') &&
+                    ($bimpAsso->associate->module === $this->object->module) &&
+                    $bimpAsso->associate->object_name === $this->object->object_name) {
+                $this->association_filters[] = array(
+                    'type'          => $type,
+                    'object_module' => $object->module,
+                    'object_name'   => $object->object_name,
+                    'id_object'     => $id_object,
+                    'association'   => $association
+                );
+            } else {
+                $this->errors[] = 'Filtre invalide pour l\'association "' . $association . '"';
+            }
+        } else {
+            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+        }
+    }
+
+    public function setAddFormName($name)
+    {
+        if (is_null($this->addForm)) {
+            $this->addForm = array();
+        }
+
+        $this->addForm['name'] = $name;
+    }
+
+    public function setAddFormValues($values)
+    {
+        if (is_null($this->addForm)) {
+            $this->addForm = array();
+        }
+
+        if (!isset($this->addForm['values'])) {
+            $this->addForm['values'] = array();
+        }
+
+        foreach ($values as $field_name => $value) {
+            $this->addForm['values'][$field_name] = $value;
         }
     }
 
@@ -221,26 +267,46 @@ class BimpList
         // Filtres selon objets associés:
         if (count($this->association_filters)) {
             foreach ($this->association_filters as $asso_filter) {
-                $bimp_asso = new BimpAssociation($this->object, $asso_filter['association']);
-                if (!count($bimp_asso->errors)) {
-                    $alias = 'asso_' . $asso_filter['association'];
-                    $sql = BimpTools::getSqlSelect(array('src_id_object'), $alias);
-                    $sql .= BimpTools::getSqlFrom(BimpAssociation::$table, null, $alias);
-                    $sql .= BimpTools::getSqlWhere($bimp_asso->getSqlFilters(null, $asso_filter['id_associate'], $alias));
-                    $id_filter = '';
-                    if (isset($filters['id'])) {
-                        $id_filter = $filters['id'];
+                $object = null;
+                $id_associate = null;
+                $id_object = null;
+                $return_field = '';
+
+                if (isset($asso_filter['object_module']) && isset($asso_filter['object_name'])) {
+                    $object = BimpObject::getInstance($asso_filter['object_module'], $asso_filter['object_name']);
+                    if (isset($asso_filter['id_object'])) {
+                        $id_object = (int) $asso_filter['id_object'];
+                        $object->fetch($id_object);
                     }
-                    $filters['id'] = array('and' => array());
-                    if ($id_filter) {
-                        $filters['id']['and'][] = $id_filter;
+                    $return_field = 'dest_id_object';
+                } elseif (isset($asso_filter['id_associate'])) {
+                    $object = $this->object;
+                    $id_associate = (int) $asso_filter['id_associate'];
+                    $return_field = 'src_id_object';
+                }
+
+                if (!is_null($object)) {
+                    $bimp_asso = new BimpAssociation($object, $asso_filter['association']);
+                    if (!count($bimp_asso->errors)) {
+                        $alias = 'asso_' . $asso_filter['association'];
+                        $sql = BimpTools::getSqlSelect(array('src_id_object'), $alias);
+                        $sql .= BimpTools::getSqlFrom(BimpAssociation::$table, null, $alias);
+                        $sql .= BimpTools::getSqlWhere($bimp_asso->getSqlFilters($id_object, $id_associate, $alias));
+                        $id_filter = '';
+                        if (isset($filters['id'])) {
+                            $id_filter = $filters['id'];
+                        }
+                        $filters['id'] = array('and' => array());
+                        if ($id_filter) {
+                            $filters['id']['and'][] = $id_filter;
+                        }
+                        $filters['id']['and'][] = array(
+                            $asso_filter['type'] => $sql
+                        );
+                    } else {
+                        $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
+                        $filters['id'] = 0;
                     }
-                    $filters['id']['and'][] = array(
-                        $asso_filter['type'] => $sql
-                    );
-                } else {
-                    $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
-                    $filters['id'] = 0;
                 }
             }
         }
@@ -390,6 +456,7 @@ class BimpList
         $this->setConfPath();
 
         $labels = $this->object->getLabels();
+        $objects_change_reload = $this->object->getConf($this->list_path . '/objects_change_reload', '');
 
         $html = '<script type="text/javascript">';
         $html .= 'object_labels[\'' . $this->object->object_name . '\'] = ' . json_encode($labels);
@@ -403,6 +470,7 @@ class BimpList
         $content .= ' data-list_name="' . $this->list_name . '"';
         $content .= ' data-module_name="' . $this->object->module . '"';
         $content .= ' data-object_name="' . $this->object->object_name . '"';
+        $content .= ' data-objects_change_reload="' . $objects_change_reload . '"';
         $content .= '>';
 
         $content .= '<div class="objectViewContainer" style="display: none"></div>';
@@ -984,7 +1052,7 @@ class BimpList
                         $html .= 'window.location = \'' . $url . '\';';
                     } else {
                         $html .= 'displayObjectView($(\'#' . $this->listIdentifier . '_container\').find(\'.objectViewContainer\'), ';
-                        $html .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'default\', ' . $id_object.', \'default\'';
+                        $html .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'default\', ' . $id_object . ', \'default\'';
                         $html .= ');';
                     }
                     $html .= '"></span>';

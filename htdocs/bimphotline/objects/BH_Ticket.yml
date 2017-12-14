@@ -19,10 +19,24 @@ objects:
         instance: 
             dol_object: societe
             id_object:
-                prop:
-                    object: contrat
-                    name: socid
+                field_value: id_client
         card: societe_card
+    
+    contact:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: contact
+            id_object:
+                field_value: id_contact
+                
+    user_resp: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: user
+            id_object: 
+                field_value: id_user_resp
                 
     inters:
         relation: hasMany
@@ -100,6 +114,83 @@ fields:
                         table: contrat
                         field_value: ref
                         field_on: rowid
+         
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        input: 
+            type: custom
+            content: 
+                callback: getClientFormInput
+            display_if:
+                input_name: id_contrat
+                hide_values:
+                    array: 0,
+        depends_on: id_contrat
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: societe_card
+        sortable: 1
+        search:
+            input: 
+                type: search_societe
+                societe_type: customer
+                
+    id_contact:
+        label: Contact
+        type: id_object
+        object: contact
+        depends_on: id_contrat
+        input: 
+            type: select
+            options: 
+                array: client_contacts
+            display_if:
+                input_name: id_contrat
+                hide_values:
+                    array: 0,
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: contact_card
+        sortable: 1
+        search:
+            input:
+                type: search_list
+                search_list:
+                    table: socpeople
+                    field_return_value: rowid
+                    field_return_label: lastname,firstname
+                    fields_search: lastname,firstname
+                    label_syntaxe: <label_1> <label_2>
+                            
+    id_user_resp: 
+        label: Responsable
+        type: id_object
+        object: user_resp
+        input: 
+            type: hidden
+        default_value:
+            prop:
+                name: id
+                object: 
+                    global: user
+        display: 
+            nom_url: 
+                type: nom_url
+            card:
+                type: card
+                card: user_card
+        sortable: 1
+        search:
+            input: 
+                type: search_user
             
     ticket_number:
         label: N° ticket
@@ -115,10 +206,54 @@ fields:
             type: hidden
         display: field_value
         
+    priorite: 
+        label: Priorité
+        type: int
+        default_value: 1
+        values: 
+            array: priorities
+        display: 
+            default: 
+                type: array_value
+            icon:
+                type: array_value
+                icon_only: 1
+        input: 
+            type: hidden
+        search:
+            input: 
+                type: select
+                options:
+                    array: priorities
+        sortable: 1
+        
+    impact:
+        label: Impact
+        type: int
+        values: 
+            array: impacts
+        default_value: 1
+        display: 
+            default: 
+                type: array_value
+            icon:
+                type: array_value
+                icon_only: 1
+        sortable: 1
+        search: 1
+        
 forms: 
     default:
         rows: 
             - field: id_contrat
+            - field: id_client
+              content: 
+                  callback: getClientFormInput
+              label: Client 
+              
+              depends_on: id_contrat
+            - field: id_contact
+            - field: impact
             - association: equipments
               label: Equipements concernés
               input: 
@@ -136,6 +271,8 @@ views:
     main:
         title: nom
         delete_btn: 1
+        edit_form: default
+        objects_change_reload: BH_Inter
         rows:
             - cols: 
                   - type: object_common_fields
@@ -145,12 +282,21 @@ views:
                     col_lg: 9
                     fields_table:
                         rows:
+                            - field: id_user_resp
+                              display: card
                             - field: ticket_number
+                            - label: Durée totale
+                              value:
+                                  callback: displayDureeTotale
+                            - field: priorite
+                            - field: impact
                             - field: id_contrat
                               display: card
                             - label: Client
                               card: 
                                   object: client
+                            - field: id_contact
+                              display: card
                             - association: equipments
                               label: Equipements concernés
                               edit: 1
@@ -161,7 +307,7 @@ list:
         - label: supprimer les tickets sélectionnés
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-            
+    objects_change_reload: BH_Inter
     sort_col: date_create
     sort_way: desc
     n: 10
@@ -169,19 +315,34 @@ list:
         id:
             label: ID
             field: id
-        user_create:
-            label: Créé par
-            field: user_create
+        priorite:
+            label: Prio.
+            field: priorite
+            display: icon
+        impact:
+            label: Imp.
+            field: impact
+            display: icon
+        resp:
+            field: id_user_resp
+            display: nom_url
         date_create:
             label: Créé le
             field: date_create
         contrat:
             field: id_contrat
             display: nom_url
+        client: 
+            field: id_client
+            display: nom_url
+        contact:
+            field: id_contact
+            display: nom_url
         ticket:
             field: ticket_number
             
     add_form: default
+    edit_btn: 1
     delete_btn: 1
     view_btn: 1
     

@@ -70,7 +70,7 @@ $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
  */ 
 
 $categstatic = new Categorie($db);
-$pb = new BimpProductBrowser($db);
+$pb = new BimpProductBrowserConfig($db);
 
 $pb->fetch($object->id);
 

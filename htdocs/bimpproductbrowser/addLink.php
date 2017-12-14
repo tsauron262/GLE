@@ -29,7 +29,7 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/class/productBrowser.class.php';
 
-$pb = new BimpProductBrowser($db);
+$pb = new BimpProductBrowserConfig($db);
 $id = GETPOST('id_oject');
 $pb->fetch($id);
 

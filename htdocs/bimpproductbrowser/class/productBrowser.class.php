@@ -52,14 +52,9 @@ class BimpProductBrowser extends CommonObject {
         dol_syslog(get_class($this) . '::create', LOG_DEBUG);
     }
 
-    /**
-     *  Load an import profil from database
-     */
- 
-
     /* Create a link between a category and a product */
+
     function addProdToCat($id_prod, $id_categ) {
-        //$objOut = $this->getTabRestr($id_categ);
         if ($id_categ != 0) {
             $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'categorie_product (fk_categorie, fk_product)';
             $sql.= 'VALUES (' . $id_categ . ',' . $id_prod . ')';
@@ -74,6 +69,7 @@ class BimpProductBrowser extends CommonObject {
     }
 
     /* Delete a link between some categories and a product ($id_cat_out is an Array) */
+
     function deleteSomeCateg($id_prod, $id_cat_out) {
         foreach ($id_cat_out as $id_cat) {
             $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'categorie_product';
@@ -90,6 +86,7 @@ class BimpProductBrowser extends CommonObject {
     }
 
     /* get all categories attached to a product */
+
     function getProdCateg($id_prod) {
         $cat = array();
 
@@ -111,6 +108,7 @@ class BimpProductBrowser extends CommonObject {
     }
 
     /* Get category(s) implied by the cat with the id $id_cat */
+
     function getRestriction($id_cat) {
         $sql = 'SELECT fk_child_cat';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
@@ -127,7 +125,7 @@ class BimpProductBrowser extends CommonObject {
         return $tabResult;
     }
 
-    /** 
+    /**
      * Get every categories of the product. It consider also category that have
      * to be set (and isn't set yet).
      * 
@@ -204,12 +202,8 @@ class BimpProductBrowser extends CommonObject {
         return $result;
     }
 
-    /* Get restriction implied by the category
-     * Used by addProdCat !
-     */
-
-
     /* Used by the hook to determine if the product is fully categorized */
+
     function productIsCategorized($id_prod) {
         $obj = $this->getOldWay($id_prod);
 
@@ -221,15 +215,17 @@ class BimpProductBrowser extends CommonObject {
 
 }
 
+class BimpProductBrowserConfig extends CommonObject {
 
-class BimpProductBrowserConfig{
-        function __construct($db) {
-            global $conf;
-            $this->db = $db;
-        }
-    
-    
-       function fetch($id) {
+    function __construct($db) {
+        global $conf;
+        $this->db = $db;
+    }
+
+    /**
+     *  Load an import profil from database
+     */
+    function fetch($id) {
         $sql = 'SELECT fk_child_cat';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
         $sql.= ' WHERE fk_parent_cat = ' . $id;
@@ -249,6 +245,7 @@ class BimpProductBrowserConfig{
     }
 
     /* Create a link between a category and an other category */
+
     function insertRow($id_parent, $id_child) {
         $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
         $sql.= 'VALUES (' . $id_parent . ', ' . $id_child . ');';
@@ -262,6 +259,7 @@ class BimpProductBrowserConfig{
     }
 
     /* Delete a link between a category and an other category */
+
     function deleteRow($id_parent, $id_child) {
         $sql = 'DELETE';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
@@ -276,6 +274,7 @@ class BimpProductBrowserConfig{
     }
 
     /* Add and/or suppress row(s) from the bimp_cat_cat table */
+
     function changeRestrictions($checkboxs) {
         $objOut = null;
         $cntInsertion = 0;
@@ -304,4 +303,5 @@ class BimpProductBrowserConfig{
         $objOut->deletion = $cntDeletion;
         return $objOut;
     }
+
 }

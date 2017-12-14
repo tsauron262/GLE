@@ -77,7 +77,7 @@ function initNav() {
 
     /* Annexes categories implied bar */
     $('<div></div>')
-            .attr('id', 'impliedContainer')
+            .attr('id', 'annexeNavContainer')
             .attr('class', 'customBody')
             .appendTo('.fiche');
     $('<div><div>')
@@ -113,28 +113,45 @@ $(document).ready(function () {
         } else if ($(this).attr('id') === 'divToBrowse') {
             location.href = DOL_URL_ROOT + '/bimpproductbrowser/browse.php?id=' + objInit.ROOT_CATEGORY;
         } else if ($(this).hasClass('navDiv')) {
-
-        } else if ($(this).hasClass('divNavAnnexe')) {
+            deleteCategAfter($(this).attr('id'));
+            reloadAllAndPrint();
+        } /*else if ($(this).hasClass('divNavAnnexe')) {
 
         } else if ($(this).hasClass('divForAnnexe')) {
-
-        } else {
-//            reloadAllAndPrint();
-//            addCatInProd($(this).attr('id'));
+         
+         }*/else {
+            addCatInProd($(this).attr('id'));
+            reloadAllAndPrint();
         }
     });
 });
 
+/* Supress category and all after it */
+function deleteCategAfter(id) {
+    var categToremove = [] ;
+    categToremove.push($("#navContainer").find('#' + id).attr('idFille'));
+    $("#navContainer").find('#' + id).nextAll().each(function (elt) {
+        categToremove.push($(this).attr('idFille'));
+    });
+    deleteCateg(categToremove);
+}
+
 function reloadAllAndPrint() {
     getOldWay();
-    if (obj.ROOT_CATEGORY === null || obj.ROOT_CATEGORY === undefined) {
-        addErrorDivs();
-        return;
-    }
     resetAllDivs();
 }
 
 function resetAllDivs() {
+    $("#otherContainer").empty();
+    $("#annexeNavContainer").empty();
+    $("#navContainer").empty();
+    $("#mainContainer").empty();
+
+    if (obj.ROOT_CATEGORY === null || obj.ROOT_CATEGORY === undefined) {
+        addErrorDivs();
+        return;
+    }
+    
     addWays();
     addAllNav();
     addDivChoice();
@@ -145,22 +162,30 @@ function addWays() {
             .attr('style', 'margin-bottom:-15px ; margin-top: -5px')
             .text('Catégories hors module ')
             .appendTo('#otherContainer');
-
-    for (var id in obj.waysAnnexesCategories) {
+    var id;
+    for (id in obj.waysAnnexesCategories) {
         addOneWay(obj.waysAnnexesCategories[id]);
     }
 }
 
+function addOneWay(way) {
+    $('<li></li>')
+            .attr('class', "noborderoncategories customLi")
+            .attr('style', 'margin-right:5px ; background-color:#aaa')
+            .html(way)
+            .appendTo('#otherContainer');
+    $('<img>')
+            .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')
+            .attr('class', "inline-block valigntextbottom")
+}
+
 function addAllNav() {
     for (var id in obj.catOk) {
-        if(obj.catOk[id].lierARacine == true) {
-            $('<div>' + obj.catOk[id].nomMere + ' :<br>' + obj.catOk[id].nomFille + '</div>')
-                    .attr('id', id)
-                    .attr('class', 'customDiv divClikable navDiv')
-                    .appendTo('#navContainer');
-        } else {
-            
-        }
+        $('<div>' + obj.catOk[id].nomMere + ' :<br>' + obj.catOk[id].nomFille + '</div>')
+                .attr('id', id)
+                .attr('idFille', obj.catOk[id].idFille)
+                .attr('class', 'customDiv divClikable navDiv')
+                .appendTo('#navContainer');
     }
 }
 
@@ -170,7 +195,7 @@ function addDivChoice() {
                 .attr('class', 'customDiv divClikable')
                 .attr('id', 'divToBrowse')
                 .appendTo('#mainContainer');
-    } else if (obj.catAChoisir === null) {
+    } else if (obj.catAChoisir === undefined) {
         $('<div><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
                 .attr('class', 'customDiv divClikable')
                 .attr('id', 'divEnd')
@@ -185,24 +210,23 @@ function addDivChoice() {
                 .text(obj.catAChoisir['labelMere'])
                 .appendTo('#mainContainer');
         for (var id in obj.catAChoisir) {
-            $('<div>' + obj.catAChoisir[id].nom + '<a class="fillTheDiv" href=""></a></div>')
-                    .attr("id", id)
-                    .attr('class', 'customDiv divClikable')
-                    .appendTo('#mainContainer');
+            if (obj.catAChoisir[id].nom != undefined) {
+                $('<div>' + obj.catAChoisir[id].nom + '<a class="fillTheDiv" href=""></a></div>')
+                        .attr("id", id)
+                        .attr('class', 'customDiv divClikable')
+                        .appendTo('#mainContainer');
+            }
         }
     }
 }
 
-function addOneWay(way) {
-    $('<li></li>')
-            .attr('class', "noborderoncategories customLi")
-            .attr('style', 'margin-right:5px ; background-color:#aaa')
-            .html(way)
-            .appendTo('#otherContainer');
-    $('<img>')
-            .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')
-            .attr('class', "inline-block valigntextbottom")
-}
+
+
+
+
+
+
+
 
 
 
@@ -237,7 +261,7 @@ function addImpliedNav(cat) {
             .attr('originalName', cat.label)
             .attr('name', cat.selectedLabel)
             .attr('value', cat.selectedLabel)
-            .appendTo('#impliedContainer');
+            .appendTo('#annexeNavContainer');
 }
 
 function retrieveCateg() {
@@ -285,9 +309,9 @@ function addNextDiv() {
 }
 
 function changeAnnexeDivs(idMother, label, id) {
-    $("#impliedContainer").find('#' + idMother.toString()).append(':<br>' + label);
-    $("#impliedContainer").find('#' + idMother.toString()).attr('name', id);
-    $("#impliedContainer").find('#' + idMother.toString()).attr('value', label);
+    $("#annexeNavContainer").find('#' + idMother.toString()).append(':<br>' + label);
+    $("#annexeNavContainer").find('#' + idMother.toString()).attr('name', id);
+    $("#annexeNavContainer").find('#' + idMother.toString()).attr('value', label);
 
     var cat = $.grep(annexes, function (elt) {
         return elt.id == idMother;
@@ -395,7 +419,7 @@ function addAnnexeNavDivs(child, i) {
                 .attr('originalName', child.label)
                 .attr('name', nameChild)
                 .attr('value', val.replace('<br>', ''))
-                .appendTo('#impliedContainer');
+                .appendTo('#annexeNavContainer');
     else
         $('<div>' + child.label + val + '</div>')
                 .attr('id', child.id)
@@ -403,7 +427,7 @@ function addAnnexeNavDivs(child, i) {
                 .attr('originalName', child.label)
                 .attr('name', nameChild)
                 .attr('value', val.replace('<br>', ''))
-                .appendTo('#impliedContainer');
+                .appendTo('#annexeNavContainer');
 }
 
 function addAnnexeDivs(id) {

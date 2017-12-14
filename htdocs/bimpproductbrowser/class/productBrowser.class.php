@@ -223,7 +223,7 @@ class BimpProductBrowser extends CommonObject {
         }
         return $tabResult;
     }
-    
+
     function getOldWay($id_prod) {
         global $conf;
         $catsT = $this->getProdCateg($id_prod);
@@ -243,7 +243,7 @@ class BimpProductBrowser extends CommonObject {
         foreach ($catsT->prod as $cat) {
             $cats[$cat->id] = $cat;
         }
-        
+
         foreach ($cats as $catId => $cat) {
             $result = $this->getRestriction($catId);
             if (!$result)
@@ -298,6 +298,28 @@ class BimpProductBrowser extends CommonObject {
 //        die;
 
         return $result;
+    }
+
+    /* Used by addProdCat */
+    function getTabRestr($id_categ) {
+        $objOut = null;
+        $this->fetch($id_categ);
+        sort($this->id_childs);
+        $objOut->tabRestr = array();
+        for ($i = 0; $i < count($this->id_childs); $i++) {
+            $currentCat = new Categorie($this->db);
+            $currentCat->fetch($this->id_childs[$i]);
+            $objOut->tabRestr[$i]->idParent = $id_categ;
+            $objOut->tabRestr[$i]->label = $currentCat->label;
+            $objOut->tabRestr[$i]->tabIdChild = array();
+            $objOut->tabRestr[$i]->tabNameChild = array();
+            $arrChildCat = $currentCat->get_filles();
+            for ($j = 0; $j < count($arrChildCat); $j++) {
+                $objOut->tabRestr[$i]->tabIdChild[$j] = $arrChildCat[$j]->id;
+                $objOut->tabRestr[$i]->tabNameChild[$j] = $arrChildCat[$j]->label;
+            }
+        }
+        return $objOut;
     }
 
     function productIsCategorized($id_prod) {

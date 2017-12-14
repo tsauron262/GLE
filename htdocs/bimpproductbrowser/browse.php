@@ -70,7 +70,7 @@ $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
  */ 
 
 $categstatic = new Categorie($db);
-$pb = new BimpProductBrowser($db);
+$pb = new BimpProductBrowserConfig($db);
 
 $pb->fetch($object->id);
 
@@ -148,10 +148,16 @@ foreach($fulltree as $key => $val)
         $checked = ' checked';
     else
         $checked = '';
+    $newCat = new Categorie($db);
+    $newCat->fetch($val['id']);
+    if (!empty($newCat->get_filles()))
+        $textCheckbox = '<input type="checkbox" id='.$val['rowid'].$checked.'>';
+    else
+        $textCheckbox = '';
     $data[] = array(
     'rowid'=>$val['rowid'],
     'fk_menu'=>$val['fk_parent'],
-    'entry'=>'<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" '.($categstatic->color?' style="background: #'.$categstatic->color.';"':' style="background: #aaa"').'><input type="checkbox" id='.$val['rowid'].$checked.'>'.$li.'</span></td>'.
+    'entry'=>'<table class="nobordernopadding centpercent"><tr><td><span class="noborderoncategories" '.($categstatic->color?' style="background: #'.$categstatic->color.';"':' style="background: #aaa"').'>'.$textCheckbox.$li.'</span></td>'.
     //'<td width="50%">'.dolGetFirstLineOfText($desc).'</td>'.
     '<td align="right" width="20px;"><a href="'.DOL_DOCUMENT_ROOT.'/bimpproductbrowser/browse.php?id='.$val['id'].'"></a></td>'.
     '</tr></table>'

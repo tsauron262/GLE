@@ -32,8 +32,7 @@ $pb = new BimpProductBrowser($db);
 
 switch (GETPOST('action')) {
     case 'addCategory': {
-            $objOut = $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'));
-            echo json_encode($objOut);
+            $pb->addProdToCat(GETPOST('id_prod'), GETPOST('id_categ'));
             break;
         }
     case 'delSomeCateg': {
@@ -43,8 +42,6 @@ switch (GETPOST('action')) {
             $objOut = $pb->getOldWay(GETPOST('id_prod'));
             
             
-            if(GETPOST("test") != "")
-                echo "<pre>";print_r($objOut);die;
             echo json_encode($objOut);
         }
     default: break;

@@ -524,6 +524,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
         $text .= $textSuivie . "\n\nCordialement.
 \nL'équipe BIMP" . $signature;
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3);
+        //sendSms($chrono, "Bonjour, nous venons d'envoyer votre devis par mail. L'Equipe BIMP.");
     } elseif ($type == "debut") {
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agréé Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n" . $textSuivie . "
 \n Cordialement."

@@ -2,22 +2,6 @@ strong {
     font-size:32px;
 }
 
-.deleteButton {
-    clear:both;
-    cursor:pointer;
-    width:90px;
-    height:30px;
-    border-radius: 4px;
-    background-color: #5CD2D2;
-    border:none;
-    text-align:center;
-    line-height:10px;
-    color:#FFFFFF;
-    font-size:11px;
-    font-family:Arial, Helvetica, sans-serif;
-    font-weight:bold;
-}
-
 .customDiv {
     border-radius: 8px;
     margin:5px;

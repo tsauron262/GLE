@@ -204,7 +204,8 @@ function calculTotal(selecteur) {
 function hideShowAvance(hide){
     if($("#ca_calc").length > 0){
         var selecteur = "#montant_total, #montant_total2, #duree_total, #cout_banque, #loy_inter, #frais_div, #total_loyer,"
-                +"#periodicity_inputContainer, #mode_calcul_inputContainer, #duration_inputContainer";
+                +"#periodicity_inputContainer, #mode_calcul_inputContainer, #duration_inputContainer,"
+                +'[name="periodicity"], [name="mode_calcul"], [name="duration"]';
         var elems = $(selecteur).parent().parent();
         var elem2 = elems.parent().parent().find(".btn-primary").parent();
         var moreBut = "erreur";

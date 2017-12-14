@@ -282,7 +282,7 @@ class BimpProductBrowserConfig extends CommonObject {
 
         for ($i = 0; $i < sizeof($checkboxs); $i++) {
             $id_f = $checkboxs[$i]['id'];
-            if ($this->id != $id_f and ! in_array($id_f, $this->id_childs) and $id_f !== '') {
+            if (/*$this->id != $id_f and*/ ! in_array($id_f, $this->id_childs) and $id_f !== '') {
                 $this->insertRow($this->id, $id_f);
                 ++$cntInsertion;
             }

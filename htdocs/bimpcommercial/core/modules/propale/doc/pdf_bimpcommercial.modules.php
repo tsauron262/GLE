@@ -1216,7 +1216,7 @@ class pdf_bimpcommercial extends ModelePDFPropales
 		$pdf->SetXY($this->marge_gauche,$posy);
 
 		// Logo
-		$logo=$conf->bimpcommercial->dir_output.'/logos/'.$this->emetteur->logo;
+		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo)
 		{
 			if (is_readable($logo))

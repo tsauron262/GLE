@@ -54,9 +54,6 @@ class BimpProductBrowser extends CommonObject {
 
     /**
      *  Load an import profil from database
-     *
-     *  @param		int		$id		Id of profil to load
-     *  @return		int				<0 if KO, >0 if OK
      */
     function fetch($id) {
         $sql = 'SELECT fk_child_cat';
@@ -77,6 +74,7 @@ class BimpProductBrowser extends CommonObject {
         }
     }
 
+    /* Create a link between a category and an other category */
     function insertRow($id_parent, $id_child) {
         $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'bimp_cat_cat (fk_parent_cat, fk_child_cat) ';
         $sql.= 'VALUES (' . $id_parent . ', ' . $id_child . ');';
@@ -89,6 +87,7 @@ class BimpProductBrowser extends CommonObject {
         }
     }
 
+    /* Delete a link between a category and an other category */
     function deleteRow($id_parent, $id_child) {
         $sql = 'DELETE';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
@@ -102,11 +101,11 @@ class BimpProductBrowser extends CommonObject {
         }
     }
 
+    /* Add and/or suppress row(s) from the bimp_cat_cat table */
     function changeRestrictions($checkboxs) {
         $objOut = null;
         $cntInsertion = 0;
         $cntDeletion = 0;
-
 
         for ($i = 0; $i < sizeof($checkboxs); $i++) {
             $id_f = $checkboxs[$i]['id'];
@@ -132,9 +131,10 @@ class BimpProductBrowser extends CommonObject {
         return $objOut;
     }
 
+    /* Create a link between a category and a product */
     function addProdToCat($id_prod, $id_categ) {
         $objOut = $this->getTabRestr($id_categ);
-        if ($id_categ != 0 && $runInit == false) {
+        if ($id_categ != 0) {
             $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'categorie_product (fk_categorie, fk_product)';
             $sql.= 'VALUES (' . $id_categ . ',' . $id_prod . ')';
             try {
@@ -145,9 +145,9 @@ class BimpProductBrowser extends CommonObject {
                 $this->db->rollback();
             }
         }
-        return $objOut;
     }
 
+    /* Delete a link between some categories and a product ($id_cat_out is an Array) */
     function deleteSomeCateg($id_prod, $id_cat_out) {
         foreach ($id_cat_out as $id_cat) {
             $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'categorie_product';
@@ -163,9 +163,10 @@ class BimpProductBrowser extends CommonObject {
         }
     }
 
+    /* get all categories attached to a product */
     function getProdCateg($id_prod) {
-        $cat->prod = array();
-        $cat->mothers = array();
+        $cat = array();
+
         $sql = 'SELECT fk_categorie';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'categorie_product';
         $sql.= ' WHERE fk_product = ' . $id_prod;
@@ -174,10 +175,7 @@ class BimpProductBrowser extends CommonObject {
             while ($obj = $this->db->fetch_object($result)) {
                 $categ = New Categorie($this->db);
                 $categ->fetch($obj->fk_categorie);
-                $mother = New Categorie($this->db);
-                $mother->fetch($categ->fk_parent);
-                array_push($cat->prod, $categ);
-                array_push($cat->mothers, $mother);
+                array_push($cat, $categ);
             }
         } else {
             dol_print_error($this->db);
@@ -186,28 +184,7 @@ class BimpProductBrowser extends CommonObject {
         return $cat;
     }
 
-    function getCategRestrictions() {
-        $categRestr = null;
-        $categRestr->parent = array();
-        $categRestr->child = array();
-        $sql = 'SELECT fk_parent_cat, fk_child_cat';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
-        $sql.= ' ORDER BY fk_parent_cat';
-        $result = $this->db->query($sql);
-        $i = 0;
-        if ($result) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $categRestr->parent[$i] = $obj->fk_parent_cat;
-                $categRestr->child[$i] = $obj->fk_child_cat;
-                $i++;
-            }
-        } else {
-            dol_print_error($this->db);
-            return -3;
-        }
-        return $categRestr;
-    }
-
+    /* Get category(s) implied by the cat with the id $id_cat */
     function getRestriction($id_cat) {
         $sql = 'SELECT fk_child_cat';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
@@ -224,6 +201,13 @@ class BimpProductBrowser extends CommonObject {
         return $tabResult;
     }
 
+    /** 
+     * Get every categories of the product. It consider also category that have
+     * to be set (and isn't set yet).
+     * 
+     * @param type $id_prod the id of the product
+     * @return type Array with multiple off key-value combinaison
+     */
     function getOldWay($id_prod) {
         global $conf;
         $catsT = $this->getProdCateg($id_prod);
@@ -240,7 +224,7 @@ class BimpProductBrowser extends CommonObject {
 
         $catT = new Categorie($this->db);
 
-        foreach ($catsT->prod as $cat) {
+        foreach ($catsT as $cat) {
             $cats[$cat->id] = $cat;
         }
 
@@ -291,16 +275,12 @@ class BimpProductBrowser extends CommonObject {
                 break;
             }
         }
-
-
-//        echo "<pre>";
-//        print_r($result);
-//        die;
-
         return $result;
     }
 
-    /* Used by addProdCat */
+    /* Get restriction implied by the category
+     * Used by addProdCat !
+     */
     function getTabRestr($id_categ) {
         $objOut = null;
         $this->fetch($id_categ);
@@ -322,18 +302,14 @@ class BimpProductBrowser extends CommonObject {
         return $objOut;
     }
 
+    /* Used by the hook to determine if the product is fully categorized */
     function productIsCategorized($id_prod) {
         $obj = $this->getOldWay($id_prod);
-        $cnt = 0;
-        foreach ($obj->cntRestr as $count) {
-            $cnt += $count;
-        }
-        if ($cnt == $obj->cnt)
-            return 1;
-        else if ($cnt > $obj->cnt)
+
+        if ($obj['restrictionNonSatisfaite'] != null)
             return 0;
         else
-            return -1;
+            return 1;
     }
 
 }

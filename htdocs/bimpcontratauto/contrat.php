@@ -34,7 +34,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
 
-$arrayofcss = array('');
+$arrayofcss = array('/bimpcontratauto/css/BimpContratAuto.css');
 $arrayofjs = array('');
 
 
@@ -59,9 +59,12 @@ if ($socid > 0) {
     print '<div class="underbanner clearboth"></div>';
 }
 
-print '<form>';
+print '<form class="customForm">';
 
-//print '<div>';
+print '<div class="customDiv fixDiv">Maintenance</div><br>';
+print '<div class="customDiv divClikable">Non</div>';
+print '<div class="customDiv divClikable">12</div>';
+print '<div class="isSelected customDiv divClikable ">24</div>';
 
 
 print '</form>';

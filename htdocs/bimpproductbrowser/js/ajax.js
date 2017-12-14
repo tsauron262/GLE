@@ -1,19 +1,9 @@
-/* global DOL_URL_ROOT */
-var objs = [];  /*
- [
- obj.idParent
- obj.label
- obj.tabIdChild = []
- obj.tabNameChild = []
- ]
- */
 
-var cnt = 0;
-var cntRestr = [];
-var catArr = [];
-var annexes = [];
 
-var objInit;   // existing categories before the execution
+
+
+
+var obj = [];   // existing categories before the execution
 
 /*
  *  AJAX requests
@@ -35,7 +25,7 @@ function getOldWay() {
             console.log(error);
         },
         success: function (objOut) {
-            objInit = JSON.parse(objOut);
+            obj = JSON.parse(objOut);
         }
     });
 }
@@ -57,7 +47,7 @@ function deleteCateg(catOut) {
     });
 }
 
-function addCatInProd(id_categ, isAnnexe) {
+function addCatInProd(id_categ) {
     id_prod = getUrlParameter('id');
 
     $.ajax({
@@ -72,56 +62,10 @@ function addCatInProd(id_categ, isAnnexe) {
         error: function () {
             alert("Error");
         },
-        success: function (objOut) {
-            obj = JSON.parse(objOut);
-            if (!isAnnexe) {
-                cntRestr[cnt] = 0;
-                for (i = 0; i < obj.tabRestr.length; i++) {
-                    objs.push(obj.tabRestr[i]);
-                    cntRestr[cnt]++;
-                }
-            } else {
-                for (i = 0; i < obj.tabRestr.length; i++) {
-                    obj.tabRestr[i].id = obj.tabRestr[i].idParent;
-                    annexes.push(obj.tabRestr[i]);
-                    addImpliedNav(obj.tabRestr[i]);
-                }
-            }
-        }
     });
 }
 
-function addImpliedCatInProd(id_categ) {
-    id_prod = getUrlParameter('id');
-
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpproductbrowser/nextCategory.php",
-        data: {
-            id_prod: id_prod,
-            id_categ: id_categ,
-            action: 'addImpliedCategory'
-        },
-        async: false,
-        error: function () {
-            alert("Error");
-        },
-        success: function (objOut) {
-            obj = JSON.parse(objOut);
-            cntRestr[cnt] = 0;
-            for (i = 0; i < obj.tabRestr.length; i++) {
-                objs.push(obj.tabRestr[i]);
-                cntRestr[cnt]++;
-            }
-        }
-    });
-}
-
-/*
- *  When the document is loaded
- */
-
-function initPage() {
+function initNav() {
     /* Annexes categories bar */
     $('<div></div>')
             .attr('id', 'otherContainer')
@@ -156,39 +100,130 @@ function initPage() {
             .appendTo('.fiche');
 }
 
+/*
+ *  When the document is loaded
+ */
+
 $(document).ready(function () {
-    initPage();
-    retrieveCateg();
+    initNav();
+    reloadAllAndPrint();
     $(document).on("click", ".divClikable", function () {
         if ($(this).attr('id') === 'divEnd') {
             location.href = DOL_URL_ROOT + '/product/card.php?id=' + getUrlParameter('id');
         } else if ($(this).attr('id') === 'divToBrowse') {
             location.href = DOL_URL_ROOT + '/bimpproductbrowser/browse.php?id=' + objInit.ROOT_CATEGORY;
         } else if ($(this).hasClass('navDiv')) {
-            deleteFrom($(this).attr('id'), $(this).attr('name'));
+
         } else if ($(this).hasClass('divNavAnnexe')) {
-//            var tmp = $(this).text().replace($(this).attr("value"), '');
-            var OG = $(this).attr('originalName');
-            $(this).text(OG);
-            deleteAnnexe($(this).attr('name'), $(this).attr('id'));
-            $(this).removeAttr('name');
-            $(this).removeAttr('value');
-            deleteAllDivs();
-            addNextDiv();
+
         } else if ($(this).hasClass('divForAnnexe')) {
-            changeAnnexeDivs($(this).attr('idMother'), $(this).text(), $(this).attr('id'));
-            addCatInProd($(this).attr('id'), true);
-            deleteAllDivs();
-            addNextDiv();
+
         } else {
-            catArr.push($(this).attr('id'));
-            addCatInProd($(this).attr('id'), false);
-            deleteAllDivs();
-            changeNavDiv($(this).text());
-            addNextDiv();
+//            reloadAllAndPrint();
+//            addCatInProd($(this).attr('id'));
         }
     });
 });
+
+function reloadAllAndPrint() {
+    getOldWay();
+    if (obj.ROOT_CATEGORY === null || obj.ROOT_CATEGORY === undefined) {
+        addErrorDivs();
+        return;
+    }
+    resetAllDivs();
+}
+
+function resetAllDivs() {
+    addWays();
+    addAllNav();
+    addDivChoice();
+}
+
+function addWays() {
+    $('<p></p><br>')
+            .attr('style', 'margin-bottom:-15px ; margin-top: -5px')
+            .text('Catégories hors module ')
+            .appendTo('#otherContainer');
+
+    for (var id in obj.waysAnnexesCategories) {
+        addOneWay(obj.waysAnnexesCategories[id]);
+    }
+}
+
+function addAllNav() {
+    for (var id in obj.catOk) {
+        if(obj.catOk[id].lierARacine == true) {
+            $('<div>' + obj.catOk[id].nomMere + ' :<br>' + obj.catOk[id].nomFille + '</div>')
+                    .attr('id', id)
+                    .attr('class', 'customDiv divClikable navDiv')
+                    .appendTo('#navContainer');
+        } else {
+            
+        }
+    }
+}
+
+function addDivChoice() {
+    if (obj.restrictionNonSatisfaite === null && obj.catOk === null) {
+        $('<div>Aucune catégorie faisant partie de ce module n\'a été définie.<br> Cliquez ici pour en ajouter une.<a class="fillTheDiv" href=""></a></div>')
+                .attr('class', 'customDiv divClikable')
+                .attr('id', 'divToBrowse')
+                .appendTo('#mainContainer');
+    } else if (obj.catAChoisir === null) {
+        $('<div><strong><br>Merci</strong><br><br> Cliquez ici pour revenir<br>à la fiche du produit<a class="fillTheDiv" href=""></a></div>')
+                .attr('class', 'customDiv divClikable')
+                .attr('id', 'divEnd')
+                .appendTo('#mainContainer');
+    } else {
+        $('<div>' + obj.catAChoisir['labelMere'] + '</div>')
+                .attr('id', obj.catAChoisir['idMere'])
+                .attr('class', 'customDiv divClikable navDiv')
+                .appendTo('#navContainer');
+        $('<div></div><br>')
+                .attr('class', 'customDiv fixDiv')
+                .text(obj.catAChoisir['labelMere'])
+                .appendTo('#mainContainer');
+        for (var id in obj.catAChoisir) {
+            $('<div>' + obj.catAChoisir[id].nom + '<a class="fillTheDiv" href=""></a></div>')
+                    .attr("id", id)
+                    .attr('class', 'customDiv divClikable')
+                    .appendTo('#mainContainer');
+        }
+    }
+}
+
+function addOneWay(way) {
+    $('<li></li>')
+            .attr('class', "noborderoncategories customLi")
+            .attr('style', 'margin-right:5px ; background-color:#aaa')
+            .html(way)
+            .appendTo('#otherContainer');
+    $('<img>')
+            .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')
+            .attr('class', "inline-block valigntextbottom")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  *  Annexe functions
@@ -262,24 +297,7 @@ function changeAnnexeDivs(idMother, label, id) {
 }
 
 
-function addWays() {
-    $('<p></p><br>')
-            .attr('style', 'margin-bottom:-15px ; margin-top: -5px')
-            .text('Catégories hors module ')
-            .appendTo('#otherContainer');
-    for (i = 0; i < objInit.waysAnnexesCategories.length; i++) {
-        $('<li></li>')
-                .attr('class', "noborderoncategories customLi")
-                .attr('style', 'margin-right:5px ; background-color:#aaa')
-                .attr('id', 'idOther' + i)
-                .html(objInit.waysAnnexesCategories[i])
-                .appendTo('#otherContainer');
-        $('<img>')
-                .attr('src', DOL_URL_ROOT + '/theme/eldy/img/object_category.png')
-                .attr('class', "inline-block valigntextbottom")
-                .prependTo('#idOther' + i);
-    }
-}
+
 
 function deleteFrom(id_div) {
 

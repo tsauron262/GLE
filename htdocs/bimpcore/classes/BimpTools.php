@@ -530,6 +530,25 @@ class BimpTools
         return $return;
     }
 
+    public static function displayTimefromSeconds($total_seconds)
+    {
+        $timer = self::getTimeDataFromSeconds((int) $total_seconds);
+        $html = '<span class="timer">';
+        if ($timer['days'] > 0) {
+            $html .= $timer['days'] . ' j ';
+            $html .= $timer['hours'] . ' h ';
+            $html .= $timer['minutes'] . ' min ';
+        } elseif ($timer['hours'] > 0) {
+            $html .= $timer['hours'] . ' h ';
+            $html .= $timer['minutes'] . ' min ';
+        } elseif ($timer['minutes'] > 0) {
+            $html .= $timer['minutes'] . ' min ';
+        }
+        $html .= $timer['secondes'] . ' sec ';
+        $html .= '</span>';
+        return $html;
+    }
+
     // Devises: 
 
     public static function getCurrencyIcon($currency)

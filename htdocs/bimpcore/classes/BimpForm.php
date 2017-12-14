@@ -8,9 +8,10 @@ class BimpForm
     public $form_name = null;
     public $form_path = null;
     public $form_identifier = null;
+    protected $associations_params = array();
     public $errors = array();
     public static $row_types = array(
-        'field', 'association'
+        'field', 'association', 'custom'
     );
 
     public function __construct(BimpObject $object, $form_name = 'default', $id_parent = null)
@@ -28,7 +29,6 @@ class BimpForm
                 }
             }
         }
-
         if ($this->object->config->isDefined('forms/' . $form_name)) {
             $this->form_path = 'forms/' . $form_name;
         } elseif (($form_name === 'default')) {
@@ -52,6 +52,29 @@ class BimpForm
             return $this->object->config->setCurrentPath($this->form_path . '/' . $path);
         }
         return $this->object->config->setCurrentPath($path);
+    }
+
+    public function addAssociationObjectParams($object_module, $object_name, $id_object, $association)
+    {
+        $this->associations_params[] = array(
+            'object_module' => $object_module,
+            'object_name'   => $object_name,
+            'id_object'     => $id_object,
+            'association'   => $association
+        );
+    }
+
+    public function addAssociationAssociateParams($id_associate, $association)
+    {
+        $this->associations_params[] = array(
+            'id_associate' => $id_associate,
+            'association'  => $association
+        );
+    }
+
+    public function addAssociationParams($params)
+    {
+        $this->associations_params[] = $params;
     }
 
     public function renderPanel($footer = '')
@@ -89,10 +112,14 @@ class BimpForm
         $html .= ' data-form_name="' . $this->form_name . '"';
         $html .= ' data-module_name="' . $this->object->module . '"';
         $html .= ' data-object_name="' . $this->object->object_name . '"';
-        $html .= '>';
+        $html .= ' enctype="multipart/form-data">';
 
         $html .= '<input type="hidden" name="module_name" value="' . $this->object->module . '"/>';
         $html .= '<input type="hidden" name="object_name" value="' . $this->object->object_name . '"/>';
+
+        if (count($this->associations_params)) {
+            $html .= '<input type="hidden" name="associations_params" value="' . htmlentities(json_encode($this->associations_params)) . '"/>';
+        }
 
         if (isset($this->object->id) && $this->object->id) {
             $html .= '<input type="hidden" name="id_object" value="' . $this->object->id . '" data-default_value="' . $this->object->id . '"/>';
@@ -128,17 +155,16 @@ class BimpForm
         return $html;
     }
 
-    public function renderFormRow($conf_path, $identifier = '', $label_cols = 3)
+    public function renderFormRow($row_path, $identifier = '', $label_cols = 3)
     {
-        ;
         $item_path = '';
         $row_type = 'field';
 
         if (!$identifier) {
             foreach (self::$row_types as $rt) {
-                if ($this->object->config->isDefined($conf_path . '/' . $rt)) {
+                if ($this->object->config->isDefined($row_path . '/' . $rt)) {
                     $row_type = $rt;
-                    $identifier = $this->object->getConf($conf_path . '/' . $rt, '');
+                    $identifier = $this->object->getConf($row_path . '/' . $rt, '');
                     break;
                 }
             }
@@ -154,13 +180,13 @@ class BimpForm
         }
 
         $input_path = '';
-        if ($this->object->config->isDefined($conf_path . '/input')) {
-            $input_path = $conf_path;
+        if ($this->object->config->isDefined($row_path . '/input')) {
+            $input_path = $row_path;
         } else {
             $input_path = $item_path;
         }
 
-        $label = $this->object->getConf($conf_path . '/label', $this->object->getConf($item_path . '/label', '', true));
+        $label = $this->object->getConf($row_path . '/label', $this->object->getConf($item_path . '/label', '', true));
         $input_type = $this->object->getConf($input_path . '/input/type', '');
         $display_if = (bool) $this->object->config->isDefined($input_path . '/input/display_if');
         $depends_on = (bool) $this->object->config->isDefined($item_path . '/depends_on');
@@ -185,7 +211,11 @@ class BimpForm
                 break;
 
             case 'association':
-                $html .= $this->renderFormAssociation($identifier, $conf_path);
+                $html .= $this->renderFormAssociation($identifier, $row_path);
+                break;
+
+            case 'custom':
+                $html .= $this->renderCustomField($identifier, $row_path);
                 break;
 
             default:
@@ -207,8 +237,17 @@ class BimpForm
     {
         $html = '';
 
+        if (!$field) {
+            $field = $this->object->getConf($input_path . '/input/name', '', true);
+            if (!$field) {
+                return BimpRender::renderAlerts('Erreur de configuration - aucun identifiant défini pour ce champ');
+            }
+            $value = $this->object->getConf($input_path . '/value', null, false, 'any');
+        } else {
+            $value = $this->object->getData($field);
+        }
+
         $multiple = (bool) $this->object->getConf($input_path . '/input/multiple', false, false, 'bool');
-        $value = $this->object->getData($field);
 
         $html .= '<div id="' . $this->form_identifier . '_' . $field . '" class="inputContainer"';
         $html .= ' data-field_name="' . $field . '" ';
@@ -218,6 +257,27 @@ class BimpForm
 
         $html .= '</div>';
 
+        return $html;
+    }
+
+    public function renderCustomField($identifier, $conf_path)
+    {
+        $html = '';
+
+        $multiple = (bool) $this->object->getConf($conf_path . '/input/multiple', false, false, 'bool');
+        $depends_on = (bool) $this->object->getConf($conf_path . '/depends_on', '', false);
+
+        $html .= '<div id="' . $this->form_identifier . '_' . $identifier . '" class="inputContainer customField"';
+        $html .= ' data-field_name="' . $identifier . '" ';
+        $html .= ' data-content_config_path="' . $conf_path . '/content' . '"';
+        $html .= ' data-multiple="' . ($multiple ? '1' : '0') . '">';
+
+        $html .= $this->object->getConf($conf_path . '/content', '');
+
+        if ($depends_on) {
+            $html .= $this->renderDependsOnScript($identifier, $conf_path . '/depends_on');
+        }
+        $html .= '</div>';
         return $html;
     }
 
@@ -377,7 +437,7 @@ class BimpForm
         $options = array();
 
         $type = $object->getCurrentConf('input/type', '');
-        
+
         $addon_right = $object->getCurrentConf('input/addon_right', null, false, 'array');
         $addon_left = $object->getCurrentConf('input/addon_left', null, false, 'array');
         $multiple = $object->getCurrentConf('input/multiple', false, false, 'bool');
@@ -478,7 +538,7 @@ class BimpForm
                 break;
 
             case 'custom':
-                $content = $object->getCurrentConf('input/html', null, true);
+                $content = $object->getCurrentConf('input/content', null, true);
                 if (is_null($content)) {
                     $html .= '<p class="alert alert-danger">Erreur technique: Aucun input défini pour ce champ</p>';
                 } else {

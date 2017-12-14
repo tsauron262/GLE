@@ -74,7 +74,24 @@ objects:
         delete: 1
         instance: 
             bimp_object: BF_FraisFournisseur
+
+    file:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
             
+associations:
+    files: 
+        object: file
+        label: Fichiers joints
+        add_form:
+            name: upload
+            values: 
+                array:
+                    fields: 
+                        files_dir: bimpfinancement/demande
+
 fields:
     id_client:
         label: Client
@@ -299,7 +316,7 @@ lists:
                 label: Etat
                 field: status
                 
-views:                         
+views:
     demande: 
         title: nom
         edit_form: default
@@ -503,3 +520,4 @@ views:
                     list: 
                         children: frais_fournisseur
                         panel: 0
+        

@@ -28,7 +28,7 @@ class BimpInput
                         $html .= '<span class="input-group-addon">' . $options['addon_left'] . '</span>';
                     }
 
-                    $html .= '<input type="text" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '"/>';
+                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"/>';
 
                     if (isset($options['addon_right']) && $options['addon_right']) {
                         $html .= '<span class="input-group-addon">' . $options['addon_right'] . '</span>';
@@ -37,7 +37,7 @@ class BimpInput
                     $html .= '</div>';
                     $html .= '</div>';
                 } else {
-                    $html .= '<input type="text" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '"/>';
+                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"/>';
                 }
                 break;
 
@@ -51,7 +51,7 @@ class BimpInput
                 if (!isset($options['note'])) {
                     $options['note'] = false;
                 }
-                $html .= '<textarea id="' . $field_name . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
+                $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
                 if ($options['auto_expand'] || $options['note']) {
                     $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . '"';
                     $html .= ' data-min_rows="' . $options['rows'] . '"';
@@ -60,7 +60,7 @@ class BimpInput
                 break;
 
             case 'switch':
-                $html .= '<select class="switch" id="' . $field_name . '" name="' . $field_name . '">';
+                $html .= '<select class="switch" id="' . $input_id . '" name="' . $field_name . '">';
                 $html .= '<option value="1"' . ($value ? ' selected' : '') . '>OUI</option>';
                 $html .= '<option value="0"' . (!$value ? ' selected' : '') . '>NON</option>';
                 $html .= '</select>';
@@ -87,7 +87,7 @@ class BimpInput
                 }
 
                 if (count($options['options'])) {
-                    $html .= '<select id="' . $field_name . '" name="' . $field_name . '">';
+                    $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
                     foreach ($options['options'] as $option_value => $option) {
                         if (is_array($option)) {
                             if (isset($option['label'])) {
@@ -138,6 +138,10 @@ class BimpInput
 
             case 'search_user':
                 $html .= $form->select_dolusers((int) $value, $field_name, 0);
+                break;
+
+            case 'search_contact':
+                $html .= $form->selectcontacts(0, (int) $value, $field_name);
                 break;
 
             case 'check_list':
@@ -254,48 +258,13 @@ class BimpInput
                 break;
 
             case 'timer':
-                if (is_null($value)) {
-                    $value = 0;
-                }
-                $timer = BimpTools::getTimeDataFromSeconds((int) $value);
-
-                $html .= '<div class="timer_input">';
-                $html .= '<input type="hidden" name="' . $field_name . '" id="' . $input_id . '" value="' . $value . '"/>';
-
-                $html .= '<input type="text" class="' . $field_name . '_time_value time_input_value" value="' . (int) $timer['days'] . '" name="' . $field_name . '_days"/>';
-                $html .= '<span>j</span>';
-
-                $html .= '<select name="' . $field_name . '_hours" class="' . $field_name . '_time_value time_input_value">';
-                for ($i = 0; $i < 24; $i++) {
-                    $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['hours']) ? ' selected' : '') . '>' . $i . '</option>';
-                }
-                $html .= '</select>';
-                $html .= '<span>h</span>';
-
-                $html .= '<select name="' . $field_name . '_minutes" class="' . $field_name . '_time_value time_input_value">';
-                for ($i = 0; $i < 60; $i++) {
-                    $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['minutes']) ? ' selected' : '') . '>' . $i . '</option>';
-                }
-                $html .= '</select>';
-                $html .= '<span>min</span>';
-
-                $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value">';
-                for ($i = 0; $i < 60; $i++) {
-                    $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
-                }
-                $html .= '</select>';
-                $html .= '<span>sec</span>';
-                $html .= '</div>';
-
-                $html .= '<script type="text/javascript">';
-                $html .= '$(\'.' . $field_name . '_time_value\').each(function() {';
-                $html .= '$(this).change(function() {';
-                $html .= 'updateTimerInput($(this), \'' . $field_name . '\');';
-                $html .= '});';
-                $html .= '});';
-                $html .= '</script>';
+                $html = self::renderTimerInput($field_name, $value);
                 break;
 
+            case 'file_upload':
+                $html = '<input type="file" name="'.$field_name.'" id="'.$input_id.'"/>';
+                break;
+            
             default:
                 $html .= '<p class="alert alert-danger">Erreur technique: type d\'input invalide pour le champ "' . $field_name . '"</p>';
                 break;
@@ -419,6 +388,7 @@ class BimpInput
             $field_return_label = $object->getConf($path . 'field_return_label', null, true);
             $field_return_value = $object->getConf($path . 'field_return_value', null, true);
             $join_return_label = $object->getConf($path . 'join_return_label', '');
+            $label_syntaxe = $object->getConf($path . 'label_syntaxe', '<label_1>');
 
             if (is_null($table) || is_null($field_return_label) || is_null($field_return_value)) {
                 $html .= BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $field_name . '"');
@@ -482,7 +452,7 @@ class BimpInput
                     if (!is_array($fields_search)) {
                         $fields_search = explode(',', $fields_search);
                     }
-                    $where = '`'. preg_replace('/^.*\.(.*)$/', '$1', $field_return_value) . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
+                    $where = '`' . preg_replace('/^.*\.(.*)$/', '$1', $field_return_value) . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
                     $search = $bdb->getValue(preg_replace('/^.*\.(.*)$/', '$1', $table), preg_replace('/^.*\.(.*)$/', '$1', $fields_search[0]), $where);
                     if (is_null($search)) {
                         $search = '';
@@ -493,7 +463,7 @@ class BimpInput
                 if (is_array($fields_search)) {
                     $fields_search = implode(',', $fields_search);
                 }
-                
+
                 $html .= '<input type="hidden" name="' . $field_name . '" value="' . $value . '"/>';
                 $html .= '<input type="text" name="' . $field_name . '_search" class="search_list_input" value="' . $search . '" onkeyup="searchObjectList($(this));"';
                 $html .= ' data-table="' . $table . '"';
@@ -503,11 +473,58 @@ class BimpInput
                 $html .= ' data-field_return_label="' . $field_return_label . '"';
                 $html .= ' data-field_return_value="' . $field_return_value . '"';
                 $html .= ' data-join_return_label="' . $join_return_label . '"';
+                $html .= ' data-label_syntaxe="' . htmlentities($label_syntaxe) . '"';
                 $html .= '/>';
                 $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
                 $html .= '<div class="search_input_results"></div>';
             }
         }
+        return $html;
+    }
+
+    public static function renderTimerInput($field_name, $value)
+    {
+        if (is_null($value)) {
+            $value = 0;
+        }
+        $timer = BimpTools::getTimeDataFromSeconds((int) $value);
+
+        $html = '';
+        $html .= '<div class="timer_input">';
+        $html .= '<input type="hidden" name="' . $field_name . '" id="' . $input_id . '" value="' . $value . '"/>';
+
+        $html .= '<input type="text" class="' . $field_name . '_time_value time_input_value" value="' . (int) $timer['days'] . '" name="' . $field_name . '_days"/>';
+        $html .= '<span>j</span>';
+
+        $html .= '<select name="' . $field_name . '_hours" class="' . $field_name . '_time_value time_input_value">';
+        for ($i = 0; $i < 24; $i++) {
+            $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['hours']) ? ' selected' : '') . '>' . $i . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '<span>h</span>';
+
+        $html .= '<select name="' . $field_name . '_minutes" class="' . $field_name . '_time_value time_input_value">';
+        for ($i = 0; $i < 60; $i++) {
+            $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['minutes']) ? ' selected' : '') . '>' . $i . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '<span>min</span>';
+
+        $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value">';
+        for ($i = 0; $i < 60; $i++) {
+            $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '<span>sec</span>';
+        $html .= '</div>';
+
+        $html .= '<script type="text/javascript">';
+        $html .= '$(\'.' . $field_name . '_time_value\').each(function() {';
+        $html .= '$(this).change(function() {';
+        $html .= 'updateTimerInput($(this), \'' . $field_name . '\');';
+        $html .= '});';
+        $html .= '});';
+        $html .= '</script>';
         return $html;
     }
 

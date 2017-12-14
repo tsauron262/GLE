@@ -61,7 +61,8 @@ div.tabBar {
     }
 }
 
-.ui-autocomplete {
+.ui-autocomplete,
+.select2-drop {
     z-index: 10250!important;
 }
 .typeLabel {

@@ -143,6 +143,36 @@ class BimpObject
         return $this->config->getObject('', $object_name);
     }
 
+    public function getChildrenObjects($object_name)
+    {
+        $children = array();
+        if (isset($this->id) && $this->id) {
+            if ($this->config->isDefined('objects/' . $object_name)) {
+                $relation = $this->getConf('objects/' . $object_name . '/relation', '', true);
+                if ($relation !== 'hasMany') {
+                    return array();
+                }
+
+                $instance = $this->config->getObject('', $object_name);
+                if (!is_null($instance)) {
+                    if (is_a($instance, 'BimpObject')) {
+                        if ($instance->getParentObjectName() === $this->object_name) {
+                            $primary = $instance->getPrimary();
+                            $list = $instance->getListByParent($this->id, null, null, 'id', 'asc', 'array', array($primary));
+                            foreach ($list as $item) {
+                                $child = BimpObject::getInstance($instance->module, $instance->object_name);
+                                if ($child->fetch($item[$primary])) {
+                                    $children[] = $child;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $children;
+    }
+
     // Gestion des données:
 
     public function getData($field)
@@ -472,7 +502,7 @@ class BimpObject
                     $value = implode(',', $value);
                 }
             }
-            $html .= '<input type="hidden" name="'.$field.'" value="'.$value.'"/>';
+            $html .= '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
             $html .= $this->displayValue($this->data[$field], 'fields/' . $field . '/display' . ($display_name ? '/' . $display_name : ''), $field);
         } else {
             $html = '<p class="alert alert-danger">Champ "' . $field . '" non défini</p>';
@@ -554,7 +584,7 @@ class BimpObject
                                             $instance_prev_path = $instance->config->current_path;
                                             $instance->config->setCurrentPath('cards/' . $card);
                                             $bimpCard = new BimpCard($instance, $instance->config, 'cards/' . $card);
-                                            $html = $bimpCard->render();
+                                            $html .= $bimpCard->render();
                                             $instance->config->setCurrentPath($instance_prev_path);
                                             return $html;
                                         }
@@ -607,10 +637,32 @@ class BimpObject
                 $check = false;
                 if (isset($array[$value])) {
                     if (is_array($array[$value])) {
-                        if (isset($array[$value]['label'])) {
-                            $html = '<span';
+                        $icon_only = (bool) $this->getConf($display_path . '/icon_only', false, false, 'bool');
+                        if ($icon_only && isset($array[$value]['icon'])) {
+                            if (!isset($array[$value]['classes'])) {
+                                $array[$value]['classes'] = array();
+                            }
+                            $array[$value]['classes'] = array_merge($array[$value]['classes'], array('fa', 'fa-' . $array[$value]['icon'], 'iconLeft', 'bs-popover'));
+                            $html .= '<div style="text-align: center">';
+                            $html .= '<i ' . BimpRender::displayTagAttrs($array[$value]);
+                            $html .= ' data-toggle="popover"';
+                            $html .= ' data-trigger="hover"';
+                            $html .= ' data-content="' . $array[$value]['label'] . '"';
+                            $html .= ' data-container="body"';
+                            $html .= ' data-placement="top"></i>';
+                            $html .= '</div>';
+                            $check = true;
+                        } else {
+                            $html .= '<span';
                             $html .= BimpRender::displayTagAttrs($array[$value]);
-                            $html .= '>' . $array[$value]['label'] . '</span>';
+                            $html .= '>';
+                            if (isset($array[$value]['icon'])) {
+                                $html .= '<i class="fa fa-' . $array[$value]['icon'] . ' iconLeft"></i>';
+                            }
+                            if (isset($array[$value]['label'])) {
+                                $html .= $array[$value]['label'];
+                            }
+                            $html .= '</span>';
                             $check = true;
                         }
                     } else {
@@ -643,20 +695,7 @@ class BimpObject
                 break;
 
             case 'timer':
-                $timer = BimpTools::getTimeDataFromSeconds((int) $value);
-                $html .= '<span class="timer">';
-                if ($timer['days'] > 0) {
-                    $html .= $timer['days'] . ' j ';
-                    $html .= $timer['hours'] . ' h ';
-                    $html .= $timer['minutes'] . ' min ';
-                } elseif ($timer['hours'] > 0) {
-                    $html .= $timer['hours'] . ' h ';
-                    $html .= $timer['minutes'] . ' min ';
-                } elseif ($timer['minutes'] > 0) {
-                    $html .= $timer['minutes'] . ' min ';
-                }
-                $html .= $timer['secondes'] . ' sec ';
-                $html .= '</span>';
+                $html = BimpTools::displayTimefromSeconds($value);
                 break;
 
             case 'money':
@@ -942,7 +981,6 @@ class BimpObject
                             case 'id_object':
                                 if ($required && ((int) $value <= 0)) {
                                     $errors[] = 'Valeur obligatoire manquante : "' . $label . '"';
-                                    $validate = false;
                                 }
                                 break;
                         }
@@ -1004,7 +1042,7 @@ class BimpObject
         $table = $this->getTable();
 
         if (is_null($table)) {
-            return array('Fichier de configuration invalide (table non renseignée)');
+            return array('Fichier de configuration invalide (table non renseignées)');
         }
 
         $errors = $this->validate();
@@ -1042,6 +1080,12 @@ class BimpObject
                 }
 
                 $errors = array_merge($errors, $this->updateAssociations());
+                $parent = $this->getParentInstance();
+                if (!is_null($parent)) {
+                    if (method_exists($parent, 'onChildSave')) {
+                        $parent->onChildSave($this->object_name);
+                    }
+                }
             } else {
                 $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
                 $sqlError = $this->db->db->error();
@@ -1098,6 +1142,12 @@ class BimpObject
         }
 
         $errors = array_merge($errors, $this->updateAssociations());
+        $parent = $this->getParentInstance();
+        if (!is_null($parent)) {
+            if (method_exists($parent, 'onChildSave')) {
+                $parent->onChildSave($this->object_name);
+            }
+        }
         return $errors;
     }
 
@@ -1262,11 +1312,6 @@ class BimpObject
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-//        if (count($filters)) {
-//            echo $sql;
-//            exit;
-//        }
-
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -1285,7 +1330,7 @@ class BimpObject
         $table = $this->getTable();
         $parent_id_property = $this->getParentIdProperty();
 
-        if (is_null($table) ||  is_null($parent_id_property)) {
+        if (is_null($table) || is_null($parent_id_property)) {
             return array();
         }
 
@@ -1336,6 +1381,8 @@ class BimpObject
             }
             $errors[] = $msg;
         } else {
+            $id = $this->id;
+            $this->reset();
             if ($this->getConf('positions')) {
                 $this->resetPositions();
             }
@@ -1347,7 +1394,7 @@ class BimpObject
                     if ((int) $delete = $this->getCurrentConf('delete', 0, false, 'bool')) {
                         $instance = $this->config->getObject('', $name);
                         if (!is_null($instance)) {
-                            if (!$instance->deleteByParent($this->id)) {
+                            if (!$instance->deleteByParent($id)) {
                                 $msg = 'Des erreurs sont survenues lors de la tentative de suppresion des ';
                                 $msg .= $this->getInstanceLabel($instance, 'name_plur');
                                 $errors[] = $msg;
@@ -1363,9 +1410,16 @@ class BimpObject
                 $prev_path = $this->config->current_path;
                 foreach ($associations as $name => $params) {
                     $bimpAsso = new BimpAssociation($this, $name);
-                    $errors = array_merge($errors, $bimpAsso->deleteAllObjectAssociations($this->id));
+                    $errors = array_merge($errors, $bimpAsso->deleteAllObjectAssociations($id));
                 }
                 $this->config->setCurrentPath($prev_path);
+            }
+
+            $parent = $this->getParentInstance();
+            if (!is_null($parent)) {
+                if (method_exists($parent, 'onChildDelete')) {
+                    $parent->onChildDelete($this->object_name);
+                }
             }
         }
 
@@ -1550,9 +1604,9 @@ class BimpObject
         return $view->render($panel);
     }
 
-    public function renderList($list_name = 'default', $panel = false)
+    public function renderList($list_name = 'default', $panel = false, $title = null, $icon = null)
     {
-        $list = new BimpList($this, $list_name);
+        $list = new BimpList($this, $list_name, null, $title, $icon);
         return $list->render($panel);
     }
 
@@ -1619,7 +1673,7 @@ class BimpObject
         return $html;
     }
 
-    public function renderChildrenList($children_object, $list_name = 'default', $panel = false)
+    public function renderChildrenList($children_object, $list_name = 'default', $panel = false, $title = null, $icon = null)
     {
         $children_instance = $this->config->getObject('', $children_object);
         if (!isset($this->id) || !$this->id) {
@@ -1628,7 +1682,7 @@ class BimpObject
             return BimpRender::renderAlerts($msg);
         }
         if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
-            $list = new BimpList($children_instance, $list_name, $this->id);
+            $list = new BimpList($children_instance, $list_name, $this->id, $title, $icon);
             return $list->render($panel);
         }
         $msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');
@@ -1665,10 +1719,44 @@ class BimpObject
 
         if ($card_path) {
             $card = new BimpCard($object, $config, $card_path);
-            return $card->render();
+            $html = $card->render();
+            unset($card);
+            return $html;
         }
 
         return '';
+    }
+
+    public function renderAssociatesList($association, $list_name = 'default', $panel = false, $title = null, $icon = null)
+    {
+        $bimpAsso = new BimpAssociation($this, $association);
+        if (count($bimpAsso->errors)) {
+            return BimpRender::renderAlerts($bimpAsso->errors);
+        }
+        if (!isset($this->id) || !$this->id) {
+            $msg = 'Impossible d\'afficher la liste des ' . self::getInstanceLabel($bimpAsso->associate, 'name_plur');
+            $msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
+            return BimpRender::renderAlerts($msg);
+        }
+
+        $bimpList = new BimpList($bimpAsso->associate, $list_name, null, $title, $icon);
+        $bimpList->addObjectAssociationFilter($this, $this->id, $association);
+        
+        if ($this->config->isDefined('associations/'.$association.'/add_form')) {
+            $name = $this->getConf('associations/'.$association.'/add_form/name', '');
+            $values = $this->getConf('associations/'.$association.'/add_form/values', null, false, 'array');
+            
+            if ($name) {
+                $bimpList->setAddFormName($name);
+            }
+            if (!is_null($values)) {
+                $bimpList->setAddFormValues($values);
+            }
+        } else {
+            $bimpList->addForm = null;
+        }
+        
+        return $bimpList->render($panel);
     }
 
     // Gestion des intitulés (labels):

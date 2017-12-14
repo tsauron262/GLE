@@ -3,7 +3,7 @@ parent_object: BF_Demande
 parent_id_property: id_demande
 
 positions: 1
-position_insert: after
+position_insert: before
 
 labels:
     name: Refinanceur

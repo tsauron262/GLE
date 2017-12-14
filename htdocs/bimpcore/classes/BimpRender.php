@@ -10,7 +10,7 @@ class BimpRender
             $html .= ' data-' . $name . '="' . $value . '"';
         }
     }
-
+    
     public static function renderIcon($icon, $class = '')
     {
         return '<i class="fa fa-' . $icon . ($class ? ' ' . $class : '') . '"></i>';

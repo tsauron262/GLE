@@ -4,8 +4,9 @@ class BH_Inter extends BimpObject
 {
 
     public static $priorities = array(
-        1 => array('label' => 'Urgent', 'classes' => array('danger')),
-        2 => array('label' => 'non urgent', 'classes' => array('info')),
+        1 => array('label' => 'Non urgent', 'classes' => array('success'), 'icon' => 'hourglass-start'),
+        2 => array('label' => 'Urgent', 'classes' => array('warning'), 'icon' => 'hourglass-half'),
+        3 => array('label' => 'Très urgent', 'classes' => array('danger'), 'icon' => 'hourglass-end'),
     );
     public static $status = array(
         1 => array('label' => 'Ouvert', 'classes' => array('success')),

@@ -165,6 +165,7 @@ class BimpViewsList
         $this->setConfPath();
 
         $labels = $this->object->getLabels();
+        $objects_change_reload = $this->object->getConf($this->view_path . '/objects_change_reload', '');
 
         $html = '<script type="text/javascript">';
         $html .= 'object_labels[\'' . $this->object->object_name . '\'] = ' . json_encode($labels);
@@ -172,14 +173,16 @@ class BimpViewsList
 
         $html .= '<div id="' . $this->views_list_identifier . '_container" class="' . ($panel ? 'section ' : '') . 'viewsListContainer ' . $this->object->object_name . '_viewsListContainer">';
 
+        $html .= '<div class="objectViewContainer" style="display: none"></div>';
+
         $content = '';
         $content .= '<div id="' . $this->views_list_identifier . '" class="row objectViewslist ' . $this->object->object_name . '_views_list"';
         $content .= ' data-module_name="' . $this->object->module . '"';
         $content .= ' data-object_name="' . $this->object->object_name . '"';
         $content .= ' data-views_list_name="' . $this->views_list_name . '"';
         $content .= ' data-item_view_name="' . $this->view_name . '"';
+        $content .= ' data-objects_change_reload="' . $objects_change_reload . '"';
         $content .= '>';
-        $content .= '<div class="objectViewContainer" style="display: none"></div>';
         $content .= $this->renderItemViews();
         $content .= '</div>';
 
@@ -190,8 +193,8 @@ class BimpViewsList
             $add_btn = $this->object->getCurrentConf('add_btn', 0, false, 'bool');
 
             $params = array(
-                'type' => 'secondary',
-                'icon' => $icon,
+                'type'     => 'secondary',
+                'icon'     => $icon,
                 'foldable' => 1
             );
 
@@ -213,6 +216,14 @@ class BimpViewsList
         } else {
             $html .= $content;
         }
+
+        $hide_pagination = (is_null($this->nbItems) || ($this->n <= 0) || ($this->n >= $this->nbItems));
+
+        $html .= '<div class="paginationContainer"' . ($hide_pagination ? ' style="display: none"' : '') . '>';
+        $html .= '<div class="' . $this->views_list_identifier . '_pagination listPagination">';
+        $html .= $this->renderPagination();
+        $html .= '</div>';
+        $html .= '</div>';
 
         $html .= '</div>';
 
@@ -335,11 +346,7 @@ class BimpViewsList
 
     public function renderPagination()
     {
-        $hide = (is_null($this->nbItems) || ($this->n <= 0) || ($this->n >= $this->nbItems));
-
-        $html = '<div class="paginationContainer"' . ($hide ? ' style="display: none"' : '') . '>';
-        $html .= '<div id="' . $this->views_list_identifier . '_pagination" class="listPagination">';
-
+        $html = '';
         if (!is_null($this->nbItems)) {
             if (($this->n > 0) && ($this->n < $this->nbItems)) {
                 $first = $this->p - 4;
@@ -376,10 +383,6 @@ class BimpViewsList
             }
         }
 
-        $html .= '</div>';
-        $html .= '</div>';
-
-        $this->setConfPath();
         return $html;
     }
 }

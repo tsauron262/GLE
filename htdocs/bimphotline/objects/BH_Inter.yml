@@ -72,7 +72,7 @@ fields:
         sortable: 1
         search: 0
         
-    priority:
+    priorite:
         label: Priorité
         type: int
         values: 
@@ -126,7 +126,7 @@ list:
         duree:
             field: timer
         priorite:
-            field: priority
+            field: priorite
             edit: 1
         status:
             field: status
@@ -197,7 +197,7 @@ views:
                             - field: tech_id_user
                               display: card
                             - field: timer
-                            - field: priority
+                            - field: priorite
                             - field: status
                             - field: description
 
@@ -211,7 +211,7 @@ views:
                             - field: id_ticket
                               display: card
                             - field: timer
-                            - field: priority
+                            - field: priorite
                             - field: status
                             - field: description
         

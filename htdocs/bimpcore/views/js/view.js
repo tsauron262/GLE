@@ -193,7 +193,7 @@ function saveObjectfromFieldsTable(table_id, $button) {
             $resultContainer.parent('td').parent('tr').show();
 
             var data = getInputsValues($table);
-            
+
             data['object_module'] = $view.data('module_name');
             data['object_name'] = $view.data('object_name');
             data['id_object'] = $view.data('id_object');
@@ -310,12 +310,34 @@ function onViewLoaded($view) {
         });
 
         if (!$view.data('object_change_event_init')) {
+            var objects = $view.data('objects_change_reload');
+            if (objects) {
+                objects = objects.split(',');
+            }
             $('body').on('objectChange', function (e) {
                 if ((e.module === $view.data('module_name')) && (e.object_name === $view.data('object_name'))
                         && parseInt(e.id_object) === parseInt($view.data('id_object'))) {
                     reloadObjectView($view.attr('id'));
+                } else if (objects && objects.length) {
+                    for (var i in objects) {
+                        if (e.object_name === objects[i]) {
+                            reloadObjectView($view.attr('id'));
+                        }
+                    }
                 }
             });
+
+            if (objects && objects.length) {
+                $('body').on('objectDelete', function (e) {
+                    for (var i in objects) {
+                        if (e.object_name === objects[i]) {
+                            reloadObjectView($view.attr('id'));
+                        }
+                    }
+                });
+            }
+
+            $view.data('object_change_event_init', 1);
         }
 
         $('body').trigger($.Event('viewLoaded', {

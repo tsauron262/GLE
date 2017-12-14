@@ -29,7 +29,8 @@ function saveObjectFromForm(form_id, $button, success_callback) {
 
     var module = $form.data('module_name');
     var object_name = $form.data('object_name');
-    var data = $form.serialize();
+
+    var data = new FormData($form.get(0));
 
     bimp_json_ajax('saveObject', data, $result, function (result) {
         $button.removeClass('disabled');
@@ -55,6 +56,9 @@ function saveObjectFromForm(form_id, $button, success_callback) {
 
     }, function () {
         $button.removeClass('disabled');
+    }, true, {
+        processData: false,
+        contentType: false
     });
 }
 
@@ -189,7 +193,7 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
     }
 }
 
-function loadModalForm($button, module_name, object_name, form_name, id_object, id_parent, values) {
+function loadModalForm($button, data) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -208,18 +212,18 @@ function loadModalForm($button, module_name, object_name, form_name, id_object, 
 
     if (id_object) {
         title = '<i class="fa fa-edit iconLeft"></i>Edition ';
-        if (typeof (object_labels[object_name].of_the) !== 'undefined') {
-            title += object_labels[object_name].of_the;
+        if (typeof (object_labels[data.object_name].of_the) !== 'undefined') {
+            title += object_labels[data.object_name].of_the;
         } else {
-            title += 'l\'objet "' + object_name + '"';
+            title += 'l\'objet "' + data.object_name + '"';
         }
         title += ' n°' + id_object;
     } else {
         title = '<i class="fa fa-plus-circle iconLeft"></i>Ajout ';
-        if (typeof (object_labels[object_name].of_a) !== 'undefined') {
-            title += object_labels[object_name].of_a;
+        if (typeof (object_labels[data.object_name].of_a) !== 'undefined') {
+            title += object_labels[data.object_name].of_a;
         } else {
-            title += 'd\'un objet "' + object_name + '"';
+            title += 'd\'un objet "' + data.object_name + '"';
         }
     }
 
@@ -236,19 +240,8 @@ function loadModalForm($button, module_name, object_name, form_name, id_object, 
         isCancelled = true;
         $button.removeClass('disabled');
     });
-
-    var data = {
-        'module_name': module_name,
-        'object_name': object_name,
-        'form_name': form_name,
-        'id_object': id_object,
-        'id_parent': id_parent,
-        'full_panel': 0
-    };
-
-    if (typeof (values) !== 'undefined') {
-        data['values'] = values;
-    }
+    
+    data.full_panel = 0;
 
     bimp_json_ajax('loadObjectForm', data, null, function (result) {
         $modal.find('.content-loading').hide();
@@ -382,12 +375,22 @@ function reloadObjectInput(form_id, input_name, fields) {
         return;
     }
 
+    var custom = 0;
+    if ($container.hasClass('customField')) {
+        custom = 1;
+    }
+
     var data = {
         object_module: object_module,
         object_name: object_name,
         field_name: input_name,
-        fields: fields
+        fields: fields,
+        custom_field: custom
     };
+
+    if (custom) {
+        data['content_config_path'] = $container.data('content_config_path');
+    }
 
     bimp_json_ajax('loadObjectInput', data, $container, function (result) {
         if (typeof (result.html) !== 'undefined') {
@@ -404,12 +407,12 @@ function reloadObjectInput(form_id, input_name, fields) {
 function searchObjectList($input) {
     var $container = $input.parent('div');
     var value = $input.val();
-    
+
     if (!value) {
         $container.find('[name=' + $container.data('field_name') + ']').val('0').change();
         return;
     }
-    
+
     var data = {
         'table': $input.data('table'),
         'fields_search': $input.data('fields_search'),
@@ -418,9 +421,10 @@ function searchObjectList($input) {
         'join': $input.data('join'),
         'join_on': $input.data('join_on'),
         'join_return_label': $input.data('join_return_label'),
+        'label_syntaxe': $input.data('label_syntaxe'),
         'value': value
     };
-    
+
     var $spinner = $container.find('.loading');
     var $result = $container.find('.search_input_results');
 
@@ -854,7 +858,7 @@ function setSearchListOptionsEvents($container) {
                 if (typeof (join_return_label) === 'undefined') {
                     join_return_label = '';
                 }
-                
+
                 $input.val('');
                 $input.data('fields_search', fields_search);
                 $input.data('join', join);
@@ -872,7 +876,7 @@ function setSearchListOptionsEvents($container) {
             }).change();
             $input.val(current_value);
         }
-        
+
         $container.data('event_init', 1);
     }
 }

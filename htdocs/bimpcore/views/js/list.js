@@ -132,13 +132,25 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         id_object = 0;
     }
 
-    var values;
+    var data = {
+        'module_name': $list.data('module_name'),
+        'object_name': $list.data('object_name'),
+        'form_name': form_name,
+        'id_object': id_object,
+        'id_parent': id_parent
+    };
+
     var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
     if ($values_input.length) {
-        values = $values_input.val();
+        data.values = $values_input.val();
     }
 
-    loadModalForm($button, $list.data('module_name'), $list.data('object_name'), form_name, id_object, id_parent, values);
+    var $asso_filters_input = $list.find('input[name=associations_filters]');
+    if ($asso_filters_input.length) {
+        data['associations_params'] = $asso_filters_input.val();
+    }
+
+    loadModalForm($button, data);
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {
@@ -617,19 +629,37 @@ function onListLoaded($list) {
         setCommonEvents($('#' + $list.attr('id') + '_container'));
         setInputsEvents($list);
         setPositionsHandlesEvents($list);
+        setPaginationEvents($list);
 
         if (!$list.data('object_change_event_init')) {
             var module = $list.data('module_name');
             var object_name = $list.data('object_name');
 
+            var objects = $list.data('objects_change_reload');
+            if (objects) {
+                objects = objects.split(',');
+            }
+
             $('body').on('objectChange', function (e) {
                 if ((e.module === module) && (e.object_name === object_name)) {
                     reloadObjectList($list.attr('id'));
+                } else if (objects && objects.length) {
+                    for (var i in objects) {
+                        if (e.object_name === objects[i]) {
+                            reloadObjectList($list.attr('id'));
+                        }
+                    }
                 }
             });
             $('body').on('objectDelete', function (e) {
                 if ((e.module === module) && (e.object_name === object_name)) {
                     reloadObjectList($list.attr('id'));
+                } else if (objects.length) {
+                    for (var i in objects) {
+                        if (e.object_name === objects[i]) {
+                            reloadObjectList($list.attr('id'));
+                        }
+                    }
                 }
             });
 

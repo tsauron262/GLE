@@ -142,11 +142,16 @@ class BimpStruct
         if (!is_null($object)) {
             $name = $config->getFromCurrentPath('name', 'default');
             $panel = $config->getFromCurrentPath('panel', 0, false, 'bool');
+            $title = $config->getFromCurrentPath('title', null);
+            $title = $config->getFromCurrentPath('icon', null);
             $children = $config->getFromCurrentPath('children', null);
+            $association = $config->getFromCurrentPath('association', null);
             if (!is_null($children)) {
-                $html = $object->renderChildrenList($children, $name, $panel);
+                $html = $object->renderChildrenList($children, $name, $panel, $title, $icon);
+            } elseif (!is_null($association)) {
+                $html = $object->renderAssociatesList($association, $name, $panel, $title, $icon);
             } else {
-                $html = $object->renderList($name, $panel);
+                $html = $object->renderList($name, $panel, $title, $icon);
             }
         }
 
@@ -206,7 +211,7 @@ class BimpStruct
 
         $table_id = 'objectViewTable_' . rand(0, 999999);
         $html .= '<div class="objectViewTableContainer">';
-        $html .= '<table class="objectViewtable' . (!is_null($caption) ? ' foldable open' : '') . '" id="' . $table_id . '">';
+        $html .= '<table class="' . $object->object_name . '_viewTable objectViewtable' . (!is_null($caption) ? ' foldable open' : '') . '" id="' . $table_id . '">';
         $html .= '<thead>';
         if (!is_null($caption)) {
             if (is_array($caption)) {
@@ -313,6 +318,11 @@ class BimpStruct
                     $html .= $config->getFromCurrentPath('label', $object->getConf('fields/' . $field . '/label', ''));
                     $html .= '</th>';
                     $html .= '<td>';
+                    $value = $object->getData($field);
+                    if (is_null($value)) {
+                        $value = '';
+                    }
+                    $html .= '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
                     $html .= $object->displayData($field, $config->getFromCurrentPath('display', 'default'));
                     $html .= '</td>';
                 } elseif ($association) {

@@ -14,6 +14,7 @@ header("Content-type: text/xml");
 
 
 
+define("NOLOGIN", 1);  // This means this output page does not require to be logged.
 require_once("../../main.inc.php");
 
 $tabU = array();

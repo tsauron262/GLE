@@ -208,13 +208,19 @@ if (!isset($conf->global->BIMP_FORCE_CATEGORIZATION) or $conf->global->BIMP_FORC
     print 'Non <input type="radio" value="0" name="forceCat"><br>';
 }
 
+print '<br><table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print "  <td>Mode 1 = Une seul condition pour être requis. Mode 2 = Toutes les conditions pour être requis</td>\n";
+print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
+print '</tr>' . "\n";
+print '</table>';
 
 if (!isset($conf->global->BIMP_CATEGORIZATION_MODE) or $conf->global->BIMP_CATEGORIZATION_MODE != 2) {
     print 'Mode 1<input type="radio" name="mode" value="1" checked>';
-    print 'Mode 2<input type="radio" value="2" name="mode"><br>';
+    print '  Mode 2<input type="radio" value="2" name="mode"><br>';
 } else {
     print 'Mode 1<input type="radio" name="mode" value="1">';
-    print 'Mode 2<input type="radio" value="2" name="mode" checked><br>';
+    print '  Mode 2<input type="radio" value="2" name="mode" checked><br>';
 }
 
 print '<br><input type="submit" class="button" value="Valider">';

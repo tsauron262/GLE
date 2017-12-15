@@ -45,35 +45,9 @@ foreach($tabUser as $user){
     ));
 }
 
-die(count($tabU)."kk");
-
 
 
 echo array2xml($tabU, "ConfigIDs");
-
-/*<ConfigIDs>
-    <ID>
-        <Left>
-            <Host>gle.synopsis-erp.com</Host>
-            <Port>443</Port>
-            <Protocol>https</Protocol>
-            <Path>/bimp/synopsiscaldav/html/cal.php/calendars/test/Calendar/</Path>
-            <Login>test</Login>
-            <Password>testtest1</Password>
-            <Filter>VEVENT [20170323T000000Z;20180315T000000Z] : STATUS!=CANCELLED</Filter>
-        </Left>
-        <Right>
-            <Host>10.192.20.20</Host>
-            <Port>8080</Port>
-            <Protocol>http</Protocol>
-            <Path>/SOGo/dav/test@bimp.fr/Calendar/personal/</Path>
-            <Login>test@bimp.fr</Login>
-            <Password>testtest1</Password>
-            <Filter>VEVENT [20170323T000000Z;20180315T000000Z] : STATUS!=CANCELLED</Filter>
-        </Right>
-    </ID>
-</ConfigIDs>*/
-
 
 
 

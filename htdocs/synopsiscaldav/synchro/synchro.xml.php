@@ -1,10 +1,10 @@
 <?php
 
 
-if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" || $_SERVER['PHP_AUTH_PW'] != "synchrosynchro" ) {
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" || $_SERVER['PHP_AUTH_PW'] != "9DDrvuNcWRdKClhTe2LGh0mbKVIV33I3" ) {
     header('WWW-Authenticate: Basic realm="My Realm"');
     header('HTTP/1.0 401 Unauthorized');
-    echo 'Texte utilisé si le visiteur utilise le bouton d\'annulation';
+    echo 'NON autorisé';
     exit;
 } else {
 
@@ -14,32 +14,33 @@ header("Content-type: text/xml");
 
 
 
+require_once("../../main.inc.php");
 
 $tabU = array();
+$tabUser = array();
 
-
-
-
-$tabUser = array(array("test", "test@bimp.fr"), array("tsauron", "tommy@bimp.fr"));
-
+$result = $db->query('SELECT login, email  FROM `'.MAIN_DB_PREFIX.'user` u, '.MAIN_DB_PREFIX.'user_extrafields ue WHERE `statut` = 1 AND email != "" AND login != "" AND fk_object = u.rowid AND synchaction = 1');
+while ($ligne = $db->fetch_object($result))
+    $tabUser[] = array($ligne->login, $ligne->email);
 
 foreach($tabUser as $user){
-$tabU[] = array("ID" => array("Left" => 
+    if(isset($user[1]) && $user[0] != "" && $user[1] != "")
+        $tabU[] = array("ID" => array("Left" => 
                                 array("Host" => "gle.synopsis-erp.com",
                                         "Port" => "443",
                                         "Protocol" => "https",
                                         "Path" => "/bimp/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
-                                        "Login" => "test",
-                                        "Password" => "testtest1",
-                                        "Filter" => "VEVENT [20170323T000000Z;20180315T000000Z] : STATUS!=CANCELLED"),
+                                        "Login" => "gle_suivi",
+                                        "Password" => "wxrjt2n8",
+                                        "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED"),
                             "Right" => 
                                 array("Host" => "10.192.20.20",
                                         "Port" => "8080",
                                         "Protocol" => "http",
                                         "Path" => "/SOGo/dav/".$user[1]."/Calendar/personal/",
-                                        "Login" => "test@bimp.fr",
-                                        "Password" => "testtest1",
-                                        "Filter" => "VEVENT [20170323T000000Z;20180315T000000Z] : STATUS!=CANCELLED")
+                                        "Login" => "gle_suivi@bimp.fr",
+                                        "Password" => "wxrjt2n8",
+                                        "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED")
     ));
 }
 

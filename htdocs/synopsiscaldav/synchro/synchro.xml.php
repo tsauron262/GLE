@@ -29,7 +29,7 @@ foreach($tabUser as $user){
                                 array("Host" => "gle.synopsis-erp.com",
                                         "Port" => "443",
                                         "Protocol" => "https",
-                                        "Path" => "/bimp/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
+                                        "Path" => "/bimp6/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
                                         "Login" => "gle_suivi",
                                         "Password" => "wxrjt2n8",
                                         "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED"),

@@ -36,7 +36,7 @@ foreach($tabUser as $user){
                                         "Password" => "{3DES}UjUdKx13cbo/ZyMe8sUwAQ==",
                                         "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED"),
                             "Right" => 
-                                array("Host" => "gle.synopsis-erp.com",
+                                array("Host" => "mailhost.bimp.fr",
                                         "Port" => "443",
                                         "Protocol" => "https",
                                         "Path" => "/SOGo/dav/".$user[1]."/Calendar/personal/",

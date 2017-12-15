@@ -37,8 +37,8 @@ foreach($tabUser as $user){
                                         "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED"),
                             "Right" => 
                                 array("Host" => "10.192.20.20",
-                                        "Port" => "8080",
-                                        "Protocol" => "http",
+                                        "Port" => "443",
+                                        "Protocol" => "https",
                                         "Path" => "/SOGo/dav/".$user[1]."/Calendar/personal/",
                                         "Login" => "gle_suivi@bimp.fr",
                                         "Password" => "{3DES}UjUdKx13cbo/ZyMe8sUwAQ==",

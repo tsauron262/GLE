@@ -51,6 +51,7 @@ if (!$user->admin)
 $idRootCateg = GETPOST('categMere');
 if ($idRootCateg > 0) {
     $forceCategorization = GETPOST('forceCat');
+    $mode = GETPOST('mode');
 
     $db->begin();
 
@@ -62,6 +63,11 @@ if ($idRootCateg > 0) {
     }
     if ($forceCategorization != $conf->global->BIMP_FORCE_CATEGORIZATION) {
         $res = dolibarr_set_const($db, "BIMP_FORCE_CATEGORIZATION", $forceCategorization, 'chaine', 0, '', $conf->entity);
+        if (!$res > 0)
+            $error++;
+    }
+    if ($mode != $conf->global->BIMP_CATEGORIZATION_MODE) {
+        $res = dolibarr_set_const($db, "BIMP_CATEGORIZATION_MODE", $mode, 'chaine', 0, '', $conf->entity);
         if (!$res > 0)
             $error++;
     }
@@ -200,6 +206,15 @@ if (!isset($conf->global->BIMP_FORCE_CATEGORIZATION) or $conf->global->BIMP_FORC
     print 'Non <input type="radio" value="0" name="forceCat" checked><br>';
 } else {
     print 'Non <input type="radio" value="0" name="forceCat"><br>';
+}
+
+
+if (!isset($conf->global->BIMP_CATEGORIZATION_MODE) or $conf->global->BIMP_CATEGORIZATION_MODE != 2) {
+    print 'Mode 1<input type="radio" name="mode" value="1" checked>';
+    print 'Mode 2<input type="radio" value="2" name="mode"><br>';
+} else {
+    print 'Mode 1<input type="radio" name="mode" value="1">';
+    print 'Mode 2<input type="radio" value="2" name="mode" checked><br>';
 }
 
 print '<br><input type="submit" class="button" value="Valider">';

@@ -35,17 +35,21 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
 
 $arrayofcss = array('/bimpcontratauto/css/BimpContratAuto.css');
-$arrayofjs = array('');
+$arrayofjs = array('/bimpcontratauto/js/ajax.js');
 
 
 $socid = GETPOST('id', 'int');       // TODO id ou socid ?
 
 
 /*
+ * 
+ */
+
+/*
  * 	View
  */
 
-llxHeader('', 'Catégoriser', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
+llxHeader('', 'Contrat Auto', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
 if ($socid > 0) {
     $langs->load("companies");
@@ -59,15 +63,33 @@ if ($socid > 0) {
     print '<div class="underbanner clearboth"></div>';
 }
 
-print '<form class="customForm">';
 
-print '<div class="customDiv fixDiv">Maintenance</div><br>';
-print '<div class="customDiv divClikable">Non</div>';
-print '<div class="customDiv divClikable">12</div>';
-print '<div class="isSelected customDiv divClikable ">24</div>';
+print'
+<div id="container">
+  <div id="accordeon">
+		<div id="contratsActif" class="item">
+			<a href="#">Contrats actifs</a>
+			<p>Contrat2017<br>
+			Contrat2016</p>
+		</div>
+		<div id="contratsInactif" class="item">
+			<a href="#">Contrats inactifs</a>
+			<p>Contrat2015</p>
+			<p>Contrat2014</p>
+		</div>
+	</div>
+</div>';
+        
 
-
-print '</form>';
+//print '<form class="customForm">';
+//
+//print '<div class="customDiv fixDiv">Maintenance</div><br>';
+//print '<div class="customDiv divClikable">Non</div>';
+//print '<div class="customDiv divClikable">12</div>';
+//print '<div class="isSelected customDiv divClikable ">24</div>';
+//
+//
+//print '</form>';
 
 llxFooter();
 

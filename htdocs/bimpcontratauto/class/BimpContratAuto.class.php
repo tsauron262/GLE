@@ -39,14 +39,51 @@ class BimpContratAuto extends CommonObject {
     function __construct($db) {
         $this->db = $db;
     }
-/*
-              $tabProd = array(
-                    array("id"=>234, "name"=> "Maintenance", "Values"=>array("Non", 12,24)),
-                    array("id"=>235, "name"=> "Extenssion", "Values"=>array("Non", 12,24)));
- */
-    
 
     function create() {
         dol_syslog(get_class($this) . '::create', LOG_DEBUG);
     }
 }
+
+
+
+/*
+Nom : bimpcontratauto
+
+But :
+Dans un client un new onglet qui affichera le résumé des contrat en cours + possibilité de créer un contrat a la volé.
+
+Resumé du ou des contrat en cours.
+
+Total facturé
+Total payé (peu être différent)
+Total restant
+Total Contrat
+
+Création du contrat :
+Un peut comme dans le module précédent plusieurs choix possible par service :
+
+•CTR-ASSITANCE
+- Non
+- 12 moi
+- 24 moi
+- 36 moi
+
+CTR-PNEUMATIQUE
+- Non
+- 12 moi
+- 24 moi
+- 36 moi
+
+CTR-MAINTENANCE
+
+CTR_EXTENSION
+
+Blyyd Connect
+
+Puis un formulaire avec date de début
+Et un boutons créer.
+$tabProd = array(
+                    array("id"=>234, "name"=> "Maintenance", "Values"=>array("Non", 12,24)),
+                    array("id"=>235, "name"=> "Extenssion", "Values"=>array("Non", 12,24)));
+ */

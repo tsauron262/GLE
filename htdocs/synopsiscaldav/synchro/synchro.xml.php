@@ -33,7 +33,7 @@ foreach($tabUser as $user){
                                         "Protocol" => "https",
                                         "Path" => "/bimp6/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
                                         "Login" => "gle_suivi",
-                                        "Password" => "wxrjt2n8",
+                                        "Password" => "{3DES}UjUdKx13cbo/ZyMe8sUwAQ==",
                                         "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED"),
                             "Right" => 
                                 array("Host" => "10.192.20.20",
@@ -41,7 +41,7 @@ foreach($tabUser as $user){
                                         "Protocol" => "http",
                                         "Path" => "/SOGo/dav/".$user[1]."/Calendar/personal/",
                                         "Login" => "gle_suivi@bimp.fr",
-                                        "Password" => "wxrjt2n8",
+                                        "Password" => "{3DES}UjUdKx13cbo/ZyMe8sUwAQ==",
                                         "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED")
     ));
 }

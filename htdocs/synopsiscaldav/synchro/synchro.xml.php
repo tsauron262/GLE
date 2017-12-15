@@ -21,7 +21,8 @@ $tabUser = array();
 
 $result = $db->query('SELECT login, email  FROM `'.MAIN_DB_PREFIX.'user` u, '.MAIN_DB_PREFIX.'user_extrafields ue WHERE `statut` = 1 AND email != "" AND login != "" AND fk_object = u.rowid AND synchaction = 1');
 while ($ligne = $db->fetch_object($result))
-    $tabUser[] = array($ligne->login, $ligne->email);
+        if(stripos($ligne->email, "@bimp.fr") > 0)
+            $tabUser[] = array($ligne->login, $ligne->email);
 
 foreach($tabUser as $user){
     if(isset($user[1]) && $user[0] != "" && $user[1] != "")
@@ -44,7 +45,7 @@ foreach($tabUser as $user){
     ));
 }
 
-
+die(count($tabU)."kk");
 
 
 

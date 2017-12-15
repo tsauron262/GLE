@@ -176,7 +176,7 @@ else {
         $categstatic->color = $val['color'];
         $categstatic->type = $type;
         $li = $categstatic->getNomUrl(1, '', 60);
-        $li = str_replace("categories/viewcat.php?", "bimpproductbrowser/browse.php?", $li);
+        $li = str_replace("categories/viewcat.php?", "bimpproductbrowser/browse.php?mode=".$_REQUEST['mode']."&", $li);
         $desc = dol_htmlcleanlastbr($val['description']);
         if (in_array($val['rowid'], $pb->id_childs))
             $checked = ' checked';

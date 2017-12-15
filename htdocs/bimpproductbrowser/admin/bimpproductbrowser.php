@@ -216,11 +216,11 @@ print '</tr>' . "\n";
 print '</table>';
 
 if (!isset($conf->global->BIMP_CATEGORIZATION_MODE) or $conf->global->BIMP_CATEGORIZATION_MODE != 2) {
-    print 'Mode 1<input type="radio" name="mode" value="1" checked>';
-    print '  Mode 2<input type="radio" value="2" name="mode"><br>';
+    print 'Mode 1  <input type="radio" name="mode" value="1" checked>';
+    print '  Mode 2  <input type="radio" value="2" name="mode"><br>';
 } else {
-    print 'Mode 1<input type="radio" name="mode" value="1">';
-    print '  Mode 2<input type="radio" value="2" name="mode" checked><br>';
+    print 'Mode 1  <input type="radio" name="mode" value="1">';
+    print '  Mode 2 <input type="radio" value="2" name="mode" checked><br>';
 }
 
 print '<br><input type="submit" class="button" value="Valider">';

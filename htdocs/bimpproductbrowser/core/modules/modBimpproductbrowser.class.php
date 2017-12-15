@@ -149,7 +149,8 @@ class modBimpproductbrowser extends DolibarrModules {
         // 'thirdparty'       to add a tab in third party view
         // 'user'             to add a tab in user view
         $this->tabs = array(
-            'categories_0:+restreindre:Restreindre:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__',
+            'categories_0:+restreindre1:Impliquant:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__&mode=1',
+            'categories_0:+restreindre2:Impliqué par:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__&mode=2',
             'product:+categoriser:Catégoriser:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/categoriser.php?id=__ID__');
 
         if (!isset($conf->modProductBrowser) || !isset($conf->modProductBrowser->enabled)) {

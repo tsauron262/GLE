@@ -40,6 +40,8 @@ switch (GETPOST('action')) {
         }
     case 'getOldWay': {
             $objOut = $pb->getOldWay(GETPOST('id_prod'));
+            
+            
             echo json_encode($objOut);
         }
     default: break;

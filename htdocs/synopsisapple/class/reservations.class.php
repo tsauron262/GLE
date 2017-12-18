@@ -16,6 +16,8 @@ class Reservations
     // mettre à false pour envoyer les mails aux bons destinataires:
     var $debugMails = false;
     public $createProductAndChrono = false;
+    
+    private $currentReservations = array();
 
     function __construct($db)
     {
@@ -40,7 +42,7 @@ class Reservations
             'IPOD', 'IPAD', 'IPHONE', 'WATCH', 'APPLETV', 'MAC', 'BEATS'
         );
 
-        $currentReservations = $this->getCurrentReservations();
+        $this->getCurrentReservations();
 
         $sql = 'SELECT DISTINCT(CAST(`apple_shipto` AS UNSIGNED)) as shipTo, `apple_service` as soldTo FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
         $sql .= ' WHERE `apple_shipto` IS NOT NULL AND `apple_service` IS NOT NULL';
@@ -66,7 +68,7 @@ class Reservations
 
         foreach ($numbers as $n) {
             if (!empty($n['soldTo']) && !empty($n['shipTo'])) {
-                if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $currentReservations))
+                if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo']))
                         break;
             }
         }
@@ -141,7 +143,7 @@ class Reservations
                 }
             }
         }
-        return $reservations;
+        $this->currentReservations = $reservations;
     }
 
     function getUsersByShipTo($shipTo)
@@ -534,7 +536,7 @@ L’équipe BIMP";
         }
     }
 
-    function fetchReservationSummary($soldTo, $shipTo, $currentReservations)
+    function fetchReservationSummary($soldTo, $shipTo)
     {
         global $tabCert, $dateBegin, $dateEnd, $productCodes;
 
@@ -605,7 +607,7 @@ L’équipe BIMP";
                     }
                     foreach ($data->response->reservations as $reservation) {
                         if (isset($reservation->reservationId)) {
-                            if (in_array($reservation->reservationId, $currentReservations)) {
+                            if (in_array($reservation->reservationId, $this->currentReservations)) {
                                 if ($this->display_debug)
                                     echo 'Réservation "' . $reservation->reservationId . '" déjà enregistrée.<br/>';
                                 continue;
@@ -619,6 +621,7 @@ L’équipe BIMP";
                             } else {
                                 if (isset($r->response) && !empty($r->response)) {
                                     $this->processReservation($r->response, $users);
+                                    $this->currentReservations[] = $reservation->reservationId;
                                 } else {
                                     $msg = 'Echec de la récupération des données de la réservation "' . $reservation->reservationId;
                                     $this->logError($msg);

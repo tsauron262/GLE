@@ -505,7 +505,9 @@ class pdf_bimpcommercial extends ModelePDFPropales
 					// Unit price before discount
 					$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
                                                                                           $remise_percent = pdf_getlineremisepercent($object, $i, $outputlangs, $hidedetails);
-                                                                                          $up_excl_tax2 = price($up_excl_tax*(1-$remise_percent/100));
+                                                                                          $coef = 1-str_replace("%", "", $remise_percent)/100;
+                                                                                          $up_excl_tax2 = price(str_replace(",",".",$up_excl_tax)*$coef);
+//                                                                                          $up_excl_tax2 = $up_excl_tax . " * ". $coef ." = ".$coef * $up_excl_tax ;
                                                                                           
 					$pdf->SetXY($this->posxup, $curY);
 					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax2, 0, 'R', 0);

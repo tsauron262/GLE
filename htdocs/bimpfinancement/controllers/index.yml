@@ -5,7 +5,7 @@ objects:
     demandes:
         instance:
             bimp_object: BF_Demande
-            
+    
 sections:
     - type: tabs
       tabs: 

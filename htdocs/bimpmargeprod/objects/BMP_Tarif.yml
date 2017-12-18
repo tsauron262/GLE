@@ -1,0 +1,48 @@
+table: bmp_event_tarif
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: tarif
+    
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+        
+    name: 
+        label: Nom
+        type: string
+        required: 1
+        sortable: 1
+        search: 1
+        
+    amount: 
+        label: montant
+        type: money
+        required: 1
+        sortable: 1
+        
+list:
+    title: Tarifs
+    icon: euro
+    checkboxes: 1
+    bulk_actions:
+        - label: supprimer les tarifs sélectionnés
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this))
+    sort_col: amount
+    sort_way: desc
+    n: 25
+    add_object_row: 1
+    update_btn: 1
+    delete_btn: 1
+    cols: 
+        name: 
+            field: name
+            edit: 1
+        amount: 
+            field: amount
+            edit: 1

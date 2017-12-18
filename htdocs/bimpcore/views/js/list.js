@@ -80,7 +80,10 @@ function reloadObjectList(list_id, callback) {
         data['p'] = p;
     }
 
-    if ($list.find('input[name=associations_filters]')) {
+    if ($list.find('input[name=list_filters]').length) {
+        data['list_filters'] = $list.find('input[name=list_filters]').val();
+    }
+    if ($list.find('input[name=associations_filters]').length) {
         data['associations_filters'] = $list.find('input[name=associations_filters]').val();
     }
 

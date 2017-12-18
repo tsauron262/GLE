@@ -1,56 +1,54 @@
-table: 
-primary: 
-controller: 
+table: string
+primary: string #fac - déf: id
+controller: string #fac
 
-parent_id_property: 
-parent_object: 
+parent_id_property: string #fac
+parent_object: string #fac - object_name OR instance_def
 
 labels: 
-    name: 
-    name_plur: 
-    isFemale: 
+    name: string
+    name_plur: string - fac (name + s par déf)
+    isFemale: bool # fac - déf: 0
 
 objects:
     nom_objet:
-        relation: 
-        delete: 
-        instance:
+        relation: string #hasOne / hasMany
+        delete: bool # fac - def: 0
+        instance: #instance_def
                 
 associations:
     nom_asso:
-        object: 
-        table: 
-        display:   
+        object: #object_name OR instance_def
                 
 fields: 
     nom_champ:
-        label: 
-        type: 
-        required: 
-        default_value:
-        input:
-            type:
-        display:
-            type:        
-        search: 
-        sortable:
-        sort_options:
+        label: string
+        type: string (int, 
+        required: bool #fac - def: 0
+        default_value: #fac
+        input: #fac
+            type: string
+        display: #fac
+            type: string    
+        search: bool OR Search_def
+        sortable: bool
+        sort_options: sort_options_def
 
 views:
     nom_vue:
-        title:
-        edit_btn:
-        delete_btn:
+        title: string
+        edit_btn: bool
+        delete_btn: bool
         rows:
             - cols: 
-                  - type:
-                    col_lg:
-                    col_md:
-                    col_sm:
-                    col_xs:
+                  - type: 
+                    col_lg: 0 à 12
+                    col_md: 0 à 12
+                    col_sm: 0 à 12
+                    col_xs: 0 à 12
 lists:
     nom_list:
-        checkboxes: 
+        checkboxes: bool 
         title: 
         icon: 
         bulk_actions: 

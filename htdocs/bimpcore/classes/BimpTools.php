@@ -481,7 +481,7 @@ class BimpTools
                 return false;
 
             case 'datetime':
-                if (preg_match('/^\d{4}\-\d{2}\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
+                if (preg_match('/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
                     return true;
                 }
                 return false;
@@ -569,6 +569,58 @@ class BimpTools
         return '&euro;';
     }
 
+    public static function displayMoneyValue($value, $currency)
+    {
+        if (is_numeric($value)) {
+            $value = (float) $value;
+        }
+
+        if (!is_float($value)) {
+            return $value;
+        }
+
+        $value = round($value, 2);
+
+        $int = floor($value);
+        $dec = ($value - $int) * 100;
+        $str = '' . $int;
+        $n = 0;
+        $result = '';
+        for ($i = (strlen($str) - 1); $i >= 0; $i--) {
+            if ($n != 0 && ($n % 3) === 0) {
+                $result = $str[$i] . ' ' . $result;
+            } else {
+                $result = $str[$i] . $result;
+            }
+            $n++;
+        }
+
+        if ($dec > 0) {
+            $result .= ',' . $dec;
+        }
+
+        return $result . ' ' . self::getCurrencyHtml($currency);
+        
+//        setlocale(LC_MONETARY, 'fr_FR');
+//        return money_format('%!i ' . self::getCurrencyHtml($currency), $value);
+    }
+
+    public static function getTaxes($id_country = 1)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $taxes = array();
+        $rows = $bdb->getRows('c_tva', '`fk_pays` = ' . $id_country . ' AND `active` = 1', null, 'array', array('rowid', 'taux'));
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $taxes[$r['rowid']] = $r['taux'];
+            }
+        }
+
+        return $taxes;
+    }
+
     // Divers:
 
     public static function ucfirst($str)
@@ -583,6 +635,7 @@ class BimpTools
             $first = preg_replace('/[ŷÿ]/', 'y', $first);
             $str = substr_replace($str, $first, 0, 2);
         }
+
 
         return ucfirst($str);
     }

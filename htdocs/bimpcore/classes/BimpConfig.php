@@ -209,6 +209,35 @@ class BimpConfig
         return $params;
     }
 
+    public function addParams($path, $params)
+    {
+        if (is_null($path) || !$path) {
+            return false;
+        }
+
+        $path = explode('/', $path);
+
+        $current = &$this->params;
+
+        foreach ($path as $key) {
+            if ($key === '') {
+                continue;
+            }
+            if (isset($current[$key])) {
+                $current = &$current[$key];
+            } else {
+                return false;
+            }
+        }
+
+        if (isset($current)) {
+            $current = array_merge($current, $params);
+            return true;
+        }
+
+        return false;
+    }
+
     protected function getvalue($value, $path)
     {
         if (is_string($value)) {
@@ -531,14 +560,15 @@ class BimpConfig
                 $this->logConfigError('Impossible d\'appeller la méthode "' . $callback . '" - Instance invalide');
             }
         } elseif (is_array($callback)) {
+            $is_static = $this->get($path . '/is_static', false, false, 'bool');
             $method = $this->get($path . '/method', null, true);
             if ($this->isDefined($path . '/object')) {
                 $instance = $this->getObject($path . '/object', null, false, 'object');
+            } elseif ($is_static && $this->isDefined($path . '/class_name')) {
+                $instance = $this->get($path . '/class_name', '', true);
             } else {
                 $instance = $this->instance;
             }
-
-            $is_static = $this->get($path . '/is_static', false, false, 'bool');
 
             if (is_null($method) || is_null($instance)) {
                 return null;

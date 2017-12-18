@@ -38,7 +38,15 @@ function loadModalFormFromView(view_id, form_name, $button) {
     if (!$view.length) {
         return;
     }
-    loadModalForm($button, $view.data('module_name'), $view.data('object_name'), form_name, $view.data('id_object'));
+    
+    var data = {
+        'module_name': $view.data('module_name'),
+        'object_name': $view.data('object_name'),
+        'id_object': $view.data('id_object'),
+        'form_name': form_name
+    };
+    
+    loadModalForm($button, data);
 }
 
 function loadModalView(view_id, view_name, $button) {

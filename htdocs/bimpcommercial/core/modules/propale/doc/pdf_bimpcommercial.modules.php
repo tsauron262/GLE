@@ -110,7 +110,7 @@ class pdf_bimpcommercial extends ModelePDFPropales
 			$this->posxup=140;
 			$this->posxqty=165;
 		
-		$this->posxdiscount=162;
+		$this->posxdiscount=120;
 		$this->postotalht=174;
 		if (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) || ! empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) $this->posxtva=$this->posxup;
 		$this->posxpicture=$this->posxtva - (empty($conf->global->MAIN_DOCUMENTS_WITH_PICTURE_WIDTH)?20:$conf->global->MAIN_DOCUMENTS_WITH_PICTURE_WIDTH);	// width of images
@@ -504,8 +504,11 @@ class pdf_bimpcommercial extends ModelePDFPropales
 
 					// Unit price before discount
 					$up_excl_tax = pdf_getlineupexcltax($object, $i, $outputlangs, $hidedetails);
+                                                                                          $remise_percent = pdf_getlineremisepercent($object, $i, $outputlangs, $hidedetails);
+                                                                                          $up_excl_tax2 = price($up_excl_tax*(1-$remise_percent/100));
+                                                                                          
 					$pdf->SetXY($this->posxup, $curY);
-					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax, 0, 'R', 0);
+					$pdf->MultiCell($this->posxqty-$this->posxup-0.8, 3, $up_excl_tax2, 0, 'R', 0);
 
 					// Quantity
 					$qty = pdf_getlineqty($object, $i, $outputlangs, $hidedetails);
@@ -532,9 +535,9 @@ class pdf_bimpcommercial extends ModelePDFPropales
 					$pdf->SetXY($this->posxdiscount, $curY);
 					if ($object->lines[$i]->remise_percent)
 					{
-						$pdf->SetXY($this->posxdiscount-2, $curY);
+						$pdf->SetXY($this->posxdiscount+2, $curY);
 						$remise_percent = pdf_getlineremisepercent($object, $i, $outputlangs, $hidedetails);
-						$pdf->MultiCell($this->postotalht-$this->posxdiscount+2, 3, $remise_percent, 0, 'R');
+						$pdf->MultiCell(15, 3, $remise_percent, 0, 'R');
 					}
 
 					// Total HT line
@@ -1159,15 +1162,15 @@ class pdf_bimpcommercial extends ModelePDFPropales
 			}
 		}*/
 
-		/*$pdf->line($this->posxdiscount-1, $tab_top, $this->posxdiscount-1, $tab_top + $tab_height);
+		$pdf->line($this->posxdiscount-1, $tab_top, $this->posxdiscount-1, $tab_top + $tab_height);
 		if (empty($hidetop))
 		{
 			if ($this->atleastonediscount)
 			{
 				$pdf->SetXY($this->posxdiscount-1, $tab_top+1);
-				$pdf->MultiCell($this->postotalht-$this->posxdiscount+1,2, $outputlangs->transnoentities("ReductionShort"),'','C');
+				$pdf->MultiCell(20,2, $outputlangs->transnoentities("ReductionShort"),'0','C');
 			}
-		}*/
+		}
 		/*if ($this->atleastonediscount)
 		{
 			$pdf->line($this->postotalht, $tab_top, $this->postotalht, $tab_top + $tab_height);

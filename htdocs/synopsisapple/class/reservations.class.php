@@ -405,7 +405,7 @@ class Reservations
 
         $usersAssigned = array();
         foreach ($users as $u)
-            $usersAssigned[] = array('id' => $u['id'], 'transparency' => 1);
+            $usersAssigned[] = array('id' => $u['id'], 'transparency' => 1, 'answer_status' => 1);
         $ac->userassigned = $usersAssigned;
         if(!isset($usersAssigned[0]))
             return false;

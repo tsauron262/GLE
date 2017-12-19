@@ -66,28 +66,70 @@ if ($socid > 0) {
 }
 
 print'
-<h2> Contrats actifs</h2>
+<h3> Contrats actifs</h3>
 
 <div id="containerForActif" class="customContainer">
 </div>
 
-<h2> Contrats inactifs</h2>
+<h3> Contrats inactifs</h3>
 
 <div id="containerForInactif" class="customContainer">
-</div>';
+</div>
+
+<h3>Nouveau contrat</h3>
+';
 
 
+print '<form class="customForm">';
 
-// Nbre max d'elements des petites listes
-//print '<form class="customForm">';
-//
-//print '<div class="customDiv fixDiv">Maintenance</div><br>';
-//print '<div class="customDiv divClikable">Non</div>';
-//print '<div class="customDiv divClikable">12</div>';
-//print '<div class="isSelected customDiv divClikable ">24</div>';
-//
-//
-//print '</form>';
+/* Assistance */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Assistance</div><br>';
+print '<div class="customDiv divClikable">Non</div>';
+print '<div class="customDiv divClikable">12</div>';
+print '<div class="isSelected customDiv divClikable ">24</div>';
+print '<div class="customDiv divClikable">36</div>';
+print '</div>';
+
+/* Pneumatique */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Pneumatique</div><br>';
+print '<div class="customDiv divClikable">Non</div>';
+print '<div class="customDiv divClikable">12</div>';
+print '<div class="customDiv divClikable ">24</div>';
+print '<div class="customDiv divClikable">36</div>';
+print '</div>';
+
+/* Maintenance */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Maintenance</div><br>';
+print '<div class="customDiv divClikable">Non</div>';
+print '<div class="customDiv divClikable">12</div>';
+print '<div class="customDiv divClikable ">24</div>';
+print '<div class="customDiv divClikable">36</div>';
+print '</div>';
+
+/* Extension */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Extension</div><br>';
+print '<div class="customDiv divClikable">Non</div>';
+print '<div class="customDiv divClikable">12</div>';
+print '<div class=" customDiv divClikable ">24</div>';
+print '<div class="customDiv divClikable">36</div>';
+print '</div>';
+
+/* Blyyd Connect */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Blyyd Connect</div><br>';
+print '<div class="customDiv divClikable">Non</div>';
+print '<div class="customDiv divClikable">12</div>';
+print '<div class=" customDiv divClikable ">24</div>';
+print '<div class="customDiv divClikable">36</div>';
+print '</div>';
+
+//print '<input type="submit" value="Valider">';
+
+print '</form>';
 
 llxFooter();
 

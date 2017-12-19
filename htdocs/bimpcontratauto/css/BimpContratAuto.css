@@ -10,42 +10,34 @@
     background-color:white;
 }
 
+.customDiv.containerWithBorder {
+    display:compact;
+}
+
 .customForm {
     text-align: center;
 }
 
-.fixDiv {
-    margin-top: 20px;
-}
-
 .divClikable {
-    background-color:#75aaff;
+    background-color:#cccccc;
 }
 
 .divClikable:hover {
-    background-color: #a8c9ff;
+    background-color: #7bb775;
     cursor: pointer;  
 }
 
 .divClikable:active {
-    background-color: #1d5cc1;
+    background-color: #35912d;
 }
 
 .isSelected {
-    margin-top: -5px;
-    background-color:#1d5cc1;
-}
-
-.fillTheDiv {
-    display:block;
-    height:100%;
-    width:100%;
-    text-decoration: none;
+    margin-top: -50px;
+    background-color:#35912d;
 }
 
 .customContainer {
     width: 600px;
-    margin: 20px auto;
 }
 
 .accordeon {
@@ -55,6 +47,7 @@
 .clickable:hover {
     cursor: pointer;  
 }
+
 .accordeon.item {
     width: 900px;
     height: 30px;  /* change .accordeon div rule and HEIGHT_DIV_CONTRAT (in file ajax.js) if you touch that field*/
@@ -80,15 +73,6 @@
     text-decoration: none;
 }
 
-/*.accordeon.item:hover {
-    height: 180px;  height = total height of A and P elements 
-}
-.accordeon.item:hover a {
-    border-bottom: 1px solid #ccc;
-    font-weight: bold;
-}*/
-
-
 /* W3 CSS */
 
 .w3-hoverable tr:hover{
@@ -99,10 +83,6 @@
     border-left: 5px solid #fff;
     border-right: 5px solid #fff;
 }
-
-/*tr:hover{
-        background-color:#ccc
-}*/
 
 .w3-table td,.w3-table th,.w3-table-all td,.w3-table-all th{
     padding-left: 15px;
@@ -138,7 +118,3 @@ table {
     margin-left: auto;
     margin-right: auto;
 }
-
-/*table, th, td {
-    border: 1px solid black;
-}*/

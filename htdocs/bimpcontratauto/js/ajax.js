@@ -5,7 +5,7 @@
 
 var contrats = [];
 
-var HEIGHT_DIV_CONTRAT = 30;
+var HEIGHT_DIV_CONTRAT = 30; /* change height of .accordeon div and .accordeon.item in css if you change that value */
 /**
  * Ajax functions
  */
@@ -38,11 +38,10 @@ function getAllContrats() {
 $(document).ready(function () {
     getAllContrats();
     printContrats();
-        $(document).on("click", 'div.clickable.item', function () {
-            var newHeight = getNewContratHeight($(this).parent());
-            $(this).parent().css("height", newHeight);
-        });
-//    $('#accordeon #contratsActif').css('height: 180px');
+    $(document).on("click", 'div.clickable.item', function () {
+        var newHeight = getNewContratHeight($(this).parent());
+        $(this).parent().css("height", newHeight);
+    });
 });
 
 function printContrats() {
@@ -63,8 +62,7 @@ function printContrats() {
 function getNewContratHeight(accDiv) {
     if (accDiv.height() === HEIGHT_DIV_CONTRAT) {
         var nbOfLine = parseInt(accDiv.attr('nbChild'));
-        console.log(nbOfLine);
-        return HEIGHT_DIV_CONTRAT*(nbOfLine + 2);
+        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2);
     }
     return HEIGHT_DIV_CONTRAT;
 }
@@ -86,12 +84,12 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
     $('#' + contratId)
             .attr('id', contratId + 'item')
             .append('<div class="clickable item">' +
-            contrat.ref +
-            '&nbsp;'.repeat(5) + 'Date de début ' + contrat.dateDebutContrat+ 
-            '&nbsp;'.repeat(5) + 'Date de fin ' + contrat.dateFin + 
-            '&nbsp;'.repeat(5) + 'Nombre de service ' + contrat.nbService + 
-            '&nbsp;'.repeat(5) + 'Prix total ' + contrat.prixTotalContrat + 
-            '</div>');
+                    contrat.ref +
+                    '&nbsp;'.repeat(5) + 'Date de début: ' + contrat.dateDebutContrat +
+                    '&nbsp;'.repeat(5) + 'Date de fin: ' + contrat.dateFinContrat +
+                    '&nbsp;'.repeat(5) + 'Nombre de service: ' + contrat.nbService +
+                    '&nbsp;'.repeat(5) + 'Prix total: ' + contrat.prixTotalContrat + ' €' +
+                    '</div>');
 
     initTable(contratId);
 
@@ -115,7 +113,7 @@ function initTable(contratId) {
             .attr('class', 'w3-light-grey')
             .appendTo('#' + contratId + 'thead');
 
-    var arrayOfField = ['Nom du service', 'Date de début', 'Date de fin', 'Durée', 'Prix unitaire', 'Prix total'];
+    var arrayOfField = ['Nom du service', 'Date de début', 'Date de fin', 'Durée (en mois)', 'Prix unitaire (en euros)', 'Prix total (en euros)'];
 
     arrayOfField.forEach(function (item) {
         $('<th></th>').text(item).appendTo('#' + contratId + 'trHead');
@@ -123,11 +121,15 @@ function initTable(contratId) {
 }
 
 function printServiceDetails(contratId, service, indService) {
-    var arrayOfValue = [service.ref, 'Pas encore', 'Pas encore', service.qty, service.prixUnitaire, service.prixTotal];
+    var arrayOfValue = [service.ref, service.dateDebutService, service.dateFinService, service.qty, service.prixUnitaire, service.prixTotal];
 
     $('<tr></tr>')
             .attr('id', contratId + 'tr' + indService)
             .appendTo('#' + contratId + 'table');
+
+    if (service.statut === 0) {    // if the service have to be closed
+        $('#' + contratId + 'tr' + indService).css("background-color", "#d34a4a");
+    }
 
     arrayOfValue.forEach(function (item) {
         $('<td></td>')

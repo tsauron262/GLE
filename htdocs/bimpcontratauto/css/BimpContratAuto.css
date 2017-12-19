@@ -56,14 +56,14 @@
     cursor: pointer;  
 }
 .accordeon.item {
-    width: 700px;
-    height: 30px;  /*height = total height of A child element */
+    width: 900px;
+    height: 30px;  /* change .accordeon div rule and HEIGHT_DIV_CONTRAT (in file ajax.js) if you touch that field*/
     overflow: hidden;
-
-    transition: height ease-in-out 500ms; /* css3 transition */
-    -o-transition: height ease-in-out 500ms;
-    -moz-transition: height ease-in-out 500ms;
-    -webkit-transition: height ease-in-out 500ms;
+    
+    transition: height ease-in-out 300ms; /* css3 transition */
+    -o-transition: height ease-in-out 300ms;
+    -moz-transition: height ease-in-out 300ms;
+    -webkit-transition: height ease-in-out 300ms;
 
     border: 2px solid #ccc;
     border-radius: 5px;
@@ -72,7 +72,7 @@
 }
 .accordeon div {
     display: block;
-    height: 30px;
+    height: 30px;   /* change .accordeon.item rule and HEIGHT_DIV_CONTRAT (in file ajax.js) if you touch that field*/
     line-height: 30px;
 
     background: #e6e6e6;
@@ -91,22 +91,13 @@
 
 /* W3 CSS */
 
-.w3-table-all tr{
-    border-bottom:0px solid #ddd
-}
-.w3-striped tbody tr:nth-child(even){
-    background-color:#f1f1f1
-}
-.w3-table-all tr:nth-child(odd){
-    background-color:#fff
-}
-
-.w3-table-all tr:nth-child(even){
-    background-color:#f1f1f1
-}
-
 .w3-hoverable tr:hover{
-    background-color:#ccc
+    background-color:#ccc;
+}
+
+.w3-hoverable tr:hover td{
+    border-left: 5px solid #fff;
+    border-right: 5px solid #fff;
 }
 
 /*tr:hover{
@@ -114,19 +105,28 @@
 }*/
 
 .w3-table td,.w3-table th,.w3-table-all td,.w3-table-all th{
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 0px;
+    padding-top: 0px;
     display:table-cell;
     text-align:left;
-    vertical-align:top;
+    vertical-align:central;
     height: 30px;
-    border-left: 3px;
-    border-right: 3px;
+    border-left: 5px solid #fff;
+    border-right: 5px solid #fff;
+    border-top: 0px;
+    border-bottom: 0px;
 }
 
-.w3-table th:first-child,.w3-table td:first-child,.w3-table-all th:first-child,.w3-table-all td:first-child{
-    padding-left:16px
+.w3-table-all th {
+    height: 26px;
+    border-left: 0px solid;
+    border-right: 0px solid;
+    border-top: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
 }
+
 
 .w3-light-grey,.w3-hover-light-grey:hover,.w3-light-gray,.w3-hover-light-gray:hover{
     color:#000!important;

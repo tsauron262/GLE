@@ -176,11 +176,6 @@ class modBimpContratAuto extends DolibarrModules {
 
         // Boxes/Widgets
         // Add here list of php file(s) stored in mymodule/core/boxes that contains class to show a widget.
-//        $this->boxes = array(
-//            0 => array('file' => 'mymodulewidget1.php@mymodule', 'note' => 'Widget provided by MyModule', 'enabledbydefaulton' => 'Home'),
-//                //1=>array('file'=>'mymodulewidget2.php@mymodule','note'=>'Widget provided by MyModule'),
-//                //2=>array('file'=>'mymodulewidget3.php@mymodule','note'=>'Widget provided by MyModule')
-//        );
         // Cronjobs (List of cron jobs entries to add when module is enabled)
 //        $this->cronjobs = array(
 //        );

@@ -78,46 +78,6 @@ print'
 
 
 
-print '<div class="w3-container">
-  <h2>Hoverable Table</h2>
-
-  <table class="w3-table-all w3-hoverable">
-    <thead>
-      <tr class="w3-light-grey">
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Points</th>
-      </tr>
-    </thead>
-    <tr>
-      <td>Jill</td>
-      <td>Smith</td>
-      <td>50</td>
-    </tr>
-    <tr>
-      <td>Eve</td>
-      <td>Jackson</td>
-      <td>94</td>
-    </tr>
-    <tr>
-      <td>Adam</td>
-      <td>Johnson</td>
-      <td>67</td>
-    </tr>
-  </table>';
-
-//<h1> Contrats inactifs</h1>
-//<div id="container">
-//    <div id="accordeon">
-//        <div id="contratsInactif" class="item">
-//            <a href="#">Contrats inactifs</a>
-//            <p>Contrat2015</p>
-//            <p>Contrat2014</p>
-//        </div>
-//    </div>
-//</div>';
-    
-
 // Nbre max d'elements des petites listes
 //print '<form class="customForm">';
 //

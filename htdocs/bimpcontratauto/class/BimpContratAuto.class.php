@@ -96,24 +96,37 @@ class BimpContratAuto extends CommonObject {
                 } else if ($lowestDuration > $line->qty) {      // fini 
                     $lowestDuration = $duree;                   // en
                 }                                               // premier
-                
                 $services[] = array(
                     'id_product' => $line->id,      // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
                     'duree' => $duree,              // non utilisé
                     'qty' => $line->qty,            // duréee du service (en mois)
-                    'dateDebutService' => $line->date_ouverture_prevue,        // TODO ou date_ouverture ?
+                    'dateDebutService' => dol_print_date($line->date_ouverture),        // TODO ou date_ouverture ?
+                    'dateFinService' => dol_print_date(dol_time_plus_duree($line->date_ouverture, $line->qty, 'm')),
                     'prixUnitaire' => $line->price,
-                    'prixTotal' => $line->qty * $line->price);                 // TODO prixTotal dépend de quantité et non pas de durée
+                    'prixTotal' => $line->qty * $line->price,      // TODO prixTotal dépend de quantité et non pas de durée
+                    'statut' => $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'))); // if 1 => OK if 0 => have to be closed
                 $prixTotalContrat += $line->qty * $line->price ;
             }
-            $contrats[$contratObj->id]['dateFin'] = dol_time_plus_duree($contrats[$contratObj->id]['dateDebutContrat'], $lowestDuration, 'm');
+            $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date(dol_time_plus_duree($contrats[$contratObj->id]['dateDebutContrat'], $lowestDuration, 'm'));
             $contrats[$contratObj->id]['services'] = $services;
             $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
+            $contrats[$contratObj->id]['dateDebutContrat'] = dol_print_date($contrats[$contratObj->id]['dateDebutContrat']);
         }
         return $contrats;
     }
 
+    /**
+     * Check if the service is active, if it is and is passed
+     * Set check to 0 if the service has to be closed
+     */
+    function checkStatut($statut, $timeEndService) {
+        if ($statut == 4 && dol_now() > $timeEndService) {
+            return 0;
+        }
+        return 1;   // The service is OK
+    }
+    
     /**
      * Get the duration of a service by instancing a product
      */
@@ -141,111 +154,12 @@ class BimpContratAuto extends CommonObject {
         else
             $MAXLIST = 25;
 
-        $sql = "SELECT s.rowid, c.rowid as id";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "contrat as c";
-        $sql.= " WHERE c.fk_soc = s.rowid ";
-        $sql.= " AND s.rowid = " . $id_client;
-        $sql.= " AND c.entity = " . $conf->entity;
-        $sql.= " ORDER BY c.datec DESC";
-
-        $resql = $this->db->query($sql);
-        if ($resql) {
-            $num = $this->db->num_rows($resql);
-            $i = 0;
-            while ($i < $num && $i < $MAXLIST) {
-                $newContrat = new Contrat($this->db);
-                $objp = $this->db->fetch_object($resql);
-                $newContrat->fetch($objp->id);
-                $dolContratObject[] = $newContrat;
-                $i++;
-            }
-            $this->db->free($resql);
-        } else {
-            dol_print_error($this->db);
-        }
-        return $dolContratObject;
+        $contratstatic = new Contrat ($this->db);
+        $contratstatic->fetch($id_client);
+        return $contratstatic->getListOfContracts();
     }
 
 }
-
-//		$productstatic=new Product($db);
-//
-//        $usemargins=0;
-//		if (! empty($conf->margin->enabled) && ! empty($object->element) && in_array($object->element,array('facture','propal','commande'))) $usemargins=1;
-//
-//        $var=false;
-//
-//		// Title line for service
-//        $cursorline=1;
-//        while ($cursorline <= $nbofservices)
-//        {
-//            print '<form name="update" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'" method="post">';
-//            print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-//            print '<input type="hidden" name="action" value="updateline">';
-//            print '<input type="hidden" name="elrowid" value="'.$object->lines[$cursorline-1]->id.'">';
-//            print '<input type="hidden" name="idprod" value="'.(!empty($object->lines[$cursorline-1]->fk_product) ? $object->lines[$cursorline-1]->fk_product : 0).'">';
-//            print '<input type="hidden" name="fournprice" value="'.(!empty($object->lines[$cursorline-1]->fk_fournprice) ? $object->lines[$cursorline-1]->fk_fournprice : 0).'">';
-//
-//            // Area with common detail of line
-//            print '<table class="notopnoleftnoright allwidth tableforservicepart1" width="100%">';
-//
-//            $sql = "SELECT cd.rowid, cd.statut, cd.label as label_det, cd.fk_product, cd.product_type, cd.description, cd.price_ht, cd.qty,";
-//            $sql.= " cd.tva_tx, cd.vat_src_code, cd.remise_percent, cd.info_bits, cd.subprice, cd.multicurrency_subprice,";
-//            $sql.= " cd.date_ouverture_prevue as date_debut, cd.date_ouverture as date_debut_reelle,";
-//            $sql.= " cd.date_fin_validite as date_fin, cd.date_cloture as date_fin_reelle,";
-//            $sql.= " cd.commentaire as comment, cd.fk_product_fournisseur_price as fk_fournprice, cd.buy_price_ht as pa_ht,";
-//	        $sql.= " cd.fk_unit,";
-//            $sql.= " p.rowid as pid, p.ref as pref, p.label as plabel, p.fk_product_type as ptype, p.entity as pentity";
-//            $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as cd";
-//            $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
-//            $sql.= " WHERE cd.rowid = ".$object->lines[$cursorline-1]->id;
-//
-//            $result = $db->query($sql);
-//            if ($result)
-//            {
-//                $total = 0;
-//
-//                print '<tr class="liste_titre'.($cursorline?' liste_titre_add':'').'">';
-//                print '<td>'.$langs->trans("ServiceNb",$cursorline).'</td>';
-//                print '<td width="80" align="center">'.$langs->trans("VAT").'</td>';
-//                print '<td width="80" align="right">'.$langs->trans("PriceUHT").'</td>';
-//                if (!empty($conf->multicurrency->enabled)) {
-//                    print '<td width="80" align="right">'.$langs->trans("PriceUHTCurrency").'</td>';
-//                }
-//                print '<td width="30" align="center">'.$langs->trans("Qty").'</td>';
-//	            if ($conf->global->PRODUCT_USE_UNITS) print '<td width="30" align="left">'.$langs->trans("Unit").'</td>';
-//                print '<td width="50" align="right">'.$langs->trans("ReductionShort").'</td>';
-//				if (! empty($conf->margin->enabled) && ! empty($conf->global->MARGIN_SHOW_ON_CONTRACT)) print '<td width="50" align="right">'.$langs->trans("BuyingPrice").'</td>';
-//                print '<td width="30">&nbsp;</td>';
-//                print "</tr>\n";
-//
-//                $objp = $db->fetch_object($result);
-//
-//                //
-//
-//                if ($action != 'editline' || GETPOST('rowid') != $objp->rowid)
-//                {
-//                    print '<tr '.$bcnd[$var].' valign="top">';
-//                    // Label
-//                    if ($objp->fk_product > 0)
-//                    {
-//                        print '<td>';
-//                        $productstatic->id=$objp->fk_product;
-//                        $productstatic->type=$objp->ptype;
-//                        $productstatic->ref=$objp->pref;
-//						$productstatic->entity=$objp->pentity;
-//						$productstatic->label=$objp->plabel;
-//						$text = $productstatic->getNomUrl(1,'',20);
-//                        if ($objp->plabel)
-//                        {
-//                        	$text .= ' - ';
-//                        	//$productstatic->ref=$objp->label;
-//                        	//$text .= $productstatic->getNomUrl(0,'',16);
-//                        	$text .= $objp->plabel;
-//                        }
-//                        $description = $objp->description;
-//
-
 
     /*
 

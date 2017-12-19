@@ -5,6 +5,7 @@
 
 var contrats = [];
 
+var HEIGHT_DIV_CONTRAT = 30;
 /**
  * Ajax functions
  */
@@ -37,6 +38,10 @@ function getAllContrats() {
 $(document).ready(function () {
     getAllContrats();
     printContrats();
+        $(document).on("click", 'div.clickable.item', function () {
+            var newHeight = getNewContratHeight($(this).parent());
+            $(this).parent().css("height", newHeight);
+        });
 //    $('#accordeon #contratsActif').css('height: 180px');
 });
 
@@ -51,27 +56,84 @@ function printContrats() {
     }
 }
 
-function addContratAndServices(contrat, divIdToAppend, contratId) {
+/*
+ * Functions when a an event is triggered
+ */
 
-//        <div id="contratsInactif" class="item">
-//        </div>
+function getNewContratHeight(accDiv) {
+    if (accDiv.height() === HEIGHT_DIV_CONTRAT) {
+        var nbOfLine = parseInt(accDiv.attr('nbChild'));
+        console.log(nbOfLine);
+        return HEIGHT_DIV_CONTRAT*(nbOfLine + 2);
+    }
+    return HEIGHT_DIV_CONTRAT;
+}
+
+
+/**
+ * Other functions
+ */
+
+
+function addContratAndServices(contrat, divIdToAppend, contratId) {
 
     $('<div></div>')
             .attr('id', contratId)
             .attr('class', 'accordeon item')
+            .attr('nbChild', contrat.services.length)
             .appendTo(divIdToAppend);
 
     $('#' + contratId)
-            .attr('id', contratId+'item')
-            .append('<a href="#" class="item">' + contrat.ref + '</a>');
+            .attr('id', contratId + 'item')
+            .append('<div class="clickable item">' +
+            contrat.ref +
+            '&nbsp;'.repeat(5) + 'Date de début ' + contrat.dateDebutContrat+ 
+            '&nbsp;'.repeat(5) + 'Date de fin ' + contrat.dateFin + 
+            '&nbsp;'.repeat(5) + 'Nombre de service ' + contrat.nbService + 
+            '&nbsp;'.repeat(5) + 'Prix total ' + contrat.prixTotalContrat + 
+            '</div>');
 
-    for (ind in contrat.services) {
-        $('<p></p>')
-                .attr('id', ind)
-//                .attr('class', 'item')
-                .text(contrat.services[ind].ref)
-                .appendTo('#' + contratId+'item');
+    initTable(contratId);
+
+    for (var ind in contrat.services) {
+        printServiceDetails(contratId, contrat.services[ind], ind);
     }
+}
+
+function initTable(contratId) {
+    $('<table></table>')
+            .attr('id', contratId + 'table')
+            .attr('class', 'w3-table-all w3-hoverable')
+            .appendTo('#' + contratId + 'item');
+
+    $('<thead></thead>')
+            .attr('id', contratId + 'thead')
+            .appendTo('#' + contratId + 'table');
+
+    $('<tr></tr>')
+            .attr('id', contratId + 'trHead')
+            .attr('class', 'w3-light-grey')
+            .appendTo('#' + contratId + 'thead');
+
+    var arrayOfField = ['Nom du service', 'Date de début', 'Date de fin', 'Durée', 'Prix unitaire', 'Prix total'];
+
+    arrayOfField.forEach(function (item) {
+        $('<th></th>').text(item).appendTo('#' + contratId + 'trHead');
+    });
+}
+
+function printServiceDetails(contratId, service, indService) {
+    var arrayOfValue = [service.ref, 'Pas encore', 'Pas encore', service.qty, service.prixUnitaire, service.prixTotal];
+
+    $('<tr></tr>')
+            .attr('id', contratId + 'tr' + indService)
+            .appendTo('#' + contratId + 'table');
+
+    arrayOfValue.forEach(function (item) {
+        $('<td></td>')
+                .text(item)
+                .appendTo('#' + contratId + 'tr' + indService);
+    });
 }
 
 
@@ -79,12 +141,6 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
 
 
 
-
-
-
-/**
- * Other functions
- */
 
 
 /* Get the parameter sParam */

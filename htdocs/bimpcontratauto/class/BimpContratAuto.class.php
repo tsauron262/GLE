@@ -84,6 +84,7 @@ class BimpContratAuto extends CommonObject {
      */
     function addServices($dolContratObject, $contrats) {
         foreach ($dolContratObject as $contratObj) {
+            $prixTotalContrat  = 0;
             $lines = $contratObj->fetch_lines();    // get services
             $services = array();                    // init tab service
             
@@ -102,10 +103,13 @@ class BimpContratAuto extends CommonObject {
                     'duree' => $duree,              // non utilisé
                     'qty' => $line->qty,            // duréee du service (en mois)
                     'dateDebutService' => $line->date_ouverture_prevue,        // TODO ou date_ouverture ?
+                    'prixUnitaire' => $line->price,
                     'prixTotal' => $line->qty * $line->price);                 // TODO prixTotal dépend de quantité et non pas de durée
+                $prixTotalContrat += $line->qty * $line->price ;
             }
             $contrats[$contratObj->id]['dateFin'] = dol_time_plus_duree($contrats[$contratObj->id]['dateDebutContrat'], $lowestDuration, 'm');
             $contrats[$contratObj->id]['services'] = $services;
+            $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
         }
         return $contrats;
     }

@@ -66,19 +66,45 @@ if ($socid > 0) {
 }
 
 print'
-<h1> Contrats actifs</h1>
-<div id="containerForActif">
-    <div id="accordeon" class="item">
-        <div id="contratsActif" >
-        </div>
-    </div>
+<h2> Contrats actifs</h2>
+
+<div id="containerForActif" class="customContainer">
 </div>
 
-<h1> Contrats inactifs</h1>
+<h2> Contrats inactifs</h2>
 
 <div id="containerForInactif" class="customContainer">
 </div>';
 
+
+
+print '<div class="w3-container">
+  <h2>Hoverable Table</h2>
+
+  <table class="w3-table-all w3-hoverable">
+    <thead>
+      <tr class="w3-light-grey">
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Points</th>
+      </tr>
+    </thead>
+    <tr>
+      <td>Jill</td>
+      <td>Smith</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <td>Eve</td>
+      <td>Jackson</td>
+      <td>94</td>
+    </tr>
+    <tr>
+      <td>Adam</td>
+      <td>Johnson</td>
+      <td>67</td>
+    </tr>
+  </table>';
 
 //<h1> Contrats inactifs</h1>
 //<div id="container">

@@ -43,14 +43,14 @@
     text-decoration: none;
 }
 
-#container {
+.customContainer {
     width: 600px;
     margin: 20px auto;
 }
-#accordeon {
+.accordeon {
     margin-top: 20px;
 }
-#accordeon .item {
+.accordeon.item {
     width: 400px;
     height: 30px;  /*height = total height of A child element */
     overflow: hidden;
@@ -67,7 +67,7 @@
 
     margin-bottom: 2px;
 }
-#accordeon a {
+.accordeon a {
     display: block;
     height: 20px;
     line-height: 20px;
@@ -78,20 +78,10 @@
     text-decoration: none;
 }
 
-#accordeon p {
-    height: 150px;
-    padding: 5px;
+.accordeon.item:hover {
+    height: 180px; /* height = total height of A and P elements */
 }
-
-#accordeon #contratsActif {
-    height: 180px;
-}
-
-
-/*#accordeon div:active {
-    height: 180px;  height = total height of A and P elements 
-}
-#accordeon div:active a {
+.accordeon.item:hover a {
     border-bottom: 1px solid #ccc;
     font-weight: bold;
-}*/
+}

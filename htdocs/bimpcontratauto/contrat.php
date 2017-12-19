@@ -33,6 +33,8 @@ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
+require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
+
 
 $arrayofcss = array('/bimpcontratauto/css/BimpContratAuto.css');
 $arrayofjs = array('/bimpcontratauto/js/ajax.js');
@@ -63,24 +65,34 @@ if ($socid > 0) {
     print '<div class="underbanner clearboth"></div>';
 }
 
-
 print'
-<div id="container">
-  <div id="accordeon">
-		<div id="contratsActif" class="item">
-			<a href="#">Contrats actifs</a>
-			<p>Contrat2017<br>
-			Contrat2016</p>
-		</div>
-		<div id="contratsInactif" class="item">
-			<a href="#">Contrats inactifs</a>
-			<p>Contrat2015</p>
-			<p>Contrat2014</p>
-		</div>
-	</div>
-</div>';
-        
+<h1> Contrats actifs</h1>
+<div id="containerForActif">
+    <div id="accordeon" class="item">
+        <div id="contratsActif" >
+        </div>
+    </div>
+</div>
 
+<h1> Contrats inactifs</h1>
+
+<div id="containerForInactif" class="customContainer">
+</div>';
+
+
+//<h1> Contrats inactifs</h1>
+//<div id="container">
+//    <div id="accordeon">
+//        <div id="contratsInactif" class="item">
+//            <a href="#">Contrats inactifs</a>
+//            <p>Contrat2015</p>
+//            <p>Contrat2014</p>
+//        </div>
+//    </div>
+//</div>';
+    
+
+// Nbre max d'elements des petites listes
 //print '<form class="customForm">';
 //
 //print '<div class="customDiv fixDiv">Maintenance</div><br>';

@@ -282,7 +282,7 @@ class modBimpCommercial extends DolibarrModules
 	{
 		$sql = array();
 
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommercial', 1, 'propal', 'proposition loyer', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommercial', 1, 'propal', 'Proposition loyer', NULL);";
                 
 		//$this->_load_tables('/bimpcommercial/sql/');
 

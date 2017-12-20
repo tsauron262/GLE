@@ -12,12 +12,12 @@ $staticca = new BimpContratAuto($db);
 
 switch (GETPOST('action')) {
     case 'getAllContrats': {
-            $contrats = $staticca->getAllContrats(GETPOST('id_client'));
+            $contrats = $staticca->getAllContrats(GETPOST('socid'));
             echo json_encode($contrats);
             break;
         }
     case 'newContrat': {
-            $staticca->createContrat(GETPOST('id_client'), GETPOST('contrat'));
+            $staticca->createContrat(GETPOST('socid'), GETPOST('contrat'));
         }
     default: break;
 }

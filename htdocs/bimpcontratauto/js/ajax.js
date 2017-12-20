@@ -11,13 +11,13 @@ var HEIGHT_DIV_CONTRAT = 30; /* change height of .accordeon div and .accordeon.i
  */
 
 function getAllContrats() {
-    id_client = getUrlParameter('id');
+    socid = getUrlParameter('socid');
 
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpcontratauto/interface.php",
         data: {
-            id_client: id_client,
+            socid: socid,
             action: 'getAllContrats'
         },
         async: false,
@@ -31,13 +31,13 @@ function getAllContrats() {
 }
 
 function newContrat(contrat) {
-    id_client = getUrlParameter('id');
+    socid = getUrlParameter('socid');
 
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpcontratauto/interface.php",
         data: {
-            id_client: id_client,
+            socid: socid,
             newContrat: contrat,
             action: 'newContrat'
         },

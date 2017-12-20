@@ -40,12 +40,8 @@ $arrayofcss = array('/bimpcontratauto/css/BimpContratAuto.css');
 $arrayofjs = array('/bimpcontratauto/js/ajax.js');
 
 
-$socid = GETPOST('id', 'int');       // TODO id ou socid ?
+$socid = GETPOST('socid', 'int');
 
-
-/*
- * 
- */
 
 /*
  * 	View

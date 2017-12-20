@@ -51,15 +51,13 @@ class BimpContratAuto extends CommonObject {
 
     /**
      * 
-     * @param type $id_client
+     * @param type $socid
      * @return $dolContratObject  array of all contrats/service by contrat
      */
-    function getAllContrats($id_client) {
-        $dolContratObject = $this->getDolContratsObject($id_client);
+    function getAllContrats($socid) {
+        $dolContratObject = $this->getDolContratsObject($socid);
         $contrats = $this->fillCustomFieldForContrat($dolContratObject);
         $contrats = $this->addServices($dolContratObject, $contrats);
-//                $newContrat = array('id' => $objp->id, 'nomUrl' => $contrat->getNomUrl(1, 12));
-//                $contrats[] = $newContrat;
         return $contrats;
     }
 
@@ -95,18 +93,20 @@ class BimpContratAuto extends CommonObject {
                 } else if ($lowestDuration > $line->qty) {      // fini 
                     $lowestDuration = $duree;                   // en
                 }                                               // premier
+                
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
                     'duree' => $duree, // non utilisé
                     'qty' => $line->qty, // duréee du service (en mois)
-                    'dateDebutService' => dol_print_date($line->date_ouverture), // TODO ou date_ouverture ?
+                    'dateDebutService' => dol_print_date($line->date_ouverture),
                     'dateFinService' => dol_print_date(dol_time_plus_duree($line->date_ouverture, $line->qty, 'm')),
                     'prixUnitaire' => $line->price,
                     'prixTotal' => $line->qty * $line->price, // TODO prixTotal dépend de quantité et non pas de durée
                     'statut' => $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'))); // if 1 => OK if 0 => have to be closed
                 $prixTotalContrat += $line->qty * $line->price;
             }
+            
             $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date(dol_time_plus_duree($contrats[$contratObj->id]['dateDebutContrat'], $lowestDuration, 'm'));
             $contrats[$contratObj->id]['services'] = $services;
             $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
@@ -140,10 +140,10 @@ class BimpContratAuto extends CommonObject {
 
     /**
      * Search all contract with that client and return it
-     * @param type $id_client
+     * @param type $socid
      * @return \Contrat     array of contrat objects
      */
-    function getDolContratsObject($id_client) {     // TODO change en utilisant get list of contract
+    function getDolContratsObject($socid) {
         global $conf;
 
         $dolContratObject = array();
@@ -154,12 +154,14 @@ class BimpContratAuto extends CommonObject {
             $MAXLIST = 25;
 
         $contratstatic = new Contrat($this->db);
-        $contratstatic->fetch($id_client);
+        $contratstatic->socid = $socid;
         return $contratstatic->getListOfContracts();
     }
 
-    function createContrat($id_client, $contrat) {
-        print_r ($contrat);
+    function createContrat($socid, $contrat) {
+//    $soc = new Societe($db);
+//    if ($socid>0)
+//        $soc->fetch($socid);
     }
 
 }
@@ -182,7 +184,6 @@ class BimpContratAuto extends CommonObject {
   function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
   function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $tvatx, $localtax1tx=0.0, $localtax2tx=0.0, $date_debut_reel='', $date_fin_reel='', $price_base_type='HT', $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
   function deleteline($idline,$user)
- *  @deprecated					This function will never be used. Status of a contract is status of its lines.
   function update_statut($user)
   function getLibStatut($mode)
   function LibStatut($statut,$mode)
@@ -198,6 +199,8 @@ class BimpContratAuto extends CommonObject {
   public function generateDocument($modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0)
   public static function replaceThirdparty(DoliDB $db, $origin_id, $dest_id)
   function createFromClone($socid = 0, $notrigger=0) {
+   
+   
   function __construct($db)
   function getLibStatut($mode)
   function LibStatut($statut,$mode,$expired=-1,$moreatt='')

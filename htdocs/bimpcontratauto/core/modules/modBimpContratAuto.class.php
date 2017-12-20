@@ -147,7 +147,7 @@ class modBimpContratAuto extends DolibarrModules {
         // 'thirdparty'       to add a tab in third party view
         // 'user'             to add a tab in user view
         $this->tabs = array(
-            'thirdparty:+contratauto:Contrat:@bimpcontratauto:$user->rights->bimpproductbrowser->read:/bimpcontratauto/contrat.php?id=__ID__'
+            'thirdparty:+contratauto:Contrat:@bimpcontratauto:$user->rights->bimpproductbrowser->read:/bimpcontratauto/contrat.php?socid=__ID__'
         );
 //            'categories_0:+restreindre:Restreindre:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__',
 

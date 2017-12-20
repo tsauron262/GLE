@@ -11,13 +11,13 @@ var HEIGHT_DIV_CONTRAT = 30; /* change height of .accordeon div and .accordeon.i
  */
 
 function getAllContrats() {
-    id_client = getUrlParameter('id');
+    socid = getUrlParameter('socid');
 
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpcontratauto/interface.php",
         data: {
-            id_client: id_client,
+            socid: socid,
             action: 'getAllContrats'
         },
         async: false,
@@ -29,6 +29,26 @@ function getAllContrats() {
         }
     });
 }
+
+function newContrat(contrat) {
+    socid = getUrlParameter('socid');
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpcontratauto/interface.php",
+        data: {
+            socid: socid,
+            newContrat: contrat,
+            action: 'newContrat'
+        },
+        async: false,
+        error: function () {
+            console.log("Erreur PHP");
+        }
+    });
+}
+
+
 
 
 /**
@@ -43,13 +63,66 @@ $(document).ready(function () {
         $(this).parent().css("height", newHeight);
     });
     $(document).on("click", 'div.divClikable', function () {   // add/change field of new contrat
-        changeValueOfField($(this).parent(), $(this).attr('val'));
+        changeValueOfField($(this).parent(), $(this).attr('value'));
     });
     $(document).on("click", 'div.buttonCustom', function () {
-        var emptyField = valider();
+        valider();
     });
 });
 
+
+
+
+
+/*
+ * Functions when a an event is triggered
+ */
+
+/* Get the new height of the clicked contrat */
+function getNewContratHeight(accDiv) {
+    if (accDiv.height() === HEIGHT_DIV_CONTRAT) {
+        var nbOfLine = parseInt(accDiv.attr('nbChild'));
+        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2);
+    }
+    return HEIGHT_DIV_CONTRAT;
+}
+
+/* When the user want to change the duration of a service */
+function changeValueOfField(parent, value) {
+    parent.children().each(function () {
+        if ($(this).hasClass('divClikable')) {
+            if ($(this).hasClass('isSelected')) {
+                $(this).removeClass('isSelected');
+            }
+            if ($(this).attr('value') === value) {
+                $(this).addClass('isSelected');
+            }
+        }
+    });
+}
+
+/* When the user want to create a new contrat */
+function valider() {
+    var contrat = [];
+    var i = 0;
+    $('#invisibleDiv').find('.isSelected').each(function () {
+        var field = {};
+        field.name = $(this).attr('name');
+        field.value = $(this).attr('value');
+        contrat[i] = field;
+        i++;
+    });
+    newContrat(contrat);
+}
+
+
+
+
+/**
+ * Other functions
+ */
+
+/* display table of contrat */
 function printContrats() {
     var id;
     for (id in contrats) {
@@ -61,41 +134,7 @@ function printContrats() {
     }
 }
 
-/*
- * Functions when a an event is triggered
- */
-
-function getNewContratHeight(accDiv) {
-    if (accDiv.height() === HEIGHT_DIV_CONTRAT) {
-        var nbOfLine = parseInt(accDiv.attr('nbChild'));
-        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2);
-    }
-    return HEIGHT_DIV_CONTRAT;
-}
-
-function changeValueOfField(parent, value) {
-    parent.children().each(function () {
-        if ($(this).hasClass('divClikable')) {
-            if ($(this).hasClass('isSelected')) {
-                $(this).removeClass('isSelected');
-            }
-            if ($(this).attr('val') === value) {
-                $(this).addClass('isSelected');
-            }
-        }
-    });
-}
-
-function valider() {
-    return '';
-}
-
-
-/**
- * Other functions
- */
-
-
+/* Add contratcs and services in the array */
 function addContratAndServices(contrat, divIdToAppend, contratId) {
 
     $('<div></div>')
@@ -121,6 +160,7 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
     }
 }
 
+/* Initilize the table of contrat */
 function initTable(contratId) {
     $('<table></table>')
             .attr('id', contratId + 'table')
@@ -143,6 +183,7 @@ function initTable(contratId) {
     });
 }
 
+/* Fill contrat array with its services */
 function printServiceDetails(contratId, service, indService) {
     var arrayOfValue = [service.ref, service.dateDebutService, service.dateFinService, service.qty, service.prixUnitaire, service.prixTotal];
 
@@ -160,13 +201,6 @@ function printServiceDetails(contratId, service, indService) {
                 .appendTo('#' + contratId + 'tr' + indService);
     });
 }
-
-
-
-
-
-
-
 
 /* Get the parameter sParam */
 var getUrlParameter = function getUrlParameter(sParam) {

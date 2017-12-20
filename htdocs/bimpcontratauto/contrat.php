@@ -80,56 +80,54 @@ print'
 ';
 
 
-print '<form class="customForm">';
-
 /* Assistance */
 print '<div class="customDiv containerWithBorder">';
 print '<div class="customDiv fixDiv">Assistance</div><br>';
-print '<div class="customDiv divClikable">Non</div>';
-print '<div class="customDiv divClikable">12</div>';
-print '<div class="isSelected customDiv divClikable ">24</div>';
-print '<div class="customDiv divClikable">36</div>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
 print '</div>';
 
 /* Pneumatique */
 print '<div class="customDiv containerWithBorder">';
 print '<div class="customDiv fixDiv">Pneumatique</div><br>';
-print '<div class="customDiv divClikable">Non</div>';
-print '<div class="customDiv divClikable">12</div>';
-print '<div class="customDiv divClikable ">24</div>';
-print '<div class="customDiv divClikable">36</div>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
 print '</div>';
 
 /* Maintenance */
 print '<div class="customDiv containerWithBorder">';
 print '<div class="customDiv fixDiv">Maintenance</div><br>';
-print '<div class="customDiv divClikable">Non</div>';
-print '<div class="customDiv divClikable">12</div>';
-print '<div class="customDiv divClikable ">24</div>';
-print '<div class="customDiv divClikable">36</div>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
 print '</div>';
 
 /* Extension */
 print '<div class="customDiv containerWithBorder">';
 print '<div class="customDiv fixDiv">Extension</div><br>';
-print '<div class="customDiv divClikable">Non</div>';
-print '<div class="customDiv divClikable">12</div>';
-print '<div class=" customDiv divClikable ">24</div>';
-print '<div class="customDiv divClikable">36</div>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
 print '</div>';
 
 /* Blyyd Connect */
 print '<div class="customDiv containerWithBorder">';
 print '<div class="customDiv fixDiv">Blyyd Connect</div><br>';
-print '<div class="customDiv divClikable">Non</div>';
-print '<div class="customDiv divClikable">12</div>';
-print '<div class=" customDiv divClikable ">24</div>';
-print '<div class="customDiv divClikable">36</div>';
-print '</div>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
+print '</div><br>';
 
-//print '<input type="submit" value="Valider">';
+print '<div class="buttonCustom">Valider</div>';
 
-print '</form>';
+
 
 llxFooter();
 

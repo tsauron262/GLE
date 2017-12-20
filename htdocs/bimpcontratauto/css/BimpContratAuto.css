@@ -12,6 +12,7 @@
 
 .customDiv.containerWithBorder {
     display:compact;
+    border:solid 2px;
 }
 
 .customForm {
@@ -23,17 +24,17 @@
 }
 
 .divClikable:hover {
-    background-color: #7bb775;
+    background-color: #4CAF50;
     cursor: pointer;  
 }
 
 .divClikable:active {
-    background-color: #35912d;
+    background-color: #4CAF50;
 }
 
-.isSelected {
-    margin-top: -50px;
-    background-color:#35912d;
+.divClikable.isSelected {
+    background-color:#4CAF50;
+    color: white;
 }
 
 .customContainer {
@@ -48,11 +49,23 @@
     cursor: pointer;  
 }
 
+.divClikable {
+    color: black; 
+    border: 2px solid #4CAF50;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    background-color: white; 
+}
+
+.divClikable:hover {
+    cursor: pointer;  
+}
+
 .accordeon.item {
     width: 900px;
     height: 30px;  /* change .accordeon div rule and HEIGHT_DIV_CONTRAT (in file ajax.js) if you touch that field*/
     overflow: hidden;
-    
+
     transition: height ease-in-out 300ms; /* css3 transition */
     -o-transition: height ease-in-out 300ms;
     -moz-transition: height ease-in-out 300ms;
@@ -111,6 +124,32 @@
 .w3-light-grey,.w3-hover-light-grey:hover,.w3-light-gray,.w3-hover-light-gray:hover{
     color:#000!important;
     background-color:#f1f1f1!important
+}
+
+.buttonCustom {
+    margin-top: 20px;
+    display: inline-block;
+    padding: 15px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
+}
+
+.buttonCustom:hover {
+    background-color: #3e8e41;
+}
+
+.buttonCustom:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
 }
 
 table {

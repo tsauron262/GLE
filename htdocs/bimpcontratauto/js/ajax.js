@@ -38,9 +38,15 @@ function getAllContrats() {
 $(document).ready(function () {
     getAllContrats();
     printContrats();
-    $(document).on("click", 'div.clickable.item', function () {
+    $(document).on("click", 'div.clickable.item', function () { // click on existing contrat
         var newHeight = getNewContratHeight($(this).parent());
         $(this).parent().css("height", newHeight);
+    });
+    $(document).on("click", 'div.divClikable', function () {   // add/change field of new contrat
+        changeValueOfField($(this).parent(), $(this).attr('val'));
+    });
+    $(document).on("click", 'div.buttonCustom', function () {
+        var emptyField = valider();
     });
 });
 
@@ -65,6 +71,23 @@ function getNewContratHeight(accDiv) {
         return HEIGHT_DIV_CONTRAT * (nbOfLine + 2);
     }
     return HEIGHT_DIV_CONTRAT;
+}
+
+function changeValueOfField(parent, value) {
+    parent.children().each(function () {
+        if ($(this).hasClass('divClikable')) {
+            if ($(this).hasClass('isSelected')) {
+                $(this).removeClass('isSelected');
+            }
+            if ($(this).attr('val') === value) {
+                $(this).addClass('isSelected');
+            }
+        }
+    });
+}
+
+function valider() {
+    return '';
 }
 
 

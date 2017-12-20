@@ -33,19 +33,25 @@ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
+require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
+
 
 $arrayofcss = array('/bimpcontratauto/css/BimpContratAuto.css');
-$arrayofjs = array('');
+$arrayofjs = array('/bimpcontratauto/js/ajax.js');
 
 
 $socid = GETPOST('id', 'int');       // TODO id ou socid ?
 
 
 /*
+ * 
+ */
+
+/*
  * 	View
  */
 
-llxHeader('', 'Catégoriser', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
+llxHeader('', 'Contrat Auto', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
 if ($socid > 0) {
     $langs->load("companies");
@@ -59,15 +65,69 @@ if ($socid > 0) {
     print '<div class="underbanner clearboth"></div>';
 }
 
-print '<form class="customForm">';
+print'
+<h3> Contrats actifs</h3>
 
+<div id="containerForActif" class="customContainer">
+</div>
+
+<h3> Contrats inactifs</h3>
+
+<div id="containerForInactif" class="customContainer">
+</div>
+
+<h3>Nouveau contrat</h3>
+';
+
+
+/* Assistance */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Assistance</div><br>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
+print '</div>';
+
+/* Pneumatique */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Pneumatique</div><br>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
+print '</div>';
+
+/* Maintenance */
+print '<div class="customDiv containerWithBorder">';
 print '<div class="customDiv fixDiv">Maintenance</div><br>';
-print '<div class="customDiv divClikable">Non</div>';
-print '<div class="customDiv divClikable">12</div>';
-print '<div class="isSelected customDiv divClikable ">24</div>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
+print '</div>';
+
+/* Extension */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Extension</div><br>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
+print '</div>';
+
+/* Blyyd Connect */
+print '<div class="customDiv containerWithBorder">';
+print '<div class="customDiv fixDiv">Blyyd Connect</div><br>';
+print '<div class="customDiv divClikable" val=0 >Non</div>';
+print '<div class="customDiv divClikable" val=12 >12</div>';
+print '<div class="customDiv divClikable" val=24 ">24</div>';
+print '<div class="customDiv divClikable" val=36 >36</div>';
+print '</div><br>';
+
+print '<div class="buttonCustom">Valider</div>';
 
 
-print '</form>';
 
 llxFooter();
 

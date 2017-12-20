@@ -151,10 +151,18 @@ function resetAllDivs() {
         addErrorDivs();
         return;
     }
-
+    
     addWays();
     addAllNav();
     addDivChoice();
+}
+
+/* Add a message in a div if the BIMP_ROOT_CATEGORY isn't */
+function addErrorDivs() {
+    $('<div></div><br>')
+            .attr('class', 'customDiv fixDiv errorDiv')
+            .text("Erreur : La catégorie racine n'est pas définie, veuillez conctactez l'administrateur pour qu'il en désigne une.")
+            .appendTo('#mainContainer');
 }
 
 function addWays() {

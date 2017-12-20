@@ -1,0 +1,159 @@
+.customDiv {
+    border-radius: 8px;
+    margin:5px;
+    padding: 15px;
+    border:solid 1px;
+    text-align: center;
+    display: inline-block;
+    font-size: 20px;
+    border-color:black;
+    background-color:white;
+}
+
+.customDiv.containerWithBorder {
+    display:compact;
+    border:solid 2px;
+}
+
+.customForm {
+    text-align: center;
+}
+
+.divClikable {
+    background-color:#cccccc;
+}
+
+.divClikable:hover {
+    background-color: #4CAF50;
+    cursor: pointer;  
+}
+
+.divClikable:active {
+    background-color: #4CAF50;
+}
+
+.divClikable.isSelected {
+    background-color:#4CAF50;
+    color: white;
+}
+
+.customContainer {
+    width: 600px;
+}
+
+.accordeon {
+    margin-top: 20px;
+}
+
+.clickable:hover {
+    cursor: pointer;  
+}
+
+.divClikable {
+    color: black; 
+    border: 2px solid #4CAF50;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    background-color: white; 
+}
+
+.divClikable:hover {
+    cursor: pointer;  
+}
+
+.accordeon.item {
+    width: 900px;
+    height: 30px;  /* change .accordeon div rule and HEIGHT_DIV_CONTRAT (in file ajax.js) if you touch that field*/
+    overflow: hidden;
+
+    transition: height ease-in-out 300ms; /* css3 transition */
+    -o-transition: height ease-in-out 300ms;
+    -moz-transition: height ease-in-out 300ms;
+    -webkit-transition: height ease-in-out 300ms;
+
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+.accordeon div {
+    display: block;
+    height: 30px;   /* change .accordeon.item rule and HEIGHT_DIV_CONTRAT (in file ajax.js) if you touch that field*/
+    line-height: 30px;
+
+    background: #e6e6e6;
+    color: #1e1e1e;
+    text-decoration: none;
+}
+
+/* W3 CSS */
+
+.w3-hoverable tr:hover{
+    background-color:#ccc;
+}
+
+.w3-hoverable tr:hover td{
+    border-left: 5px solid #fff;
+    border-right: 5px solid #fff;
+}
+
+.w3-table td,.w3-table th,.w3-table-all td,.w3-table-all th{
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+    display:table-cell;
+    text-align:left;
+    vertical-align:central;
+    height: 30px;
+    border-left: 5px solid #fff;
+    border-right: 5px solid #fff;
+    border-top: 0px;
+    border-bottom: 0px;
+}
+
+.w3-table-all th {
+    height: 26px;
+    border-left: 0px solid;
+    border-right: 0px solid;
+    border-top: 2px solid #ccc;
+    border-bottom: 2px solid #ccc;
+}
+
+
+.w3-light-grey,.w3-hover-light-grey:hover,.w3-light-gray,.w3-hover-light-gray:hover{
+    color:#000!important;
+    background-color:#f1f1f1!important
+}
+
+.buttonCustom {
+    margin-top: 20px;
+    display: inline-block;
+    padding: 15px 25px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 9px #999;
+}
+
+.buttonCustom:hover {
+    background-color: #3e8e41;
+}
+
+.buttonCustom:active {
+    background-color: #3e8e41;
+    box-shadow: 0 5px #666;
+    transform: translateY(4px);
+}
+
+table {
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+}

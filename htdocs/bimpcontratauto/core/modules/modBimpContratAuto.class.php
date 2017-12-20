@@ -54,7 +54,7 @@ class modBimpContratAuto extends DolibarrModules {
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
-        $this->family = "other";
+        $this->family = "crm";
         // Module position in the family
         $this->module_position = 500;
         // Gives the possibility to the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
@@ -176,11 +176,6 @@ class modBimpContratAuto extends DolibarrModules {
 
         // Boxes/Widgets
         // Add here list of php file(s) stored in mymodule/core/boxes that contains class to show a widget.
-//        $this->boxes = array(
-//            0 => array('file' => 'mymodulewidget1.php@mymodule', 'note' => 'Widget provided by MyModule', 'enabledbydefaulton' => 'Home'),
-//                //1=>array('file'=>'mymodulewidget2.php@mymodule','note'=>'Widget provided by MyModule'),
-//                //2=>array('file'=>'mymodulewidget3.php@mymodule','note'=>'Widget provided by MyModule')
-//        );
         // Cronjobs (List of cron jobs entries to add when module is enabled)
 //        $this->cronjobs = array(
 //        );

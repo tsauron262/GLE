@@ -28,7 +28,11 @@ class BimpInput
                         $html .= '<span class="input-group-addon">' . $options['addon_left'] . '</span>';
                     }
 
-                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"/>';
+                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"';
+                    if (isset($options['placeholder'])) {
+                        $html .= ' placeholder="' . $options['placeholder'] . '"';
+                    }
+                    $html .= '/>';
 
                     if (isset($options['addon_right']) && $options['addon_right']) {
                         $html .= '<span class="input-group-addon">' . $options['addon_right'] . '</span>';
@@ -37,7 +41,11 @@ class BimpInput
                     $html .= '</div>';
                     $html .= '</div>';
                 } else {
-                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"/>';
+                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"';
+                    if (isset($options['placeholder'])) {
+                        $html .= ' placeholder="' . $options['placeholder'] . '"';
+                    }
+                    $html .= '/>';
                 }
                 break;
 
@@ -85,6 +93,7 @@ class BimpInput
                 if (is_null($options['options']) || !is_array($options['options'])) {
                     $options['options'] = array();
                 }
+
 
                 if (count($options['options'])) {
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
@@ -262,9 +271,9 @@ class BimpInput
                 break;
 
             case 'file_upload':
-                $html = '<input type="file" name="'.$field_name.'" id="'.$input_id.'"/>';
+                $html = '<input type="file" name="' . $field_name . '" id="' . $input_id . '"/>';
                 break;
-            
+
             default:
                 $html .= '<p class="alert alert-danger">Erreur technique: type d\'input invalide pour le champ "' . $field_name . '"</p>';
                 break;

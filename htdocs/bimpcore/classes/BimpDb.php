@@ -40,15 +40,12 @@ class BimpDb
         $result = $this->db->query($sql);
         if ($result > 0) {
             if ($return_id) {
-                $return = $this->db->last_insert_id(MAIN_DB_PREFIX . $table);
-            } else {
-                $return = 1;
+                return $this->db->last_insert_id(MAIN_DB_PREFIX . $table);
             }
-            return $return;
-        } else {
-            $this->logSqlError();
+            return 1;
         }
 
+        $this->logSqlError();
         return 0;
     }
 
@@ -210,7 +207,7 @@ class BimpDb
     public function getValue($table, $field, $where = '1')
     {
         $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where . ' LIMIT 1';
-        
+
         $result = $this->db->query($sql);
 
         if ($result && $this->db->num_rows($result)) {

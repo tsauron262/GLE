@@ -78,6 +78,7 @@ class BimpView
         if ($panel) {
             $this->setConfPath();
             $title = $this->object->getCurrentConf('title', 'nom');
+            $icon = $this->object->getCurrentConf('icon', 'file-o');
             if ($title === 'nom') {
                 $title = BimpTools::ucfirst($this->object->getInstanceName());
             }
@@ -113,7 +114,7 @@ class BimpView
             }
             $html .= BimpRender::renderPanel($title, $content, $footer, array(
                         'panel_id' => $this->view_identifier . '_panel',
-                        'icon'     => 'file-o',
+                        'icon'     => $icon,
                         'type'     => $panel_type,
                         'foldable' => 1
                             )

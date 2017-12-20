@@ -138,9 +138,13 @@ class BimpObject
         return null;
     }
 
-    public function getChildObject($object_name)
+    public function getChildObject($object_name, $id_object = null)
     {
-        return $this->config->getObject('', $object_name);
+        $child = $this->config->getObject('', $object_name);
+        if (!is_null($child) && !is_null($id_object)) {
+            $child->fetch($id_object);
+        }
+        return $child;
     }
 
     public function getChildrenObjects($object_name)
@@ -157,8 +161,10 @@ class BimpObject
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
                         if ($instance->getParentObjectName() === $this->object_name) {
+                            $filters = $this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array');
+                            $filters[$instance->getParentIdProperty()] = $this->id;
                             $primary = $instance->getPrimary();
-                            $list = $instance->getListByParent($this->id, null, null, 'id', 'asc', 'array', array($primary));
+                            $list = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary));
                             foreach ($list as $item) {
                                 $child = BimpObject::getInstance($instance->module, $instance->object_name);
                                 if ($child->fetch($item[$primary])) {
@@ -502,7 +508,6 @@ class BimpObject
                     $value = implode(',', $value);
                 }
             }
-            $html .= '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
             $html .= $this->displayValue($this->data[$field], 'fields/' . $field . '/display' . ($display_name ? '/' . $display_name : ''), $field);
         } else {
             $html = '<p class="alert alert-danger">Champ "' . $field . '" non défini</p>';
@@ -1682,7 +1687,18 @@ class BimpObject
             return BimpRender::renderAlerts($msg);
         }
         if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
+            $title = $this->getConf('objects/' . $children_object . '/list/title');
+            $icon = $this->getConf('objects/' . $children_object . '/list/icon');
+
+            $list_filters = $this->getConf('objects/' . $children_object . '/list/filters', array(), false, 'array');
+
             $list = new BimpList($children_instance, $list_name, $this->id, $title, $icon);
+
+            if (count($list_filters)) {
+                foreach ($list_filters as $field_name => $value) {
+                    $list->addFieldFilterValue($field_name, $value);
+                }
+            }
             return $list->render($panel);
         }
         $msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');
@@ -1741,11 +1757,11 @@ class BimpObject
 
         $bimpList = new BimpList($bimpAsso->associate, $list_name, null, $title, $icon);
         $bimpList->addObjectAssociationFilter($this, $this->id, $association);
-        
-        if ($this->config->isDefined('associations/'.$association.'/add_form')) {
-            $name = $this->getConf('associations/'.$association.'/add_form/name', '');
-            $values = $this->getConf('associations/'.$association.'/add_form/values', null, false, 'array');
-            
+
+        if ($this->config->isDefined('associations/' . $association . '/add_form')) {
+            $name = $this->getConf('associations/' . $association . '/add_form/name', '');
+            $values = $this->getConf('associations/' . $association . '/add_form/values', null, false, 'array');
+
             if ($name) {
                 $bimpList->setAddFormName($name);
             }
@@ -1755,7 +1771,7 @@ class BimpObject
         } else {
             $bimpList->addForm = null;
         }
-        
+
         return $bimpList->render($panel);
     }
 

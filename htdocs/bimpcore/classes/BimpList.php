@@ -23,6 +23,7 @@ class BimpList
     public $p = 1;
     protected $cols = null;
     protected $filters = array();
+    protected $list_filters = array();
     protected $association_filters = array();
     protected $items = null;
     protected $rows = null;
@@ -45,6 +46,10 @@ class BimpList
                     $this->id_parent = BimpTools::getValue($parent_id_property, null);
                 }
             }
+        }
+
+        if (!is_null($id_parent)) {
+            $this->object->setIdParent($id_parent);
         }
 
         if ($this->object->config->isDefined('lists/' . $list_name)) {
@@ -83,6 +88,15 @@ class BimpList
     public function setConfPath($path = '')
     {
         return $this->object->config->setCurrentPath($this->list_path . '/' . $path);
+    }
+
+    public function addFieldFilterValue($field_name, $value)
+    {
+        $this->list_filters[] = array(
+            'name'   => $field_name,
+            'filter' => $value
+        );
+        $this->addForm['values']['fields'][$field_name] = $value;
     }
 
     public function addBulkAssociation($association, $id_associate, $label = null)
@@ -195,6 +209,22 @@ class BimpList
         }
     }
 
+    protected function mergeFilter($name, $filter)
+    {
+        if (isset($this->filters[$name])) {
+            if (isset($this->filters[$name]['and'])) {
+                $this->filters[$name]['and'][] = $filter;
+            } else {
+                $current_filter = $this->filters[$name];
+                $this->filters[$name] = array('and' => array());
+                $this->filters[$name]['and'][] = $current_filter;
+                $this->filters[$name]['and'][] = $filter;
+            }
+        } else {
+            $this->filters[$name] = $filter;
+        }
+    }
+
     protected function fetchCols()
     {
         $prev_path = $this->object->config->current_path;
@@ -216,6 +246,14 @@ class BimpList
 //        }
 
         $this->cols = $this->object->getCurrentConf('cols', array(), true, 'array');
+
+        if ($this->object->config->isDefined($this->list_path . '/extra_cols')) {
+            $new_cols = $this->object->getCurrentConf('extra_cols', array(), true, 'array');
+            $this->cols = array_merge($this->cols, $new_cols);
+            $this->object->config->addParams($this->list_path . '/cols', $new_cols);
+            $params = $this->object->config->getParams($this->list_path . '/cols');
+        }
+
         $this->object->config->setCurrentPath($prev_path);
     }
 
@@ -229,10 +267,15 @@ class BimpList
         $this->sort_way = BimpTools::getValue('sort_way', $this->object->getCurrentConf('sort_way', 'DESC'));
         $this->sort_option = BimpTools::getValue('sort_option', 'default');
 
+        if (BimpTools::isSubmit('list_filters')) {
+            $this->list_filters = json_decode(BimpTools::getValue('list_filters'), true);
+        }
+//        echo '<pre>';
+//        print_r($this->list_filters);
+//        exit;
         if (BimpTools::isSubmit('associations_filters')) {
             $this->association_filters = json_decode(BimpTools::getValue('associations_filters'), true);
         }
-
         $addForm = $this->object->getConf($this->list_path . '/add_form');
 
         if ($addForm) {
@@ -258,11 +301,17 @@ class BimpList
         $joins = array();
 
         // Filtres: 
+        if (count($this->list_filters)) {
+            foreach ($this->list_filters as $list_filter) {
+                $this->mergeFilter($list_filter['name'], $list_filter['filter']);
+            }
+        }
+        
         $filters = $this->filters;
         if (!is_null($this->id_parent)) {
             $parent_id_property = $this->object->getParentIdProperty();
             $filters[$parent_id_property] = $this->id_parent;
-        }
+        }        
 
         // Filtres selon objets associés:
         if (count($this->association_filters)) {
@@ -292,17 +341,7 @@ class BimpList
                         $sql = BimpTools::getSqlSelect(array('src_id_object'), $alias);
                         $sql .= BimpTools::getSqlFrom(BimpAssociation::$table, null, $alias);
                         $sql .= BimpTools::getSqlWhere($bimp_asso->getSqlFilters($id_object, $id_associate, $alias));
-                        $id_filter = '';
-                        if (isset($filters['id'])) {
-                            $id_filter = $filters['id'];
-                        }
-                        $filters['id'] = array('and' => array());
-                        if ($id_filter) {
-                            $filters['id']['and'][] = $id_filter;
-                        }
-                        $filters['id']['and'][] = array(
-                            $asso_filter['type'] => $sql
-                        );
+                        $this->mergeFilter('id', array($asso_filter['type'] => $sql));
                     } else {
                         $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
                         $filters['id'] = 0;
@@ -394,6 +433,7 @@ class BimpList
                     }
                 }
                 foreach ($this->cols as $col_name => $params) {
+                    $content = '';
                     if ($this->setConfPath('cols/' . $col_name)) {
                         $field = $this->object->getCurrentConf('field', '');
                         $edit = (int) $this->object->getCurrentConf('edit', 0, false, 'bool');
@@ -408,7 +448,6 @@ class BimpList
                             continue;
                         }
 
-                        $content = '';
                         if ($field) {
                             $display_name = $this->object->getCurrentConf('display', '');
                             $display = $this->object->displayData($field, $display_name);
@@ -425,8 +464,8 @@ class BimpList
                                 }
                             }
                         }
-                        $row[$col_name] = $content;
                     }
+                    $row[$col_name] = $content;
                 }
                 $rows[$item[$primary]] = $row;
                 $this->object->reset();
@@ -476,10 +515,12 @@ class BimpList
         $content .= '<div class="objectViewContainer" style="display: none"></div>';
         $content .= '<div class="objectFormContainer" style="display: none"></div>';
 
+        if (count($this->list_filters)) {
+            $content .= '<input type="hidden" name="list_filters" value="' . htmlentities(json_encode($this->list_filters)) . '"/>';
+        }
         if (count($this->association_filters)) {
             $content .= '<input type="hidden" name="associations_filters" value="' . htmlentities(json_encode($this->association_filters)) . '"/>';
         }
-
         if (isset($this->addForm['values'])) {
             $content .= '<input type="hidden" name="' . $this->addForm['name'] . '_add_form_values" value="' . htmlentities(json_encode($this->addForm['values'])) . '">';
         }
@@ -530,7 +571,7 @@ class BimpList
             $params['header_buttons'] = array(
                 array(
                     'classes'     => array('btn', 'btn-default'),
-                    'label'       => 'Ajouter ' . $this->object->getLabel('a'),
+                    'label'       => $this->object->getConf($this->list_path . '/add_btn_label', 'Ajouter ' . $this->object->getLabel('a')),
                     'icon_before' => 'plus-circle',
                     'attr'        => array(
                         'type'    => 'button',
@@ -677,8 +718,8 @@ class BimpList
                     if ($search != '0') {
                         $search_type = $this->object->getConf('fields/' . $field . '/search/type', 'field_input');
                         $searchOnKeyUp = $this->object->getConf('fields/' . $field . '/search/search_on_key_up', 0);
-                        $minChars = $this->object->getConf('fields/' . $field . '/search/min_chars', 1);
-
+                        $minChars = $this->object->getConf('fields/' . $field . '/search/min_chars', 0);
+                        $data_type = $this->object->getConf('fields/' . $field . '/type', '');
                         $html .= '<div class="searchInputContainer"';
                         $html .= ' data-field_name="search_' . $field . '"';
                         $html .= ' data-search_type="' . $search_type . '"';
@@ -695,7 +736,21 @@ class BimpList
                                 if ($this->object->config->isDefined('fields/' . $field . '/search/input')) {
                                     $html .= BimpForm::renderInput($this->object, 'fields/' . $field . '/search', 'search_' . $field, null, $this->id_parent, null, 'default', $input_id, 'search_' . $field);
                                 } elseif ($this->object->config->isDefined('fields/' . $field)) {
-                                    $html .= BimpForm::renderInput($this->object, 'fields/' . $field, 'search_' . $field, null, $this->id_parent, null, 'default', $input_id, 'search_' . $field);
+                                    switch ($data_type) {
+                                        case 'bool':
+                                            $on_label = $this->object->getConf('fields/' . $field . '/input/toggle_on', 'OUI');
+                                            $off_label = $this->object->getConf('fields/' . $field . '/input/toggle_off', 'NON');
+                                            $html .= BimpInput::renderInput('select', 'search_' . $field, null, array('options' => array(
+                                                            '' => '',
+                                                            1  => $on_label,
+                                                            0  => $off_label
+                                                        )), null, 'default', $input_id);
+                                            break;
+
+                                        default:
+                                            $html .= BimpForm::renderInput($this->object, 'fields/' . $field, 'search_' . $field, null, $this->id_parent, null, 'default', $input_id, 'search_' . $field);
+                                            break;
+                                    }
                                 }
                                 break;
 
@@ -729,6 +784,10 @@ class BimpList
     public function renderAddObjectRow()
     {
         $html = '';
+
+        if (!is_null($this->id_parent)) {
+            $this->object->setIdParent($this->id_parent);
+        }
 
         if ((int) $this->addobjectRow && !is_null($this->list_path)) {
             $html .= '<tr id="' . $this->listIdentifier . '_addObjectRow" class="addObjectRow inputsRow">';

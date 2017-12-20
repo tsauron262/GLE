@@ -3,6 +3,10 @@ input, select {
     color: #636363;
 }
 
+*::-moz-placeholder {
+    color: #787878!important;
+}
+
 .fieldRow,
 .formRow {
     display: -webkit-box;

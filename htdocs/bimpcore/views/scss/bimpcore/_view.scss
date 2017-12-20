@@ -30,9 +30,16 @@
         padding: 8px 12px;
         background-color: #c8c8c8;
         color: $gray_darker;
-        font-weight: bold;
         font-size: 16px;
         font-weight: normal;
+    }
+    
+    & > thead > tr.col_headers > th {
+        padding: 5px 8px;
+        background-color: $primary;
+        color: #fff;
+        font-size: 13px;
+        font-weight: bold;
     }
 
     & > tbody {

@@ -65,7 +65,7 @@ function saveObjectFromForm(form_id, $button, success_callback) {
 function saveObject(module, object_name, id_object, fields, $resultContainer, successCallback) {
     var data = fields;
 
-    data['object_module'] = module;
+    data['module_name'] = module;
     data['object_name'] = object_name;
     data['id_object'] = id_object;
 

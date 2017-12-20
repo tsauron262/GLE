@@ -558,6 +558,6 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
 \nL'équipe BIMP" . $signature, array(), array(), array());
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
     } elseif ($type == "commercialRefuse") {
-        mailSyn2("Devis sav refusé par « " . $chrono->societe->getFullName($langs) . " »", $toMail, $fromMail, "Notre client « " . $chrono->societe->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . $chrono->propal->total_ht . "€ »", array(), array(), array());
+        mailSyn2("Devis sav refusé par « " . $chrono->societe->getFullName($langs) . " »", $toMail, $fromMail, "Notre client « " . $chrono->societe->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($chrono->propal->total_ttc) . "€ »", array(), array(), array());
     }
 }

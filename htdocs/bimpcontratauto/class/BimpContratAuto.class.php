@@ -25,7 +25,6 @@
  * 	\ingroup    bimpcontratauto
  * 	\brief      Chose 
  */
-
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
@@ -71,10 +70,10 @@ class BimpContratAuto extends CommonObject {
     function fillCustomFieldForContrat($dolContratObject) {
         $contrats = array();
         foreach ($dolContratObject as $contratObj) {
-            $contrats[$contratObj->id] = array( 'ref' => $contratObj->ref,
-                                                'dateDebutContrat' => $contratObj->date_creation,
-                                                'nbService' => sizeof($contratObj->lines),
-                                                'statut' => $contratObj->statut);       // 1 -> open ; 0 -> closed
+            $contrats[$contratObj->id] = array('ref' => $contratObj->ref,
+                'dateDebutContrat' => $contratObj->date_creation,
+                'nbService' => sizeof($contratObj->lines),
+                'statut' => $contratObj->statut);       // 1 -> open ; 0 -> closed
         }
         return $contrats;
     }
@@ -84,29 +83,29 @@ class BimpContratAuto extends CommonObject {
      */
     function addServices($dolContratObject, $contrats) {
         foreach ($dolContratObject as $contratObj) {
-            $prixTotalContrat  = 0;
+            $prixTotalContrat = 0;
             $lines = $contratObj->fetch_lines();    // get services
             $services = array();                    // init tab service
-            
+
             foreach ($lines as $line) {
                 $duree = $this->getServiceDuration($line->fk_product);
-                
+
                 if (!isset($lowestDuration)) {                  // Recherche du
                     $lowestDuration = $line->qty;               // service qui se
                 } else if ($lowestDuration > $line->qty) {      // fini 
                     $lowestDuration = $duree;                   // en
                 }                                               // premier
                 $services[] = array(
-                    'id_product' => $line->id,      // attention l'id n'est pas toujours définit
+                    'id_product' => $line->id, // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
-                    'duree' => $duree,              // non utilisé
-                    'qty' => $line->qty,            // duréee du service (en mois)
-                    'dateDebutService' => dol_print_date($line->date_ouverture),        // TODO ou date_ouverture ?
+                    'duree' => $duree, // non utilisé
+                    'qty' => $line->qty, // duréee du service (en mois)
+                    'dateDebutService' => dol_print_date($line->date_ouverture), // TODO ou date_ouverture ?
                     'dateFinService' => dol_print_date(dol_time_plus_duree($line->date_ouverture, $line->qty, 'm')),
                     'prixUnitaire' => $line->price,
-                    'prixTotal' => $line->qty * $line->price,      // TODO prixTotal dépend de quantité et non pas de durée
+                    'prixTotal' => $line->qty * $line->price, // TODO prixTotal dépend de quantité et non pas de durée
                     'statut' => $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'))); // if 1 => OK if 0 => have to be closed
-                $prixTotalContrat += $line->qty * $line->price ;
+                $prixTotalContrat += $line->qty * $line->price;
             }
             $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date(dol_time_plus_duree($contrats[$contratObj->id]['dateDebutContrat'], $lowestDuration, 'm'));
             $contrats[$contratObj->id]['services'] = $services;
@@ -126,15 +125,15 @@ class BimpContratAuto extends CommonObject {
         }
         return 1;   // The service is OK
     }
-    
+
     /**
      * Get the duration of a service by instancing a product
      */
     function getServiceDuration($fk_product) {
-        if($fk_product >0 ) {
-        $product = new Product($this->db);
-        $product->fetch($fk_product);
-        return $product->duration;
+        if ($fk_product > 0) {
+            $product = new Product($this->db);
+            $product->fetch($fk_product);
+            return $product->duration;
         }
         return 'unfetchable_product';
     }
@@ -154,95 +153,99 @@ class BimpContratAuto extends CommonObject {
         else
             $MAXLIST = 25;
 
-        $contratstatic = new Contrat ($this->db);
+        $contratstatic = new Contrat($this->db);
         $contratstatic->fetch($id_client);
         return $contratstatic->getListOfContracts();
     }
 
+    function createContrat($id_client, $contrat) {
+        print_r ($contrat);
+    }
+
 }
 
-    /*
+/*
 
-      function __construct($db)
-      function getNextNumRef($soc)
-      function active_line($user, $line_id, $date, $date_end='', $comment='')
-      function close_line($user, $line_id, $date_end, $comment='')
-      function cloture($user)
-      dol_print_error($this->db,'Error in cloture function');
-      function validate($user, $force_number='', $notrigger=0)
-      function reopen($user, $notrigger=0)
-      function fetch($id,$ref='')
-      function fetch_lines()
-      function create($user)
-      function delete($user)
-      function update($user=null, $notrigger=0)
-      function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
-      function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $tvatx, $localtax1tx=0.0, $localtax2tx=0.0, $date_debut_reel='', $date_fin_reel='', $price_base_type='HT', $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
-      function deleteline($idline,$user)
-     *  @deprecated					This function will never be used. Status of a contract is status of its lines.
-      function update_statut($user)
-      function getLibStatut($mode)
-      function LibStatut($statut,$mode)
-      function getNomUrl($withpicto=0,$maxlength=0,$notooltip=0)
-      function info($id)
-      function array_detail($statut=-1)
-      function getListOfContracts($option='all')
-      function load_board($user,$mode)
-      function load_state_board()
-      function getIdBillingContact()
-      function getIdServiceContact()
-      function initAsSpecimen()
-      public function generateDocument($modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0)
-      public static function replaceThirdparty(DoliDB $db, $origin_id, $dest_id)
-      function createFromClone($socid = 0, $notrigger=0) {
-      function __construct($db)
-      function getLibStatut($mode)
-      function LibStatut($statut,$mode,$expired=-1,$moreatt='')
-      function getNomUrl($withpicto=0,$maxlength=0)
-      function fetch($id, $ref='')
-      function update($user, $notrigger=0)
-      function update_total()
-      public function insert($notrigger = 0)
-      function active_line($user, $date, $date_end = '', $comment = '')
-      function close_line($user, $date_end, $comment = '')
+  function __construct($db)
+  function getNextNumRef($soc)
+  function active_line($user, $line_id, $date, $date_end='', $comment='')
+  function close_line($user, $line_id, $date_end, $comment='')
+  function cloture($user)
+  dol_print_error($this->db,'Error in cloture function');
+  function validate($user, $force_number='', $notrigger=0)
+  function reopen($user, $notrigger=0)
+  function fetch($id,$ref='')
+  function fetch_lines()
+  function create($user)
+  function delete($user)
+  function update($user=null, $notrigger=0)
+  function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
+  function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $tvatx, $localtax1tx=0.0, $localtax2tx=0.0, $date_debut_reel='', $date_fin_reel='', $price_base_type='HT', $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
+  function deleteline($idline,$user)
+ *  @deprecated					This function will never be used. Status of a contract is status of its lines.
+  function update_statut($user)
+  function getLibStatut($mode)
+  function LibStatut($statut,$mode)
+  function getNomUrl($withpicto=0,$maxlength=0,$notooltip=0)
+  function info($id)
+  function array_detail($statut=-1)
+  function getListOfContracts($option='all')
+  function load_board($user,$mode)
+  function load_state_board()
+  function getIdBillingContact()
+  function getIdServiceContact()
+  function initAsSpecimen()
+  public function generateDocument($modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0)
+  public static function replaceThirdparty(DoliDB $db, $origin_id, $dest_id)
+  function createFromClone($socid = 0, $notrigger=0) {
+  function __construct($db)
+  function getLibStatut($mode)
+  function LibStatut($statut,$mode,$expired=-1,$moreatt='')
+  function getNomUrl($withpicto=0,$maxlength=0)
+  function fetch($id, $ref='')
+  function update($user, $notrigger=0)
+  function update_total()
+  public function insert($notrigger = 0)
+  function active_line($user, $date, $date_end = '', $comment = '')
+  function close_line($user, $date_end, $comment = '')
 
 
-      Nom : bimpcontratauto
+  Nom : bimpcontratauto
 
-      But :
-      Dans un client un new onglet qui affichera le résumé des contrat en cours + possibilité de créer un contrat a la volé.
+  But :
+  Dans un client un new onglet qui affichera le résumé des contrat en cours + possibilité de créer un contrat a la volé.
 
-      Resumé du ou des contrat en cours.
+  Resumé du ou des contrat en cours.
 
-      Total facturé
-      Total payé (peu être différent)
-      Total restant
-      Total Contrat
+  Total facturé
+  Total payé (peu être différent)
+  Total restant
+  Total Contrat
 
-      Création du contrat :
-      Un peut comme dans le module précédent plusieurs choix possible par service :
+  Création du contrat :
+  Un peut comme dans le module précédent plusieurs choix possible par service :
 
-      •CTR-ASSITANCE
-      - Non
-      - 12 moi
-      - 24 moi
-      - 36 moi
+  •CTR-ASSITANCE
+  - Non
+  - 12 moi
+  - 24 moi
+  - 36 moi
 
-      CTR-PNEUMATIQUE
-      - Non
-      - 12 moi
-      - 24 moi
-      - 36 moi
+  CTR-PNEUMATIQUE
+  - Non
+  - 12 moi
+  - 24 moi
+  - 36 moi
 
-      CTR-MAINTENANCE
+  CTR-MAINTENANCE
 
-      CTR_EXTENSION
+  CTR_EXTENSION
 
-      Blyyd Connect
+  Blyyd Connect
 
-      Puis un formulaire avec date de début
-      Et un boutons créer.
-      $tabProd = array(
-      array("id"=>234, "name"=> "Maintenance", "Values"=>array("Non", 12,24)),
-      array("id"=>235, "name"=> "Extenssion", "Values"=>array("Non", 12,24)));
-     */    
+  Puis un formulaire avec date de début
+  Et un boutons créer.
+  $tabProd = array(
+  array("id"=>234, "name"=> "Maintenance", "Values"=>array("Non", 12,24)),
+  array("id"=>235, "name"=> "Extenssion", "Values"=>array("Non", 12,24)));
+ */    

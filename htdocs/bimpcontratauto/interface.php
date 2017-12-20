@@ -8,13 +8,16 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
 
-$ca = new BimpContratAuto($db);
+$staticca = new BimpContratAuto($db);
 
 switch (GETPOST('action')) {
     case 'getAllContrats': {
-            $contrats = $ca->getAllContrats(GETPOST('id_client'));
+            $contrats = $staticca->getAllContrats(GETPOST('id_client'));
             echo json_encode($contrats);
             break;
+        }
+    case 'newContrat': {
+            $staticca->createContrat(GETPOST('id_client'), GETPOST('contrat'));
         }
     default: break;
 }

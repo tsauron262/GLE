@@ -872,7 +872,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             
             
             if (stripos($clef, "DESCRIPTION") > -1 || stripos($val, "DESCRIPTION:") == 0)
-                $val = dol_trunc ($val, 1000);
+                $val = dol_trunc ($val, 2000);
 
             //pour le tour d'apres
             if (stripos($val, "BEGIN:VCALENDAR") > -1)

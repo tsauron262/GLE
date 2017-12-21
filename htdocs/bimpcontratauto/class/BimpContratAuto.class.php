@@ -70,7 +70,6 @@ class BimpContratAuto {
                 'dateDebutContrat' => $contratObj->date_creation,
                 'nbService' => sizeof($contratObj->lines),
                 'statut' => $contratObj->statut);       // 1 -> open ; 0 -> closed
-//            print_r($contratObj->getIdBillingContact());
         }
         return $contrats;
     }
@@ -84,7 +83,7 @@ class BimpContratAuto {
             $lines = $contratObj->fetch_lines();    // get services
             $services = array();                    // init tab service
             $contratIsActive = false;
-            $endContrat=0;
+            $endContrat = 0;
             foreach ($lines as $line) {
                 $duree = $this->getServiceDuration($line->fk_product);
 
@@ -105,16 +104,16 @@ class BimpContratAuto {
                         $endContrat = $line->date_fin_validite;
                     else if (!$contratIsActive) // si le contrat n'est pas ENCORE actif
                         $endContrat = $line->date_fin_validite; // avancer la date de fin à celle de ce service
-                    $contratIsActive=true;
+                    $contratIsActive = true;
                 } else {    // si le service est inactif
                     $date_ouverture = $line->date_ouverture;
                     $date_fin = $line->date_cloture;
                     if (!$contratIsActive && $endContrat < $line->date_cloture) // si le contrat n'est pas actif et que ce service est, pour l'instant, le dernier
                         $endContrat = $line->date_cloture;  // reculer la date de fin du contrat à ce service
                 }
-                
+
                 $facture = $this->getFacture($contratObj->socid);
-                
+
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
@@ -137,7 +136,7 @@ class BimpContratAuto {
         }
         return $contrats;
     }
-    
+
     function getFacture($socid) {
         
     }
@@ -191,91 +190,34 @@ class BimpContratAuto {
 //        $soc->fetch($socid);
     }
 
+    static function getTabService($db) {
+
+        $refService = array('CTR-ASSISTANCE', 'CTR-PNEUMATIQUE', 'CTR-MAINTENANCE', 'CTR-EXTENSION', 'Blyyd Connect');  // ref in database
+
+        $tabService = array();
+        $sql = 'SELECT rowid, ref ';
+        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'product';
+        $sql.= ' WHERE';
+        foreach ($refService as $i => $ref) {
+            if ($i == 0) {
+                $sql.=' ref=\'' . $ref . '\'';
+            } else {
+                $sql.=' OR ref=\'' . $ref . '\'';
+            }
+        }
+        $result = $db->query($sql);
+        if ($result) {
+            while ($obj = $db->fetch_object($result)) {
+                $service = array('id' => $obj->rowid,
+                                 'name' => $obj->ref,
+                                 'values'=> array("Non", 12, 24, 6));
+                $tabService[] = $service;
+            }
+            return $tabService;
+        } else {
+            dol_print_error($db->db);
+            return -3;
+        }
+        return -1;
+    }
 }
-
-/*
-
-  function __construct($db)
-  function getNextNumRef($soc)
-  function active_line($user, $line_id, $date, $date_end='', $comment='')
-  function close_line($user, $line_id, $date_end, $comment='')
-  function cloture($user)
-  dol_print_error($this->db,'Error in cloture function');
-  function validate($user, $force_number='', $notrigger=0)
-  function reopen($user, $notrigger=0)
-  function fetch($id,$ref='')
-  function fetch_lines()
-  function create($user)
-  function delete($user)
-  function update($user=null, $notrigger=0)
-  function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
-  function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $tvatx, $localtax1tx=0.0, $localtax2tx=0.0, $date_debut_reel='', $date_fin_reel='', $price_base_type='HT', $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
-  function deleteline($idline,$user)
-  function update_statut($user)
-  function getLibStatut($mode)
-  function LibStatut($statut,$mode)
-  function getNomUrl($withpicto=0,$maxlength=0,$notooltip=0)
-  function info($id)
-  function array_detail($statut=-1)
-  function getListOfContracts($option='all')
-  function load_board($user,$mode)
-  function load_state_board()
-  function getIdBillingContact()
-  function getIdServiceContact()
-  function initAsSpecimen()
-  public function generateDocument($modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0)
-  public static function replaceThirdparty(DoliDB $db, $origin_id, $dest_id)
-  function createFromClone($socid = 0, $notrigger=0) {
-   
-   
-  function __construct($db)
-  function getLibStatut($mode)
-  function LibStatut($statut,$mode,$expired=-1,$moreatt='')
-  function getNomUrl($withpicto=0,$maxlength=0)
-  function fetch($id, $ref='')
-  function update($user, $notrigger=0)
-  function update_total()
-  public function insert($notrigger = 0)
-  function active_line($user, $date, $date_end = '', $comment = '')
-  function close_line($user, $date_end, $comment = '')
-
-
-  Nom : bimpcontratauto
-
-  But :
-  Dans un client un new onglet qui affichera le résumé des contrat en cours + possibilité de créer un contrat a la volé.
-
-  Resumé du ou des contrat en cours.
-
-  Total facturé
-  Total payé (peu être différent)
-  Total restant
-  Total Contrat
-
-  Création du contrat :
-  Un peut comme dans le module précédent plusieurs choix possible par service :
-
-  •CTR-ASSITANCE
-  - Non
-  - 12 moi
-  - 24 moi
-  - 36 moi
-
-  CTR-PNEUMATIQUE
-  - Non
-  - 12 moi
-  - 24 moi
-  - 36 moi
-
-  CTR-MAINTENANCE
-
-  CTR_EXTENSION
-
-  Blyyd Connect
-
-  Puis un formulaire avec date de début
-  Et un boutons créer.
-  $tabProd = array(
-  array("id"=>234, "name"=> "Maintenance", "Values"=>array("Non", 12,24)),
-  array("id"=>235, "name"=> "Extenssion", "Values"=>array("Non", 12,24)));
- */    

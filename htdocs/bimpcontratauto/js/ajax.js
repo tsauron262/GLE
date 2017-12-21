@@ -59,13 +59,13 @@ function newContrat(contrat, dateDeb) {
 $(document).ready(function () {
     getAllContrats();
     printContrats();
-    $('#datepicker').datepicker({minDate: 0});        // create datepicker and disallow previous dates (befor today)
+    $('#datepicker').datepicker({minDate: 0});                  // create datepicker and disallow previous dates (befor today)
     $(document).on("click", 'div.clickable.item', function () { // click on existing contrat
         var newHeight = getNewContratHeight($(this).parent());
         $(this).parent().css("height", newHeight);
     });
-    $(document).on("click", 'div.divClikable', function () {   // add/change field of new contrat
-        changeValueOfField($(this).parent(), $(this).attr('value'));
+    $(document).on("click", 'div.divClikable', function () {   // change field of new contrat
+        changeValueOfField($(this).parent(), $(this).text());
     });
     $(document).on("click", 'div.buttonCustom', function () {
         valider();
@@ -96,7 +96,7 @@ function changeValueOfField(parent, value) {
             if ($(this).hasClass('isSelected')) {
                 $(this).removeClass('isSelected');
             }
-            if ($(this).attr('value') === value) {
+            if ($(this).text() === value) {
                 $(this).addClass('isSelected');
             }
         }
@@ -106,13 +106,12 @@ function changeValueOfField(parent, value) {
 /* When the user want to create a new contrat */
 function valider() {
     var contrat = [];
-    var i = 0;
     $('#invisibleDiv').find('.isSelected').each(function () {
         var field = {};
-        field.name = $(this).attr('name');
-        field.value = $(this).attr('value');
-        contrat[i] = field;
-        i++;
+        var id = $(this).parent().attr('id');
+        field.name = $(this).parent().attr('name');
+        field.value = $(this).text();
+        contrat[id] = field;
     });
     
     var date = getDate();

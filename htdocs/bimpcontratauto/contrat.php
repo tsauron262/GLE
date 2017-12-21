@@ -77,52 +77,26 @@ print'
 <h5>Services</h5>
 ';
 
+$staticbca = new BimpContratAuto($db);
+
+$tabService = $staticbca->getTabService($db);
+
 print '<div id="invisibleDiv">';
 
-/* Assistance */
-print '<div id=1 class="customDiv containerWithBorder">';
-print '<div class="customDiv fixDiv">Assistance</div><br>';
-print '<div name="assistance" class="customDiv divClikable isSelected" value=0 >Non</div>';
-print '<div name="assistance" class="customDiv divClikable" value=12 >12</div>';
-print '<div name="assistance" class="customDiv divClikable" value=24 ">24</div>';
-print '<div name="assistance" class="customDiv divClikable" value=36 >36</div>';
-print '</div>';
-
-/* Pneumatique */
-print '<div id=2 class="customDiv containerWithBorder">';
-print '<div class="customDiv fixDiv">Pneumatique</div><br>';
-print '<div name="pneumatique" class="customDiv divClikable isSelected" value=0 >Non</div>';
-print '<div name="pneumatique" class="customDiv divClikable" value=12 >12</div>';
-print '<div name="pneumatique" class="customDiv divClikable" value=24 ">24</div>';
-print '<div name="pneumatique" class="customDiv divClikable" value=36 >36</div>';
-print '</div>';
-
-/* Maintenance */
-print '<div id=3 class="customDiv containerWithBorder">';
-print '<div class="customDiv fixDiv">Maintenance</div><br>';
-print '<div name="maintenance" class="customDiv divClikable isSelected" value=0 >Non</div>';
-print '<div name="maintenance" class="customDiv divClikable" value=12 >12</div>';
-print '<div name="maintenance" class="customDiv divClikable" value=24 ">24</div>';
-print '<div name="maintenance" class="customDiv divClikable" value=36 >36</div>';
-print '</div>';
-
-/* Extension */
-print '<div id=4 class="customDiv containerWithBorder">';
-print '<div name="extension" class="customDiv fixDiv">Extension</div><br>';
-print '<div name="extension" class="customDiv divClikable isSelected" value=0 >Non</div>';
-print '<div name="extension" class="customDiv divClikable" value=12 >12</div>';
-print '<div name="extension" class="customDiv divClikable" value=24 ">24</div>';
-print '<div name="extension" class="customDiv divClikable" value=36 >36</div>';
-print '</div>';
-
-/* Blyyd Connect */
-print '<div id=5 class="customDiv containerWithBorder">';
-print '<div name="blyyd connect" class="customDiv fixDiv">Blyyd Connect</div><br>';
-print '<div name="blyyd connect" class="customDiv divClikable isSelected" value=0 >Non</div>';
-print '<div name="blyyd connect" class="customDiv divClikable" value=12 >12</div>';
-print '<div name="blyyd connect" class="customDiv divClikable" value=24 ">24</div>';
-print '<div name="blyyd connect" class="customDiv divClikable" value=36 >36</div>';
-print '</div><br>';
+foreach ($tabService as $service) {
+    print '<div id=' . $service['id'] . ' name="' . $service['name'] . '" class="customDiv containerWithBorder">';
+    print '<div class="customDiv fixDiv">' . $service['name'] . '</div><br>';
+    $isFirst = true;
+    foreach ($service['values'] as $value) {
+        if ($isFirst) {
+            print '<div class="customDiv divClikable isSelected">' . $value . '</div>';
+            $isFirst = false;
+        } else {
+            print '<div class="customDiv divClikable">' . $value . '</div>';
+        }
+    }
+    print '</div>';
+}
 
 /* Date début */
 

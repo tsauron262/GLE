@@ -62,7 +62,7 @@
 }
 
 .accordeon.item {
-    width: 900px;
+    width: 1200px;
     height: 30px;  /* change .accordeon div rule and HEIGHT_DIV_CONTRAT (in file ajax.js) if you touch that field*/
     overflow: hidden;
 
@@ -156,4 +156,17 @@ table {
     border-collapse: collapse;
     margin-left: auto;
     margin-right: auto;
+}
+
+#datepicker {
+    border-radius: 5px;
+    border: 1px solid #4CAF50;
+}
+
+#datepicker:hover {
+    cursor: pointer;
+}
+
+#errorDate {
+    color: red;
 }

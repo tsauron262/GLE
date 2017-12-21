@@ -18,6 +18,14 @@
  * BIMP-ERP-1.2
  */
 require_once('../main.inc.php');
+
+
+require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportfacture.class.php");
+$export = new exportfacture($db);
+$export->extract(GETPOST("id"));
+
+
+
 llxHeader();
 
 //if (isset($_REQUEST['connect']))

@@ -168,9 +168,9 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
                     '&nbsp;'.repeat(5) + 'Date de début: ' + contrat.dateDebutContrat +
                     '&nbsp;'.repeat(5) + 'Date de fin: ' + contrat.dateFinContrat +
                     '&nbsp;'.repeat(5) + 'Nombre de service: ' + contrat.nbService +
-                    '&nbsp;'.repeat(5) + 'Total facturé: ' + 'A faire' + ' €' +
-                    '&nbsp;'.repeat(5) + 'Total payé: ' + 'A faire' + ' €' +
-                    '&nbsp;'.repeat(5) + 'Total restant: ' + 'A faire' + ' €' +
+                    '&nbsp;'.repeat(5) + 'Total facturé: ' + contrat.totalFacturer + ' €' +
+                    '&nbsp;'.repeat(5) + 'Total payé: ' + contrat.totalPayer + ' €' +
+                    '&nbsp;'.repeat(5) + 'Total restant: ' + contrat.totalRestant + ' €' +
                     '&nbsp;'.repeat(5) + 'Prix total: ' + contrat.prixTotalContrat + ' €' +
                     '</div>');
 

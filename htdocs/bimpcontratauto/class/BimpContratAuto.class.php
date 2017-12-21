@@ -32,6 +32,8 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobjectline.class.php';
 require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsisres/manipElementElement.php';
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 
 class BimpContratAuto {
 
@@ -74,6 +76,23 @@ class BimpContratAuto {
         return $contrats;
     }
 
+    function getTotalFacture($elements, $prixTotalContrat) {
+        $totalFacturer = 0;
+        $totalPayer = 0;
+        $totalRestant = 0;
+        foreach ($elements as $element) {
+            $newFacture = new Facture($this->db);
+            $newFacture->fetch($element['d']); // id of facture
+            $totalFacturer += $newFacture->total_ht;
+            foreach ($newFacture->getListOfPayments() as $payment) {
+                $totalPayer += $payment['amount'];
+            }
+        }
+
+        $totalRestant = $prixTotalContrat - $totalPayer;
+        return array('totalFacturer' => $totalFacturer, 'totalPayer' => $totalPayer, 'totalRestant' => $totalRestant);
+    }
+
     /**
      * Add services to contrats
      */
@@ -112,8 +131,6 @@ class BimpContratAuto {
                         $endContrat = $line->date_cloture;  // reculer la date de fin du contrat à ce service
                 }
 
-                $facture = $this->getFacture($contratObj->socid);
-
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
@@ -129,16 +146,19 @@ class BimpContratAuto {
             if ($contratIsActive) {
                 
             }
+            
+            $elements = getElementElement('contrat', 'facture', $contratObj->id, null);
+            $totalFacture = $this->getTotalFacture($elements, $prixTotalContrat);
+
+            $contrats[$contratObj->id]['totalFacturer'] = $totalFacture['totalFacturer'];
+            $contrats[$contratObj->id]['totalPayer'] = $totalFacture['totalPayer'];
+            $contrats[$contratObj->id]['totalRestant'] = $totalFacture['totalRestant'];
             $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date($endContrat);
             $contrats[$contratObj->id]['services'] = $services;
             $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
             $contrats[$contratObj->id]['dateDebutContrat'] = dol_print_date($contrats[$contratObj->id]['dateDebutContrat']);
         }
         return $contrats;
-    }
-
-    function getFacture($socid) {
-        
     }
 
     /**
@@ -190,10 +210,17 @@ class BimpContratAuto {
 //        $soc->fetch($socid);
     }
 
+    /**
+     * Statics functions
+     */
+
+    /**
+     * Used to display in the view
+     */
     static function getTabService($db) {
 
         /* If you want to add a service, add its reference in that array */
-        $refService = array('CTR-ASSISTANCE', 'CTR-PNEUMATIQUE', 'CTR-MAINTENANCE', 'CTR-EXTENSION', 'Blyyd Connect', 'dzd');  // ref in database
+        $refService = array('CTR-ASSISTANCE', 'CTR-PNEUMATIQUE', 'CTR-MAINTENANCE', 'CTR-EXTENSION', 'Blyyd Connect');  // ref in database
 
         $tabService = array();
         $sql = 'SELECT rowid, ref ';
@@ -209,10 +236,9 @@ class BimpContratAuto {
         $result = $db->query($sql);
         if ($result) {
             while ($obj = $db->fetch_object($result)) {
-                $service = array('id' => $obj->rowid,
-                                 'name' => $obj->ref,
-                                 'values'=> array("Non", 12, 24, 6));
-                $tabService[] = $service;
+                $tabService[] = array('id' => $obj->rowid,
+                    'name' => $obj->ref,
+                    'values' => array("Non", 12, 24, 36));
             }
             return $tabService;
         } else {
@@ -221,4 +247,5 @@ class BimpContratAuto {
         }
         return -1;
     }
+
 }

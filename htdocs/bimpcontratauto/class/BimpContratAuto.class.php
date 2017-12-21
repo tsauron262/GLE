@@ -192,7 +192,8 @@ class BimpContratAuto {
 
     static function getTabService($db) {
 
-        $refService = array('CTR-ASSISTANCE', 'CTR-PNEUMATIQUE', 'CTR-MAINTENANCE', 'CTR-EXTENSION', 'Blyyd Connect');  // ref in database
+        /* If you want to add a service, add its reference in that array */
+        $refService = array('CTR-ASSISTANCE', 'CTR-PNEUMATIQUE', 'CTR-MAINTENANCE', 'CTR-EXTENSION', 'Blyyd Connect', 'dzd');  // ref in database
 
         $tabService = array();
         $sql = 'SELECT rowid, ref ';

@@ -106,13 +106,12 @@ function changeValueOfField(parent, value) {
 /* When the user want to create a new contrat */
 function valider() {
     var contrat = [];
-    var i = 0;
     $('#invisibleDiv').find('.isSelected').each(function () {
         var field = {};
+        var id = $(this).parent().attr('id');
         field.name = $(this).parent().attr('name');
         field.value = $(this).text();
-        contrat[i] = field;
-        i++;
+        contrat[id] = field;
     });
     
     var date = getDate();

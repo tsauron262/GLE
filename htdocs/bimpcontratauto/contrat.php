@@ -73,6 +73,8 @@ print'
 </div>
 
 <h3>Nouveau contrat</h3>
+
+<h5>Services</h5>
 ';
 
 print '<div id="invisibleDiv">';
@@ -121,6 +123,12 @@ print '<div name="blyyd connect" class="customDiv divClikable" value=12 >12</div
 print '<div name="blyyd connect" class="customDiv divClikable" value=24 ">24</div>';
 print '<div name="blyyd connect" class="customDiv divClikable" value=36 >36</div>';
 print '</div><br>';
+
+/* Date début */
+
+print '<h5>Date de début</h5>';
+
+print '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
 
 print '<div class="buttonCustom">Valider</div>';
 

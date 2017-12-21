@@ -17,7 +17,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'newContrat': {
-            $staticca->createContrat(GETPOST('socid'), GETPOST('contrat'));
+            $staticca->createContrat(GETPOST('socid'), GETPOST('contrat'), GETPOST('dateDeb'));
         }
     default: break;
 }

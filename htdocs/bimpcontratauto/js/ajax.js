@@ -30,7 +30,7 @@ function getAllContrats() {
     });
 }
 
-function newContrat(contrat) {
+function newContrat(contrat, dateDeb) {
     socid = getUrlParameter('socid');
 
     $.ajax({
@@ -39,6 +39,7 @@ function newContrat(contrat) {
         data: {
             socid: socid,
             newContrat: contrat,
+            dateDeb: dateDeb,
             action: 'newContrat'
         },
         async: false,
@@ -58,6 +59,7 @@ function newContrat(contrat) {
 $(document).ready(function () {
     getAllContrats();
     printContrats();
+    $('#datepicker').datepicker({minDate: 0});        // create datepicker and disallow previous dates (befor today)
     $(document).on("click", 'div.clickable.item', function () { // click on existing contrat
         var newHeight = getNewContratHeight($(this).parent());
         $(this).parent().css("height", newHeight);
@@ -112,10 +114,27 @@ function valider() {
         contrat[i] = field;
         i++;
     });
-    newContrat(contrat);
+    
+    var date = getDate();
+    date/=1000;
+    console.log(date);
+    if (date !== -1) {
+        newContrat(contrat, date);
+//        location.reload();
+    } else {
+        $('#datepicker').css('border', '2px solid red');
+        $('#errorDate').empty();
+        $('#errorDate').append('Veuillez saisir une date');
+    }
 }
 
-
+function getDate() {
+    var date = $("#datepicker").datepicker('getDate');
+    if ($('#datepicker').val() == '') {
+        return -1;
+    }
+    return $.datepicker.formatDate('@', date);
+}
 
 
 /**
@@ -150,6 +169,9 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
                     '&nbsp;'.repeat(5) + 'Date de début: ' + contrat.dateDebutContrat +
                     '&nbsp;'.repeat(5) + 'Date de fin: ' + contrat.dateFinContrat +
                     '&nbsp;'.repeat(5) + 'Nombre de service: ' + contrat.nbService +
+                    '&nbsp;'.repeat(5) + 'Total facturé: ' + 'A faire' + ' €' +
+                    '&nbsp;'.repeat(5) + 'Total payé: ' + 'A faire' + ' €' +
+                    '&nbsp;'.repeat(5) + 'Total restant: ' + 'A faire' + ' €' +
                     '&nbsp;'.repeat(5) + 'Prix total: ' + contrat.prixTotalContrat + ' €' +
                     '</div>');
 

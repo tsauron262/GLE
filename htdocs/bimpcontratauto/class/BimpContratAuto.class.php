@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-class BimpContratAuto extends CommonObject {
+class BimpContratAuto {
 
     /**
      * 	Constructor
@@ -50,9 +50,7 @@ class BimpContratAuto extends CommonObject {
     }
 
     /**
-     * 
-     * @param type $socid
-     * @return $dolContratObject  array of all contrats/service by contrat
+     * Return array with all contrats and services for that societe
      */
     function getAllContrats($socid) {
         $dolContratObject = $this->getDolContratsObject($socid);
@@ -72,6 +70,7 @@ class BimpContratAuto extends CommonObject {
                 'dateDebutContrat' => $contratObj->date_creation,
                 'nbService' => sizeof($contratObj->lines),
                 'statut' => $contratObj->statut);       // 1 -> open ; 0 -> closed
+//            print_r($contratObj->getIdBillingContact());
         }
         return $contrats;
     }
@@ -84,7 +83,8 @@ class BimpContratAuto extends CommonObject {
             $prixTotalContrat = 0;
             $lines = $contratObj->fetch_lines();    // get services
             $services = array();                    // init tab service
-
+            $contratIsActive = false;
+            $endContrat=0;
             foreach ($lines as $line) {
                 $duree = $this->getServiceDuration($line->fk_product);
 
@@ -93,26 +93,53 @@ class BimpContratAuto extends CommonObject {
                 } else if ($lowestDuration > $line->qty) {      // fini 
                     $lowestDuration = $duree;                   // en
                 }                                               // premier
+
+                /* Définition début et fin de service et contrat */
+                if ($line->statut == 0) {     // si le service n'est pas encore ouvert
+                    $date_ouverture = $line->date_ouverture_prevue;
+                    $date_fin = $line->date_fin_validite;
+                } else if ($line->statut == 4) {  // si le service est inactif
+                    $date_ouverture = $line->date_ouverture;
+                    $date_fin = $line->date_fin_validite;
+                    if ($contratIsActive && $line->date_fin_validite < $endContrat) // si le service est actif et que sa date est antérieur à la date de fin du contrat
+                        $endContrat = $line->date_fin_validite;
+                    else if (!$contratIsActive) // si le contrat n'est pas ENCORE actif
+                        $endContrat = $line->date_fin_validite; // avancer la date de fin à celle de ce service
+                    $contratIsActive=true;
+                } else {    // si le service est inactif
+                    $date_ouverture = $line->date_ouverture;
+                    $date_fin = $line->date_cloture;
+                    if (!$contratIsActive && $endContrat < $line->date_cloture) // si le contrat n'est pas actif et que ce service est, pour l'instant, le dernier
+                        $endContrat = $line->date_cloture;  // reculer la date de fin du contrat à ce service
+                }
+                
+                $facture = $this->getFacture($contratObj->socid);
                 
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
                     'duree' => $duree, // non utilisé
                     'qty' => $line->qty, // duréee du service (en mois)
-                    'dateDebutService' => dol_print_date($line->date_ouverture),
-                    'dateFinService' => dol_print_date(dol_time_plus_duree($line->date_ouverture, $line->qty, 'm')),
-                    'prixUnitaire' => $line->price,
-                    'prixTotal' => $line->qty * $line->price, // TODO prixTotal dépend de quantité et non pas de durée
+                    'dateDebutService' => dol_print_date($date_ouverture),
+                    'dateFinService' => dol_print_date($date_fin),
+                    'prixUnitaire' => $line->price_ht,
+                    'prixTotal' => $line->qty * $line->price_ht, // TODO prixTotal dépend de quantité et non pas de durée
                     'statut' => $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'))); // if 1 => OK if 0 => have to be closed
-                $prixTotalContrat += $line->qty * $line->price;
+                $prixTotalContrat += $line->qty * $line->price_ht;
             }
-            
-            $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date(dol_time_plus_duree($contrats[$contratObj->id]['dateDebutContrat'], $lowestDuration, 'm'));
+            if ($contratIsActive) {
+                
+            }
+            $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date($endContrat);
             $contrats[$contratObj->id]['services'] = $services;
             $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
             $contrats[$contratObj->id]['dateDebutContrat'] = dol_print_date($contrats[$contratObj->id]['dateDebutContrat']);
         }
         return $contrats;
+    }
+    
+    function getFacture($socid) {
+        
     }
 
     /**
@@ -158,7 +185,7 @@ class BimpContratAuto extends CommonObject {
         return $contratstatic->getListOfContracts();
     }
 
-    function createContrat($socid, $contrat) {
+    function createContrat($socid, $contrat, $dateDeb) {
 //    $soc = new Societe($db);
 //    if ($socid>0)
 //        $soc->fetch($socid);

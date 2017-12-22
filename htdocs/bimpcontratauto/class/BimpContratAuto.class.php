@@ -36,6 +36,7 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisres/manipElementElement.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
+
 class BimpContratAuto {
 
     const NO_SERVICE = "Non";
@@ -79,6 +80,7 @@ class BimpContratAuto {
         return $contrats;
     }
 
+    /* Return an array with 3 values about the bill linked to that contrat */
     function getTotalFacture($elements, $prixTotalContrat) {
         $totalFacturer = 0;
         $totalPayer = 0;
@@ -215,34 +217,35 @@ class BimpContratAuto {
         return $contratstatic->getListOfContracts();
     }
 
+    /**
+     * Create a new contrat with its service
+     * @param type $socid
+     * @param type $services    array of services
+     * @param type $dateDeb     date start contrat
+     * @param type $user        the user who is creating the contrat
+     */
     function createContrat($socid, $services, $dateDeb, $user) {
         $nContrat = new Contrat($this->db);
 
-        $nContrat->date_contrat = convertirDate($dateDeb, false);
+        $nContrat->date_contrat = convertirDate($dateDeb, false);   // translate date
         $nContrat->socid = $socid;
         $nContrat->commercial_suivi_id = $user->id;
         $nContrat->commercial_signature_id = $user->id;
-        $nContrat->create($user);
+        $nContrat->create($user);    // create contrat
 
         foreach ($services as $id => $service) {
-            if ($service['value'] == self::NO_SERVICE)
+            if ($service['value'] == self::NO_SERVICE)      // dont add that service
                 continue;
-            echo $service['name'] . " " . $service['value'] . "\n";
             $prod = new Product($this->db);
             $prod->fetch($service['id']);
-            $dateFin = dol_time_plus_duree($dateDeb, $service['value'], 'm');
-            $nContrat->addline('', $prod->price, $service['value'], 0.0, 0, 0, $service['id'], 0, $dateDeb, $dateFin);
-            //addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
+            $dateFin = dol_time_plus_duree($dateDeb, $service['value'], 'm');   // define the end of the contrat
+            $nContrat->addline('', $prod->price, $service['value'], 0.0, 0, 0, $service['id'], 0, $dateDeb, $dateFin);  // add service
         }
-//        $date_fin = new DateTime(convertirDate($_POST["datesign"], false));
-//        $date_fin->add(new DateInterval('P' . 12 . 'M'));
-//        $date_fin->sub(new DateInterval('P1D'));
-//        $date_fin = $date_fin->format('Y-m-d');
-//
-
-        return 'End server action'; // TODO remove it
     }
 
+    
+    
+    
     /**
      * Statics functions
      */
@@ -278,7 +281,7 @@ class BimpContratAuto {
         $result = $db->query($sql);
         if ($result) {
             while ($obj = $db->fetch_object($result)) {
-                foreach ($services as $service) {   // search diffenrent values that can be associated with that reference
+                foreach ($services as $service) {   // search different values that can be associated with that reference
                     if ($service['ref'] == $obj->ref) {
                         $values = $service['values'];
                         break;
@@ -295,5 +298,4 @@ class BimpContratAuto {
         }
         return -1;
     }
-
 }

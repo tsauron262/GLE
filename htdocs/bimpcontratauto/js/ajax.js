@@ -5,7 +5,10 @@
 
 var contrats = [];
 
-var HEIGHT_DIV_CONTRAT = 30; /* change height of .accordeon div and .accordeon.item in css if you change that value */
+var HEIGHT_DIV_CONTRAT = 30; /* change height of classes ".accordeon" and ".accordeon.item" in css if you change that value */
+
+
+
 /**
  * Ajax functions
  */
@@ -76,6 +79,7 @@ $(document).ready(function () {
 
 
 
+
 /*
  * Functions when a an event is triggered
  */
@@ -115,22 +119,20 @@ function valider() {
     });
 
     var date = getDate();
-    if (date !== -1) {
+    if (date !== '') {      // if date is selected
         date /= 1000;
         newContrat(services, date);
-//        location.reload();
-    } else {
+        location.reload();
+    } else {             // if no date is selected
         $('#datepicker').css('border', '2px solid red');
         $('#errorDate').empty();
-        $('#errorDate').append('Veuillez saisir une date');
+        $('#errorDate').append('<b>Veuillez saisir une date<b>');
     }
 }
 
+/* Get the date in the datepicker as TMS */
 function getDate() {
     var date = $("#datepicker").datepicker('getDate');
-    if ($('#datepicker').val() == '') {
-        return -1;
-    }
     return $.datepicker.formatDate('@', date);
 }
 
@@ -181,9 +183,10 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
         }
     } else {
         $('<p></p>')
-                .text("Il n'y a pas encore de service associés à ce contrat")
+                .text("Il n'y a pas encore de services associés à ce contrat")
                 .css('margin', '0px 0px 20px 20px')
                 .css('font-size', '14px')
+                .css('font-family', 'Times New Roman')
                 .appendTo('#' + contratId + 'item');
     }
 }

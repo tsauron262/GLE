@@ -26,6 +26,7 @@ while ($ligne = $db->fetch_object($result))
             $tabUser[] = array($ligne->login, $ligne->email);
 
 foreach($tabUser as $user){
+    $filter = "VEVENT [20170323T000000Z;20250315T000000Z] : STATUS!=CANCELLED";
     if(isset($user[1]) && $user[0] != "" && $user[1] != "")
         $tabU[] = array("ID" => array("Left" => 
                                 array("Host" => "gle.synopsis-erp.com",
@@ -34,7 +35,7 @@ foreach($tabUser as $user){
                                         "Path" => "/bimp6/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
                                         "Login" => "gle_suivi",
                                         "Password" => "{3DES}UjUdKx13cbo/ZyMe8sUwAQ==",
-                                        "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED"),
+                                        "Filter" => $filter),
                             "Right" => 
                                 array("Host" => "mailhost.bimp.fr",
                                         "Port" => "443",
@@ -42,7 +43,7 @@ foreach($tabUser as $user){
                                         "Path" => "/SOGo/dav/".$user[1]."/Calendar/personal/",
                                         "Login" => "gle_suivi@bimp.fr",
                                         "Password" => "{3DES}UjUdKx13cbo/ZyMe8sUwAQ==",
-                                        "Filter" => "VEVENT [20170323T000000Z;20500315T000000Z] : STATUS!=CANCELLED")
+                                        "Filter" => $filter)
     ));
 }
 

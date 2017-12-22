@@ -119,7 +119,7 @@ class BimpContratAuto {
                 if ($line->statut == 0) {     // si le service est inactif
                     $date_ouverture = $line->date_ouverture_prevue;
                     $date_fin = $line->date_fin_validite;
-                    if (!$contratIsActive  && $endContrat < $line->date_fin_validite) {    // si contrat inactif
+                    if (!$contratIsActive && $endContrat < $line->date_fin_validite) {    // si contrat inactif
                         $endContrat = $line->date_fin_validite;
                     }
                 } else if ($line->statut == 4) {  // si le service actif
@@ -164,7 +164,7 @@ class BimpContratAuto {
             if ($endContrat != 0)
                 $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date($endContrat);
             else
-                $contrats[$contratObj->id]['dateFinContrat'] = 'non définie' ;
+                $contrats[$contratObj->id]['dateFinContrat'] = 'non définie';
             $contrats[$contratObj->id]['services'] = $services;
             $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
             $contrats[$contratObj->id]['dateDebutContrat'] = dol_print_date($contrats[$contratObj->id]['dateDebutContrat']);
@@ -251,27 +251,42 @@ class BimpContratAuto {
      * Used to display in the view
      */
     static function getTabService($db) {
-
-        /* If you want to add a service, add its reference in that array */
-        $refService = array('CTR-ASSISTANCE', 'CTR-PNEUMATIQUE', 'CTR-MAINTENANCE', 'CTR-EXTENSION', 'Blyyd Connect');  // ref in database
+        /* If you want to add a service, add its reference and its values in that array
+           /!\ Dont forget to add self::NO_SERVICE the service is not mandatory
+         */
+        $services = array(
+            array('ref' => 'CTR-ASSISTANCE', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
+            array('ref' => 'CTR-PNEUMATIQUE', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
+            array('ref' => 'CTR-MAINTENANCE', 'values' => array(self::NO_SERVICE, 12, 24)),
+            array('ref' => 'CTR-EXTENSION', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
+            array('ref' => 'Blyyd Connect', 'values' => array(self::NO_SERVICE, 12, 24, 36, 48))
+        );
 
         $tabService = array();
         $sql = 'SELECT rowid, ref ';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql.= ' WHERE';
-        foreach ($refService as $i => $ref) {
-            if ($i == 0) {
-                $sql.=' ref=\'' . $ref . '\'';
+        $first=true;
+        foreach ($services as $service) {   // loop to make a single query
+            if ($first) {
+                $sql.=' ref=\'' . $service['ref'] . '\'';
             } else {
-                $sql.=' OR ref=\'' . $ref . '\'';
+                $sql.=' OR ref=\'' . $service['ref'] . '\'';
             }
+            $first=false;
         }
         $result = $db->query($sql);
         if ($result) {
             while ($obj = $db->fetch_object($result)) {
+                foreach ($services as $service) {   // search diffenrent values that can be associated with that reference
+                    if ($service['ref'] == $obj->ref) {
+                        $values = $service['values'];
+                        break;
+                    }
+                }
                 $tabService[] = array('id' => $obj->rowid,
                     'name' => $obj->ref,
-                    'values' => array(self::NO_SERVICE, 12, 24, 36));
+                    'values' => $values);
             }
             return $tabService;
         } else {

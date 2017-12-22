@@ -30,7 +30,7 @@ function getAllContrats() {
     });
 }
 
-function newContrat(contrat, dateDeb) {
+function newContrat(services, dateDeb) {
     socid = getUrlParameter('socid');
 
     $.ajax({
@@ -38,7 +38,7 @@ function newContrat(contrat, dateDeb) {
         url: DOL_URL_ROOT + "/bimpcontratauto/interface.php",
         data: {
             socid: socid,
-            newContrat: contrat,
+            services: services,
             dateDeb: dateDeb,
             action: 'newContrat'
         },
@@ -105,20 +105,19 @@ function changeValueOfField(parent, value) {
 
 /* When the user want to create a new contrat */
 function valider() {
-    var contrat = [];
+    var services = [];
     $('#invisibleDiv').find('.isSelected').each(function () {
-        var field = {};
-        var id = $(this).parent().attr('id');
-        field.name = $(this).parent().attr('name');
-        field.value = $(this).text();
-        contrat[id] = field;
+        services.push({
+            id: $(this).parent().attr('id'),
+            name: $(this).parent().attr('name'),
+            value: $(this).text()
+        });
     });
-    
+
     var date = getDate();
-    date/=1000;
-    console.log(date);
     if (date !== -1) {
-        newContrat(contrat, date);
+        date /= 1000;
+        newContrat(services, date);
 //        location.reload();
     } else {
         $('#datepicker').css('border', '2px solid red');
@@ -174,10 +173,18 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
                     '&nbsp;'.repeat(5) + 'Prix total: ' + contrat.prixTotalContrat + ' €' +
                     '</div>');
 
-    initTable(contratId);
+    if (contrat.services.length > 0) {
+        initTable(contratId);
 
-    for (var ind in contrat.services) {
-        printServiceDetails(contratId, contrat.services[ind], ind);
+        for (var ind in contrat.services) {
+            printServiceDetails(contratId, contrat.services[ind], ind);
+        }
+    } else {
+        $('<p></p>')
+                .text("Il n'y a pas encore de service associés à ce contrat")
+                .css('margin', '0px 0px 20px 20px')
+                .css('font-size', '14px')
+                .appendTo('#' + contratId + 'item');
     }
 }
 

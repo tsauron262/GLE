@@ -34,8 +34,11 @@ require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisres/manipElementElement.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class BimpContratAuto {
+
+    const NO_SERVICE = "Non";
 
     /**
      * 	Constructor
@@ -113,22 +116,27 @@ class BimpContratAuto {
                 }                                               // premier
 
                 /* Définition début et fin de service et contrat */
-                if ($line->statut == 0) {     // si le service n'est pas encore ouvert
+                if ($line->statut == 0) {     // si le service est inactif
                     $date_ouverture = $line->date_ouverture_prevue;
                     $date_fin = $line->date_fin_validite;
-                } else if ($line->statut == 4) {  // si le service est inactif
+                    if (!$contratIsActive  && $endContrat < $line->date_fin_validite) {    // si contrat inactif
+                        $endContrat = $line->date_fin_validite;
+                    }
+                } else if ($line->statut == 4) {  // si le service actif
                     $date_ouverture = $line->date_ouverture;
                     $date_fin = $line->date_fin_validite;
-                    if ($contratIsActive && $line->date_fin_validite < $endContrat) // si le service est actif et que sa date est antérieur à la date de fin du contrat
+                    if ($contratIsActive && $line->date_fin_validite < $endContrat) { // si le contrat est actif et que la date de fin du service est antérieur à la date de fin du contrat
                         $endContrat = $line->date_fin_validite;
-                    else if (!$contratIsActive) // si le contrat n'est pas ENCORE actif
+                    } else if (!$contratIsActive) { // si le contrat n'est pas encore actif
                         $endContrat = $line->date_fin_validite; // avancer la date de fin à celle de ce service
-                    $contratIsActive = true;
-                } else {    // si le service est inactif
+                        $contratIsActive = true;
+                    }
+                } else {    // si le service est fermé
                     $date_ouverture = $line->date_ouverture;
                     $date_fin = $line->date_cloture;
-                    if (!$contratIsActive && $endContrat < $line->date_cloture) // si le contrat n'est pas actif et que ce service est, pour l'instant, le dernier
+                    if (!$contratIsActive && $endContrat < $line->date_cloture) { // si le contrat n'est pas actif et que ce service est, pour l'instant, le dernier
                         $endContrat = $line->date_cloture;  // reculer la date de fin du contrat à ce service
+                    }
                 }
 
                 $services[] = array(
@@ -146,14 +154,17 @@ class BimpContratAuto {
             if ($contratIsActive) {
                 
             }
-            
+
             $elements = getElementElement('contrat', 'facture', $contratObj->id, null);
             $totalFacture = $this->getTotalFacture($elements, $prixTotalContrat);
 
             $contrats[$contratObj->id]['totalFacturer'] = $totalFacture['totalFacturer'];
             $contrats[$contratObj->id]['totalPayer'] = $totalFacture['totalPayer'];
             $contrats[$contratObj->id]['totalRestant'] = $totalFacture['totalRestant'];
-            $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date($endContrat);
+            if ($endContrat != 0)
+                $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date($endContrat);
+            else
+                $contrats[$contratObj->id]['dateFinContrat'] = 'non définie' ;
             $contrats[$contratObj->id]['services'] = $services;
             $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
             $contrats[$contratObj->id]['dateDebutContrat'] = dol_print_date($contrats[$contratObj->id]['dateDebutContrat']);
@@ -204,10 +215,32 @@ class BimpContratAuto {
         return $contratstatic->getListOfContracts();
     }
 
-    function createContrat($socid, $contrat, $dateDeb) {
-//    $soc = new Societe($db);
-//    if ($socid>0)
-//        $soc->fetch($socid);
+    function createContrat($socid, $services, $dateDeb, $user) {
+        $nContrat = new Contrat($this->db);
+
+        $nContrat->date_contrat = convertirDate($dateDeb, false);
+        $nContrat->socid = $socid;
+        $nContrat->commercial_suivi_id = $user->id;
+        $nContrat->commercial_signature_id = $user->id;
+        $nContrat->create($user);
+
+        foreach ($services as $id => $service) {
+            if ($service['value'] == self::NO_SERVICE)
+                continue;
+            echo $service['name'] . " " . $service['value'] . "\n";
+            $prod = new Product($this->db);
+            $prod->fetch($service['id']);
+            $dateFin = dol_time_plus_duree($dateDeb, $service['value'], 'm');
+            $nContrat->addline('', $prod->price, $service['value'], 0.0, 0, 0, $service['id'], 0, $dateDeb, $dateFin);
+            //addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0.0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0,$array_options=0, $fk_unit = null)
+        }
+//        $date_fin = new DateTime(convertirDate($_POST["datesign"], false));
+//        $date_fin->add(new DateInterval('P' . 12 . 'M'));
+//        $date_fin->sub(new DateInterval('P1D'));
+//        $date_fin = $date_fin->format('Y-m-d');
+//
+
+        return 'End server action'; // TODO remove it
     }
 
     /**
@@ -238,7 +271,7 @@ class BimpContratAuto {
             while ($obj = $db->fetch_object($result)) {
                 $tabService[] = array('id' => $obj->rowid,
                     'name' => $obj->ref,
-                    'values' => array("Non", 12, 24, 36));
+                    'values' => array(self::NO_SERVICE, 12, 24, 36));
             }
             return $tabService;
         } else {

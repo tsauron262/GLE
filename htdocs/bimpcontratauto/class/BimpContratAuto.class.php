@@ -36,7 +36,6 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisres/manipElementElement.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
-
 class BimpContratAuto {
 
     const NO_SERVICE = "Non";
@@ -62,6 +61,32 @@ class BimpContratAuto {
         $dolContratObject = $this->getDolContratsObject($socid);
         $contrats = $this->fillCustomFieldForContrat($dolContratObject);
         $contrats = $this->addServices($dolContratObject, $contrats);
+        $contrats = $this->sortArrayByDate($contrats);
+        $contrats = $this->tmsToDates($contrats);
+        return $contrats;
+    }
+
+    /* Translate date in format tms to a human readable's one */
+    function tmsToDates($contrats) {
+        foreach ($contrats as $i => $contrat) {
+            if ($contrat['dateFinContrat'] != 'non définie')
+            $contrats[$i]['dateFinContrat'] = dol_print_date($contrat['dateFinContrat']);
+        }
+        return $contrats;
+    }
+
+    /* Used to sort contrats by date of end */
+    function sortArrayByDate($contrats) {
+
+        $dates = array();
+        foreach ($contrats as $key => $row) {
+            $dates[$key] = $row['dateFinContrat'];
+        }
+        array_multisort($dates, SORT_ASC, $contrats);
+
+        foreach ($contrats as $key => $row) {
+            $dates[$key] = $row['dateFinContrat'];
+        }
         return $contrats;
     }
 
@@ -70,6 +95,7 @@ class BimpContratAuto {
      * To send to the view
      */
     function fillCustomFieldForContrat($dolContratObject) {
+
         $contrats = array();
         foreach ($dolContratObject as $contratObj) {
             $contrats[$contratObj->id] = array('ref' => $contratObj->ref,
@@ -81,6 +107,7 @@ class BimpContratAuto {
     }
 
     /* Return an array with 3 values about the bill linked to that contrat */
+
     function getTotalFacture($elements, $prixTotalContrat) {
         $totalFacturer = 0;
         $totalPayer = 0;
@@ -164,7 +191,7 @@ class BimpContratAuto {
             $contrats[$contratObj->id]['totalPayer'] = $totalFacture['totalPayer'];
             $contrats[$contratObj->id]['totalRestant'] = $totalFacture['totalRestant'];
             if ($endContrat != 0)
-                $contrats[$contratObj->id]['dateFinContrat'] = dol_print_date($endContrat);
+                $contrats[$contratObj->id]['dateFinContrat'] = $endContrat;
             else
                 $contrats[$contratObj->id]['dateFinContrat'] = 'non définie';
             $contrats[$contratObj->id]['services'] = $services;
@@ -243,9 +270,6 @@ class BimpContratAuto {
         }
     }
 
-    
-    
-    
     /**
      * Statics functions
      */
@@ -255,7 +279,7 @@ class BimpContratAuto {
      */
     static function getTabService($db) {
         /* If you want to add a service, add its reference and its values in that array
-           /!\ Dont forget to add self::NO_SERVICE the service is not mandatory
+          /!\ Dont forget to add self::NO_SERVICE the service is not mandatory
          */
         $services = array(
             array('ref' => 'CTR-ASSISTANCE', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
@@ -269,14 +293,14 @@ class BimpContratAuto {
         $sql = 'SELECT rowid, ref ';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql.= ' WHERE';
-        $first=true;
+        $first = true;
         foreach ($services as $service) {   // loop to make a single query
             if ($first) {
                 $sql.=' ref=\'' . $service['ref'] . '\'';
             } else {
                 $sql.=' OR ref=\'' . $service['ref'] . '\'';
             }
-            $first=false;
+            $first = false;
         }
         $result = $db->query($sql);
         if ($result) {
@@ -298,4 +322,5 @@ class BimpContratAuto {
         }
         return -1;
     }
+
 }

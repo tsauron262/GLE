@@ -55,6 +55,7 @@ function newContrat(services, dateDeb) {
 
 
 
+
 /**
  * Page loaded
  */
@@ -81,16 +82,16 @@ $(document).ready(function () {
 
 
 /*
- * Functions when a an event is triggered
+ * Functions when an event is triggered
  */
 
 /* Get the new height of the clicked contrat */
 function getNewContratHeight(accDiv) {
     if (accDiv.height() === HEIGHT_DIV_CONTRAT) {
         var nbOfLine = parseInt(accDiv.attr('nbChild'));
-        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2);
+        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2); // HEIGHT_DIV_CONTRAT * (nb services + contrat div + header of array)
     }
-    return HEIGHT_DIV_CONTRAT;
+    return HEIGHT_DIV_CONTRAT;  // HEIGHT_DIV_CONTRAT * contrat div
 }
 
 /* When the user want to change the duration of a service */
@@ -144,17 +145,18 @@ function getDate() {
 /* display table of contrat */
 function printContrats() {
     var id;
+    var spaces = '&nbsp;'.repeat(5);
     for (id in contrats) {
         if (contrats[id].statut === '0') {
-            addContratAndServices(contrats[id], '#containerForInactif', id)
+            addContratAndServices(contrats[id], '#containerForInactif', id, spaces);
         } else {
-            addContratAndServices(contrats[id], '#containerForActif', id)
+            addContratAndServices(contrats[id], '#containerForActif', id, spaces);
         }
     }
 }
 
 /* Add contratcs and services in the array */
-function addContratAndServices(contrat, divIdToAppend, contratId) {
+function addContratAndServices(contrat, divIdToAppend, contratId, spaces) {
 
     $('<div></div>')
             .attr('id', contratId)
@@ -166,13 +168,13 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
             .attr('id', contratId + 'item')
             .append('<div class="clickable item">' +
                     contrat.ref +
-                    '&nbsp;'.repeat(5) + 'Date de début: ' + contrat.dateDebutContrat +
-                    '&nbsp;'.repeat(5) + 'Date de fin: ' + contrat.dateFinContrat +
-                    '&nbsp;'.repeat(5) + 'Nombre de service: ' + contrat.nbService +
-                    '&nbsp;'.repeat(5) + 'Total facturé: ' + contrat.totalFacturer + ' €' +
-                    '&nbsp;'.repeat(5) + 'Total payé: ' + contrat.totalPayer + ' €' +
-                    '&nbsp;'.repeat(5) + 'Total restant: ' + contrat.totalRestant + ' €' +
-                    '&nbsp;'.repeat(5) + 'Prix total: ' + contrat.prixTotalContrat + ' €' +
+                    spaces + 'Date de début: <strong>' + contrat.dateDebutContrat + '</strong>' +
+                    spaces + 'Date de fin: <strong>' + contrat.dateFinContrat + '</strong>' +
+                    spaces + 'Nombre de service: <strong>' + contrat.nbService + '</strong>' +
+                    spaces + 'Total facturé: <strong>' + contrat.totalFacturer + '</strong> €' +
+                    spaces + 'Total payé: <strong>' + contrat.totalPayer + '</strong> €' +
+                    spaces + 'Total restant: <strong>' + contrat.totalRestant + '</strong> €' +
+                    spaces + 'Prix total: <strong>' + contrat.prixTotalContrat + '</strong> €' +
                     '</div>');
 
     if (contrat.services.length > 0) {

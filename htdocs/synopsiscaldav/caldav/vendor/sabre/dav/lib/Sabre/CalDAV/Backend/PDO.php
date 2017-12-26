@@ -295,9 +295,9 @@ global $conf;
         foreach ($newValues as $fieldName => $value) {
             $valuesSql[] = $fieldName . ' = ?';
         }
-        $valuesSql[] = 'ctag = ctag + 1';
+        //$valuesSql[] = 'ctag = ctag + 1';
 
-        dol_syslog("Update agenda ".$calendarId, 3,1, "_caldav2");
+        //dol_syslog("Update agenda ".$calendarId, 3,1, "_caldav2");
         
         
         $stmt = $this->pdo->prepare("UPDATE " . $this->calendarTableName . " SET " . implode(', ', $valuesSql) . " WHERE id = ?");

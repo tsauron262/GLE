@@ -67,15 +67,17 @@ class BimpContratAuto {
     }
 
     /* Translate date in format tms to a human readable's one */
+
     function tmsToDates($contrats) {
         foreach ($contrats as $i => $contrat) {
             if ($contrat['dateFinContrat'] != 'non définie')
-            $contrats[$i]['dateFinContrat'] = dol_print_date($contrat['dateFinContrat']);
+                $contrats[$i]['dateFinContrat'] = dol_print_date($contrat['dateFinContrat']);
         }
         return $contrats;
     }
 
     /* Used to sort contrats by date of end */
+
     function sortArrayByDate($contrats) {
 
         $dates = array();
@@ -202,11 +204,11 @@ class BimpContratAuto {
     }
 
     /**
-     * Check if the service is active, if it is and is passed
+     * Check if the service is active, if it is and is passed (or will be passed during the incoming month)
      * Set check to 0 if the service has to be closed
      */
     function checkStatut($statut, $timeEndService) {
-        if ($statut == 4 && dol_now() > $timeEndService) {
+        if ($statut == 4 && $timeEndService < dol_time_plus_duree(dol_now(), 1, 'm')) {
             return 0;
         }
         return 1;   // The service is OK
@@ -265,8 +267,8 @@ class BimpContratAuto {
                 continue;
             $prod = new Product($this->db);
             $prod->fetch($service['id']);
-            $dateFin = dol_time_plus_duree($dateDeb, $service['value'], 'm');   // define the end of the contrat
-            $nContrat->addline('', $prod->price, $service['value'], 0.0, 0, 0, $service['id'], 0, $dateDeb, $dateFin);  // add service
+            $dateFin = dol_time_plus_duree($nContrat->date_contrat, $service['value'], 'm');   // define the end of the contrat
+            $nContrat->addline('', $prod->price, $service['value'], 0.0, 0, 0, $service['id'], 0, $nContrat->date_contrat, $dateFin);  // add service
         }
     }
 

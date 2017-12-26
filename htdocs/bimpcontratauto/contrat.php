@@ -62,7 +62,7 @@ if ($socid > 0) {
 }
 
 if ($user->rights->contrat->lire) {
-
+    print'<h3> Contrats actifs</h3>';
     print'<div id="containerForActif" class="customContainer">';
     print'</div>';
     print'<h3> Contrats inactifs</h3>';

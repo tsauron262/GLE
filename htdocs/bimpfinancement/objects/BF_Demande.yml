@@ -75,22 +75,33 @@ objects:
         instance: 
             bimp_object: BF_FraisFournisseur
 
-    file:
+    files:
         instance:
             bimp_object:
                 module: bimpcore
                 name: BimpFile
-            
-associations:
-    files: 
-        object: file
-        label: Fichiers joints
-        add_form:
+        list: 
+            filters:
+                parent_module: bimpfinancement
+                parent_object_name: demande
+                
+        add_form: 
             name: upload
-            values: 
-                array:
-                    fields: 
-                        files_dir: bimpfinancement/demande
+            values:
+                fields: 
+                    parent_module: bimpfinancement
+                    parent_object_name: demande
+            
+#associations:
+#    files: 
+#        object: file
+#        label: Fichiers joints
+#        add_form:
+#            name: upload
+#            values: 
+#                array:
+#                    fields: 
+#                        files_dir: bimpfinancement/demande
 
 fields:
     id_client:

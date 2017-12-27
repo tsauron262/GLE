@@ -1,6 +1,14 @@
 var inputsEvents = [];
 
 function addInputEvent(form_id, input_name, event, callback) {
+    for (i in inputsEvents) {
+        if (inputsEvents[i].form_id === form_id &&
+                inputsEvents[i].input_name === input_name &&
+                inputsEvents[i].event === event &&
+                ('' + inputsEvents[i].callback) === ('' + callback)) {
+            return;
+        }
+    }
     inputsEvents.push({
         form_id: form_id,
         input_name: input_name,
@@ -240,7 +248,7 @@ function loadModalForm($button, data) {
         isCancelled = true;
         $button.removeClass('disabled');
     });
-    
+
     data.full_panel = 0;
 
     bimp_json_ajax('loadObjectForm', data, null, function (result) {
@@ -368,6 +376,7 @@ function reloadObjectInput(form_id, input_name, fields) {
 
     var object_module = $form.data('object_module');
     var object_name = $form.data('object_name');
+    var id_parent = $form.data('id_parent');
 
     var $container = $form.find('#' + form_id + '_' + input_name);
 
@@ -383,6 +392,7 @@ function reloadObjectInput(form_id, input_name, fields) {
     var data = {
         object_module: object_module,
         object_name: object_name,
+        id_parent: id_parent,
         field_name: input_name,
         fields: fields,
         custom_field: custom
@@ -571,6 +581,92 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     }
 }
 
+function checkTextualInput($input) {
+    if ($input.length) {
+        var data_type = $input.data('data_type');
+        if (data_type) {
+            var value = $input.val();
+            if (value === '') {
+                return true;
+            }
+            var msg = '';
+            var initial_value = value;
+            switch (data_type) {
+                case 'number':
+                    var min = $input.data('min');
+                    var max = $input.data('max');
+                    var decimals = parseInt($input.data('decimals'));
+                    var unsigned = parseInt($input.data('unsigned'));
+
+                    value = value.replace(/[^0-9\.,\-]/g, '');
+                    value = value.replace(',', '.');
+                    if (value === '-') {
+                        if (unsigned || (parseFloat(min) >= 0)) {
+                            value = '';
+                            msg = 'Nombres négatifs interdits';
+                        }
+                        break;
+                    }
+                    var parsed_value = 0;
+                    if (decimals > 0) {
+                        var reg_str = '^(\-?[0-9]+\.[0-9]{0,' + decimals + '}).*$';
+                        var reg = new RegExp(reg_str);
+                        value = value.replace(reg, '$1');
+                        if (/\.$/.test(value)) {
+                            break;
+                        }
+                        parsed_value = parseFloat(value);
+                        min = parseFloat(min);
+                        max = parseFloat(max);
+
+                    } else {
+                        value = value.replace(/^(\-?[0-9]*)\.?.*$/, '$1');
+                        parsed_value = parseInt(value);
+                        initial_value = parseInt(initial_value);
+                        min = parseInt(min);
+                        max = parseInt(max);
+                    }
+                    if (parsed_value < min) {
+                        value = min;
+                        msg = 'Min: ' + min;
+                    } else if (parsed_value > max) {
+                        value = max;
+                        msg = 'Max: ' + max;
+                    }
+                    break;
+
+                case 'string':
+                    var size = $input.data('size');
+                    var forbidden_chars = $input.data('forbidden_chars');
+                    var regexp = $input.data('regexp');
+                    var invalide_msg = $input.data('invalid_msg');
+                    var uppercase = $input.data('uppercase');
+                    var lowercase = $input.data('lowercase');
+                    break;
+            }
+            if (value !== initial_value) {
+                $input.val(value).change();
+            }
+            if (msg) {
+                displayInputMsg($input, msg, 'info');
+            } else {
+                $input.popover('destroy');
+            }
+        }
+    }
+}
+
+function displayInputMsg($input, msg, className) {
+    if (typeof (className) === 'undefined') {
+        className = 'info';
+    }
+    var html = '<p class="alert alert-' + className + '">' + msg + '</p>';
+    bimp_display_element_popover($input, html, 'right');
+    $input.unbind('blur').blur(function () {
+        $input.popover('destroy');
+    });
+}
+
 // Gestion de l'affichage conditionnel des champs: 
 
 function toggleInputDisplay($container, $input) {
@@ -693,6 +789,14 @@ function setInputsEvents($container) {
             $(this).data('event_init', 1);
         }
     });
+    $container.find('input[type="text"]').each(function () {
+        if (!$(this).data('check_event_init')) {
+            $(this).keyup(function () {
+                checkTextualInput($(this));
+            });
+            $(this).data('check_event_init', 1);
+        }
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -784,9 +888,9 @@ function setToggleInputEvent($input) {
     var $toggle = $input.parent().find('.toggle');
     $toggle.change(function () {
         if ($(this).prop('checked')) {
-            $input.val(1);
+            $input.val(1).change();
         } else {
-            $input.val(0);
+            $input.val(0).change();
         }
     });
 

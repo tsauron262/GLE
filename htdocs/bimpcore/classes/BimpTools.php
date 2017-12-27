@@ -159,15 +159,15 @@ class BimpTools
         }
 
         if (!file_exists($dir . $old_name)) {
-            return false;
+            return 'Le fichier "' . $old_name . '" n\'existe pas';
         }
 
         if (file_exists($dir . $new_name)) {
-            return false;
+            return 'Le fichier "' . $new_name . '" existe déjà';
         }
 
         if (!rename($dir . $old_name, $dir . $new_name)) {
-            return false;
+            return 'Echec du renommage du fichier';
         }
         if (file_exists($dir . 'thumbs/')) {
             $old_path = pathinfo($old_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
@@ -182,7 +182,7 @@ class BimpTools
                 }
             }
         }
-        return true;
+        return '';
     }
 
     // Gestion Logs: 
@@ -435,21 +435,21 @@ class BimpTools
             case 'bool':
                 if (is_string($value)) {
                     if (in_array(strtolower($value), array('true', 'oui', 'yes', 'vrai', '1'))) {
-                        $value = true;
+                        $value = 1;
                     }
                     if (in_array(strtolower($value), array('false', 'non', 'no', 'faux', '0'))) {
-                        $value = false;
+                        $value = 0;
                     }
                 }
 
                 if (is_numeric($value)) {
                     if ($value !== 0) {
-                        $value = true;
+                        $value = 1;
                     } else {
-                        $value = false;
+                        $value = 0;
                     }
                 }
-                return is_bool($value);
+                return is_int($value);
 
             case 'float':
                 if (is_string($value)) {
@@ -581,28 +581,7 @@ class BimpTools
 
         $value = round($value, 2);
 
-        $int = floor($value);
-        $dec = ($value - $int) * 100;
-        $str = '' . $int;
-        $n = 0;
-        $result = '';
-        for ($i = (strlen($str) - 1); $i >= 0; $i--) {
-            if ($n != 0 && ($n % 3) === 0) {
-                $result = $str[$i] . ' ' . $result;
-            } else {
-                $result = $str[$i] . $result;
-            }
-            $n++;
-        }
-
-        if ($dec > 0) {
-            $result .= ',' . $dec;
-        }
-
-        return $result . ' ' . self::getCurrencyHtml($currency);
-        
-//        setlocale(LC_MONETARY, 'fr_FR');
-//        return money_format('%!i ' . self::getCurrencyHtml($currency), $value);
+        return price($value, 1, '', 1, -1, -1, $currency);
     }
 
     public static function getTaxes($id_country = 1)
@@ -654,5 +633,36 @@ class BimpTools
         }
 
         return lcfirst($str);
+    }
+
+    public static function getAlertColor($class)
+    {
+        switch ($class) {
+            case 'success':
+                return '348C41';
+            case 'info':
+                return '3B6EA0';
+            case 'warning':
+                return 'E69900';
+            case 'danger':
+                return 'A00000';
+            default:
+                return '636363';
+        }
+    }
+
+    public static function getDolEventsMsgs($types = array('mesgs, errors, warnings'), $clean = true)
+    {
+        $return = array();
+        foreach ($types as $type) {
+            if (isset($_SESSION['dol_events'][$type])) {
+                $return = array_merge($_SESSION['dol_events'][$type]);
+                if ($clean) {
+                    unset($_SESSION['dol_events'][$type]);
+                }
+            }
+        }
+
+        return $return;
     }
 }

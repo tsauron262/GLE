@@ -1,6 +1,7 @@
 input, select {
     background-color: #fff;
     color: #636363;
+    @include transition(all 0.5s ease);
 }
 
 *::-moz-placeholder {
@@ -335,7 +336,7 @@ select.switch {
     .check_list_item {
         margin: 0;
         padding: 0;
-        
+
         input[type=checkbox] {
             display: none;
         }
@@ -346,7 +347,7 @@ select.switch {
             color: darken($gray, 20%);
             cursor: pointer;
             @include transition(all 0.3s ease);
-            
+
             &:before {
                 font-family: 'FontAwesome';
                 position: absolute;
@@ -356,15 +357,15 @@ select.switch {
                 font-size: 14px;
             }
         }
-        
+
         input[type=checkbox]:checked + label {
             color: $gray-darker;
-            
+
             &:before {
                 font-size: 16px;
                 content: '\f046';
                 color: $primary;
-                
+
             }
         }
     }

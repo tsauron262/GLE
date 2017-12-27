@@ -19,6 +19,12 @@ class BimpInput
                 break;
 
             case 'text':
+                $data = '';
+                if (isset($options['data'])) {
+                    foreach ($options['data'] as $data_name => $data_value) {
+                        $data .= ' data-' . $data_name . '="' . $data_value . '"';
+                    }
+                }
                 if ((isset($options['addon_left']) && $options['addon_left']) ||
                         (isset($options['addon_right']) && $options['addon_right'])) {
                     $html .= '<div class="inputGroupContainer">';
@@ -32,6 +38,7 @@ class BimpInput
                     if (isset($options['placeholder'])) {
                         $html .= ' placeholder="' . $options['placeholder'] . '"';
                     }
+                    $html .= $data;
                     $html .= '/>';
 
                     if (isset($options['addon_right']) && $options['addon_right']) {
@@ -45,6 +52,7 @@ class BimpInput
                     if (isset($options['placeholder'])) {
                         $html .= ' placeholder="' . $options['placeholder'] . '"';
                     }
+                    $html .= $data;
                     $html .= '/>';
                 }
                 break;
@@ -98,6 +106,7 @@ class BimpInput
                 if (count($options['options'])) {
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
                     foreach ($options['options'] as $option_value => $option) {
+                        $color = null;
                         if (is_array($option)) {
                             if (isset($option['label'])) {
                                 $label = $option['label'];
@@ -106,12 +115,20 @@ class BimpInput
                             } else {
                                 $label = $option_value;
                             }
+                            if (isset($option['color'])) {
+                                $color = $option['color'];
+                            } elseif (isset($option['classes'])) {
+                                $color = BimpTools::getAlertColor($option['classes'][0]);
+                            }
                         } else {
                             $label = $option;
                         }
                         $html .= '<option value="' . $option_value . '"';
                         if ($value == $option_value) {
                             $html .= ' selected';
+                        }
+                        if (!is_null($color)) {
+                            $html .= ' data-color="' . $color . '" style="color: #' . $color . '"';
                         }
                         $html .= '>' . $label . '</option>';
                     }

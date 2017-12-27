@@ -201,10 +201,11 @@ class BimpAssociation
 
     public function setObjectAssociations($associations, $id_object = null)
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         if (is_null($id_object)) {
             if (!isset($this->object->id) || !$this->object->id) {
@@ -259,10 +260,11 @@ class BimpAssociation
 
     public function setAssociateAssociations($associations, $id_associate = null)
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         if (is_null($id_associate)) {
             if (!isset($this->associate->id) || !$this->associate->id) {
@@ -314,10 +316,11 @@ class BimpAssociation
 
     public function addObjectAssociation($id_associate, $id_object = null)
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         if (is_null($id_object)) {
             if (!isset($this->object->id) || !$this->object->id) {
@@ -360,10 +363,11 @@ class BimpAssociation
 
     public function addAssociateAssociation($id_object, $id_associate = null)
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         if (is_null($id_associate)) {
             if (!isset($this->associate->id) || !$this->associate->id) {
@@ -404,10 +408,11 @@ class BimpAssociation
 
     public function deleteAssociation($id_object, $id_associate)
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         if (is_null($id_object) || !$id_object) {
             $errors[] = 'ID ' . $this->object->getLabel('of_the') . ' absent';
@@ -444,10 +449,11 @@ class BimpAssociation
 
     public function deleteAllObjectAssociations($id_object)
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         if (is_null($id_object) || !$id_object) {
             $errors[] = 'ID ' . $this->object->getLabel('of_the') . ' absent';
@@ -477,10 +483,11 @@ class BimpAssociation
 
     public function deleteAllAssociateAssociations($id_associate)
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         if (is_null($id_associate) || !$id_associate) {
             $errors[] = 'ID ' . BimpObject::getInstanceLabel($this->associate, 'of_the') . ' absent';
@@ -510,10 +517,11 @@ class BimpAssociation
 
     public function deleteAllAssociations()
     {
-        $errors = array();
         if (count($this->errors)) {
-            return array('Erreur de configuration');
+            return $this->errors;
         }
+        
+        $errors = array();
 
         $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
         $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
@@ -553,7 +561,7 @@ class BimpAssociation
     public function renderAddAssociateInput($item_display = null, $autosave = false)
     {
         if (count($this->errors)) {
-            return BimpRender::renderAlerts('Erreur de configuration pour cette association');
+            return BimpRender::renderAlerts($this->errors);
         }
 
         $input_type = $this->object->getConf($this->association_path . '/input/type', '', true);

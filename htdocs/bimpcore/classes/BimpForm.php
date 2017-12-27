@@ -29,6 +29,11 @@ class BimpForm
                 }
             }
         }
+
+        if (!is_null($id_parent)) {
+            $this->object->setIdParent($id_parent);
+        }
+
         if ($this->object->config->isDefined('forms/' . $form_name)) {
             $this->form_path = 'forms/' . $form_name;
         } elseif (($form_name === 'default')) {
@@ -112,6 +117,7 @@ class BimpForm
         $html .= ' data-form_name="' . $this->form_name . '"';
         $html .= ' data-module_name="' . $this->object->module . '"';
         $html .= ' data-object_name="' . $this->object->object_name . '"';
+        $html .= ' data-id_parent="' . (!is_null($this->id_parent) ? $this->id_parent : 0) . '"';
         $html .= ' enctype="multipart/form-data">';
 
         $html .= '<input type="hidden" name="module_name" value="' . $this->object->module . '"/>';
@@ -501,6 +507,38 @@ class BimpForm
         }
 
         switch ($type) {
+            case 'text':
+                $options['data'] = array();
+                $min = 'none';
+                $max = 'none';
+                $decimals = 0;
+                switch ($data_type) {
+                    case 'percent':
+                        $min = '0';
+                        $max = '100';
+                    case 'money':
+                    case 'float':
+                        $decimals = $object->getCurrentConf('decimals', 2, false, 'int');
+                    case 'int':
+                        $options['data']['data_type'] = 'number';
+                        $options['data']['decimals'] = $decimals;
+                        $options['data']['min'] = $object->getCurrentConf('min', $min, false, 'int');
+                        $options['data']['max'] = $object->getCurrentConf('max', $max, false, 'int');
+                        $options['data']['unsigned'] = $object->getCurrentConf('unsigned', 0, false, 'bool');
+                        break;
+
+                    case 'string':
+                        $options['data']['data_type'] = 'string';
+                        $options['data']['size'] = $object->getCurrentConf('size', 128, false, 'int');
+                        $options['data']['forbidden_chars'] = $object->getCurrentConf('forbidden_chars', '');
+                        $options['data']['regexp'] = $object->getCurrentConf('regexp', '^.*$');
+                        $options['data']['invalid_msg'] = $object->getCurrentConf('invalid_msg', '');
+                        $options['data']['uppercase'] = $object->getCurrentConf('uppercase', 0, false, 'bool');
+                        $options['data']['lowercase'] = $object->getCurrentConf('lowercase', 0, false, 'bool');
+                        break;
+                }
+                break;
+
             case 'time':
             case 'date':
             case 'datetime':

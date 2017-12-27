@@ -711,7 +711,7 @@ class BimpController
 
         $objects = BimpTools::getValue('objects', array());
         $object_name = BimpTools::getValue('object_name', null);
-        $object_module = BimpTools::getValue('object_module', $this->module);
+        $object_module = BimpTools::getValue('module_name', $this->module);
 
         if (!count($objects)) {
             $errors[] = 'Liste des objets à supprimer vide ou absente';
@@ -722,7 +722,6 @@ class BimpController
 
         if (!count($errors)) {
             $instance = BimpObject::getInstance($object_module, $object_name);
-
             if (is_null($instance)) {
                 $errors[] = 'Classe "' . $object_name . '" inexistante';
             } else {
@@ -882,8 +881,9 @@ class BimpController
         $errors = array();
         $html = '';
 
-        $object_name = BimpTools::getValue('object_name');
         $object_module = BimpTools::getValue('object_module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $id_parent = BimpTools::getValue('id_parent', null);
         $field_name = BimpTools::getValue('field_name');
         $fields = BimpTools::getValue('fields', array());
         $custom_field = BimpTools::getValue('custom_field', false);
@@ -905,6 +905,8 @@ class BimpController
                 if (!$object->fetch($id_object)) {
                     $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé';
                 }
+            } elseif (!is_null($id_parent) && $id_parent) {
+                $object->setIdParent($id_parent);
             }
 
             if (!count($errors)) {
@@ -955,6 +957,7 @@ class BimpController
         $module_name = BimpTools::getValue('module_name', $this->module);
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
+        $list_id = BimpTools::getValue('list_id', null);
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -963,6 +966,12 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module_name, $object_name);
             $list = new BimpList($object, $list_name, $id_parent);
+            if (!is_null($list_id)) {
+                $list->listIdentifier = $list_id;
+            }
+            if (BimpTools::isSubmit('new_values')) {
+                $list->setNewValues(BimpTools::getValue('new_values', array()));
+            }
             $rows_html = $list->renderRows();
             $pagination_html = $list->renderPagination();
         }
@@ -989,6 +998,7 @@ class BimpController
         $id_object = BimpTools::getValue('id_object', 0);
         $view_name = BimpTools::getValue('view_name', 'default');
         $content_only = BimpTools::getValue('content_only', false);
+        $panel = BimpTools::getValue('panel', true);
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1005,7 +1015,7 @@ class BimpController
                 $html = $view->renderViewContent();
             } else {
                 $panel_type = BimpTools::getValue('panel_type', 'secondary');
-                $html = $view->render(true, $panel_type);
+                $html = $view->render($panel, $panel_type);
             }
             $view_id = $view->view_identifier;
         }

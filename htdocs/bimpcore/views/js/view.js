@@ -38,31 +38,23 @@ function loadModalFormFromView(view_id, form_name, $button) {
     if (!$view.length) {
         return;
     }
-    
+
     var data = {
         'module_name': $view.data('module_name'),
         'object_name': $view.data('object_name'),
         'id_object': $view.data('id_object'),
         'form_name': form_name
     };
-    
+
     loadModalForm($button, data);
 }
 
-function loadModalView(view_id, view_name, $button) {
+function loadModalView(module, object_name, id_object, view_name, $button) {
     if ($button.hasClass('disabled')) {
         return;
     }
 
     $button.addClass('disabled');
-
-    var $view = $('#' + view_id);
-    if (!$view.length) {
-        return;
-    }
-
-    var id_object = $view.data('id_object');
-    var object_name = $view.data('object_name');
 
     var $modal = $('#page_modal');
     var $resultContainer = $modal.find('.modal-ajax-content');
@@ -95,11 +87,11 @@ function loadModalView(view_id, view_name, $button) {
     });
 
     var data = {
-        'object_module': $view.data('module'),
+        'object_module': module,
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,
-        'content_only': 1
+        'panel': 0
     };
 
     bimp_json_ajax('loadObjectView', data, null, function (result) {
@@ -111,7 +103,7 @@ function loadModalView(view_id, view_name, $button) {
                     var $new_view = $resultContainer.find('.objectView');
                     if ($new_view.length) {
                         $new_view.each(function () {
-                            onViewLoaded($new_view);
+                            onViewLoaded($(this));
                         });
                     }
                 }
@@ -322,27 +314,30 @@ function onViewLoaded($view) {
             if (objects) {
                 objects = objects.split(',');
             }
-            $('body').on('objectChange', function (e) {
-                if ((e.module === $view.data('module_name')) && (e.object_name === $view.data('object_name'))
-                        && parseInt(e.id_object) === parseInt($view.data('id_object'))) {
-                    reloadObjectView($view.attr('id'));
-                } else if (objects && objects.length) {
-                    for (var i in objects) {
-                        if (e.object_name === objects[i]) {
-                            reloadObjectView($view.attr('id'));
-                        }
-                    }
-                }
-            });
-
-            if (objects && objects.length) {
-                $('body').on('objectDelete', function (e) {
-                    for (var i in objects) {
-                        if (e.object_name === objects[i]) {
-                            reloadObjectView($view.attr('id'));
+            if (!$('body').data($view.attr('id') + '_object_events_init')) {
+                $('body').on('objectChange', function (e) {
+                    if ((e.module === $view.data('module_name')) && (e.object_name === $view.data('object_name'))
+                            && parseInt(e.id_object) === parseInt($view.data('id_object'))) {
+                        reloadObjectView($view.attr('id'));
+                    } else if (objects && objects.length) {
+                        for (var i in objects) {
+                            if (e.object_name === objects[i]) {
+                                reloadObjectView($view.attr('id'));
+                            }
                         }
                     }
                 });
+
+                if (objects && objects.length) {
+                    $('body').on('objectDelete', function (e) {
+                        for (var i in objects) {
+                            if (e.object_name === objects[i]) {
+                                reloadObjectView($view.attr('id'));
+                            }
+                        }
+                    });
+                }
+                $('body').data($view.attr('id') + '_object_events_init', 1);
             }
 
             $view.data('object_change_event_init', 1);

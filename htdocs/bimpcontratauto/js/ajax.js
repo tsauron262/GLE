@@ -5,7 +5,10 @@
 
 var contrats = [];
 
-var HEIGHT_DIV_CONTRAT = 30; /* change height of .accordeon div and .accordeon.item in css if you change that value */
+var HEIGHT_DIV_CONTRAT = 30; /* change height of classes ".accordeon" and ".accordeon.item" in css if you change that value */
+
+
+
 /**
  * Ajax functions
  */
@@ -30,7 +33,7 @@ function getAllContrats() {
     });
 }
 
-function newContrat(contrat, dateDeb) {
+function newContrat(services, dateDeb) {
     socid = getUrlParameter('socid');
 
     $.ajax({
@@ -38,7 +41,7 @@ function newContrat(contrat, dateDeb) {
         url: DOL_URL_ROOT + "/bimpcontratauto/interface.php",
         data: {
             socid: socid,
-            newContrat: contrat,
+            services: services,
             dateDeb: dateDeb,
             action: 'newContrat'
         },
@@ -48,6 +51,7 @@ function newContrat(contrat, dateDeb) {
         }
     });
 }
+
 
 
 
@@ -76,17 +80,18 @@ $(document).ready(function () {
 
 
 
+
 /*
- * Functions when a an event is triggered
+ * Functions when an event is triggered
  */
 
 /* Get the new height of the clicked contrat */
 function getNewContratHeight(accDiv) {
     if (accDiv.height() === HEIGHT_DIV_CONTRAT) {
         var nbOfLine = parseInt(accDiv.attr('nbChild'));
-        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2);
+        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2); // HEIGHT_DIV_CONTRAT * (nb services + contrat div + header of array)
     }
-    return HEIGHT_DIV_CONTRAT;
+    return HEIGHT_DIV_CONTRAT;  // HEIGHT_DIV_CONTRAT * contrat div
 }
 
 /* When the user want to change the duration of a service */
@@ -105,33 +110,30 @@ function changeValueOfField(parent, value) {
 
 /* When the user want to create a new contrat */
 function valider() {
-    var contrat = [];
+    var services = [];
     $('#invisibleDiv').find('.isSelected').each(function () {
-        var field = {};
-        var id = $(this).parent().attr('id');
-        field.name = $(this).parent().attr('name');
-        field.value = $(this).text();
-        contrat[id] = field;
+        services.push({
+            id: $(this).parent().attr('id'),
+            name: $(this).parent().attr('name'),
+            value: $(this).text()
+        });
     });
-    
+
     var date = getDate();
-    date/=1000;
-    console.log(date);
-    if (date !== -1) {
-        newContrat(contrat, date);
-//        location.reload();
-    } else {
+    if (date !== '') {      // if date is selected
+        date /= 1000;
+        newContrat(services, date);
+        location.reload();
+    } else {             // if no date is selected
         $('#datepicker').css('border', '2px solid red');
         $('#errorDate').empty();
-        $('#errorDate').append('Veuillez saisir une date');
+        $('#errorDate').append('<b>Veuillez saisir une date<b>');
     }
 }
 
+/* Get the date in the datepicker as TMS */
 function getDate() {
     var date = $("#datepicker").datepicker('getDate');
-    if ($('#datepicker').val() == '') {
-        return -1;
-    }
     return $.datepicker.formatDate('@', date);
 }
 
@@ -143,17 +145,18 @@ function getDate() {
 /* display table of contrat */
 function printContrats() {
     var id;
+    var spaces = '&nbsp;'.repeat(5);
     for (id in contrats) {
         if (contrats[id].statut === '0') {
-            addContratAndServices(contrats[id], '#containerForInactif', id)
+            addContratAndServices(contrats[id], '#containerForInactif', id, spaces);
         } else {
-            addContratAndServices(contrats[id], '#containerForActif', id)
+            addContratAndServices(contrats[id], '#containerForActif', id, spaces);
         }
     }
 }
 
 /* Add contratcs and services in the array */
-function addContratAndServices(contrat, divIdToAppend, contratId) {
+function addContratAndServices(contrat, divIdToAppend, contratId, spaces) {
 
     $('<div></div>')
             .attr('id', contratId)
@@ -165,19 +168,28 @@ function addContratAndServices(contrat, divIdToAppend, contratId) {
             .attr('id', contratId + 'item')
             .append('<div class="clickable item">' +
                     contrat.ref +
-                    '&nbsp;'.repeat(5) + 'Date de début: ' + contrat.dateDebutContrat +
-                    '&nbsp;'.repeat(5) + 'Date de fin: ' + contrat.dateFinContrat +
-                    '&nbsp;'.repeat(5) + 'Nombre de service: ' + contrat.nbService +
-                    '&nbsp;'.repeat(5) + 'Total facturé: ' + 'A faire' + ' €' +
-                    '&nbsp;'.repeat(5) + 'Total payé: ' + 'A faire' + ' €' +
-                    '&nbsp;'.repeat(5) + 'Total restant: ' + 'A faire' + ' €' +
-                    '&nbsp;'.repeat(5) + 'Prix total: ' + contrat.prixTotalContrat + ' €' +
+                    spaces + 'Date de début: <strong>' + contrat.dateDebutContrat + '</strong>' +
+                    spaces + 'Date de fin: <strong>' + contrat.dateFinContrat + '</strong>' +
+                    spaces + 'Nombre de service: <strong>' + contrat.nbService + '</strong>' +
+                    spaces + 'Total facturé: <strong>' + contrat.totalFacturer + '</strong> €' +
+                    spaces + 'Total payé: <strong>' + contrat.totalPayer + '</strong> €' +
+                    spaces + 'Total restant: <strong>' + contrat.totalRestant + '</strong> €' +
+                    spaces + 'Prix total: <strong>' + contrat.prixTotalContrat + '</strong> €' +
                     '</div>');
 
-    initTable(contratId);
+    if (contrat.services.length > 0) {
+        initTable(contratId);
 
-    for (var ind in contrat.services) {
-        printServiceDetails(contratId, contrat.services[ind], ind);
+        for (var ind in contrat.services) {
+            printServiceDetails(contratId, contrat.services[ind], ind);
+        }
+    } else {
+        $('<p></p>')
+                .text("Il n'y a pas encore de services associés à ce contrat")
+                .css('margin', '0px 0px 20px 20px')
+                .css('font-size', '14px')
+                .css('font-family', 'Times New Roman')
+                .appendTo('#' + contratId + 'item');
     }
 }
 

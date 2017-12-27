@@ -185,12 +185,12 @@ class modBimpContratAuto extends DolibarrModules {
         // Permissions
         $this->rights = array();  // Permission array used by this module
 
-        $r = 0;
-        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-        $this->rights[$r][1] = 'Read restrictions'; // Permission label
-        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
-        $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//        $r = 0;
+//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+//        $this->rights[$r][1] = 'Read restrictions'; // Permission label
+//        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
+//        $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 //        $r++;
 //        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 //        $this->rights[$r][1] = 'Create/Update objects of My Module'; // Permission label

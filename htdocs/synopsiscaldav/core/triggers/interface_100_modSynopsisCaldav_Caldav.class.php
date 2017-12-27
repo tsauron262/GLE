@@ -104,8 +104,9 @@ class InterfaceCaldav {
     function run_trigger($action, $object, $user, $langs, $conf) {
         global $db, $infoEvent;
         if ($action == "ACTION_MODIFY" || $action == "ACTION_CREATE" || $action == "ACTION_DELETE") {
-                $db->query("UPDATE " . MAIN_DB_PREFIX . "user_extrafields SET ctag = ctag+1 WHERE fk_object = " . $object->userownerid);
-                
+                if(!in_array($object->type_id, array(3,8,9,10,30,31,40)))
+                    $db->query("UPDATE " . MAIN_DB_PREFIX . "user_extrafields SET ctag = ctag+1 WHERE fk_object = " . $object->userownerid);
+
                 $object->fetch_userassigned();
                 
                 $tIdUser = array();

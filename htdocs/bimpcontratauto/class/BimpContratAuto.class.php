@@ -66,8 +66,7 @@ class BimpContratAuto {
         return $contrats;
     }
 
-    /* Translate date in format tms to a human readable's one */
-
+    /* Translate dates of contrats in format tms to a human readable's one */
     function tmsToDates($contrats) {
         foreach ($contrats as $i => $contrat) {
             if ($contrat['dateFinContrat'] != 'non définie')
@@ -77,7 +76,6 @@ class BimpContratAuto {
     }
 
     /* Used to sort contrats by date of end */
-
     function sortArrayByDate($contrats) {
 
         $dates = array();
@@ -86,9 +84,6 @@ class BimpContratAuto {
         }
         array_multisort($dates, SORT_ASC, $contrats);
 
-        foreach ($contrats as $key => $row) {
-            $dates[$key] = $row['dateFinContrat'];
-        }
         return $contrats;
     }
 
@@ -140,40 +135,34 @@ class BimpContratAuto {
             foreach ($lines as $line) {
                 $duree = $this->getServiceDuration($line->fk_product);
 
-                if (!isset($lowestDuration)) {                  // Recherche du
-                    $lowestDuration = $line->qty;               // service qui se
-                } else if ($lowestDuration > $line->qty) {      // fini 
-                    $lowestDuration = $duree;                   // en
-                }                                               // premier
-
                 /* Définition début et fin de service et contrat */
                 if ($line->statut == 0) {     // si le service est inactif
                     $date_ouverture = $line->date_ouverture_prevue;
                     $date_fin = $line->date_fin_validite;
-                    if (!$contratIsActive && $endContrat < $line->date_fin_validite) {    // si contrat inactif
-                        $endContrat = $line->date_fin_validite;
+                    if (!$contratIsActive && $endContrat < $date_fin) {    // si contrat inactif
+                        $endContrat = $date_fin;
                     }
                 } else if ($line->statut == 4) {  // si le service actif
                     $date_ouverture = $line->date_ouverture;
                     $date_fin = $line->date_fin_validite;
-                    if ($contratIsActive && $line->date_fin_validite < $endContrat) { // si le contrat est actif et que la date de fin du service est antérieur à la date de fin du contrat
-                        $endContrat = $line->date_fin_validite;
+                    if ($contratIsActive && $date_fin < $endContrat) { // si le contrat est actif et que la date de fin du service est antérieur à la date de fin du contrat
+                        $endContrat = $date_fin;
                     } else if (!$contratIsActive) { // si le contrat n'est pas encore actif
-                        $endContrat = $line->date_fin_validite; // avancer la date de fin à celle de ce service
+                        $endContrat = $date_fin; // avancer la date de fin à celle de ce service
                         $contratIsActive = true;
                     }
                 } else {    // si le service est fermé
                     $date_ouverture = $line->date_ouverture;
                     $date_fin = $line->date_cloture;
-                    if (!$contratIsActive && $endContrat < $line->date_cloture) { // si le contrat n'est pas actif et que ce service est, pour l'instant, le dernier
-                        $endContrat = $line->date_cloture;  // reculer la date de fin du contrat à ce service
+                    if (!$contratIsActive && $endContrat < $date_fin) { // si le contrat n'est pas actif et que ce service est, pour l'instant, le dernier
+                        $endContrat = $date_fin;  // reculer la date de fin du contrat à ce service
                     }
                 }
 
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
-                    'duree' => $duree, // non utilisé
+                    'duree' => $duree, // non utilisé pour le moment
                     'qty' => $line->qty, // duréee du service (en mois)
                     'dateDebutService' => dol_print_date($date_ouverture),
                     'dateFinService' => dol_print_date($date_fin),
@@ -181,9 +170,6 @@ class BimpContratAuto {
                     'prixTotal' => $line->qty * $line->price_ht, // TODO prixTotal dépend de quantité et non pas de durée
                     'statut' => $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'))); // if 1 => OK if 0 => have to be closed
                 $prixTotalContrat += $line->qty * $line->price_ht;
-            }
-            if ($contratIsActive) {
-                
             }
 
             $elements = getElementElement('contrat', 'facture', $contratObj->id, null);
@@ -209,7 +195,7 @@ class BimpContratAuto {
      */
     function checkStatut($statut, $timeEndService) {
         if ($statut == 4 && $timeEndService < dol_time_plus_duree(dol_now(), 1, 'm')) {
-            return 0;
+            return 0;   // The service has to be closed
         }
         return 1;   // The service is OK
     }
@@ -324,5 +310,4 @@ class BimpContratAuto {
         }
         return -1;
     }
-
 }

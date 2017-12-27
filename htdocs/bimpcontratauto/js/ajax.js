@@ -225,7 +225,7 @@ function printServiceDetails(contratId, service, indService) {
             .appendTo('#' + contratId + 'table');
 
     if (service.statut === 0) {    // if the service have to be closed
-        $('#' + contratId + 'tr' + indService).css("background-color", "#d34a4a");
+        $('#' + contratId + 'tr' + indService).css("background-color", "#d34a4a");  // red
     }
 
     arrayOfValue.forEach(function (item) {

@@ -50,7 +50,18 @@ sections:
                         panel: 1
                         name: frais_totaux
                         object: event
-                      
+          hotel:
+              label: Frais hôtellerie
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view:
+                        panel: 0
+                        name: frais_hotel
+                        object: event
+                        
           recettes:
               label: Recettes
               url_params:
@@ -68,6 +79,18 @@ sections:
                     view: 
                         panel: 1
                         name: recettes_totaux
+                        object: event
+                        
+          billets:
+              label: Billeterie
+              url_params: 
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: billets
                         object: event
                       
     - type: buttons

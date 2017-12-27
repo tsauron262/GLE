@@ -14,7 +14,7 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
         display_processing = true;
     }
 
-    if (display_processing) {
+    if (display_processing && $resultContainer && typeof ($resultContainer) !== 'undefined' && $resultContainer.length) {
         bimp_display_msg('Traitement en cours', $resultContainer, 'info');
     }
 
@@ -86,6 +86,7 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
 
 function bimp_display_msg(msg, $container, className) {
     if (!$container || (typeof ($container) === 'undefined') || !$container.length) {
+        bimp_show_msg(msg, className);
         return;
     }
     var html = '';
@@ -136,9 +137,7 @@ function bimp_display_result_errors(result, $container) {
                 msg += n + '- ' + result.errors[i] + '<br/>';
                 n++;
             }
-            if ($container) {
-                bimp_display_msg(msg, $container, 'danger');
-            }
+            bimp_display_msg(msg, $container, 'danger');
             return true;
         }
     }
@@ -153,6 +152,122 @@ function bimp_display_result_success(result, $container) {
             bimp_display_msg('Opération réalisée avec succès', $container, 'success');
         }
     }
+}
+
+// Notifications
+
+function bimp_show_msg(msg, className) {
+    if (typeof (className) === 'undefined') {
+        className = 'info';
+    }
+    var html = '<p class="alert alert-' + className + '">';
+    html += msg;
+    html += '</p>';
+
+    var $container = $('#page_notifications');
+    $container.append(html).show();
+
+    var $p = $container.find('p:last-child').css('margin-left', '370px').animate({
+        'margin-left': 0
+    }, {
+        'duration': 250,
+        complete: function () {
+            setTimeout(function () {
+                $p.fadeOut(500, function () {
+                    $p.remove();
+                    if (!$container.find('p').length) {
+                        $container.hide();
+                    }
+                });
+            }, 5000);
+        }
+    });
+}
+
+function bimp_display_element_popover($element, content, side) {
+    if ($element.length) {
+        if (typeof (side) === 'undefined') {
+            side = 'right';
+        }
+//        $element.popover('destroy');
+        $element.popover({
+            html: true,
+            content: content,
+            placement: side,
+            trigger: 'manual',
+            container: 'body'
+        }).popover('show');
+    }
+}
+
+//Modals:
+
+function loadModalIFrame($button, url, title) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var $modal = $('#page_modal');
+    var $resultContainer = $modal.find('.modal-ajax-content');
+    $resultContainer.html('').hide();
+
+    $modal.find('.modal-title').html(title);
+    $modal.modal('show');
+    $modal.find('.content-loading').show().find('.loading-text').text('Chargement');
+
+    $modal.on('hide.bs.modal', function (e) {
+        $modal.find('.extra_button').remove();
+        $modal.find('.content-loading').hide();
+        $button.removeClass('disabled');
+    });
+
+    var html = '<div style="overflow: hidden"><iframe id="iframe" frameborder="0" src="' + url + '" width="100%" height="800px"></iframe></div>';
+    $resultContainer.html(html);
+
+    $('#iframe').on("load", function () {
+            var $head = $("iframe").contents().find("head");                
+            $head.append($("<link/>", {rel: "stylesheet", href: DOL_URL_ROOT + "/bimpcore/views/css/content_only.css", type: "text/css"}));
+        $modal.find('.content-loading').hide();
+        $resultContainer.slideDown(250);
+      });
+}
+
+function loadImageModal($button, src, title) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var $modal = $('#page_modal');
+    var $resultContainer = $modal.find('.modal-ajax-content');
+    $resultContainer.html('').hide();
+
+    $modal.find('.modal-title').html(title);
+    $modal.modal('show');
+    $modal.find('.content-loading').show().find('.loading-text').text('Chargement');
+
+    $modal.on('hide.bs.modal', function (e) {
+        $modal.find('.extra_button').remove();
+        $modal.find('.content-loading').hide();
+        $modal.children('.modal-dialog').removeAttr('style');
+        $button.removeClass('disabled');
+    });
+
+    var html = '<div class="align-center"><img id="modalImg" src="' + src + '" alt="' + title + '"/></div>';
+    $resultContainer.html(html);
+
+    $('#modalImg').on("load", function () {
+        var $img = $(this);
+
+        $modal.find('.content-loading').hide();
+        $resultContainer.slideDown(250, function () {
+            $modal.children('.modal-dialog').css('width', $img.width() + 30);
+            $modal.modal('handleUpdate');
+        });
+      });
 }
 
 // Actions: 
@@ -221,11 +336,11 @@ function setCommonEvents($container) {
             if (!parseInt($(this).data('foldable_event_init'))) {
                 $(this).click(function () {
                     if ($table.hasClass('open')) {
-                        $table.children('tbody,tfoot').fadeOut(250, function () {
+                        $table.children('tbody,tfoot').add($table.children('thead').children('tr.col_headers')).fadeOut(250, function () {
                             $table.removeClass('open').addClass('closed');
                         });
                     } else {
-                        $table.children('tbody,tfoot').fadeIn(250, function () {
+                        $table.children('tbody,tfoot').add($table.children('thead').children('tr.col_headers')).fadeIn(250, function () {
                             $table.removeClass('closed').addClass('open');
                         });
                     }
@@ -265,6 +380,24 @@ function setCommonEvents($container) {
                 rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
                 this.rows = rows + minRows;
             }
+        }
+    });
+    $container.find('select').each(function () {
+        if (!parseInt($(this).data('color_event_init'))) {
+            checkSelectColor($(this));
+            $(this).change(function () {
+                checkSelectColor($(this));
+            });
+            $(this).data('color_event_init', 1);
+        }
+    });
+    $container.find('.nav-tabs').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            $(this).find('li > a').click(function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+            $(this).data('event_init', 1);
         }
     });
 }
@@ -334,6 +467,15 @@ function updateTimerInput($input, input_name) {
     var secondes = parseInt($container.find('[name=' + input_name + '_secondes]').val());
     var total_secs = secondes + (minutes * 60) + (hours * 3600) + (days * 86400);
     $container.find('input[name=' + input_name + ']').val(total_secs).change();
+}
+
+function checkSelectColor($select) {
+    var color = $select.find('option:selected').data('color');
+    if (color) {
+        $select.css({'color': '#' + color, 'font-weight': 'bold', 'border-bottom-color': '#' + color});
+    } else {
+        $select.css({'color': '#636363', 'font-weight': 'normal', 'border-bottom-color': 'rgba(0, 0, 0, 0.2)'});
+    }
 }
 
 // Affichages: 
@@ -429,3 +571,13 @@ function lisibilite_nombre(nbr)
         };
     }
 })();
+
+// Ajouts jQuery:
+
+$.fn.tagName = function () {
+    return this.get(0).tagName.toLowerCase();
+};
+
+$(document).ready(function () {
+    $('body').append('<div id="page_notifications"></div>');
+});

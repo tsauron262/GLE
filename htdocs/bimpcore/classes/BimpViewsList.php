@@ -315,7 +315,7 @@ class BimpViewsList
                         }
                         if ($item_modal_view) {
                             $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="';
-                            $item_footer .= 'loadModalView(\'' . $view->view_identifier . '\', \'' . $item_modal_view . '\', $(this));"';
+                            $item_footer .= 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ',\'' . $item_modal_view . '\', $(this));"';
                             $item_footer .= ' data-toggle="popover"';
                             $item_footer .= ' data-trigger="hover"';
                             $item_footer .= ' data-container="body"';

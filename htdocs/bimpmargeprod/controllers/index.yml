@@ -22,6 +22,7 @@ sections:
             sections:
                 - type: list
                   list: 
+                      panel: 1
                       object: event
                       
         montants:
@@ -29,7 +30,9 @@ sections:
             sections: 
                 - type: list
                   list: 
+                      panel: 1
                       object: categorie_montant
                 - type: list
                   list: 
+                      panel: 1
                       object: type_montant

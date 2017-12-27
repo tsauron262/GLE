@@ -143,7 +143,7 @@ class BimpStruct
             $name = $config->getFromCurrentPath('name', 'default');
             $panel = $config->getFromCurrentPath('panel', 0, false, 'bool');
             $title = $config->getFromCurrentPath('title', null);
-            $title = $config->getFromCurrentPath('icon', null);
+            $icon = $config->getFromCurrentPath('icon', null);
             $children = $config->getFromCurrentPath('children', null);
             $association = $config->getFromCurrentPath('association', null);
             if (!is_null($children)) {

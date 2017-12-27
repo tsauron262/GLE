@@ -151,10 +151,15 @@ class BimpConfig
         return $value;
     }
 
-    public function getCompiledParams($path)
+    public function getCompiledParams($full_path)
     {
-        $params = $this->getParams($path);
-        return $this->compileParams($params, $path);
+        $params = $this->getParams($full_path);
+        return $this->compileParams($params, $full_path);
+    }
+
+    public function getCompiledParamsfromCurrentPath($path_from_current)
+    {
+        return $this->getCompiledParams($this->current_path . $path_from_current);
     }
 
     public function getParams($full_path)

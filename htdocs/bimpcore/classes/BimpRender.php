@@ -10,7 +10,7 @@ class BimpRender
             $html .= ' data-' . $name . '="' . $value . '"';
         }
     }
-    
+
     public static function renderIcon($icon, $class = '')
     {
         return '<i class="fa fa-' . $icon . ($class ? ' ' . $class : '') . '"></i>';
@@ -198,7 +198,7 @@ class BimpRender
                 $html .= self::renderButton($button);
             }
         }
-        
+
         if (isset($params['foldable']) && $params['foldable']) {
             $html .= '<span class="panel-caret"></span>';
         }
@@ -218,6 +218,41 @@ class BimpRender
             $html .= '</div>';
         }
 
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderNavTabs($tabs)
+    {
+        $html = '';
+
+        $html .= '<ul class="nav nav-tabs" role="tablist">';
+        $first = true;
+        foreach ($tabs as $tab) {
+            $html .= '<li role="presentation"' . ($first ? ' class="active"' : '') . '>';
+            $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
+            $html .= $tab['title'];
+            $html .= '</a>';
+            $html .= '</li>';
+
+            if ($first) {
+                $first = false;
+            }
+        }
+        $html .= '</ul>';
+
+        $first = true;
+
+        $html .= '<div class="tab-content">';
+        foreach ($tabs as $tab) {
+            $html .= '<div class="tab-pane fade' . ($first ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
+            $html .= $tab['content'];
+            $html .= '</div>';
+            if ($first) {
+                $first = false;
+            }
+        }
         $html .= '</div>';
 
         return $html;
@@ -391,6 +426,23 @@ class BimpRender
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderObjectFieldHistoryPopoverButton(BimpObject $object, $field)
+    {
+        $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
+
+        $html = '<span class="historyPopoverButton bs-popover"';
+        $html .= ' data-toggle="popover"';
+        $html .= ' data-trigger="hover" ';
+        $html .= ' data-placement="bottom"';
+        $html .= ' data-html="true"';
+        $html .= ' data-content="' . htmlentities($bimpHistory->renderCard($object, $field, 10, false, false)) . '"';
+        $html .= '></span>';
+
+        unset($bimpHistory);
 
         return $html;
     }

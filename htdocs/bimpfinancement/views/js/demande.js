@@ -17,8 +17,8 @@ function onBFDemandeViewLoaded($view) {
         $("body").on("listRefresh", function (event) {
             initEvents($view);
         });
+        hideShowAvance($view.attr('id'), true);
     }
-    hideShowAvance(true);
 }
 
 function initEvents($view) {
@@ -38,9 +38,9 @@ function initEvents($view) {
 }
 
 function calculateMontantTotal($view, champ) {
-    if(champ != undefined)
-    $(champ).val($(champ).val().replace(",", ".").replace(" ", "").replace("€", ""));
-    
+    if (champ != undefined)
+        $(champ).val($(champ).val().replace(",", ".").replace(" ", "").replace("€", ""));
+
     if (!$view.length) {
         return;
     }
@@ -107,10 +107,10 @@ function calculateMontantTotal($view, champ) {
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
 
 
-    $view.find('#duree_total').html(duree+" mois");
-    
-    
-    if(duree == 0)
+    $view.find('#duree_total').html(duree + " mois");
+
+
+    if (duree == 0)
         duree = $view.find('input[name="duration"]').val();
 
     //Cout banque
@@ -170,9 +170,9 @@ function calculateMontantTotal($view, champ) {
 
 
 function calculInteret(montant, duree, taux, echoir) {
-    if(taux == 0)
+    if (taux == 0)
         return 0;
-    
+
     if (typeof (echoir) === 'undefined') {
         echoir = true;
     }
@@ -186,7 +186,7 @@ function calculInteret(montant, duree, taux, echoir) {
         //moins = 1 + taux/100 * duree / 432;//Pour 36
         moins = 1 + taux / 100 * 0.083333333333333;//Pour 36
     }
-    
+
     return ((montant) * (tauxPM / (1 - Math.pow((1 + tauxPM), -(duree)))) * duree) / moins - montant; //calcul du montant avec interet
 }
 
@@ -201,25 +201,26 @@ function calculTotal(selecteur) {
 }
 
 
-function hideShowAvance(hide){
-    if($("#ca_calc").length > 0){
+function hideShowAvance(view_id, hide) {
+    if ($("#ca_calc").length > 0) {
+        var $container = $('#' + view_id).find('.objectViewtable');
         var selecteur = "#montant_total, #montant_total2, #duree_total, #cout_banque, #loy_inter, #frais_div, #total_loyer,"
-                +"#periodicity_inputContainer, #mode_calcul_inputContainer, #duration_inputContainer,"
-                +'[name="periodicity"], [name="mode_calcul"], [name="duration"]';
-        var elems = $(selecteur).parent().parent();
+                + "#periodicity_inputContainer, #mode_calcul_inputContainer, #duration_inputContainer,"
+                + '[name="periodicity"], [name="mode_calcul"], [name="duration"]';
+        var elems = $container.find(selecteur).parent().parent();
         var elem2 = elems.parent().parent().find(".btn-primary").parent();
         var moreBut = "erreur";
 
         $("#plusMoinsAvance").remove();
-        if(hide == true){
+        if (hide == true) {
             elems.hide();
-            moreBut = "onClick='hideShowAvance(false)'>Mode Avancé";
+            moreBut = "onClick='hideShowAvance(\"" + view_id + "\", false)'>Mode Avancé";
         }
-        else{
+        else {
             elems.show();
-            moreBut = "onClick='hideShowAvance(true)'>Mode Normal";
+            moreBut = "onClick='hideShowAvance(\"" + view_id + "\", true)'>Mode Normal";
         }
 
-        elem2.prepend('<button type="button" id="plusMoinsAvance"  class="btn btn-primary" '+moreBut+'</button>');
+        elem2.prepend('<button type="button" id="plusMoinsAvance"  class="btn btn-primary" ' + moreBut + '</button>');
     }
 }

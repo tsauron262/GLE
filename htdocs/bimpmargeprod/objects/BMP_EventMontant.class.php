@@ -3,11 +3,50 @@
 class BMP_EventMontant extends BimpObject
 {
 
+    public static $status = array(
+        1 => array('label' => 'A confirmer', 'classes' => array('warning')),
+        2 => array('label' => 'Confirmé', 'classes' => array('success')),
+        3 => array('label' => 'Optionnel', 'classes' => array('info'))
+    );
+
+    public function isEditable()
+    {
+        $typeMontant = $this->getChildObject('type_montant');
+        if (is_null($typeMontant)) {
+            return false;
+        }
+        $editable = (bool) $typeMontant->getData('editable');
+        if (is_null($editable)) {
+            return false;
+        }
+        return $editable;
+    }
+
+    public function isRequired()
+    {
+        $typeMontant = $this->getChildObject('type_montant');
+        if (is_null($typeMontant)) {
+            return false;
+        }
+        $required = (bool) $typeMontant->getData('required');
+        if (is_null($required)) {
+            return false;
+        }
+        return $required;
+    }
+
+    public function isDeletable()
+    {
+        return (!$this->isRequired() && $this->isEditable());
+    }
+
     public function getCategoriesArray()
     {
         $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_CategorieMontant');
         $rows = $instance->getList();
-        $categories = array();
+        $categories = array(
+            '' => ''
+        );
 
         foreach ($rows as $r) {
             $categories[$r['id']] = $r['name'];
@@ -19,19 +58,38 @@ class BMP_EventMontant extends BimpObject
     public function getTypes_montantsArray()
     {
         $id_category = $this->getData('id_category_montant');
-
-        if (is_null($id_category)) {
+        $type = $this->getData('type');
+        if (is_null($id_category) || is_null($type)) {
             return array();
+        }
+        $event = $this->getParentInstance();
+        switch ($type) {
+            case 1:
+                $children_name = 'frais';
+                break;
+
+            case 2:
+                $children_name = 'recettes';
+                break;
+        }
+        $current_montants = array();
+        foreach ($event->getChildrenObjects($children_name) as $montant) {
+            $id_type_montant = (int) $montant->getData('id_montant');
+            if (!is_null($id_type_montant) && $id_type_montant) {
+                $current_montants[] = $id_type_montant;
+            }
         }
 
         $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_TypeMontant');
         $rows = $instance->getList(array(
-            'type'        => 1,
+            'type'        => $type,
             'id_category' => (int) $id_category
         ));
         $types = array();
         foreach ($rows as $r) {
-            $types[$r['id']] = $r['name'];
+            if (!in_array((int) $r['id'], $current_montants)) {
+                $types[$r['id']] = $r['name'];
+            }
         }
         return $types;
     }
@@ -122,12 +180,35 @@ class BMP_EventMontant extends BimpObject
         $placeholder = $this->getCoProdDefaultPart($id_coprod);
 
         $html = '<div class="editInputContainer coProdPart" data-id_coprod="' . $id_coprod . '" data-field_name="coprod_' . $id_coprod . '_part">';
+        $html .= '<input type="hidden" name="coprod_' . $id_coprod . '_part_initial_value" value="' . $value . '"/>';
         $html .= BimpInput::renderInput('text', 'coprod_' . $id_coprod . '_part', $value, array(
                     'addon_right' => '<i class="fa fa-percent"></i>',
-                    'placeholder' => $placeholder
+                    'placeholder' => $placeholder,
+                    'data'        => array(
+                        'data_type' => 'number',
+                        'decimals'  => 2,
+                        'min'       => 0,
+                        'max'       => 100,
+                        'unsigned'  => 0
+                    )
         ));
         $html .= '</div>';
         return $html;
+    }
+
+    public function getDefaultListExtraButtons()
+    {
+        if ($this->hasChildren('details')) {
+            return array(
+                array(
+                    'label'   => 'Détail',
+                    'icon'    => 'file-text-o',
+                    'onclick' => 'loadModalView(\'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id . ',\'' . 'details_list' . '\', $(this));'
+                )
+            );
+        }
+
+        return array();
     }
 
     public function getTva()
@@ -150,6 +231,12 @@ class BMP_EventMontant extends BimpObject
     {
         $type = BimpObject::getInstance('bimpmargeprod', 'BMP_TypeMontant');
         return $type->getAllTypes();
+    }
+
+    public function getDetailsName()
+    {
+        $montant = $this->getChildObject('type_montant');
+        return 'Détails du montant "' . $montant->getData('name') . '"';
     }
 
     public function update()
@@ -197,5 +284,38 @@ class BMP_EventMontant extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function fetch($id)
+    {
+        if (parent::fetch($id)) {
+            $typeMontant = $this->getChildObject('type_montant');
+            $type = (int) $typeMontant->getData('type');
+            if ($type !== (int) $this->getData('type')) {
+                $this->set('type', $type);
+                $this->update();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function onChildSave($object_name)
+    {
+        if ($object_name === 'BMP_EventMontantDetail') {
+            $amount = 0;
+            $children = $this->getChildrenObjects('details');
+            foreach ($children as $child) {
+                if (!is_null($child) && is_a($child, 'BMP_EventMontantDetail')) {
+                    $amount += $child->getTotal();
+                }
+            }
+            $amount = (float) round($amount, 2);
+            $current_amount = (float) $this->getData('amount');
+            if ($current_amount !== $amount) {
+                $this->set('amount', $amount);
+                $this->update();
+            }
+        }
     }
 }

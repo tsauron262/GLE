@@ -6,6 +6,7 @@ function reloadObjectList(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -17,13 +18,16 @@ function reloadObjectList(list_id, callback) {
         id_parent_object = 0;
     }
 
+    // Données de base:
     var data = {
         'list_name': $list.data('list_name'),
+        'list_id': list_id,
         'module_name': $list.data('module_name'),
         'object_name': object_name,
         'id_parent': id_parent_object
     };
 
+    // Champs de recherche:
     var $row = $('#' + list_id + '_searchRow');
 
     if ($row.length) {
@@ -58,6 +62,30 @@ function reloadObjectList(list_id, callback) {
         });
     }
 
+    // Lignes modifiées:
+    var $rows = $list.find('tbody.listRows').find('tr.modified');
+    if ($rows.length) {
+        data['new_values'] = {};
+        $rows.each(function () {
+            var id_object = $(this).data('id_object');
+            $(this).find('.editInputContainer').each(function () {
+                var field_name = $(this).data('field_name');
+                if (field_name) {
+                    var $input = $(this).find('[name="' + field_name + '"]');
+                    if ($input.length) {
+                        if ($input.hasClass('modified')) {
+                            if (typeof (data['new_values'][id_object]) === 'undefined') {
+                                data['new_values'][id_object] = {};
+                            }
+                            data['new_values'][id_object][field_name] = $input.val();
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // Options de trie et de pagination:
     var sort_col = $list.find('input[name=sort_col]').val();
     var sort_way = $list.find('input[name=sort_way]').val();
     var sort_option = $list.find('input[name=sort_option]').val();
@@ -80,6 +108,7 @@ function reloadObjectList(list_id, callback) {
         data['p'] = p;
     }
 
+    // Filtres: 
     if ($list.find('input[name=list_filters]').length) {
         data['list_filters'] = $list.find('input[name=list_filters]').val();
     }
@@ -87,6 +116,7 @@ function reloadObjectList(list_id, callback) {
         data['associations_filters'] = $list.find('input[name=associations_filters]').val();
     }
 
+    // Envoi requête:
     bimp_json_ajax('loadObjectList', data, 0, function (result) {
         if (result.rows_html) {
             $list.find('tbody.listRows').html(result.rows_html);
@@ -128,6 +158,7 @@ function reloadObjectList(list_id, callback) {
 function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent) {
     var $list = $('#' + list_id);
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -164,16 +195,17 @@ function updateObjectFromRow(list_id, id_object, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
     var object_name = $list.data('object_name');
 
-    var $resultContainer = $('#' + list_id + '_result');
+//    var $resultContainer = $('#' + list_id + '_result');
     var $row = $list.find('tbody').find('#' + object_name + '_row_' + id_object);
 
     if (!$row.length) {
-        bimp_display_msg('Erreur technique: liste non trouvée', $resultContainer, 'danger');
+        bimp_show_msg('Erreur technique: liste non trouvée', 'danger');
         return;
     }
 
@@ -186,6 +218,7 @@ function updateObjectFromRow(list_id, id_object, $button) {
         'id_object': id_object
     };
 
+    $row.removeClass('modified');
     $row.find('.editInputContainer').each(function () {
         var field_name = $(this).data('field_name');
         if (field_name) {
@@ -196,7 +229,7 @@ function updateObjectFromRow(list_id, id_object, $button) {
         }
     });
 
-    bimp_json_ajax('saveObject', data, $resultContainer, function (result) {
+    bimp_json_ajax('saveObject', data, null, function (result) {
         $button.removeClass('disabled');
         $('body').trigger($.Event('objectChange', {
             module: $list.data('module_name'),
@@ -208,6 +241,21 @@ function updateObjectFromRow(list_id, id_object, $button) {
     });
 }
 
+function saveAllRowsModifications(list_id, $button) {
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    $list.find('tbody.listRows').children('tr.modified').each(function () {
+        var id_object = $(this).data('id_object');
+        var $button = $(this).find('.updateButton');
+        updateObjectFromRow(list_id, id_object, $button);
+    });
+}
+
 function addObjectFromList(list_id, $button) {
     if ($button.hasClass('disabled')) {
         return;
@@ -215,6 +263,7 @@ function addObjectFromList(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -271,6 +320,7 @@ function deleteObjects(list_id, objects_list, $button) {
 
     var $list = $('#' + list_id);
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -293,6 +343,7 @@ function deleteObjects(list_id, objects_list, $button) {
         var $resultContainer = $('#' + list_id + '_result');
         $button.addClass('disabled');
         var data = {
+            'module_name': $list.data('module_name'),
             'object_name': object_name,
             'objects': objects_list
         };
@@ -316,6 +367,7 @@ function deleteSelectedObjects(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -343,6 +395,7 @@ function deleteSelectedObjects(list_id, $button) {
 function saveObjectPosition(list_id, id_object, position) {
     var $list = $('#' + list_id);
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -364,6 +417,7 @@ function toggleSelectedItemsAssociation(list_id, operation, association, id_asso
     var $list = $('#' + list_id);
 
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -398,6 +452,106 @@ function toggleSelectedItemsAssociation(list_id, operation, association, id_asso
 }
 
 // Actions:
+
+function cancelObjectRowModifications(list_id, id_object, $button) {
+    var $list = $('#' + list_id);
+    if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+    var object_name = $list.data('object_name');
+
+    var $row = $list.find('tbody.listRows').find('tr#' + object_name + '_row_' + id_object);
+    if (!$row.length) {
+        bimp_show_msg('Erreur technique: ligne correspondante non trouvée', 'danger');
+        return;
+    }
+
+    $row.find('.editInputContainer').each(function () {
+        var field_name = $(this).data('field_name');
+        var $input = $(this).find('[name="' + field_name + '"]');
+        var $initial = $(this).find('[name="' + field_name + '_initial_value"]');
+        if ($input.length && $initial.length) {
+            $input.val($initial.val()).change();
+        }
+        $input.removeClass('modified');
+    });
+
+    $row.removeClass('modified');
+    $row.find('.cancelModificationsButton').hide();
+    $row.find('.updateButton').hide();
+
+    checkRowsModifications($list);
+}
+
+function cancelAllRowsModifications(list_id, $button) {
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    $list.find('tbody.listRows').children('tr.modified').each(function () {
+        var id_object = $(this).data('id_object');
+        var $button = $(this).find('.cancelModificationsButton');
+        cancelObjectRowModifications(list_id, id_object, $button);
+    });
+}
+
+function checkRowModifications($row) {
+    if ($row.length) {
+        var modified = false;
+        $row.find('.editInputContainer').each(function () {
+            var field_name = $(this).data('field_name');
+            if (field_name) {
+                var $input = $(this).find('[name="' + field_name + '"]');
+                var $initial = $(this).find('[name="' + field_name + '_initial_value"]');
+                if ($initial.length) {
+                    if ($input.length) {
+                        if ($initial.val() != $input.val()) {
+                            $input.addClass('modified');
+                        } else {
+                            $input.removeClass('modified');
+                        }
+                    }
+                }
+                if ($input.length) {
+                    if ($input.hasClass('modified')) {
+                        modified = true;
+                    }
+                }
+            }
+        });
+        if (modified) {
+            $row.addClass('modified');
+            $row.find('.cancelModificationsButton').removeClass('hidden').show();
+            $row.find('.updateButton').removeClass('hidden').show();
+        } else {
+            $row.removeClass('modified');
+            $row.find('.cancelModificationsButton').hide();
+            $row.find('.updateButton').hide();
+        }
+        checkRowsModifications($row.parent('tbody').parent('table').parent('.objectList'));
+    }
+}
+
+function checkRowsModifications($list) {
+    if ($list.length) {
+        var hasModifications = false;
+        $list.find('tbody.listRows').children('tr').each(function () {
+            if ($(this).hasClass('modified')) {
+                hasModifications = true;
+            }
+        });
+        var $container = $('#' + $list.attr('id') + '_container');
+        if (hasModifications) {
+            $container.find('.modifiedRowsActions').show();
+        } else {
+            $container.find('.modifiedRowsActions').hide();
+        }
+    }
+}
 
 function toggleCheckAll(list_id, $input) {
     var $inputs = $('#' + list_id).find('tbody').find('input.item_check');
@@ -483,6 +637,7 @@ function sortListByPosition(list_id, first_page) {
 
 function loadPage($list, page) {
     if (!$list.length) {
+        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -629,8 +784,13 @@ function onListLoaded($list) {
             $(this).attr('target', '_blank');
         });
 
+        $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
+            checkRowModifications($(this));
+        });
+
         setCommonEvents($('#' + $list.attr('id') + '_container'));
         setInputsEvents($list);
+        setListEditInputsEvents($list);
         setPositionsHandlesEvents($list);
         setPaginationEvents($list);
 
@@ -643,28 +803,31 @@ function onListLoaded($list) {
                 objects = objects.split(',');
             }
 
-            $('body').on('objectChange', function (e) {
-                if ((e.module === module) && (e.object_name === object_name)) {
-                    reloadObjectList($list.attr('id'));
-                } else if (objects && objects.length) {
-                    for (var i in objects) {
-                        if (e.object_name === objects[i]) {
-                            reloadObjectList($list.attr('id'));
+            if (!$('body').data($list.attr('id') + '_object_events_init')) {
+                $('body').on('objectChange', function (e) {
+                    if ((e.module === module) && (e.object_name === object_name)) {
+                        reloadObjectList($list.attr('id'));
+                    } else if (objects && objects.length) {
+                        for (var i in objects) {
+                            if (e.object_name === objects[i]) {
+                                reloadObjectList($list.attr('id'));
+                            }
                         }
                     }
-                }
-            });
-            $('body').on('objectDelete', function (e) {
-                if ((e.module === module) && (e.object_name === object_name)) {
-                    reloadObjectList($list.attr('id'));
-                } else if (objects.length) {
-                    for (var i in objects) {
-                        if (e.object_name === objects[i]) {
-                            reloadObjectList($list.attr('id'));
+                });
+                $('body').on('objectDelete', function (e) {
+                    if ((e.module === module) && (e.object_name === object_name)) {
+                        reloadObjectList($list.attr('id'));
+                    } else if (objects.length) {
+                        for (var i in objects) {
+                            if (e.object_name === objects[i]) {
+                                reloadObjectList($list.attr('id'));
+                            }
                         }
                     }
-                }
-            });
+                });
+                $('body').data($list.attr('id') + '_object_events_init', 1);
+            }
 
             $list.data('object_change_event_init', 1);
         }
@@ -693,8 +856,13 @@ function onListRefeshed($list) {
         }
     });
 
+    $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
+        checkRowModifications($(this));
+    });
+
     setCommonEvents($tbody);
     setInputsEvents($tbody);
+    setListEditInputsEvents($list);
     setPositionsHandlesEvents($list);
 
     $list.trigger('listRefresh');
@@ -759,6 +927,29 @@ function setSearchInputsEvents($list) {
                     }
                 }
             }
+        });
+    }
+}
+
+function setListEditInputsEvents($list) {
+    var $rows = $list.find('tbody.listRows').find('.objectListItemRow');
+    if ($rows.length) {
+        $rows.each(function () {
+            var $row = $(this);
+            $(this).find('.editInputContainer').each(function () {
+                var field_name = $(this).data('field_name');
+                if (field_name) {
+                    var $input = $(this).find('[name="' + field_name + '"]');
+                    if ($input.length) {
+                        if (!$input.data('list_row_change_event_init')) {
+                            $input.change(function () {
+                                checkRowModifications($row);
+                            });
+                            $input.data('list_row_change_event_init', 1);
+                        }
+                    }
+                }
+            });
         });
     }
 }
@@ -865,6 +1056,7 @@ $(document).ready(function () {
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
             e.$container.find('.objectList').each(function () {
+                onListLoaded($(this));
                 onListLoaded($(this));
             });
         }

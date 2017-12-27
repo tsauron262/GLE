@@ -16,9 +16,11 @@ class BimpObject
         'user_update',
         'position'
     );
+    public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent');
     public $use_commom_fields = true;
     protected $data = array();
     protected $associations = array();
+    protected $history = array();
 
     public static function getInstance($module, $object_name)
     {
@@ -138,6 +140,41 @@ class BimpObject
         return null;
     }
 
+    public function hasChildren($object_name)
+    {
+        if (!$this->config->isDefined('objects/' . $object_name)) {
+            return false;
+        }
+
+        $relation = $this->getConf('objects/' . $object_name . '/relation', '', true);
+        if (!$relation) {
+            return false;
+        }
+
+        $instance = $this->config->getObject('', $object_name);
+        if (is_null($instance)) {
+            return false;
+        }
+
+        switch ($relation) {
+            case 'hasOne':
+                if (isset($instance->id) && $instance->id) {
+                    return true;
+                }
+                return false;
+
+            case 'hasMany':
+                if (is_a($instance, 'BimpObject')) {
+                    if ($instance->getParentObjectName() === $this->object_name) {
+                        $filters = $this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array');
+                        $filters[$instance->getParentIdProperty()] = $this->id;
+                        return ($instance->getListCount($filters) > 0);
+                    }
+                }
+        }
+        return false;
+    }
+
     public function getChildObject($object_name, $id_object = null)
     {
         $child = $this->config->getObject('', $object_name);
@@ -179,6 +216,35 @@ class BimpObject
         return $children;
     }
 
+    public function getChildrenList($object_name)
+    {
+        $children = array();
+        if (isset($this->id) && $this->id) {
+            if ($this->config->isDefined('objects/' . $object_name)) {
+                $relation = $this->getConf('objects/' . $object_name . '/relation', '', true);
+                if ($relation !== 'hasMany') {
+                    return array();
+                }
+
+                $instance = $this->config->getObject('', $object_name);
+                if (!is_null($instance)) {
+                    if (is_a($instance, 'BimpObject')) {
+                        if ($instance->getParentObjectName() === $this->object_name) {
+                            $filters = $this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array');
+                            $filters[$instance->getParentIdProperty()] = $this->id;
+                            $primary = $instance->getPrimary();
+                            $list = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary));
+                            foreach ($list as $item) {
+                                $children[] = (int) $item[$primary];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $children;
+    }
+
     // Gestion des données:
 
     public function getData($field)
@@ -195,7 +261,7 @@ class BimpObject
 
     public function set($field, $value)
     {
-        return $this->validateValue($field, $value);
+        $this->validateValue($field, $value);
     }
 
     public function addMultipleValuesItem($name, $value)
@@ -438,6 +504,34 @@ class BimpObject
         }
 
         return $filters;
+    }
+
+    protected function checkFieldHistory($field, $value)
+    {
+        $history = $this->getConf('fields/' . $field . '/history', false, false, 'bool');
+        if ($history) {
+            $current_value = $this->getData($field);
+            if (!isset($this->id) || !$this->id || is_null($current_value) || ($current_value != $value)) {
+                $this->history[$field] = $value;
+            }
+        }
+    }
+
+    protected function saveHistory()
+    {
+        if (!count($this->history) || !isset($this->id) || !$this->id) {
+            return array();
+        }
+
+        $errors = array();
+        $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
+
+        foreach ($this->history as $field => $value) {
+            $errors = array_merge($errors, $bimpHistory->add($this, $field, $value));
+        }
+
+        $this->history = array();
+        return $errors;
     }
 
     // Affichage des données:
@@ -865,7 +959,7 @@ class BimpObject
             $this->config->setCurrentPath('fields/' . $field);
             $value = null;
             if (BimpTools::isSubmit($field)) {
-                $value = BimpTools::getValue($field);
+                $value = BimpTools::getValue($field, null);
             } elseif (isset($this->data[$field])) {
                 $value = $this->getData($field);
             } else {
@@ -939,86 +1033,94 @@ class BimpObject
                 }
             }
             $type = $this->getCurrentConf('type', '');
-            if (is_null($value) || ($value === '') && in_array($type, array('id', 'id_parent', 'id_object'))) {
-                $value = 0;
-            }
-            if (is_null($value) || ($value === '')) {
+
+            if (is_null($value) || $value === '') {
                 $missing = false;
                 if ($required) {
                     $missing = true;
                 }
                 if ($missing) {
                     $errors[] = 'Valeur obligatoire manquante : "' . $label . '"';
+                    return $errors;
                 }
-            } else {
-                $validate = true;
-                $invalid_msg = $this->getCurrentConf('invalid_msg');
+            }
 
-                if ($type) {
-                    if (is_null($invalid_msg)) {
-                        switch ($type) {
-                            case 'time':
-                                $invalid_msg = 'Format attendu: HH:MM:SS';
-                                break;
+            if (is_null($value)) {
+                $value = '';
+            }
 
-                            case 'date':
-                                $invalid_msg = 'Format attendu: AAAA-MM-JJ';
-                                break;
+            if (($value === '') && in_array($type, self::$numeric_types)) {
+                $value = 0;
+            }
 
-                            case 'datetime':
-                                $invalid_msg = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
-                                break;
+            $validate = true;
+            $invalid_msg = $this->getCurrentConf('invalid_msg');
 
-                            case 'id_object':
-                                $invalid_msg = 'La valeur doit être un nombre entier positif';
-                                break;
+            if ($type) {
+                if (is_null($invalid_msg)) {
+                    switch ($type) {
+                        case 'time':
+                            $invalid_msg = 'Format attendu: HH:MM:SS';
+                            break;
 
-                            default:
-                                $invalid_msg = 'La valeur doit être de type "' . $type . '"';
-                        }
-                    }
+                        case 'date':
+                            $invalid_msg = 'Format attendu: AAAA-MM-JJ';
+                            break;
 
-                    if (!$this->checkFieldValueType($field, $value)) {
-                        $validate = false;
-                    } else {
-                        switch ($type) {
-                            case 'id':
-                            case 'id_object':
-                                if ($required && ((int) $value <= 0)) {
-                                    $errors[] = 'Valeur obligatoire manquante : "' . $label . '"';
-                                }
-                                break;
-                        }
+                        case 'datetime':
+                            $invalid_msg = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
+                            break;
+
+                        case 'id_object':
+                            $invalid_msg = 'La valeur doit être un nombre entier positif';
+                            break;
+
+                        default:
+                            $invalid_msg = 'La valeur doit être de type "' . $type . '"';
                     }
                 }
 
-                if (!count($errors) && !is_null($regexp = $this->getCurrentConf('regexp'))) {
-                    if (!preg_match('/' . $regexp . '/', $value)) {
-                        $validate = false;
+                if (!$this->checkFieldValueType($field, $value)) {
+                    $validate = false;
+                } else {
+                    switch ($type) {
+                        case 'id':
+                        case 'id_object':
+                            if ($required && ((int) $value <= 0)) {
+                                $errors[] = 'Valeur obligatoire manquante : "' . $label . '"';
+                            }
+                            break;
                     }
                 }
-                if (!count($errors) && !is_null($is_key_array = $this->getCurrentConf('is_key_array'))) {
-                    if (is_array($is_key_array) && !array_key_exists($value, $is_key_array)) {
-                        $validate = false;
-                    }
-                }
-                if (!count($errors) && !is_null($in_array = $this->getCurrentConf('in_array'))) {
-                    if (is_array($in_array) && !in_array($value, $in_array)) {
-                        $validate = false;
-                    }
-                }
+            }
 
-                if (!$validate) {
-                    $msg = '"' . $label . '": valeur invalide';
-                    if (!is_null($invalid_msg)) {
-                        $msg .= ' (' . $invalid_msg . ')';
-                    }
-                    $errors[] = $msg;
+            if (!count($errors) && !is_null($regexp = $this->getCurrentConf('regexp'))) {
+                if (!preg_match('/' . $regexp . '/', $value)) {
+                    $validate = false;
                 }
+            }
+            if (!count($errors) && !is_null($is_key_array = $this->getCurrentConf('is_key_array'))) {
+                if (is_array($is_key_array) && !array_key_exists($value, $is_key_array)) {
+                    $validate = false;
+                }
+            }
+            if (!count($errors) && !is_null($in_array = $this->getCurrentConf('in_array'))) {
+                if (is_array($in_array) && !in_array($value, $in_array)) {
+                    $validate = false;
+                }
+            }
 
-                if (!count($errors)) {
-                    $this->data[$field] = $value;
+            if (!$validate) {
+                $msg = '"' . $label . '": valeur invalide';
+                if (!is_null($invalid_msg)) {
+                    $msg .= ' (' . $invalid_msg . ')';
                 }
+                $errors[] = $msg;
+            }
+
+            if (!count($errors)) {
+                $this->checkFieldHistory($field, $value);
+                $this->data[$field] = $value;
             }
         }
 
@@ -1085,6 +1187,8 @@ class BimpObject
                 }
 
                 $errors = array_merge($errors, $this->updateAssociations());
+                $errors = array_merge($errors, $this->saveHistory());
+
                 $parent = $this->getParentInstance();
                 if (!is_null($parent)) {
                     if (method_exists($parent, 'onChildSave')) {
@@ -1147,6 +1251,8 @@ class BimpObject
         }
 
         $errors = array_merge($errors, $this->updateAssociations());
+        $errors = array_merge($errors, $this->saveHistory());
+
         $parent = $this->getParentInstance();
         if (!is_null($parent)) {
             if (method_exists($parent, 'onChildSave')) {
@@ -1317,6 +1423,7 @@ class BimpObject
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
+//        echo $sql; exit;
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -1419,6 +1526,9 @@ class BimpObject
                 }
                 $this->config->setCurrentPath($prev_path);
             }
+
+            $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
+            $bimpHistory->deleteByObject($this, $id);
 
             $parent = $this->getParentInstance();
             if (!is_null($parent)) {
@@ -1687,18 +1797,30 @@ class BimpObject
             return BimpRender::renderAlerts($msg);
         }
         if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
-            $title = $this->getConf('objects/' . $children_object . '/list/title');
-            $icon = $this->getConf('objects/' . $children_object . '/list/icon');
-
-            $list_filters = $this->getConf('objects/' . $children_object . '/list/filters', array(), false, 'array');
+            $title = (is_null($title) ? $this->getConf('objects/' . $children_object . '/list/title') : $title);
+            $icon = (is_null($icon) ? $this->getConf('objects/' . $children_object . '/list/icon', $icon) : $icon);
 
             $list = new BimpList($children_instance, $list_name, $this->id, $title, $icon);
+
+            $list_filters = $this->config->getCompiledParams('objects/' . $children_object . '/list/filters', array(), false, 'array');
 
             if (count($list_filters)) {
                 foreach ($list_filters as $field_name => $value) {
                     $list->addFieldFilterValue($field_name, $value);
                 }
             }
+
+            $add_form_name = $this->getConf('objects/' . $children_object . '/add_form/name', null);
+
+            if (!is_null($add_form_name)) {
+                $list->setAddFormName($add_form_name);
+            }
+
+            $add_form_values = $this->config->getCompiledParams('objects/' . $children_object . '/add_form/values', null, false, 'array');
+            if (!is_null($add_form_values)) {
+                $list->setAddFormValues($add_form_values);
+            }
+
             return $list->render($panel);
         }
         $msg = 'Erreur technique: objets "' . $children_object . '" non trouvés pour ' . $this->getLabel('this');

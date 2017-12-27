@@ -25,6 +25,7 @@ class BimpList
     protected $filters = array();
     protected $list_filters = array();
     protected $association_filters = array();
+    protected $new_values = array();
     protected $items = null;
     protected $rows = null;
     protected $colspan = 0;
@@ -63,7 +64,11 @@ class BimpList
         }
 
         if (!count($this->errors) && !is_null($this->list_path)) {
-            $this->listIdentifier = $this->object->object_name . '_' . $list_name . '_list';
+            $this->listIdentifier = $this->object->object_name;
+            if (!is_null($this->id_parent)) {
+                $this->listIdentifier .= '_' . $this->object->getParentObjectName() . '_' . $this->id_parent;
+            }
+            $this->listIdentifier .= '_' . $list_name . '_list';
             if (!is_null($title)) {
                 $this->title = $title;
             } else {
@@ -74,6 +79,7 @@ class BimpList
             } else {
                 $this->icon = $this->object->getCurrentConf('icon', 'bars');
             }
+
             $this->checkboxes = (int) $this->object->getCurrentConf('checkboxes', 0, false, 'bool');
             $this->addobjectRow = (int) $this->object->getCurrentConf('add_object_row', 0, false, 'bool');
             $this->use_positions = (int) $this->object->getConf('positions', false, false, 'bool');
@@ -105,7 +111,7 @@ class BimpList
             $associate = $this->object->config->getObject('associations/' . $association . '/object');
             if (!is_null($associate)) {
                 if ($associate->fetch($id_associate) > 0) {
-                    $this->listIdentifier .= 'associate_to_' . $association;
+                    $this->listIdentifier .= '_associate_to_' . $association;
                     $this->title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' associables ';
                     $this->title .= BimpObject::getInstanceLabel($associate, 'to') . ' "' . BimpObject::getInstanceNom($associate) . '"';
                     $this->association_filters[] = array(
@@ -144,7 +150,7 @@ class BimpList
                     if (is_null($label)) {
                         $label = 'Désassocier les ' . $this->object->getLabel('name_plur') . ' sélectionnés';
                     }
-                    $this->listIdentifier .= 'associated_to_' . $association;
+                    $this->listIdentifier .= '_associated_to_' . $association;
                     $this->addForm = null;
                     $this->title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' associés ';
                     $this->title .= BimpObject::getInstanceLabel($associate, 'to') . ' "' . BimpObject::getInstanceNom($associate) . '"';
@@ -209,6 +215,13 @@ class BimpList
         }
     }
 
+    public function setNewValues($new_values)
+    {
+        foreach ($new_values as $id_object => $fields) {
+            $this->new_values[(int) $id_object] = $fields;
+        }
+    }
+
     protected function mergeFilter($name, $filter)
     {
         if (isset($this->filters[$name])) {
@@ -221,6 +234,7 @@ class BimpList
                 $this->filters[$name]['and'][] = $filter;
             }
         } else {
+//            echo 'la'; exit;
             $this->filters[$name] = $filter;
         }
     }
@@ -270,9 +284,6 @@ class BimpList
         if (BimpTools::isSubmit('list_filters')) {
             $this->list_filters = json_decode(BimpTools::getValue('list_filters'), true);
         }
-//        echo '<pre>';
-//        print_r($this->list_filters);
-//        exit;
         if (BimpTools::isSubmit('associations_filters')) {
             $this->association_filters = json_decode(BimpTools::getValue('associations_filters'), true);
         }
@@ -306,12 +317,6 @@ class BimpList
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
             }
         }
-        
-        $filters = $this->filters;
-        if (!is_null($this->id_parent)) {
-            $parent_id_property = $this->object->getParentIdProperty();
-            $filters[$parent_id_property] = $this->id_parent;
-        }        
 
         // Filtres selon objets associés:
         if (count($this->association_filters)) {
@@ -348,6 +353,12 @@ class BimpList
                     }
                 }
             }
+        }
+
+        $filters = $this->filters;
+        if (!is_null($this->id_parent)) {
+            $parent_id_property = $this->object->getParentIdProperty();
+            $filters[$parent_id_property] = $this->id_parent;
         }
 
         // Trie: 
@@ -426,6 +437,7 @@ class BimpList
             $this->object->reset();
             $row = array();
             if ($this->object->fetch((int) $item[$primary])) {
+                $new_values = isset($this->new_values[(int) $item[$primary]]) ? $this->new_values[(int) $item[$primary]] : array();
                 if ($this->use_positions) {
                     $row['position'] = $this->object->getData('position');
                     if (is_null($row['position'])) {
@@ -437,13 +449,26 @@ class BimpList
                     if ($this->setConfPath('cols/' . $col_name)) {
                         $field = $this->object->getCurrentConf('field', '');
                         $edit = (int) $this->object->getCurrentConf('edit', 0, false, 'bool');
+                        $history = (int) $this->object->getCurrentConf('history', 0, false, 'bool');
+
+                        $history_html = '';
+                        if ($field && $history) {
+                            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $field);
+                        }
 
                         if ($edit && $field) {
                             $value = $this->object->getData($field);
+                            if (isset($new_values[$field])) {
+                                $new_value = $new_values[$field];
+                            } else {
+                                $new_value = $value;
+                            }
                             $input_id = $this->object->object_name . '_' . $item[$primary] . '_' . $field;
                             $input = '<div class="editInputContainer" data-field_name="' . $field . '">';
-                            $input .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $value, $this->id_parent, null, null, $input_id);
+                            $input .= '<input type="hidden" name="' . $field . '_initial_value" value="' . $value . '"/>';
+                            $input .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $new_value, $this->id_parent, null, null, $input_id);
                             $input .= '</div>';
+                            $input .= $history_html;
                             $row[$col_name] = $input;
                             continue;
                         }
@@ -454,6 +479,7 @@ class BimpList
                             $value = $this->object->getData($field);
                             $content .= '<input type="hidden" name="' . $field . '" value="' . $value . '"/>';
                             $content .= $display;
+                            $content .= $history_html;
                         } else {
                             $value = $this->object->getCurrentConf('value', '', true);
                             if ($value) {
@@ -903,6 +929,7 @@ class BimpList
 
     public function renderBulkActions()
     {
+        $html = '';
         if (count($this->bulk_actions)) {
             $buttons = array();
 
@@ -950,11 +977,36 @@ class BimpList
             }
 
             $title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' sélectionné' . ($this->object->isLabelFemale() ? 'e' : '') . 's';
-            $html = BimpRender::renderDropDownButton($title, $buttons, array(
+            $html .= BimpRender::renderDropDownButton($title, $buttons, array(
                         'icon' => 'check-square-o'
             ));
         }
 
+        $buttons = array();
+        $buttons[] = BimpRender::renderButton(array(
+                    'classes'     => array('btn', 'btn-light-default'),
+                    'label'       => 'Enregistrer toutes les modifications',
+                    'attr'        => array(
+                        'type'    => 'button',
+                        'onclick' => 'saveAllRowsModifications(\'' . $this->listIdentifier . '\', $(this))'
+                    ),
+                    'icon_before' => 'save'
+                        ), 'button');
+        $buttons[] = BimpRender::renderButton(array(
+                    'classes'     => array('btn', 'btn-light-default'),
+                    'label'       => 'Annuler toutes les modifications',
+                    'attr'        => array(
+                        'type'    => 'button',
+                        'onclick' => 'cancelAllRowsModifications(\'' . $this->listIdentifier . '\', $(this))'
+                    ),
+                    'icon_before' => 'undo'
+                        ), 'button');
+        $title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' modifié' . ($this->object->isLabelFemale() ? 'e' : '') . 's';
+        $html .= '<span class="modifiedRowsActions" style="display: none">';
+        $html .= BimpRender::renderDropDownButton($title, $buttons, array(
+                    'icon' => 'edit'
+        ));
+        $html .= '</span>';
         $this->setConfPath();
         return $html;
     }
@@ -1021,6 +1073,38 @@ class BimpList
         return $html;
     }
 
+    public function renderRowButton($btn_params)
+    {
+        $html = '';
+        $tag = isset($btn_params['tag']) ? $btn_params['tag'] : 'span';
+        $html .= '<' . $tag . ' class="rowButton' . (isset($btn_params['class']) ? ' ' . $btn_params['class'] : '');
+
+        if (isset($btn_params['label'])) {
+            $html .= ' bs-popover"';
+            $html .= ' data-toggle="popover"';
+            $html .= ' data-trigger="hover"';
+            $html .= ' data-placement="top"';
+            $html .= ' data-content="' . $btn_params['label'];
+        }
+        if (isset($btn_params['onclick'])) {
+            $html .= '" onclick="' . $btn_params['onclick'];
+        }
+
+        $html .= '"';
+
+        if (isset($btn_params['attrs'])) {
+            $html .= BimpRender::displayTagAttrs($btn_params['attrs']);
+        }
+
+        $html .= '>';
+        if (isset($btn_params['icon'])) {
+            $html .= '<i class="fa fa-' . $btn_params['icon'] . '"></i>';
+        }
+        $html .= '</' . $tag . '>';
+
+        return $html;
+    }
+
     public function renderRows()
     {
         $html = '';
@@ -1044,13 +1128,22 @@ class BimpList
         }
 
         if (count($this->rows)) {
-            $update_btn = (int) $this->object->getCurrentConf('update_btn', 0);
-            $edit_btn = (int) $this->object->getCurrentConf('edit_btn', 0);
-            $delete_btn = (int) $this->object->getCurrentConf('delete_btn', 0);
-            $view_btn = (int) $this->object->getCurrentConf('view_btn', 0);
-
             foreach ($this->rows as $id_object => $row) {
-                $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow" id="' . $this->object->object_name . '_row_' . $id_object . '"';
+                $this->object->reset();
+                $this->object->fetch($id_object);
+
+                $update_btn = (int) $this->object->getCurrentConf('update_btn', 0, false, 'bool');
+                $edit_btn = (int) $this->object->getCurrentConf('edit_btn', 0, false, 'bool');
+                $edit_form = $this->object->getCurrentConf('edit_form');
+                $delete_btn = (int) $this->object->getCurrentConf('delete_btn', 0, false, 'bool');
+                $view_btn = (int) $this->object->getCurrentConf('view_btn', 0, false, 'bool');
+                $extra_buttons = $this->object->config->getCompiledParamsfromCurrentPath('extra_buttons');
+
+                $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow';
+                if (isset($this->new_values[(int) $id_object]) && count($this->new_values[(int) $id_object])) {
+                    $html .= ' modified';
+                }
+                $html .= '" id="' . $this->object->object_name . '_row_' . $id_object . '"';
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->use_positions) {
                     $html .= ' data-position="' . $row['position'] . '"';
@@ -1059,10 +1152,12 @@ class BimpList
 
                 $html .= '<td style="text-align: center">';
                 if ($this->checkboxes) {
-                    $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
-                    $html .= ' name="' . $this->object->object_name . '_check"';
-                    $html .= ' class="item_check"';
-                    $html .= ' data-id_object="' . $id_object . '"/>';
+                    if ($this->object->getCurrentConf('item_checkbox', true, false, 'bool')) {
+                        $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
+                        $html .= ' name="' . $this->object->object_name . '_check"';
+                        $html .= ' class="item_check"';
+                        $html .= ' data-id_object="' . $id_object . '"/>';
+                    }
                 }
                 $html .= '</td>';
 
@@ -1094,32 +1189,60 @@ class BimpList
 
                 $this->setConfPath();
 
+                if (count($extra_buttons)) {
+                    foreach ($extra_buttons as $btn_params) {
+                        $html .= $this->renderRowButton($btn_params);
+                    }
+                }
                 if ($update_btn) {
-                    $html .= '<span class="rowButton updateButton" title="Mettre à jour"';
-                    $html .= ' onclick="updateObjectFromRow(\'' . $this->listIdentifier . '\', ' . $id_object . ', $(this))"></span>';
+                    $html .= $this->renderRowButton(array(
+                        'class'   => 'cancelModificationsButton hidden',
+                        'icon'    => 'undo',
+                        'label'   => 'Annuler les modifications',
+                        'onclick' => 'cancelObjectRowModifications(\'' . $this->listIdentifier . '\', ' . $id_object . ', $(this))'
+                    ));
+                    $html .= $this->renderRowButton(array(
+                        'class'   => 'updateButton hidden',
+                        'label'   => 'Enregistrer',
+                        'onclick' => 'updateObjectFromRow(\'' . $this->listIdentifier . '\', ' . $id_object . ', $(this))'
+                    ));
                 }
                 if ($edit_btn) {
-                    $html .= '<span class="rowButton editButton" title="Editer"';
-                    $html .= ' onclick="loadModalFormFromList(\'' . $this->listIdentifier . '\', \'default\', $(this), ' . $id_object . ')">';
-                    $html .= '</span>';
+                    if (is_null($edit_form) || !$edit_form) {
+                        $edit_form = 'default';
+                    }
+                    $html .= $this->renderRowButton(array(
+                        'class'   => 'editButton',
+                        'label'   => 'Editer',
+                        'onclick' => 'loadModalFormFromList(\'' . $this->listIdentifier . '\', \'' . $edit_form . '\', $(this), ' . $id_object . ')'
+                    ));
                 }
                 if ($view_btn) {
-                    $html .= '<span class="rowButton viewButton" title="Afficher" onclick="';
                     $controller = $this->object->getController();
                     if ($controller && !is_null($id_object) && $id_object) {
                         $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $id_object;
-                        $html .= 'window.location = \'' . $url . '\';';
+                        $html .= $this->renderRowButton(array(
+                            'label'   => 'Afficher la page',
+                            'onclick' => 'window.location = \'' . $url . '\';',
+                            'icon'    => 'file-o'
+                        ));
                     } else {
-                        $html .= 'displayObjectView($(\'#' . $this->listIdentifier . '_container\').find(\'.objectViewContainer\'), ';
-                        $html .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'default\', ' . $id_object . ', \'default\'';
-                        $html .= ');';
+                        $onclick = 'displayObjectView($(\'#' . $this->listIdentifier . '_container\').find(\'.objectViewContainer\'), ';
+                        $onclick .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'default\', ' . $id_object . ', \'default\'';
+                        $onclick .= ');';
+                        $html .= $this->renderRowButton(array(
+                            'label'   => 'Vue rapide',
+                            'icon'    => 'eye',
+                            'onclick' => $onclick
+                        ));
                     }
-                    $html .= '"></span>';
                 }
                 if ($delete_btn) {
-                    $html .= '<span class="rowButton deleteButton" title="Supprimer"';
-                    $html .= ' onclick="deleteObjects(\'' . $this->listIdentifier . '\', [' . $id_object . '], $(this))">';
-                    $html .= '</span>';
+                    $html .= $this->renderRowButton(array(
+                        'class'   => 'deleteButton',
+                        'label'   => 'Supprimer',
+                        'onclick' => 'deleteObjects(\'' . $this->listIdentifier . '\', [' . $id_object . '], $(this))'
+                    ));
                 }
                 $html .= '</td>';
                 $html .= '</tr>';

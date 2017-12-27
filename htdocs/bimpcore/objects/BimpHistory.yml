@@ -1,0 +1,51 @@
+table: bimp_history
+common_fields: 0
+
+labels: 
+    name: Historique
+    
+objects: 
+    object: 
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object: 
+                module: 
+                    field_value: module_name
+                name: 
+                    field_value: object_name
+        id_object: 
+            field_value: id_object
+            
+    user:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: user
+            id_object: 
+                field_value: id_user
+                    
+fields: 
+    module:
+        label: Module
+        type: string
+    object: 
+        label: Objet
+        type: string
+    id_object:
+        label: ID Objet
+        type: id_object
+    field: 
+        label: Champ
+        type: string
+    value: 
+        label: Valeur
+        type: text
+    date: 
+        label: Date
+        type: datetime
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        
+        

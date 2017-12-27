@@ -59,6 +59,12 @@ fields:
         sortable: 1
         search: 1
         
+    code_compta:
+        label: code comptable
+        type: string
+        sortable: 1
+        search: 1
+            
     required: 
         label: Obligatoire
         type: bool
@@ -97,6 +103,9 @@ list:
             edit: 1
         tva: 
             field: id_taxe
+            edit: 1
+        code: 
+            field: code_compta
             edit: 1
         required: 
             field: required

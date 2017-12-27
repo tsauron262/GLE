@@ -5,6 +5,12 @@ labels:
     name: événement
 
 objects:
+    groups: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventGroup
+            
     tarifs: 
         relation: hasMany
         delete: 1
@@ -42,8 +48,12 @@ objects:
             title: Recettes
             filters: 
                 type: 2
-            
-associations:
+                
+    billets:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventBillets
     
 fields: 
     name: 
@@ -63,6 +73,30 @@ fields:
         sortable: 1
         search: 1
     
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+        sortable: 1
+        search: 1
+        
+    place: 
+        label: Lieu
+        type: int
+        values: 
+            array: places
+        sortable: 1
+        search: 1
+            
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status
+        sortable: 1
+        search: 1
+        
 lists:
     default: 
         checkboxes: 1
@@ -83,6 +117,12 @@ lists:
                 field: date_end
             name: 
                 field: name
+            type: 
+                field: type
+            place: 
+                field: place
+            status: 
+                field: status
                 
 views:
     default:
@@ -104,13 +144,16 @@ views:
                       rows:
                         - field: date_begin
                         - field: date_end
+                        - field: type
+                        - field: place
+                        - field: status
                 
             - cols:
                 - type: list
                   col_lg: 6
                   col_md: 6
                   list: 
-                      children: tarifs
+                      children: groups
                       panel: 0
                       
                 - type: list
@@ -119,9 +162,30 @@ views:
                   list: 
                       children: coprods
                       panel: 0
+                      
+    billets:
+        title: Billeterie
+        rows:                
+            - cols:
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  list: 
+                      title: Tarifs
+                      children: tarifs
+                      panel: 0
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  list: 
+                      title: Vente de billets
+                      children: billets
+                      panel: 0
                   
     frais_totaux:
-        title: Montants totaux
+        title: Montants HT totaux
+        objects_change_reload: BMP_EventMontant
         icon: euro
         rows:
             - cols: 
@@ -133,7 +197,8 @@ views:
                               type: 1
                               
     recettes_totaux:
-        title: Montants totaux
+        title: Montants HT totaux
+        objects_change_reload: BMP_EventMontant
         icon: euro
         rows:
             - cols: 
@@ -143,3 +208,14 @@ views:
                           method: renderMontantsTotaux
                           params: 
                               type: 2
+                              
+    frais_hotel:
+        title: Détail des frais d'hôtellerie
+        icon: euro
+        rows:
+            - cols:
+                - type: custom
+                  custom: 
+                      callback:
+                          method: renderFraisHotel
+                          

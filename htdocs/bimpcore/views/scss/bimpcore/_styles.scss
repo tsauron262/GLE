@@ -110,8 +110,22 @@ div.tabBar {
     }
 }
 
-.bold {
-    font-weight: bold;
+.historyPopoverButton {
+    margin: 0 6px;
+    font-weight: normal;
+    color: $gray-dark;
+    cursor: pointer;
+    font-size: 15px;
+    @include transition(all 0.3s ease);
+    
+    &:before {
+        font-family: 'FontAwesome';
+        content: '\f1da';
+    }
+    
+    &:hover {
+        color: $primary;
+    }
 }
 
 /*Boutons*/
@@ -231,7 +245,6 @@ i.iconRight {
         border-left: 1px dotted #B4B4B4;
     }
 }
-
 .panel.foldable {
     & > .panel-heading:first-child {
         cursor: pointer;
@@ -268,7 +281,6 @@ i.iconRight {
         }
     }
 }
-
 .objectViewtable.foldable {
     & > thead {
         tr:first-child {
@@ -413,9 +425,29 @@ i.iconRight {
         }
     }
 }
-
 .fixe_tab_content {
     .bimp_timer {
         display: inline-block;
+    }
+}
+
+/*Page Notifications*/
+#page_notifications {
+    display: none;
+    position: fixed; 
+    z-index: 99999;
+    background-color: transparent;
+    padding: 30px;
+    top: 40px;
+    right: 0;
+    width: 430px;
+    
+    p {
+        width: 340px;
+        margin: 15px;
+        border-radius: 4px;
+        box-shadow: 3px 3px 6px $gray-dark;
+        
+        margin-left: 370px;
     }
 }

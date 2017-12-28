@@ -88,7 +88,7 @@ class CalendarQueryParser {
         }
 
         $compFilters = $this->parseCompFilters($filter->item(0));
-        dol_syslog("query   ".$compFilters,3,0,"_caldav2");
+        dol_syslog("query   ".print_r($compFilters),3,0,"_caldav2");
         if (count($compFilters)!==1) {
             throw new \Sabre\DAV\Exception\BadRequest('There must be exactly 1 top-level comp-filter.');
         }

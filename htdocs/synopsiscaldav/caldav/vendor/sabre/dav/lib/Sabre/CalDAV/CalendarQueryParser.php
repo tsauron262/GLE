@@ -88,7 +88,6 @@ class CalendarQueryParser {
         }
 
         $compFilters = $this->parseCompFilters($filter->item(0));
-        
         if (count($compFilters)!==1) {
             throw new \Sabre\DAV\Exception\BadRequest('There must be exactly 1 top-level comp-filter.');
         }

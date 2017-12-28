@@ -62,13 +62,21 @@ if ($socid > 0) {
 }
 
 if ($user->rights->contrat->lire) {
-    print'<h3> Contrats actifs</h3>';
-    print'<div id="containerForActif" class="customContainer">';
-    print'</div>';
-    print'<h3> Contrats inactifs</h3>';
-    print'<div id="containerForInactif" class="customContainer">';
-    print'</div>';
-    print'<h3>Nouveau contrat</h3>';
+    print '<h3> Contrats actifs '
+        . '<div class="miniCustomDiv">Services inactifs</div>'
+        . '<div class="miniCustomDiv isGreen">Services actifs</div>'
+        . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
+        . '<div class="miniCustomDiv isGrey">Services fermé</div>'
+        . '</h3>';
+
+    print '<div id="containerForActif" class="customContainer">';
+    print '</div>';
+    print '<h3> Contrats inactifs</h3>';
+    print '<div id="containerForInactif" class="customContainer">';
+    print '</div>';
+    
+    print '<h3>Nouveau contrat</h3>';
+    
     if ($user->rights->contrat->creer) {
         $staticbca = new BimpContratAuto($db);
 

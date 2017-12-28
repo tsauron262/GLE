@@ -37,6 +37,11 @@ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class BimpContratAuto {
+    
+    /* 
+     * If you want to add a service for new contrat
+     * modify the function static getTabService()
+     */
 
     const NO_SERVICE = "Non";
 
@@ -67,6 +72,7 @@ class BimpContratAuto {
     }
 
     /* Translate dates of contrats in format tms to a human readable's one */
+
     function tmsToDates($contrats) {
         foreach ($contrats as $i => $contrat) {
             if ($contrat['dateFinContrat'] != 'non définie')
@@ -76,6 +82,7 @@ class BimpContratAuto {
     }
 
     /* Used to sort contrats by date of end */
+
     function sortArrayByDate($contrats) {
 
         $dates = array();
@@ -95,7 +102,9 @@ class BimpContratAuto {
 
         $contrats = array();
         foreach ($dolContratObject as $contratObj) {
-            $contrats[$contratObj->id] = array('ref' => $contratObj->ref,
+            $contrats[$contratObj->id] = array(
+                'ref' => $contratObj->getNomUrl(1),
+                'id' => $contratObj->id,
                 'dateDebutContrat' => $contratObj->date_creation,
                 'nbService' => sizeof($contratObj->lines),
                 'statut' => $contratObj->statut);       // 1 -> open ; 0 -> closed
@@ -136,11 +145,14 @@ class BimpContratAuto {
                 $duree = $this->getServiceDuration($line->fk_product);
 
                 /* Définition début et fin de service et contrat */
-                if ($line->statut == 0) {     // si le service est inactif
-                    $date_ouverture = $line->date_ouverture_prevue;
+                if ($line->statut == 0) {  // si le service inactif
+                    $date_ouverture = $line->date_ouverture;
                     $date_fin = $line->date_fin_validite;
-                    if (!$contratIsActive && $endContrat < $date_fin) {    // si contrat inactif
+                    if ($contratIsActive && $date_fin < $endContrat) { // si le contrat est actif et que la date de fin du service est antérieur à la date de fin du contrat
                         $endContrat = $date_fin;
+                    } else if (!$contratIsActive) { // si le contrat n'est pas encore actif
+                        $endContrat = $date_fin; // avancer la date de fin à celle de ce service
+                        $contratIsActive = true;
                     }
                 } else if ($line->statut == 4) {  // si le service actif
                     $date_ouverture = $line->date_ouverture;
@@ -159,6 +171,8 @@ class BimpContratAuto {
                     }
                 }
 
+                $statut = $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'));
+
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit
                     'ref' => $line->ref,
@@ -168,8 +182,11 @@ class BimpContratAuto {
                     'dateFinService' => dol_print_date($date_fin),
                     'prixUnitaire' => $line->price_ht,
                     'prixTotal' => $line->qty * $line->price_ht, // TODO prixTotal dépend de quantité et non pas de durée
-                    'statut' => $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'))); // if 1 => OK if 0 => have to be closed
+                    'statut' => $statut); // if 0 => have to be closed if 1 => inactif if 2 => actif
                 $prixTotalContrat += $line->qty * $line->price_ht;
+
+                if ($statut == 0)
+                    $contrats[$contratObj->id]['statut'] = 2;
             }
 
             $elements = getElementElement('contrat', 'facture', $contratObj->id, null);
@@ -194,9 +211,13 @@ class BimpContratAuto {
      * Set check to 0 if the service has to be closed
      */
     function checkStatut($statut, $timeEndService) {
-        if ($statut == 4 && $timeEndService < dol_time_plus_duree(dol_now(), 1, 'm')) {
-            return 0;   // The service has to be closed
+        if ($statut == 4) {
+            if ($timeEndService < dol_time_plus_duree(dol_now(), 1, 'm'))
+                return 0;   // The service has to be closed
+            return 2;
         }
+        if ($statut == 5)
+            return 3;
         return 1;   // The service is OK
     }
 
@@ -256,6 +277,7 @@ class BimpContratAuto {
             $dateFin = dol_time_plus_duree($nContrat->date_contrat, $service['value'], 'm');   // define the end of the contrat
             $nContrat->addline('', $prod->price, $service['value'], 0.0, 0, 0, $service['id'], 0, $nContrat->date_contrat, $dateFin);  // add service
         }
+        return $nContrat->id;
     }
 
     /**
@@ -310,4 +332,5 @@ class BimpContratAuto {
         }
         return -1;
     }
+
 }

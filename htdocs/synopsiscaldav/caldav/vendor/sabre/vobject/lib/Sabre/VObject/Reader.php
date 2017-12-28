@@ -146,6 +146,7 @@ class Reader {
         }
         else
                 dol_syslog("Pas de probléme de parsage caldav ".print_r($lines,1), 3);
+        die;
 
         $propertyName = strtoupper($matches['name']);
         $propertyValue = preg_replace_callback('#(\\\\(\\\\|N|n))#',function($matches) {

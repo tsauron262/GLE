@@ -150,17 +150,29 @@ class BimpFile extends BimpObject
                 );
             }
         }
-        if (in_array($this->getData('file_type'), array('img'))) {
-            if ($url) {
+        switch ($this->getData('file_type')) {
+            case 'img':
+                if ($url) {
+                    $buttons[] = array(
+                        'label'   => 'Afficher l\'image',
+                        'icon'    => 'eye',
+                        'onclick' => 'loadImageModal($(this), \'' . $url . '\', \'' . $this->getData('file_name') . '\')'
+                    );
+                }
+                break;
 
-                $buttons[] = array(
-                    'label'   => 'Afficher l\'image',
-                    'icon'    => 'eye',
-                    'onclick' => 'loadImageModal($(this), \'' . $url . '\', \'' . $this->getData('file_name') . '\')'
-                );
-            }
+            case 'pdf':
+                if ($url) {
+                    $url .= '&attachment=0';
+                    $buttons[] = array(
+                        'label'   => 'Afficher le document',
+                        'icon'    => 'eye',
+                        'onclick' => 'window.open(\''.$url.'\', \'_blank\');'
+                    );
+                }
+                break;
         }
-        return $buttons;
+            return $buttons;
     }
 
     // Vérifications:

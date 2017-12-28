@@ -423,7 +423,7 @@ class BimpForm
         }
 
         if (is_null($value)) {
-            $value = $object->getCurrentConf('default_value', '');
+            $value = $object->getCurrentConf('input/value', $object->getCurrentConf('default_value', '', false, 'any'), false, 'any');
         }
 
         if (is_null($form)) {
@@ -573,6 +573,10 @@ class BimpForm
 
             case 'search_societe':
                 $options['type'] = $object->getCurrentConf('input/societe_type', '');
+                break;
+
+            case 'check_list':
+                $options['items'] = $object->getCurrentConf('input/items', array(), true, 'array');
                 break;
 
             case 'custom':

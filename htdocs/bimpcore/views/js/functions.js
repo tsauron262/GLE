@@ -53,13 +53,16 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
         ajax_params.success = function (result) {
             bimp_displayAjaxResult(result, $resultContainer, display_result_errors_only);
             if (!result.errors.length) {
-                if ((typeof (result.success) === 'string') && result.success) {
-                    bimp_display_msg(result.success, $resultContainer, 'success');
-                } else if (typeof (successCallBack) === 'string') {
-                    bimp_display_msg(successCallBack, $resultContainer, 'success');
-                }
                 if (typeof (successCallBack) === 'function') {
                     successCallBack(result);
+                } else if (typeof (successCallBack) === 'string') {
+                    if (successCallBack) {
+                        bimp_display_msg(successCallBack, $resultContainer, 'success');
+                    }
+                } else if ((typeof (result.success) === 'string') && result.success) {
+                    if (result.success) {
+                        bimp_display_msg(result.success, $resultContainer, 'success');
+                    }
                 }
             } else {
                 if (typeof (errorCallBack) === 'function') {

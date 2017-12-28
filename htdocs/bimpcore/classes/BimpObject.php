@@ -1817,7 +1817,7 @@ class BimpObject
             }
 
             $add_form_values = $this->config->getCompiledParams('objects/' . $children_object . '/add_form/values', null, false, 'array');
-            if (!is_null($add_form_values)) {
+            if (!is_null($add_form_values) && count($add_form_values)) {
                 $list->setAddFormValues($add_form_values);
             }
 

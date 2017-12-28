@@ -6,7 +6,7 @@ function reloadObjectList(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+//        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -944,6 +944,9 @@ function setListEditInputsEvents($list) {
                         if (!$input.data('list_row_change_event_init')) {
                             $input.change(function () {
                                 checkRowModifications($row);
+                            });
+                            $input.keyup(function () {
+                                $(this).change();
                             });
                             $input.data('list_row_change_event_init', 1);
                         }

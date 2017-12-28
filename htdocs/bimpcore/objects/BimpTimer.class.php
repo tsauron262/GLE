@@ -82,7 +82,7 @@ class BimpTimer extends BimpObject
         $html .= '</div>';
 
         $html .= '<div class="' . $timer_id . '_total_time bimp_timer_total_time bimp_timer_time">';
-        $html .= '<div class="title">Durée totale intervention:</div>';
+        $html .= '<div class="title">Durée totale:</div>';
         $html .= $this->renderTime(BimpTools::getTimeDataFromSeconds($times['total']));
         $html .= '</div>';
 
@@ -98,7 +98,7 @@ class BimpTimer extends BimpObject
         $button .= '<i class="fa fa-history iconLeft"></i>Réinitialiser la durée de la session</button>';
         $buttons[] = $button;
         $button = '<button type="button" class="btn btn-light-default bimp_timer_reset_total_btn" onclick="bimp_timers[\'' . $timer_id . '\'].resetTotal();">';
-        $button .= '<i class="fa fa-history iconLeft"></i>Réinitialiser la durée totale de l\'intervention</button>';
+        $button .= '<i class="fa fa-history iconLeft"></i>Réinitialiser la durée totale</button>';
         $buttons[] = $button;
         $button = '<button type="button" class="btn btn-light-default bimp_timer_cancel_reset_btn"';
         $button .= ' style="display: none" onclick="bimp_timers[\'' . $timer_id . '\'].cancelLastReset();">';
@@ -134,11 +134,11 @@ class BimpTimer extends BimpObject
         $hideHours = false;
         $hideMinutes = false;
 
-        if (!isset($timer['days']) || !$timer['days']) {
+        if (!isset($timer['days']) || !(int) $timer['days']) {
             $hideDays = true;
-            if (!isset($timer['hours']) || !$timer['hours']) {
+            if (!isset($timer['hours']) || !(int) $timer['hours']) {
                 $hideHours = true;
-                if (!isset($timer['minutes']) || !$timer['minutes']) {
+                if (!isset($timer['minutes']) || !(int) $timer['minutes']) {
                     $hideMinutes = true;
                 }
             }
@@ -149,9 +149,10 @@ class BimpTimer extends BimpObject
         $html .= '<span class="bimp_timer_hours bimp_timer_value"' . ($hideHours ? ' style="display: none"' : '') . '>' . $timer['hours'] . '</span>';
         $html .= '<span class="bimp_timer_label bimp_timer_hours_label"' . ($hideHours ? ' style="display: none"' : '') . '>h</span>';
         $html .= '<span class="bimp_timer_minutes bimp_timer_value"' . ($hideMinutes ? ' style="display: none"' : '') . '>' . $timer['minutes'] . '</span>';
-        $html .= '<span class="bimp_timer_label bimp_timer_minutes_label' . ($hideMinutes ? ' style="display: none"' : '') . '">min</span>';
+        $html .= '<span class="bimp_timer_label bimp_timer_minutes_label"' . ($hideMinutes ? ' style="display: none' : '') . '">min</span>';
         $html .= '<span class="bimp_timer_secondes bimp_timer_value">' . $timer['secondes'] . '</span>';
         $html .= '<span class="bimp_timer_label bimp_timer_secondes_label">sec</span>';
+        
         return $html;
     }
 }

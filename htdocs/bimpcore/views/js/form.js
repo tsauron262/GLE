@@ -107,7 +107,7 @@ function saveObjectField(module, object_name, id_object, field, value, $resultCo
         $('body').trigger($.Event('objectChange', {
             module: module,
             object_name: object_name,
-            id_object: result.id_object
+            id_object: id_object
         }));
     });
 }

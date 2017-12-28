@@ -39,7 +39,7 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
     this.startSession = function () {
         var date = new Date();
         timer.session_start = Math.floor(date.getTime() / 1000);
-        saveObjectField('bimpcore', 'BimpTimer', timer.id, 'session_start', timer.session_start, null, null);
+        saveObjectField('bimpcore', 'BimpTimer', timer.id, 'session_start', timer.session_start, null, 'testest');
     };
 
     this.stopSession = function () {
@@ -48,7 +48,7 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
             'time_session': timer.time_current,
             'session_start': 0
         };
-        saveObject('bimpcore', 'BimpTimer', timer.id, fields, null, null);
+        saveObject('bimpcore', 'BimpTimer', timer.id, fields, null, '');
     };
 
     this.save = function () {
@@ -61,13 +61,13 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
             if (!timer.is_pause) {
                 var date = new Date();
                 timer.session_start = Math.floor(date.getTime() / 1000);
-                saveObjectField('bimpcore', 'BimpTimer', timer.id, 'session_start', timer.session_start, null, null);
+                saveObjectField('bimpcore', 'BimpTimer', timer.id, 'session_start', timer.session_start, null, 'Enregistrement effectué');
             } else {
                 var fields = {
                     'time_session': 0,
                     'session_start': 0
                 };
-                saveObject('bimpcore', 'BimpTimer', timer.id, fields, null, null);
+                saveObject('bimpcore', 'BimpTimer', timer.id, fields, null, 'Enregistrement effectué');
             }
             timer.updateTimer();
         });

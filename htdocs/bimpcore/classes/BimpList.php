@@ -14,7 +14,7 @@ class BimpList
     public $checkboxes = false;
     public $search = false;
     public $addobjectRow = false;
-    public $addForm = null;
+    
     public $use_positions = false;
     public $sort_col = null;
     public $sort_way = 'desc';
@@ -26,6 +26,7 @@ class BimpList
     protected $list_filters = array();
     protected $association_filters = array();
     protected $new_values = array();
+    protected $addForm = null;
     protected $items = null;
     protected $rows = null;
     protected $colspan = 0;
@@ -1168,8 +1169,8 @@ class BimpList
                 $this->setConfPath('cols');
                 foreach ($this->cols as $col_name => $col_params) {
                     $hidden = (int) $this->object->getCurrentConf($col_name . '/hidden', 0, false, 'bool');
-                    $min_width = (int) $this->object->getCurrentConf($col_name . '/min_width', 0);
-                    $max_width = (int) $this->object->getCurrentConf($col_name . '/max_width', 0);
+                    $min_width = $this->object->getCurrentConf($col_name . '/min_width', 0);
+                    $max_width = $this->object->getCurrentConf($col_name . '/max_width', 0);
 
                     $html .= '<td style="';
                     if ($hidden) {

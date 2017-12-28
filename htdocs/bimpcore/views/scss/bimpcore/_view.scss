@@ -69,6 +69,10 @@
                 .inputContainer,
                 .inputGroupContainer {
                     margin-right: 10px;
+                    
+                    textarea {
+                        width: 100%;
+                    }
                 }
                 .form-control {
                     width: auto!important;

@@ -31,6 +31,8 @@ class fixeTabsController extends BimpController
             global $main_controller;
             $main_controller = $this;
             
+            BimpCore::displayHeaderFiles();
+            
             foreach ($this->cssFiles as $url) {
                 echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $url . '"/>';
             }

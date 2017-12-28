@@ -8,6 +8,19 @@ class BH_Ticket extends BimpObject
         2 => array('label' => 'Moyen', 'classes' => array('warning'), 'icon' => 'star-half-o'),
         3 => array('label' => 'Haut', 'classes' => array('danger'), 'icon' => 'star'),
     );
+    public static $cover_types = array(
+        1 => 'Couvert',
+        2 => 'Payant',
+        3 => 'Non couvert'
+    );
+    public static $status_list = array(
+        1 => 'En cours',
+        2 => 'En attente client',
+        3 => 'En attente commercial',
+        4 => 'En attente technicien',
+        5 => 'En attente prestataire',
+        6 => 'Clôt'
+    );
 
     public function getPrioritiesArray()
     {
@@ -185,5 +198,45 @@ class BH_Ticket extends BimpObject
     public function displayDureeTotale()
     {
         return BimpTools::displayTimefromSeconds($this->getDureeTotale());
+    }
+
+    public function getNotificationsList($operation)
+    {
+        switch ($operation) {
+            case 'create':
+                return array(
+                    array('label' => 'Commercial du client', 'value' => 'comm'),
+                    array('label' => 'Client', 'value' => 'client'),
+                    array('label' => 'Technicien', 'value' => 'tech')
+                );
+        }
+    }
+    
+    public function renderChronoView()
+    {
+        if (!isset($this->id) || !$this->id) {
+            return BimpRender::renderAlerts('Ticket non enregistré');
+        }
+
+        $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+
+        if (!$timer->find(array(
+                    'obj_module' => $this->module,
+                    'obj_name'   => $this->object_name,
+                    'id_obj'     => (int) $this->id,
+                    'field_name' => 'appels_timer'
+                ))) {
+            if (!$timer->setObject($this, 'appels_timer')) {
+                return BimpRender::renderAlerts('Echec de la création du timer');
+            }
+        }
+
+        if (!isset($timer->id) || !$timer->id) {
+            return BimpRender::renderAlerts('Echec de l\'initialisation du timer');
+        }
+
+        $html = $timer->render('Chrono appels payants');
+
+        return $html;
     }
 }

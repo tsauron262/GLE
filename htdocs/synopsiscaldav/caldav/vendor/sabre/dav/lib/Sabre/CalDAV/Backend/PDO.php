@@ -352,6 +352,8 @@ global $conf;
     public function getCalendarObjects($calendarId) {
         $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, size FROM ' . $this->calendarObjectTableName . ' WHERE '/* lastoccurence > "' . mktime(0, 0, 0, date("m") - 4, date("d"), date("Y")) . '" AND */ . ' calendarid = ?');
         $stmt->execute(array($calendarId));
+        
+        dol_syslog("getCalendarObjects ".$calendarId,3,0,"_caldav2");
 
         $result = array();
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {

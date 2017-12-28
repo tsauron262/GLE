@@ -65,10 +65,16 @@ class BimpPDF extends TCPDF
         if ($display === true) {
             $display = 'I';
         } elseif ($display === false) {
-            $display = 'S';
+            $display = 'F';
         } 
         if ($display == 'F') {// on enregistre sur server
             $output = 'F';
+            
+            $folder = str_replace($nomPure, "", $filename);
+            if(!is_dir($folder))
+                if(!mkdir($folder))
+                    die("Le dossier ".$folder." n'existe pas est ne pe etre créer");
+            
         } else{
             if ($display == 'DS') {//On enregistre et on download
                 $this->Output($filename, 'F');

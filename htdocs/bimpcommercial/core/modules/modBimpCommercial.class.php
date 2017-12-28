@@ -282,7 +282,8 @@ class modBimpCommercial extends DolibarrModules
 	{
 		$sql = array();
 
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommercial', 1, 'propal', 'Proposition loyer', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommercial', 1, 'propal', 'Proposition loyer 2', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimployerdevis', 1, 'propal', 'Proposition loyer', NULL);";
                 
 		//$this->_load_tables('/bimpcommercial/sql/');
 
@@ -302,6 +303,7 @@ class modBimpCommercial extends DolibarrModules
 		$sql = array();
                 
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommercial';";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimployerdevis';";
 
 		return $this->_remove($sql, $options);
 	}

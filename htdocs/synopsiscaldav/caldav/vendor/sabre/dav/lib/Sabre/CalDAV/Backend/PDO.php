@@ -939,7 +939,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => " ", CHR(10) => " ");
-            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "URI");
+            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "UID");
             $ligne = strtr($ligne, $tabR);
             if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
                 $ligne = substr($ligne,0,2000);

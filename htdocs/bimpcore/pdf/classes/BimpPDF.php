@@ -53,19 +53,41 @@ class BimpPDF extends TCPDF
     public function render($filename, $display = true)
     {
         $this->lastPage();
+        
+        
+        if(stripos($filename, ".pdf") === false)
+                $filename .= ".pdf";
+        
+        $tabT = explode("/", $filename);
+        $nomPure = $tabT[count($tabT)-1];
+        
 
         if ($display === true) {
-            $output = 'D';
+            $display = 'I';
         } elseif ($display === false) {
-            $output = 'S';
-        } elseif ($display == 'D') {
-            $output = 'D';
-        } elseif ($display == 'S') {
-            $output = 'S';
-        } elseif ($display == 'F') {
+            $display = 'S';
+        } 
+        if ($display == 'F') {// on enregistre sur server
             $output = 'F';
-        } else {
-            $output = 'I';
+        } else{
+            if ($display == 'DS') {//On enregistre et on download
+                $this->Output($filename, 'F');
+                $display = 'D';
+            }elseif ($display == 'IS') {//On enregistre et on affiche
+                $this->Output($filename, 'F');
+                $display = 'I';
+            }
+            
+            
+            $filename = $nomPure;
+            if ($display == 'D') {//On download
+                $output = 'D';
+            } elseif ($display == 'S') {//je sait pas
+                $output = 'S';
+            } else {               //On affiche
+                $output = 'I';
+                $filename = $nomPure;
+            }
         }
 
         return $this->Output($filename, $output);

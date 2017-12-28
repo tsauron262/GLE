@@ -144,6 +144,8 @@ class Reader {
                 throw new ParseException('Invalid VObject, line ' . ($lineNr+1) . ' did not follow the icalendar/vcard format');
             }
         }
+        else
+                dol_syslog("Pas de probléme de parsage caldav ".print_r($lines,1), 3);
 
         $propertyName = strtoupper($matches['name']);
         $propertyValue = preg_replace_callback('#(\\\\(\\\\|N|n))#',function($matches) {

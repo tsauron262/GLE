@@ -353,7 +353,6 @@ global $conf;
         $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, size FROM ' . $this->calendarObjectTableName . ' WHERE '/* lastoccurence > "' . mktime(0, 0, 0, date("m") - 4, date("d"), date("Y")) . '" AND */ . ' calendarid = ?');
         $stmt->execute(array($calendarId));
         
-        dol_syslog("getCalendarObjects ".$calendarId,3,0,"_caldav2");
 
         $result = array();
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
@@ -940,7 +939,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => " ", CHR(10) => " ");
-            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION");
+            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "URI");
             $ligne = strtr($ligne, $tabR);
             if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
                 $ligne = substr($ligne,0,2000);

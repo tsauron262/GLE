@@ -485,6 +485,12 @@ global $conf;
         //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
         if($row['dtstamp'] != "" && $row['dtstamp'] != "0")
         $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$row['dtstamp'], $calData);
+        else{
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET dtstamp = now() WHERE fk_object = ".$row['id']);
+            $res = $db->query("SELECT dtstamp FROM ".MAIN_DB_PREFIX."synopsiscaldav_event WHERE fk_object = ".$row['id']);
+            $row2 = $db->fetch_object($res);
+            $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$row2['dtstamp'], $calData);
+        }
         date_default_timezone_set("Europe/Paris");
         
 

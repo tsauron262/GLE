@@ -82,12 +82,16 @@ $(document).ready(function () {
 
     var id = sessionStorage.getItem('newContratId');
     if (id !== null) {
-            $('html, body').animate({
-                scrollTop: $('#' + id + 'div').offset().top
-            }, 'slow');
+        $('html, body').animate({
+            scrollTop: $('#' + id + 'div').offset().top
+        }, 'slow');
 
-            $('#' + id + 'div').click();
-            sessionStorage.removeItem('newContratId');
+        $('#' + id + 'div').click();
+        sessionStorage.removeItem('newContratId');
+        $('#' + id + 'div').parent().addClass('isFocused');
+        setTimeout(function () {
+            $('#' + id + 'div').parent().removeClass('isFocused');
+        }, 5000);
     }
 });
 

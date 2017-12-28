@@ -36,9 +36,9 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/PropalPDF.php';
  */
 class pdf_bimployerdevis extends PropalPDF
 {
-    public function __construct() {
+    public function initData() {
         $this->mode = "loyer";
-        parent::__construct();
+        parent::initData();
     }
 }
 

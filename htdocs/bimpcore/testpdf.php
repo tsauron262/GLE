@@ -8,4 +8,6 @@ require_once './pdf/classes/InvoicePDF.php';
 
 $pdf = new InvoicePDF();
 
-$pdf->render('invoice.pdf', true);
+echo $pdf->render(DOL_DATA_ROOT.'/invoice.pdf', 'S');
+
+//echo DOL_DATA_ROOT.'/invoice.pdf';

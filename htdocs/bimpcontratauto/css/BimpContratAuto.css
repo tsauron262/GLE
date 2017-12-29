@@ -10,6 +10,16 @@
     background-color:white;
 }
 
+.miniCustomDiv {
+    border-radius: 3px;
+    margin:5px;
+    padding: 3px;
+    border:solid 1px black;
+    text-align: center;
+    display: inline-block;
+    font-size: 13px;
+}
+
 .customDiv.containerWithBorder {
     display:compact;
     border:solid 2px;
@@ -88,15 +98,6 @@
 
 /* W3 CSS */
 
-.w3-hoverable tr:hover{
-    background-color:#ccc;
-}
-
-.w3-hoverable tr:hover td{
-    border-left: 5px solid #fff;
-    border-right: 5px solid #fff;
-}
-
 .w3-table td,.w3-table th,.w3-table-all td,.w3-table-all th{
     padding-left: 15px;
     padding-right: 15px;
@@ -169,4 +170,21 @@ table {
 
 #errorDate {
     color: red;
+}
+
+.isRed{
+    background-color: #ff6666;
+}
+
+.isGreen{
+    background-color: #b3ffb3;
+}
+
+.isGrey{
+    background-color: #bfbfbf;
+}
+
+.isFocused {
+    box-shadow: 0 0 8px rgba(81, 203, 238, 1);
+    border: 1px solid rgba(81, 203, 238, 1);
 }

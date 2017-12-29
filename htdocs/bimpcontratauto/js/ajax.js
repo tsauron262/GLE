@@ -7,7 +7,7 @@ var contrats = [];
 
 var HEIGHT_DIV_CONTRAT = 30; /* change height of classes ".accordeon" and ".accordeon.item" in css if you change that value */
 
-
+var newContratId;            /* Used to developp the new contrat it is created */
 
 /**
  * Ajax functions
@@ -48,6 +48,9 @@ function newContrat(services, dateDeb) {
         async: false,
         error: function () {
             console.log("Erreur PHP");
+        },
+        success: function (id) {
+            newContratId = id;
         }
     });
 }
@@ -65,8 +68,10 @@ $(document).ready(function () {
     printContrats();
     $('#datepicker').datepicker({minDate: 0});                  // create datepicker and disallow previous dates (befor today)
     $(document).on("click", 'div.clickable.item', function () { // click on existing contrat
+        console.log("Start event");
         var newHeight = getNewContratHeight($(this).parent());
         $(this).parent().css("height", newHeight);
+        console.log("End event");
     });
     $(document).on("click", 'div.divClikable', function () {   // change field of new contrat
         changeValueOfField($(this).parent(), $(this).text());
@@ -74,6 +79,20 @@ $(document).ready(function () {
     $(document).on("click", 'div.buttonCustom', function () {
         valider();
     });
+
+    var id = sessionStorage.getItem('newContratId');
+    if (id !== null) {
+        $('html, body').animate({
+            scrollTop: $('#' + id + 'div').offset().top
+        }, 'slow');
+
+        $('#' + id + 'div').click();
+        sessionStorage.removeItem('newContratId');
+        $('#' + id + 'div').parent().addClass('isFocused');
+        setTimeout(function () {
+            $('#' + id + 'div').parent().removeClass('isFocused');
+        }, 5000);
+    }
 });
 
 
@@ -123,6 +142,7 @@ function valider() {
     if (date !== '') {      // if date is selected
         date /= 1000;
         newContrat(services, date);
+        sessionStorage.setItem('newContratId', newContratId);
         location.reload();
     } else {             // if no date is selected
         $('#datepicker').css('border', '2px solid red');
@@ -158,6 +178,10 @@ function printContrats() {
 /* Add contratcs and services in the array */
 function addContratAndServices(contrat, divIdToAppend, contratId, spaces) {
 
+    baliseDateFin = '<strong>';
+    if (contrat.statut === 2)
+        baliseDateFin = '<strong style="color :red">'
+
     $('<div></div>')
             .attr('id', contratId)
             .attr('class', 'accordeon item')
@@ -166,10 +190,10 @@ function addContratAndServices(contrat, divIdToAppend, contratId, spaces) {
 
     $('#' + contratId)
             .attr('id', contratId + 'item')
-            .append('<div class="clickable item">' +
-                    contrat.ref +
+            .append('<div id="' + contrat.id + 'div' + '"class="clickable item">' +
+                    spaces + contrat.ref +
                     spaces + 'Date de début: <strong>' + contrat.dateDebutContrat + '</strong>' +
-                    spaces + 'Date de fin: <strong>' + contrat.dateFinContrat + '</strong>' +
+                    spaces + 'Date de fin: ' + baliseDateFin + contrat.dateFinContrat + '</strong>' +
                     spaces + 'Nombre de service: <strong>' + contrat.nbService + '</strong>' +
                     spaces + 'Total facturé: <strong>' + contrat.totalFacturer + '</strong> €' +
                     spaces + 'Total payé: <strong>' + contrat.totalPayer + '</strong> €' +
@@ -225,7 +249,11 @@ function printServiceDetails(contratId, service, indService) {
             .appendTo('#' + contratId + 'table');
 
     if (service.statut === 0) {    // if the service have to be closed
-        $('#' + contratId + 'tr' + indService).css("background-color", "#d34a4a");
+        $('#' + contratId + 'tr' + indService).addClass('isRed');  // red
+    } else if (service.statut === 2) {    // if the service is active
+        $('#' + contratId + 'tr' + indService).addClass('isGreen');  // green
+    } else if (service.statut === 3) {    // if the service is active
+        $('#' + contratId + 'tr' + indService).addClass('isGrey');  // green
     }
 
     arrayOfValue.forEach(function (item) {

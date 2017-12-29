@@ -61,52 +61,56 @@ if ($socid > 0) {
     print '<div class="underbanner clearboth"></div>';
 }
 
-if ($user->rights->contrat->lire) {
-    print'<h3> Contrats actifs</h3>';
-    print'<div id="containerForActif" class="customContainer">';
-    print'</div>';
-    print'<h3> Contrats inactifs</h3>';
-    print'<div id="containerForInactif" class="customContainer">';
-    print'</div>';
-    print'<h3>Nouveau contrat</h3>';
-    if ($user->rights->contrat->creer) {
-        $staticbca = new BimpContratAuto($db);
+print '<h3> Contrats actifs '
+        . '<div class="miniCustomDiv">Services inactifs</div>'
+        . '<div class="miniCustomDiv isGreen">Services actifs</div>'
+        . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
+        . '<div class="miniCustomDiv isGrey">Services fermés</div>'
+        . '</h3>';
 
-        $tabService = $staticbca->getTabService($db);
+print '<div id="containerForActif" class="customContainer">';
+print '</div>';
+print '<h3> Contrats inactifs</h3>';
+print '<div id="containerForInactif" class="customContainer">';
+print '</div>';
 
-        print '<h5>Services</h5>';
+print '<h3>Nouveau contrat</h3>';
 
-        print '<div id="invisibleDiv">';
+if ($user->rights->contrat->creer) {
+    $staticbca = new BimpContratAuto($db);
 
-        foreach ($tabService as $service) {
-            print '<div id=' . $service['id'] . ' name="' . $service['name'] . '" class="customDiv containerWithBorder">';
-            print '<div class="customDiv fixDiv">' . $service['name'] . '</div><br>';
-            $isFirst = true;
-            foreach ($service['values'] as $value) {
-                if ($isFirst) {
-                    print '<div class="customDiv divClikable isSelected">' . $value . '</div>';
-                    $isFirst = false;
-                } else {
-                    print '<div class="customDiv divClikable">' . $value . '</div>';
-                }
+    $tabService = $staticbca->getTabService($db);
+
+    print '<h5>Services</h5>';
+
+    print '<div id="invisibleDiv">';
+
+    foreach ($tabService as $service) {
+        print '<div id=' . $service['id'] . ' name="' . $service['name'] . '" class="customDiv containerWithBorder">';
+        print '<div class="customDiv fixDiv">' . $service['name'] . '</div><br>';
+        $isFirst = true;
+        foreach ($service['values'] as $value) {
+            if ($isFirst) {
+                print '<div class="customDiv divClikable isSelected">' . $value . '</div>';
+                $isFirst = false;
+            } else {
+                print '<div class="customDiv divClikable">' . $value . '</div>';
             }
-            print '</div>';
         }
-
-        /* Date début */
-
-        print '<h5>Date de début</h5>';
-
-        print '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
-
-        print '<div class="buttonCustom">Valider</div>';
-
         print '</div>';
-    } else {
-        print "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
     }
+
+    /* Date début */
+
+    print '<h5>Date de début</h5>';
+
+    print '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
+
+    print '<div class="buttonCustom">Valider</div>';
+
+    print '</div>';
 } else {
-    print "<p>Vous n'avez pas les droits requis pour voir les contrats.<p>";
+    print "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
 }
 
 llxFooter();

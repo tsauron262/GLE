@@ -52,11 +52,10 @@ $idRootCateg = GETPOST('categMere');
 if ($idRootCateg > 0) {
     $forceCategorization = GETPOST('forceCat');
     $mode = GETPOST('mode');
-
+    $categRecur = GETPOST('recursive');
     $db->begin();
 
     if ($idRootCateg) {
-
         $res = dolibarr_set_const($db, "BIMP_ROOT_CATEGORY", $idRootCateg, 'chaine', 0, '', $conf->entity);
         if (!$res > 0)
             $error++;
@@ -68,6 +67,11 @@ if ($idRootCateg > 0) {
     }
     if ($mode != $conf->global->BIMP_CATEGORIZATION_MODE) {
         $res = dolibarr_set_const($db, "BIMP_CATEGORIZATION_MODE", $mode, 'chaine', 0, '', $conf->entity);
+        if (!$res > 0)
+            $error++;
+    }
+    if ($categRecur != $conf->global->BIMP_CATEGORIZATION_RECURSIVE) {
+        $res = dolibarr_set_const($db, "BIMP_CATEGORIZATION_RECURSIVE", $categRecur, 'chaine', 0, '', $conf->entity);
         if (!$res > 0)
             $error++;
     }
@@ -198,14 +202,14 @@ print '</tr>' . "\n";
 print '</table>';
 
 if (isset($conf->global->BIMP_FORCE_CATEGORIZATION) and $conf->global->BIMP_FORCE_CATEGORIZATION == 1) {
-    print 'Oui <input type="radio" name="forceCat" value="1" checked>';
+    print '    Oui <input type="radio" name="forceCat" value="1" checked>';
 } else {
-    print 'Oui <input type="radio" name="forceCat" value="1">';
+    print '    Oui <input type="radio" name="forceCat" value="1">';
 }
 if (!isset($conf->global->BIMP_FORCE_CATEGORIZATION) or $conf->global->BIMP_FORCE_CATEGORIZATION != 1) {
-    print 'Non <input type="radio" value="0" name="forceCat" checked><br>';
+    print '    Non <input type="radio" value="0" name="forceCat" checked><br>';
 } else {
-    print 'Non <input type="radio" value="0" name="forceCat"><br>';
+    print '    Non <input type="radio" value="0" name="forceCat"><br>';
 }
 
 print '<br><table class="noborder" width="100%">';
@@ -221,6 +225,21 @@ if (!isset($conf->global->BIMP_CATEGORIZATION_MODE) or $conf->global->BIMP_CATEG
 } else {
     print 'Mode 1  <input type="radio" name="mode" value="1">';
     print '  Mode 2 <input type="radio" value="2" name="mode" checked><br>';
+}
+
+print '<br><table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print "  <td>Autoriser la recherche récursive de catégorie ?</td>\n";
+print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
+print '</tr>' . "\n";
+print '</table>';
+
+if (!isset($conf->global->BIMP_CATEGORIZATION_RECURSIVE) or $conf->global->BIMP_CATEGORIZATION_RECURSIVE == 1) {
+    print '    Oui  <input type="radio" value="1" name="recursive" checked>';
+    print '    Non  <input type="radio" value="0" name="recursive"><br>';
+} else {
+    print '    Oui  <input type="radio" value="1" name="recursive">';
+    print '    Non  <input type="radio" value="0" name="recursive" checked><br>';
 }
 
 print '<br><input type="submit" class="button" value="Valider">';

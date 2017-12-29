@@ -15,7 +15,16 @@ objects:
             dol_object: societe
             id_object: 
                 field_value: id_soc_supplier
-        
+    
+    file: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+            id_object: 
+                field_value: id_file
                 
 fields: 
     id_demande: 
@@ -78,6 +87,33 @@ fields:
         default_value: 0
         sortable: 1
         
+    id_file:
+        label: Fichier
+        type: id_object
+        object: file
+        default_value: 0
+        input: 
+            type: hidden
+
+forms:
+    default: 
+        rows: 
+            - field: id_demande
+            - field: date
+            - field: id_soc_supplier
+            - field: supplier_name
+            - field: description
+            - field: amount
+            - field: paid
+            - field: id_file
+            - label: Fichier
+              input:
+                  name: file
+                  type: file_upload
+                  display_if:
+                      input_name: id_file
+                      show_values: 0,
+
 list:
     checkboxes: 1
     title: Factures fournisseurs
@@ -112,3 +148,4 @@ list:
     edit_btn: 1
     update_btn: 1
     delete_btn: 1
+    

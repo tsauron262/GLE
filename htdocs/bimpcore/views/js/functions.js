@@ -477,7 +477,7 @@ function checkSelectColor($select) {
     if (color) {
         $select.css({'color': '#' + color, 'font-weight': 'bold', 'border-bottom-color': '#' + color});
     } else {
-        $select.css({'color': '#636363', 'font-weight': 'normal', 'border-bottom-color': 'rgba(0, 0, 0, 0.2)'});
+        $select.css({'color': '#3C3C3C', 'font-weight': 'normal', 'border-bottom-color': 'rgba(0, 0, 0, 0.2)'});
     }
 }
 

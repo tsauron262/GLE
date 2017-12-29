@@ -25,7 +25,6 @@ class InvoicePDF
     {
         $header = $this->pdf->renderTemplate($this->tpl_dir . '/header.html', $this->header_vars);
         $this->pdf->createHeader($header);
-        
         $footer = $this->pdf->renderTemplate($this->tpl_dir . '/footer.html', $this->footer_vars);
         $this->pdf->createFooter($footer);
 

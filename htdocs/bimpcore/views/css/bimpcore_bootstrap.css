@@ -7578,7 +7578,7 @@ output {
   padding-top: 7px;
   font-size: 13px;
   line-height: 1.4;
-  color: #636363;
+  color: #3c3c3c;
 }
 
 /* line 114, ../scss/bootstrap/_forms.scss */
@@ -7589,7 +7589,7 @@ output {
   padding: 6px 12px;
   font-size: 13px;
   line-height: 1.4;
-  color: #636363;
+  color: #3c3c3c;
   background-color: white;
   background-image: none;
   border: 1px solid #cccccc;
@@ -9450,7 +9450,7 @@ tbody.collapse.in {
   font-size: 13px;
   font-weight: normal;
   line-height: 1;
-  color: #636363;
+  color: #3c3c3c;
   text-align: center;
   background-color: whitesmoke;
   border: 1px solid #cccccc;
@@ -13860,7 +13860,7 @@ i.iconRight {
 /* line 1, ../scss/bimpcore/_form.scss */
 input, select {
   background-color: #fff;
-  color: #636363;
+  color: #3C3C3C;
   -webkit-transition: all 0.5s ease;
   -o-transition: all 0.5s ease;
   transition: all 0.5s ease;

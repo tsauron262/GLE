@@ -231,6 +231,9 @@ function updateObjectFromRow(list_id, id_object, $button) {
 
     bimp_json_ajax('saveObject', data, null, function (result) {
         $button.removeClass('disabled');
+        if (typeof (result.success) !== 'undefined') {
+            bimp_show_msg(result.success, 'success');
+        }
         $('body').trigger($.Event('objectChange', {
             module: $list.data('module_name'),
             object_name: object_name,
@@ -298,6 +301,9 @@ function addObjectFromList(list_id, $button) {
         if (!result.errors.length) {
             resetListAddObjectRow(list_id);
             $button.removeClass('disabled');
+            if (typeof (result.success) !== 'undefined') {
+                bimp_show_msg(result.success, 'success');
+            }
             $('body').trigger($.Event('objectChange', {
                 module: $list.data('module_name'),
                 object_name: $list.data('object_name'),

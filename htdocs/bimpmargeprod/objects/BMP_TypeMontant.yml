@@ -78,6 +78,13 @@ fields:
         default_value: 1
         sortable: 1
         search: 1
+        
+    has_details:
+        label: Détails
+        type: bool
+        default_value: 0
+        sortable: 1
+        search: 1
                 
 list:
     checkboxes: 1
@@ -112,4 +119,7 @@ list:
             edit: 1
         editable: 
             field: editable
+            edit: 1
+        details: 
+            field: has_details
             edit: 1

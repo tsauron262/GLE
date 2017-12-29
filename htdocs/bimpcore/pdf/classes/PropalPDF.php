@@ -6,51 +6,6 @@ class PropalPDF extends BimpModelPDF {
 
     public $mode = "normal";
 
-    function renderTable($arrayHead, $arrayData) {
-        $arrayUtil = array();
-        foreach ($arrayHead as $clef => $label) {
-            foreach ($arrayData as $ligne) {
-                $val = $ligne[$clef];
-                if (is_array($val))
-                    $val = $val[0];
-
-                if ($val !== null && $val !== "" && $val !== "0")
-                    $arrayUtil[$clef] = $label;
-            }
-        }
-
-        $html = "<table><tr style='background-color: green;'>";
-        foreach ($arrayUtil as $valT) {
-            if (is_array($valT))
-                $label = $valT[0];
-            else
-                $label = $valT;
-            $html .= "<th>" . $label . "</th>";
-        }
-        $html .= "</tr>";
-
-        foreach ($arrayData as $ligne) {
-            $html .= "<tr>";
-            foreach ($arrayUtil as $clef => $valT) {
-                $html .= "<td>";
-                if (isset($ligne[$clef])) {
-                    $unit = "";
-                    $val = $ligne[$clef];
-                    if (is_array($valT) && isset($valT[1]))
-                        $unit = " " . $valT[1];
-                    if ($unit == " €" || $unit == " %")
-                        $val = price($val);
-                    $html .= $val . $unit;
-                }
-                $html .= "</td>";
-            }
-            $html .= "</tr>";
-        }
-        $html .= "</table>";
-
-        return $html;
-    }
-
     function initData() {
         $this->typeObject = "propal";
         $this->prefName = "loyer_";
@@ -65,7 +20,6 @@ class PropalPDF extends BimpModelPDF {
         $arrayTot = array();
 
         $this->object->fetch_lines();
-//            $line = new PropaleLigne;
         foreach ($this->object->lines as $line) {
             $arrayData[] = array("desc" => $line->desc,
                 "prix" => $line->subprice,

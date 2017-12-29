@@ -65,7 +65,7 @@ print '<h3> Contrats actifs '
         . '<div class="miniCustomDiv">Services inactifs</div>'
         . '<div class="miniCustomDiv isGreen">Services actifs</div>'
         . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
-        . '<div class="miniCustomDiv isGrey">Services fermé</div>'
+        . '<div class="miniCustomDiv isGrey">Services fermés</div>'
         . '</h3>';
 
 print '<div id="containerForActif" class="customContainer">';

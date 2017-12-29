@@ -443,6 +443,11 @@ class Facture extends CommonInvoice
 			$resql=$this->db->query($sql);
 			if (! $resql) $error++;
 
+			if (! empty($this->linkedObjectsIds) && empty($this->linked_objects))	// To use new linkedObjectsIds instead of old linked_objects
+			{
+				$this->linked_objects = $this->linkedObjectsIds;	// TODO Replace linked_objects with linkedObjectsIds
+			}
+
 			// Add object linked
 			if (! $error && $this->id && is_array($this->linked_objects) && ! empty($this->linked_objects))
 			{
@@ -455,7 +460,7 @@ class Facture extends CommonInvoice
 				            $ret = $this->add_object_linked($origin, $origin_id);
 				            if (! $ret)
 				            {
-				                dol_print_error($this->db);
+				                $this->error=$this->db->lasterror();
 				                $error++;
 				            }
 				        }
@@ -466,7 +471,7 @@ class Facture extends CommonInvoice
     					$ret = $this->add_object_linked($origin, $origin_id);
     					if (! $ret)
     					{
-    						dol_print_error($this->db);
+    						$this->error=$this->db->lasterror();
     						$error++;
     					}
 				    }
@@ -2051,6 +2056,10 @@ class Facture extends CommonInvoice
 		$error=0;
 		dol_syslog(get_class($this).'::validate user='.$user->id.', force_number='.$force_number.', idwarehouse='.$idwarehouse);
 
+		// Force to have object complete for checks
+		$this->fetch_thirdparty();
+		$this->fetch_lines();
+
 		// Check parameters
 		if (! $this->brouillon)
 		{
@@ -2067,9 +2076,6 @@ class Facture extends CommonInvoice
 		}
 
 		$this->db->begin();
-
-		$this->fetch_thirdparty();
-		$this->fetch_lines();
 
 		// Check parameters
 		if ($this->type == self::TYPE_REPLACEMENT)		// si facture de remplacement
@@ -2637,6 +2643,11 @@ class Facture extends CommonInvoice
 				$this->db->rollback();
 				return -2;
 			}
+		}
+		else
+		{
+			dol_syslog(get_class($this)."::addline status of order must be Draft to allow use of ->addline()", LOG_ERR);
+			return -3;
 		}
 	}
 

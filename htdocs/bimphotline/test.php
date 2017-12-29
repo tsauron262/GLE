@@ -1,20 +1,15 @@
 <?php
+
 require_once '../main.inc.php';
 
 ini_set('display_errors', 1);
-require_once __DIR__.'/classes/BimpDb.php';
-require_once __DIR__.'/classes/BimpObject.php';
-require_once __DIR__.'/classes/BDS_Tools.php';
-require_once __DIR__.'/classes/TestObject.php';
 
-$jsFiles = array(
-    '/bimpdatasync/views/js/functions.js',
-    '/bimpdatasync/views/js/ajax.js'
-);
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-llxHeader('', '', '', false, false, false, $jsFiles);
+$test = BimpObject::getInstance('bimphotline', 'test');
 
-echo '<link type="text/css" rel="stylesheet" href="./views/css/font-awesome.css"/>';
-echo '<link type="text/css" rel="stylesheet" href="./views/css/styles.css"/>';
+$instance = $test->getConf('fields/field1/object', array(), true, 'object');
 
-echo TestObject::renderFormAndList();
+echo '<pre>';
+print_r($instance);
+exit;

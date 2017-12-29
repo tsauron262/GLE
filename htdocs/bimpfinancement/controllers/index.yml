@@ -1,0 +1,17 @@
+bootstrap: 1
+title: Bimp Financement
+
+objects:
+    demandes:
+        instance:
+            bimp_object: BF_Demande
+    
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Demandes
+            sections:
+                - type: list
+                  list: 
+                      object: demandes

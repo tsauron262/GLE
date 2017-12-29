@@ -1,0 +1,76 @@
+table: string
+primary: string #fac - déf: id
+controller: string #fac
+
+parent_id_property: string #fac
+parent_object: string #fac - object_name OR instance_def
+
+labels: 
+    name: string
+    name_plur: string - fac (name + s par déf)
+    isFemale: bool # fac - déf: 0
+
+objects:
+    nom_objet:
+        relation: string #hasOne / hasMany
+        delete: bool # fac - def: 0
+        instance: #instance_def
+                
+associations:
+    nom_asso:
+        object: #object_name OR instance_def
+                
+fields: 
+    nom_champ:
+        label: string
+        type: string (int, 
+        required: bool #fac - def: 0
+        default_value: #fac
+        input: #fac
+            type: string
+        display: #fac
+            type: string    
+        search: bool OR Search_def
+        sortable: bool
+        sort_options: sort_options_def
+
+views:
+    nom_vue:
+        title: string
+        edit_btn: bool
+        delete_btn: bool
+        rows:
+            - cols: 
+                  - type: 
+                    col_lg: 0 à 12
+                    col_md: 0 à 12
+                    col_sm: 0 à 12
+                    col_xs: 0 à 12
+lists:
+    nom_list:
+        checkboxes: bool 
+        title: 
+        icon: 
+        bulk_actions: 
+        sort_col: 
+        sort_way: 
+        n: 
+        cols:
+            col_name:
+                label: 
+                value: 
+                field: 
+                edit: 
+                display: 
+        add_btn: 
+        edit_btn: 
+        update_btn: 
+        delete_btn: 
+        view_btn: 
+            
+forms:
+    nom_form:
+        - field:
+        - field:
+          label:
+          input:

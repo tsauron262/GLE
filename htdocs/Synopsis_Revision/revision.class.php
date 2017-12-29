@@ -135,7 +135,6 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         
         $newId = $object->createFromClone($socid, $hookmanager);
         if ($newId > 0) {
-            echo $oldRef; //.print_r($propal, true);
             self::setLienRevision($oldRef, $oldId, $newId);
             $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE propalid = " . $oldId);
             if ($db->num_rows($result) > 0) {

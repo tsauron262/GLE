@@ -1,0 +1,37 @@
+bootstrap: 1
+objects:
+    equipment:
+        instance: 
+            bimp_object: Equipment
+            id_object:
+                request: id
+
+sections:
+    - type: tabs
+      tabs:
+          default:
+              label: Fiche
+              url_params:
+                  id: 
+                      request: id
+              sections:
+                  - type: view
+                    view:
+                        panel: 1
+                        object: equipment
+    - type: buttons
+      buttons:
+          - label: Accueil Hotline
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary
+          - label: Liste des équipements
+            url:
+                controller: index
+                url_params:
+                    tab: equipments
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

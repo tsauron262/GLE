@@ -51,8 +51,8 @@ if ($res>0)
                                 ".MAIN_DB_PREFIX."synopsisdemandeintervdet as dt WHERE dt.fk_synopsisdemandeinterv=d.rowid AND fk_commande IN (".join(',',$arrGrpCom)."))
                        OR id in 
                        (SELECT fk_typeinterv FROM 
-                            ".MAIN_DB_PREFIX."Synopsis_fichinter as f, 
-                            ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft WHERE ft.fk_fichinter=f.rowid AND fk_commande IN (".join(',',$arrGrpCom)."))";
+                            ".MAIN_DB_PREFIX."synopsis_fichinter as f, 
+                            ".MAIN_DB_PREFIX."synopsis_fichinterdet as ft WHERE ft.fk_fichinter=f.rowid AND fk_commande IN (".join(',',$arrGrpCom)."))";
       $sql = $db->query($requete);
       $arrLabel = array();
       while ($res = $db->fetch_object($sql))
@@ -84,9 +84,9 @@ if ($res>0)
                        ft.duree,
                        ft.total_ht,
                        t.label
-                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
+                  FROM ".MAIN_DB_PREFIX."synopsis_fichinter as f,
                        ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t,
-                       ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft
+                       ".MAIN_DB_PREFIX."synopsis_fichinterdet as ft
                  WHERE f.fk_commande IN (".join(',',$arrGrpCom).")
                    AND ft.fk_fichinter = f.rowid
                    AND ft.fk_typeinterv = t.id ";

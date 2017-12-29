@@ -311,8 +311,8 @@ if ($resql) {
 //Realise en euros et en temps
             $requete = "SELECT SUM(det.duree) as durTot ,
                    SUM(det.total_ht) as totHT
-              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter as inter,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as det,
+              FROM " . MAIN_DB_PREFIX . "synopsis_fichinter as inter,
+                   " . MAIN_DB_PREFIX . "synopsis_fichinterdet as det,
                    " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as t
              WHERE t.id=det.fk_typeinterv
                AND det.fk_fichinter = inter.rowid

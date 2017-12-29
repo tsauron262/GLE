@@ -125,7 +125,7 @@ class pdf_crabe extends ModelePDFFactures
 		}
 		else
 		{
-			$this->posxtva=112;
+			$this->posxtva=110;
 			$this->posxup=126;
 			$this->posxqty=145;
 		}
@@ -496,8 +496,8 @@ class pdf_crabe extends ModelePDFFactures
 					if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN))
 					{
 						$vat_rate = pdf_getlinevatrate($object, $i, $outputlangs, $hidedetails);
-						$pdf->SetXY($this->posxtva, $curY);
-						$pdf->MultiCell($this->posxup-$this->posxtva-0.8, 3, $vat_rate, 0, 'R');
+						$pdf->SetXY($this->posxtva-5, $curY);
+						$pdf->MultiCell($this->posxup-$this->posxtva+4, 3, $vat_rate, 0, 'R');
 					}
 
 					// Unit price before discount
@@ -1691,7 +1691,7 @@ class pdf_crabe extends ModelePDFFactures
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFont('','', $default_font_size - 2);
 			$pdf->SetXY($posx,$posy-5);
-			$pdf->MultiCell(66,5, $outputlangs->transnoentities("BillFrom").":", 0, 'L');
+			//$pdf->MultiCell(66,5, $outputlangs->transnoentities("BillFrom").":", 0, 'L');
 			$pdf->SetXY($posx,$posy);
 			$pdf->SetFillColor(230,230,230);
 			$pdf->MultiCell($widthrecbox, $hautcadre, "", 0, 'R', 1);
@@ -1742,7 +1742,7 @@ class pdf_crabe extends ModelePDFFactures
 			$pdf->SetTextColor(0,0,0);
 			$pdf->SetFont('','', $default_font_size - 2);
 			$pdf->SetXY($posx+2,$posy-5);
-			$pdf->MultiCell($widthrecbox, 5, $outputlangs->transnoentities("BillTo").":",0,'L');
+			//$pdf->MultiCell($widthrecbox, 5, $outputlangs->transnoentities("BillTo").":",0,'L');
 			$pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
 
 			// Show recipient name

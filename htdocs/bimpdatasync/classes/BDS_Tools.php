@@ -58,7 +58,7 @@ class BDS_Tools
         return $str;
     }
 
-    public static function getChildrenCategoriesIds(BimpDb $db, $id_parent)
+    public static function getChildrenCategoriesIds(BDSDb $db, $id_parent)
     {
         $sql = 'SELECT `rowid` as id FROM ' . MAIN_DB_PREFIX . 'categorie ';
         $sql .= 'WHERE `fk_parent` = ' . (int) $id_parent . ' AND `type` = 0';
@@ -73,7 +73,7 @@ class BDS_Tools
         return $cats;
     }
 
-    public static function getCategorieParent(BimpDb $db, $id_categorie)
+    public static function getCategorieParent(BDSDb $db, $id_categorie)
     {
         $cat_id_parent = $db->getValue('categorie', 'fk_parent', '`rowid` = ' . (int) $id_categorie);
         if (is_null($cat_id_parent)) {
@@ -82,7 +82,7 @@ class BDS_Tools
         return $cat_id_parent;
     }
 
-    public static function isCategorieChildOf(BimpDb $db, $id_categorie, $id_parent, $can_be_parent = true)
+    public static function isCategorieChildOf(BDSDb $db, $id_categorie, $id_parent, $can_be_parent = true)
     {
         if ((int) $id_categorie === (int) $id_parent) {
             if ($can_be_parent) {
@@ -245,7 +245,7 @@ class BDS_Tools
         return '';
     }
 
-    public static function makeObjectName(BimpDb $bdb, $object_name, $id_object, $include_id = true)
+    public static function makeObjectName(BDSDb $bdb, $object_name, $id_object, $include_id = true)
     {
         if (is_null($object_name) || !$object_name) {
             return '';

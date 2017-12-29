@@ -76,7 +76,7 @@ class modSynopsisFicheinter extends DolibarrModules {
         $this->dirs = array();
 
         // Config pages
-        $this->config_page_url = array("Synopsis_fichinter.php");
+        $this->config_page_url = array("synopsis_fichinter.php");
 
         // Dependances
         $this->depends = array("modSociete");
@@ -410,7 +410,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             "INSERT IGNORE INTO " . MAIN_DB_PREFIX . "document_model (nom, type) VALUES('" . $this->const[0][2] . "','ficheinter')",
         );
 
-//        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter` (
+//        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsis_fichinter` (
 //  `rowid` int(11) NOT NULL auto_increment,
 //  `fk_soc` int(11) NOT NULL,
 //  `fk_projet` int(11) default '0',
@@ -439,7 +439,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 //  KEY `idx_fichinter_fk_soc` (`fk_soc`)
 //) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 //
-//        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` (
+//        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsis_fichinterdet` (
 //  `rowid` int(11) NOT NULL auto_increment,
 //  `fk_fichinter` int(11) default NULL,
 //  `date` date default NULL,
@@ -615,14 +615,14 @@ class modSynopsisFicheinter extends DolibarrModules {
   `prix_ht` double default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
-        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."Synopsis_fichinterdet;";
-        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."Synopsis_fichinter;";
-        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."Synopsis_fichinter;";
-        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."Synopsis_fichinterdet;";
+        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."synopsis_fichinterdet;";
+        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."synopsis_fichinter;";
+        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."synopsis_fichinter;";
+        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."synopsis_fichinterdet;";
         $sql[] = "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
-". MAIN_DB_PREFIX ."Synopsis_fichinter as (SELECT f.`rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `fk_commande`, `ref`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, `total_ht`, `total_tva`, `total_ttc`, `natureInter`, `entity` 
+". MAIN_DB_PREFIX ."synopsis_fichinter as (SELECT f.`rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `fk_commande`, `ref`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, `total_ht`, `total_tva`, `total_ttc`, `natureInter`, `entity` 
 FROM ".MAIN_DB_PREFIX."fichinter f left join ".MAIN_DB_PREFIX."synopsisfichinter sf on f.rowid = sf.rowid);";
-        $sql[] = "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW ".MAIN_DB_PREFIX."Synopsis_fichinterdet as (SELECT f.`rowid`, `fk_fichinter`, `date`, `description`, `duree`, `rang`, `fk_typeinterv`, `fk_depProduct`, `tx_tva`, `pu_ht`, `qte`, `total_ht`, `total_tva`, `total_ttc`, `fk_contratdet`, `fk_commandedet`, `isForfait` 
+        $sql[] = "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW ".MAIN_DB_PREFIX."synopsis_fichinterdet as (SELECT f.`rowid`, `fk_fichinter`, `date`, `description`, `duree`, `rang`, `fk_typeinterv`, `fk_depProduct`, `tx_tva`, `pu_ht`, `qte`, `total_ht`, `total_tva`, `total_ttc`, `fk_contratdet`, `fk_commandedet`, `isForfait` 
 FROM ". MAIN_DB_PREFIX ."fichinterdet f  left join ".MAIN_DB_PREFIX."synopsisfichinterdet sf on f.rowid = sf.rowid);";
         
 //        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
@@ -633,7 +633,7 @@ FROM ". MAIN_DB_PREFIX ."fichinterdet f  left join ".MAIN_DB_PREFIX."synopsisfic
 //        
 //        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
 //        
-//        $sql[] = "CREATE VIEW ". MAIN_DB_PREFIX ."fichinter as (SELECT `rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `ref`, 1 as `entity`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, '' as `extraparams` FROM `". MAIN_DB_PREFIX ."Synopsis_fichinter` WHERE 1);";
+//        $sql[] = "CREATE VIEW ". MAIN_DB_PREFIX ."fichinter as (SELECT `rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `ref`, 1 as `entity`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, '' as `extraparams` FROM `". MAIN_DB_PREFIX ."synopsis_fichinter` WHERE 1);";
 
         return $this->_init($sql);
     }

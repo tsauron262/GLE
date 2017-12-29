@@ -202,7 +202,7 @@ if ($_REQUEST["id"] > 0) {
             $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
         }
     }
-    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter WHERE rowid =" . $fichinter->id);
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsis_fichinter WHERE rowid =" . $fichinter->id);
     $resultG = $db->fetch_object($sql);
 
 
@@ -339,7 +339,7 @@ if ($_REQUEST["id"] > 0) {
         require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
         $htmlStr = '';
 //        if ($fichinter->fk_contrat > 0) {
-//            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+//            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
 //            $sql = $db->query($requete);
 //            $arrTmp = array();
 //            while ($res = $db->fetch_object($sql)) {
@@ -492,7 +492,7 @@ $htmlStr .= '<tr>
 require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
 require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
 //if ($fichinter->fk_contrat > 0) {
-//    $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+//    $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
 //    $sql = $db->query($requete);
 //    $arrTmp = array();
 //    while ($res = $db->fetch_object($sql)) {
@@ -594,7 +594,7 @@ function saveForm() {
     for ($i = 1; $i < 5; $i++) {
         $_POST['date' . $i] = traiteHeure($_POST['date' . $i]);
     }
-//    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
+//    $req = "SELECT * FROM ".MAIN_DB_PREFIX."synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);
 //    $oldData = mysql_fetch_object($req);
     $req = "UPDATE `" . MAIN_DB_PREFIX . "fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`note_private` =  '" . $_POST['descP'] . "',`description` =  '" . $_POST['desc'] . "'
@@ -718,10 +718,10 @@ function prestations($rowid = null, $desc = null, $type = null, $duree = null) {
         $sql = $db->query($req);
     } else {//Select
         if ($rowid)
-            $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . " AND rowid =" . $rowid;
-//        $req = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE rowid = (SELECT min(rowid) FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . ")";
+            $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . " AND rowid =" . $rowid;
+//        $req = "SELECT * FROM `".MAIN_DB_PREFIX."synopsis_fichinterdet` WHERE rowid = (SELECT min(rowid) FROM `".MAIN_DB_PREFIX."synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . ")";
         else
-            $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id;
+            $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id;
         $sql = $db->query($req);
         return mysqlToArray($sql, $db);
     }

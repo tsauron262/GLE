@@ -1,0 +1,86 @@
+table: bmp_event_coprod_def_part
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: part co-producteur par défaut
+    name_plur: parts co-producteur par défaut
+    is_female: 1
+    
+objects: 
+    category: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BMP_CategorieMontant
+            id_object: 
+                field_value: id_category_montant
+                
+    event_coprod:
+        relation: hasOne
+        delete: 0
+        intance: 
+            bimp_object: BMP_EventCoProd
+            id_object:
+                field_value: id_event_coprod
+                
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+    
+    id_category_montant: 
+        label: Catégorie
+        type: id_object
+        object: category
+        values: 
+            callback:
+                method: getCategories
+                object: category
+                
+        display: 
+            type: nom
+        sortable: 1
+        search: 1
+        
+    id_event_coprod:
+        label: Co-producteur
+        type: id_object
+        object: event_coprod
+        values: 
+            callback:
+                method: getCoProds
+                object: 
+                    callback: getParentInstance
+        sortable: 1
+        search: 1
+        
+    part: 
+        label: Part
+        type: percent
+        sortable: 1
+        search: 1
+        
+list:
+    title: Parts Co-producteurs par défaut
+    checkboxes: 1
+    bulk_actions:
+        - label: supprimer les lignes sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this))
+    sort_col: id
+    sort_way: desc
+    n: 25
+    add_object_row: 1
+    update_btn: 1
+    delete_btn: 1
+    cols: 
+        category:
+            field: id_category_montant
+        coprod: 
+            field: id_event_coprod
+        part:
+            field: part
+            edit: 1

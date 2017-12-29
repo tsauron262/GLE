@@ -266,7 +266,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
                 //le prod
-                $pdf->SetXY('121', '71.4');
+                $pdf->SetXY('121', '71.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $chrono2->description, 0, 'L');
 
@@ -276,16 +276,25 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('137', '79.4');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1064]->value, 0, 'L');
 
-                $pdf->SetXY('145', '84');
+                
+                //Date achat
+                $pdf->SetXY('147', '83.7');
+                $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1014]->value, 0, 'L');
+                
+                //Fin de ga
+                $pdf->SetXY('147', '87.7');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1015]->value, 0, 'L');
 
-                $pdf->SetXY('131.5', '88.2');
+                //etat
+                $pdf->SetXY(130, 91.6);
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1040]->valueStr . "    " . $chrono->description, 0, 'L');
 
-                $pdf->SetXY('143', '104.5');
+                //accessoire
+                $pdf->SetXY('142.8', '104.8');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1041]->valueStr, 0, 'L');
 
-                $pdf->SetXY(130, 109);
+                //Systeme
+                $pdf->SetXY(126, 108.5);
                 $pdf->MultiCell(80, 6, $chrono2->valuesPlus[1067]->valueStr, 0, '');
 
                 //symptom et sauv
@@ -312,15 +321,20 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                     $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
                 } else {
                     $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
-                    $cgv.="-Les frais de prise en charge diagnostic de 45€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+                    $cgv.="-Les frais de prise en charge diagnostic de 49€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
                 }
 //                $pdf->SetX(6);
 //                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
 //                $pdf->SetX(6);
                 $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 0.75€ par jour.\n\n";
+                
+                $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas 
+été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n
+-BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: 
+en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 
-                if ($chrono->valuesPlus[1068]->value == 1) {
-                    $pdf->SetXY('62', '115');
+                if ($chrono->valuesPlus[1068]->value == 1 && stripos($chrono2->description, "Iphone") === false) {
+                    $pdf->SetXY('62', '113');
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
                     $pdf->SetTextColor(255, 102, 0);
                     $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
@@ -330,8 +344,8 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 $pdf->SetTextColor("black");
 //                $pdf->SetXY('6', '245');
-                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $pdf->SetXY('7', '197');
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 7);
+                $pdf->SetXY('7', '195');
                 $pdf->MultiCell(145, 6, $cgv, 0, 'L');
 
 //                //info pour prise en charge

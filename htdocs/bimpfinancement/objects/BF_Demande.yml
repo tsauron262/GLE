@@ -1,0 +1,534 @@
+table: bf_demande
+controller: demande
+
+labels:
+    name: demande de financement
+    name_plur: demandes de financement
+    is_female: 1
+
+objects:
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object: 
+                field_value: id_client
+                
+    client_contact: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: contact
+            id_object:
+                field_value: id_client_contact
+                
+    supplier:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object:
+                field_value: id_supplier
+                
+    supplier_contact:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: contact
+            id_object:
+                field_value: id_supplier_contact
+                
+    comments:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BF_Comment
+            
+    refinanceurs:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_Refinanceur
+            
+    rents:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BF_Rent
+            
+    rents_except: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_RentExcept
+            
+    frais_divers:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_FraisDivers
+            
+    frais_fournisseur:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_FraisFournisseur
+
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpfinancement
+                parent_object_name: demande
+                
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpfinancement
+                    parent_object_name: demande
+            
+#associations:
+#    files: 
+#        object: file
+#        label: Fichiers joints
+#        add_form:
+#            name: upload
+#            values: 
+#                array:
+#                    fields: 
+#                        files_dir: bimpfinancement/demande
+
+fields:
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        input:
+            type: search_societe
+            societe_type: customer
+            help: Entrez le nom ou la référence pour rechercher un client
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: societe_card
+        sortable: 1
+        search: 1
+        sort_options:
+            by_ref: 
+                label: référence
+                value:
+                    join:
+                        table: societe
+                        field_value: ref
+                        field_on: rowid
+    
+    id_client_contact:
+        label: Contact client
+        type: id_object
+        object: client_contact
+        depends_on: id_client
+        input: 
+            type: select
+            options: 
+                array: client_contacts
+            display_if:
+                input_name: id_client
+                hide_values:
+                    array: 0,''
+        display: 
+            default: 
+                type: nom_url
+            card: 
+                type: card
+                card: contact_card
+                    
+    duration:
+        label: Durée
+        type: int
+        values: 
+            array: durations
+        search: 1
+        
+    periodicity: 
+        label: Périodicité
+        type: int
+        values: 
+            array: periodicities
+        search: 1
+        
+    montant_materiels:
+        label: Montant matériels
+        type: money
+        default_value: 0
+        
+    montant_services:
+        label: Montant services
+        type: money
+        default_value: 0
+                
+    montant_logiciels:
+        label: Montant logiciels
+        type: money
+        input: 
+        default_value: 0
+    
+    commission_commerciale:
+        label: Commission commerciale
+        type: percent
+        default_value: 0
+                
+    commission_financiere:
+        label: Commission financière
+        type: percent
+        default_value: 0
+                
+    vr: 
+        label: VR demandée
+        type: money
+        default_value: 0
+                
+    mode_calcul:
+        label: Mode de calcul
+        type: int
+        default_value: 2
+        values: 
+            array: calc_modes
+                
+    status:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        search: 1
+        sortable: 1
+                
+    accepted:
+        label: Acceptation définitive de la banque
+        type: bool
+        input:
+            type: toggle
+        display: 
+            type: yes_no
+                
+    insurance:
+        label: Assurance
+        type: bool
+        default_value: 0
+        search: 1
+        sortable: 1
+        
+    annexe: 
+        label: Annexes
+        type: int
+        values: 
+            array: annexes
+        default_value: 0
+        sortable: 1
+        search: 1
+        
+    ca_prevu: 
+        label: CA prévu
+        type: money
+        required: 0
+        
+    pba_prevu:
+        label: PBA prévu
+        type: money
+        required: 0
+        
+    date_livraison:
+        label: Date de livraison
+        type: date
+        required: 0
+        search:
+            type: date_range
+            
+    date_loyer:
+        label: Date de mise en loyer
+        type: date
+        required: 0
+        search:
+            type: date_range
+        
+    id_supplier:
+        label: Apporteur
+        type: id_object
+        object: supplier
+        input: 
+            type: search_societe
+            help: Entrez le nom ou la référence pour rechercher un tiers
+        display:
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: societe_card
+        
+    id_supplier_contact:
+        label: Contact apporteur
+        type: id_object
+        object: supplier_contact
+        input: 
+            type: select
+            options:
+                array: supplier_contacts
+            display_if: 
+                input_name: id_supplier
+                hide_values: 0,''
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: contact_card
+        depends_on: id_supplier
+        
+lists:
+    default:
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les demandes de fincancement sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_col: date_create
+        sort_way: desc
+        n: 10
+        add_form: default
+        delete_btn: 1
+        view_btn: 1
+        cols:
+            id:
+                label: ID
+                field: id
+            date_create:
+                label: Créée le
+                field: date_create
+            client: 
+                label: Client
+                field: id_client
+                display: nom_url
+            duration:
+                label: Durée
+                field: duration
+            periodicity:
+                label: Périodicité
+                field: periodicity
+            vr:
+                label: VR demandée
+                field: vr
+            status:
+                label: Etat
+                field: status
+                
+views:
+    demande: 
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows: 
+                      - cols: 
+                          - type: object_common_fields
+                            col_lg: 12                            
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                caption:
+                                    label: Contrat
+                                    icon: file-text
+                                rows:
+                                  - field: status
+                                    edit: 1
+                                  - field: accepted
+                                    edit: 1
+                                  - field: annexe
+                                    edit: 1
+                                  - field: date_livraison
+                                    edit: 1
+                                  - field: date_loyer
+                                    edit: 1
+                          
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      caption:
+                          label: Options
+                          icon: check-square-o
+                      rows:
+                        - field: duration
+                          edit: 1
+                        - field: periodicity
+                          edit: 1
+                        - field: insurance
+                          edit: 1
+                        - field: mode_calcul
+                          edit: 1 
+                        - field: vr
+                          edit: 1    
+                        - field: ca_prevu
+                          edit: 1
+                        - field: pba_prevu
+                          edit: 1       
+                                      
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    fields_table:
+                        caption:
+                            label: Client
+                            icon: user
+                        rows:
+                            - field: id_client
+                              label: Société
+                              display: card
+                            - field: id_client_contact
+                              label: Contact
+                              display: card
+                              
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    fields_table:
+                        caption:
+                            label: Apporteur
+                            icon: handshake-o
+                        rows:
+                            - field: id_supplier
+                              label: Société
+                              display: card
+                            - field: id_supplier_contact
+                              label: Contact
+                              display: card
+                
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderViewLoadedScript
+                  
+    montants:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols:  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        caption:
+                            label: Montants
+                            icon: euro
+                        rows:
+                          - field: montant_materiels
+                            edit: 1
+                          - field: montant_services
+                            edit: 1
+                          - field: montant_logiciels
+                            edit: 1
+                          - label: Montant total
+                            value: <span id="montant_total"></span>
+                          - field: commission_commerciale
+                            edit: 1
+                          - field: commission_financiere
+                            edit: 1
+                          - label: Montant total
+                            value: <span id="montant_total2"></span>
+                          - label: Durée Calculée
+                            value: <span id="duree_total"></span>
+                          - field: duration
+                            label: Durée demandée
+                          - field: mode_calcul
+                          - field: periodicity
+                            label: Périodicité demandé
+                          - label: Coût banque
+                            value: <span id="cout_banque"></span>
+                          - label: Loyer Théorique
+                            value: <span id="loyer_the"></span>
+                          - label: Total loyer Calculé
+                            value: <span id="total_loyer"></span>
+                          - label: Dif financement/demande
+                            value: <span id="dif_banque_demande"></span>
+                          - label: Loyer intermediaire
+                            value: <span id="loy_inter"></span>
+                          - label: Frais Divers
+                            value: <span id="frais_div"></span>
+                          - label: Marge Calculé
+                            value: <span id="ca_calc"></span>
+                            
+                  - type: list
+                    col_lg: 6
+                    col_md: 6
+                    list: 
+                        children: frais_divers
+                        panel: 0  
+                        
+                  - type: list
+                    col_lg: 6
+                    col_md: 12
+                    list: 
+                        children: rents
+                        panel: 0
+                        
+                  - type: list
+                    col_lg: 6
+                    col_md: 12
+                    list: 
+                        children: rents_except
+                        panel: 0
+                        
+            - cols:
+                  - type: list
+                    col_lg: 12
+                    list: 
+                        children: refinanceurs
+                        panel: 0
+                        
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderViewLoadedScript
+    
+    fournisseurs:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 3
+                    col_md: 4
+                    col_sm: 12
+                    fields_table:
+                        caption:
+                            label: Montants
+                            icon: euro
+                        rows:
+                            - field: montant_materiels
+                            - field: montant_services
+                            - field: montant_logiciels
+                            - label: Reste a payé Fournisseur
+                              value: <span id="rest_fact"></span>
+                  - type: list
+                    col_lg: 9
+                    col_md: 8
+                    col_sm: 12
+                    list: 
+                        children: frais_fournisseur
+                        panel: 0
+        

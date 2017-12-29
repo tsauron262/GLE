@@ -257,6 +257,7 @@ a.commonlink { color: rgb(<?php print $colortextlink; ?>) !important; text-decor
 th.liste_titre a div div:hover, th.liste_titre_sel a div div:hover { text-decoration: underline; }
 input, input.flat, textarea, textarea.flat, form.flat select, select, select.flat, .dataTables_length label select {
     background-color: #FFF;
+    color: black;
 }
 
 input.select2-input {

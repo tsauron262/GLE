@@ -130,11 +130,11 @@ if ($_POST["sendit"] && !empty($conf->global->MAIN_UPLOAD_DOC)) {
         if (!is_dir($upload_dir))
             dol_mkdir($upload_dir);
         if (is_dir($upload_dir)) {
-            $tmpName = $_FILES['userfile']['name'];
+            $tmpName = $_FILES['userfile']['name'][0];
             //decode decimal HTML entities added by web browser
             $tmpName = dol_unescapefile($tmpName);
-
-            if (dol_move_uploaded_file($_FILES['userfile']['tmp_name'], $upload_dir . "/" . $tmpName, 0) > 0) {
+            
+            if (dol_move_uploaded_file($_FILES['userfile']['tmp_name'][0], $upload_dir . "/" . $tmpName, 0) > 0) {
                 $mesg = '<div class="ok">' . $langs->trans("FileTransferComplete") . '</div>';
                 //add file to ecm
                 // Appel des triggers
@@ -172,11 +172,11 @@ if ($action == 'delete') {
 
     $id = $_GET["id"];
     if ($synopsisdemandeinterv->fetch($id)) {
-        $tmpName = $_FILES['userfile']['name'];
+        $tmpName = $_GET['urlfile'];
+        
         //decode decimal HTML entities added by web browser
         $tmpName = dol_unescapefile($tmpName);
-
-        $upload_dir = $conf->synopsisdemandeinterv->dir_output . "/" . sanitize_string($synopsisdemandeinterv->ref);
+        $upload_dir = $conf->synopsisdemandeinterv->dir_output . "/";// . sanitize_string($synopsisdemandeinterv->ref);
         $file = $upload_dir . '/' . urldecode($_GET['urlfile']);
         dol_delete_file($file);
         $mesg = '<div class="ok">' . $langs->trans("FileWasRemoved") . '</div>';

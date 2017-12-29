@@ -8,6 +8,7 @@
  * Copyright (C) 2013       Florian Henry           <forian.henry@open-concept.pro>
  * Copyright (C) 2015       Charles-Fr BENKE        <charles.fr@benke.fr>
  * Copyright (C) 2016       Raphaël Doursenaud      <rdoursenaud@gpcsolutions.fr>
+ * Copyright (C) 2017       Nicolas ZABOURI         <info@inovea-conseil.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -737,7 +738,7 @@ class ExtraFields
 	 * Return HTML string to put an input field into a page
 	 *
 	 * @param  string  $key            Key of attribute
-	 * @param  string  $value          Preselected value to show (for date type it must be in timestamp format)
+	 * @param  string  $value          Preselected value to show (for date type it must be in timestamp format, for amount or price it must be a php numeric value)
 	 * @param  string  $moreparam      To add more parametes on html input tag
 	 * @param  string  $keyprefix      Prefix string to add into name and id of field (can be used to avoid duplicate names)
 	 * @param  string  $keysuffix      Suffix string to add into name and id of field (can be used to avoid duplicate names)
@@ -832,7 +833,7 @@ class ExtraFields
 		{
 			$tmp=explode(',',$size);
 			$newsize=$tmp[0];
-			$out='<input type="text" class="flat '.$showsize.' maxwidthonsmartphone" name="'.$keysuffix.'options_'.$key.$keyprefix.'" " maxlength="'.$newsize.'" value="'.$value.'"'.($moreparam?$moreparam:'').'>';
+			$out='<input type="text" class="flat '.$showsize.' maxwidthonsmartphone" name="'.$keysuffix.'options_'.$key.$keyprefix.'" maxlength="'.$newsize.'" value="'.$value.'"'.($moreparam?$moreparam:'').'>';
 		}
 		elseif ($type == 'varchar')
 		{
@@ -860,11 +861,14 @@ class ExtraFields
 		}
 		elseif ($type == 'price')
 		{
-			$out='<input type="text" class="flat '.$showsize.' maxwidthonsmartphone" name="'.$keysuffix.'options_'.$key.$keyprefix.'" value="'.price2num($value).'" '.($moreparam?$moreparam:'').'> '.$langs->getCurrencySymbol($conf->currency);
+			if (!empty($value)) {		// $value in memory is a php numeric, we format it into user number format.
+				$value=price($value);
+			}
+			$out.='<input type="text" class="flat '.$showsize.' maxwidthonsmartphone" name="'.$keysuffix.'options_'.$key.$keyprefix.'" value="'.$value.'" '.($moreparam?$moreparam:'').'> '.$langs->getCurrencySymbol($conf->currency);
 		}
 		elseif ($type == 'double')
 		{
-			if (!empty($value)) {
+			if (!empty($value)) {		// $value in memory is a php numeric, we format it into user number format.
 				$value=price($value);
 			}
 			$out='<input type="text" class="flat '.$showsize.' maxwidthonsmartphone" name="'.$keysuffix.'options_'.$key.$keyprefix.'" value="'.$value.'" '.($moreparam?$moreparam:'').'> ';

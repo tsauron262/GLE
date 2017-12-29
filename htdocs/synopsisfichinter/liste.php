@@ -152,7 +152,7 @@ echo "<form action=''><input name='ref' value='".$_REQUEST['ref']."'/></form>";
         print '<td align="center">' . dol_print_date($db->jdate($objp->dp), 'day') . "</td>\n";
         print '<td align="right">' . ConvertSecondToTime($objp->duree) . '</td>';
         $requete = "SELECT fk_contrat, fk_commande
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter as f
+                      FROM " . MAIN_DB_PREFIX . "synopsis_fichinter as f
                  LEFT JOIN " . MAIN_DB_PREFIX . "commande as c ON c.rowid = f.fk_commande
                  LEFT JOIN " . MAIN_DB_PREFIX . "contrat as o  ON o.rowid = f.fk_contrat
                      WHERE (fk_contrat >0 OR fk_commande >0)

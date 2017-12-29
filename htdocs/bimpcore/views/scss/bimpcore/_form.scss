@@ -1,0 +1,372 @@
+input, select {
+    background-color: #fff;
+    color: #3C3C3C;
+    @include transition(all 0.5s ease);
+}
+
+*::-moz-placeholder {
+    color: #787878!important;
+}
+
+.fieldRow,
+.formRow {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+
+    .inputLabel, 
+    .inputContainer {
+        padding: 10px 15px;
+        margin-right: 12px;
+    }
+
+    .inputLabel {
+        color: #fff;
+        background-color: $primary;
+        border-bottom: 1px solid #fff;
+        font-weight: bold;
+        text-align: right;
+        vertical-align: middle;
+    }
+
+    .fieldRowInput,
+    .formRowInput {
+        color: $secondary;
+        background-color: #fff;
+        border-bottom: 1px solid $gray_light;
+
+        .inputContainer {            
+            input {
+                width: 350px;
+
+                &[type=checkbox] {
+                    width: auto;
+                }
+            }
+            textarea {
+                width: 450px;
+            }
+        }
+    }
+}
+
+@media (max-width: $screen-sm) {
+    .fieldRow,
+    formRow {
+        display: block;
+
+        .inputLabel {
+            text-align: left;
+        }
+    }
+}
+
+/*.formRow {
+    padding: 5px;
+    width: 100%;
+
+    .formLabel {
+        text-align: right;
+        display: inline-block;
+        width: 25%;
+        padding-right: 15px;
+    }
+
+    .formInput {
+        text-align: left;
+        display: inline-block;
+        width: 70%;
+
+        select.fullwidth, 
+        input.fullwidth {
+            width: 100%;
+        }
+    }
+
+    input[type=checkbox] {
+        margin-right: 12px;
+    }
+}*/
+.formSubmit {
+    text-align: right;
+    padding: 10px 20px;
+    .button {
+        margin-left: 10px;
+    }
+}
+.inputHelp {
+    font-size: 12px;
+    font-style: italic;
+    color: $gray;
+    margin: 8px 0;
+    padding-left: 15px;
+}
+.objectToolbar,
+.toolBar {
+    padding: 15px 0;
+    text-align: right;
+}
+
+/*Inputs*/
+input {
+    padding-bottom: 5px!important;
+
+    &[type=checkbox] + label {
+        margin-left: 8px;
+    }
+}
+.inputContainer {
+    vertical-align: top;
+
+    .help {
+        font-size: 12px;
+        font-style: italic;
+        color: $gray;
+        margin: 8px 0;
+        padding-left: 15px;
+    }
+}
+.inputGroupContainer {
+    display: inline-block;
+    vertical-align: middle;
+}
+.auto_expand {
+    overflow: hidden;
+    line-height: 16px !important;
+}
+.input-group {
+    input {
+        padding-bottom: 5px;
+    }
+}
+.object_view_content textarea.note,
+.objectlistTable textarea.note {
+    background-color: #FFFFE1;
+    border-color: #FFFFE1;
+    padding: 6px 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 2px #787878;
+}
+
+select.switch {
+    width: 75px;
+    font-weight: bold;
+
+    option[value='1'] {
+        color: #3b6ea0;
+    }
+    option[value='0'] {
+        color: #8C8C8C;
+    }
+}
+.formSwitch {
+    label {
+        margin-right: 20px;
+    }
+
+    input {
+        margin: 0 5px;
+    }
+}
+.toggle {
+    display: none;
+
+    & + span,
+    & + span + label + span {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: bold;
+        vertical-align: top;
+        line-height: 20px;
+        margin: 0 6px;
+        color: $gray;
+        @include transition(all 0.5s ease);
+    }
+
+    & + span {
+        color: $gray-dark;
+    }
+
+    & + span + .toggle-slider {
+        position: relative; 
+        display: inline-block;
+        width: 40px; 
+        height: 20px;
+        cursor: pointer;
+        border-radius: 1.5em;
+        @include transition(350ms);
+        background: linear-gradient(rgba(#000,0.07),rgba(#fff,0)),#ddd;
+        box-shadow:
+            0 0.07em 0.1em -0.1em rgba(#000,.4) inset,
+            0 0.05em 0.08em -0.01em rgba(#fff,.7);
+
+        &:after {
+            position: absolute; 
+            content:'';
+            width: 16px; 
+            height: 16px;
+            top: 2px; 
+            left: 2px;
+            border-radius: 50%;
+            @include transition(250ms ease-in-out);
+            background: linear-gradient(#f5f5f5 10%,#eee);
+            box-shadow:
+                0 0.1em 0.15em -0.05em rgba(#fff,.9
+                ) inset,
+                0 0.2em 0.2em -0.12em rgba(#000,.5);    
+        }
+
+        &:before {
+            position: absolute; content:'';
+            width: 32px; 
+            height: 12px;
+            top: 4px; 
+            left: 4px;
+            border-radius: 0.75em;
+            @include transition(250ms ease-in-out);
+            background: linear-gradient(rgba(#000,0.07),rgba(#fff,0.1)),#d0d0d0;
+            box-shadow:
+                0 0.08em 0.15em -0.1em rgba(#000,.5) inset,
+                0 0.05em 0.08em -0.01em rgba(#fff,.7),
+                0 0 0 0 rgba(#4c6,.7) inset;
+        }
+    }
+    &:checked {
+        & + span {
+            color: $gray;
+        }
+        & + span + label + span {
+            color: #2fa04b;
+        }
+        & + span + .toggle-slider {
+            &:before {
+                box-shadow:
+                    0 0.08em 0.15em -0.1em rgba(#000,.5) inset,
+                    0 0.05em 0.08em -0.01em rgba(#fff,.7),
+                    3em 0 0 0 rgba(#4c6,.7) inset;        
+            }  
+            &:after {
+                left: 22px
+            }
+        }
+    }
+}
+.search_input_results {
+    position: absolute;
+    z-index: 99999;
+    background-color: #fff;
+    min-width: 120px;
+    box-shadow: 4px 4px 4px #505050;
+    padding: 0 15px;
+
+    button {
+        display: block;
+        width: 100%;
+        text-align: left;
+    }
+}
+.switchOption {
+    &.selected {
+        color: #fff!important;
+        background-color: $primary!important;
+        border-color: $primary!important;
+    }
+}
+.timer_input {
+    input, select {
+        width: 45px!important;
+    }
+    span {
+        display: inline-block;
+        font-weight: bold!important;
+        margin: 8px;
+    }
+}
+.optionsContainer {
+    text-align: right;
+
+    .optionsButton {
+        display: inline-block;
+        margin: 5px;
+        color: $secondary;
+        font-weight: normal;
+        margin: 0 3px;
+        padding: 4px 6px;
+        height: 100%;
+        cursor: pointer;
+        font-size: 12px;
+
+        transition: all 0.3s ease;
+        -webkit-transition: all 0.3s ease;
+
+        &:hover {
+            color: #fff;
+            background-color: $primary;
+
+            &:before {
+                color: #fff;
+            }
+        }
+
+        &:before {
+            font-size: 14px;
+            color: $primary;
+            font-family: 'FontAwesome';
+            content: '\f013';
+            margin-right: 8px;
+        }
+    }
+}
+.inputMultipleValues {
+    table tbody tr {
+        border: 1px solid $gray;
+
+        td {
+            padding: 6px 12px;
+        }
+    }
+}
+
+.check_list_container {
+    max-height: 450px;
+    overflow-y: auto;
+    margin: 10px;
+
+    .check_list_item {
+        margin: 0;
+        padding: 0;
+
+        input[type=checkbox] {
+            display: none;
+        }
+
+        label {
+            padding: 6px 6px 6px 30px;
+            background-color: #fff;
+            color: darken($gray, 20%);
+            cursor: pointer;
+            @include transition(all 0.3s ease);
+
+            &:before {
+                font-family: 'FontAwesome';
+                position: absolute;
+                margin-left: -24px;
+                font-weight: normal;
+                content: '\f096';
+                font-size: 14px;
+            }
+        }
+
+        input[type=checkbox]:checked + label {
+            color: $gray-darker;
+
+            &:before {
+                font-size: 16px;
+                content: '\f046';
+                color: $primary;
+
+            }
+        }
+    }
+}

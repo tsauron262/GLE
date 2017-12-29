@@ -41,6 +41,10 @@ $MAXLIST = 100;
 $langs->load("companies");
 $langs->load("other");
 
+//Récuperation date de début et de fin 
+$dateD = GETPOST("dateD");
+$dateF = GETPOST("dateF");
+
 // Security check
 $socid = GETPOST('socid', 'int');
 $action = GETPOST('action', 'alpha');
@@ -51,7 +55,29 @@ $result = restrictedArea($user, 'societe', $socid, '&societe');
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('infothirdparty'));
 
+
 $object = new Societe($db);
+
+if ($socid > 0) {
+    $result = $object->fetch($socid);
+    if (!$result) {
+        $langs->load("errors");
+        print $langs->trans("ErrorRecordNotFound");
+
+        llxFooter();
+        $db->close();
+
+        exit;
+
+    }
+    else
+    $object->info($socid);
+}
+
+// Actions to build doc
+$upload_dir = $conf->bimpcesu->dir_output;
+$permissioncreate = $user->rights->bimpcesu->read;
+include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
 
 
 /*
@@ -82,24 +108,13 @@ llxHeader('', $title, $help_url);
 
 
 if ($socid > 0) {
-    $result = $object->fetch($socid);
-    if (!$result) {
-        $langs->load("errors");
-        print $langs->trans("ErrorRecordNotFound");
-
-        llxFooter();
-        $db->close();
-
-        exit;
-    }
+    
 
     $head = societe_prepare_head($object);
 
     dol_fiche_head($head, 'attestation', $langs->trans("ThirdParty"), 0, 'company');
 
     dol_banner_tab($object, 'socid', '', ($user->societe_id ? 0 : 1), 'rowid', 'nom');
-
-    $object->info($socid);
 
 
 
@@ -123,9 +138,7 @@ if ($socid > 0) {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture as pf ON f.rowid=pf.fk_facture';
         $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
         $sql .= " AND f.entity = " . $conf->entity;
-        $sql .= ' GROUP BY f.rowid, f.facnumber, f.type, f.amount, f.total, f.tva, f.total_ttc,';
-        $sql .= ' f.datef, f.datec, f.paye, f.fk_statut,';
-        $sql .= ' s.nom, s.rowid';
+        $sql .= " GROUP BY f.rowid";
         $sql .= " ORDER BY f.datef DESC, f.datec DESC";
 
         $resql = $db->query($sql);
@@ -137,7 +150,7 @@ if ($socid > 0) {
                 print '<table class="noborder" width="100%">';
 
                 print '<tr class="liste_titre">';
-                print '<td colspan="5"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernieres factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
+                print '<td colspan="5" id="derniereFacture"><table width="100%" class="nobordernopadding"><tr><td>' . $langs->trans("Les dernieres factures clients", ($num <= $MAXLIST ? "" : $MAXLIST)) . '</td><td align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/list.php?socid=' . $object->id . '">' . $langs->trans("Toutes les factures") . ' <span class="badge">' . $num . '</span></a></td>';
                 print '<td width="20px" align="right"><a href="' . DOL_URL_ROOT . '/compta/facture/stats/index.php?socid=' . $object->id . '">' . img_picto($langs->trans("Statistics"), 'stats') . '</a></td>';
                 print '</tr></table></td>';
                 print '</tr>';
@@ -216,7 +229,7 @@ echo '<br />';
 echo '<br />';
 echo '<br />';
 
-print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3">';
+print '<tr><td class="titelfield">' . $langs->trans("Organisme intervenant : ") . '</td><td colspan="3" id="nomInt">';
 print_r ($conf->global->MAIN_INFO_SOCIETE_NOM);
 print "</td></tr>";
 
@@ -243,7 +256,7 @@ if ($socid > 0)
 if (empty($conf->global->SOCIETE_DISABLE_CONTACTS)) {
     if ($socid > 0) {
         print '<tr><td><label for="socid">' . $langs->trans("Client : ") . '</label></td>';
-        print '<td colspan="3" class="maxwidthonsmartphone">';
+        print '<td colspan="3" class="maxwidthonsmartphone nomClient">';
         print $objsoc->getNomUrl(1);
         print '</td>';
         print '<input type="hidden" name="socid" id="socid" value="' . $objsoc->id . '">';
@@ -264,22 +277,67 @@ print "</td></tr></table>";
 //<--- -------------- TABLEAU END --------------- --->
 
 
+
+
+
+
+
+
+//<-- ------------------- FORMULAIRE PERIOD START------------ -->
+
+
+    
+    $annee = date("Y"); //recuperation de l'annee en cours
+     
    
+    // View Formulaire
+    echo '<h3>Sélectionnez une periode de facturation</h3>';
+    
+    echo '<form> <b>Du</b> <input type="date" name="dateDebut" value="' .$annee. '-01-01"/>'; //valeur par defaut = 1er janvier de l'année en cours 
+    echo '<b>Au</b> <input type="date" name="dateFin" value="' .$annee. '-12-31"/>'; // valeur par defaut = 31 decembre de l'année en cours
+    
+    echo '<button type="button" class="butAction" id="boutondate">Génerer</button></form>';
+        
+?>        
+<script>        
+    (function($){
+        
+        $(document).ready(function(){
+            $('#builddoc_generatebutton').hide();
+        });
+    
+        $('#boutondate').on('click', function(e){
+            
+            var dateDeDebut = $('input[name=dateDebut]').val();
+            var dateDeFin = $('input[name=dateFin]').val();
+            
+            $('<input type="hidden" name="dateD" value="'+dateDeDebut+'"/>').appendTo('#builddoc_form');                        
+            $('<input type="hidden" name="dateF" value="'+dateDeFin+'"/>').appendTo('#builddoc_form');
+            
+            var regTiret = new RegExp('-', 'gi');
+            
+            var dateDSansTiret = dateDeDebut.replace(regTiret, '');
+            var dateFSansTiret = dateDeFin.replace(regTiret, '');
+            
+            var dateDtoInt = parseInt(dateDSansTiret);
+            var dateFtoInt = parseInt(dateFSansTiret);
+            
+            
+            if (dateDtoInt > dateFtoInt){                
+                alert('Veuillez sélectionner une date de début anterieur à la date de fin');
+                
+            }else {
+                //$('#builddoc_generatebutton').show();
+                $('#builddoc_generatebutton').click();
+            }
+        });
+    
+    })(jQuery);
+</script>
+<?php
 
 
-
-
-
-
-
-
-//<--- -------------- GENE PDF START --------------- --->
-
-
-    // Actions to build doc
-$upload_dir = $conf->bimpcesu->dir_output;
-$permissioncreate = $user->rights->bimpcesu->read;
-include DOL_DOCUMENT_ROOT . '/core/actions_builddoc.inc.php';
+//<-- ------------------- FORMULAIRE PERIOD END------------ -->
 
 /*
  * Documents generes
@@ -298,13 +356,8 @@ $delallowed = $user->rights->bimpcesu->read;
         if ($resql) {
             $var = true;
             $formfile = new FormFile($db);
-            $num = $db->num_rows($resql);
-            $i = 0;
-            if ($num > 0) {
                 $somethingshown = $formfile->show_documents('bimpcesu', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', 0, '', $soc->default_lang);                
-            }
-            else
-                echo "";
+            
         }
     }
 

@@ -356,7 +356,7 @@ if ($id > 0) {
     /* deb mod drsi */
     print '<table cellpadding=15 class="border" width="100%">';
     print '<tr><th width="25%" class="ui-widget-header ui-state-default">Type</th>
-                <td colspan="1" width="25%" class="ui-widget-content">';
+  ';/*              <td colspan="1" width="25%" class="ui-widget-content">';
 
 
     switch ($type) {
@@ -373,7 +373,7 @@ if ($id > 0) {
         default:
             print 'Divers';
             break;
-    }
+    }*/
     print '<td colspan="2" width="50%" class="ui-widget-content">';
     if ($hasProd1)
         print $product1->getNomUrl(1) . "  " . $product1->description . "<br/>";
@@ -398,7 +398,7 @@ if ($id > 0) {
         $qte = $qteTkt;
     }
     print $qte;
-
+/*
     print '<tr><th width="25%" class="ui-widget-header ui-state-default">Nb visite annuel</th>
                                    <td colspan="1" class="ui-widget-content">';
     if ($ligne->GMAO_Mixte['nbVisiteAn'] == 0) {
@@ -511,7 +511,7 @@ if ($id > 0) {
     // Clause
     print '<tr><th width="25%" class="ui-widget-header ui-state-default">Clause contractuelle</th>';
     print '<td colspan="3" class="ui-widget-content">' . $ligne->GMAO_Mixte['clause'];
-    
+    */
     
     // ProductCli
     $_REQUEST['chrono_id'] = $_REQUEST['id'];

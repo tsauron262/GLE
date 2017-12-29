@@ -66,7 +66,7 @@
                            ref,
                            fk_user_author as fk_interv,
                            UNIX_TIMESTAMP(datei) as dateinterv
-                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter
+                      FROM ".MAIN_DB_PREFIX."synopsis_fichinter
                      WHERE fk_commande in (".join(',',$arrGrpCom). ")
                   ORDER BY datei DESC ";
         $sql = $db->query($requete);

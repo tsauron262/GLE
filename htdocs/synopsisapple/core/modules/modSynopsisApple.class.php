@@ -150,7 +150,7 @@ $this->menus = array();			// List of menus to add
 		$r++;
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=apple',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
 					'type'=>'left',			// This is a Left menu entry
-					'titre'=>'Suvie SAV',
+					'titre'=>'Suvi SAV',
 					'mainmenu'=>'apple',
 					'leftmenu'=>'apple',
 					'url'=>'/synopsisapple/statChronoSuivie.php',
@@ -163,7 +163,7 @@ $this->menus = array();			// List of menus to add
 		$r++;
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=apple',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
 					'type'=>'left',			// This is a Left menu entry
-					'titre'=>'Suvie prêt SAV',
+					'titre'=>'Suvi prêt SAV',
 					'mainmenu'=>'apple',
 					'leftmenu'=>'apple',
 					'url'=>'/synopsisapple/iphonePret.php',

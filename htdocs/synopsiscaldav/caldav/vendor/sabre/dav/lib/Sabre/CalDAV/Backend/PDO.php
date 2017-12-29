@@ -295,8 +295,11 @@ global $conf;
         foreach ($newValues as $fieldName => $value) {
             $valuesSql[] = $fieldName . ' = ?';
         }
-        $valuesSql[] = 'ctag = ctag + 1';
+        //$valuesSql[] = 'ctag = ctag + 1';
 
+        //dol_syslog("Update agenda ".$calendarId, 3,1, "_caldav2");
+        
+        
         $stmt = $this->pdo->prepare("UPDATE " . $this->calendarTableName . " SET " . implode(', ', $valuesSql) . " WHERE id = ?");
         $newValues['id'] = $calendarId;
         $stmt->execute(array_values($newValues));
@@ -349,6 +352,7 @@ global $conf;
     public function getCalendarObjects($calendarId) {
         $stmt = $this->pdo->prepare('SELECT id, uri, lastmodified, etag, calendarid, size FROM ' . $this->calendarObjectTableName . ' WHERE '/* lastoccurence > "' . mktime(0, 0, 0, date("m") - 4, date("d"), date("Y")) . '" AND */ . ' calendarid = ?');
         $stmt->execute(array($calendarId));
+        
 
         $result = array();
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
@@ -451,6 +455,11 @@ global $conf;
                //iciattendee 
                 $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
         }
+        
+	$action->fetch_optionals();
+        if (isset($action->array_options['options_conf']) && $action->array_options['options_conf'] == true) {
+            $calendarData2[] = 'CLASS:CONFIDENTIAL';
+        }
 
         if($row['organisateur'] != "")
         $calendarData2[] = 'X-OWNER:mailto:'.$row['organisateur'];
@@ -477,6 +486,11 @@ global $conf;
         //$calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'. date("Ymd\THis\Z",$calendarData2['LAST-MODIFIED']), $calData);
         if($row['dtstamp'] != "" && $row['dtstamp'] != "0")
         $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$row['dtstamp'], $calData);
+        else{
+            $dtstamp = gmdate('Ymd').'T'. gmdate('His') . "Z";
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET dtstamp = '".$dtstamp."' WHERE fk_object = ".$row['id']);
+            $calData = preg_replace('\'DTSTAMP:[0-9]+T[0-9]+Z\'', 'DTSTAMP:'.$dtstamp, $calData);
+        }
         date_default_timezone_set("Europe/Paris");
         
 
@@ -630,6 +644,8 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
         if (is_object($user))
             $user = $user->id;
         $sequence = 0;
+        
+        $action->array_options['options_conf'] = false;
         foreach ($calendarData2 as $nom => $ligne) {
             
             $tab = array( CHR(13) => "", CHR(10) => "", " " => "" ); 
@@ -637,6 +653,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             //$ligne = str_replace("\r", "", $ligne);
             if (stripos($nom, "SEQUENCE") !== false) {
                 $sequence = $ligne;
+            }
+            if (stripos($ligne, "CONFIDENTIAL") !== false) {
+                $action->array_options['options_conf'] = true;
             }
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:","",$ligne);
@@ -852,9 +871,17 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             //Pour ce tour
             if (stripos($val, "CUTYPE=INDIVIDUAL") > -1)
                 $position = 'core';
+            if (stripos($val, "CONFIDENTIAL") > -1)
+                $position = 'core';
+            if (stripos($val, "SEQUENCE") > -1)
+                $position = 'core';
             
             if (stripos($val, "X-OWNER") > -1)
                 $position = 'header';
+            
+            
+            if (stripos($clef, "DESCRIPTION") > -1 || stripos($val, "DESCRIPTION:") == 0)
+                $val = dol_trunc ($val, 2000);
 
             //pour le tour d'apres
             if (stripos($val, "BEGIN:VCALENDAR") > -1)
@@ -912,8 +939,10 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => " ", CHR(10) => " ");
-            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION");
+            $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "UID");
             $ligne = strtr($ligne, $tabR);
+            if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
+                $ligne = substr($ligne,0,2000);
             if (!is_integer($clef)) {
                 if (stripos($ligne, "=") !== false && !in_array($clef,  $tabException))
                     $tab2[] = $clef . ";" . $ligne;

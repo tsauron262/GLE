@@ -148,7 +148,7 @@ $(window).on("load", function () {
     
     
     //change nom menu product bimp
-    $('#mainmenutd_products').find('.mainmenuaspan').text('PRESTATIONS');
+    //$('#mainmenutd_products').find('.mainmenuaspan').text('PRESTATIONS');
 });
 
 

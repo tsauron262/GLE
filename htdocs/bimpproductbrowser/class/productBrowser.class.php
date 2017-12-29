@@ -149,7 +149,7 @@ class BimpProductBrowser extends CommonObject {
 
         foreach ($this->cats as $catId => $cat) {
             $result = $this->getChilds($catId);
-            if (!$result and is_a($cat, 'Categorie')) // dont display way for BIMP_ROOT_CATEGORY
+            if (!$result)
                 $catsNonRestr[$catId] = $cat->print_all_ways(); //array("nom"=>$cat->label,"id"=>$catId);
             else {
                 $catsRestr[$catId] = $catId;

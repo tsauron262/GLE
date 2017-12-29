@@ -1,0 +1,17 @@
+title: Bimp Hotline - Equipements
+bootstrap: 1
+
+sections:
+    - type: list
+      object:
+          instance: 
+              bimp_object: Equipment
+              
+    - type: buttons
+      buttons:
+          - label: Accueil Hotline
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

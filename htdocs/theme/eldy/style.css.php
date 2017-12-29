@@ -269,7 +269,7 @@ input.select2-input {
 
 .liste_titre input[name=monthvalid], .liste_titre input[name=search_ordermonth], .liste_titre input[name=search_deliverymonth],
 .liste_titre input[name=search_smonth], .liste_titre input[name=search_month], .liste_titre input[name=search_emonth], .liste_titre input[name=smonth], .liste_titre input[name=month], .liste_titre select[name=month],
-.liste_titre input[name=month_lim] {
+.liste_titre input[name=month_lim], .liste_titre input[name=month_create] {
 	margin-right: 4px;
 }
 input[type=submit] {
@@ -634,6 +634,12 @@ div.myavailability {
 }
 .tdoverflowmax100 {			/* For tdoverflow, the max-midth become a minimum ! */
     max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tdoverflowmax200 {			/* For tdoverflow, the max-midth become a minimum ! */
+    max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3447,6 +3453,12 @@ table.cal_event td.cal_event_right { padding: 4px 4px !important; }
 /* Gantt
 /* ============================================================================== */
 
+div.gTaskInfo {
+    background: #f0f0f0 !important;
+}
+.gtaskblue {
+	background: rgb(108,152,185) !important;
+}
 td.gtaskname {
     overflow: hidden;
     text-overflow: ellipsis;

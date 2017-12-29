@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/BimpObject.php';
+require_once __DIR__ . '/BDSObject.php';
 
-class Manufacturer extends BimpObject
+class Manufacturer extends BDSObject
 {
 
     public static $table = 'manufacturer';

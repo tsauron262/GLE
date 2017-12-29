@@ -68,6 +68,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
         		$ldap->connect_bind();
 global $creationUser;
 $creationUser = true;
+$object->statut = 1;
 
 				$info=$object->_load_ldap_info();
 				$dn=$object->_load_ldap_dn($info);

@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessOperation extends BimpObject
+class BDSProcessOperation extends BDSObject
 {
 
     public static $table = 'bds_process_operation';
@@ -64,7 +64,7 @@ class BDSProcessOperation extends BimpObject
     public static function getOperationOptions($id_operation)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
         $sql = 'SELECT o.* FROM ' . MAIN_DB_PREFIX . 'bds_process_option o ';
         $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'bds_process_operation_option oo ';
         $sql .= 'ON oo.id_option = o.id ';
@@ -130,7 +130,7 @@ class BDSProcessOperation extends BimpObject
     public static function renderListRows($id_parent = null)
     {
         global $db;
-        $bdb = new BimpDb($db);
+        $bdb = new BDSDb($db);
 
         $operations = self::getListData($bdb, $id_parent);
 

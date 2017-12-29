@@ -1,0 +1,103 @@
+bootstrap: 1
+objects:
+    event: 
+        instance: 
+            bimp_object: BMP_Event
+            id_object: 
+                request: id
+                
+sections:
+    - type: tabs
+      tabs:
+          default:
+              label: Infos
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: default
+                        object: event
+          parts:
+              label: Parts Co-producteurs
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        name: default
+                        object: event
+                        children: coprod_def_parts
+          frais: 
+              label: Frais
+              url_params:
+                  id: 
+                      request: id
+              sections:
+                  - type: list
+                    list: 
+                        panel: 1
+                        name: default
+                        object: event
+                        children: frais
+                        
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: frais_totaux
+                        object: event
+          hotel:
+              label: Frais hôtellerie
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view:
+                        panel: 0
+                        name: frais_hotel
+                        object: event
+                        
+          recettes:
+              label: Recettes
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        name: default
+                        object: event
+                        children: recettes
+                        
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: recettes_totaux
+                        object: event
+                        
+          billets:
+              label: Billeterie
+              url_params: 
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: billets
+                        object: event
+                      
+    - type: buttons
+      buttons:
+          - label: Liste des événements
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

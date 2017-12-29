@@ -1,6 +1,6 @@
 <?php
 
-class BDSProcessCustomMatchingValues extends BimpObject
+class BDSProcessCustomMatchingValues extends BDSObject
 {
 
     public static $table = 'bds_process_custom_matching_values';

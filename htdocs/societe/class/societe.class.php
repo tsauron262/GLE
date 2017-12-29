@@ -1021,7 +1021,7 @@ class Societe extends CommonObject
         $sql = 'SELECT s.rowid, s.nom as name, s.name_alias, s.entity, s.ref_ext, s.ref_int, s.address, s.datec as date_creation, s.prefix_comm';
         $sql .= ', s.status';
         $sql .= ', s.price_level';
-        $sql .= ', s.tms as date_modification';
+        $sql .= ', s.tms as date_modification, s.fk_user_creat, s.fk_user_modif';
         $sql .= ', s.phone, s.fax, s.email, s.skype, s.url, s.zip, s.town, s.note_private, s.note_public, s.model_pdf, s.client, s.fournisseur';
         $sql .= ', s.siren as idprof1, s.siret as idprof2, s.ape as idprof3, s.idprof4, s.idprof5, s.idprof6';
         $sql .= ', s.capital, s.tva_intra';
@@ -1087,8 +1087,10 @@ class Societe extends CommonObject
                 $this->ref_ext      = $obj->ref_ext;
                 $this->ref_int      = $obj->ref_int;
 
-                $this->date_creation = $this->db->jdate($obj->date_creation);
+                $this->date_creation     = $this->db->jdate($obj->date_creation);
                 $this->date_modification = $this->db->jdate($obj->date_modification);
+                $this->user_creation     = $obj->fk_user_creat;
+                $this->user_modification = $obj->fk_user_modif;
 
                 $this->address 		= $obj->address;
                 $this->zip 			= $obj->zip;
@@ -1828,6 +1830,8 @@ class Societe extends CommonObject
     function getNomUrl($withpicto=0, $option='', $maxlen=0, $notooltip=0, $save_lastsearch_value=-1)
     {
         global $conf, $langs/*mod drsi, $hookmanager fmoddrsi*/;
+        if($option == "" && $this->client)
+            $option = 'compta';
 
         if (! empty($conf->dol_no_mouse_hover)) $notooltip=1;   // Force disable tooltips
 
@@ -2795,7 +2799,7 @@ class Societe extends CommonObject
             if (! empty($conf->global->MAIN_DISABLEPROFIDRULES)) return '';
 
             // TODO Move links to validate professional ID into a dictionary table "country" + "link"
-            if ($idprof == 1 && $thirdparty->country_code == 'FR') $url='http://www.societe.com/cgi-bin/search?champs='.$thirdparty->idprof1;    // See also http://avis-situation-sirene.insee.fr/
+            if ($idprof == 1 && $thirdparty->country_code == 'FR') $url='http://www.societe.com/cgi-bin/search?champs='.str_replace(" ", "", $thirdparty->idprof1);    // See also http://avis-situation-sirene.insee.fr/
             //if ($idprof == 1 && ($thirdparty->country_code == 'GB' || $thirdparty->country_code == 'UK')) $url='http://www.companieshouse.gov.uk/WebCHeck/findinfolink/';     // Link no more valid
             if ($idprof == 1 && $thirdparty->country_code == 'ES') $url='http://www.e-informa.es/servlet/app/portal/ENTP/screen/SProducto/prod/ETIQUETA_EMPRESA/nif/'.$thirdparty->idprof1;
             if ($idprof == 1 && $thirdparty->country_code == 'IN') $url='http://www.tinxsys.com/TinxsysInternetWeb/dealerControllerServlet?tinNumber='.$thirdparty->idprof1.';&searchBy=TIN&backPage=searchByTin_Inter.jsp';

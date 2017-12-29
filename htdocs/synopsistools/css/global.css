@@ -459,4 +459,18 @@ table.tabBorder100 td{
 
 
 
+#calendar .ui-checkboxradio-icon, #calendar .ui-button-icon{
+        float: left;
+}
 
+
+#zoneR{
+    position: fixed;
+    right: 40px;
+    top: 20px;
+    width: auto;
+    background: white;
+    padding: 19px;
+    border: black solid;
+    border-radius: 13px;
+}

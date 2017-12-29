@@ -39,11 +39,13 @@ $(document).ready(function () {
         e.preventDefault();
         calc();
     });
-    $("#check").change(function (e) {//to do
+    $("#check, #radoperationnel").change(function (e) {//to do
         if ($("#check")[0].checked == false) {
             $("#po_degr, .degr select").val(0);
+            $(".degr").hide(400);
         }
-        $(".degr").toggle(400);
+        else
+            $(".degr").show(400);
     });
     $("#pretAP").change(function (e) {
         calc();
@@ -67,7 +69,6 @@ function init_location(valdef) {
         $(".vr").fadeOut();
         $("#VR").val(0);
         if (aff) {
-            $(".degr").toggle(400);
             $("#po_degr, .degr select").val(0);
         }
         $("#check").attr("checked", false);
@@ -79,10 +80,6 @@ function init_location(valdef) {
         $("#preter").val(0);
         $(".vr").fadeIn();
         $("#check").attr("checked", false);
-        if (aff) {
-            $(".degr").toggle(400);
-            $("#po_degr, .degr select").val(0);
-        }
         if (valdef)
             $("#VR").val(parseFloat($("#matos").html().replace(" ", "").replace(",", ".")) * 0.15);//calc vr matos
         if (valdef)
@@ -138,7 +135,7 @@ function calc_P() {
 }
 
 
-function calculeAfterBanque() {
+function calculeAfterBanque() {//CALCUL COEF + TAUX
     banqueT = $("#banque option:selected").html();
     if ($("#banque").val() != "") {
         var tc = $("#banque").val().split(":");
@@ -577,7 +574,7 @@ function calculeAfterBanque() {
 
 
 
-        else if (banqueT.toUpperCase() == "BNP") {
+        else if (banqueT.toUpperCase() == "BNP") {//BNP CALCUL logiciel
             if (montant >= 2000 && montant < 5000)
                 coefT = 12.45;
             else if (montant >= 5000 && montant < 7500)

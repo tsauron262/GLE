@@ -33,6 +33,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 
 
 
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+
+
+
 
 /**
  *	Class to generate PDF Azur bimpcesu
@@ -315,603 +319,8 @@ class pdf_bimpcesu extends ModeleBimpcesu
 		return 0;   // Erreur par defaut
 	}
 
-	/**
-	 *  Show payments table
-	 *
-     *  @param	PDF			&$pdf           Object PDF
-     *  @param  Object		$object         Object proposal
-     *  @param  int			$posy           Position y in PDF
-     *  @param  Translate	$outputlangs    Object langs for output
-     *  @return int             			<0 if KO, >0 if OK
-	 */
-	function _tableau_versements(&$pdf, $object, $posy, $outputlangs)
-	{
 
-	}
 
-
-	/**
-	 *   Show miscellaneous information (payment mode, payment term, ...)
-	 *
-	 *   @param		PDF			&$pdf     		Object PDF
-	 *   @param		Object		$object			Object to show
-	 *   @param		int			$posy			Y
-	 *   @param		Translate	$outputlangs	Langs object
-	 *   @return	void
-	 */
-	function _tableau_info(&$pdf, $object, $posy, $outputlangs)
-	{
-		global $conf;
-		$default_font_size = pdf_getPDFFontSize($outputlangs);
-
-		$pdf->SetFont('','', $default_font_size - 1);
-
-		// If France, show VAT mention if not applicable
-		if ($this->emetteur->country_code == 'FR' && $this->franchise == 1)
-		{
-			$pdf->SetFont('','B', $default_font_size - 2);
-			$pdf->SetXY($this->marge_gauche, $posy);
-			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("VATIsNotUsedForInvoice"), 0, 'L', 0);
-
-			$posy=$pdf->GetY()+4;
-		}
-
-		$posxval=52;
-
-        // Show shipping date
-        if (! empty($object->date_livraison))
-		{
-            $outputlangs->load("sendings");
-			$pdf->SetFont('','B', $default_font_size - 2);
-			$pdf->SetXY($this->marge_gauche, $posy);
-			$titre = $outputlangs->transnoentities("DateDeliveryPlanned").':';
-			$pdf->MultiCell(80, 4, $titre, 0, 'L');
-			$pdf->SetFont('','', $default_font_size - 2);
-			$pdf->SetXY($posxval, $posy);
-			$dlp=dol_print_date($object->date_livraison,"daytext",false,$outputlangs,true);
-			$pdf->MultiCell(80, 4, $dlp, 0, 'L');
-
-            $posy=$pdf->GetY()+1;
-		}
-        elseif ($object->availability_code || $object->availability)    // Show availability conditions
-		{
-			$pdf->SetFont('','B', $default_font_size - 2);
-			$pdf->SetXY($this->marge_gauche, $posy);
-			$titre = $outputlangs->transnoentities("AvailabilityPeriod").':';
-			$pdf->MultiCell(80, 4, $titre, 0, 'L');
-			$pdf->SetTextColor(0,0,0);
-			$pdf->SetFont('','', $default_font_size - 2);
-			$pdf->SetXY($posxval, $posy);
-			$lib_availability=$outputlangs->transnoentities("AvailabilityType".$object->availability_code)!=('AvailabilityType'.$object->availability_code)?$outputlangs->transnoentities("AvailabilityType".$object->availability_code):$outputlangs->convToOutputCharset($object->availability);
-			$lib_availability=str_replace('\n',"\n",$lib_availability);
-			$pdf->MultiCell(80, 4, $lib_availability, 0, 'L');
-
-			$posy=$pdf->GetY()+1;
-		}
-
-		// Show payments conditions
-		if (1 || empty($conf->global->PROPALE_PDF_HIDE_PAYMENTTERMCOND) && ($object->cond_reglement_code || $object->cond_reglement))
-		{
-			$pdf->SetFont('','B', $default_font_size - 2);
-			$pdf->SetXY($this->marge_gauche, $posy);
-			$titre = $outputlangs->transnoentities("PaymentConditions").':';
-			//$pdf->MultiCell(80, 4, $titre, 0, 'L');
-
-//			$pdf->SetFont('','', $default_font_size - 2);
-//			$pdf->SetXY($posxval, $posy);
-			$lib_condition_paiement=$outputlangs->transnoentities("PaymentCondition".$object->cond_reglement_code)!=('PaymentCondition'.$object->cond_reglement_code)?$outputlangs->transnoentities("PaymentCondition".$object->cond_reglement_code):$outputlangs->convToOutputCharset($object->cond_reglement_doc);
-			$lib_condition_paiement=str_replace('\n',"\n",$lib_condition_paiement);
-                        
-                        
-                        /*mod drsi*/
-                        global $db;
-                        require_once (DOL_DOCUMENT_ROOT . "/synopsisfinanc/class/synopsisfinancement.class.php");
-                        $valfinance = new Synopsisfinancement($db);
-                        $valfinance->fetch(null, $object->id);
-                        if($valfinance->id>0){
-                            $valfinance->calcul();
-                            $lib_condition_paiement="PROPOSITION DE FINANCEMENT: \nSolution de location sur " . $valfinance->nb_periode ." ". $valfinance::$tabM[$valfinance->periode] .": à partir de ".price($valfinance->loyer1+0.005) . " € HT \ mois";
-                            if($valfinance->duree_degr>0 && $valfinance->pourcent_degr>0){
-                                $lib_condition_paiement.=" puis ".price($valfinance->loyer2+0.005)." € HT   X   ".$valfinance->nb_periode2." ". $valfinance::$tabM[$valfinance->periode];
-                            }
-                            if($valfinance->VR>0){
-                                $lib_condition_paiement.=" avec un VR de: ".price($valfinance->VR)." €";
-                            }
-                            $lib_condition_paiement.="\n\nConditions sous réserves de l'acceptation de votre dossier par nos partenaire financiers";
-                        }else{
-                            $lib_condition_paiement="Vous n'avez pas configurer le financement.";
-                        }
-                        /*fmod drsi*/
-			$pdf->MultiCell(150, 4, $lib_condition_paiement,0,'L');
-
-			$posy=$pdf->GetY()+3;
-		}
-
-		if (empty($conf->global->PROPALE_PDF_HIDE_PAYMENTTERMCOND))
-		{
-			// Check a payment mode is defined
-			/* Not required on a proposal
-			if (empty($object->mode_reglement_code)
-			&& ! $conf->global->FACTURE_CHQ_NUMBER
-			&& ! $conf->global->FACTURE_RIB_NUMBER)
-			{
-				$pdf->SetXY($this->marge_gauche, $posy);
-				$pdf->SetTextColor(200,0,0);
-				$pdf->SetFont('','B', $default_font_size - 2);
-				$pdf->MultiCell(90, 3, $outputlangs->transnoentities("ErrorNoPaiementModeConfigured"),0,'L',0);
-				$pdf->SetTextColor(0,0,0);
-
-				$posy=$pdf->GetY()+1;
-			}
-			*/
-
-			// Show payment mode
-			if ($object->mode_reglement_code
-			&& $object->mode_reglement_code != 'CHQ'
-			&& $object->mode_reglement_code != 'VIR')
-			{
-				$pdf->SetFont('','B', $default_font_size - 2);
-				$pdf->SetXY($this->marge_gauche, $posy);
-				$titre = $outputlangs->transnoentities("PaymentMode").':';
-				$pdf->MultiCell(80, 5, $titre, 0, 'L');
-				$pdf->SetFont('','', $default_font_size - 2);
-				$pdf->SetXY($posxval, $posy);
-				$lib_mode_reg=$outputlangs->transnoentities("PaymentType".$object->mode_reglement_code)!=('PaymentType'.$object->mode_reglement_code)?$outputlangs->transnoentities("PaymentType".$object->mode_reglement_code):$outputlangs->convToOutputCharset($object->mode_reglement);
-				$pdf->MultiCell(80, 5, $lib_mode_reg,0,'L');
-
-				$posy=$pdf->GetY()+2;
-			}
-
-			// Show payment mode CHQ
-			if (empty($object->mode_reglement_code) || $object->mode_reglement_code == 'CHQ')
-			{
-				// Si mode reglement non force ou si force a CHQ
-				if (! empty($conf->global->FACTURE_CHQ_NUMBER))
-				{
-					if ($conf->global->FACTURE_CHQ_NUMBER > 0)
-					{
-						$account = new Account($this->db);
-						$account->fetch($conf->global->FACTURE_CHQ_NUMBER);
-
-						$pdf->SetXY($this->marge_gauche, $posy);
-						$pdf->SetFont('','B', $default_font_size - 3);
-						$pdf->MultiCell(100, 3, $outputlangs->transnoentities('PaymentByChequeOrderedTo',$account->proprio),0,'L',0);
-						$posy=$pdf->GetY()+1;
-
-			            if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS))
-			            {
-							$pdf->SetXY($this->marge_gauche, $posy);
-							$pdf->SetFont('','', $default_font_size - 3);
-							$pdf->MultiCell(100, 3, $outputlangs->convToOutputCharset($account->owner_address), 0, 'L', 0);
-							$posy=$pdf->GetY()+2;
-			            }
-					}
-					if ($conf->global->FACTURE_CHQ_NUMBER == -1)
-					{
-						$pdf->SetXY($this->marge_gauche, $posy);
-						$pdf->SetFont('','B', $default_font_size - 3);
-						$pdf->MultiCell(100, 3, $outputlangs->transnoentities('PaymentByChequeOrderedTo',$this->emetteur->name),0,'L',0);
-						$posy=$pdf->GetY()+1;
-
-			            if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS))
-			            {
-							$pdf->SetXY($this->marge_gauche, $posy);
-							$pdf->SetFont('','', $default_font_size - 3);
-							$pdf->MultiCell(100, 3, $outputlangs->convToOutputCharset($this->emetteur->getFullAddress()), 0, 'L', 0);
-							$posy=$pdf->GetY()+2;
-			            }
-					}
-				}
-			}
-
-			// If payment mode not forced or forced to VIR, show payment with BAN
-			if (empty($object->mode_reglement_code) || $object->mode_reglement_code == 'VIR')
-			{
-				if (! empty($conf->global->FACTURE_RIB_NUMBER))
-				{
-					$account = new Account($this->db);
-					$account->fetch($conf->global->FACTURE_RIB_NUMBER);
-
-					$curx=$this->marge_gauche;
-					$cury=$posy;
-
-					$posy=pdf_bank($pdf,$outputlangs,$curx,$cury,$account,0,$default_font_size);
-
-					$posy+=2;
-				}
-			}
-		}
-
-		return $posy;
-	}
-
-
-	/**
-	 *	Show total to pay
-	 *
-	 *	@param	PDF			&$pdf           Object PDF
-	 *	@param  Facture		$object         Object invoice
-	 *	@param  int			$deja_regle     Montant deja regle
-	 *	@param	int			$posy			Position depart
-	 *	@param	Translate	$outputlangs	Objet langs
-	 *	@return int							Position pour suite
-	 */
-	function _tableau_tot(&$pdf, $object, $deja_regle, $posy, $outputlangs)
-	{
-		global $conf,$mysoc;
-		$default_font_size = pdf_getPDFFontSize($outputlangs);
-
-		$tab2_top = $posy;
-		$tab2_hl = 4;
-		$pdf->SetFont('','', $default_font_size - 1);
-
-		// Tableau total
-		$col1x = 120; $col2x = 170;
-		if ($this->page_largeur < 210) // To work with US executive format
-		{
-			$col2x-=20;
-		}
-		$largcol2 = ($this->page_largeur - $this->marge_droite - $col2x);
-
-		$useborder=0;
-		$index = 0;
-
-		// Total HT
-		$pdf->SetFillColor(255,255,255);
-		$pdf->SetXY($col1x, $tab2_top + 0);
-                /*mod drsi*/global $accTht, $accTtva;/*fmod drsi*/
-		$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalHT"), 0, 'L', 1);
-
-		$pdf->SetXY($col2x, $tab2_top + 0);
-		$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ht + (! empty($object->remise)?$object->remise:0)/*mod drsi*/-$accTht/*fmod drsi*/, 0, $outputlangs), 0, 'R', 1);
-
-		// Show VAT by rates and total
-		$pdf->SetFillColor(248,248,248);
-
-		$this->atleastoneratenotnull=0;
-		if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
-		{
-			$tvaisnull=((! empty($this->tva) && count($this->tva) == 1 && isset($this->tva['0.000']) && is_float($this->tva['0.000'])) ? true : false);
-			if (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_ISNULL) && $tvaisnull)
-			{
-				// Nothing to do
-			}
-			else
-			{
-				//Local tax 1 before VAT
-				//if (! empty($conf->global->FACTURE_LOCAL_TAX1_OPTION) && $conf->global->FACTURE_LOCAL_TAX1_OPTION=='localtax1on')
-				//{
-					foreach( $this->localtax1 as $localtax_type => $localtax_rate )
-					{
-						if (in_array((string) $localtax_type, array('1','3','5'))) continue;
-
-						foreach( $localtax_rate as $tvakey => $tvaval )
-						{
-							if ($tvakey!=0)    // On affiche pas taux 0
-							{
-								//$this->atleastoneratenotnull++;
-
-								$index++;
-								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-
-								$tvacompl='';
-								if (preg_match('/\*/',$tvakey))
-								{
-									$tvakey=str_replace('*','',$tvakey);
-									$tvacompl = " (".$outputlangs->transnoentities("NonPercuRecuperable").")";
-								}
-								$totalvat = $outputlangs->transcountrynoentities("TotalLT1",$mysoc->country_code).' ';
-								$totalvat.=vatrate(abs($tvakey),1).$tvacompl;
-								$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
-
-								$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-								$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval, 0, $outputlangs), 0, 'R', 1);
-							}
-						}
-					}
-	      		//}
-				//Local tax 2 before VAT
-				//if (! empty($conf->global->FACTURE_LOCAL_TAX2_OPTION) && $conf->global->FACTURE_LOCAL_TAX2_OPTION=='localtax2on')
-				//{
-					foreach( $this->localtax2 as $localtax_type => $localtax_rate )
-					{
-						if (in_array((string) $localtax_type, array('1','3','5'))) continue;
-
-						foreach( $localtax_rate as $tvakey => $tvaval )
-						{
-							if ($tvakey!=0)    // On affiche pas taux 0
-							{
-								//$this->atleastoneratenotnull++;
-
-
-
-								$index++;
-								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-
-								$tvacompl='';
-								if (preg_match('/\*/',$tvakey))
-								{
-									$tvakey=str_replace('*','',$tvakey);
-									$tvacompl = " (".$outputlangs->transnoentities("NonPercuRecuperable").")";
-								}
-								$totalvat = $outputlangs->transcountrynoentities("TotalLT2", $mysoc->country_code).' ';
-								$totalvat.=vatrate(abs($tvakey),1).$tvacompl;
-								$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
-
-								$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-								$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval, 0, $outputlangs), 0, 'R', 1);
-
-							}
-						}
-					}
-				//}
-				// VAT
-				foreach($this->tva as $tvakey => $tvaval)
-				{
-					if ($tvakey > 0)    // On affiche pas taux 0
-					{
-						$this->atleastoneratenotnull++;
-
-						$index++;
-						$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-
-						$tvacompl='';
-						if (preg_match('/\*/',$tvakey))
-						{
-							$tvakey=str_replace('*','',$tvakey);
-							$tvacompl = " (".$outputlangs->transnoentities("NonPercuRecuperable").")";
-						}
-						$totalvat =$outputlangs->transnoentities("TotalVAT").' ';
-						$totalvat.=vatrate($tvakey,1).$tvacompl;
-						$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
-
-						$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-						$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval, 0, $outputlangs), 0, 'R', 1);
-					}
-				}
-
-				//Local tax 1 after VAT
-				//if (! empty($conf->global->FACTURE_LOCAL_TAX1_OPTION) && $conf->global->FACTURE_LOCAL_TAX1_OPTION=='localtax1on')
-				//{
-					foreach( $this->localtax1 as $localtax_type => $localtax_rate )
-					{
-						if (in_array((string) $localtax_type, array('2','4','6'))) continue;
-
-						foreach( $localtax_rate as $tvakey => $tvaval )
-						{
-							if ($tvakey != 0)    // On affiche pas taux 0
-							{
-								//$this->atleastoneratenotnull++;
-
-								$index++;
-								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-
-								$tvacompl='';
-								if (preg_match('/\*/',$tvakey))
-								{
-									$tvakey=str_replace('*','',$tvakey);
-									$tvacompl = " (".$outputlangs->transnoentities("NonPercuRecuperable").")";
-								}
-								$totalvat = $outputlangs->transcountrynoentities("TotalLT1",$mysoc->country_code).' ';
-
-								$totalvat.=vatrate(abs($tvakey),1).$tvacompl;
-								$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
-								$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-								$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval, 0, $outputlangs), 0, 'R', 1);
-							}
-						}
-					}
-	      		//}
-				//Local tax 2 after VAT
-				//if (! empty($conf->global->FACTURE_LOCAL_TAX2_OPTION) && $conf->global->FACTURE_LOCAL_TAX2_OPTION=='localtax2on')
-				//{
-					foreach( $this->localtax2 as $localtax_type => $localtax_rate )
-					{
-						if (in_array((string) $localtax_type, array('2','4','6'))) continue;
-
-						foreach( $localtax_rate as $tvakey => $tvaval )
-						{
-							if ($tvakey != 0)    // On affiche pas taux 0
-							{
-								//$this->atleastoneratenotnull++;
-
-								$index++;
-								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-
-								$tvacompl='';
-								if (preg_match('/\*/',$tvakey))
-								{
-									$tvakey=str_replace('*','',$tvakey);
-									$tvacompl = " (".$outputlangs->transnoentities("NonPercuRecuperable").")";
-								}
-								$totalvat = $outputlangs->transcountrynoentities("TotalLT2",$mysoc->country_code).' ';
-
-								$totalvat.=vatrate(abs($tvakey),1).$tvacompl;
-								$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
-
-								$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-								$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval, 0, $outputlangs), 0, 'R', 1);
-							}
-						}
-					}
-				//}
-
-				// Total TTC
-				$index++;
-				$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-				$pdf->SetTextColor(0,0,60);
-				$pdf->SetFillColor(224,224,224);
-				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
-
-				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc/*mod drsi*/-$accTht -$accTtva/*fmod drsi*/, 0, $outputlangs), $useborder, 'R', 1);
-                                
-                                 /*mod drsi*/
-                                if(-$accTht > 0){
-                                        $pdf->SetFillColor(248,248,248);
-                                        $index++;
-                                        $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-                                        $pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("Acompte"), 0, 'L', 0);
-                                        $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-                                        $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
-                                }
-                                /*fmod drsi*/
-			}
-		}
-
-		$pdf->SetTextColor(0,0,0);
-
-		/*
-		$resteapayer = $object->total_ttc - $deja_regle;
-		if (! empty($object->paye)) $resteapayer=0;
-		*/
-
-		if ($deja_regle > 0)
-		{
-			$index++;
-
-			$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-			$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("AlreadyPaid"), 0, 'L', 0);
-
-			$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-			$pdf->MultiCell($largcol2, $tab2_hl, price($deja_regle, 0, $outputlangs), 0, 'R', 0);
-
-			/*
-			if ($object->close_code == 'discount_vat')
-			{
-				$index++;
-				$pdf->SetFillColor(255,255,255);
-
-				$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("EscompteOffered"), $useborder, 'L', 1);
-
-				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc - $deja_regle, 0, $outputlangs), $useborder, 'R', 1);
-
-				$resteapayer=0;
-			}
-			*/
-
-			$index++;
-			$pdf->SetTextColor(0,0,60);
-			$pdf->SetFillColor(224,224,224);
-			$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-			$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("RemainderToPay"), $useborder, 'L', 1);
-
-			$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-			$pdf->MultiCell($largcol2, $tab2_hl, price($resteapayer, 0, $outputlangs), $useborder, 'R', 1);
-
-			$pdf->SetFont('','', $default_font_size - 1);
-			$pdf->SetTextColor(0,0,0);
-		}
-
-		$index++;
-		return ($tab2_top + ($tab2_hl * $index));
-	}
-
-	/**
-	 *   Show table for lines
-	 *
-	 *   @param		PDF			&$pdf     		Object PDF
-	 *   @param		string		$tab_top		Top position of table
-	 *   @param		string		$tab_height		Height of table (rectangle)
-	 *   @param		int			$nexY			Y (not used)
-	 *   @param		Translate	$outputlangs	Langs object
-	 *   @param		int			$hidetop		1=Hide top bar of array and title, 0=Hide nothing, -1=Hide only title
-	 *   @param		int			$hidebottom		Hide bottom bar of array
-	 *   @return	void
-	 */
-	function _tableau(&$pdf, $tab_top, $tab_height, $nexY, $outputlangs, $hidetop=0, $hidebottom=0)
-	{
-		global $conf;
-
-		// Force to disable hidetop and hidebottom
-		$hidebottom=0;
-		if ($hidetop) $hidetop=-1;
-
-		$default_font_size = pdf_getPDFFontSize($outputlangs);
-
-		// Amount in (at tab_top - 1)
-		$pdf->SetTextColor(0,0,0);
-		$pdf->SetFont('','',$default_font_size - 2);
-
-		if (empty($hidetop))
-		{
-			$titre = $outputlangs->transnoentities("AmountInCurrency",$outputlangs->transnoentitiesnoconv("Currency".$conf->currency));
-			$pdf->SetXY($this->page_largeur - $this->marge_droite - ($pdf->GetStringWidth($titre) + 3), $tab_top-4);
-			$pdf->MultiCell(($pdf->GetStringWidth($titre) + 3), 2, $titre);
-
-			//$conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR='230,230,230';
-			if (! empty($conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR)) $pdf->Rect($this->marge_gauche, $tab_top, $this->page_largeur-$this->marge_droite-$this->marge_gauche, 6, 'F', null, explode(',',$conf->global->MAIN_PDF_TITLE_BACKGROUND_COLOR));
-		}
-
-		$pdf->SetDrawColor(128,128,128);
-		$pdf->SetFont('','',$default_font_size - 1);
-
-		// Output Rect
-		$this->printRect($pdf,$this->marge_gauche, $tab_top, $this->page_largeur-$this->marge_gauche-$this->marge_droite, $tab_height, $hidetop, $hidebottom);	// Rect prend une longueur en 3eme param et 4eme param
-
-		if (empty($hidetop))
-		{
-			$pdf->line($this->marge_gauche, $tab_top+6, $this->page_largeur-$this->marge_droite, $tab_top+6);	// line prend une position y en 2eme param et 4eme param
-
-			$pdf->SetXY($this->posxdesc-1, $tab_top+1);
-			$pdf->MultiCell(108,2, $outputlangs->transnoentities("Designation"),'','L');
-		}
-
-		if (! empty($conf->global->MAIN_GENERATE_PROPOSALS_WITH_PICTURE))
-		{
-			$pdf->line($this->posxpicture-1, $tab_top, $this->posxpicture-1, $tab_top + $tab_height);
-			if (empty($hidetop))
-			{
-				//$pdf->SetXY($this->posxpicture-1, $tab_top+1);
-				//$pdf->MultiCell($this->posxtva-$this->posxpicture-1,2, $outputlangs->transnoentities("Photo"),'','C');
-			}
-		}
-
-//		if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))
-//		{
-//			$pdf->line($this->posxtva-1, $tab_top, $this->posxtva-1, $tab_top + $tab_height);
-//			if (empty($hidetop))
-//			{
-//				$pdf->SetXY($this->posxtva-3, $tab_top+1);
-//				$pdf->MultiCell($this->posxup-$this->posxtva+3,2, $outputlangs->transnoentities("VAT"),'','C');
-//			}
-//		}
-
-//		$pdf->line($this->posxup-1, $tab_top, $this->posxup-1, $tab_top + $tab_height);
-//		if (empty($hidetop))
-//		{
-//			$pdf->SetXY($this->posxup-1, $tab_top+1);
-//			$pdf->MultiCell($this->posxqty-$this->posxup-1,2, $outputlangs->transnoentities("PriceUHT"),'','C');
-//		}
-
-//		$pdf->line($this->posxqty-1, $tab_top, $this->posxqty-1, $tab_top + $tab_height);
-//		if (empty($hidetop))
-//		{
-//			$pdf->SetXY($this->posxqty-1, $tab_top+1);
-//			$pdf->MultiCell($this->posxdiscount-$this->posxqty-1,2, $outputlangs->transnoentities("Qty"),'','C');
-//		}
-
-//		$pdf->line($this->posxdiscount-1, $tab_top, $this->posxdiscount-1, $tab_top + $tab_height);
-//		if (empty($hidetop))
-//		{
-//			if ($this->atleastonediscount)
-//			{
-//				$pdf->SetXY($this->posxdiscount-1, $tab_top+1);
-//				$pdf->MultiCell($this->postotalht-$this->posxdiscount+1,2, $outputlangs->transnoentities("ReductionShort"),'','C');
-//			}
-//		}
-//		if ($this->atleastonediscount)
-//		{
-//			$pdf->line($this->postotalht, $tab_top, $this->postotalht, $tab_top + $tab_height);
-//		}
-//		if (empty($hidetop))
-//		{
-//			$pdf->SetXY($this->postotalht-1, $tab_top+1);
-//			$pdf->MultiCell(30,2, $outputlangs->transnoentities("TotalHT"),'','C');
-//		}
-	}
 
 	/**
 	 *  Show top header of page.
@@ -922,26 +331,85 @@ class pdf_bimpcesu extends ModeleBimpcesu
 	 *  @param  Translate	$outputlangs	Object lang for output
 	 *  @return	void
 	 */
-	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
-	{
-		global $conf,$langs;
-
-	
         
-        $total = "Error"; // Inconnu pour le moment       
-        $totalcesu = "Error"; // Inconnu pour le moment       
-        $npref = "Error"; // Inconnu pour le moment
-        $diri = "Christian CONSTANTIN BERTIN";
-        $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
-        $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
-        $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
-        $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
+        
+        
+	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
+	{               
+		global $conf,$langs,$db,$dateD,$dateF;
 
+	$facturestatic = new Facture($db);
+        
+        $sql = 'SELECT f.rowid as facid, f.fk_mode_reglement as mr';
+        $sql .= ', fd.description';
+        $sql .= ', fd.total_ttc as total_ttc';
+        $sql .= " FROM " . MAIN_DB_PREFIX . "societe s," . MAIN_DB_PREFIX . "facture f," . MAIN_DB_PREFIX . "facturedet fd";
+        $sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = " . $object->id;
+        $sql .= " AND f.datef BETWEEN '" . $dateD . "' AND '" . $dateF ."'";
+        $sql .= " AND fd.fk_facture = f.rowid ";
+      //  $sql .=  "AND fd.product_type = 1";
+        //$sql .= " GROUP BY f.rowid";
+
+        $resql = $db->query($sql);
+        
+        if ($resql) {
+          //$var = true;
+          $num = $db->num_rows($resql);
+          $i = 0;
+
+          $array_total = array();   //déclaration du tableau en variable globale
+          $array_total_cesu = array();
+      
+           while ($i < $num) {
+              $objp = $db->fetch_object($resql);
+              //$var = !$var;
+              
+              $facturestatic->id = $objp->facid;
+              $facturestatic->ref = $objp->facnumber;
+              $facturestatic->type = $objp->type;
+              $facturestatic->total_ttc = $objp->total_ttc;
+              $facturestatic->mr = $objp->mr;
+              $facturestatic->description = $objp->description;
+            $description .= "\n - ".$objp->description;
+              
+              if($objp->mr == 150){
+                  $array_total_cesu[] = $objp->total_ttc;
+                  $array_total[] = $objp->total_ttc;    //push du tableau
+                  
+              } else {
+                  $array_total[] = $objp->total_ttc;    //push du tableau
+              }
+                                          
+              $i++;
+              
+            }
+            
+          //$db->free($resql);
+      
+            $total = array_sum ($array_total); // Montant total facture     
+            $totalcesu = array_sum ($array_total_cesu); // Montant total CESU       
+            
+            
+            $npref = "SAP821320892"; // Inconnu pour le moment
+            $diri = "Christian CONSTANTIN BERTIN";
+            $orga = $conf->global->MAIN_INFO_SOCIETE_NOM;
+            $orgaadd = $conf->global->MAIN_INFO_SOCIETE_ADDRESS;
+            $orgazip = $conf->global->MAIN_INFO_SOCIETE_ZIP;
+            $orgaville = $conf->global->MAIN_INFO_SOCIETE_TOWN;
+            
+        } elseif (empty($dateD) || empty($dateF)) {
+            echo 'Pas de dates selectionnées';
+            
+        } else {
+            echo 'Pas de fatcures';
+        }
+        
+        
        // $object = new Societe($db);
         $bene = $object->nom;
-        $beneadd = $object->address; // Inconnu pour le moment
-        $benezip = $object->zip; // Inconnu pour le moment
-        $beneville = $object->town; // Inconnu pour le moment
+        $beneadd = $object->address; 
+        $benezip = $object->zip; 
+        $beneville = $object->town; 
 
         // Date & Date -1
         date_default_timezone_set('UTC+1');
@@ -950,7 +418,17 @@ class pdf_bimpcesu extends ModeleBimpcesu
         $date03 = date('Y')-1;
         $date04 = date('Y')+1;
         
-
+        // Remise en ordre des dates début et fin (jours/mois/annee)
+        $anneeD = substr($dateD,   0,  4);
+        $moisD = substr($dateD,  4, 4);
+        $jourD = substr($dateD,  8,  2);
+        $dateDOrdre = $jourD.$moisD.$anneeD;
+        
+        $anneeF = substr($dateF,  0,  4);
+        $moisF = substr($dateF,  4, 4);
+        $jourF = substr($dateF,  8,  2);
+        $dateFOrdre = $jourF.$moisF.$anneeF;
+                
 
         $outputlangs->load("main");
 		$outputlangs->load("bills");
@@ -976,7 +454,7 @@ class pdf_bimpcesu extends ModeleBimpcesu
 		$pdf->SetXY($this->marge_gauche,$posy);
 
 		// Logo
-		$logo=$conf->bimpcesu->dir_output.'/logos/'.$this->emetteur->logo;
+		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo)
 		{
 			if (is_readable($logo))
@@ -1097,11 +575,11 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         $pdf->SetXY($posx+2,$posy+10); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
                         $pdf->SetFont('','',$default_font_size); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
-                        $pdf->MultiCell(182, 3, "$orga agréé pour les services à la personne par arrêté préfectoral N°$npref en date du", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->MultiCell(182, 3, "$orga déclaré pour les services à la personne sous le N° $npref", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         
                         // LIGNES ORGANISATION
-                        $pdf->SetXY($posx+2,$posy+15); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$date01", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+//                        $pdf->SetXY($posx+2,$posy+15); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+//                        $pdf->MultiCell(100, 3, "$date01", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+20); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->MultiCell(100, 3, "$orgaadd", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+25); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
@@ -1112,38 +590,49 @@ class pdf_bimpcesu extends ModeleBimpcesu
                         $pdf->SetTextColor(0,0,200); // fixe la couleur du texte
                         $pdf->MultiCell(600, 3, "$bene", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+45); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$beneadd Error", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
+                        $pdf->MultiCell(100, 3, "$beneadd", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         $pdf->SetXY($posx+2,$posy+50); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(100, 3, "$benezip Error - $beneville Error", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(100, 3, "$benezip - $beneville", 0, 'L'); // imprime du texte
                         
                         // LIGNES DATE
                         $pdf->SetXY($posx+150,$posy+60); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
-                        $pdf->MultiCell(100, 3, "Lieu, le $date02$date03", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(100, 3, "$orgaville, le $date01", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 1
                         $pdf->SetXY($posx+2,$posy+70); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(182, 3, "Je soussigné(e) M. $diri, de $orga certifie que M. $bene a bénéficié(e) de services à la personne (préciser la nature du service). ", 0, 'L'); // imprime du texte
+                        $pdf->MultiCell(182, 3, "Je soussigné(e) M. $diri, de $orga certifie que M. $bene a bénéficié(e) de services à la personne ($description). ", 0, 'L'); // imprime du texte
+                        
+                        
+                        if($pdf->getY() > 200){
+                            $this->_pagefoot($pdf,$object,$outputlangs);
+                            $pdf->AddPage();
+                            $pdf->SetFont('','',$default_font_size);
+                        }
+                        else
+                            $pdf->MultiCell(182, 3, "\n\n", 0, 'L'); // imprime du texte
+                            
+                        
                         
                         // LIGNES CONTENUS 2
-                        $pdf->SetXY($posx+2,$posy+85); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(182, 3, "En $date03, sa participation représente une somme totale de : $total €, dont $totalcesu € au titre du Cesu.", 0, 'L'); // imprime du texte
+                        //$pdf->SetXY($posx+2,$posy+85); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(182, 3, "Du $dateDOrdre au $dateFOrdre, sa participation représente une somme totale de : $total €, dont $totalcesu € au titre du Cesu.", 0, 'L'); // imprime du texte
                         
-                        // LIGNES CONTENUS 3
-                        $pdf->SetXY($posx+2,$posy+100); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
-                        $pdf->MultiCell(182, 3, "Montant total des factures $date03 : $total €", 0, 'L'); // imprime du texte
+                        // LIGNES CONTENUS 3                        
+                        //$pdf->SetXY($posx+2,$posy+100); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        $pdf->MultiCell(182, 3,  "Montant total des factures Du $dateDOrdre au $dateFOrdre : $total €", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 4
-                        $pdf->SetXY($posx+2,$posy+105); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        //$pdf->SetXY($posx+2,$posy+105); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->MultiCell(182, 3, "Montant total payé en Cesu préfinancés : $totalcesu €", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 5
-                        $pdf->SetXY($posx+2,$posy+120); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        //$pdf->SetXY($posx+2,$posy+120); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->MultiCell(182, 3, "Les sommes perçues pour financer les services à la personne sont à déduire de la valeur indiquée
 précédemment. La déclaration engage la responsabilité du seul contribuable.", 0, 'L'); // imprime du texte
                         
                         // LIGNES CONTENUS 6
-                        $pdf->SetXY($posx+2,$posy+145); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        //$pdf->SetXY($posx+2,$posy+145); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
                         $pdf->SetFont('','I',"8"); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
                         $pdf->MultiCell(182, 3, "* 1. Le client doit conserver à fin de contrôle, les factures remises par le prestataire de services qui précisent les dates
@@ -1155,13 +644,13 @@ la déclaration fiscale annuelle.
 3. Pour toute information concernant les services à la personne, le cesu et les aides, consultez services-a-domicile.fr", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         
                         // LIGNES CONTENUS 7
-                        $pdf->SetXY($posx+2,$posy+185); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        //$pdf->SetXY($posx+2,$posy+185); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
                         $pdf->SetFont('','',$default_font_size +2); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
                         $pdf->MultiCell(182, 3, "Fait pour valoir ce que de droit,", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?
                         
                         // LIGNES CONTENUS FIN
-                        $pdf->SetXY($posx+65,$posy+200); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
+                        //$pdf->SetXY($posx+65,$posy+200); // Position du texte sur la page //$POSX = LARGEUR // $POSY = HAUTEUR
                         $pdf->SetTextColor(32,32,32); // fixe la couleur du texte
                         $pdf->SetFont('','',$default_font_size); // fixe la police, le type ( 'B' pour gras, 'I' pour italique, '' pour normal,...)
                         $pdf->MultiCell(182, 3, "$bene, Cachet de l’entreprise", 0, 'L'); // imprime du texte avec saut de ligne avec choix de la largeur du formatage du texte ( MultiCell(600, 8,) ) 600 = largeur / 8 = hauteur?

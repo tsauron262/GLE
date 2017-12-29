@@ -1,0 +1,230 @@
+table: bh_inter
+parent_id_property: id_ticket
+parent_object: BH_Ticket
+
+labels:
+    name: intervention
+    is_female: 1
+
+objects: 
+    tech_user: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: user
+            id_object: 
+                field_value: tech_id_user
+                
+fields:
+    id_ticket:
+        label: Ticket
+        type: id_parent
+        input: 
+            type: hidden
+        required: 1
+        sortable: 1
+        display: 
+            default: 
+                type: nom_url
+            id: 
+                type: field_value
+            number: 
+                type: object_field
+                field: ticket_number
+            card:
+                type: card
+                card: default
+        sort_options: 
+            default: ticket_number
+            id: id
+            
+    tech_id_user:
+        label: Technicien
+        type: id_object
+        input: 
+            type: search_user
+        object: tech_user
+        required: 0
+        sortable: 1
+        search: 1
+        display: 
+            default: 
+                type: nom_url
+            id: 
+                type: field_value
+            card: 
+                type: card
+                card: user_card
+        sort_option: 
+            default: 
+                label: nom utilisateur
+                join_field: lastname
+                
+    timer:
+        label: Durée
+        type: time_last
+        input: 
+            type: timer
+        default_value: 0
+        display: 
+            default: 
+                type: timer
+        sortable: 1
+        search: 0
+        
+    priorite:
+        label: Priorité
+        type: int
+        values: 
+            array: priorities
+        required: 1
+        sortable: 1
+        search: 1
+    
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status
+        required: 1
+        sortable: 1
+        search: 1
+                    
+    description:
+        label: Description
+        type: text
+        input:
+            rows: 3
+            auto_expand: 1
+        sortable: 0
+        search: 0
+    
+list:
+    title: Interventions
+    checkboxes: 1
+    bulk_actions: 
+        - label: Supprimer les interventions sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: id
+    sort_way: desc
+    n: 10
+    cols:
+        id:
+            label: ID
+            field: id
+        user_create:
+            label: Créé par
+            field: user_create
+        date_create:
+            label: Début
+            field: date_create
+        tech_user: 
+            label: Technicien
+            field: tech_id_user
+        duree:
+            field: timer
+        priorite:
+            field: priorite
+            edit: 1
+        status:
+            field: status
+            edit: 1
+    add_form: default
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1
+    view_btn: 1
+    page_btn: 1
+    
+views:
+    default: 
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        no_reload: 1
+        buttons:
+            - label: Fermer
+              icon_before: times
+              classes: btn,btn-default
+              attr:
+                  onclick: closeInterView($(this));
+        rows: 
+            - cols:
+                - type: custom
+                  custom:
+                      callback: renderDefaultView
+    full:
+        no_reload: 1
+        rows: 
+            - cols:
+                - type: view
+                  col_lg: 5
+                  col_md: 8
+                  col_sm: 12
+                  view: 
+                      name: chrono
+                      panel: 0
+                      
+                - type: view
+                  col_lg: 7
+                  col_md: 12
+                  col_sm: 12
+                  view: 
+                      name: data
+                      panel: 0
+                      
+    chrono: 
+        no_reload: 1
+        rows:
+            - cols:
+                - type: custom
+                  custom:
+                      callback: renderChronoView
+                      
+    data: 
+        rows:
+            - cols:
+                  - type: object_common_fields
+                    col_lg: 4
+                    col_sm: 12
+                  - type: fields_table
+                    col_lg: 8
+                    col_sm: 12
+                    fields_table:
+                        rows:
+                            - field: tech_id_user
+                              display: card
+                            - field: timer
+                            - field: priorite
+                            - field: status
+                            - field: description
+
+    card:
+        rows:
+            - cols:
+                  - type: fields_table
+                    col_lg: 12
+                    fields_table:
+                        rows:
+                            - field: id_ticket
+                              display: card
+                            - field: timer
+                            - field: priorite
+                            - field: status
+                            - field: description
+        
+views_lists: 
+    user_currents:
+        title: Vos interventions en cours
+        view: card
+        view_btn: 1
+        add_btn: 0
+        edit_form: default
+        item_col_lg: 4
+        item_col_md: 6
+        item_modal_view: default
+        filters: 
+            callback: getUserCurrentIntersFilters
+        

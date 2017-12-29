@@ -196,7 +196,7 @@ if ($action == 'add')
 		exit;
 	}
 
-    $percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
+    $percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-2,-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
 
     // Clean parameters
 	$datep=dol_mktime($fulldayevent?'00':GETPOST("aphour"), $fulldayevent?'00':GETPOST("apmin"), 0, GETPOST("apmonth"), GETPOST("apday"), GETPOST("apyear"));
@@ -383,7 +383,7 @@ if ($action == 'update')
         $apmin=GETPOST('apmin');
         $p2hour=GETPOST('p2hour');
         $p2min=GETPOST('p2min');
-		$percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
+		$percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-2,-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
 
 	    // Clean parameters
 		if ($aphour == -1) $aphour='0';
@@ -397,7 +397,7 @@ if ($action == 'update')
 		$datep=dol_mktime($fulldayevent?'00':$aphour, $fulldayevent?'00':$apmin, 0, $_POST["apmonth"], $_POST["apday"], $_POST["apyear"]);
 		$datef=dol_mktime($fulldayevent?'23':$p2hour, $fulldayevent?'59':$p2min, $fulldayevent?'59':'0', $_POST["p2month"], $_POST["p2day"], $_POST["p2year"]);
 
-		$object->fk_action   = dol_getIdFromCode($db, GETPOST("actioncode"), 'c_actioncomm');
+		$object->type_id   = dol_getIdFromCode($db, GETPOST("actioncode"), 'c_actioncomm');
 		$object->label       = GETPOST("label");
 		$object->datep       = $datep;
 		$object->datef       = $datef;
@@ -579,7 +579,7 @@ if ($action == 'mupdate')
 
 // Actions to delete doc
 $upload_dir = $conf->agenda->dir_output.'/'.dol_sanitizeFileName($object->ref);
-$permissioncreate = ($user->rights->agenda->allactions->delete ||	(($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->delete));
+$permissioncreate = ($user->rights->agenda->allactions->create || (($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->read));
 include DOL_DOCUMENT_ROOT.'/core/actions_builddoc.inc.php';
 
 
@@ -864,7 +864,7 @@ if ($id > 0)
 
 	if ($listUserAssignedUpdated || $donotclearsession)
 	{
-        $percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
+        $percentage=in_array(GETPOST('status'),array(-1,100))?GETPOST('status'):(in_array(GETPOST('complete'),array(-2,-1,100))?GETPOST('complete'):GETPOST("percentage"));	// If status is -1 or 100, percentage is not defined and we must use status
 
 		$datep=dol_mktime($fulldayevent?'00':$aphour, $fulldayevent?'00':$apmin, 0, $_POST["apmonth"], $_POST["apday"], $_POST["apyear"]);
 		$datef=dol_mktime($fulldayevent?'23':$p2hour, $fulldayevent?'59':$p2min, $fulldayevent?'59':'0', $_POST["p2month"], $_POST["p2day"], $_POST["p2year"]);
@@ -1124,12 +1124,14 @@ if ($id > 0)
 			print '</td></tr>';
 
 			// related contact
+                        if($object->socid > 0){
 			print '<tr><td>'.$langs->trans("ActionOnContact").'</td><td>';
 			print '<div class="maxwidth200onsmartphone">';
-			$form->select_contacts($object->socid, $object->contactid, 'contactid', 1, '', '', 0, 'minwidth200');
+			$form->select_contacts($object->socid, $object->contactid, 'contactid', 1, '', 15, 0, 'minwidth200');
 			print '</div>';
 			print '</td>';
 			print '</tr>';
+                        }
 		}
 
 		// Project
@@ -1454,6 +1456,7 @@ if ($id > 0)
 			{
 				print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans("ToClone").'</a></div>';
 			}
+		}
 
 			if ($user->rights->agenda->allactions->delete ||
 			   (($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->delete))
@@ -1464,7 +1467,6 @@ if ($id > 0)
 			{
 				print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans("Delete").'</a></div>';
 			}
-		}
 	}
 
 	print '</div>';
@@ -1483,8 +1485,8 @@ if ($id > 0)
             $filedir=$conf->agenda->multidir_output[$conf->entity].'/'.$object->id;
             $urlsource=$_SERVER["PHP_SELF"]."?id=".$object->id;
 
-            $genallowed=$user->rights->agenda->myactions->create;
-	        $delallowed=$user->rights->agenda->myactions->delete;
+            $genallowed=$user->rights->agenda->myactions->read;
+	        $delallowed=$user->rights->agenda->myactions->create;
 
             $var=true;
 

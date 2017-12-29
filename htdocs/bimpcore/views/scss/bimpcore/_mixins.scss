@@ -1,0 +1,11 @@
+@mixin spinner($font-size, $color) {
+    font-family: 'FontAwesome';
+    font-size: $font-size;
+    color: $color;
+    content: '\f110';
+}
+
+@mixin spin() {
+    -webkit-animation: fa-spin 2s infinite linear;
+    animation: fa-spin 2s infinite linear;
+}

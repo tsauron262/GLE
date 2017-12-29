@@ -71,7 +71,7 @@
 		}
 		if ($object->element == 'stock')
 		{
-			print '<td width="20%" class="fieldrequired" colspan="2">'.$langs->trans("Product").'</td>';
+			print '<td width="20%" class="fieldrequired" colspan="1">'.$langs->trans("Product").'</td>';
 	        print '<td width="30%">';
 	        print $form->select_produits(GETPOST('product_id'), 'product_id', (empty($conf->global->STOCK_SUPPORTS_SERVICES)?'0':''), 20, 0, -1);
     		print ' &nbsp; <select name="mouvement" id="mouvement">';

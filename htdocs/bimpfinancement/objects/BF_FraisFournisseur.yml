@@ -1,0 +1,151 @@
+table: bf_frais_fournisseur
+parent_object: BF_Demande
+parent_id_property: id_demande
+
+labels:
+    name: facture fournisseur
+    name_plur: factures fournisseurs
+    is_female: 1
+    
+objects:
+    supplier:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: societe
+            id_object: 
+                field_value: id_soc_supplier
+    
+    file: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+            id_object: 
+                field_value: id_file
+                
+fields: 
+    id_demande: 
+        label: Demande
+        type: id_parent
+        input: 
+            type: hidden
+        
+    date: 
+        label: Date
+        type: date
+        required: 1
+        sortable: 1
+
+    id_soc_supplier:
+        label: Société fournisseur
+        type: id_object
+        default_value: 0
+        required: 0
+        object: supplier
+        input: 
+            type: search_societe
+            societe_type: supplier
+            help: Entrez le nom ou la référence pour rechercher un fournisseur enregistré
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: societe_card
+        sortable: 1
+    
+    supplier_name:
+        label: Nom fournisseur
+        type: string
+        required: 0
+        input:
+            type: text
+            help: Utilisez ce champ si le fournisseur n'est pas enregistré
+            display_if:
+                input_name: id_soc_supplier
+                show_values: 
+                    array: 0,
+        sortable: 1
+    
+    description:
+        label: Libellé
+        required: 1
+        sortable: 1
+        
+    amount:
+        label: Montant HT
+        type: money
+        required: 1
+        sortable: 1
+        
+    paid:
+        label: Payé
+        type: bool
+        default_value: 0
+        sortable: 1
+        
+    id_file:
+        label: Fichier
+        type: id_object
+        object: file
+        default_value: 0
+        input: 
+            type: hidden
+
+forms:
+    default: 
+        rows: 
+            - field: id_demande
+            - field: date
+            - field: id_soc_supplier
+            - field: supplier_name
+            - field: description
+            - field: amount
+            - field: paid
+            - field: id_file
+            - label: Fichier
+              input:
+                  name: file
+                  type: file_upload
+                  display_if:
+                      input_name: id_file
+                      show_values: 0,
+
+list:
+    checkboxes: 1
+    title: Factures fournisseurs
+    icon: vcard
+    bulk_actions: 
+        - label: Supprimer les lignes sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: date_create
+    sort_way: desc
+    n: 25
+    cols:
+        date: 
+            field: date
+        supplier:
+            label: Fournisseur
+            value:
+                callback: 
+                    method: displaySupplier
+                    params: 
+                        - nom_url
+        description:
+            field: description
+        amount: 
+            field: amount
+        paid:
+            field: paid
+            edit: 1
+            min_width: 125px
+    add_form: default
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1
+    

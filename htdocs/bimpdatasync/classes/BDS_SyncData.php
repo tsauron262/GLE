@@ -21,7 +21,7 @@ class BDS_SyncData
     public function __construct($id = null)
     {
         global $db;
-        $this->db = new BimpDb($db);
+        $this->db = new BDSDb($db);
 
         if (!is_null($id)) {
             $this->id = $id;
@@ -284,7 +284,7 @@ class BDS_SyncData
         $this->objects[$type] = $objects;
     }
 
-    public static function updateStatusById(BimpDb $db, $id_sync_data, $new_status)
+    public static function updateStatusById(BDSDb $db, $id_sync_data, $new_status)
     {
         if (!is_null($id_sync_data) && $id_sync_data) {
             return $result = $db->update(self::$table, array(
@@ -294,7 +294,7 @@ class BDS_SyncData
         return false;
     }
 
-    public static function updateStatusBylocIdObject(BimpDb $db, $id_process, $object_name, $id_object, $new_status)
+    public static function updateStatusBylocIdObject(BDSDb $db, $id_process, $object_name, $id_object, $new_status)
     {
         $where = '`loc_id_process` = ' . (int) $id_process;
         $where .= ' AND `loc_object_name` = \'' . $object_name . '\'';
@@ -305,7 +305,7 @@ class BDS_SyncData
                         ), $where);
     }
 
-    public static function resetAllStatus(BimpDb $db, $id_process, $object_name)
+    public static function resetAllStatus(BDSDb $db, $id_process, $object_name)
     {
         $where = '`loc_id_process` = ' . (int) $id_process;
         $where .= ' AND `loc_object_name` = \'' . $object_name . '\'';
@@ -315,7 +315,7 @@ class BDS_SyncData
                 ), $where);
     }
 
-    public static function getObjectValue(BimpDb $db, $value_name, $loc_id_process, $loc_object_name, $key_value, $key_property)
+    public static function getObjectValue(BDSDb $db, $value_name, $loc_id_process, $loc_object_name, $key_value, $key_property)
     {
         if (!property_exists('BDS_SyncData', $value_name)) {
             return null;
@@ -335,7 +335,7 @@ class BDS_SyncData
         return $db->getValue(self::$table, $value_name, $where);
     }
 
-    public static function getObjectObjects(BimpDb $db, $type, $loc_id_process, $loc_object_name, $loc_id_object)
+    public static function getObjectObjects(BDSDb $db, $type, $loc_id_process, $loc_object_name, $loc_id_object)
     {
         $sql = 'SELECT o.loc_value, o.ext_value FROM ' . MAIN_DB_PREFIX . self::$table . '_object o';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . self::$table . ' d ON o.id_sync_data = d.id';
@@ -372,7 +372,7 @@ class BDS_SyncData
         }
     }
 
-    public static function getObjectsList(BimpDb $db, $id_process = null, $object_name = null)
+    public static function getObjectsList(BDSDb $db, $id_process = null, $object_name = null)
     {
         $where = '';
 
@@ -403,7 +403,7 @@ class BDS_SyncData
         return $objects;
     }
 
-    public static function getAllObjectsList(BimpDb $db, $id_process = null, $order_by = 'date_update', $order_way = 'desc')
+    public static function getAllObjectsList(BDSDb $db, $id_process = null, $order_by = 'date_update', $order_way = 'desc')
     {
         $where = '';
         if (!is_null($id_process)) {

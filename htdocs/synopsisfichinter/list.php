@@ -83,7 +83,7 @@ $sql.= " FROM (" . MAIN_DB_PREFIX . "societe as s";
 if (!$user->rights->societe->client->voir && !$socid)
     $sql.= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
 $sql.= ", " . MAIN_DB_PREFIX . "fichinter as f)";
-//$sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd ON fd.fk_fichinter = f.rowid";
+//$sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsis_fichinterdet as fd ON fd.fk_fichinter = f.rowid";
 $sql.= " WHERE f.fk_soc = s.rowid ";
 $sql.= " AND f.entity = " . $conf->entity;
 if ($search_ref)

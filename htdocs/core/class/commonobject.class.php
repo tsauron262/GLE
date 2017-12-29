@@ -1562,22 +1562,22 @@ abstract class CommonObject
 
 						switch ($this->element) {
 							case 'propal':
-								$this->updateline($line->id, $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->desc, 'HT', $line->info_bits, $line->special_code, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->product_type, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
+								$this->updateline($line->id, $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx,  ($line->description?$line->description:$line->desc), 'HT', $line->info_bits, $line->special_code, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->product_type, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
 								break;
 							case 'commande':
-								$this->updateline($line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->date_start, $line->date_end, $line->product_type, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
+								$this->updateline($line->id,  ($line->description?$line->description:$line->desc), $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->date_start, $line->date_end, $line->product_type, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
 								break;
 							case 'facture':
-								$this->updateline($line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->product_type, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit, $line->multicurrency_subprice);
+								$this->updateline($line->id,  ($line->description?$line->description:$line->desc), $line->subprice, $line->qty, $line->remise_percent, $line->date_start, $line->date_end, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits, $line->product_type, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->special_code, $line->array_options, $line->situation_percent, $line->fk_unit, $line->multicurrency_subprice);
 								break;
 							case 'supplier_proposal':
-								$this->updateline($line->id, $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->desc, 'HT', $line->info_bits, $line->special_code, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->product_type, $line->array_options, $line->ref_fourn, $line->multicurrency_subprice);
+								$this->updateline($line->id, $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, ($line->description?$line->description:$line->desc), 'HT', $line->info_bits, $line->special_code, $line->fk_parent_line, $line->skip_update_total, $line->fk_fournprice, $line->pa_ht, $line->label, $line->product_type, $line->array_options, $line->ref_fourn, $line->multicurrency_subprice);
 								break;
 							case 'order_supplier':
-								$this->updateline($line->id, $line->desc, $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits,  $line->product_type, false, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
+								$this->updateline($line->id,  ($line->description?$line->description:$line->desc), $line->subprice, $line->qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT', $line->info_bits,  $line->product_type, false, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
 								break;
 							case 'invoice_supplier':
-								$this->updateline($line->id, $line->desc, $line->subprice, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->qty, 0, 'HT', $line->info_bits, $line->product_type, $line->remise_percent, false, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
+								$this->updateline($line->id, ($line->description?$line->description:$line->desc), $line->subprice, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->qty, 0, 'HT', $line->info_bits, $line->product_type, $line->remise_percent, false, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->multicurrency_subprice);
 								break;
 							default:
 								dol_syslog(get_class($this).'::setMulticurrencyRate no updateline defined', LOG_DEBUG);
@@ -4559,12 +4559,16 @@ abstract class CommonObject
 					{
 						$out .= '<tr '.$class.$csstyle.' class="'.$this->element.'_extras_'.$key.'">';
 					}
-					// Convert date into timestamp format
+					// Convert date into timestamp format (value in memory must be a timestamp)
 					if (in_array($extrafields->attribute_type[$key],array('date','datetime')))
 					{
 						$value = isset($_POST["options_".$key])?dol_mktime($_POST["options_".$key."hour"], $_POST["options_".$key."min"], 0, $_POST["options_".$key."month"], $_POST["options_".$key."day"], $_POST["options_".$key."year"]):$this->db->jdate($this->array_options['options_'.$key]);
 					}
-
+					// Convert float submited string into real php numeric (value in memory must be a php numeric)
+					if (in_array($extrafields->attribute_type[$key],array('price','double')))
+					{
+						$value = isset($_POST["options_".$key])?price2num($_POST["options_".$key]):$this->array_options['options_'.$key];
+					}
 					if($extrafields->attribute_required[$key])
 						$label = '<span'.($mode != 'view' ? ' class="fieldrequired"':'').'>'.$label.'</span>';
 

@@ -2,10 +2,10 @@
 
 require_once('../main.inc.php');
 
-llxHeader("", "Suivie des interventions SAV");
+llxHeader("", "Suivi des interventions SAV");
 
 
-print load_fiche_titre("Suivie des interventions SAV");
+print load_fiche_titre("Suivi des interventions SAV");
 
 
 $requete = "SELECT c.id, c.ref FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 c105, " . MAIN_DB_PREFIX . "element_element e1, " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "facture f"

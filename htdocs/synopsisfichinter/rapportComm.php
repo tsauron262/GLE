@@ -95,7 +95,7 @@ $sql = "SELECT s.nom,
             f.duree,
 	    f.total_ht";
 $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s,
-            " . MAIN_DB_PREFIX . "Synopsis_fichinter as f ";
+            " . MAIN_DB_PREFIX . "synopsis_fichinter as f ";
 $sql .= " WHERE f.fk_soc = s.rowid";
 
 if ($filterUser) {

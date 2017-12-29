@@ -1,0 +1,129 @@
+table: bimp_file
+
+parent_module: 
+    field_value: parent_module
+parent_object: 
+    field_value: parent_object_name
+parent_id_property: id_parent
+    
+labels: 
+    name: fichier
+    
+common_fields: 1
+
+fields:
+    parent_module:
+        label: Module
+        type: string
+        input: 
+            type: hidden
+            
+    parent_object_name:
+        label: Objet
+        type: string
+        input: 
+            type: hidden
+            
+    id_parent:
+        label: ID Objet
+        type: id_object
+        input: 
+            type: hidden
+    
+    file_dir:
+        label: Dossier de destination
+        type: string
+        size: 256
+        input: 
+            type: hidden
+            
+    file_name:
+        label: Nom
+        type: string
+        sortable: 1
+        search: 1
+        
+    file_ext:
+        label: Extension
+        type: string
+        sortable: 1
+        search: 1
+        
+    file_size:
+        label: Taille
+        type: int
+        input: 
+            type: hidden
+        sortable: 1
+        search: 1
+            
+    file_type: 
+        label: Type
+        type: string
+        values: 
+            array: types
+        display:
+            icon: 
+                icon_only: 1
+        sortable: 1
+        search: 1
+                
+    description:
+        label: Description
+        type: text
+        input:
+            auto_expand: 1
+            rows: 1
+
+forms:
+    upload: 
+        rows:
+            - field: parent_module
+            - field: parent_object_name
+            - field: id_parent
+            - field: file_dir
+            - label: Fichier
+              input:
+                  name: file
+                  type: file_upload
+            - field: file_name
+              label: Nom à donner au fichier
+            - field: description
+    edit:
+        rows:
+            - field: file_name
+            - field: description
+lists:
+    default:
+        title: Fichiers
+        checkboxes: 1
+        add_form: upload
+        edit_btn: 1
+        edit_form: edit
+        delete_btn: 
+            callback: isDeletable
+        bulk_actions: 
+            - label: Supprimer les fichiers sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        sort_col: id
+        sort_way: desc
+        n: 10
+        cols:
+            type: 
+                field: file_type
+                display: icon
+            nom:
+                field: file_name
+            size: 
+                field: file_size
+            date:
+                label: Date
+                field: date_create
+            descripton: 
+                field: description
+        extra_buttons:
+            callback: getDefaultListExtraButtons
+                
+    

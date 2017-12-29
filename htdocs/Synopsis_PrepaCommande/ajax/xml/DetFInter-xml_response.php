@@ -23,7 +23,7 @@
   if ($id > 0)
   {
     $requete = "SELECT *
-                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft
+                  FROM ".MAIN_DB_PREFIX."synopsis_fichinterdet as ft
              LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
                  WHERE fk_fichinter = ".$id. "
               ORDER BY ft.rang ";

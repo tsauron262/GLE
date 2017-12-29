@@ -1054,7 +1054,7 @@ class Synopsis_Contrat extends Contrat {
 
         $requete = "SELECT fd.rowid, fd.duree
                       FROM " . MAIN_DB_PREFIX . "fichinter as f,
-                           " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
+                           " . MAIN_DB_PREFIX . "synopsis_fichinterdet as fd,
                            " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as b
                      WHERE b.id = fd.fk_typeinterv
                        AND fd.fk_fichinter = f.rowid

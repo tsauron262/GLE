@@ -168,7 +168,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $propal->addline(/*"Prise en charge :  : " . $chrono->ref .*/
                     "\n" . "Machine : " . $nomMachine .
                     "\n" . "Frais de gestion devis refusé.
-", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 0, $chrono->societe->remise_percent, 'HT', null, null, 1);
+", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 3470, $chrono->societe->remise_percent, 'HT', null, null, 1);
 
 
 
@@ -340,12 +340,12 @@ if (isset($_REQUEST['actionEtat'])) {
             $facture->fetch($facture->id);
 
 
-            $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "element_contact 
+          /*  $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "element_contact 
 WHERE  `element_id` =" . $propal->id . "
 AND  `fk_c_type_contact` =40");
             while ($ligne = $db->fetch_object($sql))
                 $db->query("INSERT INTO " . MAIN_DB_PREFIX . "element_contact (`statut`, `element_id`, `fk_c_type_contact`, `fk_socpeople`) VALUES ('4', '" . $facture->id . "', '60', '" . $ligne->fk_socpeople . "');");
-
+*/
             if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0 && $_REQUEST['modeP'] != 56)) {
                 require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                 $payement = new Paiement($db);
@@ -485,7 +485,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
     }
 
 
-    $textSuivie = "\n <a href='/bimp/synopsis_chrono_public/page.php?back_serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
+    $textSuivie = "\n <a href='".DOL_MAIN_URL_ROOT."/synopsis_chrono_public/page.php?back_serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
 
 
     if ($type == "Facture") {
@@ -524,6 +524,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
         $text .= $textSuivie . "\n\nCordialement.
 \nL'équipe BIMP" . $signature;
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3);
+        //sendSms($chrono, "Bonjour, nous venons d'envoyer votre devis par mail. L'Equipe BIMP.");
     } elseif ($type == "debut") {
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agréé Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n" . $textSuivie . "
 \n Cordialement."
@@ -557,6 +558,6 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine,
 \nL'équipe BIMP" . $signature, array(), array(), array());
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
     } elseif ($type == "commercialRefuse") {
-        mailSyn2("Devis sav refusé par « " . $chrono->societe->getFullName($langs) . " »", $toMail, $fromMail, "Notre client « " . $chrono->societe->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . $chrono->propal->total_ht . "€ »", array(), array(), array());
+        mailSyn2("Devis sav refusé par « " . $chrono->societe->getFullName($langs) . " »", $toMail, $fromMail, "Notre client « " . $chrono->societe->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($chrono->propal->total) . "€ »", array(), array(), array());
     }
 }

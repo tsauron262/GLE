@@ -45,11 +45,11 @@
 
     $requete1="SELECT fk_user_author, fk_user_valid , datei, duree, description, fk_statut, note_private, note_public, rowid";
     $requete2="SELECT count(rowid) as nb, fk_user_author as user";
-    $requete = " FROM ".MAIN_DB_PREFIX."Synopsis_fichinter
+    $requete = " FROM ".MAIN_DB_PREFIX."synopsis_fichinter
                WHERE fk_commande IN (".join(",",$arrGrpCom).")";
     if ($DiId>0)
     {
-        $requete .= " AND ".MAIN_DB_PREFIX."Synopsis_fichinter.rowid = ".$DiId;
+        $requete .= " AND ".MAIN_DB_PREFIX."synopsis_fichinter.rowid = ".$DiId;
     }
     $requete2 .= $requete . " GROUP BY user";
     $requete1 .= $requete . " ORDER BY fk_user_author, datei DESC";

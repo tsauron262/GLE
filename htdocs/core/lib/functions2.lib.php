@@ -973,6 +973,32 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
         $counter = $obj->val;
     }
     else dol_print_error($db);
+    
+    
+    /* mod drsi */
+    if ($mode == 'next' && $table == "societe") {
+        $tabResa = getElementElement("resa", $table . $maskLike);
+        for ($i = 1; $i < 100; $i++) {
+            $numTemp = $counter + 1;
+            $change = false;
+            foreach ($tabResa as $resa) {
+                if ($resa['s'] == $numTemp) {
+                    if ($resa['d'] == 1)
+                        setElementElement("resa", $table . $maskLike, $numTemp, "2");
+                    else {
+                        $counter++;
+                        $change = true;
+                    }
+                }
+            }
+            if (!$change) {
+                addElementElement("resa", $table . $maskLike, $numTemp, "1");
+                break;
+            }
+        }
+    }
+    /* fmod drsi */
+    
 
     // Check if we must force counter to maskoffset
     if (empty($counter) || preg_match('/[^0-9]/i',$counter)) $counter=$maskoffset;

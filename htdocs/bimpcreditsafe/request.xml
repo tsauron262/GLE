@@ -1,0 +1,14 @@
+<xmlrequest>
+    <header>
+        <username>testgeta</username>
+        <password>creditsafe</password>
+        <operation>getcompanyinformation</operation>
+        <language>FR</language>
+        <country>FR</country>
+        <chargereference></chargereference>
+    </header>
+    <body>
+        <package>standard</package>
+        <companynumber>SIREN</companynumber>
+    </body>
+</xmlrequest>

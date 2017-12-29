@@ -48,7 +48,7 @@ $reports = BDS_Report::getReportsList();
 $processes = BDSProcess::getProcessesQuery();
 
 global $db;
-$bdb = new BimpDb($db);
+$bdb = new BDSDb($db);
 $form = new Form($db);
 
 $dateTo = new DateTime();

@@ -1,0 +1,97 @@
+table: bmp_event_billets
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: vente de billets
+    name_plur: ventes de billets
+    is_female: 1
+    
+objects: 
+    seller: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object: 
+                field_value: id_soc_seller
+    tarif:
+       relation: hasOne
+       delete: 0
+       instance: 
+           bimp_object: BMP_Tarif
+           id_object: 
+               field_value: id_tarif
+               
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+    
+    id_soc_seller: 
+        label: Vendeur
+        type: id_object
+        object: seller
+        input: 
+            type: search_societe
+            help: Entrez une référence ou un nom pour rechercher un vendeur enregistré
+        display: 
+            type: nom_url
+        sortable: 1
+        search: 1
+            
+    seller_name:
+        label: Nom Vendeur
+        type: string
+        input: 
+            help: Utilisez ce champ si le vendeur n'est pas enregistré
+            display_if:
+                input_name: id_soc_seller
+                show_values: 
+                    array: 0,
+        sortable: 1
+        
+    id_tarif:
+        label: Tarif
+        type: id_object
+        object: tarif
+        values: 
+            array: tarifs
+        sortable: 1
+        search: 1
+        
+    quantity:
+        label: Quantité vendue
+        type: int
+        default_value: 0
+        sortable: 1
+        history: 1
+            
+list:
+    title: Vente de billets
+    checkboxes: 1
+    bulk_actions:
+        - label: supprimer les lignes sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this))
+    sort_col: id
+    sort_way: desc
+    n: 25
+    update_btn: 1
+    add_form: default
+    delete_btn: 1
+    cols: 
+        seller:
+            label: Vendeur
+            value: 
+                callback: displaySeller
+        tarif_name:
+            label: Tarif
+            value: 
+                callback: displayTarif
+        quantity: 
+            field: quantity
+            edit: 1
+            history: 1

@@ -49,9 +49,9 @@ class Synopsisfichinter extends Fichinter {
 
     public $db;
     public $element = 'synopsisfichinter';
-    public $table_element = 'Synopsis_fichinter';
+    public $table_element = 'synopsis_fichinter';
     public $fk_element = 'fk_fichinter';
-    public $table_element_line = 'Synopsis_fichinterdet';
+    public $table_element_line = 'synopsis_fichinterdet';
     public $id;
     public $socid;        // Id client
     public $client;        // Objet societe client (a charger par fetch_client)
@@ -242,7 +242,7 @@ class Synopsisfichinter extends Fichinter {
         
         $sql = "SELECT ref, description, fk_soc, fk_user_author, fk_statut, fk_contrat, fk_commande, total_ht, total_tva, total_ttc,";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf, natureInter";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "synopsis_fichinter";
         $sql.= " WHERE rowid=" . $rowid;
 
 //        dol_syslog("Fichinter::fetch sql=".$sql);
@@ -337,6 +337,10 @@ class Synopsisfichinter extends Fichinter {
      */
     function valid($user, $outputdir) {
         $this->setValid($user);
+        
+        
+        if($this->total_ttc > 0)
+        mailSyn2("FI Validé", "m.gallet@bimp.fr", null, "Bonjour, la FI ".str_replace("card.php", "document.php", $this->getNomUrl(1))." a été validé pour facturation (".$this->total_ttc." €)");
 //        global $langs, $conf;
 //        $this->db->begin();
 //
@@ -427,7 +431,7 @@ class Synopsisfichinter extends Fichinter {
      */
       function verifyNumRef($soc)
       {
-      $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_fichinter";
+      $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."synopsis_fichinter";
       $sql.= " WHERE ref = '".$this->ref."'";
 
       $result = $this->db->query($sql);
@@ -748,7 +752,7 @@ class Synopsisfichinter extends Fichinter {
         global $langs, $conf;
         $this->update_note($description, "_private");
 //        if ($user->rights->synopsisficheinter->creer) {
-//            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_fichinter ";
+//            $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsis_fichinter ";
 //            $sql.= " SET note_private = '" . addslashes($description) . "'";
 //            $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 //
@@ -969,7 +973,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
 
     public $db;
     public $error;
-    // From ".MAIN_DB_PREFIX."Synopsis_fichinterdet
+    // From ".MAIN_DB_PREFIX."synopsis_fichinterdet
     public $rowid;
     public $fk_fichinter;
     public $desc;              // Description ligne
@@ -1002,7 +1006,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $sql = 'SELECT ft.rowid, ft.fk_fichinter, ft.description, ft.duree, ft.rang, ft.fk_typeinterv, f.label as typeinterv ';
         $sql .= ',`tx_tva`,`pu_ht` ,`qte`,`total_ht`,`total_tva`,`total_ttc`,`fk_contratdet`,`fk_commandedet`,`isForfait`';
         $sql.= ' ,ft.date as datei,fk_depProduct,f.isDeplacement';
-        $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as ft";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet as ft";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv";
 
         
@@ -1251,13 +1255,13 @@ class SynopsisfichinterLigne extends FichinterLigne{
     }
 
     /**
-     *      \brief         Mise a jour duree total dans table ".MAIN_DB_PREFIX."Synopsis_fichinter
+     *      \brief         Mise a jour duree total dans table ".MAIN_DB_PREFIX."synopsis_fichinter
      *        \return        int        <0 si ko, >0 si ok
      */
     function update_total() {
         global $user, $langs, $conf;
         /*        $sql = "SELECT SUM(duree) as total_duration";
-          $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet";
+          $sql.= " FROM ".MAIN_DB_PREFIX."synopsis_fichinterdet";
           $sql.= " WHERE fk_fichinter=".$this->fk_fichinter;
 
           dol_syslog("FichinterLigne::update_total sql=".$sql);
@@ -1268,7 +1272,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
           $total_duration=0;
           if ($obj) $total_duration = $obj->total_duration;
 
-          $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter";
+          $sql = "UPDATE ".MAIN_DB_PREFIX."synopsis_fichinter";
           $sql.= " SET duree = ".$total_duration;
           $sql.= " WHERE rowid = ".$this->fk_fichinter;
 
@@ -1306,7 +1310,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
                                    sum(total_tva) as stva,
                                    sum(total_ttc) as sttc,
                                    sum(duree) as sdur
-                              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet
+                              FROM " . MAIN_DB_PREFIX . "synopsis_fichinterdet
                              WHERE fk_fichinter = " . $this->fk_fichinter;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);

@@ -4,10 +4,10 @@ require_once('../main.inc.php');
 
 require_once DOL_DOCUMENT_ROOT.'/synopsischrono/class/chrono.class.php';
 
-llxHeader("", "Suivie des prêt SAV");
+llxHeader("", "Suivi des prêt SAV");
 
 
-print load_fiche_titre("Suivie des prêt SAV en cours");
+print load_fiche_titre("Suivi des prêt SAV en cours");
 
 
 

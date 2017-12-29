@@ -13,7 +13,7 @@ $id = isset($_GET["id"]) ? $_GET["id"] : '';
 
 
 if($user->societe_id)
-    header("Location: ".DOL_URL_ROOT."/comm/propal.php?id=".$id);
+    header("Location: ".DOL_URL_ROOT."/comm/propal/card.php?id=".$id);
 
 // Security check
 if ($user->societe_id)
@@ -39,7 +39,7 @@ $propalSui = $revisionPropal->getPropalSuiv();
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "revisee") {
     $newId = $revisionPropal->reviserPropal(array(array('Diagnostic'), null));
     if($newId)
-            header("Location: " . DOL_URL_ROOT.'/comm/propal.php?id=' . $newId);
+            header("Location: " . DOL_URL_ROOT.'/comm/propal/card.php?id=' . $newId);
 }
 
 

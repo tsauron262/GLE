@@ -1,0 +1,70 @@
+@import "bootstrap/variables";
+@import "bootstrap/mixins";
+
+#id-right {
+    padding-bottom: 60px;
+}
+
+#bimp_fixe_tabs {
+    position: fixed;
+    z-index: 1000;
+    bottom: 0;
+    right: 0;
+    display: inline-block;
+
+    #bimp_fixe_tabs_captions {
+        text-align: right;
+        display: block;
+        background-color: transparent;
+        
+        .fixe_tab_caption {
+            @include transition (all 0.3s ease);
+
+            display: inline-block;
+            padding: 12px 8px;
+            margin: 0 3px;
+            border-left: 1px solid $gray-dark;
+            border-right: 1px solid $gray-dark;
+            border-top: 3px solid $primary;
+            background-color: #fff;
+            box-shadow: 0 0 4px $gray-dark;
+            cursor: pointer;
+            z-index: 1002;
+
+            .title {
+                font-size: 15px;
+                color: $gray-darker;
+                span {
+                    margin: 0 2px;
+                }
+            }
+
+            &.active, &:hover {
+                background-color: $primary;
+                .title {
+                    color: #fff;
+                }
+            }
+        }
+    }
+    
+    #bimp_fixe_tabs_contents {
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 0 4px $gray-dark;
+        z-index: 1001;
+        
+        .fixe_tab_content {
+            background-color: $gray-light;
+            display: none;
+            padding: 8px;
+            text-align: right;
+            
+            div {
+                text-align: left;
+            }
+        }
+    }
+
+}
+

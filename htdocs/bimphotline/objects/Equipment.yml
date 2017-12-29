@@ -1,0 +1,225 @@
+table: bh_equipment
+controller: equipment
+
+labels:
+    name: équipement
+
+objects:
+    product:
+        relation: hasOne
+        instance:
+            dol_object: product
+            id_object:
+                field_value: id_product
+        cards: 
+            default:
+                title:
+                    object_prop: label
+                    image: 
+                        callback: 
+                            method: getProductImageUrl
+                            params: 
+                                id_product:
+                                    field_value: id_product
+                            instance: BimpTools
+                            is_static: 1
+                    fields:
+                        Réf.:
+                            object_prop: ref
+                    view_btn: 1
+                    
+    contrat:
+        instance:
+            dol_object: contrat
+
+associations:
+    contrats:
+        object: contrat
+        display:
+            default:
+                type: callback
+                
+        label: Contrats
+        input:
+            type: search_list
+            multiple: 1
+            search_list:
+                table: contrat c
+                field_return_value: c.rowid
+                field_return_label: c.ref
+                options:
+                    default:
+                        label: Recherche par référence contrat
+                        fields_search: c.ref,c.rowid
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez la référence ou l'ID d'un contrat
+                    by_client:
+                        label: Recherche par client
+                        fields_search: s.nom,s.code_client
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez le nom ou le code d'un client
+                
+fields: 
+    id_product: 
+        label: Produit
+        type: id_object
+        required: 1
+        search: 1
+        object: product
+        input:
+            type: search_product
+            help: Entrez la référence ou le nom d'un produit
+        display:
+            default:
+                type: field_value
+            nom_url: 
+                type: nom_url
+            nom:
+                type: nom
+            card:
+                type: card
+                card: default
+                    
+        sortable: 1
+        sort_options:
+            default:
+                label: référence
+                join_field: ref
+            id:
+                label: id du produit
+            label:
+                label: nom
+                join_field: label
+                
+    serial: 
+        label: Numéro de série
+        type: string
+        size: 128
+        required: 1
+        search:
+            type: value_part
+            part_type: beginning
+            search_on_key_up: 1
+            min_chars: 0
+        sortable: 1
+        
+    date_purchase: 
+        label: Date d'achat
+        type: date
+        required: 0
+        search:
+            type: date_range
+        sortable: 1
+        
+    date_warranty_end: 
+        label: Date de fin de garantie
+        type: date
+        required: 0
+        search:
+            type: date_range
+        sortable: 1
+        
+    warranty_type: 
+        label: Type de garantie
+        type: string
+        values: 
+            array: warranty_types
+        search: 1
+        sortable: 1
+                
+    admin_login: 
+        label: Login admin
+        type: string
+        size: 128
+        required: 0
+        sortable: 1
+        search: 0
+        
+    admin_pword: 
+        label: Mot de passe admin
+        type: string
+        size: 128
+        required: 0
+        sortable: 1
+        search: 0        
+        
+    note:
+        label: Note
+        type: text
+        size: 800
+        required: 0
+        sortable: 0
+        search: 0
+
+views:
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: object_common_fields
+                    col_lg: 3
+                    col_sm: 12
+                  - type: fields_table
+                    col_lg: 9
+                    fields_table:
+                        rows:
+                            - field: id_product
+                              display: card
+                            - field: serial
+                            - field: date_purchase
+                            - field: warranty_type
+                            - field: date_warranty_end
+                            - field: admin_login
+                            - field: admin_pword
+                            - field: note
+                            - association: contrats
+                              edit: 1
+                              
+forms:
+    default:
+        rows: 
+            - field: id_product
+            - field: serial
+            - field: date_purchase
+            - field: warranty_type
+            - field: date_warranty_end
+            - field: admin_login
+            - field: admin_pword
+            - association: contrats
+
+list:
+    checkboxes: 1
+    bulk_actions: 
+        - label: Supprimer les équipements sélectionnés
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: product
+    sort_way: asc
+    n: 10
+    cols:
+        id:
+            label: ID
+            field: id
+        product: 
+            field: id_product
+            display: nom_url
+        serial:
+            field: serial
+        purchase:
+            field: date_purchase
+        warranty_type:
+            field: warranty_type
+        warranty_end:
+            field: date_warranty_end
+    add_form: default
+    edit_btn: 1
+    delete_btn: 1
+    view_btn: 1
+    page_btn: 1

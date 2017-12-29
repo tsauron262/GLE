@@ -1,0 +1,38 @@
+bootstrap: 1
+title: Marge de production
+
+objects:
+    event:
+        instance:
+            bimp_object: BMP_Event
+    
+    categorie_montant:
+        instance: 
+            bimp_object: BMP_CategorieMontant
+                
+    type_montant:
+        instance: 
+            bimp_object: BMP_TypeMontant
+            
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Evénements
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: event
+                      
+        montants:
+            label: Montants
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: categorie_montant
+                - type: list
+                  list: 
+                      panel: 1
+                      object: type_montant

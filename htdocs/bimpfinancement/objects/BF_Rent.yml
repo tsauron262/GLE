@@ -1,0 +1,71 @@
+table: bf_rent
+parent_object: BF_Demande
+parent_id_property: id_demande
+positions: 1
+position_insert: before
+
+labels:
+    name: loyer
+    
+fields: 
+    id_demande: 
+        label: Demande
+        type: id_parent
+        input: 
+            type: hidden
+            
+    quantity: 
+        label: Nombre
+        type: int
+        required: 1
+        sortable: 1
+        
+    amount_ht:
+        label: Montant HT
+        type: money
+        required: 1
+        sortable: 1
+        
+    payment:
+        label: Règlement
+        type: int
+        values: 
+            array: payments
+        required: 0
+        sortable: 1
+        
+    periodicity:
+        label: Périodicité
+        type: int
+        values: 
+            array: periodicities
+        
+list:
+    checkboxes: 1
+    title: Loyers
+    icon: calendar
+    bulk_actions: 
+        - label: Supprimer les lignes sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_col: position
+    sort_way: asc
+    n: 10
+    cols:
+        quantity: 
+            field: quantity
+            edit: 1
+        amount: 
+            field: amount_ht
+            edit: 1
+        payment:
+            field: payment
+            edit: 1
+        periodicity:
+            field: periodicity
+            edit: 1
+    add_object_row: 1
+    update_btn: 1
+    delete_btn: 1
+    drag_n_drop: 1

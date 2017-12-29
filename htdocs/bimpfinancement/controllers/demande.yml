@@ -1,0 +1,84 @@
+bootstrap: 1
+objects:
+    demande: 
+        instance: 
+            bimp_object: BF_Demande
+            id_object: 
+                request: id
+                
+sections:
+    - type: buttons
+      buttons:
+          - label: Liste des demandes de financement
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary
+                
+    - type: tabs
+      tabs: 
+          default: 
+              label: Demande
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: demande
+                        object: demande
+                        
+          montants: 
+              label: Montants
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: montants
+                        object: demande
+          
+          fournisseurs: 
+              label: Factures fournisseurs
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: fournisseurs
+                        object: demande
+                        
+          fichiers:
+              label: Fichiers
+              url_params:
+                  id: 
+                      request: id
+              sections:
+                  - type: list
+                    list: 
+                        title: Fichier joints
+                        name: default
+                        panel: 1
+                        object: demande
+                        children: files
+                        
+    - type: list
+      list:
+          panel: 1
+          object: demande
+          children: comments
+          
+    - type: buttons
+      buttons:
+          - label: Liste des demandes de financement
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

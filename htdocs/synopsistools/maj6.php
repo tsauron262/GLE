@@ -16,6 +16,7 @@
  */
 require_once('../main.inc.php');
 
+
 include_once("./class/maj.class.php");
 
 global $nbError;
@@ -39,11 +40,20 @@ if (isset($_REQUEST['ok'])) {
     
     echo "<form><input type='submit' name='ok2' value='ok'/></form>";
 }
+elseif (isset($_REQUEST['ok3'])) {
+    $idCat = "1035";
+    $tabInsert = array("ADSL","Fibre","Imprimant laser","Imprimante étiquette","Imprimante grand format","Imprimante jet d'encre ","Imprimante matricielles","Multifonction jet d'encre","Multifonction laser","SDSL");
+    $sql = "INSERT INTO `llx_categorie` (`rowid`, `entity`, `fk_parent`, `label`, `type`, `description`, `fk_soc`, `visible`, `import_key`, `color`) VALUES ";
+    foreach($tabInsert as $name)
+        $sql .= "(NULL, '1', '".$idCat."', '". addslashes($name)." ', '0', '', NULL, '0', NULL, ''),";
+    echo $sql;
+}
 elseif (isset($_REQUEST['ok2'])) {
     foreach($tabModuleReactive as $mod){
         activateModule($mod,1);
         test($db, "Module ".$mod." activer");
     }
+    
     
     
     $dest = "type2";

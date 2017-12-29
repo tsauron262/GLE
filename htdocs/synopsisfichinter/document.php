@@ -43,7 +43,7 @@ $action = GETPOST('action','alpha');
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'ficheinter', $id, 'Synopsis_fichinter');
+$result = restrictedArea($user, 'ficheinter', $id, 'synopsis_fichinter');
 
 
 // Get parameters
@@ -75,7 +75,7 @@ if (GETPOST('sendit','alpha') && ! empty($conf->global->MAIN_UPLOAD_DOC))
 
 	if (dol_mkdir($upload_dir) >= 0)
 	{
-		$resupload=dol_move_uploaded_file($_FILES['userfile']['tmp_name'], $upload_dir . "/" . dol_unescapefile($_FILES['userfile']['name']),0,0,$_FILES['userfile']['error']);
+		$resupload=dol_move_uploaded_file($_FILES['userfile']['tmp_name'][0], $upload_dir . "/" . dol_unescapefile($_FILES['userfile']['name'][0]),0,0,$_FILES['userfile']['error']);
 		if (is_numeric($resupload) && $resupload > 0)
 		{
 		    if (image_format_supported($upload_dir . "/" . $_FILES['userfile']['name']) == 1)
@@ -133,7 +133,8 @@ if ($object->id)
 
 	if ($action == 'delete')
 	{
-		$file = $upload_dir . '/' . GETPOST('urlfile','alpha');	// Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
+		$file = $conf->ficheinter->dir_output.'/' . GETPOST('urlfile','alpha');	// Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
+
 		$result=dol_delete_file($file);
 		//if ($result >= 0) $mesg=$langs->trans("FileWasRemoced");
 	}

@@ -1,0 +1,221 @@
+table: bmp_event
+controller: event
+
+labels: 
+    name: événement
+
+objects:
+    groups: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventGroup
+            
+    tarifs: 
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BMP_Tarif
+            
+    coprods: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventCoProd
+    
+    coprod_def_parts:
+        realtion: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventCoProdDefPart
+            
+    frais: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventMontant
+        list: 
+            title: Frais
+            filters: 
+                type: 1
+            
+    recettes: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventMontant
+        list: 
+            title: Recettes
+            filters: 
+                type: 2
+                
+    billets:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventBillets
+    
+fields: 
+    name: 
+        label: Nom
+        
+    date_begin:
+        label: Du
+        type: datetime
+        required: 1
+        sortable: 1
+        search: 1
+        
+    date_end: 
+        label: Au
+        type: datetime
+        required: 1
+        sortable: 1
+        search: 1
+    
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+        sortable: 1
+        search: 1
+        
+    place: 
+        label: Lieu
+        type: int
+        values: 
+            array: places
+        sortable: 1
+        search: 1
+            
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status
+        sortable: 1
+        search: 1
+        
+lists:
+    default: 
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les événements sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_col: date_begin
+        sort_way: desc
+        n: 10
+        add_form: default
+        delete_btn: 1
+        view_btn: 1
+        cols:
+            begin:
+                field: date_begin
+            end: 
+                field: date_end
+            name: 
+                field: name
+            type: 
+                field: type
+            place: 
+                field: place
+            status: 
+                field: status
+                
+views:
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                - type: object_common_fields
+                  col_lg: 6    
+                  col_md: 6
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      caption: 
+                          label: Infos événement
+                          icon: info-circle
+                      rows:
+                        - field: date_begin
+                        - field: date_end
+                        - field: type
+                        - field: place
+                        - field: status
+                
+            - cols:
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  list: 
+                      children: groups
+                      panel: 0
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  list: 
+                      children: coprods
+                      panel: 0
+                      
+    billets:
+        title: Billeterie
+        rows:                
+            - cols:
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  list: 
+                      title: Tarifs
+                      children: tarifs
+                      panel: 0
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  list: 
+                      title: Vente de billets
+                      children: billets
+                      panel: 0
+                  
+    frais_totaux:
+        title: Montants HT totaux
+        objects_change_reload: BMP_EventMontant
+        icon: euro
+        rows:
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderMontantsTotaux
+                          params: 
+                              type: 1
+                              
+    recettes_totaux:
+        title: Montants HT totaux
+        objects_change_reload: BMP_EventMontant
+        icon: euro
+        rows:
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderMontantsTotaux
+                          params: 
+                              type: 2
+                              
+    frais_hotel:
+        title: Détail des frais d'hôtellerie
+        icon: euro
+        rows:
+            - cols:
+                - type: custom
+                  custom: 
+                      callback:
+                          method: renderFraisHotel
+                          

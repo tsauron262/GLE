@@ -1,0 +1,48 @@
+bootstrap: 1
+js:
+    - /bimpcore/views/js/BimpTimer.js
+    - /bimphotline/views/js/ticket.js
+    
+objects:
+    ticket: 
+        instance: 
+            bimp_object: BH_Ticket
+            id_object:
+                request: id
+        
+sections:
+    - type: buttons
+      buttons:
+          - label: Liste des tickets
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary
+                
+    - type: view
+      view:
+          name: main
+          panel: 1
+          object: ticket
+    
+    - type: list
+      list: 
+          panel: 1
+          object: ticket
+          children: inters
+            
+    - type: list
+      list: 
+          panel: 1
+          object: ticket
+          children: notes
+              
+    - type: buttons
+      buttons:
+          - label: Liste des tickets
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

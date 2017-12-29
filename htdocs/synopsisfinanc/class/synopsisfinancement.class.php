@@ -42,6 +42,7 @@ class Synopsisfinancement extends CommonObject {
     var $coef;
     //mode du module
     var $mode3;
+    static $debug = true;
     //tableau static pour l'affichage de donnée variable
     static $TPeriode = array(1 => "Mensuel", 3 => "Trimestriel", 4 => "Quadrimestriel", 6 => "Semestriel");
     static $tabM = array(1 => "Mois", 3 => "Trimestres", 4 => "Quadrimestres", 6 => "Semestres");
@@ -51,24 +52,43 @@ class Synopsisfinancement extends CommonObject {
 
     function __construct($db) {
         $this->db = $db;
+        
+    }
+    
+    static function calculInteret($montant, $duree, $taux){
+            $tauxPM = $taux / 100 / 12;
+            return ($montant) * ($tauxPM / (1 - pow((1 + $tauxPM), -($duree)))) * $duree; //calcul du montant avec interet
     }
 
-    function calculLoyer($montant, $montantPre, $duree) {
-        if ($this->taux > 0 && $this->taux != "") {//si il y a un taux
-            $mensualite = ($montant) * ($this->interet / (1 - pow((1 + $this->interet), -($duree)))); //calcul de la mensualité de remboursement
-        } else {
-            $mensualite = ($montant) / $duree; //calcul de la mensualité de remboursement sans taux
+    static function calculLoyer($montant, $montantPre, $duree, $nb_periode, $taux, $coef) {
+        //Si taux on ajoute les interet
+        if ($taux > 0 && $taux != "") {//si il y a un taux
+            $montant = self::calculInteret($montant, $duree, $taux);
+            
         }
-
-        $mensualite0 = $montantPre / $duree; //calcul des mensualité de remboursement à taux 0 (evol+) sur le materiel
-
-
-
-        $loyer = ($mensualite + $mensualite0) * $this->periode; //calcul du monant des mensualités en fonction du nombre de periode
-
-        if ($this->coef != 0) {
-            $loyer = $loyer * ($this->coef) / 100 * $this->duree / $this->periode;
+        
+        if(self::$debug)
+            echo "<br/><br/>taux ".$taux. " duree ".$duree.
+                "<br/>Montant avec intret ".$montant."   montant preté : ".$montantPre."";
+        
+        //montant total
+        $montant += $montantPre;
+        
+        
+        //Si coef on calcule
+        if ($coef != 0) {
+            $montant = $montant * $coef / 100 * $nb_periode;
         }
+        
+        if(self::$debug)
+            echo "<br/>Montant total (aj du coef : ".$montant.")";
+        
+        
+        //On calculeles le loyer
+        $loyer = $montant / $nb_periode; 
+
+
+
 
         return $loyer;
     }
@@ -81,14 +101,13 @@ class Synopsisfinancement extends CommonObject {
 
         $this->nb_periode = $this->duree / $this->periode;
         $this->nb_periode2 = $this->duree_degr / $this->periode; //nombre de période de remboursement durant toute la durée du financement
-        $this->interet = $this->taux / 100 / 12; //calcul des interets par mois en fonction du taux
         $this->ratioperiode = $this->duree_degr / $this->duree;
 
 
         $this->p_degr = $this->pourcent_degr / 100;
 
 //        $this->montantAF1 = $this->montantAF * (1 - $this->p_degr);
-        $this->montantAF2 = $this->montantAF * ($this->p_degr);
+        $this->montantAF2 = $this->montantAF * ($this->p_degr);//Montant a financée
         $this->montantAF1 = $this->montantAF;
 
         $this->commCM1 = $this->montantAF1 * (($this->commC) / 100);
@@ -99,15 +118,19 @@ class Synopsisfinancement extends CommonObject {
         }
 
         $this->commCM2 = $this->montantAF2 * (($this->commC) / 100);
-        if ($mode) {
+        if ($mode) {//Commission fincancierer sur tot + commistion comm
             $this->commFM2 = ($this->montantAF2 + $this->commCM2) * (($this->commF) / 100);
         } else {
             $this->commFM2 = $this->montantAF2 * (($this->commF) / 100);
         }
 //        echo 'commF='.$this->commFM1."\n";
 
-        $this->emprunt1 = $this->montantAF1 + $this->commCM1 + $this->commFM1;
-        $this->emprunt2 = $this->montantAF2 + $this->commCM2 + $this->commFM2;
+        $this->emprunt1 = $this->montantAF1 + $this->commCM1 + $this->commFM1 - $this->VR;
+        
+        if($this->duree_degr > 0)
+            $this->emprunt2 = $this->montantAF2 + $this->commCM2 + $this->commFM2;
+        else
+            $this->emprunt2 = 0;
 
 //        if($this->coef!=0 && $this->coef!=1){
 //            $this->emprunt1=$this->emprunt1*$this->coef;
@@ -138,18 +161,23 @@ class Synopsisfinancement extends CommonObject {
             $this->pret2 = $this->pret2 + $this->commCP2 + $this->commFP2;
 //            echo $this->commFP1." , ".$this->commFP2;
         }
-
-
-        $this->loyer1 = $this->calculLoyer($this->emprunt1, $this->pret1, $this->duree);
+        
+        $this->loyer1 = $this->calculLoyer($this->emprunt1, $this->pret1, $this->duree, $this->nb_periode, $this->taux, $this->coef);
         if ($this->duree_degr != 0 && $this->pourcent_degr != 0) {
-            $this->loyer2 = $this->calculLoyer($this->emprunt2, $this->pret2, $this->duree_degr);
+            echo "hhhh";
+            $this->loyer2 = $this->calculLoyer($this->emprunt2, $this->pret2, $this->duree_degr, $this->nb_periode2, $this->taux , $this->coef);
         } else {
             $this->loyer2 = 0;
         }
         if ($this->mode3) {
             $this->loyer2 = $this->pret / $this->duree;
         }
+        
+        
 
+        if(self::$debug)
+            echo "<br/>Premier loyer : ".$this->loyer1.
+                "<br/>Deuxieme loyer : ".$this->loyer2;
 
         //
         //
@@ -317,18 +345,7 @@ class Synopsisfinancement extends CommonObject {
     function calc_no_commF() {
         $this->emprunt2 = $this->montantAF * (100 + $this->commC);
 
-        if ($this->taux > 0) {
-            //$this->interet = $this->taux / 100 / 12;
-            $this->mensualite2 = $this->emprunt2 * ($this->interet / (1 - pow((1 + $this->interet), -($this->duree))));
-        } else {
-            $this->mensualite2 = $this->emprunt2 / $this->duree;
-        }
-
-        $this->mensualite02 = $this->pret / $this->duree;
-
-
-
-        return $this->prix_final2 = ($this->duree * ($this->mensualite2 + $this->mensualite02));
+        $this->calculLoyer($this->emprunt2, $this->pret, $this->duree, $this->nb_periode, $this->taux , $this->coef);
     }
 
 }

@@ -19,7 +19,7 @@
     require_once('../../main.inc.php');
    $comId = $_REQUEST['id'];
     //Ajoute une intervention à la commande
-    $requete = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE fk_commande is null ";
+    $requete = "SELECT rowid FROM ".MAIN_DB_PREFIX."synopsis_fichinter WHERE fk_commande is null ";
     $sql = $db->query($requete);
     print "<table cellpadding=10>";
     print "<tr><th class='ui-widget-header ui-state-default'>Ref";

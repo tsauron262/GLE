@@ -42,7 +42,7 @@ foreach($userArr as $key=> $userId)
         while ( $res=$db->fetch_object($sql) ) {
             $arrDate[$res->udatei]=$res->duree + $arrDate[$res->udatei];
         }
-        $requete = "SELECT UNIX_TIMESTAMP(datei) as udatei, duree FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE fk_user_author = $userId";
+        $requete = "SELECT UNIX_TIMESTAMP(datei) as udatei, duree FROM ".MAIN_DB_PREFIX."synopsis_fichinter WHERE fk_user_author = $userId";
         $sql=$db->query($requete);
         while ( $res=$db->fetch_object($sql) ) {
             $arrDate1[$res->udatei]=$res->duree + $arrDate1[$res->udatei];

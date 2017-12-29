@@ -1,0 +1,146 @@
+[id$="_view_panel"] {
+    .panel-secondary {
+        /*border-color: #c8c8c8;*/
+        .panel-heading {
+            background-color: #c8c8c8;
+            color: $gray_darker;
+            border-color: #c8c8c8
+        }
+    }
+}
+
+
+.object_view_content {
+    padding: 0!important;
+
+    .row:not(:first-child) {
+        margin-top: 15px;
+    }
+}
+
+.objectViewTableContainer {
+    width: 100%;
+    border: 1px solid $secondary;
+}
+
+.objectViewtable {
+    width: 100%;
+
+    & > thead > tr > th {
+        padding: 8px 12px;
+        background-color: #c8c8c8;
+        color: $gray_darker;
+        font-size: 15px;
+        font-weight: normal;
+    }
+    
+    & > thead > tr.col_headers > th {
+        padding: 5px 8px;
+        background-color: $primary;
+        color: #fff;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    & > tbody {
+        & > tr:last-child {
+            & > th, & > td {
+                border-bottom: none;
+            }
+        }
+
+        & > tr {
+            & > th, & > td {
+                padding: 5px 10px;
+            }
+            & > th {
+                width: 20%;
+                min-width: 90px;
+                background-color: $primary;
+                color: #fff;
+                font-weight: bold;
+                vertical-align: top;
+                text-align: right;
+                border-bottom: 1px solid #fff;
+            }
+            & > td {
+                border-bottom: 1px solid $gray-light;
+
+                .inputContainer,
+                .inputGroupContainer {
+                    margin-right: 10px;
+                    
+                    textarea {
+                        width: 100%;
+                    }
+                }
+                .form-control {
+                    width: auto!important;
+                }
+            }
+        }
+    }
+
+    & > tfoot > tr > td {
+        text-align: right;
+        padding: 5px 10px;
+        background-color: $gray-lighter;
+    }
+}
+.object_card_table {    
+    tbody tr {
+        th, td {
+            padding: 0 5px;
+            border-bottom: 1px solid #fff;
+        }
+
+        th {
+            width: 30%;
+            min-width: 120px;
+            font-weight: bold;
+            text-align: right;
+            vertical-align: top;
+            background-color: #fff;
+            color: $gray-darker;
+        }
+
+        td {
+            color: $gray-darker;
+            background-color: #fff;
+        }
+    }
+}
+.object_common_fields {
+    margin: 5px 0;
+    background-color: $gray-lighter;
+
+    table {
+        width: 100%;
+        border: none;
+
+        tbody tr {
+            th, td {
+                padding: 3px 5px;                
+                font-size: 12px;
+                border-bottom: 1px solid #fff;
+            }
+
+            th {
+                font-weight: normal;
+                color: $gray-light;
+                border-bottom: 1px solid $gray-light;;
+                width: 30%;
+                min-width: 90px;
+                text-align: right;
+                vertical-align: top;
+                background-color: $secondary;
+            }
+
+            td {
+                color: $gray-darker;
+                border-bottom: 1px solid $gray-light;
+                vertical-align: middle;
+            }
+        }
+    }
+}

@@ -1,0 +1,44 @@
+bootstrap: 1
+js:
+    - /bimpcore/views/js/BimpTimer.js
+    - /bimphotline/views/js/ticket.js
+title: Bimp HotLine
+
+objects:
+    tickets:
+        instance:
+            bimp_object: BH_Ticket
+    inters: 
+        instance:
+            bimp_object: BH_Inter
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Tickets
+            sections:
+                - type: list
+                  list: 
+                      object: tickets
+                
+                - type: views_list
+                  views_list: 
+                      name: user_currents
+                      panel: 1
+                      object: inters
+            
+        equipments:
+            label: Equipements
+            sections:
+                - type: list
+                  list:
+                      object:
+                          instance: 
+                              bimp_object: Equipment
+                              
+        test:
+            label: Tests Assos
+            sections:
+                - type: custom
+                  custom: 
+                      callback: renderTestAssos

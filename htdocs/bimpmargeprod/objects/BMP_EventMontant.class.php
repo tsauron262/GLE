@@ -15,11 +15,11 @@ class BMP_EventMontant extends BimpObject
         if (is_null($typeMontant)) {
             return false;
         }
-        $editable = (bool) $typeMontant->getData('editable');
+        $editable = $typeMontant->getData('editable');
         if (is_null($editable)) {
             return false;
         }
-        return $editable;
+        return (int) $editable;
     }
 
     public function isRequired()

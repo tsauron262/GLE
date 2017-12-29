@@ -283,6 +283,19 @@ class BMP_EventMontant extends BimpObject
         return '<span class="warning">Non défini</span>';
     }
 
+    public function getAllCategoriesArray()
+    {
+        $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_CategorieMontant');
+        $rows = $instance->getList();
+        $categories = array(
+            '' => ''
+        );
+        foreach ($rows as $r) {
+            $categories[$r['id']] = $r['name'];
+        }
+        return $categories;
+    }
+
     public function getAllTypesArray()
     {
         $type = BimpObject::getInstance('bimpmargeprod', 'BMP_TypeMontant');

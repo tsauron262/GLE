@@ -17,7 +17,6 @@ fields:
         type: string
         required: 1
         sortable: 1
-        search: 1
         
     amount: 
         label: montant

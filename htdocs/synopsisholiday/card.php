@@ -2044,7 +2044,6 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         if ($user->id == $drhUserId || $droitAll || $user->rights->holiday->delete || $user->id == $cp->fk_user)
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=delete" class="butActionDelete">' . $langs->trans("DeleteCP") . '</a>';
                     } else if ($cp->statut == 2) {
-                        echo $user->id."!!!".$cp->fk_validator;
                         if ($user->id != $drhUserId && $user->id == $cp->fk_validator) {
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=valid" class="butAction">' . $langs->trans("Approve") . '</a>';
                             print '<a href="card.php?id=' . $_GET['id'] . '&action=refuse" class="butAction">' . $langs->trans("ActionRefuseCP") . '</a>';

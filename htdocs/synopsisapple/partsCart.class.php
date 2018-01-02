@@ -124,7 +124,7 @@ class partsCart {
         
         foreach ($tabCas9 as $val)
             if (stripos($ref, $val) === 0)
-                $newPrix = 29;
+                $newPrix = 32.5;
         
         
         

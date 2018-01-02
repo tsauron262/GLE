@@ -55,8 +55,8 @@ div.userOneDay{
     background: whitesmoke;
     margin: 10px 20px;
     padding: 3px;
-border-radius: 10px;
-text-align: center;
+    border-radius: 10px;
+    text-align: center;
 }
 
 
@@ -76,4 +76,26 @@ div.wc-cal-event div.wc-title,div.wc-cal-event div.wc-title a{
 
 .twhite{
     color:white;
+}
+
+table.userInList {
+    table-layout: fixed;
+}
+
+.userInList tbody tr {
+vertical-align: text-top;
+}
+
+.userInList tbody tr td {
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.userInList tbody tr td .letters{
+    font-size: 24px;
+    height: 40px;
+    width: 40px;
+    text-align: center;
+    background-color: #bfbfbf;
+    line-height: 40px;
 }

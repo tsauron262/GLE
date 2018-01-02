@@ -1,13 +1,13 @@
 <?php
-
+ 
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
 require_once DOL_DOCUMENT_ROOT.'/core/lib/agenda.lib.php';
-
+ 
 global $isMobile;
 if($isMobile)
     $conf->global->MAIN_HIDE_LEFT_MENU = true;
-
+ 
 $tabUserId = array();
 $tabUser = getTabUser();
 if(isset($_REQUEST['timeTranche']))
@@ -24,7 +24,7 @@ foreach ($tabUser as $userId => $nom) {
     $tabJsIdUser .= 'tabUserId.push(' . $userId . ');';
 }
 $userStr = "'" . implode("','", $tabUser) . "'";
-
+ 
 $js = ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js" type="text/javascript"></script>';
 $js .= <<<EOF
         <script type="text/javascript" src="../agenda/agenda.js"></script>
@@ -38,13 +38,13 @@ $js .= <<<EOF
       font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
       margin: 0;
     }
-
+ 
     h1 {
       margin:0 0 2em;
       padding: 0.5em;
       font-size: 1.3em;
     }
-
+ 
     p.description {
       font-size: 0.8em;
       padding: 1em;
@@ -52,7 +52,7 @@ $js .= <<<EOF
       top: 1.2em;
       margin-right: 400px;
     }
-
+ 
     #calendar_selection {
       font-size: 0.7em;
 //      position: absolute;
@@ -63,7 +63,7 @@ $js .= <<<EOF
       border: 1px solid #dda;
       width: 270px;
     }
-
+ 
     #message {
       font-size: 0.7em;
 //      position: absolute;
@@ -89,8 +89,8 @@ $js .= <<<EOF
     }
   </style>
 EOF;
-
-
+ 
+ 
   $js .= '<script type="text/javascript" src="./calendar/jquery.weekcalendar.js"></script>';
   $js .= '<script type="text/javascript">';
 $js .= $tabJsIdUser;
@@ -101,14 +101,14 @@ $js .= <<<EOF
     var year = d.getFullYear();
     var month = d.getMonth();
     var day = d.getDate();
-
-
+ 
+ 
     d = new Date();
     d.setDate(d.getDate() -(d.getDay() - 3));
     year = d.getFullYear();
     month = d.getMonth();
     day = d.getDate();
-
+ 
         
         function save(calEvent){
             jQuery.ajax({
@@ -124,7 +124,7 @@ $js .= <<<EOF
                 }
             });
         }
-
+ 
     $(document).ready(function() {
       var Ocalendar = $('#calendar').weekCalendar({
 EOF;
@@ -205,8 +205,8 @@ else{
     $dateDeb = new DateTime("");
     $dateDebStr = $dateDeb->getTimestamp();
 }
-
-
+ 
+ 
 if(isset($_SESSION['nbJour'])){
     $nbJour = $_SESSION['nbJour'];
 }
@@ -216,12 +216,12 @@ else{
 $js .= '
         date: '.$dateDebStr.'000,
         daysToShow: ' . ((count($tabUser) > 5 && $nbJour > 3) ? '3' : $nbJour) . ',';
-
+ 
 $js .= "switchDisplay: {'1 journée': 1, '3 journées': 3";
 if (count($tabUser) < 6)
     $js .= ", 'work week': 6, 'full week': 7";
 $js .= "},";
-
+ 
 $js .= <<<EOF
         headerSeparator: ' ',
         useShortDayNames: true,
@@ -332,24 +332,24 @@ function blink(ob) {
 }  
   </script>
 EOF;
-
-
-
-
+ 
+ 
+ 
+ 
 llxHeader($js);
-
-
-
+ 
+ 
+ 
 $head = calendars_prepare_head($paramnoaction);
-
+ 
 dol_fiche_head($head, "team", $langs->trans('Agenda'), 0, 'action');
-
-
+ 
+ 
 echo "<div class='floatL'>";
 printMenu($tabUser);
 echo "</div>";
-
-
+ 
+ 
 echo "<div class='floatL'>";
 echo '<form>Interval : <select name="timeTranche">';
 foreach(array(5,10,15,20,30) as $time)
@@ -359,9 +359,9 @@ echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><
 echo "<label style='margin-left:11px' for='chevauche'>Chevaucher rdv : </label><input type='checkbox' id='chevauche' name='chevauche' ".("true" == $_SESSION['paraAgenda']['chevauche'] ? 'checked="checked"' : "") .'/>';
 echo "<input type='submit' value='Ok' class='butAction'/></form>";
 echo "</div>";
-
-
-
+ 
+ 
+ 
 echo "<div class='floatL'>";
 echo '<input type="text" class="datePicker" id="dateChange"/>';
 echo "<button class='butAction' onclick='"
@@ -370,17 +370,17 @@ echo "<button class='butAction' onclick='"
 . "$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date(dateStr));"
         . "' >Ok</button>";
 echo "</div><div class='clear'></div>";
-
-
+ 
+ 
 echo '
-
+ 
   <div id="calendar"></div>
 </body>
 </html>';
-
+ 
 function printMenu($tabUser) {
     global $db,$user;
-
+ 
     $js = "var tabGroup = new Array();";
     $js .= "tabGroup[-1] = new Array();";
     $js .= "tabGroup[-1].push(".$user->id.");";
@@ -392,8 +392,8 @@ function printMenu($tabUser) {
 //        $tabGroup[$result->fk_usergroup][$result->fk_user] = $result->fk_user;
     }
     echo "<script>" . $js . "</script>";
-
-
+ 
+ 
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup ORDER BY nom");
     while ($result = $db->fetch_object($sql)) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom;
@@ -403,8 +403,8 @@ function printMenu($tabUser) {
     echo "<form action='' method='post'>";
     echo "<select id='group'><option value='0'>Groupes</option><option value='-1'>Moi</option>" . $select . "</select>";
     echo "<div class='contentListUser'><a href='#'><span class='nbGroup'></span></a>";
-
-
+ 
+ 
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
     echo "<div class='listUser'>"
     . "Classement alphabétique horizontal<br/><br/>"
@@ -424,7 +424,7 @@ function printMenu($tabUser) {
             echo "<br/>";
     }
     echo "</td></tr></table><br/></div></div>";
-
+ 
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
     echo "<div class='listUser'><br/><br/></div>";
@@ -432,8 +432,8 @@ function printMenu($tabUser) {
     //que pour 2016
     echo "<br/>ATTENTION sur l'année 2016 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";
 }
-
-
-
+ 
+ 
+ 
 llxFooter();
 ?>

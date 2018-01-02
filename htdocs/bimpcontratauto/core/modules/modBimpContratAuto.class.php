@@ -81,19 +81,6 @@ class modBimpContratAuto extends DolibarrModules {
         // for default path (eg: /mymodule/core/xxxxx) (0=disable, 1=enable)
         // for specific path of parts (eg: /mymodule/core/modules/barcode)
         // for specific css file (eg: /mymodule/css/mymodule.css.php)
-        $this->module_parts = array(
-            'triggers' => 0, // Set this to 1 if module has its own trigger directory (core/triggers)
-            'login' => 0, // Set this to 1 if module has its own login method directory (core/login)
-            'substitutions' => 0, // Set this to 1 if module has its own substitution function file (core/substitutions)
-            'menus' => 0, // Set this to 1 if module has its own menus handler directory (core/menus)
-            'theme' => 0, // Set this to 1 if module has its own theme directory (theme)
-            'tpl' => 0, // Set this to 1 if module overwrite template dir (core/tpl)
-            'barcode' => 0, // Set this to 1 if module has its own barcode directory (core/modules/barcode)
-            'models' => 0, // Set this to 1 if module has its own models directory (core/modules/xxx)
-            // 'css' => array('/modBimpContratAuto/css/modBimpContratAuto.css'),	// Set this to relative path of css file if module has its own css file
-            //'js' => array(), // Set this to relative path of js file if module must load a js on all pages
-            'hooks' => array('')  // Set here all hooks context managed by module. You can also set hook context 'all'
-        );
 
         // Data directories to create when module is enabled.
         // Example: this->dirs = array("/mymodule/temp","/mymodule/subdir");
@@ -116,10 +103,6 @@ class modBimpContratAuto extends DolibarrModules {
         // Example: $this->const=array(0=>array('MYMODULE_MYNEWCONST1','chaine','myvalue','This is a constant to add',1),
         //                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
         // );
-        $this->const = array(
-//            1 => array('MYMODULE_MYCONSTANT', 'chaine', 'avalue', 'This is a constant to add', 1, 'allentities', 1)
-        );
-
         // Array to add new pages in new tabs
         // Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
         //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.

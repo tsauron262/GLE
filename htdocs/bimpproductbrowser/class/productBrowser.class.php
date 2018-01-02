@@ -328,6 +328,7 @@ class BimpProductBrowserConfig extends CommonObject {
 
     public $id;      // id of the parent category
     public $id_childs = array();
+    public $mode = 1;
 
     function __construct($db) {
         $this->db = $db;
@@ -337,7 +338,7 @@ class BimpProductBrowserConfig extends CommonObject {
     function getTabCategCheck(){
         global $conf;
         $tabCategCheck = array();
-        if($conf->global->BIMP_CATEGORIZATION_MODE == 2)
+        if($this->mode == 2)
             $result = $this->db->query("SELECT DISTINCT(rowid) as id_mere FROM `".MAIN_DB_PREFIX."categorie` WHERE type = 0");
         else
             $result = $this->db->query("SELECT DISTINCT(fk_parent) as id_mere FROM `".MAIN_DB_PREFIX."categorie` WHERE type = 0");
@@ -352,9 +353,9 @@ class BimpProductBrowserConfig extends CommonObject {
     /**
      *  Load an import profil from database
      */
-    function fetch($id) {
-        global $conf;
-        if($conf->global->BIMP_CATEGORIZATION_MODE == 2){            
+    function fetch($id, $mode) {
+        $this->mode = $mode;
+        if($this->mode == 2){            
             $sql = 'SELECT fk_parent_cat as fk_child_cat';
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
             $sql .= ' WHERE fk_child_cat = ' . $id;
@@ -385,7 +386,7 @@ class BimpProductBrowserConfig extends CommonObject {
     function insertRow($id_parent, $id_child) {
         global $conf;
         $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'bimp_cat_cat ';
-        if($conf->global->BIMP_CATEGORIZATION_MODE == 2)
+        if($this->mode == 2)
             $sql .= '(fk_child_cat, fk_parent_cat) ';
         else
             $sql .= '(fk_parent_cat, fk_child_cat) ';
@@ -405,7 +406,7 @@ class BimpProductBrowserConfig extends CommonObject {
         global $conf;
         $sql = 'DELETE';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
-        if($conf->global->BIMP_CATEGORIZATION_MODE == 2){
+        if($this->mode == 2){
             $sql .= ' WHERE fk_child_cat = ' . $id_parent;
             $sql .= ' AND fk_parent_cat = ' . $id_child;
         }

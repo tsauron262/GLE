@@ -60,9 +60,7 @@ function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCa
                         bimp_display_msg(successCallBack, $resultContainer, 'success');
                     }
                 } else if ((typeof (result.success) === 'string') && result.success) {
-                    if (result.success) {
-                        bimp_display_msg(result.success, $resultContainer, 'success');
-                    }
+                    bimp_display_msg(result.success, $resultContainer, 'success');
                 }
             } else {
                 if (typeof (errorCallBack) === 'function') {
@@ -477,7 +475,7 @@ function checkSelectColor($select) {
     if (color) {
         $select.css({'color': '#' + color, 'font-weight': 'bold', 'border-bottom-color': '#' + color});
     } else {
-        $select.css({'color': '#636363', 'font-weight': 'normal', 'border-bottom-color': 'rgba(0, 0, 0, 0.2)'});
+        $select.css({'color': '#3C3C3C', 'font-weight': 'normal', 'border-bottom-color': 'rgba(0, 0, 0, 0.2)'});
     }
 }
 

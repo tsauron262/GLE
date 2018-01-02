@@ -15,11 +15,11 @@ class BMP_EventMontant extends BimpObject
         if (is_null($typeMontant)) {
             return false;
         }
-        $editable = (bool) $typeMontant->getData('editable');
+        $editable = $typeMontant->getData('editable');
         if (is_null($editable)) {
             return false;
         }
-        return $editable;
+        return (int) $editable;
     }
 
     public function isRequired()
@@ -40,16 +40,72 @@ class BMP_EventMontant extends BimpObject
         return (!$this->isRequired() && $this->isEditable());
     }
 
+    public function hasDetails()
+    {
+        $typeMontant = $this->getChildObject('type_montant');
+        if (is_null($typeMontant)) {
+            return 0;
+        }
+        $has_details = $typeMontant->getData('has_details');
+        if (is_null($has_details)) {
+            return 0;
+        }
+        return (int) $has_details;
+    }
+
     public function getCategoriesArray()
     {
         $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_CategorieMontant');
         $rows = $instance->getList();
-        $categories = array(
-            '' => ''
-        );
+        $categories = array();
+
+        $current_montants = array();
+        $type = (int) $this->getData('type');
+        if (!is_null($type)) {
+            $event = $this->getParentInstance();
+            if (!is_null($event) && isset($event->id) && $event->id) {
+                switch ($type) {
+                    case 1:
+                        $children_name = 'frais';
+                        break;
+
+                    case 2:
+                        $children_name = 'recettes';
+                        break;
+                }
+
+                foreach ($event->getChildrenObjects($children_name) as $montant) {
+                    $id_type_montant = (int) $montant->getData('id_montant');
+                    if (!is_null($id_type_montant) && $id_type_montant) {
+                        $current_montants[] = $id_type_montant;
+                    }
+                }
+            }
+        }
+
+        $type_instance = BimpObject::getInstance('bimpmargeprod', 'BMP_TypeMontant');
 
         foreach ($rows as $r) {
+            if (!is_null($type)) {
+                $typesMontants = $type_instance->getList(array(
+                    'id_category' => (int) $r['id'],
+                    'type'        => (int) $type
+                        ), NULL, null, 'id', 'asc', 'array', array('id'));
+                foreach ($typesMontants as $idx => $typeMontant) {
+                    if (in_array((int) $typeMontant['id'], $current_montants)) {
+                        unset($typesMontants[$idx]);
+                    }
+                }
+                if (!count($typesMontants)) {
+                    continue;
+                }
+            }
             $categories[$r['id']] = $r['name'];
+        }
+
+        if (count($categories)) {
+            $categories[0] = '';
+            ksort($categories);
         }
 
         return $categories;
@@ -198,7 +254,7 @@ class BMP_EventMontant extends BimpObject
 
     public function getDefaultListExtraButtons()
     {
-        if ($this->hasChildren('details')) {
+        if ($this->hasDetails()) {
             return array(
                 array(
                     'label'   => 'Détail',
@@ -225,6 +281,19 @@ class BMP_EventMontant extends BimpObject
         }
 
         return '<span class="warning">Non défini</span>';
+    }
+
+    public function getAllCategoriesArray()
+    {
+        $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_CategorieMontant');
+        $rows = $instance->getList();
+        $categories = array(
+            '' => ''
+        );
+        foreach ($rows as $r) {
+            $categories[$r['id']] = $r['name'];
+        }
+        return $categories;
     }
 
     public function getAllTypesArray()

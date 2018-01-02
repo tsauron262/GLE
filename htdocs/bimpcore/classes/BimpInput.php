@@ -83,18 +83,27 @@ class BimpInput
                 break;
 
             case 'toggle':
-                if (!isset($options['toggle_on']) || !$options['toggle_on']) {
-                    $options['toggle_on'] = 'OUI';
+                $display_labels = isset($options['display_label']) ? (int) $options['display_labels'] : 1;
+
+                if ($display_labels) {
+                    if (!isset($options['toggle_on']) || !$options['toggle_on']) {
+                        $options['toggle_on'] = 'OUI';
+                    }
+                    if (!isset($options['toggle_off']) || !$options['toggle_off']) {
+                        $options['toggle_off'] = 'NON';
+                    }
                 }
-                if (!isset($options['toggle_off']) || !$options['toggle_off']) {
-                    $options['toggle_off'] = 'NON';
-                }
+
                 $input_id .= rand(0, 999999);
                 $html .= '<input type="hidden" class="toggle_value" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"/>';
                 $html .= '<input type="checkbox" class="toggle" id="' . $input_id . '_toggle" ' . ($value ? ' checked' : '') . '/>';
-                $html .= '<span class="toggle-label-on">' . $options['toggle_off'] . '</span>';
+                if ($display_labels) {
+                    $html .= '<span class="toggle-label-off">' . $options['toggle_off'] . '</span>';
+                }
                 $html .= '<label class="toggle-slider" for="' . $input_id . '_toggle"></label>';
-                $html .= '<span class="toggle-label-on">' . $options['toggle_on'] . '</span>';
+                if ($display_labels) {
+                    $html .= '<span class="toggle-label-on">' . $options['toggle_on'] . '</span>';
+                }
                 break;
 
             case 'select':

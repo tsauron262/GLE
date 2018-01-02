@@ -316,7 +316,21 @@ forms:
               input:
                   name: start_timer
                   type: toggle
-                        
+    
+    edit:
+        rows:
+            - field: id_contact
+            - field: status
+            - field: impact
+            - field: cover
+            - field: appels_timer
+            - field: symptomes
+            - association: equipments
+              label: Equipements concernés
+              input: 
+                display_if: 
+                    input_name: id_contrat
+                    hide_values:
 views:
     default:
         title: nom
@@ -326,7 +340,7 @@ views:
     main:
         title: nom
         delete_btn: 1
-        edit_form: default
+        edit_form: edit
         objects_change_reload: BH_Inter
         rows:
             - cols: 
@@ -420,6 +434,7 @@ list:
             
     add_form: default
     edit_btn: 1
+    edit_form: edit
     delete_btn: 1
     view_btn: 1
     

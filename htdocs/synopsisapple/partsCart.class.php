@@ -71,6 +71,7 @@ class partsCart {
     private function convertPrix($prix, $ref, $desc) {
         $coefPrix = 1;
         $constPrix = 0;
+        $newPrix = 0;
         $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
         
         $tabCas2 = array("SVC,IPOD", "Ipod nano");
@@ -78,6 +79,9 @@ class partsCart {
         $tabCas3 = array("661", "Z661");
         $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");//design commence par
         $tabCas36 = array("Ipad Pro", "Ipad mini", "Apple Watc");//design contient
+        
+        
+        $tabCas9 = array("661-04479","661-04579","661-04580","661-04581","661-04582","661-05421","661-0575");//Prix a 29
 
         $cas = 0;
         foreach ($tabCas1 as $val)
@@ -116,11 +120,18 @@ class partsCart {
                 $coefPrix = 0.6;
                 $constPrix = 10;
             }
-        } 
+        }
+        
+        foreach ($tabCas9 as $val)
+            if (stripos($ref, $val) === 0)
+                $newPrix = 29;
         
         
         
-        $prix = (($prix + $constPrix) / $coefPrix);
+        if($newPrix > 0)
+            $prix = $newPrix;
+        else
+            $prix = (($prix + $constPrix) / $coefPrix);
 
 //        if (($cas == 1) && $this->fraisP < 1)
 //            $this->fraisP = 0;

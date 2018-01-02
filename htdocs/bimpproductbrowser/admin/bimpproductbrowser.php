@@ -53,6 +53,7 @@ if ($idRootCateg > 0) {
     $forceCategorization = GETPOST('forceCat');
     $mode = GETPOST('mode');
     $categRecur = GETPOST('recursive');
+    $descendre = GETPOST('descendre');
     $db->begin();
 
     if ($idRootCateg) {
@@ -72,6 +73,11 @@ if ($idRootCateg > 0) {
     }
     if ($categRecur != $conf->global->BIMP_CATEGORIZATION_RECURSIVE) {
         $res = dolibarr_set_const($db, "BIMP_CATEGORIZATION_RECURSIVE", $categRecur, 'chaine', 0, '', $conf->entity);
+        if (!$res > 0)
+            $error++;
+    }
+    if ($descendre != $conf->global->BIMP_CATEGORIZATION_DESCENDRE) {
+        $res = dolibarr_set_const($db, "BIMP_CATEGORIZATION_DESCENDRE", $descendre, 'chaine', 0, '', $conf->entity);
         if (!$res > 0)
             $error++;
     }
@@ -219,7 +225,7 @@ print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
 print '</tr>' . "\n";
 print '</table>';
 
-if (!isset($conf->global->BIMP_CATEGORIZATION_MODE) or $conf->global->BIMP_CATEGORIZATION_MODE != 2) {
+if (isset($conf->global->BIMP_CATEGORIZATION_MODE) && $conf->global->BIMP_CATEGORIZATION_MODE != 2) {
     print 'Mode 1  <input type="radio" name="mode" value="1" checked>';
     print '  Mode 2  <input type="radio" value="2" name="mode"><br>';
 } else {
@@ -234,12 +240,30 @@ print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
 print '</tr>' . "\n";
 print '</table>';
 
-if (!isset($conf->global->BIMP_CATEGORIZATION_RECURSIVE) or $conf->global->BIMP_CATEGORIZATION_RECURSIVE == 1) {
+if (isset($conf->global->BIMP_CATEGORIZATION_RECURSIVE) && $conf->global->BIMP_CATEGORIZATION_RECURSIVE == 1) {
     print '    Oui  <input type="radio" value="1" name="recursive" checked>';
     print '    Non  <input type="radio" value="0" name="recursive"><br>';
 } else {
     print '    Oui  <input type="radio" value="1" name="recursive">';
     print '    Non  <input type="radio" value="0" name="recursive" checked><br>';
+}
+
+
+print '<br><table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print "  <td>Decendre dans l'arbre des catégorie ?</td>\n";
+print "  <td align=\"right\" width=\"160\">&nbsp;</td>\n";
+print '</tr>' . "\n";
+print '</table>';
+
+
+
+if (isset($conf->global->BIMP_CATEGORIZATION_DESCENDRE) && $conf->global->BIMP_CATEGORIZATION_DESCENDRE == 1) {
+    print '    Oui  <input type="radio" value="1" name="descendre" checked>';
+    print '    Non  <input type="radio" value="0" name="descendre"><br>';
+} else {
+    print '    Oui  <input type="radio" value="1" name="descendre">';
+    print '    Non  <input type="radio" value="0" name="descendre" checked><br>';
 }
 
 print '<br><input type="submit" class="button" value="Valider">';

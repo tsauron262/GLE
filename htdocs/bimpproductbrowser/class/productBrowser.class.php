@@ -106,17 +106,40 @@ class BimpProductBrowser extends CommonObject {
     /* Get category(s) implied by the cat with the id $id_cat */
 
     function getChilds($id_cat) {
+        global $conf;
         $sql = 'SELECT fk_child_cat';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
         $sql .= ' WHERE fk_parent_cat = ' . $id_cat;
 
+        
         $tabResult = array();
+        if($conf->global->BIMP_CATEGORIZATION_DESCENDRE && count($this->gatCatChilds($id_cat)) > 0)
+            $tabResult[] = $id_cat;
+        
         $result = $this->db->query($sql);
         if ($this->db->num_rows($result) < 1)
-            return false; //pas de restriction
+            return $tabResult; //pas de restriction
         else {
             while ($ligne = $this->db->fetch_object($result))
                 $tabResult[] = $ligne->fk_child_cat;
+        }
+        return $tabResult;
+    }
+    
+    
+
+    function gatCatChilds($id_cat) {
+        $sql = 'SELECT rowid';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'categorie';
+        $sql .= ' WHERE fk_parent = ' . $id_cat;
+
+        $tabResult = array();
+        $result = $this->db->query($sql);
+        if ($this->db->num_rows($result) < 1)
+            return $tabResult; //pas de restriction
+        else {
+            while ($ligne = $this->db->fetch_object($result))
+                $tabResult[] = $ligne->rowid;
         }
         return $tabResult;
     }

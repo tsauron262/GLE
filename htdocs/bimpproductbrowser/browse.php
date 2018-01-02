@@ -127,9 +127,9 @@ $morehtmlref .= '</div>';
 dol_banner_tab($object, 'label', $linkback, ($user->societe_id ? 0 : 1), 'label', 'label', $morehtmlref, '', 0, '', '', 1);
 
 
-if ($mode == 2 && count($object->get_filles()) == 0)
-    echo "Cette catégorie n'a pas de fille il n'y a donc pas de sens d'y ajouter des restrictions";
-else {
+//if ($mode == 2 && count($object->get_filles()) == 0)
+//    echo "Cette catégorie n'a pas de fille il n'y a donc pas de sens d'y ajouter des restrictions";
+//else {
 
     echo "<h3>Choisissez les catégories ";
     if ($mode == 2)
@@ -230,7 +230,7 @@ else {
         print "</table>";
         print '</div>';
     }
-}
+//}
 llxFooter();
 
 $db->close();

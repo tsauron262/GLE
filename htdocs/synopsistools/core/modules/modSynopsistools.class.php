@@ -132,8 +132,6 @@ class modSynopsistools extends DolibarrModules
         $this->rights[$r][5] = 'defaultViewMy'; // Droit
         $r ++;
 
-
-
         $this->menus = array();            // List of menus to add
         $r=0;
         $this->menu[$r]=array(

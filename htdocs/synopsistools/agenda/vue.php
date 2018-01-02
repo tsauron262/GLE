@@ -1,22 +1,22 @@
 <?php
- 
+
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
-require_once DOL_DOCUMENT_ROOT.'/core/lib/agenda.lib.php';
- 
+require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
+
 global $isMobile;
-if($isMobile)
+if ($isMobile)
     $conf->global->MAIN_HIDE_LEFT_MENU = true;
- 
+
 $tabUserId = array();
 $tabUser = getTabUser();
-if(isset($_REQUEST['timeTranche']))
-    $_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on')? 'true' : 'false';
-if(isset($_REQUEST['timeTranche']))
-    $_REQUEST['chevauche'] = (isset($_REQUEST['chevauche']) && $_REQUEST['chevauche'] == 'on')? 'true' : 'false';
+if (isset($_REQUEST['timeTranche']))
+    $_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on') ? 'true' : 'false';
+if (isset($_REQUEST['timeTranche']))
+    $_REQUEST['chevauche'] = (isset($_REQUEST['chevauche']) && $_REQUEST['chevauche'] == 'on') ? 'true' : 'false';
 $tabPara = getPara();
 $i = 0;
-$tabJsIdUser = 'chevauche = '.$_SESSION['paraAgenda']['chevauche'].';';
+$tabJsIdUser = 'chevauche = ' . $_SESSION['paraAgenda']['chevauche'] . ';';
 $tabJsIdUser .= 'tabUserId = Array();';
 foreach ($tabUser as $userId => $nom) {
     $i++;
@@ -24,11 +24,13 @@ foreach ($tabUser as $userId => $nom) {
     $tabJsIdUser .= 'tabUserId.push(' . $userId . ');';
 }
 $userStr = "'" . implode("','", $tabUser) . "'";
- 
+
 $js = ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js" type="text/javascript"></script>';
 $js .= <<<EOF
         <script type="text/javascript" src="../agenda/agenda.js"></script>
+        <script type="text/javascript" src="../agenda/chosen.jquery.js"></script>
     <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
+    <link rel="stylesheet" type="text/css" href="../agenda/chosen.min.css" />
  <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
   <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css" />
   <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css" />
@@ -87,12 +89,49 @@ $js .= <<<EOF
     .ui-widget-content td.ui-state-active{
         background: none;
     }
+        
+        
+        .form {
+
+	// Reset default Chosen.js styles
+	.chosen-container {
+		font-size: rem(16);
+
+		// Remove borders and box-shadows
+		.chosen-single,
+		.chosen-drop {
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+		}
+	}
+
+	// Reset active styles
+	.chosen-container-active {
+
+		// Remove borders and box-shadows
+		&.chosen-with-drop .chosen-single,
+		.chosen-choices {
+			border: none;
+			border-radius: 0;
+			box-shadow: none;		
+		}
+
+		.chosen-results {
+
+			// Remove gradient and set the highlight color
+			.highlighted {
+				background: $color-blue;
+			}
+		}
+	}
+}
   </style>
 EOF;
- 
- 
-  $js .= '<script type="text/javascript" src="./calendar/jquery.weekcalendar.js"></script>';
-  $js .= '<script type="text/javascript">';
+
+
+$js .= '<script type="text/javascript" src="./calendar/jquery.weekcalendar.js"></script>';
+$js .= '<script type="text/javascript">';
 $js .= $tabJsIdUser;
 $js .= <<<EOF
   (function($) {
@@ -109,7 +148,6 @@ $js .= <<<EOF
     month = d.getMonth();
     day = d.getDate();
  
-        
         function save(calEvent){
             jQuery.ajax({
                 url: DOL_URL_ROOT + "/synopsistools/agenda/ajax.php",
@@ -129,10 +167,10 @@ $js .= <<<EOF
       var Ocalendar = $('#calendar').weekCalendar({
 EOF;
 $js .= "
-        timeslotsPerHour: ".$_SESSION['paraAgenda']['timeTranche'].",
-        businessHours: {start: 8, end: 20, limitDisplay: ".$_SESSION['paraAgenda']['workHour']."},
+        timeslotsPerHour: " . $_SESSION['paraAgenda']['timeTranche'] . ",
+        businessHours: {start: 8, end: 20, limitDisplay: " . $_SESSION['paraAgenda']['workHour'] . "},
         timeslotHeight: 25,
-        ";    
+        ";
 $js .= <<<EOF
         defaultEventLength: 2,
         date: new Date(toDateUrl(new Date(), 2)+'T08:00:00.000+00:00'),
@@ -198,30 +236,28 @@ $js .= <<<EOF
         displayOddEven: true,
         displayFreeBusys: true,
 EOF;
-if(isset($_SESSION['dateDebStr'])){
+if (isset($_SESSION['dateDebStr'])) {
     $dateDebStr = $_SESSION['dateDebStr'];
-}
-else{
+} else {
     $dateDeb = new DateTime("");
     $dateDebStr = $dateDeb->getTimestamp();
 }
- 
- 
-if(isset($_SESSION['nbJour'])){
+
+
+if (isset($_SESSION['nbJour'])) {
     $nbJour = $_SESSION['nbJour'];
-}
-else{
+} else {
     $nbJour = 6;
 }
 $js .= '
-        date: '.$dateDebStr.'000,
+        date: ' . $dateDebStr . '000,
         daysToShow: ' . ((count($tabUser) > 5 && $nbJour > 3) ? '3' : $nbJour) . ',';
- 
+
 $js .= "switchDisplay: {'1 journée': 1, '3 journées': 3";
 if (count($tabUser) < 6)
     $js .= ", 'work week': 6, 'full week': 7";
 $js .= "},";
- 
+
 $js .= <<<EOF
         headerSeparator: ' ',
         useShortDayNames: true,
@@ -330,60 +366,107 @@ function blink(ob) {
         ob.show();  
         }
 }  
+        
+        /**
+ * Chosen: Multiple Dropdown
+ */
+window.WDS_Chosen_Multiple_Dropdown = {};
+( function( window, $, that ) {
+
+	// Constructor.
+	that.init = function() {
+		that.cache();
+
+		if ( that.meetsRequirements ) {
+			that.bindEvents();
+		}
+	};
+
+	// Cache all the things.
+	that.cache = function() {
+		that.param = {
+			window: $(window),
+			theDropdown: $( '.dropdown' ),
+		};
+	};
+
+	// Combine all events.
+	that.bindEvents = function() {
+		that.param.window.on( 'load', that.applyChosen );
+	};
+
+	// Do we meet the requirements?
+	that.meetsRequirements = function() {
+		return that.param.theDropdown.length;
+	};
+
+	// Apply the Chosen.js library to a dropdown.
+	// https://harvesthq.github.io/chosen/options.html
+	that.applyChosen = function() {
+		that.param.theDropdown.chosen({
+			inherit_select_classes: true,
+			width: '300px',
+		});
+	};
+
+	// Engage!
+	$( that.init );
+
+})( window, jQuery, window.WDS_Chosen_Multiple_Dropdown );
   </script>
 EOF;
- 
- 
- 
- 
+
+
+
+
 llxHeader($js);
- 
- 
- 
+
+
+
 $head = calendars_prepare_head($paramnoaction);
- 
+
 dol_fiche_head($head, "team", $langs->trans('Agenda'), 0, 'action');
- 
- 
+
+
 echo "<div class='floatL'>";
 printMenu($tabUser);
 echo "</div>";
- 
- 
+
+
 echo "<div class='floatL'>";
 echo '<form>Interval : <select name="timeTranche">';
-foreach(array(5,10,15,20,30) as $time)
-    echo '<option value="'.(60/$time).'" '.((60/$time) == $_SESSION['paraAgenda']['timeTranche'] ? 'selected="selected"' : "") .'>'.$time.'</option>';
+foreach (array(5, 10, 15, 20, 30) as $time)
+    echo '<option value="' . (60 / $time) . '" ' . ((60 / $time) == $_SESSION['paraAgenda']['timeTranche'] ? 'selected="selected"' : "") . '>' . $time . '</option>';
 echo '</select>';
-echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><input type='checkbox' id='workHour' name='workHour' ".("true" == $_SESSION['paraAgenda']['workHour'] ? 'checked="checked"' : "") .'/>';
-echo "<label style='margin-left:11px' for='chevauche'>Chevaucher rdv : </label><input type='checkbox' id='chevauche' name='chevauche' ".("true" == $_SESSION['paraAgenda']['chevauche'] ? 'checked="checked"' : "") .'/>';
+echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><input type='checkbox' id='workHour' name='workHour' " . ("true" == $_SESSION['paraAgenda']['workHour'] ? 'checked="checked"' : "") . '/>';
+echo "<label style='margin-left:11px' for='chevauche'>Chevaucher rdv : </label><input type='checkbox' id='chevauche' name='chevauche' " . ("true" == $_SESSION['paraAgenda']['chevauche'] ? 'checked="checked"' : "") . '/>';
 echo "<input type='submit' value='Ok' class='butAction'/></form>";
 echo "</div>";
- 
- 
- 
+
+
+
 echo "<div class='floatL'>";
 echo '<input type="text" class="datePicker" id="dateChange"/>';
 echo "<button class='butAction' onclick='"
-. "dateTab = $(\"#dateChange\").val().split(\"/\");"
-. "dateStr = dateTab[2] +\"-\"+ dateTab[1] +\"-\"+ dateTab[0];"
-. "$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date(dateStr));"
-        . "' >Ok</button>";
+ . "dateTab = $(\"#dateChange\").val().split(\"/\");"
+ . "dateStr = dateTab[2] +\"-\"+ dateTab[1] +\"-\"+ dateTab[0];"
+ . "$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date(dateStr));"
+ . "' >Ok</button>";
 echo "</div><div class='clear'></div>";
- 
- 
+
+
 echo '
  
   <div id="calendar"></div>
 </body>
 </html>';
- 
+
 function printMenu($tabUser) {
-    global $db,$user;
- 
+    global $db, $user;
+
     $js = "var tabGroup = new Array();";
     $js .= "tabGroup[-1] = new Array();";
-    $js .= "tabGroup[-1].push(".$user->id.");";
+    $js .= "tabGroup[-1].push(" . $user->id . ");";
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup_user ");
 //    $tabGroup = array();
     while ($result = $db->fetch_object($sql)) {
@@ -392,48 +475,35 @@ function printMenu($tabUser) {
 //        $tabGroup[$result->fk_usergroup][$result->fk_user] = $result->fk_user;
     }
     echo "<script>" . $js . "</script>";
- 
- 
+
+
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup ORDER BY nom");
     while ($result = $db->fetch_object($sql)) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom;
 //        $select .= "   [".count($tabGroup[$result->rowid])."]";
         $select .= "</option>";
     }
-    echo "<form action='' method='post'>";
-    echo "<select id='group'><option value='0'>Groupes</option><option value='-1'>Moi</option>" . $select . "</select>";
-    echo "<div class='contentListUser'><a href='#'><span class='nbGroup'></span></a>";
- 
- 
+
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
-    echo "<div class='listUser'>"
-    . "Classement alphabétique horizontal<br/><br/>"
-            . "<table><tr>";
-    $i = 0;
-        echo "<td>";
+    echo '<form action="" method="post" class="form" id="customForm" >';
+    echo '<label for="customSelectFor" class="screen-reader-text">Ajouter/supprimer des utilisateurs  </label>';
+    echo '<select id="customSelectId" name="customSelect[]" class="dropdown" form="customForm" multiple data-placeholder="Indiquez au moins un nom ou un prénom">';
     while ($result = $db->fetch_object($sql)) {
-        $i++;
-        echo "<input " . (isset($tabUser[$result->rowid]) ? "checked='checked'" : "") . " type='checkbox' class='userCheck' id='user" . $result->rowid . "' name='user" . $result->rowid . "' value='" . $result->rowid . "'/>";
-        echo "<label for='user" . $result->rowid . "'>" . $result->firstname . " " . $result->lastname . "</label>";
-        if ($i > 20) {
-            $i = 0;
-        echo "</td><td>";
-//            echo "</tr><tr>";
+        if (isset($tabUser[$result->rowid])) {
+            echo "<option id='user" . $result->rowid . "' name='" . $result->rowid . "' value='" . $result->rowid . "' selected>" . $result->firstname . " " . $result->lastname . "</option>";
+        } else {
+            echo "<option id='user" . $result->rowid . "' name='" . $result->rowid . "' value='" . $result->rowid . "'>" . $result->firstname . " " . $result->lastname . "</option>";
         }
-        else
-            echo "<br/>";
     }
-    echo "</td></tr></table><br/></div></div>";
- 
+    echo '</select>  ';
+
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
     echo "<div class='listUser'><br/><br/></div>";
-    
+
     //que pour 2016
     echo "<br/>ATTENTION sur l'année 2016 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";
 }
- 
- 
- 
+
 llxFooter();
 ?>

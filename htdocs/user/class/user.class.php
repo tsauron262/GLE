@@ -1965,7 +1965,7 @@ class User extends CommonObject
 
 			    // Call trigger
                 $result=$this->call_trigger('USER_MODIFY',$user);
-                $result=$this->call_trigger('USER_SETINGROUP',$user);
+                $result=$this->call_trigger('USER_REMOVEFROMGROUP',$user);
                 if ($result < 0) { $error++; }
                 // End call triggers
 			}

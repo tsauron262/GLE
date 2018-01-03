@@ -132,6 +132,8 @@ class modSynopsistools extends DolibarrModules
         $this->rights[$r][5] = 'defaultViewMy'; // Droit
         $r ++;
 
+
+
         $this->menus = array();            // List of menus to add
         $r=0;
         $this->menu[$r]=array(
@@ -254,7 +256,7 @@ class modSynopsistools extends DolibarrModules
         
         $this->tabs = array('thirdparty:-document',
             'thirdparty:+allDoc:allDoc:synopsisGene@synopsistools:$user->rights->societe->lire:/synopsistools/allDocumentSoc.php?id=__ID__',
-            'agenda:+team:Vue équipe:@synopsistools:$user->rights->agenda->myactions->read:/synopsistools/agenda/vue.php');
+            'agenda:+team:Vue équipe:@synopsistools:$user->rights->agenda->read:/synopsistools/agenda/vue.php');
         
         
 

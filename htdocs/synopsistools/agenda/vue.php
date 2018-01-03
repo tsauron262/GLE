@@ -367,57 +367,8 @@ function blink(ob) {
         }
 }  
         
-        /**
- * Chosen: Multiple Dropdown
- */
-window.WDS_Chosen_Multiple_Dropdown = {};
-( function( window, $, that ) {
-
-	// Constructor.
-	that.init = function() {
-		that.cache();
-
-		if ( that.meetsRequirements ) {
-			that.bindEvents();
-		}
-	};
-
-	// Cache all the things.
-	that.cache = function() {
-		that.param = {
-			window: $(window),
-			theDropdown: $( '.dropdown' ),
-		};
-	};
-
-	// Combine all events.
-	that.bindEvents = function() {
-		that.param.window.on( 'load', that.applyChosen );
-	};
-
-	// Do we meet the requirements?
-	that.meetsRequirements = function() {
-		return that.param.theDropdown.length;
-	};
-
-	// Apply the Chosen.js library to a dropdown.
-	// https://harvesthq.github.io/chosen/options.html
-	that.applyChosen = function() {
-		that.param.theDropdown.chosen({
-			inherit_select_classes: true,
-			width: '300px',
-		});
-	};
-
-	// Engage!
-	$( that.init );
-
-})( window, jQuery, window.WDS_Chosen_Multiple_Dropdown );
   </script>
 EOF;
-
-
-
 
 llxHeader($js);
 
@@ -463,43 +414,52 @@ echo '
 
 function printMenu($tabUser) {
     global $db, $user;
-
-    $js = "var tabGroup = new Array();";
+    $js = "var allUsers = new Array();";
+    $js .= "var tabGroup = new Array();";
     $js .= "tabGroup[-1] = new Array();";
     $js .= "tabGroup[-1].push(" . $user->id . ");";
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup_user ");
-//    $tabGroup = array();
+    $tabGroup = array();
     while ($result = $db->fetch_object($sql)) {
         $js .= "if(!tabGroup[" . $result->fk_usergroup . "]) tabGroup[" . $result->fk_usergroup . "] = new Array();";
         $js .= "tabGroup[" . $result->fk_usergroup . "].push(" . $result->fk_user . ");";
-//        $tabGroup[$result->fk_usergroup][$result->fk_user] = $result->fk_user;
+        $tabGroup[$result->fk_usergroup][$result->fk_user] = $result->fk_user;
     }
     echo "<script>" . $js . "</script>";
-
 
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup ORDER BY nom");
     while ($result = $db->fetch_object($sql)) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom;
-//        $select .= "   [".count($tabGroup[$result->rowid])."]";
+        $select .= "   [" . count($tabGroup[$result->rowid]) . "]";
         $select .= "</option>";
     }
-
+    
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
+    $newJs ='';
+
+    echo '<br/><br/><div>';
     echo '<form action="" method="post" class="form" id="customForm" >';
+    echo '<select id="group" class="dropdown" data-placeholder="Indiquez le groupe">';
+    echo "<option value='0'>Groupes</option><option value='-1'>Moi</option>" . $select . "</select>";
+    echo "<div class='contentListUser'><text><span class='nbGroup'></span></text><br/><br/>";
     echo '<label for="customSelectFor" class="screen-reader-text">Ajouter/supprimer des utilisateurs  </label>';
-    echo '<select id="customSelectId" name="customSelect[]" class="dropdown" form="customForm" multiple data-placeholder="Indiquez au moins un nom ou un prénom">';
+    echo '<select id="chosenSelectId" name="customSelect[]" class="dropdown" form="customForm" multiple data-placeholder="Indiquez au moins un nom ou un prénom">';
     while ($result = $db->fetch_object($sql)) {
         if (isset($tabUser[$result->rowid])) {
-            echo "<option id='user" . $result->rowid . "' name='" . $result->rowid . "' value='" . $result->rowid . "' selected>" . $result->firstname . " " . $result->lastname . "</option>";
+            echo "<option id='user" . $result->rowid . "' name='" . $result->rowid . "' value='" . $result->rowid . "' selected='selected'>" . $result->firstname . " " . $result->lastname . "</option>";
         } else {
             echo "<option id='user" . $result->rowid . "' name='" . $result->rowid . "' value='" . $result->rowid . "'>" . $result->firstname . " " . $result->lastname . "</option>";
         }
+        $newJs .= "allUsers.push(" . $result->rowid . ");";
     }
     echo '</select>  ';
+    echo "<script>" . $newJs . "</script>";
+
+    echo "<input id='clearAll' class='butActionDelete' style='width:40px' value='Vider'/>  ";
 
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
-    echo "<div class='listUser'><br/><br/></div>";
+    echo "<br/></div>";
 
     //que pour 2016
     echo "<br/>ATTENTION sur l'année 2016 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";

@@ -1909,6 +1909,7 @@ class User extends CommonObject
 
 			    // Call trigger
                 $result=$this->call_trigger('USER_MODIFY',$user);
+                $result=$this->call_trigger('USER_SETINGROUP',$user);
 	            if ($result < 0) { $error++; }
                 // End call triggers
 			}
@@ -1964,6 +1965,7 @@ class User extends CommonObject
 
 			    // Call trigger
                 $result=$this->call_trigger('USER_MODIFY',$user);
+                $result=$this->call_trigger('USER_SETINGROUP',$user);
                 if ($result < 0) { $error++; }
                 // End call triggers
 			}

@@ -68,10 +68,13 @@ $(document).ready(function () {
     printContrats();
     $('#datepicker').datepicker({minDate: 0});                  // create datepicker and disallow previous dates (befor today)
     $(document).on("click", 'div.clickable.item', function () { // click on existing contrat
-        console.log("Start event");
         var newHeight = getNewContratHeight($(this).parent());
+        if ($(this).parent().attr('isOpened') === 'true') {
+            $(this).parent().attr('isOpened', 'false');
+        } else {
+            $(this).parent().attr('isOpened', 'true');
+        }
         $(this).parent().css("height", newHeight);
-        console.log("End event");
     });
     $(document).on("click", 'div.divClikable', function () {   // change field of new contrat
         changeValueOfField($(this).parent(), $(this).text());
@@ -106,11 +109,11 @@ $(document).ready(function () {
 
 /* Get the new height of the clicked contrat */
 function getNewContratHeight(accDiv) {
-    if (accDiv.height() === HEIGHT_DIV_CONTRAT) {
-        var nbOfLine = parseInt(accDiv.attr('nbChild'));
-        return HEIGHT_DIV_CONTRAT * (nbOfLine + 2); // HEIGHT_DIV_CONTRAT * (nb services + contrat div + header of array)
+    if (accDiv.attr('isOpened') === 'true') {
+        return HEIGHT_DIV_CONTRAT;
     }
-    return HEIGHT_DIV_CONTRAT;  // HEIGHT_DIV_CONTRAT * contrat div
+    var nbOfLine = parseInt(accDiv.attr('nbChild'));
+    return HEIGHT_DIV_CONTRAT * (nbOfLine + 2); // HEIGHT_DIV_CONTRAT * (nb services + contrat div + header of array)
 }
 
 /* When the user want to change the duration of a service */
@@ -186,6 +189,7 @@ function addContratAndServices(contrat, divIdToAppend, contratId, spaces) {
             .attr('id', contratId)
             .attr('class', 'accordeon item')
             .attr('nbChild', contrat.services.length)
+            .attr('isOpened', 'false')
             .appendTo(divIdToAppend);
 
     $('#' + contratId)

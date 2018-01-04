@@ -83,7 +83,7 @@ table.userInList {
 }
 
 .userInList tbody tr {
-vertical-align: text-top;
+    vertical-align: text-top;
 }
 
 .userInList tbody tr td {
@@ -98,4 +98,95 @@ vertical-align: text-top;
     text-align: center;
     background-color: #bfbfbf;
     line-height: 40px;
+}
+
+body {
+    font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+    margin: 0;
+}
+
+h1 {
+    margin:0 0 2em;
+    padding: 0.5em;
+    font-size: 1.3em;
+}
+
+p.description {
+    font-size: 0.8em;
+    padding: 1em;
+/*    //      position: absolute;*/
+    top: 1.2em;
+    margin-right: 400px;
+}
+
+#calendar_selection {
+    font-size: 0.7em;
+/*    //      position: absolute;*/
+    top: 1em;
+    right: 1em;
+    padding: 1em;
+    background: #ffc;
+    border: 1px solid #dda;
+    width: 270px;
+}
+
+#message {
+    font-size: 0.7em;
+/*    //      position: absolute;*/
+    top: 1em;
+    right: 320px;
+    padding: 1em;
+    background: #ddf;
+    border: 1px solid #aad;
+    width: 270px;
+}
+
+.wc-header .wc-user-header a, .wc-header .wc-user-header{
+    overflow: visible;
+    height: 60px;
+    width: 60px;
+    -moz-transform:rotate(-45deg);
+    -webkit-transform:rotate(-45deg); 
+    -o-transform:rotate(-90deg);
+    -ms-transform : rotate(-90deg) 
+}
+.ui-widget-content td.ui-state-active{
+    background: none;
+}
+
+
+.form {
+
+/*    // Reset default Chosen.js styles*/
+    .chosen-container {
+        font-size: rem(16);
+
+/*        // Remove borders and box-shadows*/
+        .chosen-single,
+        .chosen-drop {
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+        }
+    }
+
+/*    // Reset active styles*/
+    .chosen-container-active {
+
+/*        // Remove borders and box-shadows*/
+        &.chosen-with-drop .chosen-single,
+        .chosen-choices {
+            border: none;
+            border-radius: 0;
+            box-shadow: none;		
+        }
+
+        .chosen-results {
+
+/*            // Remove gradient and set the highlight color*/
+            .highlighted {
+                background: blue;
+            }
+        }
+    }
 }

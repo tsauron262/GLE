@@ -92,7 +92,7 @@ class BimpProductBrowser extends CommonObject {
         $result = $this->db->query($sql);
         if ($result) {
             while ($obj = $this->db->fetch_object($result)) {
-                $categ = New Categorie($this->db);
+                $categ = new Categorie($this->db);
                 $categ->fetch($obj->fk_categorie);
                 $this->cats[$categ->id] = $categ;
             }
@@ -151,7 +151,7 @@ class BimpProductBrowser extends CommonObject {
      * @param type $id_prod the id of the product
      * @return type Array with multiple off key-value combinaison
      */
-    function getOldWay($id_prod) {
+    function    getOldWay($id_prod) {
         global $conf;
         $this->cats[$conf->global->BIMP_ROOT_CATEGORY] = array();
         $this->getProdCateg($id_prod);
@@ -167,13 +167,10 @@ class BimpProductBrowser extends CommonObject {
 
         $catT = new Categorie($this->db);
 
-        foreach ($catsT as $cat) {
-            $this->cats[$cat->id] = $cat;
-        }
-
+        
         foreach ($this->cats as $catId => $cat) {
             $result = $this->getChilds($catId);
-            if (!$result)
+            if (!$result && $catId != $conf->global->BIMP_ROOT_CATEGORY)
                 $catsNonRestr[$catId] = $cat->print_all_ways(); //array("nom"=>$cat->label,"id"=>$catId);
             else {
                 $catsRestr[$catId] = $catId;
@@ -274,76 +271,6 @@ class BimpProductBrowser extends CommonObject {
                 $tabResult[] = $ligne->fk_parent_cat;
         }
         return $tabResult;
-    }
-
-    function getOldWay2($id_prod) {
-        global $conf;
-        $catsT = $this->getProdCateg($id_prod);
-
-//        $prod = new Product($this->db);
-//        $prod->fetch($id_prod);
-//        $prod->getCate
-        $cats = array($conf->global->BIMP_ROOT_CATEGORY => array());
-        $catsRestr = array();
-        $catsNonRestr = array();
-        $idsCatObligatoir = array();
-        $idsRestrNonSatisfaite = array();
-        $catOK = array();
-
-        $catT = new Categorie($this->db);
-
-        foreach ($catsT as $cat) {
-            $cats[$cat->id] = $cat;
-        }
-
-        foreach ($cats as $catId => $cat) {
-            $result = $this->getChilds($catId);
-            if (!$result)
-                $catsNonRestr[$catId] = $cat->print_all_ways(); //array("nom"=>$cat->label,"id"=>$catId);
-            else {
-                $catsRestr[$catId] = $catId;
-                foreach ($result as $catOb)
-                    $idsCatObligatoir[$catOb] = $catOb; //Attention que des id
-            }
-        }
-
-        foreach ($idsCatObligatoir as $idCatObligatoir) {//On parcoure les obligation et on en cherche une non satisfaite
-            $ok = false;
-            $catT->fetch($idCatObligatoir);
-            foreach ($cats as $cat) {
-                if ($cat->fk_parent == $idCatObligatoir) {
-                    $catOK[$idCatObligatoir] = array("nomMere" => $catT->label, "idMere" => $idCatObligatoir, "nomFille" => $cat->label, "idFille" => $cat->id);
-                    $ok = true;
-                    Unset($catsNonRestr[$cat->id]);
-                    break;
-                }
-            }
-
-            if (!$ok) {
-                $idsRestrNonSatisfaite[$idCatObligatoir] = array("nomMere" => $catT->label, "idMere" => $idCatObligatoir);
-            }
-        }
-
-
-        $result = array("ROOT_CATEGORY" => $conf->global->BIMP_ROOT_CATEGORY, "catOk" => $catOK, "waysAnnexesCategories" => $catsNonRestr, "restrictionNonSatisfaite" => $idsRestrNonSatisfaite);
-
-
-
-
-        if (count($idsRestrNonSatisfaite) > 0) {
-            $result["catAChoisir"] = array($conf->global->BIMP_ROOT_CATEGORY => array());
-
-            foreach ($idsRestrNonSatisfaite as $idT => $inut) {
-                $catT->fetch($idT);
-                $filles = $catT->get_filles();
-                $result["catAChoisir"]["idMere"] = $catT->id;
-                $result["catAChoisir"]["labelMere"] = $catT->label;
-                foreach ($filles as $catT2)
-                    $result["catAChoisir"][$catT2->id] = array("nom" => $catT2->label, "id" => $catT2->id);
-                break;
-            }
-        }
-        return $result;
     }
 
     /* Used by the hook to determine if the product is fully categorized */

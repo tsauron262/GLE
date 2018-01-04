@@ -31,7 +31,7 @@ require_once DOL_DOCUMENT_ROOT.'/bimpproductbrowser/class/productBrowser.class.p
 
 $pb = new BimpProductBrowserConfig($db);
 $id = GETPOST('id_oject');
-$pb->fetch($id, GETPOST($mode));
+$pb->fetch($id, GETPOST('mode'));
 
 switch (GETPOST('action'))
 {

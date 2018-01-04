@@ -160,6 +160,7 @@ dol_banner_tab($object, 'label', $linkback, ($user->societe_id ? 0 : 1), 'label'
 
 
     print '<input type="hidden" name="id_oject" id="id_oject" value="' . $object->id . '"/>';
+    print '<input type="hidden" name="mode" id="mode" value="' . $mode . '"/>';
 // Charge tableau des categories
     $cate_arbo = $categstatic->get_full_arbo($typetext);
 

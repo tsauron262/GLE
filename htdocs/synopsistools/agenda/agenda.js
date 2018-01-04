@@ -53,6 +53,26 @@ $(window).on("load", function () {
             $('.wc-next').click();
         }
     });
+    
+    
+    $(".dropdown").chosen();
+    
+    $('#clearAll').click(function () {
+        $("#chosenSelectId").children().each(function () {
+            $(this).prop('selected', false);
+            $(this).trigger("chosen:updated");
+        });
+        initNbUser();
+    });
+
+    $("#group").change(function () {
+        id = $(this).find("option:selected").val();
+        tabGroup[id].forEach(function (element) {
+            $("#user" + element).attr('selected', '');
+            $("#user" + element).trigger("chosen:updated");
+        });
+        initNbUser();
+    });
 });
 
 function initNbUser() {
@@ -84,72 +104,3 @@ function initSimult() {
         return false;
     });
 }
-
-/**
- * Chosen: Multiple Dropdown
- */
-
-$(document).ready(function () {
-    
-    $(".dropdown").chosen();
-//    window.WDS_Chosen_Multiple_Dropdown = {};
-//    (function (window, $, that) {
-//
-//        // Constructor.
-//        that.init = function () {
-//            that.cache();
-//
-//            if (that.meetsRequirements) {
-//                that.bindEvents();
-//            }
-//        };
-//
-//        // Cache all the things.
-//        that.cache = function () {
-//            that.param = {
-//                window: $(window),
-//                theDropdown: $('.dropdown')
-//            };
-//        };
-//
-//        // Combine all events.
-//        that.bindEvents = function () {
-//            that.param.window.on('load', that.applyChosen);
-//        };
-//
-//        // Do we meet the requirements?
-//        that.meetsRequirements = function () {
-//            return that.param.theDropdown.length;
-//        };
-//
-//        // Apply the Chosen.js library to a dropdown.
-//        // https://harvesthq.github.io/chosen/options.html
-//        that.applyChosen = function () {
-//            that.param.theDropdown.chosen({
-//                inherit_select_classes: true,
-//                width: '300px'
-//            });
-//        };
-//
-//        // Engage!
-//        $(that.init);
-//
-//    })(window, jQuery, window.WDS_Chosen_Multiple_Dropdown);
-
-    $('#clearAll').click(function () {
-        $("#chosenSelectId").children().each(function () {
-            $(this).prop('selected', false);
-            $(this).trigger("chosen:updated");
-        });
-        initNbUser();
-    });
-
-    $("#group").change(function () {
-        id = $(this).find("option:selected").val();
-        tabGroup[id].forEach(function (element) {
-            $("#user" + element).attr('selected', '');
-            $("#user" + element).trigger("chosen:updated");
-        });
-        initNbUser();
-    });
-});

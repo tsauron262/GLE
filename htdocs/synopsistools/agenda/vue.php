@@ -28,9 +28,9 @@ $userStr = "'" . implode("','", $tabUser) . "'";
 $js = ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js" type="text/javascript"></script>';
 $js .= <<<EOF
         <script type="text/javascript" src="../agenda/agenda.js"></script>
-        <script type="text/javascript" src="../agenda/chosen.jquery.js"></script>
+        <script type="text/javascript" src="../jquery/chosen/chosen.jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../jquery/chosen/chosen.css" />
     <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
-    <link rel="stylesheet" type="text/css" href="../agenda/chosen.min.css" />
  <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
   <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css" />
   <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css" />

@@ -28,13 +28,19 @@ class exportfacture {
 
     public function exportFactureSav() {
         $this->type = "sav";
-        $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens "
+        $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens, Centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "synopsischrono chrono , " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT , " . MAIN_DB_PREFIX . "user_extrafields ue , " . MAIN_DB_PREFIX . "societe soc "
                 . "WHERE el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut != 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND `fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) AND fact.fk_soc = soc.rowid "
                 . $this->where);
         
 
         while ($ligne = $this->db->fetch_object($result)) {
+            if ($ligne->id8Sens < 1 && isset($ligne->Centre) && $ligne->Centre != "") {
+                require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
+                global $tabCentre;
+                if (isset($tabCentre[$ligne->Centre][3]) && $tabCentre[$ligne->Centre][3] > 0)
+                    $valeur = $tabCentre[$ligne->Centre][3];
+            }
             $this->id8sens = $ligne->id8Sens;
             $this->extract($ligne->id);
         }

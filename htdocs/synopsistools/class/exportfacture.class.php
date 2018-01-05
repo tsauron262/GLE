@@ -13,6 +13,7 @@ class exportfacture {
     public $type = "";
     public $id8sens = 0;
     public $nbE = 0;
+    public $debug = false;
     
     private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid";
 
@@ -137,7 +138,8 @@ class exportfacture {
                 //header("Content-Disposition: attachment; filename=\"test.txt\"");
                 $text = $this->getTxt($tabFact, $tabFactDet);
                 if(file_put_contents($this->path. $facture->ref.".txt", $text)){
-                    echo "<br/>Facture ".$facture->getNomUrl(1). " exporté<br/>";
+                    if($this->debug)
+                        echo "<br/>Facture ".$facture->getNomUrl(1). " exporté<br/>";
                     $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $facture->id);
                     $this->nbE++;
                     return 1;
@@ -219,7 +221,8 @@ class exportfacture {
         }
         if($to != "")
             mailSyn2("Produit non catégorisé", $to, "admin@bimp.fr", "Bonjour ceci est un message automatique des export vers 8sens <br/>".$msg);
-        echo "<span class='red'>".$msg."</span><br/>";
+        if($this->debug)
+            echo "<span class='red'>".$msg."</span><br/>";
     }
    
 }

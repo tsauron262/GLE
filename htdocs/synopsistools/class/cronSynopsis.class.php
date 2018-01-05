@@ -46,9 +46,12 @@ class CronSynopsis {
     }
 
     public function extractFact() {
-        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
-        $export = new synopsisexport($this->db, 'file');
-        $export->exportFactureSav(false);
+//        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
+//        $export = new synopsisexport($this->db, 'file');
+//        $export->exportFactureSav(false);
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportfacture.class.php");
+        $export = new exportfacture($this->db);
+        $export->exportTout(); 
         echo 1;
     }
 

@@ -131,13 +131,15 @@ class exportfacture {
             
             
             if($this->exportOk){
-                echo "<br/>Facture ".$facture->getNomUrl(1). " exporté<br/>";
                 //header("Content-Disposition: attachment; filename=\"test.txt\"");
                 $text = $this->getTxt($tabFact, $tabFactDet);
                 if(file_put_contents($this->path. $facture->ref.".txt", $text)){
+                    echo "<br/>Facture ".$facture->getNomUrl(1). " exporté<br/>";
                     $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $facture->id);
                     return 1;
                 }
+                else
+                    $this->error ("Impossible d'exporté le fichier ".$this->path. $facture->ref.".txt");
             }
             return 0;
         }
@@ -146,7 +148,7 @@ class exportfacture {
     
     function getRef($line){
         $tabCatProd = array(1202=>"GEN-ABO", 1203=>"GEN-CERTIF", 1204=>"GEN-HEBERG", 1205=>"GEN-LOC",
-            1100=>"GEN-TELECOM", 1176=>"GEN-CONSO", 1216=>"GEN-SAV-PIECES", 1079=>"GEN-MAT", 1072=>"GEN-LOG", 1227=>"GEN-MO-EXT", 1156=>"GEN-MO-INT", 1225=>"GEN-MAINT-INT", 1140=>"GEN-MAIN-EXT", 1214=>"GEN-MAT-OCCAS", 1215=>"GEN-ACCES", 1207=>"GEN-PORT", 1217=>"GEN-DEP-INT", 1228=>"GEN-DEP-EXT", 1135=>"GEN-TEXTIL", "GEN-ZZ");
+            1100=>"GEN-TELECOM", 1176=>"GEN-CONSO", 1216=>"GEN-SAV-PIECES", 1079=>"GEN-MAT", 1072=>"GEN-LOG", 1227=>"GEN-MO-EXT", 1156=>"GEN-MO-INT", 1225=>"GEN-MAINT-INT", 1140=>"GEN-MAIN-EXT", 1214=>"GEN-MAT-OCCAS", 1215=>"GEN-ACCES", 1207=>"GEN-PORT", 1217=>"GEN-DEP-INT", 1228=>"GEN-DEP-EXT", 1135=>"GEN-TEXTIL", 1233=>"GEN-ZZ");
         $valeur = "";
         
         if($line->total_ht == 0 && $line->pa_ht == 0)

@@ -84,7 +84,7 @@ class exportfacture {
         }
         foreach($tab2 as $tabT){
             foreach($tabT as $val)
-                $sortie .= $val.$this->sep;
+                $sortie .= str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ",$val).$this->sep;
             $sortie.= $this->saut;
         }
         
@@ -123,7 +123,7 @@ class exportfacture {
                     $ref = $prod->ref;
                 }
                 
-                $tabFactDet[] = array("L"=>"L", "ref"=>$ref, "product_type"=>$type, "qty"=>$line->qty, "subprice"=>price($line->subprice), "description"=>str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ",$line->desc), "buy_price_ht"=>price($line->pa_ht), "tva_tx"=>$line->tva_tx, "remise_percent"=>$line->remise_percent);
+                $tabFactDet[] = array("L"=>"L", "ref"=>$ref, "product_type"=>$type, "qty"=>$line->qty, "subprice"=>price($line->subprice), "description"=>$line->desc, "buy_price_ht"=>price($line->pa_ht), "tva_tx"=>$line->tva_tx, "remise_percent"=>$line->remise_percent);
             
             }
             

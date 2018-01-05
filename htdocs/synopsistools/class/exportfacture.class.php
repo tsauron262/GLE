@@ -35,13 +35,13 @@ class exportfacture {
         
 
         while ($ligne = $this->db->fetch_object($result)) {
+            $this->id8sens = $ligne->id8Sens;
             if ($ligne->id8Sens < 1 && isset($ligne->Centre) && $ligne->Centre != "") {
                 require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
                 global $tabCentre;
                 if (isset($tabCentre[$ligne->Centre][3]) && $tabCentre[$ligne->Centre][3] > 0)
-                    $valeur = $tabCentre[$ligne->Centre][3];
+                    $this->id8sens = $tabCentre[$ligne->Centre][3];
             }
-            $this->id8sens = $ligne->id8Sens;
             $this->extract($ligne->id);
         }
         

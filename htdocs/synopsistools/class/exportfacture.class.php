@@ -79,7 +79,7 @@ class exportfacture {
         
         foreach($tab1 as $tabT){
             foreach($tabT as $val)
-                $sortie .= $val.$this->sep;
+                $sortie .= str_replace(array($this->saut, $this->sep, "\n", "\r"), "  ",$val).$this->sep;
             $sortie.= $this->saut;
         }
         foreach($tab2 as $tabT){

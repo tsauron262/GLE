@@ -91,10 +91,10 @@ class exportfacture {
             
     function extract($id){
         if($this->type == ""){
-            $this->error ("Pas de type pour export");
+            $this->error ("Pas de type pour export ".$id);
         }
         elseif($this->id8sens == 0){
-            $this->error ("Pas d'id collaborateur 8sens");
+            $this->error ("Pas d'id collaborateur 8sens ".$id);
         }
         else{
             $this->exportOk = true;

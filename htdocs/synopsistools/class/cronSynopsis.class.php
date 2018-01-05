@@ -51,8 +51,7 @@ class CronSynopsis {
 //        $export->exportFactureSav(false);
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportfacture.class.php");
         $export = new exportfacture($this->db);
-        $export->exportTout(); 
-        echo 1;
+        return $export->exportTout(); 
     }
 
     public function sortieMail() {

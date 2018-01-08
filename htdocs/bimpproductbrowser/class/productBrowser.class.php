@@ -92,7 +92,7 @@ class BimpProductBrowser extends CommonObject {
         $result = $this->db->query($sql);
         if ($result) {
             while ($obj = $this->db->fetch_object($result)) {
-                $categ = New Categorie($this->db);
+                $categ = new Categorie($this->db);
                 $categ->fetch($obj->fk_categorie);
                 $this->cats[$categ->id] = $categ;
             }
@@ -106,17 +106,40 @@ class BimpProductBrowser extends CommonObject {
     /* Get category(s) implied by the cat with the id $id_cat */
 
     function getChilds($id_cat) {
+        global $conf;
         $sql = 'SELECT fk_child_cat';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
         $sql .= ' WHERE fk_parent_cat = ' . $id_cat;
 
+        
         $tabResult = array();
+        if($conf->global->BIMP_CATEGORIZATION_DESCENDRE && count($this->gatCatChilds($id_cat)) > 0)
+            $tabResult[] = $id_cat;
+        
         $result = $this->db->query($sql);
         if ($this->db->num_rows($result) < 1)
-            return false; //pas de restriction
+            return $tabResult; //pas de restriction
         else {
             while ($ligne = $this->db->fetch_object($result))
                 $tabResult[] = $ligne->fk_child_cat;
+        }
+        return $tabResult;
+    }
+    
+    
+
+    function gatCatChilds($id_cat) {
+        $sql = 'SELECT rowid';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'categorie';
+        $sql .= ' WHERE fk_parent = ' . $id_cat;
+
+        $tabResult = array();
+        $result = $this->db->query($sql);
+        if ($this->db->num_rows($result) < 1)
+            return $tabResult; //pas de restriction
+        else {
+            while ($ligne = $this->db->fetch_object($result))
+                $tabResult[] = $ligne->rowid;
         }
         return $tabResult;
     }
@@ -128,7 +151,7 @@ class BimpProductBrowser extends CommonObject {
      * @param type $id_prod the id of the product
      * @return type Array with multiple off key-value combinaison
      */
-    function getOldWay($id_prod) {
+    function    getOldWay($id_prod) {
         global $conf;
         $this->cats[$conf->global->BIMP_ROOT_CATEGORY] = array();
         $this->getProdCateg($id_prod);
@@ -144,13 +167,10 @@ class BimpProductBrowser extends CommonObject {
 
         $catT = new Categorie($this->db);
 
-        foreach ($catsT as $cat) {
-            $this->cats[$cat->id] = $cat;
-        }
-
+        
         foreach ($this->cats as $catId => $cat) {
             $result = $this->getChilds($catId);
-            if (!$result)
+            if (!$result && $catId != $conf->global->BIMP_ROOT_CATEGORY)
                 $catsNonRestr[$catId] = $cat->print_all_ways(); //array("nom"=>$cat->label,"id"=>$catId);
             else {
                 $catsRestr[$catId] = $catId;
@@ -253,76 +273,6 @@ class BimpProductBrowser extends CommonObject {
         return $tabResult;
     }
 
-    function getOldWay2($id_prod) {
-        global $conf;
-        $catsT = $this->getProdCateg($id_prod);
-
-//        $prod = new Product($this->db);
-//        $prod->fetch($id_prod);
-//        $prod->getCate
-        $cats = array($conf->global->BIMP_ROOT_CATEGORY => array());
-        $catsRestr = array();
-        $catsNonRestr = array();
-        $idsCatObligatoir = array();
-        $idsRestrNonSatisfaite = array();
-        $catOK = array();
-
-        $catT = new Categorie($this->db);
-
-        foreach ($catsT as $cat) {
-            $cats[$cat->id] = $cat;
-        }
-
-        foreach ($cats as $catId => $cat) {
-            $result = $this->getChilds($catId);
-            if (!$result)
-                $catsNonRestr[$catId] = $cat->print_all_ways(); //array("nom"=>$cat->label,"id"=>$catId);
-            else {
-                $catsRestr[$catId] = $catId;
-                foreach ($result as $catOb)
-                    $idsCatObligatoir[$catOb] = $catOb; //Attention que des id
-            }
-        }
-
-        foreach ($idsCatObligatoir as $idCatObligatoir) {//On parcoure les obligation et on en cherche une non satisfaite
-            $ok = false;
-            $catT->fetch($idCatObligatoir);
-            foreach ($cats as $cat) {
-                if ($cat->fk_parent == $idCatObligatoir) {
-                    $catOK[$idCatObligatoir] = array("nomMere" => $catT->label, "idMere" => $idCatObligatoir, "nomFille" => $cat->label, "idFille" => $cat->id);
-                    $ok = true;
-                    Unset($catsNonRestr[$cat->id]);
-                    break;
-                }
-            }
-
-            if (!$ok) {
-                $idsRestrNonSatisfaite[$idCatObligatoir] = array("nomMere" => $catT->label, "idMere" => $idCatObligatoir);
-            }
-        }
-
-
-        $result = array("ROOT_CATEGORY" => $conf->global->BIMP_ROOT_CATEGORY, "catOk" => $catOK, "waysAnnexesCategories" => $catsNonRestr, "restrictionNonSatisfaite" => $idsRestrNonSatisfaite);
-
-
-
-
-        if (count($idsRestrNonSatisfaite) > 0) {
-            $result["catAChoisir"] = array($conf->global->BIMP_ROOT_CATEGORY => array());
-
-            foreach ($idsRestrNonSatisfaite as $idT => $inut) {
-                $catT->fetch($idT);
-                $filles = $catT->get_filles();
-                $result["catAChoisir"]["idMere"] = $catT->id;
-                $result["catAChoisir"]["labelMere"] = $catT->label;
-                foreach ($filles as $catT2)
-                    $result["catAChoisir"][$catT2->id] = array("nom" => $catT2->label, "id" => $catT2->id);
-                break;
-            }
-        }
-        return $result;
-    }
-
     /* Used by the hook to determine if the product is fully categorized */
 
     function productIsCategorized($id_prod) {
@@ -346,6 +296,7 @@ class BimpProductBrowserConfig extends CommonObject {
 
     public $id;      // id of the parent category
     public $id_childs = array();
+    public $mode = 1;
 
     function __construct($db) {
         $this->db = $db;
@@ -354,8 +305,8 @@ class BimpProductBrowserConfig extends CommonObject {
     function getTabCategCheck() {
         global $conf;
         $tabCategCheck = array();
-        if ($conf->global->BIMP_CATEGORIZATION_MODE == 2)
-            $result = $this->db->query("SELECT DISTINCT(rowid) as id_mere FROM `" . MAIN_DB_PREFIX . "categorie` WHERE type = 0");
+        if($this->mode == 2)
+            $result = $this->db->query("SELECT DISTINCT(rowid) as id_mere FROM `".MAIN_DB_PREFIX."categorie` WHERE type = 0");
         else
             $result = $this->db->query("SELECT DISTINCT(fk_parent) as id_mere FROM `" . MAIN_DB_PREFIX . "categorie` WHERE type = 0");
 
@@ -368,9 +319,9 @@ class BimpProductBrowserConfig extends CommonObject {
     /**
      *  Load an import profil from database
      */
-    function fetch($id) {
-        global $conf;
-        if ($conf->global->BIMP_CATEGORIZATION_MODE == 2) {
+    function fetch($id, $mode) {
+        $this->mode = $mode;
+        if($this->mode == 2){            
             $sql = 'SELECT fk_parent_cat as fk_child_cat';
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
             $sql .= ' WHERE fk_child_cat = ' . $id;
@@ -400,7 +351,7 @@ class BimpProductBrowserConfig extends CommonObject {
     function insertRow($id_parent, $id_child) {
         global $conf;
         $sql = 'INSERT IGNORE INTO ' . MAIN_DB_PREFIX . 'bimp_cat_cat ';
-        if ($conf->global->BIMP_CATEGORIZATION_MODE == 2)
+        if($this->mode == 2)
             $sql .= '(fk_child_cat, fk_parent_cat) ';
         else
             $sql .= '(fk_parent_cat, fk_child_cat) ';
@@ -420,7 +371,7 @@ class BimpProductBrowserConfig extends CommonObject {
         global $conf;
         $sql = 'DELETE';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_cat_cat';
-        if ($conf->global->BIMP_CATEGORIZATION_MODE == 2) {
+        if($this->mode == 2){
             $sql .= ' WHERE fk_child_cat = ' . $id_parent;
             $sql .= ' AND fk_parent_cat = ' . $id_child;
         } else {

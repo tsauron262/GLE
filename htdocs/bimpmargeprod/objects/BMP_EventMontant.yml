@@ -44,7 +44,11 @@ fields:
         display: 
             type: nom
         sortable: 1
-        search: 1
+        search: 
+            input: 
+                type: select
+                options:  
+                    array: allCategories
             
     id_montant:
         label: Type montant

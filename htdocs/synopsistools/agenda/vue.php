@@ -27,14 +27,106 @@ $userStr = "'" . implode("','", $tabUser) . "'";
 
 $js = ' <script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js"  async=false defer=true></script>';
 $js .= <<<EOF
-        <script type="text/javascript" src="../agenda/chosen.jquery.js" async=false defer=true></script>
-        <script type="text/javascript" src="../agenda/agenda.js" async=false defer=true></script>
-    <link rel="stylesheet" type="text/css" href="../agenda/agenda.css"  async=false defer=true/>
-    <link rel="stylesheet" type="text/css" href="../agenda/chosen.min.css"  async=false defer=true/>
- <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css'  async=false defer=true/>
-  <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css"  async=false defer=true/>
-  <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css"  async=false defer=true/>
-  <link rel="stylesheet" type="text/css" href="./calendar/skins/gcalendar.css"  async=false defer=true/>
+        <script type="text/javascript" src="../agenda/agenda.js"></script>
+        <script type="text/javascript" src="../jquery/chosen/chosen.jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../jquery/chosen/chosen.css" />
+    <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
+ <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
+  <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css" />
+  <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css" />
+  <link rel="stylesheet" type="text/css" href="./calendar/skins/gcalendar.css" />
+  <style type="text/css">
+    body {
+      font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+      margin: 0;
+    }
+ 
+    h1 {
+      margin:0 0 2em;
+      padding: 0.5em;
+      font-size: 1.3em;
+    }
+ 
+    p.description {
+      font-size: 0.8em;
+      padding: 1em;
+//      position: absolute;
+      top: 1.2em;
+      margin-right: 400px;
+    }
+ 
+    #calendar_selection {
+      font-size: 0.7em;
+//      position: absolute;
+      top: 1em;
+      right: 1em;
+      padding: 1em;
+      background: #ffc;
+      border: 1px solid #dda;
+      width: 270px;
+    }
+ 
+    #message {
+      font-size: 0.7em;
+//      position: absolute;
+      top: 1em;
+      right: 320px;
+      padding: 1em;
+      background: #ddf;
+      border: 1px solid #aad;
+      width: 270px;
+    }
+        
+    .wc-header .wc-user-header a, .wc-header .wc-user-header{
+        overflow: visible;
+        height: 60px;
+        width: 60px;
+        -moz-transform:rotate(-45deg);
+        -webkit-transform:rotate(-45deg); 
+        -o-transform:rotate(-90deg);
+        -ms-transform : rotate(-90deg) 
+    }
+    .ui-widget-content td.ui-state-active{
+        background: none;
+    }
+        
+        
+        .form {
+
+	// Reset default Chosen.js styles
+	.chosen-container {
+		font-size: rem(16);
+
+		// Remove borders and box-shadows
+		.chosen-single,
+		.chosen-drop {
+			border: none;
+			border-radius: 0;
+			box-shadow: none;
+		}
+	}
+
+	// Reset active styles
+	.chosen-container-active {
+
+		// Remove borders and box-shadows
+		&.chosen-with-drop .chosen-single,
+		.chosen-choices {
+			border: none;
+			border-radius: 0;
+			box-shadow: none;		
+		}
+
+		.chosen-results {
+
+			// Remove gradient and set the highlight color
+			.highlighted {
+				background: $color-blue;
+			}
+		}
+	}
+}
+  </style>
 EOF;
 
 $js .= '<script type="text/javascript" src="./calendar/jquery.weekcalendar.js"></script>';

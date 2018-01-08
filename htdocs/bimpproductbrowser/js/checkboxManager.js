@@ -22,6 +22,7 @@ $(document).ready(function ()
                     data: {
                         id_oject: $('#id_oject').val(),
                         checked: checkboxs,
+                        mode: $("#mode").val(),
                         action: 'filldb'
                     },
                     cache: false,

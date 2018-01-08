@@ -34,4 +34,14 @@ class BMP_TypeMontant extends BimpObject
         
         return $list;
     }
+    
+    public function validate()
+    {
+        $errors = parent::validate();
+        
+        if ((int) $this->getData('editable') && (int) $this->getData('has_details')) {
+            $errors[] = 'Un type de montant ne peux pas être à la fois éditable et avoir une liste de détails. Veuillez choisir entre l\'un ou l\'autre';
+        }
+        return $errors;
+    }
 }

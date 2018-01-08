@@ -60,7 +60,9 @@ if ($result <= 0) {
 }
 
 if(isset($_REQUEST["mode"]))
-    $conf->global->BIMP_CATEGORIZATION_MODE = $_REQUEST["mode"];
+    $mode = $_REQUEST["mode"];
+else
+    $mode = $conf->global->BIMP_CATEGORIZATION_MODE;
 
 
 $type = $object->type;
@@ -75,7 +77,7 @@ $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 $categstatic = new Categorie($db);
 $pb = new BimpProductBrowserConfig($db);
 
-$pb->fetch($object->id);
+$pb->fetch($object->id, $mode);
 
 
 if ($type == Categorie::TYPE_PRODUCT) {
@@ -109,7 +111,7 @@ llxHeader('', 'Restreindre', '', '', 0, 0, $arrayofjs, $arrayofcss);
 $head = categories_prepare_head($object, $type);
 
 
-dol_fiche_head($head, 'restreindre'.$conf->global->BIMP_CATEGORIZATION_MODE, $title, -1, 'category');
+dol_fiche_head($head, 'restreindre'.$mode, $title, -1, 'category');
 
 // Get the path to that categ
 $linkback = '<a href="' . DOL_URL_ROOT . '/categories/index.php?leftmenu=cat&type=' . $type . '">' . $langs->trans("BackToList") . '</a>';
@@ -125,12 +127,12 @@ $morehtmlref .= '</div>';
 dol_banner_tab($object, 'label', $linkback, ($user->societe_id ? 0 : 1), 'label', 'label', $morehtmlref, '', 0, '', '', 1);
 
 
-if ($conf->global->BIMP_CATEGORIZATION_MODE == 2 && count($object->get_filles()) == 0)
-    echo "Cette catégorie n'a pas de fille il n'y a donc pas de sens d'y ajouter des restrictions";
-else {
+//if ($mode == 2 && count($object->get_filles()) == 0)
+//    echo "Cette catégorie n'a pas de fille il n'y a donc pas de sens d'y ajouter des restrictions";
+//else {
 
     echo "<h3>Choisissez les catégories ";
-    if ($conf->global->BIMP_CATEGORIZATION_MODE == 2)
+    if ($mode == 2)
         echo "qui impliquent";
     else
         echo "impliquées par";
@@ -158,6 +160,7 @@ else {
 
 
     print '<input type="hidden" name="id_oject" id="id_oject" value="' . $object->id . '"/>';
+    print '<input type="hidden" name="mode" id="mode" value="' . $mode . '"/>';
 // Charge tableau des categories
     $cate_arbo = $categstatic->get_full_arbo($typetext);
 
@@ -228,7 +231,7 @@ else {
         print "</table>";
         print '</div>';
     }
-}
+//}
 llxFooter();
 
 $db->close();

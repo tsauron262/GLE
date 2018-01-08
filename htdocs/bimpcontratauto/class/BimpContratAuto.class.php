@@ -146,7 +146,7 @@ class BimpContratAuto {
 
                 /* Définition début et fin de service et contrat */
                 if ($line->statut == 0) {  // si le service inactif
-                    $date_ouverture = $line->date_ouverture;
+                    $date_ouverture = $line->date_ouverture_prevue;
                     $date_fin = $line->date_fin_validite;
                     if ($contratIsActive && $date_fin < $endContrat) { // si le contrat est actif et que la date de fin du service est antérieur à la date de fin du contrat
                         $endContrat = $date_fin;
@@ -296,7 +296,7 @@ class BimpContratAuto {
             array('ref' => 'CTR-PNEUMATIQUE', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
             array('ref' => 'CTR-MAINTENANCE', 'values' => array(self::NO_SERVICE, 12, 24)),
             array('ref' => 'CTR-EXTENSION', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
-            array('ref' => 'Blyyd Connect', 'values' => array(self::NO_SERVICE, 12, 24, 36, 48))
+            array('ref' => 'Blyyd_Connect', 'values' => array(self::NO_SERVICE, 12, 24, 36, 48))
         );
 
         $tabService = array();

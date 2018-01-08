@@ -1,0 +1,20 @@
+.round {
+    border-radius: 5px;
+}
+
+.dd-handle {
+    cursor: grab;
+
+/*  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+  cursor: -o-grabbing;
+  cursor: -ms-grabbing;
+  cursor: grabbing;*/
+}
+.dd-handle:active {
+    cursor: grabbing;
+}
+
+div.cf.nestable-lists {
+    /*padding: 0px;*/
+}

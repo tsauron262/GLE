@@ -17,9 +17,17 @@ require_once('../../main.inc.php');
 //$separateur = " | ";
 
 
-require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/synopsisexport.class.php");
-$export = new synopsisexport($db, (isset($_REQUEST['sortie'])? $_REQUEST['sortie'] : 'html'));
-$export->exportFactureSav();
+//require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/synopsisexport.class.php");
+//$export = new synopsisexport($db, (isset($_REQUEST['sortie'])? $_REQUEST['sortie'] : 'html'));
+//$export->exportFactureSav();
+
+
+
+
+require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportfacture.class.php");
+$export = new exportfacture($db);
+$export->debug = true;
+$export->exportTout();    
 
 echo "FIN";
 

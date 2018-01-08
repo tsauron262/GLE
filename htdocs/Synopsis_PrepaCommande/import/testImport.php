@@ -2046,7 +2046,7 @@ EOF;
     $mailContent .= $mailFooter;
 
     if (!isset($conf->global->BIMP_MAIL_TO) || !isset($conf->global->BIMP_MAIL_FROM)) {
-        $webContent .= "<div style='color: #FF000;'>La fonction mail n'est pas configur&eacute;e</div>";
+//        $webContent .= "<div style='color: #FF000;'>La fonction mail n'est pas configur&eacute;e</div>";
     } else {
         $mailFileArr = array();
         $mailFileMimeArr = array();

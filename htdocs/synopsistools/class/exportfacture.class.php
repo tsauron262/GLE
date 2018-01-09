@@ -14,7 +14,7 @@ class exportfacture {
     public $id8sens = 0;
     public $nbE = 0;
     public $debug = false;
-    public $output = "";
+    public $output = "Rien";
     
     private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid";
 

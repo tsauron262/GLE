@@ -191,6 +191,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             $factureA->date = dol_now();
                             $factureA->socid = $chrono->socid;
                             $factureA->modelpdf = "crabeSav";
+                            $factureA->array_options['options_type'] = "S";
                             $factureA->create($user);
                             $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
 

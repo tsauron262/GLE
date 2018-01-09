@@ -333,6 +333,7 @@ if (isset($_REQUEST['actionEtat'])) {
         if ($chrono->propal->id > 0) {
             $facture = new Facture($db);
             $facture->modelpdf = "crabeSav";
+            $facture->array_options['options_type'] = "S";
             $facture->createFromOrder($propal);
 //        $facture->create($user);
             $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Resolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);

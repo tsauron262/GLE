@@ -181,11 +181,11 @@ class synopsisexport {
                              ON p1.rowid = p2.fk_paiement";
             
             
-            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
-            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "propal propal on  propal.rowid = el.fk_source ";
-            $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON (`revisionNext` = 0 || `revisionNext` is NULL) AND chrono1.propalId = el.fk_source ";
-            $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
-            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
+            $partReq6 = " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
+            $partReq6 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "propal propal on  propal.rowid = el.fk_source ";
+            $partReq6 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON (`revisionNext` = 0 || `revisionNext` is NULL) AND chrono1.propalId = el.fk_source ";
+            $partReq6 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chrono on  chrono1.id = chrono.id ";
+            $partReq6 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL || propal.fk_statut = 4) AND ";
             $partReqFin = " GROUP BY p1.rowid, fact.rowid ORDER BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
 //            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
@@ -280,13 +280,13 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
             $j = 0;
 //            echo $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin;
             if (is_null($blockCentre))
-                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
+                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $partReq6 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
             foreach ($tabMateriel as $codeCentre => $val) {
                 $j++;
                 $titre = strtoupper($tabCentre[$codeCentre]);
 //            if($j > 50)
 //                break;
-                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.fk_statut != 3 AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
+                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $partReq6 . $where . " AND propal.fk_statut != 3 AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
                 $this->statLigneFacture($titre. "sans SAV", $partReq1 . $partReq5. " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafileds fe ON fe.fk_object = fact.roid " . $where . " AND fe.centre = '".$codeCentre."' AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
                 echo $partReq1 . $partReq5. " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafileds fe ON fe.fk_object = fact.roid " . $where . " AND fe.centre = '".$codeCentre."' AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin."<br/><br/>";
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);

@@ -15,6 +15,7 @@ class exportfacture {
     public $nbE = 0;
     public $debug = false;
     public $output = "Rien";
+    public $error = "";
     
     private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid";
 
@@ -28,7 +29,14 @@ class exportfacture {
         $this->exportFactureSav();
         $this->exportFactureReseau();
         $this->getFactDontExport();
-        $this->output = $this->nbE." facture(s) exportée(s)";
+        if($this->error == ""){
+            $this->output=trim($this->nbE." facture(s) exportée(s)");
+            return 0;
+        }
+        else {
+            $this->output=trim($this->error);
+            return 1;
+        }
     }
 
     public function exportFactureSav() {
@@ -219,6 +227,7 @@ class exportfacture {
 
 
     function error($msg, $idProd = 0, $idCat = 0){
+        $this->error = $msg;
         dol_syslog($msg,3, 0, "_extract");
         $to = "";
         

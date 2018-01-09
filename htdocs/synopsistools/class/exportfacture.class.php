@@ -69,7 +69,6 @@ class exportfacture {
     
 
     public function exportFactureReseau() {
-        $this->path = DOL_DATA_ROOT . "/test/";
         $this->type = "R";
         $result = $this->db->query("SELECT fact.rowid as id "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
@@ -82,7 +81,6 @@ class exportfacture {
     }
 
     public function exportFactureSavSeul() {
-        $this->path = DOL_DATA_ROOT . "/test/";
         $this->type = "R";
         $result = $this->db->query("SELECT fact.rowid as id, fe.centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "

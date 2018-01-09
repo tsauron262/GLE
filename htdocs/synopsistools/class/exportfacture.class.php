@@ -27,6 +27,7 @@ class exportfacture {
     
     public function exportTout(){
         $this->exportFactureSav();
+        $this->exportFactureSavSeul();
         $this->exportFactureReseau();
         $this->getFactDontExport();
         if($this->error == ""){
@@ -37,6 +38,14 @@ class exportfacture {
             $this->output=trim($this->error);
             return 1;
         }
+    }
+    
+    private function getId8sensByCentreSav($centre){
+        require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
+        global $tabCentre;
+        if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
+            return $centre[$ligne->Centre][3];
+        return 0;
     }
 
     public function exportFactureSav() {
@@ -50,10 +59,7 @@ class exportfacture {
         while ($ligne = $this->db->fetch_object($result)) {
             $this->id8sens = $ligne->id8Sens;
             if ($ligne->id8Sens < 1 && isset($ligne->Centre) && $ligne->Centre != "") {
-                require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
-                global $tabCentre;
-                if (isset($tabCentre[$ligne->Centre][3]) && $tabCentre[$ligne->Centre][3] > 0)
-                    $this->id8sens = $tabCentre[$ligne->Centre][3];
+                $this->id8sens = $this->getId8sensByCentreSav($ligne->Centre);
             }
             $this->extract($ligne->id);
         }
@@ -70,6 +76,19 @@ class exportfacture {
                 . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'R' ".$this->where);
         while ($ligne = $this->db->fetch_object($result)) {
             $this->id8sens = 239;
+            $this->extract($ligne->id);
+        }
+        
+    }
+
+    public function exportFactureSavSeul() {
+        $this->path = DOL_DATA_ROOT . "/test/";
+        $this->type = "R";
+        $result = $this->db->query("SELECT fact.rowid as id, fe.centre "
+                . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
+                . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' ".$this->where);
+        while ($ligne = $this->db->fetch_object($result)) {
+            $this->id8sens = $this->getId8sensByCentreSav($ligne->centre);
             $this->extract($ligne->id);
         }
         

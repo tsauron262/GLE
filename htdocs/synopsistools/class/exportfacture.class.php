@@ -44,7 +44,7 @@ class exportfacture {
         require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
-            return $centre[$centre][3];
+            return $tabCentre[$centre][3];
         return 0;
     }
 

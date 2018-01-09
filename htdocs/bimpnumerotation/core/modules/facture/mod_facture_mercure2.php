@@ -160,6 +160,8 @@ class mod_facture_mercure2 extends ModeleNumRefFactures
                 $suffixe = $facture->array_options['options_type'];
             }
         }
+        if($suffixe == "S")
+            $suffixe ="";
         
         $mask = str_replace("{TYPE}", $suffixe, $mask);
 

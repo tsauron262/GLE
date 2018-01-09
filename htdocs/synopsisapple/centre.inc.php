@@ -12,8 +12,8 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "C" => array("03 44 200 200", "sav60@bimp.fr", "Compiegne", 106, "1040727", "60200", "Compiègne", "10 rue de l’étoile"),
     "MA" => array("04 96 11 29 40", "sav13@bimp.fr", "Marseille", 116, "1046076", "13011", "Marseille", "Route de la Sablière"),
     "AB" => array("04 50 22 15 55", "sav74@bimp.fr", "Annecy Boutique", 58, "1046075", "74000", "Annecy", "7 rue de la poste"),
-    "CFC" => array("04 73 19 28 00", "sav63@bimp.fr", "Clermont-Ferrand", 58, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
-    "CFB" => array("04 73 19 28 00", "sav63@bimp.fr", "Clermont-Ferrand", 58, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
+    "CFC" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 58, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
+    "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 58, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
     
     
     "P" => array("09 71 002 450", "sav66@bimp.fr", "Perpignan", 58, "883234", "66000", "Perpignan", "9 Boulevard Georges Clemenceau"),

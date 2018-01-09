@@ -28,7 +28,7 @@ class exportfacture {
         $this->exportFactureSav();
         $this->exportFactureReseau();
         $this->getFactDontExport();
-        $object->output = $this->nbE." facture(s) exportée(s)";
+        $this->output = $this->nbE." facture(s) exportée(s)";
     }
 
     public function exportFactureSav() {
@@ -77,7 +77,7 @@ class exportfacture {
             $facts .= $ligne->facnumber." - ";
         }
         if($facts != "")
-            mailSyn2 ("Facture non export", "admin@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté ".$facts);
+            mailSyn2 ("Facture non export", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté ".$facts);
         
     }
     

@@ -152,7 +152,7 @@ class mod_facture_mercure2 extends ModeleNumRefFactures
             return 0;
         }
         
-        $suffixe = "X";
+        $suffixe = "XX";
         
         if(isset($facture) && $facture->id > 0){
             $facture->fetch_optionals();

@@ -29,6 +29,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobjectline.class.php';
 
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
 class BimpGroupManager {
 
@@ -92,7 +93,7 @@ class BimpGroupManager {
      * Function triggered by the client 
      */
     function updateGroup($groupId, $newGroupId) {
-        
+
         $this->removeChild($groupId);
         if (isset($newGroupId)) {
             $this->addChild($groupId, $newGroupId);
@@ -262,6 +263,87 @@ class BimpGroupManager {
             $array1[] = $arr2;
         }
         return $array1;
+    }
+
+    /**
+     * used by trigger
+     */
+    function insertInGroups($userid, $groupid) {
+        $groupsId = $this->getAllParents($groupid);
+        $groupsIdFiltered = $this->removeGroupsUserOwn($userid, $groupsId);
+        $this->addUserInGroups($userid, $groupsIdFiltered);
+    }
+
+    function getAllParents($groupid) {
+
+        $parents = array($groupid);
+        do {
+            $len = sizeof($parents);
+            $sql = 'SELECT fk_parent';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_grp_grp';
+            $sql .= ' WHERE fk_child = ' . end($parents);
+
+            $result = $this->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->fetch_object($result)) {
+                    $parents[] = $obj->fk_parent;
+                }
+            }
+        } while ($len != sizeof($parents));
+
+        array_shift($parents);
+        return $parents;
+    }
+
+    /* Remove group which already contain the use (in order not to duplicate that user) */
+
+    function removeGroupsUserOwn($userid, $groupsId) {
+
+        $sql = 'SELECT fk_usergroup';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'usergroup_user';
+        $sql .= ' WHERE fk_user=' . $userid;
+
+//        foreach ($groupsId as $id) {
+//            if ($id != end($groupsId))
+//                $sql .= ' fk_user = ' . $id . ' OR ';
+//            else
+//                $sql .= ' fk_user = ' . $id;
+//        }
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $ind = array_search($obj->fk_usergroup, $groupsId);
+                if ($ind !== false)
+                    unset($groupsId[$ind]);
+//                $ind = in_array($obj->fk_usergroup, $groupsId);
+//                if ($ind != false) {
+//                    $groupsId = array_slice($groupsId, $ind);
+//                }
+            }
+        }
+        return $groupsId;
+    }
+
+    function addUserInGroups($userid, $groupsId) {
+        $user = new User($this->db);
+        $user->fetch($userid);
+
+        if (sizeof($groupsId) == 1)
+            $str = "$user->firstname $user->lastname à été ajouté au groupe : ";
+        else if (sizeof($groupsId) > 1)
+            $str = "$user->firstname $user->lastname à été ajouté aux groupes : ";
+
+
+        $groupsId = array_reverse($groupsId);
+        foreach ($groupsId as $id) {
+            $grp = new UserGroup($this->db);
+            $grp->fetch($id);
+            $str.= "$grp->nom\n";
+            $user->SetInGroup($id, 1, 1);
+        }
+
+        setEventMessages($str, null, 'mesgs');
     }
 
 }

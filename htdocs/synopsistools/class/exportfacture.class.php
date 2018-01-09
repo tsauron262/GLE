@@ -42,8 +42,8 @@ class exportfacture {
     public function exportFactureSav() {
         $this->type = "sav";
         $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens, Centre "
-                . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "synopsischrono chrono , " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT , " . MAIN_DB_PREFIX . "user_extrafields ue , " . MAIN_DB_PREFIX . "societe soc "
-                . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut != 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND ue.`fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) AND fact.fk_soc = soc.rowid "
+                . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "synopsischrono chrono , " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT , " . MAIN_DB_PREFIX . "user_extrafields ue "
+                . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut != 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND ue.`fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) "
                 . $this->where);
         
 

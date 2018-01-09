@@ -283,11 +283,12 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                 $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
             foreach ($tabMateriel as $codeCentre => $val) {
                 $j++;
-                $titre = strtoupper($codeCentre);
+                $titre = strtoupper($tabCentre[$codeCentre]);
 //            if($j > 50)
 //                break;
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.fk_statut != 3 AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
                 $this->statLigneFacture($titre. "sans SAV", $partReq1 . $partReq5. " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafileds fe ON fe.fk_object = fact.roid " . $where . " AND fe.centre = '".$codeCentre."' AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
+                echo $partReq1 . $partReq5. " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafileds fe ON fe.fk_object = fact.roid " . $where . " AND fe.centre = '".$codeCentre."' AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin."<br/><br/>";
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }

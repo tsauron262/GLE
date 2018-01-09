@@ -258,9 +258,8 @@ class synopsisexport {
 //WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             $req = "SELECT label, valeur, propalid
 FROM  `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` ls, " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 ct , " . MAIN_DB_PREFIX . "synopsischrono chrono
-WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
-//            $req = "SELECT label, valeur, propalid
-//FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` ls ON `list_refid` =11 AND chrono.CentreVal = ls.valeur WHERE 1";
+WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id AND chrono.date_create > DATE_ADD(STR_TO_DATE('" . $dateDeb . " 00:00','%d/%m/%Y %H:%i'), INTERVAL -6 MONTH)";
+
             if ($centre) {
                 $req .= " AND centre = '" . $centre . "'";
                 $blockCentre = true;
@@ -287,8 +286,8 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 //            if($j > 50)
 //                break;
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $partReq6 . $where . " AND propal.fk_statut != 3 AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
-                $this->statLigneFacture($titre. "sans SAV", $partReq1 . $partReq5. " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafileds fe ON fe.fk_object = fact.roid " . $where . " AND fe.centre = '".$codeCentre."' AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
-                echo $partReq1 . $partReq5. " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafileds fe ON fe.fk_object = fact.roid " . $where . " AND fe.centre = '".$codeCentre."' AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin."<br/><br/>";
+                $this->statLigneFacture($titre. "sans SAV", $partReq1 . $partReq5. " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields fe ON fe.fk_object = fact.rowid  WHERE" . $where . " AND fe.centre = '".$codeCentre."' " . $partReqFin);
+                
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }

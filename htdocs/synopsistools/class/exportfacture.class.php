@@ -24,9 +24,9 @@ class exportfacture {
     
     
     public function exportTout(){
-        $nb = 0;
         $this->exportFactureSav();
         $this->exportFactureReseau();
+        $this->getFactDontExport();
         return $this->nbE;
     }
 
@@ -63,6 +63,21 @@ class exportfacture {
             $this->id8sens = 239;
             $this->extract($ligne->id);
         }
+        
+    }
+
+    public function getFactDontExport() {
+        $this->path = DOL_DATA_ROOT . "/test/";
+        $this->type = "R";
+        $result = $this->db->query("SELECT fact.rowid as id, facnumber "
+                . "FROM `" . MAIN_DB_PREFIX . "facture` fact "
+                . "WHERE 1 ".$this->where);
+        $facts = "";
+        while ($ligne = $this->db->fetch_object($result)) {
+            $facts .= $ligne->facnumber." - ";
+        }
+        if($facts != "")
+            mailSyn2 ("Facture non export", "admin@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté ".$facts);
         
     }
     

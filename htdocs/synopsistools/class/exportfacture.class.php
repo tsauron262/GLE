@@ -14,6 +14,7 @@ class exportfacture {
     public $id8sens = 0;
     public $nbE = 0;
     public $debug = false;
+    public $output = "";
     
     private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid";
 
@@ -27,7 +28,7 @@ class exportfacture {
         $this->exportFactureSav();
         $this->exportFactureReseau();
         $this->getFactDontExport();
-        return $this->nbE;
+        $object->output = $this->nbE." facture(s) exportée(s)";
     }
 
     public function exportFactureSav() {

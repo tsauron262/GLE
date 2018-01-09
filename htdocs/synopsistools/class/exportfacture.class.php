@@ -41,6 +41,7 @@ class exportfacture {
     }
     
     private function getId8sensByCentreSav($centre){
+        echo $centre;
         require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)

@@ -87,7 +87,7 @@ $(document).ready(function () {
 /**
  * Functions
  */
-
+/* Just to vizualize data, do not use that function in production */
 function dev() {
 
     $('<textarea id="nestable-output"></textarea>').appendTo('div.cf.nestable-lists');
@@ -100,17 +100,14 @@ function dev() {
         }
     };
 
-    // activate Nestable for list 1
     $('#nestable').nestable({
         group: 1
     }).on('change', updateOutput);
 
-    // output initial serialised data
     updateOutput($('#nestable').data('output', $('#nestable-output')));
 }
 
 function printGroups() {
-
     groups.forEach(function (grp) {
         if (grp.isRoot === true) {
             addItem(grp, '#nestable ol:first');
@@ -118,9 +115,9 @@ function printGroups() {
             addItem(grp, 'ol#' + grp.id_parent);
         }
     });
-
-
 }
+
+/* Add a group */
 function addItem(element, fullBalise) {
     if (element.childs.length !== 0) {
         $('<li class="dd-item dd3-item" data-id="' + element.id + '">' +
@@ -134,6 +131,7 @@ function addItem(element, fullBalise) {
     }
 }
 
+/* If the group got children, use that function */
 function addNewList(element) {
     $('<ol class="dd-list" id=' + element.id + '></ol>').appendTo('li[data-id="' + element.id + '"]')
 }

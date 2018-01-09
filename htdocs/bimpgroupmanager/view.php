@@ -1,14 +1,11 @@
 <?php
 
 /**
- *  \file       htdocs/societe/agenda.php
- *  \ingroup    societe
- *  \brief      Page of third party events
+ *  \file       htdocs/bimpgroupmanager/view.php
+ *  \ingroup    bimpgroupmanager
+ *  \brief      Page of the group manager
  */
 require '../main.inc.php';
-
-require_once DOL_DOCUMENT_ROOT . '/bimpgroupmanager/class/BimpGroupManager.class.php';  //TODO remove after developpment
-
 
 $arrayofcss = array('/bimpgroupmanager/nestable/nestable.css', '/bimpgroupmanager/css/styles.css');
 $arrayofjs = array('/bimpgroupmanager/nestable/jquery.nestable.js', '/bimpgroupmanager/js/group.js');

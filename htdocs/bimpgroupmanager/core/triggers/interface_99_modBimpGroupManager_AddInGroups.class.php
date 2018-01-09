@@ -19,8 +19,8 @@
  */
 
 /**
- *  \file       
- *  \ingroup    
+ *  \file       /bimpgroupmanager/core/triggers/interface_99_modBimpGroupManager_AddInGroups.class.php
+ *  \ingroup    bimpgroupmanager
  *  \brief      File of class of triggers for add a user in multiple groups
  */
 require_once DOL_DOCUMENT_ROOT . '/core/triggers/dolibarrtriggers.class.php';
@@ -31,11 +31,15 @@ require_once DOL_DOCUMENT_ROOT . '/bimpgroupmanager/class/BimpGroupManager.class
  */
 class InterfaceAddInGroups extends DolibarrTriggers {
 
-    // <0 si ko, 0 si aucune action faite, >0 si ok 
+    /**
+     * When we hadd a user in a group, that trigger had those user in
+     * every parent of the group
+     */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         if ($action == 'USER_SETINGROUP') {
             $gm = new BimpGroupManager($user->db);
-            $gm->insertInGroups($object->id, $object->newgroupid);
+            $code = $gm->insertInGroups($object->id, $object->newgroupid);
+            return $code;
         }
     }
 }

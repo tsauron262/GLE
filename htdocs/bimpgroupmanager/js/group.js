@@ -29,7 +29,7 @@ function getOldGroup() {
 }
 
 function updateGroup(groupId, newGroupId) {
-console.log(groupId, newGroupId);
+    
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
@@ -40,7 +40,7 @@ console.log(groupId, newGroupId);
         },
         error: function () {
             console.log("Erreur PHP");
-        },
+        }
     });
 }
 
@@ -54,6 +54,7 @@ $(document).ready(function () {
 
     getOldGroup();
     printGroups();
+    var elem;
     $('.dd').nestable();
 
     /* Gestion boutons */
@@ -67,11 +68,18 @@ $(document).ready(function () {
             $('.dd').nestable('collapseAll');
         }
     });
-    
-    $('.dd-handle').nestable().on('change', function () {
-        updateGroup($(this).parent().attr('data-id'), $(this).parent().parent().parent().attr('data-id'));
+
+    elem = null;
+    $('.dd-handle').on('mousedown touchend', function () {
+        elem = $(this);
     });
 
+    $('.dd').on('change', function () {
+        if (!elem)
+            alert("Pas d'élem referent");
+        else
+            updateGroup(elem.parent().attr('data-id'), elem.parent().parent().parent().attr('data-id'));
+    });
 });
 
 
@@ -79,7 +87,7 @@ $(document).ready(function () {
 /**
  * Functions
  */
-
+/* Just to vizualize data, do not use that function in production */
 function dev() {
 
     $('<textarea id="nestable-output"></textarea>').appendTo('div.cf.nestable-lists');
@@ -92,29 +100,26 @@ function dev() {
         }
     };
 
-    // activate Nestable for list 1
     $('#nestable').nestable({
         group: 1
     }).on('change', updateOutput);
 
-    // output initial serialised data
     updateOutput($('#nestable').data('output', $('#nestable-output')));
 }
 
 function printGroups() {
-
     groups.forEach(function (grp) {
         if (grp.isRoot === true) {
-            addItem(grp, '#nestable ol');
+            addItem(grp, '#nestable ol:first');
         } else {
-            addItem(grp, 'ol[id="' + grp.id_parent + '"]');
+            addItem(grp, 'ol#' + grp.id_parent);
         }
     });
-
-
 }
-function addItem(element, fullBalise) {    // parent = balise + id
-     if (element.childs.length != 0) {
+
+/* Add a group */
+function addItem(element, fullBalise) {
+    if (element.childs.length !== 0) {
         $('<li class="dd-item dd3-item" data-id="' + element.id + '">' +
                 '<div class="dd-handle dd3-handle"></div><div class="dd3-content">' + element.name + '</div>')
                 .appendTo(fullBalise);
@@ -125,7 +130,8 @@ function addItem(element, fullBalise) {    // parent = balise + id
                 .appendTo(fullBalise);
     }
 }
-//
+
+/* If the group got children, use that function */
 function addNewList(element) {
     $('<ol class="dd-list" id=' + element.id + '></ol>').appendTo('li[data-id="' + element.id + '"]')
 }

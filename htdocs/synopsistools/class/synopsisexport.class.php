@@ -284,6 +284,7 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 //            if($j > 50)
 //                break;
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.fk_statut != 3 AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
+                $this->statLigneFacture($titre. "sans SAV", $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }

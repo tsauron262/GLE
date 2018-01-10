@@ -26,6 +26,7 @@ print '<p>Pour réorganiser les groupes, veuillez déplacer le carré à gauche 
     <menu id="nestable-menu">
         <button type="button" class="butAction round" data-action="expand-all">Tout développer</button>
         <button type="button" class="butAction round" data-action="collapse-all">Tout réduire</button>
+        <button type="button" class="butAction round" data-action="set-all-users">Classer tous les utilisateurs</button>
     </menu>
 
     <div class="cf nestable-lists">

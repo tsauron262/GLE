@@ -29,7 +29,7 @@ function getOldGroup() {
 }
 
 function updateGroup(groupId, newGroupId) {
-    
+
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
@@ -40,6 +40,23 @@ function updateGroup(groupId, newGroupId) {
         },
         error: function () {
             console.log("Erreur PHP");
+        }
+    });
+}
+
+function setAllUsers() {
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
+        data: {
+            action: 'setAllUsers'
+        },
+        async: false,
+        error: function () {
+            console.log("Erreur PHP");
+        },
+        success: function () {
+            alert("Les groupes de tous utilisateurs ont été mis à jour.");
         }
     });
 }
@@ -67,6 +84,11 @@ $(document).ready(function () {
         if (action === 'collapse-all') {
             $('.dd').nestable('collapseAll');
         }
+        if (action === 'set-all-users' && confirm("Vous êtes sur le points de redéfinir les groupes de tous les utilisateurs" +
+                ", il s'agit d'une lourde opération. Poursuivre ?")) {
+            setAllUsers();
+        }
+
     });
 
     elem = null;

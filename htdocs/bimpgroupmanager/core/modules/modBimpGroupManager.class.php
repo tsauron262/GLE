@@ -62,9 +62,9 @@ class modBimpGroupManager extends DolibarrModules {
         // Module label (no space allowed), used if translation string 'ModuleMyModuleName' not found (MyModue is name of module).
         $this->name = preg_replace('/^mod/i', '', get_class($this));
         // Module description, used if translation string 'ModuleMyModuleDesc' not found (MyModue is name of module).
-        $this->description = "Créer hiérarchie de groupe";
+        $this->description = "Créer arbre de groupe";
         // Used only if file README.md and README-LL.md not found.
-        $this->descriptionlong = "Créer hiérarchie de groupe";
+        $this->descriptionlong = "Créer arbre de groupe";
 
         $this->editor_url = 'https://www.example.com';
 
@@ -190,7 +190,7 @@ class modBimpGroupManager extends DolibarrModules {
 //        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
         // Main menu entries
         $this->menu = array();   // List of menus to add
-        $r = 1;
+//        $r = 1;
 
         // Add here entries to declare new menus
         // Example to declare a new Top Menu entry and its Left menu entry:
@@ -213,31 +213,22 @@ class modBimpGroupManager extends DolibarrModules {
         // Example to declare a Left Menu entry into an existing Top menu entry:
         /* BEGIN MODULEBUILDER LEFTMENU MYOBJECT */
 
-        /* 		$r=1;
-          $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=cat',
-          'type'=>'left',
-          'titre'=>'Recherche',
-          'mainmenu'=>'cat',
-          'leftmenu'=>'cat',
-          'url'=>'/modBimpContratAuto/index.php?leftmenu=cat&type=1',
-          'langs'=>'rechercherecherche@recherche',
-          'position'=>110, 'enabled'=>'1',
-          'perms'=>'1',
-          'target'=>'', 'user'=>2);
-          $r++;
-          $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=products,fk_leftmenu=cat',
-          'type'=>'left',
-          'titre'=>'Rechercher',
-          'mainmenu'=>'products', 'leftmenu'=>'cat',
-          'url'=>'/modBimpContratAuto/index.php?leftmenu=cat&type=1',
-          'langs'=>'cat@cat',
-          'position'=>110, 'enabled'=>'1',
-          'perms'=>'1',
-          'target'=>'', 'user'=>2);
-         */
+          $r=1;
+          $this->menu[$r]=array(
+                'fk_leftmenu' => 'users',
+                'type'=>'left',
+                'titre'=>'Gestion Groupes',
+                'leftmenu'=>'users',
+                'url'=>'/bimpgroupmanager/view.php',
+                'position'=>110,
+                'enabled'=>'1',
+                'perms'=>'1',
+                'target'=>'',
+                'user'=>2);
+
         // END MODULEBUILDER LEFTMENU MYOBJECT */
         // Exports
-        $r = 1;
+//        $r = 1;
 
         // Example:
         /* BEGIN MODULEBUILDER EXPORT MYOBJECT

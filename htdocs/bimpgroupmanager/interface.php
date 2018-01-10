@@ -20,6 +20,10 @@ switch (GETPOST('action')) {
             $staticGM->updateGroup(GETPOST('groupId'), GETPOST('newGroupId'));
             break;
         }
+    case 'setAllUsers': {
+            $staticGM->setAllUsers();
+            break;
+        }
     default: break;
 }
 

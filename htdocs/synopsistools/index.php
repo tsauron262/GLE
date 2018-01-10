@@ -60,7 +60,8 @@ print" <br/><br/><a href='../synopsisapple/test.php'><span style='float: left;' 
 if (isset($user->rights->SynopsisPrepaCom->import->Admin))
     print" <br/><br/><a href='../synopsistools/public/extractFact.php?sortie=file'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Extraction facture</span></a>";
 
-
+if ($conf->bimpgroupmanager->enabled)
+    print" <br/><br/><a href='../bimpgroupmanager/view.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Gestion des groupes</span></a>";
 
 
 

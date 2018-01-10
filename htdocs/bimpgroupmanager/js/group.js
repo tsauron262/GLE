@@ -6,6 +6,7 @@
 var groups = {};
 
 
+
 /**
  * Ajax functions
  */
@@ -69,12 +70,11 @@ function setAllUsers() {
 
 $(document).ready(function () {
 
+    var elem;
     getOldGroup();
     printGroups();
-    var elem;
     $('.dd').nestable();
 
-    /* Gestion boutons */
     $('#nestable-menu').on('click', function (e) {
         var target = $(e.target),
                 action = target.data('action');
@@ -109,7 +109,10 @@ $(document).ready(function () {
 /**
  * Functions
  */
-/* Just to vizualize data, do not use that function in production */
+
+/* Just to vizualize data, do not use that function in production, 
+ * it can be use to check if nestable is OK
+ */
 function dev() {
 
     $('<textarea id="nestable-output"></textarea>').appendTo('div.cf.nestable-lists');

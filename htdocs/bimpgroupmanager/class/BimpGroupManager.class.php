@@ -102,10 +102,8 @@ class BimpGroupManager {
         }
     }
 
-    /**
-     * Other functions
-     */
     /* Remove link between 2 groups */
+
     function removeChild($groupId) {
         $sql = "DELETE ";
         $sql.= " FROM " . MAIN_DB_PREFIX . "bimp_grp_grp";
@@ -155,8 +153,6 @@ class BimpGroupManager {
     function getOldGroup() {
 
         $filledGroups = array();
-
-        /* $allGroups[idGroup] = nomGroup */
         $allGroups = $this->getAllGroups();
 
         foreach ($allGroups as $id => $name) {
@@ -264,8 +260,8 @@ class BimpGroupManager {
         }
         return $array1;
     }
-    
-    /* Called by the interface*/
+
+    /* Called by the interface */
 
     function setAllUsers() {
         $ids = $this->getAllUsersId();
@@ -273,6 +269,8 @@ class BimpGroupManager {
         $usergrp = $this->getGrp($users);
         $this->addInGroups($usergrp);
     }
+
+    /* Return an array with id of all users */
 
     function getAllUsersId() {
 
@@ -290,6 +288,8 @@ class BimpGroupManager {
         return $ids;
     }
 
+    /* Return an array with all users instances */
+
     function getAllUsersById($ids) {
         $users = array();
         foreach ($ids as $id) {
@@ -300,6 +300,11 @@ class BimpGroupManager {
         return $users;
     }
 
+    /**
+     * @param type $users  object user
+     * @return $usergrp['idUser']['grps'] => ids of groups of the user
+     *         $usergrp['idUser']['user'] => a user object
+     */
     function getGrp($users) {
         $staticgrp = new UserGroup($this->db);
         $usergrp = array();
@@ -311,6 +316,7 @@ class BimpGroupManager {
         return $usergrp;
     }
 
+    /* Set all user in their group (and their parents, grand-parent, etc...) */
     function addInGroups($usergrp) {
         foreach ($usergrp as $userid => $elt) {
             $grpsidWithDuplicate = array();
@@ -326,7 +332,7 @@ class BimpGroupManager {
     }
 
     /**
-     * used by trigger AddInGroups
+     * Used by trigger AddInGroups
      */
     function insertInGroups($userid, $groupid) {
         $groupsId = $this->getAllParents($groupid);
@@ -364,6 +370,7 @@ class BimpGroupManager {
         return $parents;
     }
 
+    /* Print dolibarr message when the user add an user in a group */
     function printMessage($userid, $groupsId, $groupid) {
         $user = new User($this->db);
         $user->fetch($userid);

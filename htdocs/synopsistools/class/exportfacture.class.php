@@ -81,7 +81,7 @@ class exportfacture {
     }
 
     public function exportFactureSavSeul() {
-        $this->type = "R";
+        $this->type = "sav";
         $result = $this->db->query("SELECT fact.rowid as id, fe.centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
                 . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' ".$this->where);

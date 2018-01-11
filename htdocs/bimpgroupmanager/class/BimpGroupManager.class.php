@@ -307,14 +307,30 @@ class BimpGroupManager {
      *         $usergrp['idUser']['user'] => a user object
      */
     function getGrp($users) {
-        $staticgrp = new UserGroup($this->db);
         $usergrp = array();
 
         foreach ($users as $user) {
-            $usergrp[$user->id]['grps'] = $staticgrp->listGroupsForUser($user->id);
+            $usergrp[$user->id]['groupids'] = $this->getGroupIdByUserId($user->id);
             $usergrp[$user->id]['user'] = $user;
         }
         return $usergrp;
+    }
+
+    function getGroupIdByUserId($userid) {
+        
+        $groupids = array();
+        
+        $sql = "SELECT fk_usergroup";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
+        $sql.= " WHERE fk_user=" . $userid;
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $groupids[] = $obj->fk_usergroup;
+            }
+        }
+        return $groupids;
     }
 
     /* Set all user in their group (and their parents, grand-parent, etc...) */
@@ -322,7 +338,7 @@ class BimpGroupManager {
     function addInGroups($usergrp) {
         foreach ($usergrp as $elt) {
             $grpsidWithDuplicate = array();
-            foreach ($elt['grps'] as $groupid => $inut) {
+            foreach ($elt['groupids'] as $groupid) {
                 $parents = $this->getAllParents($groupid);
                 $grpsidWithDuplicate = $this->custMerge($grpsidWithDuplicate, $parents);
             }
@@ -359,10 +375,10 @@ class BimpGroupManager {
             $len = sizeof($parents);
             $sql = 'SELECT `fk_parent`';
             $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimp_grp_grp`';
-            $sql .= ' WHERE (`fk_parent` IN (SELECT `rowid` FROM `'. MAIN_DB_PREFIX .'usergroup`)';
-            $sql .= '   OR   `fk_child`  IN (SELECT `rowid` FROM `'. MAIN_DB_PREFIX .'usergroup`))';
+            $sql .= ' WHERE (`fk_parent` IN (SELECT `rowid` FROM `' . MAIN_DB_PREFIX . 'usergroup`)';
+            $sql .= '   OR   `fk_child`  IN (SELECT `rowid` FROM `' . MAIN_DB_PREFIX . 'usergroup`))';
             $sql .= ' AND `fk_child` = ' . end($parents);
-            
+
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {

@@ -40,7 +40,8 @@ function updateGroup(groupId, newGroupId) {
             newGroupId: newGroupId
         },
         error: function () {
-            console.log("Erreur PHP");
+            alert("Erreur serveur. Il est possible qu'un autre utilisateur " +
+                    "soit en train de modifier les propriété de ce groupe.");
         }
     });
 }

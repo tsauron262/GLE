@@ -6,9 +6,12 @@
  *  \brief      Page of the group manager
  */
 require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpgroupmanager/class/BimpGroupManager.class.php';
 
 $arrayofcss = array('/bimpgroupmanager/nestable/nestable.css', '/bimpgroupmanager/css/styles.css');
 $arrayofjs = array('/bimpgroupmanager/nestable/jquery.nestable.js', '/bimpgroupmanager/js/group.js');
+
+$gm = new BimpGroupManager($db);
 
 
 /*

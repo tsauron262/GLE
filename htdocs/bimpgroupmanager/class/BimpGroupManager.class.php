@@ -41,6 +41,7 @@ class BimpGroupManager {
     var $id;
     var $id_parent;
     var $id_childs = array();
+    var $grp_ids = array();
 
     function __construct($db) {
         $this->db = $db;
@@ -317,8 +318,9 @@ class BimpGroupManager {
     }
 
     /* Set all user in their group (and their parents, grand-parent, etc...) */
+
     function addInGroups($usergrp) {
-        foreach ($usergrp as $userid => $elt) {
+        foreach ($usergrp as $elt) {
             $grpsidWithDuplicate = array();
             foreach ($elt['grps'] as $groupid => $inut) {
                 $parents = $this->getAllParents($groupid);
@@ -355,10 +357,12 @@ class BimpGroupManager {
         $parents = array($groupid);
         do {
             $len = sizeof($parents);
-            $sql = 'SELECT fk_parent';
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_grp_grp';
-            $sql .= ' WHERE fk_child = ' . end($parents);
-
+            $sql = 'SELECT `fk_parent`';
+            $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimp_grp_grp`';
+            $sql .= ' WHERE (`fk_parent` IN (SELECT `rowid` FROM `'. MAIN_DB_PREFIX .'usergroup`)';
+            $sql .= '   OR   `fk_child`  IN (SELECT `rowid` FROM `'. MAIN_DB_PREFIX .'usergroup`))';
+            $sql .= ' AND `fk_child` = ' . end($parents);
+            
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {
@@ -371,6 +375,7 @@ class BimpGroupManager {
     }
 
     /* Print dolibarr message when the user add an user in a group */
+
     function printMessage($userid, $groupsId, $groupid) {
         $user = new User($this->db);
         $user->fetch($userid);

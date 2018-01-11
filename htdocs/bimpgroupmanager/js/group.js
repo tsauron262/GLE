@@ -6,6 +6,7 @@
 var groups = {};
 
 
+
 /**
  * Ajax functions
  */
@@ -29,7 +30,7 @@ function getOldGroup() {
 }
 
 function updateGroup(groupId, newGroupId) {
-    
+
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
@@ -44,6 +45,23 @@ function updateGroup(groupId, newGroupId) {
     });
 }
 
+function setAllUsers() {
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
+        data: {
+            action: 'setAllUsers'
+        },
+        async: false,
+        error: function () {
+            console.log("Erreur PHP");
+        },
+        success: function () {
+            alert("Les groupes de tous utilisateurs ont été mis à jour.");
+        }
+    });
+}
+
 
 
 /**
@@ -52,12 +70,11 @@ function updateGroup(groupId, newGroupId) {
 
 $(document).ready(function () {
 
+    var elem;
     getOldGroup();
     printGroups();
-    var elem;
     $('.dd').nestable();
 
-    /* Gestion boutons */
     $('#nestable-menu').on('click', function (e) {
         var target = $(e.target),
                 action = target.data('action');
@@ -67,6 +84,11 @@ $(document).ready(function () {
         if (action === 'collapse-all') {
             $('.dd').nestable('collapseAll');
         }
+        if (action === 'set-all-users' && confirm("Vous êtes sur le points de redéfinir les groupes de tous les utilisateurs" +
+                ", il s'agit d'une lourde opération. Poursuivre ?")) {
+            setAllUsers();
+        }
+
     });
 
     elem = null;
@@ -87,7 +109,10 @@ $(document).ready(function () {
 /**
  * Functions
  */
-/* Just to vizualize data, do not use that function in production */
+
+/* Just to vizualize data, do not use that function in production, 
+ * it can be use to check if nestable is OK
+ */
 function dev() {
 
     $('<textarea id="nestable-output"></textarea>').appendTo('div.cf.nestable-lists');

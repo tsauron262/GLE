@@ -41,6 +41,7 @@ class BimpGroupManager {
     var $id;
     var $id_parent;
     var $id_childs = array();
+    var $grp_ids = array();
 
     function __construct($db) {
         $this->db = $db;
@@ -82,6 +83,7 @@ class BimpGroupManager {
     }
 
     /* Get groups ID and name $groups['id'] => name  */
+
     function getAllGroups() {
         $groups = array();
 
@@ -101,11 +103,8 @@ class BimpGroupManager {
         }
     }
 
-    /**
-     * Other functions
-     */
-    
     /* Remove link between 2 groups */
+
     function removeChild($groupId) {
         $sql = "DELETE ";
         $sql.= " FROM " . MAIN_DB_PREFIX . "bimp_grp_grp";
@@ -120,6 +119,7 @@ class BimpGroupManager {
     }
 
     /* Create link between 2 groups */
+
     function addChild($id_child, $id_parent) {
         $sql = "INSERT INTO " . MAIN_DB_PREFIX . "bimp_grp_grp";
         $sql.= " (fk_parent, fk_child)";
@@ -134,6 +134,7 @@ class BimpGroupManager {
     }
 
     /* Get the unique parent id by the id one of his child ($id) */
+
     function getParentId($id) {
         $sql = 'SELECT fk_parent';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_grp_grp';
@@ -149,11 +150,10 @@ class BimpGroupManager {
     }
 
     /* Retrieve links between groups from the database */
+
     function getOldGroup() {
 
         $filledGroups = array();
-
-        /* $allGroups[idGroup] = nomGroup */
         $allGroups = $this->getAllGroups();
 
         foreach ($allGroups as $id => $name) {
@@ -189,6 +189,7 @@ class BimpGroupManager {
     }
 
     /* Add the field isRoot */
+
     function addRoots($merged) {
         foreach ($merged as $id => $inut) {
             if ($this->getParentId($id) == -1) {
@@ -201,6 +202,7 @@ class BimpGroupManager {
     }
 
     /* Reindex the array */
+
     function sort($groups) {
 
         $out = array();
@@ -240,6 +242,7 @@ class BimpGroupManager {
     }
 
     /* Add the id of parent */
+
     function addParents($grps) {
         foreach ($grps as $index => $grp) {
             $id_parent = $this->getParentId($grp['id']);
@@ -251,6 +254,7 @@ class BimpGroupManager {
     }
 
     /* Merge array2 in array1 */
+
     function custMerge($array1, $array2) {
         foreach ($array2 as $arr2) {
             $array1[] = $arr2;
@@ -258,13 +262,85 @@ class BimpGroupManager {
         return $array1;
     }
 
+    /* Called by the interface */
+
+    function setAllUsers() {
+        $ids = $this->getAllUsersId();
+        $users = $this->getAllUsersById($ids);
+        $usergrp = $this->getGrp($users);
+        $this->addInGroups($usergrp);
+    }
+
+    /* Return an array with id of all users */
+
+    function getAllUsersId() {
+
+        $ids = array();
+
+        $sql = "SELECT rowid";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "user";
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $ids[] = $obj->rowid;
+            }
+        }
+        return $ids;
+    }
+
+    /* Return an array with all users instances */
+
+    function getAllUsersById($ids) {
+        $users = array();
+        foreach ($ids as $id) {
+            $user = new User($this->db);
+            $user->fetch($id);
+            $users[] = $user;
+        }
+        return $users;
+    }
+
     /**
-     * used by trigger AddInGroups
+     * @param type $users  object user
+     * @return $usergrp['idUser']['grps'] => ids of groups of the user
+     *         $usergrp['idUser']['user'] => a user object
+     */
+    function getGrp($users) {
+        $staticgrp = new UserGroup($this->db);
+        $usergrp = array();
+
+        foreach ($users as $user) {
+            $usergrp[$user->id]['grps'] = $staticgrp->listGroupsForUser($user->id);
+            $usergrp[$user->id]['user'] = $user;
+        }
+        return $usergrp;
+    }
+
+    /* Set all user in their group (and their parents, grand-parent, etc...) */
+
+    function addInGroups($usergrp) {
+        foreach ($usergrp as $elt) {
+            $grpsidWithDuplicate = array();
+            foreach ($elt['grps'] as $groupid => $inut) {
+                $parents = $this->getAllParents($groupid);
+                $grpsidWithDuplicate = $this->custMerge($grpsidWithDuplicate, $parents);
+            }
+            $grpidNoDuplicate = array_unique($grpsidWithDuplicate);
+            foreach ($grpidNoDuplicate as $groupid) {
+                $elt['user']->SetInGroup($groupid, 1, 1);
+            }
+        }
+    }
+
+    /**
+     * Used by trigger AddInGroups
      */
     function insertInGroups($userid, $groupid) {
         $groupsId = $this->getAllParents($groupid);
+        $this->printMessage($userid, $groupsId, $groupid);
         $groupsIdFiltered = $this->removeGroupsUserOwn($userid, $groupsId);
-        $grp = $this->addUserInGroups($userid, $groupsIdFiltered);
+        $grp = $this->addUserInGroups($userid, $groupsIdFiltered, $groupid);
         if (sizeof($grp) == 0) {
             return 0;
         } else if (0 < sizeof($grp)) {
@@ -275,15 +351,18 @@ class BimpGroupManager {
     }
 
     /* Get parent, grand-parents etc ... Of a group */
+
     function getAllParents($groupid) {
 
         $parents = array($groupid);
         do {
             $len = sizeof($parents);
-            $sql = 'SELECT fk_parent';
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_grp_grp';
-            $sql .= ' WHERE fk_child = ' . end($parents);
-
+            $sql = 'SELECT `fk_parent`';
+            $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimp_grp_grp`';
+            $sql .= ' WHERE (`fk_parent` IN (SELECT `rowid` FROM `'. MAIN_DB_PREFIX .'usergroup`)';
+            $sql .= '   OR   `fk_child`  IN (SELECT `rowid` FROM `'. MAIN_DB_PREFIX .'usergroup`))';
+            $sql .= ' AND `fk_child` = ' . end($parents);
+            
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {
@@ -292,11 +371,38 @@ class BimpGroupManager {
             }
         } while ($len != sizeof($parents));
 
-        array_shift($parents);
         return $parents;
     }
 
+    /* Print dolibarr message when the user add an user in a group */
+
+    function printMessage($userid, $groupsId, $groupid) {
+        $user = new User($this->db);
+        $user->fetch($userid);
+
+        if (sizeof($groupsId) == 1) {
+            $str = "$user->firstname $user->lastname à été ajouté au groupe : ";
+        } else if (sizeof($groupsId) > 1) {
+            $str = "$user->firstname $user->lastname à été ajouté aux groupes : ";
+        }
+
+        $groupsId2 = array_reverse($groupsId);
+        foreach ($groupsId2 as $id) {
+            $grp = new UserGroup($this->db);
+            $grp->fetch($id);
+            if ($id != $groupid) {
+                $str.= "$grp->nom, ";
+            } else if (sizeof($groupsId) != 1) {
+                $str.= "et $grp->nom.";
+            } else {
+                $str.= " $grp->nom.";
+            }
+        }
+        setEventMessages($str, null, 'mesgs');
+    }
+
     /* Remove group which already contain the user (in order not to duplicate that user) */
+
     function removeGroupsUserOwn($userid, $groupsId) {
 
         $sql = 'SELECT fk_usergroup';
@@ -316,24 +422,19 @@ class BimpGroupManager {
     }
 
     /* Add the user in every parents, grands-parent etc ... Of the group */
-    function addUserInGroups($userid, $groupsId) {
+
+    function addUserInGroups($userid, $groupsId, $initGroupId) {
         $user = new User($this->db);
         $user->fetch($userid);
-
-        if (sizeof($groupsId) == 1) {
-            $str = "$user->firstname $user->lastname à été ajouté au groupe : ";
-        } else if (sizeof($groupsId) > 1) {
-            $str = "$user->firstname $user->lastname à été ajouté aux groupes : ";
-        }
 
         $groupsId2 = array_reverse($groupsId);
         foreach ($groupsId2 as $id) {
             $grp = new UserGroup($this->db);
             $grp->fetch($id);
-            $str.= "$grp->nom\n";
             $user->SetInGroup($id, 1, 1);
         }
-        setEventMessages($str, null, 'mesgs');
+
         return $groupsId2;
     }
+
 }

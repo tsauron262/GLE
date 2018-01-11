@@ -11,3 +11,7 @@
     border: solid 2px gray;
     border-radius: 8px;
 }
+
+ .dd {
+    /*max-width: 600px;   width of the box */
+}

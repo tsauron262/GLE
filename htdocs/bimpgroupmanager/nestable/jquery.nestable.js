@@ -41,8 +41,8 @@
             expandBtnHTML   : '<button data-action="expand" type="button">Expand</button>',
             collapseBtnHTML : '<button data-action="collapse" type="button">Collapse</button>',
             group           : 0,
-            maxDepth        : 5,
-            threshold       : 20
+            maxDepth        : 20,
+            threshold       : 20 /* Changed for the module bimpgroupmanager, default value was 5 */
         };
 
     function Plugin(element, options)

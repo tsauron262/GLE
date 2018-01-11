@@ -34,4 +34,4 @@ AddContract=Créer Contrat / Licence
 
 
 
-PredefinedMailContentSendInvoice=__CONTACTCIVNAME__\n\nNous vous prions de trouver ci-joint notre facturation n° __REF__\n\nD'autre part, merci de bien vouloir enregistrer nos nouvelles coordonnées bancaires selon RIB en pièce jointe.\n\n__PERSONALIZED__Vous remerciant par avance pour votre aimable règlement, veuillez agréer, cher client, nos meilleures salutations.\n\n__SIGNATURE__
+PredefinedMailContentSendInvoice=__CONTACTCIVNAME__\n\nCher client,\n\nNous vous prions de trouver ci-joint notre facturation n° __REF__\n\nD'autre part, merci de bien vouloir enregistrer nos nouvelles coordonnées bancaires selon RIB en pièce jointe.\n\n__PERSONALIZED__Vous remerciant par avance pour votre aimable règlement, veuillez agréer, cher client, nos meilleures salutations.\n\n__SIGNATURE__

@@ -148,11 +148,17 @@ class exportfacture {
         }
         else{
             $this->exportOk = true;
+            
+            
 
             $facture = new Facture($this->db);
             $facture->fetch($id);
             $societe = new Societe($this->db);
             $societe->fetch($facture->socid);
+            
+            
+            if($this->debug)
+                echo "Tentative export facture ".$facture->getNomUrl (1);
             
             
             $tabFact = $tabFactDet = array();

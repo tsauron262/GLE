@@ -477,7 +477,7 @@ else
 					}
 					print '<td align="center">'.$useringroup->getLibStatut(3).'</td>';
 					print '<td align="right">';
-					if (! empty($user->admin) && empty($conf->multicompany->enabled))
+					if ($caneditperms && empty($conf->multicompany->enabled))
 					{
 						print '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=removeuser&amp;user='.$useringroup->id.'">';
 						print img_delete($langs->trans("RemoveFromGroup"));

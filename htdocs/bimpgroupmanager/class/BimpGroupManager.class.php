@@ -343,17 +343,19 @@ class BimpGroupManager {
 
         $grp = new UserGroup($this->db);
         if ($fromTrigger) {
-            $grp->fetch($groupid);
+            $grp = $this->getGroup($groupid);
             ($setmsg == true) ? setEventMessages('Ajouté au groupe ' . $grp->name, null, 'mesgs') : null;
         }
 
         $parentid = $this->getParentId($groupid);
         $groups = $this->getGroupIdByUserId($userid);
-        $grp->fetch($parentid);
+        $grp = $this->getGroup($parentid);
         while (in_array($parentid, $groups) != false) {
-            ($setmsg == true) ? setEventMessages('Reste dans le groupe ' . $grp->name, null, 'mesgs') : null;
             $parentid2 = $this->getParentId($parentid);
-            $grp->fetch($parentid2);
+            if ($setmsg == true) {
+                setEventMessages('Reste dans le groupe ' . $grp->name, null, 'mesgs');
+                $grp = $this->getGroup($parentid2);
+            }
             $parentid = $parentid2;
         }
         if ($parentid == -1) {  // if there is no parent
@@ -365,6 +367,15 @@ class BimpGroupManager {
         } else {
             return -1; // undenifed user and group
         }
+    }
+
+    function getGroup($id) {
+        if (!isset($this->tabGrp[$id])) {
+            $grp = new UserGroup($this->db);
+            $grp->fetch($id);
+            $this->tabGrp[$id] = $grp;
+        }
+        return $this->tabGrp[$id];
     }
 
     /* Get parent, grand-parents etc ... Of a group */
@@ -390,4 +401,5 @@ class BimpGroupManager {
 
         return $parents;
     }
+
 }

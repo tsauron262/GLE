@@ -363,7 +363,6 @@ class BimpGroupManager {
      * Used by trigger AddInGroups
      */
     function insertInGroups($userid, $groupid, $setmsg, $user = null, $fromTrigger = true) {
-
         if ($user == null) {
             $user = new User($this->db);
             $user->fetch($userid);
@@ -374,7 +373,7 @@ class BimpGroupManager {
             $grp->fetch($groupid);
             ($setmsg == true) ? setEventMessages('Ajouté au groupe ' . $grp->name, null, 'mesgs') : null;
         }
-        
+
         $parentid = $this->getParentId($groupid);
         $groups = $this->getGroupIdByUserId($userid);
         $grp->fetch($parentid);

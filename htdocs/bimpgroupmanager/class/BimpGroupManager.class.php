@@ -299,33 +299,6 @@ class BimpGroupManager {
         return $ids;
     }
 
-    /* Return an array with all users instances */
-
-    function getAllUsersById($ids) {
-        $users = array();
-        foreach ($ids as $id) {
-            $user = new User($this->db);
-            $user->fetch($id);
-            $users[] = $user;
-        }
-        return $users;
-    }
-
-    /**
-     * @param type $users  object user
-     * @return $usergrp['idUser']['grps'] => ids of groups of the user
-     *         $usergrp['idUser']['user'] => a user object
-     */
-    function getGrp($users) {
-        $usergrp = array();
-
-        foreach ($users as $user) {
-            $usergrp[$user->id]['groupids'] = $this->getGroupIdByUserId($user->id);
-            $usergrp[$user->id]['user'] = $user;
-        }
-        return $usergrp;
-    }
-
     function getGroupIdByUserId($userid) {
 
         $groupids = array();
@@ -360,7 +333,7 @@ class BimpGroupManager {
     }
 
     /**
-     * Used by trigger AddInGroups
+     * Used by trigger action USER_SETINGROUP
      */
     function insertInGroups($userid, $groupid, $setmsg, $user = null, $fromTrigger = true) {
         if ($user == null) {
@@ -370,20 +343,22 @@ class BimpGroupManager {
 
         $grp = new UserGroup($this->db);
         if ($fromTrigger) {
-            $grp->fetch($groupid);
+            $grp = $this->getGroup($groupid);
             ($setmsg == true) ? setEventMessages('Ajouté au groupe ' . $grp->name, null, 'mesgs') : null;
         }
 
         $parentid = $this->getParentId($groupid);
         $groups = $this->getGroupIdByUserId($userid);
-        $grp->fetch($parentid);
+        $grp = $this->getGroup($parentid);
         while (in_array($parentid, $groups) != false) {
-            ($setmsg == true) ? setEventMessages('Reste dans le groupe ' . $grp->name, null, 'mesgs') : null;
             $parentid2 = $this->getParentId($parentid);
-            $grp->fetch($parentid2);
+            if ($setmsg == true) {
+                setEventMessages('Reste dans le groupe ' . $grp->name, null, 'mesgs');
+                $grp = $this->getGroup($parentid2);
+            }
             $parentid = $parentid2;
         }
-        if ($parentid == -1) {
+        if ($parentid == -1) {  // if there is no parent
             return 0;
         }
         $user->SetInGroup($parentid, 1);
@@ -392,6 +367,15 @@ class BimpGroupManager {
         } else {
             return -1; // undenifed user and group
         }
+    }
+
+    function getGroup($id) {
+        if (!isset($this->tabGrp[$id])) {
+            $grp = new UserGroup($this->db);
+            $grp->fetch($id);
+            $this->tabGrp[$id] = $grp;
+        }
+        return $this->tabGrp[$id];
     }
 
     /* Get parent, grand-parents etc ... Of a group */
@@ -416,75 +400,6 @@ class BimpGroupManager {
         } while ($len != sizeof($parents));
 
         return $parents;
-    }
-
-    /* Print dolibarr message when the user add an user in a group */
-
-    function printMessage($userid, $groupsId, $groupid) {
-        $user = new User($this->db);
-        $user->fetch($userid);
-
-        if (sizeof($groupsId) == 1) {
-            $str = "$user->firstname $user->lastname à été ajouté au groupe : ";
-        } else if (sizeof($groupsId) > 1) {
-            $str = "$user->firstname $user->lastname à été ajouté aux groupes : ";
-        }
-
-        $groupsId2 = array_reverse($groupsId);
-        foreach ($groupsId2 as $id) {
-            $grp = new UserGroup($this->db);
-            $grp->fetch($id);
-            if ($id != $groupid) {
-                $str.= "$grp->nom, ";
-            } else if (sizeof($groupsId) != 1) {
-                $str.= "et $grp->nom.";
-            } else {
-                $str.= " $grp->nom.";
-            }
-        }
-        setEventMessages($str, null, 'mesgs');
-    }
-
-    /* Remove group which already contain the user (in order not to duplicate that user) */
-
-    function removeGroupsUserOwn($userid, $groupsId) {
-
-        $sql = 'SELECT fk_usergroup';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'usergroup_user';
-        $sql .= ' WHERE fk_user=' . $userid;
-
-        $result = $this->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $ind = array_search($obj->fk_usergroup, $groupsId);
-                if ($ind !== false) {
-                    unset($groupsId[$ind]);
-                }
-            }
-        }
-        return $groupsId;
-    }
-
-    /* Add the user in every parents, grands-parent etc ... Of the group */
-
-    function addUserInGroups($userid, $groupsId) {
-        global $conf;
-
-        $conf->global->GROUP_MANAGER_ADDING_USER = 1;
-
-        $user = new User($this->db);
-        $user->fetch($userid);
-
-        $groupsId2 = array_reverse($groupsId);
-        foreach ($groupsId2 as $id) {
-            $grp = new UserGroup($this->db);
-            $grp->fetch($id);
-            $user->SetInGroup($id, 1);
-        }
-
-        $conf->global->GROUP_MANAGER_ADDING_USER = 0;
-
-        return $groupsId2;
     }
 
 }

@@ -42,11 +42,18 @@ class BimpGroupManager {
     var $id_parent;
     var $id_childs = array();
     var $grp_ids = array();
+    
+    var $cache;
 
     function __construct($db) {
         $this->db = $db;
+        $this->initCache();
     }
-
+    
+    function initCache(){
+        $this->cache = array("grpsUser"=>array(), "parentGrp" => array(), "tabGrp"=>array());
+    }
+    
     function create() {
         dol_syslog(get_class($this) . '::create', LOG_DEBUG);
     }
@@ -136,17 +143,22 @@ class BimpGroupManager {
     /* Get the unique parent id by the id one of his child ($id) */
 
     function getParentId($id) {
-        $sql = 'SELECT fk_parent';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_grp_grp';
-        $sql .= ' WHERE fk_child = ' . $id;
+        if (!isset($this->cache['parentGrp'][$id])) {
+            $sql = 'SELECT fk_parent';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_grp_grp';
+            $sql .= ' WHERE fk_child = ' . $id;
 
-        $result = $this->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                return $obj->fk_parent;
+            $result = $this->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->fetch_object($result)) {
+                    $this->cache['parentGrp'][$id] = $obj->fk_parent;
+                }
+            } else {
+                $this->cache['parentGrp'][$id] = -1;
+                return $this->cache['parentGrp'][$id];
             }
         }
-        return -1;
+        return $this->cache['parentGrp'][$id];
     }
 
     /* Retrieve links between groups from the database */
@@ -300,20 +312,21 @@ class BimpGroupManager {
     }
 
     function getGroupIdByUserId($userid) {
+        if (!isset($this->cache['grpsUser'][$userid])) {
+            $groupids = array();
+            $sql = "SELECT fk_usergroup";
+            $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
+            $sql.= " WHERE fk_user=" . $userid;
 
-        $groupids = array();
-
-        $sql = "SELECT fk_usergroup";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
-        $sql.= " WHERE fk_user=" . $userid;
-
-        $result = $this->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $groupids[] = $obj->fk_usergroup;
+            $result = $this->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->fetch_object($result)) {
+                    $groupids[] = $obj->fk_usergroup;
+                }
             }
+            $this->cache['grpsUser'][$userid] = $groupids;
         }
-        return $groupids;
+        return $this->cache['grpsUser'][$userid];
     }
 
     /* Set all user in their group (and their parents, grand-parent, etc...) */
@@ -361,6 +374,8 @@ class BimpGroupManager {
         if ($parentid == -1) {  // if there is no parent
             return 0;
         }
+        // dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
+        $this->getGroupIdByUserId($parentid);
         $user->SetInGroup($parentid, 1);
         if (isset($grp->id)) {
             return 1;
@@ -370,12 +385,12 @@ class BimpGroupManager {
     }
 
     function getGroup($id) {
-        if (!isset($this->tabGrp[$id])) {
+        if (!isset($this->cache['tabGrp'][$id])) {
             $grp = new UserGroup($this->db);
             $grp->fetch($id);
-            $this->tabGrp[$id] = $grp;
+            $this->cache['tabGrp'][$id] = $grp;
         }
-        return $this->tabGrp[$id];
+        return $this->cache['tabGrp'][$id];
     }
 
     /* Get parent, grand-parents etc ... Of a group */

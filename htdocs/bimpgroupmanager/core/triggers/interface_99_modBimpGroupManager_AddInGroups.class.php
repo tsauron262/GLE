@@ -36,10 +36,13 @@ class InterfaceAddInGroups extends DolibarrTriggers {
      * every parent of the group
      */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
-        if ($action == 'USER_SETINGROUP') {
+        global $conf;
+
+        if ($action == 'USER_SETINGROUP' and $conf->global->BIMP_AJOUT_GROUP_RECURSIF == 1) {
             $gm = new BimpGroupManager($user->db);
-            $code = $gm->insertInGroups($object->id, $object->newgroupid);
+            $code = $gm->insertInGroups($object->id, $object->newgroupid, true);
             return $code;
         }
     }
+
 }

@@ -47,11 +47,12 @@ function updateGroup(groupId, newGroupId) {
 }
 
 function setAllUsers() {
+    
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpgroupmanager/interface.php",
         data: {
-            action: 'setAllUsers'
+            action: 'setAllUsers',
         },
         async: false,
         error: function () {
@@ -116,7 +117,7 @@ $(document).ready(function () {
  */
 function dev() {
 
-    $('<textarea id="nestable-output"></textarea>').appendTo('div.cf.nestable-lists');
+    $('<textarea id="nestable-output" style="visibility: hidden"></textarea>').appendTo('div.cf.nestable-lists');
 
     var updateOutput = function (e) {
         var list = e.length ? e : $(e.target),

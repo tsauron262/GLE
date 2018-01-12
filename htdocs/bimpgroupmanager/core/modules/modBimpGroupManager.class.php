@@ -88,7 +88,8 @@ class modBimpGroupManager extends DolibarrModules {
         $this->dirs = array();
 
         // Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
-//        $this->config_page_url = array("modBimpContratAuto.php@modBimpContratAuto");
+        $this->config_page_url = array("view.php@bimpgroupmanager");
+        
         // Dependencies
 //        $this->hidden = false;   // A condition to hide module
 //        $this->depends = array();  // List of module class names as string that must be enabled if this module is enabled

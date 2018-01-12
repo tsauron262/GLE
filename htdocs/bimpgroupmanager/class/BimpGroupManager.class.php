@@ -265,10 +265,20 @@ class BimpGroupManager {
     /* Called by the interface */
 
     function setAllUsers() {
-        $ids = $this->getAllUsersId();
-        $users = $this->getAllUsersById($ids);
-        $usergrp = $this->getGrp($users);
-        $this->addInGroups($usergrp);
+        global $conf;
+
+        $conf->global->GROUP_MANAGER_SET_ALL_USER = 1;
+
+        $userids = $this->getAllUsersId();
+        foreach ($userids as $userid) {
+            $groupids = $this->getGroupIdByUserId($userid);
+            $user = new User($this->db);
+            $user->fetch($userid);
+            foreach ($groupids as $groupid) {
+                $this->insertInGroups($userid, $groupid, false, $user, false);
+            }
+        }
+        unset($conf->global->GROUP_MANAGER_SET_ALL_USER);
     }
 
     /* Return an array with id of all users */
@@ -317,9 +327,9 @@ class BimpGroupManager {
     }
 
     function getGroupIdByUserId($userid) {
-        
+
         $groupids = array();
-        
+
         $sql = "SELECT fk_usergroup";
         $sql.= " FROM " . MAIN_DB_PREFIX . "usergroup_user";
         $sql.= " WHERE fk_user=" . $userid;
@@ -352,17 +362,36 @@ class BimpGroupManager {
     /**
      * Used by trigger AddInGroups
      */
-    function insertInGroups($userid, $groupid) {
-        $groupsId = $this->getAllParents($groupid);
-        $this->printMessage($userid, $groupsId, $groupid);
-        $groupsIdFiltered = $this->removeGroupsUserOwn($userid, $groupsId);
-        $grp = $this->addUserInGroups($userid, $groupsIdFiltered, $groupid);
-        if (sizeof($grp) == 0) {
+    function insertInGroups($userid, $groupid, $setmsg, $user = null, $fromTrigger = true) {
+
+        if ($user == null) {
+            $user = new User($this->db);
+            $user->fetch($userid);
+        }
+
+        $grp = new UserGroup($this->db);
+        if ($fromTrigger) {
+            $grp->fetch($groupid);
+            ($setmsg == true) ? setEventMessages('Ajouté au groupe ' . $grp->name, null, 'mesgs') : null;
+        }
+        
+        $parentid = $this->getParentId($groupid);
+        $groups = $this->getGroupIdByUserId($userid);
+        $grp->fetch($parentid);
+        while (in_array($parentid, $groups) != false) {
+            ($setmsg == true) ? setEventMessages('Reste dans le groupe ' . $grp->name, null, 'mesgs') : null;
+            $parentid2 = $this->getParentId($parentid);
+            $grp->fetch($parentid2);
+            $parentid = $parentid2;
+        }
+        if ($parentid == -1) {
             return 0;
-        } else if (0 < sizeof($grp)) {
-            return sizeof($grp);
-        } else if (!isset($grp)) {
-            return -1;
+        }
+        $user->SetInGroup($parentid, 1);
+        if (isset($grp->id)) {
+            return 1;
+        } else {
+            return -1; // undenifed user and group
         }
     }
 
@@ -439,7 +468,11 @@ class BimpGroupManager {
 
     /* Add the user in every parents, grands-parent etc ... Of the group */
 
-    function addUserInGroups($userid, $groupsId, $initGroupId) {
+    function addUserInGroups($userid, $groupsId) {
+        global $conf;
+
+        $conf->global->GROUP_MANAGER_ADDING_USER = 1;
+
         $user = new User($this->db);
         $user->fetch($userid);
 
@@ -447,8 +480,10 @@ class BimpGroupManager {
         foreach ($groupsId2 as $id) {
             $grp = new UserGroup($this->db);
             $grp->fetch($id);
-            $user->SetInGroup($id, 1, 1);
+            $user->SetInGroup($id, 1);
         }
+
+        $conf->global->GROUP_MANAGER_ADDING_USER = 0;
 
         return $groupsId2;
     }

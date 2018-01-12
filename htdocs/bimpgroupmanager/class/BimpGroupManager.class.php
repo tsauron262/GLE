@@ -383,7 +383,7 @@ class BimpGroupManager {
             $grp->fetch($parentid2);
             $parentid = $parentid2;
         }
-        if ($parentid == -1) {
+        if ($parentid == -1) {  // if there is no parent
             return 0;
         }
         $user->SetInGroup($parentid, 1);

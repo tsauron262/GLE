@@ -129,15 +129,17 @@ class BimpGroupManager {
     /* Create link between 2 groups */
 
     function addChild($id_child, $id_parent) {
-        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "bimp_grp_grp";
-        $sql.= " (fk_parent, fk_child)";
-        $sql.= " VALUES (" . $id_parent . ", " . $id_child . ")";
+        if($id_parent != '') {
+            $sql = "INSERT INTO " . MAIN_DB_PREFIX . "bimp_grp_grp";
+            $sql.= " (fk_parent, fk_child)";
+            $sql.= " VALUES (" . $id_parent . ", " . $id_child . ")";
 
-        dol_syslog(get_class($this) . "::insert child", LOG_DEBUG);
+            dol_syslog(get_class($this) . "::insert child", LOG_DEBUG);
 
-        $result = $this->db->query($sql);
-        if (!$result) {
-            $this->error = $this->db->error();
+            $result = $this->db->query($sql);
+            if (!$result) {
+                $this->error = $this->db->error();
+            }
         }
     }
 

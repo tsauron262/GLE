@@ -1,0 +1,10 @@
+Erreur : mauvais calcul des marges sur les factures avoir:
+    Changement fichier /core/class/html.formmargin.class.php, fonction getMarginInfosArray().
+
+    $marginInfos['margin_on_products'] += $pv - $pa;
+    $marginInfos['margin_on_products'] += $pv + $pa;
+
+    $marginInfos['margin_on_services'] += $pv - $pa;
+    $marginInfos['margin_on_services'] += $pv + $pa;
+
+

@@ -43,6 +43,7 @@ class BimpGroupManager {
     var $id_childs = array();
     var $grp_ids = array();
     
+    /* Used to limit SQL queries */
     var $cache;
 
     function __construct($db) {

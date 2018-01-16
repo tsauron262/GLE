@@ -127,6 +127,12 @@ class modSynopsisprojetplus extends DolibarrModules {
         $s = $r;
         $s1 = $r;
         $r++;
+        
+        
+        
+        $this->module_parts = array(
+        'hooks' => array('projecttaskcard')  // Set here all hooks context you want to support
+        );
   
         
         

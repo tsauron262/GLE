@@ -302,7 +302,6 @@ class BimpGroupManager {
             $user->fetch($userid);
         }
 
-        $grp = new UserGroup($this->db);
         if ($fromTrigger) {
             $grp = $this->getGroup($groupid);
             ($setmsg == true) ? setEventMessages('Ajouté au groupe ' . $grp->name, null, 'mesgs') : null;
@@ -322,13 +321,11 @@ class BimpGroupManager {
         if ($parentid == -1) {  // if there is no parent
             return 0;
         }
-         dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
-        //$this->getGroupIdByUserId($parentid);
+        dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
         if (! is_object($user->oldcopy)) 
             $user->oldcopy = clone $user;
-        $user->SetInGroup($parentid, 1);
-        $this->initCache();
-        if (isset($grp->id)) {
+        if ($user->SetInGroup($parentid, 1)) {
+            $this->initCache();
             return 1;
         } else {
             return -1; // undenifed user and group

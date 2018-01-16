@@ -102,20 +102,14 @@ class InterfaceBimpNumerotationTriggers extends DolibarrTriggers
         
 	    // Put here code you want to execute when a Dolibarr business events occurs.
 		// Data and type of action are stored into $object and $action
-//                    if ($action == 'BILL_VALIDATE'){
-//                        $object->fetch($object->id);
-//                        $tabPrefixe = array("AV", "FA", "AC");
-//                        $suffixe = "C";
-//                        foreach($tabPrefixe as $pref){
-//                            $object->ref = str_replace($pref.$suffixe, $pref, $object->ref);
-//                            $object->ref = str_replace($pref.$suffixe, $pref, $object->ref);//Pour être sur de ne pas doublé
-//                            $object->ref = str_replace($pref, $pref.$suffixe, $object->ref);
-//                        }
-//                        
-//                        $object->update($user, 1);
-//                        
-//                        
-//                    }
+                    if ($action == 'BILL_VALIDATE'){
+                        $object->fetch_optionals();
+                        if(!isset($object->array_options['options_type']) || $object->array_options['options_type'] == ""){
+                            $this->error = "Pas de secteur";
+                            return -1;
+                        }
+                        return 0;
+                    }
 //        
 
 

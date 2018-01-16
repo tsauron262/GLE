@@ -14,14 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 /**
  *	\file       htdocs/core/class/html.formmargin.class.php
  *  \ingroup    core
  *	\brief      Fichier de la classe des fonctions predefinie de composants html autre
  */
-
-
 /**
  *	Classe permettant la generation de composants html autre
  *	Only common components are here.
@@ -30,8 +27,6 @@ class FormMargin
 {
     var $db;
     var $error;
-
-
     /**
      *	Constructor
      *
@@ -40,12 +35,8 @@ class FormMargin
     function __construct($db)
     {
         $this->db = $db;
-
         return 1;
     }
-
-
-
 	/**
 	 *	get array with margin information from lines of object
 	 *  TODO Move this in common class.
@@ -57,7 +48,6 @@ class FormMargin
 	function getMarginInfosArray($object, $force_price=false)
 	{
 		global $conf, $db;
-
 		// Default returned array
 		$marginInfos = array(
 				'pa_products' => 0,
@@ -76,7 +66,6 @@ class FormMargin
 				'total_margin_rate' => '',
 				'total_mark_rate' => ''
 		);
-
 		foreach($object->lines as $line)
 		{
 			if (empty($line->pa_ht) && isset($line->fk_fournprice) && !$force_price)
@@ -92,9 +81,9 @@ class FormMargin
 			if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
 				$line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
 			}
-
 			$pv = $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
-			$pa_ht = $line->pa_ht;      // We choosed to have line->pa_ht always positive in database, so we guess the correct sign
+                        /*mod drsi*/ if($line->pa_ht <0 ) $line->pa_ht = -$line->pa_ht; /*fmod drsi*/
+			$pa_ht = ($pv < 0 ? - $line->pa_ht : $line->pa_ht);      // We choosed to have line->pa_ht always positive in database, so we guess the correct sign
 			$pa = $line->qty * $pa_ht;
 			
 			// calcul des marges
@@ -162,25 +151,21 @@ class FormMargin
 			$marginInfos['margin_rate_products'] = 100 * $marginInfos['margin_on_products'] / $marginInfos['pa_products'];
 		if ($marginInfos['pv_products'] > 0)
 			$marginInfos['mark_rate_products'] = 100 * $marginInfos['margin_on_products'] / $marginInfos['pv_products'];
-
 		if ($marginInfos['pa_services'] > 0)
 			$marginInfos['margin_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pa_services'];
 		if ($marginInfos['pv_services'] > 0)
 			$marginInfos['mark_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pv_services'];
-
 		// if credit note, margin = -1 * (abs(selling_price) - buying_price)
 		//if ($marginInfos['pv_total'] < 0)
 		//	$marginInfos['total_margin'] = -1 * (abs($marginInfos['pv_total']) - $marginInfos['pa_total']);
 		//else
-			$marginInfos['total_margin'] = $marginInfos['margin_on_products'] + $marginInfos['margin_on_services'];
+			$marginInfos['total_margin'] = $marginInfos['pv_total'] - $marginInfos['pa_total'];
 		if ($marginInfos['pa_total'] > 0)
 			$marginInfos['total_margin_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pa_total'];
 		if ($marginInfos['pv_total'] > 0)
 			$marginInfos['total_mark_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pv_total'];
-
 		return $marginInfos;
 	}
-
 	/**
 	 * 	Show the array with all margin infos
 	 *
@@ -191,29 +176,22 @@ class FormMargin
 	function displayMarginInfos($object, $force_price=false)
 	{
 		global $langs, $conf, $user;
-
     	if (! empty($user->societe_id)) return;
-
     	if (! $user->rights->margins->liretous) return;
-
         $rounding = min($conf->global->MAIN_MAX_DECIMALS_UNIT, $conf->global->MAIN_MAX_DECIMALS_TOT);
-
 		$marginInfo = $this->getMarginInfosArray($object, $force_price);
-
 		if (! empty($conf->global->MARGIN_ADD_SHOWHIDE_BUTTON))	// TODO Warning this feature rely on an external js file that may be removed. Using native js function document.cookie should be better
 		{
 			print $langs->trans('ShowMarginInfos').' : ';
 	        $hidemargininfos = $_COOKIE['DOLUSER_MARGININFO_HIDE_SHOW'];
 	    	print '<span id="showMarginInfos" class="linkobject '.(!empty($hidemargininfos)?'':'hideobject').'">'.img_picto($langs->trans("Disabled"),'switch_off').'</span>';
 	    	print '<span id="hideMarginInfos" class="linkobject '.(!empty($hidemargininfos)?'hideobject':'').'">'.img_picto($langs->trans("Enabled"),'switch_on').'</span>';
-
     	    print '<script>$(document).ready(function() {
         	    $("span#showMarginInfos").click(function() { $.getScript( "'.dol_buildpath('/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js', 1).'", function( data, textStatus, jqxhr ) { $.cookie("DOLUSER_MARGININFO_HIDE_SHOW", 0); $(".margininfos").show(); $("span#showMarginInfos").addClass("hideobject"); $("span#hideMarginInfos").removeClass("hideobject");})});
         	    $("span#hideMarginInfos").click(function() { $.getScript( "'.dol_buildpath('/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js', 1).'", function( data, textStatus, jqxhr ) { $.cookie("DOLUSER_MARGININFO_HIDE_SHOW", 1); $(".margininfos").hide(); $("span#hideMarginInfos").addClass("hideobject"); $("span#showMarginInfos").removeClass("hideobject");})});
       	        });</script>';
     	    if (!empty($hidemargininfos)) print '<script>$(document).ready(function() {$(".margininfos").hide();});</script>';
 		}
-
 		print '<!-- Margin table -->'."\n";
 		print '<table class="noborder margintable centpercent">';
 		print '<tr class="liste_titre">';
@@ -229,7 +207,6 @@ class FormMargin
 		if (! empty($conf->global->DISPLAY_MARK_RATES))
 			print '<td class="liste_titre" align="right">'.$langs->trans('MarkRate').'</td>';
 		print '</tr>';
-
 		if (! empty($conf->product->enabled))
 		{
 			//if ($marginInfo['margin_on_products'] != 0 && $marginInfo['margin_on_services'] != 0) {
@@ -244,7 +221,6 @@ class FormMargin
 				print '<td align="right">'.(($marginInfo['mark_rate_products'] == '')?'':price($marginInfo['mark_rate_products'], null, null, null, null, $rounding).'%').'</td>';
 			print '</tr>';
 		}
-
 		if (! empty($conf->service->enabled))
 		{
 			print '<tr class="oddeven">';
@@ -258,7 +234,6 @@ class FormMargin
 				print '<td align="right">'.(($marginInfo['mark_rate_services'] == '')?'':price($marginInfo['mark_rate_services'], null, null, null, null, $rounding).'%').'</td>';
 			print '</tr>';
 		}
-
 		if (! empty($conf->product->enabled) && ! empty($conf->service->enabled))
 		{
 			print '<tr class="liste_total">';
@@ -274,6 +249,4 @@ class FormMargin
 		}
 		print '</table>';
 	}
-
 }
-

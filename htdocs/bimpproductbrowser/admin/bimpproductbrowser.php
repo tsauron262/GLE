@@ -38,7 +38,6 @@ $arrayofjs = array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.js',
 $arrayofcss = array('/includes/jquery/plugins/jquerytreeview/jquery.treeview.css');
 
 $langs->load("admin");
-$langs->load("stocks");
 
 // Securit check
 if (!$user->admin)

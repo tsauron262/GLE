@@ -172,7 +172,7 @@ class FormMargin
 		//if ($marginInfos['pv_total'] < 0)
 		//	$marginInfos['total_margin'] = -1 * (abs($marginInfos['pv_total']) - $marginInfos['pa_total']);
 		//else
-			$marginInfos['total_margin'] = $marginInfos['pv_total'] - $marginInfos['pa_total'];
+			$marginInfos['total_margin'] = $marginInfos['margin_on_products'] + $marginInfos['margin_on_services'];
 		if ($marginInfos['pa_total'] > 0)
 			$marginInfos['total_margin_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pa_total'];
 		if ($marginInfos['pv_total'] > 0)

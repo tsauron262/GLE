@@ -111,7 +111,7 @@ function marges_prepare_head()
  * @param 	float	$paht				Buying price without tax
  * @return	array						Array of margin info (buying price, marge rate, marque rate)
  */
-function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localtax2_tx, $fk_pa, $paht)
+function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localtax2_tx, $fk_pa, $paht, $type=null, $credit_type=null)
 {
 	global $db, $conf;
 
@@ -153,6 +153,9 @@ function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localta
 	// calcul taux marque
 	if ($pu_ht_remise != 0)
 		$marque_tx_ret = (100 * $marge) / $pu_ht_remise;
+        
+        if ($type == $credit_type and isset($type))
+            $paht_ret = -$paht_ret;
 
 	return array($paht_ret, $marge_tx_ret, $marque_tx_ret);
 }

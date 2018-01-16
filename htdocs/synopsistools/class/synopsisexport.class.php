@@ -145,6 +145,7 @@ class synopsisexport {
 //            $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid LEFT JOIN  " . MAIN_DB_PREFIX . "element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN " . MAIN_DB_PREFIX . "facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         } else {
             $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
+//            $totalAchat = "SUM((if(factdet.total_ht < 0 and factdet.buy_price_ht > 0,-factdet.buy_price_ht*factdet.qty,factdet.buy_price_ht*factdet.qty)))";
             $totalVendu = "SUM(factdet.total_ht)";
             $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, chrono.ref as refSav, chronoT.Etat as Statut, chrono.tms as Date_Modif, chronoT.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(chrono.date_create) as Date, MAX(fact.paye) as Paye, Technicien as Tech, repairConfirmNumber, date_close";
 //            if ($paye)

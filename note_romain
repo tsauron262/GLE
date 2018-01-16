@@ -1,10 +1,14 @@
 Erreur : mauvais calcul des marges sur les factures avoir:
-    Changement fichier /core/class/html.formmargin.class.php, fonction getMarginInfosArray().
+  - Changement fichier /compta/facture/class/facture.class.php, fonction getMarginInfosArray().
 
-    $marginInfos['margin_on_products'] += $pv - $pa;
-    $marginInfos['margin_on_products'] += $pv + $pa;
+        $marginInfos = getMarginInfos($objp->subprice, $objp->remise_percent, $objp->tva_tx, $objp->localtax1_tx, $objp->localtax2_tx, $line->fk_fournprice, $objp->pa_ht);
+     -> $marginInfos = getMarginInfos($objp->subprice, $objp->remise_percent, $objp->tva_tx, $objp->localtax1_tx, $objp->localtax2_tx, $line->fk_fournprice, $objp->pa_ht, $this->type, self::TYPE_CREDIT_NOTE);
 
-    $marginInfos['margin_on_services'] += $pv - $pa;
-    $marginInfos['margin_on_services'] += $pv + $pa;
+  - Changement fichier /margin/lib/margin.lib.php, fonction getMarginInfosArray().
 
+        function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localtax2_tx, $fk_pa, $paht)
+     -> function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localtax2_tx, $fk_pa, $paht, $type, $type_avoir)
 
+        Ajouter les deux lignes suivantes en fin de fichier
+        if ($type == $type_avoir)
+            $paht_ret = -$paht_ret;

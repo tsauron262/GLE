@@ -135,6 +135,7 @@ if ($action == 'updateline' && ! $_POST["cancel"] && $user->rights->projet->cree
 	if (! $error)
 	{
 		$object->fetch($id, $ref);
+		$object->fetch_projet();
 
 		$object->timespent_id = $_POST["lineid"];
 		$object->timespent_note = $_POST["timespent_note_line"];
@@ -389,7 +390,7 @@ if ($id > 0 || ! empty($ref))
 			print '<td>'.$langs->trans("By").'</td>';
 			print '<td>'.$langs->trans("Note").'</td>';
 			print '<td>'.$langs->trans("Occupation").'</td>';
-			print '<td align="right" colspan="2">'.$langs->trans("NewTimeSpent").'</td>';
+			print '<td align="right" colspan="2">'.$langs->trans("TimeWorkload").'</td>';
 			print "</tr>\n";
 
 			print '<tr '.$bc[false].'>';
@@ -640,6 +641,7 @@ function traiteAction($object, $db, $actionStr = "insert"){
     if($actionStr != "suppr"){
         $action = new ActionComm($db);
         $action->userassigned = $object->timespent_fk_user;
+        $action->userownerid = $object->timespent_fk_user;
         $action->type_id = 1;
         $action->elementtype = "projet_task";
         $action->fk_element = $object->id;
@@ -649,7 +651,7 @@ function traiteAction($object, $db, $actionStr = "insert"){
         $action->label = "Tache : ".$object->label;
 
         $nbMinTot = $object->timespent_duration / 60;
-        $nbMinParJ = 7 * $object->occupation / 100* 60;
+        $nbMinParJ = 7.4 * $object->occupation / 100* 60;
         $nbMinPlan = 0;
 
         $dateDeb = $object->timespent_date;

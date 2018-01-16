@@ -154,8 +154,5 @@ function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localta
 	if ($pu_ht_remise != 0)
 		$marque_tx_ret = (100 * $marge) / $pu_ht_remise;
         
-        if ($type == $credit_type and isset($type))
-            $paht_ret = -$paht_ret;
-
 	return array($paht_ret, $marge_tx_ret, $marque_tx_ret);
 }

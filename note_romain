@@ -1,4 +1,4 @@
-Erreur : mauvais calcul des marges sur les factures avoir:
+Erreur : mauvais calcul des marges sur les factures avoir {
   - Changement fichier /compta/facture/class/facture.class.php, fonction getMarginInfosArray().
 
         $marginInfos = getMarginInfos($objp->subprice, $objp->remise_percent, $objp->tva_tx, $objp->localtax1_tx, $objp->localtax2_tx, $line->fk_fournprice, $objp->pa_ht);
@@ -7,8 +7,10 @@ Erreur : mauvais calcul des marges sur les factures avoir:
   - Changement fichier /margin/lib/margin.lib.php, fonction getMarginInfosArray().
 
         function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localtax2_tx, $fk_pa, $paht)
-     -> function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localtax2_tx, $fk_pa, $paht, $type, $type_avoir)
+     -> function getMarginInfos($pvht, $remise_percent, $tva_tx, $localtax1_tx, $localtax2_tx, $fk_pa, $paht, $type=null, $credit_type=null)
 
-        Ajouter les deux lignes suivantes en fin de fichier
-        if ($type == $type_avoir)
+
+        Ajouter les deux lignes suivantes en fin de fonction :
+        if ($type == $credit_type and isset($type))
             $paht_ret = -$paht_ret;
+}

@@ -108,7 +108,7 @@ if ($user->rights->contrat->creer) {
 
     print '<h5>Note</h5>';
 
-    print '<textarea id="noteP"></textarea><br>';
+    print '<textarea id="noteP">SN: </textarea><br>';
 
     print '<div class="buttonCustom">Valider</div>';
 

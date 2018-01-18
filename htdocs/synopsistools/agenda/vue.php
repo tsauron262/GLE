@@ -454,7 +454,7 @@ function printMenu($tabUser) {
     echo '</select>  ';
     echo "<script>" . $newJs . "</script>";
 
-    echo "<input id='clearAll' class='butActionDelete' style='width:40px' value='Vider'/>  ";
+    echo "<input id='clearAll' class='butActionDelete' type='button' value='Vider'/>  ";
 
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";

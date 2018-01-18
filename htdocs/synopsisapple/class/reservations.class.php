@@ -506,18 +506,22 @@ class Reservations
             $messageClient = "Bonjour,
 Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nous vous confirmons la prise en compte de votre réservation.
 Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre attention sur les points suivants :
--        Vous devez sauvegarder vos données car nous serons peut-être amenés à les effacer de votre appareil.
+- Vous devez sauvegarder vos données car nous serons peut-être amenés à les effacer de votre appareil.
 
--        Le délai de traitement des réparations est habituellement de 7 jours.
+- Le délai de traitement des réparations est habituellement de 7 jours.
 
- 
+
 Conditions particulières aux iPhones
- 
--        Vous devez désactiver la fonction « localiser mon iPhone » dans le menu iCloud de votre téléphone avec votre mot de passe iCloud.
 
--        Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.
+- !!!!! Programme Batterie : Nous proposons le changement de la batterie de votre iPhone suite à la campagne de rappel d’Apple au prix de 39,00€TTC. Notre stock étant très limité et l’approvisionnement de nouvelles batteries étant contraint, les délais peuvent varier pour atteindre une quinzaine de jours.
+pour les iPhone 6 et 6S plus. 
+Pour l’iPhone 6 plus, ce produit n’étant plus fabriqué, les batteries seront disponibles début avril. !!!!!
 
--        Les réparations d’écrans d’iPhones sont directement envoyées chez Apple pour calibrer correctement votre iPhone et nécessitent donc un délai moyen de 10 jours ouvrés.
+- Vous devez désactiver la fonction « localiser mon iPhone » dans le menu iCloud de votre téléphone avec votre mot de passe iCloud.
+
+- Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.
+
+- Les réparations d’écrans d’iPhones sont directement envoyées chez Apple pour calibrer correctement votre iPhone et nécessitent donc un délai moyen de 10 jours ouvrés.
 
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.

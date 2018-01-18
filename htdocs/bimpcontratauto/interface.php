@@ -17,7 +17,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'newContrat': {
-            $idNewContrat = $staticCA->createContrat(GETPOST('socid'), GETPOST('services'), GETPOST('dateDeb'), $user);
+            $idNewContrat = $staticCA->createContrat(GETPOST('socid'), GETPOST('services'), GETPOST('dateDeb'), GETPOST('note'), $user);
             echo json_encode($idNewContrat);
         }
     default: break;

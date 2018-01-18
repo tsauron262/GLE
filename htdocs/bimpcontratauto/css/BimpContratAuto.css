@@ -188,3 +188,9 @@ table {
     box-shadow: 0 0 8px rgba(81, 203, 238, 1);
     border: 1px solid rgba(81, 203, 238, 1);
 }
+
+#note {
+    border: 1px solid #4CAF50;
+    width: 800px;
+    height: 100px;
+}

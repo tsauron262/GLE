@@ -33,7 +33,7 @@ function getAllContrats() {
     });
 }
 
-function newContrat(services, dateDeb) {
+function newContrat(services, dateDeb, note) {
     socid = getUrlParameter('socid');
 
     $.ajax({
@@ -43,6 +43,7 @@ function newContrat(services, dateDeb) {
             socid: socid,
             services: services,
             dateDeb: dateDeb,
+            note: note,
             action: 'newContrat'
         },
         async: false,
@@ -142,9 +143,11 @@ function valider() {
     });
 
     var date = getDate();
+    var note = $('textarea#note').val();
+    console.log(note);
     if (date !== '') {      // if date is selected
         date /= 1000;
-        newContrat(services, date);
+        newContrat(services, date, note);
         sessionStorage.setItem('newContratId', newContratId);
         location.reload();
     } else {             // if no date is selected
@@ -209,11 +212,17 @@ function addContratAndServices(contrat, divIdToAppend, contratId, spaces) {
         initTable(contratId);
 
         for (var ind in contrat.services) {
-            printServiceDetails(contratId, contrat.services[ind], ind);
+            printServiceDetails(contratId, contrat.services[ind], ind, contrat.note, contrat.nbService);
         }
+
     } else {
+        if (contrat.note !== null) {
+            var text = "Il n'y a pas encore de services associés à ce contrat. Note : " + contrat.note;
+        } else {
+            var text = "Il n'y a pas encore de services associés à ce contrat.";
+        }
         $('<p></p>')
-                .text("Il n'y a pas encore de services associés à ce contrat")
+                .text(text)
                 .css('margin', '0px 0px 20px 20px')
                 .css('font-size', '14px')
                 .css('font-family', 'Times New Roman')
@@ -237,7 +246,7 @@ function initTable(contratId) {
             .attr('class', 'w3-light-grey')
             .appendTo('#' + contratId + 'thead');
 
-    var arrayOfField = ['Nom du service', 'Date de début', 'Date de fin', 'Durée (en mois)', 'Prix unitaire (en euros)', 'Prix total (en euros)'];
+    var arrayOfField = ['Nom du service', 'Date de début', 'Date de fin', 'Durée (en mois)', 'Prix unitaire (en euros)', 'Prix total (en euros)', 'Note'];
 
     arrayOfField.forEach(function (item) {
         $('<th></th>').text(item).appendTo('#' + contratId + 'trHead');
@@ -245,7 +254,7 @@ function initTable(contratId) {
 }
 
 /* Fill contrat array with its services */
-function printServiceDetails(contratId, service, indService) {
+function printServiceDetails(contratId, service, indService, note, nbService) {
     var arrayOfValue = [service.ref, service.dateDebutService, service.dateFinService, service.qty, service.prixUnitaire, service.prixTotal];
 
     $('<tr></tr>')
@@ -265,6 +274,12 @@ function printServiceDetails(contratId, service, indService) {
                 .text(item)
                 .appendTo('#' + contratId + 'tr' + indService);
     });
+    if (indService === '0') {
+        $('<td rowspan="' + nbService + '"></td>')
+                .text(note)
+                .appendTo('#' + contratId + 'tr' + indService);
+    }
+
 }
 
 /* Get the parameter sParam */

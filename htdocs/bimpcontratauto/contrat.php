@@ -106,6 +106,10 @@ if ($user->rights->contrat->creer) {
 
     print '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
 
+    print '<h5>Note</h5>';
+
+    print '<textarea id="note"></textarea><br>';
+
     print '<div class="buttonCustom">Valider</div>';
 
     print '</div>';

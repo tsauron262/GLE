@@ -37,8 +37,7 @@ require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class BimpContratAuto {
-    
-    /* 
+    /*
      * If you want to add a service for new contrat
      * modify the function static getTabService()
      */
@@ -102,12 +101,14 @@ class BimpContratAuto {
 
         $contrats = array();
         foreach ($dolContratObject as $contratObj) {
+            $note = dol_trunc($contratObj->note_public, 120);
             $contrats[$contratObj->id] = array(
                 'ref' => $contratObj->getNomUrl(1),
                 'id' => $contratObj->id,
                 'dateDebutContrat' => $contratObj->date_creation,
                 'nbService' => sizeof($contratObj->lines),
-                'statut' => $contratObj->statut);       // 1 -> open ; 0 -> closed
+                'statut' => $contratObj->statut,
+                'note' => $note);       // 1 -> open ; 0 -> closed
         }
         return $contrats;
     }
@@ -260,13 +261,14 @@ class BimpContratAuto {
      * @param type $dateDeb     date start contrat
      * @param type $user        the user who is creating the contrat
      */
-    function createContrat($socid, $services, $dateDeb, $user) {
+    function createContrat($socid, $services, $dateDeb, $note, $user) {
         $nContrat = new Contrat($this->db);
 
         $nContrat->date_contrat = convertirDate($dateDeb, false);   // translate date
         $nContrat->socid = $socid;
         $nContrat->commercial_suivi_id = $user->id;
         $nContrat->commercial_signature_id = $user->id;
+        $nContrat->note_public = $note;
         $nContrat->create($user);    // create contrat
 
         foreach ($services as $id => $service) {

@@ -201,7 +201,7 @@ function saveObjectfromFieldsTable(table_id, $button) {
             bimp_json_ajax('saveObject', data, $resultContainer, function () {
                 $button.removeClass('disabled');
                 $('body').trigger($.Event('objectChange', {
-                    module: $view.data('module'),
+                    module: $view.data('module_name'),
                     object_name: $view.data('object_name'),
                     id_object: $view.data('id_object')
                 }));

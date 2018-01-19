@@ -421,9 +421,9 @@ class BimpConfig
             }
         } elseif (is_array($field_value)) {
             $field_name = $this->get($path . '/field_name', null, true);
-            $instance = $this->get($path . '/instance', null, true, 'object');
-            if (!is_null($field_name) && !is_null($instance) && is_a($instance, 'BimpObject')) {
-                return $instance->getData[$field_name];
+            $object = $this->getObject($path . '/object');
+            if (!is_null($field_name) && !is_null($object) && is_a($object, 'BimpObject')) {
+                return $object->getData($field_name);
             }
         }
 
@@ -579,7 +579,7 @@ class BimpConfig
                 return null;
             }
 
-            $params = $this->get($path . '/params', array(), false, 'array');
+            $params = $this->getCompiledParams($path . '/params');
 
             if ($is_static) {
                 return forward_static_call_array(array(

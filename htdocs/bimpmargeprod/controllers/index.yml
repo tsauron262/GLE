@@ -14,6 +14,14 @@ objects:
         instance: 
             bimp_object: BMP_TypeMontant
             
+    total_inter:
+        instance: 
+            bimp_object: BMP_TotalInter
+            
+    calc_montant:
+        instance: 
+            bimp_object: BMP_CalcMontant
+            
 sections:
     - type: tabs
       tabs: 
@@ -28,11 +36,36 @@ sections:
         montants:
             label: Montants
             sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: categorie_montant
-                - type: list
-                  list: 
-                      panel: 1
-                      object: type_montant
+                - type: nav_tabs
+                  nav_tabs: 
+                      - id: categories
+                        title: Catégories
+                        struct:
+                            type: list
+                            list: 
+                                panel: 1
+                                object: categorie_montant
+                                
+                      - id: types_montants
+                        title: Types de montants
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: type_montant
+                                
+                      - id: totaux_inter
+                        title: Totaux intermédiaires
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: total_inter
+                    
+                      - id: calcs_montants
+                        title: Calculs auto
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: calc_montant

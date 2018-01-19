@@ -942,6 +942,14 @@ function setListEditInputsEvents($list) {
     if ($rows.length) {
         $rows.each(function () {
             var $row = $(this);
+            $row.find('.item_check').change(function () {
+                if ($(this).prop('checked')) {
+                    $row.addClass('selected');
+                } else {
+                    $row.removeClass('selected');
+                }
+            });
+
             $(this).find('.editInputContainer').each(function () {
                 var field_name = $(this).data('field_name');
                 if (field_name) {

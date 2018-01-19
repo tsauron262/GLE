@@ -43,6 +43,10 @@ fields:
         display: 
             type: nom
         sortable: 1
+        sort_options:
+            default:
+                label: Position
+                join_field: position
         search: 1
         
     id_event_coprod:
@@ -62,20 +66,32 @@ fields:
         type: percent
         sortable: 1
         search: 1
-        
+
+form: 
+    rows: 
+        - field: id_category_montant
+
 list:
     title: Parts Co-producteurs par défaut
-    checkboxes: 1
+    checkboxes: 
+        callback: isEventEditable
     bulk_actions:
         - label: supprimer les lignes sélectionnées
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: id
-    sort_way: desc
+    sort_col: category
+    sort_way: asc
     n: 25
-    add_object_row: 1
-    update_btn: 1
-    delete_btn: 1
+    update_btn: 
+        callback: isEventEditable
+    delete_btn: 
+        callback: isEventEditable
+    add_form: 
+        callback: getCreateForm
+    edit_btn: 
+        callback: isEventEditable
+    row_style: 
+            callback: getListRowStyle
     cols: 
         category:
             field: id_category_montant
@@ -83,4 +99,5 @@ list:
             field: id_event_coprod
         part:
             field: part
-            edit: 1
+            edit: 
+                callback: isEventEditable

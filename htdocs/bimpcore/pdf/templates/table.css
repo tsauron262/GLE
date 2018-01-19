@@ -1,0 +1,17 @@
+table {
+    border-left: solid black 1px;
+    border-right: solid black 1px;
+}
+
+table.header {
+    border: solid black 1px;
+    background-color: #F0F0F0;
+}
+
+table td {
+    border-right: solid black 1px;
+}
+
+table.row {
+    border-bottom: dotted black 1px;
+}

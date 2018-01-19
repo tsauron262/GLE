@@ -81,22 +81,22 @@ class BH_Ticket extends BimpObject
         return $update;
     }
 
-    public function onChildSave($child_object_name)
+    public function onChildSave(BimpObject $child)
     {
-        if ($child_object_name === 'BH_Inter') {
+        if ($child->object_name === 'BH_Inter') {
             if ($this->onInterUpdate()) {
                 $this->update();
             }
         }
     }
 
-    public function onChildDelete($child_object_name)
+    public function onChildDelete(BimpObject $child)
     {
         if (!isset($this->id) || !$this->id) {
             return;
         }
 
-        if ($child_object_name === 'BH_Inter') {
+        if ($child->object_name === 'BH_Inter') {
             if ($this->onInterUpdate()) {
                 $this->update();
             }

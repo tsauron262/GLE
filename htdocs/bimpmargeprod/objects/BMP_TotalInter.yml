@@ -1,0 +1,149 @@
+table: bmp_total_inter
+common_fields: 0
+
+labels:
+    name: Total intermédiaire
+    name_plur: Totaux intermédiaires
+
+objects: 
+    type_montant: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: BMP_TypeMontant
+    
+    categorie:
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: BMP_CategorieMontant
+            
+associations:
+    categories_frais_in:
+        object: categorie
+        display: 
+            default:
+                type: callback
+        label: Catégories à inclure (frais)
+        input: 
+            type: select
+            options: 
+                array: categories
+                
+    categories_recettes_in:
+        object: categorie
+        display: 
+            default:
+                type: callback
+        label: Catégories à inclure (recettes)
+        input: 
+            type: select
+            options: 
+                array: categories
+                
+    categories_frais_ex:
+        object: categorie
+        display: 
+            default:
+                type: callback
+        label: Catégories à exclure (frais)
+        input: 
+            type: select
+            options: 
+                array: categories
+                
+    categories_recettes_ex:
+        object: categorie
+        display: 
+            default:
+                type: callback
+        label: Catégories à exclure (recettes)
+        input: 
+            type: select
+            options: 
+                array: categories
+                
+    montants_in:
+        object: type_montant
+        display:
+            default:
+                type: callback
+                
+        label: Montants à inclure
+        input:
+            type: select
+            options:
+                array: types_montants
+                
+    montants_ex:
+        object: type_montant
+        display:
+            default:
+                type: callback
+                
+        label: Montants à exclure
+        input:
+            type: select
+            options:
+                array: types_montants
+
+fields:
+    name: 
+        label: Nom
+        type: string
+    
+    all_frais: 
+        label: Inclure tous les frais
+        type: bool
+        default_value: 0
+    
+    all_recettes: 
+        label: Inclure toutes les recettes
+        type: bool
+        default_value: 0
+        
+    display: 
+        label: Afficher dans le bilan
+        type: bool
+        default_value: 1
+        input: 
+            help: Ce total sera affiché dans le bilan à la place des montants inclus seulement si ceux-ci partagent le même code comptable
+        
+forms:
+    default: 
+        rows: 
+            - field: name
+            - field: display
+            - field: all_frais
+            - field: all_recettes
+            - association: categories_frais_in
+            - association: categories_recettes_in
+            - association: categories_frais_ex
+            - association: categories_recettes_ex
+            - association: montants_in
+            - association: montants_ex
+            
+lists:
+    default: 
+        title: Totaux intermédiaires
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_col: label
+        sort_way: asc
+        n: 25
+        delete_btn: 1
+        update_btn: 1
+        edit_btn: 1
+        add_form: default
+        edit_form: default
+        cols: 
+            label: 
+                field: name
+            source:
+                field: display
+                edit: 1
+    
+            

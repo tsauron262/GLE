@@ -1,5 +1,7 @@
 table: bmp_categorie_montant
 common_fields: 0
+positions: 1
+position_insert: before
 
 labels:
     name: catégorie de montants
@@ -13,6 +15,11 @@ fields:
         sortable: 1
         search: 1
         
+    color: 
+        label: Couleur
+        type: color
+        default_value: 4b4b4b
+    
 list:
     checkboxes: 1
     bulk_actions:
@@ -28,4 +35,7 @@ list:
     cols: 
         name: 
             field: name
+            edit: 1
+        color: 
+            field: color
             edit: 1

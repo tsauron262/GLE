@@ -102,8 +102,6 @@ class BimpForm
 
     public function render()
     {
-//        $this->object = new BimpObject();
-
         $html = '';
 
         if (count($this->errors)) {
@@ -141,7 +139,7 @@ class BimpForm
         if (!is_null($this->form_path) && $this->form_path) {
             $rows = $this->object->getCurrentConf('rows', array(), true, 'array');
             foreach ($rows as $idx => $row) {
-                $html .= $this->renderFormRow($this->form_path . '/rows/' . $idx);
+                    $html .= $this->renderFormRow($this->form_path . '/rows/' . $idx);
             }
         } else {
             $fields = $this->object->getConf('fields', array(), true, 'array');
@@ -163,6 +161,11 @@ class BimpForm
 
     public function renderFormRow($row_path, $identifier = '', $label_cols = 3)
     {
+        $show = (int) $this->object->getConf($row_path.'/show', true, false, 'bool');
+        
+        if (!$show) {
+            return '';
+        }
         $item_path = '';
         $row_type = 'field';
 
@@ -176,8 +179,10 @@ class BimpForm
             }
         }
 
-        if ($this->object->config->isDefined($row_type . 's/' . $identifier)) {
+        if ($identifier && $this->object->config->isDefined($row_type . 's/' . $identifier)) {
             $item_path = $row_type . 's/' . $identifier;
+        } else {
+            $item_path = $row_path;
         }
 
         $parent_id_property = $this->object->getParentIdProperty();
@@ -271,7 +276,7 @@ class BimpForm
         $html = '';
 
         $multiple = (bool) $this->object->getConf($conf_path . '/input/multiple', false, false, 'bool');
-        $depends_on = (bool) $this->object->getConf($conf_path . '/depends_on', '', false);
+        $depends_on = (bool) $this->object->getConf($conf_path . '/depends_on', '');
 
         $html .= '<div id="' . $this->form_identifier . '_' . $identifier . '" class="inputContainer customField"';
         $html .= ' data-field_name="' . $identifier . '" ';
@@ -284,6 +289,7 @@ class BimpForm
             $html .= $this->renderDependsOnScript($identifier, $conf_path . '/depends_on');
         }
         $html .= '</div>';
+
         return $html;
     }
 
@@ -319,7 +325,8 @@ class BimpForm
             if ($type === 'search_list') {
                 $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $association, $field_name, '');
             } else {
-                $html .= BimpInput::renderInput($type, $field_name, '', array(), null, null, $this->form_identifier . '_' . $association);
+                $html .= self::renderInput($this->object, $input_path, $field_name, null, $this->id_parent);
+//                $html .= self::renderInput($this->object, $field_name, '', array(), null, null, $this->form_identifier . '_' . $association);
             }
 
             $items = array();
@@ -393,7 +400,7 @@ class BimpForm
         if ($input_name) {
             $html .= ' data-input_name="' . $input_name . '"';
 
-            $show_values = $object->getConf($path . '/show_values', null, false, 'array');
+            $show_values = $object->getConf($path . '/show_values', null, false, 'any');
 
             if (!is_null($show_values)) {
                 if (is_array($show_values)) {
@@ -402,7 +409,7 @@ class BimpForm
                 $html .= ' data-show_values="' . str_replace('"', "'", $show_values) . '"';
             }
 
-            $hide_values = $object->getConf($path . '/hide_values', null, false, 'array');
+            $hide_values = $object->getConf($path . '/hide_values', null, false, 'any');
 
             if (!is_null($hide_values)) {
                 if (is_array($hide_values)) {
@@ -459,6 +466,7 @@ class BimpForm
                     case 'string':
                     case 'percent':
                     case 'money':
+                    case 'color':
                         $type = 'text';
                         break;
 

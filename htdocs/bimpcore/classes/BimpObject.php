@@ -247,6 +247,11 @@ class BimpObject
 
     // Gestion des données:
 
+    public function isLoaded()
+    {
+        return (isset($this->id) && $this->id);
+    }
+
     public function getData($field)
     {
         if (isset($this->data[$field])) {
@@ -257,6 +262,18 @@ class BimpObject
             return $this->getConf('fields/' . $field . '/default_value');
         }
         return null;
+    }
+
+    public function getSavedData($field, $id_object = null)
+    {
+        if (is_null($id_object)) {
+            if ($this->isLoaded()) {
+                $id_object = $this->id;
+            } else {
+                return null;
+            }
+        }
+        return $this->db->getValue($this->getTable(), $field, '`id` = ' . (int) $id_object);
     }
 
     public function set($field, $value)
@@ -765,8 +782,7 @@ class BimpObject
                             $check = true;
                         }
                     } else {
-                        $html .= $array[$value];
-                        $check = true;
+                        return $array[$value];
                     }
                 }
 
@@ -803,10 +819,17 @@ class BimpObject
                 } else {
                     $currency = 'EUR';
                 }
-                return $value . ' ' . BimpTools::getCurrencyHtml($currency);
+                return BimpTools::displayMoneyValue($value, $currency);
 
             case 'percent':
                 return $value . ' %';
+
+            case 'callback':
+                $method = $this->getConf($display_path . '/method', '', true);
+                if (method_exists($this, $method)) {
+                    $html = $this->{$method}($value);
+                }
+                break;
 
             case 'string':
             default:
@@ -976,7 +999,6 @@ class BimpObject
                 $this->setAssociatesList($asso_name, BimpTools::getValue($asso_name));
             }
         }
-
         $this->config->setCurrentPath($prev_path);
         return $errors;
     }
@@ -1192,7 +1214,7 @@ class BimpObject
                 $parent = $this->getParentInstance();
                 if (!is_null($parent)) {
                     if (method_exists($parent, 'onChildSave')) {
-                        $parent->onChildSave($this->object_name);
+                        $parent->onChildSave($this);
                     }
                 }
             } else {
@@ -1256,7 +1278,7 @@ class BimpObject
         $parent = $this->getParentInstance();
         if (!is_null($parent)) {
             if (method_exists($parent, 'onChildSave')) {
-                $parent->onChildSave($this->object_name);
+                $parent->onChildSave($this);
             }
         }
         return $errors;
@@ -1533,7 +1555,7 @@ class BimpObject
             $parent = $this->getParentInstance();
             if (!is_null($parent)) {
                 if (method_exists($parent, 'onChildDelete')) {
-                    $parent->onChildDelete($this->object_name);
+                    $parent->onChildDelete($this);
                 }
             }
         }
@@ -1719,9 +1741,12 @@ class BimpObject
         return $view->render($panel);
     }
 
-    public function renderList($list_name = 'default', $panel = false, $title = null, $icon = null)
+    public function renderList($list_name = 'default', $panel = false, $title = null, $icon = null, $filters = array())
     {
         $list = new BimpList($this, $list_name, null, $title, $icon);
+        foreach ($filters as $field_name => $value) {
+            $list->addFieldFilterValue($field_name, $value);
+        }
         return $list->render($panel);
     }
 

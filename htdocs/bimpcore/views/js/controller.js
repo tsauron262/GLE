@@ -33,3 +33,53 @@ function loadTabContent(url, tab_name) {
         });
     }
 }
+
+function onUrlHashChange(newUrl) {
+    if (/#(.+)$/.test(newUrl)) {
+        var tab_name = newUrl.replace(/^(.*)#(.*)$/, '$2');
+        newUrl = newUrl.replace(/^(.*)#(.*)$/, '$1');
+        if (/tab=/.test(newUrl)) {
+            newUrl = newUrl.replace(/^(.*tab=)[^&]*(.*)$/, '$1' + tab_name + '$2');
+        } else {
+            if (/\?/.test(newUrl)) {
+                newUrl += '&';
+            } else {
+                newUrl += '?';
+            }
+            newUrl += 'tab=' + tab_name;
+        }
+        loadTabContent(newUrl, tab_name);
+    }
+}
+
+$(document).ready(function () {
+    $('div.tabs').find('a.tab').click(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var href = $(this).attr('href');
+        if (/#(.+)$/.test(href)) {
+            var tab_name = href.replace(/^(.*)#(.*)$/, '$2');
+            if (window.location.hash === '#' + tab_name) {
+                onUrlHashChange(window.location.toString());
+            } else {
+                window.location.hash = tab_name;
+            }
+        } else {
+            window.location = href;
+        }
+    });
+
+    var url = window.location.toString();
+
+    if (/#(.+)$/.test(url)) {
+        var tab = getUrlParam('tab');
+        if (!tab || (('#' + tab) !== window.location.hash)) {
+            onUrlHashChange(url);
+        }
+    }
+
+    window.onhashchange = function (e) {
+        onUrlHashChange(e.newURL);
+    };
+});

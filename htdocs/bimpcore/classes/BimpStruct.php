@@ -9,6 +9,12 @@ class BimpStruct
         $prev_path = $config->current_path;
         $config->setCurrentPath($path);
         $type = $config->get($path . '/type', '', true);
+        $show = (int) $config->get($path.'/show', 1, false, 'bool');
+        
+        if (!$show) {
+            return '';
+        }
+        
         switch ($type) {
             case 'view':
                 if ($config->isDefined($path . '/view')) {
@@ -61,6 +67,14 @@ class BimpStruct
             case 'rows':
                 if ($config->isDefined($path . '/rows')) {
                     $html = self::renderRows($config, $path . '/rows');
+                } else {
+                    // logError
+                }
+                break;
+
+            case 'nav_tabs':
+                if ($config->isDefined($path . '/nav_tabs')) {
+                    $html = self::renderNavTabs($config, $path . '/nav_tabs');
                 } else {
                     // logError
                 }
@@ -151,7 +165,8 @@ class BimpStruct
             } elseif (!is_null($association)) {
                 $html = $object->renderAssociatesList($association, $name, $panel, $title, $icon);
             } else {
-                $html = $object->renderList($name, $panel, $title, $icon);
+                $filters = $config->getFromCurrentPath('filters', array(), false, 'array');
+                $html = $object->renderList($name, $panel, $title, $icon, $filters);
             }
         }
 
@@ -439,6 +454,26 @@ class BimpStruct
         }
         $config->setCurrentPath($prev_path);
         return $html;
+    }
+
+    public static function renderNavTabs(BimpConfig $config, $path)
+    {
+        $tabs = array();
+        $nav_tabs = $config->getParams($path);
+        foreach ($nav_tabs as $idx => $nav_tab) {
+            $content = '';
+            if ($config->isDefined($path . '/' . $idx . '/struct')) {
+                $content = self::renderStruct($config, $path . '/' . $idx . '/struct');
+            } elseif ($config->isDefined($path . '/' . $idx . '/content')) {
+                $content = $config->get($path . '/' . $idx . '/content');
+            }
+            $tabs[] = array(
+                'id'      => $config->get($path . '/' . $idx . '/id', '', true),
+                'title'   => $config->get($path . '/' . $idx . '/title', '', true),
+                'content' => $content
+            );
+        }
+        return BimpRender::renderNavTabs($tabs);
     }
 
     public static function renderPanel(BimpConfig $config, $path)

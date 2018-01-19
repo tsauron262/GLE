@@ -66,7 +66,7 @@ fields:
         search: 1
             
     required: 
-        label: Obligatoire
+        label: Par défaut
         type: bool
         default_value: 0
         sortable: 1
@@ -85,6 +85,13 @@ fields:
         default_value: 0
         sortable: 1
         search: 1
+        
+    coprod:
+        label: Co-producteurs
+        type: bool
+        default_value: 1
+        sortable: 1
+        search: 1
                 
 list:
     checkboxes: 1
@@ -92,8 +99,8 @@ list:
         - label: supprimer les type de montant sélectionnés
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: name
-    sort_way: asc
+    sort_col: category
+    sort_way: desc
     n: 25
     add_form: default
     update_btn: 1
@@ -122,4 +129,7 @@ list:
             edit: 1
         details: 
             field: has_details
+            edit: 1
+        coprod:
+            field: coprod
             edit: 1

@@ -71,7 +71,9 @@ fields:
             
 list:
     title: Vente de billets
-    checkboxes: 1
+    checkboxes: 
+        callback: isEventEditable
+    objects_change_reload: BMP_Tarif
     bulk_actions:
         - label: supprimer les lignes sélectionnées
           icon: trash
@@ -79,9 +81,14 @@ list:
     sort_col: id
     sort_way: desc
     n: 25
-    update_btn: 1
-    add_form: default
-    delete_btn: 1
+    update_btn: 
+        callback: isEventEditable
+    add_form: 
+        callback: getCreateForm
+    edit_btn: 
+        callback: isEventEditable
+    delete_btn: 
+        callback: isEventEditable
     cols: 
         seller:
             label: Vendeur
@@ -93,5 +100,15 @@ list:
                 callback: displayTarif
         quantity: 
             field: quantity
-            edit: 1
+            edit: 
+                callback: isEventEditable
             history: 1
+            width: 120px
+        total_ttc: 
+            label: Total TTC
+            value:
+                callback: displayTotalTTC
+        total_ht: 
+            label: Total HT
+            value:
+                callback: displayTotalHT

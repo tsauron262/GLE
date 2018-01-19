@@ -157,7 +157,7 @@ function bimp_display_result_success(result, $container) {
 
 // Notifications
 
-function bimp_show_msg(msg, className) {
+function bimp_msg(msg, className, $container) {
     if (typeof (className) === 'undefined') {
         className = 'info';
     }
@@ -165,24 +165,37 @@ function bimp_show_msg(msg, className) {
     html += msg;
     html += '</p>';
 
-    var $container = $('#page_notifications');
-    $container.append(html).show();
+    if ((typeof ($container) !== 'undefined') && $container && $container.length) {
+        $container.html(html).stop().slideDown(250);
+    } else {
+        $container = $('#page_notifications');
 
-    var $p = $container.find('p:last-child').css('margin-left', '370px').animate({
-        'margin-left': 0
-    }, {
-        'duration': 250,
-        complete: function () {
-            setTimeout(function () {
-                $p.fadeOut(500, function () {
-                    $p.remove();
-                    if (!$container.find('p').length) {
-                        $container.hide();
-                    }
-                });
-            }, 5000);
+        if (!$container.length) {
+            return;
         }
-    });
+
+        $container.append(html).show();
+
+        var $p = $container.find('p:last-child').css('margin-left', '370px').animate({
+            'margin-left': 0
+        }, {
+            'duration': 250,
+            complete: function () {
+                setTimeout(function () {
+                    $p.fadeOut(500, function () {
+                        $p.remove();
+                        if (!$container.find('p').length) {
+                            $container.hide();
+                        }
+                    });
+                }, 5000);
+            }
+        });
+    }
+}
+
+function bimp_show_msg(msg, className) {
+    bimp_msg(msg, className);
 }
 
 function bimp_display_element_popover($element, content, side) {
@@ -573,6 +586,21 @@ function lisibilite_nombre(nbr)
     }
 })();
 
+// Divers:
+
+function getUrlParam(param) {
+    var search = window.location.search.replace('?', '');
+    var args = search.split('&');
+    var value = '';
+    for (i in args) {
+        var regex = new RegExp('^' + param + '=(.*)$');
+        if (regex.test(args[i])) {
+            value = args[i].replace(regex, '$1');
+        }
+    }
+    return value;
+}
+
 // Ajouts jQuery:
 
 $.fn.tagName = function () {
@@ -581,4 +609,6 @@ $.fn.tagName = function () {
 
 $(document).ready(function () {
     $('body').append('<div id="page_notifications"></div>');
+
+
 });

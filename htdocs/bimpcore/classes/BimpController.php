@@ -103,9 +103,11 @@ class BimpController
 
             BimpCore::displayHeaderFiles();
 
+            $id_object = BimpTools::getValue('id');
+
             echo '<script type="text/javascript">';
             echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
-            echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . '\';';
+            echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
             echo '</script>';
 
             foreach ($this->cssFiles as $css_file) {
@@ -217,6 +219,13 @@ class BimpController
 
         foreach ($tabs as $tab_name => $params) {
             $this->config->setCurrentPath($section_path . '/tabs/' . $tab_name);
+            $show = (int) $this->getCurrentConf('show', 1, false, 'bool');
+            if (!$show) {
+                if ($this->current_tab === $tab_name) {
+                    $this->current_tab = 'default';
+                }
+                continue;
+            }
             $url = '';
             $controller = '';
             if (isset($params['url'])) {
@@ -249,7 +258,7 @@ class BimpController
             }
 
             if ($controller && ($controller === $this->controller)) {
-                $href = 'javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
+                $href = $url . '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
                 $head[$h][0] = $href;
             } else {
                 $head[$h][0] = $url;

@@ -48,7 +48,8 @@ fields:
         
 list:
     title: Co-producteurs
-    checkboxes: 1
+    checkboxes: 
+        callback: isEventEditable
     bulk_actions:
         - label: supprimer les Co-producteurs sélectionnés
           icon: trash
@@ -56,13 +57,19 @@ list:
     sort_col: id
     sort_way: desc
     n: 25
-    add_object_row: 1
-    update_btn: 1
-    delete_btn: 1
+    add_object_row: 
+        callback: isEventEditable
+    update_btn: 
+        callback: isEventEditable
+    delete_btn: 
+        callback: isEventEditable
+    edit_btn: 
+        callback: isEventEditable
     cols: 
         societe:
             field: id_soc
             display: nom_url
         part: 
             field: default_part
-            edit: 1
+            edit:
+                callback: isEventEditable

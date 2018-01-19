@@ -1,0 +1,106 @@
+table: bmp_event_calc_montant
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: calcul automatique
+    names_plur: calculs automatiques
+    
+objects: 
+    calc_montant:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BMP_CalcMontant
+            id_object: 
+                field_value: id_calc_montant
+            
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+    
+    id_calc_montant: 
+        label: Type de calcul automatique
+        type: id_object
+        object: calc_montant
+        values: 
+            array: calcs_montants
+        display: 
+            type: nom
+        search: 0
+            
+    percent:
+        label: Pourcentage
+        type: percent
+        decimals: 6
+        search: 0
+        required: 1
+        default_value: 
+            callback: getDefaultPercent
+            
+    source_amount:
+        label: Montant Source fixe
+        type: money
+        required: 0
+        default_value: 0
+        input: 
+            type: hidden
+        
+    active: 
+        label: Activé pour cet événement
+        type: bool
+        default_value: 1
+        search: 0
+
+forms: 
+    default: 
+        rows:
+            - field: id_calc_montant
+            - field: active
+
+lists:
+    default: 
+        title: Calculs automatiques de l'événement
+        checkboxes: 
+            callback: isEventEditable
+        item_checkbox: 
+            callback: isDeletable
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_col: id
+        sort_way: desc
+        n: 25
+        update_btn: 
+            callback: isEventEditable
+        add_form: 
+            callback: getCreateFormDisplay
+        delete_btn: 
+            callback: isDeletable
+        cols: 
+            desc:
+                label: Description
+                value: 
+                    callback: displayName
+            source: 
+                label: Source
+                value: 
+                    callback: displaySource
+            target: 
+                label: Cible
+                value: 
+                    callback: displayTarget
+            percent: 
+                field: percent
+                edit: 
+                    callback: isEditable
+            active:
+                field: active
+                edit: 
+                    callback: isEventEditable
+                    
+                    

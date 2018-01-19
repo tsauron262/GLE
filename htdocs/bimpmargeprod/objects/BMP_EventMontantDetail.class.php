@@ -1,6 +1,12 @@
 <?php
 
 class BMP_EventMontantDetail extends BimpObject {
+     public function isEditable()
+     {
+         $montant = $this->getParentInstance();
+         return $montant->isEventEditable();
+     }
+     
      public function getTotal()
      {
          $qty = (int) $this->getData('quantity');

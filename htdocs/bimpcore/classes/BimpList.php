@@ -14,7 +14,6 @@ class BimpList
     public $checkboxes = false;
     public $search = false;
     public $addobjectRow = false;
-    
     public $use_positions = false;
     public $sort_col = null;
     public $sort_way = 'desc';
@@ -235,7 +234,6 @@ class BimpList
                 $this->filters[$name]['and'][] = $filter;
             }
         } else {
-//            echo 'la'; exit;
             $this->filters[$name] = $filter;
         }
     }
@@ -260,13 +258,19 @@ class BimpList
 //            }
 //        }
 
-        $this->cols = $this->object->getCurrentConf('cols', array(), true, 'array');
+        $cols = $this->object->getCurrentConf('cols', array(), true, 'array');
+        
+        foreach ($cols as $col_name => $params) {
+            $show = (int) $this->object->getCurrentConf('cols/'.$col_name.'/show', 1, false, 'bool');
+            if ($show) {
+                $this->cols[$col_name] = $params;
+            }
+        }
 
         if ($this->object->config->isDefined($this->list_path . '/extra_cols')) {
             $new_cols = $this->object->getCurrentConf('extra_cols', array(), true, 'array');
             $this->cols = array_merge($this->cols, $new_cols);
             $this->object->config->addParams($this->list_path . '/cols', $new_cols);
-            $params = $this->object->config->getParams($this->list_path . '/cols');
         }
 
         $this->object->config->setCurrentPath($prev_path);
@@ -284,6 +288,11 @@ class BimpList
 
         if (BimpTools::isSubmit('list_filters')) {
             $this->list_filters = json_decode(BimpTools::getValue('list_filters'), true);
+        } else {
+            $filters = $this->object->config->getCompiledParams($this->list_path . '/filters', array(), false, 'array');
+            foreach ($filters as $name => $value) {
+                $this->addFieldFilterValue($name, $value);
+            }
         }
         if (BimpTools::isSubmit('associations_filters')) {
             $this->association_filters = json_decode(BimpTools::getValue('associations_filters'), true);
@@ -418,6 +427,10 @@ class BimpList
         $this->items = $this->object->getList($filters, $this->n, $this->p, $order_by, $this->sort_way, 'array', array(
             $primary
                 ), $joins);
+
+        if (method_exists($this->object, 'listItemsOverride')) {
+            $this->object->listItemsOverride($this->list_name, $this->items);
+        }
     }
 
     protected function fetchRows()
@@ -448,6 +461,10 @@ class BimpList
                 foreach ($this->cols as $col_name => $params) {
                     $content = '';
                     if ($this->setConfPath('cols/' . $col_name)) {
+                        $show = (bool) $this->object->getCurrentConf('show', true, false, 'bool');
+                        if (!$show) {
+                            continue;
+                        }
                         $field = $this->object->getCurrentConf('field', '');
                         $edit = (int) $this->object->getCurrentConf('edit', 0, false, 'bool');
                         $history = (int) $this->object->getCurrentConf('history', 0, false, 'bool');
@@ -465,11 +482,18 @@ class BimpList
                                 $new_value = $value;
                             }
                             $input_id = $this->object->object_name . '_' . $item[$primary] . '_' . $field;
-                            $input = '<div class="editInputContainer" data-field_name="' . $field . '">';
+                            $input = '<div class="editInputContainer" data-field_name="' . $field . '"';
+                            if ($history_html) {
+                                $input .= ' style="padding-right: 32px;"';
+                            }
+                            $input .= '>';
                             $input .= '<input type="hidden" name="' . $field . '_initial_value" value="' . $value . '"/>';
                             $input .= BimpForm::renderInput($this->object, 'fields/' . $field, $field, $new_value, $this->id_parent, null, null, $input_id);
-                            $input .= '</div>';
+                            $input .= '<div style="float: right; margin-right: -28px; margin-top: 4px">';
                             $input .= $history_html;
+                            $input .= '</div>';
+                            $input .= '</div>';
+
                             $row[$col_name] = $input;
                             continue;
                         }
@@ -499,8 +523,15 @@ class BimpList
             }
         }
 
+        if (!is_null($this->id_parent)) {
+            $this->object->setIdParent($this->id_parent);
+        }
+
         $this->setConfPath();
         $this->rows = $rows;
+        if (method_exists($this->object, 'listRowsOverride')) {
+            $this->object->listRowsOverride($this->list_name, $this->rows);
+        }
     }
 
     public function render($panel = true)
@@ -594,18 +625,20 @@ class BimpList
         );
 
         if (!is_null($this->addForm)) {
-            $form_name = (isset($this->addForm['name']) ? $this->addForm['name'] : 'default');
-            $params['header_buttons'] = array(
-                array(
-                    'classes'     => array('btn', 'btn-default'),
-                    'label'       => $this->object->getConf($this->list_path . '/add_btn_label', 'Ajouter ' . $this->object->getLabel('a')),
-                    'icon_before' => 'plus-circle',
-                    'attr'        => array(
-                        'type'    => 'button',
-                        'onclick' => 'loadModalFormFromList(\'' . $this->listIdentifier . '\', \'' . $form_name . '\', $(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ')'
+            $form_name = (isset($this->addForm['name']) ? $this->addForm['name'] : '');
+            if ($form_name) {
+                $params['header_buttons'] = array(
+                    array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => $this->object->getConf($this->list_path . '/add_btn_label', 'Ajouter ' . $this->object->getLabel('a')),
+                        'icon_before' => 'plus-circle',
+                        'attr'        => array(
+                            'type'    => 'button',
+                            'onclick' => 'loadModalFormFromList(\'' . $this->listIdentifier . '\', \'' . $form_name . '\', $(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ')'
+                        )
                     )
-                )
-            );
+                );
+            }
         }
 
         $html .= BimpRender::renderPanel($this->title, $content, $footer, $params);
@@ -625,7 +658,7 @@ class BimpList
 
             $html .= '<tr class="headerRow">';
 
-            $html .= '<th width="5%" style="text-align: center">';
+            $html .= '<th width="40px" style="text-align: center">';
             if ($this->checkboxes) {
                 $html .= '<input type="checkbox" id="' . $this->listIdentifier . '_checkall" onchange="toggleCheckAll(\'' . $this->listIdentifier . '\', $(this));"/>';
             }
@@ -643,7 +676,7 @@ class BimpList
 
                     $field = $this->object->getCurrentConf('field', '');
                     $label = $this->object->getCurrentConf('label', $field ? $this->object->config->get('fields/' . $field . '/label', ucfirst($col_name)) : ucfirst($col_name));
-                    $sortable = ($field ? $this->object->getConf('fields/' . $field . '/sortable', in_array($field, BimpObject::$common_fields), false, 'bool') : false);
+                    $sortable = ($field ? $this->object->getConf('fields/' . $field . '/sortable', 1, false, 'bool') : false);
 
                     $html .= '<th';
                     if (!is_null($width)) {
@@ -678,8 +711,11 @@ class BimpList
                     }
                     $html .= '</th>';
 
-                    if ($field && $this->object->config->isDefined('fields/' . $field . '/search')) {
-                        $this->search = true;
+                    if ($field) {
+                        $search = $this->object->getConf('fields/' . $field . '/search', 1, false, 'any');
+                        if (is_array($search) || (int) $search) {
+                            $this->search = true;
+                        }
                     }
                 }
             }
@@ -697,11 +733,13 @@ class BimpList
             if ($this->use_positions) {
                 $html .= '<span class="headerButton activatePositionsButton open-close action-open"></span>';
             }
-            $html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
-            $html .= ' data-popup_id="' . $this->listIdentifier . '_bulkActionsPopup"></span>';
+            if ($this->checkboxes) {
+                $html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
+                $html .= ' data-popup_id="' . $this->listIdentifier . '_bulkActionsPopup"></span>';
+                $html .= $this->renderBulkActionsPopup();
+            }
             $html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
             $html .= ' data-popup_id="' . $this->listIdentifier . '_parametersPopup"></span>';
-            $html .= $this->renderBulkActionsPopup();
             $html .= $this->renderParametersPopup();
             $html .= '</div>';
             $html .= '</th>';
@@ -740,12 +778,12 @@ class BimpList
             if ($this->setConfPath('cols/' . $col_name)) {
                 $field = $this->object->getCurrentConf('field', '');
                 $html .= '<td>';
-                if ($field && $this->object->config->isDefined('fields/' . $field . '/search')) {
-                    $search = $this->object->getConf('fields/' . $field . '/search', true, false, 'any');
+                if ($field) {
+                    $search = $this->object->getConf('fields/' . $field . '/search', 1, false, 'any');
                     if ($search != '0') {
                         $search_type = $this->object->getConf('fields/' . $field . '/search/type', 'field_input');
-                        $searchOnKeyUp = $this->object->getConf('fields/' . $field . '/search/search_on_key_up', 0);
-                        $minChars = $this->object->getConf('fields/' . $field . '/search/min_chars', 0);
+                        $searchOnKeyUp = (int) $this->object->getConf('fields/' . $field . '/search/search_on_key_up', 0, false, 'bool');
+                        $minChars = (int) $this->object->getConf('fields/' . $field . '/search/min_chars', 0, false, 'int');
                         $data_type = $this->object->getConf('fields/' . $field . '/type', '');
                         $html .= '<div class="searchInputContainer"';
                         $html .= ' data-field_name="search_' . $field . '"';
@@ -755,7 +793,6 @@ class BimpList
                         $html .= '>';
 
                         $input_id = $this->object->object_name . '_search_' . $field;
-
 
                         switch ($search_type) {
                             case 'field_input':
@@ -931,7 +968,8 @@ class BimpList
     public function renderBulkActions()
     {
         $html = '';
-        if (count($this->bulk_actions)) {
+
+        if (count($this->bulk_actions) && $this->checkboxes) {
             $buttons = array();
 
             foreach ($this->bulk_actions as $idx => $action_params) {
@@ -1131,7 +1169,10 @@ class BimpList
         if (count($this->rows)) {
             foreach ($this->rows as $id_object => $row) {
                 $this->object->reset();
-                $this->object->fetch($id_object);
+
+                if (is_numeric($id_object)) {
+                    $this->object->fetch((int) $id_object);
+                }
 
                 $update_btn = (int) $this->object->getCurrentConf('update_btn', 0, false, 'bool');
                 $edit_btn = (int) $this->object->getCurrentConf('edit_btn', 0, false, 'bool');
@@ -1139,6 +1180,11 @@ class BimpList
                 $delete_btn = (int) $this->object->getCurrentConf('delete_btn', 0, false, 'bool');
                 $view_btn = (int) $this->object->getCurrentConf('view_btn', 0, false, 'bool');
                 $extra_buttons = $this->object->config->getCompiledParamsfromCurrentPath('extra_buttons');
+                if (isset($row['row_style'])) {
+                    $row_style = $row['row_style'];
+                } else {
+                    $row_style = $this->object->getCurrentConf('row_style');
+                }
 
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow';
                 if (isset($this->new_values[(int) $id_object]) && count($this->new_values[(int) $id_object])) {
@@ -1148,6 +1194,9 @@ class BimpList
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->use_positions) {
                     $html .= ' data-position="' . $row['position'] . '"';
+                }
+                if (!is_null($row_style)) {
+                    $html .= ' style="' . $row_style . '"';
                 }
                 $html .= '>';
 

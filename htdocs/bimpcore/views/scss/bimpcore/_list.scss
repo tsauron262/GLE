@@ -12,16 +12,101 @@
             font-weight: bold;
         }
 
+        & > tbody > tr.objectListItemRow {
+            @include transition(all 0.3s ease);
+
+            background-color: #fff!important;
+            & > td {
+                background-color: #fff!important;
+            }
+
+            &.selected {
+                background-color: #FFF5E1!important;
+
+                & > td {
+                    background-color: #FFF5E1!important;
+                }
+            }
+            
+            &.modified  {
+                background-color: #E1F5FF!important;
+                border-color: #E1F5FF!important;
+
+                & > td {
+                    background-color: #E1F5FF!important;
+                    border-color: #E1F5FF!important;
+
+                    .editInputContainer .modified {
+                        box-shadow: 0 0 3px #003550!important;
+                    }
+                }
+            }
+
+            &:hover {
+                background-color: #FAFAFA!important;
+                
+                & > td {
+                    background-color: #FAFAFA!important;
+                }
+            }
+
+            &.selected:hover {
+                background-color: #FFEFCD!important;
+                
+                & > td {
+                    background-color: #FFEFCD!important;
+                }
+            }
+            
+            &.modified:hover {
+                background-color: #CDEFFF!important;
+                
+                & > td {
+                    background-color: #CDEFFF!important;
+                }
+            }
+        }
+
         td {
             padding: 5px 6px;
 
             .editInputContainer {
                 display: inline-block;
                 width: 100%;
-                
+
                 input, textarea, select {
                     width: 100%;
+                    color: $input-color;
+                    font-weight: normal;
                 }
+
+                .inputHelp {
+                    display: none;
+                }
+            }
+
+            .popover {
+                color: $gray-darker;
+            }
+        }
+
+        .objectSubList {
+            width: 100%;
+            & > thead > tr > th {
+                padding: 4px 10px;
+                margin-bottom: 4px;
+                color: $gray-darker;
+                background-color: $gray-lighter;
+                text-align: left;
+                font-weight: bold;
+                border-bottom: 1px solid $primary;
+            }
+
+            td {
+                padding: 4px 10px;
+                border-bottom: 1px solid $gray-light;
+                background-color: #fff;
+                color: $gray-dark;
             }
         }
     }
@@ -193,6 +278,7 @@
         display: inline-block;
         margin: 0 1px;
         font-size: 16px;
+        font-weight: normal;
 
         transition: all 0.3s ease;
         -webkit-transition: all 0.3s ease;
@@ -243,19 +329,6 @@
 
     tbody td.positionHandle {
         cursor: grab;
-    }
-
-    tbody tr.modified  {
-        border-color: #E1F5FF!important;
-
-        > td {
-            border-color: #E1F5FF!important;
-            background-color: #E1F5FF;
-
-            .editInputContainer .modified {
-                box-shadow: 0 0 3px #003550;
-            }
-        }
     }
 }
 .ajaxResultContainer {

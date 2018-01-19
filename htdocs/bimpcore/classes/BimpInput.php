@@ -608,6 +608,11 @@ class BimpInput
         $html .= '<table>';
         $html .= '<thead></thead>';
         $html .= '<tbody>';
+
+        $html .= '<tr style="display: none">';
+        $html .= '<td><input type="hidden" value="" name="' . $field_name . '[]"/></td>';
+        $html .= '</tr>';
+
         foreach ($values as $value => $label) {
             $html .= '<tr>';
             $html .= '<td style="display: none">';

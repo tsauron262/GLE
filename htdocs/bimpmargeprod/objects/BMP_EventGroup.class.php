@@ -7,4 +7,14 @@ class BMP_EventGroup extends BimpObject {
          3 => 'Deuxième partie',
          4 => 'Autre'
      );
+     
+     public function isEventEditable()
+     {
+         $event = $this->getParentInstance();
+         if (!is_null($event) && $event->isLoaded()) {
+             return $event->isEditable();
+         }
+         
+         return 0;
+     }
 }

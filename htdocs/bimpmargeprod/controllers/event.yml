@@ -1,4 +1,6 @@
 bootstrap: 1
+pdf: 1
+
 objects:
     event: 
         instance: 
@@ -6,6 +8,10 @@ objects:
             id_object: 
                 request: id
                 
+    calc_auto:
+        instance: 
+            bimp_object: BMP_CalcMontant
+            
 sections:
     - type: tabs
       tabs:
@@ -22,6 +28,10 @@ sections:
                         object: event
           parts:
               label: Parts Co-producteurs
+              show: 
+                  callback: 
+                      method: showCoprods
+                      object: event
               url_params:
                   id: 
                       request: id
@@ -41,14 +51,14 @@ sections:
                   - type: list
                     list: 
                         panel: 1
-                        name: default
+                        name: frais
                         object: event
                         children: frais
                         
                   - type: view
                     view: 
                         panel: 1
-                        name: frais_totaux
+                        name: totaux
                         object: event
           hotel:
               label: Frais hôtellerie
@@ -71,14 +81,14 @@ sections:
                   - type: list
                     list: 
                         panel: 1
-                        name: default
+                        name: recettes
                         object: event
                         children: recettes
                         
                   - type: view
                     view: 
                         panel: 1
-                        name: recettes_totaux
+                        name: totaux
                         object: event
                         
           billets:
@@ -92,6 +102,41 @@ sections:
                         panel: 1
                         name: billets
                         object: event
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: breaks
+                        object: event
+                  - type: view
+                    view: 
+                        panel: 1
+                        name: totaux
+                        object: event
+                        
+          bilans: 
+              label: Bilans
+              url_params: 
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        panel: 0
+                        name: bilans
+                        object: event
+        
+          calcauto: 
+              label: Calculs auto
+              url_params: 
+                  id: 
+                      request: id
+              sections: 
+                  - type: list
+                    list: 
+                        name: default
+                        panel: 1
+                        object: event
+                        children: calcs_montants
                       
     - type: buttons
       buttons:

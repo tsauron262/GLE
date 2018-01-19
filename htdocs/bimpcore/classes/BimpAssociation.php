@@ -49,11 +49,12 @@ class BimpAssociation
         $sql = BimpTools::getSqlSelect(array('dest_id_object'));
         $sql .= BimpTools::getSqlFrom(self::$table);
         $sql .= BimpTools::getSqlWhere(array(
-                    'src_object_module' => $this->object->module,
-                    'src_object_name'   => $this->object->object_name,
+                    'association'        => $this->association,
+                    'src_object_module'  => $this->object->module,
+                    'src_object_name'    => $this->object->object_name,
                     'dest_object_module' => $this->object->config->getObjectModule($this->association_path . '/object'),
                     'dest_object_name'   => $this->object->config->getObjectName($this->association_path . '/object'),
-                    'src_id_object'     => (int) $id_object
+                    'src_id_object'      => (int) $id_object
         ));
 
         $rows = $this->db->executeS($sql, 'array');
@@ -86,8 +87,9 @@ class BimpAssociation
         $sql = BimpTools::getSqlSelect(array('src_id_object'));
         $sql .= BimpTools::getSqlFrom(self::$table);
         $sql .= BimpTools::getSqlWhere(array(
-                    'src_object_module' => $this->object->module,
-                    'src_object_name'   => $this->object->object_name,
+                    'association'        => $this->association,
+                    'src_object_module'  => $this->object->module,
+                    'src_object_name'    => $this->object->object_name,
                     'dest_object_module' => $this->object->config->getObjectModule($this->association_path . '/object'),
                     'dest_object_name'   => $this->object->config->getObjectName($this->association_path . '/object'),
                     'dest_id_object'     => (int) $id_associate
@@ -115,6 +117,7 @@ class BimpAssociation
         $sql = BimpTools::getSqlSelect(array('src_id_object', 'dest_id_object'));
         $sql .= BimpTools::getSqlFrom(self::$table);
         $sql .= BimpTools::getSqlWhere(array(
+                    'association'        => $this->association,
                     'src_object_module'  => $this->object->module,
                     'src_object_name'    => $this->object->object_name,
                     'dest_object_module' => $this->object->config->getObjectModule($this->association_path . '/object'),
@@ -177,7 +180,8 @@ class BimpAssociation
             return false;
         }
 
-        $where = 'a.`src_object_module` = \'' . $this->object->module . '\'';
+        $where = 'a.association = \'' . $this->association . '\'';
+        $where .= ' AND a.`src_object_module` = \'' . $this->object->module . '\'';
         $where .= ' AND a.`src_object_name` = \'' . $this->object->object_name . '\'';
         $where .= ' AND a.`src_id_object` = ' . (int) $id_object;
         $where .= ' AND a.`dest_object_module` = \'' . $this->object->config->getObjectModule($this->association_path . '/object') . '\'';
@@ -204,7 +208,7 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         if (is_null($id_object)) {
@@ -217,12 +221,13 @@ class BimpAssociation
         if (!$associations) {
             $associations = array();
         }
-        
+
         $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
         $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
 
         // Suppression des associations existantes: 
-        $where = '`src_object_module` = \'' . $this->object->module . '\'';
+        $where = '`association` = \'' . $this->association . '\'';
+        $where .= ' AND `src_object_module` = \'' . $this->object->module . '\'';
         $where .= ' AND `src_object_name` = \'' . $this->object->object_name . '\'';
         $where .= ' AND `src_id_object` = ' . (int) $id_object;
         $where .= ' AND `dest_object_module` = \'' . $dest_object_module . '\'';
@@ -235,7 +240,11 @@ class BimpAssociation
 
             // Enregistrement des nouvelles associations
             foreach ($associations as $id_associate) {
+                if ($id_associate === '') {
+                    continue;
+                }
                 if ($this->db->insert(self::$table, array(
+                            'association'        => $this->association,
                             'src_object_module'  => $this->object->module,
                             'src_object_name'    => $this->object->object_name,
                             'src_object_type'    => 'bimp_object',
@@ -263,7 +272,7 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         if (is_null($id_associate)) {
@@ -277,7 +286,8 @@ class BimpAssociation
         $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
 
         // Suppression des associations existantes: 
-        $where = '`src_object_module` = \'' . $this->object->module . '\'';
+        $where = '`association` = \'' . $this->association . '\'';
+        $where .= ' AND `src_object_module` = \'' . $this->object->module . '\'';
         $where .= ' AND `src_object_name` = \'' . $this->object->object_name . '\'';
         $where .= ' AND `dest_object_module` = \'' . $dest_object_module . '\'';
         $where .= ' AND `dest_object_name` = \'' . $dest_object_name . '\'';
@@ -290,7 +300,11 @@ class BimpAssociation
 
             // Enregistrement des nouvelles associations
             foreach ($associations as $id_object) {
+                if ($id_object === '') {
+                    continue;
+                }
                 if ($this->db->insert(self::$table, array(
+                            'association'        => $this->association,
                             'src_object_module'  => $this->object->module,
                             'src_object_name'    => $this->object->object_name,
                             'src_object_type'    => 'bimp_object',
@@ -319,7 +333,7 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         if (is_null($id_object)) {
@@ -335,6 +349,7 @@ class BimpAssociation
             $dest_object_type = $this->object->config->getObjectType($this->association_path . '/object');
 
             if ($this->db->insert(self::$table, array(
+                        'association'        => $this->association,
                         'src_object_module'  => $this->object->module,
                         'src_object_name'    => $this->object->object_name,
                         'src_object_type'    => 'bimp_object',
@@ -366,7 +381,7 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         if (is_null($id_associate)) {
@@ -382,6 +397,7 @@ class BimpAssociation
             $dest_object_type = $this->object->config->getObjectType($this->association_path . '/object');
 
             if ($this->db->insert(self::$table, array(
+                        'association'        => $this->association,
                         'src_object_module'  => $this->object->module,
                         'src_object_name'    => $this->object->name,
                         'src_object_type'    => 'bimp_object',
@@ -411,7 +427,7 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         if (is_null($id_object) || !$id_object) {
@@ -426,7 +442,8 @@ class BimpAssociation
             $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
             $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
 
-            $where = '`src_object_module` = \'' . $this->object->module . '\'';
+            $where = '`association` = \'' . $this->association . '\'';
+            $where .= ' AND `src_object_module` = \'' . $this->object->module . '\'';
             $where .= ' AND `src_object_name` = \'' . $this->object->object_name . '\'';
             $where .= ' AND `src_id_object` = ' . (int) $id_object;
             $where .= ' AND `dest_object_module` = \'' . $dest_object_module . '\'';
@@ -452,7 +469,7 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         if (is_null($id_object) || !$id_object) {
@@ -461,7 +478,8 @@ class BimpAssociation
             $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
             $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
 
-            $where = '`src_object_module` = \'' . $this->object->module . '\'';
+            $where = '`association` = \'' . $this->association . '\'';
+            $where .= ' AND `src_object_module` = \'' . $this->object->module . '\'';
             $where .= ' AND `src_object_name` = \'' . $this->object->object_name . '\'';
             $where .= ' AND `src_id_object` = ' . (int) $id_object;
             $where .= ' AND `dest_object_module` = \'' . $dest_object_module . '\'';
@@ -486,7 +504,7 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         if (is_null($id_associate) || !$id_associate) {
@@ -495,7 +513,8 @@ class BimpAssociation
             $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
             $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
 
-            $where = '`src_object_module` = \'' . $this->object->module . '\'';
+            $where = '`association` = \'' . $this->association . '\'';
+            $where .= ' AND `src_object_module` = \'' . $this->object->module . '\'';
             $where .= ' AND `src_object_name` = \'' . $this->object->object_name . '\'';
             $where .= ' AND `dest_object_module` = \'' . $dest_object_module . '\'';
             $where .= ' AND `dest_object_name` = \'' . $dest_object_name . '\'';
@@ -520,13 +539,14 @@ class BimpAssociation
         if (count($this->errors)) {
             return $this->errors;
         }
-        
+
         $errors = array();
 
         $dest_object_module = $this->object->config->getObjectModule($this->association_path . '/object');
         $dest_object_name = $this->object->config->getObjectName($this->association_path . '/object');
 
-        $where = '`src_object_module` = \'' . $this->object->module . '\'';
+        $where = '`association` = \'' . $this->association . '\'';
+        $where .= ' AND `src_object_module` = \'' . $this->object->module . '\'';
         $where .= ' AND `src_object_name` = \'' . $this->object->object_name . '\'';
         $where .= ' AND `dest_object_module` = \'' . $dest_object_module . '\'';
         $where .= ' AND `dest_object_name` = \'' . $dest_object_name . '\'';
@@ -608,7 +628,7 @@ class BimpAssociation
     public function renderAssociatesCheckList()
     {
         $associates = $this->getAssociatesList();
-        
+
         if ($this->object->config->isDefined($this->association_path . '/list')) {
             $items_ids = $this->object->config->get($this->association_path . '/list', array(), false, 'array');
         } else {
@@ -640,6 +660,7 @@ class BimpAssociation
             }
         }
 
+        $filters[$alias . 'association'] = $this->association;
         $filters[$alias . 'src_object_module'] = $this->object->module;
         $filters[$alias . 'src_object_name'] = $this->object->object_name;
         $filters[$alias . 'dest_object_module'] = $dest_object_module;

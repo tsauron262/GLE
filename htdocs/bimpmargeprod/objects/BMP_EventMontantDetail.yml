@@ -7,7 +7,8 @@ parent_object: BMP_EventMontant
 labels: 
     name: détail de montant
     name_plur: détails de montant
-    
+
+objects: 
 fields: 
     id_event_montant:
         label: Montant
@@ -38,7 +39,8 @@ fields:
             search_on_key_up: 1
             
 list: 
-    checkboxes: 1
+    checkboxes: 
+        callback: isEditable
     bulk_actions:
         - label: supprimer les lignes sélectionnées
           icon: trash
@@ -47,18 +49,22 @@ list:
     sort_way: desc
     n: 25
     update_btn: 1
-    delete_btn: 1
-    add_object_row: 1
+    delete_btn: 
+        callback: isEditable
+    add_object_row: 
+        callback: isEditable
     cols: 
         label: 
             field: label
             edit: 1
         qty: 
             field: quantity
-            edit: 1
+            edit: 
+                callback: isEditable
         price: 
             field: unit_price
-            edit: 1
+            edit: 
+                callback: isEditable
         total:
             label: Total HT
             value: 

@@ -41,7 +41,9 @@ function saveObjectFromForm(form_id, $button, success_callback) {
     var data = new FormData($form.get(0));
 
     bimp_json_ajax('saveObject', data, $result, function (result) {
-        $button.removeClass('disabled');
+        if (result.errors.length) {
+            $button.removeClass('disabled');
+        }
 
         if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
             var $link = $button.parent().find('.objectViewLink');
@@ -208,8 +210,8 @@ function loadModalForm($button, data) {
 
     $button.addClass('disabled');
 
-    if (typeof (id_object) === 'undefined') {
-        id_object = 0;
+    if (typeof (data.id_object) === 'undefined') {
+        data.id_object = 0;
     }
 
     var $modal = $('#page_modal');
@@ -218,14 +220,14 @@ function loadModalForm($button, data) {
 
     var title = '';
 
-    if (id_object) {
+    if (data.id_object) {
         title = '<i class="fa fa-edit iconLeft"></i>Edition ';
         if (typeof (object_labels[data.object_name].of_the) !== 'undefined') {
             title += object_labels[data.object_name].of_the;
         } else {
             title += 'l\'objet "' + data.object_name + '"';
         }
-        title += ' n°' + id_object;
+        title += ' ' + data.id_object;
     } else {
         title = '<i class="fa fa-plus-circle iconLeft"></i>Ajout ';
         if (typeof (object_labels[data.object_name].of_a) !== 'undefined') {
@@ -407,7 +409,7 @@ function reloadObjectInput(form_id, input_name, fields) {
             $container.html(result.html).slideDown(250, function () {
                 var $input = $container.find('[name=' + input_name + ']');
                 if ($input.length) {
-                    setInputEvents($container, $input);
+                    setInputEvents($form, $input);
                 }
             });
         }
@@ -549,7 +551,11 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     var label = $label_input.val();
     if (typeof (value) !== 'undefined' && value !== '') {
         if (!label) {
-            label = value;
+            if ($value_input.get(0).tagName.toLowerCase() === 'select') {
+                label = $value_input.find('[value="' + value + '"]').text();
+            } else {
+                label = value;
+            }
         }
         var field_name = $inputContainer.data('field_name');
         var html = '<tr>';
@@ -618,11 +624,9 @@ function checkTextualInput($input) {
                         parsed_value = parseFloat(value);
                         min = parseFloat(min);
                         max = parseFloat(max);
-
                     } else {
                         value = value.replace(/^(\-?[0-9]*)\.?.*$/, '$1');
                         parsed_value = parseInt(value);
-                        initial_value = parseInt(initial_value);
                         min = parseInt(min);
                         max = parseInt(max);
                     }
@@ -644,7 +648,7 @@ function checkTextualInput($input) {
                     var lowercase = $input.data('lowercase');
                     break;
             }
-            if (value !== initial_value) {
+            if (('' + value) !== ('' + initial_value)) {
                 $input.val(value).change();
             }
             if (msg) {
@@ -675,6 +679,7 @@ function toggleInputDisplay($container, $input) {
     var hide_values = $container.data('hide_values');
     var show = false;
     if (typeof (show_values) !== 'undefined') {
+        show_values += '';
         show_values = show_values.split(',');
         for (i in show_values) {
             if (input_val == show_values[i]) {
@@ -684,6 +689,7 @@ function toggleInputDisplay($container, $input) {
         }
     } else if (typeof (hide_values) !== 'undefined') {
         show = true;
+        hide_values += '';
         hide_values = hide_values.split(',');
         for (i in hide_values) {
             if (input_val == hide_values[i]) {
@@ -891,6 +897,18 @@ function setToggleInputEvent($input) {
             $input.val(1).change();
         } else {
             $input.val(0).change();
+        }
+    });
+    $input.change(function () {
+        var val = parseInt($input.val());
+        if (val) {
+            if (!$toggle.prop('checked')) {
+                $toggle.prop('checked', true);
+            }
+        } else {
+            if ($toggle.prop('checked')) {
+                $toggle.prop('checked', false);
+            }
         }
     });
 

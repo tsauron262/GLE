@@ -57,13 +57,13 @@
 }
 
 
-/*input[type="radio"], 
+input[type="radio"], 
 input[type="checkbox"] {
     margin-right: -20px;
     opacity: 0;
 }
 
- style your lables/button 
+/* style your lables/button */
 input[type="radio"] + label, 
 input[type="checkbox"] + label {
     cursor: pointer;
@@ -83,4 +83,4 @@ input[type="checkbox"]:hover + label{
     border: 1px solid rgb(80,90,120);
     text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
     color: white;
-}*/
+}

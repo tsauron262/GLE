@@ -76,7 +76,7 @@ print '<tr><td>Prix (unique)</td><td>
 
 print '<tr><td>Trier par (multiple)</td><td>
 
-<input id="sortByType" name="sortBy" type="checkbox" value="t" checked>
+<input id="sortByType" name="sortBy" type="checkbox" value="t">
 <label for="sortByType">Type</label>
 
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >

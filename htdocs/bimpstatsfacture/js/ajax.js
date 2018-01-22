@@ -4,6 +4,8 @@
 
 var factures;
 var taxesOrNot;
+var sortType = false;
+var sortCenter = false;
 
 /**
  * Ajax functions
@@ -69,6 +71,14 @@ function valider() {
         var sortBy = [];
         $("input[type='checkbox'][name='sortBy']:checked").each(function () {
             sortBy.push($(this).val());
+            if ($(this).val() === 'c')
+                sortCenter = true;
+            else
+                sortCenter = false;
+            if ($(this).val() === 't')
+                sortType = true;
+            else
+                sortType = false;
         });
         getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes);
         $('#forArray').empty();
@@ -76,8 +86,19 @@ function valider() {
             taxesOrNot = 'Total TTC';
         else
             taxesOrNot = 'Total HT';
+        objToArray();
+        console.log("sortType " + sortType + "          sortCenter " + sortCenter);
+        sortFactures();
         displayArray(taxesOrNot);
     }
+}
+
+function objToArray() {
+    var tmp = [];
+    for (var key in factures) {
+        tmp.push(factures[key]);
+    }
+    factures = tmp;
 }
 
 function initSelectMultiple() {
@@ -127,9 +148,10 @@ function getDate(id) {
 function displayArray(taxesOrNot) {
     initTable(taxesOrNot);
     var prevFacture;
-    for (var key in factures) {
-        fillTable(factures[key], key, prevFacture);
-        prevFacture = factures[key].facurl;
+    for (var i = 0; i < factures.length; i++) {
+        console.log(factures[i].type, factures[i].centre);
+        fillTable(factures[i], i, prevFacture);
+        prevFacture = factures[i].facurl;
     }
 }
 
@@ -150,11 +172,11 @@ function initTable(taxesOrNot) {
 }
 
 function fillTable(facture, index, prevFacture) {
-    
+
     if (prevFacture === facture.facurl)
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc];
     else
-        arrayOfValue = [facture.socurl, facture.facurl, facture.factotal, 0, facture.facstatut, facture.paiurl, facture.paipaye_ttc];
+        arrayOfValue = [facture.socurl, facture.facurl, facture.factotal, facture.marge, facture.facstatut, facture.paiurl, facture.paipaye_ttc];
 
     $('<tr></tr>')
             .attr('id', 'tr' + index)
@@ -164,4 +186,40 @@ function fillTable(facture, index, prevFacture) {
                 .html(elt)
                 .appendTo('#tr' + index);
     });
+}
+
+function sortFactures() {
+    if (sortType && sortCenter) {
+        factures.sort(function (a, b) {
+            if (a.type < b.type)
+                return -1;
+            if (a.type > b.type)
+                return 1;
+
+            if (a.centre < b.centre)
+                return -1;
+            if (a.centre > b.centre)
+                return 1;
+
+            return 0;
+        });
+    } else if (sortType) {
+        factures.sort(function (a, b) {
+            if (a.type < b.type)
+                return -1;
+            if (a.type > b.type)
+                return 1;
+
+            return 0;
+        });
+    } else {
+        factures.sort(function (a, b) {
+            if (a.centre < b.centre)
+                return -1;
+            if (a.centre > b.centre)
+                return 1;
+
+            return 0;
+        });
+    }
 }

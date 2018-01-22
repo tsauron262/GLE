@@ -27,6 +27,7 @@
  */
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/margin/lib/margins.lib.php';
 
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
@@ -50,9 +51,14 @@ class BimpStatsFacture {
 
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $sortBy);
         $hash = $this->getFields($facids, $taxes);
+        $hash = $this->addMargin($hash);
         $hash = $this->addSocieteURL($hash);
         $hash = $this->addFactureURL($hash);
         $hash = $this->addPaiementURL($hash);
+        $types = $this->getExtrafieldArray('facture', 'type');
+        $centres = $this->getExtrafieldArray('facture', 'centre');
+        $hash = $this->convertType($hash, $types);
+        $hash = $this->convertCenter($hash, $centres);
         return $hash;
     }
 
@@ -73,17 +79,18 @@ class BimpStatsFacture {
         elseif ($statut == 'u') //unpayed
             $sql .= ' AND f.paye = 0';
 
-        if (!empty($sortBy)) {
-            $sql .= ' ORDER BY ';
-            if (in_array('c', $sortBy)) {       // tri par centre
-                $sql .= ' e.centre ASC';
-                if (in_array('t', $sortBy))     // tri par centre et par type
-                    $sql .= ', e.type ASC';
-            } else
-                $sql .= ' e.type ASC';          // tri uniquement par type
-        }
+//        if (!empty($sortBy)) {
+//            $sql .= ' ORDER BY ';
+//            if (in_array('c', $sortBy)) {       // tri par centre
+//                $sql .= ' e.centre ASC';
+//                if (in_array('t', $sortBy))     // tri par centre et par type
+//                    $sql .= ', e.type ASC';
+//            } else
+//                $sql .= ' e.type ASC';          // tri uniquement par type
+//        }
 
-        dol_syslog(get_class($this) . "::getFactureIdsByPeriod sql=" . $sql, LOG_DEBUG);
+//        $sql .="ORDER BY f.total";
+        dol_syslog(get_class($this) . "::getFactureIds sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
 
         if ($result and mysqli_num_rows($result) > 0) {
@@ -102,6 +109,7 @@ class BimpStatsFacture {
         $sql = 'SELECT f.rowid as fac_id, f.facnumber as fac_number, f.fk_statut as fac_statut,';
         $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
+        $sql .= ' e.centre as centre, e.type as type,';
         if ($taxes == 'ttc')
             $sql.= ' f.total_ttc as fac_total, p.amount as pai_paye_ttc';
         else    // ht
@@ -113,15 +121,14 @@ class BimpStatsFacture {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' WHERE f.rowid IN (\'' . implode("','", $facids) . '\')';
 
-        dol_syslog(get_class($this) . "::getFactureIdsByPeriod sql=" . $sql, LOG_DEBUG);
+        dol_syslog(get_class($this) . "::getFields sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
 
+        $ind =0;
         if ($result and mysqli_num_rows($result) > 0) {
-            $i = 0;
             while ($obj = $this->db->fetch_object($result)) {
-                $hash[]['fac_id'] = $obj->fac_id;
-                end($hash);
-                $ind = key($hash);
+//                $ind = $obj->fac_id;
+                $hash[$ind]['fac_id'] = $obj->fac_id;
                 $hash[$ind]['fac_nom'] = $obj->fac_number;
                 $hash[$ind]['fac_statut'] = $obj->fac_statut;
                 $hash[$ind]['factotal'] = $obj->fac_total;
@@ -130,12 +137,38 @@ class BimpStatsFacture {
                 $hash[$ind]['pai_id'] = $obj->pai_id;
                 $hash[$ind]['pai_ref'] = $obj->pai_ref;
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
-                $i++;
+                $hash[$ind]['centre'] = $obj->centre;
+                $hash[$ind]['type'] = $obj->type;
+                $ind++;
             }
         }
         return $hash;
     }
 
+    function addMargin($hash) {
+
+        foreach ($hash as $id => $h) {
+//            $sql = 'SELECT subprice, remise_percent, tva_tx, localtax1_tx, localtax2_tx, buy_price_ht, fk_product_fournisseur_price';
+            $sql = 'SELECT buy_price_ht, total_ht';
+            $sql.= ' FROM '.MAIN_DB_PREFIX.'facturedet';
+            $sql .= ' WHERE  fk_facture =' . $h['fac_id'];
+            dol_syslog(get_class($this) . "::addMargin sql=" . $sql, LOG_DEBUG);
+            $result = $this->db->query($sql);
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->fetch_object($result)) {
+                    $hash[$id]['marge'] += $obj->total_ht - $obj->buy_price_ht;
+//                    $marge = getMarginInfos($objp->subprice, $objp->remise_percent, $objp->tva_tx, $objp->localtax1_tx, $objp->localtax2_tx, $objp->fk_product_fournisseur_price, $objp->buy_price_ht);
+//                    if(isset($hash[$id]['marge'])) {
+//                       $hash[$id]['marge'] += $marge[2];
+//                    } else {
+//                       $hash[$id]['marge'] = $marge[2];
+//                    }
+                }
+            }
+        }
+        return $hash;
+    }
+// o prix de reviens
     function addSocieteURL($hash) {
         foreach ($hash as $ind => $h) {
             $soc = new Societe($this->db);
@@ -173,7 +206,6 @@ class BimpStatsFacture {
                     }
                 default: break;
             }
-            unset($hash[$ind]['fac_id']);
             unset($hash[$ind]['fac_nom']);
             unset($hash[$ind]['fac_statut']);
         }
@@ -187,9 +219,48 @@ class BimpStatsFacture {
                 $pai->id = $h['pai_id'];
                 $pai->ref = $h['pai_ref'];
                 $hash[$ind]['paiurl'] = $pai->getNomUrl(1);
-                unset($hash[$ind]['pai_id']);
-                unset($hash[$ind]['pai_ref']);
+            } else {
+                unset($hash[$ind]['paipaye_ttc']);
             }
+            unset($hash[$ind]['pai_id']);
+            unset($hash[$ind]['pai_ref']);
+        }
+        return $hash;
+    }
+
+    function getExtrafieldArray($elementtype, $name) { // $elementtype = "faccture"
+        $out = array();
+
+        $sql = 'SELECT param ';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'extrafields';
+        $sql .= ' WHERE  elementtype = "' . $elementtype . '"';
+        $sql .= ' AND name = "' . $name . '"';
+
+        dol_syslog(get_class($this) . "::getExtrafieldArray sql=" . $sql, LOG_DEBUG);
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $row_line = $obj->param;
+            }
+        }
+        preg_match_all('/"(.*?)"/', $row_line, $in);
+
+        for ($i = 1; $i < sizeof($in[1]) - 1; $i+=2) {
+            $out[$in[1][$i]] = $in[1][$i + 1];
+        }
+        return $out;
+    }
+
+    function convertCenter($hash, $centres) {
+        foreach ($hash as $ind => $h) {
+            $hash[$ind]['centre'] = $centres[$h['centre']];
+        }
+        return $hash;
+    }
+
+    function convertType($hash, $types) {
+        foreach ($hash as $ind => $h) {
+            $hash[$ind]['type'] = $types[$h['type']];
         }
         return $hash;
     }

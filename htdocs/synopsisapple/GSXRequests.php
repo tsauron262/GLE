@@ -615,7 +615,7 @@ class GSX_Request {
         $html .= '<div class="formSus" id="formSus_' . $this->requestName . '"></div>';
 
 
-        if ($this->requestName == "CreateIPhoneRepairOrReplace") {
+        //if ($this->requestName == "CreateIPhoneRepairOrReplace") {
             $contFile = file_get_contents(DOL_DOCUMENT_ROOT . "/synopsisapple/TierParts.csv");
             $tab1 = explode("\n", $contFile);
             foreach ($tab1 as $ligne) {
@@ -642,7 +642,7 @@ class GSX_Request {
             foreach ($tab3 as $ligne)
                 $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
             $html .= "</select></div>";
-        }
+        //}
 
 
 

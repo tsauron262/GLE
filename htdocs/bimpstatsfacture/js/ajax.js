@@ -86,19 +86,8 @@ function valider() {
             taxesOrNot = 'Total TTC';
         else
             taxesOrNot = 'Total HT';
-        objToArray();
-        console.log("sortType " + sortType + "          sortCenter " + sortCenter);
-        sortFactures();
         displayArray(taxesOrNot);
     }
-}
-
-function objToArray() {
-    var tmp = [];
-    for (var key in factures) {
-        tmp.push(factures[key]);
-    }
-    factures = tmp;
 }
 
 function initSelectMultiple() {
@@ -146,47 +135,85 @@ function getDate(id) {
 }
 
 function displayArray(taxesOrNot) {
-    initTable(taxesOrNot);
     var prevFacture;
-    for (var i = 0; i < factures.length; i++) {
-        console.log(factures[i].type, factures[i].centre);
-        fillTable(factures[i], i, prevFacture);
-        prevFacture = factures[i].facurl;
+    for (var key in factures) {
+        initTable(taxesOrNot, factures[key], key);
+        for (var i = 0; i < factures[key].factures.length; i++) {
+            fillTable(factures[key].factures[i], key, prevFacture);
+            prevFacture = factures[key].factures[i].fac_id;
+        }
     }
 }
 
-function initTable(taxesOrNot) {
+function initTable(taxesOrNot, facture, key) {
+    $('<h2></h2>')
+            .text(facture.title)
+            .appendTo('#forArray');
+
     $('<table></table>')
-            .attr('id', 'array')
+            .attr('id', 'table' + key)
             .appendTo('#forArray');
 
     $('<thead></thead>')
-            .attr('id', 'thead')
-            .appendTo('#array');
+            .attr('id', 'thead' + key)
+            .appendTo('#table' + key);
 
     var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC'];
 
     arrayOfField.forEach(function (field) {
-        $('<th></th>').text(field).appendTo('#thead');
+        $('<th></th>').text(field).appendTo('#thead' + key);
     });
 }
 
-function fillTable(facture, index, prevFacture) {
+function fillTable(facture, key, prevFacture) {
 
-    if (prevFacture === facture.facurl)
+    if (prevFacture === facture.fac_id)
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc];
     else
         arrayOfValue = [facture.socurl, facture.facurl, facture.factotal, facture.marge, facture.facstatut, facture.paiurl, facture.paipaye_ttc];
 
     $('<tr></tr>')
-            .attr('id', 'tr' + index)
-            .appendTo('#array');
+            .attr('id', 'tr' + facture.fac_id)
+            .appendTo('#table' + key);
     arrayOfValue.forEach(function (elt) {
         $('<td></td>')
                 .html(elt)
-                .appendTo('#tr' + index);
+                .appendTo('#tr' + facture.fac_id);
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function sortFactures() {
     if (sortType && sortCenter) {
@@ -222,4 +249,14 @@ function sortFactures() {
             return 0;
         });
     }
+}
+
+
+
+function objToArray() {
+    var tmp = [];
+    for (var key in factures) {
+        tmp.push(factures[key]);
+    }
+    factures = tmp;
 }

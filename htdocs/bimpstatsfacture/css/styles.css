@@ -12,7 +12,7 @@
     border-radius: 3px;
 }
 
-#array {
+#forArray table {
     border-collapse:separate; 
     border-spacing:0;
     border-top: solid black 1px;
@@ -22,7 +22,7 @@
     margin-top: 30px;
 }
 
-#array tr:nth-child(even){
+#forArray table tr:nth-child(even){
     background: #ccc;
 }
 
@@ -30,7 +30,7 @@
     background: #bdc3c7;
 }*/
 
-#array th, #array td {
+#forArray table th, #forArray table td {
     padding: 3px 10px 3px 10px;
     border-right: solid black 1px;
 }
@@ -53,9 +53,32 @@
 
 .tableforField {
     border-collapse: separate; 
-    border-spacing: 15px;
+    border-spacing: 0px;
 }
 
+.tableforField td {
+    padding: 15px;
+}
+
+.tableforField td:last-child {
+    border-right: 1px solid black;
+
+}
+
+table tr.top td {
+    border-top: 1px solid black;
+}
+
+table tr.bottom td {
+    border-bottom: 1px solid black;
+}
+
+table tr td.allSides {
+    border-left:  1px solid black;
+    border-right: 1px solid black;
+    font-size: 16px;
+    font-weight: bold;
+}
 
 input[type="radio"], 
 input[type="checkbox"] {
@@ -76,11 +99,14 @@ input[type="checkbox"] + label {
 }
 
 input[type="radio"]:checked + label,
-input[type="radio"]:hover + label,
-input[type="checkbox"]:checked + label,
-input[type="checkbox"]:hover + label{
+input[type="checkbox"]:checked + label{
     background: rgb(80,90,120);
     border: 1px solid rgb(80,90,120);
     text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
     color: white;
+}
+
+input[type="radio"]:not(:checked):hover + label,
+input[type="checkbox"]:not(:checked):hover + label{
+    color: black;
 }

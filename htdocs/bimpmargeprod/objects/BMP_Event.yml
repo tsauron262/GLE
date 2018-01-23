@@ -216,7 +216,7 @@ views:
                               
     totaux:
         title: Montants HT totaux
-        objects_change_reload: BMP_EventMontant
+        objects_change_reload: BMP_EventMontant,BMP_Tarif,BMP_EventBillets
         icon: euro
         rows:
             - cols: 

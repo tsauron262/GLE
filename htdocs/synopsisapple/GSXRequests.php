@@ -630,7 +630,7 @@ class GSX_Request {
                 $result = $db->fetch_object($sql);
                 $tab3 = array_merge($tab3, $tab2[$result->nom]);
             }
-            if (count($tab3) == 1) {
+            if (count($tab3) < 2) {
                 foreach ($tab2 as $tabT)
                     foreach ($tabT as $tabT2)
                         $tab3[] = $tabT2;

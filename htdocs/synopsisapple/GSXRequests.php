@@ -628,9 +628,9 @@ class GSX_Request {
             $sql = $db->query("SELECT `description` as nom FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '" . $serial . "'");
             if ($db->num_rows($sql) > 0) {
                 $result = $db->fetch_object($sql);
-//                foreach($tab2[$result->nom] as $ln)
-//                    if(stripos ($ln[2],$result->nom) > -1)
-//                            $tab3[] = $ln;
+                foreach($tab2[$result->nom] as $ln)
+                    if(stripos ($ln[2],$result->nom) > -1)
+                            $tab3[] = $ln;
 //                    $tab3 = array_merge($tab3, $tab2[$result->nom]);
             }
             if (count($tab3) < 2) {

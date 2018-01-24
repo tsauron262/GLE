@@ -1,8 +1,10 @@
+/* global DOL_URL_ROOT */
+
 /**
  * Global
  */
 
-var factures;
+var groupes;
 var taxesOrNot;
 var sortType = false;
 var sortCenter = false;
@@ -31,7 +33,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             console.log("Erreur PHP");
         },
         success: function (objOut) {
-            factures = JSON.parse(objOut);
+            groupes = JSON.parse(objOut);
         }
     });
 }
@@ -40,8 +42,8 @@ $(document).ready(function () {
 
     var date = new Date(), y = date.getFullYear(), m = date.getMonth();
     var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
-    var lastDay = new Date(Date.UTC(y, m + 2, 0, 3, 0, 0));
-//    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));   // TODO remettre celui-ci
+    var lastDay = new Date(Date.UTC(y, m - 1, 7, 3, 0, 0));
+//    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));   // good
 
     $('#dateStart').datepicker();
     $('#dateStart').datepicker('setDate', firstDay);
@@ -135,14 +137,18 @@ function getDate(id) {
 }
 
 function displayArray(taxesOrNot) {
-    var prevFacture;
-    for (var key in factures) {
-        initTable(taxesOrNot, factures[key], key);
-        for (var i = 0; i < factures[key].factures.length; i++) {
-            fillTable(factures[key].factures[i], key, prevFacture);
-            prevFacture = factures[key].factures[i].fac_id;
+    var prevFactureId;
+    ligne =0;  // dev TODO remove
+    for (var key in groupes) {
+        initTable(taxesOrNot, groupes[key], key);
+        for (var i = 0; i < groupes[key].factures.length; i++) {
+            fillTable(groupes[key].factures[i], key, prevFactureId);
+            prevFactureId = groupes[key].factures[i].fac_id;
+            ligne++;
         }
+        addTotaux(groupes[key], key);
     }
+    console.log("Nombre de ligne total = " + ligne);
 }
 
 function initTable(taxesOrNot, facture, key) {
@@ -158,31 +164,42 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC'];
+    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type'];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
     });
 }
 
-function fillTable(facture, key, prevFacture) {
+function fillTable(facture, key, prevFactureId) {
 
-    if (prevFacture === facture.fac_id)
-        arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc];
+    if (prevFactureId === facture.fac_id)
+        arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
     else
-        arrayOfValue = [facture.socurl, facture.facurl, facture.factotal, facture.marge, facture.facstatut, facture.paiurl, facture.paipaye_ttc];
+        arrayOfValue = [facture.socurl, facture.facurl, facture.factotal, facture.marge, facture.facstatut, facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
 
     $('<tr></tr>')
-            .attr('id', 'tr' + facture.fac_id)
+            .attr('id', 'tr' + facture.fac_id + facture.pai_id)
             .appendTo('#table' + key);
     arrayOfValue.forEach(function (elt) {
         $('<td></td>')
                 .html(elt)
-                .appendTo('#tr' + facture.fac_id);
+                .appendTo('#tr' + facture.fac_id + facture.pai_id);
     });
 }
 
+function addTotaux(groupe, key) {
+    arrayOfValue = ['', '', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', ''];
 
+    $('<tr></tr>')
+            .attr('id', 'tr' + key + 'end')
+            .appendTo('#table' + key);
+    arrayOfValue.forEach(function (elt) {
+        $('<td></td>')
+                .html(elt)
+                .appendTo('#tr' + key + 'end');
+    });
+}
 
 
 

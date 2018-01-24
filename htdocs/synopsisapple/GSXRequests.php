@@ -635,6 +635,7 @@ class GSX_Request {
                     foreach ($tabT as $tabT2)
                         $tab3[] = $tabT2;
             }
+            echo "kk";print_r($tab3);
             $i = 100;
 
             $html .= "<div class='partDatasBlockHide'>";

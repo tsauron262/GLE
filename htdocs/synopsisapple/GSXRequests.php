@@ -629,7 +629,7 @@ class GSX_Request {
             if ($db->num_rows($sql) > 0) {
                 $result = $db->fetch_object($sql);
                 foreach($tab2[$result->nom] as $ln)
-                    if(stripos ($ln[2],$result->nom) > -1)
+                    if(stripos ($ln[2],$result->nom) === 0)
                             $tab3[] = $ln;
 //                    $tab3 = array_merge($tab3, $tab2[$result->nom]);
             }

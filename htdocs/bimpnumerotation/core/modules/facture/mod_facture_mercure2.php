@@ -160,7 +160,7 @@ class mod_facture_mercure2 extends ModeleNumRefFactures
                 $suffixe = $facture->array_options['options_type'];
             }
         }
-        if($suffixe == "S")
+        if($suffixe == "S" && date ("Ym", $facture->date) < "201802")
             $suffixe ="";
         
         $mask = str_replace("{TYPE}", $suffixe, $mask);

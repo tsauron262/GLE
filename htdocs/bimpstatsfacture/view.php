@@ -32,6 +32,7 @@ print '</table>';
 
 print '<table class="tableforField">';
 
+// Dates
 print '<tr class="top"><td rowspan=3 class="allSides">Filtres</td><td>Dates</td><td>';
 print '<div><text>Date de début</text><br>';
 print '<input id="dateStart" type="text" class="isDate round"></div>';
@@ -39,12 +40,13 @@ print '<input id="dateStart" type="text" class="isDate round"></div>';
 print '<div><text>Date de fin</text><br>';
 print '<input id="dateEnd" type="text" class="isDate round"></div></td></tr>';
 
-
+// Types
 $type = $staticSF->getExtrafieldArray('facture', 'type');
-print '<tr><td>Types</td><td><select id="type" class="select2" multiple style="width: 200px;">';
-
+print '<tr><td>Types</td><td>';
+print '<select id="type" class="select2" multiple style="width: 200px;">';
+print '<option  value="NRS">Non renseigné</option>';
 foreach ($type as $val => $name) {
-    print '<option selected value="'.$val.'">'.$name.'</option>';
+    print '<option value="'.$val.'">'.$name.'</option>';
 }
 print '</select>';
 
@@ -52,18 +54,37 @@ print '</select>';
 print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
 print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
-
+// Centres
 $centre = $staticSF->getExtrafieldArray('facture', 'centre');
-
-print '<tr><td>Centres</td><td><select id="centre" class="select2 round" multiple style="width: 200px;">';
+print '<tr><td>Centres</td><td>';
+print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
+print '<option  value="NRS">Non renseigné</option>';
 foreach ($centre as $val => $name) {
-    print '<option selected value="'.$val.'">'.$name.'</option>';
+    print '<option value="'.$val.'">'.$name.'</option>';
 }
 print '</select>';
 
 print '<input id="selectAllCentres"   type="button" class="butAction round" value="Tout sélectionner">';
-print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td></tr>';
+print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td>';
 
+// Etat
+print '<tr><td class="allSides"></td><td>Etat (multiple)</td><td>
+
+<input id="etatBrouillon" name="etat" type="checkbox" value="b" checked>
+<label for="etatBrouillon">Brouillon</label>
+
+<input id="etatValider" name="etat" type="checkbox" value="v" checked>
+<label for="etatValider">Validé</label>
+
+<input id="etatFermer" name="etat" type="checkbox" value="f" checked>
+<label for="etatFermer">Fermé</label>
+
+<input id="etatAbandonner" name="etat" type="checkbox" value="a" >
+<label for="etatAbandonner">Abandonné</label>
+
+</td></tr>';
+
+// Statut
 print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Statut (unique)</td><td>
 <input id="paymentAll" name="statutPayment" type="radio" value="a" checked>
 <label for="paymentAll">Toutes</label>
@@ -75,6 +96,7 @@ print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Statut (uni
 <label for="paymentUnpayed">Impayées</label>
 </td></tr>';
 
+// Prix
 print '<tr><td>Prix (unique)</td><td>
 <input id="priceTTC" name="priceTaxes" type="radio" value="ttc" checked>
 <label for="priceTTC">TTC</label>
@@ -83,6 +105,7 @@ print '<tr><td>Prix (unique)</td><td>
 <label for="priceHT">HT</label>
 </td></tr>';
 
+// Trier par
 print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multiple)</td><td>
 
 <input id="sortByType" name="sortBy" type="checkbox" value="t">
@@ -94,6 +117,7 @@ print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multi
 
 print '</table>';
 
+// Valider
 print '<br><input id="go" type="button" class="butAction round" value="Valider"><br>';
 
 print '<div id="forArray"></div>';

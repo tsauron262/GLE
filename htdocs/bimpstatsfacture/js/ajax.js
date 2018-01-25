@@ -28,15 +28,19 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             format: format,
             action: 'getFactures'
         },
-        async: false,
         error: function () {
             console.log("Erreur PHP");
         },
         success: function (objOut) {
+            groupes = JSON.parse(objOut);
+            $('#forArray').empty();
+            if (taxes === 'ttc')
+                taxesOrNot = 'Total TTC';
+            else
+                taxesOrNot = 'Total HT';
+            displayArray(taxesOrNot);
             $('#go').show();
             $('#waiting').removeClass('loading');
-
-            groupes = JSON.parse(objOut);
         }
     });
 }
@@ -44,8 +48,9 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
 $(document).ready(function () {
 
     var date = new Date(), y = date.getFullYear(), m = date.getMonth();
-    var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
-    var lastDay = new Date(Date.UTC(y, m - 1, 7, 3, 0, 0));
+    var firstDay = new Date(Date.UTC(y, m, 20, 3, 0, 0));
+    var lastDay = new Date(Date.UTC(y, m + 1, 0, 3, 0, 0));
+//    var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
 //    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));   // good
 
     $('#dateStart').datepicker();
@@ -59,6 +64,7 @@ $(document).ready(function () {
     initButtonFillAndEmpty();
 
     $('#go').on('click', function () {
+        $(this).hide();
         valider();
     });
 });
@@ -69,7 +75,6 @@ function valider() {
     if (dateEnd < dateStart) {
         alert('La date de début doit être antérieur à la date de fin.');
     } else {
-        $('#go').hide();
         $('#waiting').addClass('loading');
         var types = $('#type').val();
         var centres = $('#centre').val();
@@ -85,12 +90,6 @@ function valider() {
             etats.push($(this).val());
         });
         getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format);
-        $('#forArray').empty();
-        if (taxes === 'ttc')
-            taxesOrNot = 'Total TTC';
-        else
-            taxesOrNot = 'Total HT';
-        displayArray(taxesOrNot);
     }
 }
 
@@ -150,7 +149,7 @@ function displayArray(taxesOrNot) {
         }
         addTotaux(groupes[key], key);
     }
-    console.log("Nombre de ligne total = " + ligne);
+//    console.log("Nombre de ligne total = " + ligne);
 }
 
 function initTable(taxesOrNot, facture, key) {
@@ -178,7 +177,7 @@ function fillTable(facture, key, prevFactureId) {
     if (prevFactureId === facture.fac_id)
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
     else
-        arrayOfValue = [facture.socurl, facture.facurl, facture.factotal, facture.marge, facture.facstatut, facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
+        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type];
 
     $('<tr></tr>')
             .attr('id', 'tr' + facture.fac_id + facture.pai_id)
@@ -191,7 +190,7 @@ function fillTable(facture, key, prevFactureId) {
 }
 
 function addTotaux(groupe, key) {
-    arrayOfValue = ['', '', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', ''];
+    arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', ''];
 
     $('<tr></tr>')
             .attr('id', 'tr' + key + 'end')

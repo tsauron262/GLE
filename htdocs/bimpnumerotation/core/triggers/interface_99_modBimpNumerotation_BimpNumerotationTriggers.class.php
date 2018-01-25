@@ -104,8 +104,17 @@ class InterfaceBimpNumerotationTriggers extends DolibarrTriggers
 		// Data and type of action are stored into $object and $action
                     if ($action == 'BILL_VALIDATE'){
                         $object->fetch_optionals();
-                        if(!isset($object->array_options['options_type']) || $object->array_options['options_type'] == ""){
-                            $this->error = "Pas de secteur";
+                        if(!isset($object->array_options['options_type']) || $object->array_options['options_type'] == "" || $object->array_options['options_type'] == "0"){
+                            $this->error = "Pas de secteur ".$object->array_options['options_type'];
+                            return -1;
+                        }
+                        return 0;
+                    }
+                    
+                    if ($action == 'BILL_DELETE' || $action == 'BILL_UNVALIDATE' || $action == 'BILL_CANCEL'){
+                        
+                        if(isset($object->extraparams[0]) && $object->extraparams[0] == "1"){
+                            $this->error = "Déja exportée";
                             return -1;
                         }
                         return 0;

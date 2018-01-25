@@ -580,7 +580,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 //date_default_timezone_set("GMT");
                 $action->fulldayevent = true;
                 $extraData['firstOccurence'] -= 3600;
-                $extraData['lastOccurence'] -= 3600;
+                $extraData['lastOccurence'] -= 3601;
             } //else
                 //date_default_timezone_set("Europe/Paris");
             
@@ -812,7 +812,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
                 //date_default_timezone_set("GMT");
                 $action->fulldayevent = true;
                 $extraData['firstOccurence'] -= -3600;
-                $extraData['lastOccurence'] -= -3600;
+                $extraData['lastOccurence'] -= -3601;
             } else {
                 //date_default_timezone_set("Europe/Paris");
                 $action->fulldayevent = false;

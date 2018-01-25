@@ -70,7 +70,7 @@ class BimpStatsFacture {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
-        $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
+        $sql .= ' WHERE f.datec >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected TODO
@@ -120,7 +120,7 @@ class BimpStatsFacture {
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
         $sql .= ' e.centre as centre, e.type as type,';
         $sql .= ' fs.centre as centre,';
-        $sql .= ' pf.amount as pai_paye_ttc, ';
+        $sql .= ' p.amount as pai_paye_ttc, ';
         if ($taxes == 'ttc')
             $sql.= ' f.total_ttc as fac_total';
         else    // ht
@@ -333,6 +333,7 @@ class BimpStatsFacture {
             $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
             $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
         }
+        sort($out);
         return $out;
     }
 

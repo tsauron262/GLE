@@ -6,9 +6,9 @@
  *  \brief      Page of stats facture
  */
 require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFacture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 
-$langs->load("admin");
+require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFacture.class.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpstatsfacture/js/ajax.js');
@@ -33,7 +33,7 @@ print '</table>';
 print '<table class="tableforField">';
 
 // Dates
-print '<tr class="top"><td rowspan=3 class="allSides">Filtres</td><td>Dates</td><td>';
+print '<tr class="top"><td rowspan=5 class="allSides">Filtres</td><td>Dates</td><td>';
 print '<div><text>Date de début</text><br>';
 print '<input id="dateStart" type="text" class="isDate round"></div>';
 
@@ -65,27 +65,28 @@ foreach ($centre as $val => $name) {
 print '</select>';
 
 print '<input id="selectAllCentres"   type="button" class="butAction round" value="Tout sélectionner">';
-print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td>';
+print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
-// Etat
-print '<tr><td class="allSides"></td><td>Etat (multiple)</td><td>
+// Etats
+$facstatic = new Facture($db);
+print '<tr><td>Etat (multiple)</td><td>
 
-<input id="etatBrouillon" name="etat" type="checkbox" value="b" checked>
-<label for="etatBrouillon">Brouillon</label>
+<input id="etatBrouillon" name="etat" type="checkbox" value="'.$facstatic::STATUS_DRAFT.'" checked>
+<label for="etatBrouillon">Brouillons</label>
 
-<input id="etatValider" name="etat" type="checkbox" value="v" checked>
-<label for="etatValider">Validé</label>
+<input id="etatValider" name="etat" type="checkbox" value="'.$facstatic::STATUS_VALIDATED.'" checked>
+<label for="etatValider">Validées</label>
 
-<input id="etatFermer" name="etat" type="checkbox" value="f" checked>
-<label for="etatFermer">Fermé</label>
+<input id="etatFermer" name="etat" type="checkbox" value="'.$facstatic::STATUS_CLOSED.'" checked>
+<label for="etatFermer">Fermées</label>
 
-<input id="etatAbandonner" name="etat" type="checkbox" value="a" >
-<label for="etatAbandonner">Abandonné</label>
+<input id="etatAbandonner" name="etat" type="checkbox" value="'.$facstatic::STATUS_ABANDONED.'" >
+<label for="etatAbandonner">Abandonnées</label>
 
 </td></tr>';
 
-// Statut
-print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Statut (unique)</td><td>
+// Statuts
+print '<tr><td>Statut (unique)</td><td>
 <input id="paymentAll" name="statutPayment" type="radio" value="a" checked>
 <label for="paymentAll">Toutes</label>
 
@@ -97,12 +98,21 @@ print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Statut (uni
 </td></tr>';
 
 // Prix
-print '<tr><td>Prix (unique)</td><td>
+print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Prix (unique)</td><td>
 <input id="priceTTC" name="priceTaxes" type="radio" value="ttc" checked>
 <label for="priceTTC">TTC</label>
 
 <input id="priceHT" name="priceTaxes" type="radio" value="ht" >
 <label for="priceHT">HT</label>
+</td></tr>';
+
+// Format
+print '<tr><td>Format (unique)</td><td>
+<input id="formatHTML" name="formatOutput" type="radio" value="HTML" checked>
+<label for="formatHTML">HTML</label>
+
+<input id="formatCSV" name="formatOutput" type="radio" value="CSV" >
+<label for="formatCSV">CSV</label>
 </td></tr>';
 
 // Trier par
@@ -119,6 +129,7 @@ print '</table>';
 
 // Valider
 print '<br><input id="go" type="button" class="butAction round" value="Valider"><br>';
+print ' <div id="waiting"></div><br>';
 
 print '<div id="forArray"></div>';
 

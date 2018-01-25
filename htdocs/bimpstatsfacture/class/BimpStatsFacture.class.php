@@ -47,9 +47,9 @@ class BimpStatsFacture {
         dol_syslog(get_class($this) . '::create', LOG_DEBUG);
     }
 
-    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes) {
+    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format) {
         // TODO MAJ BDD
-        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut);
+        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);
         $hash = $this->getFields($facids, $taxes);
         $hash = $this->addMargin($hash);
         $hash = $this->addSocieteURL($hash);
@@ -63,8 +63,8 @@ class BimpStatsFacture {
         return $out;
     }
 
-    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut) {
-
+    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats) {
+//print_r($etats);echo"\n\n\n";
         $ids = array();
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
@@ -72,24 +72,28 @@ class BimpStatsFacture {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
         $sql .= ' WHERE f.datec >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
-        
-        if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné selected TODO
-            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\')';
+
+        if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected TODO
+            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0")';
             $sql .= ' OR e.type IS NULL)';
         } else if (!empty($types)) {     // Non renseigné NOT selected
             $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
         }
 
         if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected TODO
-            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\')';
+            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
+            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
             $sql .= ' OR e.centre IS NULL';
             $sql .= ' OR fs.centre IS NULL)';
         } else if (!empty($centres)) {
             $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
-            $sql .= '  OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
         }
-
+        
+        if (!empty($etats)) {
+            $sql .= ' AND f.fk_statut IN (\'' . implode("','", $etats) . '\')';
+        }
+//echo  'AND (f.fk_statut IN (\'' . implode("','", $etats) . '\')';
         if ($statut == 'p') // payed
             $sql .= ' AND f.paye = 1';
         elseif ($statut == 'u') //unpayed
@@ -130,6 +134,7 @@ class BimpStatsFacture {
 //        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list_members as sp ON f.rowid = e.fk_object';
 
         $sql .= ' WHERE f.rowid IN (\'' . implode("','", $facids) . '\')';
+        $sql .= ' ORDER BY f.rowid';
 
         dol_syslog(get_class($this) . "::getFields sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
@@ -146,8 +151,8 @@ class BimpStatsFacture {
                 $hash[$ind]['pai_id'] = $obj->pai_id;
                 $hash[$ind]['pai_ref'] = $obj->pai_ref;
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
-                $hash[$ind]['centre'] = $obj->centre;
-                $hash[$ind]['type'] = $obj->type;
+                $hash[$ind]['ct'] = ($obj->centre != "0" and $obj->centre != '') ? $obj->centre : 0;
+                $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '') ? $obj->type : 0;
                 $ind++;
             }
         }
@@ -157,33 +162,39 @@ class BimpStatsFacture {
     private function addMargin($hash) {
 
         foreach ($hash as $id => $h) {
-            $sql = 'SELECT buy_price_ht, total_ht';
+            $sql = 'SELECT buy_price_ht, total_ht, qty';
             $sql.= ' FROM ' . MAIN_DB_PREFIX . 'facturedet';
             $sql .= ' WHERE  fk_facture =' . $h['fac_id'];
             dol_syslog(get_class($this) . "::addMargin sql=" . $sql, LOG_DEBUG);
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {
-                    $pa = $obj->total_ht;
-                    $pv = $obj->buy_price_ht;
+                    $pa = $obj->buy_price_ht * $obj->qty;
+                    $pv = $obj->total_ht;
                     if ($pa < 0)
                         $pa = -$pa;
                     if ($pv < 0) {
-                        $pv = -$pv;
                         $pa = -$pa;
                     }
-                    $hash[$id]['marge'] += $pa - $pv;
+                    $hash[$id]['marge'] += $pv - $pa;
                 }
             }
         }
         return $hash;
     }
 
+//                        
+
+    function formatPrice($in) {
+        $out = str_replace(',', '.', $in);
+        return price($out) . " €";
+    }
+
     private function addSocieteURL($hash) {
         foreach ($hash as $ind => $h) {
             $soc = new Societe($this->db);
             $soc->id = $h['soc_id'];
-            $soc->nom = $h['soc_nom'];
+            $soc->name = $h['soc_nom'];
             $hash[$ind]['socurl'] = $soc->getNomUrl(1);
             unset($hash[$ind]['soc_id']);
             unset($hash[$ind]['soc_nom']);
@@ -275,77 +286,52 @@ class BimpStatsFacture {
 
     private function convertCenter($hash, $centres) {
         foreach ($hash as $ind => $h) {
-            $hash[$ind]['ct'] = $h['centre'];
-            $hash[$ind]['centre'] = $centres[$h['centre']];
+            $hash[$ind]['centre'] = $centres[$h['ct']];
         }
         return $hash;
     }
 
     private function convertType($hash, $types) {
         foreach ($hash as $ind => $h) {
-            $hash[$ind]['ty'] = $h['type'];
-            $hash[$ind]['type'] = $types[$h['type']];
+            $hash[$ind]['type'] = $types[$h['ty']];
         }
         return $hash;
     }
 
     private function sortHash($hash, $sortBy) {
         $out = array();
-        $type = array();
-        $facid = array();
-        $centre = array();
 
-        if (empty($sortBy)) {
-            $out[] = array('title' => 'Tous les centres et tous les types', 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => $hash);
-        } else if (sizeof($sortBy) == 2) {
-            foreach ($hash as $key => $row) {
-                $type[$key] = $row['type'];
-                $centre[$key] = $row['centre'];
-                $facid[$key] = $row['fac_id'];
+        foreach ($hash as $row) {
+            if (sizeof($sortBy) == 2) {
+                $filtre = $row['ty'] . '_' . $row['ct'];
+                $title = $row['centre'] . " - " . $row['type'];
+            } elseif (sizeof($sortBy) == 0){
+                $filtre = 'all';
+                $title = 'Tous les centres et tous les types';
+            } elseif ($sortBy[0] == 't') {
+                $filtre = $row['ty'];
+                $title =  $row['type'];
+            } elseif ($sortBy[0] == 'c') {
+                $filtre = $row['ct'];
+                $title = $row['centre'];
             }
-            array_multisort($type, SORT_ASC, $centre, SORT_ASC, $facid, SORT_ASC, $hash);
-
-            foreach ($hash as $key => $row) {
-                if ($key == 0 or $row['type'] != $prevRow['type'] or $row['centre'] != $prevRow['centre']) {
-                    $title = $row['centre'] . " - " . $row['type'];
-                    $out[$row['ty'] . '_' . $row['ct']] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
-                }
-                $out[$row['ty'] . '_' . $row['ct']]['total_total'] += $row['factotal'];
-                $out[$row['ty'] . '_' . $row['ct']]['total_total_marge'] += $row['marge'];
-                $out[$row['ty'] . '_' . $row['ct']]['total_payer'] += $row['paipaye_ttc'];
-                $out[$row['ty'] . '_' . $row['ct']]['factures'][] = $row;
-                $prevRow = $row;
+            
+            if (!isset($out[$filtre])) {
+                $out[$filtre] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
             }
-        } else if (sizeof($sortBy) == 1 and $sortBy[0] == 't') {    // sort by type
-            foreach ($hash as $key => $row) {
-                $type[$key] = $row['type'];
-                $facid[$key] = $row['fac_id'];
-            }
-            array_multisort($type, SORT_ASC, $facid, SORT_ASC, $hash);
-
-            foreach ($hash as $key => $row) {
-                if ($key == 0 or $row['type'] != $prevRow['type']) {
-                    $title = $row['type'];
-                    $out[$row['ty']] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
-                }
-                $out[$row['ty']]['factures'][] = $row;
-                $prevRow = $row;
-            }
-        } else {   // sort by center
-            foreach ($hash as $key => $row) {
-                $centre[$key] = $row['centre'];
-                $facid[$key] = $row['fac_id'];
-            }
-            array_multisort($centre, SORT_ASC, $facid, SORT_ASC, $hash);
-
-            foreach ($hash as $key => $row) {
-                if ($key == 0 or $row['centre'] != $prevRow['centre']) {
-                    $title = $row['centre'];
-                    $out[$row['ct']] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
-                }
-                $out[$row['ct']]['factures'][] = $row;
-                $prevRow = $row;
-            }
+            $out[$filtre]['total_total'] += $row['factotal'];
+            $out[$filtre]['total_total_marge'] += $row['marge'];
+            $out[$filtre]['total_payer'] += $row['paipaye_ttc'];
+            $row['factotal'] = $this->formatPrice($row['factotal']);
+            $row['marge'] = $this->formatPrice($row['marge']);
+            $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
+            $out[$filtre]['factures'][] = $row;
+        }
+        
+        foreach ($out as $key => $inut) {
+            $out[$key]['total_total'] = $this->formatPrice($out[$key]['total_total']);
+            $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
+            $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
         }
         return $out;
     }

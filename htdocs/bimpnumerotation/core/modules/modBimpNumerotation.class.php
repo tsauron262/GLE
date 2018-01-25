@@ -86,7 +86,7 @@ class modBimpNumerotation extends DolibarrModules
 		// for default path (eg: /mymodule/core/xxxxx) (0=disable, 1=enable)
 		// for specific path of parts (eg: /mymodule/core/modules/barcode)
 		// for specific css file (eg: /mymodule/css/mymodule.css.php)
-		$this->module_parts = array("triggers" =>0,
+		$this->module_parts = array("triggers" =>1,
                     "models" => 1);
 
 		// Data directories to create when module is enabled.
@@ -94,7 +94,7 @@ class modBimpNumerotation extends DolibarrModules
 		$this->dirs = array("/bimpnumerotation/data");
 
 		// Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
-		$this->config_page_url = array("setup.php@mymodule");
+//		$this->config_page_url = array("setup.php@mymodule");
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module

@@ -28,15 +28,19 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             format: format,
             action: 'getFactures'
         },
-        async: false,
         error: function () {
             console.log("Erreur PHP");
         },
         success: function (objOut) {
+            groupes = JSON.parse(objOut);
+            $('#forArray').empty();
+            if (taxes === 'ttc')
+                taxesOrNot = 'Total TTC';
+            else
+                taxesOrNot = 'Total HT';
+            displayArray(taxesOrNot);
             $('#go').show();
             $('#waiting').removeClass('loading');
-
-            groupes = JSON.parse(objOut);
         }
     });
 }
@@ -59,6 +63,7 @@ $(document).ready(function () {
     initButtonFillAndEmpty();
 
     $('#go').on('click', function () {
+        $(this).hide();
         valider();
     });
 });
@@ -69,7 +74,6 @@ function valider() {
     if (dateEnd < dateStart) {
         alert('La date de début doit être antérieur à la date de fin.');
     } else {
-        $('#go').hide();
         $('#waiting').addClass('loading');
         var types = $('#type').val();
         var centres = $('#centre').val();
@@ -85,12 +89,6 @@ function valider() {
             etats.push($(this).val());
         });
         getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format);
-        $('#forArray').empty();
-        if (taxes === 'ttc')
-            taxesOrNot = 'Total TTC';
-        else
-            taxesOrNot = 'Total HT';
-        displayArray(taxesOrNot);
     }
 }
 

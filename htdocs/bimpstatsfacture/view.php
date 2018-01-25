@@ -99,19 +99,22 @@ print '<tr><td>Statut (unique)</td><td>
 
 // Prix
 print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Prix (unique)</td><td>
-<input id="priceTTC" name="priceTaxes" type="radio" value="ttc" checked>
-<label for="priceTTC">TTC</label>
-
-<input id="priceHT" name="priceTaxes" type="radio" value="ht" >
+<input id="priceHT" name="priceTaxes" type="radio" value="ht" checked>
 <label for="priceHT">HT</label>
+
+<input id="priceTTC" name="priceTaxes" type="radio" value="ttc">
+<label for="priceTTC">TTC</label>
 </td></tr>';
 
 // Format
 print '<tr><td>Format (unique)</td><td>
-<input id="formatHTML" name="formatOutput" type="radio" value="HTML" checked>
-<label for="formatHTML">HTML</label>
+<input id="formatDetail" name="formatOutput" type="radio" value="d" checked>
+<label for="formatDetail">HTML détail</label>
 
-<input id="formatCSV" name="formatOutput" type="radio" value="CSV" >
+<input id="formatReduit" name="formatOutput" type="radio" value="r">
+<label for="formatReduit">HTML réduit</label>
+
+<input id="formatCSV" name="formatOutput" type="radio" value="c" >
 <label for="formatCSV">CSV</label>
 </td></tr>';
 
@@ -122,8 +125,15 @@ print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multi
 <label for="sortByType">Type</label>
 
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >
-<label for="sortByCentre">Centre</label>
-</td></tr>';
+<label for="sortByCentre">Centre</label>';
+
+//print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="tg" >
+//<label for="sortByTypeGarantie">Type de garantie</label>
+//
+//<input id="sortByEquipement" name="sortBy" type="checkbox" value="e" >
+//<label for="sortByEquipement">Equipement</label>';
+
+print '</td></tr>';
 
 print '</table>';
 

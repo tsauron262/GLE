@@ -36,7 +36,7 @@ if (! defined('NOREQUIREHTML'))   define('NOREQUIREHTML',1);
 if (! defined('NOREQUIREAJAX'))   define('NOREQUIREAJAX','1');
 
 // Colors
-$colorbackhmenu1='80,90,120';      // topmenu
+$colorbackhmenu1='26, 101, 26';      // topmenu
 $colorbackvmenu1='255,255,255';      // vmenu
 $colortopbordertitle1='120,120,120';    // top border of title
 $colorbacktitle1='230,230,233';      // title of tables,list

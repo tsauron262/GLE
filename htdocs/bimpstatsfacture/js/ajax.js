@@ -6,14 +6,12 @@
 
 var groupes;
 var taxesOrNot;
-var sortType = false;
-var sortCenter = false;
 
 /**
  * Ajax functions
  */
 
-function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes) {
+function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format) {
 
     $.ajax({
         type: "POST",
@@ -26,6 +24,8 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             statut: statut,
             sortBy: sortBy,
             taxes: taxes,
+            etats: etats,
+            format: format,
             action: 'getFactures'
         },
         async: false,
@@ -33,6 +33,9 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             console.log("Erreur PHP");
         },
         success: function (objOut) {
+            $('#go').show();
+            $('#waiting').removeClass('loading');
+
             groupes = JSON.parse(objOut);
         }
     });
@@ -66,23 +69,22 @@ function valider() {
     if (dateEnd < dateStart) {
         alert('La date de début doit être antérieur à la date de fin.');
     } else {
+        $('#go').hide();
+        $('#waiting').addClass('loading');
         var types = $('#type').val();
         var centres = $('#centre').val();
         var statut = $("input[type='radio'][name='statutPayment']:checked").val();
         var taxes = $("input[type='radio'][name='priceTaxes']:checked").val();
+        var format = $("input[type='radio'][name='formatOutput']:checked").val();
+        var etats = [];
         var sortBy = [];
         $("input[type='checkbox'][name='sortBy']:checked").each(function () {
             sortBy.push($(this).val());
-            if ($(this).val() === 'c')
-                sortCenter = true;
-            else
-                sortCenter = false;
-            if ($(this).val() === 't')
-                sortType = true;
-            else
-                sortType = false;
         });
-        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes);
+        $("input[type='checkbox'][name='etat']:checked").each(function () {
+            etats.push($(this).val());
+        });
+        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format);
         $('#forArray').empty();
         if (taxes === 'ttc')
             taxesOrNot = 'Total TTC';
@@ -138,7 +140,7 @@ function getDate(id) {
 
 function displayArray(taxesOrNot) {
     var prevFactureId;
-    ligne =0;  // dev TODO remove
+    ligne = 0;  // dev TODO remove
     for (var key in groupes) {
         initTable(taxesOrNot, groupes[key], key);
         for (var i = 0; i < groupes[key].factures.length; i++) {
@@ -199,81 +201,4 @@ function addTotaux(groupe, key) {
                 .html(elt)
                 .appendTo('#tr' + key + 'end');
     });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function sortFactures() {
-    if (sortType && sortCenter) {
-        factures.sort(function (a, b) {
-            if (a.type < b.type)
-                return -1;
-            if (a.type > b.type)
-                return 1;
-
-            if (a.centre < b.centre)
-                return -1;
-            if (a.centre > b.centre)
-                return 1;
-
-            return 0;
-        });
-    } else if (sortType) {
-        factures.sort(function (a, b) {
-            if (a.type < b.type)
-                return -1;
-            if (a.type > b.type)
-                return 1;
-
-            return 0;
-        });
-    } else {
-        factures.sort(function (a, b) {
-            if (a.centre < b.centre)
-                return -1;
-            if (a.centre > b.centre)
-                return 1;
-
-            return 0;
-        });
-    }
-}
-
-
-
-function objToArray() {
-    var tmp = [];
-    for (var key in factures) {
-        tmp.push(factures[key]);
-    }
-    factures = tmp;
 }

@@ -35,6 +35,13 @@ require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
 class BimpStatsFacture {
 
     /**
+     * 'd' => HTML détail
+     * 'r' => HTML réduit
+     * 'c' => CSV
+     */
+    private $mode;
+
+    /**
      * 	Constructor
      *
      *  @param		DoliDB		$db     Database handler
@@ -49,31 +56,22 @@ class BimpStatsFacture {
 
     public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format) {
         // TODO MAJ BDD
+        $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);
         $hash = $this->getFields($facids, $taxes);
         $hash = $this->addMargin($hash);
-        if ($format == 'CSV') {
-            $isCsv = true;
-            $hash = $this->addSocieteURL($hash, $isCsv);
-            $hash = $this->addFactureURL($hash, $isCsv);
-            $hash = $this->addPaiementURL($hash, $isCsv);
-            $t_to_types = $this->getExtrafieldArray('facture', 'type');
-            $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
-            $hash = $this->convertType($hash, $t_to_types);
-            $hash = $this->convertCenter($hash, $c_to_centres);
-            $out = $this->sortHash($hash, $sortBy);
-            $this->putCsv($out);
-        } else {
+        if ($this->mode == 'd') {
             $hash = $this->addSocieteURL($hash);
             $hash = $this->addFactureURL($hash);
             $hash = $this->addPaiementURL($hash);
-            $t_to_types = $this->getExtrafieldArray('facture', 'type');
-            $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
-            $hash = $this->convertType($hash, $t_to_types);
-            $hash = $this->convertCenter($hash, $c_to_centres);
-            $out = $this->sortHash($hash, $sortBy);
-            $this->putCsv($out);
         }
+        $t_to_types = $this->getExtrafieldArray('facture', 'type');
+        $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
+        $hash = $this->convertType($hash, $t_to_types);
+        $hash = $this->convertCenter($hash, $c_to_centres);
+        $out = $this->sortHash($hash, $sortBy);
+        if ($this->mode != 'c')
+            $this->putCsv($out);
         return $out;
     }
 
@@ -154,13 +152,13 @@ class BimpStatsFacture {
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
                 $hash[$ind]['fac_id'] = $obj->fac_id;
-                $hash[$ind]['fac_nom'] = $obj->fac_number;
+                $hash[$ind]['nom_facture'] = $obj->fac_number;
                 $hash[$ind]['fac_statut'] = $obj->fac_statut;
                 $hash[$ind]['factotal'] = $obj->fac_total;
                 $hash[$ind]['soc_id'] = $obj->soc_id;
-                $hash[$ind]['soc_nom'] = $obj->soc_nom;
+                $hash[$ind]['nom_societe'] = $obj->soc_nom;
                 $hash[$ind]['pai_id'] = $obj->pai_id;
-                $hash[$ind]['pai_ref'] = $obj->pai_ref;
+                $hash[$ind]['ref_paiement'] = $obj->pai_ref;
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
                 $hash[$ind]['ct'] = ($obj->centre != "0" and $obj->centre != '') ? $obj->centre : 0;
                 $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '') ? $obj->type : 0;
@@ -199,32 +197,23 @@ class BimpStatsFacture {
         return price($out) . " €";
     }
 
-    private function addSocieteURL($hash, $isCsv = false) {
+    private function addSocieteURL($hash) {
         foreach ($hash as $ind => $h) {
             $soc = new Societe($this->db);
-            if ($isCsv) {
-                $hash[$ind]['nom_societe'] = $soc->name;
-            } else {
-                $soc->id = $h['soc_id'];
-                $soc->name = $h['soc_nom'];
-                $hash[$ind]['socurl'] = $soc->getNomUrl(1);
-            }
+            $soc->id = $h['soc_id'];
+            $soc->name = $h['nom_societe'];
+            $hash[$ind]['nom_societe'] = $soc->getNomUrl(1);
             unset($hash[$ind]['soc_id']);
-            unset($hash[$ind]['soc_nom']);
         }
         return $hash;
     }
 
-    private function addFactureURL($hash, $isCsv = false) {
+    private function addFactureURL($hash) {
         foreach ($hash as $ind => $h) {
             $facture = new Facture($this->db);
-            if ($isCsv) {
-                $hash[$ind]['nom facture'] = $h['fac_nom'];
-            } else {
-                $facture->id = $h['fac_id'];
-                $facture->ref = $h['fac_nom'];
-                $hash[$ind]['facurl'] = $facture->getNomUrl(1);
-            }
+            $facture->id = $h['fac_id'];
+            $facture->ref = $h['nom_facture'];
+            $hash[$ind]['nom_facture'] = $facture->getNomUrl(1);
             switch ($h['fac_statut']) {
                 case $facture::STATUS_DRAFT: {
                         $hash[$ind]['facstatut'] = "Brouillon";
@@ -244,25 +233,19 @@ class BimpStatsFacture {
                     }
                 default: break;
             }
-            unset($hash[$ind]['fac_nom']);
             unset($hash[$ind]['fac_statut']);
         }
         return $hash;
     }
 
-    private function addPaiementURL($hash, $isCsv = false) {
+    private function addPaiementURL($hash) {
         foreach ($hash as $ind => $h) {
             if (isset($h['pai_id'])) {
                 $pai = new Paiement($this->db);
-                if ($isCsv) {
-                    $hash[$ind]['ref_paiement'];
-                } else {
                     $pai->id = $h['pai_id'];
-                    $pai->ref = $h['pai_ref'];
-                    $hash[$ind]['paiurl'] = $pai->getNomUrl(1, '', '');
-                }
+                    $pai->ref = $h['ref_paiement'];
+                    $hash[$ind]['ref_paiement'] = $pai->getNomUrl(1, '', '');
             }
-            unset($hash[$ind]['pai_ref']);
         }
         return $hash;
     }
@@ -346,13 +329,16 @@ class BimpStatsFacture {
             $row['factotal'] = $this->formatPrice($row['factotal']);
             $row['marge'] = $this->formatPrice($row['marge']);
             $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
-            $out[$filtre]['factures'][] = $row;
+            $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
+            if ($this->mode != 'r')
+                $out[$filtre]['factures'][] = $row;
         }
 
         foreach ($out as $key => $inut) {
             $out[$key]['total_total'] = $this->formatPrice($out[$key]['total_total']);
             $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
             $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
+            $out[$key]['nb_facture'] = count($out[$key]['nb_facture']);
         }
         sort($out);
         return $out;
@@ -366,7 +352,7 @@ class BimpStatsFacture {
         foreach ($factures as $factureTab) {
             $tabHeadIsOk = false;
             $sortie .= $sautLn;
-            $sortie .= "Tableau : " . $facureTab["title"];
+            $sortie .= "Tableau : " . $factureTab["title"];
             $sortie .= $sautLn;
             $sortie .= $sautLn;
             $sortie .= $sautLn;

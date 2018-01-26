@@ -165,7 +165,7 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type'];
+    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Numéro de série', 'Type de garantie', 'id SAV'];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
@@ -177,7 +177,7 @@ function fillTable(facture, key, prevFactureId) {
     if (prevFactureId === facture.fac_id)
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
     else
-        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type];
+        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.numero_serie, facture.type_garantie, facture.sav_id];
 
     $('<tr></tr>')
             .attr('id', 'tr' + facture.fac_id + facture.pai_id)
@@ -190,7 +190,7 @@ function fillTable(facture, key, prevFactureId) {
 }
 
 function addTotaux(groupe, key) {
-    arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', ''];
+    arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
 
     $('<tr></tr>')
             .attr('id', 'tr' + key + 'end')

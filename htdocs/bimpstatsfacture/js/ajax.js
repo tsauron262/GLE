@@ -165,7 +165,7 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Numéro de série', 'Type de garantie', 'id SAV'];
+    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'id SAV'];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
@@ -177,7 +177,7 @@ function fillTable(facture, key, prevFactureId) {
     if (prevFactureId === facture.fac_id)
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
     else
-        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.numero_serie, facture.type_garantie, facture.sav_id];
+        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_id];
 
     $('<tr></tr>')
             .attr('id', 'tr' + facture.fac_id + facture.pai_id)

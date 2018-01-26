@@ -124,10 +124,10 @@ print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multi
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >
 <label for="sortByCentre">Centre</label>
 
-<input id="sortByType" name="sortBy" type="checkbox" value="s">
+<input id="sortByType" name="sortBy" type="checkbox" value="t">
 <label for="sortByType">Secteur</label>';
 
-print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="tg" >
+print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="g" >
 <label for="sortByTypeGarantie">Type de garantie</label>
 
 <input id="sortByEquipement" name="sortBy" type="checkbox" value="e" >

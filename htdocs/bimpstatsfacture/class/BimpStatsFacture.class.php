@@ -55,6 +55,7 @@ class BimpStatsFacture {
     }
 
     /* Main function, triggered when the user click on "Valider" button */
+
     public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format) {
         // TODO MAJ BDD
         $this->mode = $format;
@@ -77,6 +78,7 @@ class BimpStatsFacture {
     }
 
     /* Filter facture */
+
     private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats) {
         $ids = array();
         $sql = 'SELECT f.rowid as facid';
@@ -133,7 +135,7 @@ class BimpStatsFacture {
         $sql .= ' e.centre as centre, e.type as type,';
         $sql .= ' fs.centre as centre, fs.idSav as sav_id,';
         $sql .= ' pf.amount as pai_paye_ttc,';
-        $sql .= ' sy.ref as equip_ref,';
+        $sql .= ' sy.model_refid as equip_ref,';
         $sql .= ' sy_101.N__Serie as numero_serie, sy_101.Type_garantie as type_garantie,';
 
         if ($taxes == 'ttc')
@@ -298,7 +300,6 @@ class BimpStatsFacture {
                 }
             }
         }
-
         return $out;
     }
 
@@ -353,8 +354,8 @@ class BimpStatsFacture {
         $out = array();
 
         (in_array('c', $sortBy)) ? $sortCenter = true : $sortCenter = false;
-        (in_array('t', $sortBy)) ? $sortSecteur = true : $sortSecteur = false;
-        (in_array('tg', $sortBy)) ? $sortTypeGarantie = true : $sortTypeGarantie = false;
+        (in_array('t', $sortBy)) ? $sortType = true : $sortType = false;
+        (in_array('g', $sortBy)) ? $sortTypeGarantie = true : $sortTypeGarantie = false;
         (in_array('e', $sortBy)) ? $sortEquipement = true : $sortEquipement = false;
 
         if ($sortTypeGarantie) {
@@ -367,7 +368,7 @@ class BimpStatsFacture {
         foreach ($hash as $row) {
             if (empty($sortBy)) {
                 $filtre = 'all';
-                $title = 'Tous les centres et tous les types';
+                $title = 'Toutes les factures';
             } else {
                 $title = '';
                 $filtre = '';
@@ -375,30 +376,29 @@ class BimpStatsFacture {
                     $filtre .= $row['ct'];
                     $title .= $row['centre'] . ' - ';
                 }
-                if ($sortSecteur) {
+                if ($sortType) {
                     $filtre .= $row['ty'];
                     $title .= $row['type'] . ' - ';
                 }
                 if ($sortTypeGarantie) {
-//                    echo "\n\n".array_search($row['type_garantie'], $allTypeGarantie). ' ' . $row['type_garantie'] . "\n\n";
                     $ind = array_search($row['type_garantie'], $allTypeGarantie);
-                    if ($ind != false) {
-                        $filtre .= $ind . ' ';
+//                    if ($ind == '' or $ind != false) {
+                        $filtre .= $ind . '_';
                         $title .= $row['type_garantie'] . ' - ';
-                    } else {
-                        $filtre .= '0_';
-                        $title .= ' Type de garantie non définit - ';
-                    }
+//                    } else {
+//                        $filtre .= 'undef_';
+//                        $title .= ' Type de garantie non définit - ';
+//                    }
                 }
                 if ($sortEquipement) {
                     $ind = array_search($row['equip_ref'], $allEquipement);
-                    if ($ind != false) {
-                        $filtre .= $ind . ' ';
+//                    if ($ind != false) {
+                        $filtre .= $ind . '_';
                         $title .= $row['equip_ref'] . ' - ';
-                    } else {
-                        $filtre .= '0_';
-                        $title .= ' Equipement non définit - ';
-                    }
+//                    } else {
+//                        $filtre .= 'undef_';
+//                        $title .= ' Equipement non définit - ';
+//                    }
                 }
                 $title = substr($title, 0, -2);
             }
@@ -446,14 +446,14 @@ class BimpStatsFacture {
 
     function getEquipements() {
         $equipements = array();
-        $sql = 'SELECT DISTINCT ref';
+        $sql = 'SELECT DISTINCT model_refid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'synopsischrono';
 
         dol_syslog(get_class($this) . "::getEquipement sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $equipements[] = $obj->ref;
+                $equipements[] = $obj->model_refid;
             }
         }
         return $equipements;

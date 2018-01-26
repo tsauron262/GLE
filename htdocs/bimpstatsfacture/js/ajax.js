@@ -34,6 +34,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
         success: function (objOut) {
             groupes = JSON.parse(objOut);
             $('#forArray').empty();
+            $('#sommaire').empty();
             if (taxes === 'ttc')
                 taxesOrNot = 'Total TTC';
             else
@@ -154,8 +155,11 @@ function displayArray(taxesOrNot) {
 
 function initTable(taxesOrNot, facture, key) {
     $('<h2></h2>')
+            .attr('id', 'title' + key)
             .text(facture.title)
             .appendTo('#forArray');
+    
+    $('<a href="#title' + key + '">'+facture.title+'</a><br/>').appendTo('#sommaire');
 
     $('<table></table>')
             .attr('id', 'table' + key)

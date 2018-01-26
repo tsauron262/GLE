@@ -141,6 +141,9 @@ print '</table>';
 print '<br><input id="go" type="button" class="butAction round" value="Valider"><br>';
 print ' <div id="waiting"></div><br>';
 
+print '<h3>Sommaire</h3>';
+print '<div id="sommaire" style="display:block"></div>';
+
 print '<div id="forArray"></div>';
 
 

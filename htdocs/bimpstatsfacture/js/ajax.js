@@ -34,6 +34,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
         success: function (objOut) {
             groupes = JSON.parse(objOut);
             $('#forArray').empty();
+            $('#sommaire').empty();
             if (taxes === 'ttc')
                 taxesOrNot = 'Total TTC';
             else
@@ -154,8 +155,11 @@ function displayArray(taxesOrNot) {
 
 function initTable(taxesOrNot, facture, key) {
     $('<h2></h2>')
+            .attr('id', 'title' + key)
             .text(facture.title)
             .appendTo('#forArray');
+    
+    $('<a href="#title' + key + '">'+facture.title+'</a><br/>').appendTo('#sommaire');
 
     $('<table></table>')
             .attr('id', 'table' + key)
@@ -165,7 +169,7 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type'];
+    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'id SAV'];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
@@ -177,7 +181,7 @@ function fillTable(facture, key, prevFactureId) {
     if (prevFactureId === facture.fac_id)
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
     else
-        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type];
+        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_id];
 
     $('<tr></tr>')
             .attr('id', 'tr' + facture.fac_id + facture.pai_id)
@@ -190,7 +194,7 @@ function fillTable(facture, key, prevFactureId) {
 }
 
 function addTotaux(groupe, key) {
-    arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', ''];
+    arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
 
     $('<tr></tr>')
             .attr('id', 'tr' + key + 'end')

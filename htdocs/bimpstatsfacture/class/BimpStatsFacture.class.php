@@ -438,12 +438,14 @@ class BimpStatsFacture {
             if (!isset($out[$filtre])) {
                 $out[$filtre] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
             }
-            $out[$filtre]['total_total'] += $row['factotal'];
-            $out[$filtre]['total_total_marge'] += $row['marge'];
             $out[$filtre]['total_payer'] += $row['paipaye_ttc'];
-            $row['factotal'] = $this->formatPrice($row['factotal']);
-            $row['marge'] = $this->formatPrice($row['marge']);
-            $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
+            
+            if(!isset($out[$filtre]['nb_facture'][$row['fac_id']])){//La facture n'est pas encore traité sinon deuxieme paiement
+                $out[$filtre]['total_total'] += $row['factotal'];
+                $out[$filtre]['total_total_marge'] += $row['marge'];
+                $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
+            }
+            
             unset($row['fac_statut']);
             unset($row['soc_id']);
 //            unset($row['pai_id']);
@@ -451,9 +453,15 @@ class BimpStatsFacture {
             unset($row['ty']);
             unset($row['sav_id']);
             unset($row['saf_refid']);
-            $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
-            if ($this->mode != 'r')
+            
+            if ($this->mode != 'r'){
+                //Formatae des données
+                $row['factotal'] = $this->formatPrice($row['factotal']);
+                $row['marge'] = $this->formatPrice($row['marge']);
+                $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
+                
                 $out[$filtre]['factures'][] = $row;
+            }
         }
 
         foreach ($out as $key => $inut) {

@@ -40,7 +40,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             $('#linkCsv').empty();
 
             if (format === 'c') {
-                $('<text>Télécharger le fichier : </text><a href="' + groupes.urlCsv + '" download>' + nomFichier + '.csv</a>').appendTo('#linkCsv');
+                $(groupes.urlCsv).appendTo('#linkCsv');
                 delete(groupes.urlCsv);
             }
             if (taxes === 'ttc')

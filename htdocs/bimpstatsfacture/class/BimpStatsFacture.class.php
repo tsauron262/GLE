@@ -77,7 +77,7 @@ class BimpStatsFacture {
         $out = $this->sortHash($hash, $sortBy);
         if ($this->mode == 'c') {
             $this->putCsv($out, $nomFichier);
-            $out['urlCsv'] = DOL_DATA_ROOT . '/' . $nomFichier . '.csv';
+            $out['urlCsv'] = "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&attachment=1&file=/export/exportGle/" . $nomFichier . ".csv' class='butAction'>Fichier</a>";
         }
         return $out;
     }
@@ -94,21 +94,34 @@ class BimpStatsFacture {
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
-            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', 0, 1)';
+            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
             $sql .= ' OR e.type IS NULL)';
         } else if (!empty($types)) {     // Non renseigné NOT selected
             $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
         }
 
-        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
-            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
-            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
-            $sql .= ' OR e.centre IS NULL';
-            $sql .= ' OR fs.centre IS NULL)';
-        } else if (!empty($centres)) {
-            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
+        $sql .= " AND (";
+        if (!empty($centres)) {
+            $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
             $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+            if (in_array('NRS', $centres)) {
+                $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
+                $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
+            }
+        } else {
+            $sql .= "1";
         }
+        $sql .= ")";
+
+//        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
+//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
+//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
+//            $sql .= ' OR e.centre IS NULL';
+//            $sql .= ' OR fs.centre IS NULL)';
+//        } else if (!empty($centres)) {
+//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
+//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+//        }
 
         if (!empty($etats)) {
             $sql .= ' AND f.fk_statut IN (\'' . implode("','", $etats) . '\')';
@@ -374,7 +387,8 @@ class BimpStatsFacture {
             $sortie .= $sautLn;
             $sortie .= $sautLn;
         }
-        file_put_contents(DOL_DATA_ROOT . "/" . $nomFichier . ".csv", $sortie);
+
+        file_put_contents(DOL_DATA_ROOT . "/synopsischrono/export/exportGle/" . $nomFichier . ".csv", $sortie);
     }
 
     private function sortHash($hash, $sortBy) {
@@ -430,6 +444,13 @@ class BimpStatsFacture {
             $row['factotal'] = $this->formatPrice($row['factotal']);
             $row['marge'] = $this->formatPrice($row['marge']);
             $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
+            unset($row['fac_statut']);
+            unset($row['soc_id']);
+//            unset($row['pai_id']);
+            unset($row['ct']);
+            unset($row['ty']);
+            unset($row['sav_id']);
+            unset($row['saf_refid']);
             $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
             if ($this->mode != 'r')
                 $out[$filtre]['factures'][] = $row;
@@ -440,13 +461,6 @@ class BimpStatsFacture {
             $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
             $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
             $out[$key]['nb_facture'] = count($out[$key]['nb_facture']);
-            unset($out[$key]['fac_statut']);
-            unset($out[$key]['soc_id']);
-            unset($out[$key]['pai_id']);
-            unset($out[$key]['ct']);
-            unset($out[$key]['ty']);
-            unset($out[$key]['sav_id']);
-            unset($out[$key]['saf_refid']);
         }
         sort($out);
         return $out;

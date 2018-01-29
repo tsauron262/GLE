@@ -26,19 +26,3 @@ sections:
                       name: user_currents
                       panel: 1
                       object: inters
-            
-        equipments:
-            label: Equipements
-            sections:
-                - type: list
-                  list:
-                      object:
-                          instance: 
-                              bimp_object: Equipment
-                              
-        test:
-            label: Tests Assos
-            sections:
-                - type: custom
-                  custom: 
-                      callback: renderTestAssos

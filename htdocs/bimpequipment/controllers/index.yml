@@ -1,0 +1,10 @@
+title: Equipements
+bootstrap: 1
+
+sections:
+    - type: list
+      list: 
+          panel: 1
+          object:
+              instance: 
+                  bimp_object: Equipment

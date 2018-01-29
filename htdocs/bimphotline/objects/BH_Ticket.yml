@@ -52,7 +52,9 @@ objects:
 
     equipment: 
         instance: 
-            bimp_object: Equipment
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
             
 associations:
     equipments:

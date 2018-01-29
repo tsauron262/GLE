@@ -19,14 +19,13 @@ sections:
                     view:
                         panel: 1
                         object: equipment
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: equipment
+                        children: places
     - type: buttons
       buttons:
-          - label: Accueil Hotline
-            url:
-                controller: index
-            icon_before: chevron-left
-            classes: 
-                array: btn,btn-primary
           - label: Liste des équipements
             url:
                 controller: index

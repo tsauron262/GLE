@@ -1,4 +1,4 @@
-table: bh_equipment
+table: be_equipment
 controller: equipment
 
 labels:
@@ -31,6 +31,10 @@ objects:
     contrat:
         instance:
             dol_object: contrat
+            
+    places: 
+        instance: 
+            bimp_object: BE_Place
 
 associations:
     contrats:
@@ -94,7 +98,13 @@ fields:
             label:
                 label: nom
                 join_field: label
-                
+    type: 
+        label: Type
+        values: 
+            array: types
+        sortable: 1
+        search: 1
+        
     serial: 
         label: Numéro de série
         type: string
@@ -106,6 +116,11 @@ fields:
             search_on_key_up: 1
             min_chars: 0
         sortable: 1
+        
+    reserved:
+        label: Réservé / transfert en cours
+        type: bool
+        default_value: 0
         
     date_purchase: 
         label: Date d'achat
@@ -186,9 +201,11 @@ forms:
         rows: 
             - field: id_product
             - field: serial
+            - field: type
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
+            - field: reserved
             - field: admin_login
             - field: admin_pword
             - association: contrats
@@ -207,6 +224,8 @@ list:
         id:
             label: ID
             field: id
+        type: 
+            field: type
         product: 
             field: id_product
             display: nom_url
@@ -218,6 +237,9 @@ list:
             field: warranty_type
         warranty_end:
             field: date_warranty_end
+        reserved: 
+            label: Réservé
+            field: reserved
     add_form: default
     edit_btn: 1
     delete_btn: 1

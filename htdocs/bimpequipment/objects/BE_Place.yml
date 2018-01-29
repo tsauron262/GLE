@@ -1,0 +1,168 @@
+table: be_equipment_place
+common_fields: 1
+positions: 1
+
+parent_object: Equipment
+parent_id_property: id_equipment
+
+labels:
+    name: emplacement
+    
+objects: 
+    client:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object:
+                field_value: id_client
+        card: societe_card
+        
+    contact:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: contact
+            id_object:
+                field_value: id_contact
+                
+    entrepot:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object: 
+                field_value: id_entrepot
+    
+    user: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: user
+            id_object: 
+                field_value: id_user
+                
+fields: 
+    id_equipment: 
+        label: Equipement
+        type: id_parent
+        
+    type: 
+        label: Type
+        values: 
+            array: types
+    
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        input: 
+            type: search_societe
+            societe_type: customer
+            display_if:
+                input_name: type
+                show_values: 1
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: societe_card
+        depends_on: type
+        
+    id_contact:
+        label: Contact
+        type: id_object
+        object: contact
+        values: 
+            array: contacts
+        input: 
+            display_if:
+                input_name: type
+                show_values: 1
+        display: 
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: contact_card
+        depends_on: type,id_client
+    
+    id_entrepot:
+        label: Entrepôt
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+            display_if:
+                input_name: type
+                show_values: 2
+        display: 
+            nom_url: 
+                type: nom_url
+        depends_on: type
+    
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+            display_if:
+                input_name: type
+                show_values: 3
+        default_value:
+            prop:
+                name: id
+                object: 
+                    global: user
+        display: 
+            nom_url: 
+                type: nom_url
+            card:
+                type: card
+                card: user_card
+        depends_on: type
+        
+    place_name: 
+        label: Nom de l'emplacement
+        input: 
+            display_if: 
+                input_name: type
+                show_values: 4
+        depends_on: type
+        
+    infos: 
+        label: Informations
+        type: text
+        input: 
+            rows: 3
+            auto_expand: 1
+            note: 1
+            
+    date:
+        label: Date d'arrivée
+        type: datetime
+        required: 1
+        
+lists:
+    default: 
+        title: Emplacements
+        icon: map-marker
+        objects_change_reload: BE_Place
+        add_form: default
+        sort_col: position
+        sort_way: asc
+        n: 10
+        add_form: default
+        cols:
+            name: 
+                label: Emplacement
+                value: 
+                    callback: displayPlace 
+            date: 
+                field: date
+            infos: 
+                field: infos

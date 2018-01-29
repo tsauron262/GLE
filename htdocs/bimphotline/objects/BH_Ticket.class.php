@@ -152,7 +152,7 @@ class BH_Ticket extends BimpObject
         $equipments = array();
         $id_contrat = (int) $this->getData('id_contrat');
         if (!is_null($id_contrat) && $id_contrat) {
-            $equipment = BimpObject::getInstance('bimphotline', 'Equipment');
+            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
             $bimpAsso = new BimpAssociation($equipment, 'contrats');
             $equipments = $bimpAsso->getObjectsList($id_contrat);
         }
@@ -162,7 +162,7 @@ class BH_Ticket extends BimpObject
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {
-        $equipment = BimpObject::getInstance('bimphotline', 'Equipment');
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
         if ($equipment->fetch($id_equipment)) {
             $label = '';
             $product = $equipment->config->getObject('', 'product');

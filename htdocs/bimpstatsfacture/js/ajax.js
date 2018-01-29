@@ -169,10 +169,13 @@ function displayArray(taxesOrNot) {
 //        if (key === 'urlCsv') 
 //            next;
         initTable(taxesOrNot, groupes[key], key);
+        $sortie = "";
         for (var i = 0; i < groupes[key].factures.length; i++) {
-            fillTable(groupes[key].factures[i], key, prevFactureId);
+            $sortie += fillTable(groupes[key].factures[i], key, prevFactureId);
             prevFactureId = groupes[key].factures[i].fac_id;
         }
+        $($sortie).appendTo('#table' + key);
+        
         addTotaux(groupes[key], key);
     }
 }
@@ -206,7 +209,7 @@ function fillTable(facture, key, prevFactureId) {
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
     else
         arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
-
+/*
     $('<tr></tr>')
             .attr('id', 'tr' + facture.fac_id + facture.pai_id)
             .appendTo('#table' + key);
@@ -214,7 +217,15 @@ function fillTable(facture, key, prevFactureId) {
         $('<td></td>')
                 .html(elt)
                 .appendTo('#tr' + facture.fac_id + facture.pai_id);
+    });*/
+    
+       
+    sortie = "";
+    arrayOfValue.forEach(function (elt) {
+        sortie += '<td>'+ elt +'</td>';
     });
+    
+     return '<tr id="tr'+ facture.fac_id + facture.pai_id+'">'+sortie+'</tr>';
 }
 
 function addTotaux(groupe, key) {

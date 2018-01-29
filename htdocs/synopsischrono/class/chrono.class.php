@@ -634,7 +634,7 @@ class Chrono extends CommonObject {
 
         if ($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
             $titre = dol_trunc($this->description, 40);
-        else if ($this->model->id != 105 && stripos($option, "nodesc") === false)
+        else if ($this->model->id != 105 && stripos($option, "nodesc") === false && $this->description != "")
             $titre = $this->ref . " : " . dol_trunc($this->description, 25);
         else
             $titre = $this->ref;

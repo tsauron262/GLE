@@ -31,6 +31,7 @@ require_once DOL_DOCUMENT_ROOT . '/margin/lib/margins.lib.php';
 
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
 
 class BimpStatsFacture {
 
@@ -56,7 +57,7 @@ class BimpStatsFacture {
 
     /* Main function, triggered when the user click on "Valider" button */
 
-    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format) {
+    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier) {
         // TODO MAJ BDD
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);    // apply filter
@@ -66,14 +67,18 @@ class BimpStatsFacture {
             $hash = $this->addSocieteURL($hash);
             $hash = $this->addFactureURL($hash);
             $hash = $this->addPaiementURL($hash);
+            $hash = $this->addSavURL($hash);
         }
+        $hash = $this->addStatut($hash);
         $t_to_types = $this->getExtrafieldArray('facture', 'type');
         $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
         $hash = $this->convertType($hash, $t_to_types);
         $hash = $this->convertCenter($hash, $c_to_centres);
         $out = $this->sortHash($hash, $sortBy);
-        if ($this->mode != 'c')
-            $this->putCsv($out);
+        if ($this->mode == 'c') {
+            $this->putCsv($out, $nomFichier);
+            $out['urlCsv'] = DOL_DATA_ROOT . '/' . $nomFichier . '.csv';
+        }
         return $out;
     }
 
@@ -133,9 +138,9 @@ class BimpStatsFacture {
         $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
         $sql .= ' e.centre as centre, e.type as type,';
-        $sql .= ' fs.centre as centre, fs.idSav as sav_id,';
+        $sql .= ' fs.centre as centre, fs.idSav as sav_id, fs.refSav as sav_ref,';
         $sql .= ' pf.amount as pai_paye_ttc,';
-        $sql .= ' sy.model_refid as equip_ref,';
+        $sql .= ' sy.description as description, sy.model_refid as saf_refid,';
         $sql .= ' sy_101.N__Serie as numero_serie, sy_101.Type_garantie as type_garantie,';
 
         if ($taxes == 'ttc')
@@ -171,10 +176,12 @@ class BimpStatsFacture {
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
                 $hash[$ind]['ct'] = ($obj->centre != "0" and $obj->centre != '' and $obj->centre != false) ? $obj->centre : 0;
                 $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
-                $hash[$ind]['equip_ref'] = $obj->equip_ref;
+                $hash[$ind]['equip_ref'] = $obj->description;
                 $hash[$ind]['numero_serie'] = $obj->numero_serie;
                 $hash[$ind]['type_garantie'] = $obj->type_garantie;
                 $hash[$ind]['sav_id'] = $obj->sav_id;
+                $hash[$ind]['sav_ref'] = $obj->sav_ref;
+                $hash[$ind]['saf_refid'] = $obj->saf_refid;
                 $ind++;
             }
         }
@@ -224,12 +231,9 @@ class BimpStatsFacture {
         return $hash;
     }
 
-    private function addFactureURL($hash) {
+    private function addStatut($hash) {
+        $facture = new Facture($this->db);
         foreach ($hash as $ind => $h) {
-            $facture = new Facture($this->db);
-            $facture->id = $h['fac_id'];
-            $facture->ref = $h['nom_facture'];
-            $hash[$ind]['nom_facture'] = $facture->getNomUrl(1);
             switch ($h['fac_statut']) {
                 case $facture::STATUS_DRAFT: {
                         $hash[$ind]['facstatut'] = "Brouillon";
@@ -250,6 +254,29 @@ class BimpStatsFacture {
                 default: break;
             }
             unset($hash[$ind]['fac_statut']);
+        }
+        return $hash;
+    }
+
+    private function addFactureURL($hash) {
+        foreach ($hash as $ind => $h) {
+            $facture = new Facture($this->db);
+            $facture->id = $h['fac_id'];
+            $facture->ref = $h['nom_facture'];
+            $hash[$ind]['nom_facture'] = $facture->getNomUrl(1);
+        }
+        return $hash;
+    }
+
+    private function addSavURL($hash) {
+        foreach ($hash as $ind => $h) {
+            if (isset($h['sav_id'])/* and $h['saf_refid'] == 105 */) {
+                $chrono = new Chrono($this->db);
+                $chrono->id = $h['sav_id'];
+                $chrono->ref = $h['sav_ref'];
+//                $chrono->model_refid = 105;
+                $hash[$ind]['sav_ref'] = $chrono->getNomUrl(1, '', '');
+            }
         }
         return $hash;
     }
@@ -317,7 +344,7 @@ class BimpStatsFacture {
         return $hash;
     }
 
-    function putCsv($factures) {
+    function putCsv($factures, $nomFichier) {
         $sautLn = "\n";
         $sep = ";";
         $sortie = "";
@@ -347,7 +374,7 @@ class BimpStatsFacture {
             $sortie .= $sautLn;
             $sortie .= $sautLn;
         }
-        file_put_contents(DOL_DATA_ROOT . "/file.csv", $sortie);
+        file_put_contents(DOL_DATA_ROOT . "/" . $nomFichier . ".csv", $sortie);
     }
 
     private function sortHash($hash, $sortBy) {
@@ -382,23 +409,13 @@ class BimpStatsFacture {
                 }
                 if ($sortTypeGarantie) {
                     $ind = array_search($row['type_garantie'], $allTypeGarantie);
-//                    if ($ind == '' or $ind != false) {
-                        $filtre .= $ind . '_';
-                        $title .= $row['type_garantie'] . ' - ';
-//                    } else {
-//                        $filtre .= 'undef_';
-//                        $title .= ' Type de garantie non définit - ';
-//                    }
+                    $filtre .= $ind . '_';
+                    $title .= $row['type_garantie'] . ' - ';
                 }
                 if ($sortEquipement) {
                     $ind = array_search($row['equip_ref'], $allEquipement);
-//                    if ($ind != false) {
-                        $filtre .= $ind . '_';
-                        $title .= $row['equip_ref'] . ' - ';
-//                    } else {
-//                        $filtre .= 'undef_';
-//                        $title .= ' Equipement non définit - ';
-//                    }
+                    $filtre .= $ind . '_';
+                    $title .= $row['equip_ref'] . ' - ';
                 }
                 $title = substr($title, 0, -2);
             }
@@ -423,6 +440,13 @@ class BimpStatsFacture {
             $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
             $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
             $out[$key]['nb_facture'] = count($out[$key]['nb_facture']);
+            unset($out[$key]['fac_statut']);
+            unset($out[$key]['soc_id']);
+            unset($out[$key]['pai_id']);
+            unset($out[$key]['ct']);
+            unset($out[$key]['ty']);
+            unset($out[$key]['sav_id']);
+            unset($out[$key]['saf_refid']);
         }
         sort($out);
         return $out;
@@ -446,37 +470,17 @@ class BimpStatsFacture {
 
     function getEquipements() {
         $equipements = array();
-        $sql = 'SELECT DISTINCT model_refid';
+        $sql = 'SELECT DISTINCT description';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'synopsischrono';
 
         dol_syslog(get_class($this) . "::getEquipement sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $equipements[] = $obj->model_refid;
+                $equipements[] = $obj->description;
             }
         }
         return $equipements;
     }
 
-//    function getCentres() {
-//        $centres = array();
-//
-//        $sql = 'SELECT DISTINCT centre';
-//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bimp_factSAV as b';
-//        $sql .= ' UNION';
-//        $sql .= ' SELECT DISTINCT centre';
-//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture_extrafields as f';
-//
-//
-//        dol_syslog(get_class($this) . "::getCentres sql=" . $sql, LOG_DEBUG);
-//        $result = $this->db->query($sql);
-//        if ($result and mysqli_num_rows($result) > 0) {
-//            while ($obj = $this->db->fetch_object($result)) {
-//                $centres[] = ($obj->centre != "0" and $obj->centre != '') ? $obj->centre : 0;
-//            }
-//        }
-//        return $centres;
-//    }
-//        e.type
 }

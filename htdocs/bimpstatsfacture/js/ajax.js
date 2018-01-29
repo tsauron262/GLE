@@ -6,12 +6,13 @@
 
 var groupes;
 var taxesOrNot;
+var format;
 
 /**
  * Ajax functions
  */
 
-function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format) {
+function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier) {
 
     $.ajax({
         type: "POST",
@@ -26,6 +27,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             taxes: taxes,
             etats: etats,
             format: format,
+            nomFichier: nomFichier,
             action: 'getFactures'
         },
         error: function () {
@@ -35,6 +37,12 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             groupes = JSON.parse(objOut);
             $('#forArray').empty();
             $('#sommaire').empty();
+            $('#linkCsv').empty();
+
+            if (format === 'c') {
+                $('<text>Télécharger le fichier : </text><a href="' + groupes.urlCsv + '" download>' + nomFichier + '.csv</a>').appendTo('#linkCsv');
+                delete(groupes.urlCsv);
+            }
             if (taxes === 'ttc')
                 taxesOrNot = 'Total TTC';
             else
@@ -42,6 +50,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             displayArray(taxesOrNot);
             $('#go').show();
             $('#waiting').removeClass('loading');
+
         }
     });
 }
@@ -63,25 +72,28 @@ $(document).ready(function () {
 
     initSelectMultiple();
     initButtonFillAndEmpty();
-
+    initButtonFormat();
     $('#go').on('click', function () {
-        $(this).hide();
         valider();
     });
 });
 
 function valider() {
-    dateStart = getDate('dateStart');
-    dateEnd = getDate('dateEnd');
+    var dateStart = getDate('dateStart');
+    var dateEnd = getDate('dateEnd');
     if (dateEnd < dateStart) {
         alert('La date de début doit être antérieur à la date de fin.');
+    } else if ($("input[type='radio'][name='formatOutput']:checked").val() === 'c' && $('#nomFichier').val() === '') {
+        alert('Veuillez entrer un nom de fichier de sortie valide.');
     } else {
+        $('#go').hide();
         $('#waiting').addClass('loading');
         var types = $('#type').val();
         var centres = $('#centre').val();
         var statut = $("input[type='radio'][name='statutPayment']:checked").val();
         var taxes = $("input[type='radio'][name='priceTaxes']:checked").val();
         var format = $("input[type='radio'][name='formatOutput']:checked").val();
+        var nomFichier = $('#nomFichier').val();
         var etats = [];
         var sortBy = [];
         $("input[type='checkbox'][name='sortBy']:checked").each(function () {
@@ -90,7 +102,7 @@ function valider() {
         $("input[type='checkbox'][name='etat']:checked").each(function () {
             etats.push($(this).val());
         });
-        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format);
+        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier);
     }
 }
 
@@ -132,6 +144,19 @@ function initButtonFillAndEmpty() {
     });
 }
 
+function initButtonFormat() {
+    $("input[type='radio'][name='formatOutput']").on('click', function () {
+        if ($(this).val() === 'c') {
+            $('#divFichier').show();
+            $('#nomFichier').val('nom_du_fichier');
+            $('#nomFichier').select();
+        } else {
+            $('#divFichier').hide();
+        }
+    });
+}
+
+
 /* Get the date in the datepicker as TMS */
 function getDate(id) {
     var date = $('#' + id).datepicker('getDate');
@@ -140,17 +165,16 @@ function getDate(id) {
 
 function displayArray(taxesOrNot) {
     var prevFactureId;
-    ligne = 0;  // dev TODO remove
     for (var key in groupes) {
+//        if (key === 'urlCsv') 
+//            next;
         initTable(taxesOrNot, groupes[key], key);
         for (var i = 0; i < groupes[key].factures.length; i++) {
             fillTable(groupes[key].factures[i], key, prevFactureId);
             prevFactureId = groupes[key].factures[i].fac_id;
-            ligne++;
         }
         addTotaux(groupes[key], key);
     }
-//    console.log("Nombre de ligne total = " + ligne);
 }
 
 function initTable(taxesOrNot, facture, key) {
@@ -158,8 +182,8 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'title' + key)
             .text(facture.title)
             .appendTo('#forArray');
-    
-    $('<a href="#title' + key + '">'+facture.title+'</a><br/>').appendTo('#sommaire');
+
+    $('<a href="#title' + key + '">' + facture.title + '</a><br/>').appendTo('#sommaire');
 
     $('<table></table>')
             .attr('id', 'table' + key)
@@ -169,7 +193,7 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'id SAV'];
+    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV'];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
@@ -179,9 +203,9 @@ function initTable(taxesOrNot, facture, key) {
 function fillTable(facture, key, prevFactureId) {
 
     if (prevFactureId === facture.fac_id)
-        arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.paiurl, facture.paipaye_ttc, facture.centre, facture.type];
+        arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
     else
-        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_id];
+        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
 
     $('<tr></tr>')
             .attr('id', 'tr' + facture.fac_id + facture.pai_id)

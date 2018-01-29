@@ -50,7 +50,6 @@ foreach ($type as $val => $name) {
 }
 print '</select>';
 
-
 print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
 print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
@@ -116,6 +115,8 @@ print '<tr><td>Format (unique)</td><td>
 
 <input id="formatCSV" name="formatOutput" type="radio" value="c" >
 <label for="formatCSV">CSV</label>
+
+<div id="divFichier" style="display:none">Nom du fichier de sortie <input class="round" id="nomFichier"></input><strong>.csv</strong></div>
 </td></tr>';
 
 // Trier par
@@ -140,6 +141,8 @@ print '</table>';
 // Valider
 print '<br><input id="go" type="button" class="butAction round" value="Valider"><br>';
 print ' <div id="waiting"></div><br>';
+
+print ' <div id="linkCsv"></div><br>';
 
 print '<h3>Sommaire</h3>';
 print '<div id="sommaire" style="display:block"></div>';

@@ -258,6 +258,9 @@ $this->menus = array();			// List of menus to add
       $sql = array();
       
         $sql[] = "DELETE FROM `".MAIN_DB_PREFIX."document_model` WHERE `nom` = 'appleretour'";
+        
+        $sql[] = 'CREATE OR REPLACE VIEW '.MAIN_DB_PREFIX.'bimp_factSAV  as (SELECT c.id as idSav, el.fk_target as idFact, el.fk_source as idPropal, c5.Centre FROM `llx_element_element` el, llx_synopsischrono c, llx_synopsischrono_chrono_105 c5 WHERE el.sourcetype = "propal" AND el.targettype = "facture" AND c.propalid = el.fk_source AND c.id = c5.id)';
+        
     return $this->_remove($sql);
   }
 }

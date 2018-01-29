@@ -14,8 +14,8 @@ $langs->load("admin");
 $arrayofcss = array('/bimpgroupmanager/nestable/nestable.css', '/bimpgroupmanager/css/styles.css');
 $arrayofjs = array('/bimpgroupmanager/nestable/jquery.nestable.js', '/bimpgroupmanager/js/group.js');
 
-if (!$user->admin)
-    accessforbidden();
+//if (!$user->admin)
+//    accessforbidden();
 
 $gm = new BimpGroupManager($db);
 

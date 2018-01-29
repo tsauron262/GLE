@@ -1,11 +1,7 @@
 <?php
 
-exit; // Eviter l'exec du script.
-
-// Init BimpCore:
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-// création de l'instance: 
 $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 
 //$types = array(
@@ -37,3 +33,29 @@ $errors = $equipement->create(); // si erreurs est vide, tout est OK.
 $asso = new BimpAssociation($equipement, 'contrats');
 $id_contrat = 123;
 $asso_errors = $asso->addObjectAssociation($id_contrat);
+
+
+// Pour ajouter un emplacement: 
+$emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+//$types = array(
+//        1 => 'Client',
+//        2 => 'Entrepôt',
+//        3 => 'Utilisateur',
+//        4 => 'Champ libre'
+//    );
+
+$emplacement->validateArray(array(
+    'id_equipment' => $equipement->id,
+    'type' => 1, // cf $types
+    'id_client' => 123, // si type = 1
+    'id_contact' => 123, // id contact associé au client
+    'id_entrepot' => 123, // si type = 2
+    'id_user' => 123, // si type = 3
+    'place_name' => '', // Nom de l'emplacement si type = 4
+    'infos' => '...', 
+    'date' => 'AAAA-MM-JJ HH:MM:SS' // date et heure d'arrivée
+));
+
+$errors = $emplacement->create();
+

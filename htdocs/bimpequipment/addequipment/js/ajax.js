@@ -1,7 +1,7 @@
 /* global DOL_URL_ROOT */
 
-var idCurentEntrepot;
-var idCurentProd;
+var idCurrentEntrepot;
+var idCurrentProd;
 var nameCurrentProd;
 var cntEquip = 0;
 
@@ -11,8 +11,8 @@ function addEquipment(serialNumber, currentEquip) {
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/addequipment/interface.php",
         data: {
-            idCurentEntrepot: idCurentEntrepot,
-            idCurentProd: idCurentProd,
+            idCurrentEntrepot: idCurrentEntrepot,
+            idCurrentProd: idCurrentProd,
             serialNumber: serialNumber,
             action: 'addEquipment'
         },
@@ -35,31 +35,32 @@ $(document).ready(function () {
     $('.select2').select2();
     console.log("ready");
 
-    idCurentProd = $('#type').val();
+    idCurrentProd = $('#type').val();
     nameCurrentProd = $('#type option:selected').text();
-    idCurentEntrepot = $('#entrepot').val();
+    idCurrentEntrepot = $('#entrepot').val();
     addFieldEquipment();
 
     $('#type').on('change', function () {
-        idCurentProd = $(this).val();
+        idCurrentProd = $(this).val();
         nameCurrentProd = $('#type option:selected').text();
         console.log('nameCurrentProd' + nameCurrentProd);
+        $('#hereEquipment tr').last().remove();
+        cntEquip--;
         addFieldEquipment();
     });
 
     $('#entrepot').on('change', function () {
-        idCurentEntrepot = $(this).val();
+        idCurrentEntrepot = $(this).val();
     });
 
 });
 
 function addFieldEquipment() {
-    var line = '<text>Numéro de série<text>';
+    var line = '<tr id="' + idCurrentProd +'"><td>' + nameCurrentProd + '</td><td>';
     for (i = 0; i < 3; i++) {
         line += '<input class="subSerialNumber" name="serial" cntEquip="' + cntEquip + '" maxlength="4">';
     }
-    line += '<text>Produit:' + nameCurrentProd + '</text>&nbsp;&nbsp;&nbsp;&nbsp;<text>Note: <text>';
-    line += '<input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"><br/><br/>';
+    line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td></tr>';
     $(line).appendTo('#hereEquipment');
 
     $('input.serial[cntEquip="' + cntEquip + '"]').first().focus();

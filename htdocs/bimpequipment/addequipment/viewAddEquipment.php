@@ -43,7 +43,7 @@ function getAllproducts($db) {
     $result = $db->query($sql);
     if ($result and mysqli_num_rows($result) > 0) {
         while ($obj = $db->fetch_object($result)) {
-            $prods[$obj->rowid] = dol_trunc($obj->label, 25);
+            $prods[$obj->rowid] = dol_trunc($obj->label, 100);
         }
     }
     return $prods;
@@ -84,4 +84,11 @@ foreach ($prods as $id => $name) {
 }
 print '</select>';
 
-print '<div id="hereEquipment" style="margin-top: 20px"></div>';
+print '<table id="hereEquipment">';
+print '<thead>';
+print '<th>Type de produit</th>';
+print '<th>Numéro de série</th>';
+print '<th>Note</th>';
+print '</thead>';
+print '</table>';
+//print '<div id="hereEquipment" style="margin-top: 20px"></div>';

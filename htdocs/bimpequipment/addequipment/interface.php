@@ -13,8 +13,8 @@ require_once '../../main.inc.php';
 
 switch (GETPOST('action')) {
     case 'addEquipment': {
-//            addEquipment($db, GETPOST('idCurentEntrepot'), GETPOST('idCurentProd'), GETPOST('serialNumber'));
-//            $note = getNote($db, GETPOST('idCurentProd'));
+//            addEquipment($db, GETPOST('idCurrentEntrepot'), GETPOST('idCurrentProd'), GETPOST('serialNumber'));
+//            $note = getNote($db, GETPOST('idCurrentProd'));
             $note = 'OK';
             echo json_encode($note);
             break;

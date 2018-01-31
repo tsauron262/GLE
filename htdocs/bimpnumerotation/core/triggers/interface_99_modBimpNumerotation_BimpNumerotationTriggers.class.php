@@ -115,6 +115,10 @@ class InterfaceBimpNumerotationTriggers extends DolibarrTriggers
                         
                         if(isset($object->extraparams[0]) && $object->extraparams[0] == "1"){
                             $this->error = "Déja exportée";
+                            if(in_array($user->id, array(1, 60)) )
+                                    return 0;
+                            
+                            
                             return -1;
                         }
                         return 0;

@@ -10,6 +10,16 @@ var nameCurrentProd;
 var cntEquip = 0;
 var allSerialNumber = [];
 
+/**
+ * Contains equipment object
+ *      serial
+ *      id_entrepot
+ *      id_product
+ * @type Array
+ */
+var newEquipments = [];
+
+
 
 
 
@@ -35,23 +45,53 @@ function checkEquipment(serialNumber, currentEquip) {
             var outDec = JSON.parse(out);
             var responseTd = 'tr#' + currentEquip + ' td text.reponseServeur';
             if (allSerialNumber.includes(serialNumber)) {
-                $(responseTd).text('A déjà scanné.');
+                $(responseTd).text('Déjà scanné.');
                 $(responseTd).css('color', 'red');
-            } else if (outDec.code === -1) {
-                $(responseTd).text('Existe déjà.');
-                $(responseTd).css('color', 'red');
-                allSerialNumber.push(serialNumber);
             } else if (outDec.code === 1) {
                 $(responseTd).text('OK');
                 $(responseTd).css('color', 'green');
                 allSerialNumber.push(serialNumber);
+                var newEquipment = {
+                    serial: serialNumber,
+                    id_entrepot: idCurrentEntrepot,
+                    id_product: idCurrentProd
+                };
+                newEquipments.push(newEquipment);
+            } else if (outDec.code === -1) {
+                $(responseTd).text('Existe déjà.');
+                $(responseTd).css('color', 'red');
+                allSerialNumber.push(serialNumber);
             }
-            $('input.custNote[cntEquip="' + currentEquip + '"]').val('Du texte ... ' + currentEquip);
+            $('input.custNote[cntEquip="' + currentEquip + '"]').val(outDec.note);
+            console.log(newEquipments);
         }
     });
 }
 
+function addEquipment() {
 
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/addequipment/interface.php",
+        data: {
+            newEquipments: newEquipments,
+            action: 'addEquipment'
+        },
+        error: function () {
+            console.log("Erreur PHP");
+        },
+        success: function (out) {
+            var outDec = JSON.parse(out);
+            if (outDec.errors.length !== 0) {
+                alert("Certains équipement n'ont pas pû être enregistrés (cf. console Javascript)");
+                for (i = 0; i < outDec.errors.length; i++) {
+                    console.log("Erreur numéro " + i + " " + outDec.errors[i]);
+                }
+            }
+            alert(outDec.nbNewEquipment + " équipement on été enregistrés avec succès");
+        }
+    });
+}
 
 
 
@@ -62,11 +102,24 @@ function checkEquipment(serialNumber, currentEquip) {
 $(document).ready(function () {
 
     $('#entrepot').select2();
-
     idCurrentEntrepot = $('#entrepot').val();
+    idCurrentProd = productid.value;
     addFieldEquipment();
+    initEvents();
 
+});
+
+
+
+
+
+/**
+ * Functions
+ */
+
+function initEvents() {
     $('#search_productid').on('change', function () {
+        idCurrentProd = productid.value;
         $('#hereEquipment tr').last().remove();
         cntEquip--;
         addFieldEquipment();
@@ -76,15 +129,12 @@ $(document).ready(function () {
         idCurrentEntrepot = $(this).val();
     });
 
-});
+    $('#enregistrer').click(function () {
+        addEquipment();
+    });
+}
 
-
-
-
-/**
- * Functions
- */
-
+/* Add a line in the table of equipments */
 function addFieldEquipment() {
 
     cntEquip++;
@@ -103,7 +153,6 @@ function addFieldEquipment() {
         if (e.keyCode === 13 && $(this).attr('valider') !== 'true') { // code for "Enter"
             if (productid.value !== '') {
                 $('#alertProd').empty();
-                $('#search_productid').css('border', 'none');
                 $(this).attr('valider', 'true');
                 var serialNumber = $("input[cntEquip='" + $(this).attr('cntEquip') + "']").val();
                 $(this).blur();

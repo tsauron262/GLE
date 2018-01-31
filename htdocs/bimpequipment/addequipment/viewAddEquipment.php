@@ -52,7 +52,7 @@ print '</select><br/><br/>';
 
 $form = new Form($db);
 $form->select_produits();
-print '<text id="alertProd" style="color: red ; margin-left: 10px"> </text>';
+print '<strong id="alertProd" style="color: red ; margin-left: 10px"> </strong>';
 
 print '<table id="hereEquipment">';
 print '<thead>';
@@ -65,7 +65,7 @@ print '</thead>';
 print '</table>';
 
 
-print '<br><input type="button" class="butAction" value="Enregistrer">';
+print '<br><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 
 
 $db->close();

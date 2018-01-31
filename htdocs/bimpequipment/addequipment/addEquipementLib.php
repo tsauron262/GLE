@@ -30,7 +30,7 @@ function addEquipment($db, $idEntrepot, $idProd, $serialNumber) {
     $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_equipement';
     $sql .= ' (id_product, serial) ';
     $sql .= ' VALUES ';
-    $sql .= ' ( ' . $idProd . ', ' . $serialNumber . ')';
+    $sql .= ' ( ' . $idProd . ', "' . $serialNumber . '")';
 
     $result = $db->query($sql);
     if ($result and mysqli_num_rows($result) > 0) {
@@ -54,7 +54,6 @@ function getNote($db, $idCurrentProd) {
             $note = $obj->note;
         }
     }
-    $note = "OK";
     return $note;
 }
 

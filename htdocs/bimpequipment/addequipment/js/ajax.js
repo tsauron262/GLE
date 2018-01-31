@@ -8,6 +8,7 @@ var idCurrentEntrepot;
 var idCurrentProd;
 var nameCurrentProd;
 var cntEquip = 0;
+var allSerialNumber = [];
 
 
 
@@ -16,7 +17,7 @@ var cntEquip = 0;
  * Ajax call
  */
 
-function addEquipment(serialNumber, currentEquip) {
+function checkEquipment(serialNumber, currentEquip) {
 
     $.ajax({
         type: "POST",
@@ -25,25 +26,27 @@ function addEquipment(serialNumber, currentEquip) {
             idCurrentEntrepot: idCurrentEntrepot,
             idCurrentProd: idCurrentProd,
             serialNumber: serialNumber,
-            action: 'addEquipment'
+            action: 'checkEquipment'
         },
         error: function () {
             console.log("Erreur PHP");
         },
         success: function (out) {
-//            $('input.custNote[cntEquip="' + currentEquip + '"]').val(out.note);
-
-//            if (out.code)
-            if (out.code === -1) {
-                $('tr#' + currentEquip + ' td text.reponseServeur').text("L'insertion à échouer, veuillez réessayer");  // (erreur base de donnée)
-            } else if (out.code === -2) {
-                $('tr#' + currentEquip + ' td text.reponseServeur').text("Le numéro de série existe déjà.");
+            var outDec = JSON.parse(out);
+            var responseTd = 'tr#' + currentEquip + ' td text.reponseServeur';
+            if (allSerialNumber.includes(serialNumber)) {
+                $(responseTd).text('A déjà scanné.');
+                $(responseTd).css('color', 'red');
+            } else if (outDec.code === -1) {
+                $(responseTd).text('Existe déjà.');
+                $(responseTd).css('color', 'red');
+                allSerialNumber.push(serialNumber);
+            } else if (outDec.code === 1) {
+                $(responseTd).text('OK');
+                $(responseTd).css('color', 'green');
+                allSerialNumber.push(serialNumber);
             }
-//            $('tr#' + currentEquip + ' td text.reponseServeur').text(out);
-
             $('input.custNote[cntEquip="' + currentEquip + '"]').val('Du texte ... ' + currentEquip);
-            $('tr#' + currentEquip + ' td text.reponseServeur').text('OK');
-            addFieldEquipment();
         }
     });
 }
@@ -58,16 +61,12 @@ function addEquipment(serialNumber, currentEquip) {
 
 $(document).ready(function () {
 
-    $('.select2').select2();
+    $('#entrepot').select2();
 
-    idCurrentProd = $('#type').val();
-    nameCurrentProd = $('#type option:selected').text();
     idCurrentEntrepot = $('#entrepot').val();
     addFieldEquipment();
 
-    $('#type').on('change', function () {
-        idCurrentProd = $(this).val();
-        nameCurrentProd = $('#type option:selected').text();
+    $('#search_productid').on('change', function () {
         $('#hereEquipment tr').last().remove();
         cntEquip--;
         addFieldEquipment();
@@ -87,32 +86,31 @@ $(document).ready(function () {
  */
 
 function addFieldEquipment() {
+
+    cntEquip++;
+
     var line = '<tr id="' + cntEquip + '"><td>' + cntEquip + '</td>';
-    line += '<td>' + nameCurrentProd + '</td><td>';
-    for (i = 0; i < 3; i++) {
-        line += '<input class="subSerialNumber" name="serial" cntEquip="' + cntEquip + '" maxlength="4">';
-    }
+    line += '<td>' + productid.value + '</td><td>';
+    line += '<input class="serialNumber" name="serial" cntEquip="' + cntEquip + '">';
     line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';
     line += '<td><text class="reponseServeur"></text></td></tr>';
     $(line).appendTo('#hereEquipment');
 
-    $('input.subSerialNumber[cntEquip="' + cntEquip + '"]').first().focus();
+    $('input.serialNumber[cntEquip="' + cntEquip + '"]').first().focus();
 
-    cntEquip++;
 
-    $(".subSerialNumber").keyup(function () {
-        if (this.value.length === this.maxLength) {
-            $(this).next('.subSerialNumber').focus();
-            if (!$(this).next('.subSerialNumber').length && $(this).attr('valider') !== 'true'/* &&
-             $(this).prev().value.length === $(this).prev().maxLength &&
-             $(this).prev().prev().value.length === $(this).prev().prev().maxLength*/) {
+    $(".serialNumber").keyup(function (e) {
+        if (e.keyCode === 13 && $(this).attr('valider') !== 'true') { // code for "Enter"
+            if (productid.value !== '') {
+                $('#alertProd').empty();
+                $('#search_productid').css('border', 'none');
                 $(this).attr('valider', 'true');
-                var serialNumber = '';
-                $("input[cntEquip='" + $(this).attr('cntEquip') + "']").each(function () {
-                    serialNumber += $(this).val();
-                });
+                var serialNumber = $("input[cntEquip='" + $(this).attr('cntEquip') + "']").val();
                 $(this).blur();
-                addEquipment(serialNumber, $(this).attr('cntEquip'));
+                checkEquipment(serialNumber, $(this).attr('cntEquip'));
+                addFieldEquipment();
+            } else {
+                $('#alertProd').text('Veuillez sélectionner un produit.');
             }
         }
     });

@@ -1,9 +1,20 @@
+/**
+ * Globals variable
+ */
+
 /* global DOL_URL_ROOT */
 
 var idCurrentEntrepot;
 var idCurrentProd;
 var nameCurrentProd;
 var cntEquip = 0;
+
+
+
+
+/**
+ * Ajax call
+ */
 
 function addEquipment(serialNumber, currentEquip) {
 
@@ -19,9 +30,19 @@ function addEquipment(serialNumber, currentEquip) {
         error: function () {
             console.log("Erreur PHP");
         },
-        success: function (note) {
-//            $("input.custNote[cntEquip='" + currentEquip + "']").val(note);
-            $("input.custNote[cntEquip='" + currentEquip + "']").val('Du texte ... ' + currentEquip);
+        success: function (out) {
+//            $('input.custNote[cntEquip="' + currentEquip + '"]').val(out.note);
+
+//            if (out.code)
+            if (out.code === -1) {
+                $('tr#' + currentEquip + ' td text.reponseServeur').text("L'insertion à échouer, veuillez réessayer");  // (erreur base de donnée)
+            } else if (out.code === -2) {
+                $('tr#' + currentEquip + ' td text.reponseServeur').text("Le numéro de série existe déjà.");
+            }
+//            $('tr#' + currentEquip + ' td text.reponseServeur').text(out);
+
+            $('input.custNote[cntEquip="' + currentEquip + '"]').val('Du texte ... ' + currentEquip);
+            $('tr#' + currentEquip + ' td text.reponseServeur').text('OK');
             addFieldEquipment();
         }
     });
@@ -30,10 +51,14 @@ function addEquipment(serialNumber, currentEquip) {
 
 
 
+
+/**
+ * Ready
+ */
+
 $(document).ready(function () {
 
     $('.select2').select2();
-    console.log("ready");
 
     idCurrentProd = $('#type').val();
     nameCurrentProd = $('#type option:selected').text();
@@ -43,7 +68,6 @@ $(document).ready(function () {
     $('#type').on('change', function () {
         idCurrentProd = $(this).val();
         nameCurrentProd = $('#type option:selected').text();
-        console.log('nameCurrentProd' + nameCurrentProd);
         $('#hereEquipment tr').last().remove();
         cntEquip--;
         addFieldEquipment();
@@ -55,22 +79,33 @@ $(document).ready(function () {
 
 });
 
+
+
+
+/**
+ * Functions
+ */
+
 function addFieldEquipment() {
-    var line = '<tr id="' + idCurrentProd +'"><td>' + nameCurrentProd + '</td><td>';
+    var line = '<tr id="' + cntEquip + '"><td>' + cntEquip + '</td>';
+    line += '<td>' + nameCurrentProd + '</td><td>';
     for (i = 0; i < 3; i++) {
         line += '<input class="subSerialNumber" name="serial" cntEquip="' + cntEquip + '" maxlength="4">';
     }
-    line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td></tr>';
+    line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';
+    line += '<td><text class="reponseServeur"></text></td></tr>';
     $(line).appendTo('#hereEquipment');
 
-    $('input.serial[cntEquip="' + cntEquip + '"]').first().focus();
+    $('input.subSerialNumber[cntEquip="' + cntEquip + '"]').first().focus();
 
     cntEquip++;
 
     $(".subSerialNumber").keyup(function () {
         if (this.value.length === this.maxLength) {
             $(this).next('.subSerialNumber').focus();
-            if (!$(this).next('.subSerialNumber').length && $(this).attr('valider') !== 'true') {
+            if (!$(this).next('.subSerialNumber').length && $(this).attr('valider') !== 'true'/* &&
+             $(this).prev().value.length === $(this).prev().maxLength &&
+             $(this).prev().prev().value.length === $(this).prev().prev().maxLength*/) {
                 $(this).attr('valider', 'true');
                 var serialNumber = '';
                 $("input[cntEquip='" + $(this).attr('cntEquip') + "']").each(function () {

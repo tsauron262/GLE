@@ -53,8 +53,6 @@ function getAllproducts($db) {
  * 	View
  */
 
-//$staticSF = new BimpStatsFacture($db);
-
 llxHeader('', 'Ajouter équipement', '', '', 0, 0, $arrayofjs, $arrayofcss);
 
 print load_fiche_titre('Ajouter équipement', $linkback);
@@ -78,7 +76,7 @@ $prods = getAllproducts($db);
 //        6 => 'Autre'
 //    );
 
-print 'Type de produit <select id="type" class="select2 cust" style="width: 200px;">';
+print 'Type de produit <select id="type" class="select2 cust" style="width: 400px;">';
 foreach ($prods as $id => $name) {
     print '<option value="'.$id.'">'.$name.'</option>';
 }
@@ -86,9 +84,11 @@ print '</select>';
 
 print '<table id="hereEquipment">';
 print '<thead>';
+print '<th>Nombre de produits scannés</th>';
 print '<th>Type de produit</th>';
 print '<th>Numéro de série</th>';
 print '<th>Note</th>';
+print '<th>Réponse serveur</th>';
 print '</thead>';
 print '</table>';
 //print '<div id="hereEquipment" style="margin-top: 20px"></div>';

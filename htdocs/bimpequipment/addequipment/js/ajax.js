@@ -26,7 +26,7 @@ var newEquipments = [];
  * Ajax call
  */
 
-function checkEquipment(serialNumber, currentEquip) {
+function checkEquipment(serialNumber, currentEquipCnt) {
 
     $.ajax({
         type: "POST",
@@ -42,7 +42,7 @@ function checkEquipment(serialNumber, currentEquip) {
         },
         success: function (out) {
             var outDec = JSON.parse(out);
-            var responseTd = 'tr#' + currentEquip + ' td text.reponseServeur';
+            var responseTd = 'tr#' + currentEquipCnt + ' td text.reponseServeur';
             if (allSerialNumber.includes(serialNumber)) {
                 $(responseTd).text('Déjà scanné.');
                 $(responseTd).css('color', 'red');
@@ -61,7 +61,7 @@ function checkEquipment(serialNumber, currentEquip) {
                 $(responseTd).css('color', 'red');
                 allSerialNumber.push(serialNumber);
             }
-            $('input.custNote[cntEquip="' + currentEquip + '"]').val(outDec.note);
+            $('input.custNote[cntEquip="' + currentEquipCnt + '"]').val(outDec.note);
         }
     });
 }
@@ -88,9 +88,9 @@ function addEquipment() {
                 setMessage(errors_msg, 'errors');
             } else {
                 if (outDec.nbNewEquipment === 1)
-                    setMessage(outDec.nbNewEquipment + " équipement a été enregistré avec succès", 'mesgs');
+                    setMessage('alertMessage', outDec.nbNewEquipment + " équipement a été enregistré avec succès", 'mesgs');
                 else if (outDec.nbNewEquipment > 1)
-                    setMessage(outDec.nbNewEquipment + " équipements ont été enregistrés avec succès", 'mesgs');
+                    setMessage('alertMessage', outDec.nbNewEquipment + " équipements ont été enregistrés avec succès", 'mesgs');
             }
             newEquipments = [];
         }
@@ -143,15 +143,14 @@ function addFieldEquipment() {
 
     cntEquip++;
 
-    var line = '<tr><td>' + cntEquip + '</td>';
-    line += '<td>' + productid.value + '</td><td>';
-    line += '<input class="serialNumber" name="serial" cntEquip="' + cntEquip + '">';
-    line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';
-    line += '<td><text class="reponseServeur"></text></td></tr>';
+    var line = '<tr id="' + cntEquip + '" ><td>' + cntEquip + '</td>';      // Nombre de produits scannés
+    line += '<td>' + productid.value + '</td><td>'; // Identifiant du produit
+    line += '<input class="serialNumber" name="serial" cntEquip="' + cntEquip + '">'; // Numéro de série
+    line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';   // Note
+    line += '<td><text class="reponseServeur"></text></td></tr>';   // Réponse serveur
     $(line).appendTo('#hereEquipment');
 
     $('input.serialNumber[cntEquip="' + cntEquip + '"]').first().focus();
-
 
     $(".serialNumber").keyup(function (e) {
         if (e.keyCode === 13 && $(this).attr('valider') !== 'true') { // code for "Enter"
@@ -159,7 +158,7 @@ function addFieldEquipment() {
                 $('#alertProd').empty();
                 $(this).attr('valider', 'true');
                 var serialNumber = $("input[cntEquip='" + $(this).attr('cntEquip') + "']").val();
-                $(this).blur();
+                $(this).blur(); // unfocus
                 checkEquipment(serialNumber, $(this).attr('cntEquip'));
                 addFieldEquipment();
             } else {
@@ -169,12 +168,17 @@ function addFieldEquipment() {
     });
 }
 
-
-function setMessage(message, type) {
+/**
+ * 
+ * @param String idElement id of the element to append the message in
+ * @param String message the message you want to display
+ * @param String type 'mesgs' => normal message (green) else => error message (red)
+ */
+function setMessage(idElement, message, type) {
     var backgroundColor;
     (type === 'mesgs') ? backgroundColor = '#25891c ' : backgroundColor = '#ff887a ';
 
-    $('#alertMessage').hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
+    $('#' + idElement).hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
     setTimeout(function () {
         $("#alertdiv").fadeOut(1000);
         setTimeout(function () {

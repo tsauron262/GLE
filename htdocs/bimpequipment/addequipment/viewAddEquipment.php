@@ -64,8 +64,9 @@ print '<th>Réponse serveur</th>';
 print '</thead>';
 print '</table>';
 
+print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 
-print '<br><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
+print '<br/><div id="alertMessage"></div>';
 
 
 $db->close();

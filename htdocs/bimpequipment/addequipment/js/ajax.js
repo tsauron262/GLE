@@ -63,7 +63,6 @@ function checkEquipment(serialNumber, currentEquip) {
                 allSerialNumber.push(serialNumber);
             }
             $('input.custNote[cntEquip="' + currentEquip + '"]').val(outDec.note);
-            console.log(newEquipments);
         }
     });
 }
@@ -83,12 +82,18 @@ function addEquipment() {
         success: function (out) {
             var outDec = JSON.parse(out);
             if (outDec.errors.length !== 0) {
-                alert("Certains équipement n'ont pas pû être enregistrés (cf. console Javascript)");
+                var errors_msg = "Certains équipement n'ont pas pû être enregistrés<br>";
                 for (i = 0; i < outDec.errors.length; i++) {
-                    console.log("Erreur numéro " + i + " " + outDec.errors[i]);
+                    errors_msg += "Erreur numéro " + i + " " + outDec.errors[i] + "<br>";
                 }
+                setMessage(errors_msg, 'errors');
+            } else {
+                if (outDec.nbNewEquipment === 1)
+                    setMessage(outDec.nbNewEquipment + " équipement a été enregistré avec succès", 'mesgs');
+                else if (outDec.nbNewEquipment > 1)
+                    setMessage(outDec.nbNewEquipment + " équipements ont été enregistrés avec succès", 'mesgs');
             }
-            alert(outDec.nbNewEquipment + " équipement on été enregistrés avec succès");
+            newEquipments = [];
         }
     });
 }
@@ -163,4 +168,18 @@ function addFieldEquipment() {
             }
         }
     });
+}
+
+
+function setMessage(message, type) {
+    var backgroundColor;
+    (type === 'mesgs') ? backgroundColor = '#25891c ' : backgroundColor = '#ff887a ';
+
+    $('#alertMessage').hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
+    setTimeout(function () {
+        $("#alertdiv").fadeOut(1000);
+        setTimeout(function () {
+            $("#alertdiv").remove();
+        }, 1000);
+    }, 10000);
 }

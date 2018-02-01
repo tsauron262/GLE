@@ -6,7 +6,6 @@
 
 var idCurrentEntrepot;
 var idCurrentProd;
-var nameCurrentProd;
 var cntEquip = 0;
 var allSerialNumber = [];
 
@@ -144,7 +143,7 @@ function addFieldEquipment() {
 
     cntEquip++;
 
-    var line = '<tr id="' + cntEquip + '"><td>' + cntEquip + '</td>';
+    var line = '<tr><td>' + cntEquip + '</td>';
     line += '<td>' + productid.value + '</td><td>';
     line += '<input class="serialNumber" name="serial" cntEquip="' + cntEquip + '">';
     line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';

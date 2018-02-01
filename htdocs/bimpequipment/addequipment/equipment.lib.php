@@ -5,7 +5,6 @@
  *      \ingroup    bimpequipment
  *      \brief      Lib of equipment
  */
-
 require_once '../../main.inc.php';
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
@@ -15,6 +14,7 @@ function addEquipments($newEquipments) {
     $cntEquipment = 0;
     $errors = array();
     foreach ($newEquipments as $newEquipment) {
+        $newErrors = array();
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 
         $equipement->validateArray(array(
@@ -30,7 +30,7 @@ function addEquipments($newEquipments) {
             'note' => ''
         ));
 
-        $errors = array_merge($errors, $equipement->create());
+        $newErrors = array_merge($newErrors, $equipement->create());
 
         $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
 
@@ -45,8 +45,12 @@ function addEquipments($newEquipments) {
             'infos' => '...',
             'date' => '2018-01-01 00:00:00' // date et heure d'arrivée
         ));
-        $errors = array_merge($errors, $emplacement->create());
-        $cntEquipment++;
+        $newErrors = array_merge($newErrors, $emplacement->create());
+
+        if (sizeof($newErrors) == 0)
+            $cntEquipment++;
+
+        $errors = array_merge($errors, $newErrors);
     }
-    return array('nbNewEquipment' =>$cntEquipment, 'errors' => $errors);
+    return array('nbNewEquipment' => $cntEquipment, 'errors' => $errors);
 }

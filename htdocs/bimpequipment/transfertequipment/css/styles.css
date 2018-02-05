@@ -1,0 +1,44 @@
+div.cust.select2-container {
+    border: solid #5897fb 1px;
+}
+
+.serialNumber {
+    width: 120px;
+    border: solid gray 1px;
+    margin-left: 8px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-family: arial;
+}
+
+.custInput {
+    border: solid gray 1px;
+}
+
+table.custTable {
+    border-collapse:separate; 
+    border-spacing:0;
+    border-top: solid black 1px;
+    border-bottom: solid black 1px;
+    border-left: solid black 1px;
+    z-index:900 !important;
+    margin-top: 30px;
+}
+
+table.custTable tr{
+    background: #ccc;
+}
+
+table.custTable th, table.custTable td {
+    padding: 3px 10px 3px 10px;
+    border-right: solid black 1px;
+}
+
+table.custTable th {
+    border-bottom: solid black 1px;
+}
+
+.clickable:hover {
+    cursor: pointer;
+}

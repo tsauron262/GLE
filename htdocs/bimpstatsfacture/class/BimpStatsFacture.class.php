@@ -378,7 +378,7 @@ class BimpStatsFacture {
                 }
 
                 foreach ($facture as $champ) {
-                    $champ = str_replace('"', '\"', $champ);
+                    $champ = str_replace('"', '', $champ);
                     $champ = '"' . $champ . '"';
                     $sortie .= $champ;
                     $sortie .= $sep;
@@ -445,6 +445,10 @@ class BimpStatsFacture {
                 $out[$filtre]['total_total'] += $row['factotal'];
                 $out[$filtre]['total_total_marge'] += $row['marge'];
                 $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
+            }
+            else{//deuxieme paiement on vire les montant
+                $row['factotal'] = 0;
+                $row['marge'] = 0;
             }
             
             unset($row['fac_statut']);

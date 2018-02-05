@@ -77,6 +77,12 @@ and open the template in the editor.
     }
     
     
+    .liste_titre .nowrap{/*Les boutons loupe*/
+        background: silver;
+        display: inline-block;
+    }
+    
+    
     
     .blockvmenusearch, #select2-drop-mask{
         background-color: white;

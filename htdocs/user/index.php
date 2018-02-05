@@ -100,6 +100,8 @@ $arrayfields=array(
     'u.tms'=>array('label'=>$langs->trans("DateModificationShort"), 'checked'=>0, 'position'=>500),
     'u.statut'=>array('label'=>$langs->trans("Status"), 'checked'=>1, 'position'=>1000),
     'u.job'=>array('label'=>$langs->trans("Job"), 'checked'=>1, 'position'=>1000),
+    'u.town'=>array('label'=>$langs->trans("town"), 'checked'=>1, 'position'=>1000),
+    'u.zip'=>array('label'=>$langs->trans("zip"), 'checked'=>1, 'position'=>1000),
 );
 // Extra fields
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label))
@@ -121,6 +123,8 @@ $search_employee=GETPOST('search_employee','alpha');
 $search_accountancy_code=GETPOST('search_accountancy_code','alpha');
 $search_email=GETPOST('search_email','alpha');
 $search_statut=GETPOST('search_statut','intcomma');
+$search_town=GETPOST('search_town','alpha');
+$search_zip=GETPOST('search_zip','alpha');
 $search_thirdparty=GETPOST('search_thirdparty','alpha');
 $search_supervisor=GETPOST('search_supervisor','intcomma');
 $search_previousconn=GETPOST('search_previousconn','alpha');
@@ -160,6 +164,8 @@ if (empty($reshook))
     	$search_accountancy_code="";
     	$search_email="";
     	$search_statut="";
+    	$search_town="";
+    	$search_zip="";
     	$search_thirdparty="";
     	$search_supervisor="";
     	$search_datelastlogin="";
@@ -179,7 +185,7 @@ $user2=new User($db);
 
 $buttonviewhierarchy='<form action="'.DOL_URL_ROOT.'/user/hierarchy.php'.(($search_statut != '' && $search_statut >= 0) ? '?search_statut='.$search_statut : '').'" method="POST"><input type="submit" class="button" style="width:120px" name="viewcal" value="'.dol_escape_htmltag($langs->trans("HierarchicView")).'"></form>';
 
-$sql = "SELECT u.rowid, u.lastname, u.job, u.firstname, u.admin, u.fk_soc, u.login, u.email, u.accountancy_code, u.gender, u.employee, u.photo,";
+$sql = "SELECT u.rowid, u.lastname, u.job, u.town, u.zip, u.firstname, u.admin, u.fk_soc, u.login, u.email, u.accountancy_code, u.gender, u.employee, u.photo,";
 $sql.= " u.datelastlogin, u.datepreviouslogin,";
 $sql.= " u.ldap_sid, u.statut, u.entity,";
 $sql.= " u.tms as date_update, u.datec as date_creation,";
@@ -217,6 +223,8 @@ if (is_numeric($search_employee) && $search_employee >= 0)    {
 if ($search_accountancy_code != '')  $sql.= natural_search("u.accountancy_code", $search_accountancy_code);
 if ($search_email != '')             $sql.= natural_search("u.email", $search_email);
 if ($search_statut != '' && $search_statut >= 0) $sql.= " AND u.statut IN (".$db->escape($search_statut).")";
+if ($search_town != '') $sql.= " AND u.town LIKE ('%".$search_town."%')";
+if ($search_zip != '') $sql.= " AND u.zip LIKE ('%".$search_zip."%')";
 if ($sall)                           $sql.= natural_search(array_keys($fieldstosearchall), $sall);
 // Add where from extra fields
 foreach ($search_array_options as $key => $val)
@@ -280,6 +288,8 @@ if ($search_accountancy_code != '') $param.="&search_accountancy_code=".$search_
 if ($search_email != '') $param.="&search_email=".$search_email;
 if ($search_supervisor > 0) $param.="&search_supervisor=".$search_supervisor;
 if ($search_statut != '') $param.="&search_statut=".$search_statut;
+if ($search_town != '') $param.="&search_town=".$search_town;
+if ($search_zip != '') $param.="&search_zip=".$search_zip;
 if ($optioncss != '') $param.='&optioncss='.$optioncss;
 if ($mode != '')      $param.='&mode='.$mode;
 // Add $param from extra fields
@@ -429,6 +439,20 @@ if (! empty($arrayfields['u.job']['checked']))
     print '<td class="liste_titre">';
     print '</td>';
 }
+if (! empty($arrayfields['u.town']['checked']))
+{
+    // Date modification
+    print '<td class="liste_titre">';
+    print '<input type="text" name="search_town" size="6" value="'.$search_town.'">';
+    print '</td>';
+}
+if (! empty($arrayfields['u.zip']['checked']))
+{
+    // Date modification
+    print '<td class="liste_titre">';
+    print '<input type="text" name="search_zip" size="6" value="'.$search_zip.'">';
+    print '</td>';
+}
 // Action column
 print '<td class="liste_titre" align="right">';
 $searchpicto=$form->showFilterAndCheckAddButtons(0);
@@ -473,6 +497,8 @@ if (! empty($arrayfields['u.datec']['checked']))  print_liste_field_titre("DateC
 if (! empty($arrayfields['u.tms']['checked']))    print_liste_field_titre("DateModificationShort",$_SERVER["PHP_SELF"],"u.tms","",$param,'align="center" class="nowrap"',$sortfield,$sortorder);
 if (! empty($arrayfields['u.statut']['checked'])) print_liste_field_titre("Status",$_SERVER["PHP_SELF"],"u.statut","",$param,'align="center"',$sortfield,$sortorder);
 if (! empty($arrayfields['u.job']['checked'])) print_liste_field_titre("Job",$_SERVER["PHP_SELF"],"u.job","",$param,'align="center"',$sortfield,$sortorder);
+if (! empty($arrayfields['u.town']['checked'])) print_liste_field_titre("Town",$_SERVER["PHP_SELF"],"u.town","",$param,'align="center"',$sortfield,$sortorder);
+if (! empty($arrayfields['u.zip']['checked'])) print_liste_field_titre("Zip",$_SERVER["PHP_SELF"],"u.zip","",$param,'align="center"',$sortfield,$sortorder);
 print_liste_field_titre($selectedfields, $_SERVER["PHP_SELF"],"",'','','align="center"',$sortfield,$sortorder,'maxwidthsearch ');
 print "</tr>\n";
 
@@ -674,9 +700,6 @@ while ($i < min($num,$limit))
        print '<td align="center">'.$userstatic->getLibStatut(3).'</td>';
        if (! $i) $totalarray['nbfield']++;
     }
-    // Action column
-    print '<td></td>';
-    if (! $i) $totalarray['nbfield']++;
 
     // Status
     if (! empty($arrayfields['u.job']['checked']))
@@ -684,6 +707,25 @@ while ($i < min($num,$limit))
        print '<td align="center">'.$obj->job.'</td>';
        if (! $i) $totalarray['nbfield']++;
     }
+    
+    
+    // ville
+    if (! empty($arrayfields['u.town']['checked']))
+    {
+       print '<td align="center">'.$obj->town.'</td>';
+       if (! $i) $totalarray['nbfield']++;
+    }
+    
+    // codep
+    if (! empty($arrayfields['u.zip']['checked']))
+    {
+       print '<td align="center">'.$obj->zip.'</td>';
+       if (! $i) $totalarray['nbfield']++;
+    }
+    
+    // Action column
+    print '<td></td>';
+    if (! $i) $totalarray['nbfield']++;
 
     print "</tr>\n";
     $i++;

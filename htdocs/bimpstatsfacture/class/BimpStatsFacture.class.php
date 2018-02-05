@@ -378,7 +378,7 @@ class BimpStatsFacture {
                 }
 
                 foreach ($facture as $champ) {
-                    if(!is_numeric($champ)){
+                    if(!is_numeric(str_repalce(" ", "", $champ))){
                         $champ = str_replace('"', '', $champ);
                         $champ = '"' . $champ . '"';
                     }

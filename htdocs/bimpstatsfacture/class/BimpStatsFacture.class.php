@@ -378,8 +378,13 @@ class BimpStatsFacture {
                 }
 
                 foreach ($facture as $champ) {
-                    $champ = str_replace('"', '', $champ);
-                    $champ = '"' . $champ . '"';
+                    if(!is_numeric($champ)){
+                        $champ = str_replace('"', '', $champ);
+                        $champ = '"' . $champ . '"';
+                    }
+                    else {
+                        $champ = 666;
+                    }
                     $sortie .= $champ;
                     $sortie .= $sep;
                 }

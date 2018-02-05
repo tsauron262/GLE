@@ -382,9 +382,7 @@ class BimpStatsFacture {
                         $champ = str_replace('"', '', $champ);
                         $champ = '"' . $champ . '"';
                     }
-                    else {
-                        $champ = 666;
-                    }
+                    
                     $sortie .= $champ;
                     $sortie .= $sep;
                 }

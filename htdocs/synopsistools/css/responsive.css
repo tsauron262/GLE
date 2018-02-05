@@ -78,7 +78,7 @@ and open the template in the editor.
     
     
     
-    .blockvmenusearch{
+    .blockvmenusearch, #select2-drop-mask{
         background-color: white;
         border: solid 1px black;
     }

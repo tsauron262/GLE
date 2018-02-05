@@ -66,6 +66,7 @@ and open the template in the editor.
         bottom: 0;
         /*height: 100%;*/
         background-color: silver;
+        background-image: url(../img/search.png);
         border: black solid 1px;
         overflow-y: scroll;
     }
@@ -324,6 +325,9 @@ and open the template in the editor.
         padding-right: 0;
         z-index: 60;
         background-color: silver;
+        background-image: url(../img/search.png);
+        background-repeat: no-repeat;
+        background-position: 70px 8px;
         height: 50px;
     }
 

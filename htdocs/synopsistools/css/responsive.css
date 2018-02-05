@@ -73,6 +73,14 @@ and open the template in the editor.
     #id-left{/*conteneur de menu 2*/
         left: -200px;
         width: 200px;
+        z-index: 60;
+    }
+    
+    
+    
+    .vmenusearchselectcombo{
+        background-color: white;
+        border: solid 1px black;
     }
     
 

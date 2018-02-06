@@ -30,6 +30,9 @@ function checkProductByRef(ref) {
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
+            if (outParsed.error === 'unknown_product') {
+                return;
+            }
             if (outParsed.stock === 'no_row') {
                 setMessage('alertProd', 'L\'entrepot de départ ne possède pas ce produit.', 'error');
             } else if (outParsed.id === false) {
@@ -107,7 +110,7 @@ function initEvents() {
             if (products.find(obj => obj.id_product === productId) !== undefined) {
                 setMessage('alertProduct', 'Le produit est déjà dans le tableau avec l\'identifiant ' + productId + '. Pour changer la quantité de ce produit, veuillez supprimer la ligne et la recréer', 'error');
             } else {
-                checkStockForProduct(productId, qty)
+                checkStockForProduct(productId, qty);
             }
         } else {
             setMessage('alertProduct', 'Veuillez sélectionner un produit pour l\'ajouter au tableau.', 'error');
@@ -128,14 +131,28 @@ function initEvents() {
     });
 
     $("input[name=refScan]").on('keyup', function (e) {
-        if ((e.keyCode === 13 || e.keyCode === 9)) { // code for "Enter" and "Tab"
-            var ref = $(this).val();
-            checkProductByRef(ref);
-            $(this).val('');
-            $(this).focus();
+        if (e.keyCode === 13) { // code for "Enter"
+            prepareAjax($(this), e);
+        }
+    });
+
+    $("input[name=refScan]").on('keydown', function (e) {
+        if (e.keyCode === 9) { // code for "Tab"
+            prepareAjax($(this), e);
         }
     });
 }
+
+function prepareAjax(element, event) {
+    var ref = element.val();
+    if (ref !== '') {
+        checkProductByRef(ref);
+        element.val('');
+    }
+    element.focus();
+    event.preventDefault();
+}
+
 
 /* Add a line in the table of equipments */
 function addFieldEquipment(id, refUrl, serial, label) {

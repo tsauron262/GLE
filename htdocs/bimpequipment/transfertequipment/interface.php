@@ -30,6 +30,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'checkProductByRef': {
+            $data = array();
             $id = checkProductByRefOrBarcode($db, GETPOST('ref'));
             if ($id == false) {
                 $idProdAndIdEquipment = getIdOfProductAndEquipment($db, GETPOST('ref')); // ref => serial
@@ -51,8 +52,9 @@ switch (GETPOST('action')) {
                     $label = getLabel($db, $id);
                     $stock = checkStock($db, $id, GETPOST('idEntrepotStart'));
                 }
+                $data = array_merge($date, array('id' => $id, 'isEquipment' => $isEquipment, 'stock' => $stock, 'label' => $label, 'refUrl' => $prod->getNomUrl(1), 'serial' => $serial, 'error' => 'no_errors'));
             }
-            $data = array('id' => $id, 'isEquipment' => $isEquipment, 'stock' => $stock, 'label' => $label, 'refUrl' => $prod->getNomUrl(1), 'serial' => $serial);
+            $data['error'] = 'unknown_product';
             echo json_encode($data);
             break;
         }

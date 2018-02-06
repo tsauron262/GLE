@@ -112,13 +112,16 @@ function checkStockEquipment($db, $idEntrepotStart, $idEquipment, $idProduct) {
     $result = $db->query($sql);
     if ($result and mysqli_num_rows($result) > 0) {
         while ($obj = $db->fetch_object($result)) {
-            return getLabel($db, $idProduct);
+            return 1;
         }
     }
     return 'no_entrepot_for_equipment';
 }
 
 function equipmentExists($db, $id) {
+    
+    if($id < 1)
+        return false;
 
     $sql = 'SELECT id';
     $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';

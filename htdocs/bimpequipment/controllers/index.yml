@@ -1,10 +1,58 @@
 title: Equipements
 bootstrap: 1
 
+objects: 
+    equipment:
+        instance: 
+            bimp_object: Equipment
+
+    logiciel: 
+        instance: 
+            bimp_object: BE_Logiciel
+            
+    user_account:
+        instance: 
+            bimp_object: BE_UserAccount
+            
+    reseau:
+        instance: 
+            bimp_object: BE_Reseau
+            
+    connection:
+        instance: 
+            bimp_object: BE_Connection
+            
 sections:
-    - type: list
-      list: 
-          panel: 1
-          object:
-              instance: 
-                  bimp_object: Equipment
+    - type: tabs
+      tabs: 
+        default:
+            label: Equipements
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: equipment
+                      
+        logiciels:
+            label: Logiciels
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: logiciel
+                - type: list
+                  list: 
+                      panel: 1
+                      object: user_account
+                      
+        reseaux:
+            label: Réseaux
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: reseau
+                - type: list
+                  list: 
+                      panel: 1
+                      object: connection

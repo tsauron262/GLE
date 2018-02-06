@@ -30,7 +30,7 @@ fields:
             array: calcs_montants
         display: 
             type: nom
-        search: 0
+        searchable: 0
             
     percent:
         label: Pourcentage
@@ -53,7 +53,7 @@ fields:
         label: Activé pour cet événement
         type: bool
         default_value: 1
-        search: 0
+        searchable: 0
 
 forms: 
     default: 
@@ -72,12 +72,12 @@ lists:
             - label: supprimer les lignes sélectionnées
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_col: id
+        sort_field: id
         sort_way: desc
         n: 25
         update_btn: 
             callback: isEventEditable
-        add_form: 
+        add_form_name: 
             callback: getCreateFormDisplay
         delete_btn: 
             callback: isDeletable

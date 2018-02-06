@@ -16,16 +16,17 @@ fields:
         label: Nom
         type: string
         required: 1
-        sortable: 1
-        search: 1
+        
+    number: 
+        label: Nombre de personnes
+        type: int
+        required: 1
         
     rank: 
         label: Ordre de passage
         type: int
         values:
             array: ranks
-        sortable: 1
-        search: 1
         
 list:
     title: Groupes
@@ -36,7 +37,7 @@ list:
         - label: supprimer les groupes sélectionnés
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: id
+    sort_field: id
     sort_way: desc
     n: 25
     add_object_row: 
@@ -50,6 +51,9 @@ list:
             field: name
             edit: 
                 callback: isEventEditable
+        number: 
+            field: number
+            edit: 1
         rank: 
             field: rank
             edit: 

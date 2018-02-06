@@ -26,7 +26,7 @@ list:
         - label: supprimer les catégories sélectionnées
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: name
+    sort_field: name
     sort_way: asc
     n: 25
     add_object_row: 1

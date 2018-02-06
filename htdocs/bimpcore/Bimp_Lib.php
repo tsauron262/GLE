@@ -11,16 +11,42 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpConfig.php';
     require_once $dir . 'BimpInput.php';
     require_once $dir . 'BimpRender.php';
-    require_once $dir . 'BimpCard.php';
-    require_once $dir . 'BimpStruct.php';
-    require_once $dir . 'BimpList.php';
-    require_once $dir . 'BimpForm.php';
-    require_once $dir . 'BimpView.php';
-    require_once $dir . 'BimpViewsList.php';
-    require_once $dir . 'BimpAssociation.php';
-    require_once $dir . 'BimpObject.php';
-    require_once $dir . 'BimpCore.php';
-    require_once $dir . 'BimpController.php';
+
+    if (defined('BIMP_NEW')) {
+        require_once $dir . 'components/BimpConfigDefinitions.php';
+        require_once $dir . 'components/BimpComponent.php';
+        require_once $dir . 'components/BC_Field.php';
+        require_once $dir . 'components/BC_Input.php';
+        require_once $dir . 'components/BC_Display.php';
+        require_once $dir . 'components/BC_Search.php';
+        require_once $dir . 'components/BC_Card.php';
+        require_once $dir . 'components/BC_Panel.php';
+        require_once $dir . 'components/BC_List.php';
+        require_once $dir . 'components/BC_ListTable.php';
+        require_once $dir . 'components/BC_ListViews.php';
+        require_once $dir . 'components/BC_FieldsTable.php';
+
+        require_once $dir . 'components/BC_Form.php';
+        require_once $dir . 'components/BC_View.php';
+        require_once $dir . 'components/BC_Input.php';
+
+        require_once $dir . 'components/BimpStruct.php';
+        require_once $dir . 'components/BimpAssociation.php';
+        require_once $dir . 'components/BimpObject.php';
+        require_once $dir . 'components/BimpCore.php';
+        require_once $dir . 'components/BimpController.php';
+    } else {
+        require_once $dir . 'BimpCard.php';
+        require_once $dir . 'BimpStruct.php';
+        require_once $dir . 'BimpList.php';
+        require_once $dir . 'BimpForm.php';
+        require_once $dir . 'BimpView.php';
+        require_once $dir . 'BimpViewsList.php';
+        require_once $dir . 'BimpAssociation.php';
+        require_once $dir . 'BimpObject.php';
+        require_once $dir . 'BimpCore.php';
+        require_once $dir . 'BimpController.php';
+    }
 
     checkBimpCoreVersion();
 }

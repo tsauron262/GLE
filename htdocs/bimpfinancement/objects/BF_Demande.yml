@@ -326,6 +326,7 @@ lists:
             status:
                 label: Etat
                 field: status
+                edit: 1
                 
 views:
     demande: 

@@ -52,7 +52,7 @@ class BMP_EventMontant extends BimpObject
     {
         $event = $this->getParentInstance();
         if (!is_null($event) && $event->isLoaded()) {
-            return $event->isEditable();
+            return (int) $event->isEditable();
         }
 
         return 0;
@@ -123,8 +123,15 @@ class BMP_EventMontant extends BimpObject
         $current_montants = array();
         $type = $this->getData('type');
         $id_coprod = $this->getData('id_coprod');
-        if (!is_null($type) && !is_null($id_coprod)) {
+        
+        if (is_null($id_coprod)) {
+            $id_coprod = 0;
+        }
+        
+        
+        if (!is_null($type)) {
             $event = $this->getParentInstance();
+            
             if (!is_null($event) && $event->isLoaded()) {
                 $eventMontant = BimpObject::getInstance($this->module, $this->object_name);
 
@@ -365,8 +372,7 @@ class BMP_EventMontant extends BimpObject
                 $value = '';
             }
 
-            $html = '<div class="editInputContainer coProdPart" data-id_coprod="' . $id_coprod . '" data-field_name="coprod_' . $id_coprod . '_part">';
-            $html .= '<input type="hidden" name="coprod_' . $id_coprod . '_part_initial_value" value="' . $value . '"/>';
+            $html = '<div class="inputContainer coProdPart" data-id_coprod="' . $id_coprod . '" data-initial_value="'.$value.'" data-field_name="coprod_' . $id_coprod . '_part">';
             $html .= BimpInput::renderInput('text', 'coprod_' . $id_coprod . '_part', $value, array(
                         'addon_right' => '<i class="fa fa-percent"></i>',
                         'placeholder' => $placeholder,
@@ -528,6 +534,7 @@ class BMP_EventMontant extends BimpObject
         foreach ($rows as $r) {
             $categories[$r['id']] = $r['name'];
         }
+
         return $categories;
     }
 

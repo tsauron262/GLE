@@ -29,8 +29,6 @@ sections:
           - label: Liste des équipements
             url:
                 controller: index
-                url_params:
-                    tab: equipments
             icon_before: chevron-left
             classes: 
                 array: btn,btn-primary

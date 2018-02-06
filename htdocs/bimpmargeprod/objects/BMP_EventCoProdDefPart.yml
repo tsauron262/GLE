@@ -5,8 +5,8 @@ parent_object: BMP_Event
 parent_id_property: id_event
 
 labels:
-    name: part co-producteur par défaut
-    name_plur: parts co-producteur par défaut
+    name: part partenaire par défaut
+    name_plur: parts partenaires par défaut
     is_female: 1
     
 objects: 
@@ -47,10 +47,9 @@ fields:
             default:
                 label: Position
                 join_field: position
-        search: 1
         
     id_event_coprod:
-        label: Co-producteur
+        label: Partenaire
         type: id_object
         object: event_coprod
         values: 
@@ -58,35 +57,32 @@ fields:
                 method: getCoProds
                 object: 
                     callback: getParentInstance
-        sortable: 1
-        search: 1
         
     part: 
         label: Part
         type: percent
-        sortable: 1
-        search: 1
 
-form: 
-    rows: 
-        - field: id_category_montant
+forms:
+    default: 
+        rows: 
+            - field: id_category_montant
 
 list:
-    title: Parts Co-producteurs par défaut
+    title: Parts partenaires par défaut
     checkboxes: 
         callback: isEventEditable
     bulk_actions:
         - label: supprimer les lignes sélectionnées
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: category
+    sort_field: id_category_montant
     sort_way: asc
     n: 25
     update_btn: 
         callback: isEventEditable
     delete_btn: 
         callback: isEventEditable
-    add_form: 
+    add_form_name: 
         callback: getCreateForm
     edit_btn: 
         callback: isEventEditable

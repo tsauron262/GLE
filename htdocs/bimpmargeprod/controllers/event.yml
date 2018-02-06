@@ -27,11 +27,13 @@ sections:
                         name: default
                         object: event
           parts:
-              label: Parts Co-producteurs
-              show: 
+              label: Parts Partenaires
+              show:
                   callback: 
                       method: showCoprods
                       object: event
+                      params: 
+                          - test
               url_params:
                   id: 
                       request: id
@@ -55,11 +57,11 @@ sections:
                         object: event
                         children: frais
                         
-                  - type: view
-                    view: 
-                        panel: 1
-                        name: totaux
-                        object: event
+#                  - type: view
+#                    view: 
+#                        panel: 1
+#                        name: totaux
+#                        object: event
           hotel:
               label: Frais hôtellerie
               url_params:
@@ -85,12 +87,23 @@ sections:
                         object: event
                         children: recettes
                         
-                  - type: view
-                    view: 
+#                  - type: view
+#                    view: 
+#                        panel: 1
+#                        name: totaux
+#                        object: event
+          bar: 
+              label: Bar
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: list
+                    list: 
                         panel: 1
-                        name: totaux
+                        name: recettes_bar
                         object: event
-                        
+                        children: recettes_bar
           billets:
               label: Billeterie
               url_params: 
@@ -107,11 +120,11 @@ sections:
                         panel: 1
                         name: breaks
                         object: event
-                  - type: view
-                    view: 
-                        panel: 1
-                        name: totaux
-                        object: event
+#                  - type: view
+#                    view: 
+#                        panel: 1
+#                        name: totaux
+#                        object: event
                         
           bilans: 
               label: Bilans

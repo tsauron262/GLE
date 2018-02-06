@@ -179,6 +179,13 @@ class BimpInput
                 $html .= $form->selectcontacts(0, (int) $value, $field_name);
                 break;
 
+            case 'search_entrepot':
+                require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
+                global $db;
+                $formProduct = new FormProduct($db);
+                $html .= $formProduct->selectWarehouses((int) $value, $field_name);
+                break;
+
             case 'check_list':
                 if (!isset($options['items']) || !count($options['items'])) {
                     $html = BimpRender::renderAlerts('Aucun élément diponible', 'warning');

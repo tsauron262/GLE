@@ -39,19 +39,15 @@ fields:
             help: Entrez une référence ou un nom pour rechercher un vendeur enregistré
         display: 
             type: nom_url
-        sortable: 1
-        search: 1
             
     seller_name:
         label: Nom Vendeur
         type: string
         input: 
             help: Utilisez ce champ si le vendeur n'est pas enregistré
-            display_if:
-                input_name: id_soc_seller
-                show_values: 
-                    array: 0,
-        sortable: 1
+        display_if:
+            field_name: id_soc_seller
+            show_values: 0,
         
     id_tarif:
         label: Tarif
@@ -59,14 +55,11 @@ fields:
         object: tarif
         values: 
             array: tarifs
-        sortable: 1
-        search: 1
         
     quantity:
         label: Quantité vendue
         type: int
         default_value: 0
-        sortable: 1
         history: 1
             
 list:
@@ -78,12 +71,12 @@ list:
         - label: supprimer les lignes sélectionnées
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: id
+    sort_field: id
     sort_way: desc
     n: 25
     update_btn: 
         callback: isEventEditable
-    add_form: 
+    add_form_name: 
         callback: getCreateForm
     edit_btn: 
         callback: isEventEditable

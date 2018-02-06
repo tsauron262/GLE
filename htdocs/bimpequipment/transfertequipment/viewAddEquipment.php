@@ -82,7 +82,9 @@ print '<br/><div id="alertProd"></div><br/><br/>';
 print '<input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 print '<br/><div id="alertEnregistrer"></div>';
 
-
+print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
+print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
+print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
 
 $db->close();
 

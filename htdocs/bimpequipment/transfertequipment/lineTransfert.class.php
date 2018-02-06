@@ -60,7 +60,7 @@ class lineTransfert {
         $this->entrepotId = $entrepotId;
         if (!$this->isProduct($entree)) {
             if (!$this->isEquipment(GETPOST('ref'))) {
-                $this->error = "Produis inconnue";
+                $this->error = "Produit inconnu";
                 return false;
             }
         }

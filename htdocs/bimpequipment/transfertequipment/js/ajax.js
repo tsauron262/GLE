@@ -37,7 +37,7 @@ function checkProductByRef(ref) {
             if (outParsed.stock < 1) {
                 setMessage('alertProd', 'L\'entrepot de départ ne possède pas '+(outParsed.isEquipment? 'cet equipement' : 'ce produit')+'.', 'error');
             } else if (outParsed.id === false) {
-                setMessage('alertProd', 'Produit non renseigné dans la base de donnée.', 'error');
+                        setMessage('alertProd', 'Produit non renseigné dans la base de donnée.', 'error');
             } else if (outParsed.isEquipment) {
                 addFieldEquipment(outParsed.id, outParsed.refUrl, outParsed.serial, outParsed.label);
             } else if ($('table#productTable tr#' + outParsed.id).length !== 0) {
@@ -131,17 +131,15 @@ function initEvents() {
         }
     });
 
-    $("input[name=refScan]").on('keyup', function (e) {
-        if (e.keyCode === 13) { // code for "Enter"
+    var element = $("input[name=refScan]");
+    
+    element.on('keyup', function (e) {
+        if (e.keyCode === 13 || e.keyCode === 9 || e.key == "Enter") { // code for "Enter"
             prepareAjax($(this), e);
         }
     });
-
-    $("input[name=refScan]").on('keydown', function (e) {
-        if (e.keyCode === 9) { // code for "Tab"
-            prepareAjax($(this), e);
-        }
-    });
+    
+    element.focus();
 }
 
 function prepareAjax(element, event) {
@@ -172,6 +170,7 @@ function addFieldEquipment(id, refUrl, serial, label) {
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove "></td></tr>'; // supprimer
     $(line).appendTo('#productTable');
     initRemoveLine(id);
+    document.querySelector("#bipAudio2").play();
 }
 
 /* Add a line in the table of product */
@@ -202,6 +201,7 @@ function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
         qty: qty
     };
     products.push(newProduct);
+    document.querySelector("#bipAudio").play();
 }
 
 function initRemoveLine(idTr) {
@@ -248,6 +248,7 @@ function addQuantity(idProduct, qty) {
             this.qty = newQty;
         }
     });
+    document.querySelector("#bipAudio").play();
 }
 
 /**
@@ -259,6 +260,8 @@ function addQuantity(idProduct, qty) {
 function setMessage(idElement, message, type) {
     var backgroundColor;
     (type === 'mesgs') ? backgroundColor = '#25891c ' : backgroundColor = '#ff887a ';
+    if(type == "error")
+        document.querySelector("#bipError").play();
 
     $('#' + idElement).hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
     setTimeout(function () {

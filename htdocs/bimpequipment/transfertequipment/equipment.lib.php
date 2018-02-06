@@ -56,6 +56,36 @@ function addEquipments($newEquipments) {
     return array('nbNewEquipment' => $cntEquipment, 'errors' => $errors);
 }
 
+//function getSerialById($db, $id) {
+//    $sql = 'SELECT serial';
+//    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+//    $sql .= ' WHERE id_product="' . $id . '"';
+//
+//    $result = $db->query($sql);
+//    if ($result and mysqli_num_rows($result) > 0) {
+//        while ($obj = $db->fetch_object($result)) {
+//            return $obj->serial;
+//        }
+//    }
+//    return 'serial_unknown';
+//}
+
+function getIdOfProductAndEquipment($db, $serial) {
+
+    $sql = 'SELECT id, id_product';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+    $sql .= ' WHERE serial="' . $serial . '"';
+
+    $result = $db->query($sql);
+    if ($result and mysqli_num_rows($result) > 0) {
+        while ($obj = $db->fetch_object($result)) {
+            return array('id' => $obj->id, 'id_product' => $obj->id_product);
+        }
+    }
+
+    return false;
+}
+
 function checkEquipment($db, $serial, $idEntrepotStart) {
 
     $sql = 'SELECT id, id_product';
@@ -72,7 +102,7 @@ function checkEquipment($db, $serial, $idEntrepotStart) {
 }
 
 function checkStockEquipment($db, $idEntrepotStart, $idEquipment, $idProduct) {
-    
+
     $sql = 'SELECT id';
     $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
     $sql .= ' WHERE id_equipment="' . $idEquipment . '"';
@@ -102,6 +132,7 @@ function equipmentExists($db, $id) {
 }
 
 /* Return true if the serial number already exists, else return false */
+
 function checkIfEquipmentExists($db, $serial) {
 
     $sql = 'SELECT rowid';

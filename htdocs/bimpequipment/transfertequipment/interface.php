@@ -31,18 +31,28 @@ switch (GETPOST('action')) {
         }
     case 'checkProductByRef': {
             $id = checkProductByRefOrBarcode($db, GETPOST('ref'));
+            if ($id == false) {
+                $idProdAndIdEquipment = getIdOfProductAndEquipment($db, GETPOST('ref')); // ref => serial
+                $id = $idProdAndIdEquipment['id_product'];
+                if ($id != false)
+                    $serial = GETPOST('ref');
+            }
             if ($id != false) {
                 $prod = new product($db);
                 $prod->id = $id;
-                $prod->ref = GETPOST('ref');
-                $label = getLabel($db, $id);
-                $isEquipment = equipmentExists($db, $id);
-                if ($isEquipment)
-                    $stock = checkStockEquipment($db, $id, GETPOST('idEntrepotStart'));
-                else
+
+                $isEquipment = equipmentExists($db, $idProdAndIdEquipment['id']);
+                if ($isEquipment) {
+                    $stock = checkStockEquipment($db, $idProdAndIdEquipment['id'], GETPOST('idEntrepotStart'), $id);
+                    $prod->ref = GETPOST('ref');
+                    $label = getLabel($db, $id);
+                } else {
+                    $prod->ref = GETPOST('ref');
+                    $label = getLabel($db, $id);
                     $stock = checkStock($db, $id, GETPOST('idEntrepotStart'));
+                }
             }
-            $data = array('id' => $id, 'isEquipment' => $isEquipment, 'stock' => $stock, 'label' => $label, 'refUrl' => $prod->getNomUrl(1));
+            $data = array('id' => $id, 'isEquipment' => $isEquipment, 'stock' => $stock, 'label' => $label, 'refUrl' => $prod->getNomUrl(1), 'serial' => $serial);
             echo json_encode($data);
             break;
         }

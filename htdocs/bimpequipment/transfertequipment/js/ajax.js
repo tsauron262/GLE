@@ -35,7 +35,7 @@ function checkProductByRef(ref) {
             } else if (outParsed.id === false) {
                 setMessage('alertProd', 'Produit non renseigné dans la base de donnée.', 'error');
             } else if (outParsed.isEquipment) {
-
+                addFieldEquipment(outParsed.id, outParsed.refUrl, outParsed.serial, outParsed.label);
             } else if ($('table#productTable tr#' + outParsed.id).length !== 0) {
                 addQuantity(outParsed.id, 1);
             } else {
@@ -87,7 +87,7 @@ $(document).ready(function () {
     $('#entrepotEnd').select2();
     idEntrepotStart = $('#entrepotStart').val();
     idEntrepotEnd = $('#entrepotEnd').val();
-    addFieldProduct(151, 2, 10, "test", '15554');
+//    addFieldProduct(151, 2, 10, "test", '15554');
     initEvents();
 });
 
@@ -138,19 +138,19 @@ function initEvents() {
 }
 
 /* Add a line in the table of equipments */
-function addFieldEquipment() {
+function addFieldEquipment(id, refUrl, serial, label) {
 
 //    $('#alertProd').empty();
 //    cntProduct++;
 
-    var line = '<tr>';
-    line += '<td></td>';      // Identifiant du produit
-    line += '<td></td>';    // Numéro de série
-    line += '<td></td>';
-    line += '<td></td>';
+    var line = '<tr id="' + serial + '">';
+    line += '<td>' + id + '</td>';    // id
+    line += '<td>' + refUrl + '</td>';    // refUrl
+    line += '<td>' + serial + '</td>';    // num série
+    line += '<td>' + label + '</td>';    // label
     line += '<td style="border-right:none"></td>';   // Quantité
     line += '<td style="border-left:none"></td>';   // Modifier
-    line += '<td id="stock"></td>';
+    line += '<td id="stock"></td>'; // prod restant
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove "></td></tr>'; // supprimer
     $(line).appendTo('#productTable');
 }
@@ -166,7 +166,7 @@ function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
     var diff = nb_prod_in_stock - qty;
     var line = '<tr id=' + productId + '>';
     line += '<td>' + productId + '</td>';
-    line += '<td>'+refUrl+'</td>';
+    line += '<td>' + refUrl + '</td>';
     line += '<td></td>';
     line += '<td>' + label + '</td>';
     line += '<td name="quantity" style="border-right:none">' + qty + '</td>';
@@ -224,6 +224,11 @@ function addQuantity(idProduct, qty) {
     var newQty = parseInt(qty) + oldQty;
     $('table#productTable tr#' + idProduct + ' td input[name=modify]').val(newQty);
     $('table#productTable tr#' + idProduct + ' img.modify').click();
+    $.each(products, function () {
+        if (this.id_product === idProduct) {
+            this.qty = newQty;
+        }
+    });
 }
 
 /**

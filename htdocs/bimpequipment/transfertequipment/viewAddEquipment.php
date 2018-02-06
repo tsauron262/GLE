@@ -7,7 +7,7 @@
  */
 require_once '../../main.inc.php';
 
-include DOL_DOCUMENT_ROOT . 'core/class/html.form.class.php';
+include_once DOL_DOCUMENT_ROOT . 'core/class/html.form.class.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/transfertequipment/css/styles.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/transfertequipment/js/ajax.js');
@@ -78,21 +78,7 @@ print '</thead>';
 print '</table>';
 
 print '<br/><div id="alertProd"></div><br/><br/>';
-
-
-
-
-//print '<table id="productsTable" class="custTable">';
-//print '<thead>';
-//print '<th>Produit</th>';
-//print '<th style="border-right:none">Quantité</th>';
-//print '<th style="border-left:none">Modifier</th>';
-//print '<th>Nb produit restant</th>';
-//print '<th>Supprimer</th>';
-//print '</thead>';
-//print '</table>';
-//print '<div id="alertProduct"></div>';
-
+    
 print '<input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 print '<br/><div id="alertEnregistrer"></div>';
 

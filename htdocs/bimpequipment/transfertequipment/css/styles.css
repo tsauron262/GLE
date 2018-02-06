@@ -12,11 +12,11 @@ div.cust.select2-container {
     font-family: arial;
 }
 
-.custNote {
+.custInput {
     border: solid gray 1px;
 }
 
-#hereEquipment {
+table.custTable {
     border-collapse:separate; 
     border-spacing:0;
     border-top: solid black 1px;
@@ -26,15 +26,19 @@ div.cust.select2-container {
     margin-top: 30px;
 }
 
-#hereEquipment tr{
+table.custTable tr{
     background: #ccc;
 }
 
-#hereEquipment th, #hereEquipment td {
+table.custTable th, table.custTable td {
     padding: 3px 10px 3px 10px;
     border-right: solid black 1px;
 }
 
-#hereEquipment th {
+table.custTable th {
     border-bottom: solid black 1px;
+}
+
+.clickable:hover {
+    cursor: pointer;
 }

@@ -15,8 +15,7 @@ class lineTransfert {
     }
 
     function isProduct($ref) {
-        $ref = str_replace("-", "_", $ref);//Pour ma scannette pas forcément vraie....
-        $ref = str_replace("ß", "-", $ref);
+        $ref = str_replace("/", "_", $ref);
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $ref . '"';

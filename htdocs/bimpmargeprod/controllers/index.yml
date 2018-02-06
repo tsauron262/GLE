@@ -14,6 +14,10 @@ objects:
         instance: 
             bimp_object: BMP_TypeMontant
             
+    detail_value:
+        instance: 
+            bimp_object: BMP_MontantDetailValue
+    
     total_inter:
         instance: 
             bimp_object: BMP_TotalInter
@@ -53,6 +57,13 @@ sections:
                             list: 
                                 panel: 1
                                 object: type_montant
+                      - id: details_values
+                        title: Valeurs prédéfinies
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: detail_value
                                 
                       - id: totaux_inter
                         title: Totaux intermédiaires

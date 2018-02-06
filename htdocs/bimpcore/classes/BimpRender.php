@@ -203,7 +203,6 @@ class BimpRender
             $html .= '<span class="panel-caret"></span>';
         }
         $html .= '</div>';
-
         $html .= '</div>';
 
         // Corps:
@@ -465,5 +464,17 @@ class BimpRender
         $html .= '</div>';
 
         return $html;
+    }
+
+    public static function renderPopoverData($content, $placement = 'top', $html = 'false', $container = 'body', $toggle = 'popover', $trigger = 'hover')
+    {
+        $return = ' data-toggle="' . $toggle . '"';
+        $return .= ' data-trigger="' . $trigger . '"';
+        $return .= ' data-container="' . $container . '"';
+        $return .= ' data-placement="' . $placement . '"';
+        $return .= ' data-content="' . htmlentities($content) . '"';
+        $return .= ' data-html="'.$html.'"';
+        
+        return $return;
     }
 }

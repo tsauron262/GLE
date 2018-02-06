@@ -1,0 +1,107 @@
+table: be_reseau
+common_fields: 1
+
+labels:
+    name: réseau
+    name_plur: réseaux
+    
+objects:
+    connection: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BE_Connection
+            id_object: 
+                field_value: id_connection
+        
+fields: 
+    name: 
+        label: Nom de l'interface
+        required: 1
+    ip:
+        label: IP
+    
+    mask: 
+        label: Masque
+        
+    gateway: 
+        label: Passerelle
+        
+    comment: 
+        label: Commentaire
+        type: text
+        input:
+            rows: 1
+            auto_expand: 1
+            
+    id_connection:
+        label: Connexion à distance
+        type: id_object
+        object: connection
+        input: 
+            type: search_list
+            search_list:
+                table: be_connection
+                field_return_label: name
+                field_return_value: id
+                fields_search: name
+
+fields_tables: 
+    default: 
+        panel: 0
+        rows:
+            - field: name
+            - field: ip
+            - field: mask
+            - field: gateway
+            - field: comment
+            - field: id_connection
+
+views: 
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: object_common_fields
+                    col_lg: 3
+                    col_sm: 12
+                  - type: fields_table
+                    col_lg: 9
+                    fields_table:
+                        name: default  
+                        
+lists: 
+    default: 
+        bulk_actions: 
+            - label: Supprimer les réseaux sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        checkboxes: 1
+        add_form_name: default
+        sort_field: id
+        sort_way: desc
+        n: 25
+        edit_btn: 1
+        delete_btn: 1
+        modal_view: default
+        cols: 
+            name: 
+                field: name
+            ip: 
+                field: ip
+            mask:
+                field: mask
+            gateway: 
+                field: gateway
+            comment: 
+                field: comment
+            connection:
+                field: id_connection
+                display: nom_url
+            
+    
+        
+    

@@ -55,6 +55,69 @@ class BimpTools
         return '';
     }
 
+    public static function getDolListArray($id_list)
+    {
+        if (!class_exists('listform')) {
+            require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Process/class/process.class.php');
+        }
+
+        $return = array();
+
+        global $db;
+        $list = new listform($db);
+        $list->fetch($id_list);
+
+        foreach ($list->lignes as $ligne) {
+            $return[$ligne->valeur] = $return[$ligne->label];
+        }
+
+        return $return;
+    }
+
+    public static function getProductImagesDir($product)
+    {
+        global $conf;
+
+        if (!is_a($product, 'Product')) {
+            return null;
+        }
+
+        if (!isset($product->id) || !$product->id) {
+            return null;
+        }
+
+        $dir = $conf->product->multidir_output[$conf->entity] . '/';
+
+        if (!empty($conf->global->PRODUCT_USE_OLD_PATH_FOR_PHOTO)) {
+            if (DOL_VERSION < '3.8.0') {
+                $dir .= get_exdir($product->id, 2) . $product->id . "/photos/";
+            } else {
+                $dir .= get_exdir($product->id, 2, 0, 0, $product, 'product') . $product->id . "/photos/";
+            }
+        } else {
+            $dir .= get_exdir(0, 0, 0, 0, $product, 'product') . dol_sanitizeFileName($product->ref) . '/';
+        }
+
+        return $dir;
+    }
+
+    public static function getProductMainImgUrl($product)
+    {
+        $dir = self::getProductImagesDir($product);
+
+        if (!is_null($dir)) {
+            $files = scandir($dir);
+
+            foreach ($files as $f) {
+                if (!in_array($f, array('.', '..'))) {
+                    return $dir . '/' . $f;
+                }
+            }
+        }
+
+        return '/test2/public/theme/common/nophoto.png';
+    }
+
     // Gestion générique des objets: 
 
     public static function getObjectTable(BimpObject $parent, $id_object_field, $object = null)
@@ -351,7 +414,7 @@ class BimpTools
         return $sql;
     }
 
-    public static function getSqlOrderBy($order_by = null, $order_way = 'ASC', $default_alias = 'a')
+    public static function getSqlOrderBy($order_by = null, $order_way = 'ASC', $default_alias = 'a', $extra_order_by = null, $extra_order_way = 'ASC')
     {
         $sql = '';
         if (!is_null($order_by) && $order_by) {
@@ -369,6 +432,23 @@ class BimpTools
             }
 
             $sql .= ' ' . strtoupper($order_way);
+
+            if (!is_null($extra_order_by) && $extra_order_by) {
+                $sql .= ', ';
+                if (preg_match('/\./', $extra_order_by)) {
+                    $sql .= $extra_order_by;
+                } elseif (!is_null($default_alias) && $default_alias) {
+                    $sql .= $default_alias . '.' . $extra_order_by;
+                } else {
+                    $sql .= '`' . $extra_order_by . '`';
+                }
+
+                if (is_null($extra_order_way) || !$extra_order_way) {
+                    $extra_order_way = 'ASC';
+                }
+
+                $sql .= ' ' . strtoupper($extra_order_way);
+            }
         }
 
         return $sql;

@@ -24,10 +24,6 @@ fields:
     previsionnel: 
         label: Ventes prévisionnelles
         type: int
-        
-    ca_moyen_bar: 
-        label: CA moyen bar TTC
-        type: money
     
 list:
     title: Tarifs
@@ -38,7 +34,7 @@ list:
         - label: supprimer les tarifs sélectionnés
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: amount
+    sort_field: amount
     sort_way: desc
     n: 25
     add_object_row: 
@@ -47,7 +43,7 @@ list:
         callback: isEventEditable
     delete_btn: 
         callback: isEventEditable
-    add_form: 
+    add_form_name: 
         callback: getCreateForm
     cols: 
         name: 
@@ -60,9 +56,5 @@ list:
                 callback: isEventEditable
         previsionnel:
             field: previsionnel
-            edit: 
-                callback: isEventEditable
-        ca_moyen: 
-            field: ca_moyen_bar
             edit: 
                 callback: isEventEditable

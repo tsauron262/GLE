@@ -1,0 +1,65 @@
+table: bmp_montant_detail_value
+common_fields: 0
+
+labels: 
+    name: Valeur prédéfinie
+    name_plur: Valeurs prédéfinies
+    is_female: 1
+
+objects: 
+    type_montant: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BMP_TypeMontant
+            id_object: 
+                field_value: id_type_montant
+                
+fields: 
+    id_type_montant: 
+        label: Type de montant
+        type: id_object
+        object: type_montant
+        values: 
+            array: types_montants
+            
+    label: 
+        label: Libéllé
+        type: string
+        size: 256
+        
+    use_groupe_number:
+        label: Choisir un groupe pour les quantités
+        type: bool
+        default_value: 0
+        
+    unit_price: 
+        label: Prix unitaire HT
+        type: money
+            
+list: 
+    checkboxes: 1
+    bulk_actions:
+        - label: supprimer les lignes sélectionnées
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this))
+    sort_field: id
+    sort_way: desc
+    n: 25
+    update_btn: 1
+    delete_btn: 1
+    add_object_row: 1
+    cols: 
+        type: 
+            field: id_type_montant
+        label: 
+            field: label
+            edit: 1
+        group: 
+            field: use_groupe_number
+            edit: 1
+        price: 
+            field: unit_price
+            edit: 1
+        
+    

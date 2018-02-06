@@ -52,10 +52,9 @@ fields:
         default_value: 0
         values: 
             array: types_montants
-        input: 
-            display_if:
-                input_name: type_source
-                show_values: 1,
+        display_if:
+            field_name: type_source
+            show_values: 1,
     
     id_total_source: 
         label: Total intermédiaire source
@@ -65,20 +64,18 @@ fields:
         default_value: 0
         values: 
             array: totaux_inter
-        input: 
-            display_if:
-                input_name: type_source
-                show_values: 2,
+        display_if:
+            field_name: type_source
+            show_values: 2,
             
     source_amount: 
         label: Montant source fixe
         type: money
         required: 0
         default_value: 0
-        input: 
-            display_if:
-                input_name: type_source
-                show_values: 3,
+        display_if:
+            field_name: type_source
+            show_values: 3
         
     id_target: 
         label: Montant cible
@@ -118,12 +115,12 @@ lists:
             - label: supprimer les calculs auto sélectionnés
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_col: label
+        sort_field: label
         sort_way: asc
         n: 25
         delete_btn: 1
         update_btn: 1
-        add_form: default
+        add_form_name: default
         edit_form: default
         edit_btn: 1
         cols: 

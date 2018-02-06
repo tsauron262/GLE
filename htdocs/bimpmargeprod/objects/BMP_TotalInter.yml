@@ -131,13 +131,13 @@ lists:
             - label: supprimer les lignes sélectionnées
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_col: label
+        sort_field: name
         sort_way: asc
         n: 25
         delete_btn: 1
         update_btn: 1
         edit_btn: 1
-        add_form: default
+        add_form_name: default
         edit_form: default
         cols: 
             label: 

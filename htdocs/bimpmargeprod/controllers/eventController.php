@@ -45,8 +45,9 @@ class eventController extends BimpController
         }
 
         die(json_encode(array(
-            'errors' => $errors,
-            'html'   => $html
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
 }

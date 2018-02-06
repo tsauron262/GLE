@@ -1,0 +1,158 @@
+table: be_connection
+common_fields: 0
+
+labels: 
+    name: connexion à distance
+    name_plur: connexions à distance
+    
+objects: 
+    user_account:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BE_UserAccount
+            id_object: 
+                field_value: id_user_account
+    
+fields:
+    name: 
+        label: Nom
+        required: 1
+        
+    type: 
+        label: Type
+        type: int
+        values: 
+            1: RDP
+            2: VNC
+            3: SSH
+            
+    geometry: 
+        label: Géométrie
+        values: 
+            dol_list: 
+                conf: BE_CONNECTION_ID_LIST_GEOMETRY
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        
+    color_depth: 
+        label: Profondeur couleur
+        values: 
+            dol_list: 
+                conf: BE_CONNECTION_ID_LIST_COLOR_DEPTH
+        display_if: 
+            field_name: type
+            show_values: 1,2
+                
+    full_screen: 
+        label: Plein écran
+        type: bool
+        default_value: 1
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        
+    console: 
+        label: Connexion console
+        type: bool
+        default_value: 1
+        display_if: 
+            field_name: type
+            show_values: 1
+        
+    share_disk:
+        label: Partager disque
+        type: bool
+        default_value: 1
+        display_if: 
+            field_name: type
+            show_values: 1
+        
+    port: 
+        label: Numéro de port
+        type: int
+        default_value: 3389
+        
+    port_redir:
+        label: Redirection port
+        display_if: 
+            field_name: type
+            show_values: 3
+            
+    font_size: 
+        label: Taille de police
+        type: int
+        display_if: 
+            field_name: type
+            show_values: 3
+        
+    id_user_account: 
+        label: Compte utilisateur
+        type: id_object
+        object: user_account
+        required: 1
+        input: 
+            type: search_list
+            search_list:
+                table: be_user_account
+                field_return_label: name
+                field_return_value: id
+                fields_search: name,login
+        display: 
+            nom: 
+                type: nom
+                card: default
+
+fields_tables: 
+    default: 
+        panel: 0
+        rows:
+            - field: name
+            - field: type
+            - field: geometry
+            - field: color_depth
+            - field: full_screen
+            - field: console
+            - field: share_disk
+            - field: port
+            - field: port_redir
+            - field: font_size
+            - field: id_user_account
+
+views: 
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 12
+                    fields_table:
+                        name: default  
+                        
+lists: 
+    default: 
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les connexions sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        title: Connexions à distance
+        icon: plug
+        add_form_name: default
+        delete_btn: 1
+        edit_btn: 1
+        modal_view: default
+        sort_field: id
+        sort_way: desc
+        cols: 
+            name: 
+                field: name
+            type: 
+                field: type
+            user: 
+                field: id_user_account
+                display: nom

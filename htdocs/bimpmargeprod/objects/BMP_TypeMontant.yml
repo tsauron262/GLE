@@ -17,8 +17,6 @@ fields:
         label: Nom
         type: string
         required: 1
-        sortable: 1
-        search: 1
         
     id_category:
         label: Catégorie
@@ -30,8 +28,6 @@ fields:
             default: 
                 type: nom
         required: 1
-        sortable: 1
-        search: 1
         
     type: 
         label: Type
@@ -55,43 +51,30 @@ fields:
                         id_country: 1
                 is_static: 1
         default_value: 11
-                
-        sortable: 1
-        search: 1
         
     code_compta:
         label: code comptable
         type: string
-        sortable: 1
-        search: 1
             
     required: 
         label: Par défaut
         type: bool
         default_value: 0
-        sortable: 1
-        search: 1
         
     editable: 
         label: Editable
         type: bool
         default_value: 1
-        sortable: 1
-        search: 1
         
     has_details:
         label: Détails
         type: bool
         default_value: 0
-        sortable: 1
-        search: 1
         
     coprod:
         label: Co-producteurs
         type: bool
         default_value: 1
-        sortable: 1
-        search: 1
                 
 list:
     checkboxes: 1
@@ -99,10 +82,10 @@ list:
         - label: supprimer les type de montant sélectionnés
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: category
+    sort_field: id_category
     sort_way: desc
     n: 25
-    add_form: default
+    add_form_name: default
     update_btn: 1
     delete_btn: 1
     cols: 

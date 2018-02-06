@@ -61,16 +61,14 @@ fields:
         input: 
             type: search_societe
             societe_type: customer
-            display_if:
-                input_name: type
-                show_values: 1
+        display_if:
+            field_name: type
+            show_values: 1
         display: 
             nom_url: 
                 type: nom_url
             card: 
                 type: card
-                card: societe_card
-        depends_on: type
         
     id_contact:
         label: Contact
@@ -78,17 +76,15 @@ fields:
         object: contact
         values: 
             array: contacts
-        input: 
-            display_if:
-                input_name: type
-                show_values: 1
+        display_if:
+            field_name: type
+            show_values: 1
         display: 
             nom_url: 
                 type: nom_url
             card: 
                 type: card
-                card: contact_card
-        depends_on: type,id_client
+        depends_on: id_client
     
     id_entrepot:
         label: Entrepôt
@@ -96,13 +92,12 @@ fields:
         object: entrepot
         input: 
             type: search_entrepot
-            display_if:
-                input_name: type
-                show_values: 2
+        display_if:
+            field_name: type
+            show_values: 2
         display: 
             nom_url: 
                 type: nom_url
-        depends_on: type
     
     id_user: 
         label: Utilisateur
@@ -110,9 +105,9 @@ fields:
         object: user
         input: 
             type: search_user
-            display_if:
-                input_name: type
-                show_values: 3
+        display_if:
+            field_name: type
+            show_values: 3
         default_value:
             prop:
                 name: id
@@ -124,15 +119,12 @@ fields:
             card:
                 type: card
                 card: user_card
-        depends_on: type
         
     place_name: 
         label: Nom de l'emplacement
-        input: 
-            display_if: 
-                input_name: type
-                show_values: 4
-        depends_on: type
+        display_if: 
+            field_name: type
+            show_values: 4
         
     infos: 
         label: Informations
@@ -152,11 +144,12 @@ lists:
         title: Emplacements
         icon: map-marker
         objects_change_reload: BE_Place
-        add_form: default
-        sort_col: position
+        add_form_name: default
+        sort_field: position
         sort_way: asc
         n: 10
-        add_form: default
+        edit_btn: 1
+        positions: 1
         cols:
             name: 
                 label: Emplacement

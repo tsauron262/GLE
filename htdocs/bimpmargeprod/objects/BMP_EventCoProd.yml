@@ -5,7 +5,7 @@ parent_object: BMP_Event
 parent_id_property: id_event
 
 labels:
-    name: co-producteur
+    name: partenaire
     
 objects: 
     societe:
@@ -37,24 +37,21 @@ fields:
             card: 
                 type: card
                 card: societe_card
-        sortable: 1
-        search: 1
         
     default_part: 
         label: Part par défaut
         type: percent
         default_value: 0
-        sortable: 1
         
 list:
-    title: Co-producteurs
+    title: Structures partenaires
     checkboxes: 
         callback: isEventEditable
     bulk_actions:
-        - label: supprimer les Co-producteurs sélectionnés
+        - label: supprimer les partenaires sélectionnés
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
-    sort_col: id
+    sort_field: id
     sort_way: desc
     n: 25
     add_object_row: 

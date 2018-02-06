@@ -54,7 +54,21 @@ objects:
             title: Recettes
             filters: 
                 type: 2
-            
+    
+    recettes_bar: 
+        relation: none
+        delete: 0
+        instance:
+            bimp_object: BMP_EventMontant
+        list: 
+            title: Recettes du bar
+            filters: 
+                type: 2
+                id_category_montant:
+                    prop: 
+                        name: id_bar_category
+                        is_static: 1
+    
     billets:
         relation: hasMany
         delete: 1
@@ -101,6 +115,11 @@ fields:
         type: int
         values: 
             array: status
+            
+    ca_moyen_bar:
+        label: CA moyen bar TTC
+        type: money
+        
         
 lists:
     default: 
@@ -109,12 +128,12 @@ lists:
             - label: supprimer les événements sélectionnées
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_col: date_begin
+        sort_field: date_begin
         sort_way: desc
         n: 10
-        add_form: default
+        add_form_name: default
         delete_btn: 1
-        view_btn: 1
+        page_btn: 1
         edit_btn: 1
         cols:
             begin:
@@ -129,7 +148,24 @@ lists:
                 field: place
             status: 
                 field: status
-                
+             
+fields_tables: 
+    infos: 
+        title: Infos événement
+        icon: info-circle
+        rows:
+          - field: date_begin
+          - field: date_end
+          - field: type
+          - field: place
+          - field: status
+            edit: 1
+    ca_bar:
+        title: Prévisionnel bar
+        icon: beer
+        rows: 
+            - field: ca_moyen_bar
+              edit: 1
 views:
     default:
         title: nom
@@ -141,16 +177,8 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table: 
-                      caption: 
-                          label: Infos événement
-                          icon: info-circle
-                      rows:
-                        - field: date_begin
-                        - field: date_end
-                        - field: type
-                        - field: place
-                        - field: status
-                          edit: 1
+                      name: infos
+                      
                 - type: object_common_fields
                   col_lg: 6    
                   col_md: 6
@@ -171,7 +199,7 @@ views:
                   list: 
                       children: coprods
                       panel: 0
-                      
+        
     billets:
         title: Billeterie
         rows:                
@@ -198,11 +226,17 @@ views:
         objects_change_reload: BMP_Tarif
         rows:
             - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: ca_bar
                 - type: custom
                   col_lg: 6
                   col_md: 6
                   custom: 
                       callback: renderPrevisionnelBreaks
+                
                       
     billets_list:
         rows: 

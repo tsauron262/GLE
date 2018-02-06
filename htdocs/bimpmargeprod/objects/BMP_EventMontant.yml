@@ -57,7 +57,6 @@ fields:
             default: 
                 type: callback
                 method: displayCategory
-        sortable: 1
         search: 
             input: 
                 type: select
@@ -67,6 +66,7 @@ fields:
             default:
                 label: Position
                 join_field: position
+        next_sort_field: id_montant
         depends_on: type,id_coprod
             
     id_montant:
@@ -77,17 +77,15 @@ fields:
             array: types_montants
         display:
             type: nom
-        sortable: 1
         search: 
             input: 
                 type: select
                 options:  
                     array: allTypes
         depends_on: id_category_montant,type,id_coprod
-        input:
-            display_if:
-                input_name: id_category_montant
-                hide_values: 0,
+        display_if:
+            field_name: id_category_montant
+            hide_values: 0,
         sort_options:
             default:
                 label: Nom
@@ -96,7 +94,6 @@ fields:
     amount: 
         label: Montant HT
         type: money
-        sortable: 1
         search:
             type: value_part
             part_type: beginning
@@ -108,8 +105,6 @@ fields:
         values:
             array: status
         default_value: 1
-        sortable: 1
-        search: 1
         display: 
             default: 
                 type: array_value
@@ -134,7 +129,8 @@ fields:
         input: 
             auto_expand: 1
             rows: 1
-            
+        searchable: 0
+     
 lists:
     frais: 
         title: Montants
@@ -149,12 +145,14 @@ lists:
             - label: supprimer les lignes sélectionnées
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_col: category
+        sort_field: id_category_montant
         sort_way: asc
         n: 0
         update_btn: 1
-        add_form: 
+        add_form_name: 
             callback: getCreateForm
+        add_form_values:
+            type: 1
         delete_btn: 
             callback: isDeletable
         cols: 
@@ -186,7 +184,7 @@ lists:
                 edit: 1
         extra_cols: 
             callback: getCoProdsCols
-        extra_buttons:
+        extra_btn:
             callback: getDefaultListExtraButtons
             
     recettes: 
@@ -202,12 +200,14 @@ lists:
             - label: supprimer les lignes sélectionnées
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_col: category
+        sort_field: id_category_montant
         sort_way: asc
         n: 0
         update_btn: 1
-        add_form: 
+        add_form_name: 
             callback: getCreateForm
+        add_form_values:
+            type: 2
         delete_btn: 
             callback: isDeletable
         cols: 
@@ -239,7 +239,48 @@ lists:
                 edit: 1
         extra_cols: 
             callback: getCoProdsCols
-        extra_buttons:
+        extra_btn:
+            callback: getDefaultListExtraButtons
+            
+    recettes_bar: 
+        title: Recette du bar
+        objects_change_reload: BMP_EventMontantDetail,BMP_EventBillets
+        row_style: 
+            callback: getListRowStyle
+        sort_field: id_montant
+        sort_way: asc
+        n: 0
+        update_btn: 1
+        cols: 
+            category:
+                field: id_category_montant
+            type: 
+                field: id_montant
+            coprod: 
+                label: Reçu par
+                field: id_coprod
+                show:
+                    callback: 
+                        method: showCoprods
+                        object: 
+                            callback: getParentInstance
+            amount: 
+                field: amount
+                edit: 
+                    callback: isEditable
+            taxe:
+                label: TVA
+                value: 
+                    callback: getTva
+            status: 
+                field: status
+                edit: 1
+            comment: 
+                field: comment
+                edit: 1
+        extra_cols: 
+            callback: getCoProdsCols
+        extra_btn:
             callback: getDefaultListExtraButtons
             
     bilan_general: 
@@ -247,7 +288,7 @@ lists:
         checkboxes: 0
         row_style: 
             callback: getListRowStyle
-        sort_col: category
+        sort_field: id_category_montant
         sort_way: asc
         n: 50
         cols:
@@ -291,7 +332,7 @@ lists:
                 method: getCoProdsCols
                 params: 
                     edit: 0
-        extra_buttons:
+        extra_btn:
             callback: 
                 method: getDefaultListExtraButtons
                 params:
@@ -305,7 +346,7 @@ lists:
             callback: getListRowStyle
         filters: 
             id_coprod: 0
-        sort_col: category
+        sort_field: id_category_montant
         sort_way: asc
         n: 50
         cols:
@@ -343,7 +384,7 @@ lists:
                         method: displayAmountByType
                         params: 
                             type: 2
-        extra_buttons:
+        extra_btn:
             callback: 
                 method: getDefaultListExtraButtons
                 params:

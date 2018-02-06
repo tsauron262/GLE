@@ -1,0 +1,170 @@
+table: be_logiciel
+common_fields: 1
+
+labels:
+    name: logiciel
+    
+objects: 
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: product
+            id_object: 
+                field_value: id_product
+        card: 
+            type: product_card
+                
+    fournisseur:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object: 
+                field_value: id_fournisseur
+                
+    user_account:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BE_UserAccount
+            id_object: 
+                field_value: id_user_account
+        
+fields: 
+    use_product:
+        label: Produit existant
+        type: bool
+        default_value: 1
+        
+    id_product:
+        label: Produit
+        type: id_object
+        object: product
+        input: 
+            type: search_product
+            help: Entrez un nom ou une référence pour rechercher un produit
+        display_if: 
+            field_name: use_product
+            show_values: 1
+        display: 
+            default: 
+                type: nom_url
+        
+    name: 
+        label: Nom du produit
+        display_if: 
+            field_name: use_product
+            show_values: 0
+        
+    id_fournisseur:
+        label: Fabricant
+        type: id_object
+        object: fournisseur
+        input: 
+            type: search_societe
+            societe_type: supplier
+        display: 
+            default: 
+                type: nom_url
+                external_link: 1
+        display_if: 
+            field_name: use_product
+            show_values: 0
+            
+    version:
+        label: Version
+        display_if: 
+            field_name: use_product
+            show_values: 0
+            
+    type: 
+        label: Type
+        values: 
+            array: 
+                1: OS
+                2: BDD
+        default_value: 1
+        
+    id_user_account:
+        label: Compte utilisateur
+        type: id_object
+        object: user_account
+        input: 
+            type: search_list
+            search_list:
+                table: be_user_account
+                field_return_label: name
+                field_return_value: id
+                fields_search: name,login
+        display: 
+            nom: 
+                type: nom
+                card: default
+        
+    sn: 
+        label: SN
+
+fields_tables: 
+    default: 
+        panel: 0
+        rows:
+            - label: Produit
+              value: 
+                  callback: 
+                      method: displayProduct
+                      params:
+                          - card
+            - field: type
+            - field: sn
+
+views: 
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: object_common_fields
+                    col_lg: 3
+                    col_sm: 12
+                  - type: fields_table
+                    col_lg: 9
+                    fields_table:
+                        name: default  
+
+lists: 
+    default: 
+        bulk_actions: 
+            - label: Supprimer les équipements sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        checkboxes: 1
+        add_form_name: default
+        sort_field: id
+        sort_way: desc
+        n: 25
+        edit_btn: 1
+        delete_btn: 1
+        modal_view: default
+        cols: 
+            product: 
+                label: Produit
+                value: 
+                    callback: 
+                        method: displayProduct
+                        params:
+                            - nom_url
+            type: 
+                field: type
+            user:
+                field: id_user_account
+                display: nom                    
+            sn: 
+                field: sn
+        
+            
+    
+        
+    

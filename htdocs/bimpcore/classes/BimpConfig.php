@@ -12,7 +12,7 @@ class BimpConfig
     public $current = null;
     public $errors = array();
     public static $keywords = array(
-        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request'
+        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'dol_list', 'conf'
     );
 
     public function __construct($dir, $file_name, $instance)
@@ -165,7 +165,7 @@ class BimpConfig
     public function getParams($full_path)
     {
         if (is_null($full_path) || !$full_path) {
-            return array();
+            return null;
         }
 
         $path = explode('/', $full_path);
@@ -179,7 +179,7 @@ class BimpConfig
             if (isset($current[$key])) {
                 $current = $current[$key];
             } else {
-                return array();
+                return null;
             }
         }
 
@@ -259,6 +259,9 @@ class BimpConfig
             if (array_key_exists('array', $value)) {
                 return $this->getArray($value['array'], $path . '/array');
             }
+            if (array_key_exists('dol_list', $value)) {
+                return $this->getDolList($value['dol_list'], $path . '/dol_list');
+            }
             if (array_key_exists('array_value', $value)) {
                 return $this->getArrayValue($path . '/array_value');
             }
@@ -267,6 +270,9 @@ class BimpConfig
             }
             if (array_key_exists('callback', $value)) {
                 return $this->processCallback($value['callback'], $path . '/callback');
+            }
+            if (array_key_exists('conf', $value)) {
+                return $this->getConfValue($value['conf'], $path . '/conf');
             }
             if (array_key_exists('global', $value)) {
                 $global_var = $this->getvalue($value['global'], $path . '/global');
@@ -323,11 +329,12 @@ class BimpConfig
                         return null;
                     }
                     $file = $this->get($path . '/dol_object/file', $module, false);
-                    $className = $this->get($path . '/dol_object/class', ucfirst($module), false);
+                    $className = $this->get($path . '/dol_object/class', ucfirst($file), false);
                 }
                 if (!is_null($module) && !is_null($file) && !is_null($className)) {
                     if (!class_exists($className)) {
                         $file_path = DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php';
+
                         if (file_exists($file_path)) {
                             require_once $file_path;
                         }
@@ -444,9 +451,9 @@ class BimpConfig
             } else {
                 $object = $this->instance;
             }
-            $is_static = $this->get($path . '/is_static', false, false, 'bool');
+            $is_static = (int) $this->get($path . '/is_static', false, false, 'bool');
         }
-
+        
         if (is_null($object)) {
             if (!is_null($prop_name)) {
                 $msg = 'Impossible d\'obtenir la propriété "' . $prop_name . '" - Instance invalide';
@@ -552,6 +559,37 @@ class BimpConfig
         return $array[$key];
     }
 
+    protected function getDolList($dol_list, $path)
+    {
+        $id_list = null;
+        if (is_int($dol_list) || preg_match('/^\d+$/', $dol_list)) {
+            $id_list = (int) $dol_list;
+        } elseif (is_array($dol_list)) {
+            $id_list = (int) $this->getvalue($dol_list, $path);
+        }
+
+        if (is_null($id_list) || !($id_list) || !is_int($id_list)) {
+            return array();
+        }
+        
+        return BimpTools::getDolListArray($id_list);
+    }
+
+    protected function getConfValue($conf, $path)
+    {
+        if (is_array($conf)) {
+            $conf = $this->getvalue($conf, $path);
+        }
+
+        if (is_string($conf)) {
+            global $db;
+            $bdb = new BimpDb($db);
+            return $bdb->getValue('bimpcore_conf', 'value', '`name` = \'' . $conf . '\'');
+        }
+
+        return null;
+    }
+
     protected function processCallback($callback, $path)
     {
         if (is_string($callback)) {
@@ -580,6 +618,10 @@ class BimpConfig
             }
 
             $params = $this->getCompiledParams($path . '/params');
+
+            if (is_null($params)) {
+                $params = array();
+            }
 
             if ($is_static) {
                 return forward_static_call_array(array(

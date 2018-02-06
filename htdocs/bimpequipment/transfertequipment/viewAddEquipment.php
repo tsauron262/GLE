@@ -55,43 +55,45 @@ foreach ($entrepots as $id => $name) {
 }
 print '</select><br/><br/>';
 
-print '<strong id="alertProd" style="color: red ; margin-left: 10px"> </strong>';
+print 'Réf. ou code barre ou numéro de série ';
+print '<input name="refScan" class="custInput" style="width : 300px"><br>';
 
-print '<h3>Produits sérialisés</h3>';
-
-print '<table id="equipmentTable" class="custTable">';
-print '<thead>';
-print '<th>Nombre de produits scannés</th>';
-print '<th>Identifiant du produit</th>';
-print '<th>Numéro de série</th>';
-print '<th>Note</th>';
-print '<th>Réponse serveur</th>';
-print '<th>Supprimer</th>';
-print '</thead>';
-print '</table>';
-
-print '<br/><div id="alertEquipment"></div><br/><br/>';
-
-
-print '<br><h3>Produits non sérialisés</h3>';
 
 $form = new Form($db);
 $form->select_produits();
-
 print '<br><span> Quantité : </span><input id="qty" type="number" class="custInput" style="width: 40px" value=1 min=1><br>';
 print '<span>Ajouter : </span><img id="addProduct" src="css/plus.ico" class="clickable" style="margin-bottom : -7px">';
-print '<table id="productsTable" class="custTable">';
+
+print '<table id="productTable" class="custTable">';
 print '<thead>';
-print '<th>Produit</th>';
+print '<th>Identifiant</th>';
+print '<th>Référence</th>';
+print '<th>Numéro de série</th>';
+print '<th>Label</th>';
 print '<th style="border-right:none">Quantité</th>';
 print '<th style="border-left:none">Modifier</th>';
-print '<th>Nb produit restant</th>';
+print '<th>Produit Restant</th>';
 print '<th>Supprimer</th>';
 print '</thead>';
 print '</table>';
-print '<div id="alertProduct"></div>';
 
-print '<br/><br/><br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
+print '<br/><div id="alertProd"></div><br/><br/>';
+
+
+
+
+//print '<table id="productsTable" class="custTable">';
+//print '<thead>';
+//print '<th>Produit</th>';
+//print '<th style="border-right:none">Quantité</th>';
+//print '<th style="border-left:none">Modifier</th>';
+//print '<th>Nb produit restant</th>';
+//print '<th>Supprimer</th>';
+//print '</thead>';
+//print '</table>';
+//print '<div id="alertProduct"></div>';
+
+print '<input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 print '<br/><div id="alertEnregistrer"></div>';
 
 

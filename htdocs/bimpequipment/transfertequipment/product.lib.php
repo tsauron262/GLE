@@ -7,22 +7,6 @@
  */
 require_once '../../main.inc.php';
 
-
-/* Return true if the serial number already exists, else return false */
-
-function checkIfEquipmentExists($db, $serial) {
-
-    $sql = 'SELECT rowid';
-    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
-    $sql .= ' WHERE serial="' . $serial . '"';
-
-    $result = $db->query($sql);
-    if ($result and mysqli_num_rows($result) > 0) {
-        return true;
-    }
-    return false;
-}
-
 function getNote($db, $idCurrentProd) {
 
     $sql = 'SELECT note_public';
@@ -69,4 +53,35 @@ function getLabel($db, $idProd) {
         }
     }
     return 'no_product_matched';
+}
+
+function getLabelAndref($db, $idProd) {
+
+    $sql = 'SELECT label, ref';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
+    $sql .= ' WHERE rowid=' . $idProd;
+
+    $result = $db->query($sql);
+    if ($result and mysqli_num_rows($result) > 0) {
+        while ($obj = $db->fetch_object($result)) {
+            return array('label' => $obj->ref, 'ref' => $obj->ref);
+        }
+    }
+    return 'no_product_matched';
+}
+
+function checkProductByRefOrBarcode($db, $ref) {
+
+    $sql = 'SELECT rowid';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
+    $sql .= ' WHERE ref="' . $ref . '"';
+    $sql .= ' OR barcode="' . $ref . '"';
+
+    $result = $db->query($sql);
+    if ($result and mysqli_num_rows($result) > 0) {
+        while ($obj = $db->fetch_object($result)) {
+            return $obj->rowid;
+        }
+    }
+    return false;
 }

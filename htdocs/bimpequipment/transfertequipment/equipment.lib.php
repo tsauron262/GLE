@@ -87,3 +87,30 @@ function checkStockEquipment($db, $idEntrepotStart, $idEquipment, $idProduct) {
     }
     return 'no_entrepot_for_equipment';
 }
+
+function equipmentExists($db, $id) {
+
+    $sql = 'SELECT id';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+    $sql .= ' WHERE id=' . $id;
+
+    $result = $db->query($sql);
+    if ($result and mysqli_num_rows($result) > 0) {
+        return true;
+    }
+    return false;
+}
+
+/* Return true if the serial number already exists, else return false */
+function checkIfEquipmentExists($db, $serial) {
+
+    $sql = 'SELECT rowid';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+    $sql .= ' WHERE serial="' . $serial . '"';
+
+    $result = $db->query($sql);
+    if ($result and mysqli_num_rows($result) > 0) {
+        return true;
+    }
+    return false;
+}

@@ -31,6 +31,7 @@ require_once DOL_DOCUMENT_ROOT . '/margin/lib/margins.lib.php';
 
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
 
 class BimpStatsFacture {
 
@@ -54,26 +55,34 @@ class BimpStatsFacture {
         dol_syslog(get_class($this) . '::create', LOG_DEBUG);
     }
 
-    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format) {
+    /* Main function, triggered when the user click on "Valider" button */
+
+    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier) {
         // TODO MAJ BDD
         $this->mode = $format;
-        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);
-        $hash = $this->getFields($facids, $taxes);
+        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);    // apply filter
+        $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
         $hash = $this->addMargin($hash);
         if ($this->mode == 'd') {
             $hash = $this->addSocieteURL($hash);
             $hash = $this->addFactureURL($hash);
             $hash = $this->addPaiementURL($hash);
+            $hash = $this->addSavURL($hash);
         }
+        $hash = $this->addStatut($hash);
         $t_to_types = $this->getExtrafieldArray('facture', 'type');
         $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
         $hash = $this->convertType($hash, $t_to_types);
         $hash = $this->convertCenter($hash, $c_to_centres);
         $out = $this->sortHash($hash, $sortBy);
-        if ($this->mode != 'c')
-            $this->putCsv($out);
+        if ($this->mode == 'c') {
+            $this->putCsv($out, $nomFichier);
+            $out['urlCsv'] = "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&attachment=1&file=/export/exportGle/" . $nomFichier . ".csv' class='butAction'>Fichier</a>";
+        }
         return $out;
     }
+
+    /* Filter facture */
 
     private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats) {
         $ids = array();
@@ -85,21 +94,34 @@ class BimpStatsFacture {
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
-            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0")';
+            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
             $sql .= ' OR e.type IS NULL)';
         } else if (!empty($types)) {     // Non renseigné NOT selected
             $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
         }
 
-        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
-            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
-            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
-            $sql .= ' OR e.centre IS NULL';
-            $sql .= ' OR fs.centre IS NULL)';
-        } else if (!empty($centres)) {
-            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
+        $sql .= " AND (";
+        if (!empty($centres)) {
+            $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
             $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+            if (in_array('NRS', $centres)) {
+                $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
+                $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
+            }
+        } else {
+            $sql .= "1";
         }
+        $sql .= ")";
+
+//        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
+//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
+//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
+//            $sql .= ' OR e.centre IS NULL';
+//            $sql .= ' OR fs.centre IS NULL)';
+//        } else if (!empty($centres)) {
+//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
+//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+//        }
 
         if (!empty($etats)) {
             $sql .= ' AND f.fk_statut IN (\'' . implode("','", $etats) . '\')';
@@ -129,8 +151,11 @@ class BimpStatsFacture {
         $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
         $sql .= ' e.centre as centre, e.type as type,';
-        $sql .= ' fs.centre as centre,';
-        $sql .= ' pf.amount as pai_paye_ttc, ';
+        $sql .= ' fs.centre as centre, fs.idSav as sav_id, fs.refSav as sav_ref,';
+        $sql .= ' pf.amount as pai_paye_ttc,';
+        $sql .= ' sy.description as description, sy.model_refid as saf_refid,';
+        $sql .= ' sy_101.N__Serie as numero_serie, sy_101.Type_garantie as type_garantie,';
+
         if ($taxes == 'ttc')
             $sql.= ' f.total_ttc as fac_total';
         else    // ht
@@ -141,6 +166,8 @@ class BimpStatsFacture {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement            as p  ON pf.fk_paiement  = p.rowid';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e  ON f.rowid         = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'synopsischrono     as sy     ON fs.equipmentId = sy.id';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'synopsischrono_chrono_101 as sy_101 ON fs.equipmentId = sy_101.id';
 
         $sql .= ' WHERE f.rowid IN (\'' . implode("','", $facids) . '\')';
         $sql .= ' ORDER BY f.rowid';
@@ -160,8 +187,14 @@ class BimpStatsFacture {
                 $hash[$ind]['pai_id'] = $obj->pai_id;
                 $hash[$ind]['ref_paiement'] = $obj->pai_ref;
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
-                $hash[$ind]['ct'] = ($obj->centre != "0" and $obj->centre != '') ? $obj->centre : 0;
-                $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '') ? $obj->type : 0;
+                $hash[$ind]['ct'] = ($obj->centre != "0" and $obj->centre != '' and $obj->centre != false) ? $obj->centre : 0;
+                $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
+                $hash[$ind]['equip_ref'] = $obj->description;
+                $hash[$ind]['numero_serie'] = $obj->numero_serie;
+                $hash[$ind]['type_garantie'] = $obj->type_garantie;
+                $hash[$ind]['sav_id'] = $obj->sav_id;
+                $hash[$ind]['sav_ref'] = $obj->sav_ref;
+                $hash[$ind]['saf_refid'] = $obj->saf_refid;
                 $ind++;
             }
         }
@@ -194,7 +227,10 @@ class BimpStatsFacture {
 
     function formatPrice($in) {
         $out = str_replace(',', '.', $in);
-        return price($out) . " €";
+        $out = price($out);
+        if ($this->mode != 'c')
+            $out .= " €";
+        return $out;
     }
 
     private function addSocieteURL($hash) {
@@ -208,12 +244,9 @@ class BimpStatsFacture {
         return $hash;
     }
 
-    private function addFactureURL($hash) {
+    private function addStatut($hash) {
+        $facture = new Facture($this->db);
         foreach ($hash as $ind => $h) {
-            $facture = new Facture($this->db);
-            $facture->id = $h['fac_id'];
-            $facture->ref = $h['nom_facture'];
-            $hash[$ind]['nom_facture'] = $facture->getNomUrl(1);
             switch ($h['fac_statut']) {
                 case $facture::STATUS_DRAFT: {
                         $hash[$ind]['facstatut'] = "Brouillon";
@@ -238,13 +271,36 @@ class BimpStatsFacture {
         return $hash;
     }
 
+    private function addFactureURL($hash) {
+        foreach ($hash as $ind => $h) {
+            $facture = new Facture($this->db);
+            $facture->id = $h['fac_id'];
+            $facture->ref = $h['nom_facture'];
+            $hash[$ind]['nom_facture'] = $facture->getNomUrl(1);
+        }
+        return $hash;
+    }
+
+    private function addSavURL($hash) {
+        foreach ($hash as $ind => $h) {
+            if (isset($h['sav_id'])/* and $h['saf_refid'] == 105 */) {
+                $chrono = new Chrono($this->db);
+                $chrono->id = $h['sav_id'];
+                $chrono->ref = $h['sav_ref'];
+//                $chrono->model_refid = 105;
+                $hash[$ind]['sav_ref'] = $chrono->getNomUrl(1, '', '');
+            }
+        }
+        return $hash;
+    }
+
     private function addPaiementURL($hash) {
         foreach ($hash as $ind => $h) {
             if (isset($h['pai_id'])) {
                 $pai = new Paiement($this->db);
-                    $pai->id = $h['pai_id'];
-                    $pai->ref = $h['ref_paiement'];
-                    $hash[$ind]['ref_paiement'] = $pai->getNomUrl(1, '', '');
+                $pai->id = $h['pai_id'];
+                $pai->ref = $h['ref_paiement'];
+                $hash[$ind]['ref_paiement'] = $pai->getNomUrl(1, '', '');
             }
         }
         return $hash;
@@ -284,7 +340,6 @@ class BimpStatsFacture {
                 }
             }
         }
-
         return $out;
     }
 
@@ -302,59 +357,14 @@ class BimpStatsFacture {
         return $hash;
     }
 
-    private function sortHash($hash, $sortBy) {
-        $out = array();
-
-        foreach ($hash as $row) {
-            if (sizeof($sortBy) == 2) {
-                $filtre = $row['ty'] . '_' . $row['ct'];
-                $title = $row['centre'] . " - " . $row['type'];
-            } elseif (empty($sortBy)) {
-                $filtre = 'all';
-                $title = 'Tous les centres et tous les types';
-            } elseif ($sortBy[0] == 't') {
-                $filtre = $row['ty'];
-                $title = $row['type'];
-            } elseif ($sortBy[0] == 'c') {
-                $filtre = $row['ct'];
-                $title = $row['centre'];
-            }
-
-            if (!isset($out[$filtre])) {
-                $out[$filtre] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
-            }
-            $out[$filtre]['total_total'] += $row['factotal'];
-            $out[$filtre]['total_total_marge'] += $row['marge'];
-            $out[$filtre]['total_payer'] += $row['paipaye_ttc'];
-            $row['factotal'] = $this->formatPrice($row['factotal']);
-            $row['marge'] = $this->formatPrice($row['marge']);
-            $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
-            $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
-            if ($this->mode != 'r')
-                $out[$filtre]['factures'][] = $row;
-        }
-
-        foreach ($out as $key => $inut) {
-            $out[$key]['total_total'] = $this->formatPrice($out[$key]['total_total']);
-            $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
-            $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
-            $out[$key]['nb_facture'] = count($out[$key]['nb_facture']);
-        }
-        sort($out);
-        return $out;
-    }
-
-    function putCsv($factures) {
+    function putCsv($factures, $nomFichier) {
         $sautLn = "\n";
         $sep = ";";
         $sortie = "";
 
         foreach ($factures as $factureTab) {
             $tabHeadIsOk = false;
-            $sortie .= $sautLn;
             $sortie .= "Tableau : " . $factureTab["title"];
-            $sortie .= $sautLn;
-            $sortie .= $sautLn;
             $sortie .= $sautLn;
             foreach ($factureTab["factures"] as $facture) {
                 $sortie .= $sautLn;
@@ -368,12 +378,141 @@ class BimpStatsFacture {
                 }
 
                 foreach ($facture as $champ) {
+                    if(!is_numeric(str_replace(",", ".", str_replace(" ", "", $champ)))){
+                        $champ = str_replace('"', '', $champ);
+                    }
+                    else{
+                        $champ = str_replace(' ', '', $champ);
+                    }
+                    $champ = '"' . $champ . '"';
                     $sortie .= $champ;
                     $sortie .= $sep;
                 }
             }
+            $sortie .= $sautLn;
+            $sortie .= $sautLn;
+            $sortie .= $sautLn;
         }
-        file_put_contents(DOL_DATA_ROOT . "/file.csv", $sortie);
+
+        file_put_contents(DOL_DATA_ROOT . "/synopsischrono/export/exportGle/" . $nomFichier . ".csv", $sortie);
+    }
+
+    private function sortHash($hash, $sortBy) {
+        $out = array();
+
+        (in_array('c', $sortBy)) ? $sortCenter = true : $sortCenter = false;
+        (in_array('t', $sortBy)) ? $sortType = true : $sortType = false;
+        (in_array('g', $sortBy)) ? $sortTypeGarantie = true : $sortTypeGarantie = false;
+        (in_array('e', $sortBy)) ? $sortEquipement = true : $sortEquipement = false;
+
+        if ($sortTypeGarantie) {
+            $allTypeGarantie = $this->getTypeGaranties();
+        }
+        if ($sortEquipement) {
+            $allEquipement = $this->getEquipements();
+        }
+
+        foreach ($hash as $row) {
+            if (empty($sortBy)) {
+                $filtre = 'all';
+                $title = 'Toutes les factures';
+            } else {
+                $title = '';
+                $filtre = '';
+                if ($sortCenter) {
+                    $filtre .= $row['ct'];
+                    $title .= $row['centre'] . ' - ';
+                }
+                if ($sortType) {
+                    $filtre .= $row['ty'];
+                    $title .= $row['type'] . ' - ';
+                }
+                if ($sortTypeGarantie) {
+                    $ind = array_search($row['type_garantie'], $allTypeGarantie);
+                    $filtre .= $ind . '_';
+                    $title .= $row['type_garantie'] . ' - ';
+                }
+                if ($sortEquipement) {
+                    $ind = array_search($row['equip_ref'], $allEquipement);
+                    $filtre .= $ind . '_';
+                    $title .= $row['equip_ref'] . ' - ';
+                }
+                $title = substr($title, 0, -2);
+            }
+
+
+            if (!isset($out[$filtre])) {
+                $out[$filtre] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
+            }
+            $out[$filtre]['total_payer'] += $row['paipaye_ttc'];
+            
+            if(!isset($out[$filtre]['nb_facture'][$row['fac_id']])){//La facture n'est pas encore traité sinon deuxieme paiement
+                $out[$filtre]['total_total'] += $row['factotal'];
+                $out[$filtre]['total_total_marge'] += $row['marge'];
+                $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
+            }
+            else{//deuxieme paiement on vire les montant
+                $row['factotal'] = 0;
+                $row['marge'] = 0;
+            }
+            
+            unset($row['fac_statut']);
+            unset($row['soc_id']);
+//            unset($row['pai_id']);
+            unset($row['ct']);
+            unset($row['ty']);
+            unset($row['sav_id']);
+            unset($row['saf_refid']);
+            
+            if ($this->mode != 'r'){
+                //Formatae des données
+                $row['factotal'] = $this->formatPrice($row['factotal']);
+                $row['marge'] = $this->formatPrice($row['marge']);
+                $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
+                
+                $out[$filtre]['factures'][] = $row;
+            }
+        }
+
+        foreach ($out as $key => $inut) {
+            $out[$key]['total_total'] = $this->formatPrice($out[$key]['total_total']);
+            $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
+            $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
+            $out[$key]['nb_facture'] = count($out[$key]['nb_facture']);
+        }
+        sort($out);
+        return $out;
+    }
+
+    function getTypeGaranties() {
+
+        $typesGarantie = array();
+        $sql = 'SELECT DISTINCT Type_garantie';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'synopsischrono_chrono_101';
+
+        dol_syslog(get_class($this) . "::getTypeGarantie sql=" . $sql, LOG_DEBUG);
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $typesGarantie[] = $obj->Type_garantie;
+            }
+        }
+        return $typesGarantie;
+    }
+
+    function getEquipements() {
+        $equipements = array();
+        $sql = 'SELECT DISTINCT description';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'synopsischrono';
+
+        dol_syslog(get_class($this) . "::getEquipement sql=" . $sql, LOG_DEBUG);
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $equipements[] = $obj->description;
+            }
+        }
+        return $equipements;
     }
 
 }

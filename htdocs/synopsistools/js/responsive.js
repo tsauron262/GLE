@@ -22,7 +22,7 @@ $(window).on("load", function () {
     }
 
     if (responsive) {
-
+        ts = 0;
         
 
         $('#id-container').append("<div id='but-menu'></div>");

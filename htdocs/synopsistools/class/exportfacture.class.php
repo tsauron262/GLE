@@ -205,7 +205,7 @@ class exportfacture {
     
     
     function getRef($line){
-        $tabCatProd = array(1202=>"GEN-ABO", 1203=>"GEN-CERTIF", 1204=>"GEN-HEBERG", 1205=>"GEN-LOC",
+        $tabCatProd = array(1202=>"GEN-ABO", 1203=>"GEN-CERTIF", 1204=>"GEN-HEBERG", 1206=>"GEN-HEBERG", 1205=>"GEN-LOC",
             1100=>"GEN-TELECOM", 1176=>"GEN-CONSO", 1216=>"GEN-SAV-PIECES", 1079=>"GEN-MAT", 1072=>"GEN-LOG", 1227=>"GEN-MO-EXT", 1156=>"GEN-MO-INT", 1225=>"GEN-MAINT-INT", 1140=>"GEN-MAINT-EXT", 1214=>"GEN-MAT-OCCAS", 1215=>"GEN-ACCES", 1207=>"GEN-PORT", 1217=>"GEN-DEP-INT", 1228=>"GEN-DEP-EXT", 1135=>"GEN-TEXTIL", 1233=>"GEN-ZZ");
         $valeur = "";
         

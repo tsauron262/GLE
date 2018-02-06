@@ -42,14 +42,13 @@ print '<input id="dateEnd" type="text" class="isDate round"></div></td></tr>';
 
 // Types
 $type = $staticSF->getExtrafieldArray('facture', 'type');
-print '<tr><td>Types</td><td>';
+print '<tr><td>Secteurs</td><td>';
 print '<select id="type" class="select2" multiple style="width: 200px;">';
 print '<option  value="NRS">Non renseigné</option>';
 foreach ($type as $val => $name) {
     print '<option value="'.$val.'">'.$name.'</option>';
 }
 print '</select>';
-
 
 print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
 print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
@@ -109,29 +108,31 @@ print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Prix (uniqu
 // Format
 print '<tr><td>Format (unique)</td><td>
 <input id="formatDetail" name="formatOutput" type="radio" value="d" checked>
-<label for="formatDetail">HTML détail</label>
+<label for="formatDetail">HTML détailé</label>
 
 <input id="formatReduit" name="formatOutput" type="radio" value="r">
 <label for="formatReduit">HTML réduit</label>
 
 <input id="formatCSV" name="formatOutput" type="radio" value="c" >
 <label for="formatCSV">CSV</label>
+
+<div id="divFichier" style="display:none">Nom du fichier de sortie <input class="round" id="nomFichier"></input><strong>.csv</strong></div>
 </td></tr>';
 
 // Trier par
 print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multiple)</td><td>
 
-<input id="sortByType" name="sortBy" type="checkbox" value="t">
-<label for="sortByType">Type</label>
-
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >
-<label for="sortByCentre">Centre</label>';
+<label for="sortByCentre">Centre</label>
 
-//print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="tg" >
-//<label for="sortByTypeGarantie">Type de garantie</label>
-//
-//<input id="sortByEquipement" name="sortBy" type="checkbox" value="e" >
-//<label for="sortByEquipement">Equipement</label>';
+<input id="sortByType" name="sortBy" type="checkbox" value="t">
+<label for="sortByType">Secteur</label>';
+
+print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="g" >
+<label for="sortByTypeGarantie">Type de garantie</label>
+
+<input id="sortByEquipement" name="sortBy" type="checkbox" value="e" >
+<label for="sortByEquipement">Equipement</label>';
 
 print '</td></tr>';
 
@@ -140,6 +141,11 @@ print '</table>';
 // Valider
 print '<br><input id="go" type="button" class="butAction round" value="Valider"><br>';
 print ' <div id="waiting"></div><br>';
+
+print ' <div id="linkCsv"></div><br>';
+
+print '<h3>Sommaire</h3>';
+print '<div id="sommaire" style="display:block"></div>';
 
 print '<div id="forArray"></div>';
 

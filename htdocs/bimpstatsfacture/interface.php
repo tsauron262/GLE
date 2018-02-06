@@ -13,7 +13,7 @@ $staticSF = new BimpStatsFacture($db);
 switch (GETPOST('action')) {
     case 'getFactures': {
             $factures = $staticSF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('types'),
-                    GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'));
+                    GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier'));
             echo json_encode($factures);
             break;
         }

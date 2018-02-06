@@ -30,12 +30,12 @@ function checkProductByRef(ref) {
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
-            if (outParsed.error === 'unknown_product') {
-                setMessage('alertProd', 'Produit inconnu', 'error');
+            if (outParsed.error != '') {
+                setMessage('alertProd', outParsed.error, 'error');
                 return;
             }
-            if (outParsed.stock === 'no_row') {
-                setMessage('alertProd', 'L\'entrepot de départ ne possède pas ce produit.', 'error');
+            if (outParsed.stock < 1) {
+                setMessage('alertProd', 'L\'entrepot de départ ne possède pas '+(outParsed.isEquipment? 'cet equipement' : 'ce produit')+'.', 'error');
             } else if (outParsed.id === false) {
                 setMessage('alertProd', 'Produit non renseigné dans la base de donnée.', 'error');
             } else if (outParsed.isEquipment) {
@@ -65,8 +65,8 @@ function checkStockForProduct(idProduct, qty) {
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
-            var nb_product_in_entrepot = parseInt(outParsed.nb_product);
-            if (outParsed.nb_product === 'no_row') {
+            var nb_product_in_entrepot = parseInt(outParsed.stock);
+            if (nb_product_in_entrepot < 1) {
                 setMessage('alertProd', 'L\'entrepot de départ ne possède pas ce produit.', 'error');
             } else if (nb_product_in_entrepot < qty) {
                 setMessage('alertProd', 'Il n\'y a que ' + nb_product_in_entrepot + ' produit(s) dans cet entrepot et vous souhaitez en transférer ' + qty + '.', 'error');

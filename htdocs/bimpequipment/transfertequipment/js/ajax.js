@@ -31,6 +31,7 @@ function checkProductByRef(ref) {
         success: function (out) {
             var outParsed = JSON.parse(out);
             if (outParsed.error === 'unknown_product') {
+                setMessage('alertProd', 'Produit inconnu', 'error');
                 return;
             }
             if (outParsed.stock === 'no_row') {
@@ -170,6 +171,7 @@ function addFieldEquipment(id, refUrl, serial, label) {
     line += '<td id="stock"></td>'; // prod restant
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove "></td></tr>'; // supprimer
     $(line).appendTo('#productTable');
+    initRemoveLine(id);
 }
 
 /* Add a line in the table of product */

@@ -31,30 +31,27 @@ switch (GETPOST('action')) {
         }
     case 'checkProductByRef': {
             $data = array();
-            $id = checkProductByRefOrBarcode($db, GETPOST('ref'));
-            if ($id == false) {
+            $id_product = checkProductByRefOrBarcode($db, GETPOST('ref'));
+            if ($id_product == false) {
                 $idProdAndIdEquipment = getIdOfProductAndEquipment($db, GETPOST('ref')); // ref => serial
-                $id = $idProdAndIdEquipment['id_product'];
-                if ($id != false)
+                $id_product = $idProdAndIdEquipment['id_product'];
+                $id_equipment = $idProdAndIdEquipment['id'];
+                if ($id_product != false)
                     $serial = GETPOST('ref');
             }
-            if ($id != false) {
+            if ($id_product != false) {
                 $prod = new product($db);
-                $prod->id = $id;
-
-                $isEquipment = equipmentExists($db, $idProdAndIdEquipment['id']);
-                if ($isEquipment) {
-                    $stock = checkStockEquipment($db, $idProdAndIdEquipment['id'], GETPOST('idEntrepotStart'), $id);
-                    $prod->ref = GETPOST('ref');
-                    $label = getLabel($db, $id);
+                $prod->fetch($id_product);
+//                $isEquipment = equipmentExists($db, $idProdAndIdEquipment['id']);
+                if (isset($id_equipment)) {
+                    $stock = checkStockEquipment($db, GETPOST('idEntrepotStart'), $id_equipment, $id_product);
                 } else {
-                    $prod->ref = GETPOST('ref');
-                    $label = getLabel($db, $id);
-                    $stock = checkStock($db, $id, GETPOST('idEntrepotStart'));
+                    $stock = checkStock($db, $id_product, GETPOST('idEntrepotStart'));
                 }
-                $data = array_merge($date, array('id' => $id, 'isEquipment' => $isEquipment, 'stock' => $stock, 'label' => $label, 'refUrl' => $prod->getNomUrl(1), 'serial' => $serial, 'error' => 'no_errors'));
+                $data = array_merge($data, array('id' => $id_product, 'isEquipment' => $isEquipment, 'stock' => $stock, 'label' => $label, 'refUrl' => $prod->getNomUrl(1), 'serial' => $serial, 'error' => 'no_errors'));
+            } else {
+                $data['error'] = 'unknown_product';
             }
-            $data['error'] = 'unknown_product';
             echo json_encode($data);
             break;
         }

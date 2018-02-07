@@ -477,7 +477,8 @@ class Repair
 
         if (!isset($this->totalFromOrder) || !$this->totalFromOrder) {
             $this->updateTotalOrder($update);
-        } elseif ($update && isset($this->rowId) && $this->rowId) {
+        } 
+        if ($update && isset($this->rowId) && $this->rowId) {
             $this->update();
         }
 

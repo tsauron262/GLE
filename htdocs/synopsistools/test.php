@@ -8,8 +8,12 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
 llxHeader();
 
-
-mailNonFerme();
+if(isset($_GET['action'])){
+    if($_GET['action'] == "mailNonFerme")
+        mailNonFerme();
+    if($_GET['action'] == "fermetureAuto")
+        tentativeFermetureAuto();
+}
         
         
         llxFooter();

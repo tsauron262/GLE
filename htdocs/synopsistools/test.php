@@ -39,12 +39,18 @@ ORDER BY `nbJ` DESC, c.id";
     $repair = new Repair($db, $GSXdatas->gsx, false);
     while ($ligne = $db->fetch_object($sql)) {
         if ($GSXdatas->connect) {
-            $repair->rowId = $ligne->rid;
-            $repair->load();
-            if ($repair->lookup())
-                echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . "<br/>";
+            if(!isset($_SESSION['idRepairInc'][$ligne->id])){
+                $repair->rowId = $ligne->rid;
+                $repair->load();
+                if ($repair->lookup())
+                    echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . "<br/>";
+                else{
+                    echo "Echec de la recup de " . $ligne->ref . "<br/>";
+                    $_SESSION['idRepairInc'][$ligne->id] = $ligne->ref;
+                }
+            }
             else
-                echo "Echec de ma recup de " . $ligne->ref . "<br/>";
+                    echo "Echec de la recup de " . $ligne->ref . " (en cache)<br/>";
         }
         else {
             echo "Connexion GSX impossible";

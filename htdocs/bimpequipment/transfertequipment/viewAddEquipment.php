@@ -86,6 +86,8 @@ print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="aud
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
 
+include(DOL_DOCUMENT_ROOT."//bimpequipment/transfertequipment/scan/scan.php");
+
 $db->close();
 
 llxFooter();

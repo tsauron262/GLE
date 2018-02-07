@@ -272,11 +272,11 @@ function setMessage(idElement, message, type) {
     }, 10000);
 }
 
-oldCode = "";
+tabFlash = Array();
 function traiteCode(code){
-    if(code != oldCode){
+    if(tabFlash.indexOf(code) == -1){
         $(".custInput").val(code);
         prepareAjax($(".custInput"));
+        tabFlash.push(code);
     }
-    oldCode = code;
 }

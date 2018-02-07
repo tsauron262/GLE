@@ -12,10 +12,10 @@ $sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `seria
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsis_apple_repair` r
 
-WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) < 0  AND DATEDIFF(c.tms, now()) > -15
+WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) < 0  AND DATEDIFF(c.tms, now()) > -20
 AND serial_number is not null
 
-ORDER BY `nbJ` DESC, c.id LIMIT 0,300");
+ORDER BY `nbJ` DESC, c.id LIMIT 0,500");
 echo "debut";
 
 $GSXdatas = new gsxDatas($ligne->serial_number);
@@ -25,7 +25,7 @@ $repair = new Repair($db, $GSXdatas->gsx, false);
                 $repair->rowId = $ligne->rid;
                 $repair->load();
                 if($repair->lookup())
-                    echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repair->repairNumber."<br/>";
+                    echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repair->repairNumber.". num2 ".$repair->confirmNumbers['repair']."<br/>";
                 else
                     echo "Echec de ma recup de ".$ligne->ref."<br/>";
             }

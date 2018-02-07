@@ -57,9 +57,13 @@ if (isset($conf->global->GOOGLE_ENABLE_GMAPS))
 
 print" <br/><br/><a href='../synopsisapple/test.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Apple</span></a>";
 
-if (isset($user->rights->SynopsisPrepaCom->import->Admin))
+if (isset($user->rights->SynopsisPrepaCom->import->Admin)){
     print" <br/><br/><a href='../synopsistools/public/extractFact.php?sortie=file'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Extraction facture</span></a>";
-
+    
+    
+    print" <br/><br/><a href='../synopsistools/test.php?action=mailNonFerme&nbJ=15'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail SAV non Fermé</span></a>";
+    print" <br/><br/><a href='../synopsistools/test.php?action=fermetureAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Fermeture SAV auto</span></a>";
+}
 
 
 

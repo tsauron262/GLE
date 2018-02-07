@@ -15,7 +15,7 @@ c.ref FROM `llx_synopsischrono` c, `llx_synopsis_apple_repair` r
 WHERE r.`chronoId` = c.`id` AND `ready_for_pick_up` = 0 AND DATEDIFF(c.tms, now()) < -15  AND DATEDIFF(c.tms, now()) > -60
 AND serial_number is not null
 
-ORDER BY `nbJ` DESC, c.id ");
+ORDER BY `nbJ` DESC, c.id LIMIT 0,10");
 echo "debut";
 
 $GSXdatas = new gsxDatas($ligne->serial_number);

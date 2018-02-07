@@ -272,8 +272,11 @@ function setMessage(idElement, message, type) {
     }, 10000);
 }
 
-
+oldCode = "";
 function traiteCode(code){
-    $(".custInput").val(code);
-    prepareAjax($(".custInput"));
+    if(code != oldCode){
+        $(".custInput").val(code);
+        prepareAjax($(".custInput"));
+    }
+    oldCode = code;
 }

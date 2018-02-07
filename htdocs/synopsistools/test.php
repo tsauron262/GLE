@@ -17,11 +17,14 @@ AND serial_number is not null
 
 ORDER BY `nbJ`  DESC LIMIT 0,10");
 echo "debut";
-            $GSXdatas = new gsxDatas($ligne->serial_number);
+
+$GSXdatas = new gsxDatas($ligne->serial_number);
+$repair = new Repair($db, $GSXdatas->gsx, false);
         while ($ligne = $db->fetch_object($sql)){
             echo "dd";
             if ($GSXdatas->connect){
-                $response = $GSXdatas->gsx->lookup($ligne->serial_number, 'warranty');
+                $repair->serial = $ligne->serial_number;
+                $repair->lookup();
                 echo "Tentative de maj de ".$ligne->ref." <br/>";
             }
             else{

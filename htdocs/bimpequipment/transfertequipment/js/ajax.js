@@ -136,20 +136,20 @@ function initEvents() {
     element.on('keyup', function (e) {
         if (e.keyCode === 13 || e.keyCode === 9 || e.key == "Enter") { // code for "Enter"
             prepareAjax($(this), e);
+            e.preventDefault();
         }
     });
     
     element.focus();
 }
 
-function prepareAjax(element, event) {
+function prepareAjax(element) {
     var ref = element.val();
     if (ref !== '') {
         checkProductByRef(ref);
         element.val('');
     }
     element.focus();
-    event.preventDefault();
 }
 
 
@@ -270,4 +270,11 @@ function setMessage(idElement, message, type) {
             $("#alertdiv").remove();
         }, 1000);
     }, 10000);
+}
+
+
+function traiteCode(code){
+    $(".custInput").val(code);
+    prepareAjax($(".custInput"));
+    alert(code);
 }

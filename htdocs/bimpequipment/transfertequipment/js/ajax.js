@@ -2,14 +2,23 @@
  * Globals variable
  */
 
-/* global DOL_URL_ROOT */
+/* global DOL_URL_ROOT, productid */
 
 var idEntrepotStart;
 var idEntrepotEnd;
 //var cntProduct = 0;
 
-var products = [];
+// list of product
+// if is equipment, fields are:
+//        is_equipment: false,
+//        id_product: productId,
+//        serial: serial
+// else:
+//        is_equipment: true,
+//        id_product: productId,
+//        qty: qty
 
+var products = [];
 
 
 /**
@@ -30,16 +39,19 @@ function checkProductByRef(ref) {
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
-            if (outParsed.error != '') {
+            if (outParsed.error !== '') {
                 setMessage('alertProd', outParsed.error, 'error');
                 return;
             }
             if (outParsed.stock < 1) {
-                setMessage('alertProd', 'L\'entrepot de départ ne possède pas '+(outParsed.isEquipment? 'cet equipement' : 'ce produit')+'.', 'error');
+                setMessage('alertProd', 'L\'entrepot de départ ne possède pas ' + (outParsed.isEquipment ? 'cet equipement' : 'ce produit') + '.', 'error');
             } else if (outParsed.id === false) {
-                        setMessage('alertProd', 'Produit non renseigné dans la base de donnée.', 'error');
+                setMessage('alertProd', 'Produit non renseigné dans la base de donnée.', 'error');
             } else if (outParsed.isEquipment) {
-                addFieldEquipment(outParsed.id, outParsed.refUrl, outParsed.serial, outParsed.label);
+                if ($('table#productTable tr#' + outParsed.serial).length === 0)
+                    addFieldEquipment(outParsed.id, outParsed.refUrl, outParsed.serial, outParsed.label);
+                else
+                    setMessage('alertProd', "Cet équipement vient d'être scanné.", 'error');
             } else if ($('table#productTable tr#' + outParsed.id).length !== 0) {
                 addQuantity(outParsed.id, 1);
             } else {
@@ -87,12 +99,15 @@ function checkStockForProduct(idProduct, qty) {
 
 $(document).ready(function () {
 
-    $('#entrepotStart').select2();
-    $('#entrepotEnd').select2();
-    idEntrepotStart = $('#entrepotStart').val();
-    idEntrepotEnd = $('#entrepotEnd').val();
 //    addFieldProduct(151, 2, 10, "test", '15554');
     initEvents();
+    $('#entrepotStart').select2();
+    $('#entrepotEnd').select2();
+    $('#entrepotEnd option:selected').next().prop('selected', true);
+    $('#entrepotEnd').trigger('change');
+
+    idEntrepotStart = $('#entrepotStart').val();
+    idEntrepotEnd = $('#entrepotEnd').val();
 });
 
 
@@ -119,10 +134,24 @@ function initEvents() {
     });
 
     $('#entrepotStart').on('change', function () {
-        idEntrepotStart = $(this).val();
+        if (products.length !== 0) {
+            if (confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?')) {
+                $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
+                idEntrepotStart = $(this).val();
+                $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
+                products = [];
+                $('table#productTable tr[id]').remove();
+            }
+        } else {
+            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
+            idEntrepotStart = $(this).val();
+            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
+        }
     });
     $('#entrepotEnd').on('change', function () {
+        $('#entrepotStart option[value=' + idEntrepotEnd + ']').prop('disabled', false);
         idEntrepotEnd = $(this).val();
+        $('#entrepotStart option[value=' + idEntrepotEnd + ']').prop('disabled', true);
     });
 
     $('#enregistrer').click(function () {
@@ -132,16 +161,32 @@ function initEvents() {
     });
 
     var element = $("input[name=refScan]");
-    
+
+
     element.on('keyup', function (e) {
         if (e.keyCode === 13 || e.keyCode === 9 || e.key == "Enter") { // code for "Enter"
             prepareAjax($(this), e);
             e.preventDefault();
         }
     });
-    
+
     element.focus();
 }
+
+//    element.on('keyup', function (e) {
+//        if (e.keyCode === 13) { // code for "Enter"
+//            prepareAjax($(this), e);
+//        }
+//    });
+//
+//    element.on('keydown', function (e) {
+//        if (e.keyCode === 9) { // code for "Tab"
+//            prepareAjax($(this), e);
+//        }
+//    });
+//
+//    element.focus();
+//}
 
 function prepareAjax(element) {
     var ref = element.val();
@@ -154,13 +199,12 @@ function prepareAjax(element) {
 
 
 /* Add a line in the table of equipments */
-function addFieldEquipment(id, refUrl, serial, label) {
+function addFieldEquipment(productId, refUrl, serial, label) {
 
-//    $('#alertProd').empty();
 //    cntProduct++;
-
+    productId = parseInt(productId);
     var line = '<tr id="' + serial + '">';
-    line += '<td>' + id + '</td>';    // id
+    line += '<td>' + productId + '</td>';    // id
     line += '<td>' + refUrl + '</td>';    // refUrl
     line += '<td>' + serial + '</td>';    // num série
     line += '<td>' + label + '</td>';    // label
@@ -169,8 +213,15 @@ function addFieldEquipment(id, refUrl, serial, label) {
     line += '<td id="stock"></td>'; // prod restant
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove "></td></tr>'; // supprimer
     $(line).appendTo('#productTable');
-    initRemoveLine(id);
+    initRemoveLine(serial);
+    var newEquipment = {
+        is_equipment: true,
+        id_product: productId,
+        serial: serial
+    };
+    products.push(newEquipment);
     document.querySelector("#bipAudio2").play();
+    console.log(products);
 }
 
 /* Add a line in the table of product */
@@ -197,21 +248,25 @@ function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
     $('table#productTable tr#' + productId + ' .modify').click(modifyQuantity);
 
     var newProduct = {
+        is_equipment: false,
         id_product: productId,
         qty: qty
     };
     products.push(newProduct);
     document.querySelector("#bipAudio").play();
+    console.log(products);
 }
 
 function initRemoveLine(idTr) {
-    $('.remove').click(function () {
-        if ($(this).parent().parent().attr('id') !== undefined) {
-            $(this).parent().parent().remove();
-            products = products.filter(function (obj) {
+    $('table#productTable tr#' + idTr + ' td img.remove').click(function () {
+        $(this).parent().parent().remove();
+        products = products.filter(function (obj) {
+            if (obj.is_equipment)
+                return obj.serial !== idTr;
+            else
                 return obj.id_product !== idTr;
-            });
-        }
+        });
+        console.log(products);
     });
 //    cntProduct--;
 }
@@ -234,7 +289,6 @@ function modifyQuantity() {
     } else {
         setMessage('alertProd', "Les stockes de l'entrepot de départ ne sont pas suffisant.", 'error');
     }
-    $(selectoTr + ' td input[name=modify]').val(1);
 }
 
 function addQuantity(idProduct, qty) {
@@ -248,6 +302,9 @@ function addQuantity(idProduct, qty) {
             this.qty = newQty;
         }
     });
+    if (newQty > $('table#productTable tr#' + idProduct + ' td input[name=modify]').attr('max'))
+        $('table#productTable tr#' + idProduct + ' td input[name=modify]').val(oldQty);
+
     document.querySelector("#bipAudio").play();
 }
 
@@ -260,10 +317,10 @@ function addQuantity(idProduct, qty) {
 function setMessage(idElement, message, type) {
     var backgroundColor;
     (type === 'mesgs') ? backgroundColor = '#25891c ' : backgroundColor = '#ff887a ';
-    if(type == "error")
+    if (type === "error")
         document.querySelector("#bipError").play();
 
-    $('#' + idElement).hide().fadeIn(1000).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
+    $('#' + idElement).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
     setTimeout(function () {
         $("#alertdiv").fadeOut(1000);
         setTimeout(function () {
@@ -272,11 +329,13 @@ function setMessage(idElement, message, type) {
     }, 10000);
 }
 
-tabFlash = Array();
-function traiteCode(code){
-    if(tabFlash.indexOf(code) == -1){
+
+var oldCode = "";
+function traiteCode(code) {
+    if (code != oldCode) {
         $(".custInput").val(code);
         prepareAjax($(".custInput"));
-        tabFlash.push(code);
     }
+    oldCode = code;
 }
+

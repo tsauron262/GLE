@@ -52,14 +52,30 @@ ORDER BY `nbJ` DESC, c.id";
 
 function mailNonFerme(){
     global $db;
-        $nbJ = 15;
-$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, c.id,
+        $nbJ = (isset($_GET['nbJ']))? $_GET['nbJ'] : 60;
+$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, c.id, Etat, `fk_user_modif` as user, fk_user_author as user2,
 
 c.ref FROM `llx_synopsischrono` c, llx_synopsischrono_chrono_105 cs
 
 WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(c.tms, now()) < ".-$nbJ."");
-    
+    $user = new User($db);
+    $tabUser = array();
     while ($ligne = $db->fetch_object($sql)) {
-        echo "SAV Non fermé depuis plus de : ".$nbJ." jours || ".$ligne->ref."</br>";
+        if($ligne->user > 0)
+            $userId = $ligne->user;
+        elseif($ligne->user2 > 0)
+            $userId = $ligne->user2;
+        else
+            $userId = 0;
+        
+        
+        
+        if(!isset($tabUser[$userId])){
+            $user = new User($db);
+            $user->fetch($userId);
+            $tabUser[$userId] = $user;
+        }
+        
+        echo "SAV Non fermé depuis plus de : ".$nbJ." jours || ".$ligne->ref."   par : ".$tabUser[$userId]->getNomUrl(1)." </br>";
     }
 }

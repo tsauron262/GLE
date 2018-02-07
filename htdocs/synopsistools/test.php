@@ -12,7 +12,7 @@ $sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `seria
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsis_apple_repair` r
 
-WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) < -7  AND DATEDIFF(c.tms, now()) > -20
+WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) < 0  AND DATEDIFF(c.tms, now()) > -15
 AND serial_number is not null
 
 ORDER BY `nbJ` DESC, c.id LIMIT 0,300");

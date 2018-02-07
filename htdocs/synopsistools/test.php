@@ -39,14 +39,14 @@ ORDER BY `nbJ` DESC, c.id";
     $repair = new Repair($db, $GSXdatas->gsx, false);
     while ($ligne = $db->fetch_object($sql)) {
         if ($GSXdatas->connect) {
-            if(!isset($_SESSION['idRepairInc'][$ligne->id])){
+            if(!isset($_SESSION['idRepairIncc'][$ligne->rid])){
                 $repair->rowId = $ligne->rid;
                 $repair->load();
                 if ($repair->lookup())
                     echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . "<br/>";
                 else{
                     echo "Echec de la recup de " . $ligne->ref . "<br/>";
-                    $_SESSION['idRepairInc'][$ligne->id] = $ligne->ref;
+                    $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                 }
             }
             else

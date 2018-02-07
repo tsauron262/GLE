@@ -8,6 +8,7 @@ if(!isset($conf))
         <div class="controls">
             <fieldset class="input-group">
                 <button class="stop">Stop</button>
+                <button class="start">Start</button>
             </fieldset>
             <fieldset class="reader-config-group">
                 <label>

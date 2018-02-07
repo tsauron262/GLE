@@ -113,6 +113,10 @@ $(function() {
                 e.preventDefault();
                 Quagga.stop();
                 self._printCollectedResults();
+            });            
+            $(".controls").on("click", "button.start", function(e) {
+                e.preventDefault();
+                Quagga.start();
             });
 
             $(".controls .reader-config-group").on("change", "input, select", function(e) {

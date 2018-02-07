@@ -115,8 +115,15 @@ $(function() {
                 self._printCollectedResults();
             });            
             $(".controls").on("click", "button.start", function(e) {
-                e.preventDefault();
-                Quagga.start();
+                Quagga.init(this.state, function(err) {
+                    if (err) {
+                        return self.handleError(err);
+                    }
+                    //Quagga.registerResultCollector(resultCollector);
+                    App.attachListeners();
+                    App.checkCapabilities();
+                    Quagga.start();
+                });
             });
 
             $(".controls .reader-config-group").on("change", "input, select", function(e) {

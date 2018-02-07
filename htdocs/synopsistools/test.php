@@ -8,7 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
 llxHeader();
 
-$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, `serial_number`, c.id,
+$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, `serial_number`, c.id, `repairNumber`, `repairConfirmNumber`,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsis_apple_repair` r
 
@@ -22,7 +22,7 @@ $GSXdatas = new gsxDatas($ligne->serial_number);
 $repair = new Repair($db, $GSXdatas->gsx, false);
         while ($ligne = $db->fetch_object($sql)){
             if ($GSXdatas->connect){
-                $repair->serial = $ligne->serial_number;
+                $repair->confirmNumbers = array('repair' => $ligne->repairConfirmNumber);
                 $repair->lookup();
                 echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repai->repairNumber."<br/>";
             }

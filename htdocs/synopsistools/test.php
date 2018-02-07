@@ -57,7 +57,7 @@ $sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, c.id, Etat, `fk_user_m
 
 c.ref FROM `llx_synopsischrono` c, llx_synopsischrono_chrono_105 cs
 
-WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(c.tms, now()) < ".-$nbJ."");
+WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(c.tms, now()) < ".-$nbJ." ORDER BY user");
     $user = new User($db);
     $tabUser = array();
     while ($ligne = $db->fetch_object($sql)) {

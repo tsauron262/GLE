@@ -57,7 +57,7 @@ $sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, c.id,
 
 c.ref FROM `llx_synopsischrono` c, llx_synopsischrono_chrono_105 cs
 
-WHERE c.id = cs.id AND cs.Etat != 999 AND DATEDIFF(c.tms, now()) < ".-$nbJ."");
+WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(c.tms, now()) < ".-$nbJ."");
     
     while ($ligne = $db->fetch_object($sql)) {
         echo "SAV Non fermé depuis plus de : ".$nbJ." jours || ".$ligne->ref."</br>";

@@ -22,9 +22,8 @@ $GSXdatas = new gsxDatas($ligne->serial_number);
 $repair = new Repair($db, $GSXdatas->gsx, false);
         while ($ligne = $db->fetch_object($sql)){
             if ($GSXdatas->connect){
-                $repair->confirmNumbers = array('repair' => $ligne->repairConfirmNumber);
-                $repair->repairNumber = "";
-                $repair->repairComplete = "";
+                $repair->serial = $ligne->serial_number;
+                $repair->load();
                 $repair->lookup();
                 echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repair->repairNumber."<br/>";
             }

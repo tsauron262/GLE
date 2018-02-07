@@ -8,14 +8,14 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
 llxHeader();
 
-$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id, `repairNumber`, `repairConfirmNumber`,
+$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, `serial_number`, c.id,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsis_apple_repair` r
 
 WHERE r.`chronoId` = c.`id` AND `ready_for_pick_up` = 0 AND DATEDIFF(c.tms, now()) < -15  AND DATEDIFF(c.tms, now()) > -60
 AND serial_number is not null
 
-ORDER BY `nbJ`  DESC LIMIT 0,10");
+ORDER BY `nbJ`, c.id  DESC LIMIT 0,10");
 echo "debut";
 
 $GSXdatas = new gsxDatas($ligne->serial_number);

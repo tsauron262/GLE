@@ -76,6 +76,6 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
             $tabUser[$userId] = $user;
         }
         
-        echo "SAV Non fermé depuis plus de : ".$nbJ." jours || ".$ligne->ref."   par : ".$tabUser[$userId]->getNomUrl(1)." </br>";
+        echo "SAV Non fermé depuis : ".$ligne->nbJ." jours || ".$ligne->ref."   par : ".$tabUser[$userId]->getNomUrl(1)." </br>";
     }
 }

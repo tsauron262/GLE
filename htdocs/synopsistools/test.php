@@ -21,11 +21,10 @@ echo "debut";
 $GSXdatas = new gsxDatas($ligne->serial_number);
 $repair = new Repair($db, $GSXdatas->gsx, false);
         while ($ligne = $db->fetch_object($sql)){
-            echo "dd";
             if ($GSXdatas->connect){
                 $repair->serial = $ligne->serial_number;
                 $repair->lookup();
-                echo "Tentative de maj de ".$ligne->ref." <br/>";
+                echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repai->repairNumber."<br/>";
             }
             else{
                 echo "Connexion GSX impossible";

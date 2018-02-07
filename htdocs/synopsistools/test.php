@@ -8,7 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
 llxHeader();
 
-$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, `serial_number`, c.id,
+$sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsis_apple_repair` r
 

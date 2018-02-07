@@ -24,8 +24,10 @@ $repair = new Repair($db, $GSXdatas->gsx, false);
             if ($GSXdatas->connect){
                 $repair->rowId = $ligne->rid;
                 $repair->load();
-                $repair->lookup();
-                echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repair->repairNumber."<br/>";
+                if($repair->lookup())
+                    echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repair->repairNumber."<br/>";
+                else
+                    echo "Echec de ma recup de ".$ligne->ref."<br/>";
             }
             else{
                 echo "Connexion GSX impossible";

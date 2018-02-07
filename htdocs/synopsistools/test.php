@@ -23,6 +23,9 @@ ORDER BY `nbJ`  DESC");
                 $response = $GSXdatas->gsx->lookup($ligne->serial_number, 'warranty');
                 echo "Tentative de maj de ".$ligne->ref." <br/>";
             }
+            else{
+                echo "Connexion GSX impossible";
+            }
         }
         
         

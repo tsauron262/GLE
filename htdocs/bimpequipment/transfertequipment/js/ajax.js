@@ -276,5 +276,4 @@ function setMessage(idElement, message, type) {
 function traiteCode(code){
     $(".custInput").val(code);
     prepareAjax($(".custInput"));
-    alert(code);
 }

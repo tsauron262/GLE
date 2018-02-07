@@ -5,7 +5,7 @@ if(!isset($conf))
 
 
     <section id="container" class="container">
-       <!-- <div class="controls">
+        <div class="controls">
             <fieldset class="input-group">
                 <button class="stop">Stop</button>
             </fieldset>
@@ -77,7 +77,7 @@ if(!isset($conf))
                 </label>
             </fieldset>
         </div>
-       !-->
+      
        
       <div id="interactive" class="viewport"></div>
     </section>

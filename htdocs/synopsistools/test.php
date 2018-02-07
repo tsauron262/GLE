@@ -23,8 +23,10 @@ $repair = new Repair($db, $GSXdatas->gsx, false);
         while ($ligne = $db->fetch_object($sql)){
             if ($GSXdatas->connect){
                 $repair->confirmNumbers = array('repair' => $ligne->repairConfirmNumber);
+                $repair->repairNumber = "";
+                $repair->repairComplete = "";
                 $repair->lookup();
-                echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repai->repairNumber."<br/>";
+                echo "Tentative de maj de ".$ligne->ref." statut ".$repair->repairComplete." num ".$repair->repairNumber."<br/>";
             }
             else{
                 echo "Connexion GSX impossible";

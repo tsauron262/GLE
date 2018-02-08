@@ -35,7 +35,7 @@ ORDER BY `nbJ` DESC, c.id";
     $req .= " LIMIT 0,500";
     $sql = $db->query($req);
 
-    
+    global $user;
     $user->array_options['options_apple_id']= "elodie@itribustore.fr";
     $user->array_options['options_apple_service'] = "579256";
     $user->array_options['options_apple_shipto'] = "883234";

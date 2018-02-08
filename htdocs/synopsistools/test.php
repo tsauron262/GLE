@@ -25,7 +25,7 @@ if (isset($_GET['action'])) {
 llxFooter();
 
 
-function qetReq($statut, $iTribu){
+function getReq($statut, $iTribu){
     
     $req = "SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id as cid,
 

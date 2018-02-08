@@ -39,6 +39,7 @@ c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_syno
 
 WHERE r.`chronoId` = c.`id` AND `". ($statut == "closed" ? "closed" : "ready_for_pick_up") ."` = 0
 AND serial_number is not null
+AND -DATEDIFF(c.tms, now()) > -730 
 AND c.id = cs.id AND cs.Etat = ".($statut == "closed" ? "999" : "9");
 
     if ($iTribu == 1) {

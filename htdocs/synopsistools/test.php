@@ -110,11 +110,11 @@ function tentativeFermetureAuto($iTribu = 0) {
                     }
                 }
                 else {
-                    echo "Echec de la recup de " . $ligne->ref . "<br/>";
+                    echo "Echec de la recup de " . $ligne->ref . " ".$ligne->nbJ." jours<br/>";
                     $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                 }
             } else
-                echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
+                echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) ".$ligne->nbJ." jours<br/>";
         }
         else {
             echo "Connexion GSX impossible";

@@ -60,8 +60,8 @@ $(window).on("load", function () {
     $('#clearAll').click(function () {
         $("#chosenSelectId").children().each(function () {
             $(this).prop('selected', false);
-            $(this).trigger("chosen:updated");
         });
+        $("#chosenSelectId").trigger("chosen:updated");
         initNbUser();
     });
 
@@ -69,8 +69,8 @@ $(window).on("load", function () {
         id = $(this).find("option:selected").val();
         tabGroup[id].forEach(function (element) {
             $("#user" + element).attr('selected', '');
-            $("#user" + element).trigger("chosen:updated");
         });
+        $("#chosenSelectId").trigger("chosen:updated");
         initNbUser();
     });
 });

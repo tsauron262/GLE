@@ -1,12 +1,13 @@
 $(window).on("load", function () {
     activeScroll = false;
-    
-    
     cacherMenuConge();
-    
-    
+
+
     afficherMargeReduc();
-    
+
+
+    autoClickSearch();
+
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if ($("div.tmenudiv").is(':visible') && activeScroll) {
         $(window).resize(function () {
@@ -467,7 +468,7 @@ function traiteScroll(heightDif) {
 //    };
 //}
 
-function cacherMenuConge(){
+function cacherMenuConge() {
     $('a[href*="/holiday/list.php"]').parent().parent().hide();
 }
 
@@ -477,88 +478,88 @@ function ajNoteAjax() {
     //var tab = "";
     var tabs = new Array("note", "notes", "info", "task_notes");
     var i = 0;
-    
+
 
     for (tab of tabs)
         if ($("a#" + tab).length > 0) {
             i++;
             ajNote(tab, i);
-           
+
         }
 }
 
-function  ajNote(tab, i){
-            var idNote = 'noteAjax'+i;
-            fermable = true;
-            var datas = 'url=' + window.location;
-            datas = datas + '&type=note&tab='+tab;
-            jQuery.ajax({
-                url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
-                data: datas,
-                async : true,
-                datatype: "xml",
-                type: "POST",
-                cache: false,
-                success: function (msg) {
-                    //var tab = tabTab[i];
-                    if (msg != "0") {
-                        //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
-                        //                $('.tabBar').append(htmlDiv);
-                        classEdit = "";
-                        if (msg.indexOf("[1]") > -1) {
-                            classEdit = "editable";
-                            msg = msg.replace("[1]", "");
-                        }
-                        var htmlDiv = '<div class="noteAjax" id="'+idNote+'"><div class="note">Note (publique) :<br><div class="' + classEdit + ' notePublicEdit" id="notePublicEdit'+i+'" title="Editer">' + msg + '</div></div></div>';
-                        $('.fiche').append(htmlDiv);
-                        //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
-                        //                $('a#note').append(htmlDiv);
-                        //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
-                        $('a#' + tab + ', #'+idNote+'').hover(shownNote, hideNote);
-                        $('a#' + tab + '').addClass("lienNote");
-                        //                $(".controlBut").click(function(){
-                        //                    if($(this).val() == "<"){
-                        //                        $(this).val(">");
-                        //                    }
-                        //                    else{
-                        //                        $(this).val("<");
-                        //                    }     
-                        //                    shownHideNote();   
-                        //                })
-
-                        editAjax(jQuery('#notePublicEdit'+i), datas, function () {
-                            hideNote()
-                        });
-
-                    }
+function  ajNote(tab, i) {
+    var idNote = 'noteAjax' + i;
+    fermable = true;
+    var datas = 'url=' + window.location;
+    datas = datas + '&type=note&tab=' + tab;
+    jQuery.ajax({
+        url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
+        data: datas,
+        async: true,
+        datatype: "xml",
+        type: "POST",
+        cache: false,
+        success: function (msg) {
+            //var tab = tabTab[i];
+            if (msg != "0") {
+                //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                //                $('.tabBar').append(htmlDiv);
+                classEdit = "";
+                if (msg.indexOf("[1]") > -1) {
+                    classEdit = "editable";
+                    msg = msg.replace("[1]", "");
                 }
-            });
+                var htmlDiv = '<div class="noteAjax" id="' + idNote + '"><div class="note">Note (publique) :<br><div class="' + classEdit + ' notePublicEdit" id="notePublicEdit' + i + '" title="Editer">' + msg + '</div></div></div>';
+                $('.fiche').append(htmlDiv);
+                //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
+                //                $('a#note').append(htmlDiv);
+                //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
+                $('a#' + tab + ', #' + idNote + '').hover(shownNote, hideNote);
+                $('a#' + tab + '').addClass("lienNote");
+                //                $(".controlBut").click(function(){
+                //                    if($(this).val() == "<"){
+                //                        $(this).val(">");
+                //                    }
+                //                    else{
+                //                        $(this).val("<");
+                //                    }     
+                //                    shownHideNote();   
+                //                })
 
-
-
-            function shownHideNote(i) {
-                $("."+idNote+" .note").animate({
-                    width: 'toggle'
+                editAjax(jQuery('#notePublicEdit' + i), datas, function () {
+                    hideNote()
                 });
+
             }
-            function shownNote() {
-                $("#"+idNote+" .note").slideDown({
-                    width: 'toggle'
-                });
-                fermer = false;
-            }
-            function hideNote() {
-                if (fermable) {
-                    fermer = true;
-                    setTimeout(function () {
-                        if (fermer)
-                            $("#"+idNote+" .note").slideUp({
-                                width: 'toggle'
-                            });
-                    }, 500);
-                }
-            }
-            }
+        }
+    });
+
+
+
+    function shownHideNote(i) {
+        $("." + idNote + " .note").animate({
+            width: 'toggle'
+        });
+    }
+    function shownNote() {
+        $("#" + idNote + " .note").slideDown({
+            width: 'toggle'
+        });
+        fermer = false;
+    }
+    function hideNote() {
+        if (fermable) {
+            fermer = true;
+            setTimeout(function () {
+                if (fermer)
+                    $("#" + idNote + " .note").slideUp({
+                        width: 'toggle'
+                    });
+            }, 500);
+        }
+    }
+}
 
 
 function editAjax(elem, datas, callOut) {
@@ -802,6 +803,8 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
 
 
 
+
+
 }
 function fermerIframe(elem, callBack) {
     id = $(elem).attr("id").replace("iFrame", "");
@@ -937,20 +940,42 @@ function traiteLien() {
 }
 
 
-function afficherMargeReduc(){
+function afficherMargeReduc() {
     var enPlace = false;
-    $("#price_ht, #qty, #remise_percent, #buying_price").keyup(function(){
-        zone = $("#price_ht").parent().parent();
-        if(!enPlace){
-            zone.append("<div id='zoneR'></div>");
-            enPlace = true;
+    $("#price_ht, #qty, #remise_percent, #buying_price").keyup(function () {
+        if($("#price_ht") != null && $("#price_ht").val() != null){
+            zone = $("#price_ht").parent().parent();
+            if (!enPlace) {
+                zone.append("<div id='zoneR'></div>");
+                enPlace = true;
+            }
+            pHt = $("#price_ht").val().replace(",", ".");
+            qte = zone.find("#qty").val().replace(",", ".");
+            reduc = zone.find("#remise_percent").val().replace(",", ".");
+            pA = zone.find("#buying_price").val().replace(",", ".");
+            reducP = pHt * reduc / 100;
+            prixVenteR = pHt - reducP;
+            $("#zoneR").html("Total = " + (Math.round((qte * prixVenteR) * 100) / 100) + " Reduc = " + (Math.round((qte * reducP) * 100) / 100) + " Marge = " + Math.round((qte * (prixVenteR - pA)) * 100) / 100 + " Taux de marge = " + Math.round((qte * (prixVenteR - pA)) * 100 * 100 / prixVenteR / qte) / 100 + " %");
         }
-        pHt = $("#price_ht").val().replace(",",".");
-        qte = zone.find("#qty").val().replace(",",".");
-        reduc = zone.find("#remise_percent").val().replace(",",".");
-        pA = zone.find("#buying_price").val().replace(",",".");
-        reducP = pHt*reduc/100;
-        prixVenteR = pHt - reducP;
-        $("#zoneR").html("Total = " + (Math.round((qte*prixVenteR)*100)/100) + " Reduc = " + (Math.round((qte*reducP)*100)/100) + " Marge = " + Math.round((qte*(prixVenteR-pA))*100)/100 + " Taux de marge = " + Math.round((qte*(prixVenteR-pA))*100*100/prixVenteR/qte)/100 + " %");
     });
+}
+
+function autoClickSearch() {
+    var champ = $(".select2-search input");
+    champ.keydown(function (e) {
+        if (e.which == 13 || e.key === "Enter") {
+            testEnvoie(champ);
+        }
+    });
+}
+
+function testEnvoie(champ) {
+    setTimeout(function () {
+        if ($("#select2-drop ul li").length > 10) {
+            $(".select2-result-label").click();
+            console.log($("#select2-drop ul li div").first().html());
+        } else {
+            testEnvoie();
+        }
+    }, 2000);
 }

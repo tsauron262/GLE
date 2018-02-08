@@ -123,15 +123,15 @@ class BMP_EventMontant extends BimpObject
         $current_montants = array();
         $type = $this->getData('type');
         $id_coprod = $this->getData('id_coprod');
-        
+
         if (is_null($id_coprod)) {
             $id_coprod = 0;
         }
-        
-        
+
+
         if (!is_null($type)) {
             $event = $this->getParentInstance();
-            
+
             if (!is_null($event) && $event->isLoaded()) {
                 $eventMontant = BimpObject::getInstance($this->module, $this->object_name);
 
@@ -372,7 +372,7 @@ class BMP_EventMontant extends BimpObject
                 $value = '';
             }
 
-            $html = '<div class="inputContainer coProdPart" data-id_coprod="' . $id_coprod . '" data-initial_value="'.$value.'" data-field_name="coprod_' . $id_coprod . '_part">';
+            $html = '<div class="inputContainer coProdPart" data-id_coprod="' . $id_coprod . '" data-initial_value="' . $value . '" data-field_name="coprod_' . $id_coprod . '_part">';
             $html .= BimpInput::renderInput('text', 'coprod_' . $id_coprod . '_part', $value, array(
                         'addon_right' => '<i class="fa fa-percent"></i>',
                         'placeholder' => $placeholder,
@@ -541,7 +541,7 @@ class BMP_EventMontant extends BimpObject
     public function getAllTypesArray()
     {
         $type = BimpObject::getInstance('bimpmargeprod', 'BMP_TypeMontant');
-        return $type->getAllTypes();
+        return array_merge(array('' => ''), $type->getAllTypes());
     }
 
     public function getDetailsName()

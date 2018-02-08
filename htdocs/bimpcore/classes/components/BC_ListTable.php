@@ -701,10 +701,13 @@ class BC_ListTable extends BC_List
                     ));
                 }
                 if ($item_params['edit_btn']) {
+                    $onclick = 'loadModalFormFromList(';
+                    $onclick .= '\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\'';
+                    $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ')';
                     $html .= $this->renderRowButton(array(
                         'class'   => 'editButton',
                         'label'   => 'Editer',
-                        'onclick' => 'loadModalFormFromList(\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\', $(this), ' . $id_object . ')'
+                        'onclick' => $onclick
                     ));
                 }
                 if ($item_params['page_btn']) {

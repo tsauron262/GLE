@@ -1,0 +1,99 @@
+table: be_equipment_logiciel
+common_fields: 0
+
+parent_object: BE_Equipment
+parent_id_property: id_equipment
+
+labels:
+    name: logiciel
+    
+objects: 
+    logiciel: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BE_Logiciel
+            id_object: 
+                field_value: id_logiciel
+                
+    user_account:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BE_UserAccount
+            id_object: 
+                field_value: id_user_account
+fields: 
+    id_equipment: 
+        label: Equipement
+        type: id_parent
+        
+    id_logiciel:
+        label: Logiciel
+        type: id_object
+        object: logiciel
+        required: 1
+        create_form: default
+        input: 
+            type: search_list
+            search_list: 
+                table: be_logiciel l
+                field_return_label: l.name
+                field_return_value: l.id
+                join: product p
+                join_on: p.rowid = l.id_product
+                join_return_label: p.ref
+                fields_search: l.id,l.name,p.ref
+            help: Entrez l'id, le nom ou la référence d'un logiciel pour effectuer une recherche
+        display: 
+            nom: 
+                type: nom
+                card: default
+                
+    id_user_account:
+        label: Compte utilisateur
+        type: id_object
+        object: user_account
+        create_form: default
+        input: 
+            type: search_list
+            search_list:
+                table: be_user_account
+                field_return_label: name
+                field_return_value: id
+                fields_search: name,login
+            help: Entrez le nom d'un compte utilisateur pour effectuer une recherche
+        display: 
+            nom: 
+                type: nom
+                card: default
+        
+    serial: 
+        label: Numéro de série
+        
+lists: 
+    default: 
+        title: Logiciels
+        icon: cube
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les lignes sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        add_form_name: default
+        sort_field: id
+        sort_way: desc
+        n: 25
+        edit_btn: 1
+        delete_btn: 1
+        enable_search: 0
+        cols: 
+            logiciel: 
+                field: id_logiciel
+                display: nom
+            serial: 
+                field: serial
+            user_account: 
+                field: id_user_account
+                display: nom

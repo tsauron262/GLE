@@ -1,6 +1,7 @@
 <?php
 
 //echo '<input type="hidden" id="start_time" value="'.date('H:i:s').'"/>';
+require_once '../bimpcore/check_log.php';
 require_once '../main.inc.php';
 
 ini_set('display_errors', 1);

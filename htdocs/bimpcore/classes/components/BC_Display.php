@@ -105,7 +105,7 @@ class BC_Display extends BimpComponent
         }
 
         if ($this->value === '') {
-            $html .= '<span class="unknown">Inconnu</span>';
+            $html .= '';
         } else {
             if (isset($this->params['type']) && !is_null($this->params['type'])) {
                 switch ($this->params['type']) {
@@ -146,13 +146,17 @@ class BC_Display extends BimpComponent
                                 case 'nom_url':
                                     $html .= BimpObject::getInstanceNomUrl($instance);
                                     if ($this->params['external_link']) {
-                                        $url = BimpObject::getInstanceUrl($instance);
+                                        if (isset($this->field_params['object'])) {
+                                            $url = $this->object->getChildObjectUrl($this->field_params['object'], $instance);
+                                        } else {
+                                            $url = BimpObject::getInstanceUrl($instance);
+                                        }
                                         if ($url) {
                                             $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
                                             $html .= '<i class="fa fa-external-link"></i>';
                                             $html .= '</span>';
                                             if (is_null($this->params['modal_view'])) {
-                                                $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . BimpObject::getInstanceNom($instance) . '\')';
+                                                $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . addslashes(BimpObject::getInstanceNom($instance)) . '\')';
                                                 $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                                                 $html .= '<i class="fa fa-eye"></i>';
                                                 $html .= '</span>';
@@ -238,18 +242,24 @@ class BC_Display extends BimpComponent
                         break;
 
                     case 'time':
-                        $time = new DateTime($this->value);
-                        $html .= '<span class="time">' . $time->format($this->params['format']) . '</span>';
+                        if ($this->value !== '00:00:00') {
+                            $time = new DateTime($this->value);
+                            $html .= '<span class="time">' . $time->format($this->params['format']) . '</span>';
+                        }
                         break;
 
                     case 'date':
-                        $date = new DateTime($this->value);
-                        $html .= '<span class="date">' . $date->format($this->params['format']) . '</span>';
+                        if ($this->value !== '0000-00-00') {
+                            $date = new DateTime($this->value);
+                            $html .= '<span class="date">' . $date->format($this->params['format']) . '</span>';
+                        }
                         break;
 
                     case 'datetime':
-                        $date = new DateTime($this->value);
-                        $html .= '<span class="datetime">' . $date->format($this->params['format']) . '</span>';
+                        if ($this->value !== '0000-00-00 00:00:00') {
+                            $date = new DateTime($this->value);
+                            $html .= '<span class="datetime">' . $date->format($this->params['format']) . '</span>';
+                        }
                         break;
 
                     case 'timer':

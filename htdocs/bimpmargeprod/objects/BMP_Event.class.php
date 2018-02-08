@@ -193,6 +193,39 @@ class BMP_Event extends BimpObject
         return $return;
     }
 
+    public function GetFreeBilletsRatio()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') > 1) {
+                $tarifs = BimpObject::getInstance($this->module, 'BMP_Tarif');
+                $freeTarifs = array();
+                foreach ($tarifs->getList(array(
+                    'id_event' => (int) $this->id,
+                    'amount'   => 0
+                        ), null, null, 'id', 'asc', 'array', array('id')) as $item) {
+                    $freeTarifs[] = $item['id'];
+                }
+
+                $nTotal = 0;
+                $nFree = 0;
+
+                foreach ($this->getChildrenObjects('billets') as $billet) {
+                    $qty = $billet->getData('quantity');
+                    $nTotal += $qty;
+                    if (in_array((int) $billet->getData('id_tarif'), $freeTarifs)) {
+                        $nFree += $qty;
+                    }
+                }
+
+                if ($nTotal > 0) {
+                    return (float) $nFree / $nTotal;
+                }
+            }
+        }
+
+        return 0;
+    }
+
     public function getCoprodsSoldes()
     {
         $return = array();
@@ -610,6 +643,11 @@ class BMP_Event extends BimpObject
                 $content .= '<tr style="font-weight: bold">';
                 $content .= '<td>Billeterie NET</td>';
                 $content .= '<td>' . BimpTools::displayMoneyValue($billets_ht_net, 'EUR') . '</td>';
+                $content .= '</tr>';
+
+                $content .= '<tr style="font-weight: bold">';
+                $content .= '<td>Ratio invitations / total billets</td>';
+                $content .= '<td>' . round($this->GetFreeBilletsRatio() * 100, 2) . ' %</td>';
                 $content .= '</tr>';
 
                 $content .= '<tr><td></td><td></td></tr>';
@@ -1153,6 +1191,11 @@ class BMP_Event extends BimpObject
         $html .= '<tr>';
         $html .= '<th>CA moyen net / billet</th>';
         $html .= '<td>' . BimpTools::displayMoneyValue($ca_moyen_net, 'EUR') . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>Ratio invitations / total billets</th>';
+        $html .= '<td>' . round($this->GetFreeBilletsRatio() * 100, 2) . ' %</td>';
         $html .= '</tr>';
 
         $html .= '</tbody>';

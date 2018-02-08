@@ -168,11 +168,13 @@ div.tabBar {
 
 /*Objects Components*/
 .object_component {
-    overflow-x: auto;
-    
-    .row {
-        margin-right: 0!important;
-        margin-left: 0!important;
+    @media (max-width: $screen-sm-max) {
+        overflow-x: auto;
+
+        .row {
+            margin-right: 0!important;
+            margin-left: 0!important;
+        }
     }
 }
 
@@ -497,5 +499,25 @@ i.iconRight {
         box-shadow: 3px 3px 6px $gray-dark;
 
         margin-left: 370px;
+    }
+}
+
+/*Popup login*/ 
+
+#bimp_login_popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 99999;
+    background-color: rgba(20, 20, 20, 0.75);
+    text-align: center;
+
+    iframe {
+        margin: 5%;
+        width: 80%;
+        height: 80%;
     }
 }

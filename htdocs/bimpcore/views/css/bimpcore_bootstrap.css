@@ -9436,7 +9436,7 @@ tbody.collapse.in {
   border-radius: 0;
 }
 
-/* line 69, ../scss/bootstrap/_input-groups.scss */
+/* line 70, ../scss/bootstrap/_input-groups.scss */
 .input-group-addon,
 .input-group-btn {
   width: 1%;
@@ -9444,10 +9444,11 @@ tbody.collapse.in {
   vertical-align: middle;
 }
 
-/* line 77, ../scss/bootstrap/_input-groups.scss */
+/* line 78, ../scss/bootstrap/_input-groups.scss */
 .input-group-addon {
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: 12px;
+  /*$font-size-base;*/
   font-weight: normal;
   line-height: 1;
   color: #3c3c3c;
@@ -9456,7 +9457,7 @@ tbody.collapse.in {
   border: 1px solid #cccccc;
   border-radius: 0;
 }
-/* line 89, ../scss/bootstrap/_input-groups.scss */
+/* line 90, ../scss/bootstrap/_input-groups.scss */
 .input-group-addon.input-sm,
 .input-group-sm > .input-group-addon,
 .input-group-sm > .input-group-btn > .input-group-addon.btn {
@@ -9464,7 +9465,7 @@ tbody.collapse.in {
   font-size: 12px;
   border-radius: 3px;
 }
-/* line 94, ../scss/bootstrap/_input-groups.scss */
+/* line 95, ../scss/bootstrap/_input-groups.scss */
 .input-group-addon.input-lg,
 .input-group-lg > .input-group-addon,
 .input-group-lg > .input-group-btn > .input-group-addon.btn {
@@ -9472,13 +9473,13 @@ tbody.collapse.in {
   font-size: 17px;
   border-radius: 6px;
 }
-/* line 102, ../scss/bootstrap/_input-groups.scss */
+/* line 103, ../scss/bootstrap/_input-groups.scss */
 .input-group-addon input[type="radio"],
 .input-group-addon input[type="checkbox"] {
   margin-top: 0;
 }
 
-/* line 114, ../scss/bootstrap/_input-groups.scss */
+/* line 115, ../scss/bootstrap/_input-groups.scss */
 .input-group .form-control:first-child,
 .input-group-addon:first-child,
 .input-group-btn:first-child > .btn,
@@ -9493,7 +9494,7 @@ tbody.collapse.in {
 /*.input-group-addon:first-child {
   border-right: 0;
 }*/
-/* line 126, ../scss/bootstrap/_input-groups.scss */
+/* line 127, ../scss/bootstrap/_input-groups.scss */
 .input-group .form-control:last-child,
 .input-group-addon:last-child,
 .input-group-btn:last-child > .btn,
@@ -9508,30 +9509,30 @@ tbody.collapse.in {
 /*.input-group-addon:last-child {
   border-left: 0;
 }*/
-/* line 135, ../scss/bootstrap/_input-groups.scss */
+/* line 136, ../scss/bootstrap/_input-groups.scss */
 .input-group-btn {
   position: relative;
   font-size: 0;
   white-space: nowrap;
 }
-/* line 144, ../scss/bootstrap/_input-groups.scss */
+/* line 145, ../scss/bootstrap/_input-groups.scss */
 .input-group-btn > .btn {
   position: relative;
 }
-/* line 146, ../scss/bootstrap/_input-groups.scss */
+/* line 147, ../scss/bootstrap/_input-groups.scss */
 .input-group-btn > .btn + .btn {
   margin-left: -1px;
 }
-/* line 152, ../scss/bootstrap/_input-groups.scss */
+/* line 153, ../scss/bootstrap/_input-groups.scss */
 .input-group-btn > .btn:hover, .input-group-btn > .btn:focus, .input-group-btn > .btn:active {
   z-index: 2;
 }
-/* line 160, ../scss/bootstrap/_input-groups.scss */
+/* line 161, ../scss/bootstrap/_input-groups.scss */
 .input-group-btn:first-child > .btn,
 .input-group-btn:first-child > .btn-group {
   margin-right: -1px;
 }
-/* line 166, ../scss/bootstrap/_input-groups.scss */
+/* line 167, ../scss/bootstrap/_input-groups.scss */
 .input-group-btn:last-child > .btn,
 .input-group-btn:last-child > .btn-group {
   z-index: 2;
@@ -13858,20 +13859,11 @@ i.iconRight {
 }
 
 /* line 1, ../scss/bimpcore/_form.scss */
-input, select {
-  background-color: #fff;
-  color: #3C3C3C;
-  -webkit-transition: all 0.5s ease;
-  -o-transition: all 0.5s ease;
-  transition: all 0.5s ease;
-}
-
-/* line 7, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {
   color: #787878 !important;
 }
 
-/* line 12, ../scss/bimpcore/_form.scss */
+/* line 6, ../scss/bimpcore/_form.scss */
 .fieldRow,
 .formRow {
   display: -webkit-box;
@@ -13879,7 +13871,7 @@ input, select {
   display: -ms-flexbox;
   display: flex;
 }
-/* line 19, ../scss/bimpcore/_form.scss */
+/* line 13, ../scss/bimpcore/_form.scss */
 .fieldRow .inputLabel,
 .fieldRow .inputContainer,
 .formRow .inputLabel,
@@ -13887,7 +13879,7 @@ input, select {
   padding: 10px 15px;
   margin-right: 12px;
 }
-/* line 24, ../scss/bimpcore/_form.scss */
+/* line 18, ../scss/bimpcore/_form.scss */
 .fieldRow .inputLabel,
 .formRow .inputLabel {
   color: #fff;
@@ -13897,7 +13889,7 @@ input, select {
   text-align: right;
   vertical-align: middle;
 }
-/* line 34, ../scss/bimpcore/_form.scss */
+/* line 28, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput,
 .fieldRow .formRowInput,
 .formRow .fieldRowInput,
@@ -13906,21 +13898,21 @@ input, select {
   background-color: #fff;
   border-bottom: 1px solid gainsboro;
 }
-/* line 40, ../scss/bimpcore/_form.scss */
+/* line 34, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput .inputContainer input,
 .fieldRow .formRowInput .inputContainer input,
 .formRow .fieldRowInput .inputContainer input,
 .formRow .formRowInput .inputContainer input {
   width: 350px;
 }
-/* line 43, ../scss/bimpcore/_form.scss */
+/* line 37, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput .inputContainer input[type=checkbox],
 .fieldRow .formRowInput .inputContainer input[type=checkbox],
 .formRow .fieldRowInput .inputContainer input[type=checkbox],
 .formRow .formRowInput .inputContainer input[type=checkbox] {
   width: auto;
 }
-/* line 47, ../scss/bimpcore/_form.scss */
+/* line 41, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput .inputContainer textarea,
 .fieldRow .formRowInput .inputContainer textarea,
 .formRow .fieldRowInput .inputContainer textarea,
@@ -13929,12 +13921,12 @@ input, select {
 }
 
 @media (max-width: 768px) {
-  /* line 56, ../scss/bimpcore/_form.scss */
+  /* line 50, ../scss/bimpcore/_form.scss */
   .fieldRow,
   formRow {
     display: block;
   }
-  /* line 59, ../scss/bimpcore/_form.scss */
+  /* line 53, ../scss/bimpcore/_form.scss */
   .fieldRow .inputLabel,
   formRow .inputLabel {
     text-align: left;
@@ -13966,26 +13958,26 @@ input, select {
         margin-right: 12px;
     }
 }*/
-/* line 91, ../scss/bimpcore/_form.scss */
+/* line 85, ../scss/bimpcore/_form.scss */
 .formSubmit {
   text-align: right;
   padding: 10px 20px;
 }
-/* line 94, ../scss/bimpcore/_form.scss */
+/* line 88, ../scss/bimpcore/_form.scss */
 .formSubmit .button {
   margin-left: 10px;
 }
 
-/* line 98, ../scss/bimpcore/_form.scss */
+/* line 92, ../scss/bimpcore/_form.scss */
 .inputHelp {
   font-size: 12px;
   font-style: italic;
-  color: #b4b4b4;
+  color: #747474;
   margin: 8px 0;
   padding-left: 15px;
 }
 
-/* line 106, ../scss/bimpcore/_form.scss */
+/* line 100, ../scss/bimpcore/_form.scss */
 .objectToolbar,
 .toolBar {
   padding: 15px 0;
@@ -13993,6 +13985,16 @@ input, select {
 }
 
 /*Inputs*/
+/* line 106, ../scss/bimpcore/_form.scss */
+input, select {
+  background-color: #fff;
+  color: #3C3C3C;
+  -webkit-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+  height: 26px;
+}
+
 /* line 112, ../scss/bimpcore/_form.scss */
 input {
   padding-bottom: 5px !important;

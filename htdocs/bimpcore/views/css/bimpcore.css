@@ -4288,20 +4288,11 @@ i.iconRight {
 }
 
 /* line 1, ../scss/bimpcore/_form.scss */
-input, select {
-  background-color: #fff;
-  color: #3C3C3C;
-  -webkit-transition: all 0.5s ease;
-  -o-transition: all 0.5s ease;
-  transition: all 0.5s ease;
-}
-
-/* line 7, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {
   color: #787878 !important;
 }
 
-/* line 12, ../scss/bimpcore/_form.scss */
+/* line 6, ../scss/bimpcore/_form.scss */
 .fieldRow,
 .formRow {
   display: -webkit-box;
@@ -4309,7 +4300,7 @@ input, select {
   display: -ms-flexbox;
   display: flex;
 }
-/* line 19, ../scss/bimpcore/_form.scss */
+/* line 13, ../scss/bimpcore/_form.scss */
 .fieldRow .inputLabel,
 .fieldRow .inputContainer,
 .formRow .inputLabel,
@@ -4317,7 +4308,7 @@ input, select {
   padding: 10px 15px;
   margin-right: 12px;
 }
-/* line 24, ../scss/bimpcore/_form.scss */
+/* line 18, ../scss/bimpcore/_form.scss */
 .fieldRow .inputLabel,
 .formRow .inputLabel {
   color: #fff;
@@ -4327,7 +4318,7 @@ input, select {
   text-align: right;
   vertical-align: middle;
 }
-/* line 34, ../scss/bimpcore/_form.scss */
+/* line 28, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput,
 .fieldRow .formRowInput,
 .formRow .fieldRowInput,
@@ -4336,21 +4327,21 @@ input, select {
   background-color: #fff;
   border-bottom: 1px solid gainsboro;
 }
-/* line 40, ../scss/bimpcore/_form.scss */
+/* line 34, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput .inputContainer input,
 .fieldRow .formRowInput .inputContainer input,
 .formRow .fieldRowInput .inputContainer input,
 .formRow .formRowInput .inputContainer input {
   width: 350px;
 }
-/* line 43, ../scss/bimpcore/_form.scss */
+/* line 37, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput .inputContainer input[type=checkbox],
 .fieldRow .formRowInput .inputContainer input[type=checkbox],
 .formRow .fieldRowInput .inputContainer input[type=checkbox],
 .formRow .formRowInput .inputContainer input[type=checkbox] {
   width: auto;
 }
-/* line 47, ../scss/bimpcore/_form.scss */
+/* line 41, ../scss/bimpcore/_form.scss */
 .fieldRow .fieldRowInput .inputContainer textarea,
 .fieldRow .formRowInput .inputContainer textarea,
 .formRow .fieldRowInput .inputContainer textarea,
@@ -4359,12 +4350,12 @@ input, select {
 }
 
 @media (max-width: 768px) {
-  /* line 56, ../scss/bimpcore/_form.scss */
+  /* line 50, ../scss/bimpcore/_form.scss */
   .fieldRow,
   formRow {
     display: block;
   }
-  /* line 59, ../scss/bimpcore/_form.scss */
+  /* line 53, ../scss/bimpcore/_form.scss */
   .fieldRow .inputLabel,
   formRow .inputLabel {
     text-align: left;
@@ -4396,26 +4387,26 @@ input, select {
         margin-right: 12px;
     }
 }*/
-/* line 91, ../scss/bimpcore/_form.scss */
+/* line 85, ../scss/bimpcore/_form.scss */
 .formSubmit {
   text-align: right;
   padding: 10px 20px;
 }
-/* line 94, ../scss/bimpcore/_form.scss */
+/* line 88, ../scss/bimpcore/_form.scss */
 .formSubmit .button {
   margin-left: 10px;
 }
 
-/* line 98, ../scss/bimpcore/_form.scss */
+/* line 92, ../scss/bimpcore/_form.scss */
 .inputHelp {
   font-size: 12px;
   font-style: italic;
-  color: #b4b4b4;
+  color: #747474;
   margin: 8px 0;
   padding-left: 15px;
 }
 
-/* line 106, ../scss/bimpcore/_form.scss */
+/* line 100, ../scss/bimpcore/_form.scss */
 .objectToolbar,
 .toolBar {
   padding: 15px 0;
@@ -4423,6 +4414,16 @@ input, select {
 }
 
 /*Inputs*/
+/* line 106, ../scss/bimpcore/_form.scss */
+input, select {
+  background-color: #fff;
+  color: #3C3C3C;
+  -webkit-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+  height: 26px;
+}
+
 /* line 112, ../scss/bimpcore/_form.scss */
 input {
   padding-bottom: 5px !important;

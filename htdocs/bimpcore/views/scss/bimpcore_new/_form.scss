@@ -93,7 +93,7 @@
 .inputHelp {
     font-size: 12px;
     font-style: italic;
-    color: $gray;
+    color: darken($gray, 15%);
     margin: 8px 0;
     padding-left: 15px;
 }

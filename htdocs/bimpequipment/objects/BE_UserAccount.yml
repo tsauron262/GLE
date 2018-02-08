@@ -5,6 +5,27 @@ labels:
     name: compte utilisateur
     name_plur: comptes utilisateurs
     
+objects: 
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object: 
+                field_value: id_client
+        card:
+            type: societe_card
+            
+    client_contact: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: contact
+            id_object: 
+            field_value: id_client_contact
+        card: 
+            type: contact_card
+            
 fields:
     name: 
         label: Nom
@@ -17,6 +38,12 @@ fields:
     pword: 
         label: Mot de passe
         required: 1
+        
+    id_client: 
+        label: Client
+        input: 
+            type: search_societe
+            
         
 lists: 
     default: 
@@ -45,7 +72,6 @@ lists:
                 edit: 1
                 
 card:
-    title: nom
     fields:
         - field: login
         - field: pword

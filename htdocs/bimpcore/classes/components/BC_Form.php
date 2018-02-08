@@ -15,6 +15,7 @@ class BC_Form extends BC_Panel
         'association' => array('default'),
         'custom'      => array('data_type' => 'bool', 'default' => 0),
         'label'       => array('default' => ''),
+        'create_form' => array('default' => '')
     );
     public static $custom_row_params = array(
         'input_name' => array('required' => true, 'default' => ''),
@@ -168,7 +169,7 @@ class BC_Form extends BC_Panel
         $html .= BimpRender::renderButton(array(
                     'label'       => 'Enregistrer',
                     'icon_before' => 'save',
-                    'classes'     => array('btn', 'btn-primary', 'pull-right'),
+                    'classes'     => array('btn', 'btn-primary', 'pull-right', 'save_object_button'),
                     'attr'        => array(
                         'onclick' => 'saveObjectFromForm(\'' . $this->identifier . '\')'
                     )
@@ -201,6 +202,14 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+
+        if ($field->params['type'] === 'id_object') {
+            $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
+            if ($form_name) {
+                $html .= $this->renderCreateObjectButton($field, $form_name);
+            }
+        }
+
         $html .= $field->renderHtml();
         $html .= '</div>';
 
@@ -232,8 +241,10 @@ class BC_Form extends BC_Panel
         $html .= '<div class="row formRow">';
 
         $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
-        if (isset($params['label'])) {
+        if ($params['label']) {
             $html .= $params['label'];
+        } elseif ($this->object->config->isDefined('associations/'.$params['association'].'/label')) {
+            $html .= $this->object->getConf('associations/'.$params['association'].'/label');
         } elseif (!is_null($associate)) {
             $html .= BimpTools::ucfirst(BimpObject::getInstanceLabel($associate, 'name_plur')) . ' associés';
         } else {
@@ -355,6 +366,45 @@ class BC_Form extends BC_Panel
         } else {
             $html .= BimpRender::renderAlerts('Erreur de configuration: aucun contenu défini pour ce champ');
         }
+
+        return $html;
+    }
+
+    public function renderCreateObjectButton(BC_Field $field, $form_name)
+    {
+        if (!$form_name || !$field->params['object']) {
+            return '';
+        }
+        
+        $object = $this->object->config->getObject('', $field->params['object']);
+
+        if (is_null($object) || !is_a($object, 'BimpObject')) {
+            return '';
+        }
+
+        $label = 'Créer ' . $object->getLabel('a');
+        $title = 'Ajout ' . addslashes($object->getLabel('of_a'));
+
+        if ($this->object->isLoaded() && $object->getParentObjectName() === $this->object->object_name) {
+            $id_parent = $this->object->id;
+        } else {
+            $id_parent = 0;
+        }
+
+        $html = '';
+
+        $html .= '<div style="text-align: right">';
+
+        $html .= BimpRender::renderButton(array(
+                    'icon_before' => 'plus-circle',
+                    'label'       => $label,
+                    'classes'     => array('btn', 'btn-light-default'),
+                    'attr'        => array(
+                        'onclick' => 'loadObjectFormFromForm(\'' . $title . '\', \'' . $field->name . '\', \'' . $this->identifier . '\', \'' . $object->module . '\', \'' . $object->object_name . '\', \'' . $form_name . '\', ' . $id_parent . ', $(this))'
+                    )
+                        ));
+
+        $html .= '</div>';
 
         return $html;
     }

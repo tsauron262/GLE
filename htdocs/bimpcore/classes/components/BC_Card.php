@@ -18,7 +18,7 @@ class BC_Card extends BimpComponent
     public function __construct(BimpObject $object, $display_object_name = null, $name = '')
     {
         $this->params_def['type'] = array('default' => '');
-        $this->params_def['title'] = array();
+        $this->params_def['title'] = array('default' => 'nom');
         $this->params_def['image'] = array();
         $this->params_def['view_btn'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['fields'] = array('type' => 'keys');

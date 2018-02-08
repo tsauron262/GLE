@@ -34,6 +34,7 @@ list:
         - label: supprimer les tarifs sélectionnés
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
+    enable_search: 0
     sort_field: amount
     sort_way: desc
     n: 25

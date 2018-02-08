@@ -916,57 +916,59 @@ class BimpObject
             $validate = true;
             $invalid_msg = $this->getCurrentConf('invalid_msg');
 
-            if ($type) {
-                if (is_null($invalid_msg)) {
-                    switch ($type) {
-                        case 'time':
-                            $invalid_msg = 'Format attendu: HH:MM:SS';
-                            break;
+            if ($value) {
+                if ($type) {
+                    if (is_null($invalid_msg)) {
+                        switch ($type) {
+                            case 'time':
+                                $invalid_msg = 'Format attendu: HH:MM:SS';
+                                break;
 
-                        case 'date':
-                            $invalid_msg = 'Format attendu: AAAA-MM-JJ';
-                            break;
+                            case 'date':
+                                $invalid_msg = 'Format attendu: AAAA-MM-JJ';
+                                break;
 
-                        case 'datetime':
-                            $invalid_msg = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
-                            break;
+                            case 'datetime':
+                                $invalid_msg = 'Format attendu: AAAA-MM-JJ HH:MM:SS';
+                                break;
 
-                        case 'id_object':
-                            $invalid_msg = 'La valeur doit être un nombre entier positif';
-                            break;
+                            case 'id_object':
+                                $invalid_msg = 'La valeur doit être un nombre entier positif';
+                                break;
 
-                        default:
-                            $invalid_msg = 'La valeur doit être de type "' . $type . '"';
+                            default:
+                                $invalid_msg = 'La valeur doit être de type "' . $type . '"';
+                        }
+                    }
+
+                    if (!$this->checkFieldValueType($field, $value)) {
+                        $validate = false;
                     }
                 }
 
-                if (!$this->checkFieldValueType($field, $value)) {
-                    $validate = false;
-                } else {
-                    switch ($type) {
-                        case 'id':
-                        case 'id_object':
-                            if ($required && ((int) $value <= 0)) {
-                                $errors[] = 'Valeur obligatoire manquante : "' . $label . '"';
-                            }
-                            break;
+                if (!count($errors) && !is_null($regexp = $this->getCurrentConf('regexp'))) {
+                    if (!preg_match('/' . $regexp . '/', $value)) {
+                        $validate = false;
                     }
                 }
-            }
-
-            if (!count($errors) && !is_null($regexp = $this->getCurrentConf('regexp'))) {
-                if (!preg_match('/' . $regexp . '/', $value)) {
-                    $validate = false;
+                if (!count($errors) && !is_null($is_key_array = $this->getCurrentConf('is_key_array'))) {
+                    if (is_array($is_key_array) && !array_key_exists($value, $is_key_array)) {
+                        $validate = false;
+                    }
                 }
-            }
-            if (!count($errors) && !is_null($is_key_array = $this->getCurrentConf('is_key_array'))) {
-                if (is_array($is_key_array) && !array_key_exists($value, $is_key_array)) {
-                    $validate = false;
+                if (!count($errors) && !is_null($in_array = $this->getCurrentConf('in_array'))) {
+                    if (is_array($in_array) && !in_array($value, $in_array)) {
+                        $validate = false;
+                    }
                 }
-            }
-            if (!count($errors) && !is_null($in_array = $this->getCurrentConf('in_array'))) {
-                if (is_array($in_array) && !in_array($value, $in_array)) {
-                    $validate = false;
+            } else {
+                switch ($type) {
+                    case 'id':
+                    case 'id_object':
+                        if ($required && ((int) $value <= 0)) {
+                            $errors[] = 'Valeur obligatoire manquante : "' . $label . '"';
+                        }
+                        break;
                 }
             }
 
@@ -2121,6 +2123,51 @@ class BimpObject
         return '';
     }
 
+    // Liens et url: 
+
+    public function getUrl()
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $controller = $this->getController();
+        if (!$controller) {
+            return '';
+        }
+
+        return $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
+    }
+
+    public function getChildObjectUrl($object_name, $object = null)
+    {
+        if (is_null($object)) {
+            $object = $this->config->getObject('', $object_name);
+        }
+
+        if (is_null($object)) {
+            return '';
+        }
+
+        if (is_a($object, 'BimpObject')) {
+            return $object->getUrl();
+        }
+
+        $module = $this->config->getObjectModule("", $object_name);
+        if ($module) {
+            $file = $module . '/card.php';
+            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                $primary = 'id';
+                if (is_a($object, 'Societe')) {
+                    $primary = 'socid';
+                }
+                return DOL_URL_ROOT . '/' . $file . (isset($object->id) && $object->id ? '?' . $primary . '=' . $object->id : '');
+            }
+        }
+
+        return '';
+    }
+    
     public static function getInstanceNomUrl($instance)
     {
         if (is_a($instance, 'BimpObject')) {

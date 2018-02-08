@@ -35,6 +35,12 @@ objects:
     places: 
         instance: 
             bimp_object: BE_Place
+            
+    logiciels: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BE_EquipmentLogiciel
 
 associations:
     contrats:
@@ -73,8 +79,18 @@ fields:
         required: 1
         object: product
         input:
-            type: search_product
-            help: Entrez la référence ou le nom d'un produit
+            type: search_list
+            search_list: 
+                table: product p
+                field_return_value: p.rowid
+                field_return_label: p.label,p.ref
+                label_syntaxe: <label_2> - <label_1>
+                join: product_extrafields pe
+                join_on: p.rowid = pe.fk_object
+                fields_search: p.rowid,p.ref,p.label,p.barcode
+                filters: 
+                    pe.serialisable: 1
+            help: Entrez la référence, le nom, le code-barre ou l'id d'un produit pour effectuer une recherche
         display:
             default:
                 type: field_value
@@ -94,6 +110,7 @@ fields:
             label:
                 label: nom
                 join_field: label
+                
     type: 
         label: Type
         values: 
@@ -159,7 +176,8 @@ fields:
 
 fields_tables: 
     default: 
-        panel: 0
+        panel: 1
+        title: Informations
         rows:
             - field: id_product
               display: card
@@ -167,11 +185,13 @@ fields_tables:
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
-            - field: admin_login
-            - field: admin_pword
+            - field: reserved
+              edit: 1
             - field: note
+              edit: 1
             - association: contrats
               edit: 1
+              
 views:
     default:
         title: nom
@@ -185,7 +205,8 @@ views:
                   - type: fields_table
                     col_lg: 9
                     fields_table:
-                        name: default                              
+                        name: default           
+                        
 forms:
     default:
         rows: 
@@ -214,6 +235,7 @@ list:
         id:
             label: ID
             field: id
+            min_width: 60px
         type: 
             field: type
         product: 

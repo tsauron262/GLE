@@ -180,7 +180,7 @@ class BimpInput
                 break;
 
             case 'search_entrepot':
-                require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
+                require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
                 global $db;
                 $formProduct = new FormProduct($db);
                 $html .= $formProduct->selectWarehouses((int) $value, $field_name);
@@ -414,16 +414,16 @@ class BimpInput
         return $html;
     }
 
-    public static function renderSearchListInput(BimpObject $object, $config_path, $field_name, $value = '', $option = null)
+    public static function renderSearchListInput(BimpObject $object, $config_path, $input_name, $value = '', $option = null)
     {
         if (is_null($value)) {
             $value = '';
         }
 
-        if (!$object->config->isDefined($config_path . '/input/search_list')) {
-            $html .= BimpRender::renderAlerts('Paramètres de recherche non définis pour le champ "' . $field_name . '"');
+        if (!$object->config->isDefined($config_path . '/search_list')) {
+            $html .= BimpRender::renderAlerts('Paramètres de recherche non définis pour le champ "' . $input_name . '"');
         } else {
-            $path = $config_path . '/input/search_list/';
+            $path = $config_path . '/search_list/';
             $table = $object->getConf($path . 'table', null, true);
             $join = $object->getConf($path . 'join', '');
             $join_on = $object->getConf($path . 'join_on', '');
@@ -431,9 +431,15 @@ class BimpInput
             $field_return_value = $object->getConf($path . 'field_return_value', null, true);
             $join_return_label = $object->getConf($path . 'join_return_label', '');
             $label_syntaxe = $object->getConf($path . 'label_syntaxe', '<label_1>');
+            if ($object->config->isDefined($path . '/filters')) {
+                $filters = $object->config->getCompiledParams($path . '/filters');
+            } else {
+                $filters = array();
+            }
+
 
             if (is_null($table) || is_null($field_return_label) || is_null($field_return_value)) {
-                $html .= BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $field_name . '"');
+                $html .= BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $input_name . '"');
             } else {
                 $fields_search = array();
                 if ($object->config->isDefined($path . 'options')) {
@@ -445,8 +451,8 @@ class BimpInput
                     } else {
                         $options = $object->getConf($path . 'options', array(), true, 'array');
                         $html .= '<div class="searchListOptions optionsContainer">';
-                        $html .= '<span class="displayPopupButton optionsButton" data-popup_id="' . $field_name . '_searchListOptionsPopup">Options de recherche</span>';
-                        $html .= '<div id="' . $field_name . '_searchListOptionsPopup" class="tinyPopup searchListOptionsPopup">';
+                        $html .= '<span class="displayPopupButton optionsButton" data-popup_id="' . $input_name . '_searchListOptionsPopup">Options de recherche</span>';
+                        $html .= '<div id="' . $input_name . '_searchListOptionsPopup" class="tinyPopup searchListOptionsPopup">';
                         $switchOptions = array();
                         foreach ($options as $opt_name => $opt_params) {
                             $opt_label = $object->getConf($path . 'options/' . $opt_name . '/label', '', true);
@@ -455,6 +461,10 @@ class BimpInput
                             $opt_join_on = $object->getConf($path . 'options/' . $opt_name . '/join_on', '');
                             $opt_join_return_label = $object->getConf($path . 'options/' . $opt_name . '/join_return_label', '');
                             $opt_help = $object->getConf($path . 'options/' . $opt_name . '/help', '');
+                            $opt_filters = array();
+                            if ($object->config->isDefined($path . 'options/' . $opt_name . '/filters')) {
+                                $opt_filters = $object->config->getCompiledParams($path . 'options/' . $opt_name . '/filters');
+                            }
                             if (!is_null($opt_fields_search) && !is_null($opt_label)) {
                                 $html .= '<input type="hidden" id="searchList_' . $opt_name . '_fields_search" value="' . $opt_fields_search . '"/>';
                                 if ($opt_join) {
@@ -466,6 +476,9 @@ class BimpInput
                                 if ($opt_join_on) {
                                     $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_return_label" value="' . $opt_join_return_label . '"/>';
                                 }
+                                if (count($opt_filters)) {
+                                    $html .= '<input type="hidden" id="searchList_' . $opt_name . '_filters" value="' . json_encode($opt_filters) . '"/>';
+                                }
                                 if ($opt_help) {
                                     $html .= '<input type="hidden" id="searchList_' . $opt_name . '_help" value="' . htmlentities($opt_help) . '"/>';
                                 }
@@ -476,10 +489,11 @@ class BimpInput
                                 $join = $opt_join;
                                 $join_on = $opt_join_on;
                                 $join_return_label = $opt_join_return_label;
+                                $filters = $opt_filters;
                             }
                         }
                         $html .= '<div class="title">Options de recherche</div>';
-                        $html .= self::renderSwitchOptionsInput($field_name . '_search_list_option', $switchOptions, 'default', null, true);
+                        $html .= BimpInput::renderSwitchOptionsInput($input_name . '_search_list_option', $switchOptions, 'default', null, true);
                         $html .= '</div>';
                         $html .= '</div>';
                     }
@@ -494,10 +508,20 @@ class BimpInput
                     if (!is_array($fields_search)) {
                         $fields_search = explode(',', $fields_search);
                     }
-                    $where = '`' . preg_replace('/^.*\.(.*)$/', '$1', $field_return_value) . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
-                    $search = $bdb->getValue(preg_replace('/^.*\.(.*)$/', '$1', $table), preg_replace('/^.*\.(.*)$/', '$1', $fields_search[0]), $where);
-                    if (is_null($search)) {
+
+                    $sql = 'SELECT ' . $field_return_label . ' as label';
+                    $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
+                    if ($join) {
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
+                    }
+                    $sql .= ' WHERE ' . $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
+
+                    $result = $bdb->executeS($sql, 'array');
+
+                    if (is_null($result) || !isset($result[0]['label'])) {
                         $search = '';
+                    } else {
+                        $search = $result[0]['label'];
                     }
                     unset($bdb);
                 }
@@ -506,8 +530,8 @@ class BimpInput
                     $fields_search = implode(',', $fields_search);
                 }
 
-                $html .= '<input type="hidden" name="' . $field_name . '" value="' . $value . '"/>';
-                $html .= '<input type="text" name="' . $field_name . '_search" class="search_list_input" value="' . $search . '" onkeyup="searchObjectList($(this));"';
+                $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
+                $html .= '<input type="text" name="' . $input_name . '_search" class="search_list_input" value="" onkeyup="searchObjectList($(this));"';
                 $html .= ' data-table="' . $table . '"';
                 $html .= ' data-join="' . $join . '"';
                 $html .= ' data-join_on="' . $join_on . '"';
@@ -516,9 +540,14 @@ class BimpInput
                 $html .= ' data-field_return_value="' . $field_return_value . '"';
                 $html .= ' data-join_return_label="' . $join_return_label . '"';
                 $html .= ' data-label_syntaxe="' . htmlentities($label_syntaxe) . '"';
+                $html .= ' data-filters="' . htmlentities(json_encode($filters)) . '"';
                 $html .= '/>';
                 $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
                 $html .= '<div class="search_input_results"></div>';
+                $html .= '<div class="search_input_selected_label"' . (!$search ? ' style="display: none"' : '') . '>';
+                $html .= '<i class="fa fa-check iconLeft"></i>';
+                $html .= '<span class="">' . $search . '</span>';
+                $html .= '</div>';
             }
         }
         return $html;

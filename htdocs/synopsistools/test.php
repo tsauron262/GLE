@@ -13,7 +13,9 @@ if (isset($_GET['action'])) {
         mailNonFerme();
     if ($_GET['action'] == "fermetureAuto"){
         tentativeFermetureAuto();
-        tentativeFermetureAuto(true);
+        tentativeFermetureAuto(1);
+        tentativeFermetureAuto(2);
+        tentativeFermetureAuto(3);
     }
     if ($_GET['action'] == "mailFermePasGsx")
         mailFermePasGsx();
@@ -32,14 +34,26 @@ WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) > -30
 AND serial_number is not null
 AND c.id = cs.id AND cs.Etat = 999";
 
-    if ($iTribu) {
-        $req .= " AND ( ref LIKE('SAVP%') || ref LIKE('SAVP%') )";
+    if ($iTribu == 1) {
+        $req .= " AND ( ref LIKE('SAVN%'))";
+        global $user;
+        $user->array_options['options_apple_id'] = "f.marino@bimp.fr";
+        $user->array_options['options_apple_service'] = "0000579256";
+        $user->array_options['options_apple_shipto'] = "0000459993";
+    } elseif ($iTribu == 2) {
+        $req .= " AND ( ref LIKE('SAVMONTP%'))";
+        global $user;
+        $user->array_options['options_apple_id'] = "xavier@itribustore.fr";
+        $user->array_options['options_apple_service'] = "0000579256";
+        $user->array_options['options_apple_shipto'] = "0000579256";
+    } elseif ($iTribu == 3) {
+        $req .= " AND ( ref LIKE('SAVP%'))";
         global $user;
         $user->array_options['options_apple_id'] = "elodie@itribustore.fr";
         $user->array_options['options_apple_service'] = "579256";
         $user->array_options['options_apple_shipto'] = "883234";
     } else
-        $req .= " AND ( ref NOT LIKE('SAVP%') || ref NOT LIKE('SAVP%') )";
+        $req .= " AND ( ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') )";
 
     $req .= " ORDER BY `nbJ` DESC, c.id";
 
@@ -106,7 +120,9 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
 function mailFermePasGsx() {
     global $db;
     tentativeFermetureAuto();
-        tentativeFermetureAuto(true);
+        tentativeFermetureAuto(1);
+        tentativeFermetureAuto(2);
+        tentativeFermetureAuto(3);
     $req = "SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id as cid, c.ref, Technicien 
         
 FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r

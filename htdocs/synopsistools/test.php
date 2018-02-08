@@ -30,7 +30,7 @@ function tentativeFermetureAuto($iTribu = false) {
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
 
-WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) > -120
+WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) > -180
 AND serial_number is not null
 AND c.id = cs.id AND cs.Etat = 999";
 

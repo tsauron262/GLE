@@ -41,7 +41,7 @@ AND c.id = cs.id AND cs.Etat = 999";
         $user->array_options['options_apple_service'] = "0000579256";
         $user->array_options['options_apple_shipto'] = "0000459993";
     } elseif ($iTribu == 2) {
-        $req .= " AND ( ref LIKE('SAVMONTP%'))";
+        $req .= " AND ( ref LIKE('SAVMONTP%') || ref LIKE('SAVMAU%'))";
         global $user;
         $user->array_options['options_apple_id'] = "xavier@itribustore.fr";
         $user->array_options['options_apple_service'] = "0000579256";
@@ -53,7 +53,7 @@ AND c.id = cs.id AND cs.Etat = 999";
         $user->array_options['options_apple_service'] = "579256";
         $user->array_options['options_apple_shipto'] = "883234";
     } else
-        $req .= " AND ( ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') )";
+        $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
 
     $req .= " ORDER BY `nbJ` DESC, c.id";
 

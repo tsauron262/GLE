@@ -75,7 +75,7 @@ class LignePanier {
         $prod = new product($this->db);
         $prod->fetch($this->prodId);
 
-        return array('id' => $this->prodId, 'isEquipment' => ($this->equipmentId > 0), 'stock' => $this->checkStock(), 'label' => $prod->label, 'refUrl' => $prod->getNomUrl(1), 'serial' => $this->serial, 'error' => $this->error);
+        return array('id' => $this->prodId, 'isEquipment' => ($this->equipmentId > 0), 'stock' => $this->checkStock(), 'label' => dol_trunc($prod->label, 30), 'refUrl' => $prod->getNomUrl(1), 'serial' => $this->serial, 'error' => $this->error);
     }
 
     function checkStock() {

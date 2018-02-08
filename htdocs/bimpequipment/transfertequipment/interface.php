@@ -8,6 +8,7 @@
 require_once '../../main.inc.php';
 
 require_once DOL_DOCUMENT_ROOT . '/bimpequipment/transfertequipment/lignepanier.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpequipment/transfertequipment/transfert.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 
@@ -21,6 +22,11 @@ switch (GETPOST('action')) {
     case 'checkProductByRef': {
             $lp->check(GETPOST('ref'), GETPOST('idEntrepotStart'));
             echo json_encode($lp->getInfo());
+            break;
+        }
+    case 'transfertAll': {
+            echo json_encode(new Transfert($db, GETPOST('products'), GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd')));
+//            echo json_encode($transfert->transfertAll());
             break;
         }
     default: break;

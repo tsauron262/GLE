@@ -81,6 +81,7 @@ print '</table>';
 
 print '<table id="productTable" class="custTable">';
 print '<thead>';
+print '<th>Produits scanné</th>';
 print '<th>Identifiant</th>';
 print '<th>Référence</th>';
 print '<th>Numéro de série</th>';
@@ -94,7 +95,13 @@ print '</table>';
 
 print '<br/><div id="alertProd"></div><br/><br/><br/>';
 
-print '<input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
+print '<input id="enregistrer" type="button" class="butAction" value="Transférer">';
+
+print '<div name="confirmEnregistrer" hidden>';
+print '<p name="confTransfert"></p>';
+print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmet">';
+print '<input id="noEnregistrer" type="button" class="butActionDelete" value="Annuler"></div>';
+
 print '<br/><div id="alertEnregistrer"></div><br/>';
 
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';

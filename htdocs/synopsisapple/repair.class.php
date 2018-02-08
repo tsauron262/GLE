@@ -457,7 +457,7 @@ class Repair
         $this->confirmNumbers['repair'] = $this->repairLookUp['repairConfirmationNumber'];
         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
             $repairComplete = 0;
-            if (($this->repairLookUp['repairStatus'] == 'Closed') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée') || ($this->repairLookUp['repairStatus'] == 'Réparation marquée comme complète') || ($this->repairLookUp['repairStatus'] == 'Refusée - réparation annulée'))
+            if (($this->repairLookUp['repairStatus'] == 'Closed') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée') || ($this->repairLookUp['repairStatus'] == 'Réparation marquée comme complète') || ($this->repairLookUp['repairStatus'] == 'Refusée - réparation annulée') || ($this->repairLookUp['repairStatus'] == 'Refusé - Refusé par Apple'))
                 $repairComplete = 1;
             if (!isset($this->repairComplete) || !$this->repairComplete != $repairComplete) {
                 $update = true;

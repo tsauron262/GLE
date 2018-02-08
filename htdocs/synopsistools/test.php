@@ -43,7 +43,7 @@ ORDER BY `nbJ` DESC, c.id";
                 $repair->rowId = $ligne->rid;
                 $repair->load();
                 if ($repair->lookup())
-                    echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . "<br/>";
+                    echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : ".$repair->repairLookUp['repairStatus']."<br/>";
                 else {
                     echo "Echec de la recup de " . $ligne->ref . "<br/>";
                     $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
@@ -110,7 +110,7 @@ ORDER BY `nbJ` DESC, c.id";
             $repair->rowId = $ligne->rid;
             $repair->load();
 
-            echo "Necessite fermeture manuelle de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . "<br/>";
+            echo "Necessite fermeture manuelle de " . $ligne->ref  . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . "<br/>";
         }
     }
 }

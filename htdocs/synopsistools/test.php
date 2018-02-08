@@ -72,8 +72,11 @@ AND c.id = cs.id AND cs.Etat = 999";
             if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                 $repair->rowId = $ligne->rid;
                 $repair->load();
-                if ($repair->lookup())
+                if ($repair->lookup()){
                     echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                    if($repair->repairComplete == "Prêt pour enlèvement")
+                        $repair->close(1,0);
+                }
                 else {
                     echo "Echec de la recup de " . $ligne->ref . "<br/>";
                     $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;

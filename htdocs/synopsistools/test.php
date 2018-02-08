@@ -130,10 +130,10 @@ function tentativeARestitueAuto($iTribu = 0) {
                         $repair->update();
                     }
                     else{
-//                        if($repair->updateStatus('RFPU'))
-//                                echo "Semble avoir été passer dans GSX a RFPU<br/>";
-//                        else
-//                            echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                        if($repair->updateStatus('RFPU'))
+                                echo "Semble avoir été passer dans GSX a RFPU<br/>";
+                        else
+                            echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
                     }
                 }
                 else {

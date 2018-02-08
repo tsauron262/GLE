@@ -7,21 +7,20 @@
  */
 require_once '../../main.inc.php';
 
-require_once DOL_DOCUMENT_ROOT . '/bimpequipment/transfertequipment/lineTransfert.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpequipment/transfertequipment/lignepanier.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 
-$ln = new lineTransfert($db);
+$lp = new LignePanier($db);
 switch (GETPOST('action')) {
     case 'checkStockForProduct': {
-            $ln->fetchProd(GETPOST('idProduct'), GETPOST('idEntrepotStart'));
-
-            echo json_encode($ln->getInfo());
+            $lp->fetchProd(GETPOST('idProduct'), GETPOST('idEntrepotStart'));
+            echo json_encode($lp->getInfo());
             break;
         }
     case 'checkProductByRef': {
-            $ln->check(GETPOST('ref'), GETPOST('idEntrepotStart'));
-            echo json_encode($ln->getInfo());
+            $lp->check(GETPOST('ref'), GETPOST('idEntrepotStart'));
+            echo json_encode($lp->getInfo());
             break;
         }
     default: break;

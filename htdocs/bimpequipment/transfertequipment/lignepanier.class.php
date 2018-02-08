@@ -1,7 +1,7 @@
 <?php
 
 
-class lineTransfert {
+class LignePanier {
 
     private $db;
     public $prodId = 0;
@@ -15,7 +15,7 @@ class lineTransfert {
     }
 
     function isProduct($ref) {
-        $ref = str_replace("/", "_", $ref);
+//        $ref = str_replace("/", "_", $ref);
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $ref . '"';

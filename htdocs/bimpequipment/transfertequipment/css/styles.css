@@ -17,12 +17,12 @@ div.cust.select2-container {
 }
 
 table.custTable {
-    border-collapse:separate; 
-    border-spacing:0;
+    border-collapse: separate; 
+    border-spacing: 0;
     border-top: solid black 1px;
     border-bottom: solid black 1px;
     border-left: solid black 1px;
-    z-index:900 !important;
+    z-index: 900 !important;
     margin-top: 30px;
 }
 

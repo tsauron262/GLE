@@ -35,8 +35,17 @@ ORDER BY `nbJ` DESC, c.id";
     $req .= " LIMIT 0,500";
     $sql = $db->query($req);
 
+    
+    $user->array_options['options_apple_id']= "elodie@itribustore.fr";
+    $user->array_options['options_apple_service'] = "579256";
+    $user->array_options['options_apple_shipto'] = "883234";
+    
+    
     $GSXdatas = new gsxDatas($ligne->serial_number);
     $repair = new Repair($db, $GSXdatas->gsx, false);
+    
+    
+    
     while ($ligne = $db->fetch_object($sql)) {
         if ($GSXdatas->connect) {
             if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {

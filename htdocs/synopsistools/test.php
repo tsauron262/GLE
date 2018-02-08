@@ -117,7 +117,7 @@ ORDER BY `nbJ` DESC, c.id";
                 if($user->statut == 1 && $user->email != "")
                     $mailTech = $user->email;
             }
-            $mailTech = "jc.cannet@bimp.fr, tommy@bimp.fr";
+            
             mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV ".getNomUrlChrono($ligne->cid, $ligne->ref)." avec comme code repa : ".$repair->confirmNumbers['repair']." n'est pas fermé dans GSX.");
             echo "Necessite fermeture manuelle de " . getNomUrlChrono($ligne->cid, $ligne->ref)  . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Mail envoyé a ".$mailTech."<br/>";
         }

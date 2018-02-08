@@ -86,20 +86,25 @@ function tentativeFermetureAuto($iTribu = 0) {
                 $repair->load();
                 if ($repair->lookup()){
                     echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
-                    if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
-                        if($repair->close(1,0))
-                                echo "Semble avoir été fermé en auto<br/>";
-                        else{
-                            echo "N'arrive pas a être fermé<br/> ";
-                            echo "mail<br/>";
-                        }
+                    if($repair->repairComplete){
+                        echo "Fermée dans GSX maj dans GLE.<br/>";
                     }
-                    else{//tentative de passage a rfpu
-                        if($repair->updateStatus('RFPU'))
-                                echo "Semble avoir été passer dans GSX a RFPU<br/>";
-                        else{
-                            echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
-                            echo "mail<br/>";
+                    else{
+                        if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
+                            if($repair->close(1,0))
+                                    echo "Semble avoir été fermé en auto<br/>";
+                            else{
+                                echo "N'arrive pas a être fermé<br/> ";
+                                echo "mail<br/>";
+                            }
+                        }
+                        else{//tentative de passage a rfpu
+                            if($repair->updateStatus('RFPU'))
+                                    echo "Semble avoir été passer dans GSX a RFPU<br/>";
+                            else{
+                                echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                                echo "mail<br/>";
+                            }
                         }
                     }
                 }

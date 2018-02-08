@@ -17,6 +17,12 @@ if (isset($_GET['action'])) {
         tentativeFermetureAuto(2);
         tentativeFermetureAuto(3);
     }
+    if ($_GET['action'] == "rfpuAuto"){
+        tentativeARestitueAuto(4);
+        tentativeARestitueAuto(1);
+        tentativeARestitueAuto(2);
+        tentativeARestitueAuto(3);
+    }
     if ($_GET['action'] == "mailFermePasGsx")
         mailFermePasGsx();
 }
@@ -31,9 +37,9 @@ function getReq($statut, $iTribu){
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
 
-WHERE r.`chronoId` = c.`id` AND `". ($statut == "closed" ? "closed" : "ready_for_pickup") ."` = 0
+WHERE r.`chronoId` = c.`id` AND `". ($statut == "closed" ? "closed" : "ready_for_pick_up") ."` = 0
 AND serial_number is not null
-AND c.id = cs.id AND cs.Etat = 999";
+AND c.id = cs.id AND cs.Etat = ".($statut == "closed" ? "999" : "9");
 
     if ($iTribu == 1) {
         $req .= " AND ( ref LIKE('SAVN%'))";
@@ -89,6 +95,49 @@ function tentativeFermetureAuto($iTribu = 0) {
                 }
                 else {
                     echo "Echec de la recup de " . $ligne->ref . "<br/>";
+                    $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
+                }
+            } else
+                echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
+        }
+        else {
+            echo "Connexion GSX impossible";
+        }
+    }
+}
+
+function tentativeARestitueAuto($iTribu = 0) {
+
+    global $db;
+    $sql = $db->query(getReq('ready', $iTribu));
+
+
+    $GSXdatas = new gsxDatas($ligne->serial_number);
+    $repair = new Repair($db, $GSXdatas->gsx, false);
+
+
+
+    while ($ligne = $db->fetch_object($sql)) {
+        if ($GSXdatas->connect) {
+            if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
+                $repair->rowId = $ligne->rid;
+                $repair->load();
+                if ($repair->lookup()){
+                    echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                    if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
+                        echo "Passage dans GLE a RFPU<br/>";
+                        $repair->readyForPickUp = 1;
+//                        $repair->update();
+                        }
+                        else{
+//                            if($repair->updateStatus('RFPU'))
+//                                    echo "Semble avoir été passer dans GSX a RFPU<br/>";
+//                            else
+//                                echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                    }
+                }
+                else {
+                    echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/>";
                     $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                 }
             } else

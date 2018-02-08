@@ -12,7 +12,7 @@ if (isset($_GET['action'])) {
     if ($_GET['action'] == "mailNonFerme")
         mailNonFerme();
     if ($_GET['action'] == "fermetureAuto"){
-        tentativeFermetureAuto();
+        tentativeFermetureAuto(4);
         tentativeFermetureAuto(1);
         tentativeFermetureAuto(2);
         tentativeFermetureAuto(3);
@@ -24,13 +24,14 @@ if (isset($_GET['action'])) {
 
 llxFooter();
 
-function tentativeFermetureAuto($iTribu = false) {
-    global $db;
+
+function qetReq($statut, $iTribu){
+    
     $req = "SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id as cid,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
 
-WHERE r.`chronoId` = c.`id` AND `closed` = 0
+WHERE r.`chronoId` = c.`id` AND `".($statut == "closed")? "closed" : "ready_for_pickup" ."` = 0
 AND serial_number is not null
 AND c.id = cs.id AND cs.Etat = 999";
 
@@ -52,14 +53,19 @@ AND c.id = cs.id AND cs.Etat = 999";
         $user->array_options['options_apple_id'] = "elodie@itribustore.fr";
         $user->array_options['options_apple_service'] = "579256";
         $user->array_options['options_apple_shipto'] = "883234";
-    } else
+    } elseif ($iTribu == 4)
         $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
 
     $req .= " ORDER BY `nbJ` DESC, c.id";
 
     $req .= " LIMIT 0,500";
-    $sql = $db->query($req);
+    return $req;
+}
 
+function tentativeFermetureAuto($iTribu = 0) {
+
+    global $db;
+    $sql = $db->query(getReq('closed', $iTribu));
 
 
     $GSXdatas = new gsxDatas($ligne->serial_number);
@@ -126,22 +132,13 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
 
 function mailFermePasGsx() {
     global $db;
-    tentativeFermetureAuto();
+    tentativeFermetureAuto(4);
         tentativeFermetureAuto(1);
         tentativeFermetureAuto(2);
         tentativeFermetureAuto(3);
-    $req = "SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id as cid, c.ref, Technicien 
         
-FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
-
-WHERE r.`chronoId` = c.`id` AND `closed` = 0 
-AND serial_number is not null
-AND c.id = cs.id AND cs.Etat = 999
-
-ORDER BY `nbJ` DESC, c.id";
-
-    $req .= " LIMIT 0,500";
-    $sql = $db->query($req);
+        
+    $sql = $db->query(getReq('closed', $iTribu));
 
     $GSXdatas = new gsxDatas($ligne->serial_number);
     $repair = new Repair($db, $GSXdatas->gsx, false);

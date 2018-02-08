@@ -124,16 +124,16 @@ function tentativeARestitueAuto($iTribu = 0) {
                 $repair->load();
                 if ($repair->lookup()){
                     echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
-                    if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
+                    if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->repairComplete){
                         echo "Passage dans GLE a RFPU<br/>";
                         $repair->readyForPickUp = 1;
-//                        $repair->update();
-                        }
-                        else{
-//                            if($repair->updateStatus('RFPU'))
-//                                    echo "Semble avoir été passer dans GSX a RFPU<br/>";
-//                            else
-//                                echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                        $repair->update();
+                    }
+                    else{
+//                        if($repair->updateStatus('RFPU'))
+//                                echo "Semble avoir été passer dans GSX a RFPU<br/>";
+//                        else
+//                            echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
                     }
                 }
                 else {

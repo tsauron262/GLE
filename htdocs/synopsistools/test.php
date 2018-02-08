@@ -74,11 +74,12 @@ AND c.id = cs.id AND cs.Etat = 999";
                 $repair->load();
                 if ($repair->lookup()){
                     echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
-                    if($repair->repairComplete == "Prêt pour enlèvement")
+                    if($repair->repairComplete == "Prêt pour enlèvement"){
                         if($repair->close(1,0))
                                 echo "Semble avoir été fermé en auto<br/>";
                         else
-                            echo "N'arrive pas a être fermé<br/>";
+                            echo "N'arrive pas a être fermé<br/> ";
+                    }
                 }
                 else {
                     echo "Echec de la recup de " . $ligne->ref . "<br/>";

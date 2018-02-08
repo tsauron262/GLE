@@ -33,13 +33,13 @@ llxFooter();
 
 function getReq($statut, $iTribu){
     
-    $req = "SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id as cid,
+    $req = "SELECT DATEDIFF(now(), c.tms) as nbJ, r.rowid as rid, `serial_number`, c.id as cid,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
 
 WHERE r.`chronoId` = c.`id` AND `". ($statut == "closed" ? "closed" : "ready_for_pick_up") ."` = 0
 AND serial_number is not null
-AND -DATEDIFF(c.tms, now()) > -730 
+AND -DATEDIFF(now(), c.tms) < 730 
 AND c.id = cs.id AND cs.Etat = ".($statut == "closed" ? "999" : "9");
 
     if ($iTribu == 1) {
@@ -170,11 +170,11 @@ function tentativeARestitueAuto($iTribu = 0) {
 function mailNonFerme() {
     global $db;
     $nbJ = (isset($_GET['nbJ'])) ? $_GET['nbJ'] : 60;
-    $sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, c.id as cid, Etat, `fk_user_modif` as user, fk_user_author as user2,
+    $sql = $db->query("SELECT DATEDIFF(now(), c.tms) as nbJ, c.id as cid, Etat, `fk_user_modif` as user, fk_user_author as user2,
 
 c.ref FROM `llx_synopsischrono` c, llx_synopsischrono_chrono_105 cs
 
-WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(c.tms, now()) < " . -$nbJ . " ORDER BY user");
+WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATEDIFF(now(), c.tms) > " . $nbJ . " ORDER BY user");
     $user = new User($db);
     $tabUser = array();
     while ($ligne = $db->fetch_object($sql)) {

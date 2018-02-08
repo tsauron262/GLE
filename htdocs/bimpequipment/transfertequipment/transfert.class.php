@@ -9,15 +9,11 @@ abstract class LigneTransfert {
     private $db;
     public $isEquipment;
     public $id_product;
-    public $entrepotIdStart;
-    public $entrepotIdEnd;
 
-    public function __construct($db, $isEquipment, $id_product, $entrepotIdStart, $entrepotIdEnd) {
+    public function __construct($db, $isEquipment, $id_product) {
         $this->db = $db;
         $this->isEquipment = $isEquipment;
         $this->id_product = $id_product;
-        $this->entrepotIdStart = $entrepotIdStart;
-        $this->entrepotIdEnd = $entrepotIdEnd;
     }
 
 }
@@ -26,15 +22,14 @@ class LigneTransfertProduct extends LigneTransfert {
 
     public $qty;
 
-    public function __construct($db, $id_product, $qty, $entrepotIdStart, $entrepotIdEnd) {
-        parent::__construct($db, false, $id_product, $entrepotIdStart, $entrepotIdEnd);
+    public function __construct($db, $id_product, $qty) {
+        parent::__construct($db, false, $id_product);
         $this->qty = $qty;
     }
 
-    public function transfert() {
+    public function transfert($entrepotIdStart, $entrepotIdEnd, $user, $label, $codemove) {
         $id = $val['id']; // TODO
-        $id_product = $ligne->id_product;
-        $qty = (isset($ligne->qty)) ? $ligne->qty : 1;
+        $id_product = $this->id_product;
         $batch = $val['batch']; // TODO
         $dlc = -1;  // They are loaded later from serial
         $dluo = -1;  // They are loaded later from serial
@@ -51,7 +46,7 @@ class LigneTransfertProduct extends LigneTransfert {
         //print 'price src='.$pricesrc.', price dest='.$pricedest;exit;
         // Remove stock
         $result1 = $product->correct_stock(
-                $user, $this->entrepotIdStart, $qty, 1, GETPOST("label"), $pricesrc, GETPOST("codemove")
+                $user, $entrepotIdStart, $this->qty, 1, $label, $pricesrc, $codemove
         );
         if ($result1 < 0) {
             $errors[] = $product->errors;
@@ -60,7 +55,7 @@ class LigneTransfertProduct extends LigneTransfert {
 
         // Add stock
         $result2 = $product->correct_stock(
-                $user, $this->entrepotIdEnd, $qty, 0, GETPOST("label"), $pricedest, GETPOST("codemove")
+                $user, $entrepotIdEnd, $this->qty, 0, $label, $pricedest, $codemove
         );
         if ($result2 < 0) {
             $errors[] = $product->errors;
@@ -74,15 +69,15 @@ class LigneTransfertEquipment extends LigneTransfert {
 
     public $serial;
 
-    public function __construct($db, $id_product, $serial, $entrepotIdStart, $entrepotIdEnd) {
-        parent::__construct($db, true, $id_product, $entrepotIdStart, $entrepotIdEnd);
+    public function __construct($db, $id_product, $serial) {
+        parent::__construct($db, true, $id_product);
         $this->serial = $serial;
     }
 
-    public function transfert() {
+    public function transfert($entrepotIdStart, $entrepotIdEnd, $user, $label, $codemove) {
         $id = $val['id']; // TODO
         $id_product = $this->id_product;
-        $qty = (isset($ligne->qty)) ? $ligne->qty : 1;
+        $qty = 1;
         $batch = $val['batch']; // TODO
         $dlc = -1;  // They are loaded later from serial
         $dluo = -1;  // They are loaded later from serial
@@ -111,7 +106,7 @@ class LigneTransfertEquipment extends LigneTransfert {
 
         // Remove stock
         $result1 = $product->correct_stock_batch(
-                $user, $this->entrepotIdStart, $qty, 1, GETPOST("label"), $pricesrc, $dlc, $dluo, $batch, GETPOST("codemove")
+                $user, $entrepotIdStart, $qty, 1, $label, $pricesrc, $dlc, $dluo, $batch, $codemove
         );
         if ($result1 < 0) {
             $errors[] = $product->errors;
@@ -120,7 +115,7 @@ class LigneTransfertEquipment extends LigneTransfert {
 
         // Add stock
         $result2 = $product->correct_stock_batch(
-                $user, $this->entrepotIdEnd, $qty, 0, GETPOST("label"), $pricedest, $dlc, $dluo, $batch, GETPOST("codemove")
+                $user, $entrepotIdEnd, $qty, 0, $label, $pricedest, $dlc, $dluo, $batch, $codemove
         );
         if ($result2 < 0) {
             $errors[] = $product->errors;
@@ -130,17 +125,24 @@ class LigneTransfertEquipment extends LigneTransfert {
 
 }
 
+
+
 class Transfert {
 
     private $db;
     private $entrepotIdStart;
     private $entrepotIdEnd;
     private $lt;    // ligne transfert
+    private $user;
 
-    public function __construct($db, $prodAndEquipment, $entrepotIdStart, $entrepotIdEnd) {
+    public function __construct($db, $prodAndEquipment, $entrepotIdStart, $entrepotIdEnd, $user) {
         $this->db = $db;
         $this->entrepotIdStart = $entrepotIdStart;
         $this->entrepotIdEnd = $entrepotIdEnd;
+        $this->user = $user;
+    }
+    
+    function addLignes($prodAndEquipment) {
         $products = array();
         $equipments = array();
 
@@ -154,7 +156,6 @@ class Transfert {
             }
         }
         $this->lt = array_merge($products, $equipments);
-        print_r($this->lt);
     }
 
     /**
@@ -162,12 +163,14 @@ class Transfert {
      * @param type $entrepotIdEnd   entrepot d'arrivé
      * @param type $prodAndEquipment     liste de produits et équipement
      */
-    function transfertAll() {
+    function execute() {
 
+        $label = '';
+        $codemove = '';
         $this->db->begin();
         $errors = array();
         foreach ($this->lt as $ligne) { // Loop on each movement to do
-            $errors = array_merge($errors, $ligne->transfert());
+            $errors = array_merge($errors, $ligne->transfert($this->entrepotIdStart, $this->entrepotIdEnd, $this->user, $label, $codemove));
         }
         $this->db->commit();
     }

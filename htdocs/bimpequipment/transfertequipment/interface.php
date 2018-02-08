@@ -25,7 +25,9 @@ switch (GETPOST('action')) {
             break;
         }
     case 'transfertAll': {
-            echo json_encode(new Transfert($db, GETPOST('products'), GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd')));
+            $transfert = new Transfert($db, GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), GETPOST('user'));
+            $transfert->addLignes(GETPOST('products'));
+            $transfert->execute();
 //            echo json_encode($transfert->transfertAll());
             break;
         }

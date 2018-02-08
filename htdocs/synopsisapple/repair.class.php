@@ -42,7 +42,7 @@ class Repair
     public $repairComplete = 0;
     public $dateClose = null;
     public $isReimbursed = false;
-    protected $repairLookUp = null;
+    public $repairLookUp = null;
     protected $errors = array();
     public $isIphone;
     public $majSerialOk = false;

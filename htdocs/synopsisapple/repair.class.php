@@ -42,7 +42,7 @@ class Repair
     public $repairComplete = 0;
     public $dateClose = null;
     public $isReimbursed = false;
-    protected $repairLookUp = null;
+    public $repairLookUp = null;
     protected $errors = array();
     public $isIphone;
     public $majSerialOk = false;
@@ -457,7 +457,7 @@ class Repair
         $this->confirmNumbers['repair'] = $this->repairLookUp['repairConfirmationNumber'];
         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
             $repairComplete = 0;
-            if (($this->repairLookUp['repairStatus'] == 'Closed') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée') || ($this->repairLookUp['repairStatus'] == 'Réparation marquée comme complète'))
+            if (($this->repairLookUp['repairStatus'] == 'Closed') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée') || ($this->repairLookUp['repairStatus'] == 'Réparation marquée comme complète') || ($this->repairLookUp['repairStatus'] == 'Refusée - réparation annulée') || ($this->repairLookUp['repairStatus'] == 'Refusé - Refusé par Apple') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée par le système'))
                 $repairComplete = 1;
             if (!isset($this->repairComplete) || !$this->repairComplete != $repairComplete) {
                 $update = true;
@@ -477,7 +477,8 @@ class Repair
 
         if (!isset($this->totalFromOrder) || !$this->totalFromOrder) {
             $this->updateTotalOrder($update);
-        } elseif ($update && isset($this->rowId) && $this->rowId) {
+        } 
+        if ($update && isset($this->rowId) && $this->rowId) {
             $this->update();
         }
 

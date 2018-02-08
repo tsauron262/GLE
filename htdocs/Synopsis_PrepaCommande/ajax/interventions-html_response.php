@@ -643,7 +643,7 @@ jQuery(document).ready(function(){
         jQuery(".toRight").click(function(){
             var elem = $(this).parent().parent().parent().parent();
                     DnDArray.push(elem.attr("id"));
-             elem.css("left", "400px");
+             elem.css("left", "600px");
         });
 
         jQuery('.revertDraggable').droppable({

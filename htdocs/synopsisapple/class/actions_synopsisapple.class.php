@@ -18,7 +18,7 @@ class ActionsSynopsisapple {
     
     function addSearchEntry($parameters, &$object, &$action, $hookmanager) {
         global $langs;
-	$hookmanager->resArray['searchintosn']=array('text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("S/N"), 'url'=>DOL_URL_ROOT.'/synopsisapple/list.php?mainmenu=Process&filtre='.GETPOST('q'));
+	$hookmanager->resArray['searchintosn']=array('text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("S/N"), 'url'=>DOL_URL_ROOT.'/bimpequipment/?search=1&object=equipment&sall='.GETPOST('q'));
         return 0;
     }
     

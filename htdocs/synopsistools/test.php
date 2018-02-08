@@ -89,8 +89,18 @@ function tentativeFermetureAuto($iTribu = 0) {
                     if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
                         if($repair->close(1,0))
                                 echo "Semble avoir été fermé en auto<br/>";
-                        else
+                        else{
                             echo "N'arrive pas a être fermé<br/> ";
+                            echo "mail<br/>";
+                        }
+                    }
+                    else{//tentative de passage a rfpu
+                        if($repair->updateStatus('RFPU'))
+                                echo "Semble avoir été passer dans GSX a RFPU<br/>";
+                        else{
+                            echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                            echo "mail<br/>";
+                        }
                     }
                 }
                 else {
@@ -132,8 +142,10 @@ function tentativeARestitueAuto($iTribu = 0) {
                     else{
                         if($repair->updateStatus('RFPU'))
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
-                        else
+                        else{
                             echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                            echo "mail<br/>";
+                        }
                     }
                 }
                 else {

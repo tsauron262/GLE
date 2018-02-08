@@ -31,7 +31,7 @@ function getReq($statut, $iTribu){
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
 
-WHERE r.`chronoId` = c.`id` AND `".($statut == "closed")? "closed" : "ready_for_pickup" ."` = 0
+WHERE r.`chronoId` = c.`id` AND `". ($statut == "closed" ? "closed" : "ready_for_pickup") ."` = 0
 AND serial_number is not null
 AND c.id = cs.id AND cs.Etat = 999";
 

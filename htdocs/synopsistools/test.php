@@ -49,7 +49,7 @@ ORDER BY `nbJ` DESC, c.id";
                     $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                 }
             } else
-                echo "Echec de la recup de " . $ligne->ref . " (en cache)<br/>";
+                echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
         }
         else {
             echo "Connexion GSX impossible";
@@ -60,7 +60,7 @@ ORDER BY `nbJ` DESC, c.id";
 function mailNonFerme() {
     global $db;
     $nbJ = (isset($_GET['nbJ'])) ? $_GET['nbJ'] : 60;
-    $sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, c.id, Etat, `fk_user_modif` as user, fk_user_author as user2,
+    $sql = $db->query("SELECT -DATEDIFF(c.tms, now()) as nbJ, c.id as cid, Etat, `fk_user_modif` as user, fk_user_author as user2,
 
 c.ref FROM `llx_synopsischrono` c, llx_synopsischrono_chrono_105 cs
 
@@ -83,16 +83,16 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
             $tabUser[$userId] = $user;
         }
 
-        echo "SAV Non fermé depuis : " . $ligne->nbJ . " jours || " . $ligne->ref . "   par : " . $tabUser[$userId]->getNomUrl(1) . " </br>";
+        echo "SAV Non fermé depuis : " . $ligne->nbJ . " jours || " . getNomUrlChrono($ligne->cid, $ligne->ref) . "   par : " . $tabUser[$userId]->getNomUrl(1) . " </br>";
     }
 }
 
 function mailFermePasGsx() {
     global $db;
     tentativeFermetureAuto();
-    $req = "SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id,
-
-c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
+    $req = "SELECT -DATEDIFF(c.tms, now()) as nbJ, r.rowid as rid, `serial_number`, c.id as cid, c.ref, Technicien 
+        
+FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
 
 WHERE r.`chronoId` = c.`id` AND `closed` = 0 AND DATEDIFF(c.tms, now()) > -30
 AND serial_number is not null
@@ -109,8 +109,25 @@ ORDER BY `nbJ` DESC, c.id";
         if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
             $repair->rowId = $ligne->rid;
             $repair->load();
-
-            echo "Necessite fermeture manuelle de " . $ligne->ref  . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . "<br/>";
+            
+            $mailTech = "jc.cannet@bimp.fr";
+            if($ligne->Technicien > 0){
+                $user = new User($db);
+                $user->fetch($ligne->Technicien);
+                if($user->statut == 1 && $user->email != "")
+                    $mailTech = $user->email;
+            }
+            //$mailTech = "jc.cannet@bimp.fr, tommy@bimp.fr";
+            //mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV ".getNomUrlChrono($ligne->cid, $ligne->ref)." avec comme code repa : ".$repair->confirmNumbers['repair']." n'est pas fermé dans GSX.");
+            echo "Necessite fermeture manuelle de " . getNomUrlChrono($ligne->cid, $ligne->ref)  . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Mail envoyé a ".$mailTech."<br/>";
         }
     }
+}
+
+function getNomUrlChrono($id, $ref){
+    global $db;
+    $chrono = new Chrono($db);
+    $chrono->ref = $ref;
+    $chrono->id = $id;
+    return $chrono->getNomUrl();
 }

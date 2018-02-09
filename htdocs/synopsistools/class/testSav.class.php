@@ -46,11 +46,10 @@ class testSav {
         $this->tentativeFermetureAuto(1);
         $this->tentativeFermetureAuto(2);
         $this->tentativeFermetureAuto(3);
-        die("okokokokkoko");
     }
 
     function getReq($statut, $iTribu) {
-echo "debut req";
+
         $req = "SELECT DATEDIFF(now(), c.tms) as nbJ, r.rowid as rid, `serial_number`, c.id as cid,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
@@ -60,13 +59,13 @@ AND serial_number is not null
 AND DATEDIFF(now(), c.tms) < 730 
 AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
         
-        echo $req;
+        
         
             global $user;
             $user->array_options['options_apple_id'] = "tommy@drsi.fr";
             $user->array_options['options_apple_service'] = "897316";
             $user->array_options['options_apple_shipto'] = "1046075";
-echo "apuser";
+
         if ($iTribu == 1) {
             $req .= " AND ( ref LIKE('SAVN%'))";
             global $user;
@@ -160,10 +159,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
     function tentativeARestitueAuto($iTribu = 0) {
 
         global $db;
-        
-        $req = $this->getReq('ready', $iTribu);
-        echo $req."fin";
-        $sql = $db->query($req);
+        $sql = $db->query($this->getReq('ready', $iTribu));
 
 
         $GSXdatas = new gsxDatas($ligne->serial_number);
@@ -246,7 +242,6 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
 
     function getNomUrlChrono($id, $ref) {
         global $db;
-        require_once DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php";
         $chrono = new Chrono($db);
         $chrono->ref = $ref;
         $chrono->id = $id;

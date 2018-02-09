@@ -50,6 +50,8 @@ class testSav {
         $this->tentativeFermetureAuto(1);
         $this->tentativeFermetureAuto(2);
         $this->tentativeFermetureAuto(3);
+        
+        return true;
     }
 
     function getReq($statut, $iTribu) {
@@ -102,11 +104,11 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
         global $db;
         $sql = $db->query($this->getReq('closed', $iTribu));
 
-
+echo "av gsx";
         $GSXdatas = new gsxDatas($ligne->serial_number);
         $repair = new Repair($db, $GSXdatas->gsx, false);
 
-
+echo "ap gsx";
 
         while ($ligne = $db->fetch_object($sql)) {
             if ($GSXdatas->connect) {

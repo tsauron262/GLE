@@ -46,6 +46,8 @@ class testSav {
         $this->tentativeFermetureAuto(1);
         $this->tentativeFermetureAuto(2);
         $this->tentativeFermetureAuto(3);
+        
+        return true;
     }
 
     function getReq($statut, $iTribu) {
@@ -242,6 +244,7 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
 
     function getNomUrlChrono($id, $ref) {
         global $db;
+        require_once DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php";
         $chrono = new Chrono($db);
         $chrono->ref = $ref;
         $chrono->id = $id;

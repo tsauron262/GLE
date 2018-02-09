@@ -59,7 +59,7 @@ class exportfacture {
 
         while ($ligne = $this->db->fetch_object($result)) {
             $this->id8sens = $ligne->id8Sens;
-            if ($ligne->id8Sens < 1 && isset($ligne->Centre) && $ligne->Centre != "") {
+            if ($ligne->id8Sens < 0 && isset($ligne->Centre) && $ligne->Centre != "") {
                 $this->id8sens = $this->getId8sensByCentreSav($ligne->Centre);
             }
             $this->extract($ligne->id);

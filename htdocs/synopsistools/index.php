@@ -61,9 +61,9 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin)){
     print" <br/><br/><a href='../synopsistools/public/extractFact.php?sortie=file'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Extraction facture</span></a>";
     
     
-    print" <br/><br/><a href='../synopsistools/class/testSav.php?action=mailNonFerme&nbJ=15'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail SAV non Fermé</span></a>";
-    print" <br/><br/><a href='../synopsistools/class/testSav.php?action=fermetureAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Fermeture SAV Auto</span></a>";
-    print" <br/><br/><a href='../synopsistools/class/testSav.php?action=rfpuAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail RFPU SAV Auto</span></a>";
+    print" <br/><br/><a href='../synopsistools/class/testSav.php?actionTest=mailNonFerme&nbJ=15'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail SAV non Fermé</span></a>";
+    print" <br/><br/><a href='../synopsistools/class/testSav.php?actionTest=fermetureAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Fermeture SAV Auto</span></a>";
+    print" <br/><br/><a href='../synopsistools/class/testSav.php?actionTest=rfpuAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail RFPU SAV Auto</span></a>";
 }
 
 

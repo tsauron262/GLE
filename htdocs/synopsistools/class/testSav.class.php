@@ -1,18 +1,18 @@
 <?php
 
-if (isset($_GET['action'])) {
+if (isset($_GET['actionTest'])) {
     require "../../main.inc.php";
     llxHeader();
     $class = new testSav();
-    if ($_GET['action'] == "mailNonFerme")
+    if ($_GET['actionTest'] == "mailNonFerme")
         mailNonFerme();
-    if ($_GET['action'] == "fermetureAuto") {
+    if ($_GET['actionTest'] == "fermetureAuto") {
         $class->tentativeFermetureAuto(4);
         $class->tentativeFermetureAuto(1);
         $class->tentativeFermetureAuto(2);
         $class->tentativeFermetureAuto(3);
     }
-    if ($_GET['action'] == "rfpuAuto") {
+    if ($_GET['actionTest'] == "rfpuAuto") {
         $class->tentativeARestitueAuto(4);
         $class->tentativeARestitueAuto(1);
         $class->tentativeARestitueAuto(2);
@@ -20,7 +20,7 @@ if (isset($_GET['action'])) {
     }
 
 
-    if ($_GET['action'] == "global") {
+    if ($_GET['actionTest'] == "global") {
         $class->testGlobal();
     }
     llxFooter();

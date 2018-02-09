@@ -108,7 +108,7 @@ echo "av gsx";
         $GSXdatas = new gsxDatas($ligne->serial_number);
         $repair = new Repair($db, $GSXdatas->gsx, false);
 
-echo "ap gsx ".$sql;
+echo "ap gsx ".$this->getReq('closed', $iTribu);
 
         while ($ligne = $db->fetch_object($sql)) {
             echo "debiut boucle";

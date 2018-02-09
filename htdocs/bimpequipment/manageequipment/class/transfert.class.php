@@ -1,10 +1,10 @@
 <?php
 
-require_once '../../main.inc.php';
+include_once '../../../main.inc.php';
 
-require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+include_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 class Transfert {
 

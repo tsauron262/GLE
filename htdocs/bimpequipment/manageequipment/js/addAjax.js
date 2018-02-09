@@ -30,7 +30,7 @@ function checkEquipment(serialNumber, currentEquipCnt) {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/addequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             idCurrentEntrepot: idCurrentEntrepot,
             idCurrentProd: idCurrentProd,
@@ -70,7 +70,7 @@ function addEquipment() {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/addequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             newEquipments: newEquipments,
             action: 'addEquipment'

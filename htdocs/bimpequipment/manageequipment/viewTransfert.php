@@ -1,16 +1,16 @@
 <?php
 
 /**
- *  \file       htdocs/bimpequipment/addequipment/viewAddEquipment.php
+ *  \file       htdocs/bimpequipment/manageequipment/viewTransfertEquipment.php
  *  \ingroup    bimpequipment
  *  \brief      Used while adding equipments
  */
-require_once '../../main.inc.php';
+include_once '../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
-$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/transfertequipment/css/styles.css');
-$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/transfertequipment/js/ajax.js');
+$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css');
+$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/transfertAjax.js');
 
 
 /*
@@ -108,7 +108,7 @@ print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="aud
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
 
-include(DOL_DOCUMENT_ROOT . "/bimpequipment/transfertequipment/scan/scan.php");
+include(DOL_DOCUMENT_ROOT . "/bimpequipment/manageequipment/scan/scan.php");
 
 $db->close();
 

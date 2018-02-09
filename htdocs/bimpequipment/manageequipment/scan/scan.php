@@ -1,6 +1,6 @@
 <?php
 if(!isset($conf))
- require_once '../../../../main.inc.php';
+ require_once '../../../main.inc.php';
 ?>
 
 <br/><br/>
@@ -86,6 +86,6 @@ if(!isset($conf))
 <?php
     echo ''
 . '<script src="//webrtc.github.io/adapter/adapter-latest.js" type="text/javascript"></script>
-    <script src="'. DOL_URL_ROOT .'/bimpequipment/transfertequipment/scan/quagga.min.js" type="text/javascript"></script>
-    <script src="'. DOL_URL_ROOT .'/bimpequipment/transfertequipment/scan/live_w_locator.js" type="text/javascript"></script>';
+    <script src="'. DOL_URL_ROOT .'/bimpequipment/manageequipment/scan/quagga.min.js" type="text/javascript"></script>
+    <script src="'. DOL_URL_ROOT .'/bimpequipment/manageequipment/scan/live_w_locator.js" type="text/javascript"></script>';
 ?>

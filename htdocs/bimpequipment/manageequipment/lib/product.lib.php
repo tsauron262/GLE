@@ -1,12 +1,12 @@
 <?php
 
 /**
- *      \file       /htdocs/bimpequipment/addequipment/product.lib.php
+ *      \file       /htdocs/bimpequipment/manageequipment/product.lib.php
  *      \ingroup    bimpequipment
  *      \brief      Lib of products
  */
 
-require_once '../../main.inc.php';
+include_once '../../../main.inc.php';
 
 
 /* Return true if the serial number already exists, else return false */

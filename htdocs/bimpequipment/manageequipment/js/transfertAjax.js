@@ -28,7 +28,7 @@ var products = [];
 function checkProductByRef(ref) {
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/transfertequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             ref: ref,
             idEntrepotStart: idEntrepotStart,
@@ -66,7 +66,7 @@ function checkStockForProduct(idProduct, qty) {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/transfertequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             idProduct: idProduct,
             idEntrepotStart: idEntrepotStart,
@@ -95,7 +95,7 @@ function saveproducts() {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/transfertequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             products: products,
             idEntrepotStart: idEntrepotStart,

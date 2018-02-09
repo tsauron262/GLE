@@ -1,13 +1,13 @@
 <?php
 
 /**
- *      \file       /htdocs/bimpequipment/addequipment/equipment.lib.php
+ *      \file       /htdocs/bimpequipment/manageequipment/equipment.lib.php
  *      \ingroup    bimpequipment
  *      \brief      Lib of equipment
  */
-require_once '../../main.inc.php';
+include_once '../../../main.inc.php';
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 function addEquipments($newEquipments) {
 

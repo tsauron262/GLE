@@ -163,7 +163,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
         
         $req = $this->getReq('ready', $iTribu);
         echo $req."fin";
-        $sql = $db->query();
+        $sql = $db->query($req);
 
 
         $GSXdatas = new gsxDatas($ligne->serial_number);

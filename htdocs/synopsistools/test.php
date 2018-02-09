@@ -129,7 +129,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 else {
                                     echo "N'arrive pas a être fermé<br/> ";
                                     if (isset($_GET['envoieMail']))
-                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponsse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponsse : " . $repair->repairLookUp['repairStatus']);
                                 }
                             }
                             else {//tentative de passage a rfpu
@@ -138,7 +138,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 else {
                                     echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
                                     if (isset($_GET['envoieMail']))
-                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : " . $repair->repairLookUp['repairStatus']);
                                 }
                             }
                         }
@@ -148,7 +148,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else
-                    echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) " . $ligne->nbJ . " jours<br/>";
+                    echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) " . $ligne->nbJ . " jours<br/>";
             }
             else {
                 echo "Connexion GSX impossible";
@@ -193,16 +193,16 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 }
 $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 if (isset($_GET['envoieMail']))
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : " . $repair->repairLookUp['repairStatus']);
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : " . $repair->repairLookUp['repairStatus']);
                             }
                         }
                     }
                     else {
-                        echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/>";
+                        echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/>";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else
-                    echo "Echec de la recup de " . getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
+                    echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
             }
             else {
                 echo "Connexion GSX impossible";
@@ -236,7 +236,7 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
                 $tabUser[$userId] = $user;
             }
 
-            echo "SAV Non fermé depuis : " . $ligne->nbJ . " jours || " . getNomUrlChrono($ligne->cid, $ligne->ref) . "   par : " . $tabUser[$userId]->getNomUrl(1) . " </br>";
+            echo "SAV Non fermé depuis : " . $ligne->nbJ . " jours || " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "   par : " . $tabUser[$userId]->getNomUrl(1) . " </br>";
         }
     }
 

@@ -96,7 +96,7 @@ function tentativeFermetureAuto($iTribu = 0) {
                             if ($user->statut == 1 && $user->email != "")
                                 $mailTech = $user->email;
                         }
-                        $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
+                        //$mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
 
                         if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
                             if($repair->close(1,0))
@@ -167,7 +167,7 @@ function tentativeARestitueAuto($iTribu = 0) {
                                 if ($user->statut == 1 && $user->email != "")
                                     $mailTech = $user->email;
                             }
-                            $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
+                            //$mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                             if(isset($_GET['envoieMail']))
                                 mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : ".$repair->repairLookUp['repairStatus']);  
                         }

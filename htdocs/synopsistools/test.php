@@ -31,6 +31,10 @@ if (isset($_GET['action'])) {
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
 class verifGsxSav {
+    
+    function __construct() {
+        require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
+    }
 
     function testGlobal() {
         $_GET['envoieMail'] = "yes";

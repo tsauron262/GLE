@@ -160,7 +160,10 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
     function tentativeARestitueAuto($iTribu = 0) {
 
         global $db;
-        $sql = $db->query($this->getReq('ready', $iTribu));
+        
+        $req = $this->getReq('ready', $iTribu);
+        echo $req;
+        $sql = $db->query();
 
 
         $GSXdatas = new gsxDatas($ligne->serial_number);

@@ -32,13 +32,16 @@ if (isset($_GET['actionTest'])) {
 class testSav {
     
     function __construct() {
-        die("av");
         require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
+        echo "ap";
     }
 
     function testGlobal() {
+        echo("av");
         $_GET['envoieMail'] = "yes";
+        echo "av2";
         $this->tentativeARestitueAuto(4);
+        die("pendant");
         $this->tentativeARestitueAuto(1);
         $this->tentativeARestitueAuto(2);
         $this->tentativeARestitueAuto(3);

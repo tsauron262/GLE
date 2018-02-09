@@ -28,11 +28,11 @@ if (isset($_GET['actionTest'])) {
 
 
 
-require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
 class testSav {
     
     function __construct() {
+        die("av");
         require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
     }
 

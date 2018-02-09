@@ -104,7 +104,7 @@ function tentativeFermetureAuto($iTribu = 0) {
                             else{
                                 echo "N'arrive pas a être fermé<br/> ";
                                 if(isset($_GET['envoieMail']))
-                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.");
+                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponsse : ".$repair->repairLookUp['repairStatus']);
                             }
                         }
                         else{//tentative de passage a rfpu

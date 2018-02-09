@@ -168,10 +168,11 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
         $sql = $db->query($this->getReq('ready', $iTribu));
 
 
+echo "av gsx";
         $GSXdatas = new gsxDatas($ligne->serial_number);
         $repair = new Repair($db, $GSXdatas->gsx, false);
 
-
+echo "ap gsx";
 
         while ($ligne = $db->fetch_object($sql)) {
             if ($GSXdatas->connect) {

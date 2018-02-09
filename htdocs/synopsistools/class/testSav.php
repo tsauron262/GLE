@@ -111,7 +111,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                     $repair->rowId = $ligne->rid;
                     $repair->load();
                     if ($repair->lookup()) {
-                        echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                        echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->repairComplete) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
                         } else {
@@ -130,7 +130,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 else {
                                     echo "N'arrive pas a être fermé<br/> ";
                                     if (isset($_GET['envoieMail']))
-                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponsse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponse : " . $repair->repairLookUp['repairStatus']);
                                 }
                             }
                             else {//tentative de passage a rfpu
@@ -139,7 +139,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 else {
                                     echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
                                     if (isset($_GET['envoieMail']))
-                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
                                 }
                             }
                         }
@@ -174,7 +174,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                     $repair->rowId = $ligne->rid;
                     $repair->load();
                     if ($repair->lookup()) {
-                        echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponsse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                        echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->repairComplete) {
                             echo "Passage dans GLE a RFPU<br/>";
                             $repair->readyForPickUp = 1;
@@ -194,7 +194,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 }
 $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                                 if (isset($_GET['envoieMail']))
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : " . $repair->repairLookUp['repairStatus']);
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
                             }
                         }
                     }

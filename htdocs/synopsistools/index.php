@@ -62,8 +62,8 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin)){
     
     
     print" <br/><br/><a href='../synopsistools/test.php?action=mailNonFerme&nbJ=15'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail SAV non Fermé</span></a>";
-    print" <br/><br/><a href='../synopsistools/test.php?action=fermetureAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Fermeture SAV auto</span></a>";
-    print" <br/><br/><a href='../synopsistools/test.php?action=mailFermePasGsx'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail Fermeture Manuelle</span></a>";
+    print" <br/><br/><a href='../synopsistools/test.php?action=fermetureAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Fermeture SAV Auto</span></a>";
+    print" <br/><br/><a href='../synopsistools/test.php?action=rfpuAuto'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Mail RFPU SAV Auto</span></a>";
 }
 
 

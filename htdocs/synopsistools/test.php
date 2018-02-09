@@ -23,8 +23,6 @@ if (isset($_GET['action'])) {
         tentativeARestitueAuto(2);
         tentativeARestitueAuto(3);
     }
-    if ($_GET['action'] == "mailFermePasGsx")
-        mailFermePasGsx();
 }
 
 
@@ -91,12 +89,22 @@ function tentativeFermetureAuto($iTribu = 0) {
                         echo "Fermée dans GSX maj dans GLE.<br/>";
                     }
                     else{
+                        $mailTech = "jc.cannet@bimp.fr";
+                        if ($ligne->Technicien > 0) {
+                            $user = new User($db);
+                            $user->fetch($ligne->Technicien);
+                            if ($user->statut == 1 && $user->email != "")
+                                $mailTech = $user->email;
+                        }
+                        $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
+
                         if($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
                             if($repair->close(1,0))
                                     echo "Semble avoir été fermé en auto<br/>";
                             else{
                                 echo "N'arrive pas a être fermé<br/> ";
-                                echo "mail<br/>";
+                                if(isset($_GET['envoieMail']))
+                                    mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.");
                             }
                         }
                         else{//tentative de passage a rfpu
@@ -104,7 +112,8 @@ function tentativeFermetureAuto($iTribu = 0) {
                                     echo "Semble avoir été passer dans GSX a RFPU<br/>";
                             else{
                                 echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
-                                echo "mail<br/>";
+                                if(isset($_GET['envoieMail']))
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX.");
                             }
                         }
                     }
@@ -150,7 +159,17 @@ function tentativeARestitueAuto($iTribu = 0) {
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
                         else{
                             echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
-                            echo "mail<br/>";
+                            
+                            $mailTech = "jc.cannet@bimp.fr";
+                            if ($ligne->Technicien > 0) {
+                                $user = new User($db);
+                                $user->fetch($ligne->Technicien);
+                                if ($user->statut == 1 && $user->email != "")
+                                    $mailTech = $user->email;
+                            }
+                            $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
+                            if(isset($_GET['envoieMail']))
+                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX.");  
                         }
                     }
                 }
@@ -194,37 +213,6 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
         }
 
         echo "SAV Non fermé depuis : " . $ligne->nbJ . " jours || " . getNomUrlChrono($ligne->cid, $ligne->ref) . "   par : " . $tabUser[$userId]->getNomUrl(1) . " </br>";
-    }
-}
-
-function mailFermePasGsx() {
-    global $db;
-    tentativeFermetureAuto(4);
-        tentativeFermetureAuto(1);
-        tentativeFermetureAuto(2);
-        tentativeFermetureAuto(3);
-        
-        
-    $sql = $db->query(getReq('closed', $iTribu));
-
-    $GSXdatas = new gsxDatas($ligne->serial_number);
-    $repair = new Repair($db, $GSXdatas->gsx, false);
-    while ($ligne = $db->fetch_object($sql)) {
-        if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-            $repair->rowId = $ligne->rid;
-            $repair->load();
-
-            $mailTech = "jc.cannet@bimp.fr";
-            if ($ligne->Technicien > 0) {
-                $user = new User($db);
-                $user->fetch($ligne->Technicien);
-                if ($user->statut == 1 && $user->email != "")
-                    $mailTech = $user->email;
-            }
-
-            mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.");
-            echo "Necessite fermeture manuelle de " . getNomUrlChrono($ligne->cid, $ligne->ref) . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Mail envoyé a " . $mailTech . "<br/>";
-        }
     }
 }
 

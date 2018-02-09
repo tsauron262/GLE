@@ -45,6 +45,7 @@ class exportfacture {
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
+        mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : ".$centre);
         return 0;
     }
 

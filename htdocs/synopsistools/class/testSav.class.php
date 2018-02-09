@@ -33,15 +33,11 @@ class testSav {
     
     function __construct() {
         require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
-        echo "ap";
     }
 
     function testGlobal() {
-        echo("av");
         $_GET['envoieMail'] = "yes";
-        echo "av2";
         $this->tentativeARestitueAuto(4);
-        die("pendant");
         $this->tentativeARestitueAuto(1);
         $this->tentativeARestitueAuto(2);
         $this->tentativeARestitueAuto(3);
@@ -50,12 +46,11 @@ class testSav {
         $this->tentativeFermetureAuto(1);
         $this->tentativeFermetureAuto(2);
         $this->tentativeFermetureAuto(3);
-        
-        return true;
+        die("okokokokkoko");
     }
 
     function getReq($statut, $iTribu) {
-
+echo "debut req";
         $req = "SELECT DATEDIFF(now(), c.tms) as nbJ, r.rowid as rid, `serial_number`, c.id as cid,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
@@ -65,13 +60,13 @@ AND serial_number is not null
 AND DATEDIFF(now(), c.tms) < 730 
 AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
         
-        
+        echo $req;
         
             global $user;
             $user->array_options['options_apple_id'] = "tommy@drsi.fr";
             $user->array_options['options_apple_service'] = "897316";
             $user->array_options['options_apple_shipto'] = "1046075";
-
+echo "apuser";
         if ($iTribu == 1) {
             $req .= " AND ( ref LIKE('SAVN%'))";
             global $user;
@@ -104,16 +99,15 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
         global $db;
         $sql = $db->query($this->getReq('closed', $iTribu));
 
-echo "av gsx";
+
         $GSXdatas = new gsxDatas($ligne->serial_number);
         $repair = new Repair($db, $GSXdatas->gsx, false);
 
-echo "ap gsx ".$this->getReq('closed', $iTribu);
+
 
         while ($ligne = $db->fetch_object($sql)) {
-            echo "debiut boucle";
             if ($GSXdatas->connect) {
-                if (1){//!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
+                if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->rowId = $ligne->rid;
                     $repair->load();
                     if ($repair->lookup()) {
@@ -152,7 +146,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                     }
                     else {
                         echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>";
-                        //$_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
+                        $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else
                     echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) " . $ligne->nbJ . " jours<br/>";
@@ -169,11 +163,10 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
         $sql = $db->query($this->getReq('ready', $iTribu));
 
 
-echo "av gsx";
         $GSXdatas = new gsxDatas($ligne->serial_number);
         $repair = new Repair($db, $GSXdatas->gsx, false);
 
-echo "ap gsx";
+
 
         while ($ligne = $db->fetch_object($sql)) {
             if ($GSXdatas->connect) {

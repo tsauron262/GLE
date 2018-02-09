@@ -62,6 +62,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
         
         
         
+            global $user;
             $user->array_options['options_apple_id'] = "tommy@drsi.fr";
             $user->array_options['options_apple_service'] = "897316";
             $user->array_options['options_apple_shipto'] = "1046075";

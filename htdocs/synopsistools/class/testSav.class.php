@@ -112,7 +112,7 @@ echo "ap gsx";
 
         while ($ligne = $db->fetch_object($sql)) {
             if ($GSXdatas->connect) {
-                if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
+                if (1){//!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->rowId = $ligne->rid;
                     $repair->load();
                     if ($repair->lookup()) {
@@ -151,7 +151,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                     }
                     else {
                         echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>";
-                        $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
+                        //$_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else
                     echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) " . $ligne->nbJ . " jours<br/>";

@@ -111,6 +111,7 @@ echo "av gsx";
 echo "ap gsx";
 
         while ($ligne = $db->fetch_object($sql)) {
+            echo "debiut boucle";
             if ($GSXdatas->connect) {
                 if (1){//!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->rowId = $ligne->rid;

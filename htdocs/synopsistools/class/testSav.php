@@ -3,7 +3,7 @@
 if (isset($_GET['action'])) {
     require "../../main.inc.php";
     llxHeader();
-    $class = new verifGsxSav();
+    $class = new testSav();
     if ($_GET['action'] == "mailNonFerme")
         mailNonFerme();
     if ($_GET['action'] == "fermetureAuto") {
@@ -30,7 +30,7 @@ if (isset($_GET['action'])) {
 
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 
-class verifGsxSav {
+class testSav {
     
     function __construct() {
         require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';

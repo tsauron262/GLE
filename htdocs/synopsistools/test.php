@@ -55,6 +55,12 @@ WHERE r.`chronoId` = c.`id` AND `" . ($statut == "closed" ? "closed" : "ready_fo
 AND serial_number is not null
 AND DATEDIFF(now(), c.tms) < 730 
 AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
+        
+        
+        
+            $user->array_options['options_apple_id'] = "tommy@drsi.fr";
+            $user->array_options['options_apple_service'] = "897316";
+            $user->array_options['options_apple_shipto'] = "1046075";
 
         if ($iTribu == 1) {
             $req .= " AND ( ref LIKE('SAVN%'))";

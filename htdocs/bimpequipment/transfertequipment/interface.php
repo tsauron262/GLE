@@ -25,10 +25,9 @@ switch (GETPOST('action')) {
             break;
         }
     case 'transfertAll': {
-            $transfert = new Transfert($db, GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), GETPOST('user'));
+            $transfert = new Transfert($db, GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user);
             $transfert->addLignes(GETPOST('products'));
-            $transfert->execute();
-//            echo json_encode($transfert->transfertAll());
+            echo json_encode($transfert->execute());
             break;
         }
     default: break;

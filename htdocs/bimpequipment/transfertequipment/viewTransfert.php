@@ -7,7 +7,7 @@
  */
 require_once '../../main.inc.php';
 
-include_once DOL_DOCUMENT_ROOT . 'core/class/html.form.class.php';
+include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/transfertequipment/css/styles.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/transfertequipment/js/ajax.js');
@@ -99,7 +99,7 @@ print '<input id="enregistrer" type="button" class="butAction" value="Transfére
 
 print '<div name="confirmEnregistrer" hidden>';
 print '<p name="confTransfert"></p>';
-print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmet">';
+print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmer">';
 print '<input id="noEnregistrer" type="button" class="butActionDelete" value="Annuler"></div>';
 
 print '<br/><div id="alertEnregistrer"></div><br/>';

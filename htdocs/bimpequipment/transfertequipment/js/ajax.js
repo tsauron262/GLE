@@ -106,7 +106,9 @@ function saveproducts() {
             console.log("Erreur PHP");
         },
         success: function (out) {
-            console.log("Pas d'erreur coté serveur");
+            console.log("Pas d'erreur fatale coté serveur");
+//            var outParsed = JSON.parse(out);
+//            console.log(outParsed);
         }
     });
 }
@@ -162,6 +164,7 @@ function initEvents() {
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
                 products = [];
                 $('table#productTable tr[id]').remove();
+                cntProduct =0;
             }
         } else {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
@@ -188,6 +191,10 @@ function initEvents() {
     
     $('input#okEnregistrer').click(function () {
         saveproducts();
+        $('div [name=confirmEnregistrer]').hide();
+        products = [];
+        $('table#productTable tr[id]').remove();
+        cntProduct =0;
     });
     
     $('input#noEnregistrer').click(function () {

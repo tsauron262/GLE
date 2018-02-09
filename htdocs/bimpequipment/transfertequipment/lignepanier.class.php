@@ -55,7 +55,6 @@ class LignePanier {
     }
 
     function check($entree, $entrepotId) {
-        $data = array();
         $this->entrepotId = $entrepotId;
         if (!$this->isProduct($entree)) {
             if (!$this->isEquipment(GETPOST('ref'))) {

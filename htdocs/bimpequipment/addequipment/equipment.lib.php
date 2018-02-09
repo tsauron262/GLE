@@ -37,11 +37,7 @@ function addEquipments($newEquipments) {
         $emplacement->validateArray(array(
             'id_equipment' => $equipement->id,
             'type' => 2, // cf $types
-            'id_client' => 123, // si type = 1
-            'id_contact' => 123, // id contact associé au client
             'id_entrepot' => $newEquipment['id_entrepot'], // si type = 2
-            'id_user' => 123, // si type = 3
-            'place_name' => '', // Nom de l'emplacement si type = 4
             'infos' => '...',
             'date' => '2018-01-01 00:00:00' // date et heure d'arrivée
         ));
@@ -54,3 +50,17 @@ function addEquipments($newEquipments) {
     }
     return array('nbNewEquipment' => $cntEquipment, 'errors' => $errors);
 }
+
+function equipmentExists($db, $id) {
+    
+    $sql = 'SELECT id';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+    $sql .= ' WHERE id=' . $id;
+
+    $result = $db->query($sql);
+    if ($result and mysqli_num_rows($result) > 0) {
+        return true;
+    }
+    return false;
+}
+

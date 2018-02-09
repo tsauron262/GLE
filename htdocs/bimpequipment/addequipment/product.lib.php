@@ -12,7 +12,7 @@ require_once '../../main.inc.php';
 /* Return true if the serial number already exists, else return false */
 function checkIfEquipmentExists($db, $serial) {
 
-    $sql = 'SELECT rowid';
+    $sql = 'SELECT id';
     $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
     $sql .= ' WHERE serial="' . $serial . '"';
 

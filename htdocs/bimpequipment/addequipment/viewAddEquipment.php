@@ -8,7 +8,7 @@
 
 require_once '../../main.inc.php';
 
-include DOL_DOCUMENT_ROOT.'core/class/html.form.class.php';
+include_once DOL_DOCUMENT_ROOT.'core/class/html.form.class.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/addequipment/css/styles.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/addequipment/js/ajax.js');

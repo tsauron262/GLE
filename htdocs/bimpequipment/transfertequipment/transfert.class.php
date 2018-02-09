@@ -3,176 +3,117 @@
 require_once '../../main.inc.php';
 
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-
-abstract class LigneTransfert {
-
-    private $db;
-    public $isEquipment;
-    public $id_product;
-
-    public function __construct($db, $isEquipment, $id_product) {
-        $this->db = $db;
-        $this->isEquipment = $isEquipment;
-        $this->id_product = $id_product;
-    }
-
-}
-
-class LigneTransfertProduct extends LigneTransfert {
-
-    public $qty;
-
-    public function __construct($db, $id_product, $qty) {
-        parent::__construct($db, false, $id_product);
-        $this->qty = $qty;
-    }
-
-    public function transfert($entrepotIdStart, $entrepotIdEnd, $user, $label, $codemove) {
-        $id = $val['id']; // TODO
-        $id_product = $this->id_product;
-        $batch = $val['batch']; // TODO
-        $dlc = -1;  // They are loaded later from serial
-        $dluo = -1;  // They are loaded later from serial
-
-        $result = $product->fetch($id_product);
-
-        $product->load_stock('novirtual'); // Load array product->stock_warehouse
-        // Define value of products moved
-        $pricesrc = 0;
-        if (!empty($product->pmp))
-            $pricesrc = $product->pmp;
-        $pricedest = $pricesrc;
-
-        //print 'price src='.$pricesrc.', price dest='.$pricedest;exit;
-        // Remove stock
-        $result1 = $product->correct_stock(
-                $user, $entrepotIdStart, $this->qty, 1, $label, $pricesrc, $codemove
-        );
-        if ($result1 < 0) {
-            $errors[] = $product->errors;
-            $errors[] = $product->errorss;
-        }
-
-        // Add stock
-        $result2 = $product->correct_stock(
-                $user, $entrepotIdEnd, $this->qty, 0, $label, $pricedest, $codemove
-        );
-        if ($result2 < 0) {
-            $errors[] = $product->errors;
-            $errors[] = $product->errorss;
-        }
-    }
-
-}
-
-class LigneTransfertEquipment extends LigneTransfert {
-
-    public $serial;
-
-    public function __construct($db, $id_product, $serial) {
-        parent::__construct($db, true, $id_product);
-        $this->serial = $serial;
-    }
-
-    public function transfert($entrepotIdStart, $entrepotIdEnd, $user, $label, $codemove) {
-        $id = $val['id']; // TODO
-        $id_product = $this->id_product;
-        $qty = 1;
-        $batch = $val['batch']; // TODO
-        $dlc = -1;  // They are loaded later from serial
-        $dluo = -1;  // They are loaded later from serial
-
-        $result = $product->fetch($id_product);
-
-        $product->load_stock('novirtual'); // Load array product->stock_warehouse
-        // Define value of products moved
-        $pricesrc = 0;
-        if (!empty($product->pmp))
-            $pricesrc = $product->pmp;
-        $pricedest = $pricesrc;
-
-        //print 'price src='.$pricesrc.', price dest='.$pricedest;exit;
-
-        $arraybatchinfo = $product->loadBatchInfo($batch);
-        if (count($arraybatchinfo) > 0) {
-            $firstrecord = array_shift($arraybatchinfo);
-            $dlc = $firstrecord['eatby'];
-            $dluo = $firstrecord['sellby'];
-            //var_dump($batch); var_dump($arraybatchinfo); var_dump($firstrecord); var_dump($dlc); var_dump($dluo); exit;
-        } else {
-            $dlc = '';
-            $dluo = '';
-        }
-
-        // Remove stock
-        $result1 = $product->correct_stock_batch(
-                $user, $entrepotIdStart, $qty, 1, $label, $pricesrc, $dlc, $dluo, $batch, $codemove
-        );
-        if ($result1 < 0) {
-            $errors[] = $product->errors;
-            $errors[] = $product->errorss;
-        }
-
-        // Add stock
-        $result2 = $product->correct_stock_batch(
-                $user, $entrepotIdEnd, $qty, 0, $label, $pricedest, $dlc, $dluo, $batch, $codemove
-        );
-        if ($result2 < 0) {
-            $errors[] = $product->errors;
-            $errors[] = $product->errorss;
-        }
-    }
-
-}
-
-
+require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 class Transfert {
 
     private $db;
     private $entrepotIdStart;
     private $entrepotIdEnd;
-    private $lt;    // ligne transfert
+    private $ligneTransfert;    // ligne transfert
     private $user;
 
-    public function __construct($db, $prodAndEquipment, $entrepotIdStart, $entrepotIdEnd, $user) {
+    public function __construct($db, $entrepotIdStart, $entrepotIdEnd, $user) {
         $this->db = $db;
         $this->entrepotIdStart = $entrepotIdStart;
         $this->entrepotIdEnd = $entrepotIdEnd;
         $this->user = $user;
     }
-    
-    function addLignes($prodAndEquipment) {
-        $products = array();
-        $equipments = array();
 
+    public function addLignes($prodAndEquipment) {
+        $this->ligneTransfert = array();
         foreach ($prodAndEquipment as $ligne) {
-            if ($ligne['is_equipment']) {
-                $equipment = new LigneTransfertEquipment($this->db, $ligne['id_product'], $ligne['serial'], $this->entrepotIdStart, $this->entrepotIdEnd);
-                $equipments[] = $equipment;
+            if ($ligne['is_equipment'] == 'true') {
+                $ligneObject = new LigneTransfert($this->db, intval($ligne['id_product']), 1, $ligne['serial']);
             } else {
-                $product = new LigneTransfertProduct($this->db, $ligne['id_product'], $ligne['qty'], $this->entrepotIdStart, $this->entrepotIdEnd);
-                $products[] = $product;
+                $ligneObject = new LigneTransfert($this->db, intval($ligne['id_product']), intval($ligne['qty']), '');
             }
+            $this->ligneTransfert[] = $ligneObject;
         }
-        $this->lt = array_merge($products, $equipments);
     }
 
-    /**
-     * @param type $entrepotIdStart entrepot de départ
-     * @param type $entrepotIdEnd   entrepot d'arrivé
-     * @param type $prodAndEquipment     liste de produits et équipement
-     */
-    function execute() {
+    public function execute() {
 
-        $label = '';
-        $codemove = '';
+        $now = dol_now();
+        $codemove = dol_print_date($now, '%y%m%d%H%M%S');
+        $label = 'Transférer stock Bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
         $this->db->begin();
         $errors = array();
-        foreach ($this->lt as $ligne) { // Loop on each movement to do
+        foreach ($this->ligneTransfert as $ligne) { // Loop on each movement to do
             $errors = array_merge($errors, $ligne->transfert($this->entrepotIdStart, $this->entrepotIdEnd, $this->user, $label, $codemove));
         }
-        $this->db->commit();
+        if (sizeof($errors) == 0)
+            $this->db->commit();
+        return $errors;
     }
 
+}
+
+class LigneTransfert {
+
+    private $db;
+    public $id_product;
+    public $qty;
+    public $serial;
+
+    public function __construct($db, $id_product, $qty, $serial) {
+        $this->db = $db;
+        $this->id_product = $id_product;
+        $this->qty = $qty;
+        $this->serial = $serial;
+    }
+
+    public function transfert($entrepotIdStart, $entrepotIdEnd, $user, $label, $codemove) {
+        $errors = array();
+
+        $product = new Product($this->db);
+        $product->fetch($this->id_product);
+
+        // Remove stock
+        $result1 = $product->correct_stock($user, $entrepotIdStart, $this->qty, 1, $label, 0, $codemove);
+        if ($result1 < 0) {
+            $errors[] = $product->errors;
+            $errors[] = $product->errorss;
+        }
+
+        // Add stock
+        $result2 = $product->correct_stock($user, $entrepotIdEnd, $this->qty, 0, $label, 0, $codemove);
+        if ($result2 < 0) {
+            $errors[] = $product->errors;
+            $errors[] = $product->errorss;
+        }
+
+        if ($this->serial != '') {  // if it is an equipment
+            $id_equipment = getIdBySerial($this->db, $this->serial);
+
+            $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+            $emplacement->validateArray(array(
+                'id_equipment' => $id_equipment,
+                'type' => 2, // type entrepot
+                'id_entrepot' => $entrepotIdEnd, // si type = 2
+                'infos' => '...',
+                'date' => '2018-01-01 00:00:00' // date et heure d'arrivée TODO
+            ));
+            $errors = array_merge($errors, $emplacement->create());
+//            var_dump($emplacement);
+        }
+        return $errors;
+    }
+
+}
+
+function getIdBySerial($db, $serial) {
+    $sql = 'SELECT id';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+    $sql .= ' WHERE serial="' . $serial . '"';
+
+    $result = $db->query($sql);
+    if ($result and mysqli_num_rows($result) > 0) {
+        while ($obj = $db->fetch_object($result)) {
+            $id = $obj->id;
+        }
+        return $id;
+    }
+    return 'Aucun équipment correspond à ce numéro de série';
 }

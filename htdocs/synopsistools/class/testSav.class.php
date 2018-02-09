@@ -108,7 +108,7 @@ echo "av gsx";
         $GSXdatas = new gsxDatas($ligne->serial_number);
         $repair = new Repair($db, $GSXdatas->gsx, false);
 
-echo "ap gsx";
+echo "ap gsx ".$sql;
 
         while ($ligne = $db->fetch_object($sql)) {
             echo "debiut boucle";

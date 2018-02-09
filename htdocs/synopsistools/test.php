@@ -113,7 +113,7 @@ function tentativeFermetureAuto($iTribu = 0) {
                             else{
                                 echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
                                 if(isset($_GET['envoieMail']))
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX.");
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : ".$repair->repairLookUp['repairStatus']);
                             }
                         }
                     }
@@ -169,7 +169,7 @@ function tentativeARestitueAuto($iTribu = 0) {
                             }
                             $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
                             if(isset($_GET['envoieMail']))
-                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX.");  
+                                mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponsse : ".$repair->repairLookUp['repairStatus']);  
                         }
                     }
                 }

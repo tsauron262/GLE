@@ -1,7 +1,7 @@
 <?php
 
 if (isset($_GET['action'])) {
-    require "../main.inc.php";
+    require "../../main.inc.php";
     llxHeader();
     $class = new verifGsxSav();
     if ($_GET['action'] == "mailNonFerme")

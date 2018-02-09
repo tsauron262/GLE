@@ -162,7 +162,7 @@ $mailTech = "tommy@bimp.fr, jc.cannet@bimp.fr";
         global $db;
         
         $req = $this->getReq('ready', $iTribu);
-        echo $req;
+        echo $req."fin";
         $sql = $db->query();
 
 

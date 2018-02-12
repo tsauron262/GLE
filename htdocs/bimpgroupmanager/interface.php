@@ -21,6 +21,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'setAllUsers': {
+            ini_set('max_execution_time', 300);
             $staticGM->setAllUsers();
             break;
         }

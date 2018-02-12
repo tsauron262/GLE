@@ -33,6 +33,7 @@ table.custTable tr{
 table.custTable th, table.custTable td {
     padding: 3px 10px 3px 10px;
     border-right: solid black 1px;
+    text-align: center;
 }
 
 table.custTable th {
@@ -41,4 +42,8 @@ table.custTable th {
 
 .clickable:hover {
     cursor: pointer;
+}
+
+.modify {
+    margin-bottom: -8px;
 }

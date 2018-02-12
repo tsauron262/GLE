@@ -284,7 +284,7 @@ function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
     line += '<td></td>';
     line += '<td>' + label + '</td>';
     line += '<td name="quantity" style="border-right:none">' + qty + '</td>';
-    line += '<td style="border-left:none"><input name="modify" type="number" class="custInput" style="width: 40px" value=1 min=1 max=' + nb_prod_in_stock + '><img src="css/ok.ico" class="clickable modify"></td>';
+    line += '<td style="border-left:none"><input name="modify" type="number" class="custInput" style="width: 40px" value=1 min=1 max=' + nb_prod_in_stock + '> <img src="css/ok.ico" class="clickable modify"></td>';
     line += '<td name="stock">' + diff + '</td>';
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove"></td></tr>';
     $(line).appendTo('#productTable');

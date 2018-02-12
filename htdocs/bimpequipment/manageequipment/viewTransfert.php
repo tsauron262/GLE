@@ -8,30 +8,11 @@
 include_once '../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/transfertAjax.js');
 
-
-/*
- * Functions  
- */
-
-function getAllEntrepots($db) {
-
-    $entrepots = array();
-
-    $sql = 'SELECT rowid, label';
-    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
-
-    $result = $db->query($sql);
-    if ($result and mysqli_num_rows($result) > 0) {
-        while ($obj = $db->fetch_object($result)) {
-            $entrepots[$obj->rowid] = $obj->label;
-        }
-    }
-    return $entrepots;
-}
 
 /*
  * 	View
@@ -81,7 +62,7 @@ print '</table>';
 
 print '<table id="productTable" class="custTable">';
 print '<thead>';
-print '<th>Produits scanné</th>';
+print '<th>Groupes scanné</th>';
 print '<th>Identifiant</th>';
 print '<th>Référence</th>';
 print '<th>Numéro de série</th>';

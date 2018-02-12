@@ -135,6 +135,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                                 else {
                                     $this->nbErr++;
                                     echo "N'arrive pas a être fermé<br/> ";
+                                    dol_syslog("N'arrive pas a être fermé : ".$ligne->cid, 3);
                                     if (isset($_GET['envoieMail']))
                                         mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponse : " . $repair->repairLookUp['repairStatus']);
                                 }
@@ -145,6 +146,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                                 else {
                                     $this->nbErr++;
                                     echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                                    dol_syslog("N'arrive pas a être RFPU : ".$ligne->cid, 3);
                                     if (isset($_GET['envoieMail']))
                                         mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
                                 }
@@ -192,6 +194,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                             else {
                                 $this->nbErr++;
                                 echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                                dol_syslog("N'arrive pas a être RFPU : ".$ligne->cid, 3);
 
                                 $mailTech = "jc.cannet@bimp.fr";
                                 if ($ligne->Technicien > 0) {

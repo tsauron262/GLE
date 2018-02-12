@@ -616,7 +616,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             //$action->userownerid = $calendarId;
             $action->percentage = -1;
             if ($action->add($user) < 1)
-                $this->forbiden();
+                $this->forbiden("Create.");
 
 
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
@@ -843,7 +843,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
             if ($action->update($user) < 1)
-                $this->forbiden();
+                $this->forbiden("update.");
             
             
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
@@ -1061,12 +1061,12 @@ dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
         $action = new \ActionComm($db);
         $action->fetch($row['id']);
         if ($action->delete() < 1)
-            $this->forbiden();
+            $this->forbiden("delete.");
 //        $this->userIdCaldavPlus($calendarId);
     }
 
-    function forbiden() {
-        throw new DAV\Exception\Forbidden('Permission denied to delete node');
+    function forbiden($msg = "") {
+        throw new DAV\Exception\Forbidden('Permission denied to '.$msg);
 //            header('HTTP/1.0 403 Forbidden');
 //            header('Content-type: application/xml');
 //            echo '<D:error xmlns:D="DAV:">

@@ -656,18 +656,21 @@ function asPosition($str) {
 
 function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '') {
     global $dolibarr_main_url_root, $conf;
-
+        dol_syslog("mail 1 ".$subject,3);
     $subject = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $subject);
     $msg = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $msg);
 
+        dol_syslog("mail 2 ".$subject,3);
     $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
     $msg = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $msg);
 
+        dol_syslog("mail 3 ".$subject,3);
     $mailOk = true;
 
     if ($from == '')
         $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr>';
 
+        dol_syslog("mail 4 ".$subject,3);
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";
     if (defined('MOD_DEV_SYN_MAIL')) {
@@ -682,6 +685,8 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         $to = $toReplay;
         $mailOk = false;
     }
+    
+        dol_syslog("mail 5 ".$subject,3);
 //    if (!$headers) {
 //        $headers = 'MIME-Version: 1.0' . "\r\n";
 //        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";

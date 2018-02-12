@@ -138,6 +138,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                                     dol_syslog("N'arrive pas a être fermé : ".$ligne->cid, 3);
                                     if (isset($_GET['envoieMail']))
                                         mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponse : " . $repair->repairLookUp['repairStatus']);
+                                    dol_syslog("Mail OK", 3);
                                 }
                             }
                             else {//tentative de passage a rfpu
@@ -149,6 +150,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                                     dol_syslog("N'arrive pas a être RFPU : ".$ligne->cid, 3);
                                     if (isset($_GET['envoieMail']))
                                         mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
+                                    dol_syslog("Mail OK", 3);
                                 }
                             }
                         }
@@ -205,6 +207,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                                 }
                                 if (isset($_GET['envoieMail']))
                                     mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
+                                dol_syslog("Mail OK", 3);
                             }
                         }
                     }

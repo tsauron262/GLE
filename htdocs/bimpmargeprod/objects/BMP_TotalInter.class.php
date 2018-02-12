@@ -245,10 +245,6 @@ class BMP_TotalInter extends BimpObject
         unset($asso);
         unset($list);
 
-        if ($this->id === 3) {
-            echo 'Total recettes bar: ' . $total;
-            exit;
-        }
         return $total;
     }
 
@@ -287,5 +283,203 @@ class BMP_TotalInter extends BimpObject
         }
 
         return $return;
+    }
+
+    public function getAllTypesMontantsList()
+    {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        $return = array();
+
+        $all_frais = (int) $this->getData('all_frais');
+        $all_recettes = (int) $this->getData('all_recettes');
+
+        $typeMontant = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
+        $typesMontants = $typeMontant->getList(array(), null, null, 'id', 'asc', 'array', array(
+            'id', 'type', 'id_category'
+        ));
+
+        if ($all_frais) {
+            foreach ($typesMontants as $tm) {
+                if ((int) $tm['type'] === 1) {
+                    if (!in_array((int) $tm['id'], $return)) {
+                        $return[] = (int) $tm['id'];
+                    }
+                }
+            }
+        }
+
+        if ($all_recettes) {
+            foreach ($typesMontants as $tm) {
+                if ((int) $tm['type'] === 2) {
+                    if (!in_array((int) $tm['id'], $return)) {
+                        $return[] = (int) $tm['id'];
+                    }
+                }
+            }
+        }
+
+        $tm_instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
+
+        $asso = new BimpAssociation($this, 'categories_frais_in');
+        $list = $asso->getAssociatesList();
+
+        foreach ($list as $id_categorie) {
+            $tm_list = $tm_instance->getList(array(
+                'id_category' => (int) $id_categorie,
+                'type'        => (int) BMP_TypeMontant::BMP_TYPE_FRAIS
+            ));
+
+            foreach ($tm_list as $tm) {
+                if (!in_array((int) $tm['id'], $return)) {
+                    $return[] = (int) $tm['id'];
+                }
+            }
+        }
+        unset($asso);
+        unset($list);
+
+        $asso = new BimpAssociation($this, 'categories_frais_ex');
+        $list = $asso->getAssociatesList();
+
+        foreach ($list as $id_categorie) {
+            $tm_list = $tm_instance->getList(array(
+                'id_category' => (int) $id_categorie,
+                'type'        => (int) BMP_TypeMontant::BMP_TYPE_FRAIS
+            ));
+
+            foreach ($tm_list as $tm) {
+                foreach ($return as $key => $tid) {
+                    if ((int) $tid === (int) $tm['id']) {
+                        unset($return[$key]);
+                    }
+                }
+            }
+        }
+        unset($asso);
+        unset($list);
+
+        $asso = new BimpAssociation($this, 'categories_recettes_in');
+        $list = $asso->getAssociatesList();
+
+        foreach ($list as $id_categorie) {
+            $tm_list = $tm_instance->getList(array(
+                'id_category' => (int) $id_categorie,
+                'type'        => (int) BMP_TypeMontant::BMP_TYPE_RECETTE
+            ));
+
+            foreach ($tm_list as $tm) {
+                if (!in_array((int) $tm['id'], $return)) {
+                    $return[] = (int) $tm['id'];
+                }
+            }
+        }
+        unset($asso);
+        unset($list);
+
+        $asso = new BimpAssociation($this, 'categories_recettes_ex');
+        $list = $asso->getAssociatesList();
+
+        foreach ($list as $id_categorie) {
+            $tm_list = $tm_instance->getList(array(
+                'id_category' => (int) $id_categorie,
+                'type'        => BMP_TypeMontant::BMP_TYPE_RECETTE
+            ));
+
+            foreach ($tm_list as $tm) {
+                foreach ($return as $key => $tid) {
+                    if ((int) $tid === (int) $tm['id']) {
+                        unset($return[$key]);
+                    }
+                }
+            }
+        }
+        unset($asso);
+        unset($list);
+
+        $asso = new BimpAssociation($this, 'montants_in');
+        $list = $asso->getAssociatesList();
+
+        foreach ($list as $id_type_montant) {
+            if (!in_array((int) $id_type_montant, $return)) {
+                $return[] = (int) $id_type_montant;
+            }
+        }
+        unset($asso);
+        unset($list);
+
+        $asso = new BimpAssociation($this, 'montants_ex');
+        $list = $asso->getAssociatesList();
+
+        foreach ($list as $id_type_montant) {
+            foreach ($return as $key => $tid) {
+                if ((int) $tid === (int) $id_type_montant) {
+                    unset($return[$key]);
+                }
+            }
+        }
+        unset($asso);
+        unset($list);
+
+        return $return;
+    }
+
+    // Overrides: 
+
+    public function update()
+    {
+        $errors = parent::update();
+
+        if ($this->isLoaded()) {
+            $calcMontant = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
+
+            $list = $calcMontant->getList(array(
+                'type_source'     => 2,
+                'id_total_source' => (int) $this->id
+                    ), null, null, 'id', 'asc', 'array', array(
+                'id'
+            ));
+
+            foreach ($list as $item) {
+                if ($calcMontant->fetch((int) $item['id'])) {
+                    $errors = array_merge($errors, $calcMontant->rebuildTypesMontantsCache());
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function delete()
+    {
+        if ($this->isLoaded()) {
+            $id = $this->id;
+        } else {
+            $id = null;
+        }
+
+        $errors = parent::delete();
+
+        if (!is_null($id)) {
+            $calcMontant = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
+
+            $list = $calcMontant->getList(array(
+                'type_source'     => 2,
+                'id_total_source' => (int) $this->id
+                    ), null, null, 'id', 'asc', 'array', array(
+                'id'
+            ));
+
+            foreach ($list as $id) {
+                if ($calcMontant->fetch((int) $id)) {
+                    $calcMontant->set('id_total_source', 0);
+                    $errors = array_merge($errors, $calcMontant->update());
+                }
+            }
+        }
+
+        return $errors;
     }
 }

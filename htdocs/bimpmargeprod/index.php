@@ -1,5 +1,5 @@
 <?php
-require_once '../main.inc.php';
+require_once '../bimpcore/main.php';
 
 ini_set('display_errors', 1);
 

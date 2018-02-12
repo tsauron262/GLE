@@ -328,11 +328,14 @@ select.switch {
         }
     }
 }
+
 .inputMultipleValues {
-    table tbody tr {
+    margin: 15px 0;
+    
+    & > table > tbody > tr {
         border: 1px solid $gray;
 
-        td {
+        & > td {
             padding: 6px 12px;
         }
     }

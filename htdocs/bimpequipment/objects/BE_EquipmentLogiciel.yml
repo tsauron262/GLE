@@ -17,12 +17,29 @@ objects:
                 field_value: id_logiciel
                 
     user_account:
-        relation: hasOne
-        delete: 0
         instance: 
             bimp_object: BE_UserAccount
             id_object: 
                 field_value: id_user_account
+                
+associations:
+    user_accounts: 
+        label: Comptes utilisateurs
+        object: user_account
+        create_form: default
+        display: 
+            default: 
+                type: card
+                card: light
+        input: 
+            type: search_list
+            search_list:
+                table: be_user_account
+                field_return_label: name
+                field_return_value: id
+                fields_search: name,login
+            help: Entrez le nom d'un compte utilisateur pour effectuer une recherche
+    
 fields: 
     id_equipment: 
         label: Equipement
@@ -49,28 +66,39 @@ fields:
             nom: 
                 type: nom
                 card: default
-                
-    id_user_account:
-        label: Compte utilisateur
-        type: id_object
-        object: user_account
-        create_form: default
-        input: 
-            type: search_list
-            search_list:
-                table: be_user_account
-                field_return_label: name
-                field_return_value: id
-                fields_search: name,login
-            help: Entrez le nom d'un compte utilisateur pour effectuer une recherche
-        display: 
-            nom: 
-                type: nom
-                card: default
         
     serial: 
         label: Numéro de série
         
+forms:
+    default: 
+        rows: 
+            - field: id_logiciel
+            - field: serial
+            - association: user_accounts
+
+fields_table: 
+    default: 
+        panel: 0
+        rows: 
+            - field: id_logiciel
+              display: card
+            - field: serial
+            - association: user_accounts
+              edit: 1        
+
+views:
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 12
+                    fields_table:
+                        name: default 
+
 lists: 
     default: 
         title: Logiciels
@@ -82,6 +110,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this));
               btn_class: deleteSelectedObjects
         add_form_name: default
+        modal_view: default
         sort_field: id
         sort_way: desc
         n: 25
@@ -94,6 +123,3 @@ lists:
                 display: nom
             serial: 
                 field: serial
-            user_account: 
-                field: id_user_account
-                display: nom

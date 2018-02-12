@@ -472,6 +472,24 @@ class BimpTools
         return $sql;
     }
 
+    public static function mergeSqlFilter($filters, $field, $new_filter)
+    {
+        if (isset($filters[$field])) {
+            if (isset($filters[$field]['and'])) {
+                $filters[$field]['and'][] = $new_filter;
+            } else {
+                $current_filter = $filters[$field];
+                $filters[$field] = array('and' => array());
+                $filters[$field]['and'][] = $current_filter;
+                $filters[$field]['and'][] = $new_filter;
+            }
+        } else {
+            $filters[$field] = $new_filter;
+        }
+
+        return $filters;
+    }
+
     // Gestion de données:
 
     public static function checkValueByType($type, &$value)

@@ -531,6 +531,7 @@ class BimpInput
                 }
 
                 $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
+                $html .= '<input type="hidden" name="' . $input_name . '_label" value="' . $search . '"/>';
                 $html .= '<input type="text" name="' . $input_name . '_search" class="search_list_input" value="" onkeyup="searchObjectList($(this));"';
                 $html .= ' data-table="' . $table . '"';
                 $html .= ' data-join="' . $join . '"';
@@ -643,7 +644,7 @@ class BimpInput
         $html .= '<div class="inputMultipleValues">';
         $html .= '<table>';
         $html .= '<thead></thead>';
-        $html .= '<tbody>';
+        $html .= '<tbody class="multipleValuesList">';
 
         $html .= '<tr style="display: none">';
         $html .= '<td><input type="hidden" value="" name="' . $field_name . '[]"/></td>';

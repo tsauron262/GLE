@@ -185,25 +185,34 @@ function reloadForm(form_id) {
 
     $form.find('.object_form_content').hide();
 
-    var $modal = $form.findParentByClass('modal-body');
-    if ($modal.length) {
-        $modal.find('.loading-text').text('Chargement du formulaire');
-        $modal.find('.content-loading').show();
+    var $panel = $form.findParentByClass('panel');
+    var $modal = $();
+    if ($.isOk($panel)) {
+        $modal = $form.findParentByClass('modal');
+        if ($modal.length) {
+            $modal.find('.loading-text').text('Chargement du formulaire');
+            $modal.find('.content-loading').show();
+        }
     }
 
     BimpAjax('loadObjectForm', data, null, {
+        $form: $form,
+        $modal: $modal,
         display_success: false,
         error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être rechargé',
         success: function (result) {
             if (result.form_id && result.html) {
-                var $form = $('#' + form_id);
-                var $modal = $form.findParentByClass('modal-body');
-                if ($modal.length) {
+                if ($.isOk($panel)) {
+                    $modal.find('.panel-footer').find('.save_object_button').removeClass('disabled');
+                }
+                
+                if ($.isOk($modal)) {
                     $modal.find('.content-loading').hide();
                     $modal.find('.loading-text').text('');
+                    $modal.find('.modal-footer').find('.save_object_button').removeClass('disabled');
                 }
 
-                if ($form.length) {
+                if ($.isOk($form)) {
                     $form.find('.object_form_content').html(result.html).slideDown(function () {
                         setFormEvents($form);
                         setCommonEvents($form);
@@ -214,7 +223,7 @@ function reloadForm(form_id) {
     });
 }
 
-function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, $button) {
+function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -264,6 +273,7 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
         title: title,
         $parentFormSubmit: $parentFormSubmit,
         result_input_name: result_input_name,
+        reload_input: reload_input,
         success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined' && result.html) {
                 if (bimpAjax.$parentFormSubmit) {
@@ -314,9 +324,16 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                                 bimpAjax.$parentFormSubmit.removeClass('disabled');
                                             }
                                             if (bimpAjax.result_input_name) {
-                                                var fields = {};
-                                                fields[bimpAjax.result_input_name] = saveResult.id_object;
-                                                reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields);
+                                                if (bimpAjax.reload_input) {
+                                                    var fields = {};
+                                                    fields[bimpAjax.result_input_name] = saveResult.id_object;
+                                                    reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields);
+                                                } else {
+                                                    var $resultInput = bimpAjax.$parentForm.find('[name="' + bimpAjax.result_input_name + '"]');
+                                                    if ($resultInput.length) {
+                                                        $resultInput.val(saveResult.id_object).change();
+                                                    }
+                                                }
                                             }
                                         });
                                     });
@@ -530,6 +547,7 @@ function searchObjectList($input) {
                         field_name += '_add_value';
                     }
                     var $field_input = bimpAjax.$container.find('[name=' + field_name + ']');
+                    var $label_input = bimpAjax.$container.find('[name="' + field_name + '_label"]');
                     bimpAjax.$result.find('button').click(function () {
                         $field_input.val($(this).data('value')).change();
                         bimpAjax.$result.html('').hide();
@@ -537,6 +555,9 @@ function searchObjectList($input) {
                         var label = $(this).text();
                         $container.find('.search_input_selected_label').find('span').text(label);
                         $container.find('.search_input_selected_label').slideDown(250);
+                        if ($label_input.length) {
+                            $label_input.val(label);
+                        }
                     });
                     bimpAjax.$result.show();
                     bimpAjax.$result.off('mouseleave');
@@ -654,7 +675,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                 $container.find('div.inputMultipleValuesContainer').find('table').find('tbody').append(html);
             });
         } else {
-            $container.find('table').find('tbody').append(html);
+            $container.find('table').find('tbody.multipleValuesList').append(html);
         }
     }
 }

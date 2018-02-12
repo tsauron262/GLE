@@ -14304,30 +14304,34 @@ select.switch option[value='0'] {
 }
 
 /* line 332, ../scss/bimpcore_new/_form.scss */
-.inputMultipleValues table tbody tr {
-  border: 1px solid #b4b4b4;
+.inputMultipleValues {
+  margin: 15px 0;
 }
 /* line 335, ../scss/bimpcore_new/_form.scss */
-.inputMultipleValues table tbody tr td {
+.inputMultipleValues > table > tbody > tr {
+  border: 1px solid #b4b4b4;
+}
+/* line 338, ../scss/bimpcore_new/_form.scss */
+.inputMultipleValues > table > tbody > tr > td {
   padding: 6px 12px;
 }
 
-/* line 341, ../scss/bimpcore_new/_form.scss */
+/* line 344, ../scss/bimpcore_new/_form.scss */
 .check_list_container {
   max-height: 450px;
   overflow-y: auto;
   margin: 10px;
 }
-/* line 346, ../scss/bimpcore_new/_form.scss */
+/* line 349, ../scss/bimpcore_new/_form.scss */
 .check_list_container .check_list_item {
   margin: 0;
   padding: 0;
 }
-/* line 350, ../scss/bimpcore_new/_form.scss */
+/* line 353, ../scss/bimpcore_new/_form.scss */
 .check_list_container .check_list_item input[type=checkbox] {
   display: none;
 }
-/* line 354, ../scss/bimpcore_new/_form.scss */
+/* line 357, ../scss/bimpcore_new/_form.scss */
 .check_list_container .check_list_item label {
   padding: 6px 6px 6px 30px;
   background-color: #fff;
@@ -14337,7 +14341,7 @@ select.switch option[value='0'] {
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 361, ../scss/bimpcore_new/_form.scss */
+/* line 364, ../scss/bimpcore_new/_form.scss */
 .check_list_container .check_list_item label:before {
   font-family: 'FontAwesome';
   position: absolute;
@@ -14346,11 +14350,11 @@ select.switch option[value='0'] {
   content: '\f096';
   font-size: 14px;
 }
-/* line 371, ../scss/bimpcore_new/_form.scss */
+/* line 374, ../scss/bimpcore_new/_form.scss */
 .check_list_container .check_list_item input[type=checkbox]:checked + label {
   color: #282828;
 }
-/* line 374, ../scss/bimpcore_new/_form.scss */
+/* line 377, ../scss/bimpcore_new/_form.scss */
 .check_list_container .check_list_item input[type=checkbox]:checked + label:before {
   font-size: 16px;
   content: '\f046';

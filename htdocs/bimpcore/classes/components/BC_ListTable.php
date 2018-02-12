@@ -111,12 +111,6 @@ class BC_ListTable extends BC_List
             $this->fetchItems();
         }
 
-//        if ($this->object->object_name === 'BMP_TypeMontant') {
-//            echo '<pre>';
-//            print_r($this->items);
-//            exit;
-//        }
-
         $rows = array();
 
         if (is_null($this->items) || !count($this->items)) {
@@ -126,7 +120,6 @@ class BC_ListTable extends BC_List
         $primary = $this->object->getPrimary();
 
         foreach ($this->items as $item) {
-            $this->object->reset();
             $row = array();
             if ($this->object->fetch((int) $item[$primary])) {
                 $new_values = isset($this->new_values[(int) $item[$primary]]) ? $this->new_values[(int) $item[$primary]] : array();

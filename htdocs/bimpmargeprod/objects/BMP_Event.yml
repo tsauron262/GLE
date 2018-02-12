@@ -120,7 +120,6 @@ fields:
         label: CA moyen bar TTC
         type: money
         
-        
 lists:
     default: 
         checkboxes: 1
@@ -166,6 +165,7 @@ fields_tables:
         rows: 
             - field: ca_moyen_bar
               edit: 1
+              
 views:
     default:
         title: nom
@@ -223,10 +223,12 @@ views:
     breaks:
         title: Calculs du break
         icon: pie-chart
-        objects_change_reload: BMP_Tarif
+        objects_change_reload: BMP_Tarif,BMP_EventBillets
         rows:
             - cols:
                 - type: fields_table
+                  show: 
+                      callback: isInPrevisionnelMode
                   col_lg: 6
                   col_md: 6
                   fields_table:

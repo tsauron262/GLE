@@ -11,7 +11,6 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/transfert.class.php';
-include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimpfournorder.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/product.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/equipment.lib.php';
 
@@ -44,8 +43,8 @@ switch (GETPOST('action')) {
             break;
         }
     case 'modifyOrder': {
-            $bfo = new BimpFournOrder($db);
-            echo json_encode($bfo->addInStock(GETPOST('products'), GETPOST('orderId','int')));
+            $bfor = new BimpFournOrderReception($db);
+            echo json_encode($bfor->addInStock(GETPOST('products'), GETPOST('orderId','int'), GETPOST('entrepotId','int'), $user));
             break;
         }
     default: break;

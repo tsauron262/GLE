@@ -7,7 +7,8 @@ include_once DOL_DOCUMENT_ROOT.'/core/lib/fourn.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php';
 include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
-include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/class/bimpfournorder.class.php';
+
+include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/class/transfert.class.php';
 
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css');
@@ -134,8 +135,8 @@ foreach ($entrepots as $id => $name) {
 }
 print '</select> ';
 
-$bfo = new BimpFournOrder($db);
-$lignes = $bfo->getLigneOrder($orderId);
+$bfor = new BimpFournOrderReception($db);
+$lignes = $bfor->getLigneOrder($orderId);
 $refurl = array();
 
 print '</table>';

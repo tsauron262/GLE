@@ -22,6 +22,7 @@ function modifyOrder(products) {
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             action: 'modifyOrder',
+            entrepotId: $('#entrepot').val(),
             products: products,
             orderId: getUrlParameter('id')
         },

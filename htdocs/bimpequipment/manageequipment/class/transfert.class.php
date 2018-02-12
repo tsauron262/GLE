@@ -2,8 +2,10 @@
 
 include_once '../../../main.inc.php';
 
+include_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 class Transfert {
@@ -116,4 +118,63 @@ function getIdBySerial($db, $serial) {
         return $id;
     }
     return 'Aucun équipment correspond à ce numéro de série';
+}
+
+class BimpFournOrderReception {
+
+    private $db;
+
+//    public $orderId;
+//    public $statut;
+
+    function __construct($db) {
+        $this->db = $db;
+    }
+
+    function getLigneOrder($orderId) {
+        $lignes = array();
+
+        $sql = 'SELECT rowid, fk_product, ref, label, qty, subprice';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet';
+        $sql .= ' WHERE fk_commande=' . $orderId;
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $lignes[$obj->rowid] = array('productId' => $obj->fk_product,
+                    'ref' => $obj->ref,
+                    'label' => dol_trunc($obj->label, 25),
+                    'qty' => $obj->qty,
+                    'price_u' => price2num($obj->subprice) . ' €');
+            }
+        }
+        return $lignes;
+    }
+
+    function addInStock($products, $orderId, $entrepotId, $user) {
+        $errors = array();
+        $now = dol_now();
+        $order = new CommandeFournisseur($this->db);
+        $order->fetch($orderId);
+        $labelmove = 'Reception commande bimp ' . $order->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
+        $codemove = dol_print_date($now, '%y%m%d%H%M%S');
+        
+        foreach ($products as $product) {
+            $productObject = new Product($this->db);
+            $productObject->fetch($product['id_prod']);
+
+            // Add stock
+            $result = $productObject->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove);
+            if ($result < 0) {
+                $errors[] = $productObject->errors;
+                $errors[] = $productObject->errorss;
+            }
+        }
+
+
+
+
+        return $codeName;
+    }
+
 }

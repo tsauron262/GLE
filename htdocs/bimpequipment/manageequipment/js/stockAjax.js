@@ -15,7 +15,7 @@
  * @param {Object} products
  * @returns {undefined}
  */
-function modifyOrder(products) {
+function modifyOrder(products, isTotal) {
 
     $.ajax({
         type: "POST",
@@ -23,6 +23,7 @@ function modifyOrder(products) {
         data: {
             action: 'modifyOrder',
             entrepotId: $('#entrepot').val(),
+            isTotal: isTotal,
             products: products,
             orderId: getUrlParameter('id')
         },
@@ -60,6 +61,8 @@ function initEvents() {
         $('table#productTable [name=stocker]').prop('checked', isChecked);
     });
 
+    $('input[name=stocker]').change(changeCheckbox);
+
     $('#enregistrer').click(function () {
         $('p[name=confTransfert]').text('Etes-vous sur de vouloir mettre en stock ces produits ?');
         $('div [name=confirmEnregistrer]').show();
@@ -73,6 +76,20 @@ function initEvents() {
     $('input#noEnregistrer').click(function () {
         $('div [name=confirmEnregistrer]').hide();
     });
+}
+
+function changeCheckbox() {
+    if (!$(this).prop('checked'))
+        $('input[name=checkAll]').prop('checked', false);
+    else {
+        var allchecked = true;
+        $('input[name=stocker]').each(function () {
+            if (!$(this).prop('checked'))
+                allchecked = false;
+        })
+        if (allchecked)
+            $('input[name=checkAll]').prop('checked', true);
+    }
 }
 
 function modifyQuantity() {
@@ -95,8 +112,37 @@ function saveProducts() {
             products.push(newProd);
         }
     });
-    console.log(products);
-    modifyOrder(products);
+
+    if (products.length === 0) {
+        setMessage('alertEnregistrer', 'Veuillez cocher des lignes pour effectuer la mise en stock.', 'error');
+    } else {
+        console.log(products);
+        var isTotal = checkIfStatutIsTotal();
+        modifyOrder(products, isTotal);
+    }
+}
+
+function checkIfStatutIsTotal() {
+    var stop = false;
+    // search if ther is at least 1 line which is unchecked
+    $('table#productTable tr > td > input[name=stocker]').each(function () {
+        if (!$(this).prop('checked')) {
+            stop = true;
+        }
+    });
+    if (stop)   // at least one checkbox is unchecked
+        return false;
+
+    // search if the amount is at least equal to the minimum defined in the order
+    $('table#productTable tr td[name=qty]').each(function () {
+        if (parseInt($(this).text()) < parseInt($(this).attr('initValue'))) {
+            stop = true;
+        }
+    });
+
+    if (stop)   // at least 1 amount is less than the one defined in the order
+        return false;
+    return true;
 }
 
 
@@ -132,4 +178,5 @@ var getUrlParameter = function getUrlParameter(sParam) {
             return sParameterName[1] === undefined ? true : sParameterName[1];
         }
     }
-};
+}
+;

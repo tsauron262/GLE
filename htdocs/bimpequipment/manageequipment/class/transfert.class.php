@@ -151,30 +151,43 @@ class BimpFournOrderReception {
         return $lignes;
     }
 
-    function addInStock($products, $orderId, $entrepotId, $user) {
+    function addInStock($products, $orderId, $entrepotId, $user, $isTotal) {
         $errors = array();
+        $lps = array();
         $now = dol_now();
         $order = new CommandeFournisseur($this->db);
         $order->fetch($orderId);
         $labelmove = 'Reception commande bimp ' . $order->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
         $codemove = dol_print_date($now, '%y%m%d%H%M%S');
-        
+
         foreach ($products as $product) {
-            $productObject = new Product($this->db);
-            $productObject->fetch($product['id_prod']);
-
-            // Add stock
-            $result = $productObject->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove);
-            if ($result < 0) {
-                $errors[] = $productObject->errors;
-                $errors[] = $productObject->errorss;
+            $lp = new LignePanier($this->db);
+            if ($lp->check((isset($product['ref']) ? $product['ref'] : $product['serial']), $entrepotId) != false) {
+                
+            } else {
+                $errors[] = $lp->error;
             }
+            $lps[] = $lp;
+            
         }
+// loop product
+//        foreach ($products as $product) {
+//            $productObject = new Product($this->db);
+//            $productObject->fetch($product['id_prod']);
+//
+//            // Add stock
+//            $result = $productObject->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove);
+//            if ($result < 0) {
+//                $errors[] = $productObject->errors;
+//                $errors[] = $productObject->errorss;
+//            }
+//        }
 
+        $type = ($isTotal == 'false') ? 'par' : 'tot';
 
+        $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
 
-
-        return $codeName;
+        return $errors;
     }
 
 }

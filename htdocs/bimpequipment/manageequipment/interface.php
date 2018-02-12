@@ -44,7 +44,7 @@ switch (GETPOST('action')) {
         }
     case 'modifyOrder': {
             $bfor = new BimpFournOrderReception($db);
-            echo json_encode($bfor->addInStock(GETPOST('products'), GETPOST('orderId','int'), GETPOST('entrepotId','int'), $user));
+            echo json_encode($bfor->addInStock(GETPOST('products'), GETPOST('orderId','int'), GETPOST('entrepotId','int'), $user, GETPOST('isTotal')));
             break;
         }
     default: break;

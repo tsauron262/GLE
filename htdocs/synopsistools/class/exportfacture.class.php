@@ -45,6 +45,7 @@ class exportfacture {
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
+        mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : ".$centre);
         return 0;
     }
 
@@ -52,9 +53,8 @@ class exportfacture {
         $this->type = "sav";
         $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens, chronoT.Centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "synopsischrono chrono , " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT , " . MAIN_DB_PREFIX . "user_extrafields ue "
-                . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.fk_statut != 3 AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND ue.`fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) "
+                . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source "./*AND prop.fk_statut != 3 je ne sais pas trop pourquoi*/" AND prop.rowid = chrono.propalid AND chronoT.id = chrono.id AND ue.`fk_object` = IF(chronoT.Technicien > 0, chronoT.Technicien, fact.fk_user_author) "
                 . $this->where);
-        
 
         while ($ligne = $this->db->fetch_object($result)) {
             $this->id8sens = $ligne->id8Sens;

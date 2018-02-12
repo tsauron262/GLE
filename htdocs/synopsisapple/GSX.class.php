@@ -713,7 +713,7 @@ class GSX
 
                 $requestName = $clientLookup . 'Request';
                 $wrapperName = 'lookupRequestData';
-                dol_syslog("requete : " . $requestName, 3);
+                dol_syslog("requete : " . $requestName, LOG_DEBUG);
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
 
@@ -911,7 +911,7 @@ class GSX
                 $msg .= print_r($requestData, 1);
                 $msg .= 'Données reçues:' . "\n";
                 $msg .= print_r($response, 1);
-                dol_syslog($msg, 3);
+                dol_syslog($msg, LOG_DEBUG);
             }
 
 //            if ($user->id == 1)
@@ -924,7 +924,7 @@ class GSX
                     $msg .= print_r($requestData, 1);
                     $msg .= 'Erreur(s):' . "\n";
                     $msg .= $f->faultstring;
-                    dol_syslog($msg, 3);
+                    dol_syslog($msg, LOG_DEBUG);
                 }
                 
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {

@@ -30,6 +30,8 @@ if (isset($_GET['actionTest'])) {
 
 
 class testSav {
+    public $output = "";
+    public $nbErr = 0;
     
     function __construct() {
         require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
@@ -46,6 +48,9 @@ class testSav {
         $this->tentativeFermetureAuto(1);
         $this->tentativeFermetureAuto(2);
         $this->tentativeFermetureAuto(3);
+        
+        if($this->nbErr > 0)
+            $this->output = $this->nbErr." posant prôbléme.";
         
         return true;
     }
@@ -128,6 +133,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                                 if ($repair->close(1, 0))
                                     echo "Semble avoir été fermé en auto<br/>";
                                 else {
+                                    $this->nbErr++;
                                     echo "N'arrive pas a être fermé<br/> ";
                                     if (isset($_GET['envoieMail']))
                                         mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponse : " . $repair->repairLookUp['repairStatus']);
@@ -137,6 +143,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                                 if ($repair->updateStatus('RFPU'))
                                     echo "Semble avoir été passer dans GSX a RFPU<br/>";
                                 else {
+                                    $this->nbErr++;
                                     echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
                                     if (isset($_GET['envoieMail']))
                                         mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
@@ -183,6 +190,7 @@ AND c.id = cs.id AND cs.Etat = " . ($statut == "closed" ? "999" : "9");
                             if ($repair->updateStatus('RFPU'))
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
                             else {
+                                $this->nbErr++;
                                 echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
 
                                 $mailTech = "jc.cannet@bimp.fr";

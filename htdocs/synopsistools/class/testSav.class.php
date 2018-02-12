@@ -28,6 +28,7 @@ if (isset($_GET['actionTest'])) {
 
 
 
+require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class testSav {
     public $output = "";

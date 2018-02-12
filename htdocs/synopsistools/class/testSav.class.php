@@ -5,7 +5,7 @@ if (isset($_GET['actionTest'])) {
     llxHeader();
     $class = new testSav();
     if ($_GET['actionTest'] == "mailNonFerme")
-        mailNonFerme();
+        $class->mailNonFerme();
     if ($_GET['actionTest'] == "fermetureAuto") {
         $class->tentativeFermetureAuto(4);
         $class->tentativeFermetureAuto(1);

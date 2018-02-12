@@ -693,6 +693,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     if (isset($to) && $to != '') {
 //        mail($to, $sujet, $msg, $headers);
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+        dol_syslog("juste av Mail ".$subject);
         $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
         $return = $mailfile->sendfile();
         if (!$return || !$mailOk)

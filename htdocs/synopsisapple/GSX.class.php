@@ -908,7 +908,7 @@ class GSX
             if (in_array($user->id, array(1, 270, 271))) {
                 $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
                 $msg .= 'Données envoyées:' . "\n";
-                $msg .= print_r($requestData, 1);
+                $msg .= print_r($requestData, LOG_DEBUG);
                 $msg .= 'Données reçues:' . "\n";
                 $msg .= print_r($response, 1);
                 dol_syslog($msg, 3);
@@ -921,7 +921,7 @@ class GSX
                 if (in_array($user->id, array(1, 270, 271))) {
                     $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
                     $msg .= 'Données envoyées:' . "\n";
-                    $msg .= print_r($requestData, 1);
+                    $msg .= print_r($requestData, LOG_DEBUG);
                     $msg .= 'Erreur(s):' . "\n";
                     $msg .= $f->faultstring;
                     dol_syslog($msg, 3);

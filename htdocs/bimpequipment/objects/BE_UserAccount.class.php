@@ -6,7 +6,7 @@ class BE_UserAccount extends BimpObject
     public function getClient_contactsArray()
     {
         $contacts = array(
-            '' => ''
+            0 => ''
         );
         $id_client = $this->getData('id_client');
         if (!is_null($id_client) && $id_client) {

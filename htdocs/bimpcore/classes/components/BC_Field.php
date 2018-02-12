@@ -9,6 +9,7 @@ class BC_Field extends BimpComponent
     public $new_value = null;
     public $display_name = 'default';
     public $container_id = null;
+    public $display_input_value = true;
     public static $type_params_def = array(
         'id_object' => array(
             'object'      => array('required' => true),
@@ -227,7 +228,9 @@ class BC_Field extends BimpComponent
             $html .= '<div style="padding-right: 32px;">';
         }
 
-        $html .= '<input type="hidden" name="' . $this->name . '" value="' . $this->value . '">';
+        if ($this->display_input_value) {
+            $html .= '<input type="hidden" name="' . $this->name . '" value="' . $this->value . '">';
+        }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
 

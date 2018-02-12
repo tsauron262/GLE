@@ -26,7 +26,7 @@ class BC_Card extends BimpComponent
         $path = null;
 
         if (is_null($display_object_name)) {
-            $this->display_object = $this->object;
+            $this->display_object = $object;
         } else {
             $this->display_object = $object->getChildObject($display_object_name);
 
@@ -100,6 +100,7 @@ class BC_Card extends BimpComponent
             if (is_null($field_params['value'])) {
                 if ($field_params['field']) {
                     $field = new BC_Field($this->display_object, $field_params['field']);
+                    $field->display_input_value = false;
                     if ($field_params['display']) {
                         $field->display_name = $field_params['display'];
                     }
@@ -116,7 +117,7 @@ class BC_Card extends BimpComponent
                     }
                 }
             }
-            if (!is_null($field_params['value']) && $field_params['value']) {
+            if (!is_null($field_params['value']) && ($field_params['value'] !== '')) {
                 $fields[] = array(
                     'label' => $field_params['label'],
                     'icon'  => $field_params['icon'],
@@ -142,7 +143,7 @@ class BC_Card extends BimpComponent
 
             case 'user_card':
                 return $this->renderUserCard();
-                
+
             case 'produt_card':
                 return $this->renderProductCard();
         }
@@ -381,7 +382,7 @@ class BC_Card extends BimpComponent
         if (!is_a($this->display_object, 'User')) {
             return BimpRender::renderAlerts('Erreur de configuration. Cet objet n\'est pas un utilisateur');
         }
-        
+
         $img_url = null; // todo...
         $fields = array();
 
@@ -469,15 +470,15 @@ class BC_Card extends BimpComponent
 
         return self::renderCard($this->display_object, $this->display_object, $title, $img_url, $fields, true);
     }
-    
+
     public function renderProductCard()
     {
         if (!is_a($this->display_object, 'Product')) {
             return BimpRender::renderAlerts('Erreur de configuration. Cet objet n\'est pas un utilisateur');
         }
-        
+
         $img_url = BimpTools::getProductMainImgUrl($this->display_object);
-        
+
         $fields = array();
     }
 

@@ -3,6 +3,16 @@
 class BimpConfigDefinitions
 {
 
+    public static $labels = array(
+        'name'      => array('required' => true, 'default' => ''),
+        'name_plur' => array(),
+        'is_female' => array('data_type' => 'bool', 'default' => 0)
+    );
+    public static $object_child = array(
+        'relation' => array('default' => 'none'),
+        'delete'   => array('data_type' => 'bool', 'default' => 0),
+        'instance' => array('data_type' => 'array')
+    );
     public static $button = array(
         'label'   => array('required' => true),
         'icon'    => array(),

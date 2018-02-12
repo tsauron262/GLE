@@ -2,6 +2,7 @@
 
 class BMP_TypeMontant extends BimpObject
 {
+
     const BMP_TYPE_FRAIS = 1;
     const BMP_TYPE_RECETTE = 2;
 
@@ -37,6 +38,24 @@ class BMP_TypeMontant extends BimpObject
         return $list;
     }
 
+    public function rebuildAllCalcMontantsCaches()
+    {
+
+        $errors = array();
+        $calc_montant = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
+
+        $list = $calc_montant->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
+
+        foreach ($list as $item) {
+            if ($calc_montant->fetch((int) $item['id'])) {
+                $errors = array_merge($errors, $calc_montant->rebuildTypesMontantsCache());
+            }
+        }
+
+
+        return $errors;
+    }
+
     public function validate()
     {
         $errors = parent::validate();
@@ -49,6 +68,33 @@ class BMP_TypeMontant extends BimpObject
                 $errors[] = 'Un type de montant avec une liste de détails doit être obligatoire';
             }
         }
+        return $errors;
+    }
+
+    public function create()
+    {
+        $errors = parent::create();
+
+        $errors = array_merge($errors, $this->rebuildAllCalcMontantsCaches());
+
+        return $errors;
+    }
+
+    public function update()
+    {
+        $errors = parent::update();
+
+        $errors = array_merge($errors, $this->rebuildAllCalcMontantsCaches());
+
+        return $errors;
+    }
+
+    public function delete()
+    {
+        $errors = parent::delete();
+
+        $errors = array_merge($errors, $this->rebuildAllCalcMontantsCaches());
+
         return $errors;
     }
 }

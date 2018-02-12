@@ -87,6 +87,48 @@ class BMP_CalcMontant extends BimpObject
         return $errors;
     }
 
+    public function rebuildTypesMontantsCache($id = null)
+    {
+        $errors = array();
+
+        if (is_null($id) && $this->isLoaded()) {
+            $id = $this->id;
+        } else {
+            return array();
+        }
+
+        if ($this->db->delete('bmp_calc_montant_type_montant', '`id_calc_montant` = ' . (int) $id) <= 0) {
+            $errors[] = 'Echec de la reconstruction du cache (Echec suppression des types de montants déjà enregistrés)';
+        } else {
+
+            $type_src = $this->getData('type_source');
+
+            if ($type_src === 1) {
+                if ($this->db->insert('bmp_calc_montant_type_montant', array(
+                            'id_calc_montant' => (int) $id,
+                            'id_type_montant' => (int) $this->getData('id_montant_source')
+                        )) <= 0) {
+                    $errors[] = 'Reconstruction du cache: échec de l\'insertion du type de montant d\'id ' . $this->getData('id_montant_source');
+                }
+            } elseif ($type_src === 2) {
+
+                $totalInter = BimpObject::getInstance($this->module, 'BMP_TotalInter', (int) $this->getData('id_total_source'));
+                $list = $totalInter->getAllTypesMontantsList();
+                
+                foreach ($list as $id_type_montant) {
+                    if ($this->db->insert('bmp_calc_montant_type_montant', array(
+                                'id_calc_montant' => (int) $id,
+                                'id_type_montant' => (int) $id_type_montant
+                            )) <= 0) {
+                        $errors[] = 'Reconstruction du cache: échec de l\'insertion du type de montant d\'id ' . $this->getData('id_montant_source');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
 //    public function getEventPercentInput($id_event)
 //    {
 //        if (!isset($this->id) || !$this->id) {
@@ -191,6 +233,49 @@ class BMP_CalcMontant extends BimpObject
         $errors = parent::validate();
         if (!count($errors)) {
             $errors = $this->checkConflicts();
+        }
+
+        return $errors;
+    }
+
+    public function create()
+    {
+        $errors = parent::create();
+
+        if ($this->isLoaded()) {
+            $errors = array_merge($errors, $this->rebuildTypesMontantsCache());
+        }
+
+        return $errors;
+    }
+
+    public function update()
+    {
+        $errors = parent::update();
+
+        if ($this->isLoaded()) {
+            $errors = array_merge($errors, $this->rebuildTypesMontantsCache());
+        }
+
+        return $errors;
+    }
+
+    public function delete()
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $id = $this->id;
+        } else {
+            $id = null;
+        }
+
+        $errors = parent::delete();
+
+        if (!is_null($id)) {
+            if ($this->db->delete('bmp_calc_montant_type_montant', '`id_calc_montant` = ' . (int) $id) <= 0) {
+                $errors[] = 'Echec de la suppression du cache (Echec suppression des types de montants déjà enregistrés)';
+            }
         }
 
         return $errors;

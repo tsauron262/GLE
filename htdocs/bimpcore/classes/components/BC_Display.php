@@ -8,6 +8,7 @@ class BC_Display extends BimpComponent
     public $field_name = null;
     public $field_params = null;
     public $value = null;
+    
     public static $type_params_def = array(
         'syntaxe'     => array(
             'syntaxe' => array('default' => '<value>')
@@ -125,7 +126,7 @@ class BC_Display extends BimpComponent
                             $instance = null;
                         }
 
-                        if (!is_null($instance)) {
+                        if (!is_null($instance) && isset($instance->id) && $instance->id) {
                             switch ($this->params['type']) {
                                 case 'nom':
                                     $html .= BimpObject::getInstanceNom($instance);

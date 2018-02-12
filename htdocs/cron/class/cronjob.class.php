@@ -428,7 +428,7 @@ class Cronjob extends CommonObject
     		$sql.= " WHERE ".implode(' AND ',$sqlwhere);
     	}
 
-    	dol_syslog(get_class($this)."::fetch_all", LOG_DEBUG);
+    	dol_syslog(get_class($this)."::fetch_all", 3);
     	$resql=$this->db->query($sql);
     	if ($resql)
     	{

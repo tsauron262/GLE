@@ -52,7 +52,7 @@ class testSav {
 
     function getReq($statut, $iTribu) {
 
-        $req = "SELECT DATEDIFF(now(), c.tms) as nbJ, r.rowid as rid, `serial_number`, c.id as cid,
+        $req = "SELECT DATEDIFF(now(), c.tms) as nbJ, Technicien, r.rowid as rid, `serial_number`, c.id as cid,
 
 c.ref FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` cs, `llx_synopsis_apple_repair` r
 

@@ -2017,7 +2017,15 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         print '<tr>';
                         print '<td width="50%">Remplaçant</td>' . "\n";
                         print '<td>' . "\n";
-                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, array($cp->fk_user), null, null, null, null, null, null, null, null, null, null,1);
+                        
+                        $tabExclude = array($cp->fk_user);
+                        $req = "SELECT DISTINCT(h2.`fk_user`) as idUser FROM `llx_holiday` h1, `llx_holiday` h2 WHERE h1.rowid = ".$cp->id." AND ((h2.`date_debut` >= h1.`date_debut` AND h2.`date_debut` <= h1.`date_fin`) || (h2.`date_fin` <= h1.`date_fin` AND h2.`date_fin` >= h1.`date_debut`)) AND h2.`statut` = 6";
+                        $sql = $db->query($req);
+                        while($ln = $db->fetch_object($sql))
+                                $tabExclude[] = $ln->idUser;
+                        
+                        
+                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, $tabExclude, null, null, null, null, null, null, null, null, null, null,1);
                         print '</td>' . "\n";
                         print '<td><input type="submit" value="Enregistrer" class="butAction"></td>';
                         print '</tr>' . "\n";

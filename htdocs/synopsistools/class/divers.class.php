@@ -177,11 +177,11 @@ class synopsisHook {//FA1506-0369
             die;
         }
         
-        if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && stripos($_SERVER["SCRIPT_URI"], str_replace("https://", "", $conf->file->main_force_https)) === false) {
+//        if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && stripos($_SERVER["SCRIPT_URI"], str_replace("https://", "", $conf->file->main_force_https)) === false) {
+        if (defined("REDIRECT_DOMAINE") && REDIRECT_DOMAINE != "" && stripos($_SERVER["HTTP_HOST"], str_replace(array("https://", "http://"), "", REDIRECT_DOMAINE)) === false) {
 
-//            header('HTTP/1.1 301 Moved Permanently');
-//
-//            header('Location: '.$conf->file->main_force_https . "/" . $_SERVER["SCRIPT_URL"]);
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: '.REDIRECT_DOMAINE . "/" . $_SERVER["REQUEST_URI"]);
         }
 
         if (defined('URL_REDIRECT') && (!defined('IP_ADMIN') || IP_ADMIN != $_SERVER['REMOTE_ADDR']))

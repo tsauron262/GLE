@@ -61,6 +61,8 @@ class LignePanier {
                 $this->error = "Produit inconnu";
                 return false;
             }
+        } else {
+            //extrafield
         }
     }
     

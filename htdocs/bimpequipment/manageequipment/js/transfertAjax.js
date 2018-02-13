@@ -35,16 +35,12 @@ function checkProductByRef(ref) {
             action: 'checkProductByRef'
         },
         error: function () {
-            setMessage('alertProd', 'Erreur serveur.', 'error');
+            setMessage('alertEnregistrer', 'Erreur serveur 5316.', 'error');
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
             if (outParsed.error.length !== 0) {
-                var errors_msg = '';
-                for (i = 0; i < outParsed.error.length; i++) {
-                    errors_msg += "Erreur numéro " + i + " " + outParsed.error[i] + "<br>";
-                }
-                setMessage('alertProd', errors_msg, 'error');
+                setMessage('alertProd', outParsed.error.length, 'error');
                 return;
             }
             if (outParsed.stock < 1) {
@@ -77,7 +73,7 @@ function checkStockForProduct(idProduct, qty) {
             action: 'checkStockForProduct'
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertEnregistrer', 'Erreur serveur 5315.', 'error');
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
@@ -95,7 +91,7 @@ function checkStockForProduct(idProduct, qty) {
     });
 }
 
-function saveproducts() {
+function saveproducts(localCntProduct) {
 
     $.ajax({
         type: "POST",
@@ -107,12 +103,18 @@ function saveproducts() {
             action: 'transfertAll'
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertEnregistrer', 'Erreur serveur 5314.', 'error');
         },
         success: function (out) {
-            console.log("Pas d'erreur fatale coté serveur");
-//            var outParsed = JSON.parse(out);
-//            console.log(outParsed);
+            var outParsed = JSON.parse(out);
+            if (outParsed.length !== 0) {
+                setMessage('alertEnregistrer', outParsed, 'error');
+
+            } else if (1 < localCntProduct) {
+                setMessage('alertEnregistrer', localCntProduct + ' Groupes de produit ont été enregistré avec succès.', 'mesgs');
+            } else {
+                setMessage('alertEnregistrer', localCntProduct + ' Groupe de produit a été enregistré avec succès.', 'mesgs');
+            }
         }
     });
 }
@@ -163,8 +165,8 @@ function initEvents() {
         if (idEntrepotStart === undefined) {
             idEntrepotStart = $(this).val();
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
-            $('#allTheFiche').css('visibility', 'visible');
-            $('#allTheFiche').addClass('fade-in');
+            $('#divEntrepotEnd').css('visibility', 'visible');
+            $('#divEntrepotEnd').addClass('fade-in');
         } else if (products.length !== 0) {
             if (confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?')) {
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
@@ -181,6 +183,11 @@ function initEvents() {
         }
     });
     $('#entrepotEnd').on('change', function () {
+        if (idEntrepotEnd === undefined) {
+            idEntrepotEnd = $(this).val();
+            $('#allTheFiche').css('visibility', 'visible');
+            $('#allTheFiche').addClass('fade-in');
+        }
         if (idEntrepotEnd !== undefined) {
             $('#entrepotStart option[value=' + idEntrepotEnd + ']').prop('disabled', false);
         }
@@ -200,7 +207,7 @@ function initEvents() {
     });
 
     $('input#okEnregistrer').click(function () {
-        saveproducts();
+        saveproducts(cntProduct);
         $('div [name=confirmEnregistrer]').hide();
         products = [];
         $('table#productTable tr[id]').remove();
@@ -308,7 +315,6 @@ function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
     };
     products.push(newProduct);
     document.querySelector("#bipAudio").play();
-    console.log(products);
 }
 
 function initRemoveLine(idTr) {
@@ -325,7 +331,7 @@ function initRemoveLine(idTr) {
             $(this).text(cntProduct);
             cntProduct++;
         })
-        console.log(products);
+        cntProduct--;
     });
 }
 

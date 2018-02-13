@@ -51,10 +51,15 @@ table.custTable th {
 .fadeInOut {
   opacity: 0;
     visibility: hidden;
-      transition: opacity 500ms ease-in-out;
-  -webkit-transition: opacity 500ms ease-in-out;
+      transition: opacity 600ms ease-in-out;
+  -webkit-transition: opacity 600ms ease-in-out;
 }
 
 .fade-in {
   opacity: 1;
+}
+
+.entry td {
+    border-collapse: collapse;
+    padding: 2px 4px 0px 4px;
 }

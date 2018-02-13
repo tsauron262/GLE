@@ -23,8 +23,10 @@ switch (GETPOST('action')) {
             break;
         }
     case 'checkProductByRef': {
-            $lp->check(GETPOST('ref'), GETPOST('idEntrepotStart'));
-            echo json_encode($lp->getInfo());
+            if ($lp->check(GETPOST('ref'), GETPOST('idEntrepotStart')) == false)
+                echo json_encode($lp->error);
+            else
+                echo json_encode($lp->getInfo());
             break;
         }
     case 'transfertAll': {

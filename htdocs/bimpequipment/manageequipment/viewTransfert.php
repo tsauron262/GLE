@@ -34,7 +34,7 @@ foreach ($entrepots as $id => $name) {
 print '</select> ';
 print '</div>';
 
-print '<div id="allTheFiche" class="fadeInOut">';
+print '<div id="divEntrepotEnd" class="fadeInOut">';
 
 print '<div  style="float:left ; margin: 14px 5px 0px 5px"> ';
 print '<img src="css/next.png" > ';
@@ -50,10 +50,11 @@ foreach ($entrepots as $id => $name) {
 //    else
         print '<option value="' . $id . '">' . $name . '</option>';
 }
-print '</select></div><br/><br/><br/>';
+print '</select></div></div><br/><br/><br/>';
 
+print '<div id="allTheFiche" class="fadeInOut">';
 
-print '<table>';
+print '<table class="entry">';
 print '<tr><td><strong>Réf. ou code barre ou numéro de série</strong></td>';
 print '<td><input name="refScan" class="custInput" style="width : 300px"></td></tr>';
 

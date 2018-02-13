@@ -83,7 +83,6 @@ $conffileT = str_replace(".php", "-".$_SERVER['HTTP_HOST'].".php", $conffile);
 $conffileT = str_replace(basename(__FILE__), $conffileT, __FILE__);
 if(is_file($conffileT))
     $conffile = $conffileT;
-die($conffile);
 /*fmod drsi*/ 
 
 

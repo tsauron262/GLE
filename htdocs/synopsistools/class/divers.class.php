@@ -179,9 +179,9 @@ class synopsisHook {//FA1506-0369
         
         if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && substr($_SERVER["SCRIPT_URI"], 0, 11) != str_replace("https://", "", $conf->file->main_force_https)) {
 
-            header('HTTP/1.1 301 Moved Permanently');
-
-            header('Location: '.$conf->file->main_force_https . "/" . $_SERVER["SCRIPT_URL"]);
+//            header('HTTP/1.1 301 Moved Permanently');
+//
+//            header('Location: '.$conf->file->main_force_https . "/" . $_SERVER["SCRIPT_URL"]);
         }
 
         if (defined('URL_REDIRECT') && (!defined('IP_ADMIN') || IP_ADMIN != $_SERVER['REMOTE_ADDR']))

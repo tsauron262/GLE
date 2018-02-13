@@ -13,6 +13,7 @@
  * Insert modifications in database
  * 
  * @param {Object} products
+ * @param {Bool} isTotal is the order total or partial ?
  * @returns {undefined}
  */
 function modifyOrder(products, isTotal) {
@@ -44,9 +45,7 @@ function modifyOrder(products, isTotal) {
 
 $(document).ready(function () {
     $('#entrepot').select2();
-
     initEvents();
-
 });
 
 /**
@@ -78,6 +77,7 @@ function initEvents() {
     });
 }
 
+
 function changeCheckbox() {
     if (!$(this).prop('checked'))
         $('input[name=checkAll]').prop('checked', false);
@@ -100,11 +100,12 @@ function modifyQuantity() {
 
 }
 
+/* Create product object for each line, then call ajax to save those products */
 function saveProducts() {
     var products = [];
 
     $('table#productTable tr').each(function () {
-        if ($(this).find('td input[name=stocker]').prop('checked')) { // is the kine checked ?
+        if ($(this).find('td input[name=stocker]').prop('checked')) { // is the line checked ?
             var newProd = {
                 id_prod: parseInt($(this).find('td[name=productId]').text()),
                 qty: parseInt($(this).find('td[name=qty]').text())
@@ -122,6 +123,7 @@ function saveProducts() {
     }
 }
 
+/* Check is every lines of the order is fullfilled */
 function checkIfStatutIsTotal() {
     var stop = false;
     // search if ther is at least 1 line which is unchecked

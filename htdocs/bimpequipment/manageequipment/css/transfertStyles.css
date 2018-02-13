@@ -47,3 +47,14 @@ table.custTable th {
 .modify {
     margin-bottom: -8px;
 }
+
+.fadeInOut {
+  opacity: 0;
+    visibility: hidden;
+      transition: opacity 500ms ease-in-out;
+  -webkit-transition: opacity 500ms ease-in-out;
+}
+
+.fade-in {
+  opacity: 1;
+}

@@ -71,6 +71,8 @@ class LigneTransfert {
 
         $product = new Product($this->db);
         $product->fetch($this->id_product);
+        if ($this->serial != '')
+            $label = 'Transférer stock Bimp ' . $this->serial;
 
         // Remove stock
         $result1 = $product->correct_stock($user, $entrepotIdStart, $this->qty, 1, $label, 0, $codemove);
@@ -131,6 +133,8 @@ class BimpFournOrderReception {
         $this->db = $db;
     }
 
+    /* Get every line of the order */
+
     function getLigneOrder($orderId) {
         $lignes = array();
 
@@ -168,7 +172,6 @@ class BimpFournOrderReception {
                 $errors[] = $lp->error;
             }
             $lps[] = $lp;
-            
         }
 // loop product
 //        foreach ($products as $product) {

@@ -15,6 +15,7 @@ include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/product.lib
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/equipment.lib.php';
 
 $lp = new LignePanier($db);
+
 switch (GETPOST('action')) {
     case 'checkStockForProduct': {
             $lp->fetchProd(GETPOST('idProduct'), GETPOST('idEntrepotStart'));
@@ -39,7 +40,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'addEquipment': {
-            echo json_encode(addEquipments(GETPOST('newEquipments')));
+            echo json_encode(addEquipments($db, GETPOST('newEquipments'), $user));
             break;
         }
     case 'modifyOrder': {

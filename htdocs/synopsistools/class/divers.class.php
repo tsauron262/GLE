@@ -177,7 +177,7 @@ class synopsisHook {//FA1506-0369
             die;
         }
         
-        if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && substr($_SERVER["SCRIPT_URI"], 0, 11) != $conf->file->main_force_https) {
+        if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && substr($_SERVER["SCRIPT_URI"], 0, 11) != str_replace("https://", "", $conf->file->main_force_https)) {
 
             header('HTTP/1.1 301 Moved Permanently');
 

@@ -83,6 +83,12 @@ if (! empty($_GET['conf']))
 */
 
 // Include configuration
+/*mod drsi*/
+$conffileT = str_replace(".php", "-".$_SERVER['HTTP_HOST'].".php", $conffile);
+$conffileT = str_replace(basename(__FILE__), $conffileT, __FILE__);
+if(is_file($conffileT))
+    $conffile = $conffileT;
+/*fmod drsi*/ 
 $result=@include_once $conffile;	// Keep @ because with some error reporting this break the redirect
 
 if (! $result && ! empty($_SERVER["GATEWAY_INTERFACE"]))    // If install not done and we are in a web session

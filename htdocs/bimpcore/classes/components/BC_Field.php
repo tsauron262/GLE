@@ -9,9 +9,11 @@ class BC_Field extends BimpComponent
     public $new_value = null;
     public $display_name = 'default';
     public $container_id = null;
+    public $display_input_value = true;
     public static $type_params_def = array(
         'id_object' => array(
-            'object' => array('required' => true)
+            'object'      => array('required' => true),
+            'create_form' => array('default' => '')
         ),
         'number'    => array(
             'min'      => array('data_type' => 'float'),
@@ -37,6 +39,7 @@ class BC_Field extends BimpComponent
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
         $this->params_def['sortable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['searchable'] = array('data_type' => 'bool', 'default' => 1);
@@ -193,12 +196,12 @@ class BC_Field extends BimpComponent
                 break;
         }
 
-//        if ($this->name === 'vr') {
-//            echo '<pre>';
-//            print_r($this->params);
-//            exit;
-//        }
-        $html .= BimpInput::renderInput($input_type, $input_name, null, $options, null, 'default', $input_id);
+        if ($input_type === 'search_list') {
+            $html .= BimpInput::renderSearchListInput($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
+        } else {
+            $html .= BimpInput::renderInput($input_type, $input_name, null, $options, null, 'default', $input_id);
+        }
+
         $html .= '</div>';
 
         return $html;
@@ -225,7 +228,9 @@ class BC_Field extends BimpComponent
             $html .= '<div style="padding-right: 32px;">';
         }
 
-        $html .= '<input type="hidden" name="' . $this->name . '" value="' . $this->value . '">';
+        if ($this->display_input_value) {
+            $html .= '<input type="hidden" name="' . $this->name . '" value="' . $this->value . '">';
+        }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
 

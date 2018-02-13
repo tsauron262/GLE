@@ -83,61 +83,58 @@ abstract class BimpComponent
 
     public function setParam($name, $value)
     {
-        if ($this->validateParam($name, $value)) {
+        if (self::validateParam($name, $value, $this->params_def, $errors)) {
             $this->params[$name] = $value;
         }
     }
 
-    protected function validateParam($name, $value, $definitions = null)
-    {
-        if (is_null($definitions)) {
-            $definitions = $this->params_def;
-        }
-
-        if (!array_key_exists($name, $definitions)) {
-            $this->addTechnicalError('Paramètre de configuration invalide: "' . $name . '" (définitions absentes)');
-            return false;
-        }
-
-        $defs = $definitions[$name];
-
-        if (isset($defs['type']) && $defs['type'] !== 'value') {
-            return true;
-        }
-
-        if (is_null($value) || ($value === '')) {
-            if (isset($defs['required']) && (bool) $defs['required']) {
-                $this->addTechnicalError('Paramètre de configuration obligatoire absent: "' . $name . '"');
-                return false;
-            }
-            $value = '';
-        }
-
-        $type = isset($defs['data_type']) ? $defs['data_type'] : 'string';
-        if (!BimpTools::checkValueByType($type, $value)) {
-            $this->addTechnicalError('Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")');
-            return false;
-        }
-
-        return true;
-    }
-
     public function fetchParams($path, $definitions = null)
     {
-        $params = array();
         if (is_null($definitions)) {
             $definitions = $this->params_def;
+        }
+
+        $errors = array();
+        $params = self::fetchParamsStatic($this->object->config, $path, $definitions, $errors);
+
+        if (count($errors)) {
+            foreach ($errors as $e) {
+                $this->addTechnicalError($e);
+            }
+        }
+        
+        return $params;
+    }
+
+    public function fetchParam($name, $definitions, $path)
+    {
+        $errors = array();
+        $param = self::fetchParamStatic($this->object->config, $name, $definitions, $path, $errors);
+        if (count($errors)) {
+            foreach ($errors as $e) {
+                $this->addTechnicalError($e);
+            }
+        }
+        return $param;
+    }
+
+    public static function fetchParamsStatic(BimpConfig $config, $path, $definitions, &$errors)
+    {
+        $params = array();
+        if (is_null($definitions) || is_null($config)) {
+            return array();
         }
 
         foreach ($definitions as $name => $defs) {
-            $params[$name] = $this->fetchParam($name, $definitions, $path);
+            $params[$name] = self::fetchParamStatic($config, $name, $definitions, $path, $errors);
         }
         return $params;
     }
 
-    protected function fetchParam($name, $definitions, $path)
+    protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors)
     {
         if (!isset($definitions[$name])) {
+            $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
             return null;
         }
 
@@ -170,33 +167,33 @@ abstract class BimpComponent
                         if ($data_type === 'array') {
                             $compile = isset($defs['compile']) ? (bool) $defs['compile'] : true;
                             if ($compile) {
-                                $value = $this->object->config->getCompiledParams($path . '/' . $name, array(), $required, 'array');
+                                $value = $config->getCompiledParams($path . '/' . $name, array(), $required, 'array');
                             }
                         } else {
-                            $value = $this->object->getConf($path . '/' . $name, $default_value, $required, $data_type);
+                            $value = $config->get($path . '/' . $name, $default_value, $required, $data_type);
                         }
                     } else {
                         $value = $default_value;
                     }
                 }
                 if (!is_null($value)) {
-                    if ($this->validateParam($name, $value, $definitions)) {
+                    if (self::validateParam($name, $value, $definitions, $errors)) {
                         $param = $value;
                     }
                 } elseif ($required) {
-                    $this->addTechnicalError('Paramètre obligatoire "' . $name . '" absent du fichier de configuration');
+                    $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
                 }
                 break;
 
             case 'object':
                 if (!is_null($path)) {
-                    $param = $this->object->config->getObject($path . '/' . $name);
+                    $param = $config->getObject($path . '/' . $name);
                 }
                 break;
 
             case 'keys':
                 if (!is_null($path)) {
-                    $values = $this->object->getConf($path . '/' . $name, array(), $required, 'array');
+                    $values = $config->get($path . '/' . $name, array(), $required, 'array');
                     $param = array();
                     if (!is_null($values)) {
                         foreach ($values as $key => $val) {
@@ -213,23 +210,23 @@ abstract class BimpComponent
 
                     if (!is_null($defs_type)) {
                         if (property_exists('BimpConfigDefinitions', $defs_type)) {
-                            if (!$this->object->config->isDefined($path . '/' . $name) && $required) {
-                                $this->addTechnicalError('Paramètre obligatoire "' . $name . '" absent du fichier de configuration');
+                            if (!$config->isDefined($path . '/' . $name) && $required) {
+                                $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
                             } else {
                                 if ($multiple) {
                                     $param = array();
-                                    foreach ($this->object->getConf($path . '/' . $name, array(), false, 'array') as $key => $values) {
-                                        $param[$key] = self::fetchParams($path . '/' . $name . '/' . $key, BimpConfigDefinitions::${$defs_type});
+                                    foreach ($config->get($path . '/' . $name, array(), false, 'array') as $key => $values) {
+                                        $param[$key] = self::fetchParamsStatic($config, $path . '/' . $name . '/' . $key, BimpConfigDefinitions::${$defs_type}, $errors);
                                     }
                                 } else {
-                                    $param = $this->fetchParams($path . '/' . $name, BimpConfigDefinitions::${$defs_type});
+                                    $param = self::fetchParamsStatic($config, $path . '/' . $name, BimpConfigDefinitions::${$defs_type}, $errors);
                                 }
                             }
                         } else {
-                            $this->addTechnicalError('Type de définitions invalide pour le paramètre "' . $name . '" (' . $defs_type . ')');
+                            $errors[] = 'Type de définitions invalide pour le paramètre "' . $name . '" (' . $defs_type . ')';
                         }
                     } else {
-                        $this->addTechnicalError('Type de définitions absent pour le paramètre "' . $name . '"');
+                        $errors[] = 'Type de définitions absent pour le paramètre "' . $name . '"';
                     }
                 }
                 break;
@@ -240,6 +237,36 @@ abstract class BimpComponent
         }
 
         return $param;
+    }
+
+    protected static function validateParam($name, $value, $definitions, &$errors)
+    {
+        if (is_null($definitions) || !is_array($definitions) || !array_key_exists($name, $definitions)) {
+            $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
+            return false;
+        }
+
+        $defs = $definitions[$name];
+
+        if (isset($defs['type']) && $defs['type'] !== 'value') {
+            return true;
+        }
+
+        if (is_null($value) || ($value === '')) {
+            if (isset($defs['required']) && (bool) $defs['required']) {
+                $errors[] = 'Paramètre de configuration obligatoire absent: "' . $name . '"';
+                return false;
+            }
+            $value = '';
+        }
+
+        $type = isset($defs['data_type']) ? $defs['data_type'] : 'string';
+        if (!BimpTools::checkValueByType($type, $value)) {
+            $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';
+            return false;
+        }
+
+        return true;
     }
 
     // Rendus:

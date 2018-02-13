@@ -125,29 +125,29 @@ function reloadObjectList(list_id, callback) {
     }
     error_msg += ' n\'a pas pu être rechargée';
 
-    requests.push(new BimpAjax('loadObjectList', data, null, {
+    BimpAjax('loadObjectList', data, null, {
+        $list: $list,
+        $resultContainer: $resultContainer,
         display_success: false,
         error_msg: error_msg,
-        success: function (result) {
-            if (result.rows_html && result.list_id) {
-                var $list = $('#' + result.list_id);
-                $list.find('tbody.listRows').html(result.rows_html);
-                var $container = $('#' + result.list_id + '_container');
-                if ($container.length) {
+        success: function (result, bimpAjax) {
+            if (result.rows_html) {
+                bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
+                if (bimpAjax.$resultContainer.length) {
                     if (result.pagination_html) {
-                        $container.find('.listPagination').each(function () {
+                        bimpAjax.$resultContainer.find('.listPagination').each(function () {
                             $(this).data('event_init', 0);
                             $(this).html(result.pagination_html).parent('td').parent('tr.paginationContainer').show();
                         });
-                        setPaginationEvents($list);
+                        setPaginationEvents(bimpAjax.$list);
                     } else {
-                        $container.find('.listPagination').each(function () {
+                        bimpAjax.$resultContainer.find('.listPagination').each(function () {
                             $(this).html('').parent('td').parent('tr.paginationContainer').hide();
                         });
                     }
                 }
 
-                onListRefeshed($list);
+                onListRefeshed(bimpAjax.$list);
 
                 if (typeof (callback) === 'function') {
                     callback(true);
@@ -163,7 +163,7 @@ function reloadObjectList(list_id, callback) {
                 callback(false);
             }
         }
-    }));
+    });
 }
 
 function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent) {

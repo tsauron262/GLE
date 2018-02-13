@@ -22,14 +22,6 @@ objects:
             dol_object: societe
             id_object: 
                 field_value: id_fournisseur
-                
-    user_account:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BE_UserAccount
-            id_object: 
-                field_value: id_user_account
         
 fields: 
     use_product:
@@ -41,6 +33,7 @@ fields:
         label: Produit
         type: id_object
         object: product
+        required_if: use_product=1
         input: 
             type: search_product
             help: Entrez un nom ou une référence pour rechercher un produit
@@ -56,6 +49,7 @@ fields:
         display_if: 
             field_name: use_product
             show_values: 0
+        required_if: use_product=0
         
     id_fournisseur:
         label: Fabricant
@@ -71,12 +65,14 @@ fields:
         display_if: 
             field_name: use_product
             show_values: 0
+        required_if: use_product=0
             
     version:
         label: Version
         display_if: 
             field_name: use_product
             show_values: 0
+        required_if: use_product=0
             
     type: 
         label: Type
@@ -85,25 +81,6 @@ fields:
                 1: OS
                 2: BDD
         default_value: 1
-        
-    id_user_account:
-        label: Compte utilisateur
-        type: id_object
-        object: user_account
-        input: 
-            type: search_list
-            search_list:
-                table: be_user_account
-                field_return_label: name
-                field_return_value: id
-                fields_search: name,login
-        display: 
-            nom: 
-                type: nom
-                card: default
-        
-    sn: 
-        label: SN
 
 fields_tables: 
     default: 
@@ -116,7 +93,6 @@ fields_tables:
                       params:
                           - card
             - field: type
-            - field: sn
 
 views: 
     default:
@@ -158,13 +134,15 @@ lists:
                             - nom_url
             type: 
                 field: type
-            user:
-                field: id_user_account
-                display: nom                    
-            sn: 
-                field: sn
         
-            
-    
-        
-    
+cards: 
+    default: 
+        fields: 
+            - field: name
+            - field: type
+    large: 
+        fields: 
+            - label: Produit
+              value: 
+                  callback: displayProduct
+            - field: type

@@ -106,9 +106,13 @@ class pdf_bimpcommercial extends ModelePDFPropales
 		// Define position of columns
 		$this->posxdesc=$this->marge_gauche+1;
 		
-			$this->posxtva=110;
-			$this->posxup=140;
-			$this->posxqty=165;
+//			$this->posxtva=110;
+//			$this->posxup=140;
+//			$this->posxqty=165;
+                        
+			$this->posxtva=40;
+			$this->posxup=70;
+			$this->posxqty=95;
 		
 		$this->posxdiscount=120;
 		$this->postotalht=174;
@@ -299,6 +303,9 @@ class pdf_bimpcommercial extends ModelePDFPropales
 					if ($object->lines[$i]->remise_percent)
 					{
 						$this->atleastonediscount++;
+			$this->posxtva=140;
+			$this->posxup=140;
+			$this->posxqty=165;
 					}
 				}
 				if (empty($this->atleastonediscount) && empty($conf->global->PRODUCT_USE_UNITS))

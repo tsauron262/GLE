@@ -3,7 +3,7 @@
 class BE_Logiciel extends BimpObject
 {
 
-    public function displayProduct($display)
+    public function displayProduct($display = '')
     {
         if (!$this->isLoaded()) {
             return '';
@@ -49,5 +49,26 @@ class BE_Logiciel extends BimpObject
         $html .= (!is_null($name) ? $name : '');
         $html .= '</span>';
         return $html;
+    }
+
+    public function validate()
+    {
+        if ((int) $this->getData('use_product')) {
+            $id_product = (int) $this->getData('id_product');
+            if ($id_product) {
+                $label = $this->db->getValue('product', 'label', '`rowid` = ' . $id_product);
+                if (!is_null($label)) {
+                    $this->set('name', $label);
+                }
+            } else {
+                $this->set('name', '');
+            }
+            $this->set('id_fournisseur', 0);
+            $this->set('version', '');
+        } else {
+            $this->set('id_product', 0);
+        }
+
+        return parent::validate();
     }
 }

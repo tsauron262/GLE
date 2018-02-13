@@ -7,6 +7,7 @@ class CronSynopsis {
 
     var $nbErreur = 0;
     var $sortie = '';
+    var $output = "";
 
     public function __construct($db) {
         $this->db = $db;
@@ -51,7 +52,9 @@ class CronSynopsis {
 //        $export->exportFactureSav(false);
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportfacture.class.php");
         $export = new exportfacture($this->db);
-        return $export->exportTout(); 
+        $export->exportTout(); 
+        $this->output = $export->output;
+        return "End";
     }
 
     public function sortieMail() {

@@ -258,6 +258,11 @@ class BimpStruct
                 $col_path = $path . '/' . $idx_row . '/cols/' . $idx_col;
                 $config->setCurrentPath($col_path);
 
+                $show = (int) $config->getFromCurrentPath('show', 1, false, 'bool');
+                if (!$show) {
+                    continue;
+                }
+
                 $col_lg = $config->getFromCurrentPath('col_lg', 12, false, 'int');
                 $col_md = $config->getFromCurrentPath('col_md', null, false, 'int');
                 $col_sm = $config->getFromCurrentPath('col_sm', null, false, 'int');

@@ -2247,6 +2247,9 @@ class BimpObject
 
     public static function getInstanceNom($instance)
     {
+        if (!isset($instance->id) || !$instance->id) {
+            return '';
+        }
         if (is_a($instance, 'BimpObject')) {
             return $instance->getInstanceName();
         } elseif (is_a($instance, 'user')) {
@@ -2263,6 +2266,51 @@ class BimpObject
         return '';
     }
 
+    // Liens et url: 
+
+    public function getUrl()
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $controller = $this->getController();
+        if (!$controller) {
+            return '';
+        }
+
+        return $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
+    }
+
+    public function getChildObjectUrl($object_name, $object = null)
+    {
+        if (is_null($object)) {
+            $object = $this->config->getObject('', $object_name);
+        }
+
+        if (is_null($object)) {
+            return '';
+        }
+
+        if (is_a($object, 'BimpObject')) {
+            return $object->getUrl();
+        }
+
+        $module = $this->config->getObjectModule("", $object_name);
+        if ($module) {
+            $file = $module . '/card.php';
+            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                $primary = 'id';
+                if (is_a($object, 'Societe')) {
+                    $primary = 'socid';
+                }
+                return DOL_URL_ROOT . '/' . $file . (isset($object->id) && $object->id ? '?' . $primary . '=' . $object->id : '');
+            }
+        }
+
+        return '';
+    }
+
     public static function getInstanceNomUrl($instance)
     {
         if (is_a($instance, 'BimpObject')) {
@@ -2276,6 +2324,10 @@ class BimpObject
 
     public static function getInstanceUrl($instance)
     {
+        if (!isset($instance->id) || !$instance->id) {
+            return '';
+        }
+
         if (is_a($instance, 'BimpObject')) {
             if ($controller = $instance->getController()) {
                 return DOL_URL_ROOT . '/' . $instance->module . '/index.php?fc=' . $controller . (isset($instance->id) && $instance->id ? '&id=' . $instance->id : '');

@@ -1,161 +1,4 @@
-// successCallBack : soit fonction callback en cas de succès, soit message par défaut en cas de succès
-// errorCallBack : soit fonction callback en cas d'erreur, soit message par défaut en cas d'erreur
-
-// Traitements Ajax:
-var ajaxRequestsUrl = './index.php';
-function bimp_json_ajax(action, data, $resultContainer, successCallBack, errorCallBack, display_processing, ajax_params) {
-    var display_result_errors_only = false;
-    if ((typeof (successCallBack) === 'string') ||
-            typeof (successCallBack) === 'function') {
-        display_result_errors_only = true;
-    }
-
-    if (typeof (display_processing) === 'undefined') {
-        display_processing = true;
-    }
-
-    if (display_processing && $resultContainer && typeof ($resultContainer) !== 'undefined' && $resultContainer.length) {
-        bimp_display_msg('Traitement en cours', $resultContainer, 'info');
-    }
-
-    var ajaxRequestUrl = '';
-    if (typeof (data.ajaxRequestUrl) !== 'undefined') {
-        ajaxRequestUrl = data.ajaxRequestUrl;
-    } else {
-        ajaxRequestUrl = ajaxRequestsUrl;
-    }
-
-    if (!/\?/.test(ajaxRequestUrl)) {
-        ajaxRequestUrl += '?';
-    } else {
-        ajaxRequestUrl += '&';
-    }
-    ajaxRequestUrl += 'ajax=1&action=' + action;
-
-    if (typeof (ajax_params) === 'undefined') {
-        var ajax_params = {};
-    }
-
-    if (typeof (ajax_params.type) === 'undefined') {
-        ajax_params.type = "POST";
-    }
-
-    if (typeof (ajax_params.url) === 'undefined') {
-        ajax_params.url = ajaxRequestUrl;
-    }
-    if (typeof (ajax_params.dataType) === 'undefined') {
-        ajax_params.dataType = 'json';
-    }
-    if (typeof (ajax_params.data) === 'undefined') {
-        ajax_params.data = data;
-    }
-    if (typeof (ajax_params.success) === 'undefined') {
-        ajax_params.success = function (result) {
-            bimp_displayAjaxResult(result, $resultContainer, display_result_errors_only);
-            if (!result.errors.length) {
-                if (typeof (successCallBack) === 'function') {
-                    successCallBack(result);
-                } else if (typeof (successCallBack) === 'string') {
-                    if (successCallBack) {
-                        bimp_display_msg(successCallBack, $resultContainer, 'success');
-                    }
-                } else if ((typeof (result.success) === 'string') && result.success) {
-                    bimp_display_msg(result.success, $resultContainer, 'success');
-                }
-            } else {
-                if (typeof (errorCallBack) === 'function') {
-                    errorCallBack(result);
-                }
-            }
-        };
-    }
-    if (typeof (ajax_params.error) === 'undefined') {
-        ajax_params.error = function () {
-            if (typeof (errorCallBack) === 'string') {
-                bimp_display_msg(errorCallBack, $resultContainer, 'danger');
-            } else {
-                bimp_display_msg('Une erreur est survenue. La requête n\'a pas aboutie', $resultContainer, 'danger');
-            }
-            if (typeof (errorCallBack) === 'function') {
-                errorCallBack();
-            }
-        };
-    }
-
-    $.ajax(ajax_params);
-}
-
-function bimp_display_msg(msg, $container, className) {
-    if (!$container || (typeof ($container) === 'undefined') || !$container.length) {
-        bimp_show_msg(msg, className);
-        return;
-    }
-    var html = '';
-    if (typeof (className) !== 'undefined') {
-        html += '<p class="alert alert-' + className + ' alert-dismissible">';
-        html += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-    } else {
-        html += '<p>';
-    }
-    html += msg + '</p>';
-    $container.html(html).slideDown(250);
-}
-
-function bimp_displayAjaxResult(data, $container, errors_only) {
-    if (typeof (errors_only) === 'undefined') {
-        errors_only = false;
-    }
-    if (!$container || (typeof ($container) === 'undefined') || !$container || !$container.length) {
-        $container = false;
-    } else {
-        $container.hide().html('');
-    }
-
-    if (typeof (data) === 'undefined') {
-        bimp_display_msg('Une erreur est survenue: aucune données reçues', $container, 'danger');
-        return;
-    }
-
-    if (!bimp_display_result_errors(data, $container)) {
-        if (!errors_only) {
-            bimp_display_result_success(data, $container);
-        }
-    }
-}
-
-function bimp_display_result_errors(result, $container) {
-    if (typeof (result.errors) !== 'undefined') {
-        if (result.errors.length) {
-            var msg = result.errors.length;
-            if (result.errors.length > 1) {
-                msg += ' erreurs détectées';
-            } else {
-                msg += ' erreur détectée';
-            }
-            msg += '<br/><br/>';
-            var n = 1;
-            for (var i in result.errors) {
-                msg += n + '- ' + result.errors[i] + '<br/>';
-                n++;
-            }
-            bimp_display_msg(msg, $container, 'danger');
-            return true;
-        }
-    }
-    return false;
-}
-
-function bimp_display_result_success(result, $container) {
-    if (typeof (result.success) !== 'undefined') {
-        if (typeof (result.success) === 'string') {
-            bimp_display_msg(result.success, $container, 'success');
-        } else {
-            bimp_display_msg('Opération réalisée avec succès', $container, 'success');
-        }
-    }
-}
-
-// Notifications
+// Notifications:
 
 function bimp_msg(msg, className, $container) {
     if (typeof (className) === 'undefined') {
@@ -192,10 +35,6 @@ function bimp_msg(msg, className, $container) {
             }
         });
     }
-}
-
-function bimp_show_msg(msg, className) {
-    bimp_msg(msg, className);
 }
 
 function bimp_display_element_popover($element, content, side) {
@@ -561,8 +400,7 @@ function displayMoneyValue(value, $container, classCss, currency) {
     $container.html('<span class="' + classCss + '">' + value + ' ' + currency + '</span>');
 }
 
-function lisibilite_nombre(nbr)
-{
+function lisibilite_nombre(nbr) {
     var nombre = '' + nbr;
     var retour = '';
     var count = 0;
@@ -576,6 +414,7 @@ function lisibilite_nombre(nbr)
     }
     return retour.replace(" ,", ",");
 }
+
 // Math:
 
 (function () {
@@ -668,6 +507,22 @@ $.fn.findParentByTag = function (tag) {
     return $();
 };
 
+$.isOk = function (object) {
+    if (typeof (object) !== 'object') {
+        return false;
+    }
+
+    if (typeof (object.length) === 'undefined') {
+        return false;
+    }
+
+    if (!object.length) {
+        return false;
+    }
+
+    return true;
+};
+
 function findParentByClass($element, className) {
     return $element.findParentByClass(className);
 }
@@ -678,6 +533,4 @@ function findParentByTag($element, tag) {
 
 $(document).ready(function () {
     $('body').append('<div id="page_notifications"></div>');
-
-
 });

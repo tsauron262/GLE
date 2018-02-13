@@ -20,8 +20,7 @@ fields:
         size: 256
         search: 
             type: value_part
-            part_type: beginning
-            search_on_key_up: 1
+            part_type: middle
             
     quantity:
         label: Quantité
@@ -30,6 +29,9 @@ fields:
         display_if: 
             field_name: id_group
             show_values: 0
+        search:
+            type: value_part
+            part_type: beginning
         
     unit_price:
         label: Prix unitaire HT
@@ -37,7 +39,6 @@ fields:
         search:
             type: value_part
             part_type: beginning
-            search_on_key_up: 1
 
 forms: 
     predef: 

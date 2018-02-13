@@ -39,15 +39,19 @@ function reloadObjectView(view_id) {
         'new_values': new_values
     };
 
-    bimp_json_ajax('loadObjectView', data, null, function (result) {
-        if (typeof (result.html) !== 'undefined') {
-            if (result.html) {
-                $view.find('.object_view_content').stop().fadeOut(250, function () {
-                    $(this).html(result.html);
-                    $(this).fadeIn(250, function () {
-                        onViewRefreshed($view);
+    BimpAjax('loadObjectView', data, null, {
+        $view: $view,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined') {
+                if (result.html) {
+                    bimpAjax.$view.find('.object_view_content').stop().fadeOut(250, function () {
+                        $(this).html(result.html);
+                        $(this).fadeIn(250, function () {
+                            onViewRefreshed(bimpAjax.$view);
+                        });
                     });
-                });
+                }
             }
         }
     });
@@ -115,30 +119,25 @@ function loadModalView(module, object_name, id_object, view_name, $button) {
     };
 
     BimpAjax('loadObjectView', data, null, {
+        $modal: $modal,
+        $resultContainer: $resultContainer,
         display_success: false,
-        success: function (result) {
-            var $modal = $('#page_modal');
-            var $resultContainer = $modal.find('.modal-ajax-content');
-            $modal.find('.content-loading').hide();
+        success: function (result, bimpAjax) {
+            bimpAjax.$modal.find('.content-loading').hide();
             if (!isCancelled) {
                 if (typeof (result.html) !== 'undefined') {
-                    $resultContainer.html(result.html).slideDown(250);
-                    var $new_view = $resultContainer.find('#' + result.view_id);
+                    bimpAjax.$resultContainer.html(result.html).slideDown(250);
+                    var $new_view = bimpAjax.$resultContainer.find('#' + result.view_id);
                     if ($new_view.length) {
                         onViewLoaded($new_view);
                     }
                 }
-                $modal.modal('handleUpdate');
+                bimpAjax.$modal.modal('handleUpdate');
             }
         },
-        error: function (result) {
-            var $modal = $('#page_modal');
-            var $resultContainer = $modal.find('.modal-ajax-content');
-            $modal.find('.content-loading').hide();
-            if (!bimp_display_result_errors(result, $resultContainer)) {
-                bimp_display_msg('Echec du chargement du contenu', $resultContainer, 'danger');
-            }
-            $modal.modal('handleUpdate');
+        error: function (result, bimpAjax) {
+            bimpAjax.$modal.find('.content-loading').hide();
+            bimpAjax.$modal.modal('handleUpdate');
         }
     });
 }
@@ -177,15 +176,21 @@ function saveObjectFromViewModalForm(view_id, $button) {
         if ($form.length) {
             var data = $form.serialize();
         }
-        bimp_json_ajax('saveObject', data, $resultContainer, function () {
-            $button.removeClass('disabled');
-            $('body').trigger($.Event('objectChange', {
-                module: $view.data('module'),
-                object_name: $view.data('object_name'),
-                id_object: $view.data('id_object')
-            }));
-        }, function () {
-            $button.removeClass('disabled');
+
+        BimpAjax('saveObject', data, $resultContainer, {
+            $button: $button,
+            $view: $view,
+            success: function (result, bimpAjax) {
+                bimpAjax.$button.removeClass('disabled');
+                $('body').trigger($.Event('objectChange', {
+                    module: bimpAjax.$view.data('module'),
+                    object_name: bimpAjax.$view.data('object_name'),
+                    id_object: bimpAjax.$view.data('id_object')
+                }));
+            },
+            error: function (result, bimpAjax) {
+                bimpAjax.$button.removeClass('disabled');
+            }
         });
     }
 }
@@ -411,7 +416,7 @@ function onViewLoaded($view) {
                     }
                 });
 
-                if (objects && objects.length) {                
+                if (objects && objects.length) {
                     $('body').on('objectDelete', function (e) {
                         for (var i in objects) {
                             if (e.object_name === objects[i]) {

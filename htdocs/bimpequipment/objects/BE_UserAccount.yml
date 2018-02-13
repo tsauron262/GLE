@@ -5,10 +5,56 @@ labels:
     name: compte utilisateur
     name_plur: comptes utilisateurs
     
+objects: 
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object: 
+                field_value: id_client
+        card:
+            type: societe_card
+            
+    client_contact: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: contact
+            id_object: 
+            field_value: id_client_contact
+        card: 
+            type: contact_card
+            
 fields:
     name: 
         label: Nom
         required: 1
+        
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        input: 
+            type: search_societe
+            societe_type: customer
+        display: 
+            default:
+                type: nom_url
+            
+    id_client_contact:
+        label: Contact
+        type: id_object
+        object: client_contact
+        values: 
+            array: client_contacts
+        display: 
+            default:
+                type: nom_url
+        display_if:
+            field_name: id_client
+            hide_values: 0,
+        depends_on: id_client
         
     login: 
         label: Identifiant
@@ -17,6 +63,8 @@ fields:
     pword: 
         label: Mot de passe
         required: 1
+        
+    
         
 lists: 
     default: 
@@ -28,15 +76,18 @@ lists:
               btn_class: deleteSelectedObjects
         title: Comptes utilisateurs
         icon: users
-        add_object_row: 1
+        add_form_name: default
         delete_btn: 1
         update_btn: 1
+        edit_btn: 1
         sort_field: id
         sort_way: desc
         cols: 
             name: 
                 field: name
                 edit: 1
+            client: 
+                field: id_client
             login: 
                 field: login
                 edit: 1
@@ -44,8 +95,17 @@ lists:
                 field: pword
                 edit: 1
                 
-card:
-    title: nom
-    fields:
-        - field: login
-        - field: pword
+cards:
+    default: 
+        fields:
+            - field: login
+            - field: pword
+            - field: id_client
+            - field: id_client_contact
+            
+    light: 
+        fields: 
+            - field: id_client
+              display: nom
+            - field: id_client_contact
+              display: nom

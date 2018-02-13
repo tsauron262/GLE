@@ -130,14 +130,17 @@ fields:
         label: Informations
         type: text
         input: 
-            rows: 3
+            rows: 1
             auto_expand: 1
             note: 1
+        sortable: 0
+        searchable: 0
             
     date:
         label: Date d'arrivée
         type: datetime
         required: 1
+        sortable: 0
         
 lists:
     default: 
@@ -149,6 +152,7 @@ lists:
         sort_way: asc
         n: 10
         edit_btn: 1
+        update_btn: 1
         positions: 1
         cols:
             name: 
@@ -159,3 +163,4 @@ lists:
                 field: date
             infos: 
                 field: infos
+                edit: 1

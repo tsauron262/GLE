@@ -41,7 +41,7 @@ class BimpController
             $this->errors = array_merge($this->errors, $this->config->errors);
         }
 
-        $this->addJsFile('/bimpcore/views/js/controller.js');
+        $this->addJsFile('/bimpcore/views/js/new/controller.js');
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/views/js/' . $controller . '.js')) {
             $this->addJsFile('/' . $module . '/views/js/' . $controller . '.js');
@@ -1134,6 +1134,7 @@ class BimpController
         $fields_return_label = BimpTools::getValue('field_return_label', '');
         $label_syntaxe = html_entity_decode(BimpTools::getValue('label_syntaxe', '<label_1>'));
         $fields_return_value = BimpTools::getValue('field_return_value', '');
+        $filters = BimpTools::getValue('filters', '');
         $join = BimpTools::getValue('join', '');
         $join_return_label = BimpTools::getValue('join_return_label', '');
         $join_on = BimpTools::getValue('join_on', '');
@@ -1184,12 +1185,19 @@ class BimpController
             }
 
             if ($where) {
-                $sql .= ' WHERE ' . $where;
+                $sql .= ' WHERE (' . $where . ')';
+            }
+
+            if (count($filters)) {
+                foreach ($filters as $field => $filter) {
+                    $sql .= ' AND ' . BimpTools::getSqlFilter($field, $filter);
+                }
             }
 
             $sql .= ' LIMIT 15';
 
-//            echo $sql; exit;
+//            echo $sql;
+//            exit;
 
             $rows = $bdb->executeS($sql, 'array');
 

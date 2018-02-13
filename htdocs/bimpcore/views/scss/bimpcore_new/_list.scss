@@ -1,354 +1,358 @@
-.object_list_table  {    
-    table.objectlistTable {
-        border: none;
-        box-shadow: none;
+table.bimp_list_table,
+table.objectlistTable {
+    border: none;
+    box-shadow: none;
 
-        & > thead > tr > th {
-            padding: 10px 6px;
-            margin-bottom: 8px;
-            color: #fff;
-            background-color: $primary;
-            text-align: left;
-            font-weight: bold;
-            
-            min-width: 80px;
-            
-            &.th_checkboxes {
-                min-width: 40px!important;
-                width: 40px!important;
-            }
-            
-            &.th_tools {
-                min-width: 0;
-            }
+    & > thead > tr > th {
+        padding: 10px 6px;
+        margin-bottom: 8px;
+        color: #fff;
+        background-color: $primary;
+        text-align: left;
+        font-weight: bold;
+
+        min-width: 80px;
+
+        &.th_checkboxes {
+            min-width: 40px!important;
+            width: 40px!important;
         }
 
-        & > tbody > tr.objectListItemRow {
-            @include transition(all 0.3s ease);
-            
+        &.th_tools {
+            min-width: 0;
+        }
+
+        &.positionHandle {
+            min-width: 30px;
+        }
+    }
+
+    & > tbody > tr.objectListItemRow {
+        @include transition(all 0.3s ease);
+
+        background-color: #fff!important;
+        & > td {
             background-color: #fff!important;
-            & > td {
-                background-color: #fff!important;
-                
-                @media (max-width: $screen-sm) {
-                    .toggle-label-off,
-                    .toggle-label-on {
-                        display: none;
-                    }
-                }
-            }
 
-            &.selected {
-                background-color: #FFF5E1!important;
-
-                & > td {
-                    background-color: #FFF5E1!important;
-                }
-            }
-            
-            &.modified  {
-                background-color: #E1F5FF!important;
-                border-color: #E1F5FF!important;
-
-                & > td {
-                    background-color: #E1F5FF!important;
-                    border-color: #E1F5FF!important;
-
-                    .inputContainer .modified {
-                        box-shadow: 0 0 3px #003550!important;
-                    }
-                }
-            }
-
-            &:hover {
-                background-color: #FAFAFA!important;
-                
-                & > td {
-                    background-color: #FAFAFA!important;
-                }
-            }
-
-            &.selected:hover {
-                background-color: #FFEFCD!important;
-                
-                & > td {
-                    background-color: #FFEFCD!important;
-                }
-            }
-            
-            &.modified:hover {
-                background-color: #CDEFFF!important;
-                
-                & > td {
-                    background-color: #CDEFFF!important;
-                }
-            }
-        }
-
-        td {
-            padding: 5px 6px;
-
-            .inputContainer {
-                display: inline-block;
-                width: 100%;
-
-                input, textarea, select {
-                    width: 100%;
-                    color: $input-color;
-                    font-weight: normal;
-                }
-
-                .inputHelp {
+            @media (max-width: $screen-sm) {
+                .toggle-label-off,
+                .toggle-label-on {
                     display: none;
                 }
             }
+        }
 
-            .popover {
-                color: $gray-darker;
+        &.selected {
+            background-color: #FFF5E1!important;
+
+            & > td {
+                background-color: #FFF5E1!important;
             }
         }
 
-        .objectSubList {
-            width: 100%;
-            & > thead > tr > th {
-                padding: 4px 10px;
-                margin-bottom: 4px;
-                color: $gray-darker;
-                background-color: $gray-lighter;
-                text-align: left;
-                font-weight: bold;
-                border-bottom: 1px solid $primary;
-            }
+        &.modified  {
+            background-color: #E1F5FF!important;
+            border-color: #E1F5FF!important;
 
-            td {
-                padding: 4px 10px;
-                border-bottom: 1px solid $gray-light;
-                background-color: #fff;
-                color: $gray-dark;
-            }
-        }
-    }
+            & > td {
+                background-color: #E1F5FF!important;
+                border-color: #E1F5FF!important;
 
-    .sortTitle {
-        cursor: pointer;
-
-        &:after {
-            font-family: 'FontAwesome';
-            margin-left: 8px;
-            opacity: 0;
-            color: #fff;
-            transition: all 0.15s ease;
-            -webkit-transition: all 0.15s ease;
-        }
-        &:hover,
-            &.active {
-            text-decoration: none!important;
-            &:after {
-                opacity: 1;
+                .inputContainer .modified {
+                    box-shadow: 0 0 3px #003550!important;
+                }
             }
         }
 
-        &.sorted-asc:after {
-            content: '\f0d7';
-        }
-        &.sorted-desc:after {
-            content: '\f0d8';
-        }
-        &.active.sorted-asc:after {
-            content: '\f0d8';
-        }
-        &.active.sorted-desc:after {
-            content: '\f0d7';
-        }
-        &.active.sorted-asc:hover:after {
-            content: '\f0d7';
-        }
-        &.active.sorted-desc:hover:after {
-            content: '\f0d8';
-        }
+        &:hover {
+            background-color: #FAFAFA!important;
 
-        &.deactivated,
-        &.deactivated:hover {
-            cursor: not-allowed;
-
-            &:after {
-                opacity: 0!important;
+            & > td {
+                background-color: #FAFAFA!important;
             }
-
-        }
-    }
-    .listSearchRow {
-        display: none;
-        background-color: #DCDCDC;
-
-        i.fa-search {
-            font-size: 16px;
-            font-weight: bold;
-            color: #787878;
-        }
-        .inputHelp {
-            display: none;
         }
 
-        #search_id {
-            max-width: 45px;
-        }
-        td.searchTools {
-            text-align: right;
-        }
+        &.selected:hover {
+            background-color: #FFEFCD!important;
 
-        .searchInputContainer {
-            width: 100%;
-            padding: 2px;
-
-            input, select, .input-group {
-                width: 100%;
+            & > td {
+                background-color: #FFEFCD!important;
             }
+        }
 
-            .search_list_input {
-                width: 80%
+        &.modified:hover {
+            background-color: #CDEFFF!important;
+
+            & > td {
+                background-color: #CDEFFF!important;
             }
         }
     }
-    .addObjectRow {
-        display: none;
-        background-color: #A0A0A0;
 
-        td:first-child {
-            text-align: center;
-
-            i.fa-plus-circle {
-                font-size: 20px;
-                font-weight: normal;
-                color: #DCDCDC;
-            }
-        }
-        .inputHelp {
-            display: none;
-        }
+    td {
+        padding: 5px 6px;
 
         .inputContainer {
-            input, select, textarea {
-                width: 100%;
-            }
-        }
-    }
-    th.th_tools {
-        margin-right: 25px;
-    }
-
-    .headerTools {
-        text-align: right;
-        height: 100%;
-
-        .headerButton {
             display: inline-block;
-            margin: 5px;
-            color: #fff;
-            font-weight: normal;
-            margin: 0 3px;
-            padding: 4px 6px;
-            height: 100%;
-            cursor: pointer;
-            font-size: 14px;
+            width: 100%;
 
-            transition: all 0.3s ease;
-            -webkit-transition: all 0.3s ease;
-
-            &:hover {
-                color: #EF7D00;
-                background-color: #fff;
+            input, textarea, select {
+                width: 100%;
+                color: $input-color;
+                font-weight: normal;
             }
-            &:before,
-                &:after {
-                font-family: 'FontAwesome';
+
+            .inputHelp {
+                display: none;
             }
         }
-        .openSearchRowButton:before {
-            content: '\f002';
-        }
-        .openAddObjectRowButton:before {
-            content: '\f055';
-        }
-        .activatePositionsButton:before {
-            content: '\f07d';
-        }
-        .openBulkActionsPopupButton:before {
-            content: '\f046';
-        }
-        .openParametersPopupButton:before {
-            content: '\f013';
+
+        .popover {
+            color: $gray-darker;
         }
     }
-    td.buttons {
-        text-align: right;
-        min-width: 160px;
+
+    .objectSubList {
+        width: 100%;
+        & > thead > tr > th {
+            padding: 4px 10px;
+            margin-bottom: 4px;
+            color: $gray-darker;
+            background-color: $gray-lighter;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 1px solid $primary;
+        }
+
+        td {
+            padding: 4px 10px;
+            border-bottom: 1px solid $gray-light;
+            background-color: #fff;
+            color: $gray-dark;
+        }
     }
-    .rowButton {
-        color: #636363;
-        text-align: center;
-        width: 32px;
-        height: 32px;
-        vertical-align: middle;
-        line-height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: inline-block;
-        margin: 0 1px;
+}
+
+.sortTitle {
+    cursor: pointer;
+
+    &:after {
+        font-family: 'FontAwesome';
+        margin-left: 8px;
+        opacity: 0;
+        color: #fff;
+        transition: all 0.15s ease;
+        -webkit-transition: all 0.15s ease;
+    }
+    &:hover,
+        &.active {
+        text-decoration: none!important;
+        &:after {
+            opacity: 1;
+        }
+    }
+
+    &.sorted-asc:after {
+        content: '\f0d7';
+    }
+    &.sorted-desc:after {
+        content: '\f0d8';
+    }
+    &.active.sorted-asc:after {
+        content: '\f0d8';
+    }
+    &.active.sorted-desc:after {
+        content: '\f0d7';
+    }
+    &.active.sorted-asc:hover:after {
+        content: '\f0d7';
+    }
+    &.active.sorted-desc:hover:after {
+        content: '\f0d8';
+    }
+
+    &.deactivated,
+    &.deactivated:hover {
+        cursor: not-allowed;
+
+        &:after {
+            opacity: 0!important;
+        }
+
+    }
+}
+.listSearchRow {
+    display: none;
+    background-color: #DCDCDC;
+
+    i.fa-search {
         font-size: 16px;
+        font-weight: bold;
+        color: #787878;
+    }
+    .inputHelp {
+        display: none;
+    }
+
+    #search_id {
+        max-width: 45px;
+    }
+    td.searchTools {
+        text-align: right;
+    }
+
+    .searchInputContainer {
+        width: 100%;
+        padding: 2px;
+
+        input, select, .input-group {
+            width: 100%;
+        }
+
+        .search_list_input {
+            width: 80%
+        }
+    }
+}
+.addObjectRow {
+    display: none;
+    background-color: #A0A0A0;
+
+    td:first-child {
+        text-align: center;
+
+        i.fa-plus-circle {
+            font-size: 20px;
+            font-weight: normal;
+            color: #DCDCDC;
+        }
+    }
+    .inputHelp {
+        display: none;
+    }
+
+    .inputContainer {
+        input, select, textarea {
+            width: 100%;
+        }
+    }
+}
+th.th_tools {
+    margin-right: 25px;
+}
+
+.headerTools {
+    text-align: right;
+    height: 100%;
+
+    .headerButton {
+        display: inline-block;
+        margin: 5px;
+        color: #fff;
         font-weight: normal;
+        margin: 0 3px;
+        padding: 4px 6px;
+        height: 100%;
+        cursor: pointer;
+        font-size: 14px;
 
         transition: all 0.3s ease;
         -webkit-transition: all 0.3s ease;
 
         &:hover {
-            color: #fff;
-            background-color: #EF7D00;
-            text-decoration: none;
+            color: #EF7D00;
+            background-color: #fff;
         }
-        &:before {
+        &:before,
+            &:after {
             font-family: 'FontAwesome';
         }
-        &.editButton:before {
-            content: '\f044';
-        }
-        &.updateButton:before {
-            content: '\f0c7';
-        }
-        &.deleteButton:before {
-            content: '\f1f8';
-        }
-        &.viewButton:before {
-            content: '\f06e';
-        }
     }
-
-    .select2-container {
-        max-width: 160px!important;
+    .openSearchRowButton:before {
+        content: '\f002';
     }
-
-    .positionHandle {
-        display: none;
-        text-align: center;
+    .openAddObjectRowButton:before {
+        content: '\f055';
     }
-
-    td.positionHandle {
-        span {
-            display: inline-block;
-            font-size: 15px;
-            margin: 0 6px;
-        }
-
-        span:before {
-            font-family: 'FontAwesome';
-            content: '\f07d';
-        }
+    .activatePositionsButton:before {
+        content: '\f07d';
     }
-
-    tbody td.positionHandle {
-        cursor: grab;
+    .openBulkActionsPopupButton:before {
+        content: '\f046';
+    }
+    .openParametersPopupButton:before {
+        content: '\f013';
     }
 }
+td.buttons {
+    text-align: right;
+    min-width: 160px;
+}
+.rowButton {
+    color: #636363;
+    text-align: center;
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    line-height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 1px;
+    font-size: 16px;
+    font-weight: normal;
+
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+
+    &:hover {
+        color: #fff;
+        background-color: #EF7D00;
+        text-decoration: none;
+    }
+    &:before {
+        font-family: 'FontAwesome';
+    }
+    &.editButton:before {
+        content: '\f044';
+    }
+    &.updateButton:before {
+        content: '\f0c7';
+    }
+    &.deleteButton:before {
+        content: '\f1f8';
+    }
+    &.viewButton:before {
+        content: '\f06e';
+    }
+}
+
+.select2-container {
+    max-width: 160px!important;
+}
+
+.positionHandle {
+    display: none;
+    text-align: center;
+}
+
+td.positionHandle {
+    span {
+        display: inline-block;
+        font-size: 15px;
+        margin: 0 6px;
+    }
+
+    span:before {
+        font-family: 'FontAwesome';
+        content: '\f07d';
+    }
+}
+
+tbody td.positionHandle {
+    cursor: grab;
+}
+
 .ajaxResultContainer {
     display: none;
     margin: 20px 15px;

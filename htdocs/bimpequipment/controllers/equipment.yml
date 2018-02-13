@@ -24,6 +24,18 @@ sections:
                         panel: 1
                         object: equipment
                         children: places
+          logiciels:
+              label: Logiciels / Réseaux
+              url_params:
+                  id: 
+                      request: id
+              sections:
+                  - type: list
+                    list: 
+                        object: equipment
+                        children: logiciels
+                        
+                
     - type: buttons
       buttons:
           - label: Liste des équipements

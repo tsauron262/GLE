@@ -71,6 +71,7 @@ list:
         - label: supprimer les lignes sélectionnées
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
+    enable_search: 0
     sort_field: id
     sort_way: desc
     n: 25

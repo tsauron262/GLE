@@ -61,6 +61,28 @@ class BMP_Event extends BimpObject
         return 1;
     }
 
+    public function isInPrevisionnelMode()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') === 1) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function isInReelMode()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') > 1) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     public function getTotalAmounts($status = false)
     {
         $return = array(
@@ -77,6 +99,7 @@ class BMP_Event extends BimpObject
         if (!$this->isLoaded()) {
             return $return;
         }
+
 
         $montants = $this->getChildrenObjects('montants');
 
@@ -189,8 +212,50 @@ class BMP_Event extends BimpObject
                 }
             }
         }
-
         return $return;
+    }
+
+    public function GetFreeBilletsRatio()
+    {
+        if ($this->isLoaded()) {
+            $tarifs = BimpObject::getInstance($this->module, 'BMP_Tarif');
+            $freeTarifs = array();
+
+            foreach ($tarifs->getList(array(
+                'id_event' => (int) $this->id,
+                'amount'   => 0
+                    ), null, null, 'id', 'asc', 'array', array('id')) as $item) {
+                $freeTarifs[] = $item['id'];
+            }
+
+            $nTotal = 0;
+            $nFree = 0;
+
+            if ((int) $this->getData('status') > 1) {
+                foreach ($this->getChildrenObjects('billets') as $billet) {
+                    $qty = $billet->getData('quantity');
+                    $nTotal += $qty;
+                    if (in_array((int) $billet->getData('id_tarif'), $freeTarifs)) {
+                        $nFree += $qty;
+                    }
+                }
+            } else {
+                foreach ($tarifs->getList(array(
+                    'id_event' => (int) $this->id
+                        ), null, null, 'id', 'asc', 'array', array('id', 'previsionnel')) as $tarif) {
+                    $nTotal += (int) $tarif['previsionnel'];
+                    if (in_array((int) $tarif['id'], $freeTarifs)) {
+                        $nFree += (int) $tarif['previsionnel'];
+                    }
+                }
+            }
+
+            if ($nTotal > 0) {
+                return (float) $nFree / $nTotal;
+            }
+        }
+
+        return 0;
     }
 
     public function getCoprodsSoldes()
@@ -410,6 +475,7 @@ class BMP_Event extends BimpObject
         $break_html .= '</div>';
 
         $all_amounts = $this->getTotalAmounts(true);
+
         foreach ($status as $s) {
             if (!is_null($s['code'])) {
                 if (!isset($all_amounts['status'][$s['code']])) {
@@ -610,6 +676,11 @@ class BMP_Event extends BimpObject
                 $content .= '<tr style="font-weight: bold">';
                 $content .= '<td>Billeterie NET</td>';
                 $content .= '<td>' . BimpTools::displayMoneyValue($billets_ht_net, 'EUR') . '</td>';
+                $content .= '</tr>';
+
+                $content .= '<tr style="font-weight: bold">';
+                $content .= '<td>Ratio invitations / total billets</td>';
+                $content .= '<td>' . round($this->GetFreeBilletsRatio() * 100, 2) . ' %</td>';
                 $content .= '</tr>';
 
                 $content .= '<tr><td></td><td></td></tr>';
@@ -1155,6 +1226,11 @@ class BMP_Event extends BimpObject
         $html .= '<td>' . BimpTools::displayMoneyValue($ca_moyen_net, 'EUR') . '</td>';
         $html .= '</tr>';
 
+        $html .= '<tr>';
+        $html .= '<th>Ratio invitations / total billets</th>';
+        $html .= '<td>' . round($this->GetFreeBilletsRatio() * 100, 2) . ' %</td>';
+        $html .= '</tr>';
+
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
@@ -1390,118 +1466,95 @@ class BMP_Event extends BimpObject
 
         $id_type_montant = (int) $eventMontant->getData('id_montant');
         $id_coprod = (int) $eventMontant->getData('id_coprod');
-        $calcsMontants = $this->getChildrenObjects('calcs_montants');
+//        $calcsMontants = $this->getChildrenObjects('calcs_montants');
+        
+        // Traitements des calculs automatiques dont le montant intervient dans le montant source:
+        $sql = BimpTools::getSqlSelect(array('a.id_target'));
+        $sql .= BimpTools::getSqlFrom('bmp_calc_montant', array(array(
+                        'table' => 'bmp_event_calc_montant',
+                        'on'    => 'b.id_calc_montant = a.id',
+                        'alias' => 'b'
+        )));
 
-        // Traitements des calculs automatiques dont le montant est la source:
-        foreach ($calcsMontants as $eventCalcMontant) {
-            if ((int) $eventCalcMontant->getData('active')) {
-                $calcMontant = $eventCalcMontant->getChildObject('calc_montant');
-                if (!is_null($calcMontant) && $calcMontant->isLoaded()) {
-                    $type_source = $calcMontant->getData('type_source');
-                    if (($type_source === 1) && (int) $calcMontant->getData('id_montant_source') === $id_type_montant) {
-                        $this->calcMontant($calcMontant->getData('id_target'), $id_coprod);
-                    }
-                }
+        $sql .= ' WHERE ' . (int) $id_type_montant . ' IN (';
+        $sql .= 'SELECT c.id_type_montant FROM llx_bmp_calc_montant_type_montant c WHERE c.id_calc_montant = a.id';
+        $sql .= ')';
+        $sql .= ' AND a.active = 1 AND b.active = 1 AND b.id_event = ' . (int) $this->id;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $this->calcMontant((int) $r['id_target'], $id_coprod);
             }
         }
 
-        // Si le montant est inclus dans un total intermédiaire, 
-        // traitement des calculs automatiques dont ce total intermédiaire est la source: 
-        $totalInterInstance = BimpObject::getInstance($this->module, 'BMP_TotalInter');
-        $tm_instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
-        $ti_list = $totalInterInstance->getList();
-
-        foreach ($ti_list as $ti) {
-            $totalInterInstance->reset();
-            $totalInterInstance->fetch((int) $ti['id']);
-            if ($totalInterInstance->isLoaded()) {
-                $process = false;
-                $montantType = $eventMontant->getData('type');
-                if ($montantType === BMP_TypeMontant::BMP_TYPE_FRAIS &&
-                        (int) $totalInterInstance->getData('all_frais')) {
-                    $process = true;
-                } elseif ($montantType === BMP_TypeMontant::BMP_TYPE_RECETTE &&
-                        (int) $totalInterInstance->getData('all_recettes')) {
-                    $process = true;
-                }
-
-                if (!$process) {
-                    $id_categorie = $eventMontant->getData('id_category_montant');
-
-                    $sql = 'SELECT COUNT(DISTINCT a.id) as nb_rows';
-                    $sql .= BimpTools::getSqlFrom('bimp_objects_associations');
-                    $sql .= ' WHERE a.src_object_name = \'BMP_TotalInter\'';
-                    $sql .= ' AND a.src_id_object = ' . $ti['id'];
-                    $sql .= ' AND ((a.dest_object_name = \'BMP_CategorieMontant\' AND a.dest_id_object = ' . $id_categorie . ')';
-                    $sql .= ' OR (a.dest_object_name = \'BMP_TypeMontant\' AND a.dest_id_object = ' . $id_type_montant . '))';
-
-                    $result = $this->db->execute($sql);
-                    if ($result > 0) {
-                        $obj = $this->db->db->fetch_object($result);
-                        if ((int) $obj->nb_rows > 0) {
-                            $process = true;
-                        }
-                    }
-                }
-
-//                if (!$process) {
-//                    $asso = new BimpAssociation($totalInterInstance, 'categories_frais_in');
-//                    $items = $asso->getAssociatesList();
-//                    if (in_array((int) $id_categorie, $items)) {
-//                        $process = true;
+//        foreach ($calcsMontants as $eventCalcMontant) {
+//            if ((int) $eventCalcMontant->getData('active')) {
+//                $calcMontant = $eventCalcMontant->getChildObject('calc_montant');
+//                if (!is_null($calcMontant) && $calcMontant->isLoaded()) {
+//                    $type_source = $calcMontant->getData('type_source');
+//                    if (($type_source === 1) && (int) $calcMontant->getData('id_montant_source') === $id_type_montant) {
+//                        $this->calcMontant($calcMontant->getData('id_target'), $id_coprod);
 //                    }
 //                }
+//            }
+//        }
+////        
+//        // Si le montant est inclus dans un total intermédiaire, 
+//        // traitement des calculs automatiques dont ce total intermédiaire est la source: 
+//        $totalInterInstance = BimpObject::getInstance($this->module, 'BMP_TotalInter');
+//        $tm_instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
+//        $ti_list = $totalInterInstance->getList();
+//
+//        foreach ($ti_list as $ti) {
+//            $totalInterInstance->reset();
+//            $totalInterInstance->fetch((int) $ti['id']);
+//            if ($totalInterInstance->isLoaded()) {
+//                $process = false;
+//                $montantType = $eventMontant->getData('type');
+//                if ($montantType === BMP_TypeMontant::BMP_TYPE_FRAIS &&
+//                        (int) $totalInterInstance->getData('all_frais')) {
+//                    $process = true;
+//                } elseif ($montantType === BMP_TypeMontant::BMP_TYPE_RECETTE &&
+//                        (int) $totalInterInstance->getData('all_recettes')) {
+//                    $process = true;
+//                }
+//
 //                if (!$process) {
-//                    $asso = new BimpAssociation($totalInterInstance, 'categories_recettes_in');
-//                    $items = $asso->getAssociatesList();
-//                    if (in_array((int) $id_categorie, $items)) {
-//                        $process = true;
+//                    $id_categorie = $eventMontant->getData('id_category_montant');
+//
+//                    $sql = 'SELECT COUNT(DISTINCT a.id) as nb_rows';
+//                    $sql .= BimpTools::getSqlFrom('bimp_objects_associations');
+//                    $sql .= ' WHERE a.src_object_name = \'BMP_TotalInter\'';
+//                    $sql .= ' AND a.src_id_object = ' . $ti['id'];
+//                    $sql .= ' AND ((a.dest_object_name = \'BMP_CategorieMontant\' AND a.dest_id_object = ' . $id_categorie . ')';
+//                    $sql .= ' OR (a.dest_object_name = \'BMP_TypeMontant\' AND a.dest_id_object = ' . $id_type_montant . '))';
+//
+//                    $result = $this->db->execute($sql);
+//                    if ($result > 0) {
+//                        $obj = $this->db->db->fetch_object($result);
+//                        if ((int) $obj->nb_rows > 0) {
+//                            $process = true;
+//                        }
 //                    }
 //                }
-//                if (!$process) {
-//                    $asso = new BimpAssociation($totalInterInstance, 'categories_frais_ex');
-//                    $items = $asso->getAssociatesList();
-//                    if (in_array((int) $id_categorie, $items)) {
-//                        $process = true;
+//
+//                if ($process) {
+//                    foreach ($calcsMontants as $eventCalcMontant) {
+//                        if ((int) $eventCalcMontant->getData('active')) {
+//                            $calcMontant = $eventCalcMontant->getChildObject('calc_montant');
+//                            if (!is_null($calcMontant) && $calcMontant->isLoaded()) {
+//                                $type_source = $calcMontant->getData('type_source');
+//                                if (($type_source === 2) && (int) $calcMontant->getData('id_total_source') === (int) $ti['id']) {
+//                                    $this->calcMontant($calcMontant->getData('id_target'), $id_coprod);
+//                                }
+//                            }
+//                        }
 //                    }
 //                }
-//                if (!$process) {
-//                    $asso = new BimpAssociation($totalInterInstance, 'categories_recettes_ex');
-//                    $items = $asso->getAssociatesList();
-//                    if (in_array((int) $id_categorie, $items)) {
-//                        $process = true;
-//                    }
-//                }
-//                if (!$process) {
-//                    $asso = new BimpAssociation($totalInterInstance, 'montants_in');
-//                    $items = $asso->getAssociatesList();
-//                    if (in_array((int) $id_type_montant, $items)) {
-//                        $process = true;
-//                    }
-//                }
-//                if (!$process) {
-//                    $asso = new BimpAssociation($totalInterInstance, 'montants_ex');
-//                    $items = $asso->getAssociatesList();
-//                    if (in_array((int) $id_type_montant, $items)) {
-//                        $process = true;
-//                    }
-//                }
-
-                if ($process) {
-                    foreach ($calcsMontants as $eventCalcMontant) {
-                        if ((int) $eventCalcMontant->getData('active')) {
-                            $calcMontant = $eventCalcMontant->getChildObject('calc_montant');
-                            if (!is_null($calcMontant) && $calcMontant->isLoaded()) {
-                                $type_source = $calcMontant->getData('type_source');
-                                if (($type_source === 2) && (int) $calcMontant->getData('id_total_source') === (int) $ti['id']) {
-                                    $this->calcMontant($calcMontant->getData('id_target'), $id_coprod);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+//            }
+//        }
     }
 
     public function onChildSave(BimpObject $child)

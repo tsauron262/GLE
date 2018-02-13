@@ -11,13 +11,12 @@ class Equipment extends BimpObject
         5 => 'Matériel réseau',
         6 => 'Autre'
     );
-    
     public static $warranty_types = array(
         0 => ' - ',
         1 => 'Type 1',
         2 => 'Type 2'
     );
-    
+
     public function getContratsArray()
     {
         $id_soc = isset($this->data['id_soc']) ? $this->data['id_soc'] : 0;
@@ -62,5 +61,26 @@ class Equipment extends BimpObject
             return $label;
         }
         return BimpRender::renderAlerts('Le contrat d\'ID ' . $id_contrat . ' semble ne plus exister');
+    }
+
+//    Overrides
+    
+    public function validate()
+    {
+        $serial = $this->getData('serial');
+
+        if (!is_null($serial) && $serial) {
+            $where = '`serial` = \'' . $serial . '\'';
+            if ($this->isLoaded()) {
+                $where .= ' AND `id` != ' . (int) $this->id;
+            }
+
+            $value = $this->db->getValue($this->getTable(), 'id', $where);
+            if (!is_null($value) && (int) $value) {
+                return array('Ce numéro de série est déjà associé à l\'équipement ' . $value);
+            }
+        }
+
+        return parent::validate();
     }
 }

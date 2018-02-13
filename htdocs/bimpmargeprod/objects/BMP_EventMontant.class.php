@@ -123,15 +123,15 @@ class BMP_EventMontant extends BimpObject
         $current_montants = array();
         $type = $this->getData('type');
         $id_coprod = $this->getData('id_coprod');
-        
+
         if (is_null($id_coprod)) {
             $id_coprod = 0;
         }
-        
-        
+
+
         if (!is_null($type)) {
             $event = $this->getParentInstance();
-            
+
             if (!is_null($event) && $event->isLoaded()) {
                 $eventMontant = BimpObject::getInstance($this->module, $this->object_name);
 
@@ -372,7 +372,7 @@ class BMP_EventMontant extends BimpObject
                 $value = '';
             }
 
-            $html = '<div class="inputContainer coProdPart" data-id_coprod="' . $id_coprod . '" data-initial_value="'.$value.'" data-field_name="coprod_' . $id_coprod . '_part">';
+            $html = '<div class="inputContainer coProdPart" data-id_coprod="' . $id_coprod . '" data-initial_value="' . $value . '" data-field_name="coprod_' . $id_coprod . '_part">';
             $html .= BimpInput::renderInput('text', 'coprod_' . $id_coprod . '_part', $value, array(
                         'addon_right' => '<i class="fa fa-percent"></i>',
                         'placeholder' => $placeholder,
@@ -541,7 +541,15 @@ class BMP_EventMontant extends BimpObject
     public function getAllTypesArray()
     {
         $type = BimpObject::getInstance('bimpmargeprod', 'BMP_TypeMontant');
-        return $type->getAllTypes();
+        $types = $type->getAllTypes();
+        $return = array(
+            '' => ''
+        );
+
+        foreach ($types as $id_type => $label) {
+            $return[$id_type] = $label;
+        }
+        return $return;
     }
 
     public function getDetailsName()
@@ -640,6 +648,23 @@ class BMP_EventMontant extends BimpObject
         }
 
         return '';
+    }
+
+    public function calcDetailsTotal()
+    {
+        $amount = 0;
+        $children = $this->getChildrenObjects('details');
+        foreach ($children as $child) {
+            if (!is_null($child) && is_a($child, 'BMP_EventMontantDetail')) {
+                $amount += $child->getTotal();
+            }
+        }
+        $amount = (float) round($amount, 2);
+        $current_amount = (float) $this->getData('amount');
+        if ($current_amount !== $amount) {
+            $this->set('amount', $amount);
+            $this->update();
+        }
     }
 
     // Liste overrides: 
@@ -981,10 +1006,12 @@ class BMP_EventMontant extends BimpObject
     {
         if (parent::fetch($id)) {
             $typeMontant = $this->getChildObject('type_montant');
-            $type = (int) $typeMontant->getData('type');
-            if ($type !== (int) $this->getData('type')) {
-                $this->set('type', $type);
-                $this->update();
+            if (!is_null($typeMontant)) {
+                $type = (int) $typeMontant->getData('type');
+                if ($type && $type !== (int) $this->getData('type')) {
+                    $this->set('type', $type);
+                    $this->update();
+                }
             }
             return true;
         }
@@ -994,19 +1021,14 @@ class BMP_EventMontant extends BimpObject
     public function onChildSave(BimpObject $child)
     {
         if ($child->object_name === 'BMP_EventMontantDetail') {
-            $amount = 0;
-            $children = $this->getChildrenObjects('details');
-            foreach ($children as $child) {
-                if (!is_null($child) && is_a($child, 'BMP_EventMontantDetail')) {
-                    $amount += $child->getTotal();
-                }
-            }
-            $amount = (float) round($amount, 2);
-            $current_amount = (float) $this->getData('amount');
-            if ($current_amount !== $amount) {
-                $this->set('amount', $amount);
-                $this->update();
-            }
+            $this->calcDetailsTotal();
+        }
+    }
+
+    public function onChildDelete(BimpObject $child)
+    {
+        if ($child->object_name === 'BMP_EventMontantDetail') {
+            $this->calcDetailsTotal();
         }
     }
 }

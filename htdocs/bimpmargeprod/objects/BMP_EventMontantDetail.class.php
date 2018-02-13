@@ -106,20 +106,19 @@ class BMP_EventMontantDetail extends BimpObject
             }
 
             $id_event_montant = BimpTools::getValue('id_event_montant');
-            
+
             if (is_null($id_event_montant) || !$id_event_montant) {
                 return array('ID du montant correspondant absent');
             }
-            
+
             $this->setIdParent($id_event_montant);
-            
+
             $detailValue = BimpObject::getInstance($this->module, 'BMP_MontantDetailValue');
             if (!$detailValue->fetch($id_value)) {
                 return array('Valeur prédéfinie sélectionnée invalide');
             }
 
-            $this->set('label', $detailValue->getData('label'));
-            $this->set('unit_price', $detailValue->getData('unit_price'));
+            $label = $detailValue->getData('label');
 
             $quantity = null;
             if ((int) $detailValue->getData('use_groupe_number')) {
@@ -127,6 +126,7 @@ class BMP_EventMontantDetail extends BimpObject
                 if ($id_group) {
                     $group = BimpObject::getInstance($this->module, 'BMP_EventGroup');
                     if ($group->fetch($id_group)) {
+                        $label .= ' (Groupe: ' . $group->getData('name') . ')';
                         $quantity = (int) $group->getData('number');
                     }
                 }
@@ -135,6 +135,8 @@ class BMP_EventMontantDetail extends BimpObject
                 $quantity = BimpTools::getValue('quantity', 0);
             }
 
+            $this->set('label', $label);
+            $this->set('unit_price', $detailValue->getData('unit_price'));
             $this->set('quantity', $quantity);
             return array();
         } else {

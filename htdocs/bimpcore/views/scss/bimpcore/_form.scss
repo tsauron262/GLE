@@ -1,9 +1,3 @@
-input, select {
-    background-color: #fff;
-    color: #3C3C3C;
-    @include transition(all 0.5s ease);
-}
-
 *::-moz-placeholder {
     color: #787878!important;
 }
@@ -98,7 +92,7 @@ input, select {
 .inputHelp {
     font-size: 12px;
     font-style: italic;
-    color: $gray;
+    color: darken($gray, 25%);
     margin: 8px 0;
     padding-left: 15px;
 }
@@ -109,6 +103,12 @@ input, select {
 }
 
 /*Inputs*/
+input, select {
+    background-color: #fff;
+    color: #3C3C3C;
+    @include transition(all 0.5s ease);
+    height: 26px;
+}
 input {
     padding-bottom: 5px!important;
 

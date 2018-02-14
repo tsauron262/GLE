@@ -40,7 +40,7 @@ function checkProductByRef(ref) {
         success: function (out) {
             var outParsed = JSON.parse(out);
             if (outParsed.error.length !== 0) {
-                setMessage('alertProd', outParsed.error.length, 'error');
+                setMessage('alertProd', outParsed.error, 'error');
                 return;
             }
             if (outParsed.stock < 1) {
@@ -77,6 +77,10 @@ function checkStockForProduct(idProduct, qty) {
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
+            if (outParsed.error.length !== 0) {
+                setMessage('alertProd', outParsed.error, 'error');
+                return;
+            }
             var nb_product_in_entrepot = parseInt(outParsed.stock);
             if (nb_product_in_entrepot < 1) {
                 setMessage('alertProd', 'L\'entrepot de départ ne possède pas ce produit.', 'error');
@@ -107,9 +111,8 @@ function saveproducts(localCntProduct) {
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
-            if (outParsed.length !== 0) {
-                setMessage('alertEnregistrer', outParsed, 'error');
-
+            if (outParsed.errors.length !== 0) {
+                setMessage('alertEnregistrer', outParsed.errors, 'error');
             } else if (1 < localCntProduct) {
                 setMessage('alertEnregistrer', localCntProduct + ' Groupes de produit ont été enregistré avec succès.', 'mesgs');
             } else {

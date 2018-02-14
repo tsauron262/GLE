@@ -4,6 +4,9 @@
 
 /* global DOL_URL_ROOT */
 
+var entrepotId;
+var orderId;
+var cntProduct = 0;
 
 /**
  * Ajax call
@@ -23,20 +26,57 @@ function modifyOrder(products, isTotal) {
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             action: 'modifyOrder',
-            entrepotId: $('#entrepot').val(),
+            entrepotId: entrepotId,
             isTotal: isTotal,
             products: products,
-            orderId: getUrlParameter('id')
+            orderId: orderId
         },
         error: function () {
             console.log("Erreur PHP");
         },
         success: function (out) {
-            setMessage('alertEnregistrer', products.length + ' Groupes de produits on été rajouté avec succès.', 'mesgs');
+            var outP = JSON.parse(out);
+            console.log(outP.errors.length);
+            if (outP.errors.length !== 0) {
+                for (var i=0 ; i< outP.errors.length ; i++) {
+                    setMessage('alertEnregistrer', outP.errors[i], 'error');
+
+                }
+            } else {
+                setMessage('alertEnregistrer', products.length + ' Groupes de produits on été rajouté avec succès.', 'mesgs');
+            }
         }
     });
 }
 
+function getRemainingLignes() {
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+        data: {
+            action: 'getRemainingLignes',
+            entrepotId: entrepotId,
+            orderId: orderId
+        },
+        error: function () {
+            console.log("Erreur PHP");
+        },
+        success: function (out) {
+            var lignes = JSON.parse(out);
+
+            $.each(lignes, function (index, ligne) {
+                if (ligne.isEquipment) {
+                    for (i = 0; i < ligne.remainingQty; i++)
+                        addEquipment(ligne);
+                } else
+                    addProduct(ligne);
+            });
+
+            initEvents();
+        }
+    });
+}
 
 
 /**
@@ -44,16 +84,58 @@ function modifyOrder(products, isTotal) {
  */
 
 $(document).ready(function () {
-    $('#entrepot').select2();
-    initEvents();
+    $('#entrepot').select2({placeholder: 'Rechercher ...'});
+    orderId = getUrlParameter('id');
+    getRemainingLignes();
 });
 
 /**
  * Functions
  */
 
+function addProduct(ligne) {
+
+    cntProduct++;
+    var line = '<tr id="' + cntProduct + '">';
+    line += '<td name="cnt">' + cntProduct + '</td>';    // cnt ligne
+    line += '<td name="productId">' + ligne.prodId + '</td>';    // id
+    line += '<td>' + ligne.refurl + '</td>';    // refUrl
+    line += '<td></td>';    // num série
+    line += '<td>' + ligne.label + '</td>';    // label
+    line += '<td>' + ligne.remainingQty + '</td>';
+    line += '<td name="qty">0</td>';
+    line += '<td><input name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px"> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
+    line += '<td>' + ligne.price_unity + ' €</td>';
+    line += '<td style="text-align:center"><input type="checkbox" name="stocker"></td></tr>';
+    $(line).appendTo('#productTable tbody');
+}
+
+function addEquipment(ligne) {
+
+    cntProduct++;
+    var line = '<tr id="' + cntProduct + '">';
+    line += '<td name="cnt">' + cntProduct + '</td>';    // cnt ligne
+    line += '<td name="productId">' + ligne.prodId + '</td>';    // id
+    line += '<td>' + ligne.refurl + '</td>';    // refUrl
+    line += '<td><input name="serial" class="custInput"></td>';    // num série
+    line += '<td>' + ligne.label + '</td>';    // label
+    line += '<td></td>';
+    line += '<td></td>';
+    line += '<td></td>';
+    line += '<td>' + ligne.price_unity + ' €</td>';
+    line += '<td style="text-align:center"><input type="checkbox" name="stocker"></td></tr>';
+    $(line).appendTo('#productTable tbody');
+}
+
+
 function initEvents() {
+
     $('.modify').click(modifyQuantity);
+
+    $('#entrepot').change(function () {
+        entrepotId = $('#entrepot').val();
+        $('input[name=serial]').first().focus();
+    });
 
     $('input[name=checkAll]').change(function () {
         var isChecked = $(this).prop('checked');
@@ -63,8 +145,12 @@ function initEvents() {
     $('input[name=stocker]').change(changeCheckbox);
 
     $('#enregistrer').click(function () {
-        $('p[name=confTransfert]').text('Etes-vous sur de vouloir mettre en stock ces produits ?');
-        $('div [name=confirmEnregistrer]').show();
+        if (!entrepotId) {
+            setMessage('alertEnregistrer', 'Veuillez sélectionner un entrepôt avant d\'enregistrer.', 'error');
+        } else {
+            $('p[name=confTransfert]').text('Etes-vous sur de vouloir mettre en stock ces produits ?');
+            $('div [name=confirmEnregistrer]').show();
+        }
     });
 
     $('input#okEnregistrer').click(function () {
@@ -74,6 +160,22 @@ function initEvents() {
 
     $('input#noEnregistrer').click(function () {
         $('div [name=confirmEnregistrer]').hide();
+    });
+
+    $('input[name=serial]').on('keyup', function (e) {
+        if (e.keyCode === 13) { // code for "Enter"
+            $(this).parent().parent().next().find('input[name=serial]').focus();
+            $(this).parent().parent().find('input[name=stocker]').prop('checked', true);
+            e.preventDefault();
+        }
+    });
+
+    $('input[name=serial]').on('keydown', function (e) {
+        if (e.keyCode === 9) { // code for "Tab"
+            $(this).parent().parent().next().find('input[name=serial]').focus();
+            $(this).parent().parent().find('input[name=stocker]').prop('checked', true);
+            e.preventDefault();
+        }
     });
 }
 
@@ -86,7 +188,7 @@ function changeCheckbox() {
         $('input[name=stocker]').each(function () {
             if (!$(this).prop('checked'))
                 allchecked = false;
-        })
+        });
         if (allchecked)
             $('input[name=checkAll]').prop('checked', true);
     }
@@ -97,7 +199,10 @@ function modifyQuantity() {
     var selectoTr = 'table#productTable tr#' + idLine;
     var newQty = parseInt($(selectoTr + ' td input[name=modify]').val());
     $(selectoTr + ' td[name=qty]').text(newQty);
-
+    if (newQty === 0)
+        $(selectoTr + ' td input[name=stocker]').prop('checked', false);
+    else
+        $(selectoTr + ' td input[name=stocker]').prop('checked', true);
 }
 
 /* Create product object for each line, then call ajax to save those products */
@@ -106,10 +211,17 @@ function saveProducts() {
 
     $('table#productTable tr').each(function () {
         if ($(this).find('td input[name=stocker]').prop('checked')) { // is the line checked ?
-            var newProd = {
-                id_prod: parseInt($(this).find('td[name=productId]').text()),
-                qty: parseInt($(this).find('td[name=qty]').text())
-            };
+            if ($(this).find('td input[name=modify]').length) {
+                var newProd = {
+                    id_prod: parseInt($(this).find('td[name=productId]').text()),
+                    qty: parseInt($(this).find('td[name=qty]').text())
+                };
+            } else {
+                var newProd = {
+                    id_prod: parseInt($(this).find('td[name=productId]').text()),
+                    serial: $(this).find('input[name=serial]').val()
+                };
+            }
             products.push(newProd);
         }
     });

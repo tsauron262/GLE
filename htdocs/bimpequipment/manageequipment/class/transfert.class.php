@@ -100,7 +100,6 @@ class LigneTransfert {
                 'date' => '2018-01-01 00:00:00' // date et heure d'arrivée TODO
             ));
             $errors = array_merge($errors, $emplacement->create());
-//            var_dump($emplacement);
         }
         return $errors;
     }
@@ -120,77 +119,4 @@ function getIdBySerial($db, $serial) {
         return $id;
     }
     return 'Aucun équipment correspond à ce numéro de série';
-}
-
-class BimpFournOrderReception {
-
-    private $db;
-
-//    public $orderId;
-//    public $statut;
-
-    function __construct($db) {
-        $this->db = $db;
-    }
-
-    /* Get every line of the order */
-
-    function getLigneOrder($orderId) {
-        $lignes = array();
-
-        $sql = 'SELECT rowid, fk_product, ref, label, qty, subprice';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet';
-        $sql .= ' WHERE fk_commande=' . $orderId;
-
-        $result = $this->db->query($sql);
-        if ($result and $this->db->num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $lignes[$obj->rowid] = array('productId' => $obj->fk_product,
-                    'ref' => $obj->ref,
-                    'label' => dol_trunc($obj->label, 25),
-                    'qty' => $obj->qty,
-                    'price_u' => price2num($obj->subprice) . ' €');
-            }
-        }
-        return $lignes;
-    }
-
-    function addInStock($products, $orderId, $entrepotId, $user, $isTotal) {
-        $errors = array();
-        $lps = array();
-        $now = dol_now();
-        $order = new CommandeFournisseur($this->db);
-        $order->fetch($orderId);
-        $labelmove = 'Reception commande bimp ' . $order->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
-        $codemove = dol_print_date($now, '%y%m%d%H%M%S');
-
-        foreach ($products as $product) {
-            $lp = new LignePanier($this->db);
-            if ($lp->check((isset($product['ref']) ? $product['ref'] : $product['serial']), $entrepotId) != false) {
-                
-            } else {
-                $errors[] = $lp->error;
-            }
-            $lps[] = $lp;
-        }
-// loop product
-//        foreach ($products as $product) {
-//            $productObject = new Product($this->db);
-//            $productObject->fetch($product['id_prod']);
-//
-//            // Add stock
-//            $result = $productObject->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove);
-//            if ($result < 0) {
-//                $errors[] = $productObject->errors;
-//                $errors[] = $productObject->errorss;
-//            }
-//        }
-
-        $type = ($isTotal == 'false') ? 'par' : 'tot';
-
-        $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
-
-        return $errors;
-    }
-
 }

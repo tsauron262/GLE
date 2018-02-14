@@ -107,7 +107,6 @@ global $conf;
      */
     public function getCalendarsForUser($principalUri) {
 
-        dol_syslog("getCalendars user",3);
         $fields = array_values($this->propertyMap);
         $fields[] = 'id';
         $fields[] = 'uri';
@@ -146,7 +145,6 @@ global $conf;
             $calendars[] = $calendar;
         }
 
-        dol_syslog("fin getCalendars".print_r($calendars,1),3);
         return $calendars;
     }
 
@@ -1139,6 +1137,8 @@ dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
      * @return array
      */
     public function calendarQuery($calendarId, array $filters) {
+        
+        dol_syslog("debut calendar query".print_r($filters,1),3);
         $result = array();
         $validator = new \Sabre\CalDAV\CalendarQueryValidator();
 
@@ -1206,6 +1206,7 @@ dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
             }
             $result[] = $row['uri'];
         }
+        dol_syslog("fin calendar query".print_r($result,1),3);
         return $result;
     }
 

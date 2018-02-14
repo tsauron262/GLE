@@ -735,6 +735,7 @@ class Server {
         $minimal = $prefer['return-minimal'];
 
         $data = $this->generateMultiStatus($newProperties, $minimal);
+        dol_syslog("fin prop find".print_r($data),3);
         $this->httpResponse->sendBody($data);
 
     }

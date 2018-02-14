@@ -146,7 +146,7 @@ global $conf;
             $calendars[] = $calendar;
         }
 
-        dol_syslog("fin getCalendars".print_r($calendars),3);
+        dol_syslog("fin getCalendars".print_r($calendars,1),3);
         return $calendars;
     }
 

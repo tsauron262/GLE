@@ -710,6 +710,7 @@ class Server {
      * @return void
      */
     protected function httpPropfind($uri) {
+        dol_syslog("fin prop debut".print_r($data),3);
 
         $requestedProperties = $this->parsePropFindRequest($this->httpRequest->getBody(true));
 

@@ -26,10 +26,10 @@ while ($ligne = $db->fetch_object($result))
             $tabUser[] = array($ligne->login, $ligne->email);
 
 foreach($tabUser as $user){
-    $filter = "VEVENT [20170323T000000Z;20250315T000000Z] : STATUS!=CANCELLED";
+    $filter = "VEVENT [20180101T000000Z;20250315T000000Z] : STATUS!=CANCELLED";
     if(isset($user[1]) && $user[0] != "" && $user[1] != "")
         $tabU[] = array("ID" => array("Left" => 
-                                array("Host" => "gle.synopsis-erp.com",
+                                array("Host" => "erp.bimp.fr",
                                         "Port" => "443",
                                         "Protocol" => "https",
                                         "Path" => "/bimp6/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",

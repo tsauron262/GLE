@@ -107,6 +107,7 @@ global $conf;
      */
     public function getCalendarsForUser($principalUri) {
 
+        dol_syslog("getCalendars user",3);
         $fields = array_values($this->propertyMap);
         $fields[] = 'id';
         $fields[] = 'uri';
@@ -145,6 +146,7 @@ global $conf;
             $calendars[] = $calendar;
         }
 
+        dol_syslog("fin getCalendars",3);
         return $calendars;
     }
 

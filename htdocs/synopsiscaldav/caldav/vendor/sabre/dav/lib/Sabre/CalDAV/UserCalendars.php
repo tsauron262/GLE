@@ -178,6 +178,7 @@ class UserCalendars implements DAV\IExtendedCollection, DAVACL\IACL {
         if ($this->caldavBackend instanceof Backend\NotificationSupport) {
             $objs[] = new Notifications\Collection($this->caldavBackend, $this->principalInfo['uri']);
         }
+        print_r("getChidren ".print_r($objs,1),3);
         return $objs;
 
     }

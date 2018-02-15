@@ -177,7 +177,7 @@ dol_syslog("deb getChildren2",3);
 dol_syslog("deb getChildren3",3);
         $objs[] = new Schedule\Outbox($this->principalInfo['uri']);
 
-dol_syslog("deb getChildren4",3);
+dol_syslog("deb getChildren4".print_r($objs,1),3);
         // We're adding a notifications node, if it's supported by the backend.
         if ($this->caldavBackend instanceof Backend\NotificationSupport) {
             $objs[] = new Notifications\Collection($this->caldavBackend, $this->principalInfo['uri']);

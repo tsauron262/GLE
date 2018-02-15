@@ -38,7 +38,7 @@ function checkEquipment(serialNumber, currentEquipCnt) {
             action: 'checkEquipment'
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertMessage', 'Erreur serveur.', 'error');
         },
         success: function (out) {
             var outDec = JSON.parse(out);
@@ -76,7 +76,7 @@ function addEquipment() {
             action: 'addEquipment'
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertMessage', 'Erreur serveur.', 'error');
         },
         success: function (out) {
             var outDec = JSON.parse(out);
@@ -149,7 +149,7 @@ function addFieldEquipment() {
     line += '<input class="serialNumber" name="serial" cntEquip="' + cntEquip + '">'; // Numéro de série
     line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';   // Note
     line += '<td><text class="reponseServeur"></text></td></tr>';   // Réponse serveur
-    $(line).appendTo('#hereEquipment');
+    $(line).appendTo('#hereEquipment tbody');
 
     $('input.serialNumber[cntEquip="' + cntEquip + '"]').first().focus();
 

@@ -9,7 +9,7 @@ include_once '../../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-function addEquipments($newEquipments) {
+function addEquipments($db, $newEquipments, $user) {
 
     $cntEquipment = 0;
     $errors = array();
@@ -46,13 +46,24 @@ function addEquipments($newEquipments) {
         if (sizeof($newErrors) == 0)
             $cntEquipment++;
 
+        $product = new product($db);
+        $product->fetch($newEquipment['id_product']);
+        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+        $label = 'Transférer stock Bimp ' . $newEquipment['serial'];
+        // Add stock
+        $result = $product->correct_stock($user, $newEquipment['id_entrepot'], 1, 0, $label, 0, $codemove);
+        if ($result < 0) {
+           $newErrors = array_merge($newErrors, $product->errors);
+           $newErrors = array_merge($newErrors, $product->errorss);
+        }
+        
         $errors = array_merge($errors, $newErrors);
     }
     return array('nbNewEquipment' => $cntEquipment, 'errors' => $errors);
 }
 
 function equipmentExists($db, $id) {
-    
+
     $sql = 'SELECT id';
     $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
     $sql .= ' WHERE id=' . $id;
@@ -63,4 +74,3 @@ function equipmentExists($db, $id) {
     }
     return false;
 }
-

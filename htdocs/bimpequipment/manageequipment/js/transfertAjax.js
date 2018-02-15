@@ -35,11 +35,11 @@ function checkProductByRef(ref) {
             action: 'checkProductByRef'
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertEnregistrer', 'Erreur serveur 5316.', 'error');
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
-            if (outParsed.error !== '') {
+            if (outParsed.error.length !== 0) {
                 setMessage('alertProd', outParsed.error, 'error');
                 return;
             }
@@ -73,10 +73,14 @@ function checkStockForProduct(idProduct, qty) {
             action: 'checkStockForProduct'
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertEnregistrer', 'Erreur serveur 5315.', 'error');
         },
         success: function (out) {
             var outParsed = JSON.parse(out);
+            if (outParsed.error.length !== 0) {
+                setMessage('alertProd', outParsed.error, 'error');
+                return;
+            }
             var nb_product_in_entrepot = parseInt(outParsed.stock);
             if (nb_product_in_entrepot < 1) {
                 setMessage('alertProd', 'L\'entrepot de départ ne possède pas ce produit.', 'error');
@@ -91,7 +95,7 @@ function checkStockForProduct(idProduct, qty) {
     });
 }
 
-function saveproducts() {
+function saveproducts(localCntProduct) {
 
     $.ajax({
         type: "POST",
@@ -103,12 +107,17 @@ function saveproducts() {
             action: 'transfertAll'
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertEnregistrer', 'Erreur serveur 5314.', 'error');
         },
         success: function (out) {
-            console.log("Pas d'erreur fatale coté serveur");
-//            var outParsed = JSON.parse(out);
-//            console.log(outParsed);
+            var outParsed = JSON.parse(out);
+            if (outParsed.errors.length !== 0) {
+                setMessage('alertEnregistrer', outParsed.errors, 'error');
+            } else if (1 < localCntProduct) {
+                setMessage('alertEnregistrer', localCntProduct + ' Groupes de produit ont été enregistré avec succès.', 'mesgs');
+            } else {
+                setMessage('alertEnregistrer', localCntProduct + ' Groupe de produit a été enregistré avec succès.', 'mesgs');
+            }
         }
     });
 }
@@ -120,17 +129,16 @@ function saveproducts() {
 
 $(document).ready(function () {
 
-//    addFieldProduct(151, 2, 10, "test", '15554');
-    initEvents();
-    $('#entrepotStart').select2();
-    $('#entrepotEnd').select2();
+    $('#entrepotStart').select2({placeholder: 'Rechercher ...'});
+    $('#entrepotEnd').select2({placeholder: 'Rechercher ...'});
     $('#entrepotStart option:selected').prop('selected', true);
     $('#entrepotStart').trigger('change');
-    $('#entrepotEnd option:selected').next().prop('selected', true);
+    $('#entrepotEnd option:selected').prop('selected', true);
     $('#entrepotEnd').trigger('change');
+    initEvents();
 
-    idEntrepotStart = $('#entrepotStart').val();
-    idEntrepotEnd = $('#entrepotEnd').val();
+//    $('.fiche').hide();
+
 });
 
 
@@ -147,24 +155,29 @@ function initEvents() {
         var qty = $('#qty').val();
         if (productId !== '') {
             if (products.find(obj => obj.id_product === productId) !== undefined) {
-                setMessage('alertProduct', 'Le produit est déjà dans le tableau avec l\'identifiant ' + productId + '. Pour changer la quantité de ce produit, veuillez supprimer la ligne et la recréer', 'error');
+                setMessage('alertProd', 'Le produit est déjà dans le tableau avec l\'identifiant ' + productId + '. Pour changer la quantité de ce produit, veuillez supprimer la ligne et la recréer', 'error');
             } else {
                 checkStockForProduct(productId, qty);
             }
         } else {
-            setMessage('alertProduct', 'Veuillez sélectionner un produit pour l\'ajouter au tableau.', 'error');
+            setMessage('alertProd', 'Veuillez sélectionner un produit pour l\'ajouter au tableau.', 'error');
         }
     });
 
     $('#entrepotStart').on('change', function () {
-        if (products.length !== 0) {
+        if (idEntrepotStart === undefined) {
+            idEntrepotStart = $(this).val();
+            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
+            $('#divEntrepotEnd').css('visibility', 'visible');
+            $('#divEntrepotEnd').addClass('fade-in');
+        } else if (products.length !== 0) {
             if (confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?')) {
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
                 idEntrepotStart = $(this).val();
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
                 products = [];
                 $('table#productTable tr[id]').remove();
-                cntProduct =0;
+                cntProduct = 0;
             }
         } else {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
@@ -173,7 +186,14 @@ function initEvents() {
         }
     });
     $('#entrepotEnd').on('change', function () {
-        $('#entrepotStart option[value=' + idEntrepotEnd + ']').prop('disabled', false);
+        if (idEntrepotEnd === undefined) {
+            idEntrepotEnd = $(this).val();
+            $('#allTheFiche').css('visibility', 'visible');
+            $('#allTheFiche').addClass('fade-in');
+        }
+        if (idEntrepotEnd !== undefined) {
+            $('#entrepotStart option[value=' + idEntrepotEnd + ']').prop('disabled', false);
+        }
         idEntrepotEnd = $(this).val();
         $('#entrepotStart option[value=' + idEntrepotEnd + ']').prop('disabled', true);
     });
@@ -181,22 +201,22 @@ function initEvents() {
     $('#enregistrer').click(function () {
         if (idEntrepotStart === idEntrepotEnd) {
             setMessage('alertEnregistrer', 'L\'entrepot de départ doit être différent de celui d\'arrivé.', 'error');
-        } else if (cntProduct !== 0){
+        } else if (cntProduct !== 0) {
             $('p[name=confTransfert]').text('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?');
             $('div [name=confirmEnregistrer]').show();
         } else {
             setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
         }
     });
-    
+
     $('input#okEnregistrer').click(function () {
-        saveproducts();
+        saveproducts(cntProduct);
         $('div [name=confirmEnregistrer]').hide();
         products = [];
         $('table#productTable tr[id]').remove();
-        cntProduct =0;
+        cntProduct = 0;
     });
-    
+
     $('input#noEnregistrer').click(function () {
         $('div [name=confirmEnregistrer]').hide();
     });
@@ -255,7 +275,7 @@ function addFieldEquipment(productId, refUrl, serial, label) {
     line += '<td style="border-left:none"></td>';   // Modifier
     line += '<td id="stock"></td>'; // prod restant
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove "></td></tr>'; // supprimer
-    $(line).appendTo('#productTable');
+    $(line).appendTo('#productTable tbody');
     initRemoveLine(serial);
     var newEquipment = {
         is_equipment: true,
@@ -264,7 +284,6 @@ function addFieldEquipment(productId, refUrl, serial, label) {
     };
     products.push(newEquipment);
     document.querySelector("#bipAudio2").play();
-    console.log(products);
 }
 
 /* Add a line in the table of product */
@@ -287,7 +306,7 @@ function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
     line += '<td style="border-left:none"><input name="modify" type="number" class="custInput" style="width: 40px" value=1 min=1 max=' + nb_prod_in_stock + '> <img src="css/ok.ico" class="clickable modify"></td>';
     line += '<td name="stock">' + diff + '</td>';
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove"></td></tr>';
-    $(line).appendTo('#productTable');
+    $(line).appendTo('#productTable tbody');
     initRemoveLine(productId);
 
     $('table#productTable tr#' + productId + ' .modify').click(modifyQuantity);
@@ -299,7 +318,6 @@ function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
     };
     products.push(newProduct);
     document.querySelector("#bipAudio").play();
-    console.log(products);
 }
 
 function initRemoveLine(idTr) {
@@ -316,7 +334,7 @@ function initRemoveLine(idTr) {
             $(this).text(cntProduct);
             cntProduct++;
         })
-        console.log(products);
+        cntProduct--;
     });
 }
 
@@ -369,7 +387,7 @@ function setMessage(idElement, message, type) {
     if (type === "error")
         document.querySelector("#bipError").play();
 
-    $('#' + idElement).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
+    $('#' + idElement).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px; color:black">' + message + '</div>');
     setTimeout(function () {
         $("#alertdiv").fadeOut(1000);
         setTimeout(function () {

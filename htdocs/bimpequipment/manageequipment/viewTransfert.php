@@ -10,7 +10,7 @@ include_once '../../main.inc.php';
 include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
-$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css');
+$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/transfertAjax.js');
 
 
@@ -24,26 +24,37 @@ print load_fiche_titre('Transférer équipement', $linkback);
 
 $entrepots = getAllEntrepots($db);
 
-print '<strong style="margin-right:140px">Entrepôt source</strong>';
-print '<strong>Entrepôt Destination</strong><br>';
+print '<div id="divEntrepotStart" style="float:left">';
+print '<strong>Entrepôt source</strong></br>';
 print '<select id="entrepotStart" class="select2 cust" style="width: 200px;">';
+print '<option></option>';
 foreach ($entrepots as $id => $name) {
     print '<option value="' . $id . '">' . $name . '</option>';
 }
 print '</select> ';
+print '</div>';
 
-print ' <img src="css/next.png" style="margin-bottom:-12px"></td> ';
+print '<div id="divEntrepotEnd" class="fadeInOut">';
+
+print '<div  style="float:left ; margin: 14px 5px 0px 5px"> ';
+print '<img src="css/next.png" > ';
+print '</div>';
+print '<div  style="float:left">';
+print '<strong>Entrepôt Destination</strong><br>';
 
 print '<select id="entrepotEnd" class="select2 cust" style="width: 200px;">';
+print '<option></option>';
 foreach ($entrepots as $id => $name) {
 //    if ($name == end($entrepots))
 //        print '<option value="' . $id . '" selected>' . $name . '</option>';
 //    else
         print '<option value="' . $id . '">' . $name . '</option>';
 }
-print '</select><br/><br/>';
+print '</select></div></div><br/><br/><br/>';
 
-print '<table>';
+print '<div id="allTheFiche" class="fadeInOut">';
+
+print '<table class="entry">';
 print '<tr><td><strong>Réf. ou code barre ou numéro de série</strong></td>';
 print '<td><input name="refScan" class="custInput" style="width : 300px"></td></tr>';
 
@@ -60,8 +71,9 @@ print '<td><img id="addProduct" src="css/plus.ico" class="clickable" style="marg
 
 print '</table>';
 
-print '<table id="productTable" class="custTable">';
-print '<thead>';
+print '<div class="object_list_table">';
+print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
+print '<thead><tr class="headerRow">';
 print '<th>Groupes scanné</th>';
 print '<th>Identifiant</th>';
 print '<th>Référence</th>';
@@ -71,10 +83,13 @@ print '<th style="border-right:none">Quantité</th>';
 print '<th style="border-left:none">Modifier</th>';
 print '<th>Produit Restant</th>';
 print '<th>Supprimer</th>';
-print '</thead>';
+print '</tr></thead>';
+print '<tbody></tbody>';
 print '</table>';
+print '<div>';
 
-print '<br/><div id="alertProd"></div><br/><br/><br/>';
+
+print '<div id="alertProd" style="clear:left"></div><br/><br/><br/>';
 
 print '<input id="enregistrer" type="button" class="butAction" value="Transférer">';
 
@@ -83,13 +98,15 @@ print '<p name="confTransfert"></p>';
 print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmer">';
 print '<input id="noEnregistrer" type="button" class="butActionDelete" value="Annuler"></div>';
 
-print '<br/><div id="alertEnregistrer"></div><br/>';
+print '<br/><div id="alertEnregistrer" style="clear:left"></div><br/>';
 
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
 
 include(DOL_DOCUMENT_ROOT . "/bimpequipment/manageequipment/scan/scan.php");
+
+print '</div>';
 
 $db->close();
 

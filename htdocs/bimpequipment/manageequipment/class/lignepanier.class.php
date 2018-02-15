@@ -1,6 +1,5 @@
 <?php
 
-
 class LignePanier {
 
     private $db;
@@ -15,7 +14,7 @@ class LignePanier {
     }
 
     function isProduct($ref) {
-//        $ref = str_replace("/", "_", $ref);
+        $ref = str_replace("/", "_", $ref);
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $ref . '"';
@@ -45,11 +44,10 @@ class LignePanier {
                 return true;
             }
         }
-
         return false;
     }
-    
-    function fetchProd($prodId, $entrepotId){
+
+    function fetchProd($prodId, $entrepotId) {
         $this->prodId = $prodId;
         $this->entrepotId = $entrepotId;
     }
@@ -58,18 +56,37 @@ class LignePanier {
         $this->entrepotId = $entrepotId;
         if (!$this->isProduct($entree)) {
             if (!$this->isEquipment(GETPOST('ref'))) {
-                $this->error = "Produit inconnu";
+                $this->error .= "Produit inconnu";
                 return false;
             }
+        } else if ($this->isSerialisable()){
+            $this->error .= "Veuillez scanner le numéro de série au lieu de la référence.";
         }
     }
-    
-    function getError(){
-        return array('error'=>$this->error);
+
+    function isSerialisable() {
+        $sql = 'SELECT serialisable';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_extrafields';
+        $sql .= ' WHERE fk_object=' . $this->prodId;
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                if ($obj->serialisable == 1)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        $this->error .= "Identifiant du produit non définit";
     }
-    
-    function getInfo(){
-        if($this->prodId < 1)
+
+    function getError() {
+        return array('error' => $this->error);
+    }
+
+    function getInfo() {
+        if ($this->prodId < 1)
             return $this->getError();
         $prod = new product($this->db);
         $prod->fetch($this->prodId);
@@ -83,10 +100,8 @@ class LignePanier {
         } else {
             $stock = $this->checkStockProd();
         }
-        return ($stock > 0)? $stock : 0;
+        return ($stock > 0) ? $stock : 0;
     }
-
-
 
     function checkStockEquipment() {
 

@@ -11,13 +11,21 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/transfert.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimplivraison.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/product.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/equipment.lib.php';
 
 $lp = new LignePanier($db);
+$bl = new BimpLivraison($db);
+
 switch (GETPOST('action')) {
     case 'checkStockForProduct': {
             $lp->fetchProd(GETPOST('idProduct'), GETPOST('idEntrepotStart'));
+            if ($lp->isSerialisable() == true) {
+                $lp->error .= "Veuillez indiquer les numéros de série des produits";
+                echo json_encode($lp->geterror());
+                break;
+            }
             echo json_encode($lp->getInfo());
             break;
         }
@@ -29,7 +37,7 @@ switch (GETPOST('action')) {
     case 'transfertAll': {
             $transfert = new Transfert($db, GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user);
             $transfert->addLignes(GETPOST('products'));
-            echo json_encode($transfert->execute());
+            echo json_encode(array('errors' => $transfert->execute()));
             break;
         }
     case 'checkEquipment': {
@@ -39,12 +47,16 @@ switch (GETPOST('action')) {
             break;
         }
     case 'addEquipment': {
-            echo json_encode(addEquipments(GETPOST('newEquipments')));
+            echo json_encode(addEquipments($db, GETPOST('newEquipments'), $user));
             break;
         }
     case 'modifyOrder': {
-            $bfor = new BimpFournOrderReception($db);
-            echo json_encode($bfor->addInStock(GETPOST('products'), GETPOST('orderId','int'), GETPOST('entrepotId','int'), $user, GETPOST('isTotal')));
+            echo json_encode($bl->addInStock(GETPOST('products'), GETPOST('orderId', 'int'), GETPOST('entrepotId', 'int'), $user, GETPOST('isTotal')));
+            break;
+        }
+    case 'getRemainingLignes': {
+            $bl->fetch(GETPOST('orderId'));
+            echo json_encode($bl->getRemainingLignes());
             break;
         }
     default: break;

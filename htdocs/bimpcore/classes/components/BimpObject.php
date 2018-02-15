@@ -18,7 +18,7 @@ class BimpObject
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent');
     public $use_commom_fields = true;
-    public static $params_defs = array(
+    public $params_defs = array(
         'table'              => array('default' => ''),
         'controller'         => array('default' => ''),
         'primary'            => array('default' => 'id'),
@@ -43,6 +43,7 @@ class BimpObject
     protected $associations = array();
     protected $history = array();
     protected $parent = null;
+    public $dol_object = null;
 
     public static function getInstance($module, $object_name, $id_object = null)
     {
@@ -110,16 +111,26 @@ class BimpObject
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
 
+        if ($this->config->isDefined('dol_object')) {
+            $this->dol_object = $this->config->getObject('dol_object');
+            $this->use_commom_fields = 0;
+        }
+
         if ($this->use_commom_fields) {
             $this->addCommonFieldsConfig();
         }
 
         $errors = array();
-        $this->params = BimpComponent::fetchParamsStatic($this->config, '', self::$params_defs, $errors);
+        $this->params = BimpComponent::fetchParamsStatic($this->config, '', $this->params_defs, $errors);
 
         if (!$this->params['parent_module']) {
             $this->params['parent_module'] = $this->module;
         }
+    }
+
+    public function isDolObject()
+    {
+        return !is_null($this->dol_object);
     }
 
     protected function addCommonFieldsConfig()
@@ -244,7 +255,8 @@ class BimpObject
 
     public function field_exists($field_name)
     {
-        return array_key_exists($field_name, $this->params['fields']);
+        return ($this->use_commom_fields && in_array($field_name, self::$common_fields)) ||
+                in_array($field_name, $this->params['fields']);
     }
 
     public function object_exists($object_name)
@@ -545,15 +557,21 @@ class BimpObject
 
     public function reset()
     {
+        $this->config->resetObjects();
+
         if (!is_null($this->parent)) {
             unset($this->parent);
             $this->parent = null;
         }
 
+        if (!is_null($this->dol_object)) {
+            unset($this->dol_object);
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
         $this->data = array();
         $this->associations = array();
         $this->id = null;
-        $this->config->resetObjects();
     }
 
     public function getAssociatesList($association)
@@ -1101,12 +1119,6 @@ class BimpObject
 
     public function create()
     {
-        $table = $this->getTable();
-
-        if (is_null($table)) {
-            return array('Fichier de configuration invalide (table non renseignées)');
-        }
-
         $errors = $this->validate();
 
         if (!count($errors)) {
@@ -1124,7 +1136,18 @@ class BimpObject
                 $this->checkFieldValueType($field, $value);
             }
 
-            $result = $this->db->insert($table, $this->data, true);
+            if (!is_null($this->dol_object)) {
+                $result = $this->createDolObject($errors);
+            } else {
+                $table = $this->getTable();
+
+                if (is_null($table)) {
+                    return array('Fichier de configuration invalide (table non renseignées)');
+                }
+
+                $result = $this->db->insert($table, $this->data, true);
+            }
+
             if ($result > 0) {
                 $this->id = $result;
 
@@ -1165,15 +1188,9 @@ class BimpObject
 
     public function update()
     {
-        $table = $this->getTable();
-        $primary = $this->getPrimary();
-
-        if (is_null($table)) {
-            return array('Fichier de configuration invalide (table non renseignée)');
-        }
-
         $errors = array();
-        if (is_null($this->id) || !$this->id) {
+
+        if (!$this->isLoaded()) {
             return array('ID Absent');
         }
 
@@ -1194,7 +1211,18 @@ class BimpObject
                 $this->checkFieldValueType($field, $value);
             }
 
-            $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
+            if (!is_null($this->dol_object)) {
+                $result = $this->updateDolObject($errors);
+            } else {
+                $table = $this->getTable();
+                $primary = $this->getPrimary();
+
+                if (is_null($table)) {
+                    return array('Fichier de configuration invalide (table non renseignée)');
+                }
+
+                $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
+            }
 
             if ($result <= 0) {
                 $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
@@ -1271,6 +1299,11 @@ class BimpObject
     public function fetch($id)
     {
         $this->reset();
+
+        if (!is_null($this->dol_object)) {
+            return $this->fetchDolObject($id);
+        }
+
         $table = $this->getTable();
         $primary = $this->getPrimary();
 
@@ -1284,8 +1317,7 @@ class BimpObject
             foreach ($row as $field => $value) {
                 if ($field === $primary) {
                     $this->id = (int) $value;
-                } elseif (in_array($field, self::$common_fields) ||
-                        $this->config->isDefined('fields/' . $field)) {
+                } elseif ($this->field_exists($field)) {
                     $this->checkFieldValueType($field, $value);
                     $this->data[$field] = $value;
                 }
@@ -1332,24 +1364,21 @@ class BimpObject
 
     public function getDataArray($include_id = false)
     {
-        $fields = $this->getConf('fields', null, true, 'array');
-
-        if (is_null($fields)) {
+        if (!count($this->params['fields'])) {
             return array();
         }
 
         $data = array();
-        $primary = $this->getPrimary();
-        $prev_path = $this->config->current_path;
-        foreach ($fields as $field => $params) {
-            $this->config->setCurrentPath('fields/' . $field);
+
+        foreach ($this->params['fields'] as $field) {
             if (isset($this->data[$field])) {
                 $data[$field] = $this->data[$field];
             } else {
-                $data[$field] = $this->getCurrentConf('default_value');
+                $data[$field] = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
             }
         }
         if ($include_id) {
+            $primary = $this->getPrimary();
             $id = !is_null($this->id) ? $this->id : 0;
             $data['id'] = $id;
             if ($primary !== 'id') {
@@ -1357,7 +1386,6 @@ class BimpObject
             }
         }
 
-        $this->config->setCurrentPath($prev_path);
         return $data;
     }
 
@@ -1429,13 +1457,7 @@ class BimpObject
 
     public function delete()
     {
-        $table = $this->getTable();
-        $primary = $this->getPrimary();
-
-        if (is_null($table)) {
-            return array('Fichier de configuration invalide (table non renseignée)');
-        }
-        if (is_null($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             return array('ID absent');
         }
 
@@ -1443,7 +1465,18 @@ class BimpObject
 
         $parent = $this->getParentInstance();
 
-        $result = $this->db->delete($table, '`' . $primary . '` = ' . (int) $this->id);
+        if (!is_null($this->dol_object)) {
+            $result = $this->deleteDolObject($errors);
+        } else {
+            $table = $this->getTable();
+            $primary = $this->getPrimary();
+
+            if (is_null($table)) {
+                return array('Fichier de configuration invalide (table non renseignée)');
+            }
+            $result = $this->db->delete($table, '`' . $primary . '` = ' . (int) $this->id);
+        }
+
         if ($result <= 0) {
             $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
             $sqlError = $this->db->db->error();
@@ -1451,7 +1484,7 @@ class BimpObject
                 $msg .= ' - Erreur SQL: ' . $sqlError;
             }
             $errors[] = $msg;
-        } else {
+        } elseif (!count($errors)) {
             $id = $this->id;
             $this->reset();
             if ($this->getConf('positions')) {
@@ -1549,6 +1582,171 @@ class BimpObject
             }
         }
         return $check;
+    }
+
+    protected function createDolObject(&$errors)
+    {
+        if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
+            unset($this->dol_object);
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
+        if (is_null($this->dol_object)) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        foreach ($this->data as $field => $value) {
+            if ($this->field_exists($field)) {
+                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                if (is_null($prop)) {
+                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+                } elseif (!property_exists($this->dol_object, $prop)) {
+                    $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+                } else {
+                    $this->dol_object->{$prop} = $value;
+                }
+            }
+        }
+
+        if (method_exists($this, 'beforeCreateDolObject')) {
+            $this->beforeCreateDolObject();
+        }
+
+        if (!count($errors)) {
+            if (method_exists($this, 'getDolObjectCreateParams')) {
+                $params = $this->getDolObjectCreateParams();
+            } else {
+                global $user;
+                $params = array($user);
+            }
+
+            return call_user_func_array(array($this->dol_object, 'create'), $params);
+        }
+
+        return 0;
+    }
+
+    protected function updateDolObject(&$errors)
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+        if (is_null($this->dol_object)) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        if (!isset($this->dol_object->id) || !$this->dol_object->id) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        foreach ($this->data as $field => $value) {
+            if ($this->field_exists($field)) {
+                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                if (is_null($prop)) {
+                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+                } elseif (!property_exists($this->dol_object, $prop)) {
+                    $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+                } else {
+                    $this->dol_object->{$prop} = $value;
+                }
+            }
+        }
+
+        if (method_exists($this, 'beforeUpdateDolObject')) {
+            $this->beforeUpdateDolObject();
+        }
+
+        if (!count($errors)) {
+            if (method_exists($this, 'getDolObjectUpdateParams')) {
+                $params = $this->getDolObjectUpdateParams();
+            } else {
+                global $user;
+                $params = array($user);
+            }
+
+            return call_user_func_array(array($this->dol_object, 'update'), $params);
+        }
+
+        return 0;
+    }
+
+    protected function fetchDolObject($id, &$errors)
+    {
+        if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
+            unset($this->dol_object);
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
+        if (is_null($this->dol_object)) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return false;
+        }
+
+        if (method_exists($this, 'getDolObjectFetchParams')) {
+            $params = $this->getDolObjectFetchParams($id);
+        } else {
+            $params = array($id);
+        }
+
+        $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
+
+        if ($result <= 0) {
+            if (isset($this->dol_object->error) && $this->dol_object->error) {
+                $errors[] = $this->dol_object->error;
+            }
+
+            return false;
+        }
+
+        $this->id = $this->dol_object->id;
+
+        foreach ($this->params['fields'] as $field) {
+            $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+            if (is_null($prop)) {
+                $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+            } elseif (!property_exists($this->dol_object, $prop)) {
+                $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+            } else {
+                $value = $this->dol_object->{$prop};
+                $this->checkFieldValueType($field, $value);
+                $this->data[$field] = $value;
+            }
+        }
+
+        if (!count($errors)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function deleteDolObject(&$errors)
+    {
+        if (is_null($this->dol_object) || !isset($this->dol_object->id) || !$this->dol_object->id) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        if (method_exists($this, 'getDolObjectDeleteParams')) {
+            $params = $this->getDolObjectDeleteParams();
+        } else {
+            $params = array($this->id);
+        }
+
+        $result = call_user_func_array(array($this->dol_object, 'delete'), $params);
+
+        if ($result <= 0) {
+            if (isset($this->dol_object->error) && $this->dol_object->error) {
+                $errors[] = $this->dol_object->error;
+            }
+
+            return 0;
+        }
+
+        return 1;
     }
 
     // Gestion des positions: 
@@ -1858,7 +2056,7 @@ class BimpObject
 
     public function getLabels()
     {
-        $labels = $this->getConf('labels', array(), false, 'array');
+        $labels = $this->params['labels'];
 
         if (isset($labels['name'])) {
             $object_name = $labels['name'];
@@ -1981,7 +2179,7 @@ class BimpObject
 
     public function getLabel($type = '')
     {
-        $labels = $this->getConf('labels', array(), false, 'array');
+        $labels = $this->params['labels'];
 
         if (isset($labels['name'])) {
             $object_name = $labels['name'];
@@ -2099,7 +2297,7 @@ class BimpObject
 
     public function isLabelFemale()
     {
-        return $this->getConf('labels/is_female', 0, false, 'bool');
+        return (int) $this->params['labels']['is_female'];
     }
 
     public function getInstanceName()
@@ -2107,18 +2305,21 @@ class BimpObject
         if (!$this->isLoaded()) {
             return ' ';
         }
-        if ($this->config->isDefined('fields/title') &&
+        if ($this->field_exists('title') &&
                 isset($this->data['title']) && $this->data['title']) {
             return $this->data['title'];
-        } elseif ($this->config->isDefined('fields/public_name') &&
+        } elseif ($this->field_exists('public_name') &&
                 isset($this->data['public_name']) && $this->data['public_name']) {
             return $this->data['public_name'];
-        } elseif ($this->config->isDefined('fields/label') &&
+        } elseif ($this->field_exists('label') &&
                 isset($this->data['label']) && $this->data['label']) {
             return $this->data['label'];
-        } elseif ($this->config->isDefined('fields/name') &&
+        } elseif ($this->field_exists('name') &&
                 isset($this->data['name']) && $this->data['name']) {
             return $this->data['name'];
+        } elseif ($this->field_exists('nom') &&
+                isset($this->data['nom']) && $this->data['nom']) {
+            return $this->data['nom'];
         } elseif (isset($this->id) && $this->id) {
             return $this->getLabel() . ' ' . $this->id;
         }

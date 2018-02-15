@@ -187,7 +187,7 @@ function reloadForm(form_id) {
 
     var $panel = $form.findParentByClass('panel');
     var $modal = $();
-    if ($.isOk($panel)) {
+    if (!$.isOk($panel)) {
         $modal = $form.findParentByClass('modal');
         if ($modal.length) {
             $modal.find('.loading-text').text('Chargement du formulaire');
@@ -197,25 +197,26 @@ function reloadForm(form_id) {
 
     BimpAjax('loadObjectForm', data, null, {
         $form: $form,
+        $panel: $panel,
         $modal: $modal,
         display_success: false,
         error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être rechargé',
-        success: function (result) {
+        success: function (result, bimpAjax) {
             if (result.form_id && result.html) {
-                if ($.isOk($panel)) {
-                    $modal.find('.panel-footer').find('.save_object_button').removeClass('disabled');
+                if ($.isOk(bimpAjax.$panel)) {
+                    bimpAjax.$panel.find('.panel-footer').find('.save_object_button').removeClass('disabled');
                 }
                 
-                if ($.isOk($modal)) {
-                    $modal.find('.content-loading').hide();
-                    $modal.find('.loading-text').text('');
-                    $modal.find('.modal-footer').find('.save_object_button').removeClass('disabled');
+                if ($.isOk(bimpAjax.$modal)) {
+                    bimpAjax.$modal.find('.content-loading').hide();
+                    bimpAjax.$modal.find('.loading-text').text('');
+                    bimpAjax.$modal.find('.modal-footer').find('.save_object_button').removeClass('disabled');
                 }
 
-                if ($.isOk($form)) {
-                    $form.find('.object_form_content').html(result.html).slideDown(function () {
-                        setFormEvents($form);
-                        setCommonEvents($form);
+                if ($.isOk(bimpAjax.$form)) {
+                    bimpAjax.$form.find('.object_form_content').html(result.html).slideDown(function () {
+                        setFormEvents(bimpAjax.$form);
+                        setCommonEvents(bimpAjax.$form);
                     });
                 }
             }

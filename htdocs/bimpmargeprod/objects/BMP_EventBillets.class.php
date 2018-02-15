@@ -94,8 +94,13 @@ class BMP_EventBillets extends BimpObject
     public function displayTotalHT()
     {
         $total_ttc = $this->getTotal();
-        $event = BimpObject::getInstance($this->module, 'BMP_Event');
-        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . BMP_Event::$id_billets_type_montant);
+        $event = $this->getParentInstance();
+        if (!is_null($event) && $event->isLoaded()) {
+            $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . $event->getBilletsIdTypeMontant());
+        } else {
+            $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . BMP_Event::$id_billets_type_montant);
+        }
+        
         $total_ht = (float) BimpTools::calculatePriceTaxEx($total_ttc, BimpTools::getTaxeRateById($id_tax));
         return BimpTools::displayMoneyValue($total_ht, 'EUR');
     }

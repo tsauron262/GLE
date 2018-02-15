@@ -165,7 +165,7 @@ class Server {
      * @param Tree|INode|array|null $treeOrNode The tree object
      */
     public function __construct($treeOrNode = null) {
-
+dol_syslog("ddd construct server",3);
         if ($treeOrNode instanceof Tree) {
             $this->tree = $treeOrNode;
         } elseif ($treeOrNode instanceof INode) {

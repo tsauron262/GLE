@@ -32,18 +32,18 @@ function modifyOrder(products, isTotal) {
             orderId: orderId
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertEnregistrer', 'Erreur interne 1534.', 'error');
         },
         success: function (out) {
             var outP = JSON.parse(out);
-            console.log(outP.errors.length);
             if (outP.errors.length !== 0) {
-                for (var i=0 ; i< outP.errors.length ; i++) {
-                    setMessage('alertEnregistrer', outP.errors[i], 'error');
-
-                }
-            } else {
-                setMessage('alertEnregistrer', products.length + ' Groupes de produits on été rajouté avec succès.', 'mesgs');
+                printErrors(outP.errors, 'alertEnregistrer');
+            } else if (1 < products.length) {
+                localStorage.setItem('enregistrementOK', products.length + ' Groupes de produits on été rajouté avec succès.')
+                window.location.reload();
+            } else if (1 === products.length) {
+                localStorage.setItem('enregistrementOK', 'Un groupe de produit a été rajouté avec succès.')
+                window.location.reload();
             }
         }
     });
@@ -60,20 +60,25 @@ function getRemainingLignes() {
             orderId: orderId
         },
         error: function () {
-            console.log("Erreur PHP");
+            setMessage('alertEnregistrer', 'Erreur interne 1535.', 'error');
         },
         success: function (out) {
-            var lignes = JSON.parse(out);
+            var outP = JSON.parse(out);
+            if (outP.errors.length !== 0) {
+                printErrors(outP.errors, 'alertEnregistrer');
+            } else {
+                lignes = outP.lignes;
+                lignes.sort(sorByType);
+                $.each(lignes, function (index, ligne) {
+                    if (ligne.isEquipment) {
+                        for (i = 0; i < ligne.remainingQty; i++)
+                            addEquipment(ligne);
+                    } else
+                        addProduct(ligne);
+                });
 
-            $.each(lignes, function (index, ligne) {
-                if (ligne.isEquipment) {
-                    for (i = 0; i < ligne.remainingQty; i++)
-                        addEquipment(ligne);
-                } else
-                    addProduct(ligne);
-            });
-
-            initEvents();
+                initEvents();
+            }
         }
     });
 }
@@ -84,6 +89,11 @@ function getRemainingLignes() {
  */
 
 $(document).ready(function () {
+    if (localStorage.getItem('enregistrementOK'))
+    {
+        alert(localStorage.getItem('enregistrementOK'));
+        localStorage.clear();
+    }
     $('#entrepot').select2({placeholder: 'Rechercher ...'});
     orderId = getUrlParameter('id');
     getRemainingLignes();
@@ -150,6 +160,7 @@ function initEvents() {
         } else {
             $('p[name=confTransfert]').text('Etes-vous sur de vouloir mettre en stock ces produits ?');
             $('div [name=confirmEnregistrer]').show();
+            location.hash = '#okEnregistrer';
         }
     });
 
@@ -164,21 +175,26 @@ function initEvents() {
 
     $('input[name=serial]').on('keyup', function (e) {
         if (e.keyCode === 13) { // code for "Enter"
-            $(this).parent().parent().next().find('input[name=serial]').focus();
-            $(this).parent().parent().find('input[name=stocker]').prop('checked', true);
+            validateSerial($(this));
             e.preventDefault();
         }
     });
 
     $('input[name=serial]').on('keydown', function (e) {
         if (e.keyCode === 9) { // code for "Tab"
-            $(this).parent().parent().next().find('input[name=serial]').focus();
-            $(this).parent().parent().find('input[name=stocker]').prop('checked', true);
+            validateSerial($(this));
             e.preventDefault();
         }
     });
 }
 
+function validateSerial(element) {
+    if (element.parent().parent().find('input[name=serial]').val() !== '') {
+        element.parent().parent().next().find('input[name=serial]').focus();
+        element.parent().parent().find('input[name=stocker]').prop('checked', true);
+        document.querySelector("#bipAudio2").play();
+    }
+}
 
 function changeCheckbox() {
     if (!$(this).prop('checked'))
@@ -199,6 +215,7 @@ function modifyQuantity() {
     var selectoTr = 'table#productTable tr#' + idLine;
     var newQty = parseInt($(selectoTr + ' td input[name=modify]').val());
     $(selectoTr + ' td[name=qty]').text(newQty);
+    document.querySelector("#bipAudio").play();
     if (newQty === 0)
         $(selectoTr + ' td input[name=stocker]').prop('checked', false);
     else
@@ -229,7 +246,6 @@ function saveProducts() {
     if (products.length === 0) {
         setMessage('alertEnregistrer', 'Veuillez cocher des lignes pour effectuer la mise en stock.', 'error');
     } else {
-        console.log(products);
         var isTotal = checkIfStatutIsTotal();
         modifyOrder(products, isTotal);
     }
@@ -260,6 +276,17 @@ function checkIfStatutIsTotal() {
 }
 
 
+/*
+ * Unserialized first, then serialized
+ */
+function sorByType(a, b) {
+    if (a.isEquipment < b.isEquipment)
+        return -1;
+    if (a.isEquipment > b.isEquipment)
+        return 1;
+    return 0;
+}
+
 
 /**
  * 
@@ -269,9 +296,14 @@ function checkIfStatutIsTotal() {
  */
 function setMessage(idElement, message, type) {
     var backgroundColor;
-    (type === 'mesgs') ? backgroundColor = '#25891c ' : backgroundColor = '#ff887a ';
+    if (type === 'mesgs') {
+        backgroundColor = '#25891c ';
+    } else {
+        document.querySelector("#bipError").play();
+        backgroundColor = '#ff887a ';
+    }
 
-    $('#' + idElement).append('<div id="alertdiv" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
+    $('#' + idElement).append('<div id="alertdiv" style="color:black ; background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px;">' + message + '</div>');
     setTimeout(function () {
         $("#alertdiv").fadeOut(1000);
         setTimeout(function () {
@@ -279,6 +311,20 @@ function setMessage(idElement, message, type) {
         }, 1000);
     }, 10000);
 }
+
+/**
+ * Print and array of string in
+ * @param {Array} errors
+ * @param {String} idAlertPlaceHolder the id of the element where you want to
+ *  set the message in.
+ * @dependent setMessage()
+ */
+function printErrors(errors, idAlertPlaceHolder) {
+    for (var i = 0; i < errors.length && i < 100; i++) {
+        setMessage(idAlertPlaceHolder, errors[i], 'error');
+    }
+}
+
 
 /* Get the parameter sParam */
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -293,4 +339,3 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
     }
 }
-;

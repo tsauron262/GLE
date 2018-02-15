@@ -27,10 +27,6 @@ class BimpLivraison {
 
     /* Get every line of the order */
 
-    /**
-     * remove
-     * @deprecated
-     */
     function getLignesOrder() {
         $lignes = array();
 
@@ -56,46 +52,37 @@ class BimpLivraison {
 
                 $lignes[] = $ligne;
             }
+        } else if (!$result) {
+            $this->errors[] = 'Erreur de recherche de lignes d\'une commande.';
         }
         return $lignes;
     }
-
-//            // List of language codes for status
-//        $this->statuts[0] = 'StatusOrderDraft';
-//        $this->statuts[1] = 'StatusOrderValidated';
-//        $this->statuts[2] = 'StatusOrderApproved';
-//        if (empty($conf->global->SUPPLIER_ORDER_USE_DISPATCH_STATUS)) $this->statuts[3] = 'StatusOrderOnProcess';
-//        else $this->statuts[3] = 'StatusOrderOnProcessWithValidation';
-//        $this->statuts[4] = 'StatusOrderReceivedPartially';
-//        $this->statuts[5] = 'StatusOrderReceivedAll';
-//        $this->statuts[6] = 'StatusOrderCanceled';	// Approved->Canceled
-//        $this->statuts[7] = 'StatusOrderCanceled';	// Process running->canceled
-//        //$this->statuts[8] = 'StatusOrderBilled';	// Everything is finished, order received totally and bill received
-//        $this->statuts[9] = 'StatusOrderRefused';
-//    class LignePanier {
-//
 
     function getAllMouvement() {
         $moveQty = array();
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
-        $sql .= ' WHERE inventorycode ="' . 'BimpLivraison ' . $this->ref . '"';
+        $sql .= ' WHERE inventorycode="' . 'BimpLivraison ' . $this->ref . '"';
         // value supp à 0 ?
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $moveQty[$obj->fk_product] = $obj->value;
+                $moveQty[$obj->fk_product] += $obj->value;
             }
+        } else if (!$result) {
+            $this->errors[] = 'Erreur de recherche de mouvement de stock.';
         }
         return $moveQty;
     }
+
+    /* Called by interface */
 
     function getRemainingLignes() {
         $initLignes = $this->getLignesOrder();
         // StatusOrderValidated or StatusOrderApproved or StatusOrderOnProcess
         if ($this->statut == 3) {
-            return $initLignes;
+            return array('lignes' => $initLignes, 'errors' => $this->errors);
         } else if ($this->statut == 4) { // ReceivedPartially
             $moveQty = $this->getAllMouvement();
             foreach ($initLignes as $key => $ligne) {
@@ -108,8 +95,10 @@ class BimpLivraison {
                 }
             }
         }
-        return $initLignes;
+        return array('lignes' => $initLignes, 'errors' => $this->errors);
     }
+
+    /* Called by interface */
 
     function addInStock($products, $orderId, $entrepotId, $user, $isTotal) {
         $now = dol_now();
@@ -140,9 +129,6 @@ class BimpLivraison {
 
         $type = ($isTotal == 'false') ? 'par' : 'tot';
 
-        echo $now;
-        echo $type;
-        echo $labelmove;
         $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
 
         return array('errors' => $this->errors);
@@ -174,7 +160,7 @@ class BimpLivraison {
             'type' => 2, // cf $types
             'id_entrepot' => $entrepotId, // si type = 2
             'infos' => '...',
-            'date' => '2018-01-01 00:00:00' // date et heure d'arrivée
+            'date' => '2018-01-01 00:00:00' //$this->db->idate($now) // date et heure d'arrivée
         ));
         $this->errors = array_merge($this->errors, $emplacement->create());
         if ($length != sizeof($this->errors))

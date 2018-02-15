@@ -29,7 +29,7 @@ $object->fetch($id, $ref);
  * View
  */
 $help_url = 'EN:Module_Suppliers_Orders|FR:CommandeFournisseur|ES:Módulo_Pedidos_a_proveedores';
-llxHeader('', $langs->trans("Order"), $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
+llxHeader('', 'Livrer', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
 $form = new Form($db);
 
@@ -95,11 +95,11 @@ if ($id > 0 || !empty($ref)) {
 /**
  * Start Fiche
  */
-
 $facid = $id;
 $orderId = $object->id;
 if ($object->statut < 3) {
     print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
+    return;
 }
 if (4 < $object->statut) {
     if (5 == $object->statut)
@@ -143,61 +143,21 @@ print '<th>Modifier</th>';
 print '<th>Prix unitaire</th>';
 print '<th>Mettre en stock <input type="checkbox" name="checkAll"></th>';
 print '</tr></thead>';
-print '<tbody>';
-
-
-//$cnt = 1;
-
-//// loop for product
-//foreach ($lignes as $ligne) {
-//    $prod = new Product($db);
-//    $prod->id = $ligne->prodId;
-//    $prod->ref = $ligne->ref;
-//    print '<tr>';
-//    print '<td>' . $cnt . '</td>';
-//    print '<td name="productId">' . $ligne->prodId . '</td>';
-//    print '<td>' . $prod->getNomUrl(1) . '</td>';
-//    print '<td></td>';
-//    print '<td>' . $ligne->label . '</td>';
-//    print '<td name="qty" initValue=' . $ligne->qty . ' >' . $ligne->qty . '</td>';
-//    print '<td><input name="modify" type="number" class="custInput" style="width: 40px" value=' . $ligne->qty . ' min=0> <img src="css/ok.ico" class="clickable modify"></td>';
-//    print '<td>' . $ligne->price_unity . '</td>';
-//    print '<td><input type="checkbox" name="stocker"></td>';
-//    print '</tr>';
-//    $cnt++;
-//}
-
-//// loop for equipment
-//foreach ($lignes as $id => $ligne) {
-//    $prod = new Product($db);
-//    $prod->id = $ligne['productId'];
-//    $prod->ref = $ligne['ref'];
-//    print '<tr id="' . $ligne['serial'] . '">';
-//    print '<td>' . $cnt . '</td>';
-//    print '<td name="productId">' . $ligne['productId'] . '</td>';
-//    print '<td>' . $prod->getNomUrl(1) . '</td>';
-//    print '<td><input name="serial" class="custInput"></td>';
-//    print '<td>' . $ligne['label'] . '</td>';
-//    print '<td></td>';
-//    print '<td></td>';
-//    print '<td>' . $ligne['price_u'] . '</td>';
-//    print '<td><input type="checkbox" name="stocker"></td>';
-//    print '</tr>';
-//    $cnt++;
-//}
-
-
-print '</tbody></table>';
+print '<tbody></tbody>';
+print '</table>';
 
 print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 
-print '<br/><div id="alertEnregistrer"></div><br/>';
+print '<br/><div id="alertEnregistrer"></div><br/><br/><br/>';
 
 print '<div name="confirmEnregistrer" hidden>';
 print '<p name="confTransfert"></p>';
 print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmer">';
 print '<input id="noEnregistrer" type="button" class="butActionDelete" value="Annuler"></div>';
 
+print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
+print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
+print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
 
 llxFooter();
 

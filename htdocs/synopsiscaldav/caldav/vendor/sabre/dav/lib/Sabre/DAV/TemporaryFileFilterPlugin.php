@@ -104,7 +104,7 @@ class TemporaryFileFilterPlugin extends ServerPlugin {
      * @return bool
      */
     public function beforeMethod($method, $uri) {
-
+dol_syslog("deb beforeMethod".$method,3);
         if (!$tempLocation = $this->isTempFile($uri))
             return true;
 

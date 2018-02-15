@@ -874,6 +874,10 @@ class MouvementStock extends CommonObject
 				require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 				$origin = new Project($this->db);
 				break;
+			/*moddrsi*/case 'entrepot':
+				require_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
+				$origin = new Entrepot($this->db);
+				break;/*fmoddrsi*/
 
 			default:
 				if ($origintype)

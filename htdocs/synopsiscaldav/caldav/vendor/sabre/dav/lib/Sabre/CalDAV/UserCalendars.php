@@ -161,7 +161,9 @@ class UserCalendars implements DAV\IExtendedCollection, DAVACL\IACL {
 dol_syslog("deb getChildren",3);
         $calendars = $this->caldavBackend->getCalendarsForUser($this->principalInfo['uri']);
         $objs = array();
+dol_syslog("deb getChildren1",3);
         foreach($calendars as $calendar) {
+dol_syslog("deb getChildren2",3);
             if ($this->caldavBackend instanceof Backend\SharingSupport) {
                 if (isset($calendar['{http://calendarserver.org/ns/}shared-url'])) {
                     $objs[] = new SharedCalendar($this->caldavBackend, $calendar);
@@ -172,8 +174,10 @@ dol_syslog("deb getChildren",3);
                 $objs[] = new Calendar($this->caldavBackend, $calendar);
             }
         }
+dol_syslog("deb getChildren3",3);
         $objs[] = new Schedule\Outbox($this->principalInfo['uri']);
 
+dol_syslog("deb getChildren4",3);
         // We're adding a notifications node, if it's supported by the backend.
         if ($this->caldavBackend instanceof Backend\NotificationSupport) {
             $objs[] = new Notifications\Collection($this->caldavBackend, $this->principalInfo['uri']);

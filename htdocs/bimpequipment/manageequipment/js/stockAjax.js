@@ -67,14 +67,15 @@ function getRemainingLignes() {
             if (outP.errors.length !== 0) {
                 printErrors(outP.errors, 'alertEnregistrer');
             } else {
-                lignes = outP.lignes;
-                lignes.sort(sorByType);
-                $.each(lignes, function (index, ligne) {
-                    if (ligne.isEquipment) {
-                        for (i = 0; i < ligne.remainingQty; i++)
-                            addEquipment(ligne);
-                    } else
-                        addProduct(ligne);
+                var lignes = outP.lignes;   // lignes = 1 object containing multiple object ligne
+                var tabProd = getTabProduct(lignes);
+                var tabEquipment = getTabEquipment(lignes);
+                tabProd.forEach(function (prod) {
+                    addProduct(prod);
+                });
+                tabEquipment.forEach(function (equipment) {
+                    for (var j = 0; j < equipment.remainingQty; j++)
+                        addEquipment(equipment);
                 });
 
                 initEvents();
@@ -83,6 +84,23 @@ function getRemainingLignes() {
     });
 }
 
+function getTabProduct(lignes) {
+    var tabProduct = [];
+    $.each(lignes, function (index, ligne) {
+        if (!ligne.isEquipment)
+            tabProduct.push(ligne);
+    });
+    return tabProduct;
+}
+
+function getTabEquipment(lignes) {
+    var tabEquipment = [];
+    $.each(lignes, function (index, ligne) {
+        if (ligne.isEquipment)
+            tabEquipment.push(ligne);
+    });
+    return tabEquipment;
+}
 
 /**
  * Ready
@@ -98,7 +116,6 @@ $(document).ready(function () {
     orderId = getUrlParameter('id');
     getRemainingLignes();
 });
-
 /**
  * Functions
  */
@@ -233,15 +250,21 @@ function saveProducts() {
                     id_prod: parseInt($(this).find('td[name=productId]').text()),
                     qty: parseInt($(this).find('td[name=qty]').text())
                 };
+                products.push(newProd);
             } else {
-                var newProd = {
+                var newEquipment = {
                     id_prod: parseInt($(this).find('td[name=productId]').text()),
                     serial: $(this).find('input[name=serial]').val()
                 };
+                products.push(newEquipment);
             }
-            products.push(newProd);
         }
     });
+
+    var stopProcess = checkEntries(products);
+
+    if (stopProcess)
+        return;
 
     if (products.length === 0) {
         setMessage('alertEnregistrer', 'Veuillez cocher des lignes pour effectuer la mise en stock.', 'error');
@@ -249,6 +272,29 @@ function saveProducts() {
         var isTotal = checkIfStatutIsTotal();
         modifyOrder(products, isTotal);
     }
+}
+
+function checkEntries(products) {
+    var fieldName = [];
+    fieldName['qty'] = 'quantité';
+    fieldName['serial'] = 'numéro de série';
+    var stopProcess = false;
+    var cntProduct = 0;
+    products.forEach(function (prod) {
+        ++cntProduct;
+        for (var field in prod) {
+            if (prod[field] === '') {
+                stopProcess = true;
+                setMessage('alertEnregistrer', 'Une ligne a été cochée sans renseigner le champ "' + fieldName[field] + '".', 'error');
+                $('table#productTable tr#' + cntProduct + '> td').css('border-top', 'solid 1px red');
+                $('table#productTable tr#' + cntProduct + '> td').css('border-bottom', 'solid 1px red');
+                $('table#productTable tr#' + cntProduct + '> td:first').css('border-left', 'solid 1px red');
+                $('table#productTable tr#' + cntProduct + '> td:last').css('border-right', 'solid 1px red');
+//                $('table#productTable tr#' + cntProduct+' td[name=cnt]').css('opacity', '0.5');
+            }
+        }
+    });
+    return stopProcess;
 }
 
 /* Check is every lines of the order is fullfilled */
@@ -273,18 +319,6 @@ function checkIfStatutIsTotal() {
     if (stop)   // at least 1 amount is less than the one defined in the order
         return false;
     return true;
-}
-
-
-/*
- * Unserialized first, then serialized
- */
-function sorByType(a, b) {
-    if (a.isEquipment < b.isEquipment)
-        return -1;
-    if (a.isEquipment > b.isEquipment)
-        return 1;
-    return 0;
 }
 
 

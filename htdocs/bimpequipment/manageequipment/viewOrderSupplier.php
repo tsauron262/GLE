@@ -98,11 +98,14 @@ if ($id > 0 || !empty($ref)) {
 
 $facid = $id;
 $orderId = $object->id;
+if ($object->statut < 3) {
+    print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
+}
 if (4 < $object->statut) {
     if (5 == $object->statut)
-        print '<strong>Cette commande a déjà été livrée</strong>';
+        print '<strong>Cette commande a déjà été livrée.</strong>';
     else
-        print '<strong>Cette commande a été annulée</strong>';
+        print '<strong>Cette commande a été annulée.</strong>';
 
     llxFooter();
     $db->close();

@@ -10,6 +10,7 @@ class BimpLivraison {
     private $db;
     public $orderId;
     public $statut;
+    public $ref;
     public $errors = array();
 
     function __construct($db) {
@@ -21,6 +22,7 @@ class BimpLivraison {
         $doliFournOrder = new CommandeFournisseur($this->db);
         $doliFournOrder->fetch($orderId);
         $this->statut = $doliFournOrder->statut;
+        $this->ref = $doliFournOrder->ref;
     }
 
     /* Get every line of the order */
@@ -73,13 +75,39 @@ class BimpLivraison {
 //    class LignePanier {
 //
 
+    function getAllMouvement() {
+        $moveQty = array();
+        $sql = 'SELECT fk_product, value';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
+        $sql .= ' WHERE inventorycode ="' . 'BimpLivraison ' . $this->ref . '"';
+        // value supp à 0 ?
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $moveQty[$obj->fk_product] = $obj->value;
+            }
+        }
+        return $moveQty;
+    }
+
     function getRemainingLignes() {
-        // StatusOrderValidated or StatusOrderApproved or StatusOrderOnProcess
-//        if ($this->statut == 1 or $this->statut == 2 or $this->statut == 3) {
-//            return $this->getLignesOrder();
-//        } else if ($this->statut == 4) { // ReceivedPartially
         $initLignes = $this->getLignesOrder();
-//        }
+        // StatusOrderValidated or StatusOrderApproved or StatusOrderOnProcess
+        if ($this->statut == 3) {
+            return $initLignes;
+        } else if ($this->statut == 4) { // ReceivedPartially
+            $moveQty = $this->getAllMouvement();
+            foreach ($initLignes as $key => $ligne) {
+                $qtyAlreadyDelivered = $moveQty[$ligne->prodId];
+                if ($qtyAlreadyDelivered) {
+                    if ($ligne->remainingQty <= $qtyAlreadyDelivered)   // done
+                        unset($initLignes[$key]);
+                    else
+                        $initLignes[$key]->remainingQty -= $qtyAlreadyDelivered;
+                }
+            }
+        }
         return $initLignes;
     }
 
@@ -88,7 +116,7 @@ class BimpLivraison {
         $order = new CommandeFournisseur($this->db);
         $order->fetch($orderId);
         $labelmove = 'Reception commande bimp ' . $order->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
-        $codemove = $order->ref;
+        $codemove = 'BimpLivraison ' . $order->ref;
 
         foreach ($products as $product) {
             $doliProduct = new Product($this->db);
@@ -112,6 +140,9 @@ class BimpLivraison {
 
         $type = ($isTotal == 'false') ? 'par' : 'tot';
 
+        echo $now;
+        echo $type;
+        echo $labelmove;
         $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
 
         return array('errors' => $this->errors);

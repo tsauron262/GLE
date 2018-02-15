@@ -97,7 +97,7 @@ class LigneTransfert {
                 'type' => 2, // type entrepot
                 'id_entrepot' => $entrepotIdEnd, // si type = 2
                 'infos' => '...',
-                'date' => '2018-01-01 00:00:00' // date et heure d'arrivée TODO
+                'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée TODO
             ));
             $errors = array_merge($errors, $emplacement->create());
         }

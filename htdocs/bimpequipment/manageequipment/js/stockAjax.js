@@ -39,10 +39,10 @@ function modifyOrder(products, isTotal) {
             if (outP.errors.length !== 0) {
                 printErrors(outP.errors, 'alertEnregistrer');
             } else if (1 < products.length) {
-                localStorage.setItem('enregistrementOK', products.length + ' Groupes de produits on été rajouté avec succès.')
+                localStorage.setItem('enregistrementOK', products.length + ' Groupes de produits on été rajouté avec succès.');
                 window.location.reload();
             } else if (1 === products.length) {
-                localStorage.setItem('enregistrementOK', 'Un groupe de produit a été rajouté avec succès.')
+                localStorage.setItem('enregistrementOK', 'Un groupe de produit a été rajouté avec succès.');
                 window.location.reload();
             }
         }
@@ -242,27 +242,29 @@ function modifyQuantity() {
 /* Create product object for each line, then call ajax to save those products */
 function saveProducts() {
     var products = [];
-
+    var cntProduct = 0;
     $('table#productTable tr').each(function () {
         if ($(this).find('td input[name=stocker]').prop('checked')) { // is the line checked ?
             if ($(this).find('td input[name=modify]').length) {
                 var newProd = {
                     id_prod: parseInt($(this).find('td[name=productId]').text()),
-                    qty: parseInt($(this).find('td[name=qty]').text())
+                    qty: parseInt($(this).find('td[name=qty]').text()),
+                    cnt: cntProduct
                 };
                 products.push(newProd);
             } else {
                 var newEquipment = {
                     id_prod: parseInt($(this).find('td[name=productId]').text()),
-                    serial: $(this).find('input[name=serial]').val()
+                    serial: $(this).find('input[name=serial]').val(),
+                    cnt: cntProduct
                 };
                 products.push(newEquipment);
             }
         }
+        cntProduct++;
     });
 
     var stopProcess = checkEntries(products);
-
     if (stopProcess)
         return;
 
@@ -275,23 +277,25 @@ function saveProducts() {
 }
 
 function checkEntries(products) {
-    var fieldName = [];
-    fieldName['qty'] = 'quantité';
-    fieldName['serial'] = 'numéro de série';
     var stopProcess = false;
-    var cntProduct = 0;
+    var badLigne;
+    var nameField;
     products.forEach(function (prod) {
-        ++cntProduct;
-        for (var field in prod) {
-            if (prod[field] === '') {
-                stopProcess = true;
-                setMessage('alertEnregistrer', 'Une ligne a été cochée sans renseigner le champ "' + fieldName[field] + '".', 'error');
-                $('table#productTable tr#' + cntProduct + '> td').css('border-top', 'solid 1px red');
-                $('table#productTable tr#' + cntProduct + '> td').css('border-bottom', 'solid 1px red');
-                $('table#productTable tr#' + cntProduct + '> td:first').css('border-left', 'solid 1px red');
-                $('table#productTable tr#' + cntProduct + '> td:last').css('border-right', 'solid 1px red');
-//                $('table#productTable tr#' + cntProduct+' td[name=cnt]').css('opacity', '0.5');
-            }
+        badLigne = false;
+        if (prod.serial === '') {
+            badLigne = true;
+            nameField = '"numéro de série"';
+        } else if (prod.qty === 0) {
+            badLigne = true;
+            nameField = '"quantité". Cliquez sur le <img src="css/ok.ico" style="margin-bottom:3px"> pour valider la quantité';
+        }
+        if (badLigne) {
+            setMessage('alertEnregistrer', 'Une ligne a été cochée sans renseigner le champ ' + nameField + '.', 'error');
+            $('table#productTable tr#' + prod.cnt + '> td').css('border-top', 'solid 1px red');
+            $('table#productTable tr#' + prod.cnt + '> td').css('border-bottom', 'solid 1px red');
+            $('table#productTable tr#' + prod.cnt + '> td:first').css('border-left', 'solid 1px red');
+            $('table#productTable tr#' + prod.cnt + '> td:last').css('border-right', 'solid 1px red');
+            stopProcess = true;
         }
     });
     return stopProcess;

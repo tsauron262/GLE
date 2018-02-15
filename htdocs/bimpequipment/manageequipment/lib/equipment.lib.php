@@ -39,7 +39,7 @@ function addEquipments($db, $newEquipments, $user) {
             'type' => 2, // cf $types
             'id_entrepot' => $newEquipment['id_entrepot'], // si type = 2
             'infos' => '...',
-            'date' => '2018-01-01 00:00:00' // date et heure d'arrivée
+            'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
         ));
         $newErrors = array_merge($newErrors, $emplacement->create());
 

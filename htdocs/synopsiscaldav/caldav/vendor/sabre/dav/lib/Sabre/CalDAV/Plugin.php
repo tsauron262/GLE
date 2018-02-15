@@ -256,7 +256,7 @@ class Plugin extends DAV\ServerPlugin {
      * @return bool
      */
     public function report($reportName,$dom) {
-
+dol_syslog("report", 3);
         switch($reportName) {
             case '{'.self::NS_CALDAV.'}calendar-multiget' :
                 $this->calendarMultiGetReport($dom);

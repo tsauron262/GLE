@@ -35,7 +35,6 @@ class UserCalendars implements DAV\IExtendedCollection, DAVACL\IACL {
      * @param mixed $userUri
      */
     public function __construct(Backend\BackendInterface $caldavBackend, $principalInfo) {
-dol_syslog("construct UserCalendar",3);
         $this->caldavBackend = $caldavBackend;
         $this->principalInfo = $principalInfo;
 
@@ -124,7 +123,6 @@ dol_syslog("construct UserCalendar",3);
      * @return Calendar
      */
     public function getChild($name) {
-dol_syslog("deb getChildren",3);
 
         foreach($this->getChildren() as $child) {
             if ($name==$child->getName())
@@ -159,12 +157,9 @@ dol_syslog("deb getChildren",3);
      * @return array
      */
     public function getChildren() {
-dol_syslog("deb getChildren",3);
         $calendars = $this->caldavBackend->getCalendarsForUser($this->principalInfo['uri']);
         $objs = array();
-dol_syslog("deb getChildren1",3);
         foreach($calendars as $calendar) {
-dol_syslog("deb getChildren2",3);
             if ($this->caldavBackend instanceof Backend\SharingSupport) {
                 if (isset($calendar['{http://calendarserver.org/ns/}shared-url'])) {
                     $objs[] = new SharedCalendar($this->caldavBackend, $calendar);
@@ -175,15 +170,12 @@ dol_syslog("deb getChildren2",3);
                 $objs[] = new Calendar($this->caldavBackend, $calendar);
             }
         }
-dol_syslog("deb getChildren3",3);
         $objs[] = new Schedule\Outbox($this->principalInfo['uri']);
 
-dol_syslog("deb getChildren4".print_r($objs,1),3);
         // We're adding a notifications node, if it's supported by the backend.
         /*if ($this->caldavBackend instanceof Backend\NotificationSupport) {
             $objs[] = new Notifications\Collection($this->caldavBackend, $this->principalInfo['uri']);
         }*/
-        dol_syslog("getChidren ".print_r($objs,1),3);
         return $objs;
 
     }

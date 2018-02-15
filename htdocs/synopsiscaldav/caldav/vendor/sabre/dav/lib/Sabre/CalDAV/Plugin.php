@@ -456,7 +456,7 @@ class Plugin extends DAV\ServerPlugin {
      * @return void
      */
     public function calendarMultiGetReport($dom) {
-
+dol_syslog("calendarMultiGetReport",3);
         $properties = array_keys(DAV\XMLUtil::parseProperties($dom->firstChild));
         $hrefElems = $dom->getElementsByTagNameNS('urn:DAV','href');
 

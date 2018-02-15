@@ -51,10 +51,13 @@ class Tools {
 	
 	public static function configureEnvironment() {
 		set_exception_handler('\Baikal\Core\Tools::handleException');
-		//ini_set("error_reporting", E_ALL);;
+		ini_set("error_reporting", E_ALL);;
 	}
 	
 	public static function handleException($exception) {
+            dol_syslog("exception caldav ".$exception,3);
+            
+            file_put_contents("//Users/tommy/Desktop/tmpcdav/exception.txt", $exception);
 		echo "<pre>" . $exception . "<pre>";
 	}
 	

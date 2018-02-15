@@ -1,0 +1,203 @@
+dol_object: 
+    instance: 
+        dol_object: user
+        
+table: user
+primary: rowid
+
+labels: 
+    name: utilisateur
+    
+objects: 
+    resp_user:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: user
+            id_object: 
+                field_value: fk_user
+                
+fields: 
+    admin: 
+        label: Administrateur
+        type: bool
+        default_value: 0 
+    login: 
+        label: Identifiant
+        required: 1
+    pass: 
+        label: Mot de passe
+        required: 1
+    lastname: 
+        label: Nom
+        required: 1
+    firstname:
+        label: Prénom
+        required: 1
+    gender: 
+        label: Genre
+        values:
+            array: genders
+    email: 
+        label: E-mail
+    job: 
+        label: Poste / fonction
+    employee: 
+        label: Salarié
+        type: bool
+    dateemployment:
+        label: Date d'embauche
+        type: date
+    address: 
+        label: Adresse
+        type: text
+    zip: 
+        label: Code postal
+    town: 
+        label: Ville
+    fk_country: 
+        label: Pays
+        dol_prop: country_id
+        type: int
+        default_value: 1
+        input: 
+            type: search_country
+    office_phone:
+        label: Tél. pro
+    office_fax:
+        label: Fax pro
+    user_mobile: 
+        label: Tél. portable
+    skype: 
+        label: Identifiant Skype
+    fk_user: 
+        label: Responsable hiérarchique
+        type: id_object
+        object: resp_user
+        input: 
+            type: search_user
+    signature: 
+        label: Signature
+        type: text
+    note: 
+        label: Note
+        type: text
+        
+lists:
+    default: 
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les utilisateurs sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 50
+        add_form_name: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        edit_btn: 1
+        cols:
+            gender:
+                field: gender
+            firstname:
+                field: firstname
+            lastname: 
+                field: lastname
+            login: 
+                field: login
+            job:
+                field: job
+            email: 
+                field: email
+            office_phone: 
+                field: office_phone
+                
+fields_tables: 
+    identity:
+        title: Identité
+        icon: id-card
+        rows: 
+            - field: firstname
+            - field: lastname
+            - field: login
+            - field: gender
+            
+    address:
+        title: Adresse
+        icon: map-marker
+        rows: 
+            - field: address
+            - field: zip
+            - field: town
+            - field: fk_country
+            
+    contact: 
+        title: Informations de contact
+        icon: phone
+        rows: 
+            - field: email
+            - field: office_phone
+            - field: office_fax
+            - field: user_mobile
+            - field: skype
+        
+    status: 
+        title: Statut
+        icon: user
+        rows: 
+            - field: job
+            - field: employee
+            - field: dateemployment
+            - field: fk_user
+              display: nom_url
+        
+    notes: 
+        title: Notes
+        icon: file-text
+        rows: 
+            - field: note
+            - field: signature
+            
+views: 
+    default: 
+        title: nom
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: identity
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: contact
+                      
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: address
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: status
+                      
+            - cols: 
+                - type: fields_table
+                  col_lg: 12
+                  fields_table: 
+                      name: notes
+        
+        

@@ -59,6 +59,10 @@ class BC_ListTable extends BC_List
 
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
 
+        if (!$this->params['pagination']) {
+            $this->params['n'] = 0;
+            $this->params['p'] = 1;
+        }
         $this->fetchCols();
         $this->colspan = 2 + count($this->cols);
     }
@@ -197,9 +201,11 @@ class BC_ListTable extends BC_List
 
         $html .= '</tbody>';
 
-        $html .= '<tfoot>';
-        $html .= $this->renderPaginationRow();
-        $html .= '</tfoot>';
+        if ($this->params['pagination']) {
+            $html .= '<tfoot>';
+            $html .= $this->renderPaginationRow();
+            $html .= '</tfoot>';
+        }
 
         $html .= '</table>';
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
@@ -309,10 +315,14 @@ class BC_ListTable extends BC_List
                 $html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
                 $html .= $this->renderBulkActionsPopup();
             }
-            $html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
-            $html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
-            $html .= $this->renderParametersPopup();
-            $html .= '</div>';
+
+            $parametersPopUpHtml = $this->renderParametersPopup();
+            if ($parametersPopUpHtml) {
+                $html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
+                $html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
+                $html .= $parametersPopUpHtml;
+                $html .= '</div>';
+            }
             $html .= '</th>';
 
             $html .= '</tr>';
@@ -433,6 +443,10 @@ class BC_ListTable extends BC_List
 
     public function renderPaginationRow()
     {
+        if (!$this->params['pagination']) {
+            return '';
+        }
+
         $hide = (is_null($this->nbItems) || ($this->params['n'] <= 0) || ($this->params['n'] >= $this->nbItems));
 
         $html = '<tr class="paginationContainer"' . ($hide ? ' style="display: none"' : '') . '>';
@@ -545,18 +559,23 @@ class BC_ListTable extends BC_List
     public function renderParametersPopup()
     {
         $html = '';
-        $html .= '<div id="' . $this->identifier . '_parametersPopup" class="tinyPopup listPopup">';
+        $nb_Items = '';
 
-        $html .= '<div class="title">';
-        $html .= 'Nombre d\'items par page';
-        $html .= '</div>';
+        if ($this->params['pagination']) {
+            $nb_Items .= '<div class="title">';
+            $nb_Items .= 'Nombre d\'items par page';
+            $nb_Items .= '</div>';
 
-        $html .= BimpInput::renderSwitchOptionsInput('select_n', array(
-                    10  => '10', 25  => '25', 50  => '50', 100 => '100', 250 => '250', 500 => '500', 0   => 'Tout'), $this->params['n'], $this->identifier . '_n');
+            $nb_Items .= BimpInput::renderSwitchOptionsInput('select_n', array(
+                        10  => '10', 25  => '25', 50  => '50', 100 => '100', 250 => '250', 500 => '500', 0   => 'Tout'), $this->params['n'], $this->identifier . '_n');
+        }
 
-        $html .= '</div>';
+        if ($nb_Items) {
+            $html .= '<div id="' . $this->identifier . '_parametersPopup" class="tinyPopup listPopup">';
+            $html .= $nb_Items;
+            $html .= '</div>';
+        }
 
-        $this->setConfPath();
         return $html;
     }
 
@@ -704,19 +723,35 @@ class BC_ListTable extends BC_List
                     ));
                 }
                 if ($item_params['page_btn']) {
-                    $controller = $this->object->getController();
-                    if ($controller && !is_null($id_object) && $id_object) {
-                        $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $id_object;
-                        $html .= $this->renderRowButton(array(
-                            'label'   => 'Afficher la page',
-                            'onclick' => 'window.location = \'' . $url . '\';',
-                            'icon'    => 'file-o'
-                        ));
-                        $html .= $this->renderRowButton(array(
-                            'label'   => 'Afficher la page dans un nouvel onglet',
-                            'onclick' => 'window.open(\'' . $url . '\');',
-                            'icon'    => 'external-link'
-                        ));
+                    if (!is_null($id_object) && $id_object) {
+                        $controller = $this->object->getController();
+                        if ($controller) {
+                            $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $id_object;
+                            $html .= $this->renderRowButton(array(
+                                'label'   => 'Afficher la page',
+                                'onclick' => 'window.location = \'' . $url . '\';',
+                                'icon'    => 'file-o'
+                            ));
+                            $html .= $this->renderRowButton(array(
+                                'label'   => 'Afficher la page dans un nouvel onglet',
+                                'onclick' => 'window.open(\'' . $url . '\');',
+                                'icon'    => 'external-link'
+                            ));
+                        } elseif ($this->object->isDolObject()) {
+                            $url = BimpTools::getDolObjectUrl($this->object->dol_object, $id_object);
+                            if ($url) {
+                                $html .= $this->renderRowButton(array(
+                                    'label'   => 'Afficher la fiche ' . $this->object->getLabel(),
+                                    'onclick' => 'window.location = \'' . $url . '\';',
+                                    'icon'    => 'file-o'
+                                ));
+                                $html .= $this->renderRowButton(array(
+                                    'label'   => 'Afficher la fiche ' . $this->object->getLabel() . ' dans un nouvel onglet',
+                                    'onclick' => 'window.open(\'' . $url . '\');',
+                                    'icon'    => 'external-link'
+                                ));
+                            }
+                        }
                     }
                 }
                 if (!is_null($item_params['inline_view'])) {

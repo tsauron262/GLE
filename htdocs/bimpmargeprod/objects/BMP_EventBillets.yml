@@ -66,6 +66,7 @@ list:
     title: Vente de billets
     checkboxes: 
         callback: isEventEditable
+    pagination: 0
     objects_change_reload: BMP_Tarif
     bulk_actions:
         - label: supprimer les lignes sélectionnées
@@ -74,7 +75,7 @@ list:
     enable_search: 0
     sort_field: id
     sort_way: desc
-    n: 25
+    n: 0
     update_btn: 
         callback: isEventEditable
     add_form_name: 

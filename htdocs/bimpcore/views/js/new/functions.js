@@ -1,6 +1,11 @@
 // Notifications:
+var bimp_msg_enable = true;
 
 function bimp_msg(msg, className, $container) {
+    if (!bimp_msg_enable) {
+        return;
+    }
+
     if (typeof (className) === 'undefined') {
         className = 'info';
     }

@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/BimpPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
-require_once __DIR__.'/BimpPDF_AmountsTable.php';
+require_once __DIR__ . '/BimpPDF_AmountsTable.php';
 
 Abstract class BimpModelPDF
 {
@@ -128,7 +128,10 @@ Abstract class BimpModelPDF
         );
     }
 
-    protected function initData() {}
+    protected function initData()
+    {
+        
+    }
 
     function init($object)
     {
@@ -148,22 +151,28 @@ Abstract class BimpModelPDF
 
         if (is_null($this->header)) {
             if (file_exists(self::$tpl_dir . '/' . static::$type . '/header.html')) {
-                $this->header = $this->pdf->renderTemplate(self::$tpl_dir . '/' . static::$type . '/header.html', $this->header_vars);
+                $this->header = $this->renderTemplate(self::$tpl_dir . '/' . static::$type . '/header.html', $this->header_vars);
             } else {
                 $this->header = $this->renderTemplate(self::$tpl_dir . '/header.html', $this->header_vars);
             }
         }
+
+        if (count($this->errors)) {
+            $this->displayErrors();
+            exit;
+        }
+
         $this->pdf->createHeader($this->header);
 
         if (is_null($this->footer)) {
             if (file_exists(self::$tpl_dir . '/' . static::$type . '/footer.html')) {
-                $this->footer = $this->pdf->renderTemplate(self::$tpl_dir . '/' . static::$type . '/footer.html', $this->footer_vars);
+                $this->footer = $this->renderTemplate(self::$tpl_dir . '/' . static::$type . '/footer.html', $this->footer_vars);
             } else {
                 $this->footer = $this->renderTemplate(self::$tpl_dir . '/footer.html', $this->footer_vars);
             }
         }
         $this->pdf->createFooter($this->footer);
-        
+
         $this->pdf->newPage();
 
         $this->renderContent();
@@ -192,7 +201,7 @@ Abstract class BimpModelPDF
             }
         }
         $styles .= '</style>' . "\n";
-        
+
         $this->pdf->writeHTML($styles . $content, true, false, true, false, '');
     }
 
@@ -206,9 +215,7 @@ Abstract class BimpModelPDF
                 $content = str_replace('{' . $name . '}', $value, $content);
             }
             return $content;
-        } else {
-            $this->errors[] = 'Template file "' . $file . '" is missing';
-        }
+        } 
         return '';
     }
 
@@ -336,5 +343,16 @@ Abstract class BimpModelPDF
         $this->render($file, false);
 
         return 1;
+    }
+
+    // Affichages erreurs: 
+    public function displayErrors()
+    {
+        if (count($this->errors)) {
+            echo count($this->errors) . ' erreur(s) détectée(s):<br/>';
+            foreach ($this->errors as $error) {
+                echo ' - ' . $error . '<br/>';
+            }
+        }
     }
 }

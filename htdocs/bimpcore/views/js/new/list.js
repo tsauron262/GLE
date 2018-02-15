@@ -133,18 +133,16 @@ function reloadObjectList(list_id, callback) {
         success: function (result, bimpAjax) {
             if (result.rows_html) {
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
-                if (bimpAjax.$resultContainer.length) {
-                    if (result.pagination_html) {
-                        bimpAjax.$resultContainer.find('.listPagination').each(function () {
-                            $(this).data('event_init', 0);
-                            $(this).html(result.pagination_html).parent('td').parent('tr.paginationContainer').show();
-                        });
-                        setPaginationEvents(bimpAjax.$list);
-                    } else {
-                        bimpAjax.$resultContainer.find('.listPagination').each(function () {
-                            $(this).html('').parent('td').parent('tr.paginationContainer').hide();
-                        });
-                    }
+                if (result.pagination_html) {
+                    bimpAjax.$list.find('.listPagination').each(function () {
+                        $(this).data('event_init', 0);
+                        $(this).html(result.pagination_html).parent('td').parent('tr.paginationContainer').show();
+                    });
+                    setPaginationEvents(bimpAjax.$list);
+                } else {
+                    bimpAjax.$list.find('.listPagination').each(function () {
+                        $(this).html('').parent('td').parent('tr.paginationContainer').hide();
+                    });
                 }
 
                 onListRefeshed(bimpAjax.$list);
@@ -665,6 +663,7 @@ function loadPage($list, page) {
     }
 
     $list.find('input[name=param_p]').val(page);
+
     reloadObjectList($list.attr('id'));
 }
 
@@ -876,7 +875,6 @@ function onListRefeshed($list) {
     });
 
     var $tbody = $list.find('tbody.listRows');
-    $list.find('input[name=param_p]').val('');
 
     $tbody.find('a').each(function () {
         $(this).attr('target', '_blank');

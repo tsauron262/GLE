@@ -86,6 +86,14 @@ $(document).ready(function () {
             }
         }
     });
+    
+    $('body').on('objectChange', function(e) {
+        if (e.object_name === 'BMP_Event') {
+            bimp_msg_enable = false;
+            e.stopPropagation();
+            window.location.reload();
+        }
+    });
 
     var $cp_list = $('.BMP_EventCoProd_list');
     if ($cp_list.length) {

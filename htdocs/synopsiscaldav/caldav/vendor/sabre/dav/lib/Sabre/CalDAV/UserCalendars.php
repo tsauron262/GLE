@@ -35,7 +35,7 @@ class UserCalendars implements DAV\IExtendedCollection, DAVACL\IACL {
      * @param mixed $userUri
      */
     public function __construct(Backend\BackendInterface $caldavBackend, $principalInfo) {
-
+dol_syslog("construct UserCalendar",3);
         $this->caldavBackend = $caldavBackend;
         $this->principalInfo = $principalInfo;
 
@@ -124,6 +124,7 @@ class UserCalendars implements DAV\IExtendedCollection, DAVACL\IACL {
      * @return Calendar
      */
     public function getChild($name) {
+dol_syslog("deb getChildren",3);
 
         foreach($this->getChildren() as $child) {
             if ($name==$child->getName())

@@ -1,38 +1,19 @@
 <?php
 
 /**
- *  \file       htdocs/bimpequipment/addequipment/viewAddEquipment.php
+ *  \file       htdocs/bimpequipment/manageequipment/viewAddEquipment.php
  *  \ingroup    bimpequipment
  *  \brief      Used while adding equipments
  */
 
-require_once '../../main.inc.php';
+include_once '../../main.inc.php';
 
-include DOL_DOCUMENT_ROOT.'core/class/html.form.class.php';
+include_once DOL_DOCUMENT_ROOT.'core/class/html.form.class.php';
+include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
-$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/addequipment/css/styles.css');
-$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/addequipment/js/ajax.js');
+$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/addStyles.css');
+$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/addAjax.js');
 
-
-/*
- * Functions  
- */
-
-function getAllEntrepots($db) {
-    
-    $entrepots = array();
-
-    $sql = 'SELECT rowid, label';
-    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
-
-    $result = $db->query($sql);
-    if ($result and mysqli_num_rows($result) > 0) {
-        while ($obj = $db->fetch_object($result)) {
-            $entrepots[$obj->rowid] = $obj->label;
-        }
-    }
-    return $entrepots;
-}
 
 /*
  * 	View

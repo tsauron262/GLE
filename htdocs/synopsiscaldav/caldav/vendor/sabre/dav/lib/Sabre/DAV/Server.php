@@ -710,6 +710,7 @@ class Server {
      * @return void
      */
     protected function httpPropfind($uri) {
+        dol_syslog("fin prop debut".print_r($data),3);
 
         $requestedProperties = $this->parsePropFindRequest($this->httpRequest->getBody(true));
 
@@ -735,6 +736,7 @@ class Server {
         $minimal = $prefer['return-minimal'];
 
         $data = $this->generateMultiStatus($newProperties, $minimal);
+        dol_syslog("fin prop find".print_r($data),3);
         $this->httpResponse->sendBody($data);
 
     }

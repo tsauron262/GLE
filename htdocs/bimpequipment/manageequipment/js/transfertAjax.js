@@ -6,7 +6,7 @@
 
 var idEntrepotStart;
 var idEntrepotEnd;
-//var cntProduct = 0;
+var cntProduct = 0;
 
 // list of product
 // if is equipment, fields are:
@@ -28,7 +28,7 @@ var products = [];
 function checkProductByRef(ref) {
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/transfertequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             ref: ref,
             idEntrepotStart: idEntrepotStart,
@@ -66,7 +66,7 @@ function checkStockForProduct(idProduct, qty) {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/transfertequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             idProduct: idProduct,
             idEntrepotStart: idEntrepotStart,
@@ -91,6 +91,27 @@ function checkStockForProduct(idProduct, qty) {
     });
 }
 
+function saveproducts() {
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+        data: {
+            products: products,
+            idEntrepotStart: idEntrepotStart,
+            idEntrepotEnd: idEntrepotEnd,
+            action: 'transfertAll'
+        },
+        error: function () {
+            console.log("Erreur PHP");
+        },
+        success: function (out) {
+            console.log("Pas d'erreur fatale coté serveur");
+//            var outParsed = JSON.parse(out);
+//            console.log(outParsed);
+        }
+    });
+}
 
 
 /**
@@ -103,6 +124,8 @@ $(document).ready(function () {
     initEvents();
     $('#entrepotStart').select2();
     $('#entrepotEnd').select2();
+    $('#entrepotStart option:selected').prop('selected', true);
+    $('#entrepotStart').trigger('change');
     $('#entrepotEnd option:selected').next().prop('selected', true);
     $('#entrepotEnd').trigger('change');
 
@@ -141,6 +164,7 @@ function initEvents() {
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
                 products = [];
                 $('table#productTable tr[id]').remove();
+                cntProduct =0;
             }
         } else {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
@@ -157,14 +181,32 @@ function initEvents() {
     $('#enregistrer').click(function () {
         if (idEntrepotStart === idEntrepotEnd) {
             setMessage('alertEnregistrer', 'L\'entrepot de départ doit être différent de celui d\'arrivé.', 'error');
+        } else if (cntProduct !== 0){
+            $('p[name=confTransfert]').text('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?');
+            $('div [name=confirmEnregistrer]').show();
+        } else {
+            setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
         }
     });
+    
+    $('input#okEnregistrer').click(function () {
+        saveproducts();
+        $('div [name=confirmEnregistrer]').hide();
+        products = [];
+        $('table#productTable tr[id]').remove();
+        cntProduct =0;
+    });
+    
+    $('input#noEnregistrer').click(function () {
+        $('div [name=confirmEnregistrer]').hide();
+    });
+
 
     var element = $("input[name=refScan]");
 
 
-    element.on('keyup', function (e) {
-        if (e.keyCode === 13 || e.keyCode === 9 || e.key == "Enter") { // code for "Enter"
+    element.on('keyup keydown', function (e) {
+        if (e.keyCode === 13 || e.keyCode === 9 || e.key === "Enter") { // code for "Enter"
             prepareAjax($(this), e);
             e.preventDefault();
         }
@@ -201,9 +243,10 @@ function prepareAjax(element) {
 /* Add a line in the table of equipments */
 function addFieldEquipment(productId, refUrl, serial, label) {
 
-//    cntProduct++;
+    cntProduct++;
     productId = parseInt(productId);
     var line = '<tr id="' + serial + '">';
+    line += '<td name="cnt">' + cntProduct + '</td>';    // cnt ligne
     line += '<td>' + productId + '</td>';    // id
     line += '<td>' + refUrl + '</td>';    // refUrl
     line += '<td>' + serial + '</td>';    // num série
@@ -227,19 +270,21 @@ function addFieldEquipment(productId, refUrl, serial, label) {
 /* Add a line in the table of product */
 function addFieldProduct(productId, qty, nb_prod_in_stock, label, refUrl) {
 
-//    cntProduct++;
+    cntProduct++;
+
     productId = parseInt(productId);
     qty = parseInt(qty);
     nb_prod_in_stock = parseInt(nb_prod_in_stock);
 
     var diff = nb_prod_in_stock - qty;
     var line = '<tr id=' + productId + '>';
+    line += '<td name="cnt">' + cntProduct + '</td>';    // cnt ligne
     line += '<td>' + productId + '</td>';
     line += '<td>' + refUrl + '</td>';
     line += '<td></td>';
     line += '<td>' + label + '</td>';
     line += '<td name="quantity" style="border-right:none">' + qty + '</td>';
-    line += '<td style="border-left:none"><input name="modify" type="number" class="custInput" style="width: 40px" value=1 min=1 max=' + nb_prod_in_stock + '><img src="css/ok.ico" class="clickable modify"></td>';
+    line += '<td style="border-left:none"><input name="modify" type="number" class="custInput" style="width: 40px" value=1 min=1 max=' + nb_prod_in_stock + '> <img src="css/ok.ico" class="clickable modify"></td>';
     line += '<td name="stock">' + diff + '</td>';
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove"></td></tr>';
     $(line).appendTo('#productTable');
@@ -266,9 +311,13 @@ function initRemoveLine(idTr) {
             else
                 return obj.id_product !== idTr;
         });
+        cntProduct = 1;
+        $('table#productTable td[name=cnt]').each(function () {
+            $(this).text(cntProduct);
+            cntProduct++;
+        })
         console.log(products);
     });
-//    cntProduct--;
 }
 
 function modifyQuantity() {

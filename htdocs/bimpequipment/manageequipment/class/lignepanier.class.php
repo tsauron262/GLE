@@ -15,7 +15,7 @@ class LignePanier {
     }
 
     function isProduct($ref) {
-        $ref = str_replace("/", "_", $ref);
+//        $ref = str_replace("/", "_", $ref);
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $ref . '"';
@@ -55,7 +55,6 @@ class LignePanier {
     }
 
     function check($entree, $entrepotId) {
-        $data = array();
         $this->entrepotId = $entrepotId;
         if (!$this->isProduct($entree)) {
             if (!$this->isEquipment(GETPOST('ref'))) {
@@ -75,7 +74,7 @@ class LignePanier {
         $prod = new product($this->db);
         $prod->fetch($this->prodId);
 
-        return array('id' => $this->prodId, 'isEquipment' => ($this->equipmentId > 0), 'stock' => $this->checkStock(), 'label' => $prod->label, 'refUrl' => $prod->getNomUrl(1), 'serial' => $this->serial, 'error' => $this->error);
+        return array('id' => $this->prodId, 'isEquipment' => ($this->equipmentId > 0), 'stock' => $this->checkStock(), 'label' => dol_trunc($prod->label, 30), 'refUrl' => $prod->getNomUrl(1), 'serial' => $this->serial, 'error' => $this->error);
     }
 
     function checkStock() {

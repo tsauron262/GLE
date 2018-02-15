@@ -78,6 +78,14 @@ $conffiletoshow = "htdocs/conf/conf.php";
 //$conffiletoshow = "/etc/dolibarr/conf.php";
 
 
+/*mod drsi*/
+$conffileT = str_replace(".php", "-".$_SERVER['HTTP_HOST'].".php", $conffile);
+$conffileT = str_replace(basename(__FILE__), $conffileT, __FILE__);
+if(is_file($conffileT))
+    $conffile = $conffileT;
+/*fmod drsi*/ 
+
+
 // Load conf file if it is already defined
 if (! defined('DONOTLOADCONF') && file_exists($conffile) && filesize($conffile) > 8) // Test on filesize is to ensure that conf file is more that an empty template with just <?php in first line
 {

@@ -16,9 +16,9 @@ class synopsisHook {//FA1506-0369
 
     function synopsisHook() {
         global $conf, $db, $dbBIMPERP, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
-        
-        require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
-        
+
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/centre.inc.php");
+
         //Pour les logiciel externe.
         $dbBIMPERP = $db;
 
@@ -63,16 +63,16 @@ class synopsisHook {//FA1506-0369
 
         include_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
-        /*$conf->global->MAIN_MAX_DECIMALS_TOT = 5;
-        $conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
-        $conf->global->MAIN_MAX_DECIMALS_SHOWN = 2;*/
+        /* $conf->global->MAIN_MAX_DECIMALS_TOT = 5;
+          $conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
+          $conf->global->MAIN_MAX_DECIMALS_SHOWN = 2; */
 
         $conf->global->MAIN_APPLICATION_TITLE = "BIMP-ERP";
         $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
         $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
         $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 
-        $conf->global->MAIN_MODULES_FOR_EXTERNAL .=',synopsisficheinter,synopsisdemandeinterv';
+        $conf->global->MAIN_MODULES_FOR_EXTERNAL .= ',synopsisficheinter,synopsisdemandeinterv';
 
         $conf->global->PRODUIT_CONFIRM_DELETE_LINE = "1";
 
@@ -122,7 +122,6 @@ class synopsisHook {//FA1506-0369
         ob_start();
         self::$reload = true;
     }
-    
 
     function initRightsSyn() {
         global $conf, $user, $db;
@@ -131,19 +130,19 @@ class synopsisHook {//FA1506-0369
 
         //bimp pas de logo pour sav
         if ($user->id && isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
-            
-            
+
+
 //            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 //            $groupSav = new UserGroup($db);
 //            $groupSav->fetch('', "XX SAV");
 //            if (isset($groupSav->members[$user->id]))
-            
-            if(userInGroupe("XX Sav", $user->id))
+
+            if (userInGroupe("XX Sav", $user->id))
                 $conf->global->MAIN_SHOW_LOGO = false;
         }
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISPROCESS)) {
-            require_once(DOL_DOCUMENT_ROOT."/synopsisres/extractObjTypeId.php");
+            require_once(DOL_DOCUMENT_ROOT . "/synopsisres/extractObjTypeId.php");
             $tab = getTypeAndId();
             if ($tab[0] == "projet")
                 $tab[0] = "project";
@@ -176,6 +175,13 @@ class synopsisHook {//FA1506-0369
             $langs->load("main");
             require (DOL_DOCUMENT_ROOT . "/synopsistools/public/close.php");
             die;
+        }
+        
+//        if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && stripos($_SERVER["SCRIPT_URI"], str_replace("https://", "", $conf->file->main_force_https)) === false) {
+        if (defined("REDIRECT_DOMAINE") && REDIRECT_DOMAINE != "" && stripos($_SERVER["HTTP_HOST"], str_replace(array("https://", "http://"), "", REDIRECT_DOMAINE)) === false) {
+
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: '.REDIRECT_DOMAINE . "/" . $_SERVER["REQUEST_URI"]);
         }
 
         if (defined('URL_REDIRECT') && (!defined('IP_ADMIN') || IP_ADMIN != $_SERVER['REMOTE_ADDR']))
@@ -224,7 +230,7 @@ class synopsisHook {//FA1506-0369
 //                . 'alert("Test en cours !!! Nombreuses errerurs de chargement possible.");'
                 . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/js/global.js"></script>';
-        $return .='<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/synopsistools/css/responsive.css">';
+        $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/synopsistools/css/responsive.css">';
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/js/responsive.js"></script>';
 //        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsistools/jquerymobile/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.js"></script>';
 
@@ -237,7 +243,7 @@ class synopsisHook {//FA1506-0369
         if (is_object($langs)) {
             $langsSoc = "/synopsistools/langs/fr_FR/" . $conf->global->MAIN_INFO_SOCIETE_NOM . ".lang";
             if (is_file(DOL_DOCUMENT_ROOT . $langsSoc))
-                $langs->load( $conf->global->MAIN_INFO_SOCIETE_NOM . "@synopsistools");
+                $langs->load($conf->global->MAIN_INFO_SOCIETE_NOM . "@synopsistools");
             $langs->load("synopsisGene@synopsistools");
         }
 
@@ -246,7 +252,7 @@ class synopsisHook {//FA1506-0369
 
     static function footer() {
         global $conf, $db, $logLongTime;
-        
+
         $return = "";
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
@@ -258,7 +264,7 @@ class synopsisHook {//FA1506-0369
         $return .= "</div>";
 
         $return .= "<div class='notificationText'></div><div class='notificationObj'></div>";
-        
+
         $nbReq = $db->countReq;
 
         $time = (microtime(true) - self::$timeDeb);
@@ -266,9 +272,9 @@ class synopsisHook {//FA1506-0369
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time");
         if ($nbReq > self::$MAX_REQ_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages trop de req " . $nbReq . " ", 4, 0, "_time");
-        if ($nbReq > self::$MAX_REQ_LOG/2 && $time > self::$MAX_TIME_LOG/2 && (!isset($logLongTime) || $logLongTime))
-            dol_syslog("Pages trop de req*temp " . $nbReq . " en ". $time . " s", 4, 0, "_time");
-        $return .= "<span class='timePage'>" . number_format($time,4) . " s | ".$nbReq." requetes</span>";
+        if ($nbReq > self::$MAX_REQ_LOG / 2 && $time > self::$MAX_TIME_LOG / 2 && (!isset($logLongTime) || $logLongTime))
+            dol_syslog("Pages trop de req*temp " . $nbReq . " en " . $time . " s", 4, 0, "_time");
+        $return .= "<span class='timePage'>" . number_format($time, 4) . " s | " . $nbReq . " requetes</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
             $return .= "<br/>";
             $return .= "<br/>";
@@ -532,11 +538,11 @@ class Synopsis_Commande extends Commande {
         $label = $langs->trans("ShowOrder") . ': ' . $this->ref;
 
         if ($withpicto)
-            $result.=($linkstart . img_object($label, $picto) . $linkend);
+            $result .= ($linkstart . img_object($label, $picto) . $linkend);
         if ($withpicto && $withpicto != 2)
-            $result.=' ';
+            $result .= ' ';
 //        $connect = pictoConnect("commande",$this->id,$this->ref);
-        $result.=$linkstart . $this->ref . $linkend . $connect;
+        $result .= $linkstart . $this->ref . $linkend . $connect;
         return $result;
     }
 

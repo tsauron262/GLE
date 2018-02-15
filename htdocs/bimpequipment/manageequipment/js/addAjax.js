@@ -30,7 +30,7 @@ function checkEquipment(serialNumber, currentEquipCnt) {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/addequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             idCurrentEntrepot: idCurrentEntrepot,
             idCurrentProd: idCurrentProd,
@@ -70,7 +70,7 @@ function addEquipment() {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/addequipment/interface.php",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             newEquipments: newEquipments,
             action: 'addEquipment'
@@ -141,10 +141,11 @@ function initEvents() {
 /* Add a line in the table of equipments */
 function addFieldEquipment() {
 
+    $('#alertProd').empty();
     cntEquip++;
 
     var line = '<tr id="' + cntEquip + '" ><td>' + cntEquip + '</td>';      // Nombre de produits scannés
-    line += '<td>' + productid.value + '</td><td>'; // Identifiant du produit
+    line += '<td>'+productid.value+'</td><td>';      // Identifiant du produit
     line += '<input class="serialNumber" name="serial" cntEquip="' + cntEquip + '">'; // Numéro de série
     line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';   // Note
     line += '<td><text class="reponseServeur"></text></td></tr>';   // Réponse serveur
@@ -155,7 +156,6 @@ function addFieldEquipment() {
     $(".serialNumber").keyup(function (e) {
         if (e.keyCode === 13 && $(this).attr('valider') !== 'true') { // code for "Enter"
             if (productid.value !== '') {
-                $('#alertProd').empty();
                 $(this).attr('valider', 'true');
                 var serialNumber = $("input[cntEquip='" + $(this).attr('cntEquip') + "']").val();
                 $(this).blur(); // unfocus

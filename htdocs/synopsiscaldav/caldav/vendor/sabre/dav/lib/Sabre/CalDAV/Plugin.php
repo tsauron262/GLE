@@ -520,6 +520,7 @@ dol_syslog("calendarMultiGetReport",3);
      * @return void
      */
     public function calendarQueryReport($dom) {
+dol_syslog("calendarQueryReport",3);
 
         $parser = new CalendarQueryParser($dom);
         $parser->parse();

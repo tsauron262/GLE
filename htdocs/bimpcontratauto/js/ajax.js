@@ -113,6 +113,7 @@ function getNewContratHeight(accDiv) {
     if (accDiv.attr('isOpened') === 'true') {
         return HEIGHT_DIV_CONTRAT;
     }
+    return "auto";
     var nbOfLine = parseInt(accDiv.attr('nbChild'));
     return HEIGHT_DIV_CONTRAT * (nbOfLine + 2); // HEIGHT_DIV_CONTRAT * (nb services + contrat div + header of array)
 }

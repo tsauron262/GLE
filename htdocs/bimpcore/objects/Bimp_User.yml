@@ -90,9 +90,14 @@ fields:
 forms:
     light: 
         rows:
+            - field: firstname
+            - field: gender
             - field: office_phone
             - field: user_mobile
             - field: job
+            - field: address
+            - field: zip
+            - field: town
 
 lists:
     default: 

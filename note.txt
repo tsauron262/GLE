@@ -1595,3 +1595,17 @@ ascwse13
 ajout de tous 105 ds 107
 INSERT INTO llx_synopsischrono_key SELECT  null as id, `nom`, `description`, 
  107 as model_refid, `type_valeur`, `type_subvaleur`, `extraCss`, `inDetList`, `rang`  FROM `llx_synopsischrono_key` WHERE `model_refid` = '105'
+
+
+
+
+sudo umount /mnt/8sens  -fl
+
+
+
+maj CAPSIM
+UPDATE `llx_projet` SET date_close = null WHERE date_close < '1900-01-01 00:00:00'
+UPDATE `llx_projet` SET dateo = null WHERE dateo < '1900-01-01'
+UPDATE `llx_projet` SET datee = null WHERE datee < '1900-01-01'
+
+ALTER TABLE `llx_synopsis_projet_task_timeP` ADD `occupation` INT NOT NULL AFTER `note`;

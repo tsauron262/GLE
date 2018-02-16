@@ -62,3 +62,6 @@ if ($droitLire) {
     echo BimpRender::renderAjaxModal('page_modal');
 } else
     echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir cette page');
+
+
+llxFooter();

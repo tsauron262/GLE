@@ -1673,7 +1673,7 @@ class BimpObject
         return 0;
     }
 
-    protected function fetchDolObject($id, &$errors)
+    protected function fetchDolObject($id, &$errors = array())
     {
         if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
             unset($this->dol_object);

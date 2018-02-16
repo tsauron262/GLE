@@ -16,6 +16,7 @@ if ($user->id == $id) {//On est dans le form de l'utilisateur
     $droitModifSimple = 1;
     $droitModif = $user->rights->user->self->creer;
     $object = $user;
+$droitModif = 0;//A suupr pour montrée....
 } else {
     $droitLire = $user->rights->user->user->lire;
     $droitModifSimple = $user->rights->user->user->creer;
@@ -26,21 +27,13 @@ if ($user->id == $id) {//On est dans le form de l'utilisateur
 }
 
 
-
 llxHeader();
 
 $head = user_prepare_head($object);
 
 dol_fiche_head($head, 'formSimple', 'Essentielles', -1, 'user');
 
-//if($droitModif)
-//    echo "Vous avez le droit de Modifié tous";
-//elseif($droitModifSimple)
-//    echo "Vous avez le droit de faire des Modifs Simple";
-//elseif($droitModif)
-//    echo "Vous avez le droit de lire les infos";
-//else($droitLire)
-//    echo "Vous n'avez aucun droit";
+
 
 ini_set('display_errors', 1);
 

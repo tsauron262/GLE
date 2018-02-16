@@ -160,7 +160,7 @@ class BimpLivraison {
             'type' => 2, // cf $types
             'id_entrepot' => $entrepotId, // si type = 2
             'infos' => '...',
-            'date' => '2018-01-01 00:00:00' //$this->db->idate($now) // date et heure d'arrivée
+            'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
         ));
         $this->errors = array_merge($this->errors, $emplacement->create());
         if ($length != sizeof($this->errors))

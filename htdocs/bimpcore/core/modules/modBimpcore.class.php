@@ -49,7 +49,7 @@ class modBimpcore extends DolibarrModules
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
 		$this->numero = 598393;		// TODO Go on page http://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
-		$this->rights_class = 'bimpcesu';
+		$this->rights_class = 'bimpcore';
 
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
 		// It is used to group modules in module setup page
@@ -117,6 +117,7 @@ class modBimpcore extends DolibarrModules
 		// );
 		$this->const = array();
        
+                $this->tabs = array('user:+formSimple:Essentielles:bimpcore@bimpcore:1:/bimpcore/tabs/user.php?id=__ID__');
                 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1

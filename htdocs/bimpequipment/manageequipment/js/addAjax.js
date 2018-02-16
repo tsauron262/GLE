@@ -46,9 +46,11 @@ function checkEquipment(serialNumber, currentEquipCnt) {
             if (allSerialNumber.includes(serialNumber)) {
                 $(responseTd).text('Déjà scanné.');
                 $(responseTd).css('color', 'red');
+                $('tr#' + currentEquipCnt).attr('registered', false);
             } else if (outDec.code === 1) {
                 $(responseTd).text('OK');
                 $(responseTd).css('color', 'green');
+                $('tr#' + currentEquipCnt).attr('registered', true);
                 allSerialNumber.push(serialNumber);
                 var newEquipment = {
                     serial: serialNumber,
@@ -60,6 +62,7 @@ function checkEquipment(serialNumber, currentEquipCnt) {
                 $(responseTd).text('Existe déjà.');
                 $(responseTd).css('color', 'red');
                 allSerialNumber.push(serialNumber);
+                $('tr#' + currentEquipCnt).attr('registered', false);
             }
             $('input.custNote[cntEquip="' + currentEquipCnt + '"]').val(outDec.note);
         }
@@ -85,12 +88,15 @@ function addEquipment() {
                 for (i = 0; i < outDec.errors.length; i++) {
                     errors_msg += "Erreur numéro " + i + " " + outDec.errors[i] + "<br>";
                 }
-                setMessage(errors_msg, 'errors');
+                setMessage('alertMessage', errors_msg, 'errors');
             } else {
+                if (outDec.nbNewEquipment === 0)
+                    setMessage('alertMessage', 'Ajouter des équipements avant de les enregistrer.', 'error');
                 if (outDec.nbNewEquipment === 1)
                     setMessage('alertMessage', outDec.nbNewEquipment + " équipement a été enregistré avec succès", 'mesgs');
                 else if (outDec.nbNewEquipment > 1)
                     setMessage('alertMessage', outDec.nbNewEquipment + " équipements ont été enregistrés avec succès", 'mesgs');
+                setRegistered();
             }
             newEquipments = [];
         }
@@ -145,9 +151,9 @@ function addFieldEquipment() {
     cntEquip++;
 
     var line = '<tr id="' + cntEquip + '" ><td>' + cntEquip + '</td>';      // Nombre de produits scannés
-    line += '<td>'+productid.value+'</td><td>';      // Identifiant du produit
+    line += '<td>' + productid.value + '</td><td>';      // Identifiant du produit
     line += '<input class="serialNumber" name="serial" cntEquip="' + cntEquip + '">'; // Numéro de série
-    line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '"></td>';   // Note
+    line += '</td><td><input class="custNote" type="text" name="note" cntEquip="' + cntEquip + '" disabled></td>';   // Note
     line += '<td><text class="reponseServeur"></text></td></tr>';   // Réponse serveur
     $(line).appendTo('#hereEquipment tbody');
 
@@ -155,9 +161,12 @@ function addFieldEquipment() {
 
     $(".serialNumber").keyup(function (e) {
         if (e.keyCode === 13 && $(this).attr('valider') !== 'true') { // code for "Enter"
-            if (productid.value !== '') {
+            var serialNumber = $("input[cntEquip='" + $(this).attr('cntEquip') + "']").val();
+            if (serialNumber === '') {
+                setMessage('alertMessage', 'Veuillez saisir un numéro de série avant de valider.', 'error');
+            } else if (productid.value !== '') {
                 $(this).attr('valider', 'true');
-                var serialNumber = $("input[cntEquip='" + $(this).attr('cntEquip') + "']").val();
+                $(this).attr('disabled', 'true');
                 $(this).blur(); // unfocus
                 checkEquipment(serialNumber, $(this).attr('cntEquip'));
                 addFieldEquipment();
@@ -167,6 +176,23 @@ function addFieldEquipment() {
         }
     });
 }
+
+
+function setRegistered() {
+    $('#hereEquipment tr').each(function () {
+        var registered = $(this).attr('registered');
+        if (registered === 'true') {
+            $(this).find(' td text.reponseServeur').text('Enregistré');
+            $(this).css('background', '#bfbfbf');
+            $(this).children().children().css('background', '#bfbfbf');
+        } else if (registered) {
+            $(this).css('background', '#bfbfbf');
+            $(this).children().children().css('background', '#bfbfbf');
+        }
+    });
+}
+
+
 
 /**
  * 

@@ -348,9 +348,9 @@ function modifyQuantity() {
     if (newStock >= 0) {
         $(selectoTr + ' td[name=quantity]').text(modifyValue);
         $(selectoTr + ' td[name=stock]').text(newStock);
-        $.each(products, function () {
-            if (this.id_product === idLine) {
-                this.qty = modifyValue;
+        products.forEach(function(prod) {
+            if (prod.id_product === parseInt(idLine)) {
+                prod.qty = modifyValue;
             }
         });
     } else {

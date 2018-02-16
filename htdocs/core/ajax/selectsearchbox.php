@@ -161,8 +161,6 @@ if (! isset($usedbyinclude) || empty($usedbyinclude))
 {
     
 /*mod drsi pour le trie*/
-if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
-	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
 if((strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16) && isset($arrayresult["searchintosn"]))
 	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
 if((strlen($search_boxvalue) > 10) && strlen($search_boxvalue) < 14 && is_numeric($search_boxvalue) && isset($arrayresult["searchintoproduct"]))
@@ -173,6 +171,8 @@ if(stripos($search_boxvalue, "fa") === 0 OR
 	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);
 if(stripos($search_boxvalue, "pr") === 0)
 	$arrayresult=array_merge(array($arrayresult["searchintopropal"]), $arrayresult);
+if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
+	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
 /*fmod drsi*/
     
     

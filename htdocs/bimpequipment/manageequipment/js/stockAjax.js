@@ -71,11 +71,16 @@ function getRemainingLignes() {
                 var tabProd = getTabProduct(lignes);
                 var tabEquipment = getTabEquipment(lignes);
                 tabProd.forEach(function (prod) {
-                    addProduct(prod);
+                    if (prod.remainingQty !== 0)
+                        addProduct(prod);
+                    if (prod.deliveredQty !== 0)
+                        addDeliveredProduct(prod);
                 });
                 tabEquipment.forEach(function (equipment) {
                     for (var j = 0; j < equipment.remainingQty; j++)
                         addEquipment(equipment);
+                    for (var j = 0; j < equipment.deliveredQty; j++)
+                        addDeliveredEquipment(equipment, '');//equipment.serial[j]
                 });
 
                 initEvents();
@@ -129,11 +134,28 @@ function addProduct(ligne) {
     line += '<td>' + ligne.refurl + '</td>';    // refUrl
     line += '<td></td>';    // num série
     line += '<td>' + ligne.label + '</td>';    // label
+    line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
     line += '<td>' + ligne.remainingQty + '</td>';
     line += '<td name="qty">0</td>';
-    line += '<td><input name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px"> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
+    line += '<td><input name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px" initVal=' + parseInt(ligne.remainingQty) + '> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
     line += '<td>' + ligne.price_unity + ' €</td>';
     line += '<td style="text-align:center"><input type="checkbox" name="stocker"></td></tr>';
+    $(line).appendTo('#productTable tbody');
+}
+
+function addDeliveredProduct(ligne) {
+    var line = '<tr style="background : #bfbfbf">';
+    line += '<td></td>';    // cnt ligne
+    line += '<td>' + ligne.prodId + '</td>';    // id
+    line += '<td>' + ligne.refurl + '</td>';    // refUrl
+    line += '<td></td>';    // num série
+    line += '<td>' + ligne.label + '</td>';    // label
+    line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
+    line += '<td></td>';
+    line += '<td>' + ligne.deliveredQty + '</td>';
+    line += '<td></td>';
+    line += '<td>' + ligne.price_unity + ' €</td>';
+    line += '<td/td></tr>';
     $(line).appendTo('#productTable tbody');
 }
 
@@ -149,8 +171,25 @@ function addEquipment(ligne) {
     line += '<td></td>';
     line += '<td></td>';
     line += '<td></td>';
+    line += '<td></td>';
     line += '<td>' + ligne.price_unity + ' €</td>';
     line += '<td style="text-align:center"><input type="checkbox" name="stocker"></td></tr>';
+    $(line).appendTo('#productTable tbody');
+}
+
+function addDeliveredEquipment(ligne, serial) {
+    var line = '<tr style="background : #bfbfbf">';
+    line += '<td></td>';    // cnt ligne
+    line += '<td>' + ligne.prodId + '</td>';    // id
+    line += '<td>' + ligne.refurl + '</td>';    // refUrl
+    line += '<td>' + serial + '</td>';    // num série
+    line += '<td>' + ligne.label + '</td>';    // label
+    line += '<td></td>';
+    line += '<td></td>';
+    line += '<td></td>';
+    line += '<td></td>';
+    line += '<td>' + ligne.price_unity + ' €</td>';
+    line += '<td></td></tr>';
     $(line).appendTo('#productTable tbody');
 }
 
@@ -167,6 +206,18 @@ function initEvents() {
     $('input[name=checkAll]').change(function () {
         var isChecked = $(this).prop('checked');
         $('table#productTable [name=stocker]').prop('checked', isChecked);
+        if (isChecked) {
+            $('input[name=modify]').each(function () {
+                $(this).val($(this).attr('initVal'));
+            });
+        } else {
+            $('input[name=modify]').each(function () {
+                $(this).val(0);
+            });
+        }
+        $('img.modify').each(function () {
+            $(this).click();
+        });
     });
 
     $('input[name=stocker]').change(changeCheckbox);
@@ -174,20 +225,9 @@ function initEvents() {
     $('#enregistrer').click(function () {
         if (!entrepotId) {
             setMessage('alertEnregistrer', 'Veuillez sélectionner un entrepôt avant d\'enregistrer.', 'error');
-        } else {
-            $('p[name=confTransfert]').text('Etes-vous sur de vouloir mettre en stock ces produits ?');
-            $('div [name=confirmEnregistrer]').show();
-            location.hash = '#okEnregistrer';
+        } else if (confirm('Etes-vous sur de vouloir mettre en stock ces produits ?')) {
+            saveProducts();
         }
-    });
-
-    $('input#okEnregistrer').click(function () {
-        saveProducts();
-        $('div [name=confirmEnregistrer]').hide();
-    });
-
-    $('input#noEnregistrer').click(function () {
-        $('div [name=confirmEnregistrer]').hide();
     });
 
     $('input[name=serial]').on('keyup', function (e) {
@@ -201,6 +241,12 @@ function initEvents() {
         if (e.keyCode === 9) { // code for "Tab"
             validateSerial($(this));
             e.preventDefault();
+        }
+    });
+
+    $('input[name=serial]').on('blur', function () {
+        if ($(this).val() !== '') { // code for "Tab"
+            validateSerial($(this));
         }
     });
 }

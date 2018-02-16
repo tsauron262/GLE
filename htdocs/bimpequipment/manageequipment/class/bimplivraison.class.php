@@ -42,7 +42,6 @@ class BimpLivraison {
                 $ligne = new LigneLivraison($this->db);
                 $ligne->prodId = $obj->fk_product;
                 $ligne->label = dol_trunc($obj->label, 25);
-//                $ligne->qty = $obj->qty;
                 $ligne->remainingQty = $obj->qty;
                 $ligne->price_unity = price($obj->subprice);
                 $ligne->isDelivered = false;
@@ -79,23 +78,61 @@ class BimpLivraison {
     /* Called by interface */
 
     function getRemainingLignes() {
-        $initLignes = $this->getLignesOrder();
+        $lignes = $this->getLignesOrder();
+
         // StatusOrderValidated or StatusOrderApproved or StatusOrderOnProcess
         if ($this->statut == 3) {
-            return array('lignes' => $initLignes, 'errors' => $this->errors);
+            return array('lignes' => $lignes, 'errors' => $this->errors);
         } else if ($this->statut == 4) { // ReceivedPartially
             $moveQty = $this->getAllMouvement();
-            foreach ($initLignes as $key => $ligne) {
+            foreach ($lignes as $key => $ligne) {
                 $qtyAlreadyDelivered = $moveQty[$ligne->prodId];
+                $lignes[$key]->deliveredQty += $qtyAlreadyDelivered;
                 if ($qtyAlreadyDelivered) {
-                    if ($ligne->remainingQty <= $qtyAlreadyDelivered)   // done
-                        unset($initLignes[$key]);
-                    else
-                        $initLignes[$key]->remainingQty -= $qtyAlreadyDelivered;
+                    if ($ligne->remainingQty <= $qtyAlreadyDelivered) {   // done
+                        $lignes[$key]->remainingQty = 0;
+                    } else {
+                        $lignes[$key]->remainingQty -= $qtyAlreadyDelivered;
+                    }
                 }
             }
         }
-        return array('lignes' => $initLignes, 'errors' => $this->errors);
+
+//        $deliveredLignes = $this->getDeliveredLignes($lignes);
+
+        return array('lignes' => $lignes, 'deliveredLigne' => $deliveredLignes, 'errors' => $this->errors);
+    }
+
+    function getDeliveredLignes($lignes) {
+        $deliveredLignes = array();
+        foreach ($lignes as $ligne) {
+            $newLigne = $ligne;
+//            if ($ligne->isEquipment)
+//                $ligne->tabSerial = $this->getDeliveredSerial();
+            if (sizeof($ligne->tabSerial) != $newLigne->deliveredQty) {
+                $this->errors[] = "Le nombre d'équipement enregistré en base est différent du nombre de numéro de série.";
+            }
+        }
+        return $deliveredLignes;
+    }
+
+    function getDeliveredSerial() {
+        $prodSerial = array();
+        $sql = 'SELECT e.serial serial, e.id_product as id_product, e_place as place';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
+        $sql .= ' WHERE e_place.infos="BimpLivraison ' . $this->ref . '"';
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+//                $prodSerial[]
+//                if ($obj->place != 1) {
+//                    $this->errors = "Cet équipement n'est pas dans le bon entrepôt.";
+//                }
+            }
+        }
+        return $prodSerial;
     }
 
     /* Called by interface */
@@ -113,7 +150,7 @@ class BimpLivraison {
             $length = sizeof($this->errors);
 
             // Add stock
-            $result = $doliProduct->correct_stock($user, $entrepotId, (isset($product['qty']) ? $product['qty'] : 1), 0, $labelmove, 0, $codemove);
+            $result = $doliProduct->correct_stock($user, $entrepotId, (isset($product['qty']) ? $product['qty'] : 1), 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
             if ($result < 0) {
                 $this->errors = array_merge($this->errors, $doliProduct->errors);
                 $this->errors = array_merge($this->errors, $doliProduct->errorss);
@@ -159,7 +196,7 @@ class BimpLivraison {
             'id_equipment' => $equipement->id,
             'type' => 2, // cf $types
             'id_entrepot' => $entrepotId, // si type = 2
-            'infos' => '...',
+            'infos' => 'BimpLivraison ' . $this->ref,
             'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
         ));
         $this->errors = array_merge($this->errors, $emplacement->create());
@@ -172,11 +209,11 @@ class BimpLivraison {
 class LigneLivraison extends LignePanier {
 
     public $label;
-    public $qty;
+    public $deliveredQty;
     public $remainingQty;
     public $price_unity;
     public $isEquipment;
-    public $isDelivered;
     public $refurl;
+    public $tabSerial;
 
 }

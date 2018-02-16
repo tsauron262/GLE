@@ -42,15 +42,20 @@ class BimpTools
         return array();
     }
 
-    public static function getDolObjectUrl($object)
+    public static function getDolObjectUrl($object, $id_object = null)
     {
+        if (is_null($id_object)) {
+            if (isset($object->id) && $object->id) {
+                $id_object = $object->id;
+            }
+        }
         $file = strtolower(get_class($object)) . '/card.php';
         $primary = 'id';
         if (is_a($object, 'Societe')) {
             $primary = 'socid';
         }
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
-            return DOL_URL_ROOT . '/' . $file . (isset($object->id) && $object->id ? '?' . $primary . '=' . $object->id : '');
+            return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
         }
         return '';
     }

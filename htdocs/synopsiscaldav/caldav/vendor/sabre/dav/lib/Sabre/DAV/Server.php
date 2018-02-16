@@ -165,7 +165,7 @@ class Server {
      * @param Tree|INode|array|null $treeOrNode The tree object
      */
     public function __construct($treeOrNode = null) {
-
+dol_syslog("ddd construct server",3);
         if ($treeOrNode instanceof Tree) {
             $this->tree = $treeOrNode;
         } elseif ($treeOrNode instanceof INode) {
@@ -710,7 +710,7 @@ class Server {
      * @return void
      */
     protected function httpPropfind($uri) {
-        dol_syslog("fin prop debut".print_r($data),3);
+        dol_syslog("fin prop debut".print_r($uri),3);
 
         $requestedProperties = $this->parsePropFindRequest($this->httpRequest->getBody(true));
 
@@ -751,6 +751,7 @@ class Server {
      * @return void
      */
     protected function httpPropPatch($uri) {
+        dol_syslog("httpPropPatch debut".print_r($uri),3);
 
         $newProperties = $this->parsePropPatchRequest($this->httpRequest->getBody(true));
 
@@ -919,6 +920,7 @@ class Server {
      * @return void
      */
     protected function httpMkcol($uri) {
+        dol_syslog("httpMkcol debut".print_r($uri),3);
 
         $requestBody = $this->httpRequest->getBody(true);
 

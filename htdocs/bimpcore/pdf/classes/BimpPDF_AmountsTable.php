@@ -38,7 +38,7 @@ class BimpPDF_AmountsTable extends BimpPDF_Table
         $this->cols = $cols;
     }
 
-    public function addCol($name, $label, $width = 0)
+    public function addColDef($name, $label, $width = 0)
     {
         $this->cols_def[$name] = array(
             'label'  => $label,

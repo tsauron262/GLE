@@ -186,6 +186,10 @@ class BimpInput
                 $html .= $formProduct->selectWarehouses((int) $value, $field_name);
                 break;
 
+            case 'search_country':
+                $html .= $form->select_country((int) $value, $field_name);
+                break;
+
             case 'check_list':
                 if (!isset($options['items']) || !count($options['items'])) {
                     $html = BimpRender::renderAlerts('Aucun élément diponible', 'warning');

@@ -161,16 +161,18 @@ if (! isset($usedbyinclude) || empty($usedbyinclude))
 {
     
 /*mod drsi pour le trie*/
-if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
-	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
-if((strlen($search_boxvalue) == 12 OR strlen($search_boxvalue) == 15) && isset($arrayresult["searchintosn"]))
+if((strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16) && isset($arrayresult["searchintosn"]))
 	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
+if((strlen($search_boxvalue) > 10) && strlen($search_boxvalue) < 14 && is_numeric($search_boxvalue) && isset($arrayresult["searchintoproduct"]))
+	$arrayresult=array_merge(array($arrayresult["searchintoproduct"]), $arrayresult);
 if(stripos($search_boxvalue, "fa") === 0 OR 
         stripos($search_boxvalue, "av") === 0 OR
         stripos($search_boxvalue, "ac") === 0)
 	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);
 if(stripos($search_boxvalue, "pr") === 0)
 	$arrayresult=array_merge(array($arrayresult["searchintopropal"]), $arrayresult);
+if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
+	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
 /*fmod drsi*/
     
     

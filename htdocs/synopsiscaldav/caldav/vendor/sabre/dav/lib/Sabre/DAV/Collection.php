@@ -29,7 +29,7 @@ abstract class Collection extends Node implements ICollection {
      * @return INode
      */
     public function getChild($name) {
-
+dol_syslog("d getChild",3);
         foreach($this->getChildren() as $child) {
 
             if ($child->getName()==$name) return $child;

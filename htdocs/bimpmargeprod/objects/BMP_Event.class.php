@@ -4,11 +4,14 @@ class BMP_Event extends BimpObject
 {
 
     // Recettes: 
-    public static $id_billets_type_montant = 21;
+    public static $id_billets_2_1_type_montant = 21;
+    public static $id_billets_5_5_type_montant = 51;
     public static $id_bar20_type_montant = 22;
     public static $id_bar55_type_montant = 23;
+    public static $id_billets_location_montant = 50;
     // Frais: 
     public static $id_achats_bar_montant = 24;
+    public static $id_frais_billets_materiels = 41;
     // Taxes SACEM / CNV:
     public static $id_sacem_bar_montant = 3;
     public static $id_sacem_billets_montant = 26;
@@ -26,6 +29,7 @@ class BMP_Event extends BimpObject
     public static $id_bar_category = 15;
     public static $id_billets_category = 14;
     public static $id_coprods_category = 12;
+    public static $montant_frais_billet_materiel = 0.2;
     public static $types = array(
         1 => 'Production',
         2 => 'Co-production',
@@ -47,7 +51,18 @@ class BMP_Event extends BimpObject
         3 => array('label' => 'Validé', 'classes' => array('success'))
     );
     public static $tarifs = array(
-        'GUICHET', 'PREVENTE', 'TARIF REDUIT', 'FILGOOD', 'TARIF SPECIAL', 'INVITATIONS'
+        'GUICHET', 'PREVENTE', 'TARIF REDUIT', 'FILGOOD', 'TARIF SPECIAL', 'TARIF SPECIAL LE FIL', 'TARIF CE', 'INVITATIONS'
+    );
+    public static $analytics = array(
+        ''     => '',
+        'PRO'  => 'PRO',
+        'LOC'  => 'LOC',
+        'STU'  => 'STU',
+        'RES'  => 'RES',
+        'JEU'  => 'JEU',
+        'AUTR' => 'AUTR',
+        'INT'  => 'INT',
+        'NUM'  => 'NUM'
     );
 
     public function isEditable()
@@ -213,6 +228,18 @@ class BMP_Event extends BimpObject
             }
         }
         return $return;
+    }
+
+    public function getBilletsIdTypeMontant()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+        if ($this->getData('tva_billets') === 1) {
+            return self::$id_billets_2_1_type_montant;
+        }
+
+        return self::$id_billets_5_5_type_montant;
     }
 
     public function GetFreeBilletsRatio()
@@ -381,42 +408,6 @@ class BMP_Event extends BimpObject
         return 0;
     }
 
-    public function getPrevisionnels()
-    {
-        if (!$this->isLoaded()) {
-            return 0;
-        }
-
-        $children = $this->getChildrenObjects('tarifs');
-
-        $montants = array(
-            'billets_ttc'      => 0,
-            'billets_ht'       => 0,
-            'bar_ht'           => 0,
-            'nb_total_billets' => 0
-        );
-
-        foreach ($children as $child) {
-            if (!is_null($child) && is_a($child, 'BimpObject')) {
-                $montants['billets_ttc'] += ((int) $child->getData('previsionnel') * (float) $child->getData('amount'));
-                $montants['nb_total_billets'] += (int) $child->getData('previsionnel');
-            }
-        }
-        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_type_montant);
-        $montants['billets_ht'] = BimpTools::calculatePriceTaxEx($montants['billets_ttc'], BimpTools::getTaxeRateById($id_tax));
-
-        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_bar20_type_montant);
-        $ca_bar_taxe_rate = BimpTools::getTaxeRateById($id_tax);
-
-        $ca_moyen_bar_ttc = (float) $this->getData('ca_moyen_bar');
-        $ca_moyen_bar_ht = BimpTools::calculatePriceTaxEx((float) $ca_moyen_bar_ttc, $ca_bar_taxe_rate);
-
-        $montants['bar_ttc'] += ((int) $montants['nb_total_billets'] * $ca_moyen_bar_ttc);
-        $montants['bar_ht'] += ((int) $montants['nb_total_billets'] * $ca_moyen_bar_ht);
-
-        return $montants;
-    }
-
     public function getGroupsArray()
     {
         if (!$this->isLoaded()) {
@@ -510,7 +501,7 @@ class BMP_Event extends BimpObject
 
             $html .= '<tr class="col_headers">';
             $html .= '<th>Solde</th>';
-            $html .= '<th>Total Frais</th>';
+            $html .= '<th>Total Charges</th>';
             $html .= '<th>Total Recettes</th>';
 
             if (count($coprods)) {
@@ -564,7 +555,7 @@ class BMP_Event extends BimpObject
                 $content .= '<thead>';
                 $content .= '<tr class="col_headers">';
                 $content .= '<th colspan="2">';
-                $content .= 'Frais';
+                $content .= 'Charges';
                 $content .= '</th>';
                 $content .= '</tr>';
                 $content .= '</thead>';
@@ -629,7 +620,7 @@ class BMP_Event extends BimpObject
                 $billets_ht_brut = 0;
                 if ($eventMontant->find(array(
                             'id_event'   => (int) $this->id,
-                            'id_montant' => self::$id_billets_type_montant
+                            'id_montant' => $this->getBilletsIdTypeMontant()
                         ))) {
                     if (is_null($s['code']) || (int) $eventMontant->getData('status') === (int) $s['code']) {
                         $billets_ht_brut = $eventMontant->getData('amount');
@@ -659,7 +650,7 @@ class BMP_Event extends BimpObject
                 $billets_ht_net -= $cnv_billets;
 
                 $content .= '<tr>';
-                $content .= '<td>Billeterie BRUT</td>';
+                $content .= '<td>Billetterie BRUT</td>';
                 $content .= '<td>' . BimpTools::displayMoneyValue($billets_ht_brut, 'EUR') . '</td>';
                 $content .= '</tr>';
 
@@ -674,7 +665,7 @@ class BMP_Event extends BimpObject
                 $content .= '</tr>';
 
                 $content .= '<tr style="font-weight: bold">';
-                $content .= '<td>Billeterie NET</td>';
+                $content .= '<td>Billetterie NET</td>';
                 $content .= '<td>' . BimpTools::displayMoneyValue($billets_ht_net, 'EUR') . '</td>';
                 $content .= '</tr>';
 
@@ -827,7 +818,7 @@ class BMP_Event extends BimpObject
 //                $html .= '<tr class="col_headers">';
 //                $html .= '<th>Catégorie</th>';
 //                $html .= '<th>Solde</th>';
-//                $html .= '<th>Total Frais</th>';
+//                $html .= '<th>Total Charges</th>';
 //                $html .= '<th>Total Recette</th>';
 //
 //                if (count($coprods)) {
@@ -918,7 +909,7 @@ class BMP_Event extends BimpObject
 
         $html .= '<tr class="col_headers">';
         $html .= '<th>Solde</th>';
-        $html .= '<th>Frais</th>';
+        $html .= '<th>Charges</th>';
         $html .= '<th>Recettes</th>';
 
         $html .= '</tr>';
@@ -983,6 +974,7 @@ class BMP_Event extends BimpObject
 
         $prix_moyen_ttc = 0;
         $prix_moyen_ht = 0;
+        $prix_moyen_hors_loc_ht = 0;
         $prix_moyen_net = 0;
 
         $ca_bar_moyen_ttc = 0;
@@ -1006,9 +998,11 @@ class BMP_Event extends BimpObject
         if ($nTarifs > 0) {
             $prix_total_ttc = 0;
             $prix_total_ht = 0;
-            $ca_bar_total_ttc = 0;
+            $billets_loc_total_ttc = 0;
+            $billets_loc_total_ht = 0;
 
-            $id_tax_billets = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_type_montant);
+            $id_tax_billets = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) $this->getBilletsIdTypeMontant());
+            $id_tax_billets_loc = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_location_montant);
             $id_tax_bar = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_bar20_type_montant);
 
             $nBillets = 0;
@@ -1017,17 +1011,25 @@ class BMP_Event extends BimpObject
 
             foreach ($tarifs as $tarif) {
                 $prix_ttc = (float) $tarif->getData('amount');
+                $loc_ttc = (float) $tarif->getData('droits_loc');
+
                 $prix_ht = BimpTools::calculatePriceTaxEx($prix_ttc, BimpTools::getTaxeRateById($id_tax_billets));
+                $loc_ht = BimpTools::calculatePriceTaxEx($loc_ttc, BimpTools::getTaxeRateById($id_tax_billets_loc));
+
                 if ($prix_ht > 0) {
                     $prix_total_ttc += $prix_ttc;
                     $prix_total_ht += $prix_ht;
                     $nBillets++;
                 }
+
+                $billets_loc_total_ttc += $loc_ttc;
+                $billets_loc_total_ht += $loc_ht;
             }
 
             if ($nBillets) {
                 $prix_moyen_ttc = $prix_total_ttc / $nBillets;
                 $prix_moyen_ht = $prix_total_ht / $nBillets;
+                $prix_moyen_hors_loc_ht = ($prix_total_ht - $billets_loc_total_ht) / $nBillets;
             }
 
             if ($debug) {
@@ -1047,7 +1049,7 @@ class BMP_Event extends BimpObject
             if (!is_null($rate)) {
                 $frais_bar = ($ca_bar_moyen_ht * ($rate / 100));
                 if ($debug) {
-                    $html .= 'Frais Bar Moyen: ' . $frais_bar . ' (taux: ' . $rate . ')<br/>';
+                    $html .= 'Charges Bar Moyen: ' . $frais_bar . ' (taux: ' . $rate . ')<br/>';
                 }
             } else {
                 $frais_bar = 0;
@@ -1087,11 +1089,12 @@ class BMP_Event extends BimpObject
 
             if ($debug) {
                 $html .= 'Prix billet moyen HT: ' . $prix_moyen_ht . '<br/>';
+                $html .= 'Prix billet moyen HT hors frais location: ' . $prix_moyen_hors_loc_ht . '<br/>';
             }
 
             $rate = (float) $calc_instance->getSavedData('percent', self::$id_calc_sacem_billets);
             if (!is_null($rate)) {
-                $sacem_billets = ($prix_moyen_ht * ((float) $rate / 100));
+                $sacem_billets = ($prix_moyen_hors_loc_ht * ((float) $rate / 100));
                 if ($debug) {
                     $html .= 'SACEM billets: ' . $sacem_billets . ' (taux: ' . $rate . ')<br/>';
                 }
@@ -1106,7 +1109,7 @@ class BMP_Event extends BimpObject
 
             $rate = (float) $calc_instance->getSavedData('percent', self::$id_calc_cnv_billets);
             if (!is_null($rate)) {
-                $cnv = ($prix_moyen_ht * ((float) $rate / 100));
+                $cnv = ($prix_moyen_hors_loc_ht * ((float) $rate / 100));
                 if ($debug) {
                     $html .= 'CNV: ' . $cnv . ' (taux: ' . $rate . ')<br/>';
                 }
@@ -1116,7 +1119,7 @@ class BMP_Event extends BimpObject
 
             if ($debug) {
                 $html .= '<strong>CA billet moyen net: ' . $prix_moyen_net . '</strong><br/><br/>';
-                $html .= '<h4>Frais (hors bar et taxes): </h4>';
+                $html .= '<h4>Charges (hors bar et taxes): </h4>';
             }
 
             $total_frais_hors_bar = 0;
@@ -1154,7 +1157,7 @@ class BMP_Event extends BimpObject
 
             if ($debug) {
                 $html .= '- sécu sacem (sur SACEM autre): ' . $secu_sacem_autre . '<br/>';
-                $html .= 'Total frais: ' . $total_frais_hors_bar . '<br/><br/>';
+                $html .= 'Total charges: ' . $total_frais_hors_bar . '<br/><br/>';
                 $html .= '<h4>Recettes (hors bar et vente de billets)</h4>';
             }
 
@@ -1207,7 +1210,7 @@ class BMP_Event extends BimpObject
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>Break Billeterie</th>';
+        $html .= '<th>Break Billetterie</th>';
         $html .= '<td><span class="danger">' . round($break_billets, 2) . ' billets</span></td>';
         $html .= '</tr>';
 
@@ -1234,6 +1237,86 @@ class BMP_Event extends BimpObject
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
+        return $html;
+    }
+
+    public function renderTotalBillets()
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $tarifs = array();
+        foreach ($this->getChildrenObjects('tarifs') as $tarif) {
+            $tarifs[(int) $tarif->id] = $tarif;
+        }
+
+        $total_billets_ttc = 0;
+        $total_loc_ttc = 0;
+        $qty = 0;
+
+        if ($this->getData('status') === 1) {
+            foreach ($tarifs as $id_tarif => $tarif) {
+                $qty += (int) $tarif->getData('previsionnel');
+                $total = (float) $tarif->getData('amount') * (int) $tarif->getData('previsionnel');
+                $loc = (float) $tarif->getData('droits_loc') * (int) $tarif->getData('previsionnel');
+                $total_loc_ttc += $loc;
+                $total_billets_ttc += ($total - $loc);
+//                echo $total.', '.$loc . "\n";
+            }
+        } else {
+            $children = $this->getChildrenObjects('billets');
+            foreach ($children as $child) {
+                if (!is_null($child) && is_a($child, 'BMP_EventBillets')) {
+                    $qty += (int) $child->getData('quantity');
+                    $total = $child->getTotal();
+                    $loc = 0;
+
+                    $id_tarif = (int) $child->getData('id_tarif');
+                    if ($id_tarif && array_key_exists((int) $id_tarif, $tarifs)) {
+                        $loc = (float) $tarifs[$id_tarif]->getData('droits_loc') * (int) $child->getData('quantity');
+                        $total_loc_ttc += $loc;
+                    }
+                    $total_billets_ttc += ($total - $loc);
+                }
+            }
+        }
+
+//        echo $total_billets_ttc; exit;
+
+        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) $this->getBilletsIdTypeMontant());
+        $total_billets_ht = BimpTools::calculatePriceTaxEx($total_billets_ttc, BimpTools::getTaxeRateById($id_tax));
+
+        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_location_montant);
+        $total_loc_ht = BimpTools::calculatePriceTaxEx($total_loc_ttc, BimpTools::getTaxeRateById($id_tax));
+
+
+        $html .= '<div class="objectFieldsTableContainer">';
+        $html .= '<table class="objectFieldsTable foldable open">';
+
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th colspan="4">Total Billetterie</th>';
+        $html .= '</tr>';
+        $html .= '<tr class="col_headers">';
+        $html .= '<th>Unités vendues</th>';
+        $html .= '<th>Total HT hors droits de location</th>';
+        $html .= '<th>Total droits de location HT</th>';
+        $html .= '<th>Total HT</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td>' . $qty . '</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_billets_ht, 'EUR') . '</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_loc_ht, 'EUR') . '</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue(($total_loc_ht + $total_billets_ht), 'EUR') . '</td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+
         return $html;
     }
 
@@ -1318,6 +1401,16 @@ class BMP_Event extends BimpObject
     }
 
     // Calculs: 
+    public function getBilletsTaxEx($billets_ttc)
+    {
+        if ((int) $this->getData('tva_billets') === 1) {
+            $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_2_1_type_montant);
+        } else {
+            $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_5_5_type_montant);
+        }
+
+        return BimpTools::calculatePriceTaxEx($billets_ttc, BimpTools::getTaxeRateById($id_tax));
+    }
 
     public function calcBilletsAmount()
     {
@@ -1325,34 +1418,117 @@ class BMP_Event extends BimpObject
             return;
         }
 
+        $total_billets_ttc = 0;
+        $total_loc_ttc = 0;
+        $frais_billets = 0;
+
+        if ($this->getData('status') === 1) {
+            $previsionnels = $this->getPrevisionnels();
+            $total_billets_ttc = $previsionnels['billets_ttc'];
+            $total_loc_ttc = $previsionnels['billets_loc_ttc'];
+            $frais_billets = $previsionnels['total_frais_materiel'];
+        } else {
+            $children = $this->getChildrenObjects('billets');
+            $tarifs = array();
+            foreach ($this->getChildrenObjects('tarifs') as $tarif) {
+                $tarifs[(int) $tarif->id] = $tarif;
+            }
+
+            $event_type = (int) $this->getData('type');
+
+            foreach ($children as $child) {
+                if (!is_null($child) && is_a($child, 'BMP_EventBillets')) {
+                    $total = $child->getTotal();
+                    $loc = 0;
+
+                    $id_tarif = (int) $child->getData('id_tarif');
+                    if ($id_tarif && array_key_exists((int) $id_tarif, $tarifs)) {
+                        $loc = ((float) $tarifs[$id_tarif]->getData('droits_loc') * (int) $child->getData('quantity'));
+                        $total_loc_ttc += $loc;
+                        if (in_array($event_type, array(1, 2)) ||
+                                (float) $tarifs[$id_tarif]->getData('amount') > 0) {
+                            $frais_billets += self::$montant_frais_billet_materiel * (int) $child->getData('quantity');
+                        }
+                    }
+                    $total_billets_ttc += ($total - $loc);
+                }
+            }
+        }
+
         $eventMontant = BimpObject::getInstance('bimpmargeprod', 'BMP_EventMontant');
         if ($eventMontant->find(array(
                     'id_event'   => $this->id,
-                    'id_montant' => self::$id_billets_type_montant,
+                    'id_montant' => $this->getBilletsIdTypeMontant(),
                     'id_coprod'  => 0
                 ))) {
 
-            $amount_ttc = 0;
-            if ($this->getData('status') === 1) {
-                $previsionnels = $this->getPrevisionnels();
-                $amount_ttc = $previsionnels['billets_ttc'];
-            } else {
-                $children = $this->getChildrenObjects('billets');
+            $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) $this->getBilletsIdTypeMontant());
+            $total_billets_ht = BimpTools::calculatePriceTaxEx($total_billets_ttc, BimpTools::getTaxeRateById($id_tax));
 
-                foreach ($children as $child) {
-                    if (!is_null($child) && is_a($child, 'BMP_EventBillets')) {
-                        $amount_ttc += $child->getTotal();
-                    }
-                }
-            }
-
-            $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_type_montant);
-            $amount_ht = BimpTools::calculatePriceTaxEx($amount_ttc, BimpTools::getTaxeRateById($id_tax));
             $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== $amount_ht) {
-                $eventMontant->set('amount', $amount_ht);
+
+            if ($current_amount !== $total_billets_ht) {
+                $eventMontant->set('amount', $total_billets_ht);
                 $eventMontant->update();
             }
+            $eventMontant->reset();
+        }
+
+        $id_type_montant = 0;
+        switch ((int) $this->getData('tva_billets')) {
+            case 1:
+                $id_type_montant = self::$id_billets_5_5_type_montant;
+                break;
+
+            case 2:
+                $id_type_montant = self::$id_billets_2_1_type_montant;
+                break;
+        }
+
+        if ($id_type_montant) {
+            if ($eventMontant->find(array(
+                        'id_event'   => $this->id,
+                        'id_montant' => $id_type_montant,
+                        'id_coprod'  => 0
+                    ))) {
+
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+                $eventMontant->reset();
+            }
+        }
+
+        if ($eventMontant->find(array(
+                    'id_event'   => $this->id,
+                    'id_montant' => self::$id_billets_location_montant,
+                    'id_coprod'  => 0
+                ))) {
+
+            $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_location_montant);
+            $total_loc_ht = BimpTools::calculatePriceTaxEx($total_loc_ttc, BimpTools::getTaxeRateById($id_tax));
+
+            $current_amount = (float) $eventMontant->getData('amount');
+
+            if ($current_amount !== $total_loc_ht) {
+                $eventMontant->set('amount', $total_loc_ht);
+                $eventMontant->update();
+            }
+            $eventMontant->reset();
+        }
+
+        if ($eventMontant->find(array(
+                    'id_event'   => (int) $this->id,
+                    'id_montant' => (int) self::$id_frais_billets_materiels,
+                    'id_coprod'  => 0
+                ))) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== (float) $frais_billets) {
+                $eventMontant->set('amount', $frais_billets);
+                $eventMontant->update();
+            }
+            $eventMontant->reset();
         }
     }
 
@@ -1403,6 +1579,61 @@ class BMP_Event extends BimpObject
         }
     }
 
+    public function getPrevisionnels()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $montants = array(
+            'total_billets_ttc'    => 0,
+            'billets_ttc'          => 0,
+            'billets_ht'           => 0,
+            'billets_loc_ttc'      => 0,
+            'billets_loc_ht'       => 0,
+            'bar_ht'               => 0,
+            'nb_total_billets'     => 0,
+            'total_frais_materiel' => 0
+        );
+
+        $event_type = $this->getData('type');
+
+        $children = $this->getChildrenObjects('tarifs');
+
+        foreach ($children as $child) {
+            if (!is_null($child) && is_a($child, 'BimpObject')) {
+                $amount = (float) $child->getData('amount');
+                $qty = (int) $child->getData('previsionnel');
+                $loc = (float) $child->getData('droits_loc');
+                $montants['total_billets_ttc'] += ($qty * $amount);
+                $montants['billets_loc_ttc'] += ($qty * $loc);
+                $montants['nb_total_billets'] += $qty;
+                if (in_array($event_type, array(1, 2)) || $amount > 0) {
+                    $montants['total_frais_materiel'] += (float) self::$montant_frais_billet_materiel * $qty;
+                }
+            }
+        }
+
+        $montants['billets_ttc'] = $montants['total_billets_ttc'] - $montants['billets_loc_ttc'];
+
+        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) $this->getBilletsIdTypeMontant());
+        $montants['billets_ht'] = BimpTools::calculatePriceTaxEx($montants['billets_ttc'], BimpTools::getTaxeRateById($id_tax));
+
+        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_location_montant);
+        $montants['billets_loc_ht'] = BimpTools::calculatePriceTaxEx($montants['billets_loc_ttc'], BimpTools::getTaxeRateById($id_tax));
+
+        $id_tax = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_bar20_type_montant);
+        $ca_bar_taxe_rate = BimpTools::getTaxeRateById($id_tax);
+
+        $ca_moyen_bar_ttc = (float) $this->getData('ca_moyen_bar');
+        $ca_moyen_bar_ht = BimpTools::calculatePriceTaxEx((float) $ca_moyen_bar_ttc, $ca_bar_taxe_rate);
+
+        $montants['bar_ttc'] += ((int) $montants['nb_total_billets'] * $ca_moyen_bar_ttc);
+        $montants['bar_ht'] += ((int) $montants['nb_total_billets'] * $ca_moyen_bar_ht);
+
+        return $montants;
+    }
+
     public function calcPrevisionnels()
     {
         if (!$this->isLoaded()) {
@@ -1419,12 +1650,64 @@ class BMP_Event extends BimpObject
 
         if ($eventMontant->find(array(
                     'id_event'   => (int) $this->id,
-                    'id_montant' => (int) self::$id_billets_type_montant,
+                    'id_montant' => (int) $this->getBilletsIdTypeMontant(),
                     'id_coprod'  => 0
                 ))) {
             $current_amount = (float) $eventMontant->getData('amount');
             if ($current_amount !== (float) $previsionnels['billets_ht']) {
                 $eventMontant->set('amount', $previsionnels['billets_ht']);
+                $eventMontant->update();
+            }
+            $eventMontant->reset();
+        }
+
+        $id_type_montant = 0;
+        switch ((int) $this->getData('tva_billets')) {
+            case 1:
+                $id_type_montant = self::$id_billets_5_5_type_montant;
+                break;
+
+            case 2:
+                $id_type_montant = self::$id_billets_2_1_type_montant;
+                break;
+        }
+
+        if ($id_type_montant) {
+            if ($eventMontant->find(array(
+                        'id_event'   => $this->id,
+                        'id_montant' => $id_type_montant,
+                        'id_coprod'  => 0
+                    ))) {
+
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+                $eventMontant->reset();
+            }
+        }
+
+        if ($eventMontant->find(array(
+                    'id_event'   => (int) $this->id,
+                    'id_montant' => (int) self::$id_billets_location_montant,
+                    'id_coprod'  => 0
+                ))) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== (float) $previsionnels['billets_loc_ht']) {
+                $eventMontant->set('amount', $previsionnels['billets_loc_ht']);
+                $eventMontant->update();
+            }
+            $eventMontant->reset();
+        }
+
+        if ($eventMontant->find(array(
+                    'id_event'   => (int) $this->id,
+                    'id_montant' => (int) self::$id_frais_billets_materiels,
+                    'id_coprod'  => 0
+                ))) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== (float) $previsionnels['total_frais_materiel']) {
+                $eventMontant->set('amount', $previsionnels['total_frais_materiel']);
                 $eventMontant->update();
             }
             $eventMontant->reset();
@@ -1467,7 +1750,6 @@ class BMP_Event extends BimpObject
         $id_type_montant = (int) $eventMontant->getData('id_montant');
         $id_coprod = (int) $eventMontant->getData('id_coprod');
 //        $calcsMontants = $this->getChildrenObjects('calcs_montants');
-        
         // Traitements des calculs automatiques dont le montant intervient dans le montant source:
         $sql = BimpTools::getSqlSelect(array('a.id_target'));
         $sql .= BimpTools::getSqlFrom('bmp_calc_montant', array(array(
@@ -1652,10 +1934,10 @@ class BMP_Event extends BimpObject
         if (!count($errors)) {
             $new_status = (int) $this->getData('status');
 
-            if ($current_status !== $new_status) {
-                $eventMontant = BimpObject::getInstance($this->module, 'BMP_EventMontant');
+            $eventMontant = BimpObject::getInstance($this->module, 'BMP_EventMontant');
 
-                if ($new_status === 1) {
+            if ($new_status === 1) {
+                if ($current_status !== $new_status) {
                     $amount_20 = 0;
                     $amount_55 = 0;
 
@@ -1679,10 +1961,12 @@ class BMP_Event extends BimpObject
                         'bar_20_save' => $amount_20,
                         'bar_55_save' => $amount_55
                             ), '`id` = ' . (int) $this->id);
-                    $this->calcPrevisionnels();
-                } elseif ($current_status === 1) {
-                    $this->calcBilletsAmount();
+                }
+                $this->calcPrevisionnels();
+            } else {
+                $this->calcBilletsAmount();
 
+                if ($current_status === 1) {
                     if ($eventMontant->find(array(
                                 'id_event'   => $this->id,
                                 'id_montant' => self::$id_bar20_type_montant,
@@ -1704,8 +1988,6 @@ class BMP_Event extends BimpObject
                         $eventMontant->reset();
                     }
                 }
-            } elseif ($current_status === 1) {
-                $this->calcPrevisionnels();
             }
         }
         return $errors;

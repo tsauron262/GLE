@@ -1,0 +1,26 @@
+dol_object: 
+    instance: 
+        dol_object: societe
+        
+table: societe
+primary: rowid
+
+labels: 
+    name: société
+    is_female: 1
+    
+fields: 
+    nom: 
+        label: Nom
+        dol_prop: name
+        required: 1
+        
+    name_alias: 
+        label: Nom alternatif
+        
+    
+        
+    
+    
+    
+    

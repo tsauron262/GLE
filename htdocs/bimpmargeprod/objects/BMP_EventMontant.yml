@@ -290,7 +290,7 @@ lists:
             callback: getListRowStyle
         sort_field: id_category_montant
         sort_way: asc
-        n: 50
+        n: 0
         cols:
             category: 
                 field: id_category_montant
@@ -312,7 +312,7 @@ lists:
                     callback: getTva
            
             frais:
-                label: Frais HT
+                label: Charges HT
                 value: 
                     callback: 
                         method: displayAmountByType
@@ -348,12 +348,13 @@ lists:
             id_coprod: 0
         sort_field: id_category_montant
         sort_way: asc
-        n: 50
+        n: 0
         cols:
             status: 
                 field: status
                 display: icon
                 max_width: 32px
+                min_width: 32px
             category: 
                 field: id_category_montant
             montant:
@@ -370,7 +371,7 @@ lists:
                     callback: getTva
            
             frais:
-                label: Frais HT
+                label: Charges HT
                 value: 
                     callback: 
                         method: displayAmountByType

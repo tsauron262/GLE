@@ -256,7 +256,6 @@ class Plugin extends DAV\ServerPlugin {
      * @return bool
      */
     public function report($reportName,$dom) {
-
         switch($reportName) {
             case '{'.self::NS_CALDAV.'}calendar-multiget' :
                 $this->calendarMultiGetReport($dom);
@@ -456,7 +455,6 @@ class Plugin extends DAV\ServerPlugin {
      * @return void
      */
     public function calendarMultiGetReport($dom) {
-
         $properties = array_keys(DAV\XMLUtil::parseProperties($dom->firstChild));
         $hrefElems = $dom->getElementsByTagNameNS('urn:DAV','href');
 

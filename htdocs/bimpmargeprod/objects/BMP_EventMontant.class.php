@@ -455,8 +455,8 @@ class BMP_EventMontant extends BimpObject
 
     public function getDefaultListExtraButtons($editDetails = true, $showDetails = true)
     {
+        $event = $this->getParentInstance();
         if ($this->hasDetails()) {
-            $event = $this->getParentInstance();
             if ($event->getData('status') === 3) {
                 $editDetails = false;
             }
@@ -493,7 +493,7 @@ class BMP_EventMontant extends BimpObject
                     require_once __DIR__ . '/BMP_Event.class.php';
                 }
 
-                if ((int) $this->getData('id_montant') === BMP_Event::$id_billets_type_montant) {
+                if ((int) $this->getData('id_montant') === $event->getBilletsIdTypeMontant()) {
                     return array(
                         array(
                             'label'   => 'Détails',

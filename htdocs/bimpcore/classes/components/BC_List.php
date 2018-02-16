@@ -14,6 +14,7 @@ class BC_List extends BC_Panel
 
     public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
     {
+        $this->params_def['pagination'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['n'] = array('data_type' => 'int', 'default' => 10, 'request' => true);
         $this->params_def['p'] = array('data_type' => 'int', 'default' => 1, 'request' => true);
 
@@ -24,7 +25,7 @@ class BC_List extends BC_Panel
         $this->params_def['list_filters'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
         $this->params_def['association_filters'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
 
-        $this->params_def['add_form_name'] = array('data_type' => 'string');
+        $this->params_def['add_form_name'] = array();
         $this->params_def['add_form_values'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['add_btn_label'] = array('default' => '');
 

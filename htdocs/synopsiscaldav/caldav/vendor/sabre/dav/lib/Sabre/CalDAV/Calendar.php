@@ -38,7 +38,6 @@ class Calendar implements ICalendar, DAV\IProperties, DAVACL\IACL {
      * @param array $calendarInfo
      */
     public function __construct(Backend\BackendInterface $caldavBackend, $calendarInfo) {
-
         $this->caldavBackend = $caldavBackend;
         $this->calendarInfo = $calendarInfo;
 

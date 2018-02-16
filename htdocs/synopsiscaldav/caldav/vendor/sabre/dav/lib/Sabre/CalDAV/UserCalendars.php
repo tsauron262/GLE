@@ -35,7 +35,6 @@ class UserCalendars implements DAV\IExtendedCollection, DAVACL\IACL {
      * @param mixed $userUri
      */
     public function __construct(Backend\BackendInterface $caldavBackend, $principalInfo) {
-
         $this->caldavBackend = $caldavBackend;
         $this->principalInfo = $principalInfo;
 
@@ -158,7 +157,6 @@ class UserCalendars implements DAV\IExtendedCollection, DAVACL\IACL {
      * @return array
      */
     public function getChildren() {
-dol_syslog("deb getChildren",3);
         $calendars = $this->caldavBackend->getCalendarsForUser($this->principalInfo['uri']);
         $objs = array();
         foreach($calendars as $calendar) {
@@ -175,10 +173,9 @@ dol_syslog("deb getChildren",3);
         $objs[] = new Schedule\Outbox($this->principalInfo['uri']);
 
         // We're adding a notifications node, if it's supported by the backend.
-        if ($this->caldavBackend instanceof Backend\NotificationSupport) {
+        /*if ($this->caldavBackend instanceof Backend\NotificationSupport) {
             $objs[] = new Notifications\Collection($this->caldavBackend, $this->principalInfo['uri']);
-        }
-        print_r("getChidren ".print_r($objs,1),3);
+        }*/
         return $objs;
 
     }

@@ -14,8 +14,6 @@ class BC_View extends BC_Panel
         $this->params_def['buttons'] = array('type' => 'definitions', 'defs_type' => 'button', 'multiple' => true);
         
         $this->params_def['edit_form'] = array();
-        $this->params_def['edit_form'] = array();
-        $this->params_def['edit_form'] = array();
         
         if (!$name || $name === 'default') {
             if ($object->config->isDefined('view')) {

@@ -724,6 +724,11 @@ class BimpTools
 
     // Divers:
 
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',')
+    {
+        return str_replace('.', $separator, '' . (round((float) $value, $decimals)));
+    }
+
     public static function ucfirst($str)
     {
         if (preg_match('/^[éèêëàâäïîöôùûüŷÿ].*/', $str)) {

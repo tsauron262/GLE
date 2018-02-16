@@ -5,36 +5,56 @@ require_once("../main.inc.php");
 
 
 
+//
+//$modulepart = 'bimpcore';
+//$modulepart2 = 'bimpfinancement/demande';
+//
+//$object = new stdClass();
+//$object->ref = 5;
+//
+//$permission = $user->rights->societe->creer;
+//$permtoedit = $user->rights->societe->creer;
+//
+//$object->id = 5;
+//
+//$action = GETPOST("action");
+//$confirm = GETPOST("confirm");
+//$upload_dir = DOL_DATA_ROOT."/".$modulepart."/".$modulepart2."/".$object->ref;
+//require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+//require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+//include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
+//
+////ATTENTION pas de données envoyé avant cela
+//llxHeader();
+//
+//$relativepathwithnofile = $modulepart2."/".$object->ref."/";
+//$filearray=dol_dir_list($upload_dir,"files",0,'','(\.meta|_preview.*\.png)$',$sortfield,(strtolower($sortorder)=='desc'?SORT_DESC:SORT_ASC),1);
+//include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
+//
+//
+//
+//
+//
 
-$modulepart = 'bimpcore';
-$modulepart2 = 'bimpfinancement/demande';
+ini_set('display_errors', 1);
 
-$object = new stdClass();
-$object->ref = 5;
-
-$permission = $user->rights->societe->creer;
-$permtoedit = $user->rights->societe->creer;
-
-$object->id = 5;
-
-$action = GETPOST("action");
-$confirm = GETPOST("confirm");
-$upload_dir = DOL_DATA_ROOT."/".$modulepart."/".$modulepart2."/".$object->ref;
-require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
-include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
-
-//ATTENTION pas de données envoyé avant cela
 llxHeader();
 
-$relativepathwithnofile = $modulepart2."/".$object->ref."/";
-$filearray=dol_dir_list($upload_dir,"files",0,'','(\.meta|_preview.*\.png)$',$sortfield,(strtolower($sortorder)=='desc'?SORT_DESC:SORT_ASC),1);
-include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
+define('BIMP_NEW', 1);
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+BimpCore::displayHeaderFiles();
 
+$user = BimpObject::getInstance('bimpcore', 'Bimp_User', 191);
+$view = new BC_View($user, 'default');
 
+$full_rights = false;
+if ($full_rights) {
+    $view->params['edit_form'] = 'default';
+} else {
+    $view->params['edit_form'] = 'light';
+}
 
-
-
-
+echo $view->renderHtml();
+echo BimpRender::renderAjaxModal('page_modal');
 
 llxFooter();

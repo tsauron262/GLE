@@ -82,7 +82,14 @@ fields:
     note: 
         label: Note
         type: text
-        
+
+forms:
+    light: 
+        rows:
+            - field: office_phone
+            - field: user_mobile
+            - field: job
+
 lists:
     default: 
         checkboxes: 1

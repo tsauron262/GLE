@@ -57,7 +57,7 @@ function reloadObjectView(view_id) {
     });
 }
 
-function loadModalFormFromView(view_id, form_name, $button) {
+function loadModalFormFromView(view_id, form_name, $button, title) {
     var $view = $('#' + view_id);
     if (!$view.length) {
         return;
@@ -70,7 +70,7 @@ function loadModalFormFromView(view_id, form_name, $button) {
         'form_name': form_name
     };
 
-    loadModalForm($button, data);
+    loadModalForm($button, data, title);
 }
 
 function loadModalView(module, object_name, id_object, view_name, $button) {

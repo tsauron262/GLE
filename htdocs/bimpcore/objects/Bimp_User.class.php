@@ -17,4 +17,13 @@ class Bimp_User extends BimpObject
         }
         return '';
     }
+
+    public function getInstanceName()
+    {
+        if ($this->isLoaded()) {
+            return $this->getData('login');
+        }
+
+        return ' ';
+    }
 }

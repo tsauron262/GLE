@@ -1673,7 +1673,7 @@ class BimpObject
         return 0;
     }
 
-    protected function fetchDolObject($id, &$errors)
+    protected function fetchDolObject($id, &$errors = array())
     {
         if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
             unset($this->dol_object);
@@ -2305,6 +2305,7 @@ class BimpObject
         if (!$this->isLoaded()) {
             return ' ';
         }
+        
         if ($this->field_exists('title') &&
                 isset($this->data['title']) && $this->data['title']) {
             return $this->data['title'];
@@ -2321,7 +2322,7 @@ class BimpObject
                 isset($this->data['nom']) && $this->data['nom']) {
             return $this->data['nom'];
         } elseif (isset($this->id) && $this->id) {
-            return $this->getLabel() . ' ' . $this->id;
+            return $this->id;
         }
 
         return ucfirst($this->getLabel());

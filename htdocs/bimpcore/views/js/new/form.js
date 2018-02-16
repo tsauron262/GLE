@@ -74,7 +74,7 @@ function saveObjectFromForm(form_id, $button, successCallback) {
     });
 }
 
-function loadModalForm($button, data) {
+function loadModalForm($button, data, title) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -89,25 +89,24 @@ function loadModalForm($button, data) {
     var $resultContainer = $modal.find('.modal-ajax-content');
     $resultContainer.html('').hide();
 
-    var title = '';
-
-    if (data.id_object) {
-        title = '<i class="fa fa-edit iconLeft"></i>Edition ';
-        if (typeof (object_labels[data.object_name].of_the) !== 'undefined') {
-            title += object_labels[data.object_name].of_the;
+    if (typeof (title) === 'undefined' || !title) {
+        if (data.id_object) {
+            title = '<i class="fa fa-edit iconLeft"></i>Edition ';
+            if (typeof (object_labels[data.object_name].of_the) !== 'undefined') {
+                title += object_labels[data.object_name].of_the;
+            } else {
+                title += 'l\'objet "' + data.object_name + '"';
+            }
+            title += ' ' + data.id_object;
         } else {
-            title += 'l\'objet "' + data.object_name + '"';
-        }
-        title += ' ' + data.id_object;
-    } else {
-        title = '<i class="fa fa-plus-circle iconLeft"></i>Ajout ';
-        if (typeof (object_labels[data.object_name].of_a) !== 'undefined') {
-            title += object_labels[data.object_name].of_a;
-        } else {
-            title += 'd\'un objet "' + data.object_name + '"';
+            title = '<i class="fa fa-plus-circle iconLeft"></i>Ajout ';
+            if (typeof (object_labels[data.object_name].of_a) !== 'undefined') {
+                title += object_labels[data.object_name].of_a;
+            } else {
+                title += 'd\'un objet "' + data.object_name + '"';
+            }
         }
     }
-
     $modal.find('.modal-title').html(title);
     $modal.find('.loading-text').text('Chargement du formulaire');
     $modal.find('.content-loading').show();
@@ -206,7 +205,7 @@ function reloadForm(form_id) {
                 if ($.isOk(bimpAjax.$panel)) {
                     bimpAjax.$panel.find('.panel-footer').find('.save_object_button').removeClass('disabled');
                 }
-                
+
                 if ($.isOk(bimpAjax.$modal)) {
                     bimpAjax.$modal.find('.content-loading').hide();
                     bimpAjax.$modal.find('.loading-text').text('');

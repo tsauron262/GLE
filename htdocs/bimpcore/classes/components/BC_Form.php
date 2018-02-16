@@ -49,11 +49,11 @@ class BC_Form extends BC_Panel
         }
 
         if ($object->isLoaded()) {
-            $title = 'Edition ' . $object->getLabel('of_the') . ' ' . $object->id;
+            $title = 'Edition ' . $object->getLabel('of_the') . ' ' . $object->getInstanceName();
         } else {
             $title = 'Ajout ' . $object->getLabel('of_a');
         }
-
+        
         if (is_null($id_parent) && !is_null($object)) {
             $parent_id_property = $object->getParentIdProperty();
             if (!is_null($parent_id_property)) {

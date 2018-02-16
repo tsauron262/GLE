@@ -51,7 +51,7 @@ echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php\';';
 echo '</script>';
 
 $b_user = BimpObject::getInstance('bimpcore', 'Bimp_User', $id);
-$view = new BC_View($b_user, 'default');
+$view = new BC_View($b_user, 'default', false, 1, 'Utilisateur ' . $b_user->getData('login'));
 
 $full_rights = false;
 if ($droitModif) {

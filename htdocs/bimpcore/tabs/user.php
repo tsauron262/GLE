@@ -7,32 +7,31 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/usergroups.lib.php';
 
 
 $id = GETPOST('id', 'int');
-if($id < 1)
+if ($id < 1)
     $id = $user->id;
 
-$object = new User($db);
-$object->fetch($id);
-$object->getrights('user');
+
+if ($user->id == $id) {//On est dans le form de l'utilisateur
+    $droitLire = 1;
+    $droitModifSimple = 1;
+    $droitModif = $user->rights->user->self->creer;
+    $object = $user;
+} else {
+    $droitLire = $user->rights->user->user->lire;
+    $droitModifSimple = $user->rights->user->user->creer;
+    $droitModif = $droitModifSimple;
+    $object = new User($db);
+    $object->fetch($id);
+    $object->getrights('user');
+}
+
 
 
 llxHeader();
 
-
 $head = user_prepare_head($object);
 
 dol_fiche_head($head, 'formSimple', 'Essentielles', -1, 'user');
-
-if($user->id == $id){//On est dans le form de l'utilisateur
-    $droitLire = 1;
-    $droitModifSimple = 1;
-    $droitModif = $object->rights->user->self->creer;
-}
-else{
-    $droitLire = $object->rights->user->user->lire;
-    $droitModifSimple = $object->rights->user->user->creer;
-    $droitModif = $droitModifSimple;
-}
-
 
 //if($droitModif)
 //    echo "Vous avez le droit de Modifié tous";
@@ -43,17 +42,20 @@ else{
 //else($droitLire)
 //    echo "Vous n'avez aucun droit";
 
-
-
+ini_set('display_errors', 1);
 
 define('BIMP_NEW', 1);
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 BimpCore::displayHeaderFiles();
 
-$user = BimpObject::getInstance('bimpcore', 'Bimp_User', $id);
-$view = new BC_View($user, 'default');
+echo '<script type="text/javascript">';
+echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
+echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php\';';
+echo '</script>';
 
-$full_rights = false;
+$b_user = BimpObject::getInstance('bimpcore', 'Bimp_User', $id);
+$view = new BC_View($b_user, 'default');
+
 if ($droitModif) {
     $view->params['edit_form'] = 'default';
 } elseif ($droitModifSimple) {
@@ -62,9 +64,8 @@ if ($droitModif) {
     $view->params['edit_form'] = 'null';
 }
 
-if($droitLire) {
+if ($droitLire) {
     echo $view->renderHtml();
     echo BimpRender::renderAjaxModal('page_modal');
-}
-else
-    echo "Vous n'avez pas les droits";
+} else
+    echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir cette page');

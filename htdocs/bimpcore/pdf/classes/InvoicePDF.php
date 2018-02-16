@@ -13,12 +13,15 @@ class InvoicePDF extends BimpModelPDF
     {
         parent::__construct();
 
-        global $db;
-        $this->facture = new Facture($db);
-        $this->facture->fetch($id_facture);
-
         $this->langs->load("bills");
         $this->langs->load("products");
+        
+        global $db;
+        
+        $this->facture = new Facture($db);
+        if ($this->facture->fetch($id_facture) <= 0) {
+            $this->errors[] = 'ID facture invalide: ' . $id_facture;
+        }
     }
 
     protected function initHeader()
@@ -120,7 +123,7 @@ class InvoicePDF extends BimpModelPDF
             if (count($contacts)) {
                 $usertmp = new User($db);
                 $usertmp->fetch($contacts[0]);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('CustomerCode') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
                 $nRows++;
             }
         }
@@ -145,7 +148,7 @@ class InvoicePDF extends BimpModelPDF
             $this->pdf->topMargin += 4 * ($nRows - 2);
         }
 
-        $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . '/' . static::$type . '/header_right.html', array(
+        $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . 'header_right.html', array(
             'doc_name' => $docName,
             'doc_ref'  => $docRef,
             'rows'     => $rows

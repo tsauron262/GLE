@@ -1,17 +1,32 @@
-table {
-    border-left: solid black 1px;
-    border-right: solid black 1px;
-}
-
 table.header {
-    border: solid black 1px;
-    background-color: #F0F0F0;
+    background-color: #DCDCDC;
+    border-top-color: #505050;
+    border-left-color: #505050;
 }
 
-table td {
-    border-right: solid black 1px;
+table.header td {
+    font-size: 8px;
+    border-right-color: #505050;
 }
 
 table.row {
-    border-bottom: dotted black 1px;
+    background-color: #FFFFFF;
+    border-left-color: #505050;
+}
+
+table.row td {
+    font-size: 7px;
+    border-right-color: #505050;
+    border-bottom-color: #E6E6E6;
+}
+
+table.last {
+    background-color: #FFFFFF;
+    border-left-color: #505050;
+    border-bottom-color: #505050;
+}
+
+table.last td {
+    font-size: 7px;
+    border-right-color: #505050;
 }

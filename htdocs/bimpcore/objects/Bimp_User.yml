@@ -62,6 +62,10 @@ fields:
         default_value: 1
         input: 
             type: search_country
+        display: 
+            default: 
+                type: callback
+                method: displayCountry
     office_phone:
         label: Tél. pro
     office_fax:
@@ -82,7 +86,14 @@ fields:
     note: 
         label: Note
         type: text
-        
+
+forms:
+    light: 
+        rows:
+            - field: office_phone
+            - field: user_mobile
+            - field: job
+
 lists:
     default: 
         checkboxes: 1

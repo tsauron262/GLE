@@ -6,20 +6,18 @@ class BimpPDF_AmountsTable extends BimpPDF_Table
 {
 
     public $cols_def = array(
-        'desc'      => array('label' => 'Désignation', 'width' => 80, 'active' => 1),
-        'tva'       => array('label' => 'TVA', 'active' => 1),
-        'pu_ht'     => array('label' => 'P.U. HT', 'active' => 1),
-        'pu_ttc'    => array('label' => 'P.U. HT', 'active' => 0),
-        'qte'       => array('label' => 'Qté', 'active' => 1),
-        'reduc'     => array('label' => 'Réduc.', 'active' => 0),
-        'total_ht'  => array('label' => 'Total HT', 'active' => 1),
-        'total_ttc' => array('label' => 'Total TTC', 'active' => 0)
+        'desc'      => array('label' => 'Désignation', 'width_mm' => 100, 'active' => 0),
+        'pu_ht'     => array('label' => 'P.U. HT', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'qte'       => array('label' => 'Qté', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'reduc'     => array('label' => 'Remise.', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'total_ht'  => array('label' => 'Total HT', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'tva'       => array('label' => 'TVA', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'total_ttc' => array('label' => 'Total TTC', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;')
     );
-    public $cols = array();
 
     public function __construct($pdf)
     {
-        $this->setCols(array('desc', 'tva', 'pu_ht', 'qte', 'reduc', 'total_ht'));
+        $this->setCols(array('desc', 'tva', 'pu_ht', 'qte', 'reduc', 'total_ht', 'total_ttc'));
 
         parent::__construct($pdf);
     }
@@ -34,16 +32,32 @@ class BimpPDF_AmountsTable extends BimpPDF_Table
                 $this->cols_def[$col]['active'] = 1;
             }
         }
-        
-        $this->cols = $cols;
     }
 
-    public function addColDef($name, $label, $width = 0)
+    public function addColDef($name, $label, $width = 0, $style = '', $class = '', $head_style = '')
     {
         $this->cols_def[$name] = array(
-            'label'  => $label,
-            'active' => 1,
-            'width'  => $width
+            'label'      => $label,
+            'active'     => 1,
+            'width_mm'   => $width,
+            'style'      => $style,
+            'class'      => $class,
+            'head_style' => $head_style
         );
+    }
+
+    public function write()
+    {
+        foreach ($this->cols_def as $key => $col) {
+            if ($col['active']) {
+                $width = isset($col['width_mm']) ? $col['width_mm'] : '';
+                $style = isset($col['style']) ? $col['style'] : '';
+                $head_style = isset($col['head_style']) ? $col['head_style'] : '';
+                $class = isset($col['class']) ? $col['class'] : '';
+                $this->addCol($key, $col['label'], $width, $style, $class, $head_style);
+            }
+        }
+
+        parent::write();
     }
 }

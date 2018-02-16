@@ -13,6 +13,7 @@ class BimpPDF_Table
     public $fontSize = 8; // px
     public $width = 190; //mm
     public $styles = '';
+    public $remove_empty_cols = true;
 
     public function __construct($pdf)
     {
@@ -26,7 +27,12 @@ class BimpPDF_Table
         $this->botMargin = $bot;
     }
 
-    public function addCol($key, $title, $width_mm = 0, $style = '', $class = '')
+    public function setOption($option_name, $value)
+    {
+        $this->options[$option_name] = $value;
+    }
+
+    public function addCol($key, $title, $width_mm = 0, $style = '', $class = '', $head_style = '')
     {
         $this->cols[$key] = array(
             'title'    => $title,
@@ -38,6 +44,10 @@ class BimpPDF_Table
         if ($class) {
             $this->cols[$key]['class'] = $class;
         }
+
+        if ($head_style) {
+            $this->cols[$key]['head_style'] = $head_style;
+        }
     }
 
     protected function writeHeader($cols)
@@ -48,7 +58,11 @@ class BimpPDF_Table
         $html .= '<tr>';
 
         foreach ($cols as $key => $col) {
-            $html .= '<td style="width: ' . $col['width_px'] . 'px">' . $col['title'] . '</td>';
+            $html .= '<td style="width: ' . $col['width_px'] . 'px;';
+            if (isset($col['head_style'])) {
+                $html .= ' ' . $col['head_style'];
+            }
+            $html .= '">' . $col['title'] . '</td>';
         }
 
         $html .= '</tr>';
@@ -144,12 +158,17 @@ class BimpPDF_Table
     {
         // Vérification de l'affichage des colonnes: 
         $cols = array();
+
         foreach ($this->cols as $key => $col) {
-            foreach ($this->rows as $row) {
-                if (isset($row[$key])) {
-                    $cols[$key] = $col;
-                    break;
+            if ($this->remove_empty_cols) {
+                foreach ($this->rows as $row) {
+                    if (isset($row[$key])) {
+                        $cols[$key] = $col;
+                        break;
+                    }
                 }
+            } else {
+                $cols[$key] = $col;
             }
         }
 
@@ -171,19 +190,23 @@ class BimpPDF_Table
 
         $colWidth_mm = 0;
         $colWidth_px = 0;
+        $extraWidth_px = 0;
+
         if ($nRemainingCols > 0) {
             if ($this->cellspacing > 0) {
                 $dispoWidth_mm -= ($nCols + 1) * ($this->cellspacing * BimpPDF::$mmPerPx);
             }
             $colWidth_mm = (float) ($dispoWidth_mm / $nRemainingCols);
             $colWidth_px = (int) floor($colWidth_mm * BimpPDF::$pxPerMm);
+        } elseif ($nCols > 0) {
+            $extraWidth_px = ((int) floor($dispoWidth_mm / $nCols) * BimpPDF::$pxPerMm);
         }
 
         foreach ($cols as &$col) {
             if ((int) $col['width_mm']) {
-                $col['width_px'] = (int) floor($col['width_mm'] * BimpPDF::$pxPerMm);
+                $col['width_px'] = (int) floor($col['width_mm'] * BimpPDF::$pxPerMm) + $extraWidth_px;
             } else {
-                $col['width_px'] = $colWidth_px;
+                $col['width_px'] = $colWidth_px + $extraWidth_px;
             }
         }
 
@@ -193,22 +216,31 @@ class BimpPDF_Table
 
         $clone = clone $this->pdf;
 
+        $i = 0;
+        $nRows = count($this->rows);
+
         foreach ($this->rows as $row) {
-            $this->writeRow($clone, $cols, $row);
+            $class = 'row';
+            $i++;
+
+            if ($i >= $nRows) {
+                $class = 'last';
+            }
+            $this->writeRow($clone, $cols, $row, $class);
 
             $page = $clone->getPage();
 
             if ($page > $current_page) {
                 $this->pdf->newPage();
                 $this->writeHeader($cols);
-                $this->writeRow($this->pdf, $cols, $row);
+                $this->writeRow($this->pdf, $cols, $row, $class);
 
                 unset($clone);
                 $clone = clone $this->pdf;
 
                 $current_page = $page;
             } else {
-                $this->writeRow($this->pdf, $cols, $row);
+                $this->writeRow($this->pdf, $cols, $row, $class);
             }
         }
     }

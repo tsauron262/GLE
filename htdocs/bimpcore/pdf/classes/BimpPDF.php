@@ -95,4 +95,10 @@ class BimpPDF extends TCPDF
 
         return $this->Output($filename, $output);
     }
+
+    // Outils: 
+    public function addVMargin($margin)
+    {
+        $this->SetY($this->GetY() + $margin);
+    }
 }

@@ -31,7 +31,7 @@ llxHeader();
 
 $head = user_prepare_head($object);
 
-dol_fiche_head($head, 'formSimple', 'Essentielles', -1, 'user');
+dol_fiche_head($head, 'formSimple', 'Essentiel', -1, 'user');
 
 
 

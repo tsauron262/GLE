@@ -39,6 +39,8 @@ if ($user->id == $id) {//On est dans le form de l'utilisateur
 //else($droitLire)
 //    echo "Vous n'avez aucun droit";
 
+ini_set('display_errors', 1);
+
 define('BIMP_NEW', 1);
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 BimpCore::displayHeaderFiles();

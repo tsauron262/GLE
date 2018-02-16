@@ -10,9 +10,9 @@ $id = GETPOST('id', 'int');
 if($id < 1)
     $id = $user->id;
 
-$userC = new User($db);
-$userC->fetch($id);
-$userC->getrights('user');
+$object = new User($db);
+$object->fetch($id);
+$object->getrights('user');
 
 
 llxHeader();
@@ -25,11 +25,11 @@ dol_fiche_head($head, 'formSimple', 'Essentielles', -1, 'user');
 if($user->id == $id){//On est dans le form de l'utilisateur
     $droitLire = 1;
     $droitModifSimple = 1;
-    $droitModif = $userC->rights->user->self->creer;
+    $droitModif = $object->rights->user->self->creer;
 }
 else{
-    $droitLire = $userC->rights->user->user->lire;
-    $droitModifSimple = $userC->rights->user->user->creer;
+    $droitLire = $object->rights->user->user->lire;
+    $droitModifSimple = $object->rights->user->user->creer;
     $droitModif = $droitModifSimple;
 }
 
@@ -58,7 +58,7 @@ if ($droitModif) {
     $view->params['edit_form'] = 'default';
 } elseif ($droitModifSimple) {
     $view->params['edit_form'] = 'light';
-}elseif ($droitLire) {
+}else {
     $view->params['edit_form'] = 'null';
 }
 

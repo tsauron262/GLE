@@ -149,31 +149,55 @@ class BimpLivraison {
         $labelmove = 'Reception commande bimp ' . $order->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
         $codemove = 'BimpLivraison ' . $order->ref;
 
-        foreach ($products as $product) {
-            $doliProduct = new Product($this->db);
-            $doliProduct->fetch($product['id_prod']);
-            $length = sizeof($this->errors);
+        $this->errors = $this->checkDuplicateSerial($products);
 
-            // Add stock
-            $result = $doliProduct->correct_stock($user, $entrepotId, (isset($product['qty']) ? $product['qty'] : 1), 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
-            if ($result < 0) {
-                $this->errors = array_merge($this->errors, $doliProduct->errors);
-                $this->errors = array_merge($this->errors, $doliProduct->errorss);
+        if (sizeof($this->errors) == 0) {
+            foreach ($products as $product) {
+                $doliProduct = new Product($this->db);
+                $doliProduct->fetch($product['id_prod']);
+                $length = sizeof($this->errors);
+
+                // Add stock
+                $result = $doliProduct->correct_stock($user, $entrepotId, (isset($product['qty']) ? $product['qty'] : 1), 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
+                if ($result < 0) {
+                    $this->errors = array_merge($this->errors, $doliProduct->errors);
+                    $this->errors = array_merge($this->errors, $doliProduct->errorss);
+                }
+
+                if ($length != sizeof($this->errors))
+                    $this->errors[] = ' id : ' . $product['id_prod'];
+
+                if (!isset($product['qty'])) {   // non serialisable
+                    $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
+                }
             }
 
-            if ($length != sizeof($this->errors))
-                $this->errors[] = ' id : ' . $product['id_prod'];
+            $type = ($isTotal == 'false') ? 'par' : 'tot';
 
-            if (!isset($product['qty'])) {   // non serialisable
-                $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
-            }
+            $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
         }
 
-        $type = ($isTotal == 'false') ? 'par' : 'tot';
-
-        $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
-
         return array('errors' => $this->errors);
+    }
+
+    function checkDuplicateSerial($products) {
+        $newSerials = array();
+        $newErrors = array();
+        foreach ($products as $prod) {
+            $newSerials[] = $prod['serial'];
+        }
+
+        $sql = 'SELECT serial';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+        $sql .= ' WHERE serial IN (\'' . implode("','", $newSerials) . '\')';
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $newErrors[] = 'Erreur, le numéro de série "' . $obj->serial . '" est déjà attribué, rien n\'a été enregistrer.';
+            }
+        }
+        return $newErrors;
     }
 
     function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId) {

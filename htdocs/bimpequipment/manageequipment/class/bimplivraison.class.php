@@ -98,7 +98,7 @@ class BimpLivraison {
             }
         }
 
-//        $deliveredLignes = $this->getDeliveredLignes($lignes);
+        $deliveredLignes = $this->getDeliveredLignes($lignes);
 
         return array('lignes' => $lignes, 'deliveredLigne' => $deliveredLignes, 'errors' => $this->errors);
     }
@@ -107,26 +107,28 @@ class BimpLivraison {
         $deliveredLignes = array();
         foreach ($lignes as $ligne) {
             $newLigne = $ligne;
-//            if ($ligne->isEquipment)
-//                $ligne->tabSerial = $this->getDeliveredSerial();
-            if (sizeof($ligne->tabSerial) != $newLigne->deliveredQty) {
-                $this->errors[] = "Le nombre d'équipement enregistré en base est différent du nombre de numéro de série.";
+            if ($ligne->isEquipment) {
+                $ligne->tabSerial = $this->getDeliveredSerial($ligne);
+//                if (sizeof($ligne->tabSerial) != $newLigne->deliveredQty) {
+//                    $this->errors[] = "Le nombre d'équipement enregistré en base est différent du nombre de numéro de série.";
+//                }
             }
         }
         return $deliveredLignes;
     }
 
-    function getDeliveredSerial() {
+    function getDeliveredSerial($ligne) {
         $prodSerial = array();
-        $sql = 'SELECT e.serial serial, e.id_product as id_product, e_place as place';
+        $sql = 'SELECT e.serial as serial';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
         $sql .= ' WHERE e_place.infos="BimpLivraison ' . $this->ref . '"';
+        $sql .= ' AND e.id_product=' . $ligne->prodId;
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-//                $prodSerial[]
+                $prodSerial[] = $obj->serial;
 //                if ($obj->place != 1) {
 //                    $this->errors = "Cet équipement n'est pas dans le bon entrepôt.";
 //                }

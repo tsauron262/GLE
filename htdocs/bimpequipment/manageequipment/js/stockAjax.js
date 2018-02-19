@@ -80,7 +80,7 @@ function getRemainingLignes() {
                     for (var j = 0; j < equipment.remainingQty; j++)
                         addEquipment(equipment);
                     for (var j = 0; j < equipment.deliveredQty; j++)
-                        addDeliveredEquipment(equipment, '');//equipment.serial[j]
+                        addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Non définit');
                 });
 
                 initEvents();

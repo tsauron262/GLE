@@ -51,6 +51,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'modifyOrder': {
+            $bl->fetch(GETPOST('orderId'));
             echo json_encode($bl->addInStock(GETPOST('products'), GETPOST('orderId', 'int'), GETPOST('entrepotId', 'int'), $user, GETPOST('isTotal')));
             break;
         }

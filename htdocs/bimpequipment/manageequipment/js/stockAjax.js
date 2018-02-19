@@ -250,10 +250,6 @@ function initEvents() {
             e.preventDefault();
         }
     });
-
-    $('input[name=serial]').on('blur', function () {
-        validateSerial($(this));
-    });
 }
 
 function validateSerial(element) {

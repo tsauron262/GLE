@@ -64,9 +64,9 @@ class BimpLivraison {
         $moveQty = array();
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
-        $sql .= ' WHERE inventorycode="' . 'BimpLivraison ' . $this->ref . '"';
+        $sql .= ' WHERE inventorycode="BimpLivraison ' . $this->ref . '"';
         // value supp à 0 ?
-
+//echo $sql;
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
@@ -86,7 +86,7 @@ class BimpLivraison {
         // StatusOrderValidated or StatusOrderApproved or StatusOrderOnProcess
         if ($this->statut == 3) {
             return array('lignes' => $lignes, 'errors' => $this->errors);
-        } else if ($this->statut == 4) { // ReceivedPartially
+        } else { // ReceivedPartially
             $moveQty = $this->getAllMouvement();
             foreach ($lignes as $key => $ligne) {
                 $qtyAlreadyDelivered = $moveQty[$ligne->prodId];

@@ -102,29 +102,25 @@ print '<input id="id_order_hidden" hidden type="number" value=' . $orderId . '>'
 $facid = $id;
 if ($object->statut < 3) {
     print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
-    return;
-}
-if (4 < $object->statut) {
-    if (5 == $object->statut)
-        print '<strong>Cette commande a déjà été livrée.</strong>';
-    else
-        print '<strong>Cette commande a été annulée.</strong>';
-
     llxFooter();
     $db->close();
     return;
 }
-print '<strong>Livré dans l\'entrepôt </strong>';
 
-$entrepots = getAllEntrepots($db);
+if ($object->statut == 5) {
+    print '<strong>Cette commande a été livrée.</strong>';
+} else {
+    print '<strong>Livré dans l\'entrepôt </strong>';
 
-print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
-print '<option></option>';
-foreach ($entrepots as $id => $name) {
-    print '<option value="' . $id . '">' . $name . '</option>';
+    $entrepots = getAllEntrepots($db);
+
+    print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
+    print '<option></option>';
+    foreach ($entrepots as $id => $name) {
+        print '<option value="' . $id . '">' . $name . '</option>';
+    }
+    print '</select> ';
 }
-print '</select> ';
-
 $bl = new BimpLivraison($db);
 $bl->fetch($orderId);
 $lignes = $bl->getLignesOrder();

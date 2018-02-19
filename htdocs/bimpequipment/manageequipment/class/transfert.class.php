@@ -83,7 +83,7 @@ class LigneTransfert {
         }
 
         // Add stock
-        $result1 = $product->correct_stock($user, $entrepotIdEnd, $this->qty, 0, $label, 0, $codemove, 'entrepot', $entrepotIdStart);
+        $result2 = $product->correct_stock($user, $entrepotIdEnd, $this->qty, 0, $label, 0, $codemove, 'entrepot', $entrepotIdStart);
         if ($result2 < 0) {
             $errors[] = $product->errors;
             $errors[] = $product->errorss;

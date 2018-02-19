@@ -427,7 +427,7 @@ else
                          * 
                          */
                         echo '<form><input type="hidden" name="id" value="'.$object->id.'"/>';
-                echo '<input type="date" name="dateStock" value="'.$_REQUEST['dateStock'].'"/>';
+                echo '<input type="date" name="dateStock" value="'.$_REQUEST['dateStock'].'"/> au matin.';
                         echo '<input type="submit" class="butAction" value="Ok"/>';
                         echo "</form>";
 

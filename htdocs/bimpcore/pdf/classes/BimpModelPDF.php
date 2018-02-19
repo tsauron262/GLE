@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpTools.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTools.php';
 require_once __DIR__ . '/BimpPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once __DIR__ . '/BimpPDF_AmountsTable.php';
@@ -216,7 +216,7 @@ Abstract class BimpModelPDF
                 $content = str_replace('{' . $name . '}', $value, $content);
             }
             return $content;
-        } 
+        }
         return '';
     }
 
@@ -298,6 +298,94 @@ Abstract class BimpModelPDF
         $html .= '</tr>';
         $html .= '</table>';
         $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderBank($account, $only_number = false)
+    {
+        global $mysoc, $conf;
+
+        require_once DOL_DOCUMENT_ROOT . '/core/class/html.formbank.class.php';
+
+        $this->langs->load('banks');
+
+        $bickey = "BICNumber";
+
+        if ($account->getCountryCode() == 'IN') {
+            $bickey = "SWIFT";
+        }
+
+        $usedetailedbban = $account->useDetailedBBAN();
+
+        $html = '';
+        if (!$only_number) {
+            $html .= '<p>' . $this->langs->transnoentities('PaymentByTransferOnThisBankAccount') . '</p>';
+        }
+
+        if ($usedetailedbban) {
+            $html .= '<p><strong>' . $this->langs->transnoentities("Bank") . '</strong>: ';
+            $html .= $this->langs->convToOutputCharset($account->bank);
+            $html .= '</p>';
+
+            if (empty($conf->global->PDF_BANK_HIDE_NUMBER_SHOW_ONLY_BICIBAN)) {
+                foreach ($account->getFieldsToShow() as $val) {
+                    $content = '';
+
+                    switch ($val) {
+                        case 'BankCode':
+                            $content = $account->code_banque;
+                            break;
+                        case 'DeskCode':
+                            $content = $account->code_banque;
+                            break;
+                        case 'BankAccountNumber':
+                            $content = $account->code_banque;
+                            break;
+                        case 'BankAccountNumberKey':
+                            $content = $account->code_banque;
+                            break;
+                    }
+
+                    if ($content) {
+                        $html .= '<p><strong>' . $this->langs->transnoentities($val) . '</strong>: ';
+                        $html .= $this->langs->convToOutputCharset($content);
+                        $html .= '</p>';
+                    }
+                }
+            }
+        } else {
+            $html .= '<p><strong>' . $this->langs->transnoentities('Bank') . '</strong>: ' . $this->langs->convToOutputCharset($account->bank) . '</p>';
+            $html .= '<p><strong>' . $this->langs->transnoentities('BankAccountNumber') . '</strong>: ' . $this->langs->convToOutputCharset($account->number) . '</p>';
+        }
+
+        if (!$only_number && !empty($account->domiciliation)) {
+            $html .= '<p><strong>' . $this->langs->transnoentities('Residence') . '</strong>: ' . $this->langs->convToOutputCharset($account->domiciliation) . '</p>';
+        }
+
+        if (!empty($account->proprio)) {
+            $html .= '<p><strong>' . $this->langs->transnoentities('BankAccountOwner') . '</strong>: ' . $this->langs->convToOutputCharset($account->proprio) . '</p>';
+        }
+
+        $ibankey = FormBank::getIBANLabel($account);
+
+        if (!empty($account->iban)) {
+            $ibanDisplay_temp = str_replace(' ', '', $this->langs->convToOutputCharset($account->iban));
+            $ibanDisplay = "";
+
+            $nbIbanDisplay_temp = dol_strlen($ibanDisplay_temp);
+            for ($i = 0; $i < $nbIbanDisplay_temp; $i++) {
+                $ibanDisplay .= $ibanDisplay_temp[$i];
+                if ($i % 4 == 3 && $i > 0)
+                    $ibanDisplay .= " ";
+            }
+
+            $html .= '<p><strong>' . $this->langs->transnoentities($ibankey) . '</strong>: ' . $ibanDisplay . '</p>';
+        }
+
+        if (!empty($account->bic)) {
+            $html .= '<p><strong>' . $this->langs->transnoentities($bickey) . '</strong>: ' . $this->langs->convToOutputCharset($account->bic) . '</p>';
+        }
 
         return $html;
     }

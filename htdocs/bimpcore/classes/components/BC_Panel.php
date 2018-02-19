@@ -7,12 +7,12 @@ class BC_Panel extends BimpComponent
     public $content_only = false;
     public $level = 1;
     public $data = array(
-        'component_type'       => '',
-        'component_name'       => '',
-        'identifier'           => '',
-        'module_name'          => '',
-        'object_name'          => '',
-        'id_object'            => '',
+        'component_type'        => '',
+        'component_name'        => '',
+        'identifier'            => '',
+        'module_name'           => '',
+        'object_name'           => '',
+        'id_object'             => '',
         'objects_change_reload' => ''
     );
 
@@ -153,6 +153,8 @@ class BC_Panel extends BimpComponent
     public function getTitle()
     {
         if (isset($this->params['title'])) {
+//            echo 'la:' . $this->params['title'];
+//            exit;
             return $this->params['title'];
         }
 

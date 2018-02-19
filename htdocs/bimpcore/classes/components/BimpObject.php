@@ -462,7 +462,18 @@ class BimpObject
                 return null;
             }
         }
-        return $this->db->getValue($this->getTable(), $field, '`id` = ' . (int) $id_object);
+
+        if (!$this->field_exists($field)) {
+            return null;
+        }
+
+        if ($this->isDolObject()) {
+            if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                return $this->db->getValue($this->getTable() . '_extrafields', $field, '`fk_object` = ' . (int) $id_object);
+            }
+        }
+        $primary = $this->getPrimary();
+        return $this->db->getValue($this->getTable(), $field, '`' . $primary . '` = ' . (int) $id_object);
     }
 
     public function set($field, $value)
@@ -760,6 +771,27 @@ class BimpObject
 
         $this->history = array();
         return $errors;
+    }
+
+    protected function checkSqlFilters($filters, &$has_extrafields)
+    {
+        $return = array();
+        foreach ($filters as $field => $filter) {
+            if (is_array($filter) && isset($filter['or'])) {
+                $return[$field] = array('or' => $this->checkSqlFilters($filter['or'], $has_extrafields));
+            } elseif (is_array($filter) && isset($filter['and'])) {
+                $return[$field] = array('and' => $this->checkSqlFilters($filter['and'], $has_extrafields));
+            } else {
+                if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                    $return['ef.' . $field] = $filter;
+                    $has_extrafields = true;
+                } else {
+                    $return[$field] = $filter;
+                }
+            }
+        }
+
+        return $return;
     }
 
     // Affichage des données:
@@ -1276,18 +1308,34 @@ class BimpObject
     {
         $this->reset();
 
-        $where = '';
-        $first = true;
-        foreach ($filters as $field_name => $value) {
-            if ($first) {
-                $first = false;
-            } else {
-                $where .= ' AND ';
+        $id_object = null;
+
+        $joins = null;
+        $table = $this->getTable();
+        $primary = $this->getPrimary();
+
+        if ($this->isDolObject()) {
+            $has_extrafields = false;
+            $filters = $this->checkSqlFilters($filters, $has_extrafields);
+
+            if ($has_extrafields) {
+                $joins = array(
+                    'alias' => 'ef',
+                    'table' => $table . '_extrafields',
+                    'on'    => 'ef.fk_object = a.' . $primary
+                );
             }
-            $where .= '`' . $field_name . '` = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
         }
 
-        $id_object = $this->db->getValue($this->getTable(), $this->getPrimary(), $where);
+        $sql = BimpTools::getSqlSelect('a.' . $primary);
+        $sql .= BimpTools::getSqlFrom($table, $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (!is_null($rows) && count($rows) === 1) {
+            $id_object = $rows[0][$primary];
+        }
 
         if (is_null($id_object) || !$id_object) {
             return false;
@@ -1401,6 +1449,31 @@ class BimpObject
             return array();
         }
 
+        if ($this->isDolObject()) {
+            $has_extrafields = false;
+            foreach ($return_fields as $key => $field) {
+                if ($this->field_exists($field)) {
+                    if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                        $return_fields[$key] = 'ef.' . $field;
+                        $has_extrafields = true;
+                    }
+                }
+            }
+
+            $filters = $this->checkSqlFilters($filters, $has_extrafields);
+
+            if ($has_extrafields) {
+                if (is_null($joins)) {
+                    $joins = array();
+                }
+                $joins[] = array(
+                    'alias' => 'ef',
+                    'table' => $table . '_extrafields',
+                    'on'    => 'a.rowid = ef.fk_object'
+                );
+            }
+        }
+
         $sql = '';
         $sql .= BimpTools::getSqlSelect($return_fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -1442,6 +1515,21 @@ class BimpObject
             return 0;
         }
         $primary = $this->getPrimary();
+
+        if ($this->isDolObject()) {
+            $has_extrafields = false;
+            $filters = $this->checkSqlFilters($filters, $has_extrafields);
+            if ($has_extrafields) {
+                if (is_null($joins)) {
+                    $joins = array();
+                }
+                $joins[] = array(
+                    'alias' => 'ef',
+                    'table' => $table . '_extrafields',
+                    'on'    => 'a.rowid = ef.fk_object'
+                );
+            }
+        }
 
         $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as nb_rows';
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -1598,13 +1686,17 @@ class BimpObject
 
         foreach ($this->data as $field => $value) {
             if ($this->field_exists($field)) {
-                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                if (is_null($prop)) {
-                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                } elseif (!property_exists($this->dol_object, $prop)) {
-                    $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+                if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                    $this->dol_object->array_options['options_' . $field] = $value;
                 } else {
-                    $this->dol_object->{$prop} = $value;
+                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                    if (is_null($prop)) {
+                        $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+                    } elseif (!property_exists($this->dol_object, $prop)) {
+                        $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+                    } else {
+                        $this->dol_object->{$prop} = $value;
+                    }
                 }
             }
         }
@@ -1644,13 +1736,17 @@ class BimpObject
 
         foreach ($this->data as $field => $value) {
             if ($this->field_exists($field)) {
-                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                if (is_null($prop)) {
-                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                } elseif (!property_exists($this->dol_object, $prop)) {
-                    $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+                if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                    $this->dol_object->array_options['options_' . $field] = $value;
                 } else {
-                    $this->dol_object->{$prop} = $value;
+                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                    if (is_null($prop)) {
+                        $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+                    } elseif (!property_exists($this->dol_object, $prop)) {
+                        $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+                    } else {
+                        $this->dol_object->{$prop} = $value;
+                    }
                 }
             }
         }
@@ -1667,7 +1763,11 @@ class BimpObject
                 $params = array($user);
             }
 
-            return call_user_func_array(array($this->dol_object, 'update'), $params);
+            $result = call_user_func_array(array($this->dol_object, 'update'), $params);
+            if ($result < 0) {
+                return 0;
+            }
+            return 1;
         }
 
         return 0;
@@ -1704,15 +1804,25 @@ class BimpObject
         $this->id = $this->dol_object->id;
 
         foreach ($this->params['fields'] as $field) {
-            $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-            if (is_null($prop)) {
-                $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-            } elseif (!property_exists($this->dol_object, $prop)) {
-                $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+            $value = null;
+            if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                if (isset($this->dol_object->array_options['options_' . $field])) {
+                    $this->data[$field] = $this->dol_object->array_options['options_' . $field];
+                }
             } else {
-                $value = $this->dol_object->{$prop};
-                $this->checkFieldValueType($field, $value);
-                $this->data[$field] = $value;
+                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                if (is_null($prop)) {
+                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+                } elseif (!property_exists($this->dol_object, $prop)) {
+                    $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
+                } else {
+                    $value = $this->dol_object->{$prop};
+                }
+
+                if (!is_null($value)) {
+                    $this->checkFieldValueType($field, $value);
+                    $this->data[$field] = $value;
+                }
             }
         }
 
@@ -1878,11 +1988,6 @@ class BimpObject
     public function renderList($list_name = 'default', $panel = false, $title = null, $icon = null, $filters = array(), $level = 1)
     {
         $list = new BC_ListTable($this, $list_name, $level, null, $title, $icon);
-
-//        echo '<pre>';
-//        print_r($list->params);
-//        print_r($list->errors);
-//        exit;
 
         foreach ($filters as $field_name => $value) {
             $list->addFieldFilterValue($field_name, $value);
@@ -2305,6 +2410,7 @@ class BimpObject
         if (!$this->isLoaded()) {
             return ' ';
         }
+
         if ($this->field_exists('title') &&
                 isset($this->data['title']) && $this->data['title']) {
             return $this->data['title'];
@@ -2321,7 +2427,7 @@ class BimpObject
                 isset($this->data['nom']) && $this->data['nom']) {
             return $this->data['nom'];
         } elseif (isset($this->id) && $this->id) {
-            return $this->getLabel() . ' ' . $this->id;
+            return $this->id;
         }
 
         return ucfirst($this->getLabel());

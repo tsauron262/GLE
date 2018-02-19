@@ -13,12 +13,18 @@ class BimpPDF_Table
     public $fontSize = 8; // px
     public $width = 190; //mm
     public $styles = '';
+    public $table_classes = array();
+    public $table_styles = array();
     public $remove_empty_cols = true;
 
-    public function __construct($pdf)
+    public function __construct($pdf, $borders = true)
     {
         $this->pdf = $pdf;
-        $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table.css');
+        if ($borders) {
+            $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table_borders.css');
+        } else {
+            $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table_no_borders.css');
+        }
     }
 
     public function setMargins($top = 0, $bot = 0)
@@ -27,9 +33,14 @@ class BimpPDF_Table
         $this->botMargin = $bot;
     }
 
-    public function setOption($option_name, $value)
+    public function addTableClass($class)
     {
-        $this->options[$option_name] = $value;
+        $this->table_classes[] = $class;
+    }
+
+    public function addTableStyle($prop, $value)
+    {
+        $this->table_styles[$prop] = $value;
     }
 
     public function addCol($key, $title, $width_mm = 0, $style = '', $class = '', $head_style = '')
@@ -53,31 +64,59 @@ class BimpPDF_Table
     protected function writeHeader($cols)
     {
         $html = '';
-        $html .= '<table class="header" style="font-size: ' . $this->fontSize . 'px"';
+        $html .= '<table class="header';
+        foreach ($this->table_classes as $class) {
+            $html .= ' ' . $class;
+        }
+        $html .= '" style="font-size: ' . $this->fontSize . 'px;';
+        foreach ($this->table_styles as $prop => $value) {
+            $html .= ' ' . $prop . ': ' . $value . ';';
+        }
+        $html .= '"';
         $html .= ' cellspacing="' . $this->cellspacing . '" cellpadding="' . $this->cellpadding . '">';
         $html .= '<tr>';
 
+        $has_titles = false;
         foreach ($cols as $key => $col) {
             $html .= '<td style="width: ' . $col['width_px'] . 'px;';
             if (isset($col['head_style'])) {
                 $html .= ' ' . $col['head_style'];
             }
-            $html .= '">' . $col['title'] . '</td>';
+            $html .= '">';
+            if (isset($col['title']) && $col['title']) {
+                $html .= $col['title'];
+                $has_titles = true;
+            }
+            $html .= '</td>';
         }
 
         $html .= '</tr>';
         $html .= '</table>';
 
-        $this->pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html, false, false, true, false, '');
+        if ($has_titles) {
+            $this->pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html, false, false, true, false, '');
+        }
     }
 
     protected function writeRow($pdf, $cols, $row, $class = 'row')
     {
         $html = '';
-        $html .= '<table class="' . $class . '"';
-        $html .= 'style="font-size: ' . $this->fontSize . 'px" ';
+        $html .= '<table class="' . $class . '';
+        foreach ($this->table_classes as $tableClass) {
+            $html .= ' ' . $tableClass;
+        }
+        $html .= '"';
+        $html .= 'style="font-size: ' . $this->fontSize . 'px;';
+        foreach ($this->table_styles as $prop => $value) {
+            $html .= ' ' . $prop . ': ' . $value . ';';
+        }
+        $html .= '" ';
         $html .= 'cellspacing="' . $this->cellspacing . '" cellpadding="' . $this->cellpadding . '">';
-        $html .= '<tr>';
+        $html .= '<tr';
+        if (isset($row['row_style'])) {
+            $html .= ' style="' . $row['row_style'] . '"';
+        }
+        $html .= '>';
 
         $multicell = null;
         $multicell_width = 0;
@@ -117,10 +156,10 @@ class BimpPDF_Table
                             $content = $row[$key]['content'];
                         }
                         if (isset($row[$key]['style'])) {
-                            $style = $row[$key]['style'];
+                            $style .= ($style ? ' ' : '') . $row[$key]['style'];
                         }
                         if (isset($row[$key]['class'])) {
-                            $class = $row[$key]['class'];
+                            $class .= ($class ? ' ' : '') . $row[$key]['class'];
                         }
                         if (isset($row[$key]['colspan'])) {
                             if ((int) $row[$key]['colspan'] > 1) {

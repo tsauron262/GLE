@@ -157,11 +157,6 @@ print '<br/><input id="enregistrer" type="button" class="butAction" value="Enreg
 
 print '<br/><div id="alertEnregistrer"></div><br/><br/><br/>';
 
-print '<div name="confirmEnregistrer" hidden>';
-print '<p name="confTransfert"></p>';
-print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmer">';
-print '<input id="noEnregistrer" type="button" class="butActionDelete" value="Annuler"></div>';
-
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';

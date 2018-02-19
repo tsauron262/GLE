@@ -37,19 +37,22 @@ class BimpLivraison {
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $doliProd = new Product($this->db);
-                $doliProd->fetch($obj->fk_product);
-                $ligne = new LigneLivraison($this->db);
-                $ligne->prodId = $obj->fk_product;
-                $ligne->label = dol_trunc($obj->label, 25);
-                $ligne->remainingQty = $obj->qty;
-                $ligne->price_unity = price($obj->subprice);
-                $ligne->isDelivered = false;
-                $ligne->isEquipment = $ligne->isSerialisable();
-                $ligne->refurl = $doliProd->getNomUrl(1);
+                if (isset($lignes[$obj->fk_product]))
+                    $lignes[$obj->fk_product]->remainingQty += $obj->qty;
+                else {
+                    $doliProd = new Product($this->db);
+                    $doliProd->fetch($obj->fk_product);
+                    $ligne = new LigneLivraison($this->db);
+                    $ligne->prodId = $obj->fk_product;
+                    $ligne->label = dol_trunc($obj->label, 25);
+                    $ligne->remainingQty = $obj->qty;
+                    $ligne->price_unity = price($obj->subprice);
+                    $ligne->isDelivered = false;
+                    $ligne->isEquipment = $ligne->isSerialisable();
+                    $ligne->refurl = $doliProd->getNomUrl(1);
 
-
-                $lignes[] = $ligne;
+                    $lignes[$obj->fk_product] = $ligne;
+                }
             }
         } else if (!$result) {
             $this->errors[] = 'Erreur de recherche de lignes d\'une commande.';

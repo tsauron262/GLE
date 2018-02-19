@@ -201,26 +201,14 @@ function initEvents() {
     $('#enregistrer').click(function () {
         if (idEntrepotStart === idEntrepotEnd) {
             setMessage('alertEnregistrer', 'L\'entrepot de départ doit être différent de celui d\'arrivé.', 'error');
-        } else if (cntProduct !== 0) {
-            $('p[name=confTransfert]').text('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?');
-            $('div [name=confirmEnregistrer]').show();
+        } else if (cntProduct !== 0 && confirm('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?')) {
+            saveproducts(cntProduct);
+            products = [];
+            cntProduct = 0;
         } else {
             setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
         }
     });
-
-    $('input#okEnregistrer').click(function () {
-        saveproducts(cntProduct);
-        $('div [name=confirmEnregistrer]').hide();
-        products = [];
-        $('table#productTable tr[id]').remove();
-        cntProduct = 0;
-    });
-
-    $('input#noEnregistrer').click(function () {
-        $('div [name=confirmEnregistrer]').hide();
-    });
-
 
     var element = $("input[name=refScan]");
 
@@ -348,7 +336,7 @@ function modifyQuantity() {
     if (newStock >= 0) {
         $(selectoTr + ' td[name=quantity]').text(modifyValue);
         $(selectoTr + ' td[name=stock]').text(newStock);
-        products.forEach(function(prod) {
+        products.forEach(function (prod) {
             if (prod.id_product === parseInt(idLine)) {
                 prod.qty = modifyValue;
             }

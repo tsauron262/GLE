@@ -93,11 +93,6 @@ print '<div id="alertProd" style="clear:left"></div><br/><br/><br/>';
 
 print '<input id="enregistrer" type="button" class="butAction" value="Transférer">';
 
-print '<div name="confirmEnregistrer" hidden>';
-print '<p name="confTransfert"></p>';
-print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmer">';
-print '<input id="noEnregistrer" type="button" class="butActionDelete" value="Annuler"></div>';
-
 print '<br/><div id="alertEnregistrer" style="clear:left"></div><br/>';
 
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';

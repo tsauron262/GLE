@@ -153,7 +153,7 @@ class PropalPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        global $conf;
+        global $conf, $mysoc, $db;
 
         $this->writeContent($this->renderAddresses($this->propal->thirdparty, $this->propal->contact));
 
@@ -161,6 +161,13 @@ class PropalPDF extends BimpModelPDF
 
         $lines = $this->propal->lines;
         $i = 0;
+
+        $localtax1 = array();
+        $localtax2 = array();
+        $tva = array();
+
+        // Traitement des lignes: 
+
         foreach ($lines as $line) {
             $row = array(
                 'desc'      => $line->desc,
@@ -189,13 +196,299 @@ class PropalPDF extends BimpModelPDF
                 $tva_line = $line->multicurrency_total_tva;
             else
                 $tva_line = $line->total_tva;
-            
+
+            $localtax1ligne = $line->total_localtax1;
+            $localtax2ligne = $line->total_localtax2;
+            $localtax1_rate = $line->localtax1_tx;
+            $localtax2_rate = $line->localtax2_tx;
+            $localtax1_type = $line->localtax1_type;
+            $localtax2_type = $line->localtax2_type;
+
+            if ($this->propal->remise_percent)
+                $tvaligne-=($tvaligne * $this->propal->remise_percent) / 100;
+            if ($this->propal->remise_percent)
+                $localtax1ligne-=($localtax1ligne * $this->propal->remise_percent) / 100;
+            if ($this->propal->remise_percent)
+                $localtax2ligne-=($localtax2ligne * $this->propal->remise_percent) / 100;
+
+            $vatrate = (string) $line->tva_tx;
+
+            // Retrieve type from database for backward compatibility with old records
+            if ((!isset($localtax1_type) || $localtax1_type == '' || !isset($localtax2_type) || $localtax2_type == '') // if tax type not defined
+                    && (!empty($localtax1_rate) || !empty($localtax2_rate))) { // and there is local tax
+                $localtaxtmp_array = getLocalTaxesFromRate($vatrate, 0, $this->propal->thirdparty, $mysoc);
+                $localtax1_type = $localtaxtmp_array[0];
+                $localtax2_type = $localtaxtmp_array[2];
+            }
+
+            if (!isset($localtax1[$localtax1_type])) {
+                $localtax1[$localtax1_type] = array();
+            }
+            if (!isset($localtax1[$localtax1_type][$localtax1_rate])) {
+                $localtax1[$localtax1_type][$localtax1_rate] = 0;
+            }
+
+            $localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
+
+            if (!isset($localtax2[$localtax2_type])) {
+                $localtax2[$localtax2_type] = array();
+            }
+            if (!isset($localtax2[$localtax2_type][$localtax2_rate])) {
+                $localtax2[$localtax2_type][$localtax2_rate] = 0;
+            }
+
+            $localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
+
+            if (($line->info_bits & 0x01) == 0x01)
+                $vatrate.='*';
+
+            if (!isset($tva[$vatrate])) {
+                $tva[$vatrate] = 0;
+            }
+
+            $tva[$vatrate] += $tva_line;
+
             $table->rows[] = $row;
             $i++;
         }
 
         $this->writeContent('<div style="text-align: right; font-size: 6px;">Montants exprimés en Euros</div>');
         $this->pdf->addVMargin(1);
+        $table->write();
+        unset($table);
+
+        // *** Informations:  *** 
+        $content = '';
+
+        // Date de livraison
+        if (!empty($this->propal->date_livraison)) {
+            $content .= '<p>' . dol_print_date($this->propal->date_livraison, "daytext", false, $this->langs, true) . '</p>';
+            $this->renderContent($content);
+        } elseif ($this->propal->availability_code || (isset($this->propal->availability) && $this->propal->availability)) {
+            $content .= '<p><strong>' . $this->langs->transnoentities("AvailabilityPeriod") . ': </strong>';
+            $label = $this->langs->transnoentities("AvailabilityType" . $this->propal->availability_code) != ('AvailabilityType' . $this->propal->availability_code) ? $this->langs->transnoentities("AvailabilityType" . $this->propal->availability_code) : $this->langs->convToOutputCharset($this->propal->availability);
+            $label = str_replace('\n', "\n", $label);
+            $content .= $label . '</p>';
+        }
+
+        // Conditions de paiement: 
+        if (empty($conf->global->PROPALE_PDF_HIDE_PAYMENTTERMCOND) && ($this->propal->cond_reglement_code || $this->propal->cond_reglement)) {
+            $content .= '<p>';
+            $content .= '<strong>' . $this->langs->transnoentities("PaymentConditions") . ': </strong>';
+            $label = $this->langs->transnoentities("PaymentCondition" . $this->propal->cond_reglement_code) != ('PaymentCondition' . $this->propal->cond_reglement_code) ? $this->langs->transnoentities("PaymentCondition" . $this->propal->cond_reglement_code) : $this->langs->convToOutputCharset($this->propal->cond_reglement_doc);
+            $label = str_replace('\n', "\n", $label);
+            $content .= $label . '</p>';
+        }
+
+        // Mode de paiement: 
+        if ($this->propal->mode_reglement_code && $this->propal->mode_reglement_code != 'CHQ' && $this->propal->mode_reglement_code != 'VIR') {
+            $content .= '<p><strong>' . $this->langs->transnoentities("PaymentMode") . '</strong>: ';
+            $content .= $this->langs->transnoentities("PaymentType" . $this->propal->mode_reglement_code) != ('PaymentType' . $this->propal->mode_reglement_code) ? $this->langs->transnoentities("PaymentType" . $this->propal->mode_reglement_code) : $this->langs->convToOutputCharset($this->propal->mode_reglement);
+            $content .= '</p>';
+        }
+
+        if (empty($this->propal->mode_reglement_code) || $this->propal->mode_reglement_code == 'CHQ') {
+
+            if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
+                if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
+                    $account = new Account($db);
+                    $account->fetch($conf->global->FACTURE_CHQ_NUMBER);
+
+                    $content .= '<p>' . $this->langs->transnoentities('PaymentByChequeOrderedTo', $account->proprio) . '</p>';
+
+                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
+                        $content .= '<p>' . $this->langs->convToOutputCharset($account->owner_address) . '</p>';
+                    }
+                } elseif ($conf->global->FACTURE_CHQ_NUMBER == -1) {
+                    $content .= '<p>' . $this->langs->transnoentities('PaymentByChequeOrderedTo', $this->fromCompany->name) . '</p>';
+
+                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
+                        $content .= '<p>' . $this->langs->convToOutputCharset($this->fromCompany->getFullAddress()) . '</p>';
+                    }
+                }
+            }
+        }
+
+        if (empty($this->propal->mode_reglement_code) || $this->propal->mode_reglement_code == 'VIR') {
+            if (!empty($this->propal->fk_account) || !empty($this->propal->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
+                $bankid = (empty($this->propal->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->propal->fk_account);
+                if (!empty($this->propal->fk_bank)) {
+                    $bankid = $this->propal->fk_bank;
+                }
+
+                $account = new Account($db);
+                $account->fetch($bankid);
+                $content .= $this->renderBank($account);
+            }
+        }
+
+        $this->writeContent($content);
+
+        // *** Totaux:  ***
+
+        $table = new BimpPDF_Table($this->pdf, false);
+        $table->remove_empty_cols = false;
+        $table->addTableClass('no_borders');
+        $table->addTableStyle('margin-left', (BimpPDF::$pxPerMm * 95) . 'px');
+        $table->width = 95;
+        $table->addCol('margin', '', 95);
+        $table->addCol('label', '', 65, 'font-weight: bold;');
+        $table->addCol('value', '', null, 'text-align: right;');
+
+        // Total HT:
+        $total_ht = ($conf->multicurrency->enabled && $this->propal->mylticurrency_tx != 1 ? $this->propal->multicurrency_total_ht : $this->propal->total_ht);
+        $table->rows[] = array(
+            'label' => $this->langs->transnoentities("TotalHT"),
+            'value' => price($total_ht + (!empty($this->propal->remise) ? $this->propal->remise : 0), 0, $this->langs)
+        );
+
+        if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT)) {
+            $tvaisnull = ((!empty($this->tva) && count($this->tva) == 1 && isset($this->tva['0.000']) && is_float($this->tva['0.000'])) ? true : false);
+            if (!$tvaisnull || empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_IFNULL)) {
+                // Taxes locales 1 avant TVA
+                foreach ($localtax1 as $localtax_type => $localtax_rate) {
+                    if (in_array((string) $localtax_type, array('1', '3', '5'))) {
+                        continue;
+                    }
+
+                    foreach ($localtax_rate as $tvakey => $tvaval) {
+                        if ($tvakey != 0) {
+                            $tvacompl = '';
+                            if (preg_match('/\*/', $tvakey)) {
+                                $tvakey = str_replace('*', '', $tvakey);
+                                $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
+                            }
+                            $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
+                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+
+                            $table->rows[] = array(
+                                'label' => array(
+                                    'content' => $totalvat,
+                                    'style'   => 'background-color: #F0F0F0;'
+                                ),
+                                'value' => array(
+                                    'content' => price($tvaval, 0, $this->langs),
+                                    'style'   => 'background-color: #F0F0F0;'
+                                ),
+                            );
+                        }
+                    }
+                }
+
+                // Taxes locales 2 avant TVA
+                foreach ($localtax2 as $localtax_type => $localtax_rate) {
+                    if (in_array((string) $localtax_type, array('1', '3', '5'))) {
+                        continue;
+                    }
+
+                    foreach ($localtax_rate as $tvakey => $tvaval) {
+                        if ($tvakey != 0) {
+                            $tvacompl = '';
+                            if (preg_match('/\*/', $tvakey)) {
+                                $tvakey = str_replace('*', '', $tvakey);
+                                $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
+                            }
+                            $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
+                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+
+                            $table->rows[] = array(
+                                'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;',),
+                                'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
+                            );
+                        }
+                    }
+                }
+
+                // TVA
+                foreach ($tva as $tvakey => $tvaval) {
+                    if ($tvakey != 0) {
+                        $tvacompl = '';
+                        if (preg_match('/\*/', $tvakey)) {
+                            $tvakey = str_replace('*', '', $tvakey);
+                            $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
+                        }
+                        $totalvat = $this->langs->transcountrynoentities("TotalVAT", $this->fromCompany->country_code) . ' ';
+                        $totalvat .= vatrate($tvakey, 1) . $tvacompl;
+                        $table->rows[] = array(
+                            'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;'),
+                            'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
+                        );
+                    }
+                }
+
+                // Taxes locales 1 après TVA
+                foreach ($localtax1 as $localtax_type => $localtax_rate) {
+                    if (in_array((string) $localtax_type, array('2', '4', '6'))) {
+                        continue;
+                    }
+
+                    foreach ($localtax_rate as $tvakey => $tvaval) {
+                        if ($tvakey != 0) {
+                            $tvacompl = '';
+                            if (preg_match('/\*/', $tvakey)) {
+                                $tvakey = str_replace('*', '', $tvakey);
+                                $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
+                            }
+                            $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
+                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+
+                            $table->rows[] = array(
+                                'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;'),
+                                'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
+                            );
+                        }
+                    }
+                }
+
+                // Taxes locales 2 après TVA
+                foreach ($localtax2 as $localtax_type => $localtax_rate) {
+                    if (in_array((string) $localtax_type, array('2', '4', '6'))) {
+                        continue;
+                    }
+
+                    foreach ($localtax_rate as $tvakey => $tvaval) {
+                        if ($tvakey != 0) {
+                            $tvacompl = '';
+                            if (preg_match('/\*/', $tvakey)) {
+                                $tvakey = str_replace('*', '', $tvakey);
+                                $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
+                            }
+                            $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
+                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+
+                            $table->rows[] = array(
+                                'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;'),
+                                'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
+                            );
+                        }
+                    }
+                }
+
+                // Total TTC
+                $total_ttc = ($conf->multicurrency->enabled && $this->propal->multicurrency_tx != 1) ? $this->propal->multicurrency_total_ttc : $this->propal->total_ttc;
+                $table->rows[] = array(
+                    'label' => array('content' => $this->langs->transnoentities("TotalTTC"), 'style' => 'background-color: #DCDCDC;'),
+                    'value' => array('content' => price($total_ttc, 0, $this->langs), 'style' => 'background-color: #DCDCDC;')
+                );
+            }
+        }
+
+        $table->rows[] = array();
+        $table->rows[] = array(
+            'label' => array(
+                'colspan' => 2,
+                'style'   => 'text-align: center;',
+                'content' => 'Cachet, Date, Signature et mention "Bon pour Accord"'
+            )
+        );
+        $table->rows[] = array(
+            'label' => array(
+                'colspan' => 2,
+                'style'   => 'border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;',
+                'content' => ' <br/> <br/> <br/>'
+            )
+        );
+
         $table->write();
     }
 }

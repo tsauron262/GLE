@@ -86,18 +86,25 @@ fields:
     note: 
         label: Note
         type: text
-
+    apple_id: 
+        label: Identifiant Apple
+        dol_extra_field: 1
+    apple_service: 
+        label: Service Apple
+        dol_extra_field: 1
+    apple_techid: 
+        label: Tech ID Apple
+        dol_extra_field: 1
+    apple_shipto: 
+        label: N° ShipTo Apple
+        dol_extra_field: 1
+        
 forms:
     light: 
         rows:
-            - field: firstname
-            - field: gender
             - field: office_phone
             - field: user_mobile
             - field: job
-            - field: address
-            - field: zip
-            - field: town
 
 lists:
     default: 
@@ -176,6 +183,15 @@ fields_tables:
             - field: note
             - field: signature
             
+    apple: 
+        title: Données Apple
+        icon: apple
+        rows: 
+            - field: apple_id
+            - field: apple_service
+            - field: apple_techid
+            - field: apple_shipto
+        
 views: 
     default: 
         title: nom
@@ -212,8 +228,16 @@ views:
                       
             - cols: 
                 - type: fields_table
-                  col_lg: 12
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
                   fields_table: 
                       name: notes
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: apple
         
         

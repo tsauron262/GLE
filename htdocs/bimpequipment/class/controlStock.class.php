@@ -6,6 +6,7 @@ if(isset($_REQUEST['action'])){
     llxHeader();
     $c = new controlStock($db);
     $c->go();
+    llxFooter();
 }
 
 
@@ -43,7 +44,7 @@ class controlStock{
                     echo "<br/>";
                     $nbCorrection = $nbE - $nbS;
                     if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
-                        echo "  correction de  ".$nbCorrection;
+                        echo "  ! ! ! ! ! !  correction de  ".$nbCorrection."<br/>";
                         $product = new Product($this->db);
                         $product->fetch($idPr);
                         $now = dol_now();

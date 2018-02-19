@@ -18,8 +18,9 @@ $langs->load("companies");
 $langs->load('stocks');
 
 $id = GETPOST('id', 'int');
-$ref = GETPOST('ref');
+$ref = GETPOST('ref', 'alpha');
 $action = GETPOST('action', 'aZ09');
+
 
 $object = new CommandeFournisseur($db);
 $object->fetch($id, $ref);
@@ -27,6 +28,7 @@ $object->fetch($id, $ref);
 /*
  * View
  */
+
 $help_url = 'EN:Module_Suppliers_Orders|FR:CommandeFournisseur|ES:Módulo_Pedidos_a_proveedores';
 llxHeader('', 'Livrer', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
@@ -94,8 +96,10 @@ if ($id > 0 || !empty($ref)) {
 /**
  * Start Fiche
  */
-$facid = $id;
 $orderId = $object->id;
+print '<input id="id_order_hidden" hidden type="number" value=' . $orderId . '>';
+
+$facid = $id;
 if ($object->statut < 3) {
     print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
     return;

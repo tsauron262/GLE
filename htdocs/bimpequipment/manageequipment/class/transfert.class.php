@@ -75,14 +75,15 @@ class LigneTransfert {
             $label = 'Transférer stock Bimp ' . $this->serial;
 
         // Remove stock
-        $result1 = $product->correct_stock($user, $entrepotIdStart, $this->qty, 1, $label, 0, $codemove);
+//        function correct_stock($user, $id_entrepot, $nbpiece, $movement, $label = '', $price = 0, $inventorycode = '', $origin_element = '', $origin_id = null)
+        $result1 = $product->correct_stock($user, $entrepotIdStart, $this->qty, 1, $label, 0, $codemove, 'entrepot', $entrepotIdStart);
         if ($result1 < 0) {
             $errors[] = $product->errors;
             $errors[] = $product->errorss;
         }
 
         // Add stock
-        $result2 = $product->correct_stock($user, $entrepotIdEnd, $this->qty, 0, $label, 0, $codemove);
+        $result1 = $product->correct_stock($user, $entrepotIdStart, $this->qty, 1, $label, 0, $codemove, 'entrepot', $entrepotIdStart);
         if ($result2 < 0) {
             $errors[] = $product->errors;
             $errors[] = $product->errorss;

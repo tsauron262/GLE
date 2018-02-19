@@ -136,7 +136,8 @@ print '<th>Identifiant produit</th>';
 print '<th>Référence</th>';
 print '<th>Numéro de série</th>';
 print '<th>Label</th>';
-print '<th>Quantité attendu</th>';
+print '<th>Quantité total</th>';
+print '<th>Quantité restant</th>';
 print '<th>Quantité livré</th>';
 print '<th>Modifier</th>';
 print '<th>Prix unitaire</th>';
@@ -144,6 +145,13 @@ print '<th>Mettre en stock <input type="checkbox" name="checkAll"></th>';
 print '</tr></thead>';
 print '<tbody></tbody>';
 print '</table>';
+
+
+//print '<div class="object_list_table">';
+//print '<table id="productDeliveredTable" class="noborder objectlistTable" style="margin-top:20px">';
+//print '<tbody></tbody>';
+//print '</table>';
+
 
 print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 

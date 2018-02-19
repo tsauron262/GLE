@@ -107,7 +107,6 @@ print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="a
 include(DOL_DOCUMENT_ROOT . "/bimpequipment/manageequipment/scan/scan.php");
 
 print '</div>';
-
 $db->close();
 
 llxFooter();

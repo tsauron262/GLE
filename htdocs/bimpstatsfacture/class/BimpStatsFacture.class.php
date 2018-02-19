@@ -150,8 +150,8 @@ class BimpStatsFacture {
         $sql = 'SELECT f.rowid as fac_id, f.facnumber as fac_number, f.fk_statut as fac_statut,';
         $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
-        $sql .= ' e.centre as centre, e.type as type,';
-        $sql .= ' fs.centre as centre, fs.idSav as sav_id, fs.refSav as sav_ref,';
+        $sql .= ' e.centre as centre2, e.type as type,';
+        $sql .= ' fs.centre as centre1, fs.idSav as sav_id, fs.refSav as sav_ref,';
         $sql .= ' pf.amount as pai_paye_ttc,';
         $sql .= ' sy.description as description, sy.model_refid as saf_refid,';
         $sql .= ' sy_101.N__Serie as numero_serie, sy_101.Type_garantie as type_garantie,';
@@ -187,7 +187,12 @@ class BimpStatsFacture {
                 $hash[$ind]['pai_id'] = $obj->pai_id;
                 $hash[$ind]['ref_paiement'] = $obj->pai_ref;
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
-                $hash[$ind]['ct'] = ($obj->centre != "0" and $obj->centre != '' and $obj->centre != false) ? $obj->centre : 0;
+                if($obj->centre1 != "0" and $obj->centre1 != '' and $obj->centre1 != false)
+                    $hash[$ind]['ct'] = $obj->centre1;
+                elseif($obj->centre2 != "0" and $obj->centre2 != '' and $obj->centre2 != false)
+                    $hash[$ind]['ct'] = $obj->centre2;
+                else
+                    $hash[$ind]['ct'] = 0;
                 $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
                 $hash[$ind]['equip_ref'] = $obj->description;
                 $hash[$ind]['numero_serie'] = $obj->numero_serie;

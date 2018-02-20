@@ -191,8 +191,8 @@ function initEvents() {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
         }
     });
-    
-    
+
+
     $('#entrepotEnd').on('change', function () {
         if (idEntrepotEnd === undefined) {
             idEntrepotEnd = $(this).val();
@@ -211,6 +211,7 @@ function initEvents() {
             setMessage('alertEnregistrer', 'L\'entrepot de départ doit être différent de celui d\'arrivé.', 'error');
         } else if (cntProduct !== 0 && confirm('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?')) {
             saveproducts(cntProduct);
+            $('table#productTable tr[id]').remove();
             products = [];
             cntProduct = 0;
         } else {

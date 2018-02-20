@@ -40,8 +40,8 @@ function prepareAjaxIE(element, functionToCall, inputQtySelector) {
         $(inputQtySelector).val(ref);
     } else if (ref !== '') {
         eval(functionToCall + '(ref)');
-        element.val('');
         $(inputQtySelector).val(1);
     }
+    element.val('');
     element.focus();
 }

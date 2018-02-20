@@ -81,7 +81,6 @@ function getRemainingLignes() {
                     for (var j = 0; j < equipment.deliveredQty; j++)
                         addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Inconnu');
                 });
-
                 initEvents();
             }
         }

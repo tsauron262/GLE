@@ -136,6 +136,8 @@ $(document).ready(function () {
     $('#entrepotEnd option:selected').prop('selected', true);
     $('#entrepotEnd').trigger('change');
     initEvents();
+    initIE('input[name=refScan]', 'checkProductByRef', 'input#qty');
+
 
 //    $('.fiche').hide();
 
@@ -192,7 +194,6 @@ function initEvents() {
         }
     });
 
-
     $('#entrepotEnd').on('change', function () {
         if (idEntrepotEnd === undefined) {
             idEntrepotEnd = $(this).val();
@@ -218,43 +219,6 @@ function initEvents() {
             setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
         }
     });
-
-    var element = $("input[name=refScan]");
-
-
-    element.on('keyup keydown', function (e) {
-        if (e.keyCode === 13 || e.keyCode === 9 || e.key === "Enter") { // code for "Enter"
-            prepareAjax($(this), e);
-            e.preventDefault();
-        }
-    });
-
-    element.focus();
-}
-
-//    element.on('keyup', function (e) {
-//        if (e.keyCode === 13) { // code for "Enter"
-//            prepareAjax($(this), e);
-//        }
-//    });
-//
-//    element.on('keydown', function (e) {
-//        if (e.keyCode === 9) { // code for "Tab"
-//            prepareAjax($(this), e);
-//        }
-//    });
-//
-//    element.focus();
-//}
-
-function prepareAjax(element) {
-    var ref = element.val();
-    if (ref !== '') {
-        checkProductByRef(ref);
-        element.val('');
-    }
-    element.focus();
-}
 
 
 /* Add a line in the table of equipments */

@@ -11,7 +11,7 @@ include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
-$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/transfertAjax.js');
+$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/transfertAjax.js');
 
 
 /*
@@ -65,7 +65,7 @@ print '<td>';
 $form->select_produits('', 'productid', '', 20, 0, 1, 2, '', 1);
 print '</td></tr>';
 print '<tr><td style="text-align: right;"><strong> Quantité</strong></td>';
-print '<td><input id="qty" type="number" class="custInput" style="width: 40px" value=1 min=1></td></tr>';
+print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
 print '<tr><td style="text-align: right;"><strong>Ajouter</strong></td>';
 print '<td><img id="addProduct" src="css/plus.ico" class="clickable" style="margin-bottom : -7px"></td></tr>';
 

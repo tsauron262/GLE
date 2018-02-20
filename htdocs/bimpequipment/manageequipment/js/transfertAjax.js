@@ -165,19 +165,25 @@ function initEvents() {
     });
 
     $('#entrepotStart').on('change', function () {
-        if (idEntrepotStart === undefined) {
+        if ($(this).prop('preventOnClickEvent')) {
+            $(this).prop('preventOnClickEvent', false);
+        } else if (idEntrepotStart === undefined) {
             idEntrepotStart = $(this).val();
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
             $('#divEntrepotEnd').css('visibility', 'visible');
             $('#divEntrepotEnd').addClass('fade-in');
         } else if (products.length !== 0) {
-            if (confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?')) {
+            var confirmed = confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?');
+            if (confirmed) {
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
                 idEntrepotStart = $(this).val();
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
-                products = [];
                 $('table#productTable tr[id]').remove();
+                products = [];
                 cntProduct = 0;
+            } else {
+                $('#entrepotStart').prop('preventOnClickEvent', true);
+                $('#entrepotStart').select2('val', idEntrepotStart, true);
             }
         } else {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
@@ -185,6 +191,8 @@ function initEvents() {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
         }
     });
+    
+    
     $('#entrepotEnd').on('change', function () {
         if (idEntrepotEnd === undefined) {
             idEntrepotEnd = $(this).val();

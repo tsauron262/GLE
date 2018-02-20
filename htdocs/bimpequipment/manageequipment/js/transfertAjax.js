@@ -26,6 +26,7 @@ var products = [];
  */
 
 function checkProductByRef(ref) {
+    var qtyToAdd = parseInt($('input#qty').val());
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
@@ -53,9 +54,9 @@ function checkProductByRef(ref) {
                 else
                     setMessage('alertProd', "Cet équipement vient d'être scanné.", 'error');
             } else if ($('table#productTable tr#' + outParsed.id).length !== 0) {
-                addQuantity(outParsed.id, 1);
+                addQuantity(outParsed.id, qtyToAdd);
             } else {
-                addFieldProduct(outParsed.id, 1, outParsed.stock, outParsed.label, outParsed.refUrl);
+                addFieldProduct(outParsed.id, qtyToAdd, outParsed.stock, outParsed.label, outParsed.refUrl);
             }
         }
     });
@@ -138,12 +139,7 @@ $(document).ready(function () {
     initEvents();
     initIE('input[name=refScan]', 'checkProductByRef', 'input#qty');
 
-
-//    $('.fiche').hide();
-
 });
-
-
 
 
 
@@ -321,6 +317,7 @@ function modifyQuantity() {
 }
 
 function addQuantity(idProduct, qty) {
+    console.log("add quant " +qty);
     var selectorQuantity = 'table#productTable tr#' + idProduct + ' td[name=quantity]';
     var oldQty = parseInt($(selectorQuantity).text());
     var newQty = parseInt(qty) + oldQty;

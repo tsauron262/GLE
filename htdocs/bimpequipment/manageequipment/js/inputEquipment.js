@@ -37,14 +37,11 @@ function initEventsIE(itsSelector, functionToCall, inputQtySelector) {
 function prepareAjaxIE(element, functionToCall, inputQtySelector) {
     var ref = element.val();
     if (0 < ref && ref <= 1000) {
-        modifyQuantityIE(ref, inputQtySelector);
+        $(inputQtySelector).val(ref);
     } else if (ref !== '') {
         eval(functionToCall + '(ref)');
         element.val('');
+        $(inputQtySelector).val(1);
     }
     element.focus();
-}
-
-function modifyQuantityIE(qty, inputQtySelector) {
-    $(inputQtySelector).val(qty);
 }

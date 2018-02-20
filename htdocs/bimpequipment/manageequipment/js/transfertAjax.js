@@ -219,6 +219,7 @@ function initEvents() {
             setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
         }
     });
+}
 
 
 /* Add a line in the table of equipments */

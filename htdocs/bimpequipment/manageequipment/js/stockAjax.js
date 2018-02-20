@@ -71,8 +71,7 @@ function getRemainingLignes() {
                 var tabProd = getTabProduct(lignes);
                 var tabEquipment = getTabEquipment(lignes);
                 tabProd.forEach(function (prod) {
-                    if (prod.remainingQty !== 0)
-                        addProduct(prod);
+                    addProduct(prod);
                     if (prod.deliveredQty !== 0 && prod.deliveredQty !== null)
                         addDeliveredProduct(prod);
                 });

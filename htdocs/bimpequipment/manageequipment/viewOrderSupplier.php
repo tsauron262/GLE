@@ -108,19 +108,19 @@ if ($object->statut < 3) {
 }
 
 if ($object->statut == 5) {
-    print '<strong>Cette commande a été livrée.</strong>';
-} else {
-    print '<strong>Livré dans l\'entrepôt </strong>';
-
-    $entrepots = getAllEntrepots($db);
-
-    print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
-    print '<option></option>';
-    foreach ($entrepots as $id => $name) {
-        print '<option value="' . $id . '">' . $name . '</option>';
-    }
-    print '</select> ';
+    print '<strong>Cette commande a été livrée. Cependant vous pouvez continuer à rajouter des produits supplémentaires.</strong><br/>';
 }
+print '<strong>Livré dans l\'entrepôt </strong>';
+
+$entrepots = getAllEntrepots($db);
+
+print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
+print '<option></option>';
+foreach ($entrepots as $id => $name) {
+    print '<option value="' . $id . '">' . $name . '</option>';
+}
+print '</select> ';
+
 $bl = new BimpLivraison($db);
 $bl->fetch($orderId);
 $lignes = $bl->getLignesOrder();

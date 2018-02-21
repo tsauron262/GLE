@@ -64,6 +64,10 @@ switch (GETPOST('action')) {
         }
     case 'getStockAndSerial': {
             $lp->check(GETPOST('ref'), GETPOST('idEntrepot'));
+            if (!$lp->prodId) {
+                echo json_encode(array('errors' => array($lp->error)));
+                break;
+            }
             echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId, $lp->serial));
             break;
         }

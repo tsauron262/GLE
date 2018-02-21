@@ -56,7 +56,7 @@ class EquipmentManager {
     function getStockAndSerial($entrepotId, $idProd, $serial) {
         $doliProd = new Product($this->db);
         $doliProd->fetch($idProd);
-//        $this->errors = array_merge($this->errors, $doliProd->errors);
+        $this->errors = array_merge($this->errors, $doliProd->errors);
         $equipments = $this->getProductSerialFromEntrepot($entrepotId, $idProd);
         $stocks = $this->getProductFromEntrepot($entrepotId, $idProd);
         return array(

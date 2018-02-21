@@ -34,9 +34,10 @@ foreach ($entrepots as $id => $name) {
 print '</select> ';
 print '</div><br/><br/><br/>';
 
+print 'jeux de données pour le dev<br/>';
 print 'Exemple de ref equipement : ARM-LENTEADASH102<br/>';
 print 'Exemple de ref produit    : ZZPORT5<br/>';
-print 'Exemple de numéro de série    : fzafzaf zadzadza zadaz vezvev<br/>';
+print 'Exemple de numéro de série    : fzafzaf zadzadza zadaz<br/>';
 
 print '<div id="allTheFiche" class="fadeInOut">';
 print '<table class="entry">';

@@ -12,11 +12,13 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/transfert.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimplivraison.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/equipmentmanager.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/product.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/equipment.lib.php';
 
 $lp = new LignePanier($db);
 $bl = new BimpLivraison($db);
+$em = new EquipmentManager($db);
 
 switch (GETPOST('action')) {
     case 'checkStockForProduct': {
@@ -58,6 +60,11 @@ switch (GETPOST('action')) {
     case 'getRemainingLignes': {
             $bl->fetch(GETPOST('orderId'));
             echo json_encode($bl->getRemainingLignes());
+            break;
+        }
+    case 'getStockAndSerial': {
+            $lp->check(GETPOST('entry'), GETPOST('idEntrepot'));
+            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId));
             break;
         }
     default: break;

@@ -68,6 +68,7 @@ print '<th>Quantité Totale</th>';
 print '<th>Quantité Manquante</th>';
 //print '<th style="border-left:none">Modifier</th>';
 print '<th>Quantité Indiqué</th>';
+print '<th>Modifier</th>';
 print '<th>Supprimer</th>';
 print '</tr></thead>';
 print '<tbody></tbody>';
@@ -77,15 +78,13 @@ print '<div>';
 
 print '<div id="alertProd" style="clear:left"></div><br/><br/><br/>';
 
-print '<input id="valider" type="button" class="butAction" value="Valider">';
+print '<input id="valider" type="button" class="butAction" value="Rectifier stocks">';
 
 print '<br/><div id="alertEnregistrer" style="clear:left"></div><br/>';
 
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
-
-include(DOL_DOCUMENT_ROOT . "/bimpequipment/manageequipment/scan/scan.php");
 
 print '</div>';
 $db->close();

@@ -36,7 +36,6 @@ function getStockAndSerial(ref) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertEnregistrer');
             } else if (out.equipments.length !== 0) {
-                setMessage('alertEnregistrer', "Equipement.", 'mesgs');
                 out.equipments.forEach(function (item) {
                     addFieldEquipment(out.id, out.ref, item, out.label);
                 });
@@ -152,20 +151,6 @@ function initEvents() {
 //    });
 }
 
-function setScanned(serial) {
-    if ($('#productTable tr#' + serial).length === 0) {
-        return 'tr inexistant';
-    }
-    if ($('#productTable tr#' + serial).attr('scanned')) {
-        setMessage('alertEnregistrer', 'Vous avez déjà scanné cet équipement.', 'error');
-        return false;
-    } else {
-        $('#productTable tr#' + serial).css('background', '#bfbfbf');
-        $('#productTable tr#' + serial).attr('scanned', true);
-        return true;
-    }
-}
-
 /* Add a line in the table of equipments */
 function addFieldEquipment(productId, refUrl, serial, label) {
 
@@ -180,6 +165,7 @@ function addFieldEquipment(productId, refUrl, serial, label) {
     line += '<td></td>';   // Quantité Totale
     line += '<td></td>';   // Quantité Manquante
     line += '<td></td>';   // Quantité Indiqué
+    line += '<td></td>';   // Modifier
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove "></td></tr>'; // supprimer
     $(line).appendTo('#productTable tbody');
     initRemoveLine(serial);
@@ -193,7 +179,7 @@ function addFieldProduct(productId, qtyTotale, qtyGiven, label, refUrl) {
     cntProduct++;
     qtyTotale = parseInt(qtyTotale);
     qtyGiven = parseInt(qtyGiven);
-    
+
     var qtyMissing = qtyTotale - qtyGiven;
     var line = '<tr id=' + productId + '>';
     line += '<td name="cnt">' + cntProduct + '</td>';    // cnt ligne
@@ -204,12 +190,14 @@ function addFieldProduct(productId, qtyTotale, qtyGiven, label, refUrl) {
     line += '<td name="qtyTotale"    >' + qtyTotale + '</td>';
     line += '<td name="qtyMissing"    >' + qtyMissing + '</td>';
     line += '<td name="qtyGiven">' + qtyGiven + '</td>';
+    line += '<td><input name="modify" type="number" class="custInput" style="width: 60px" value=1 > <img name="modify" src="css/ok.ico" class="clickable"></td>';
     line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove"></td></tr>';
     $(line).appendTo('#productTable tbody');
 
     initRemoveLine(productId);
     adaptColor('table#productTable tr#' + productId);
-//    $('table#productTable tr#' + productId + ' .modify').click(modifyQuantity);
+
+    $('table#productTable tr#' + productId + ' img[name=modify]').click(modifyQuantity);
 
     document.querySelector("#bipAudio").play();
 }
@@ -217,12 +205,6 @@ function addFieldProduct(productId, qtyTotale, qtyGiven, label, refUrl) {
 function initRemoveLine(idTr) {
     $('table#productTable tr#' + idTr + ' td img.remove').click(function () {
         $(this).parent().parent().remove();
-        products = products.filter(function (obj) {
-            if (obj.is_equipment)
-                return obj.serial !== idTr;
-            else
-                return obj.id_product !== idTr;
-        });
         cntProduct = 1;
         $('table#productTable td[name=cnt]').each(function () {
             $(this).text(cntProduct);
@@ -232,25 +214,17 @@ function initRemoveLine(idTr) {
     });
 }
 
-//function modifyQuantity() {
-//    var idLine = $(this).parent().parent().attr('id');
-//    var selectoTr = 'table#productTable tr#' + idLine;
-//    var modifyValue = parseInt($(selectoTr + ' td input[name=modify]').val());
-//    var oldQty = parseInt($(selectoTr + ' td[name=quantity]').text());
-//    var oldStock = parseInt($(selectoTr + ' td[name=stock]').text());
-//    var newStock = oldStock + oldQty - modifyValue;
-//    if (newStock >= 0) {
-//        $(selectoTr + ' td[name=quantity]').text(modifyValue);
-//        $(selectoTr + ' td[name=stock]').text(newStock);
-//        products.forEach(function (prod) {
-//            if (prod.id_product === parseInt(idLine)) {
-//                prod.qty = modifyValue;
-//            }
-//        });
-//    } else {
-//        setMessage('alertProd', "Les stockes de l'entrepot de départ ne sont pas suffisant.", 'error');
-//    }
-//}
+function modifyQuantity() {
+    var selectoTr = 'table#productTable tr#' + $(this).parent().parent().attr('id');
+    var modifyValue = parseInt($(selectoTr + ' td input[name=modify]').val());
+    var total = parseInt($(selectoTr + ' td[name=qtyTotale]').text());
+
+    var newMissing = total - modifyValue;
+    $(selectoTr + ' td[name=qtyMissing]').text(newMissing);
+    $(selectoTr + ' td[name=qtyGiven]').text(modifyValue);
+
+    adaptColor(selectoTr);
+}
 
 
 function addQuantity(idProduct, qty) {
@@ -268,14 +242,33 @@ function addQuantity(idProduct, qty) {
     document.querySelector("#bipAudio").play();
 }
 
+/* for equipment */
+function setScanned(serial) {
+    if ($('#productTable tr#' + serial).length === 0) {
+        return 'tr inexistant';
+    }
+    if ($('#productTable tr#' + serial).attr('scanned')) {
+        setMessage('alertEnregistrer', 'Vous avez déjà scanné cet équipement.', 'error');
+        return false;
+    } else {
+        $('#productTable tr#' + serial).css('background', '#bfbfbf');
+        $('#productTable tr#' + serial).attr('scanned', true);
+        return true;
+    }
+}
+
+/* for products */
 function adaptColor(selectorTr) {
     var color;
     var missing = parseInt($(selectorTr + ' td[name=qtyMissing]').text());
-    if (0 < missing)
-        color = '#ffffff';
-    else
+    if (missing <= 0) {
         color = '#bfbfbf';
-    
+        $(selectorTr).attr('scanned', true);
+    } else {
+        color = '#ffffff';
+        $(selectorTr).attr('scanned', false);
+    }
+
     $(selectorTr).css('background', color);
 }
 
@@ -299,16 +292,6 @@ function setMessage(idElement, message, type) {
             $("#alertdiv").remove();
         }, 1000);
     }, 10000);
-}
-
-
-var oldCode = "";
-function traiteCode(code) {
-    if (code != oldCode) {
-        $(".custInput").val(code);
-        prepareAjax($(".custInput"));
-    }
-    oldCode = code;
 }
 
 /**

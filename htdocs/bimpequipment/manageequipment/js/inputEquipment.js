@@ -36,7 +36,7 @@ function initEventsIE(itsSelector, functionToCall, inputQtySelector) {
  */
 function prepareAjaxIE(element, functionToCall, inputQtySelector) {
     var ref = element.val();
-    if (0 < ref && ref <= 1000) {
+    if (-1000 <= ref && ref <= 1000) {
         $(inputQtySelector).val(ref);
     } else if (ref !== '') {
         eval(functionToCall + '(ref)');

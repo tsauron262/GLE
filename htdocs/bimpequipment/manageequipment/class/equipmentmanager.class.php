@@ -1,5 +1,8 @@
 <?php
 
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
+include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+
 class EquipmentManager {
 
     private $db;
@@ -11,8 +14,7 @@ class EquipmentManager {
     }
 
     function getProductFromEntrepot($entrepotId, $idProd = null) {
-        $prodQty = array();
-        $sql = 'SELECT fk_product, reel';
+        $sql = 'SELECT reel';
         $sql.= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
         $sql.= ' WHERE fk_entrepot=' . $entrepotId;
         $sql.= (isset($idProd)) ? ' AND fk_product=' . $idProd : '';
@@ -20,7 +22,7 @@ class EquipmentManager {
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $prodQty[$obj->fk_product] = $obj->reel;
+                $prodQty= $obj->reel;
             }
         }
         if (!$result) {
@@ -41,7 +43,7 @@ class EquipmentManager {
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $prodSerial[$obj->id_product][] = $obj->serial;
+                $prodSerial[] = $obj->serial;
             }
         }
         if (!$result) {
@@ -51,18 +53,18 @@ class EquipmentManager {
         return $prodSerial;
     }
 
-    function getStockAndSerial($entrepotId, $idProd) {
-        $prods = array();
-        if ($idProd == 0) { // not ref or bar code
-            $idProd = 
-        }
-        
+    function getStockAndSerial($entrepotId, $idProd, $serial) {
+        $doliProd = new Product($this->db);
+        $doliProd->fetch($idProd);
         $equipments = $this->getProductSerialFromEntrepot($entrepotId, $idProd);
-        if(empty($equipments))
-            $prods = $this->getProductFromEntrepot($entrepotId, $idProd);
+        $stocks = $this->getProductFromEntrepot($entrepotId, $idProd);
         return array(
-            'products' => $prods,
+            'id' => $idProd,
+            'stocks' => $stocks,
             'equipments' => $equipments,
+            'serial' => $serial,
+            'ref' => $doliProd->getNomUrl(1),
+            'label' => dol_trunc($doliProd->label, 25),
             'errors' => $this->errors);
     }
 

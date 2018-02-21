@@ -34,6 +34,10 @@ foreach ($entrepots as $id => $name) {
 print '</select> ';
 print '</div><br/><br/><br/>';
 
+print 'Exemple de ref equipement : ARM-LENTEADASH102<br/>';
+print 'Exemple de ref produit    : ZZPORT5<br/>';
+print 'Exemple de numéro de série    : fzafzaf zadzadza zadaz vezvev<br/>';
+
 print '<div id="allTheFiche" class="fadeInOut">';
 print '<table class="entry">';
 print '<tr><td><strong>Réf. ou code barre ou numéro de série</strong></td>';
@@ -46,7 +50,7 @@ print '<td>';
 $form->select_produits('', 'productid', '', 20, 0, 1, 2, '', 1);
 print '</td></tr>';
 print '<tr><td style="text-align: right;"><strong> Quantité</strong></td>';
-print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
+print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1></td></tr>';
 print '<tr><td style="text-align: right;"><strong>Ajouter</strong></td>';
 print '<td><img id="addProduct" src="css/plus.ico" class="clickable" style="margin-bottom : -7px"></td></tr>';
 
@@ -60,9 +64,10 @@ print '<th>Identifiant</th>';
 print '<th>Référence</th>';
 print '<th>Numéro de série</th>';
 print '<th>Label</th>';
-print '<th>Quantité Scanné</th>';
-//print '<th style="border-left:none">Modifier</th>';
+print '<th>Quantité Totale</th>';
 print '<th>Quantité Manquante</th>';
+//print '<th style="border-left:none">Modifier</th>';
+print '<th>Quantité Indiqué</th>';
 print '<th>Supprimer</th>';
 print '</tr></thead>';
 print '<tbody></tbody>';

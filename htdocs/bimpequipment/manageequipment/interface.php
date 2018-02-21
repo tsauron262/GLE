@@ -63,8 +63,12 @@ switch (GETPOST('action')) {
             break;
         }
     case 'getStockAndSerial': {
-            $lp->check(GETPOST('entry'), GETPOST('idEntrepot'));
-            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId));
+            $lp->check(GETPOST('ref'), GETPOST('idEntrepot'));
+            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId, $lp->serial));
+            break;
+        }
+    case 'getStock': {
+            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), GETPOST('prodId'), ''));
             break;
         }
     default: break;

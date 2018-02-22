@@ -8,7 +8,7 @@
 include_once '../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/inventoryAjax.js');
@@ -35,9 +35,10 @@ print '</select> ';
 print '</div><br/><br/><br/>';
 
 print 'jeux de données pour le dev<br/>';
-print 'Exemple de ref equipement : ARM-LENTEADASH102<br/>';
-print 'Exemple de ref produit    : ZZPORT5<br/>';
+print 'Exemple de ref equipement : ARM-LENTEADASH102   AZE-BEACCBA6PC250M<br/>';
+print 'Exemple de ref produit    : ZZPORT5 APP-SAVAPPLECARE+IPAD<br/>';
 print 'Exemple de numéro de série    : fzafzaf zadzadza zadaz<br/>';
+print 'Exemple plus dans entrepôt    : fr<br/>';
 
 print '<div id="allTheFiche" class="fadeInOut">';
 print '<table class="entry">';
@@ -79,7 +80,8 @@ print '<div>';
 
 print '<div id="alertProd" style="clear:left"></div><br/><br/><br/>';
 
-print '<input id="valider" type="button" class="butAction" value="Rectifier stocks">';
+print '<input id="correctStock" type="button" class="butAction" value="Rectifier stocks">';
+print '<input id="removeLines" type="button" class="butAction" value="Enlever les lignes scannée">';
 
 print '<br/><div id="alertEnregistrer" style="clear:left"></div><br/>';
 

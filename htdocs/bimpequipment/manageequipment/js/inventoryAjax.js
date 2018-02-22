@@ -7,7 +7,6 @@
 var idEntrepot;
 var cntProduct = 0;
 
-var products = [];
 
 
 /**
@@ -85,6 +84,26 @@ function addProduct(prodId) {
     });
 }
 
+function correctStock(products) {
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+        data: {
+            products: products,
+            idEntrepot: idEntrepot,
+            action: 'correctStock'
+        },
+        error: function () {
+            setMessage('alertEnregistrer', 'Erreur serveur 5816.', 'error');
+        },
+        success: function (rowOut) {
+            console.log(rowOut);
+        }
+    });
+}
+
+
 /**
  * Ready
  */
@@ -92,9 +111,10 @@ function addProduct(prodId) {
 $(document).ready(function () {
 
     $('#entrepot').select2({placeholder: 'Rechercher ...'});
+    $('#entrepot option').first().prop('selected', true);
+    $('#entrepot').trigger('change');
     initEvents();
     initIE('input[name=refScan]', 'getStockAndSerial', 'input#qty');
-
 });
 
 
@@ -124,7 +144,7 @@ function initEvents() {
             idEntrepot = $(this).val();
             $('#allTheFiche').css('visibility', 'visible');
             $('#allTheFiche').addClass('fade-in');
-        } else if (products.length !== 0) {
+        } else if ($('#productTable tr').length !== 1) {
             var confirmed = confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?');
             if (confirmed) {
                 idEntrepot = $(this).val();
@@ -139,20 +159,38 @@ function initEvents() {
         }
     });
 
-//    $('#enregistrer').click(function () {
-//        if (cntProduct !== 0 && confirm('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?')) {
-//            saveproducts(cntProduct);
-//            $('table#productTable tr[id]').remove();
-//            products = [];
-//            cntProduct = 0;
-//        } else {
-//            setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
-//        }
-//    });
+    $('#removeLines').click(function () {
+        if (confirm("Vous êtes sur le point d'enlever toutes les produits scanné (ligne grisées) du tableau, continuer ?")) {
+            $('table#productTable tr[scanned=true]').remove();
+        }
+    });
+
+    $('#correctStock').click(prepareCorrectStock);
+}
+
+function prepareCorrectStock() {
+    var products = [];
+    var equipment = [];
+    var id;
+    $('table#productTable tr[id]').each(function () {
+        id = $(this).attr('id');
+        if (0 <= id) {
+            products[id] = ({
+                qtyMissing: parseInt($(this).find('td[name="qtyMissing"]').text())
+            });
+        } else {
+            console.log('equip : ' + $(this).attr('id'));
+        }
+    });
+    console.log(products);
+    correctStock(products);
 }
 
 /* Add a line in the table of equipments */
 function addFieldEquipment(productId, refUrl, serial, label) {
+
+    if ($('#productTable tr#' + serial).length !== 0)
+        return;
 
     cntProduct++;
     productId = parseInt(productId);
@@ -175,6 +213,9 @@ function addFieldEquipment(productId, refUrl, serial, label) {
 
 /* Add a line in the table of product */
 function addFieldProduct(productId, qtyTotale, qtyGiven, label, refUrl) {
+
+    if ($('#productTable tr#' + productId).length !== 0)
+        return;
 
     cntProduct++;
     qtyTotale = parseInt(qtyTotale);
@@ -248,7 +289,7 @@ function setScanned(serial) {
         return 'tr inexistant';
     }
     if ($('#productTable tr#' + serial).attr('scanned')) {
-        setMessage('alertEnregistrer', 'Vous avez déjà scanné cet équipement.', 'error');
+        setMessage('alertEnregistrer', 'Vous avez déjà scanné cet équipement, numéro de série : ' + serial, 'error');
         return false;
     } else {
         $('#productTable tr#' + serial).css('background', '#bfbfbf');

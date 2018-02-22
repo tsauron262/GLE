@@ -26,6 +26,7 @@ var products = [];
  */
 
 function checkProductByRef(ref) {
+    var qtyToAdd = parseInt($('input#qty').val());
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
@@ -53,9 +54,9 @@ function checkProductByRef(ref) {
                 else
                     setMessage('alertProd', "Cet équipement vient d'être scanné.", 'error');
             } else if ($('table#productTable tr#' + outParsed.id).length !== 0) {
-                addQuantity(outParsed.id, 1);
+                addQuantity(outParsed.id, qtyToAdd);
             } else {
-                addFieldProduct(outParsed.id, 1, outParsed.stock, outParsed.label, outParsed.refUrl);
+                addFieldProduct(outParsed.id, qtyToAdd, outParsed.stock, outParsed.label, outParsed.refUrl);
             }
         }
     });
@@ -136,12 +137,9 @@ $(document).ready(function () {
     $('#entrepotEnd option:selected').prop('selected', true);
     $('#entrepotEnd').trigger('change');
     initEvents();
-
-//    $('.fiche').hide();
+    initIE('input[name=refScan]', 'checkProductByRef', 'input#qty');
 
 });
-
-
 
 
 
@@ -165,19 +163,25 @@ function initEvents() {
     });
 
     $('#entrepotStart').on('change', function () {
-        if (idEntrepotStart === undefined) {
+        if ($(this).prop('preventOnClickEvent')) {
+            $(this).prop('preventOnClickEvent', false);
+        } else if (idEntrepotStart === undefined) {
             idEntrepotStart = $(this).val();
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
             $('#divEntrepotEnd').css('visibility', 'visible');
             $('#divEntrepotEnd').addClass('fade-in');
         } else if (products.length !== 0) {
-            if (confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?')) {
+            var confirmed = confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?');
+            if (confirmed) {
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
                 idEntrepotStart = $(this).val();
                 $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
-                products = [];
                 $('table#productTable tr[id]').remove();
+                products = [];
                 cntProduct = 0;
+            } else {
+                $('#entrepotStart').prop('preventOnClickEvent', true);
+                $('#entrepotStart').select2('val', idEntrepotStart, true);
             }
         } else {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
@@ -185,6 +189,7 @@ function initEvents() {
             $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
         }
     });
+
     $('#entrepotEnd').on('change', function () {
         if (idEntrepotEnd === undefined) {
             idEntrepotEnd = $(this).val();
@@ -203,48 +208,13 @@ function initEvents() {
             setMessage('alertEnregistrer', 'L\'entrepot de départ doit être différent de celui d\'arrivé.', 'error');
         } else if (cntProduct !== 0 && confirm('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?')) {
             saveproducts(cntProduct);
+            $('table#productTable tr[id]').remove();
             products = [];
             cntProduct = 0;
         } else {
             setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
         }
     });
-
-    var element = $("input[name=refScan]");
-
-
-    element.on('keyup keydown', function (e) {
-        if (e.keyCode === 13 || e.keyCode === 9 || e.key === "Enter") { // code for "Enter"
-            prepareAjax($(this), e);
-            e.preventDefault();
-        }
-    });
-
-    element.focus();
-}
-
-//    element.on('keyup', function (e) {
-//        if (e.keyCode === 13) { // code for "Enter"
-//            prepareAjax($(this), e);
-//        }
-//    });
-//
-//    element.on('keydown', function (e) {
-//        if (e.keyCode === 9) { // code for "Tab"
-//            prepareAjax($(this), e);
-//        }
-//    });
-//
-//    element.focus();
-//}
-
-function prepareAjax(element) {
-    var ref = element.val();
-    if (ref !== '') {
-        checkProductByRef(ref);
-        element.val('');
-    }
-    element.focus();
 }
 
 
@@ -347,6 +317,7 @@ function modifyQuantity() {
 }
 
 function addQuantity(idProduct, qty) {
+    console.log("add quant " +qty);
     var selectorQuantity = 'table#productTable tr#' + idProduct + ' td[name=quantity]';
     var oldQty = parseInt($(selectorQuantity).text());
     var newQty = parseInt(qty) + oldQty;

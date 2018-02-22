@@ -71,8 +71,7 @@ function getRemainingLignes() {
                 var tabProd = getTabProduct(lignes);
                 var tabEquipment = getTabEquipment(lignes);
                 tabProd.forEach(function (prod) {
-                    if (prod.remainingQty !== 0)
-                        addProduct(prod);
+                    addProduct(prod);
                     if (prod.deliveredQty !== 0 && prod.deliveredQty !== null)
                         addDeliveredProduct(prod);
                 });
@@ -82,7 +81,6 @@ function getRemainingLignes() {
                     for (var j = 0; j < equipment.deliveredQty; j++)
                         addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Inconnu');
                 });
-
                 initEvents();
             }
         }

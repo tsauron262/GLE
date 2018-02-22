@@ -64,6 +64,10 @@ switch (GETPOST('action')) {
         }
     case 'getStockAndSerial': {
             $lp->check(GETPOST('ref'), GETPOST('idEntrepot'));
+            if (!$lp->prodId) {
+                echo json_encode(array('errors' => array($lp->error)));
+                break;
+            }
             echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId, $lp->serial));
             break;
         }
@@ -71,7 +75,15 @@ switch (GETPOST('action')) {
             echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), GETPOST('prodId'), ''));
             break;
         }
-    default: break;
+    case 'correctStock': {
+        echo "OKKKKKKKK";
+//            echo json_encode($em->correctrrStock(GETPOST('idEntrepot'), GETPOST('products')), $user);
+            break;
+        }
+    default: {
+            echo json_encode(array('errors' => 'Aucune action n\a été déc'));
+        break;
+    }
 }
 
 

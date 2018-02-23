@@ -1,7 +1,10 @@
 <?php
 
-include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+include_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimpinventory.class.php';
 
 class EquipmentManager {
 
@@ -97,7 +100,7 @@ class EquipmentManager {
 
     /* Called by the interface */
 
-    function correctrrStock($entrepotId, $products, $user) {
+    function correctStock($entrepotId, $products, $user) {
         var_dump($products);
         $now = dol_now();
         $codemove = dol_print_date($now, '%y%m%d%H%M%S');
@@ -121,6 +124,35 @@ class EquipmentManager {
             }
         }
         return array('OK' => 'OK', 'errors' => $this->errors);
+    }
+
+    /* Function on inventories */
+
+    public function getInventories($id_entrepot = null, $getName = false) {
+
+        $inventories = array();
+
+        $sql = 'SELECT rowid';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory';
+        $sql .= ($id_entrepot) ? ' WHERE fk_entrepot=' . $id_entrepot : '';
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $inventory = new BimpInventory($this->db);
+                $inventory->fetch($obj->rowid);
+                if ($getName) {
+                    $user = new User($this->db);
+                    $user->fetch($inventory->fk_user_create);
+                    $inventory->url_user = $user->getNomUrl(-1, '', 0, 0, 24, 0, '');
+                }
+                $inventories[] = $inventory;
+            }
+        } else {
+            $this->errors[] = ($id_entrepot) ? "Aucun inventaire pour l'entrepôt dont l'identifiant est : " . $id_entrepot : "Il n'y a aucun inventaire.";
+            return false;
+        }
+        return $inventories;
     }
 
 }

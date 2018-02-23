@@ -70,7 +70,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'createInventory': {
-            echo json_encode(array('inventories' => $inventory->create(GETPOST('idEntrepotCreate'), $user->id), 'errors' => $inventory->errors));
+            echo json_encode(array('id_inserted' => $inventory->create(GETPOST('idEntrepotCreate'), $user->id), 'errors' => $inventory->errors));
             break;
         }
     /* Inventories - viewInventory */

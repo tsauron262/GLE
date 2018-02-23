@@ -62,22 +62,24 @@ class BimpInventory {
         }
 
         $this->db->begin();
-        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "be_inventory (";
-        $sql.= "fk_entrepot";
-        $sql.= ", fk_user_create";
-        $sql.= ", date_ouverture";
-        $sql.= ", statut";
-        $sql.= ") ";
-        $sql.= "VALUES (" . $id_entrepot;
-        $sql.= ", " . $id_user;
-        $sql.= ", " . $this->db->idate(dol_now());
-        $sql.= ", " . $this::STATUT_DRAFT;
-        $sql.= ")";
+        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_inventory (';
+        $sql.= 'fk_entrepot';
+        $sql.= ', fk_user_create';
+        $sql.= ', date_ouverture';
+        $sql.= ', statut';
+        $sql.= ') ';
+        $sql.= 'VALUES (' . $id_entrepot;
+        $sql.= ', ' . $id_user;
+        $sql.= ', ' . $this->db->idate(dol_now());
+        $sql.= ', ' . $this::STATUT_DRAFT;
+        $sql.= ')';
 
+        
         $result = $this->db->query($sql);
         if ($result) {
+            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX.'be_inventory');
             $this->db->commit();
-            return 1;
+            return $last_insert_id;
         } else {
             $this->errors[] = "Impossible de créer l'inventaire.";
             dol_print_error($this->db);
@@ -173,25 +175,26 @@ class BimpInventoryLigne {
         }
 
         $this->db->begin();
-        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "be_inventory_det (";
-        $sql.= "date_creation";
-        $sql.= ", quantity";
-        $sql.= ", fk_inventory";
-        $sql.= ", fk_user";
-        $sql.= ", fk_product";
-        $sql.= ", fk_equipment";
-        $sql.= ") ";
-        $sql.= "VALUES (" . $this->db->idate(dol_now());
-        $sql.= ", " . $id_inventory;
-        $sql.= ", " . $id_user;
-        $sql.= ", " . $id_product;
-        $sql.= ", " . $id_equipment;
-        $sql.= ")";
+        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_inventory_det (';
+        $sql.= 'date_creation';
+        $sql.= ', quantity';
+        $sql.= ', fk_inventory';
+        $sql.= ', fk_user';
+        $sql.= ', fk_product';
+        $sql.= ', fk_equipment';
+        $sql.= ') ';
+        $sql.= 'VALUES (' . $this->db->idate(dol_now());
+        $sql.= ', ' . $id_inventory;
+        $sql.= ', ' . $id_user;
+        $sql.= ', ' . $id_product;
+        $sql.= ', ' . $id_equipment;
+        $sql.= ')';
 
         $result = $this->db->query($sql);
         if ($result) {
+            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX.'be_inventory_det');
             $this->db->commit();
-            return 1;
+            return $last_insert_id;
         } else {
             $this->errors[] = "Impossible de créer l'inventaire.";
             dol_print_error($this->db);

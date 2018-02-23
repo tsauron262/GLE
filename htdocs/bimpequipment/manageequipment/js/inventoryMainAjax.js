@@ -36,16 +36,16 @@ function createInventory(idEntrepotcreate) {
             action: 'createInventory'
         },
         error: function () {
-            setMessage('alertEnregistrer', 'Erreur serveur 2926.', 'error');
+            setMessage('alertCreate', 'Erreur serveur 2926.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
-                printErrors(out.errors, 'alertPlaceholder');
+                printErrors(out.errors, 'alertCreate');
+            } else if (out.id_inserted) {
+                $('#alertCreate').append('<input type="button" class="butAction" value="Voir nouvel inventaire" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewInventory.php?id=' + out.id_inserted + '\'" style="margin-top: 5px">');
             } else {
-//                out.inventories.forEach(function (inventory) {
-//                    addLineInventory(inventory.id, inventory.url_user, inventory.statut, inventory.date_ouverture, inventory.date_fermeture, 0);
-//                });
+                setMessage('alertCreate', "Pas de création, pas d'erreur côté serveur.", 'error');
             }
         }
     });
@@ -121,9 +121,9 @@ function initEvents() {
 
 /**
  * 
- * @param String idElement id of the element to append the message in
- * @param String message the message you want to displ  ay
- * @param String type 'mesgs' => normal message (green) else => error message (red)
+ * @param {String} idElement id of the element to append the message in
+ * @param {String} message the message you want to displ  ay
+ * @param {String} type 'mesgs' => normal message (green) else => error message (red)
  */
 function setMessage(idElement, message, type) {
     var backgroundColor;

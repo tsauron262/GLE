@@ -75,6 +75,8 @@ foreach ($entrepots as $id => $name) {
 }
 print '</select> ';
 
+print '<div id="alertCreate" style="clear:left"></div>';
+
 print '</div>';
 
 $db->close();

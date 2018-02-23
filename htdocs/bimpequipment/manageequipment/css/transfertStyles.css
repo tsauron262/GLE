@@ -69,3 +69,10 @@ table.custTable th {
     border: 0;
     box-shadow: 0 10px 7px -10px #8c8b8b inset;
 }
+
+.separatorDiv {
+    border: solid #bfbfbf 2px;
+    border-radius: 3px;
+    padding: 5px;
+    
+}

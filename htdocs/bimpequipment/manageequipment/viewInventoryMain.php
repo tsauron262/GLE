@@ -23,7 +23,11 @@ print load_fiche_titre('Inventaire - accueil', $linkback);
 
 $entrepots = getAllEntrepots($db);
 
-print '<h4 style="margin-top:-15px ; margin-bottom:-10px"><strong>Inventaires existants</strong></h4></br>';
+print '<div class="separatorDiv">';
+
+print '<div class="separatorDiv" style="margin:-7px 0px 0px -7px ; float:left">';
+print '<h4><strong>Inventaires existants</strong></h4>';
+print '</div><br><br><br>';
 
 print '<div id="divEntrepot" style="float:left">';
 print '<strong>Entrepôt</strong></br>';
@@ -37,9 +41,8 @@ print '</div><br/>';
 
 print '<div id="alertPlaceholder" style="clear:left"></div>';
 
-print '<div id="allTheFiche" >';
 
-print '<div class="object_list_table">';
+print '<div id="allTheFiche" class="object_list_table">';
 print '<table id="allInventories" class="noborder objectlistTable" style="margin-top:20px">';
 print '<thead>';
 print '<th>Identifiant</th>';
@@ -52,12 +55,17 @@ print '<th>Lien</th>';
 print '</thead>';
 print '<tbody></tbody>';
 print '</table>';
-print '<div>';
-
 print '</div>';
 
-print '<br><hr class="hrShadow">';
-print '<h4><strong>Créer inventaire</strong></h4></br>';
+
+print '</div><br>';
+
+
+print '<div class="separatorDiv">';
+
+print '<div class="separatorDiv" style="margin:-7px 0px 0px -7px ; float:left">';
+print '<h4><strong>Créer inventaire</strong></h4>';
+print '</div><br><br><br>';
 
 print '<p/>Sélectionnez un entrepôt pour créer un inventaire</p>';
 print '<select id="entrepotCreate" class="select2 cust" style="width: 200px;">';
@@ -66,6 +74,8 @@ foreach ($entrepots as $id => $name) {
     print '<option value="' . $id . '">' . $name . '</option>';
 }
 print '</select> ';
+
+print '</div>';
 
 $db->close();
 

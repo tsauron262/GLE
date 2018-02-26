@@ -16,10 +16,10 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
     
     
-    "P" => array("09 71 002 450", "sav66@bimp.fr", "Perpignan", 215, "883234", "66000", "Perpignan", "9 Boulevard Georges Clemenceau"),
-    "N" => array("04 66 842 974", "sav30@bimp.fr", "Nîmes", 217, "459993", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet"),
-    "MONTP" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "869780", "34000", "Montpellier", "36 Rue Saint-Guilhem"),
-    "MAU" => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "579256", "34130", "Mauguio", "39 Rue René Fonck"),
+    "P" => array("09 71 002 450", "sav66@bimp.fr", "Perpignan", 215, "1187559", "66000", "Perpignan", "9 Boulevard Georges Clemenceau"),
+    "N" => array("04 66 842 974", "sav30@bimp.fr", "Nîmes", 217, "1187562", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet"),
+    "MONTP" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem"),
+    "MAU" => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck"),
     
     );
 

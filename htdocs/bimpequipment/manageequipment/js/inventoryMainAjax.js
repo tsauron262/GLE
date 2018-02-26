@@ -43,7 +43,7 @@ function createInventory(idEntrepotcreate) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertCreate');
             } else if (out.id_inserted) {
-                $('#alertCreate').append('<input type="button" class="butAction" value="Voir nouvel inventaire" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewInventory.php?id=' + out.id_inserted + '\'" style="margin-top: 5px">');
+                $('#alertCreate').append('<input type="button" class="butAction" value="Voir nouvel inventaire" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewInventory.php?id=' + out.id_inserted + '&id_entrepot=' + $('#entrepotCreate').val() + '\'" style="margin-top: 5px">');
             } else {
                 setMessage('alertCreate', "Pas de création, pas d'erreur côté serveur.", 'error');
             }
@@ -61,7 +61,7 @@ function addLineInventory(id, responsable, statut, date_ouverture, date_fermetur
     line += '<td>' + date_ouverture + '</td>';   // date_open
     line += '<td>' + date_fermeture + '</td>';   // date_close
     line += '<td>' + nb_prod + '</td>';   // nb_prod
-    line += '<td><input type="button" class="butAction" value="Voir" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewInventory.php?id=' + id + '\'"></td>';   // link
+    line += '<td><input type="button" class="butAction" value="Voir" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewInventory.php?id=' + id + '&id_entrepot=' + idEntrepotTable + '\'"></td>';   // link
     line += '</tr>';
 
     $(line).appendTo('#allInventories tbody');

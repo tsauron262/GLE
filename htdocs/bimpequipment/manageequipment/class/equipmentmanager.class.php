@@ -123,7 +123,7 @@ class EquipmentManager {
                     $this->errors = array_merge($this->errors, $doliProd->errors);
             }
         }
-        return array('OK' => 'OK', 'errors' => $this->errors);
+        return array('OK' => 'en dèv', 'errors' => $this->errors);
     }
 
     /* Function on inventories */
@@ -153,6 +153,87 @@ class EquipmentManager {
             return false;
         }
         return $inventories;
+    }
+
+    /* Called by the interface */
+
+    function getAllProducts($id_entrepot) {
+        $cacheProducts = array();
+        $products = $this->getOnlyProductsForEntrepot($id_entrepot);
+        $equipments = $this->getOnlyequipmentForEntrepot($id_entrepot);
+
+        foreach ($products as $ind => $prod) {
+            $doli_prod = new Product($this->db);
+            $doli_prod->fetch($prod['id']);
+            $products[$ind]['ref'] = $doli_prod->getNomUrl(1);
+            $products[$ind]['label'] = dol_trunc($doli_prod->label, 25);
+        }
+
+        foreach ($equipments as $ind => $equipment) {
+            $id_product = $equipment['id_product'];
+
+            if ($cacheProducts[$id_product]) {
+                $equipments[$ind]['ref'] = $cacheProducts[$id_product]['ref'];
+                $equipments[$ind]['label'] = $cacheProducts[$id_product]['label'];
+            } else {
+                // fill the cache
+                $doli_prod = new Product($this->db);
+                $doli_prod->fetch($id_product);
+                $cacheProducts[$id_product]['ref'] = $doli_prod->getNomUrl(1);
+                $cacheProducts[$id_product]['label'] = dol_trunc($doli_prod->label, 25);
+                // then the equipment array
+                $equipments[$ind]['ref'] = $cacheProducts[$id_product]['ref'];
+                $equipments[$ind]['label'] = $cacheProducts[$id_product]['label'];
+            }
+        }
+        return (array('equipments' => $equipments, 'products' => $products, 'errors' => $this->errors));
+    }
+
+    /* Used by getAllProducts() */
+
+    function getOnlyProductsForEntrepot($id_entrepot) {
+        $products = array();
+        $sql = 'SELECT fk_product, reel';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
+        $sql .= ' WHERE fk_entrepot=' . $id_entrepot;
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $product = array('id' => $obj->fk_product, 'qty' => $obj->reel);
+                $products[] = $product;
+            }
+        } else if ($result) {
+            $this->errors[] = "Il n'y a pas de produit dans cet entrepôt.";
+        } else {
+            $this->errors[] = "La requête SQL pour la recherche des produits a échouée";
+        }
+
+        return $products;
+    }
+
+    /* Used by getAllProducts() */
+
+    function getOnlyequipmentForEntrepot($id_entrepot) {
+        $equipments = array();
+        $sql = 'SELECT e.id as id, e.serial as serial, e.id_product as id_product';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
+        $sql .= ' WHERE e_place.id_entrepot=' . $id_entrepot;
+        $sql .= ' AND e_place.position=1';
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $equipment = array('id' => $obj->id, 'serial' => $obj->serial, 'id_product' => $obj->id_product);
+                $equipments[] = $equipment;
+            }
+        } else if ($result) {
+            $this->errors[] = "Il n'y a pas d'équipements dans cet entrepôt.";
+        } else {
+            $this->errors[] = "La requête SQL pour la recherche des équipements a échouée";
+        }
+        return $equipments;
     }
 
 }

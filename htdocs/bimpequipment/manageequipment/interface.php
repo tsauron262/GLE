@@ -74,7 +74,10 @@ switch (GETPOST('action')) {
             break;
         }
     /* Inventories - viewInventory */
-
+    case 'getAllProducts': {
+            echo json_encode($em->getAllProducts(GETPOST('id_entrepot')));
+            break;
+        }
         
         
     /* Old Inventories */

@@ -75,11 +75,20 @@ switch (GETPOST('action')) {
         }
     /* Inventories - viewInventory */
     case 'getAllProducts': {
-            echo json_encode($em->getAllProducts(GETPOST('id_entrepot')));
+            $inventory->fetch(GETPOST('inventory_id'));
+            echo json_encode($inventory->retrieveScannedLignes());
+//            echo json_encode($em->getAllProducts(GETPOST('id_entrepot')));
             break;
         }
-        
-        
+    case 'addLine': {
+            $inventory->fetch(GETPOST('inventory_id'));
+            echo json_encode($inventory->addLine(GETPOST('ref'), $user->id));
+            break;
+        }
+
+
+
+
     /* Old Inventories */
     /** @deprecated */
     case 'getStockAndSerial': {
@@ -102,7 +111,7 @@ switch (GETPOST('action')) {
             break;
         }
     default: {
-            echo json_encode(array('errors' => 'Aucune action ne match avec : ' . GETPOST('action')));
+            echo json_encode(array('errors' => array('Aucune action ne match avec : ' . GETPOST('action'))));
             break;
         }
 }

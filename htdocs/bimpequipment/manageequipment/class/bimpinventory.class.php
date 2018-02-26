@@ -1,5 +1,10 @@
 <?php
 
+include_once '../../main.inc.php';
+
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/equipmentmanager.class.php';
+
 class BimpInventory {
 
     private $db;
@@ -11,6 +16,8 @@ class BimpInventory {
     public $date_ouverture;
     public $date_fermeture;
     public $statut;
+    private $prodQty;
+    private $equipments;
 
     const STATUT_DRAFT = 0;
     const STATUT_IN_PROCESS = 1;
@@ -74,10 +81,10 @@ class BimpInventory {
         $sql.= ', ' . $this::STATUT_DRAFT;
         $sql.= ')';
 
-        
+
         $result = $this->db->query($sql);
         if ($result) {
-            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX.'be_inventory');
+            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_inventory');
             $this->db->commit();
             return $last_insert_id;
         } else {
@@ -91,7 +98,7 @@ class BimpInventory {
     public function fetchLignes() {
 
         if ($this->id < 0) {
-            $this->errors[] = "Utiliser la fonction fetch d'inventaire avant d'utiliser la fonction fetchLignes.";
+            $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
             return false;
         }
 
@@ -112,6 +119,112 @@ class BimpInventory {
             return false;
         }
         return true;
+    }
+
+    private function setStatut($statut_code) {
+        // TODO
+    }
+
+    public function setProductQuantities() {
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
+            return false;
+        }
+
+        $sql = 'SELECT fk_product, SUM(quantity) as qty';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory_det';
+        $sql .= ' WHERE fk_inventory=' . $this->id;
+        $sql .= ' AND 	fk_equipment IS NULL';
+        $sql .= ' GROUP BY fk_product';
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $this->prodQty[$obj->fk_product] = $obj->qty;
+            }
+            return true;
+        } else {
+            $this->errors[] = "Aucun produit pour l'inventaire dont l'identifiant est " . $this->id;
+            return false;
+        }
+    }
+
+    public function setEquipments() {
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
+            return false;
+        }
+
+        $sql = 'SELECT eq.id as id, eq.serial as serial, ligne.fk_product as id_product';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory_det as ligne';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment as eq ON eq.id = ligne.fk_equipment';
+        $sql .= ' WHERE ligne.fk_inventory=' . $this->id;
+        $sql .= ' AND 	ligne.fk_equipment IS NOT NULL';
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $equipment = array('id' => $obj->id, 'serial' => $obj->serial, 'id_product' => $obj->id_product);
+                $this->equipments[] = $equipment;
+            }
+            return true;
+        } else {
+            $this->errors[] = "Aucun équipement pour l'inventaire dont l'identifiant est " . $this->id;
+            return false;
+        }
+    }
+
+    public function addLine($entry, $user_id) {
+        $lp = new LignePanier($this->db);
+        $lp->check($entry, 0);
+
+        if ($lp->error != '')
+            return array('errors' => array(0 => $lp->error));
+
+        $line = new BimpInventoryLigne($this->db);
+        if ($lp->serial != '') { // is an equipment
+            $line_id = $line->create($this->id, $user_id, $lp->prodId, $lp->equipmentId, 1);
+        } else { // is a product
+            $line_id = $line->create($this->id, $user_id, $lp->prodId, 'NULL', 1);
+        }
+
+        if ($line->errors != '')
+            return array('errors' => $line->errors);
+
+        $line->fetch($line_id);
+        $this->lignes[] = $line;
+
+        if ($this->statut == $this::STATUT_DRAFT)
+            $this->setStatut($this::STATUT_IN_PROCESS);
+
+        return array('new_line_id' => $line_id, 'errors' => $this->errors);
+    }
+
+    public function retrieveScannedLignes() {
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
+            return false;
+        }
+        
+        $this->setProductQuantities();
+        $this->setEquipments();
+        
+        $em = new EquipmentManager($this->db);
+        $out = $em->getAllProducts($this->fk_entrepot);
+        
+        if (sizeof($em->errors) != 0)
+            return $out;
+        
+        $allEqui = $out['equipments'];
+        $allProd = $out['products'];
+        
+        
+        
+//return (array('equipments' => $equipments, 'products' => $products, 'errors' => $this->errors));
+
     }
 
 }
@@ -165,14 +278,28 @@ class BimpInventoryLigne {
 
     public function create($id_inventory, $id_user, $id_product, $id_equipment, $quantity) {
 
-        if (0 > $id_inventory or 0 > $id_user or 0 > $id_product or 0 > $id_equipment) {
-            foreach (func_get_args() as $cnt => $arg) {
-                if (0 > $arg && $cnt < 4) {
-                    $this->errors[] = "create : Argument n°$cnt invalide : $arg";
-                    return false;
-                }
-            }
+        $stop = false;
+        if ($id_inventory < 0) {
+            $this->errors[] = "Identifiant inventaire invalide : " . $id_inventory;
+            $stop = true;
         }
+        if ($id_user < 0) {
+            $this->errors[] = "Identifiant utilisateur invalide : " . $id_user;
+            $stop = true;
+        }
+        if ($id_product < 0) {
+            $this->errors[] = "Identifiant produit invalide : " . $id_user;
+            $stop = true;
+        }
+        if ($stop)
+            return false;
+
+// update ligne ?
+//        $id = $this->checkLigneExists($id_inventory, $id_user, );
+//        if (0 < $id) {
+//            $this->update($id, $quantity);
+//            return $id;
+//        }
 
         $this->db->begin();
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_inventory_det (';
@@ -184,6 +311,7 @@ class BimpInventoryLigne {
         $sql.= ', fk_equipment';
         $sql.= ') ';
         $sql.= 'VALUES (' . $this->db->idate(dol_now());
+        $sql.= ', ' . $quantity;
         $sql.= ', ' . $id_inventory;
         $sql.= ', ' . $id_user;
         $sql.= ', ' . $id_product;
@@ -192,7 +320,7 @@ class BimpInventoryLigne {
 
         $result = $this->db->query($sql);
         if ($result) {
-            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX.'be_inventory_det');
+            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_inventory_det');
             $this->db->commit();
             return $last_insert_id;
         } else {

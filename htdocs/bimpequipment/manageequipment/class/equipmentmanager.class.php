@@ -160,7 +160,7 @@ class EquipmentManager {
     function getAllProducts($id_entrepot) {
         $cacheProducts = array();
         $products = $this->getOnlyProductsForEntrepot($id_entrepot);
-        $equipments = $this->getOnlyequipmentForEntrepot($id_entrepot);
+        $equipments = $this->getOnlyEquipmentsForEntrepot($id_entrepot);
 
         foreach ($products as $ind => $prod) {
             $doli_prod = new Product($this->db);
@@ -203,9 +203,7 @@ class EquipmentManager {
                 $product = array('id' => $obj->fk_product, 'qty' => $obj->reel);
                 $products[] = $product;
             }
-        } else if ($result) {
-            $this->errors[] = "Il n'y a pas de produit dans cet entrepôt.";
-        } else {
+        } else if (!$result) {
             $this->errors[] = "La requête SQL pour la recherche des produits a échouée";
         }
 
@@ -214,7 +212,7 @@ class EquipmentManager {
 
     /* Used by getAllProducts() */
 
-    function getOnlyequipmentForEntrepot($id_entrepot) {
+    function getOnlyEquipmentsForEntrepot($id_entrepot) {
         $equipments = array();
         $sql = 'SELECT e.id as id, e.serial as serial, e.id_product as id_product';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
@@ -228,9 +226,7 @@ class EquipmentManager {
                 $equipment = array('id' => $obj->id, 'serial' => $obj->serial, 'id_product' => $obj->id_product);
                 $equipments[] = $equipment;
             }
-        } else if ($result) {
-            $this->errors[] = "Il n'y a pas d'équipements dans cet entrepôt.";
-        } else {
+        } else if (!$result) {
             $this->errors[] = "La requête SQL pour la recherche des équipements a échouée";
         }
         return $equipments;

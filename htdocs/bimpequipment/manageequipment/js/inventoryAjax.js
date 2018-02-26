@@ -2,103 +2,39 @@
  * Globals variable
  */
 
-/* global DOL_URL_ROOT, productid */
+/* global DOL_URL_ROOT */
 
-var idEntrepot;
 var cntProduct = 0;
-
 
 
 /**
  * Ajax call
  */
 
-function getStockAndSerial(ref) {
-    var ligneExists = setScanned(ref);
-    if (ligneExists !== 'tr inexistant') {  // if it is a serial
-        return;
-    }
-    var qtyToAdd = parseInt($('input#qty').val());
+function getAllProducts() {
+
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
-            ref: ref,
-            idEntrepot: idEntrepot,
-            action: 'getStockAndSerial'
+            id_entrepot: getUrlParameter('id_entrepot'),
+            action: 'getAllProducts'
         },
         error: function () {
-            setMessage('alertEnregistrer', 'Erreur serveur 5916.', 'error');
+            setMessage('alertEnregistrer', 'Erreur serveur 8546.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertEnregistrer');
-            } else if (out.equipments.length !== 0) {
-                out.equipments.forEach(function (item) {
-                    addFieldEquipment(out.id, out.ref, item, out.label);
+            } else {
+                out.products.forEach(function (prod) {
+                    addLineProduct(prod.id, prod.ref, prod.label, prod.qty);
                 });
-                if (out.serial !== '')
-                    setScanned(out.serial);
-            } else if (out.stocks.length !== 0) {
-                if ($('table#productTable tr#' + out.id).length === 0) {
-                    if (0 < qtyToAdd)
-                        addFieldProduct(out.id, out.stocks, qtyToAdd, out.label, out.ref);
-                    else
-                        setMessage('alertEnregistrer', "Il faut ajouter des produits avant d'en enlever.", 'error');
-                } else {
-                    addQuantity(out.id, qtyToAdd);
-                }
-            } else {
-                setMessage('alertEnregistrer', "Cette entrée n'est ni une référence, ni un code barre ni un numéro de série.", 'error');
+                out.equipments.forEach(function (eq) {
+                    addLineEquipment(eq.id, eq.id_product, eq.ref, eq.serial, eq.label);
+                });
             }
-
-        }
-    });
-}
-
-function addProduct(prodId) {
-    var qtyToAdd = parseInt($('input#qty').val());
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
-        data: {
-            prodId: prodId,
-            idEntrepot: idEntrepot,
-            action: 'getStock'
-        },
-        error: function () {
-            setMessage('alertEnregistrer', 'Erreur serveur 5456.', 'error');
-        },
-        success: function (rowOut) {
-            var out = JSON.parse(rowOut);
-            if (out.errors.length !== 0) {
-                printErrors(out.errors, 'alertEnregistrer');
-            } else if (out.stocks.length !== 0) {
-                addFieldProduct(out.id, out.stocks, qtyToAdd, out.label, out.ref);
-            } else {
-                setMessage('alertEnregistrer', "Cet identifiant n'est pas renseigné dans la base de donnée.", 'error');
-            }
-
-        }
-    });
-}
-
-function correctStock(products) {
-
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
-        data: {
-            products: products,
-            idEntrepot: idEntrepot,
-            action: 'correctStock'
-        },
-        error: function () {
-            setMessage('alertEnregistrer', 'Erreur serveur 5816.', 'error');
-        },
-        success: function (rowOut) {
-            console.log(rowOut);
         }
     });
 }
@@ -109,12 +45,7 @@ function correctStock(products) {
  */
 
 $(document).ready(function () {
-
-    $('#entrepot').select2({placeholder: 'Rechercher ...'});
-    $('#entrepot option').first().prop('selected', true);
-    $('#entrepot').trigger('change');
-    initEvents();
-    initIE('input[name=refScan]', 'getStockAndSerial', 'input#qty');
+    getAllProducts();
 });
 
 
@@ -123,194 +54,42 @@ $(document).ready(function () {
  * Functions
  */
 
-function initEvents() {
-    $('#addProduct').on('click', function () {
-        var productId = productid.value;
-        if (productId !== '') {
-            if ($('#productTable tr#' + productId).length !== 0) {
-                addQuantity(productId, parseInt($('input#qty').val()));
-            } else {
-                addProduct(productId);
-            }
-        } else {
-            setMessage('alertProd', 'Veuillez sélectionner un produit pour l\'ajouter au tableau.', 'error');
-        }
-    });
-
-    $('#entrepot').on('change', function () {
-        if ($(this).prop('preventOnClickEvent')) {
-            $(this).prop('preventOnClickEvent', false);
-        } else if (idEntrepot === undefined) {
-            idEntrepot = $(this).val();
-            $('#allTheFiche').css('visibility', 'visible');
-            $('#allTheFiche').addClass('fade-in');
-        } else if ($('#productTable tr').length !== 1) {
-            var confirmed = confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?');
-            if (confirmed) {
-                idEntrepot = $(this).val();
-                $('table#productTable tr[id]').remove();
-                cntProduct = 0;
-            } else {
-                $('#entrepot').prop('preventOnClickEvent', true);
-                $('#entrepot').select2('val', idEntrepot, true);
-            }
-        } else {
-            idEntrepot = $(this).val();
-        }
-    });
-
-    $('#removeLines').click(function () {
-        if (confirm("Vous êtes sur le point d'enlever toutes les produits scanné (ligne grisées) du tableau, continuer ?")) {
-            $('table#productTable tr[scanned=true]').remove();
-        }
-    });
-
-    $('#correctStock').click(prepareCorrectStock);
-}
-
-function prepareCorrectStock() {
-    var products = [];
-    var equipment = [];
-    var id;
-    $('table#productTable tr[id]').each(function () {
-        id = $(this).attr('id');
-        if (0 <= id) {
-            products[id] = ({
-                qtyMissing: parseInt($(this).find('td[name="qtyMissing"]').text())
-            });
-        } else {
-            console.log('equip : ' + $(this).attr('id'));
-        }
-    });
-    console.log(products);
-    correctStock(products);
-}
-
 /* Add a line in the table of equipments */
-function addFieldEquipment(productId, refUrl, serial, label) {
-
-    if ($('#productTable tr#' + serial).length !== 0)
-        return;
+function addLineEquipment(equipment_id, product_id, ref, serial, label) {
 
     cntProduct++;
-    productId = parseInt(productId);
-    var line = '<tr id="' + serial + '">';
+
+    var line = '<tr id="' + equipment_id + '">';
     line += '<td name="cnt">' + cntProduct + '</td>';    // cnt ligne
-    line += '<td>' + productId + '</td>';    // id
-    line += '<td>' + refUrl + '</td>';    // refUrl
+    line += '<td>' + product_id + '</td>';    // id
+    line += '<td>' + ref + '</td>';    // refUrl
     line += '<td>' + serial + '</td>';    // num série
     line += '<td>' + label + '</td>';    // label
     line += '<td></td>';   // Quantité Totale
     line += '<td></td>';   // Quantité Manquante
     line += '<td></td>';   // Quantité Indiqué
     line += '<td></td>';   // Modifier
-    line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove "></td></tr>'; // supprimer
     $(line).appendTo('#productTable tbody');
-    initRemoveLine(serial);
-
-    document.querySelector("#bipAudio2").play();
 }
 
 /* Add a line in the table of product */
-function addFieldProduct(productId, qtyTotale, qtyGiven, label, refUrl) {
-
-    if ($('#productTable tr#' + productId).length !== 0)
-        return;
+function addLineProduct(product_id, ref, label, qty_totale) {
 
     cntProduct++;
-    qtyTotale = parseInt(qtyTotale);
-    qtyGiven = parseInt(qtyGiven);
+//    qtyTotale = parseInt(qtyTotale);
+//    qtyGiven = parseInt(qtyGiven);
 
-    var qtyMissing = qtyTotale - qtyGiven;
-    var line = '<tr id=' + productId + '>';
+//    var qtyMissing = qtyTotale - qtyGiven;
+    var line = '<tr id=' + product_id + '>';
     line += '<td name="cnt">' + cntProduct + '</td>';    // cnt ligne
-    line += '<td>' + productId + '</td>';
-    line += '<td>' + refUrl + '</td>';
+    line += '<td>' + product_id + '</td>';
+    line += '<td>' + ref + '</td>';
     line += '<td></td>';
     line += '<td>' + label + '</td>';
-    line += '<td name="qtyTotale"    >' + qtyTotale + '</td>';
-    line += '<td name="qtyMissing"    >' + qtyMissing + '</td>';
-    line += '<td name="qtyGiven">' + qtyGiven + '</td>';
-    line += '<td><input name="modify" type="number" class="custInput" style="width: 60px" value=1 > <img name="modify" src="css/ok.ico" class="clickable"></td>';
-    line += '<td style="text-align:center"><img src="css/moins.ico" class="clickable remove"></td></tr>';
+    line += '<td name="qtyTotale"    >' + qty_totale + '</td>';
+    line += '<td name="qtyMissing"    ></td>';
+    line += '<td name="qtyGiven"></td>';
     $(line).appendTo('#productTable tbody');
-
-    initRemoveLine(productId);
-    adaptColor('table#productTable tr#' + productId);
-
-    $('table#productTable tr#' + productId + ' img[name=modify]').click(modifyQuantity);
-
-    document.querySelector("#bipAudio").play();
-}
-
-function initRemoveLine(idTr) {
-    $('table#productTable tr#' + idTr + ' td img.remove').click(function () {
-        $(this).parent().parent().remove();
-        cntProduct = 1;
-        $('table#productTable td[name=cnt]').each(function () {
-            $(this).text(cntProduct);
-            cntProduct++;
-        })
-        cntProduct--;
-    });
-}
-
-function modifyQuantity() {
-    var selectoTr = 'table#productTable tr#' + $(this).parent().parent().attr('id');
-    var modifyValue = parseInt($(selectoTr + ' td input[name=modify]').val());
-    var total = parseInt($(selectoTr + ' td[name=qtyTotale]').text());
-
-    var newMissing = total - modifyValue;
-    $(selectoTr + ' td[name=qtyMissing]').text(newMissing);
-    $(selectoTr + ' td[name=qtyGiven]').text(modifyValue);
-
-    adaptColor(selectoTr);
-}
-
-
-function addQuantity(idProduct, qty) {
-    var selectorTr = 'table#productTable tr#' + idProduct;
-    var initMissing = parseInt($(selectorTr + ' td[name=qtyMissing]').text());
-    var initGiven = parseInt($(selectorTr + ' td[name=qtyGiven]').text());
-
-    var newMissing = initMissing - qty;
-    var newGiven = initGiven + qty;
-    $(selectorTr + ' td[name=qtyMissing]').text(newMissing);
-    $(selectorTr + ' td[name=qtyGiven]').text(newGiven);
-
-    adaptColor(selectorTr);
-
-    document.querySelector("#bipAudio").play();
-}
-
-/* for equipment */
-function setScanned(serial) {
-    if ($('#productTable tr#' + serial).length === 0) {
-        return 'tr inexistant';
-    }
-    if ($('#productTable tr#' + serial).attr('scanned')) {
-        setMessage('alertEnregistrer', 'Vous avez déjà scanné cet équipement, numéro de série : ' + serial, 'error');
-        return false;
-    } else {
-        $('#productTable tr#' + serial).css('background', '#bfbfbf');
-        $('#productTable tr#' + serial).attr('scanned', true);
-        return true;
-    }
-}
-
-/* for products */
-function adaptColor(selectorTr) {
-    var color;
-    var missing = parseInt($(selectorTr + ' td[name=qtyMissing]').text());
-    if (missing <= 0) {
-        color = '#bfbfbf';
-        $(selectorTr).attr('scanned', true);
-    } else {
-        color = '#ffffff';
-        $(selectorTr).attr('scanned', false);
-    }
-
-    $(selectorTr).css('background', color);
 }
 
 
@@ -347,3 +126,17 @@ function printErrors(errors, idAlertPlaceHolder) {
         setMessage(idAlertPlaceHolder, errors[i], 'error');
     }
 }
+
+/* Get the parameter sParam */
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};

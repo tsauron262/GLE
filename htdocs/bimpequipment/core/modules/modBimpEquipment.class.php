@@ -109,13 +109,13 @@ class modBimpEquipment extends DolibarrModules {
     public function init($options = '') {
         $sql = array();
 
-//        $this->_load_tables('/bimpproductbrowser/sql/');
+        $this->_load_tables('/bimpequipment/sql/');
 
         // Add restrictions to all categories son of root
-//        initRestrictions();
+
         // Create extrafields
-        include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-        $extrafields = new ExtraFields($this->db);
+//        include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+//        $extrafields = new ExtraFields($this->db);
         //$result1=$extrafields->addExtraField('myattr1', "New Attr 1 label", 'boolean', 1, 3, 'thirdparty');
         //$result2=$extrafields->addExtraField('myattr2', "New Attr 2 label", 'string', 1, 10, 'project');
 

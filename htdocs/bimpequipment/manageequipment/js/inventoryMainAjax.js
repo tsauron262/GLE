@@ -20,7 +20,7 @@ function getInventoriesForEntrepot() {
                 printErrors(out.errors, 'alertPlaceholder');
             } else {
                 out.inventories.forEach(function (inventory) {
-                    addLineInventory(inventory.id, inventory.url_user, inventory.statut, inventory.date_ouverture, inventory.date_fermeture, 0);
+                    addLineInventory(inventory.id, inventory.url_user, inventory.statut, inventory.date_ouverture, inventory.date_fermeture, inventory.prod_scanned);
                 });
             }
         }
@@ -53,6 +53,13 @@ function createInventory(idEntrepotcreate) {
 
 
 function addLineInventory(id, responsable, statut, date_ouverture, date_fermeture, nb_prod) {
+    if (statut === '0') {
+        statut = 'Brouillon';
+    } else if (statut === '1') {
+        statut = 'En cours';
+    } else if (statut === '2') {
+        statut = 'Fermé'
+    }
 
     var line = '<tr>';
     line += '<td>' + id + '</td>';   // id

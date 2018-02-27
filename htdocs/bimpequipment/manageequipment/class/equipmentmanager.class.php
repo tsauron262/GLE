@@ -56,7 +56,7 @@ class EquipmentManager {
         return $prodSerial;
     }
 
-    function equipmentIsInEntrepot($serial, $entrepotId) {
+    function getPositionEquipmentForEntrepot($serial, $entrepotId) {
         $sql = 'SELECT e_place.position as position';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
@@ -78,7 +78,7 @@ class EquipmentManager {
         $doliProd = new Product($this->db);
         $doliProd->fetch($idProd);
         $this->errors = array_merge($this->errors, $doliProd->errors);
-        $position = $this->equipmentIsInEntrepot($serial, $entrepotId);
+        $position = $this->getPositionEquipmentForEntrepot($serial, $entrepotId);
         if ($position == false && $serial != '') { // équipement connu mais jamais dans cet entrepôt
             $this->errors[] = "Cet équipement n'a jamais été dans cet entrepôt.";
         }
@@ -141,6 +141,7 @@ class EquipmentManager {
             while ($obj = $this->db->fetch_object($result)) {
                 $inventory = new BimpInventory($this->db);
                 $inventory->fetch($obj->rowid);
+                $inventory->setScannedProduct();
                 if ($getName) {
                     $user = new User($this->db);
                     $user->fetch($inventory->fk_user_create);
@@ -162,19 +163,19 @@ class EquipmentManager {
         $products = $this->getOnlyProductsForEntrepot($id_entrepot);
         $equipments = $this->getOnlyEquipmentsForEntrepot($id_entrepot);
 
-        foreach ($products as $ind => $prod) {
+        foreach ($products as $id => $prod) {
             $doli_prod = new Product($this->db);
-            $doli_prod->fetch($prod['id']);
-            $products[$ind]['ref'] = $doli_prod->getNomUrl(1);
-            $products[$ind]['label'] = dol_trunc($doli_prod->label, 25);
+            $doli_prod->fetch($id);
+            $products[$id]['ref'] = $doli_prod->getNomUrl(1);
+            $products[$id]['label'] = dol_trunc($doli_prod->label, 25);
         }
 
-        foreach ($equipments as $ind => $equipment) {
+        foreach ($equipments as $id => $equipment) {
             $id_product = $equipment['id_product'];
 
             if ($cacheProducts[$id_product]) {
-                $equipments[$ind]['ref'] = $cacheProducts[$id_product]['ref'];
-                $equipments[$ind]['label'] = $cacheProducts[$id_product]['label'];
+                $equipments[$id]['ref'] = $cacheProducts[$id_product]['ref'];
+                $equipments[$id]['label'] = $cacheProducts[$id_product]['label'];
             } else {
                 // fill the cache
                 $doli_prod = new Product($this->db);
@@ -182,8 +183,8 @@ class EquipmentManager {
                 $cacheProducts[$id_product]['ref'] = $doli_prod->getNomUrl(1);
                 $cacheProducts[$id_product]['label'] = dol_trunc($doli_prod->label, 25);
                 // then the equipment array
-                $equipments[$ind]['ref'] = $cacheProducts[$id_product]['ref'];
-                $equipments[$ind]['label'] = $cacheProducts[$id_product]['label'];
+                $equipments[$id]['ref'] = $cacheProducts[$id_product]['ref'];
+                $equipments[$id]['label'] = $cacheProducts[$id_product]['label'];
             }
         }
         return (array('equipments' => $equipments, 'products' => $products, 'errors' => $this->errors));
@@ -193,15 +194,18 @@ class EquipmentManager {
 
     function getOnlyProductsForEntrepot($id_entrepot) {
         $products = array();
-        $sql = 'SELECT fk_product, reel';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
+        $sql = 'SELECT ps.fk_product as id, ps.reel as qty';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock as ps';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields as pe ON pe.fk_object = ps.fk_product';
         $sql .= ' WHERE fk_entrepot=' . $id_entrepot;
+        $sql .= ' AND (pe.serialisable != 1';
+        $sql .= ' OR pe.serialisable IS NULL)';
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $product = array('id' => $obj->fk_product, 'qty' => $obj->reel);
-                $products[] = $product;
+                $product = array('qty' => $obj->qty);
+                $products[$obj->id] = $product;
             }
         } else if (!$result) {
             $this->errors[] = "La requête SQL pour la recherche des produits a échouée";
@@ -223,13 +227,34 @@ class EquipmentManager {
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $equipment = array('id' => $obj->id, 'serial' => $obj->serial, 'id_product' => $obj->id_product);
-                $equipments[] = $equipment;
+                $equipment = array('serial' => $obj->serial, 'id_product' => $obj->id_product);
+                $equipments[$obj->id] = $equipment;
             }
         } else if (!$result) {
             $this->errors[] = "La requête SQL pour la recherche des équipements a échouée";
         }
         return $equipments;
+    }
+
+    public function getEntrepotNameForEquipment($equipment_id) {
+
+        $sql = 'SELECT id_entrepot';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
+        $sql .= ' WHERE id_equipment=' . $equipment_id;
+        $sql .= ' AND position=1';
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $entrepot_id = $obj->id_entrepot;
+            }
+            $doliEntrepot = new Entrepot($this->db);
+            $doliEntrepot->fetch($entrepot_id);
+            return $doliEntrepot->lieu;
+        } else {
+            $this->errors[] = "L'équipement $equipment_id n'est pas dans la table des entrepôts d'équipement";
+            return false;
+        }
     }
 
 }

@@ -85,6 +85,11 @@ switch (GETPOST('action')) {
             echo json_encode($inventory->addLine(GETPOST('ref'), $user->id));
             break;
         }
+    case 'closeInventory': {
+            $inventory->fetch(GETPOST('inventory_id'));
+            echo json_encode($inventory->closeInventory());
+            break;
+        }
 
 
 

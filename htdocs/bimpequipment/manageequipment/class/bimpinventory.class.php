@@ -16,6 +16,7 @@ class BimpInventory {
     public $date_ouverture;
     public $date_fermeture;
     public $statut;
+    public $prod_scanned;
     private $prodQty;
     private $equipments;
 
@@ -121,10 +122,6 @@ class BimpInventory {
         return true;
     }
 
-    private function setStatut($statut_code) {
-        // TODO
-    }
-
     public function setProductQuantities() {
 
         if ($this->id < 0) {
@@ -166,8 +163,8 @@ class BimpInventory {
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $equipment = array('id' => $obj->id, 'serial' => $obj->serial, 'id_product' => $obj->id_product);
-                $this->equipments[] = $equipment;
+                $equipment = array('serial' => $obj->serial, 'id_product' => $obj->id_product);
+                $this->equipments[$obj->id] = $equipment;
             }
             return true;
         } else {
@@ -181,25 +178,80 @@ class BimpInventory {
         $lp->check($entry, 0);
 
         if ($lp->error != '')
-            return array('errors' => array(0 => $lp->error));
+            return array('errors' => array($lp->error));
 
         $line = new BimpInventoryLigne($this->db);
         if ($lp->serial != '') { // is an equipment
             $line_id = $line->create($this->id, $user_id, $lp->prodId, $lp->equipmentId, 1);
+            $equipment_id = $lp->equipmentId;
+            $em = new EquipmentManager($this->db);
+            $position = $em->getPositionEquipmentForEntrepot($lp->serial, $this->fk_entrepot);
+            if ($position != 1) {
+                $entrepot_name = $em->getEntrepotNameForEquipment($lp->equipmentId);
+                if ($entrepot_name == false) {
+                    $this->errors = array_merge($this->errors, $em->errors);
+                }
+            }
         } else { // is a product
             $line_id = $line->create($this->id, $user_id, $lp->prodId, 'NULL', 1);
+            $product_id = $lp->prodId;
         }
 
-        if ($line->errors != '')
+        if ($lp->error != '')
             return array('errors' => $line->errors);
 
         $line->fetch($line_id);
         $this->lignes[] = $line;
 
-        if ($this->statut == $this::STATUT_DRAFT)
-            $this->setStatut($this::STATUT_IN_PROCESS);
+        if ($this->statut != $this::STATUT_IN_PROCESS)
+            $this->updateStatut($this::STATUT_IN_PROCESS);
 
-        return array('new_line_id' => $line_id, 'errors' => $this->errors);
+        if (isset($equipment_id))
+            return array('equipment_id' => $equipment_id, 'entrepot_name' => $entrepot_name, 'errors' => $this->errors);
+        else
+            return array('product_id' => $product_id, 'errors' => $this->errors);
+    }
+
+    private function updateStatut($new_statut_code) {
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
+            return false;
+        }
+
+        $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_inventory';
+        $sql .= ' SET statut=' . $new_statut_code;
+        $sql .= ' WHERE rowid=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->db->commit();
+            return true;
+        } else {
+            $this->errors[] = "Impossible de mettre à jour le statut de l'inventaire.";
+            dol_print_error($this->db);
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    public function setScannedProduct($need_fetch_lignes = true) {
+
+        $qty = 0;
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
+            return false;
+        }
+
+        if ($need_fetch_lignes)
+            $this->fetchLignes();
+
+        foreach ($this->lignes as $ligne) {
+            $qty+= $ligne->quantity;
+        }
+
+        $this->prod_scanned = $qty;
     }
 
     public function retrieveScannedLignes() {
@@ -208,23 +260,67 @@ class BimpInventory {
             $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
             return false;
         }
-        
+
         $this->setProductQuantities();
         $this->setEquipments();
-        
+
         $em = new EquipmentManager($this->db);
         $out = $em->getAllProducts($this->fk_entrepot);
-        
+
         if (sizeof($em->errors) != 0)
             return $out;
-        
+
         $allEqui = $out['equipments'];
         $allProd = $out['products'];
-        
-        
-        
-//return (array('equipments' => $equipments, 'products' => $products, 'errors' => $this->errors));
 
+        foreach ($allEqui as $id => $inut) {
+            if ($this->equipments[$id])
+                $allEqui[$id]['scanned'] = true;
+        }
+
+        foreach ($allProd as $id => $inut) {
+            if ($this->prodQty[$id])
+                $allProd[$id]['qtyScanned'] = $this->prodQty[$id];
+        }
+
+        return (array('equipments' => $allEqui, 'products' => $allProd, 'errors' => $this->errors));
+    }
+
+    public function closeInventory() {
+
+        if ($id_inventory < 0) {
+            $this->errors[] = "Identifiant inventaire invalide : " . $id_inventory;
+            return false;
+        }
+
+        // delete lines of inventory
+        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'be_inventory_det';
+        $sql.= ' WHERE fk_inventory=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->db->commit();
+        } else {
+            $this->errors[] = "Impossible de supprimer les lignes de l'inventaire.";
+            dol_print_error($this->db);
+            $this->db->rollback();
+            return -1;
+        }
+
+        // delete inventory
+        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'be_inventory';
+        $sql.= ' WHERE rowid=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->db->commit();
+        } else {
+            $this->errors[] = "Impossible de supprimer l'inventaire.";
+            dol_print_error($this->db);
+            $this->db->rollback();
+            return -1;
+        }
+        return array('errors' => $this->errors);
     }
 
 }
@@ -293,13 +389,6 @@ class BimpInventoryLigne {
         }
         if ($stop)
             return false;
-
-// update ligne ?
-//        $id = $this->checkLigneExists($id_inventory, $id_user, );
-//        if (0 < $id) {
-//            $this->update($id, $quantity);
-//            return $id;
-//        }
 
         $this->db->begin();
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_inventory_det (';

@@ -25,23 +25,29 @@ print load_fiche_titre('Inventaire n°' . $inventory_id, $linkback);
 print '<strong>Réf. ou code barre ou numéro de série</strong> ';
 print '<input name="refScan" class="custInput" style="width : 300px">';
 
-print '<div id="alertPlaceHolder" style="clear:both"></div>';
-print '<div class="object_list_table">';
-print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
-print '<thead><tr class="headerRow">';
-print '<th>Numéro du groupe</th>';
-print '<th>Identifiant</th>';
-print '<th>Référence</th>';
-print '<th>Numéro de série</th>';
-print '<th>Label</th>';
-print '<th>Quantité Totale</th>';
-print '<th>Quantité Manquante</th>';
-print '<th>Quantité Indiqué</th>';
-print '</tr></thead>';
-print '<tbody></tbody>';
-print '</table>';
-print '<div>';
+print '<a style="font-weight: bold; float:right" href="' . DOL_URL_ROOT . '/bimpequipment/manageequipment/viewInventoryMain.php">Retour liste</a>';
 
+print '<div id="alertPlaceHolder" style="clear:both"></div>';
+
+if ($user->rights->bimpequipment->inventory->read) {
+    print '<div class="object_list_table">';
+    print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
+    print '<thead><tr class="headerRow">';
+    print '<th>Numéro du groupe</th>';
+    print '<th>Identifiant</th>';
+    print '<th>Référence</th>';
+    print '<th>Numéro de série</th>';
+    print '<th>Label</th>';
+    print '<th>Quantité Totale</th>';
+    print '<th>Quantité Manquante</th>';
+    print '<th>Quantité Scanné</th>';
+    print '</tr></thead>';
+    print '<tbody></tbody>';
+    print '</table>';
+    print '<div>';
+
+    print '<input id="closeInventory" type="button" class="butAction" value="Fermer l\'inventaire">';
+}
 
 $db->close();
 

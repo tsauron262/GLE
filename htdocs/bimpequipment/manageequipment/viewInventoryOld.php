@@ -1,59 +1,46 @@
 <?php
 
 /**
- *  \file       htdocs/bimpequipment/manageequipment/viewTransfertEquipment.php
+ *  \file       htdocs/bimpequipment/manageequipment/viewInventory.php
  *  \ingroup    bimpequipment
- *  \brief      Used while adding equipments
+ *  \brief      Used while checking stock
  */
 include_once '../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
-$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/transfertAjax.js');
+$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/inventoryAjaxOld.js');
 
 
 /*
  * 	View
  */
 
-llxHeader('', 'Transférer équipement', '', '', 0, 0, $arrayofjs, $arrayofcss);
+llxHeader('', 'Inventaire', '', '', 0, 0, $arrayofjs, $arrayofcss);
 
-print load_fiche_titre('Transférer équipement', $linkback);
+print load_fiche_titre('Inventaire', $linkback);
 
 $entrepots = getAllEntrepots($db);
 
 print '<div id="divEntrepotStart" style="float:left">';
-print '<strong>Entrepôt source</strong></br>';
-print '<select id="entrepotStart" class="select2 cust" style="width: 200px;">';
+print '<strong>Entrepôt</strong></br>';
+print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
 foreach ($entrepots as $id => $name) {
     print '<option value="' . $id . '">' . $name . '</option>';
 }
 print '</select> ';
-print '</div>';
+print '</div><br/><br/><br/>';
 
-print '<div id="divEntrepotEnd" class="fadeInOut">';
-
-print '<div  style="float:left ; margin: 14px 5px 0px 5px"> ';
-print '<img src="css/next.png" > ';
-print '</div>';
-print '<div  style="float:left">';
-print '<strong>Entrepôt Destination</strong><br>';
-
-print '<select id="entrepotEnd" class="select2 cust" style="width: 200px;">';
-print '<option></option>';
-foreach ($entrepots as $id => $name) {
-//    if ($name == end($entrepots))
-//        print '<option value="' . $id . '" selected>' . $name . '</option>';
-//    else
-        print '<option value="' . $id . '">' . $name . '</option>';
-}
-print '</select></div></div><br/><br/><br/>';
+print 'jeux de données pour le dev<br/>';
+print 'Exemple de ref equipement : ARM-LENTEADASH102   AZE-BEACCBA6PC250M<br/>';
+print 'Exemple de ref produit    : ZZPORT5 APP-SAVAPPLECARE+IPAD<br/>';
+print 'Exemple de numéro de série    : fzafzaf zadzadza zadaz<br/>';
+print 'Exemple plus dans entrepôt    : fr<br/>';
 
 print '<div id="allTheFiche" class="fadeInOut">';
-
 print '<table class="entry">';
 print '<tr><td><strong>Réf. ou code barre ou numéro de série</strong></td>';
 print '<td><input name="refScan" class="custInput" style="width : 300px"></td></tr>';
@@ -65,7 +52,7 @@ print '<td>';
 $form->select_produits('', 'productid', '', 20, 0, 1, 2, '', 1);
 print '</td></tr>';
 print '<tr><td style="text-align: right;"><strong> Quantité</strong></td>';
-print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
+print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1></td></tr>';
 print '<tr><td style="text-align: right;"><strong>Ajouter</strong></td>';
 print '<td><img id="addProduct" src="css/plus.ico" class="clickable" style="margin-bottom : -7px"></td></tr>';
 
@@ -79,9 +66,11 @@ print '<th>Identifiant</th>';
 print '<th>Référence</th>';
 print '<th>Numéro de série</th>';
 print '<th>Label</th>';
-print '<th style="border-right:none">Quantité</th>';
-print '<th style="border-left:none">Modifier</th>';
-print '<th>Produit Restant</th>';
+print '<th>Quantité Totale</th>';
+print '<th>Quantité Manquante</th>';
+//print '<th style="border-left:none">Modifier</th>';
+print '<th>Quantité Indiqué</th>';
+print '<th>Modifier</th>';
 print '<th>Supprimer</th>';
 print '</tr></thead>';
 print '<tbody></tbody>';
@@ -91,15 +80,14 @@ print '<div>';
 
 print '<div id="alertProd" style="clear:left"></div><br/><br/><br/>';
 
-print '<input id="enregistrer" type="button" class="butAction" value="Transférer">';
+print '<input id="correctStock" type="button" class="butAction" value="Rectifier stocks">';
+print '<input id="removeLines" type="button" class="butAction" value="Enlever les lignes scannée">';
 
 print '<br/><div id="alertEnregistrer" style="clear:left"></div><br/>';
 
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
-
-include(DOL_DOCUMENT_ROOT . "/bimpequipment/manageequipment/scan/scan.php");
 
 print '</div>';
 $db->close();

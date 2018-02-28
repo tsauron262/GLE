@@ -7,16 +7,10 @@ if (isset($_GET['actionTest'])) {
     if ($_GET['actionTest'] == "mailNonFerme")
         $class->mailNonFerme();
     if ($_GET['actionTest'] == "fermetureAuto") {
-        $class->tentativeFermetureAuto(4);
-        $class->tentativeFermetureAuto(1);
-        $class->tentativeFermetureAuto(2);
-        $class->tentativeFermetureAuto(3);
+        $class->tentativeFermetureAuto();
     }
     if ($_GET['actionTest'] == "rfpuAuto") {
-        $class->tentativeARestitueAuto(4);
-        $class->tentativeARestitueAuto(1);
-        $class->tentativeARestitueAuto(2);
-        $class->tentativeARestitueAuto(3);
+        $class->tentativeARestitueAuto();
     }
 
 

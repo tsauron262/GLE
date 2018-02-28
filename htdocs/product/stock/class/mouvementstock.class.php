@@ -925,6 +925,10 @@ class MouvementStock extends CommonObject
 				$this->origin = $origin;
 				$this->origin->id = $origin_id;
 			}
+                        /*moddrsi*/else{
+                            $this->origin->element = $origin_element;
+                            $this->origin->id = $origin_id;
+                        }/*fmoddrsi*/
 		}
 	}
 

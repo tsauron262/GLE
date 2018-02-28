@@ -18,8 +18,9 @@ $langs->load("companies");
 $langs->load('stocks');
 
 $id = GETPOST('id', 'int');
-$ref = GETPOST('ref');
+$ref = GETPOST('ref', 'alpha');
 $action = GETPOST('action', 'aZ09');
+
 
 $object = new CommandeFournisseur($db);
 $object->fetch($id, $ref);
@@ -27,6 +28,7 @@ $object->fetch($id, $ref);
 /*
  * View
  */
+
 $help_url = 'EN:Module_Suppliers_Orders|FR:CommandeFournisseur|ES:Módulo_Pedidos_a_proveedores';
 llxHeader('', 'Livrer', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
 
@@ -94,21 +96,19 @@ if ($id > 0 || !empty($ref)) {
 /**
  * Start Fiche
  */
-$facid = $id;
 $orderId = $object->id;
+print '<input id="id_order_hidden" hidden type="number" value=' . $orderId . '>';
+
+$facid = $id;
 if ($object->statut < 3) {
     print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
-    return;
-}
-if (4 < $object->statut) {
-    if (5 == $object->statut)
-        print '<strong>Cette commande a déjà été livrée.</strong>';
-    else
-        print '<strong>Cette commande a été annulée.</strong>';
-
     llxFooter();
     $db->close();
     return;
+}
+
+if ($object->statut == 5) {
+    print '<strong>Cette commande a été livrée. Cependant vous pouvez continuer à rajouter des produits supplémentaires.</strong><br/>';
 }
 print '<strong>Livré dans l\'entrepôt </strong>';
 
@@ -156,11 +156,6 @@ print '</table>';
 print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 
 print '<br/><div id="alertEnregistrer"></div><br/><br/><br/>';
-
-print '<div name="confirmEnregistrer" hidden>';
-print '<p name="confTransfert"></p>';
-print '<input id="okEnregistrer" type="button" class="butAction" value="Confirmer">';
-print '<input id="noEnregistrer" type="button" class="butActionDelete" value="Annuler"></div>';
 
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';

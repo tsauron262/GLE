@@ -83,7 +83,8 @@ class modBimpEquipment extends DolibarrModules {
         //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
         //                              'objecttype:-tabname:NU:conditiontoremove');                                                     										// To remove an existing tab identified by code tabname
         $this->tabs = array(
-            'supplier_order:+bimpordersupplier:Livrer:@bimpequipment:$user->rights->fournisseur->facture->lire:/bimpequipment/manageequipment/viewOrderSupplier.php?id=__ID__'
+            'supplier_order:+bimpordersupplier:Livrer:@bimpequipment:$user->rights->fournisseur->facture->lire:/bimpequipment/manageequipment/viewOrderSupplier.php?id=__ID__',
+            'stock:+bimpstock:Stock à date:@bimpequipment:$user->rights->stock->lire:/bimpequipment/tabs/stock/card.php?id=__ID__'
         );
 //            'categories_0:+restreindre1:Impliquant:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__&mode=1',
 
@@ -108,13 +109,13 @@ class modBimpEquipment extends DolibarrModules {
     public function init($options = '') {
         $sql = array();
 
-//        $this->_load_tables('/bimpproductbrowser/sql/');
+        $this->_load_tables('/bimpequipment/sql/');
 
         // Add restrictions to all categories son of root
-//        initRestrictions();
+
         // Create extrafields
-        include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-        $extrafields = new ExtraFields($this->db);
+//        include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+//        $extrafields = new ExtraFields($this->db);
         //$result1=$extrafields->addExtraField('myattr1', "New Attr 1 label", 'boolean', 1, 3, 'thirdparty');
         //$result2=$extrafields->addExtraField('myattr2', "New Attr 2 label", 'string', 1, 10, 'project');
 

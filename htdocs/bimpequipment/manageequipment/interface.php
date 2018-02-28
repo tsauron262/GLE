@@ -12,11 +12,15 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/transfert.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimplivraison.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimpinventory.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/equipmentmanager.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/product.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/equipment.lib.php';
 
 $lp = new LignePanier($db);
 $bl = new BimpLivraison($db);
+$em = new EquipmentManager($db);
+$inventory = new BimpInventory($db);
 
 switch (GETPOST('action')) {
     case 'checkStockForProduct': {
@@ -51,6 +55,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'modifyOrder': {
+            $bl->fetch(GETPOST('orderId'));
             echo json_encode($bl->addInStock(GETPOST('products'), GETPOST('orderId', 'int'), GETPOST('entrepotId', 'int'), $user, GETPOST('isTotal')));
             break;
         }
@@ -59,7 +64,47 @@ switch (GETPOST('action')) {
             echo json_encode($bl->getRemainingLignes());
             break;
         }
-    default: break;
+    /* Inventories - viewInventoryMain */
+    case 'getInventoriesForEntrepot': {
+            echo json_encode(array('inventories' => $em->getInventories(GETPOST('idEntrepot'), true), 'errors' => $em->errors));
+            break;
+        }
+    case 'createInventory': {
+            echo json_encode(array('id_inserted' => $inventory->create(GETPOST('idEntrepotCreate'), $user->id), 'errors' => $inventory->errors));
+            break;
+        }
+    /* Inventories - viewInventory */
+    case 'getAllProducts': {
+            echo json_encode($em->getAllProducts(GETPOST('id_entrepot')));
+            break;
+        }
+        
+        
+    /* Old Inventories */
+    /** @deprecated */
+    case 'getStockAndSerial': {
+            $lp->check(GETPOST('ref'), GETPOST('idEntrepot'));
+            if (!$lp->prodId) {
+                echo json_encode(array('errors' => array($lp->error)));
+                break;
+            }
+            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId, $lp->serial));
+            break;
+        }
+    /** @deprecated */
+    case 'getStock': {
+            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), GETPOST('prodId'), ''));
+            break;
+        }
+    /** @deprecated */
+    case 'correctStock': {
+//            echo json_encode($em->correctStock(GETPOST('idEntrepot'), GETPOST('products')), $user);
+            break;
+        }
+    default: {
+            echo json_encode(array('errors' => 'Aucune action ne match avec : ' . GETPOST('action')));
+            break;
+        }
 }
 
 

@@ -71,18 +71,16 @@ function getRemainingLignes() {
                 var tabProd = getTabProduct(lignes);
                 var tabEquipment = getTabEquipment(lignes);
                 tabProd.forEach(function (prod) {
-                    if (prod.remainingQty !== 0)
-                        addProduct(prod);
-                    if (prod.deliveredQty !== 0)
+                    addProduct(prod);
+                    if (prod.deliveredQty !== 0 && prod.deliveredQty !== null)
                         addDeliveredProduct(prod);
                 });
                 tabEquipment.forEach(function (equipment) {
                     for (var j = 0; j < equipment.remainingQty; j++)
                         addEquipment(equipment);
                     for (var j = 0; j < equipment.deliveredQty; j++)
-                        addDeliveredEquipment(equipment, '');//equipment.serial[j]
+                        addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Inconnu');
                 });
-
                 initEvents();
             }
         }
@@ -119,7 +117,9 @@ $(document).ready(function () {
     }
     $('#entrepot').select2({placeholder: 'Rechercher ...'});
     orderId = getUrlParameter('id');
-    getRemainingLignes();
+    if (orderId === undefined)
+        orderId = $('#id_order_hidden').val();
+        getRemainingLignes();
 });
 /**
  * Functions
@@ -134,8 +134,10 @@ function addProduct(ligne) {
     line += '<td>' + ligne.refurl + '</td>';    // refUrl
     line += '<td></td>';    // num série
     line += '<td>' + ligne.label + '</td>';    // label
-    line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
-    line += '<td>' + ligne.remainingQty + '</td>';
+    if (ligne.deliveredQty === null)
+        line += '<td>' + ligne.remainingQty + '</td>';
+    else
+        line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';    line += '<td>' + ligne.remainingQty + '</td>';
     line += '<td name="qty">0</td>';
     line += '<td><input name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px" initVal=' + parseInt(ligne.remainingQty) + '> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
     line += '<td>' + ligne.price_unity + ' €</td>';
@@ -150,12 +152,15 @@ function addDeliveredProduct(ligne) {
     line += '<td>' + ligne.refurl + '</td>';    // refUrl
     line += '<td></td>';    // num série
     line += '<td>' + ligne.label + '</td>';    // label
-    line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
+    if (ligne.deliveredQty === null)
+        line += '<td>' + ligne.remainingQty + '</td>';
+    else
+        line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
     line += '<td></td>';
-    line += '<td>' + ligne.deliveredQty + '</td>';
+    line += '<td>' + ((ligne.deliveredQty === null) ? 0 : ligne.deliveredQty) + '</td>';
     line += '<td></td>';
     line += '<td>' + ligne.price_unity + ' €</td>';
-    line += '<td/td></tr>';
+    line += '<td></td></tr>';
     $(line).appendTo('#productTable tbody');
 }
 
@@ -243,20 +248,25 @@ function initEvents() {
             e.preventDefault();
         }
     });
-
-    $('input[name=serial]').on('blur', function () {
-        if ($(this).val() !== '') { // code for "Tab"
-            validateSerial($(this));
-        }
-    });
 }
 
 function validateSerial(element) {
     if (element.parent().parent().find('input[name=serial]').val() !== '') {
-        element.parent().parent().next().find('input[name=serial]').focus();
+        var nextTr = getNextSerialTr(element.parent().parent());
+        nextTr.find('input[name=serial]').focus();
         element.parent().parent().find('input[name=stocker]').prop('checked', true);
         document.querySelector("#bipAudio2").play();
     }
+}
+
+function getNextSerialTr(tr) {
+    tr = tr.next();
+    while (tr.find('input[name=serial]').length === 0) {
+        tr = tr.next();
+        if (tr.length === 0)
+            break;
+    }
+    return tr;
 }
 
 function changeCheckbox() {

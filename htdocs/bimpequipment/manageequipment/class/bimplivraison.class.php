@@ -37,19 +37,22 @@ class BimpLivraison {
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $doliProd = new Product($this->db);
-                $doliProd->fetch($obj->fk_product);
-                $ligne = new LigneLivraison($this->db);
-                $ligne->prodId = $obj->fk_product;
-                $ligne->label = dol_trunc($obj->label, 25);
-                $ligne->remainingQty = $obj->qty;
-                $ligne->price_unity = price($obj->subprice);
-                $ligne->isDelivered = false;
-                $ligne->isEquipment = $ligne->isSerialisable();
-                $ligne->refurl = $doliProd->getNomUrl(1);
+                if (isset($lignes[$obj->fk_product]))
+                    $lignes[$obj->fk_product]->remainingQty += $obj->qty;
+                else {
+                    $doliProd = new Product($this->db);
+                    $doliProd->fetch($obj->fk_product);
+                    $ligne = new LigneLivraison($this->db);
+                    $ligne->prodId = $obj->fk_product;
+                    $ligne->label = dol_trunc($obj->label, 25);
+                    $ligne->remainingQty = $obj->qty;
+                    $ligne->price_unity = price($obj->subprice);
+                    $ligne->isDelivered = false;
+                    $ligne->isEquipment = $ligne->isSerialisable();
+                    $ligne->refurl = $doliProd->getNomUrl(1);
 
-
-                $lignes[] = $ligne;
+                    $lignes[$obj->fk_product] = $ligne;
+                }
             }
         } else if (!$result) {
             $this->errors[] = 'Erreur de recherche de lignes d\'une commande.';
@@ -61,9 +64,9 @@ class BimpLivraison {
         $moveQty = array();
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
-        $sql .= ' WHERE inventorycode="' . 'BimpLivraison ' . $this->ref . '"';
+        $sql .= ' WHERE inventorycode="BimpLivraison ' . $this->ref . '"';
         // value supp à 0 ?
-
+//echo $sql;
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
@@ -83,7 +86,7 @@ class BimpLivraison {
         // StatusOrderValidated or StatusOrderApproved or StatusOrderOnProcess
         if ($this->statut == 3) {
             return array('lignes' => $lignes, 'errors' => $this->errors);
-        } else if ($this->statut == 4) { // ReceivedPartially
+        } else { // ReceivedPartially
             $moveQty = $this->getAllMouvement();
             foreach ($lignes as $key => $ligne) {
                 $qtyAlreadyDelivered = $moveQty[$ligne->prodId];
@@ -98,7 +101,7 @@ class BimpLivraison {
             }
         }
 
-//        $deliveredLignes = $this->getDeliveredLignes($lignes);
+        $deliveredLignes = $this->getDeliveredLignes($lignes);
 
         return array('lignes' => $lignes, 'deliveredLigne' => $deliveredLignes, 'errors' => $this->errors);
     }
@@ -107,26 +110,28 @@ class BimpLivraison {
         $deliveredLignes = array();
         foreach ($lignes as $ligne) {
             $newLigne = $ligne;
-//            if ($ligne->isEquipment)
-//                $ligne->tabSerial = $this->getDeliveredSerial();
-            if (sizeof($ligne->tabSerial) != $newLigne->deliveredQty) {
-                $this->errors[] = "Le nombre d'équipement enregistré en base est différent du nombre de numéro de série.";
+            if ($ligne->isEquipment) {
+                $ligne->tabSerial = $this->getDeliveredSerial($ligne);
+//                if (sizeof($ligne->tabSerial) != $newLigne->deliveredQty) {
+//                    $this->errors[] = "Le nombre d'équipement enregistré en base est différent du nombre de numéro de série.";
+//                }
             }
         }
         return $deliveredLignes;
     }
 
-    function getDeliveredSerial() {
+    function getDeliveredSerial($ligne) {
         $prodSerial = array();
-        $sql = 'SELECT e.serial serial, e.id_product as id_product, e_place as place';
+        $sql = 'SELECT e.serial as serial';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
         $sql .= ' WHERE e_place.infos="BimpLivraison ' . $this->ref . '"';
+        $sql .= ' AND e.id_product=' . $ligne->prodId;
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-//                $prodSerial[]
+                $prodSerial[] = $obj->serial;
 //                if ($obj->place != 1) {
 //                    $this->errors = "Cet équipement n'est pas dans le bon entrepôt.";
 //                }
@@ -144,31 +149,55 @@ class BimpLivraison {
         $labelmove = 'Reception commande bimp ' . $order->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
         $codemove = 'BimpLivraison ' . $order->ref;
 
-        foreach ($products as $product) {
-            $doliProduct = new Product($this->db);
-            $doliProduct->fetch($product['id_prod']);
-            $length = sizeof($this->errors);
+        $this->errors = $this->checkDuplicateSerial($products);
 
-            // Add stock
-            $result = $doliProduct->correct_stock($user, $entrepotId, (isset($product['qty']) ? $product['qty'] : 1), 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
-            if ($result < 0) {
-                $this->errors = array_merge($this->errors, $doliProduct->errors);
-                $this->errors = array_merge($this->errors, $doliProduct->errorss);
+        if (sizeof($this->errors) == 0) {
+            foreach ($products as $product) {
+                $doliProduct = new Product($this->db);
+                $doliProduct->fetch($product['id_prod']);
+                $length = sizeof($this->errors);
+
+                // Add stock
+                $result = $doliProduct->correct_stock($user, $entrepotId, (isset($product['qty']) ? $product['qty'] : 1), 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
+                if ($result < 0) {
+                    $this->errors = array_merge($this->errors, $doliProduct->errors);
+                    $this->errors = array_merge($this->errors, $doliProduct->errorss);
+                }
+
+                if ($length != sizeof($this->errors))
+                    $this->errors[] = ' id : ' . $product['id_prod'];
+
+                if (!isset($product['qty'])) {   // non serialisable
+                    $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
+                }
             }
 
-            if ($length != sizeof($this->errors))
-                $this->errors[] = ' id : ' . $product['id_prod'];
+            $type = ($isTotal == 'false') ? 'par' : 'tot';
 
-            if (!isset($product['qty'])) {   // non serialisable
-                $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
-            }
+            $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
         }
 
-        $type = ($isTotal == 'false') ? 'par' : 'tot';
-
-        $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
-
         return array('errors' => $this->errors);
+    }
+
+    function checkDuplicateSerial($products) {
+        $newSerials = array();
+        $newErrors = array();
+        foreach ($products as $prod) {
+            $newSerials[] = $prod['serial'];
+        }
+
+        $sql = 'SELECT serial';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+        $sql .= ' WHERE serial IN (\'' . implode("','", $newSerials) . '\')';
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $newErrors[] = 'Erreur, le numéro de série "' . $obj->serial . '" est déjà attribué, rien n\'a été enregistrer.';
+            }
+        }
+        return $newErrors;
     }
 
     function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId) {

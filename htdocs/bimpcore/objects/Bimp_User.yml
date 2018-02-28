@@ -25,9 +25,6 @@ fields:
     login: 
         label: Identifiant
         required: 1
-    pass: 
-        label: Mot de passe
-        required: 1
     lastname: 
         label: Nom
         required: 1
@@ -68,8 +65,6 @@ fields:
                 method: displayCountry
     office_phone:
         label: Tél. pro
-    office_fax:
-        label: Fax pro
     user_mobile: 
         label: Tél. portable
     skype: 
@@ -98,14 +93,23 @@ fields:
     apple_shipto: 
         label: N° ShipTo Apple
         dol_extra_field: 1
+    mail_sec: 
+        label: E-Mail de secours
+        dol_extra_field: 1
         
 forms:
     light: 
         rows:
+            - field: lastname
+            - field: firstname
             - field: office_phone
             - field: user_mobile
-            - field: job
-
+            - field: mail_sec
+            - field: apple_id
+            - field: apple_service
+            - field: apple_shipto
+            - field: apple_techid
+            - field: signature
 lists:
     default: 
         checkboxes: 1
@@ -162,9 +166,9 @@ fields_tables:
         rows: 
             - field: email
             - field: office_phone
-            - field: office_fax
             - field: user_mobile
             - field: skype
+            - field: mail_sec
         
     status: 
         title: Statut

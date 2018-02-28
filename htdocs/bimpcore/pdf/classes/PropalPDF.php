@@ -169,84 +169,93 @@ class PropalPDF extends BimpModelPDF
         // Traitement des lignes: 
 
         foreach ($lines as $line) {
-            $row = array(
-                'desc'      => $line->desc,
-                'total_ht'  => BimpTools::displayMoneyValue($line->total_ht, ''),
-                'total_ttc' => BimpTools::displayMoneyValue($line->total_ttc, '')
-            );
+            $line->desc = str_replace("\n", '<br/>', $line->desc);
+            if ($line->total_ht == 0) {
+                $row['desc'] = array(
+                    'colspan' => 99,
+                    'content' => $line->desc,
+                    'style'   => 'font-weight: bold; background-color: #F5F5F5;'
+                );
+            } else {
+                $row = array(
+                    'desc'      => $line->desc,
+                    'total_ht'  => BimpTools::displayMoneyValue($line->total_ht, ''),
+                    'total_ttc' => BimpTools::displayMoneyValue($line->total_ttc, '')
+                );
 
-            $row['pu_ht'] = pdf_getlineupexcltax($this->propal, $i, $this->langs);
-            $row['qte'] = pdf_getlineqty($this->propal, $i, $this->langs);
+                $row['pu_ht'] = pdf_getlineupexcltax($this->propal, $i, $this->langs);
+                $row['qte'] = pdf_getlineqty($this->propal, $i, $this->langs);
 
-            if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
-                $row['tva'] = pdf_getlinevatrate($this->propal, $i, $this->langs);
+                if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
+                    $row['tva'] = pdf_getlinevatrate($this->propal, $i, $this->langs);
+                }
+
+                if ($conf->global->PRODUCT_USE_UNITS) {
+                    $row['unite'] = pdf_getlineunit($this->propal, $i, $this->langs);
+                }
+
+                if ($line->remise_percent) {
+                    $row['reduc'] = pdf_getlineremisepercent($this->propal, $i, $this->langs);
+                }
+
+                $row['total_ht'] = pdf_getlinetotalexcltax($this->propal, $i, $this->langs);
+
+                if ($conf->multicurrency->enabled && $this->propal->multicurrency_tx != 1)
+                    $tva_line = $line->multicurrency_total_tva;
+                else
+                    $tva_line = $line->total_tva;
+
+                $localtax1ligne = $line->total_localtax1;
+                $localtax2ligne = $line->total_localtax2;
+                $localtax1_rate = $line->localtax1_tx;
+                $localtax2_rate = $line->localtax2_tx;
+                $localtax1_type = $line->localtax1_type;
+                $localtax2_type = $line->localtax2_type;
+
+                if ($this->propal->remise_percent)
+                    $tvaligne-=($tvaligne * $this->propal->remise_percent) / 100;
+                if ($this->propal->remise_percent)
+                    $localtax1ligne-=($localtax1ligne * $this->propal->remise_percent) / 100;
+                if ($this->propal->remise_percent)
+                    $localtax2ligne-=($localtax2ligne * $this->propal->remise_percent) / 100;
+
+                $vatrate = (string) $line->tva_tx;
+
+                // Retrieve type from database for backward compatibility with old records
+                if ((!isset($localtax1_type) || $localtax1_type == '' || !isset($localtax2_type) || $localtax2_type == '') // if tax type not defined
+                        && (!empty($localtax1_rate) || !empty($localtax2_rate))) { // and there is local tax
+                    $localtaxtmp_array = getLocalTaxesFromRate($vatrate, 0, $this->propal->thirdparty, $mysoc);
+                    $localtax1_type = $localtaxtmp_array[0];
+                    $localtax2_type = $localtaxtmp_array[2];
+                }
+
+                if (!isset($localtax1[$localtax1_type])) {
+                    $localtax1[$localtax1_type] = array();
+                }
+                if (!isset($localtax1[$localtax1_type][$localtax1_rate])) {
+                    $localtax1[$localtax1_type][$localtax1_rate] = 0;
+                }
+
+                $localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
+
+                if (!isset($localtax2[$localtax2_type])) {
+                    $localtax2[$localtax2_type] = array();
+                }
+                if (!isset($localtax2[$localtax2_type][$localtax2_rate])) {
+                    $localtax2[$localtax2_type][$localtax2_rate] = 0;
+                }
+
+                $localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
+
+                if (($line->info_bits & 0x01) == 0x01)
+                    $vatrate.='*';
+
+                if (!isset($tva[$vatrate])) {
+                    $tva[$vatrate] = 0;
+                }
+
+                $tva[$vatrate] += $tva_line;
             }
-
-            if ($conf->global->PRODUCT_USE_UNITS) {
-                $row['unite'] = pdf_getlineunit($this->propal, $i, $this->langs);
-            }
-
-            if ($line->remise_percent) {
-                $row['reduc'] = pdf_getlineremisepercent($this->propal, $i, $this->langs);
-            }
-
-            $row['total_ht'] = pdf_getlinetotalexcltax($this->propal, $i, $this->langs);
-
-            if ($conf->multicurrency->enabled && $this->propal->multicurrency_tx != 1)
-                $tva_line = $line->multicurrency_total_tva;
-            else
-                $tva_line = $line->total_tva;
-
-            $localtax1ligne = $line->total_localtax1;
-            $localtax2ligne = $line->total_localtax2;
-            $localtax1_rate = $line->localtax1_tx;
-            $localtax2_rate = $line->localtax2_tx;
-            $localtax1_type = $line->localtax1_type;
-            $localtax2_type = $line->localtax2_type;
-
-            if ($this->propal->remise_percent)
-                $tvaligne-=($tvaligne * $this->propal->remise_percent) / 100;
-            if ($this->propal->remise_percent)
-                $localtax1ligne-=($localtax1ligne * $this->propal->remise_percent) / 100;
-            if ($this->propal->remise_percent)
-                $localtax2ligne-=($localtax2ligne * $this->propal->remise_percent) / 100;
-
-            $vatrate = (string) $line->tva_tx;
-
-            // Retrieve type from database for backward compatibility with old records
-            if ((!isset($localtax1_type) || $localtax1_type == '' || !isset($localtax2_type) || $localtax2_type == '') // if tax type not defined
-                    && (!empty($localtax1_rate) || !empty($localtax2_rate))) { // and there is local tax
-                $localtaxtmp_array = getLocalTaxesFromRate($vatrate, 0, $this->propal->thirdparty, $mysoc);
-                $localtax1_type = $localtaxtmp_array[0];
-                $localtax2_type = $localtaxtmp_array[2];
-            }
-
-            if (!isset($localtax1[$localtax1_type])) {
-                $localtax1[$localtax1_type] = array();
-            }
-            if (!isset($localtax1[$localtax1_type][$localtax1_rate])) {
-                $localtax1[$localtax1_type][$localtax1_rate] = 0;
-            }
-
-            $localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
-
-            if (!isset($localtax2[$localtax2_type])) {
-                $localtax2[$localtax2_type] = array();
-            }
-            if (!isset($localtax2[$localtax2_type][$localtax2_rate])) {
-                $localtax2[$localtax2_type][$localtax2_rate] = 0;
-            }
-
-            $localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
-
-            if (($line->info_bits & 0x01) == 0x01)
-                $vatrate.='*';
-
-            if (!isset($tva[$vatrate])) {
-                $tva[$vatrate] = 0;
-            }
-
-            $tva[$vatrate] += $tva_line;
 
             $table->rows[] = $row;
             $i++;
@@ -326,21 +335,16 @@ class PropalPDF extends BimpModelPDF
 
         // *** Totaux:  ***
 
-        $table = new BimpPDF_Table($this->pdf, false);
-        $table->remove_empty_cols = false;
-        $table->addTableClass('no_borders');
-        $table->addTableStyle('margin-left', (BimpPDF::$pxPerMm * 95) . 'px');
-        $table->width = 95;
-        $table->addCol('margin', '', 95);
-        $table->addCol('label', '', 65, 'font-weight: bold;');
-        $table->addCol('value', '', null, 'text-align: right;');
+        $html = '';
+        $html .= '<div>';
+        $html .= '<table style="width: 100%" cellpadding="5">';
 
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->propal->mylticurrency_tx != 1 ? $this->propal->multicurrency_total_ht : $this->propal->total_ht);
-        $table->rows[] = array(
-            'label' => $this->langs->transnoentities("TotalHT"),
-            'value' => price($total_ht + (!empty($this->propal->remise) ? $this->propal->remise : 0), 0, $this->langs)
-        );
+        $html .= '<tr>';
+        $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
+        $html .= '<td style="text-align: right;">' . price($total_ht + (!empty($this->propal->remise) ? $this->propal->remise : 0), 0, $this->langs) . '</td>';
+        $html .= '</tr>';
 
         if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT)) {
             $tvaisnull = ((!empty($this->tva) && count($this->tva) == 1 && isset($this->tva['0.000']) && is_float($this->tva['0.000'])) ? true : false);
@@ -361,16 +365,10 @@ class PropalPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $table->rows[] = array(
-                                'label' => array(
-                                    'content' => $totalvat,
-                                    'style'   => 'background-color: #F0F0F0;'
-                                ),
-                                'value' => array(
-                                    'content' => price($tvaval, 0, $this->langs),
-                                    'style'   => 'background-color: #F0F0F0;'
-                                ),
-                            );
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
@@ -391,10 +389,10 @@ class PropalPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $table->rows[] = array(
-                                'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;',),
-                                'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
-                            );
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
@@ -409,10 +407,11 @@ class PropalPDF extends BimpModelPDF
                         }
                         $totalvat = $this->langs->transcountrynoentities("TotalVAT", $this->fromCompany->country_code) . ' ';
                         $totalvat .= vatrate($tvakey, 1) . $tvacompl;
-                        $table->rows[] = array(
-                            'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;'),
-                            'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
-                        );
+
+                        $html .= '<tr>';
+                        $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                        $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                        $html .= '</tr>';
                     }
                 }
 
@@ -432,10 +431,10 @@ class PropalPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $table->rows[] = array(
-                                'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;'),
-                                'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
-                            );
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
@@ -456,37 +455,41 @@ class PropalPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $table->rows[] = array(
-                                'label' => array('content' => $totalvat, 'style' => 'background-color: #F0F0F0;'),
-                                'value' => array('content' => price($tvaval, 0, $this->langs), 'style' => 'background-color: #F0F0F0;')
-                            );
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
 
                 // Total TTC
                 $total_ttc = ($conf->multicurrency->enabled && $this->propal->multicurrency_tx != 1) ? $this->propal->multicurrency_total_ttc : $this->propal->total_ttc;
-                $table->rows[] = array(
-                    'label' => array('content' => $this->langs->transnoentities("TotalTTC"), 'style' => 'background-color: #DCDCDC;'),
-                    'value' => array('content' => price($total_ttc, 0, $this->langs), 'style' => 'background-color: #DCDCDC;')
-                );
+                $html .= '<tr>';
+                $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc, 0, $this->langs) . '</td>';
+                $html .= '</tr>';
             }
         }
+        $html .= '<tr><td></td><td></td></tr>';
 
-        $table->rows[] = array();
+        $html .= '<tr>';
+        $html .= '<td colspan="2" style="text-align: center;">Cachet, Date, Signature et mention "Bon pour Accord"</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<td colspan="2" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/></td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+        $html .= '</div>';
+
+        $table = new BimpPDF_Table($this->pdf, false);
+        $table->remove_empty_cols = false;
+        $table->addCol('left', '', 95);
+        $table->addCol('right', '', 95);
+
         $table->rows[] = array(
-            'label' => array(
-                'colspan' => 2,
-                'style'   => 'text-align: center;',
-                'content' => 'Cachet, Date, Signature et mention "Bon pour Accord"'
-            )
-        );
-        $table->rows[] = array(
-            'label' => array(
-                'colspan' => 2,
-                'style'   => 'border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;',
-                'content' => ' <br/> <br/> <br/>'
-            )
+            'right' => $html
         );
 
         $table->write();

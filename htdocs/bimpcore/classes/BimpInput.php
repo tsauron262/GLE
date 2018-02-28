@@ -180,7 +180,9 @@ class BimpInput
                 break;
 
             case 'search_entrepot':
-                require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
+                if (!class_exists('FormProduct')) {
+                    require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
+                }
                 global $db;
                 $formProduct = new FormProduct($db);
                 $html .= $formProduct->selectWarehouses((int) $value, $field_name);
@@ -188,6 +190,26 @@ class BimpInput
 
             case 'search_country':
                 $html .= $form->select_country((int) $value, $field_name);
+                break;
+
+            case 'search_state':
+                if (!class_exists('FormCompany')) {
+                    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
+                }
+                global $db;
+                $formCompany = new FormCompany($db);
+                $id_country = isset($options['id_country']) ? $options['id_country'] : 0;
+                $html .= $formCompany->select_state((int) $value, $id_country, $field_name);
+                break;
+
+            case 'search_juridicalstatus':
+                if (!class_exists('FormCompany')) {
+                    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
+                }
+                global $db;
+                $formCompany = new FormCompany($db);
+                $country_code = isset($options['country_code']) ? $options['country_code'] : 0;
+                $html .= $formCompany->select_juridicalstatus((int) $value, $country_code, '', $field_name);
                 break;
 
             case 'check_list':

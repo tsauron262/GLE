@@ -1,0 +1,74 @@
+table: bc_vente_article
+common_fields: 0
+
+labels: 
+    name: article
+    
+parent_object: BC_Vente
+parent_id_property: id_vente
+
+objects: 
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: Product
+            id_object: 
+                field_value: id_product
+                
+    equipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: 
+                field_value: id_equipment
+                
+fields: 
+    id_vente:
+        label: Vente
+        type: id_parent
+        
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        
+    qty: 
+        label: Quantité
+        type: int
+        default_value: 1
+        
+    unit_price_tax_in: 
+        label: Prix unitaire TTC
+        type: money
+        
+    
+lists: 
+    default: 
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            id_product: 
+                field: id_product
+                display: nom_url
+            id_equipment: 
+                field: id_equipment
+                display: nom_url
+            qty: 
+                field: qty
+            pu: 
+                field: unit_price_tax_in
+            total:
+                label: Total TTC
+                value: 
+                    callback: displayTotal

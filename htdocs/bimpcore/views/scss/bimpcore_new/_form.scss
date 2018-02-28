@@ -331,7 +331,7 @@ select.switch {
 
 .inputMultipleValues {
     margin: 15px 0;
-    
+
     & > table > tbody > tr {
         border: 1px solid $gray;
 
@@ -381,5 +381,83 @@ select.switch {
 
             }
         }
+    }
+}
+
+/*Free Forms*/
+
+.freeForm {
+    margin: 30px 0;
+    
+    .alert {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .freeFormContent {
+        padding: 30px;
+        background-color: #fff;
+        border: 1px solid $secondary;
+    }
+
+    .freeFormTitle {
+        background-color: $secondary;
+        color: #fff;
+        font-size: 22px;
+        padding: 10px 15px;
+    }
+
+    .freeFormRow {
+        padding: 10px 0;
+        border-bottom: 1px solid $gray;
+    }
+
+    .freeFormLabel {
+        font-size: 15px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .freeFormInput {
+        margin-left: 30px;
+    }
+
+    .freeFormAjaxResult {
+        margin: 15px 0;
+        display: none;
+    }
+
+    .freeFormSubmit {
+        margin-top: 20px;
+
+        &.rightAlign {
+            text-align: right;
+
+            .btn {
+                margin-left: 15px;
+            }
+
+            .buttonLeft {
+                float: left;
+                margin-left: 0;
+                margin-right: 15px;
+            }
+        }
+
+        &.leftAlign {
+            text-align: left;
+
+            .btn {
+                margin-right: 15px;
+            }
+            
+            .buttonRight {
+                float: right;
+                margin-right: 0;
+                margin-left: 15px;
+            }
+        }
+
+
     }
 }

@@ -6,6 +6,10 @@ objects:
         instance: 
             bimp_object: Bimp_User
             
+    clients: 
+        instance: 
+            bimp_object: Bimp_Societe
+            
 sections:
     - type: tabs
       tabs: 
@@ -16,3 +20,11 @@ sections:
                   list: 
                       panel: 1
                       object: users
+        clients: 
+            label: Clients
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: clients
+                      name: clients

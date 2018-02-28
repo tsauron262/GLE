@@ -1,6 +1,5 @@
 table: be_equipment_place
 common_fields: 1
-positions: 1
 
 parent_object: Equipment
 parent_id_property: id_equipment
@@ -148,12 +147,11 @@ lists:
         icon: map-marker
         objects_change_reload: BE_Place
         add_form_name: default
+        add_btn_label: Nouvel emplacement
         sort_field: position
         sort_way: asc
         n: 10
-        edit_btn: 1
         update_btn: 1
-        positions: 1
         cols:
             name: 
                 label: Emplacement

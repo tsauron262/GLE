@@ -1,0 +1,4 @@
+bootstrap: 1
+
+css: 
+    - /bimpcaisse/views/css/styles.css

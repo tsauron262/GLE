@@ -1,0 +1,165 @@
+dol_object: 
+    instance: 
+        dol_object: contact
+        
+table: socpeople
+primary: rowid
+
+parent_object: Bimp_Societe
+parent_id_property: fk_soc
+
+fields: 
+    fk_soc: 
+        label: Societe
+        dol_prop: socid
+        type: id_parent
+    civility:
+        label: Titre civilité
+        dol_prop: civility_id
+        type: int
+        values: 
+            array: civilities
+    lastname:
+        label: Nom
+    firstname: 
+        label: Prénom
+    address: 
+        label: Adresse
+    zip: 
+        label: Code postal
+    town: 
+        label: Ville
+    fk_pays: 
+        label: Pays
+        dol_prop: country_id
+        type: int
+        default_value: 1
+        input: 
+            type: search_country
+        display: 
+            default: 
+                type: callback
+                method: displayCountry
+    fk_departement:
+        label: Département / Canton
+        type: int
+        input: 
+            type: search_state
+            id_country: 
+                field_value: fk_pays
+        display: 
+            default: 
+                type: callback
+                method: displayDepartement
+        display_if:
+            field_name: fk_pays
+            hide_values: 0
+        depends_on: fk_pays
+    email: 
+        label: E-mail
+    phone:
+        label: Tél. pro
+        dol_prop: phone_pro
+    phone_perso: 
+        label: Tél. perso
+    phone_mobile:
+        label: Tél. portable
+    fax: 
+        label: Fax
+    jabberid:
+        label: Messagerie instantanée
+    skype: 
+        label: Identifiant Skype
+    birthday:
+        label: Date de naissance
+        type: date
+    poste:
+        label: Poste / fonction
+    note_private: 
+        label: Note privée
+        type: text
+    note_public:
+        label: Note publique
+        type: text
+        
+#Champs non gérés:
+#    ref_ext
+#    statut
+#    photo
+#    priv
+#    canvas
+#    import_key
+#    default_lang
+#    no_email
+
+fields_tables: 
+    identity:
+        title: Identité
+        icon: id-card
+        rows: 
+            - field: civility
+            - field: lastname
+            - field: firstname
+            - field: birthday
+            - field: poste
+            
+    contact: 
+        title: Informations de contact
+        icon: phone
+        rows: 
+            - field: email
+            - field: phone
+            - field: phone_perso
+            - field: phone_mobile
+            - field: fax
+            - field: jabberid
+            - field: skype
+            
+    address:
+        title: Adresse
+        icon: map-marker
+        rows: 
+            - field: address
+            - field: zip
+            - field: town
+            - field: fk_pays
+            - field: fk_departement  
+            
+    notes: 
+        title: Notes
+        icon: file-text
+        rows: 
+            - field: note_public
+            - field: note_private
+            
+views: 
+    default: 
+        title: 
+            callback: getName
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: identity
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: contact
+                      
+            - cols: 
+                - type: fields_table
+                  col_lg: 12
+                  fields_table: 
+                      name: address
+                      
+            - cols: 
+                - type: fields_table
+                  col_lg: 12
+                  fields_table: 
+                      name: notes

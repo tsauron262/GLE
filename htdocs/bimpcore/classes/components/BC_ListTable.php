@@ -722,6 +722,24 @@ class BC_ListTable extends BC_List
                         'onclick' => $onclick
                     ));
                 }
+                if (!is_null($item_params['modal_view'])) {
+                    $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this))';
+                    $html .= $this->renderRowButton(array(
+                        'label'   => 'Vue rapide',
+                        'icon'    => 'eye',
+                        'onclick' => $onclick
+                    ));
+                }
+                if (!is_null($item_params['inline_view'])) {
+                    $onclick = 'displayObjectView($(\'#' . $this->identifier . '_container\').find(\'.objectViewContainer\'), ';
+                    $onclick .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_params['inline_view'] . '\', ' . $id_object . ', \'default\'';
+                    $onclick .= ');';
+                    $html .= $this->renderRowButton(array(
+                        'label'   => 'Afficher',
+                        'icon'    => 'eye',
+                        'onclick' => $onclick
+                    ));
+                }
                 if ($item_params['page_btn']) {
                     if (!is_null($id_object) && $id_object) {
                         $controller = $this->object->getController();
@@ -753,24 +771,6 @@ class BC_ListTable extends BC_List
                             }
                         }
                     }
-                }
-                if (!is_null($item_params['inline_view'])) {
-                    $onclick = 'displayObjectView($(\'#' . $this->identifier . '_container\').find(\'.objectViewContainer\'), ';
-                    $onclick .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_params['inline_view'] . '\', ' . $id_object . ', \'default\'';
-                    $onclick .= ');';
-                    $html .= $this->renderRowButton(array(
-                        'label'   => 'Afficher',
-                        'icon'    => 'eye',
-                        'onclick' => $onclick
-                    ));
-                }
-                if (!is_null($item_params['modal_view'])) {
-                    $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this))';
-                    $html .= $this->renderRowButton(array(
-                        'label'   => 'Vue rapide',
-                        'icon'    => 'eye',
-                        'onclick' => $onclick
-                    ));
                 }
                 if ($item_params['delete_btn']) {
                     $html .= $this->renderRowButton(array(

@@ -74,7 +74,7 @@ function saveObjectFromForm(form_id, $button, successCallback) {
     });
 }
 
-function loadModalForm($button, data, title) {
+function loadModalForm($button, data, title, successCallback) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -148,6 +148,10 @@ function loadModalForm($button, data, title) {
                         $form.each(function () {
                             onFormLoaded($form);
                         });
+                    }
+
+                    if (typeof (successCallback) === 'function') {
+                        successCallback();
                     }
                 }
                 $modal.modal('handleUpdate');
@@ -693,7 +697,13 @@ function checkTextualInput($input) {
             switch (data_type) {
                 case 'number':
                     var min = $input.data('min');
+                    if (typeof (min) === 'undefined') {
+                        min = 'none';
+                    }
                     var max = $input.data('max');
+                    if (typeof (max) === 'undefined') {
+                        max = 'none';
+                    }
                     var decimals = parseInt($input.data('decimals'));
                     var unsigned = parseInt($input.data('unsigned'));
 
@@ -715,18 +725,26 @@ function checkTextualInput($input) {
                             break;
                         }
                         parsed_value = parseFloat(value);
-                        min = parseFloat(min);
-                        max = parseFloat(max);
+                        if (min !== 'none') {
+                            min = parseFloat(min);
+                        }
+                        if (max !== 'none') {
+                            max = parseFloat(max);
+                        }
                     } else {
                         value = value.replace(/^(\-?[0-9]*)\.?.*$/, '$1');
                         parsed_value = parseInt(value);
-                        min = parseInt(min);
-                        max = parseInt(max);
+                        if (min !== 'none') {
+                            min = parseInt(min);
+                        }
+                        if (max !== 'none') {
+                            max = parseInt(max);
+                        }
                     }
-                    if (parsed_value < min) {
+                    if (min !== 'none' && parsed_value < min) {
                         value = min;
                         msg = 'Min: ' + min;
-                    } else if (parsed_value > max) {
+                    } else if (max !== 'none' && parsed_value > max) {
                         value = max;
                         msg = 'Max: ' + max;
                     }

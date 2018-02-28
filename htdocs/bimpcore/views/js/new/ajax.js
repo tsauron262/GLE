@@ -39,6 +39,8 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
     this.processData = true;
 
+    this.processing_padding = 60;
+
     this.success = function () {
     };
     this.error = function () {
@@ -57,8 +59,17 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     }
     bimpAjax.url += 'ajax=1&action=' + action + '&request_id=' + request_id;
 
-    if (this.display_processing && this.$resultContainer) {
-        bimp_msg(this.processing_msg, 'info', this.$resultContainer);
+    if (this.display_processing) {
+        if (this.$resultContainer) {
+            var process_html = '<div class="content-loading" style="padding: ' + this.processing_padding + 'px;">';
+            process_html += '<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>';
+            process_html += '<p class="loading-text">' + this.processing_msg + '</p>';
+            process_html += '</div>';
+            this.$resultContainer.html(process_html).find('.content-loading').show();
+            this.$resultContainer.show();
+        } else {
+            bimp_msg(this.processing_msg, 'info');
+        }
     }
 
     this.display_result_errors = function (errors) {
@@ -143,7 +154,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 }
 
                 if (bimpAjax.display_processing && bimpAjax.$resultContainer) {
-                    bimpAjax.$resultContainer.html('').stop().slideUp(250);
+                    bimpAjax.$resultContainer.html('').slideUp(250);
                 }
                 if ((typeof (result.errors) !== 'undefined') && result.errors && result.errors.length) {
                     bimpAjax.display_result_errors(result.errors);
@@ -158,11 +169,16 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         if (bimpAjax.$resultContainer && typeof (result.html) === 'string') {
                             bimpAjax.$resultContainer.stop().slideUp(250, function () {
                                 bimpAjax.$resultContainer.html(result.html).slideDown(250);
+                                bimpAjax.$resultContainer.css('height', 'auto').slideDown(250);
+                                if (typeof (bimpAjax.success) === 'function') {
+                                    bimpAjax.success(result, bimpAjax);
+                                }
                             });
                         }
-                    }
-                    if (typeof (bimpAjax.success) === 'function') {
-                        bimpAjax.success(result, bimpAjax);
+                    } else {
+                        if (typeof (bimpAjax.success) === 'function') {
+                            bimpAjax.success(result, bimpAjax);
+                        }
                     }
                 }
                 delete bimp_requests[bimpAjax.request_id];

@@ -50,7 +50,7 @@ class modBimpEquipment extends DolibarrModules {
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
         $this->numero = 758442;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         // Key text used to identify module (for permissions, menus, etc...)
-        $this->rights_class = 'BimpEquipment';
+        $this->rights_class = 'bimpequipment';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
@@ -77,7 +77,23 @@ class modBimpEquipment extends DolibarrModules {
         // If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
         $this->picto = 'generic';
 
+        $this->rights = array();  // Permission array used by this module
 
+        $r = 0;
+        $this->rights[$r][0] = 88151;
+        $this->rights[$r][1] = 'Créer inventaire';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'inventory';
+        $this->rights[$r][5] = 'create';
+        $r++;
+
+        $this->rights[$r][0] = 88152;
+        $this->rights[$r][1] = 'Voir le détail des inventaire';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'inventory';
+        $this->rights[$r][5] = 'read';
+        $r++;
+        
         // Array to add new pages in new tabs
         // Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
         //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
@@ -91,10 +107,6 @@ class modBimpEquipment extends DolibarrModules {
             $conf->modBimpEquipment = new stdClass();
             $conf->modBimpEquipment->enabled = 0;
         }
-
-        // Permissions
-        $this->rights = array();  // Permission array used by this module
-
     }
 
     /**
@@ -111,7 +123,6 @@ class modBimpEquipment extends DolibarrModules {
         $this->_load_tables('/bimpequipment/sql/');
 
         // Add restrictions to all categories son of root
-
         // Create extrafields
 //        include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 //        $extrafields = new ExtraFields($this->db);

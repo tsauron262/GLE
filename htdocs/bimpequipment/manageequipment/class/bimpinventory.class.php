@@ -19,6 +19,7 @@ class BimpInventory {
     public $prod_scanned;
     private $prodQty;
     private $equipments;
+    private $last_fk_prod_inserted;
 
     const STATUT_DRAFT = 0;
     const STATUT_IN_PROCESS = 1;
@@ -141,8 +142,10 @@ class BimpInventory {
                 $this->prodQty[$obj->fk_product] = $obj->qty;
             }
             return true;
+        } else if (!$result) {
+            $this->errors[] = "La requête de recherche de produits a échouée";
+            return false;
         } else {
-            $this->errors[] = "Aucun produit pour l'inventaire dont l'identifiant est " . $this->id;
             return false;
         }
     }
@@ -167,8 +170,10 @@ class BimpInventory {
                 $this->equipments[$obj->id] = $equipment;
             }
             return true;
+        } else if (!$result) {
+            $this->errors[] = "La requête de recherche d'équipement a échouée";
+            return false;
         } else {
-            $this->errors[] = "Aucun équipement pour l'inventaire dont l'identifiant est " . $this->id;
             return false;
         }
     }
@@ -284,43 +289,6 @@ class BimpInventory {
         }
 
         return (array('equipments' => $allEqui, 'products' => $allProd, 'errors' => $this->errors));
-    }
-
-    public function closeInventory() {
-
-        if ($id_inventory < 0) {
-            $this->errors[] = "Identifiant inventaire invalide : " . $id_inventory;
-            return false;
-        }
-
-        // delete lines of inventory
-        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'be_inventory_det';
-        $sql.= ' WHERE fk_inventory=' . $this->id;
-
-        $result = $this->db->query($sql);
-        if ($result) {
-            $this->db->commit();
-        } else {
-            $this->errors[] = "Impossible de supprimer les lignes de l'inventaire.";
-            dol_print_error($this->db);
-            $this->db->rollback();
-            return -1;
-        }
-
-        // delete inventory
-        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'be_inventory';
-        $sql.= ' WHERE rowid=' . $this->id;
-
-        $result = $this->db->query($sql);
-        if ($result) {
-            $this->db->commit();
-        } else {
-            $this->errors[] = "Impossible de supprimer l'inventaire.";
-            dol_print_error($this->db);
-            $this->db->rollback();
-            return -1;
-        }
-        return array('errors' => $this->errors);
     }
 
 }

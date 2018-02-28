@@ -87,7 +87,7 @@ switch (GETPOST('action')) {
         }
     case 'closeInventory': {
             $inventory->fetch(GETPOST('inventory_id'));
-            echo json_encode($inventory->closeInventory());
+            echo json_encode($inventory->updateStatut($inventory::STATUT_CLOSED));
             break;
         }
 

@@ -401,17 +401,17 @@ class BimpInventoryLigne {
             }
         }
 
-        $sql .= 'UPDATE ' . MAIN_DB_PREFIX . 'be_inventory_det as write';
-        $sql .= ' SET write.quantity=write.quantity+' . $qty;
-        $sql .= ' WHERE write.fk_inventory=' . $fk_inventory;
-        $sql .= ' AND write.fk_user=' . $user_id;
-        $sql .= ' AND write.fk_product=' . $fk_product;
-        $sql .= ' AND write.tms=(';
-        $sql .= '   SELECT MAX(read.tms)';
-        $sql .= '   FROM  (SELECT * FROM ' . MAIN_DB_PREFIX . 'be_inventory_det) as read';
-        $sql .= '   WHERE read.fk_inventory=' . $fk_inventory;
-        $sql .= '   AND read.fk_user=' . $user_id;
-        $sql .= '   AND read.fk_product=' . $fk_product;
+        $sql .= 'UPDATE ' . MAIN_DB_PREFIX . 'be_inventory_det as to_write';
+        $sql .= ' SET to_write.quantity=to_write.quantity + ' . $qty;
+        $sql .= ' WHERE to_write.fk_inventory=' . $fk_inventory;
+        $sql .= ' AND to_write.fk_user=' . $user_id;
+        $sql .= ' AND to_write.fk_product=' . $fk_product;
+        $sql .= ' AND to_write.tms=(';
+        $sql .= '   SELECT MAX(to_read.tms)';
+        $sql .= '   FROM  (SELECT * FROM ' . MAIN_DB_PREFIX . 'be_inventory_det) as to_read';
+        $sql .= '   WHERE to_read.fk_inventory=' . $fk_inventory;
+        $sql .= '   AND to_read.fk_user=' . $user_id;
+        $sql .= '   AND to_read.fk_product=' . $fk_product;
         $sql .= ')';
 
         $result = $this->db->query($sql);

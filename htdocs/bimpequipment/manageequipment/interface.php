@@ -64,6 +64,8 @@ switch (GETPOST('action')) {
             echo json_encode($bl->getRemainingLignes());
             break;
         }
+
+
     /* Inventories - viewInventoryMain */
     case 'getInventoriesForEntrepot': {
             echo json_encode(array('inventories' => $em->getInventories(GETPOST('idEntrepot'), true), 'errors' => $em->errors));
@@ -73,25 +75,24 @@ switch (GETPOST('action')) {
             echo json_encode(array('id_inserted' => $inventory->create(GETPOST('idEntrepotCreate'), $user->id), 'errors' => $inventory->errors));
             break;
         }
+
+
     /* Inventories - viewInventory */
     case 'getAllProducts': {
             $inventory->fetch(GETPOST('inventory_id'));
             echo json_encode($inventory->retrieveScannedLignes());
-//            echo json_encode($em->getAllProducts(GETPOST('id_entrepot')));
             break;
         }
     case 'addLine': {
             $inventory->fetch(GETPOST('inventory_id'));
-            echo json_encode($inventory->addLine(GETPOST('ref'), $user->id));
+            echo json_encode($inventory->addLine(GETPOST('ref'), GETPOST('last_inserted_fk_product'), $user->id));
             break;
         }
     case 'closeInventory': {
             $inventory->fetch(GETPOST('inventory_id'));
-            echo json_encode($inventory->updateStatut($inventory::STATUT_CLOSED));
+            echo json_encode(array('success' => $inventory->updateStatut($inventory::STATUT_CLOSED), 'errors' => $inventory->errors));
             break;
         }
-
-
 
 
     /* Old Inventories */
@@ -119,6 +120,7 @@ switch (GETPOST('action')) {
             echo json_encode(array('errors' => array('Aucune action ne match avec : ' . GETPOST('action'))));
             break;
         }
+        
 }
 
 

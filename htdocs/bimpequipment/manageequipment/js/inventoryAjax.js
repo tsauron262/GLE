@@ -8,6 +8,7 @@ var cnt_product;
 var inventory_id;
 var entrepot_id;
 var is_responsible;
+var last_inserted_fk_product;
 
 /**
  * Ajax call
@@ -51,6 +52,7 @@ function addProductInInventory(entry) {
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             ref: entry,
+                last_inserted_fk_product: last_inserted_fk_product,
             inventory_id: inventory_id,
             action: 'addLine'
         },
@@ -58,6 +60,7 @@ function addProductInInventory(entry) {
             setMessage('alertPlaceHolder', 'Erreur serveur 8581.', 'error');
         },
         success: function (rowOut) {
+            last_inserted_fk_product = -1;
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertPlaceHolder');
@@ -69,8 +72,10 @@ function addProductInInventory(entry) {
                     setScanned(out.equipment_id);
                     if (out.entrepot_name !== null)
                         setMessage('alertPlaceHolder', "Cet équipment devrait-être dans l'entrepôt de " + out.entrepot_name, 'error');
-                } else if (out.product_id > 0)
+                } else if (out.product_id > 0) {
                     incrementQty(out.product_id);
+                    last_inserted_fk_product = out.product_id;
+                }
             }
         }
     });
@@ -89,13 +94,12 @@ function closeInventory() {
             setMessage('alertPlaceHolder', 'Erreur serveur 8811.', 'error');
         },
         success: function (rowOut) {
-            console.log("success");
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertPlaceHolder');
-            } /*else if (out.new_id_line > 0) {
-                setMessage('alertPlaceHolder', entry + " enregistré", 'error');
-            }*/
+            } else if (out.success) {
+                alert('Inventaire fermé');
+            }
         }
     });
 }
@@ -110,6 +114,7 @@ $(document).ready(function () {
     else
         is_responsible = false;
 
+    last_inserted_fk_product = -1;
     cnt_product = 0;
     inventory_id = getUrlParameter('id');
     entrepot_id = getUrlParameter('entrepot_id');

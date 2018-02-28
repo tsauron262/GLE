@@ -19,7 +19,6 @@ class BimpInventory {
     public $prod_scanned;
     private $prodQty;
     private $equipments;
-    private $last_fk_prod_inserted;
 
     const STATUT_DRAFT = 0;
     const STATUT_IN_PROCESS = 1;
@@ -50,7 +49,7 @@ class BimpInventory {
                 $this->fk_entrepot = $obj->fk_entrepot;
                 $this->fk_user_create = $obj->fk_user_create;
                 $this->date_ouverture = $obj->date_ouverture;
-                $this->date_fermeture = $this->db->jdate($obj->date_fermeture);
+                $this->date_fermeture = ($obj->date_fermeture != null) ? $obj->date_fermeture : '' ;
                 $this->statut = $obj->statut;
                 return true;
             }
@@ -178,7 +177,7 @@ class BimpInventory {
         }
     }
 
-    public function addLine($entry, $user_id) {
+    public function addLine($entry, $last_inserted_fk_product, $user_id) {
         $lp = new LignePanier($this->db);
         $lp->check($entry, 0);
 
@@ -198,15 +197,18 @@ class BimpInventory {
                 }
             }
         } else { // is a product
-            $line_id = $line->create($this->id, $user_id, $lp->prodId, 'NULL', 1);
-            $product_id = $lp->prodId;
+            if ($last_inserted_fk_product == $lp->prodId) {
+                $line_id = $line->addQty($this->id, $user_id, $lp->prodId, 1);
+            } else {
+                $line_id = $line->create($this->id, $user_id, $lp->prodId, 'NULL', 1);
+            }
         }
 
         if ($lp->error != '')
             return array('errors' => $line->errors);
 
-        $line->fetch($line_id);
-        $this->lignes[] = $line;
+//        $line->fetch($line_id);
+//        $this->lignes[] = $line;
 
         if ($this->statut != $this::STATUT_IN_PROCESS)
             $this->updateStatut($this::STATUT_IN_PROCESS);
@@ -214,10 +216,10 @@ class BimpInventory {
         if (isset($equipment_id))
             return array('equipment_id' => $equipment_id, 'entrepot_name' => $entrepot_name, 'errors' => $this->errors);
         else
-            return array('product_id' => $product_id, 'errors' => $this->errors);
+            return array('product_id' => $lp->prodId, 'errors' => $this->errors);
     }
 
-    private function updateStatut($new_statut_code) {
+    public function updateStatut($new_statut_code) {
 
         if ($this->id < 0) {
             $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
@@ -226,6 +228,7 @@ class BimpInventory {
 
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_inventory';
         $sql .= ' SET statut=' . $new_statut_code;
+        $sql .= ', date_fermeture=' . $this->db->idate(dol_now());
         $sql .= ' WHERE rowid=' . $this->id;
 
         $result = $this->db->query($sql);
@@ -381,7 +384,43 @@ class BimpInventoryLigne {
             $this->db->commit();
             return $last_insert_id;
         } else {
-            $this->errors[] = "Impossible de créer l'inventaire.";
+            $this->errors[] = "Impossible de créer la ligne d'inventaire avec id_product=$id_product";
+            dol_print_error($this->db);
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    public function addQty($fk_inventory, $user_id, $fk_product, $qty) {
+        if (0 > $fk_inventory or 0 > $user_id or 0 > $fk_product or 0 > $qty) {
+            foreach (func_get_args() as $cnt => $arg) {
+                if (0 > $arg) {
+                    $this->errors[] = "create : Argument n°$cnt invalide : $arg";
+                    return false;
+                }
+            }
+        }
+
+        $sql .= 'UPDATE ' . MAIN_DB_PREFIX . 'be_inventory_det as write';
+        $sql .= ' SET write.quantity=write.quantity+' . $qty;
+        $sql .= ' WHERE write.fk_inventory=' . $fk_inventory;
+        $sql .= ' AND write.fk_user=' . $user_id;
+        $sql .= ' AND write.fk_product=' . $fk_product;
+        $sql .= ' AND write.tms=(';
+        $sql .= '   SELECT MAX(read.tms)';
+        $sql .= '   FROM  (SELECT * FROM ' . MAIN_DB_PREFIX . 'be_inventory_det) as read';
+        $sql .= '   WHERE read.fk_inventory=' . $fk_inventory;
+        $sql .= '   AND read.fk_user=' . $user_id;
+        $sql .= '   AND read.fk_product=' . $fk_product;
+        $sql .= ')';
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_inventory_det');
+            $this->db->commit();
+            return $last_insert_id;
+        } else {
+            $this->errors[] = "Impossible de mettre à jour une quantité dans la table des ligne d'inventaire";
             dol_print_error($this->db);
             $this->db->rollback();
             return -1;

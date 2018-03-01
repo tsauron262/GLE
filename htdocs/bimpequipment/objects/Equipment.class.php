@@ -89,17 +89,17 @@ class Equipment extends BimpObject
                 $new_place = BimpObject::getInstance($this->module, 'BE_Place', $items[0]['id']);
                 switch ((int) $new_place->getData('type')) {
                     case BE_Place::BE_PLACE_CLIENT:
-                        $new_place_element = 'Societe';
+                        $new_place_element = 'societe';
                         $new_place_id_element = (int) $new_place->getData('id_client');
                         break;
 
                     case BE_Place::BE_PLACE_ENTREPOT:
-                        $new_place_element = 'Entrepot';
+                        $new_place_element = 'entrepot';
                         $new_place_id_element = (int) $new_place->getData('id_entrepot');
                         break;
 
                     case BE_Place::BE_PLACE_USER:
-                        $new_place_element = 'User';
+                        $new_place_element = 'user';
                         $new_place_id_element = (int) $new_place->getData('id_user');
                         break;
                 }
@@ -109,18 +109,18 @@ class Equipment extends BimpObject
 
                     switch ((int) $prev_place->getData('type')) {
                         case BE_Place::BE_PLACE_CLIENT:
-                            $prev_place_element = 'Societe';
+                            $prev_place_element = 'societe';
                             $prev_place_id_element = (int) $prev_place->getData('id_client');
                             break;
 
                         case BE_Place::BE_PLACE_ENTREPOT:
-                            $prev_place_element = 'Entrepot';
+                            $prev_place_element = 'entrepot';
                             $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
                             $product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element);
                             break;
 
                         case BE_Place::BE_PLACE_USER:
-                            $prev_place_element = 'User';
+                            $prev_place_element = 'user';
                             $prev_place_id_element = (int) $prev_place->getData('id_user');
                             break;
                     }

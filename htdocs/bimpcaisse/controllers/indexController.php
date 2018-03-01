@@ -189,7 +189,7 @@ class indexController extends BimpController
             $html .= '<div class="freeFormAjaxResult">';
             $html .= '</div>';
 
-            $html .= '<div class="freeFormSubmit">';
+            $html .= '<div class="freeFormSubmit rightAlign">';
             $html .= '<button id="openCaisseButton" type="button" class="btn btn-primary btn-large' . (!count($caisses) ? ' disabled' : '') . '"';
             $html .= ' onclick="openCaisse($(this), 0);">';
             $html .= '<i class="fa fa-check iconLeft"></i>Valider';

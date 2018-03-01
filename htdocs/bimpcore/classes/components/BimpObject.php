@@ -201,11 +201,6 @@ class BimpObject
                     'id_object'  => array(
                         'field_value' => 'user_update'
                     )
-                ),
-                'display'  => array(
-                    'default' => array(
-                        'type' => 'nom_url'
-                    )
                 )
             );
             $this->config->params['fields']['user_update'] = array(
@@ -221,6 +216,11 @@ class BimpObject
                         'object' => array(
                             'global' => 'user'
                         )
+                    )
+                ),
+                'display'  => array(
+                    'default' => array(
+                        'type' => 'nom_url'
                     )
                 ),
                 'editable'      => 0

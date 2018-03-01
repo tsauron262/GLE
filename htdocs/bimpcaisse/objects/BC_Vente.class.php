@@ -725,49 +725,10 @@ class BC_Vente extends BimpObject
                     if (is_null($equipment) || !$equipment->isLoaded()) {
                         $errors[] = 'L\'équipement associé à cet article n\'existe pas (ID ' . $id_equipment . ')';
                     } else {
-                        $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
-                        $html .= '<div class="product_title">' . $product->label;
-                        $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
-                        $html .= '<i class="fa fa-trash"></i>';
-                        $html .= '</span>';
-                        $html .= '</div>';
-                        $html .= '<div class="product_info"><strong>Equipement ' . $id_equipment . ' - n° de série: ' . $equipment->getData('serial') . '</strong></div>';
-                        $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-                        $html .= '<div class="article_options">';
-                        $html .= '<div class="article_qty">&nbsp;';
-                        $html .= '</div>';
-                        $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
-                        $html .= '</div>';
-                        $html .= '</div>';
+                        $html .= $this->renderCartEquipmentline($article, $product, $equipment);
                     }
                 } else {
-                    $qty = (int) $article->getData('qty');
-                    $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
-                    $html .= '<div class="product_title">' . $product->label;
-                    $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
-                    $html .= '<i class="fa fa-trash"></i>';
-                    $html .= '</span>';
-                    $html .= '</div>';
-                    $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-                    $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
-                    $html .= '<div class="article_options">';
-                    $html .= '<div class="article_qty">';
-                    $html .= '<strong>Qté: </strong>';
-                    $html .= '<span class="qty_down" onclick="changeArticleQty($(this), ' . $article->id . ', \'down\');">';
-                    $html .= '<i class="fa fa-minus-circle iconLeft"></i></span>';
-                    $html .= '<input type="text" value="' . $qty . '" class="article_qty_input" name="article_qty" id="article_' . $article->id . '_qty"';
-                    $html .= ' data-id_article="' . $article->id . '"';
-                    $html .= ' data-data_type="number"';
-                    $html .= ' data-decimals="0"';
-                    $html .= ' data-min="1"';
-                    $html .= ' data-unsigned="1"';
-                    $html .= '/>';
-                    $html .= '<span class="qty_up" onclick="changeArticleQty($(this), ' . $article->id . ', \'up\');">';
-                    $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
-                    $html .= '</div>';
-                    $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc * $qty, 'EUR') . '</div>';
-                    $html .= '</div>';
-                    $html .= '</div>';
+                    $html .= $this->renderCartProductLine($article, $product);
                 }
             }
         }
@@ -778,7 +739,66 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    public function renderCartEquipementLine($id_equipment, &$errors)
+    public function renderCartEquipmentline(BC_VenteArticle $article, Product $product, Equipment $equipment)
+    {
+        $html = '';
+        $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
+        $html .= '<div class="product_title">' . $product->label;
+        $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
+        $html .= '<i class="fa fa-trash"></i>';
+        $html .= '</span>';
+        $html .= '</div>';
+        $html .= '<div class="product_info"><strong>Equipement ' . $equipment->id . ' - n° de série: ' . $equipment->getData('serial') . '</strong></div>';
+        $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
+        $html .= '<div class="article_options">';
+        $html .= '<div class="article_qty">&nbsp;';
+        $html .= '</div>';
+        $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderCartProductLine(BC_VenteArticle $article, Product $product)
+    {
+        $html = '';
+        $qty = (int) $article->getData('qty');
+
+        $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
+        $html .= '<div class="product_title">' . $product->label;
+        $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
+        $html .= '<i class="fa fa-trash"></i>';
+        $html .= '</span>';
+        $html .= '</div>';
+        $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
+        $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+        $html .= '<div class="article_options">';
+        $html .= '<div class="article_qty">';
+        $html .= '<strong>Qté: </strong>';
+        $html .= '<span class="qty_down" onclick="changeArticleQty($(this), ' . $article->id . ', \'down\');">';
+        $html .= '<i class="fa fa-minus-circle iconLeft"></i></span>';
+        $html .= '<input type="text" value="' . $qty . '" class="article_qty_input" name="article_qty" id="article_' . $article->id . '_qty"';
+        $html .= ' data-id_article="' . $article->id . '"';
+        $html .= ' data-data_type="number"';
+        $html .= ' data-decimals="0"';
+        $html .= ' data-min="1"';
+        $html .= ' data-unsigned="1"';
+        $html .= '/>';
+        $html .= '<span class="qty_up" onclick="changeArticleQty($(this), ' . $article->id . ', \'up\');">';
+        $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
+        $html .= '</div>';
+        $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc * $qty, 'EUR') . '</div>';
+        $html .= '</div>';
+        $html .= '<div class="stockAlert">';
+        $html .= BimpRender::renderAlerts('Attention, le stock théorique de ce produit est dépassé', 'warning');
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function addCartEquipement($id_equipment, &$errors)
     {
         $html = '';
 
@@ -814,20 +834,7 @@ class BC_Vente extends BimpObject
                         if (count($article_errors)) {
                             $errors = array_merge($errors, $article_errors);
                         } else {
-                            $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
-                            $html .= '<div class="product_title">' . $product->label;
-                            $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
-                            $html .= '<i class="fa fa-trash"></i>';
-                            $html .= '</span>';
-                            $html .= '</div>';
-                            $html .= '<div class="product_info"><strong>Equipement ' . $id_equipment . ' - n° de série: ' . $equipment->getData('serial') . '</strong></div>';
-                            $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-                            $html .= '<div class="article_options">';
-                            $html .= '<div class="article_qty">&nbsp;';
-                            $html .= '</div>';
-                            $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
-                            $html .= '</div>';
-                            $html .= '</div>';
+                            $html .= $this->renderCartEquipmentline($article, $product, $equipment);
                         }
                     }
                 }
@@ -837,7 +844,7 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    public function renderCartProductLine($id_product, &$errors, $qty = 1)
+    public function addCartProduct($id_product, &$errors, $qty = 1)
     {
         $html = '';
         if (!class_exists('Product')) {
@@ -870,32 +877,7 @@ class BC_Vente extends BimpObject
                 if (count($article_errors)) {
                     $errors = array_merge($errors, $article_errors);
                 } else {
-                    $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
-                    $html .= '<div class="product_title">' . $product->label;
-                    $html .= '<span class="removeArticle" onclick="removeArticle($(this), ' . $article->id . ');">';
-                    $html .= '<i class="fa fa-trash"></i>';
-                    $html .= '</span>';
-                    $html .= '</div>';
-                    $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-                    $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
-                    $html .= '<div class="article_options">';
-                    $html .= '<div class="article_qty">';
-                    $html .= '<strong>Qté: </strong>';
-                    $html .= '<span class="qty_down" onclick="changeArticleQty($(this), ' . $article->id . ', \'down\');">';
-                    $html .= '<i class="fa fa-minus-circle iconLeft"></i></span>';
-                    $html .= '<input type="text" value="' . $qty . '" class="article_qty_input" name="article_qty" id="article_' . $article->id . '_qty"';
-                    $html .= ' data-id_article="' . $article->id . '"';
-                    $html .= ' data-data_type="number"';
-                    $html .= ' data-decimals="0"';
-                    $html .= ' data-min="1"';
-                    $html .= ' data-unsigned="1"';
-                    $html .= '/>';
-                    $html .= '<span class="qty_up" onclick="changeArticleQty($(this), ' . $article->id . ', \'up\');">';
-                    $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
-                    $html .= '</div>';
-                    $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc * $qty, 'EUR') . '</div>';
-                    $html .= '</div>';
-                    $html .= '</div>';
+                    $html .= $this->renderCartProductLine($article, $product);
                 }
             }
         }
@@ -933,7 +915,7 @@ class BC_Vente extends BimpObject
                 if (array_key_exists($equipements[0], $current_equipments)) {
                     $errors[] = 'L\'équipement correspondant au numéro de série "' . $search . '" a déjà été ajouté au panier';
                 } else {
-                    $cart_html = $this->renderCartEquipementLine($equipements[0], $errors);
+                    $cart_html = $this->addCartEquipement($equipements[0], $errors);
                 }
             }
         } else {
@@ -984,7 +966,7 @@ class BC_Vente extends BimpObject
                         }
                     }
 
-                    $cart_html = $this->renderCartProductLine((int) $products[0], $errors);
+                    $cart_html = $this->addCartProduct((int) $products[0], $errors);
                 }
             } else {
                 $result_html .= BimpRender::renderAlerts('Aucun produit trouvé', 'warning');
@@ -1007,7 +989,7 @@ class BC_Vente extends BimpObject
                 if (array_key_exists($id_object, $current_equipments)) {
                     $errors[] = 'Cet équipement a déjà été ajouté au panier';
                 } else {
-                    $html = $this->renderCartEquipementLine($id_object, $errors);
+                    $html = $this->addCartEquipement($id_object, $errors);
                 }
                 break;
 
@@ -1024,7 +1006,7 @@ class BC_Vente extends BimpObject
                         $errors[] = 'Un article a déjà été ajouté au panier pour ce code-barres mais n\'a pas pu être mis à jour';
                     }
                 } else {
-                    $html = $this->renderCartProductLine($id_object, $errors);
+                    $html = $this->addCartProduct($id_object, $errors);
                 }
                 break;
         }

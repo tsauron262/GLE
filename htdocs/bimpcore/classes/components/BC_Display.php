@@ -8,7 +8,6 @@ class BC_Display extends BimpComponent
     public $field_name = null;
     public $field_params = null;
     public $value = null;
-    
     public static $type_params_def = array(
         'syntaxe'     => array(
             'syntaxe' => array('default' => '<value>')

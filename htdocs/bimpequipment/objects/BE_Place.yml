@@ -148,10 +148,12 @@ lists:
         objects_change_reload: BE_Place
         add_form_name: default
         add_btn_label: Nouvel emplacement
-        sort_field: position
-        sort_way: asc
+        sort_field: id
+        sort_way: desc
         n: 10
         update_btn: 1
+        td_style: 
+            callback: getTdStyle
         cols:
             name: 
                 label: Emplacement

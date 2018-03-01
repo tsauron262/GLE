@@ -33,6 +33,21 @@ class BE_Place extends BimpObject
         return $contacts;
     }
 
+    public function getTdStyle()
+    {
+        if ($this->isLoaded()) {
+            $equipement = $this->getParentInstance();
+            if ($equipement->isLoaded()) {
+                $place = $equipement->getCurrentPlace();
+                if (!$place->isLoaded() || ((int) $place->id !== (int) $this->id)) {
+                    return 'background-color: #D2D2D2!important;';
+                }
+            }
+        }
+
+        return '';
+    }
+
     public function displayPlace()
     {
         $type = $this->getData('type');
@@ -55,8 +70,10 @@ class BE_Place extends BimpObject
         return '';
     }
 
+    // Overrides: 
+
     public function validate()
-    {   
+    {
         $type = $this->getData('type');
 
         if (!is_null($type) && array_key_exists($type, self::$types)) {
@@ -101,10 +118,24 @@ class BE_Place extends BimpObject
                     $this->set('id_client', 0);
                     break;
             }
-            
+
             return parent::validate();
         }
 
         return array('Type invalide ou absent');
+    }
+
+    public function create()
+    {
+        $errors = parent::create();
+
+        if ($this->isLoaded()) {
+            $equipment = $this->getParentInstance();
+            if ($equipment->isLoaded()) {
+                $equipment->onNewPlace();
+            }
+        }
+
+        return $errors;
     }
 }

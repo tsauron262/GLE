@@ -64,7 +64,7 @@ function loadModalFormFromView(view_id, form_name, $button, title) {
     }
 
     var data = {
-        'module': $view.data('module_name'),
+        'module': $view.data('module'),
         'object_name': $view.data('object_name'),
         'id_object': $view.data('id_object'),
         'form_name': form_name
@@ -241,7 +241,7 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
     }
 
     var data = {
-        'module_name': module_name,
+        'module': module_name,
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,

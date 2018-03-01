@@ -74,7 +74,7 @@ function addProductInInventory(entry) {
                     if (out.entrepot_name !== null) {
                         setMessage('alertPlaceHolder', "Cet équipment devrait-être dans l'entrepôt " + out.entrepot_name, 'error');
                         addLineEquipment(out.equipment_id, out.new_equipment.id_product, out.new_equipment.ref,
-                            out.new_equipment.serial, out.new_equipment.label, true, true);
+                            out.new_equipment.serial, out.new_equipment.label, false, true);
                     }
                 } else if (out.product_id > 0) {
                     incrementQty(out.product_id);
@@ -145,7 +145,7 @@ function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned,
 
     cnt_product++;
 
-    if (bad_entrepot != undefined)
+    if (bad_entrepot !== true)
         var line = '<tr id=e' + equipment_id + ' style="background: #ff4d4d">';
     else if (scanned === undefined)
         var line = '<tr id=e' + equipment_id + '>';

@@ -290,12 +290,11 @@ class BimpInventory {
         foreach ($allEqui as $id => $inut) {
             if ($this->equipments[$id]) {
                 $allEqui[$id]['scanned'] = true;
-                $this->equipments[$id]->is_init_inventory = true;
             }
         }
 
         foreach ($this->equipments as $id_equipment => $equipment) {
-            if (!isset($equipment->is_init_inventory)) { // is in inventory_det but not in llx_beequipment_place
+            if (!isset($allEqui[$id_equipment])) { // is in inventory_det but not in llx_beequipment_place
                 $doliProd = new Product($this->db);
                 $doliProd->fetch($equipment['id_product']);
                 $allEqui[$id_equipment] = array('serial' => $equipment['serial'],
@@ -354,7 +353,7 @@ class BimpInventory {
                     'id_equipment' => $id,
                     'type' => 2,
                     'id_entrepot' => $this->fk_entrepot,
-                    'infos' => 'Déplacement lors d\'un inventaire',
+                    'infos' => 'inventaire ' . $this->id,
                     'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
                 ));
                 $this->errors = array_merge($this->errors, $emplacement->create());

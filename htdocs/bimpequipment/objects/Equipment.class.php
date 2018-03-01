@@ -76,7 +76,6 @@ class Equipment extends BimpObject
                     'id'
                 ));
 
-                $label = 'Transfert équipement ' . $this->id . ' (serial: "' . $this->getData('serial') . '")';
                 global $user;
                 $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
 
@@ -87,6 +86,9 @@ class Equipment extends BimpObject
                 $new_place_id_element = null;
 
                 $new_place = BimpObject::getInstance($this->module, 'BE_Place', $items[0]['id']);
+                $new_place_infos = $new_place->getData('infos');
+                $label = ($new_place_infos ? $new_place_infos . ' - ' : '') . 'Produit "' . $product->ref . '" - serial: "' . $this->getData('serial') . '"';
+
                 switch ((int) $new_place->getData('type')) {
                     case BE_Place::BE_PLACE_CLIENT:
                         $new_place_element = 'societe';
@@ -106,7 +108,6 @@ class Equipment extends BimpObject
 
                 if (isset($items[1])) {
                     $prev_place = BimpObject::getInstance($this->module, 'BE_Place', $items[1]['id']);
-
                     switch ((int) $prev_place->getData('type')) {
                         case BE_Place::BE_PLACE_CLIENT:
                             $prev_place_element = 'societe';

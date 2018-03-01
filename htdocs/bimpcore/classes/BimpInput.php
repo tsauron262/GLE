@@ -350,7 +350,6 @@ class BimpInput
         $js_format = '';
         $php_format = '';
         $dt_value = null;
-
         switch ($type) {
             case 'time':
                 $display_js_format = 'HH:mm:ss';
@@ -386,6 +385,11 @@ class BimpInput
                 break;
         }
 
+        if (!$value && isset($options['display_now']) && $options['display_now']) {
+            $value = date($php_format);
+            $dt_value = new DateTime($value);
+        }
+
         $html = '';
 
         $html .= '<input type="hidden" class="datepicker_value" id="' . $input_id . '" name="' . $input_name . '" value="';
@@ -398,15 +402,15 @@ class BimpInput
         $html .= "$('#" . $input_id . "_bs_dt_picker').datetimepicker({";
         $html .= "locale: 'fr',";
         $html .= "format: '" . $display_js_format . "',";
-//        if (!is_null($dt_value)) {
-//            $html .= "defaultDate: moment('" . $dt_value->format($php_format) . "'),";
-//        }
+        if (!is_null($dt_value)) {
+            $html .= "defaultDate: moment('" . $dt_value->format($php_format) . "'),";
+        }
         $html .= "showTodayButton: " . (isset($options['display_now']) && $options['display_now'] ? "true" : "false");
         $html .= "}); ";
-        if (!is_null($dt_value)) {
-            $html .= "var cur_date = moment('" . $dt_value->format($php_format) . "'); ";
-            $html .= "$('#" . $input_id . "_bs_dt_picker').data('DateTimePicker').date(cur_date); ";
-        }
+//        if (!is_null($dt_value)) {
+//            $html .= "var cur_date = moment('" . $dt_value->format($php_format) . "'); ";
+//            $html .= "$('#" . $input_id . "_bs_dt_picker').data('DateTimePicker').date(cur_date); ";
+//        }
         $html .= "$('#" . $input_id . "_bs_dt_picker').on('dp.change', function(e) {";
         $html .= "if (e.date) {";
         $html .= "$('#" . $input_id . "').val(e.date.format('" . $js_format . "')).change();";

@@ -8,6 +8,7 @@
 include_once '../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.lib.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimpinventory.class.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/inventoryAjax.js');
@@ -22,8 +23,13 @@ llxHeader('', 'Inventaire n°' . $inventory_id, '', '', 0, 0, $arrayofjs, $array
 
 print load_fiche_titre('Inventaire n°' . $inventory_id, $linkback);
 
-print '<strong>Réf. ou code barre ou numéro de série</strong> ';
-print '<input name="refScan" class="custInput" style="width : 300px">';
+$inventory = new BimpInventory($db);
+$inventory->fetch($inventory_id);
+
+if ($inventory->statut != $inventory::STATUT_CLOSED) {
+    print '<strong>Réf. ou code barre ou numéro de série</strong> ';
+    print '<input name="refScan" class="custInput" style="width : 300px">';
+}
 
 print '<a style="font-weight: bold; float:right" href="' . DOL_URL_ROOT . '/bimpequipment/manageequipment/viewInventoryMain.php">Retour liste</a>';
 

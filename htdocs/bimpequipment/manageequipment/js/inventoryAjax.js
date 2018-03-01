@@ -9,6 +9,7 @@ var inventory_id;
 var entrepot_id;
 var is_responsible;
 var last_inserted_fk_product;
+var inventory_closed;
 
 /**
  * Ajax call
@@ -53,7 +54,7 @@ function addProductInInventory(entry) {
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
             ref: entry,
-                last_inserted_fk_product: last_inserted_fk_product,
+            last_inserted_fk_product: last_inserted_fk_product,
             inventory_id: inventory_id,
             action: 'addLine'
         },
@@ -74,7 +75,7 @@ function addProductInInventory(entry) {
                     if (out.entrepot_name !== null) {
                         setMessage('alertPlaceHolder', "Cet équipment devrait-être dans l'entrepôt " + out.entrepot_name, 'error');
                         addLineEquipment(out.equipment_id, out.new_equipment.id_product, out.new_equipment.ref,
-                            out.new_equipment.serial, out.new_equipment.label, false, true);
+                                out.new_equipment.serial, out.new_equipment.label, false, true);
                     }
                 } else if (out.product_id > 0) {
                     incrementQty(out.product_id);
@@ -118,6 +119,11 @@ $(document).ready(function () {
         is_responsible = true;
     else
         is_responsible = false;
+
+    if ($('input[name=refScan]').length !== 0)
+        inventory_closed = false;
+    else
+        inventory_closed = true;
 
     last_inserted_fk_product = -1;
     cnt_product = 0;
@@ -164,28 +170,33 @@ function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned,
 
 /* Add a line in the table of product */
 function addLineProduct(product_id, ref, label, qty_totale, qty_scanned) {
-
-    var init_qty_scanned = qty_scanned;
     cnt_product++;
-    qty_totale = parseInt(qty_totale);
-    qty_scanned = parseInt(qty_scanned);
 
-    var qty_missing = qty_totale - qty_scanned;
-    if (init_qty_scanned === undefined) {
-        qty_scanned = 0;
-        qty_missing = qty_totale;
-        var line = '<tr id=p' + product_id + '>';
+    if (!inventory_closed) {
+        var init_qty_scanned = qty_scanned;
+        qty_totale = parseInt(qty_totale);
+        qty_scanned = parseInt(qty_scanned);
+
+        var qty_missing = qty_totale - qty_scanned;
+        if (init_qty_scanned === undefined) {
+            qty_scanned = 0;
+            qty_missing = qty_totale;
+            var line = '<tr id=p' + product_id + '>';
+        } else {
+            var color;
+            if (qty_missing === 0)
+                color = 'c6ffc6';
+            else if (qty_missing < 0)
+                color = 'ff4d4d';
+            else if (qty_missing > 0)
+                color = 'ffd699';
+            else
+                color = 'cc3300';
+            var line = '<tr id=p' + product_id + ' style="background: #' + color + '">';
+        }
     } else {
-        var color;
-        if (qty_missing === 0)
-            color = 'c6ffc6';
-        else if (qty_missing < 0)
-            color = 'ff4d4d';
-        else if (qty_missing > 0)
-            color = 'ffd699';
-        else
-            color = 'cc3300';
-        var line = '<tr id=p' + product_id + ' style="background: #' + color + '">';
+        var line = '<tr id=p' + product_id + '>';
+        var qty_missing = '';
     }
 
     line += '<td name="cnt">' + cnt_product + '</td>';    // cnt ligne

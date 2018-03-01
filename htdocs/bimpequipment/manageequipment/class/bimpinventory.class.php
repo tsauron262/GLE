@@ -304,8 +304,12 @@ class BimpInventory {
         }
 
         foreach ($allProd as $id => $inut) {
-            if ($this->prodQty[$id])
-                $allProd[$id]['qtyScanned'] = $this->prodQty[$id];
+            if ($this->statut != $this::STATUT_CLOSED) {
+                if ($this->prodQty[$id])
+                    $allProd[$id]['qtyScanned'] = $this->prodQty[$id];
+            } else {
+                $allProd[$id]['qtyScanned'] = '';
+            }
         }
 
         return (array('equipments' => $allEqui, 'products' => $allProd, 'errors' => $this->errors));

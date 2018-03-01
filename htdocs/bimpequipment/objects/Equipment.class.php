@@ -78,7 +78,7 @@ class Equipment extends BimpObject
 
                 $label = 'Transfert équipement ' . $this->id . ' (serial: "' . $this->getData('serial') . '")';
                 global $user;
-                $codemove = dol_print_date(date(), '%y%m%d%H%M%S');
+                $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
 
                 $prev_place_element = '';
                 $prev_place_id_element = null;

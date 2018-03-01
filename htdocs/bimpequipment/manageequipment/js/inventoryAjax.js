@@ -38,12 +38,13 @@ function getAllProducts() {
                 }
                 for (var id in out.equipments) {
                     var eq = out.equipments[id];
-                    addLineEquipment(id, eq.id_product, eq.ref, eq.serial, eq.label, eq.scanned);
+                    addLineEquipment(id, eq.id_product, eq.ref, eq.serial, eq.label, eq.scanned, eq.bad_entrepot);
                 }
             }
         }
     });
 }
+
 // entry = ref, barcode or serial
 function addProductInInventory(entry) {
 
@@ -70,8 +71,11 @@ function addProductInInventory(entry) {
             if (is_responsible) {
                 if (out.equipment_id > 0) {
                     setScanned(out.equipment_id);
-                    if (out.entrepot_name !== null)
-                        setMessage('alertPlaceHolder', "Cet équipment devrait-être dans l'entrepôt de " + out.entrepot_name, 'error');
+                    if (out.entrepot_name !== null) {
+                        setMessage('alertPlaceHolder', "Cet équipment devrait-être dans l'entrepôt " + out.entrepot_name, 'error');
+                        addLineEquipment(out.equipment_id, out.new_equipment.id_product, out.new_equipment.ref,
+                            out.new_equipment.serial, out.new_equipment.label, true, true);
+                    }
                 } else if (out.product_id > 0) {
                     incrementQty(out.product_id);
                     last_inserted_fk_product = out.product_id;
@@ -94,12 +98,13 @@ function closeInventory() {
             setMessage('alertPlaceHolder', 'Erreur serveur 8811.', 'error');
         },
         success: function (rowOut) {
-            var out = JSON.parse(rowOut);
-            if (out.errors.length !== 0) {
-                printErrors(out.errors, 'alertPlaceHolder');
-            } else if (out.success) {
-                alert('Inventaire fermé');
-            }
+            console.log(rowOut);
+//            var out = JSON.parse(rowOut);
+//            if (out.errors.length !== 0) {
+//                printErrors(out.errors, 'alertPlaceHolder');
+//            } else if (out.success) {
+//                alert('Inventaire fermé');
+//            }
         }
     });
 }
@@ -136,11 +141,13 @@ $(document).ready(function () {
  */
 
 /* Add a line in the table of equipments */
-function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned) {
+function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned, bad_entrepot) {
 
     cnt_product++;
 
-    if (scanned === undefined)
+    if (bad_entrepot != undefined)
+        var line = '<tr id=e' + equipment_id + ' style="background: #ff4d4d">';
+    else if (scanned === undefined)
         var line = '<tr id=e' + equipment_id + '>';
     else
         var line = '<tr id=e' + equipment_id + ' style="background: #c6ffc6">';

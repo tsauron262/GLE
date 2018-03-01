@@ -106,7 +106,6 @@ class EquipmentManager {
         $codemove = dol_print_date($now, '%y%m%d%H%M%S');
         $label = 'Inventaire Bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
         foreach ($products as $id => $prod) {
-            echo $prod['qtyMissing'];
             if ($prod['qtyMissing'] == 0) {
                 
             } else {
@@ -135,6 +134,7 @@ class EquipmentManager {
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory';
         $sql .= ($id_entrepot) ? ' WHERE fk_entrepot=' . $id_entrepot : '';
+        $sql .= ' ORDER BY date_ouverture DESC';
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
@@ -256,5 +256,41 @@ class EquipmentManager {
             return false;
         }
     }
+
+    public function getEntrepotForEquipment($equipment_id) {
+
+        $sql = 'SELECT id_entrepot';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
+        $sql .= ' WHERE id_equipment=' . $equipment_id;
+        $sql .= ' AND position=1';
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $entrepot_id = $obj->id_entrepot;
+            }
+            return $entrepot_id;
+        } else {
+            $this->errors[] = "L'équipement $equipment_id n'est pas dans la table des entrepôts d'équipement";
+            return false;
+        }
+    }
+
+//    public function getEquipmentById($equipment_id) {
+//        
+//        $sql = 'SELECT id_product, serial, ';
+//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+//        $sql .= ' WHERE id=' . $equipment_id;
+//
+//        $result = $this->db->query($sql);
+//        if ($result and mysqli_num_rows($result) > 0) {
+//            while ($obj = $this->db->fetch_object($result)) {
+//                return array('id_product' => $obj->id_product, 'serial' => $obj->serial);
+//            }
+//        } else {
+//            $this->errors[] = "L'équipement $equipment_id n'est pas dans la table des équipements";
+//            return false;
+//        }
+//    }
 
 }

@@ -49,7 +49,7 @@ class BimpInventory {
                 $this->fk_entrepot = $obj->fk_entrepot;
                 $this->fk_user_create = $obj->fk_user_create;
                 $this->date_ouverture = $obj->date_ouverture;
-                $this->date_fermeture = ($obj->date_fermeture != null) ? $obj->date_fermeture : '' ;
+                $this->date_fermeture = ($obj->date_fermeture != null) ? $obj->date_fermeture : '';
                 $this->statut = $obj->statut;
                 return true;
             }
@@ -195,6 +195,11 @@ class BimpInventory {
                 if ($entrepot_name == false) {
                     $this->errors = array_merge($this->errors, $em->errors);
                 }
+                $doli_product = new Product($this->db);
+                $doli_product->fetch($lp->prodId);
+
+                $new_equipment = array('id_product' => $lp->prodId, 'serial' => $lp->serial,
+                    'ref' => $doli_product->getNomUrl(1), 'label' => $doli_product->label);
             }
         } else { // is a product
             if ($last_inserted_fk_product == $lp->prodId) {
@@ -207,14 +212,14 @@ class BimpInventory {
         if ($lp->error != '')
             return array('errors' => $line->errors);
 
-//        $line->fetch($line_id);
-//        $this->lignes[] = $line;
-
         if ($this->statut != $this::STATUT_IN_PROCESS)
             $this->updateStatut($this::STATUT_IN_PROCESS);
 
         if (isset($equipment_id))
-            return array('equipment_id' => $equipment_id, 'entrepot_name' => $entrepot_name, 'errors' => $this->errors);
+            return array('equipment_id' => $equipment_id,
+                'entrepot_name' => $entrepot_name,
+                'new_equipment' => $new_equipment,
+                'errors' => $this->errors);
         else
             return array('product_id' => $lp->prodId, 'errors' => $this->errors);
     }
@@ -228,11 +233,12 @@ class BimpInventory {
 
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_inventory';
         $sql .= ' SET statut=' . $new_statut_code;
-        $sql .= ', date_fermeture=' . $this->db->idate(dol_now());
+        $sql .= ', date_fermeture=' . (($new_statut_code < 2) ? ' NULL' : $this->db->idate(dol_now()));
         $sql .= ' WHERE rowid=' . $this->id;
 
         $result = $this->db->query($sql);
         if ($result) {
+            $this->statut = $new_statut_code;
             $this->db->commit();
             return true;
         } else {
@@ -282,8 +288,20 @@ class BimpInventory {
         $allProd = $out['products'];
 
         foreach ($allEqui as $id => $inut) {
-            if ($this->equipments[$id])
+            if ($this->equipments[$id]) {
                 $allEqui[$id]['scanned'] = true;
+                $this->equipments[$id]->is_init_inventory = true;
+            }
+        }
+
+        foreach ($this->equipments as $id_equipment => $equipment) {
+            if (!isset($equipment->is_init_inventory)) { // is in inventory_det but not in llx_beequipment_place
+                $doliProd = new Product($this->db);
+                $doliProd->fetch($equipment['id_product']);
+                $allEqui[$id_equipment] = array('serial' => $equipment['serial'],
+                    'id_product' => $equipment['id_product'], 'ref' => $doliProd->getNomUrl(1),
+                    'label' => $doliProd->label, 'bad_entrepot' => true);
+            }
         }
 
         foreach ($allProd as $id => $inut) {
@@ -292,6 +310,59 @@ class BimpInventory {
         }
 
         return (array('equipments' => $allEqui, 'products' => $allProd, 'errors' => $this->errors));
+    }
+
+    public function updateStock($user) {
+
+        $now = dol_now();
+        $codemove = dol_print_date($now, '%y%m%d%H%M%S');
+        $label = 'Inventaire Bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
+            return false;
+        }
+
+        $out = $this->retrieveScannedLignes();
+
+        $equipments = $out['equipments'];
+        $products = $out['products'];
+
+
+        foreach ($products as $id => $product) {
+            $diff = $product['qtyScanned'] - $product['qty'];
+            if ($diff != 0) { // add or remove
+                $doliProd = new Product($this->db);
+                $doliProd->fetch($id);
+                if ($diff < 0) { // remove
+                    $result = $doliProd->correct_stock($user, $this->fk_entrepot, -$diff, 1, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
+                } elseif ($product['qty'] > $product['qtyScanned']) { // add
+                    $result = $doliProd->correct_stock($user, $this->fk_entrepot, $diff, 0, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
+                }
+                if ($result == -1)
+                    $this->errors = array_merge($this->errors, $doliProd->errors);
+            }
+        }
+
+        $em = new EquipmentManager($this->db);
+        foreach ($equipments as $id => $inut) {
+            $id_entrepot_theorique = $em->getEntrepotForEquipment($id);
+            if ($id_entrepot_theorique != $this->fk_entrepot) {
+                $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+                $emplacement->validateArray(array(
+                    'id_equipment' => $id,
+                    'type' => 2,
+                    'id_entrepot' => $this->fk_entrepot,
+                    'infos' => 'Déplacement lors d\'un inventaire',
+                    'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
+                ));
+                $this->errors = array_merge($this->errors, $emplacement->create());
+            }
+
+            $this->updateStatut($this::STATUT_CLOSED);
+        }
+        return true;
     }
 
 }
@@ -334,11 +405,11 @@ class BimpInventoryLigne {
                 $this->fk_inventory = $obj->fk_inventory;
                 $this->fk_user = $obj->fk_user;
                 $this->fk_product = $obj->fk_product;
-                $this->fk_equipment = $obj->fk_equipment;
+                $this->fk_equipment = ($obj->fk_equipment != NULL) ? $obj->fk_equipment : '';
                 return true;
             }
         } else {
-            $this->errors[] = "Aucun inventaire n'a l'identifiant " . $id;
+            $this->errors[] = "Impossible de trouver la ligne dont l'identifiant est : $id";
             return false;
         }
     }

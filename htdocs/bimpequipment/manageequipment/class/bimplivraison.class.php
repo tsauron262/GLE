@@ -65,8 +65,7 @@ class BimpLivraison {
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
         $sql .= ' WHERE inventorycode="BimpLivraison ' . $this->ref . '"';
-        // value supp à 0 ?
-//echo $sql;
+
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {

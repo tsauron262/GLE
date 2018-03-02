@@ -478,7 +478,7 @@ else
                                         /*moddri*/
                                         //Todo recup des transferer depuis date
                                         //
-                                        if(isset($_REQUEST['dateStock'])){
+                                        if($objp->rowid > 0 && isset($_REQUEST['dateStock'])){
                                             $sql = $db->query("SELECT SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('".$_REQUEST['dateStock']."', '%Y-%m-%d') AND `fk_product` = ".$objp->rowid." AND `fk_entrepot` = ".$object->id);
                                             if($db->num_rows($sql) > 0){
                                                 $ligne = $db->fetch_object($sql);

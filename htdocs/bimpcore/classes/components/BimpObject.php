@@ -201,11 +201,6 @@ class BimpObject
                     'id_object'  => array(
                         'field_value' => 'user_update'
                     )
-                ),
-                'display'  => array(
-                    'default' => array(
-                        'type' => 'nom_url'
-                    )
                 )
             );
             $this->config->params['fields']['user_update'] = array(
@@ -221,6 +216,11 @@ class BimpObject
                         'object' => array(
                             'global' => 'user'
                         )
+                    )
+                ),
+                'display'  => array(
+                    'default' => array(
+                        'type' => 'nom_url'
                     )
                 ),
                 'editable'      => 0
@@ -453,6 +453,13 @@ class BimpObject
         return null;
     }
 
+    public function printData()
+    {
+        echo '<pre>';
+        print_r($this->data);
+        echo '</pre>';
+    }
+
     public function getSavedData($field, $id_object = null)
     {
         if (is_null($id_object)) {
@@ -644,6 +651,26 @@ class BimpObject
         }
 
         if ($type) {
+            if ($this->isDolObject()) {
+                if (in_array($type, array('datetime', 'date', 'time'))) {
+                    $value = $this->db->db->idate($value);
+                    if (preg_match('/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/', $value, $matches)) {
+                        switch ($type) {
+                            case 'datetime':
+                                $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                                break;
+
+                            case 'date':
+                                $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+                                break;
+
+                            case 'time':
+                                $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                                break;
+                        }
+                    }
+                }
+            }
             return BimpTools::checkValueByType($type, $value);
         }
 
@@ -1481,6 +1508,8 @@ class BimpObject
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
+//        echo $sql; exit;
+
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -1713,7 +1742,20 @@ class BimpObject
                 $params = array($user);
             }
 
-            return call_user_func_array(array($this->dol_object, 'create'), $params);
+            $result = call_user_func_array(array($this->dol_object, 'create'), $params);
+            if ($result < 0) {
+                if (isset($this->dol_object->error) && $this->dol_object->error) {
+                    $errors[] = $this->dol_object->error;
+                } elseif (count($this->dol_object->errors)) {
+                    global $langs;
+                    $langs->load("errors");
+                    foreach ($this->dol_object->errors as $error) {
+                        $errors[] = 'Erreur: ' . $langs->trans($error);
+                    }
+                }
+            }
+
+            return $result;
         }
 
         return 0;
@@ -1764,7 +1806,17 @@ class BimpObject
             }
 
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
+
             if ($result < 0) {
+                if (isset($this->dol_object->error) && $this->dol_object->error) {
+                    $errors[] = $this->dol_object->error;
+                } elseif (count($this->dol_object->errors)) {
+                    global $langs;
+                    $langs->load("errors");
+                    foreach ($this->dol_object->errors as $error) {
+                        $errors[] = 'Erreur: ' . $langs->trans($error);
+                    }
+                }
                 return 0;
             }
             return 1;
@@ -1807,7 +1859,7 @@ class BimpObject
             $value = null;
             if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                 if (isset($this->dol_object->array_options['options_' . $field])) {
-                    $this->data[$field] = $this->dol_object->array_options['options_' . $field];
+                    $value = $this->dol_object->array_options['options_' . $field];
                 }
             } else {
                 $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
@@ -1818,11 +1870,10 @@ class BimpObject
                 } else {
                     $value = $this->dol_object->{$prop};
                 }
-
-                if (!is_null($value)) {
-                    $this->checkFieldValueType($field, $value);
-                    $this->data[$field] = $value;
-                }
+            }
+            if (!is_null($value)) {
+                $this->checkFieldValueType($field, $value);
+                $this->data[$field] = $value;
             }
         }
 
@@ -2427,10 +2478,10 @@ class BimpObject
                 isset($this->data['nom']) && $this->data['nom']) {
             return $this->data['nom'];
         } elseif (isset($this->id) && $this->id) {
-            return $this->id;
+            return BimpTools::ucfirst($this->getLabel()) . ' ' . $this->id;
         }
 
-        return ucfirst($this->getLabel());
+        return BimpTools::ucfirst($this->getLabel());
     }
 
     public static function getInstanceLabel($instance, $type = '')

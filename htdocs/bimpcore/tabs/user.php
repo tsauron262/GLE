@@ -10,34 +10,28 @@ $id = GETPOST('id', 'int');
 if ($id < 1)
     $id = $user->id;
 
-$userC = new User($db);
-$userC->fetch($id);
-$userC->getrights('user');
+
+
+if ($user->id == $id) {//On est dans le form de l'utilisateur
+    $object = $user;
+    $droitLire = 1;
+    $droitModifSimple = 1;
+    $droitModif = 0;//$object->rights->user->self->creer;
+} else {
+    $object = new User($db);
+    $object->fetch($id);
+    $object->getrights('user');
+    $droitLire = $object->rights->user->user->lire;
+    $droitModifSimple = $object->rights->user->user->creer;
+    $droitModif = $droitModifSimple;
+}
+
 
 llxHeader();
 
 $head = user_prepare_head($object);
 
 dol_fiche_head($head, 'formSimple', 'Essentielles', -1, 'user');
-
-if ($user->id == $id) {//On est dans le form de l'utilisateur
-    $droitLire = 1;
-    $droitModifSimple = 1;
-    $droitModif = $userC->rights->user->self->creer;
-} else {
-    $droitLire = $userC->rights->user->user->lire;
-    $droitModifSimple = $userC->rights->user->user->creer;
-    $droitModif = $droitModifSimple;
-}
-
-//if($droitModif)
-//    echo "Vous avez le droit de Modifié tous";
-//elseif($droitModifSimple)
-//    echo "Vous avez le droit de faire des Modifs Simple";
-//elseif($droitModif)
-//    echo "Vous avez le droit de lire les infos";
-//else($droitLire)
-//    echo "Vous n'avez aucun droit";
 
 ini_set('display_errors', 1);
 

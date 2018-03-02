@@ -1,0 +1,224 @@
+table: bc_vente
+
+labels: 
+    name: vente
+    is_female: 1
+    
+objects: 
+    entrepot:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: id_entrepot
+                
+    caisse:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_Caisse
+            id_object: 
+                field_value: id_caisse
+                
+    caisse_session:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_CaisseSession
+            id_object: 
+                field_value: id_caisse_session
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                field_value: id_client
+                
+    client_contact:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
+            id_object: 
+                field_value: id_client_contact
+            
+    articles: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BC_VenteArticle
+            
+    paiements:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BC_VentePaiement
+            
+fields:
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: states
+        default_value: 1
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        default_value: 0
+        
+    total_ht: 
+        label: Total HT
+        type: money
+        default_value: 0
+        
+    id_caisse: 
+        label: Caisse
+        type: id_object
+        object: caisse
+        required: 1
+        
+    id_caisse_session:
+        label: Session de caisse
+        type: id_object
+        object: caisse_session
+        required: 1
+        
+    id_entrepot: 
+        label: Centre
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+        required: 1
+        
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        input: 
+            type: search_societe
+            societe_type: customer
+        display: 
+            default:
+                type: nom_url
+                
+    id_client_contact:
+        label: Contact
+        type: id_object
+        object: client_contact
+        values: 
+            array: client_contacts
+        display: 
+            default:
+                type: nom_url
+        display_if:
+            field_name: id_client
+            hide_values: 0,
+        depends_on: id_client
+        
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - field: status
+            - field: id_entrepot
+              display: nom
+            - field: id_caisse
+              display: nom
+            - label: Nbre Articles
+              value: 
+                  callback: displayNbArticles
+            - field: total_ttc
+            
+    client:
+        title: Client
+        icon: user
+        rows: 
+            - field: id_client
+              display: nom_url
+            - field: id_client_contact
+              display: nom_url
+            
+views:
+    default: 
+        rows:
+            - cols: 
+                  - type: object_common_fields
+                    col_lg: 4
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: infos  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: client  
+            - cols: 
+                - type: list
+                  col_lg: 12
+                  list: 
+                      title: Articles
+                      icon: shopping-basket
+                      name: default
+                      children: articles
+            - cols: 
+                - type: list
+                  col_lg: 12
+                  list: 
+                      title: Paiements
+                      icon: euro
+                      name: default
+                      children: paiements
+    creation: 
+        panel: 0
+        no_reload: 1
+        rows: 
+            - cols: 
+                - type: custom
+                  custom:
+                      callback: renderCreationViewHtml
+        
+lists: 
+    default: 
+        sort_field: date_create
+        sort_way: desc
+        modal_view: default
+        n: 10
+        cols:
+            ref: 
+                label: Ref.
+                field: id
+            status: 
+                field: status
+            date: 
+                label: Date et heure
+                field: date_create
+            articles: 
+                label: Nb articles
+                value: 
+                    callback: displayNbArticles
+            total_ttc: 
+                field: total_ttc
+        extra_btn:
+            callback: getDefaultListExtraButtons
+                
+forms: 
+    client: 
+        rows: 
+            - field: id_client
+              label: Choix du client
+            - field: id_client_contact
+              label: Choix du contact

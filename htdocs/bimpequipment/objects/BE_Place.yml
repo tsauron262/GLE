@@ -139,6 +139,8 @@ fields:
     date:
         label: Date d'arrivée
         type: datetime
+        input: 
+            display_now: 1
         required: 1
         sortable: 0
         
@@ -148,12 +150,13 @@ lists:
         icon: map-marker
         objects_change_reload: BE_Place
         add_form_name: default
-        sort_field: position
-        sort_way: asc
+        add_btn_label: Nouvel emplacement
+        sort_field: id
+        sort_way: desc
         n: 10
-        edit_btn: 1
         update_btn: 1
-        positions: 1
+        td_style: 
+            callback: getTdStyle
         cols:
             name: 
                 label: Emplacement

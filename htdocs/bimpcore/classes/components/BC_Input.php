@@ -15,35 +15,41 @@ class BC_Input extends BimpComponent
     public $extraClasses = array();
     public $extraData = array();
     public static $type_params_def = array(
-        'time'           => array(
+        'time'                   => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'date'           => array(
+        'date'                   => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'datetime'       => array(
+        'datetime'               => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'textarea'       => array(
+        'textarea'               => array(
             'rows'        => array('data_type' => 'int', 'default' => 3),
             'auto_expand' => array('data_type' => 'bool', 'default' => 0),
             'note'        => array('data_type' => 'bool', 'default' => 0),
         ),
-        'select'         => array(
+        'select'                 => array(
             'options' => array('data_type' => 'array', 'compile' => true)
         ),
-        'toggle'         => array(
+        'toggle'                 => array(
             'toggle_on'  => array('default' => 'OUI'),
             'toggle_off' => array('default' => 'NON')
         ),
-        'search_societe' => array(
-            'societe_type' => array('default' => '')
-        ),
-        'check_list'     => array(
+        'check_list'             => array(
             'items' => array('data_type' => 'array', 'default' => array(), 'compile' => 0)
         ),
-        'custom'         => array(
+        'custom'                 => array(
             'content' => array('default' => '')
+        ),
+        'search_societe'         => array(
+            'societe_type' => array('default' => '')
+        ),
+        'search_state'           => array(
+            'id_country' => array('data_type' => 'int', 'default' => 0)
+        ),
+        'search_juridicalstatus' => array(
+            'country_code' => array('default' => '0')
         )
     );
 
@@ -180,12 +186,20 @@ class BC_Input extends BimpComponent
                 $options['toggle_off'] = isset($this->params['toggle_off']) ? $this->params['toggle_off'] : 'NON';
                 break;
 
+            case 'check_list':
+                $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
+                break;
+
             case 'search_societe':
                 $options['type'] = isset($this->params['societe_type']) ? $this->params['societe_type'] : '';
                 break;
 
-            case 'check_list':
-                $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
+            case 'search_state':
+                $options['id_country'] = isset($this->params['id_country']) ? $this->params['id_country'] : '';
+                break;
+
+            case 'search_juridicalstatus':
+                $options['country_code'] = isset($this->params['country_code']) ? $this->params['country_code'] : '';
                 break;
         }
 

@@ -64,7 +64,7 @@ function loadModalFormFromView(view_id, form_name, $button, title) {
     }
 
     var data = {
-        'module_name': $view.data('module_name'),
+        'module': $view.data('module'),
         'object_name': $view.data('object_name'),
         'id_object': $view.data('id_object'),
         'form_name': form_name
@@ -73,7 +73,7 @@ function loadModalFormFromView(view_id, form_name, $button, title) {
     loadModalForm($button, data, title);
 }
 
-function loadModalView(module, object_name, id_object, view_name, $button) {
+function loadModalView(module, object_name, id_object, view_name, $button, title) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -84,16 +84,16 @@ function loadModalView(module, object_name, id_object, view_name, $button) {
     var $resultContainer = $modal.find('.modal-ajax-content');
     $resultContainer.html('').hide();
 
-    var title = '';
-
-    if (id_object) {
+    if (typeof (title) === 'undefined' || !title) {
         title = '<i class="fa fa-file-o iconLeft"></i>';
         if (typeof (object_labels[object_name].name) !== 'undefined') {
             title += object_labels[object_name].name;
         } else {
             title += 'Objet "' + object_name + '"';
         }
-        title += ' n°' + id_object;
+        if (id_object) {
+            title += ' n°' + id_object;
+        }
     }
 
     $modal.find('.modal-title').html(title);
@@ -111,11 +111,11 @@ function loadModalView(module, object_name, id_object, view_name, $button) {
     });
 
     var data = {
-        'object_module': module,
+        'module': module,
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,
-        'panel': 0
+        'content_only': 1
     };
 
     BimpAjax('loadObjectView', data, null, {
@@ -241,7 +241,7 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
     }
 
     var data = {
-        'module_name': module_name,
+        'module': module_name,
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,

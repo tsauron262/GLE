@@ -257,6 +257,7 @@ list:
     delete_btn: 1
     view_btn: 1
     page_btn: 1
+    modal_view: default
     
 searches:
     default: 

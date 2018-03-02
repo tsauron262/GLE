@@ -222,6 +222,45 @@ class BimpRender
         return $html;
     }
 
+    public static function renderFreeForm($rows, $buttons, $title, $icon = '')
+    {
+        $html = '<div class="freeForm">';
+        $html .= '<div class="freeFormTitle">';
+        if ($icon) {
+            $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+        }
+        $html .= $title;
+        $html .= '</div>';
+        $html .= '<div class="freeFormContent">';
+
+        foreach ($rows as $row) {
+            $html .= '<div class="freeFormRow">';
+            if (isset($row['label'])) {
+                $html .= '<div class="freeFormLabel">' . $row['label'] . ': </div>';
+            }
+            if (isset($row['input'])) {
+                $html .= '<div class="freeFormInput">';
+                $html .= $row['input'];
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+        }
+
+        $html .= '<div class="freeFormAjaxResult">';
+        $html .= '</div>';
+
+        $html .= '<div class="freeFormSubmit rightAlign">';
+        foreach ($buttons as $button) {
+            $html .= $button;
+        }
+        $html .= '</div>';
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public static function renderNavTabs($tabs)
     {
         $html = '';
@@ -408,10 +447,7 @@ class BimpRender
 
         $html .= '<div class="modal-body">';
 
-        $html .= '<div class="content-loading">';
-        $html .= '<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>';
-        $html .= '<p class="loading-text"></p>';
-        $html .= '</div>';
+        $html .= self::rendercontentLoading();
 
         $html .= '<div class="modal-ajax-content"></div>';
 
@@ -473,8 +509,17 @@ class BimpRender
         $return .= ' data-container="' . $container . '"';
         $return .= ' data-placement="' . $placement . '"';
         $return .= ' data-content="' . htmlentities($content) . '"';
-        $return .= ' data-html="'.$html.'"';
-        
+        $return .= ' data-html="' . $html . '"';
+
         return $return;
+    }
+
+    public static function rendercontentLoading($loading_text = '')
+    {
+        $html = '<div class="content-loading">';
+        $html .= '<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>';
+        $html .= '<p class="loading-text">' . $loading_text . '</p>';
+        $html .= '</div>';
+        return $html;
     }
 }

@@ -16,7 +16,8 @@ class BC_Form extends BC_Panel
         'custom'      => array('data_type' => 'bool', 'default' => 0),
         'label'       => array('default' => ''),
         'create_form' => array('default' => ''),
-        'display'     => array('default' => 'default')
+        'display'     => array('default' => 'default'),
+        'hidden'      => array('data_type' => 'bool', 'default' => 0)
     );
     public static $custom_row_params = array(
         'input_name' => array('required' => true, 'default' => ''),
@@ -28,13 +29,13 @@ class BC_Form extends BC_Panel
     );
 
     public function __construct(BimpObject $object, $id_parent = null, $name = '', $level = 1, $content_only = false)
-    {        
+    {
         $this->params_def['rows'] = array('type' => 'keys');
         $this->params_def['values'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
 
         $this->id_parent = $id_parent;
-
+        
         $path = null;
 
         if (!$name || $name === 'default') {
@@ -53,15 +54,20 @@ class BC_Form extends BC_Panel
         } else {
             $title = 'Ajout ' . $object->getLabel('of_a');
         }
-        
-        if (is_null($id_parent) && !is_null($object)) {
+
+        if ((is_null($id_parent) || !$id_parent) && !is_null($object)) {
             $parent_id_property = $object->getParentIdProperty();
             if (!is_null($parent_id_property)) {
                 if (BimpTools::isSubmit($parent_id_property)) {
                     $this->id_parent = BimpTools::getValue($parent_id_property, null);
+                } else {
+                    $id_parent = $object->getParentId();
+                    if (!is_null($id_parent) && $id_parent) {
+                        $this->id_parent = $id_parent;
+                    }
                 }
             }
-        }
+        } 
 
         if (!is_null($id_parent) && !is_null($object)) {
             $object->setIdParent($id_parent);
@@ -181,7 +187,7 @@ class BC_Form extends BC_Panel
     public function renderFieldRow($field_name, $params = array(), $label_cols = 3)
     {
         $field = new BC_Field($this->object, $field_name, true);
-        
+
         if (!$field->params['editable'] || !$field->params['show']) {
             return '';
         }
@@ -193,7 +199,7 @@ class BC_Form extends BC_Panel
 
         $html = '';
 
-        $html .= '<div class="row formRow' . (($input_type === 'hidden') ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
+        $html .= '<div class="row formRow' . (($input_type === 'hidden' || (int) $params['hidden']) ? ' hidden' : '') . ($display_if ? ' display_if' : '') . '"';
         if ($display_if) {
             $html .= $field->renderDisplayIfData();
         }
@@ -275,7 +281,8 @@ class BC_Form extends BC_Panel
                 if (is_a($associate, 'BimpObject')) {
                     $form_name = ($params['create_form'] ? $params['create_form'] : $this->object->getConf('associations/' . $params['association'] . '/create_form', ''));
                     if ($form_name) {
-                        $html .= $this->renderCreateObjectButton('', $input_name . '_search', $form_name, false, $associate);
+//                        $html .= $this->renderCreateObjectButton('', $input_name . '_search', $form_name, false, $associate);
+                        $html .= $this->renderCreateObjectButton('', '', $form_name, false, $associate);
                     }
                 }
 
@@ -380,7 +387,7 @@ class BC_Form extends BC_Panel
         return $html;
     }
 
-    public function renderCreateObjectButton($object_name, $result_input_name, $form_name, $reload_input = true, $object = null)
+    public function renderCreateObjectButton($object_name, $result_input_name, $form_name, $reload_input = true, $object = null, $successcallBack = '')
     {
         if (!$form_name) {
             return '';

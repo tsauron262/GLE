@@ -128,6 +128,8 @@ class BimpController
 
                 if (BimpTools::isSubmit('search')) {
                     echo $this->renderSearchResults();
+                } elseif (method_exists($this, 'renderHtml')) {
+                    echo $this->renderHtml();
                 } else {
                     echo $this->renderSections('sections');
                 }
@@ -158,6 +160,8 @@ class BimpController
             }
             if (BimpTools::isSubmit('search')) {
                 echo $this->renderSearchResults();
+            } elseif (method_exists($this, 'renderHtml')) {
+                echo $this->renderHtml();
             } else {
                 echo $this->renderSections('sections');
             }
@@ -1073,12 +1077,9 @@ class BimpController
             $object = BimpObject::getInstance($module, $object_name);
             $object->fetch($id_object);
             $view = new BC_View($object, $view_name, $content_only, 1);
+            $view->content_only = $content_only;
             $view->setNewValues($new_values);
-            if ($content_only) {
-                $html = $view->renderHtmlContent();
-            } else {
-                $html = $view->renderHtml();
-            }
+            $html = $view->renderHtml();
             $view_id = $view->identifier;
         }
 

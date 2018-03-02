@@ -17,7 +17,8 @@ class BC_ListTable extends BC_List
         'modal_view'  => array(),
         'edit_form'   => array('default' => 'default'),
         'extra_btn'   => array('data_type' => 'array', 'compile' => true),
-        'row_style'   => array('default' => '')
+        'row_style'   => array('default' => ''),
+        'td_style'    => array('default' => '')
     );
     public $col_params = array(
         'show'      => array('data_type' => 'bool', 'default' => 1),
@@ -641,6 +642,12 @@ class BC_ListTable extends BC_List
                     $row_style = $item_params['row_style'];
                 }
 
+                if (isset($row['td_style'])) {
+                    $td_style = $row['td_style'];
+                } else {
+                    $td_style = $item_params['td_style'];
+                }
+
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow';
                 if (isset($this->new_values[(int) $id_object]) && count($this->new_values[(int) $id_object])) {
                     $html .= ' modified';
@@ -655,7 +662,7 @@ class BC_ListTable extends BC_List
                 }
                 $html .= '>';
 
-                $html .= '<td style="text-align: center">';
+                $html .= '<td style="text-align: center; ' . $td_style . '">';
                 if ($this->params['checkboxes']) {
                     if ($this->object->getCurrentConf('item_checkbox', true, false, 'bool')) {
                         $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
@@ -667,7 +674,7 @@ class BC_ListTable extends BC_List
                 $html .= '</td>';
 
                 if ($this->params['positions']) {
-                    $html .= '<td class="positionHandle"><span></span></td>';
+                    $html .= '<td class="positionHandle" style="' . $td_style . '"><span></span></td>';
                 }
 
                 $this->setConfPath('cols');
@@ -686,11 +693,14 @@ class BC_ListTable extends BC_List
                     if ($max_width) {
                         $html .= 'max-width: ' . $max_width . ';';
                     }
+                    if ($td_style) {
+                        $html .= ' ' . $td_style;
+                    }
                     $html .= '">';
                     $html .= (isset($row[$col_name]) ? $row[$col_name] : '');
                     $html .= '</td>';
                 }
-                $html .= '<td class="buttons">';
+                $html .= '<td class="buttons" style="' . $td_style . '">';
 
                 $this->setConfPath();
 
@@ -719,6 +729,24 @@ class BC_ListTable extends BC_List
                     $html .= $this->renderRowButton(array(
                         'class'   => 'editButton',
                         'label'   => 'Editer',
+                        'onclick' => $onclick
+                    ));
+                }
+                if (!is_null($item_params['modal_view'])) {
+                    $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this))';
+                    $html .= $this->renderRowButton(array(
+                        'label'   => 'Vue rapide',
+                        'icon'    => 'eye',
+                        'onclick' => $onclick
+                    ));
+                }
+                if (!is_null($item_params['inline_view'])) {
+                    $onclick = 'displayObjectView($(\'#' . $this->identifier . '_container\').find(\'.objectViewContainer\'), ';
+                    $onclick .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_params['inline_view'] . '\', ' . $id_object . ', \'default\'';
+                    $onclick .= ');';
+                    $html .= $this->renderRowButton(array(
+                        'label'   => 'Afficher',
+                        'icon'    => 'eye',
                         'onclick' => $onclick
                     ));
                 }
@@ -753,24 +781,6 @@ class BC_ListTable extends BC_List
                             }
                         }
                     }
-                }
-                if (!is_null($item_params['inline_view'])) {
-                    $onclick = 'displayObjectView($(\'#' . $this->identifier . '_container\').find(\'.objectViewContainer\'), ';
-                    $onclick .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_params['inline_view'] . '\', ' . $id_object . ', \'default\'';
-                    $onclick .= ');';
-                    $html .= $this->renderRowButton(array(
-                        'label'   => 'Afficher',
-                        'icon'    => 'eye',
-                        'onclick' => $onclick
-                    ));
-                }
-                if (!is_null($item_params['modal_view'])) {
-                    $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this))';
-                    $html .= $this->renderRowButton(array(
-                        'label'   => 'Vue rapide',
-                        'icon'    => 'eye',
-                        'onclick' => $onclick
-                    ));
                 }
                 if ($item_params['delete_btn']) {
                     $html .= $this->renderRowButton(array(

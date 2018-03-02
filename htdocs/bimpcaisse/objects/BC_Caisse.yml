@@ -1,0 +1,99 @@
+table: bc_caisse
+
+labels: 
+    name: Caisse
+    is_female: 1
+
+objects: 
+    entrepot:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: id_entrepot
+    user: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+            id_object: 
+                field_value: id_current_user
+    current_session: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_CaisseSession
+            id_object: 
+                field_value: id_current_session
+fields: 
+    id_entrepot:
+        label: Entrepot
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+        required: 1
+    name: 
+        label: name
+        required: 1
+    status: 
+        label: Etat
+        type: int
+        values: 
+            array: states
+    id_current_user: 
+        label: Utilisateur actif
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+    id_current_session:
+        label: Session actuelle
+        type: id_object
+        object: current_session
+    fonds: 
+        label: Fonds de caisse
+        type: money
+
+forms: 
+    default: 
+        rows: 
+            - field: id_entrepot
+            - field: name
+            - field: status
+            - field: fonds
+
+lists: 
+    default: 
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les caisses sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        sort_field: id
+        sort_way: asc
+        n: 25
+        cols:
+            id:
+                label: ID
+                field: id
+                min_width: 60px
+            centre: 
+                field: id_entrepot
+                display: nom_url
+            name: 
+                field: name
+                display: nom_url
+            status:
+                field: status
+            fonds: 
+                field: fonds
+        add_form_name: default
+        edit_btn: 1
+        delete_btn: 1

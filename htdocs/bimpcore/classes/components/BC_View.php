@@ -9,10 +9,8 @@ class BC_View extends BC_Panel
     public function __construct(BimpObject $object, $name, $content_only = false, $level = 1, $title = null, $icon = null)
     {
 
-        $this->params_def['edit_form'] = array('default' => '');
         $this->params_def['delete_btn'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['buttons'] = array('type' => 'definitions', 'defs_type' => 'button', 'multiple' => true);
-
         $this->params_def['edit_form'] = array();
 
         if (!$name || $name === 'default') {

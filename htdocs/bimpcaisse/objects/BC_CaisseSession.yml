@@ -1,0 +1,65 @@
+table: bc_caisse_session
+common_fields: 0
+
+parent_object: BC_Caisse
+parent_id_property: id_caisse
+
+labels: 
+    name: Session de caisse
+    name_plur: Sessions de caisse
+    is_female: 1
+    
+objects: 
+    user_open: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_user
+            id_object: 
+                field_value: id_user_open
+                
+    user_closed: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_user
+            id_object: 
+                field_value: id_user_closed
+                
+fields: 
+    id_caisse: 
+        label: Caisse
+        type: id_parent
+        
+    fonds_begin: 
+        label: Fonds à l'ouverture
+        type: money
+        required: 1
+        
+    fonds_end: 
+        label: Fonds à la fermeture
+        type: money
+        default_value: 0
+        
+    date_open: 
+        label: Date et heure d'ouverture
+        type: datetime
+        
+    date_closed: 
+        label: Date et heure de fermeture
+        type: datetime
+        
+    id_user_open: 
+        label: Utilisateur à l'ouverture
+        type: id_object
+        object: user_open
+        
+    id_user_closed: 
+        label: Utilisateur à la fermeture
+        type: id_object
+        object: user_closed
+        

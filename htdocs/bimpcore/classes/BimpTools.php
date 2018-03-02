@@ -572,19 +572,31 @@ class BimpTools
                 return is_object($value);
 
             case 'date':
-                if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value)) {
+                if ($value === '0000-00-00') {
+                    $value = '';
+                    return true;
+                }
+                if ($value === '' || preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value)) {
                     return true;
                 }
                 return false;
 
             case 'time':
-                if (preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value)) {
+                if ($value === '00:00:00') {
+                    $value = '';
+                    return true;
+                }
+                if ($value === '' || preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value)) {
                     return true;
                 }
                 return false;
 
             case 'datetime':
-                if (preg_match('/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
+                if ($value === '0000-00-00 00:00:00') {
+                    $value = '';
+                    return true;
+                }
+                if ($value === '' || preg_match('/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
                     return true;
                 }
                 return false;

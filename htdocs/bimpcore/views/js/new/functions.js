@@ -14,7 +14,9 @@ function bimp_msg(msg, className, $container) {
     html += '</p>';
 
     if ($container && (typeof ($container) === 'object') && $container.length) {
-        $container.html(html).stop().slideDown(250);
+        $container.html(html).stop().slideDown(250, function() {
+            $(this).css('height', 'auto');
+        });
     } else {
         $container = $('#page_notifications');
 
@@ -22,7 +24,7 @@ function bimp_msg(msg, className, $container) {
             return;
         }
 
-        $container.append(html).show();
+        $container.append(html).show().css('height', 'auto');
 
         var $p = $container.find('p:last-child').css('margin-left', '370px').animate({
             'margin-left': 0

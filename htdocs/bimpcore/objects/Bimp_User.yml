@@ -93,13 +93,13 @@ fields:
     gsxresa:
         label: Notification réservations GSX
         dol_extra_field: 1
+        type: bool
     apple_shipto: 
         label: N° ShipTo Apple
         dol_extra_field: 1
     mail_sec: 
         label: E-Mail de secours
         dol_extra_field: 1
-        type: bool
     comp:
         label: Compétence
         dol_extra_field: 1

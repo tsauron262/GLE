@@ -96,6 +96,13 @@ fields:
     mail_sec: 
         label: E-Mail de secours
         dol_extra_field: 1
+    comp:
+        label: Compétence
+        dol_extra_field: 1
+    gsxresa:
+        label: Notification réservations GSX
+        dol_extra_field: 1
+        
         
 forms:
     light: 
@@ -109,6 +116,8 @@ forms:
             - field: apple_service
             - field: apple_shipto
             - field: apple_techid
+            - field: gsxresa
+            - field: comp
             - field: signature
 lists:
     default: 

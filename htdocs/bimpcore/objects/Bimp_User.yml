@@ -90,18 +90,20 @@ fields:
     apple_techid: 
         label: Tech ID Apple
         dol_extra_field: 1
+    gsxresa:
+        label: Notification réservations GSX
+        dol_extra_field: 1
     apple_shipto: 
         label: N° ShipTo Apple
         dol_extra_field: 1
     mail_sec: 
         label: E-Mail de secours
         dol_extra_field: 1
+        type: bool
     comp:
         label: Compétence
         dol_extra_field: 1
-    gsxresa:
-        label: Notification réservations GSX
-        dol_extra_field: 1
+        type: text
         
         
 forms:
@@ -188,6 +190,7 @@ fields_tables:
             - field: dateemployment
             - field: fk_user
               display: nom_url
+            - field: comp
         
     notes: 
         title: Notes
@@ -204,6 +207,7 @@ fields_tables:
             - field: apple_service
             - field: apple_techid
             - field: apple_shipto
+            - field: gsxresa
         
 views: 
     default: 

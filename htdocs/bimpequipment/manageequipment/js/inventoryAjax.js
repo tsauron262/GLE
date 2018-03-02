@@ -151,7 +151,7 @@ function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned,
 
     cnt_product++;
 
-    if (bad_entrepot !== true)
+    if (bad_entrepot === true)
         var line = '<tr id=e' + equipment_id + ' style="background: #ff4d4d">';
     else if (scanned === undefined)
         var line = '<tr id=e' + equipment_id + '>';
@@ -196,6 +196,7 @@ function addLineProduct(product_id, ref, label, qty_totale, qty_scanned) {
         }
     } else {
         var line = '<tr id=p' + product_id + '>';
+        var qty_totale = '';
         var qty_missing = '';
     }
 

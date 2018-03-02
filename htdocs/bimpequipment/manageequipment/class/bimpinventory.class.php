@@ -278,37 +278,59 @@ class BimpInventory {
         $this->setProductQuantities();
         $this->setEquipments();
 
-        $em = new EquipmentManager($this->db);
-        $out = $em->getAllProducts($this->fk_entrepot);
+        if ($this->statut != $this::STATUT_CLOSED) {
 
-        if (sizeof($em->errors) != 0)
-            return $out;
+            $em = new EquipmentManager($this->db);
+            $out = $em->getAllProducts($this->fk_entrepot);
 
-        $allEqui = $out['equipments'];
-        $allProd = $out['products'];
+            if (sizeof($em->errors) != 0)
+                return $out;
 
-        foreach ($allEqui as $id => $inut) {
-            if ($this->equipments[$id]) {
-                $allEqui[$id]['scanned'] = true;
+            $allEqui = $out['equipments'];
+            $allProd = $out['products'];
+
+            foreach ($allEqui as $id => $inut) {
+                if ($this->equipments[$id]) {
+                    $allEqui[$id]['scanned'] = true;
+                }
             }
-        }
 
-        foreach ($this->equipments as $id_equipment => $equipment) {
-            if (!isset($allEqui[$id_equipment])) { // is in inventory_det but not in llx_beequipment_place
+            foreach ($this->equipments as $id_equipment => $equipment) {
+                if (!isset($allEqui[$id_equipment])) { // is in inventory_det but not in llx_beequipment_place
+                    $doliProd = new Product($this->db);
+                    $doliProd->fetch($equipment['id_product']);
+                    $allEqui[$id_equipment] = array('serial' => $equipment['serial'],
+                        'id_product' => $equipment['id_product'], 'ref' => $doliProd->getNomUrl(1),
+                        'label' => $doliProd->label, 'bad_entrepot' => true);
+                }
+            }
+
+            foreach ($allProd as $id => $inut) {
+                if ($this->statut != $this::STATUT_CLOSED) {
+                    if ($this->prodQty[$id])
+                        $allProd[$id]['qtyScanned'] = $this->prodQty[$id];
+                } else {
+                    $allProd[$id]['qtyScanned'] = '';
+                }
+            }
+        } else {
+            $allEqui = $this->equipments;
+            $allProd = $this->prodQty;
+
+            foreach ($allEqui as $id_equipment => $equipment) {
                 $doliProd = new Product($this->db);
                 $doliProd->fetch($equipment['id_product']);
-                $allEqui[$id_equipment] = array('serial' => $equipment['serial'],
-                    'id_product' => $equipment['id_product'], 'ref' => $doliProd->getNomUrl(1),
-                    'label' => $doliProd->label, 'bad_entrepot' => true);
+                $allEqui[$id_equipment]['ref'] = $doliProd->getNomUrl(1);
+                $allEqui[$id_equipment]['label'] = $doliProd->label;
             }
-        }
 
-        foreach ($allProd as $id => $inut) {
-            if ($this->statut != $this::STATUT_CLOSED) {
-                if ($this->prodQty[$id])
-                    $allProd[$id]['qtyScanned'] = $this->prodQty[$id];
-            } else {
-                $allProd[$id]['qtyScanned'] = '';
+            foreach ($allProd as $id => $inut) {
+                $doliProd = new Product($this->db);
+                $doliProd->fetch($id);
+                $allProd[$id] = array();
+                $allProd[$id]['qtyScanned'] = $this->prodQty[$id];
+                $allProd[$id]['ref'] = $doliProd->getNomUrl(1);
+                $allProd[$id]['label'] = $doliProd->label;
             }
         }
 

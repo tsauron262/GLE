@@ -139,6 +139,8 @@ fields:
     date:
         label: Date d'arrivée
         type: datetime
+        input: 
+            display_now: 1
         required: 1
         sortable: 0
         

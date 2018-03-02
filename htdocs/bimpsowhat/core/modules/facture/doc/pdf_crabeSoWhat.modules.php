@@ -452,6 +452,7 @@ class pdf_crabeSoWhat extends ModelePDFFactures
                                             $niveauTitre = $object->lines[$i]->qty;
                                             $object->lines[$i]->qty = "";
                                             $object->lines[$i]->total_ht = "";
+                                            $object->lines[$i]->tva_tx = "";
                                             $pdf->SetFont('','', $default_font_size - 3 + $niveauTitre*2);
                                         }
                                         else{//Ligne non titre

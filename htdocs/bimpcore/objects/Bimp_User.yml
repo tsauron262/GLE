@@ -132,7 +132,6 @@ forms:
             - field: gsxresa
             - field: comp
             - field: signature
-            - field: lundi
 lists:
     default: 
         checkboxes: 1

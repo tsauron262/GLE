@@ -75,6 +75,17 @@ fields:
         object: resp_user
         input: 
             type: search_user
+    synchaction:
+        label: Synchro Agenda
+        dol_extra_field: 1
+        type: bool
+    displayedinglobaladdressbook:
+        label: Dans l'annuaire
+        dol_extra_field: 1
+        type: bool
+    mailquota:
+        label: Quota Mail
+        dol_extra_field: 1
     signature: 
         label: Signature
         type: text
@@ -180,6 +191,9 @@ fields_tables:
             - field: user_mobile
             - field: skype
             - field: mail_sec
+            - field: synchaction
+            - field: displayedinglobaladdressbook
+            - field: mailquota
         
     status: 
         title: Statut

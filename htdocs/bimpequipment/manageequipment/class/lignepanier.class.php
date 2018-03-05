@@ -78,7 +78,8 @@ class LignePanier {
                     return false;
             }
         }
-        $this->error .= "Identifiant du produit non définit";
+        return false;
+        //$this->error .= "Identifiant du produit non définit";
     }
 
     function getError() {

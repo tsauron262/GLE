@@ -8,6 +8,9 @@ include_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
+/**
+ * @deprecated 
+ */
 class Transfert {
 
     private $db;
@@ -52,6 +55,9 @@ class Transfert {
 
 }
 
+/**
+ * @deprecated 
+ */
 class LigneTransfert {
 
     private $db;

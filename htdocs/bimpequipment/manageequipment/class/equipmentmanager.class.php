@@ -275,6 +275,23 @@ class EquipmentManager {
             return false;
         }
     }
+    
+        public function getEquipmentBySerial($serial) {
+        
+        $sql = 'SELECT id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+        $sql .= ' WHERE serial=' . $serial;
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                return $obj->id;
+            }
+        } else {
+            $this->errors[] = "Le numéro de série $serial n'est pas dans la table des équipements";
+            return false;
+        }
+    }
 
 //    public function getEquipmentById($equipment_id) {
 //        

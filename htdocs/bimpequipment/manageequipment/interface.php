@@ -11,6 +11,7 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/transfert.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimptransfer.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimplivraison.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimpinventory.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/equipmentmanager.class.php';
@@ -91,37 +92,26 @@ switch (GETPOST('action')) {
     case 'closeInventory': {
             $inventory->fetch(GETPOST('inventory_id'));
             echo json_encode(array('success' => $inventory->updateStock($user), 'errors' => $inventory->errors));
-//            echo json_encode(array('success' => $inventory->updateStatut($inventory::STATUT_CLOSED), 'errors' => $inventory->errors));
             break;
         }
 
 
-    /* Old Inventories */
-    /** @deprecated */
-    case 'getStockAndSerial': {
-            $lp->check(GETPOST('ref'), GETPOST('idEntrepot'));
-            if (!$lp->prodId) {
-                echo json_encode(array('errors' => array($lp->error)));
-                break;
-            }
-            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId, $lp->serial));
+    /* Transfer - viewTransfer */
+
+    case 'createTransfer': {
+            $transfert = new BimpTransfer($db);
+            $id_transfer = $transfert->create(GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user->id, $transfert::STATUS_SENT);
+            $transfert->fetch($id_transfer);
+            
+            echo json_encode(array('lines_added' => $transfert->addLines(GETPOST('products')), 'errors' => $transfert->errors));
             break;
         }
-    /** @deprecated */
-    case 'getStock': {
-            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), GETPOST('prodId'), ''));
-            break;
-        }
-    /** @deprecated */
-    case 'correctStock': {
-//            echo json_encode($em->correctStock(GETPOST('idEntrepot'), GETPOST('products')), $user);
-            break;
-        }
+
+    /* Default (catch bad action parameter) */
     default: {
             echo json_encode(array('errors' => array('Aucune action ne match avec : ' . GETPOST('action'))));
             break;
         }
-        
 }
 
 

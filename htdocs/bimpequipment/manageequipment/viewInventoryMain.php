@@ -50,7 +50,7 @@ print '<th>Responsable</th>';
 print '<th>Statut</th>';
 print '<th>Date d\'ouverture</th>';
 print '<th>Date de fermeture</th>';
-print '<th>Nombre de produit scanné</th>';
+print '<th>Nombre de produit scannés</th>';
 print '<th>Lien</th>';
 print '</thead>';
 print '<tbody></tbody>';
@@ -60,24 +60,27 @@ print '</div>';
 
 print '</div><br>';
 
+if ($user->rights->bimpequipment->inventory->create) {
+    print '<div class="separatorDiv">';
 
-print '<div class="separatorDiv">';
+    print '<div class="separatorDiv" style="margin:-7px 0px 0px -7px ; float:left">';
+    print '<h4><strong>Créer inventaire</strong></h4>';
+    print '</div><br><br><br>';
 
-print '<div class="separatorDiv" style="margin:-7px 0px 0px -7px ; float:left">';
-print '<h4><strong>Créer inventaire</strong></h4>';
-print '</div><br><br><br>';
+    print '<p/>Sélectionnez un entrepôt pour créer un inventaire</p>';
+    print '<select id="entrepotCreate" class="select2 cust" style="width: 200px;">';
+    print '<option></option>';
+    foreach ($entrepots as $id => $name) {
+        print '<option value="' . $id . '">' . $name . '</option>';
+    }
+    print '</select> ';
 
-print '<p/>Sélectionnez un entrepôt pour créer un inventaire</p>';
-print '<select id="entrepotCreate" class="select2 cust" style="width: 200px;">';
-print '<option></option>';
-foreach ($entrepots as $id => $name) {
-    print '<option value="' . $id . '">' . $name . '</option>';
+    print '<div id="alertCreate" style="clear:left"></div>';
+
+    print '</div>';
+} else {
+    print '<strong style="color:red">Vous n\'avez pas les droits requis pour créer un inventaire.</strong>';
 }
-print '</select> ';
-
-print '<div id="alertCreate" style="clear:left"></div>';
-
-print '</div>';
 
 $db->close();
 

@@ -43,7 +43,7 @@ class Transfert {
         $this->db->begin();
         $errors = array();
         foreach ($this->ligneTransfert as $ligne) { // Loop on each movement to do
-            $errors = array_merge($errors, $ligne->transfert($this->entrepotIdStart, $this->entrepotIdEnd, $this->user, $label, $codemove));
+            $errors = array_merge($errors, $ligne->transfert($this->entrepotIdEnd));
         }
         if (sizeof($errors) == 0)
             $this->db->commit();
@@ -66,28 +66,11 @@ class LigneTransfert {
         $this->serial = $serial;
     }
 
-    public function transfert($entrepotIdStart, $entrepotIdEnd, $user, $label, $codemove) {
+    public function transfert($entrepotIdEnd) {
         $errors = array();
 
         $product = new Product($this->db);
         $product->fetch($this->id_product);
-        if ($this->serial != '')
-            $label = 'Transférer stock Bimp ' . $this->serial;
-
-        // Remove stock
-//        function correct_stock($user, $id_entrepot, $nbpiece, $movement, $label = '', $price = 0, $inventorycode = '', $origin_element = '', $origin_id = null)
-        $result1 = $product->correct_stock($user, $entrepotIdStart, $this->qty, 1, $label, 0, $codemove, 'entrepot', $entrepotIdEnd);
-        if ($result1 < 0) {
-            $errors[] = $product->errors;
-            $errors[] = $product->errorss;
-        }
-
-        // Add stock
-        $result2 = $product->correct_stock($user, $entrepotIdEnd, $this->qty, 0, $label, 0, $codemove, 'entrepot', $entrepotIdStart);
-        if ($result2 < 0) {
-            $errors[] = $product->errors;
-            $errors[] = $product->errorss;
-        }
 
         if ($this->serial != '') {  // if it is an equipment
             $id_equipment = getIdBySerial($this->db, $this->serial);

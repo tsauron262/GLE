@@ -65,8 +65,7 @@ class BimpLivraison {
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
         $sql .= ' WHERE inventorycode="BimpLivraison ' . $this->ref . '"';
-        // value supp à 0 ?
-//echo $sql;
+
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
@@ -157,18 +156,17 @@ class BimpLivraison {
                 $doliProduct->fetch($product['id_prod']);
                 $length = sizeof($this->errors);
 
-                // Add stock
-                $result = $doliProduct->correct_stock($user, $entrepotId, (isset($product['qty']) ? $product['qty'] : 1), 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
-                if ($result < 0) {
-                    $this->errors = array_merge($this->errors, $doliProduct->errors);
-                    $this->errors = array_merge($this->errors, $doliProduct->errorss);
-                }
-
-                if ($length != sizeof($this->errors))
-                    $this->errors[] = ' id : ' . $product['id_prod'];
-
-                if (!isset($product['qty'])) {   // non serialisable
+                if (!isset($product['qty'])) {   // serialisable
                     $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
+                } else {    // non serialisable
+                    $result = $doliProduct->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
+                    if ($result < 0) {
+                        $this->errors = array_merge($this->errors, $doliProduct->errors);
+                        $this->errors = array_merge($this->errors, $doliProduct->errorss);
+                    }
+
+                    if ($length != sizeof($this->errors))
+                        $this->errors[] = ' id : ' . $product['id_prod'];
                 }
             }
 

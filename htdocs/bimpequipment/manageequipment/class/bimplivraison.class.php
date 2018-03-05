@@ -102,7 +102,26 @@ class BimpLivraison {
 
         $deliveredLignes = $this->getDeliveredLignes($lignes);
 
-        return array('lignes' => $lignes, 'deliveredLigne' => $deliveredLignes, 'errors' => $this->errors);
+        return array('init_fk_entrepot' => $this->getInitEntrepot(), 'lignes' => $lignes, 'deliveredLigne' => $deliveredLignes, 'errors' => $this->errors);
+    }
+
+    function getInitEntrepot() {
+
+        $sql = 'SELECT e.entrepot as entrepot';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields as e';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur as cf ON cf.rowid = e.fk_object';
+        $sql .= ' WHERE e.fk_object=' . $this->orderId;
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                return $obj->entrepot;
+            }
+        } else if (!$result) {
+            $this->errors[] = "Erreur lors de la requête de recherche de l'entrepôt d'origine" . $sql;
+            return false;
+        }
+        return false;
     }
 
     function getDeliveredLignes($lignes) {

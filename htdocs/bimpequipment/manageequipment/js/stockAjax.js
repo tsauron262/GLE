@@ -82,6 +82,8 @@ function getRemainingLignes() {
                         addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Inconnu');
                 });
                 initEvents();
+                 $('#entrepot').val(outP.init_fk_entrepot);
+                 $('#entrepot').trigger('change');
             }
         }
     });

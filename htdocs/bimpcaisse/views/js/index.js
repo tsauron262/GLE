@@ -5,15 +5,17 @@ function BC_Vente() {
         this.id_client = 0;
         this.nb_articles = 0;
         this.total_ttc = 0;
-        this.total_ht = 0;
+        this.total_remises_vente = 0;
+        this.total_remises_articles = 0;
+        this.total_remises = 0;
         this.toPay = 0;
         this.toReturn = 0;
+        this.remises = []
     };
 
     this.ajaxResult = function (result) {
         if (typeof (result.vente_data) === 'undefined') {
             return;
-
         }
 
         if (typeof (result.vente_data.id_vente) !== 'undefined') {
@@ -31,12 +33,22 @@ function BC_Vente() {
 
         if (typeof (result.vente_data.total_ttc) !== 'undefined') {
             this.total_ttc = result.vente_data.total_ttc;
-
-            displayMoneyValue(this.total_ttc, $('#ventePanierTotal').find('span'));
         }
 
-        if (typeof (result.vente_data.total_ht) !== 'undefined') {
-            this.total_ht = result.vente_data.total_ht;
+        if (typeof (result.vente_data.total_remises_vente) !== 'undefined') {
+            this.total_remises_vente = result.vente_data.total_remises_vente;
+        }
+
+        if (typeof (result.vente_data.total_remises_articles) !== 'undefined') {
+            this.total_remises_articles = result.vente_data.total_remises_articles;
+        }
+
+        if (typeof (result.vente_data.total_remises) !== 'undefined') {
+            this.total_remises = result.vente_data.total_remises;
+        }
+
+        if (typeof (result.vente_data.remises) !== 'undefined') {
+            this.remises = result.vente_data.remises;
         }
 
         if (typeof (result.vente_data.toPay) !== 'undefined') {
@@ -60,10 +72,52 @@ function BC_Vente() {
                         $input.val(article.qty);
                     }
 
-                    displayMoneyValue(article.total_ttc, $line.find('.product_total_price'));
+                    if (article.total_remises > 0) {
+                        displayMoneyValue((article.total_ttc), $line.find('.base_price'));
+                        $line.find('.base_price').show();
+                    } else {
+                        $line.find('.base_price').html('').hide();
+                    }
+
+                    displayMoneyValue((article.total_ttc - article.total_remises), $line.find('.final_price'));
                 }
             }
         }
+
+//        displayMoneyValue(this.total_remises_vente, $('#venteRemises').find('.total_remises_vente span'));
+        displayMoneyValue(this.total_remises_articles, $('#venteRemises').find('.total_remises_articles span'));
+        displayMoneyValue(this.total_remises, $('#venteRemises').find('.total_remises span'));
+        displayMoneyValue((this.total_ttc - this.total_remises), $('#ventePanierTotal span'));
+
+        $('#venteRemises').hide().find('.remises_lines').html('');
+        $('#ventePanierLines').find('.cartArticleLine').each(function () {
+            $(this).find('.article_remises').hide().find('.content').html('');
+        });
+
+        if (this.remises.length) {
+            for (var j in this.remises) {
+                var html = '<div class="remise">' + this.remises[j].label + ': <span>' + this.remises[j].montant;
+                html += '</span><i class="fa fa-trash" onclick="deleteRemise($(this), ' + this.remises[j].id_remise + ')"></i></div>';
+                if (this.remises[j].id_article) {
+                    $('#cart_article_' + this.remises[j].id_article).find('.article_remises').show().find('.content').append(html);
+                } else {
+                    $('#venteRemises').find('.remises_lines').append(html);
+                }
+            }
+        }
+
+        if (this.total_remises_articles > 0) {
+            $('#venteRemises').find('.total_remises_articles').show();
+        } else {
+            $('#venteRemises').find('.total_remises_articles').hide();
+        }
+
+        if (this.total_remises > 0) {
+            $('#venteRemises').show();
+        } else {
+            $('#venteRemises').hide();
+        }
+
         if (this.toReturn > 0) {
             $('#venteToReturn').slideDown(250);
             $('#venteToPay').slideUp(250);
@@ -260,7 +314,33 @@ function changeUser($button) {
     }
 }
 
-function loadNewVente() {
+function loadCaisseMvtForm($button) {
+    var $params = $('#current_params');
+    var id_entrepot = parseInt($params.find('[name="id_entrepot"]').val());
+    var id_caisse = parseInt($params.find('[name="id_caisse"]').val());
+    var caisse_name = $params.find('[name="caisse_name"]').val();
+
+    if (!id_entrepot || !id_caisse) {
+        bimp_msg('Aucune caisse ouverte. Opération impossible', 'danger');
+        return;
+    }
+
+    var title = 'Mouvement de fonds pour la caisse "' + caisse_name + '"';
+
+    var values = '{"fields": {"id_entrepot": ' + id_entrepot + ', "id_caisse": ' + id_caisse + '}}';
+    loadModalForm($button, {
+        module: 'bimpcaisse',
+        object_name: 'BC_CaisseMvt',
+        form_name: 'light',
+        full_panel: 0,
+        param_values: values
+    }, title);
+}
+
+function loadNewVente(id_client) {
+    if (typeof (id_client) === 'undefined') {
+        id_client = 0;
+    }
     var $button = $('#newVenteButton');
     if (!$button.length || $button.hasClass('disabled')) {
         return;
@@ -288,7 +368,8 @@ function loadNewVente() {
     Vente.reset();
 
     BimpAjax('loadNewVente', {
-        id_caisse: id_caisse
+        id_caisse: id_caisse,
+        id_client: id_client
     }, $content, {
         $listContainer: $listContainer,
         $content: $content,
@@ -382,6 +463,20 @@ function loadVente($button, id_vente) {
     });
 }
 
+function refreshVente() {
+    if (Vente.id_vente) {
+        BimpAjax('loadVenteData', {
+            id_vente: Vente.id_vente
+        }, null, {
+            display_success: false,
+            display_errors_in_popup_only: true,
+            success: function (result, bimpAjax) {
+                Vente.ajaxResult(result);
+            }
+        });
+    }
+}
+
 function saveCurrentVente($button, status) {
     if ($button.hasClass('disabled')) {
         return;
@@ -399,6 +494,7 @@ function saveCurrentVente($button, status) {
         id_vente: Vente.id_vente,
         status: status
     }, null, {
+        id_vente: Vente.id_vente,
         display_success_in_popup_only: true,
         display_errors_in_popup_only: true,
         success: function (result, bimpAjax) {
@@ -416,9 +512,22 @@ function saveCurrentVente($button, status) {
             $('#newVenteButton').removeClass('disabled');
             Vente.reset();
             reloadObjectList('BC_Vente_default_list_table');
+
+            if (status === 2) {
+                if (typeof (result.validate_errors) !== 'undefined' && result.validate_errors.length) {
+                    var html = '<div class="alert alert-danger alert-dismissible">';
+                    html += '<button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>';
+                    html += 'Des erreurs sont survenues lors de la validation de la vente n°' + bimpAjax.id_vente + '<br/>';
+                    for (var i in result.validate_errors) {
+                        html += ' - ' + result.validate_errors[i];
+                    }
+                    html += '</div>';
+                    $('#venteErrors').append(html).slideDown(250);
+                }
+            }
+
         },
         error: function (result, bimpAjax) {
-
         }
     });
 }
@@ -475,6 +584,34 @@ function loadNewContactForm($button, id_client) {
             });
         }
     });
+}
+
+function selectClientFromList($button) {
+    var $row = $button.findParentByClass('Bimp_Societe_row');
+
+    if (!$row.length) {
+        bimp_msg('Erreur: ID client absent');
+        return;
+    }
+
+    var id_client = parseInt($row.data('id_object'));
+
+    if (!id_client) {
+        bimp_msg('Erreur: ID client absent');
+        return;
+    }
+
+    var $container = $('#venteClientFormContainer');
+    if (!$container.length) {
+        loadNewVente(id_client);
+    } else {
+        $container.find('[name="id_client"]').val(id_client);
+        $container.find('[name="id_client_contact"]').val(0);
+
+        saveClient();
+    }
+
+    $('#bc_main_container').find('a[href="#ventes"]').click();
 }
 
 function saveClient() {
@@ -742,22 +879,93 @@ function saveArticleQty(id_article) {
             id_article: id_article,
             qty: val
         }, null, {
+            qty: val,
+            id_article: id_article,
             display_success: false,
             display_errors_in_popup_only: true,
             error_msg: 'Echec de l\'enregistrement de la quantité',
             success: function (result, bimpAjax) {
                 Vente.ajaxResult(result);
 
-                if (result.total_ttc) {
-                    displayMoneyValue(result.total_ttc, $('#cart_article_' + id_article).find('.product_total_price'));
+//                if (result.total_ttc) {
+//                    displayMoneyValue(result.total_ttc, $('#cart_article_' + bimpAjax.id_article).find('.product_total_price'));
+//                }
+
+                var $stockAlert = $('#cart_article_' + bimpAjax.id_article).find('.stockAlert');
+                if ($stockAlert.length) {
+                    $stockAlert.find('span.stock').text(result.stock);
+                    if (result.stock < bimpAjax.qty) {
+                        $stockAlert.slideDown(250);
+                    } else {
+                        $stockAlert.slideUp(250);
+                    }
                 }
             }
         });
     }
 }
 
-function saveVente() {
+function setVenteStatus($button, id_vente, status) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
 
+    if (status === 0) {
+        if (!confirm('Etes-vous sûr de vouloir abandonner cette vente?')) {
+            return;
+        }
+    }
+
+    $button.addClass('disabled');
+
+    BimpAjax('saveVenteStatus', {
+        id_vente: id_vente,
+        status: status
+    }, null, {
+        $button: $button,
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        success: function (result, bimpAjax) {
+            $button.removeClass('disabled');
+            reloadObjectList('BC_Vente_default_list_table');
+        },
+        error: function (result, bimpAjax) {
+            $button.removeClass('disabled');
+        }
+    });
+}
+
+function loadRemiseForm($button) {
+    loadModalForm($button, {
+        'module': 'bimpcaisse',
+        'object_name': 'BC_VenteRemise',
+        'id_parent': Vente.id_vente
+    }, 'Ajout d\'une remise');
+}
+
+function deleteRemise($button, id_remise) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    BimpAjax('deleteRemise', {
+        id_vente: Vente.id_vente,
+        id_remise: id_remise
+    }, null, {
+        $button: $button,
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        success_msg: 'Remise supprimée avec succès',
+        success: function (result, bimpAjax) {
+            Vente.ajaxResult(result);
+            bimpAjax.$button.removeClass('disabled');
+        },
+        error: function (result, bimpAjax) {
+            bimpAjax.$button.removeClass('disabled');
+        }
+    });
 }
 
 function addPaiement() {
@@ -942,6 +1150,10 @@ $(document).ready(function () {
         $('#venteToolbar').slideDown(250);
     });
 
+    $('#caisseMvtButton').click(function () {
+        loadCaisseMvtForm($(this));
+    });
+
     $('#changeUserButton').click(function () {
         $('#venteToolbar').slideUp(250);
         $('#changeUserForm').slideDown(250);
@@ -960,21 +1172,19 @@ $(document).ready(function () {
         loadNewVente();
     });
 
-    $('#cancelCurrentVenteButton').click(function () {
-
-    });
-
     $('.windowMaximiseButton').click(function () {
         if ($mainContainer.hasClass('fullScreen')) {
             $('#id-left').show();
             $mainContainer.removeClass('fullScreen');
             $(this).data('content', 'Agrandir').find('i').attr('class', 'fa fa-window-maximize');
             $('.fullScreenButton').show();
+            $('body').removeClass('has_fullscreen');
         } else {
             $('#id-left').hide();
             $mainContainer.addClass('fullScreen');
             $(this).data('content', 'Rétrécir').find('i').attr('class', 'fa fa-times');
             $('.fullScreenButton').hide();
+            $('body').addClass('has_fullscreen');
         }
     });
 
@@ -993,6 +1203,7 @@ $(document).ready(function () {
                 document.webkitCancelFullScreen();
             }
             $('.windowMaximiseButton').show();
+            $('body').removeClass('has_fullscreen');
         } else {
             $('#id-left').hide();
             $mainContainer.addClass('fullScreen');
@@ -1009,6 +1220,11 @@ $(document).ready(function () {
                 docElm.webkitRequestFullScreen();
             }
             $('.windowMaximiseButton').hide();
+            $('body').addClass('has_fullscreen');
         }
+    });
+
+    $('body').on('objectChange', function (e) {
+        refreshVente();
     });
 });

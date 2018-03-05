@@ -1,0 +1,80 @@
+table: bc_vente_remise
+common_fields: 0
+
+labels: 
+    name: remise
+    is_female: 1
+    
+parent_object: BC_Vente
+parent_id_property: id_vente
+
+objects: 
+    article: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_VenteArticle
+            id_object: 
+                field_value: id_article
+                
+fields: 
+    id_vente: 
+        label: Vente
+        type: id_parent
+        
+    label: 
+        label: Libellé
+        
+    id_article: 
+        label: Article
+        type: id_object
+        object: article
+        values: 
+            array: articles
+        input: 
+            help: Laisser vide pour appliquer la remise à l'ensemble de la vente
+        
+    type: 
+        label: Type de réduction
+        type: int
+        values: 
+            1: Pourcentage
+            2: Montant
+    
+    percent: 
+        label: Pourcentage
+        type: percent
+        display_if: 
+            field_name: type
+            show_values: 1
+        decimals: 6
+        min: 0
+        max: 100
+            
+    montant: 
+        label: Montant
+        type: money
+        display_if: 
+            field_name: type
+            show_values: 2
+            
+lists: 
+    default: 
+        title: Remises
+        icon: percent
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            label: 
+                field: label
+            article: 
+                field: id_article
+            type: 
+                field: type
+            montant: 
+                label: Réduction
+                value: 
+                    callback: displayMontant
+            

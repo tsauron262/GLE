@@ -919,16 +919,16 @@ function setSearchInputsEvents($list) {
                                     search_on_key_up = 0;
                                 }
                                 if (parseInt(search_on_key_up)) {
-                                    var min_chars = $(this).data('min_chars');
-                                    if (typeof (min_chars) === 'undefined') {
-                                        min_chars = 1;
-                                    }
+//                                    var min_chars = $(this).data('min_chars');
+//                                    if (typeof (min_chars) === 'undefined') {
+//                                        min_chars = 0;
+//                                    }
                                     $input.keyup(function () {
-                                        var val = '' + $input.val();
+//                                        var val = '' + $input.val();
 
-                                        if (val.length >= min_chars) {
+//                                        if (val.length >= min_chars) {
                                             reloadObjectList($list.attr('id'));
-                                        }
+//                                        }
                                     });
                                 } else {
                                     $input.change(function () {

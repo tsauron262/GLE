@@ -1,0 +1,102 @@
+table: bc_caisse_mvt
+
+labels: 
+    name: Mouvement de fonds
+    name_plur: Mouvements de fonds
+    
+objects: 
+    entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: id_entrepot
+    caisse: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_Caisse
+            id_object:
+                field_value: id_caisse
+fields: 
+    id_entrepot: 
+        label: Centre
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+        display: 
+            nom: 
+                type: nom
+        required: 1
+    id_caisse:
+        label: Caisse
+        type: id_object
+        object: caisse
+        required: 1
+        values: 
+            array: Caisses
+        display_if: 
+            field_name: id_entrepot
+            hide_values: 0,
+        depends_on: id_entrepot
+    type: 
+        label: Type
+        values: 
+            1: Encaissement
+            2: Décaissement
+    montant: 
+        label: Montant
+        type: money
+        required: 1
+    note: 
+        label: Note
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+            note: 1
+            
+forms: 
+    light: 
+        rows: 
+            - field: id_entrepot
+              hidden: 1
+            - field: id_caisse
+              hidden: 1
+            - field: type
+            - field: montant
+            - field: note
+lists: 
+    default: 
+        title: Mouvements de fonds
+        icon: exchange
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_btn: 1
+        add_form_name: default
+        cols:
+            centre: 
+                field: id_entrepot
+                display: nom
+            caisse: 
+                field: id_caisse
+                display: nom
+            date: 
+                label: Date
+                field: date_create
+            user: 
+                label: Utilisateur
+                field: user_create
+                display: nom_url
+            type: 
+                field: type
+            montant: 
+                field: montant
+            note: 
+                field: note
+    

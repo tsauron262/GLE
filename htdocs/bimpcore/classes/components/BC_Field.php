@@ -65,7 +65,7 @@ class BC_Field extends BimpComponent
             $this->value = $this->params['default_value'];
         }
 
-        $this->params['editable'] = 1; // Pout plus tard : prise en compte des droits user
+        $this->params['editable'] = 1; // Pour plus tard : prise en compte des droits user
         $this->params['viewable'] = 1;
 
         if (in_array($this->params['type'], array('int', 'float', 'money', 'percent'))) {
@@ -152,13 +152,6 @@ class BC_Field extends BimpComponent
         $input_type = '';
         $options = array();
 
-        $html .= '<div class="searchInputContainer"';
-        $html .= ' data-field_name="' . $input_name . '"';
-        $html .= ' data-search_type="' . $this->params['search']['type'] . '"';
-        $html .= ' data-search_on_key_up="' . $this->params['search']['search_on_key_up'] . '"';
-        $html .= ' data-min_chars="1"';
-        $html .= '>';
-
         $search_type = (isset($this->params['search']['type']) ? $this->params['search']['type'] : 'field_input');
 
         switch ($search_type) {
@@ -195,6 +188,19 @@ class BC_Field extends BimpComponent
                 $options['display_now'] = 1;
                 break;
         }
+
+        if ($search_type === 'field_input') {
+            if ($input_type === 'text') {
+                $search_type = 'value_part';
+            }
+        }
+
+        $html .= '<div class="searchInputContainer"';
+        $html .= ' data-field_name="' . $input_name . '"';
+        $html .= ' data-search_type="' . $search_type . '"';
+        $html .= ' data-search_on_key_up="' . $this->params['search']['search_on_key_up'] . '"';
+        $html .= ' data-min_chars="1"';
+        $html .= '>';
 
         if ($input_type === 'search_list') {
             $html .= BimpInput::renderSearchListInput($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
@@ -317,5 +323,42 @@ class BC_Field extends BimpComponent
             }
         }
         return $html;
+    }
+    
+    public static function getInputType(BimpObject $object, $field)
+    {
+        $path = 'fields/' . $field . '/';
+        if ($object->config->isDefined($path . 'input/type')) {
+            return $object->getConf($path . 'input/type');
+        }
+
+        if ($object->config->isDefined($path . 'values')) {
+            return 'select';
+        }
+
+        $data_type = $object->getConf($path . 'type', 'string');
+
+        switch ($data_type) {
+            case 'int':
+            case 'float':
+            case 'string':
+            case 'percent':
+            case 'money':
+            case 'color':
+                return 'text';
+
+            case 'text':
+                return 'textarea';
+
+            case 'bool':
+                return 'toggle';
+
+            case 'time':
+            case 'date':
+            case 'datetime':
+                return $this->data_type;
+        }
+
+        return '';
     }
 }

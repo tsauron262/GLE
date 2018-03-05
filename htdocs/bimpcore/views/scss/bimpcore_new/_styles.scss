@@ -50,6 +50,21 @@
     #but-menu,
     #id-top .login_block {
         z-index: 10110!important;
+
+    }
+
+    body.has_fullscreen {
+        #id-right,
+        #id-left {
+            z-index: 1!important;
+        }
+
+        #tmenu_tooltip,
+        .side-nav,
+        #but-menu,
+        #id-top .login_block {
+            display: none;
+        }
     }
 }
 
@@ -241,18 +256,20 @@ i.iconRight {
     }
 }
 .btn-large {
-    font-size: 14px;
-    padding: 12px 20px;
-    
-    i {
-        font-size: 18px;
-        
-        &.iconLeft {
-            margin-right: 12px;
-        }
-        
-        &.iconRight {
-            margin-left: 12px;
+    @media (min-width: $screen-sm-max) {
+        font-size: 14px;
+        padding: 12px 20px;
+
+        i {
+            font-size: 18px;
+
+            &.iconLeft {
+                margin-right: 12px;
+            }
+
+            &.iconRight {
+                margin-left: 12px;
+            }
         }
     }
 }

@@ -151,6 +151,29 @@ fields:
         type: string
         values: 
             array: warranty_types
+            
+    prix_achat:
+        label: Prix d'achat
+        type: money
+        default_value: 0
+        
+    origin_element: 
+        label: Element d'origine
+        values: 
+            array: origin_elements
+    
+    origin_id_element: 
+        label: ID de l'élément d'origine
+        type: int
+        default_value: 0
+        display_if: 
+            field_name: origin_element
+            hide_values: 0
+        input: 
+            type: custom
+            content: 
+                callback: getOriginIdElementInput
+        depends_on: origin_element
                 
     admin_login: 
         label: Login admin
@@ -183,6 +206,7 @@ fields_tables:
               display: card
             - field: serial
             - field: date_purchase
+            - field: prix_achat
             - field: warranty_type
             - field: date_warranty_end
             - field: reserved
@@ -214,12 +238,16 @@ forms:
             - field: serial
             - field: type
             - field: date_purchase
+            - field: prix_achat
+            - field: origin_element
+            - field: origin_id_element
             - field: warranty_type
             - field: date_warranty_end
             - field: reserved
             - field: admin_login
             - field: admin_pword
             - association: contrats
+            
 
 list:
     checkboxes: 1

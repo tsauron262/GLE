@@ -1,5 +1,6 @@
 table: be_equipment_place
 common_fields: 1
+positions: 1
 
 parent_object: Equipment
 parent_id_property: id_equipment
@@ -142,6 +143,9 @@ fields:
             display_now: 1
         required: 1
         sortable: 0
+        
+    code_mvt: 
+        label: Code Mouvement
         
 lists:
     default: 

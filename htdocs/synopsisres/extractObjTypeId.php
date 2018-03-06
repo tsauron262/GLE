@@ -60,7 +60,10 @@ function getTabTypeObject($typeFiltre = null) {
             'obj' => 'Task'),
         'equipement' => array('urls' => array("equipement/card.php"),
             'path' => '/equipement/class/equipement.class.php',
-            'obj' => 'Equipement')
+            'obj' => 'Equipement'),
+        'commandeFournisseur' => array('urls' => array("fourn/commande/card.php"),
+            'path' => '/fourn/class/fournisseur.commande.class.php',
+            'obj' => 'CommandeFournisseur'),
     );
 
     $tabTypeObject2 = array();
@@ -134,61 +137,4 @@ function getTypeAndId($url = null, $request = null) {
         }
     }
     return array($element_type, $element_id);
-    /* if (stripos($url, "compta/facture") != false) {
-      $element_type = 'facture';
-      @$element_id = $request['facid'];
-      } elseif (stripos($url, "societe/soc.php") || stripos($url, "comm/card.php?socid=") || stripos($url, "comm/prospect/fiche.php?socid=")) {
-      $element_type = 'societe';
-      @$element_id = $request['socid'];
-      } elseif (stripos($url, "product/card.php") != false) {
-      $element_type = 'product';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "projet/tasks/task.php") != false) {
-      $element_type = 'tache';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "projet/") != false) {
-      $element_type = 'projet';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "commande/") != false) {
-      $element_type = 'commande';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "compta/bank/") != false) {
-      $element_type = 'banque';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "fichinter/") != false) {
-      $element_type = 'FI';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "synopsisdemandeinterv/") != false) {
-      $element_type = 'DI';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "contrat/") != false) {
-      $element_type = 'contrat';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "user/card.php") != false) {
-      $element_type = 'user';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "comm/propal.php") != false) {
-      $element_type = 'propal';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "/synopsischrono/admin/synopsischrono") != false) {
-      $element_type = 'configChrono';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "synopsischrono") != false) {
-      $element_type = 'chrono';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "Synopsis_Process") != false) {
-      $element_type = 'process';
-      @$element_id = $request['process_id'];
-      } elseif (stripos($url, "ndfp") != false) {
-      $element_type = 'ndfp';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "expedition") != false) {
-      $element_type = 'expedition';
-      @$element_id = $request['id'];
-      } elseif (stripos($url, "synopsisholiday") != false) {
-      $element_type = 'synopsisholiday';
-      @$element_id = $request['id'];
-      } else {
-      return null;
-      } */
 }

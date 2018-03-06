@@ -470,6 +470,7 @@ function reloadObjectInput(form_id, input_name, fields) {
                 var $form = $('#' + result.form_id);
                 var $container = $form.find('.' + result.field_name + '_inputContainer').parent();
                 $container.html(result.html).slideDown(250, function () {
+                    $container.removeAttr('style');
                     var $input = $form.find('[name=' + result.field_name + ']');
                     if ($input.length) {
                         setInputEvents($form, $input);
@@ -811,7 +812,9 @@ function toggleInputDisplay($container, $input) {
     }
 
     if (show) {
-        $container.stop().slideDown(250);
+        $container.stop().slideDown(250, function() {
+            $(this).css('height', 'auto');
+        });
     } else {
         var input_name = $container.find('.inputContainer').data('field_name');
         if (input_name) {
@@ -821,7 +824,9 @@ function toggleInputDisplay($container, $input) {
                 $input.val(initial_value);
             }
         }
-        $container.stop().slideUp(250);
+        $container.stop().slideUp(250, function() {
+            $(this).css('height', 'auto');
+        });
     }
 }
 

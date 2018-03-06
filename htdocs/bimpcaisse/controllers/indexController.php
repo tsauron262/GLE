@@ -127,7 +127,7 @@ class indexController extends BimpController
                 array(
                     'id'      => 'clients',
                     'title'   => 'Clients',
-                    'content' => 'Ici, pourquoi pas: consulter les clients'
+                    'content' => $this->renderClientsTabHtml()
                 ),
                 array(
                     'id'      => 'stocks',
@@ -439,8 +439,13 @@ class indexController extends BimpController
         $html .= '<button id="changeUserButton" class="btn btn-default btn-large" type="button">';
         $html .= '<i class="fa fa-exchange iconLeft"></i>Changer d\'utilisateur';
         $html .= '</button>';
+        
+        $html .= '<button id="caisseMvtButton" class="btn btn-default btn-large" type="button">';
+        $html .= '<i class="fa fa-money iconLeft"></i>Mouvement de fonds';
+        $html .= '</button>';
         $html .= '</div>';
 
+        $html .= '<div id="venteErrors"></div>';
 
         if (!is_null($caisse)) {
             $html .= $this->renderCloseCaisseHtml();
@@ -459,6 +464,13 @@ class indexController extends BimpController
         $html .= '</div>';
 
         return $html;
+    }
+
+    public function renderClientsTabHtml()
+    {
+        $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe');
+        $list = new BC_ListTable($client, 'clients_caisse');
+        return $list->renderHtml();
     }
 
     public function isCaisseValide(BC_Caisse $caisse, &$errors)
@@ -710,6 +722,7 @@ class indexController extends BimpController
         $errors = array();
 
         $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
+        $id_client = (int) BimpTools::getValue('id_client', 0);
 
         if (!$id_caisse) {
             $errors[] = 'ID de la caisse absent';
@@ -723,6 +736,9 @@ class indexController extends BimpController
                 $vente->set('id_caisse', $id_caisse);
                 $vente->set('id_caisse_session', (int) $caisse->getData('id_current_session'));
                 $vente->set('id_entrepot', (int) $caisse->getData('id_entrepot'));
+                if ($id_client) {
+                    $vente->set('id_client', $id_client);
+                }
 
                 $errors = $vente->create();
 
@@ -742,6 +758,31 @@ class indexController extends BimpController
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0),
             'vente_data' => $data
+        )));
+    }
+
+    public function ajaxProcessLoadVenteData()
+    {
+        $errors = array();
+        $data = array();
+
+        $id_vente = (int) BimpTools::getValue('id_vente');
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        } else {
+            $vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente', $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe pas';
+            } else {
+                $data = $vente->getAjaxData();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'vente_data' => $data,
+            'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
 
@@ -795,6 +836,7 @@ class indexController extends BimpController
     protected function ajaxProcessSaveVenteStatus()
     {
         $errors = array();
+        $validate_errors = array();
 
         $id_vente = (int) BimpTools::getValue('id_vente');
         $status = BimpTools::getValue('status');
@@ -818,22 +860,23 @@ class indexController extends BimpController
         if (!count($errors)) {
             if ((int) $status === 2) {
                 $success = 'Vente validée avec succès';
-                $errors = $vente->validateVente();
+                $validate_errors = $vente->validateVente();
             } else {
                 if ((int) $status === 1) {
                     $success = 'Vente enregistrée avec succès';
                 } else {
                     $success = 'Vente abandonnée';
                 }
-                $vente->set('status', (int) $status);
-                $errors = $vente->update();
             }
+            $vente->set('status', (int) $status);
+            $errors = array_merge($errors, $vente->update());
         }
-
+        
         die(json_encode(array(
-            'errors'     => $errors,
-            'success'    => $success,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'errors'          => $errors,
+            'validate_errors' => $validate_errors,
+            'success'         => $success,
+            'request_id'      => BimpTools::getValue('request_id', 0),
         )));
     }
 
@@ -1013,6 +1056,7 @@ class indexController extends BimpController
 
         $vente_data = array();
         $total_ttc = 0;
+        $stock = 0;
 
         if (!count($errors)) {
             $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
@@ -1027,6 +1071,7 @@ class indexController extends BimpController
                     $errors = $article->update();
 
                     $total_ttc = (float) ((int) $article->getData('qty') * (float) $article->getData('unit_price_tax_in'));
+                    $stock = (int) $article->getProductStock((int) $vente->getData('id_entrepot'));
                 }
                 $vente_data = $vente->getAjaxData();
             }
@@ -1036,6 +1081,7 @@ class indexController extends BimpController
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'total_ttc'  => $total_ttc,
+            'stock'      => $stock,
             'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }
@@ -1076,6 +1122,42 @@ class indexController extends BimpController
             'errors'     => $errors,
             'vente_data' => $vente_data,
             'request_id' => BimpTools::getValue('request_id', 0),
+        )));
+    }
+
+    public function ajaxProcessDeleteRemise()
+    {
+        $errors = array();
+
+        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+        $id_remise = BimpTools::getValue('id_remise', 0);
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        if (!$id_remise) {
+            $errors[] = 'ID de la remise absent';
+        }
+
+        $html = '';
+        $vente_data = array();
+
+        if (!count($errors)) {
+            $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                $remise = BimpObject::getInstance($this->module, 'BC_VenteRemise', $id_remise);
+                $errors = $remise->delete();
+                $vente_data = $vente->getAjaxData();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'request_id' => BimpTools::getValue('request_id', 0),
+            'vente_data' => $vente_data
         )));
     }
 

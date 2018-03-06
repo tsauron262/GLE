@@ -144,6 +144,7 @@ class BC_Display extends BimpComponent
                                     break;
 
                                 case 'nom_url':
+
                                     $html .= BimpObject::getInstanceNomUrl($instance);
                                     if ($this->params['external_link']) {
                                         if (isset($this->field_params['object'])) {
@@ -161,6 +162,14 @@ class BC_Display extends BimpComponent
                                                 $html .= '<i class="fa fa-eye"></i>';
                                                 $html .= '</span>';
                                             }
+                                        }
+
+                                        if (!is_null($this->params['modal_view']) && is_a($instance, 'BimpObject')) {
+                                            $title = htmlentities(addslashes($instance->getInstanceName()));
+                                            $onclick = 'loadModalView(\'' . $instance->module . '\', \'' . $instance->object_name . '\', ' . $instance->id . ', \'' . $this->params['modal_view'] . '\', $(this), \'' . $title . '\')';
+                                            $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
+                                            $html .= '<i class="fa fa-eye"></i>';
+                                            $html .= '</span>';
                                         }
                                     }
                                     break;

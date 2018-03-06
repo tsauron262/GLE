@@ -2279,7 +2279,7 @@ class BimpObject
             return '';
         }
 
-        return $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
+        return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
     }
 
     public function getChildObjectUrl($object_name, $object = null)

@@ -28,6 +28,22 @@ class BC_Vente extends BimpObject
         return $contacts;
     }
 
+    public function getArticlesArray()
+    {
+        if ($this->isLoaded()) {
+            $articles = array();
+            foreach ($this->getChildrenObjects('articles') as $article) {
+                $product = $article->getChildObject('product');
+                if (isset($product->id) && $product->id) {
+                    $articles[$article->id] = $product->label . ' (Ref: "' . $product->ref . '")';
+                }
+            }
+            return $articles;
+        }
+
+        return array();
+    }
+
     public function getAjaxData()
     {
         if (!$this->isLoaded()) {
@@ -37,20 +53,75 @@ class BC_Vente extends BimpObject
         $nb_articles = 0;
         $total_ttc = 0;
         $articles = array();
+        $remises = array();
+        $total_remises_articles = 0;
+        $total_remises_vente = 0;
+        $total_remises = 0;
 
         foreach ($this->getChildrenObjects('articles') as $article) {
             $qty = (int) $article->getData('qty');
             $article_total_ttc = (float) ($article->getData('unit_price_tax_in') * $qty);
             $nb_articles += $qty;
             $total_ttc += $article_total_ttc;
-            $articles[] = array(
-                'id_article' => (int) $article->id,
-                'qty'        => (int) $qty,
-                'total_ttc'  => $article_total_ttc
+            $articles[(int) $article->id] = array(
+                'id_article'    => (int) $article->id,
+                'qty'           => (int) $qty,
+                'total_ttc'     => $article_total_ttc,
+                'total_remises' => 0
             );
         }
 
-        $toPay = $total_ttc;
+        foreach ($this->getChildrenObjects('remises') as $remise) {
+            $id_article = (int) $remise->getData('id_article');
+            $type = (int) $remise->getData('type');
+            $montant = 0;
+            $label = $remise->getData('label');
+            if ($id_article) {
+                if (isset($articles[$id_article])) {
+                    switch ($type) {
+                        case 1:
+                            $percent = (float) $remise->getData('percent');
+                            if ($percent) {
+                                $montant = (float) ((float) $articles[$id_article]['total_ttc'] * ($percent / 100));
+                            }
+                            $label .= ' (' . str_replace('.', ',', '' . $percent) . ' %)';
+                            break;
+
+                        case 2:
+                            $montant = (float) $remise->getData('montant');
+                            break;
+                    }
+                    $articles[$id_article]['total_remises'] += $montant;
+                    $total_remises_articles += $montant;
+                } else {
+                    $remise->delete();
+                }
+            } else {
+                switch ($type) {
+                    case 1:
+                        $percent = (float) $remise->getData('percent');
+                        if ($percent) {
+                            $montant = (float) ($total_ttc * ($percent / 100));
+                        }
+                        $label .= ' (' . str_replace('.', ',', '' . $percent) . ' %)';
+                        break;
+
+                    case 2:
+                        $montant = (float) $remise->getData('montant');
+                        break;
+                }
+                $total_remises_vente += $montant;
+            }
+            $remises[] = array(
+                'id_remise'  => (int) $remise->id,
+                'label'      => $label,
+                'montant'    => BimpTools::displayMoneyValue($montant, 'EUR'),
+                'id_article' => $id_article
+            );
+            $total_remises += $montant;
+        }
+
+        $toPay = $total_ttc - $total_remises;
 
         foreach ($this->getChildrenObjects('paiements') as $paiement) {
             $montant = (float) $paiement->getData('montant');
@@ -64,13 +135,16 @@ class BC_Vente extends BimpObject
         }
 
         return array(
-            'id_vente'    => (int) $this->id,
-            'nb_articles' => $nb_articles,
-            'total_ttc'   => $total_ttc,
-            'total_ht'    => 0,
-            'toPay'       => $toPay,
-            'toReturn'    => $toReturn,
-            'articles'    => $articles
+            'id_vente'               => (int) $this->id,
+            'nb_articles'            => $nb_articles,
+            'total_ttc'              => $total_ttc,
+            'total_remises_vente'    => $total_remises_vente,
+            'total_remises_articles' => $total_remises_articles,
+            'total_remises'          => $total_remises,
+            'toPay'                  => $toPay,
+            'toReturn'               => $toReturn,
+            'articles'               => $articles,
+            'remises'                => $remises
         );
     }
 
@@ -114,6 +188,11 @@ class BC_Vente extends BimpObject
             if ((int) $this->getData('status') !== 2) {
                 return array(
                     array(
+                        'label'   => 'Abandonner la vente',
+                        'icon'    => 'times',
+                        'onclick' => 'setVenteStatus($(this), ' . $this->id . ', 0)'
+                    ),
+                    array(
                         'label'   => 'Editer',
                         'icon'    => 'edit',
                         'onclick' => 'loadVente($(this), ' . $this->id . ');'
@@ -125,6 +204,17 @@ class BC_Vente extends BimpObject
         return array();
     }
 
+    public function isDeletable()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') < 2) {
+                return 1;
+            }
+        }
+        
+        return 0;
+    }
+    
     public function displayDate()
     {
         if ($this->isLoaded()) {
@@ -159,6 +249,22 @@ class BC_Vente extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayTotalRemises()
+    {
+        if ($this->isLoaded()) {
+            $data = $this->getAjaxData();
+            return BimpTools::displayMoneyValue($data['total_remises'], 'EUR');
+        }
+    }
+
+    public function displayFinalMontant()
+    {
+        if ($this->isLoaded()) {
+            $data = $this->getAjaxData();
+            return BimpTools::displayMoneyValue($data['total_ttc'] - $data['total_remises'], 'EUR');
+        }
     }
 
     public function renderCreationViewHtml()
@@ -499,10 +605,22 @@ class BC_Vente extends BimpObject
         $html = '';
 
         $total = 0;
-
         $nbArticles = 0;
         $html .= '<div id="venteNbArticles">';
         $html .= $nbArticles . ' article' . ($nbArticles > 1 ? 's' : '');
+        $html .= '</div>';
+        $html .= '<button type="button" id="loadRemiseFormButton" class="btn btn-default"';
+        $html .= ' onclick="loadRemiseForm($(this));"';
+        $html .= '>';
+        $html .= '<i class="fa fa-percent iconLeft"></i>Ajouter une remise';
+        $html .= '</button>';
+
+        $html .= '<div id="venteRemises">';
+        $html .= '<div class="title">Remises:</div>';
+        $html .= '<div class="remises_lines"></div>';
+//        $html .= '<div class="total_remises_vente">Total remises globales: <span></span></div>';
+        $html .= '<div class="total_remises_articles">Total remises articles: <span></span></div>';
+        $html .= '<div class="total_remises">Total remises: <span></span></div>';
         $html .= '</div>';
 
         $html .= '<div id="ventePanierTotal">';
@@ -750,13 +868,24 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '<div class="product_info"><strong>Equipement ' . $equipment->id . ' - n° de série: ' . $equipment->getData('serial') . '</strong></div>';
         $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-        $html .= '<div class="article_options">';
-        $html .= '<div class="article_qty">&nbsp;';
+        $html .= '<div class="article_remises">';
+        $html .= '<div class="title">Remises: </div>';
+        $html .= '<div class="content"></div>';
         $html .= '</div>';
-        $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+        $html .= '<div class="article_options">';
+        $html .= '<div class="article_qty">&nbsp;</div>';
+        $html .= '<div class="product_total_price">';
+        $html .= '<span class="base_price"></span>';
+        $html .= '<span class="final_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</span>';
         $html .= '</div>';
         $html .= '</div>';
 
+        if (!$article->checkPlace((int) $this->getData('id_entrepot'))) {
+            $html .= '<div class="placeAlert">';
+            $html .= BimpRender::renderAlerts('Attention, cet équipement n\'est pas enregistré comme étant situé dans votre centre', 'warning');
+            $html .= '</div>';
+        }
+        $html .= '</div>';
         return $html;
     }
 
@@ -764,6 +893,7 @@ class BC_Vente extends BimpObject
     {
         $html = '';
         $qty = (int) $article->getData('qty');
+        $stock = (int) $article->getProductStock((int) $this->getData('id_entrepot'));
 
         $html .= '<div id="cart_article_' . $article->id . '" class="cartArticleLine" data-id_article="' . $article->id . '">';
         $html .= '<div class="product_title">' . $product->label;
@@ -773,6 +903,10 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
         $html .= '<div class="product_info"><strong>Prix unitaire TTC: </strong>' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+        $html .= '<div class="article_remises">';
+        $html .= '<div class="title">Remises: </div>';
+        $html .= '<div class="content"></div>';
+        $html .= '</div>';
         $html .= '<div class="article_options">';
         $html .= '<div class="article_qty">';
         $html .= '<strong>Qté: </strong>';
@@ -788,10 +922,13 @@ class BC_Vente extends BimpObject
         $html .= '<span class="qty_up" onclick="changeArticleQty($(this), ' . $article->id . ', \'up\');">';
         $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
         $html .= '</div>';
-        $html .= '<div class="product_total_price">' . BimpTools::displayMoneyValue($product->price_ttc * $qty, 'EUR') . '</div>';
+        $html .= '<div class="product_total_price">';
+        $html .= '<span class="base_price"></span>';
+        $html .= '<span class="final_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</span>';
         $html .= '</div>';
-        $html .= '<div class="stockAlert">';
-        $html .= BimpRender::renderAlerts('Attention, le stock théorique de ce produit est dépassé', 'warning');
+        $html .= '</div>';
+        $html .= '<div class="stockAlert"' . (($stock >= $qty) ? ' style="display: none"' : '') . '>';
+        $html .= BimpRender::renderAlerts('Attention, le stock de ce produit est dépassé.<br/><strong class="stock">Stock: <span>' . $stock . '</span></strong>', 'warning');
         $html .= '</div>';
         $html .= '</div>';
 
@@ -964,9 +1101,9 @@ class BC_Vente extends BimpObject
                         } else {
                             $errors[] = 'Un article a déjà été ajouté au panier pour ce code-barres mais n\'a pas pu être mis à jour';
                         }
+                    } else {
+                        $cart_html = $this->addCartProduct((int) $products[0], $errors);
                     }
-
-                    $cart_html = $this->addCartProduct((int) $products[0], $errors);
                 }
             } else {
                 $result_html .= BimpRender::renderAlerts('Aucun produit trouvé', 'warning');
@@ -1038,21 +1175,25 @@ class BC_Vente extends BimpObject
 
     public function validateVente()
     {
+        global $user;
+
         $errors = array();
         if ($this->isLoaded()) {
-            $this->set('status', 2);
-
+            if ((int) $this->getData('status') === 2) {
+                return array('Cette vente a déjà été validée');
+            }
             $caisse = $this->getChildObject('caisse');
+            $articles = $this->getChildrenObjects('articles');
+
+            $paiements = $this->getChildrenObjects('paiements');
             if (!is_null($caisse) && $caisse->isLoaded()) {
                 $total_paid = 0;
                 $total_paid_liq = 0;
-                $total_ttc = 0;
 
-                foreach ($this->getChildrenObjects('articles') as $article) {
-                    $total_ttc += (float) $article->getTotal();
-                }
+                $data = $this->getAjaxData();
+                $total_ttc = $data['total_ttc'] - $data['total_remises'];
 
-                foreach ($this->getChildrenObjects('paiements') as $paiement) {
+                foreach ($paiements as $paiement) {
                     $montant = (float) $paiement->getData('montant');
                     $total_paid += $montant;
                     if ($paiement->getData('code') === 'LIQ') {
@@ -1070,10 +1211,82 @@ class BC_Vente extends BimpObject
                     $errors = $caisse->update();
                 }
             } else {
-                $errors[] = 'Caisse assignée à cette vente invalide. Mise à jour du fonds de caisse impossible';
+                $errors[] = 'La caisse assignée à cette vente est invalide. Mise à jour du fonds de caisse impossible';
             }
 
             $errors = array_merge($errors, $this->update());
+
+            // Gestion des stocks et emplacements: 
+            $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+            foreach ($articles as $article) {
+                $id_entrepot = (int) $this->getData('id_entrepot');
+                $equipment = $article->getChildObject('equipment');
+                if (!is_null($equipment) && $equipment->isLoaded()) {
+                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                    if (!$article->checkPlace($id_entrepot)) {
+                        // Correction de l'emplacement initial en cas d'erreur: 
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $equipment->id,
+                            'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                            'id_entrepot'  => (int) $id_entrepot,
+                            'infos'        => 'Correction automatique suite à la vente de l\'équipement',
+                            'date'         => date('Y-m-d H:i:s')
+                        ));
+                        if (!count($place_errors)) {
+                            $place_errors = $place->create();
+                        }
+
+                        if (count($place_errors)) {
+                            $errors[] = 'Echec de la correction de l\'emplacement pour le n° de série "' . $equipment->getData('serial') . '"';
+                        }
+                        $place->reset();
+                    }
+
+                    // Création du nouvel emplacement: 
+                    $id_client = (int) $this->getData('id_client');
+                    if ($id_client) {
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $equipment->id,
+                            'type'         => BE_Place::BE_PLACE_CLIENT,
+                            'id_client'    => (int) $id_client,
+                            'infos'        => 'Vente',
+                            'date'         => date('Y-m-d H:i:s')
+                        ));
+                    } else {
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $equipment->id,
+                            'type'         => BE_Place::BE_PLACE_FREE,
+                            'place_name'   => 'Equipement vendu (client non renseigné)',
+                            'infos'        => 'Vente',
+                            'date'         => date('Y-m-d H:i:s')
+                        ));
+                    }
+                    if (!count($place_errors)) {
+                        $place_errors = $place->create();
+                    }
+
+                    if (count($place_errors)) {
+                        $errors[] = 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $equipment->getData('serial') . '"';
+                    }
+                } else {
+                    $product = $article->getChildObject('product');
+                    if (!is_null($product) && isset($product->id) && $product->id) {
+                        $result = $product->correct_stock($user, $id_entrepot, (int) $article->getData('qty'), 1, 'Vente - ID: ' . $this->id, 0, $codemove);
+                        if ($result < 0) {
+                            $errors[] = 'Echec de la mise à jour du stock pour le produit "' . $product->label . '" (Ref: "' . $product->ref . '")';
+                            if (count($product->errors)) {
+                                $errors = array_merge($errors, $product->errors);
+                            } elseif ($product->error) {
+                                $errors[] = $product->error;
+                            }
+                        }
+                    } else {
+                        $errors[] = 'Aucun produit enregistré pour l\'article ' . $article->id;
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Cette vente n\'existe pas';
         }
 
         return $errors;
@@ -1083,13 +1296,8 @@ class BC_Vente extends BimpObject
 
     public function update()
     {
-        $total_ttc = 0;
-        $articles = $this->getChildrenObjects('articles');
-        foreach ($articles as $article) {
-            $total_ttc += (float) $article->getTotal();
-        }
-
-        $this->set('total_ttc', $total_ttc);
+        $data = $this->getAjaxData();
+        $this->set('total_ttc', (float) $data['total_ttc'] - (float) $data['total_remises']);
 
         return parent::update();
     }

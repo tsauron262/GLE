@@ -218,7 +218,7 @@ class BimpObject
                         )
                     )
                 ),
-                'display'  => array(
+                'display'       => array(
                     'default' => array(
                         'type' => 'nom_url'
                     )
@@ -647,7 +647,7 @@ class BimpObject
                     break;
             }
         } else {
-            $type = $this->getConf('fields/' . $field . '/type', '', true);
+            $type = $this->getConf('fields/' . $field . '/type', 'string');
         }
 
         if ($type) {
@@ -725,6 +725,14 @@ class BimpObject
                         $data_type = $this->getCurrentConf('type', '');
                         if (in_array($data_type, array('id_object', 'id'))) {
                             continue;
+                        }
+                    }
+
+                    if ($search_type === 'field_input') {
+                        $input_type = BC_Field::getInputType($this, $field_name);
+
+                        if ($input_type === 'text') {
+                            $search_type = 'value_part';
                         }
                     }
 
@@ -1860,6 +1868,8 @@ class BimpObject
             if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                 if (isset($this->dol_object->array_options['options_' . $field])) {
                     $value = $this->dol_object->array_options['options_' . $field];
+                } else {
+                    $value = '';
                 }
             } else {
                 $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
@@ -2581,10 +2591,13 @@ class BimpObject
 
         $controller = $this->getController();
         if (!$controller) {
+            if ($this->isDolObject()) {
+                return $this->getInstanceUrl($this->dol_object);
+            }
             return '';
         }
 
-        return $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
+        return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
     }
 
     public function getChildObjectUrl($object_name, $object = null)
@@ -2619,7 +2632,16 @@ class BimpObject
     public static function getInstanceNomUrl($instance)
     {
         if (is_a($instance, 'BimpObject')) {
-            return '<a href="" target="_blank">' . $instance->getInstanceName() . '</a>';
+            if ($instance->isDolObject()) {
+                return $instance->dol_object->getNomUrl(1);
+            } else {
+                $url = $instance->getUrl();
+                if ($url) {
+                    return '<a href="' . $url . '" target="_blank">' . $instance->getInstanceName() . '</a>';
+                } else {
+                    return $instance->getInstanceName();
+                }
+            }
         } elseif (method_exists($instance, 'getNomUrl')) {
             return $instance->getNomUrl(1);
         }

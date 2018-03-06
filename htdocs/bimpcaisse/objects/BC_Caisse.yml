@@ -32,14 +32,14 @@ objects:
                 field_value: id_current_session
 fields: 
     id_entrepot:
-        label: Entrepot
+        label: Entrepôt
         type: id_object
         object: entrepot
         input: 
             type: search_entrepot
         required: 1
     name: 
-        label: name
+        label: Nom
         required: 1
     status: 
         label: Etat
@@ -47,11 +47,15 @@ fields:
         values: 
             array: states
     id_current_user: 
-        label: Utilisateur actif
+        label: Utilisateur connecté
         type: id_object
         object: user
         input: 
             type: search_user
+        display: 
+            nom_url: 
+                type: nom_url
+                modal_view: default
     id_current_session:
         label: Session actuelle
         type: id_object
@@ -67,6 +71,10 @@ forms:
             - field: name
             - field: status
             - field: fonds
+    edit: 
+        rows: 
+            - field: name
+            - field: id_current_user
 
 lists: 
     default: 
@@ -94,6 +102,10 @@ lists:
                 field: status
             fonds: 
                 field: fonds
+            id_current_user:
+                field: id_current_user
+                display: nom_url
         add_form_name: default
         edit_btn: 1
+        edit_form: edit
         delete_btn: 1

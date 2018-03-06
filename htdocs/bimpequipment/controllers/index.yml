@@ -22,6 +22,10 @@ objects:
         instance: 
             bimp_object: BE_Connection
             
+    reservation: 
+        instance: 
+            bimp_object: BE_Reservation
+            
 sections:
     - type: tabs
       tabs: 
@@ -56,3 +60,11 @@ sections:
                   list: 
                       panel: 1
                       object: connection
+                      
+        reservations: 
+            label: Réservations
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: reservation

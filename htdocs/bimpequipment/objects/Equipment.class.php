@@ -16,6 +16,11 @@ class Equipment extends BimpObject
         1 => 'Type 1',
         2 => 'Type 2'
     );
+    public static $origin_elements = array(
+        0 => '',
+        1 => 'Fournisseur',
+        2 => 'Client'
+    );
     protected $current_place = null;
 
     public function getContratsArray()
@@ -125,6 +130,15 @@ class Equipment extends BimpObject
                             $prev_place_id_element = (int) $prev_place->getData('id_user');
                             break;
                     }
+                } else {
+                    $prev_place_element = $this->getData('origin_element');
+                    if (in_array($prev_place_element, array(1, 2))) {
+                        $prev_place_element = 'societe';
+                    }
+                    $prev_place_id_element = $this->getData('origin_id_element');
+                    if (!$prev_place_id_element) {
+                        $prev_place_id_element = null;
+                    }
                 }
 
                 if ((int) $new_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
@@ -156,6 +170,26 @@ class Equipment extends BimpObject
         }
 
         return $this->current_place;
+    }
+
+    public function getOriginIdElementInput()
+    {
+        $element = (int) $this->getData('origin_element');
+        if ($element) {
+            switch ($element) {
+                case 1:
+                    return BimpInput::renderInput('search_societe', 'origin_id_element', $this->getData('origin_id_element'), array(
+                                'type' => 'supplier'
+                    ));
+
+                case 2:
+                    return BimpInput::renderInput('search_societe', 'origin_id_element', $this->getData('origin_id_element'), array(
+                                'type' => 'customer'
+                    ));
+            }
+        }
+
+        return '';
     }
 
 //    Overrides

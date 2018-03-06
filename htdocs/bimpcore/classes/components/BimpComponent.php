@@ -102,7 +102,7 @@ abstract class BimpComponent
                 $this->addTechnicalError($e);
             }
         }
-        
+
         return $params;
     }
 
@@ -154,9 +154,8 @@ abstract class BimpComponent
                 if ($request) {
                     $json = isset($defs['json']) ? (bool) $defs['json'] : false;
                     if (BimpTools::isSubmit('param_' . $name)) {
-
                         $value = BimpTools::getValue('param_' . $name);
-                        if ($json) {
+                        if ($json && !is_null($value)) {
                             $value = json_decode($value, true);
                         }
                     }
@@ -167,7 +166,7 @@ abstract class BimpComponent
                         if ($data_type === 'array') {
                             $compile = isset($defs['compile']) ? (bool) $defs['compile'] : true;
                             if ($compile) {
-                                $value = $config->getCompiledParams($path . '/' . $name, array(), $required, 'array');
+                                $value = $config->getCompiledParams($path . '/' . $name);
                             }
                         } else {
                             $value = $config->get($path . '/' . $name, $default_value, $required, $data_type);

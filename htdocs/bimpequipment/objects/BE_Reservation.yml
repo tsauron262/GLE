@@ -1,0 +1,173 @@
+table: be_reservation
+
+common_fields: 1
+
+labels: 
+    name: réservation
+    is_female: 1
+
+objects: 
+    user_origin: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+            id_object: 
+                field_value: id_user_origin
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: product
+            id_object: 
+                field_value: id_product
+    equipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: Equipment
+            id_object: 
+                field_value: id_equipment
+
+fields: 
+    id_user_origin: 
+        label: Utilisateur à l'origine de la réservation
+        type: id_object
+        object: user_origin
+        default_value: 
+            prop: 
+                name: id
+                object:
+                    global: user
+        input: 
+            type: search_user
+        display: 
+            nom_url: 
+                type: nom_url
+                modal_view: default
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        input: 
+            type: search_list
+            search_list: 
+                table: be_equipment
+                fields_search: id,serial
+                field_return_label: id,serial
+                field_return_value: id
+                label_syntaxe: Equipement <label_1> - serial "<label_2>"
+    id_product: 
+        label: produit
+        type: id_object
+        object: product
+        input: 
+            type: search_product
+        display_if: 
+            field_name: id_equipment
+            show_values: 0,
+    qty: 
+        label: Quantité
+        type: int
+        decimals: 0
+        min: 1
+        default_value: 1
+        display_if: 
+            field_name: id_equipment
+            show_values: 0,
+    date_from: 
+        label: A partir du
+        type: datetime
+        input: 
+            display_now: 1
+    date_to: 
+        label: Jusqu'au
+        type: datetime
+    
+    active: 
+        label: Actif
+        type: bool
+        default_value: 1
+    note: 
+        label: Note
+        type: text
+        input: 
+            note: 1
+            auto_expand: 1
+
+fields_tables: 
+    default: 
+        rows: 
+            - field: id_user_origin
+            - field: id_product
+              show: 
+                  callback: isProduct
+            - field: id_equipment
+              show: 
+                  callback: isEquipment
+            - field: qty
+              show: 
+                  callback: isProduct
+            - field: date_from
+              edit: 1
+            - field: date_to
+              edit: 1
+            - field: active
+              edit: 1
+            - field: note
+              edit: 1
+              
+views: 
+    default: 
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                  - type: object_common_fields
+                    col_lg: 3
+                    col_sm: 12
+                  - type: fields_table
+                    col_lg: 9
+                    fields_table:
+                        name: default  
+            
+lists: 
+    default: 
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les réservations sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        add_form_name: default
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        modal_view: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            product: 
+                field: id_product
+                display: nom_url
+            equipment: 
+                field: id_equipment
+                display: nom_url
+            user: 
+                label: Responsable
+                field: id_user_origin
+                display: nom_url
+            date_from:
+                label: Du
+                field: date_from
+            date_to: 
+                label: Au
+                field: date_to
+            qty: 
+                field: qty
+            active:
+                field: active
+                edit: 1

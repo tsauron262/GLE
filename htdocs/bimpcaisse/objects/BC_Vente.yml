@@ -62,6 +62,11 @@ objects:
         instance: 
             bimp_object: BC_VentePaiement
             
+    remises: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BC_VenteRemise
 fields:
     status: 
         label: Statut
@@ -85,6 +90,7 @@ fields:
         type: id_object
         object: caisse
         required: 1
+        searchable: 0
         
     id_caisse_session:
         label: Session de caisse
@@ -109,7 +115,10 @@ fields:
             societe_type: customer
         display: 
             default:
+                type: nom
+            nom_url: 
                 type: nom_url
+                modal_view: client
                 
     id_client_contact:
         label: Contact
@@ -135,20 +144,27 @@ fields_tables:
               display: nom
             - field: id_caisse
               display: nom
-            - label: Nbre Articles
-              value: 
-                  callback: displayNbArticles
-            - field: total_ttc
-            
-    client:
-        title: Client
-        icon: user
-        rows: 
             - field: id_client
               display: nom_url
             - field: id_client_contact
               display: nom_url
             
+    montants:
+        title: Montants
+        icon: euro
+        rows: 
+            - label: Nbre Articles
+              value: 
+                  callback: displayNbArticles
+            - field: total_ttc
+              label: Total produits
+            - label: Total remises
+              value: 
+                  callback: displayTotalRemises
+            - label: Montant final
+              value: 
+                  callback: displayFinalMontant        
+
 views:
     default: 
         rows:
@@ -165,15 +181,22 @@ views:
                     col_lg: 6
                     col_md: 6
                     fields_table:
-                        name: client  
+                        name: montants  
             - cols: 
                 - type: list
                   col_lg: 12
                   list: 
-                      title: Articles
-                      icon: shopping-basket
+                      
                       name: default
                       children: articles
+                      
+            - cols: 
+                - type: list
+                  col_lg: 12
+                  list: 
+                      name: default
+                      children: remises
+                      
             - cols: 
                 - type: list
                   col_lg: 12
@@ -206,6 +229,9 @@ lists:
             date: 
                 label: Date et heure
                 field: date_create
+            client: 
+                field: id_client
+                display: nom_url
             articles: 
                 label: Nb articles
                 value: 
@@ -214,7 +240,46 @@ lists:
                 field: total_ttc
         extra_btn:
             callback: getDefaultListExtraButtons
-                
+            
+    full:
+        checkboxes: 1
+        item_checkbox: 
+            callback: isDeletable
+        bulk_actions: 
+            - label: Supprimer les ventes sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        sort_field: date_create
+        sort_way: desc
+        modal_view: default
+        delete_btn: 
+            callback: isDeletable
+        n: 10
+        cols:
+            ref: 
+                label: Ref.
+                field: id
+            centre: 
+                field: id_entrepot
+                display: nom
+            caisse: 
+                field: id_caisse
+                display: nom
+            status: 
+                field: status
+            date: 
+                label: Date et heure
+                field: date_create
+            client: 
+                field: id_client
+                display: nom_url
+            articles: 
+                label: Nb articles
+                value: 
+                    callback: displayNbArticles
+            total_ttc: 
+                field: total_ttc
 forms: 
     client: 
         rows: 

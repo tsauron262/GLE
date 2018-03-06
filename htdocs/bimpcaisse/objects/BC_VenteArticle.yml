@@ -35,11 +35,17 @@ fields:
         label: Produit
         type: id_object
         object: product
+        display:
+            nom_url: 
+                type: nom_url
         
     id_equipment: 
         label: Equipement
         type: id_object
         object: equipment
+        display:
+            nom_url: 
+                type: nom_url
         
     qty: 
         label: Quantité
@@ -53,6 +59,8 @@ fields:
     
 lists: 
     default: 
+        title: Articles
+        icon: shopping-basket
         enable_search: 0
         sort_field: id
         sort_way: desc

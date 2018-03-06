@@ -20,7 +20,7 @@ class BimpConfigDefinitions
     );
     public static $search = array(
         'type'             => array('default' => 'field_input'),
-        'part_type'        => array('default' => 'beginning'),
+        'part_type'        => array('default' => 'middle'),
         'search_on_key_up' => array('data_type' => 'bool', 'default' => 1),
         'option'           => array()
     );

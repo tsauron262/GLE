@@ -144,6 +144,9 @@ fields:
         required: 1
         sortable: 0
         
+    code_mvt: 
+        label: Code Mouvement
+        
 lists:
     default: 
         title: Emplacements

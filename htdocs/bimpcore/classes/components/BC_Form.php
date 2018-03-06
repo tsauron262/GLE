@@ -74,7 +74,7 @@ class BC_Form extends BC_Panel
         }
 
         parent::__construct($object, $name, $path, $content_only, $level, $title, 'edit');
-
+        
         if (!is_null($this->id_parent)) {
             $this->data['id_parent'] = $this->id_parent;
         }

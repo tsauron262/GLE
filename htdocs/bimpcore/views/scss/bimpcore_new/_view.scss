@@ -9,7 +9,6 @@
     }
 }
 
-
 .object_view_content {
     padding: 0!important;
 
@@ -100,6 +99,9 @@
     }
 }
 .object_card_table {    
+    width: 100%;
+    margin-top: 10px;
+    
     tbody tr {
         th, td {
             padding: 0 5px;
@@ -107,7 +109,7 @@
         }
 
         th {
-            width: 30%;
+            width: 20%;
             min-width: 120px;
             font-weight: bold;
             text-align: right;

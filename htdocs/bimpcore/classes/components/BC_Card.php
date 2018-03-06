@@ -94,6 +94,9 @@ class BC_Card extends BimpComponent
     {
         $fields = array();
 
+        if (is_null($this->display_object) || !$this->display_object->isLoaded()) {
+            return '';
+        }
         foreach ($this->params['fields'] as $key) {
             $field_params = parent::fetchParams($this->config_path . '/fields/' . $key, self::$field_params);
 
@@ -144,7 +147,7 @@ class BC_Card extends BimpComponent
             case 'user_card':
                 return $this->renderUserCard();
 
-            case 'produt_card':
+            case 'product_card':
                 return $this->renderProductCard();
         }
 
@@ -468,18 +471,27 @@ class BC_Card extends BimpComponent
             );
         }
 
-        return self::renderCard($this->display_object, $this->display_object, $title, $img_url, $fields, true);
+        return self::renderCard($this->display_object, $title, $img_url, $fields, true);
     }
 
     public function renderProductCard()
     {
         if (!is_a($this->display_object, 'Product')) {
-            return BimpRender::renderAlerts('Erreur de configuration. Cet objet n\'est pas un utilisateur');
+            return BimpRender::renderAlerts('Erreur de configuration. Cet objet n\'est pas un produit');
         }
 
-        $img_url = BimpTools::getProductMainImgUrl($this->display_object);
-
+//        $img_url = BimpTools::getProductMainImgUrl($this->display_object);
+        $img_url = null;
         $fields = array();
+
+        $fields[] = array(
+            'label' => 'Ref.',
+            'value' => $this->display_object->ref
+        );
+
+        $title = $this->display_object->label;
+
+        return self::renderCard($this->display_object, $title, $img_url, $fields, true);
     }
 
     public static function renderCard($object, $title, $img_url = '', $fields = array(), $view_btn = false)
@@ -503,7 +515,7 @@ class BC_Card extends BimpComponent
                 $html .= '<tr>';
                 $html .= '<th>';
                 if (isset($field['icon']) && $field['icon']) {
-                    $html .= '<i class="fa fa-' . $field['icon'] . ' iconLeft"></i>';
+                    $html .= '<i class="' . BimpRender::renderIconClass($field['icon']) . ' iconLeft"></i>';
                 }
                 if (isset($field['label']) && $field['label']) {
                     $html .= $field['label'] . ':';

@@ -372,8 +372,7 @@ $article_color: #004264;
     .title {
         font-weight: bold;
         font-size: 16px;
-        border-bottom: 1px solid $gray;
-        margin-bottom: 5px;
+        border-bottom: 1px solid $gray-darker;
     }
 
     .remises_lines,
@@ -408,9 +407,6 @@ $article_color: #004264;
     .total_remises {
         font-weight: bold;
         font-size: 16px;
-        padding-top: 5px;
-        border-top: 1px solid $gray-light;
-        margin-top: 5px;
     }
 }
 

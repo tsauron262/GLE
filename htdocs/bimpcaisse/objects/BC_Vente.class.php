@@ -60,12 +60,14 @@ class BC_Vente extends BimpObject
 
         foreach ($this->getChildrenObjects('articles') as $article) {
             $qty = (int) $article->getData('qty');
-            $article_total_ttc = (float) ($article->getData('unit_price_tax_in') * $qty);
+            $unit_price = (float) $article->getData('unit_price_tax_in');
+            $article_total_ttc = (float) ($unit_price * $qty);
             $nb_articles += $qty;
             $total_ttc += $article_total_ttc;
             $articles[(int) $article->id] = array(
                 'id_article'    => (int) $article->id,
                 'qty'           => (int) $qty,
+                'unit_price'    => (float) $unit_price,
                 'total_ttc'     => $article_total_ttc,
                 'total_remises' => 0
             );
@@ -76,19 +78,35 @@ class BC_Vente extends BimpObject
             $type = (int) $remise->getData('type');
             $montant = 0;
             $label = $remise->getData('label');
+
+            $per_unit = (int) $remise->getData('per_unit');
+
             if ($id_article) {
                 if (isset($articles[$id_article])) {
                     switch ($type) {
                         case 1:
                             $percent = (float) $remise->getData('percent');
+                            $label .= ' (' . str_replace('.', ',', '' . $percent) . ' % ';
                             if ($percent) {
-                                $montant = (float) ((float) $articles[$id_article]['total_ttc'] * ($percent / 100));
+                                if ($per_unit) {
+                                    $montant = (float) ((float) $articles[$id_article]['total_ttc'] * ($percent / 100));
+                                    $label .= ' sur chaque unité';
+                                } else {
+                                    $montant = (float) ((float) $articles[$id_article]['unit_price'] * ($percent / 100));
+                                    $label .= ' sur 1 unité';
+                                }
                             }
-                            $label .= ' (' . str_replace('.', ',', '' . $percent) . ' %)';
+                            $label .= ')';
                             break;
 
                         case 2:
                             $montant = (float) $remise->getData('montant');
+                            if ($per_unit) {
+                                $label .= ' (' . BimpTools::displayMoneyValue($montant, 'EUR') . ' par unité)';
+                                $montant *= (int) $articles[$id_article]['qty'];
+                            } else {
+                                $label .= ' (sur 1 unité)';
+                            }
                             break;
                     }
                     $articles[$id_article]['total_remises'] += $montant;
@@ -211,10 +229,10 @@ class BC_Vente extends BimpObject
                 return 1;
             }
         }
-        
+
         return 0;
     }
-    
+
     public function displayDate()
     {
         if ($this->isLoaded()) {
@@ -935,44 +953,55 @@ class BC_Vente extends BimpObject
         return $html;
     }
 
-    public function addCartEquipement($id_equipment, &$errors)
+    public function checkEquipment($id_equipment, &$errors)
     {
-        $html = '';
-
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
-        if (!$equipment->isLoaded()) {
+
+        if (is_null($equipment) || !$equipment->isLoaded()) {
             $errors[] = 'Erreur: aucun enregistrement trouvé pour l\'équipement d\'ID ' . $id_equipment;
+            return null;
         } else {
             $id_product = (int) $equipment->getData('id_product');
 
             if (is_null($id_product) || !$id_product) {
                 $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
+                return null;
+            }
+//            else {
+////                $place = $equipment->getCurrentPlace();
+//            }
+        }
+
+        return $equipment;
+    }
+
+    public function addCartEquipement($id_equipment, &$errors)
+    {
+        $html = '';
+
+        $equipment = $this->checkEquipment($id_equipment, $errors);
+        if (!is_null($equipment)) {
+            $product = $equipment->getChildObject('product');
+            if (is_null($product) || !isset($product->id) || !$product->id) {
+                $errors[] = 'Erreur: produit d\'ID ' . $equipment->getData('id_product') . ' non trouvé pour l\'équipement d\'ID' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
             } else {
-                // todo: checker l'entrepot.
-                // todo: checker les stocks. 
+                $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
+                $article_errors = $article->validateArray(array(
+                    'id_vente'          => $this->id,
+                    'id_product'        => $product->id,
+                    'id_equipment'      => (int) $id_equipment,
+                    'qty'               => 1,
+                    'unit_price_tax_in' => (float) $product->price_ttc
+                ));
 
-                $product = $equipment->getChildObject('product');
-                if (is_null($product) || !isset($product->id) || !$product->id) {
-                    $errors[] = 'Erreur: produit d\'ID ' . $equipment->getData('id_product') . ' non trouvé pour l\'équipement d\'ID' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
+                if (count($article_errors)) {
+                    $errors = array_merge($errors, $article_errors);
                 } else {
-                    $article = BimpObject::getInstance($this->module, 'BC_VenteArticle');
-                    $article_errors = $article->validateArray(array(
-                        'id_vente'          => $this->id,
-                        'id_product'        => $id_product,
-                        'id_equipment'      => (int) $id_equipment,
-                        'qty'               => 1,
-                        'unit_price_tax_in' => (float) $product->price_ttc
-                    ));
-
+                    $article_errors = $article->create();
                     if (count($article_errors)) {
                         $errors = array_merge($errors, $article_errors);
                     } else {
-                        $article_errors = $article->create();
-                        if (count($article_errors)) {
-                            $errors = array_merge($errors, $article_errors);
-                        } else {
-                            $html .= $this->renderCartEquipmentline($article, $product, $equipment);
-                        }
+                        $html .= $this->renderCartEquipmentline($article, $product, $equipment);
                     }
                 }
             }

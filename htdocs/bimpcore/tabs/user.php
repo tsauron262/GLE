@@ -20,9 +20,9 @@ if ($user->id == $id) {//On est dans le form de l'utilisateur
 } else {
     $object = new User($db);
     $object->fetch($id);
-    $object->getrights();
-    $droitLire = $user->rights->user->user->lire;
-    $droitModifSimple = $user->rights->user->user->creer;
+    $object->getrights('user');
+    $droitLire = $object->rights->user->user->lire;
+    $droitModifSimple = $object->rights->user->user->creer;
     $droitModif = $droitModifSimple;
 }
 
@@ -35,7 +35,6 @@ dol_fiche_head($head, 'formSimple', 'Essentielles', -1, 'user');
 
 ini_set('display_errors', 1);
 
-define('BIMP_NEW', 1);
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 BimpCore::displayHeaderFiles();
 
@@ -61,6 +60,3 @@ if ($droitLire) {
     echo BimpRender::renderAjaxModal('page_modal');
 } else
     echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir cette page');
-
-
-llxFooter();

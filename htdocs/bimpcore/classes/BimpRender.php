@@ -522,4 +522,46 @@ class BimpRender
         $html .= '</div>';
         return $html;
     }
+
+    public static function renderIconClass($icon)
+    {
+        if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
+            return $matches[1] . ' fa5-' . $matches[2];
+        } else {
+            return 'fa fa-' . $icon;
+        }
+    }
+
+    public static function renderObjectIcons($object, $page_link = true, $modal_view = null, $url = null)
+    {
+        if (is_null($modal_view)) {
+            $modal_view = '';
+        }
+        $html = '';
+        if ($page_link) {
+            if (is_null($url)) {
+                $url = BimpObject::getInstanceUrl($object);
+            }
+            if ($url) {
+                $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
+                $html .= '<i class="fa fa-external-link"></i>';
+                $html .= '</span>';
+                if (!$modal_view) {
+                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . addslashes(BimpObject::getInstanceNom($object)) . '\')';
+                    $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
+                    $html .= '<i class="fa fa-eye"></i>';
+                    $html .= '</span>';
+                }
+            }
+        }
+        if ($modal_view && is_a($object, 'BimpObject')) {
+            $title = htmlentities(addslashes($object->getInstanceName()));
+            $onclick = 'loadModalView(\'' . $object->module . '\', \'' . $object->object_name . '\', ' . $object->id . ', \'' . $modal_view . '\', $(this), \'' . $title . '\')';
+            $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
+            $html .= '<i class="fa fa-eye"></i>';
+            $html .= '</span>';
+        }
+
+        return $html;
+    }
 }

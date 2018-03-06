@@ -85,6 +85,12 @@ div.tabBar {
     }
 }
 
+body.has_fullscreen {
+    .modal {
+        z-index: 11100!important;
+    }
+}
+
 .content-loading {
     display: none;
     padding: 60px;

@@ -128,7 +128,7 @@ class BimpTransfer {
         $em = new EquipmentManager($this->db);
         foreach ($products as $product) {
             $new_line = new BimpTransferLine($this->db);
-            if ($product['isEquipment'] == true) {
+            if ($product['is_equipment'] == 'true') {
                 $fk_equipment = $em->getEquipmentBySerial($product['serial']);
                 $id_line = $new_line->create($this->id, $this->fk_user_create, $product['id_product'], $fk_equipment, 1);
             } else {
@@ -194,7 +194,7 @@ class BimpTransfer {
         return false;
     }
 
-    public function getLines() {
+    public function getLines($add_prod_info = false) {
 
         if ($this->id < 0) {
             $this->errors[] = "L'identifiant du transfert est inconnu.";
@@ -212,7 +212,21 @@ class BimpTransfer {
             while ($obj = $this->db->fetch_object($result)) {
                 $line = new BimpTransferLine($this->db);
                 $line->fetch($obj->rowid);
+                if ($add_prod_info) {
+                    $doli_prod = new Product($this->db);
+                    $doli_prod->fetch($line->fk_product);
+                    $line->ref = $doli_prod->ref;
+                    $line->refurl = $doli_prod->getNomUrl(1);
+                    $line->label = dol_trunc($doli_prod->label, 25);
+                    $line->barcode = $doli_prod->barcode;
+                    if($line->fk_equipment > 0) {
+                        $em = new EquipmentManager($this->db);
+                        $line->serial = $em->getSerial($line->fk_equipment);
+                    }
+                }
+
                 $this->lines[] = $line;
+                $this->errors = array_merge($this->errors, $line->errors);
             }
         } if (!$result) {
             $this->errors[] = "Erreur lors de la requête de recherche de ligne du transfert : $this->id";
@@ -232,9 +246,10 @@ class BimpTransferLine {
     public $quantity_sent;
     public $quantity_received;
     public $fk_transfer;
-    public $fk_user;
+    public $fk_user_create;
     public $fk_product;
     public $fk_equipment;
+    public $serial;
 
     public function __construct($db) {
         $this->db = $db;
@@ -248,7 +263,7 @@ class BimpTransferLine {
             return false;
         }
 
-        $sql = 'SELECT date_opening, quantity_sent, quantity_received, fk_transfer, fk_user, fk_product, fk_equipment';
+        $sql = 'SELECT date_opening, quantity_sent, quantity_received, fk_transfer, fk_user_create, fk_product, fk_equipment';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
         $sql .= ' WHERE rowid=' . $id;
 
@@ -261,7 +276,7 @@ class BimpTransferLine {
                 $this->quantity_sent = $obj->quantity_sent;
                 $this->quantity_received = $obj->quantity_received;
                 $this->fk_transfer = $obj->fk_transfer;
-                $this->fk_user = $obj->fk_user;
+                $this->fk_user_create = $obj->fk_user_create;
                 $this->fk_product = $obj->fk_product;
                 $this->fk_equipment = ($obj->fk_equipment != NULL) ? $obj->fk_equipment : '';
                 return true;

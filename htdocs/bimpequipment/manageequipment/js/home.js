@@ -45,7 +45,7 @@ function displayLinks(warehouseElement) {
 }
 
 function diplayLink() {
-    $('#allTheFiche').append('<input type="button" class="butAction" value="Réception commande" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'"></td>');
-    $('#allTheFiche').append('<input type="button" class="butAction" value="Créer transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewTransfer.php?entrepot_id=' + fk_warehouse + '\'"></td>');
+//    $('#allTheFiche').append('<input type="button" class="butAction" value="Réception commande" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'"></td>');
+    $('#allTheFiche').append('<input type="button" class="butAction" value="Réception transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'"></td>');
     $('#allTheFiche').append('<input type="button" class="butAction" value="Accéder bimp caisse" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/\'"></td>');
 }

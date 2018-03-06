@@ -6,6 +6,11 @@
 
 var id_warehouse;
 var cnt_product = 0;
+
+var green = '#ADFF92';
+var yellow = '#FFFF96';
+var red = '#FF8484';
+
 /**
  * Ajax call
  */
@@ -38,7 +43,32 @@ function retrieveSentLines() {
     });
 }
 
+function receiveTransfert(products, equipments) {
 
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+        data: {
+            fk_transfert: getUrlParameter('id'),
+            products: products,
+            equipments: equipments,
+            action: 'receiveTransfert'
+        },
+        error: function () {
+            setMessage('alertTop', 'Erreur interne 1514.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertTop');
+            } else if (out.errors.length === undefined) {
+                setMessage('alertTop', 'Erreur interne 6489.', 'error');
+            } else {
+                console.log('OK');
+            }
+        }
+    });
+}
 
 
 
@@ -50,18 +80,21 @@ $(document).ready(function () {
 
 });
 function initEvents() {
-
-}
-
-/**
- * Triggered by the ref input
- */
-function validateProduct(ref) {
-    $('#productTable tr ').each(function() {
-        var tr = $(this);
-        if(tr.attr('is_equipment')) {
-            console.log("")
-        }
+    $('#register').click(function () {
+        var equipments = [];
+        var products = [];
+        $('#product_table tr[scanned_this_session]').each(function () {
+            var tr = $(this);
+            if (tr.attr('is_equipment') === 'true') {
+                equipments.push(getId(tr.attr('id')));
+            } else {
+                products.push({
+                    fk_product: getId(tr.attr('id')),
+                    new_qty: parseInt(tr.attr('qty_received_befor')) + parseInt(tr.find('input[name=received_qty]').val())
+                });
+            }
+        });
+        receiveTransfert(products, equipments)
     });
 }
 
@@ -69,24 +102,38 @@ function addLineProduct(prod) {
 
     cnt_product++;
     var id_tr = "p" + parseInt(prod.fk_product)
-    var line = '<tr id=' + id_tr + ' is_equipment=false barcode="' + prod.barcode + '" + ref="' + prod.ref + '">';
+    var line = '<tr id=' + id_tr + ' is_equipment=false barcode="' + prod.barcode + '" ref="' + prod.ref + '" qty_received_befor=' + prod.quantity_received + '>';
     line += '<td>' + cnt_product + '</td>';
     line += '<td>' + prod.refurl + '</td>'; // refUrl
     line += '<td></td>'; // num série
     line += '<td>' + prod.label + '</td>'; // label
     line += '<td name="sent_qty" style="text-align: right">' + prod.quantity_sent + '</td>';
-    line += '<td style="text-align: center"><img name="arrow_fill_qty" class="clickable" src="css/next.png"></img></td>';
-    line += '<td><input name="received_qty"  type="number" class="custInput" style="width: 40px" min=0 value=' + prod.quantity_received + '></td>';
-    $(line).appendTo('#productTable tbody');
+    line += '<td style="padding: 0px; text-align: center"><img name="arrow_fill_qty" class="clickable" src="css/next.png"></img></td>';
+    line += '<td style="padding: 0px"><input name="received_qty"  type="number" class="custInput" style="width: 60px" min=0 value=0 disabled> + ' + prod.quantity_received + '</td>';
+    $(line).appendTo('#product_table tbody');
     initSetFullQty(id_tr);
+
+    if (prod.quantity_received > 0)
+        setColors(id_tr, prod.quantity_received, prod.quantity_sent);
 }
 
+function setColors(id_tr, quantity_received, quantity_sent) {
+    var color;
+    if (quantity_received === quantity_sent)
+        color = green;
+    else if (quantity_received < quantity_sent)
+        color = yellow;
+    else if (quantity_received > quantity_sent)
+        color = red;
+    $('#product_table tr#' + id_tr).css('background', color);
+}
 
 function addLineEquipment(equip) {
 
     cnt_product++;
-    var id_tr = "e" + parseInt(equip.fk_product)
-    var line = '<tr id=' + id_tr + ' is_equipment=true>';
+    var id_tr = "e" + parseInt(equip.fk_equipment)
+    var line = '<tr id=' + id_tr + ' is_equipment="true" barcode="' +
+            equip.barcode + '" ref="' + equip.ref + '" serial="' + equip.serial + '" qty_received_befor=' + equip.quantity_received + '>';
     line += '<td>' + cnt_product + '</td>';
     line += '<td>' + equip.refurl + '</td>'; // refUrl
     line += '<td>' + equip.serial + '</td>'; // num série
@@ -94,28 +141,70 @@ function addLineEquipment(equip) {
     line += '<td></td>';
     line += '<td></td>';
     line += '<td></td>';
-    $(line).appendTo('#productTable tbody');
+    $(line).appendTo('#product_table tbody');
+
+    if (equip.quantity_received === equip.quantity_sent)
+        $('#product_table tr#' + id_tr).css('background', green);
 }
 
 
 function initSetFullQty(id_tr) {
-    $('#productTable tr#' + id_tr + ' > td > img[name=arrow_fill_qty]').click(function () {
-        var sent_qty = parseInt($('#productTable tr#' + id_tr + ' > td[name=sent_qty]').text());
-        $('#productTable tr#' + id_tr + ' > td > input[name=received_qty]').val(sent_qty);
+    $('#product_table tr#' + id_tr + ' > td > img[name=arrow_fill_qty]').click(function () {
+        var sent_qty = parseInt($('#product_table tr#' + id_tr + ' > td[name=sent_qty]').text());
+        $('#product_table tr#' + id_tr + ' > td > input[name=received_qty]').val(sent_qty);
     });
 }
 
 
+/**
+ * Triggered by the ref input
+ * @param {String} ref can also be a barcode or a serial number
+ */
+function validateProduct(ref) {
+//    console.log('déclenché ' + ref);
+    $('#product_table tr ').each(function () {
+        var tr = $(this);
+        if (tr.attr('is_equipment') === 'true') { // Equipment
+            if (ref === tr.attr('barcode')) {
+                setMessage('alertTop', 'Merci de renseigner le numéro de série plutôt que le code barre.', 'error');
+                return false;
+            } else if (ref === tr.attr('ref')) {
+                setMessage('alertTop', 'Merci de renseigner le numéro de série plutôt que la référence.', 'error');
+                return false;
+            } else if (ref === tr.attr('serial')) {
+                setScannedEquipment(tr);
+            }
+        } else if (tr.attr('is_equipment') === 'false') { // Product
+            if (ref === tr.attr('barcode') || ref === tr.attr('ref')) {
+                setScannedProduct(tr, $('input#qty').val());
+            }
+        }
+    });
+}
 
+/**
+ * @param {HTML element} tr
+ */
+function setScannedProduct(tr, qty_to_add) {
+    if (qty_to_add < 0)
+        return;
 
+    var qty_to_add = parseInt(qty_to_add);
+    var init_qty = parseInt(tr.find('input[name=received_qty]').val());
+    var new_qty = init_qty + qty_to_add;
+    tr.find('input[name=received_qty]').val(new_qty);
+    tr.attr('scanned_this_session', true);
+    var total_received = new_qty + parseInt(tr.attr('qty_received_befor'));
+    setColors(tr.attr('id'), total_received, (parseInt(tr.find('td[name=sent_qty]').text())));
+}
 
-
-
-
-
-
-
-
+/**
+ * @param {HTML element} tr
+ */
+function setScannedEquipment(tr) {
+    tr.attr('scanned_this_session', true);
+    tr.css('background', green);
+}
 
 
 /* Get the parameter sParam */
@@ -132,6 +221,10 @@ var getUrlParameter = function getUrlParameter(sParam) {
     }
 }
 
+
+function getId(input) {
+    return input.match(/[0-9]+/)[0];
+}
 
 
 /**

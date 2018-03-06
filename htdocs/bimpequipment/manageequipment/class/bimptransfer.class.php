@@ -219,7 +219,7 @@ class BimpTransfer {
                     $line->refurl = $doli_prod->getNomUrl(1);
                     $line->label = dol_trunc($doli_prod->label, 25);
                     $line->barcode = $doli_prod->barcode;
-                    if($line->fk_equipment > 0) {
+                    if ($line->fk_equipment > 0) {
                         $em = new EquipmentManager($this->db);
                         $line->serial = $em->getSerial($line->fk_equipment);
                     }
@@ -233,6 +233,26 @@ class BimpTransfer {
             return false;
         }
         return $this->lines;
+    }
+
+    public function receiveTransfert($products, $equipments) {
+        $nb_update = 0;
+
+        foreach ($products as $product) {
+            $line = new BimpTransferLine($this->db);
+            $line->updateQty($this->id, $product['new_qty'], $product['fk_product']);
+            $this->errors = array_merge($this->errors, $line->errors);
+            $nb_update++;
+        }
+
+        foreach ($equipments as $equipment) {
+            $line = new BimpTransferLine($this->db);
+            $line->updateQty($this->id, 1, 0, $product['fk_equipment']);
+            $this->errors = array_merge($this->errors, $line->errors);
+            $nb_update++;
+        }
+
+        return $nb_update;
     }
 
 }
@@ -329,6 +349,37 @@ class BimpTransferLine {
             return $last_insert_id;
         } else {
             $this->errors[] = "Impossible de créer la ligne de transfert avec fk_product=$fk_product";
+            dol_print_error($this->db);
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    function updateQty($fk_transfert, $new_qty, $fk_product = null, $fk_equipment = null) {
+
+        if ($fk_transfert < 0) {
+            $this->errors[] = "L'identifiant du transfert est inconnu.";
+            return false;
+        }
+        if ($fk_product < 0 and $fk_equipment < 0) {
+            $this->errors[] = "Impossible de mettre à jours les quantités de produits sans définir de fk_product ou de fk_equipment";
+            return false;
+        }
+
+        $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_transfer_det';
+        $sql .= ' SET quantity_received=' . $new_qty;
+        $sql .= ' WHERE fk_transfer=' . $fk_transfert;
+        if (0 < $fk_product)
+            $sql .= ' AND fk_product=' . $fk_product;
+        if (0 < $fk_equipment)
+            $sql .= ' AND fk_equipment=' . $fk_equipment;
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->db->commit();
+            return true;
+        } else {
+            $this->errors[] = "Impossible de changer la quantité de produit avec fk_product = $fk_product et fk_equipment = $fk_equipment";
             dol_print_error($this->db);
             $this->db->rollback();
             return -1;

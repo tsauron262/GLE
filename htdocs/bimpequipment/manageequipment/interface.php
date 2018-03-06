@@ -116,6 +116,12 @@ switch (GETPOST('action')) {
             break;
         }
 
+    case 'receiveTransfert': {
+            $transfert = new BimpTransfer($db);
+            $transfert->fetch(GETPOST('fk_transfert'));
+            echo json_encode(array('nb_update' => $transfert->receiveTransfert(GETPOST('products'), GETPOST('equipments')), 'errors' => $transfert->errors));
+            break;
+        }
 
     /* Default (catch bad action parameter) */
     default: {

@@ -82,6 +82,8 @@ function getRemainingLignes() {
                         addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Inconnu');
                 });
                 initEvents();
+                $('#entrepot').val(outP.init_fk_entrepot);
+                $('#entrepot').trigger('change');
             }
         }
     });
@@ -119,7 +121,7 @@ $(document).ready(function () {
     orderId = getUrlParameter('id');
     if (orderId === undefined)
         orderId = $('#id_order_hidden').val();
-        getRemainingLignes();
+    getRemainingLignes();
 });
 /**
  * Functions
@@ -137,7 +139,8 @@ function addProduct(ligne) {
     if (ligne.deliveredQty === null)
         line += '<td>' + ligne.remainingQty + '</td>';
     else
-        line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';    line += '<td>' + ligne.remainingQty + '</td>';
+        line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
+    line += '<td>' + ligne.remainingQty + '</td>';
     line += '<td name="qty">0</td>';
     line += '<td><input name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px" initVal=' + parseInt(ligne.remainingQty) + '> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
     line += '<td>' + ligne.price_unity + ' €</td>';
@@ -247,6 +250,11 @@ function initEvents() {
             validateSerial($(this));
             e.preventDefault();
         }
+    });
+
+    $('input[name=serial]').on('blur', function (e) {
+        validateSerial($(this));
+        e.preventDefault();
     });
 }
 

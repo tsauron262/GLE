@@ -102,10 +102,20 @@ switch (GETPOST('action')) {
             $transfert = new BimpTransfer($db);
             $id_transfer = $transfert->create(GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user->id, $transfert::STATUS_SENT);
             $transfert->fetch($id_transfer);
-            
+
             echo json_encode(array('lines_added' => $transfert->addLines(GETPOST('products')), 'errors' => $transfert->errors));
             break;
         }
+
+    /* transfer - viewReception */
+
+    case 'retrieveSentLines': {
+            $transfert = new BimpTransfer($db);
+            $transfert->fetch(GETPOST('fk_transfert'));
+            echo json_encode(array('prods' => $transfert->getLines(true), 'errors' => $transfert->errors));
+            break;
+        }
+
 
     /* Default (catch bad action parameter) */
     default: {

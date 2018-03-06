@@ -23,7 +23,6 @@ llxHeader('', 'Réception', '', '', 0, 0, $arrayofjs, $arrayofcss);
 
 print load_fiche_titre('Réception - accueil', $linkback);
 
-print '<div id="alertTop" style="clear:left"></div>';
 
 print '<table class="entry">';
 print '<tr><td><strong>Réf. ou code barre ou numéro de série</strong></td>';
@@ -32,9 +31,9 @@ print '<tr><td style="text-align: right;"><strong> Quantité</strong></td>';
 print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
 
 print '</table>';
+print '<div id="alertTop" style="clear:left"></div>';
 
-//print '<div id="allTheFiche" class="object_list_table">';
-print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
+print '<table id="product_table" class="noborder objectlistTable" style="margin-top:20px">';
 print '<thead>';
 print '<th>Groupes scanné</th>';
 print '<th>Référence</th>';
@@ -49,9 +48,7 @@ print '</table>';
 
 print '<br>';
 
-print '<input type="button" class="butAction" value="Enregistrer">';
-
-//print '</div>';
+print '<input id="register" type="button" class="butAction" value="Enregistrer">';
 
 $db->close();
 

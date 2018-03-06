@@ -216,7 +216,12 @@ function setCommonEvents($container) {
         }
     });
     // bootstrap popover:
-    $container.find('.bs-popover').popover();
+    $container.find('.bs-popover').each(function() {
+        $(this).popover();
+        $(this).click(function() {
+            $(this).popover('hide');
+        });
+    });
     // Auto-expand: 
     $container.on('input.auto_expand', 'textarea.auto_expand', function () {
         var minRows = $(this).data('min_rows'), rows;

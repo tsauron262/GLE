@@ -23,6 +23,9 @@ objects:
             dol_object: product
             id_object: 
                 field_value: id_product
+        cards: 
+            default: 
+                type: product_card
     equipment: 
         relation: hasOne
         delete: 0
@@ -68,6 +71,10 @@ fields:
         display_if: 
             field_name: id_equipment
             show_values: 0,
+        display: 
+            card: 
+                type: card
+                card: default
     qty: 
         label: Quantité
         type: int
@@ -90,6 +97,31 @@ fields:
         label: Actif
         type: bool
         default_value: 1
+        
+    origin_element:
+        label: Type d'objet lié
+        type: int
+        values:
+            array: origin_elements
+        default_value: 0
+            
+    origin_id_element:
+        label: Objet lié
+        type: int
+        default_value: 0
+        display_if: 
+            field_name: origin_element
+            hide_values: 0,
+        input: 
+            type: custom
+            content: 
+                callback: getOriginIdElementInput
+        depends_on: origin_element
+        display: 
+            default: 
+                type: callback
+                method: displayOriginElement
+        
     note: 
         label: Note
         type: text
@@ -101,10 +133,13 @@ fields_tables:
     default: 
         rows: 
             - field: id_user_origin
+              display: nom_url
+            - field: origin_element
+            - field: origin_id_element
             - field: id_product
-              show: 
-                  callback: isProduct
+              display: card
             - field: id_equipment
+              display: card
               show: 
                   callback: isEquipment
             - field: qty

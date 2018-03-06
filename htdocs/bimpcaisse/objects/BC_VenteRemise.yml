@@ -58,6 +58,14 @@ fields:
             field_name: type
             show_values: 2
             
+    per_unit:
+        label: Appliquer la réduction sur chaque unité
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: id_article
+            hide_values: 0,
+            
 lists: 
     default: 
         title: Remises

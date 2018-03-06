@@ -141,8 +141,8 @@ function addProduct(ligne) {
     else
         line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
     line += '<td>' + ligne.remainingQty + '</td>';
-    line += '<td name="qty">0</td>';
-    line += '<td><input name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px" initVal=' + parseInt(ligne.remainingQty) + '> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
+    line += '<td name="qty" initValue="' + ligne.remainingQty + '">0</td>';
+    line += '<td><input initValue=' + ligne.remainingQty + ' name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px" initVal=' + parseInt(ligne.remainingQty) + '> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
     line += '<td>' + ligne.price_unity + ' €</td>';
     line += '<td style="text-align:center"><input type="checkbox" name="stocker"></td></tr>';
     $(line).appendTo('#productTable tbody');

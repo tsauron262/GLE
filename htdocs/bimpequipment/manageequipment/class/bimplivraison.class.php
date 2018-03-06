@@ -8,6 +8,7 @@ include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepani
 class BimpLivraison {
 
     private $db;
+    private $commande;
     public $orderId;
     public $statut;
     public $ref;
@@ -22,7 +23,8 @@ class BimpLivraison {
         $doliFournOrder = new CommandeFournisseur($this->db);
         $doliFournOrder->fetch($orderId);
         $this->statut = $doliFournOrder->statut;
-        $this->ref = $doliFournOrder->ref;
+        $this->ref = "liv" . $doliFournOrder->ref;
+        $this->commande = $doliFournOrder;
     }
 
     /* Get every line of the order */
@@ -64,7 +66,7 @@ class BimpLivraison {
         $moveQty = array();
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
-        $sql .= ' WHERE inventorycode="BimpLivraison ' . $this->ref . '"';
+        $sql .= ' WHERE inventorycode="'.$this->getcodeMove(). '"';
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
@@ -143,16 +145,13 @@ class BimpLivraison {
         $sql = 'SELECT e.serial as serial';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
-        $sql .= ' WHERE e_place.infos="BimpLivraison ' . $this->ref . '"';
+        $sql .= ' WHERE e_place.infos="' . $this->getcodeMove() . '"';
         $sql .= ' AND e.id_product=' . $ligne->prodId;
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
                 $prodSerial[] = $obj->serial;
-//                if ($obj->place != 1) {
-//                    $this->errors = "Cet équipement n'est pas dans le bon entrepôt.";
-//                }
             }
         }
         return $prodSerial;
@@ -160,12 +159,10 @@ class BimpLivraison {
 
     /* Called by interface */
 
-    function addInStock($products, $orderId, $entrepotId, $user, $isTotal) {
+    function addInStock($products, $entrepotId, $user, $isTotal) {
         $now = dol_now();
-        $order = new CommandeFournisseur($this->db);
-        $order->fetch($orderId);
-        $labelmove = 'Reception commande bimp ' . $order->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
-        $codemove = 'BimpLivraison ' . $order->ref;
+        $labelmove = 'Reception commande bimp ' . $this->commande->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
+        $codemove = $this->getcodeMove();
 
         $this->errors = $this->checkDuplicateSerial($products);
 
@@ -191,7 +188,7 @@ class BimpLivraison {
 
             $type = ($isTotal == 'false') ? 'par' : 'tot';
 
-            $order->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
+            $this->commande->Livraison($user, $now, $type, $labelmove); // last argument = comment, TODO add texterea ?
         }
 
         return array('errors' => $this->errors);
@@ -242,12 +239,16 @@ class BimpLivraison {
             'id_equipment' => $equipement->id,
             'type' => 2, // cf $types
             'id_entrepot' => $entrepotId, // si type = 2
-            'infos' => 'BimpLivraison ' . $this->ref,
+            'infos' => $this->getcodeMove(),
             'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
         ));
         $this->errors = array_merge($this->errors, $emplacement->create());
         if ($length != sizeof($this->errors))
             $this->errors[] = ' id : ' . $prodId . ' numéro de série : ' . $serial;
+    }
+
+    private function getcodeMove() {
+        return "BimpLivraison" . $this->ref;
     }
 
 }

@@ -5,22 +5,24 @@ include_once '../../../main.inc.php';
 class BimpTransfer {
 
     private $db;
+    public $lines;
     public $id;
     public $date_opening;
     public $date_closing;
-    public $fk_warehouse;
+    public $fk_warehouse_source;
+    public $fk_warehouse_dest;
     public $fk_user_create;
     public $status;
     public $errors;
 
-    const STATUT_DRAFT = 0;
-    const STATUT_SENT = 1;
-    const STATUT_RECEIVED = 2;
+    const STATUS_DRAFT = 0;
+    const STATUS_SENT = 1;
+    const STATUS_RECEIVED = 2;
 
     public function __construct($db) {
         $this->db = $db;
         $this->errors = array();
-        $this->lignes = array();
+        $this->lines = array();
     }
 
     public function fetch($id) {
@@ -30,7 +32,7 @@ class BimpTransfer {
             return false;
         }
 
-        $sql = 'SELECT status, fk_warehouse, fk_user_create, date_opening, date_closing';
+        $sql = 'SELECT status, fk_warehouse_source, fk_warehouse_dest, fk_user_create, date_opening, date_closing';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer';
         $sql .= ' WHERE rowid=' . $id;
 
@@ -40,7 +42,8 @@ class BimpTransfer {
             while ($obj = $this->db->fetch_object($result)) {
                 $this->id = $id;
                 $this->status = $obj->status;
-                $this->fk_warehouse = $obj->fk_warehouse;
+                $this->fk_warehouse_source = $obj->fk_warehouse_source;
+                $this->fk_warehouse_dest = $obj->fk_warehouse_dest;
                 $this->fk_user_create = $obj->fk_user_create;
                 $this->date_opening = $obj->date_opening;
                 $this->date_closing = $obj->date_closing;
@@ -53,12 +56,15 @@ class BimpTransfer {
         }
     }
 
-    public function create($fk_warehouse, $fk_user) {
+    public function create($fk_warehouse_source, $fk_warehouse_dest, $fk_user, $status = STATUS_DRAFT) {
 
-        if ($fk_warehouse < 0) {
-            $this->errors[] = "Identifiant entrepot invalide : " . $fk_warehouse;
+        if ($fk_warehouse_source < 0) {
+            $this->errors[] = "Identifiant entrepot de départ invalide : " . $fk_warehouse_source;
             return false;
-        } else if ($fk_user < 0) {
+        } elseif ($fk_warehouse_dest < 0) {
+            $this->errors[] = "Identifiant entrepot d'arrivée invalide : " . $fk_warehouse_dest;
+            return false;
+        } elseif ($fk_user < 0) {
             $this->errors[] = "Identifiant utilisateur invalide : " . $fk_user;
             return false;
         }
@@ -66,12 +72,14 @@ class BimpTransfer {
         $this->db->begin();
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_transfer (';
         $sql.= 'status';
-        $sql.= ', fk_warehouse';
+        $sql.= ', fk_warehouse_source';
+        $sql.= ', fk_warehouse_dest';
         $sql.= ', fk_user_create';
         $sql.= ', date_opening';
         $sql.= ') ';
-        $sql.= 'VALUES (' . $this::STATUT_DRAFT;
-        $sql.= ', ' . $fk_warehouse;
+        $sql.= 'VALUES (' . $status;
+        $sql.= ', ' . $fk_warehouse_source;
+        $sql.= ', ' . $fk_warehouse_dest;
         $sql.= ', ' . $fk_user;
         $sql.= ', ' . $this->db->idate(dol_now());
         $sql.= ')';
@@ -92,7 +100,7 @@ class BimpTransfer {
     public function updateStatut($new_code_status) {
 
         if ($this->id < 0) {
-            $this->errors[] = "L'identifiant du trasnfert est inconnu.";
+            $this->errors[] = "L'identifiant du transfert est inconnu.";
             return false;
         }
 
@@ -114,6 +122,105 @@ class BimpTransfer {
         }
     }
 
+    public function addLines($products) {
+
+        $cnt_line_added = 0;
+        $em = new EquipmentManager($this->db);
+        foreach ($products as $product) {
+            $new_line = new BimpTransferLine($this->db);
+            if ($product['isEquipment'] == true) {
+                $fk_equipment = $em->getEquipmentBySerial($product['serial']);
+                $id_line = $new_line->create($this->id, $this->fk_user_create, $product['id_product'], $fk_equipment, 1);
+            } else {
+                $id_line = $new_line->create($this->id, $this->fk_user_create, $product['id_product'], 'NULL', $product['qty']);
+            }
+            if ($id_line < 0) {
+                $this->errors = array_merge($this->errors, $new_line->errors);
+            }
+            $cnt_line_added++;
+        }
+        return $cnt_line_added;
+    }
+
+    public function getTransfers($fk_warehouse_dest = null, $status = null) {
+
+        $transfers = array();
+
+        $sql = 'SELECT rowid, status, fk_warehouse_source, fk_warehouse_dest, fk_user_create, date_opening, date_closing';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer';
+
+        if ($fk_warehouse_dest != null) {
+            $sql .= ' WHERE fk_warehouse_dest=' . $fk_warehouse_dest;
+            if ($status != null)
+                $sql .= ' AND status=' . $status;
+        } elseif ($status != null) {
+            $sql .= ' WHERE status=' . $status;
+        }
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $transfers[] = array(
+                    'id' => $obj->rowid,
+                    'status' => $obj->status,
+                    'fk_warehouse_source' => $obj->fk_warehouse_source,
+                    'fk_warehouse_dest' => $obj->fk_warehouse_dest,
+                    'fk_user_create' => $obj->fk_user_create,
+                    'date_opening' => $obj->date_opening,
+                    'date_closing' => $obj->date_closing);
+            }
+        }
+        return $transfers;
+    }
+
+    public function getProductSent() {
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant du transfert est inconnu.";
+            return false;
+        }
+
+
+        $sql = 'SELECT SUM(quantity_sent) as scanned_product';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
+        $sql .= ' WHERE fk_transfer=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                return $obj->scanned_product;
+            }
+        }
+        return false;
+    }
+
+    public function getLines() {
+
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant du transfert est inconnu.";
+            return false;
+        }
+
+
+        $sql = 'SELECT rowid';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
+        $sql .= ' WHERE fk_transfer=' . $this->id;
+
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $line = new BimpTransferLine($this->db);
+                $line->fetch($obj->rowid);
+                $this->lines[] = $line;
+            }
+        } if (!$result) {
+            $this->errors[] = "Erreur lors de la requête de recherche de ligne du transfert : $this->id";
+            return false;
+        }
+        return $this->lines;
+    }
+
 }
 
 class BimpTransferLine {
@@ -122,7 +229,8 @@ class BimpTransferLine {
     public $errors;
     public $id;
     public $date_opening;
-    public $quantity;
+    public $quantity_sent;
+    public $quantity_received;
     public $fk_transfer;
     public $fk_user;
     public $fk_product;
@@ -140,7 +248,7 @@ class BimpTransferLine {
             return false;
         }
 
-        $sql = 'SELECT date_opening, quantity, fk_transfer, fk_user, fk_product, fk_equipment';
+        $sql = 'SELECT date_opening, quantity_sent, quantity_received, fk_transfer, fk_user, fk_product, fk_equipment';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
         $sql .= ' WHERE rowid=' . $id;
 
@@ -150,7 +258,8 @@ class BimpTransferLine {
             while ($obj = $this->db->fetch_object($result)) {
                 $this->id = $id;
                 $this->date_opening = $this->db->jdate($obj->date_opening);
-                $this->quantity = $obj->quantity;
+                $this->quantity_sent = $obj->quantity_sent;
+                $this->quantity_received = $obj->quantity_received;
                 $this->fk_transfer = $obj->fk_transfer;
                 $this->fk_user = $obj->fk_user;
                 $this->fk_product = $obj->fk_product;
@@ -163,7 +272,7 @@ class BimpTransferLine {
         }
     }
 
-    public function create($fk_transfer, $fk_user_create, $fk_product, $fk_equipment, $quantity) {
+    public function create($fk_transfer, $fk_user_create, $fk_product, $fk_equipment, $quantity_sent) {
 
         $stop = false;
         if ($fk_transfer < 0) {
@@ -183,15 +292,15 @@ class BimpTransferLine {
 
         $this->db->begin();
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_transfer_det (';
-        $sql.= 'date_creation';
-        $sql.= ', quantity';
+        $sql.= 'date_opening';
+        $sql.= ', quantity_sent';
         $sql.= ', fk_transfer';
         $sql.= ', fk_user_create';
         $sql.= ', fk_product';
         $sql.= ', fk_equipment';
         $sql.= ') ';
         $sql.= 'VALUES (' . $this->db->idate(dol_now());
-        $sql.= ', ' . $quantity;
+        $sql.= ', ' . $quantity_sent;
         $sql.= ', ' . $fk_transfer;
         $sql.= ', ' . $fk_user_create;
         $sql.= ', ' . $fk_product;
@@ -210,5 +319,5 @@ class BimpTransferLine {
             return -1;
         }
     }
+
 }
-    

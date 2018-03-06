@@ -11,7 +11,7 @@ include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
-$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/transfertAjax.js');
+$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/transferAjax.js');
 
 
 /*
@@ -91,7 +91,7 @@ print '<div>';
 
 print '<div id="alertProd" style="clear:left"></div><br/><br/><br/>';
 
-print '<input id="enregistrer" type="button" class="butAction" value="Transférer">';
+print '<input id="enregistrer" type="button" class="butAction" value="Enregistrer et envoyer">';
 
 print '<br/><div id="alertEnregistrer" style="clear:left"></div><br/>';
 

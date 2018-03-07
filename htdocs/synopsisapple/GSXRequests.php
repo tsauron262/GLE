@@ -637,7 +637,7 @@ class GSX_Request {
 //                    $tab3 = array_merge($tab3, $tab2[$result->nom]);
             }
             if (count($tab3) < 2) {
-                $tab3[] = $tab4;
+                $tab3 = $tab4;
             }
             if (count($tab3) < 2) {
                 foreach ($tab2 as $tabT)

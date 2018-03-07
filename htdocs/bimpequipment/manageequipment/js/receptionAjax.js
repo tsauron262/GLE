@@ -63,9 +63,10 @@ function receiveTransfert(products, equipments) {
                 if (out.errors.length !== 0) {
                     printErrors(out.errors, 'alertTop');
                 } else if (out.nb_update) {
-                    setMessage('alertTop', out.nb_update + ' Groupes de produits on été ajoutés', 'mesgs');
+                    location.reload();
+                    alert('Enregistrement réalisé');
                 } else {
-                setMessage('alertTop', 'Erreur interne 6490.', 'error');
+                    setMessage('alertTop', 'Erreur interne 6490.', 'error');
                 }
             } catch (e) {
                 setMessage('alertTop', 'Erreur interne 6489.', 'error');
@@ -87,7 +88,9 @@ function initEvents() {
     $('#register').click(function () {
         var equipments = [];
         var products = [];
+        var no_new_scan = true;
         $('#product_table tr[scanned_this_session]').each(function () {
+            no_new_scan = false;
             var tr = $(this);
             var previous_qty = parseInt(tr.attr('qty_received_befor'));
             var added_qty = parseInt(tr.find('input[name=received_qty]').val());
@@ -101,6 +104,13 @@ function initEvents() {
                 });
             }
         });
+
+        var new_status = getNewStatus();
+        console.log("new statut = " + new_status);
+        if (no_new_scan) {
+            setMessage('alertTop', 'Veuillez scanner des produits avant d\'enregistrer la réception de transfert.', 'error');
+            return;
+        }
         receiveTransfert(products, equipments)
     });
 }
@@ -121,7 +131,7 @@ function addLineProduct(prod) {
     initSetFullQty(id_tr);
 
     if (prod.quantity_received > 0)
-        setColors(id_tr, prod.quantity_received, prod.quantity_sent);
+        setColors(id_tr, parseInt(prod.quantity_received), parseInt(prod.quantity_sent));
 }
 
 function setColors(id_tr, quantity_received, quantity_sent) {
@@ -187,6 +197,34 @@ function validateProduct(ref) {
             }
         }
     });
+}
+
+function getNewStatus() {
+    var new_status = 'total';
+    var new_qty;
+    var previous_qty;
+    var added_qty;
+    var sent_qty;
+    $('#product_table > tbody > tr').each(function () {
+        var tr = $(this);
+        if (tr.attr('is_equipment') === 'true') {
+            if (tr.attr('qty_received_befor') !== '1' && tr.attr('scanned_this_session') !== 'true') {
+                new_status = 'partial';
+                return;
+            }
+        } else {
+            previous_qty = parseInt(tr.attr('qty_received_befor'));
+            added_qty = parseInt(tr.find('input[name=received_qty]').val());
+            new_qty = previous_qty + added_qty;
+            sent_qty = parseInt(tr.find('td[name=sent_qty]').text());
+            if (new_qty < sent_qty) {
+                new_status = 'partial';
+                return;
+            }
+        }
+
+    });
+    return new_status;
 }
 
 /**

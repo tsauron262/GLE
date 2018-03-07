@@ -185,20 +185,9 @@ function addLineProduct(prod) {
     $(line).appendTo('#product_table tbody');
     initSetFullQty(id_tr);
 
-    initColorEvent(id_tr);
-
     if (prod.quantity_received > 0)
         setColors(id_tr, parseInt(prod.quantity_received), parseInt(prod.quantity_sent));
 }
-
-function initColorEvent(id_tr) {
-    $('tr#' + id_tr + ' input[name=received_qty]').bind('keyup mouseup', function () {
-        var quantity_received = parseInt($(this).val()) + parseInt($('tr#' + id_tr).attr('qty_received_befor'));
-        var quantity_sent = parseInt($('tr#' + id_tr + ' td[name=sent_qty]').text());
-        setColors(id_tr, quantity_received, quantity_sent);
-    });
-}
-
 
 function setColors(id_tr, quantity_received, quantity_sent) {
     var color;

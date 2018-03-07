@@ -66,7 +66,7 @@ class BimpLivraison {
         $moveQty = array();
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
-        $sql .= ' WHERE inventorycode="'.$this->getcodeMove(). '"';
+        $sql .= ' WHERE inventorycode="' . $this->getcodeMove() . '"';
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
@@ -248,7 +248,7 @@ class BimpLivraison {
     }
 
     private function getcodeMove() {
-        return "BimpLivraison" . $this->ref;
+        return "BimpLivraison" . $this->id;
     }
 
 }

@@ -58,13 +58,17 @@ function receiveTransfert(products, equipments) {
             setMessage('alertTop', 'Erreur interne 1514.', 'error');
         },
         success: function (rowOut) {
-            var out = JSON.parse(rowOut);
-            if (out.errors.length !== 0) {
-                printErrors(out.errors, 'alertTop');
-            } else if (out.errors.length === undefined) {
+            try {
+                var out = JSON.parse(rowOut);
+                if (out.errors.length !== 0) {
+                    printErrors(out.errors, 'alertTop');
+                } else if (out.nb_update) {
+                    setMessage('alertTop', out.nb_update + ' Groupes de produits on été ajoutés', 'mesgs');
+                } else {
+                setMessage('alertTop', 'Erreur interne 6490.', 'error');
+                }
+            } catch (e) {
                 setMessage('alertTop', 'Erreur interne 6489.', 'error');
-            } else {
-                console.log('OK');
             }
         }
     });
@@ -85,12 +89,15 @@ function initEvents() {
         var products = [];
         $('#product_table tr[scanned_this_session]').each(function () {
             var tr = $(this);
+            var previous_qty = parseInt(tr.attr('qty_received_befor'));
+            var added_qty = parseInt(tr.find('input[name=received_qty]').val());
             if (tr.attr('is_equipment') === 'true') {
                 equipments.push(getId(tr.attr('id')));
             } else {
                 products.push({
                     fk_product: getId(tr.attr('id')),
-                    new_qty: parseInt(tr.attr('qty_received_befor')) + parseInt(tr.find('input[name=received_qty]').val())
+                    previous_qty: previous_qty,
+                    new_qty: previous_qty + added_qty
                 });
             }
         });

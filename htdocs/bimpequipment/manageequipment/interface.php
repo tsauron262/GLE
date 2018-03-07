@@ -119,7 +119,7 @@ switch (GETPOST('action')) {
     case 'receiveTransfert': {
             $transfert = new BimpTransfer($db);
             $transfert->fetch(GETPOST('fk_transfert'));
-            echo json_encode(array('nb_update' => $transfert->receiveTransfert(GETPOST('products'), GETPOST('equipments')), 'errors' => $transfert->errors));
+            echo json_encode(array('nb_update' => $transfert->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')), 'errors' => $transfert->errors));
             break;
         }
 

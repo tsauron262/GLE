@@ -98,8 +98,10 @@ class EquipmentManager {
             'errors' => $this->errors);
     }
 
-    /* Called by the interface */
-
+    /**
+     *  Called by the interface 
+     * @deprecated
+     */
     function correctStock($entrepotId, $products, $user) {
         var_dump($products);
         $now = dol_now();
@@ -280,7 +282,7 @@ class EquipmentManager {
 
         $sql = 'SELECT id';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
-        $sql .= ' WHERE serial="' . $serial.'"';
+        $sql .= ' WHERE serial="' . $serial . '"';
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
@@ -294,7 +296,7 @@ class EquipmentManager {
     }
 
     public function getSerial($fk_equipment) {
-        
+
         $sql = 'SELECT serial';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
         $sql .= ' WHERE id=' . $fk_equipment;
@@ -310,20 +312,4 @@ class EquipmentManager {
         }
     }
 
-//    public function getEquipmentById($equipment_id) {
-//        
-//        $sql = 'SELECT id_product, serial, ';
-//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
-//        $sql .= ' WHERE id=' . $equipment_id;
-//
-//        $result = $this->db->query($sql);
-//        if ($result and mysqli_num_rows($result) > 0) {
-//            while ($obj = $this->db->fetch_object($result)) {
-//                return array('id_product' => $obj->id_product, 'serial' => $obj->serial);
-//            }
-//        } else {
-//            $this->errors[] = "L'équipement $equipment_id n'est pas dans la table des équipements";
-//            return false;
-//        }
-//    }
 }

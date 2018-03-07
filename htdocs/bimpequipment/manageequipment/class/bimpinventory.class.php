@@ -340,7 +340,7 @@ class BimpInventory {
     public function updateStock($user) {
 
         $now = dol_now();
-        $codemove = dol_print_date($now, '%y%m%d%H%M%S');
+        $codemove = 'InventaireBimp' . $this->id;
         $label = 'Inventaire Bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
 
         if ($this->id < 0) {

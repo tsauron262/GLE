@@ -38,6 +38,9 @@ class Transfert {
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function execute() {
 
         $now = dol_now();
@@ -72,6 +75,9 @@ class LigneTransfert {
         $this->serial = $serial;
     }
 
+    /**
+     * @deprecated
+     */
     public function transfert($entrepotIdEnd) {
         $errors = array();
 
@@ -96,6 +102,9 @@ class LigneTransfert {
 
 }
 
+/**
+ * @deprecated
+ */
 function getIdBySerial($db, $serial) {
     $sql = 'SELECT id';
     $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';

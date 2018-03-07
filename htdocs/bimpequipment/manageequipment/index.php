@@ -10,7 +10,7 @@ include_once '../../main.inc.php';
 include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css');
-$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/home.js');
+$arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/index.js');
 
 
 /*

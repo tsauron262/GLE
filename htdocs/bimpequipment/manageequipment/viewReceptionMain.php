@@ -53,7 +53,7 @@ foreach ($transfers as $transfer) {
     $obj_transfer->id = $transfer['id'];
     $doli_warehouse = new Entrepot($db);
     $doli_warehouse->fetch($transfer['fk_warehouse_source']);
-    
+
     print '<tr>';
     print '<td>' . $transfer['id'] . '</td>';
     print '<td>' . $user->getNomUrl(-1, '', 0, 0, 24, 0, '') . '</td>';
@@ -61,6 +61,8 @@ foreach ($transfers as $transfer) {
         print '<td>Brouillon</td>';
     } elseif ($transfer['status'] == $obj_transfer::STATUS_SENT) {
         print '<td>Envoyé</td>';
+    } elseif ($transfer['status'] == $obj_transfer::STATUS_RECEIVED_PARTIALLY) {
+        print '<td>Reçu partiellement</td>';
     } elseif ($transfer['status'] == $obj_transfer::STATUS_RECEIVED) {
         print '<td>Reçu</td>';
     }

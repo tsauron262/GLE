@@ -175,7 +175,7 @@ class BimpLivraison {
                 if (!isset($product['qty'])) {   // serialisable
                     $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
                 } else {    // non serialisable
-                    $result = $doliProduct->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove, 'order_supplier', $entrepotId);
+                    $result = $doliProduct->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove, 'order_supplier', $this->commande->id);
                     if ($result < 0) {
                         $this->errors = array_merge($this->errors, $doliProduct->errors);
                         $this->errors = array_merge($this->errors, $doliProduct->errorss);
@@ -228,7 +228,9 @@ class BimpLivraison {
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
             'admin_login' => '',
             'admin_pword' => '',
-            'note' => ''
+            'note' => '',
+            'origin_element' => 'order_supplier',
+            'origin_id_element' => $this->commande->id
         ));
 
         $this->errors = array_merge($this->errors, $equipement->create());

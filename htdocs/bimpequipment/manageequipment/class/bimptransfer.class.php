@@ -17,7 +17,8 @@ class BimpTransfer {
 
     const STATUS_DRAFT = 0;
     const STATUS_SENT = 1;
-    const STATUS_RECEIVED = 2;
+    const STATUS_RECEIVED_PARTIALLY = 2;
+    const STATUS_RECEIVED = 3;
 
     public function __construct($db) {
         $this->db = $db;
@@ -235,19 +236,22 @@ class BimpTransfer {
         return $this->lines;
     }
 
-    public function receiveTransfert($products, $equipments) {
+    public function receiveTransfert($user, $products, $equipments) {
         $nb_update = 0;
+        $now = dol_now();
+        $labelmove = 'Reception transfert bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
+        $codemove = "BimpTransfer" . $this->id;
 
         foreach ($products as $product) {
             $line = new BimpTransferLine($this->db);
-            $line->updateQty($this->id, $product['new_qty'], $product['fk_product']);
+            $line->updateQty($user, $this->id, $product['previous_qty'], $product['new_qty'], $product['fk_product'], 0, $labelmove, $codemove, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
             $this->errors = array_merge($this->errors, $line->errors);
             $nb_update++;
         }
 
-        foreach ($equipments as $equipment) {
+        foreach ($equipments as $fk_equipment) {
             $line = new BimpTransferLine($this->db);
-            $line->updateQty($this->id, 1, 0, $product['fk_equipment']);
+            $line->updateQty($user, $this->id, 0, 1, 0, $fk_equipment, $labelmove, $codemove, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
             $this->errors = array_merge($this->errors, $line->errors);
             $nb_update++;
         }
@@ -355,14 +359,14 @@ class BimpTransferLine {
         }
     }
 
-    function updateQty($fk_transfert, $new_qty, $fk_product = null, $fk_equipment = null) {
+    function updateQty($user, $fk_transfert, $previous_qty, $new_qty, $fk_product, $fk_equipment, $labelmove, $codemove, $fk_warehouse_source, $fk_warehouse_dest, $now) {
 
         if ($fk_transfert < 0) {
             $this->errors[] = "L'identifiant du transfert est inconnu.";
             return false;
         }
         if ($fk_product < 0 and $fk_equipment < 0) {
-            $this->errors[] = "Impossible de mettre à jours les quantités de produits sans définir de fk_product ou de fk_equipment";
+            $this->errors[] = "Impossible de mettre à jours les quantités de produits sans définir de id_product ni de id_equipment";
             return false;
         }
 
@@ -377,6 +381,34 @@ class BimpTransferLine {
         $result = $this->db->query($sql);
         if ($result) {
             $this->db->commit();
+            // products
+            if (0 < $fk_product) {
+                $doli_product = new Product($this->db);
+                $doli_product->fetch($fk_product);
+                // remove from source
+                $result = $doli_product->correct_stock($user, $fk_warehouse_source, ($new_qty - $previous_qty), 1, $labelmove, 0, $codemove); //, 'order_supplier', $entrepotId);
+                if ($result < 0) {
+                    $this->errors = array_merge($this->errors, $doli_product->errors);
+                    $this->errors = array_merge($this->errors, $doli_product->errorss);
+                }
+                // add to destination
+                $result2 = $doli_product->correct_stock($user, $fk_warehouse_dest, ($new_qty - $previous_qty), 0, $labelmove, 0, $codemove); //, 'order_supplier', $entrepotId);
+                if ($result2 < 0) {
+                    $this->errors = array_merge($this->errors, $doli_product->errors);
+                    $this->errors = array_merge($this->errors, $doli_product->errorss);
+                }
+            } else if (0 < $fk_equipment) {
+                $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+                $emplacement->validateArray(array(
+                    'id_equipment' => $fk_equipment,
+                    'type' => 2,
+                    'id_entrepot' => $fk_warehouse_dest,
+                    'infos' => $codemove,
+                    'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
+                ));
+                $this->errors = array_merge($this->errors, $emplacement->create());
+            }
             return true;
         } else {
             $this->errors[] = "Impossible de changer la quantité de produit avec fk_product = $fk_product et fk_equipment = $fk_equipment";

@@ -99,6 +99,7 @@ class modBimpEquipment extends DolibarrModules {
         //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
         //                              'objecttype:-tabname:NU:conditiontoremove');                                                     										// To remove an existing tab identified by code tabname
         $this->tabs = array(
+            'order:+bimporderclient:BimpExpédition:@bimpequipment:$user->rights->commande->lire:/bimpequipment/manageequipment/viewOrderClient.php?id=__ID__',
             'supplier_order:+bimpordersupplier:Livrer:@bimpequipment:$user->rights->fournisseur->facture->lire:/bimpequipment/manageequipment/viewOrderSupplier.php?id=__ID__',
             'stock:+bimpstock:Stock à date:@bimpequipment:$user->rights->stock->lire:/bimpequipment/tabs/stock/card.php?id=__ID__'
         );

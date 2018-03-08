@@ -15,6 +15,7 @@ include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimptrans
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimplivraison.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimpinventory.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/equipmentmanager.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimporderclient.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/product.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/equipment.lib.php';
 
@@ -127,9 +128,21 @@ switch (GETPOST('action')) {
             $transfert = new BimpTransfer($db);
             $transfert->fetch(GETPOST('fk_transfert'));
             echo json_encode(array('nb_update' => $transfert->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
-                'status_changed' => $transfert->updateStatut($transfert::STATUS_RECEIVED),'errors' => $transfert->errors));
+                'status_changed' => $transfert->updateStatut($transfert::STATUS_RECEIVED), 'errors' => $transfert->errors));
             break;
         }
+
+    /* OrderClient - viewOrderClient */
+
+    case 'retrieveOrderClient': {
+            $boc = new BimpOrderClient($db);
+            $boc->fetch(GETPOST('fk_order'), GETPOST('ref_order'));
+            echo json_encode(array('order' => $boc->retrieveOrderClient(), 'errors' => $boc->errors));
+            break;
+        }
+
+
+
     /* Default (catch bad action parameter) */
     default: {
             echo json_encode(array('errors' => array('Aucune action ne match avec : ' . GETPOST('action'))));

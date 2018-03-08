@@ -126,8 +126,6 @@ $bl->fetch($orderId);
 $lignes = $bl->getLignesOrder();
 
 
-print '</table>';
-
 print '<div class="object_list_table">';
 print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
 print '<thead><tr class="headerRow">';
@@ -146,11 +144,6 @@ print '</tr></thead>';
 print '<tbody></tbody>';
 print '</table>';
 
-
-//print '<div class="object_list_table">';
-//print '<table id="productDeliveredTable" class="noborder objectlistTable" style="margin-top:20px">';
-//print '<tbody></tbody>';
-//print '</table>';
 
 
 print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';

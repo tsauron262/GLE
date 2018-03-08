@@ -63,7 +63,9 @@ function receiveTransfert(products, equipments) {
                 if (out.errors.length !== 0) {
                     printErrors(out.errors, 'alertTop');
                 } else if (out.nb_update) {
-                    location.reload();
+                    $('#product_table > tbody').empty();
+                    retrieveSentLines();
+                    setMessage('alertTop', 'Produits enregistré', 'mesgs');
                     alert('Enregistrement réalisé');
                 } else {
                     setMessage('alertTop', 'Erreur interne 6490.', 'error');
@@ -75,15 +77,44 @@ function receiveTransfert(products, equipments) {
     });
 }
 
+function closeTransfer(products, equipments) {
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+        data: {
+            fk_transfert: getUrlParameter('id'),
+            products: products,
+            equipments: equipments,
+            action: 'closeTransfer'
+        },
+        error: function () {
+            setMessage('alertTop', 'Erreur interne 3514.', 'error');
+        },
+        success: function (rowOut) {
+            try {
+                var out = JSON.parse(rowOut);
+                if (out.errors.length !== 0) {
+                    printErrors(out.errors, 'alertTop');
+                } else if (out.nb_update > 0 && out.status_changed) {
+                    alert(out.nb_update + ' Groupes de produits on été enregistrés, transfert fermé');
+                    location.reload();
+                }
+            } catch (e) {
+                setMessage('alertTop', 'Erreur interne 7861.', 'error');
+            }
+        }
+    });
+}
 
 
 $(document).ready(function () {
 
-    retrieveSentLines()
+    retrieveSentLines();
     initEvents();
     initIE('input[name=refScan]', 'validateProduct', 'input#qty');
 
 });
+
 function initEvents() {
     $('#register').click(function () {
         var equipments = [];
@@ -105,20 +136,44 @@ function initEvents() {
             }
         });
 
-        var new_status = getNewStatus();
-        console.log("new statut = " + new_status);
         if (no_new_scan) {
             setMessage('alertTop', 'Veuillez scanner des produits avant d\'enregistrer la réception de transfert.', 'error');
             return;
         }
-        receiveTransfert(products, equipments)
+        receiveTransfert(products, equipments);
+    });
+
+    $('#closeTransfer').click(function () {
+        var equipments = [];
+        var products = [];
+        var no_new_scan = true;
+        $('#product_table tr[scanned_this_session]').each(function () {
+            no_new_scan = false;
+            var tr = $(this);
+            var previous_qty = parseInt(tr.attr('qty_received_befor'));
+            var added_qty = parseInt(tr.find('input[name=received_qty]').val());
+            if (tr.attr('is_equipment') === 'true') {
+                equipments.push(getId(tr.attr('id')));
+            } else {
+                products.push({
+                    fk_product: getId(tr.attr('id')),
+                    previous_qty: previous_qty,
+                    new_qty: previous_qty + added_qty
+                });
+            }
+        });
+        if (no_new_scan) {
+            setMessage('alertTop', 'Veuillez scanner des produits avant d\'enregistrer la réception de transfert.', 'error');
+            return;
+        }
+        closeTransfer(products, equipments);
     });
 }
 
 function addLineProduct(prod) {
 
     cnt_product++;
-    var id_tr = "p" + parseInt(prod.fk_product)
+    var id_tr = "p" + parseInt(prod.fk_product);
     var line = '<tr id=' + id_tr + ' is_equipment=false barcode="' + prod.barcode + '" ref="' + prod.ref + '" qty_received_befor=' + prod.quantity_received + '>';
     line += '<td>' + cnt_product + '</td>';
     line += '<td>' + prod.refurl + '</td>'; // refUrl
@@ -126,13 +181,24 @@ function addLineProduct(prod) {
     line += '<td>' + prod.label + '</td>'; // label
     line += '<td name="sent_qty" style="text-align: right">' + prod.quantity_sent + '</td>';
     line += '<td style="padding: 0px; text-align: center"><img name="arrow_fill_qty" class="clickable" src="css/next.png"></img></td>';
-    line += '<td style="padding: 0px"><input name="received_qty"  type="number" class="custInput" style="width: 60px" min=0 value=0 disabled> + ' + prod.quantity_received + '</td>';
+    line += '<td style="padding: 0px"><input name="received_qty"  type="number" class="custInput" style="width: 60px" min=0 value=0> + ' + prod.quantity_received + '</td>';
     $(line).appendTo('#product_table tbody');
     initSetFullQty(id_tr);
+
+    initColorEvent(id_tr);
 
     if (prod.quantity_received > 0)
         setColors(id_tr, parseInt(prod.quantity_received), parseInt(prod.quantity_sent));
 }
+
+function initColorEvent(id_tr) {
+    $('tr#' + id_tr + ' input[name=received_qty]').bind('keyup mouseup', function () {
+        var quantity_received = parseInt($(this).val()) + parseInt($('tr#' + id_tr).attr('qty_received_befor'));
+        var quantity_sent = parseInt($('tr#' + id_tr + ' td[name=sent_qty]').text());
+        setColors(id_tr, quantity_received, quantity_sent);
+    });
+}
+
 
 function setColors(id_tr, quantity_received, quantity_sent) {
     var color;
@@ -148,7 +214,7 @@ function setColors(id_tr, quantity_received, quantity_sent) {
 function addLineEquipment(equip) {
 
     cnt_product++;
-    var id_tr = "e" + parseInt(equip.fk_equipment)
+    var id_tr = "e" + parseInt(equip.fk_equipment);
     var line = '<tr id=' + id_tr + ' is_equipment="true" barcode="' +
             equip.barcode + '" ref="' + equip.ref + '" serial="' + equip.serial + '" qty_received_befor=' + equip.quantity_received + '>';
     line += '<td>' + cnt_product + '</td>';
@@ -168,7 +234,11 @@ function addLineEquipment(equip) {
 function initSetFullQty(id_tr) {
     $('#product_table tr#' + id_tr + ' > td > img[name=arrow_fill_qty]').click(function () {
         var sent_qty = parseInt($('#product_table tr#' + id_tr + ' > td[name=sent_qty]').text());
-        $('#product_table tr#' + id_tr + ' > td > input[name=received_qty]').val(sent_qty);
+        var qty_received_befor = parseInt($('#product_table tr#' + id_tr).attr('qty_received_befor'));
+        var new_qty = sent_qty - qty_received_befor;
+        if (new_qty < 0)
+            new_qty = 0;
+        $('#product_table tr#' + id_tr + ' > td > input[name=received_qty]').val(new_qty);
     });
 }
 

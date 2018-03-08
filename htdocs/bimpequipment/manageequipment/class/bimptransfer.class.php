@@ -98,31 +98,6 @@ class BimpTransfer {
         }
     }
 
-    public function updateStatut($new_code_status) {
-
-        if ($this->id < 0) {
-            $this->errors[] = "L'identifiant du transfert est inconnu.";
-            return false;
-        }
-
-        $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_transfer';
-        $sql .= ' SET statut=' . $new_code_status;
-        $sql .= ', date_fermeture=' . (($new_code_status < 2) ? ' NULL' : $this->db->idate(dol_now()));
-        $sql .= ' WHERE rowid=' . $this->id;
-
-        $result = $this->db->query($sql);
-        if ($result) {
-            $this->statut = $new_code_status;
-            $this->db->commit();
-            return true;
-        } else {
-            $this->errors[] = "Impossible de mettre à jour le statut du transfert.";
-            dol_print_error($this->db);
-            $this->db->rollback();
-            return -1;
-        }
-    }
-
     public function addLines($products) {
 
         $cnt_line_added = 0;
@@ -240,23 +215,50 @@ class BimpTransfer {
         $nb_update = 0;
         $now = dol_now();
         $labelmove = 'Reception transfert bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
-        $codemove = "BimpTransfer" . $this->id;
+        $codemove_source = "ExepeditionBimpTransfer" . $this->id;
+        $codemove_dest = "ReceptionBimpTransfer" . $this->id;
 
         foreach ($products as $product) {
             $line = new BimpTransferLine($this->db);
-            $line->updateQty($user, $this->id, $product['previous_qty'], $product['new_qty'], $product['fk_product'], 0, $labelmove, $codemove, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
+            $line->updateQty($user, $this->id, $product['previous_qty'], $product['new_qty'], $product['fk_product'], 0, $labelmove, $codemove_source, $codemove_dest, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
             $this->errors = array_merge($this->errors, $line->errors);
             $nb_update++;
         }
 
         foreach ($equipments as $fk_equipment) {
             $line = new BimpTransferLine($this->db);
-            $line->updateQty($user, $this->id, 0, 1, 0, $fk_equipment, $labelmove, $codemove, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
+            $line->updateQty($user, $this->id, 0, 1, 0, $fk_equipment, $labelmove, $codemove_source, $codemove_dest, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
             $this->errors = array_merge($this->errors, $line->errors);
             $nb_update++;
         }
+        
+        $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
 
         return $nb_update;
+    }
+
+    public function updateStatut($code_status) {
+        if ($this->id < 0) {
+            $this->errors[] = "L'identifiant du transfert est inconnu.";
+            return false;
+        }
+
+        $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_transfer';
+        $sql .= ' SET status=' . $code_status;
+        $sql .= ', date_closing=' . (($code_status < $this::STATUS_RECEIVED) ? ' NULL' : $this->db->idate(dol_now()));
+        $sql .= ' WHERE rowid=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->status = $code_status;
+            $this->db->commit();
+            return true;
+        } else {
+            $this->errors[] = "Impossible de mettre à jour le statut du transfert.";
+            dol_print_error($this->db);
+            $this->db->rollback();
+            return -1;
+        }
     }
 
 }
@@ -359,7 +361,7 @@ class BimpTransferLine {
         }
     }
 
-    function updateQty($user, $fk_transfert, $previous_qty, $new_qty, $fk_product, $fk_equipment, $labelmove, $codemove, $fk_warehouse_source, $fk_warehouse_dest, $now) {
+    function updateQty($user, $fk_transfert, $previous_qty, $new_qty, $fk_product, $fk_equipment, $labelmove, $codemove_source, $codemove_dest, $fk_warehouse_source, $fk_warehouse_dest, $now) {
 
         if ($fk_transfert < 0) {
             $this->errors[] = "L'identifiant du transfert est inconnu.";
@@ -386,13 +388,13 @@ class BimpTransferLine {
                 $doli_product = new Product($this->db);
                 $doli_product->fetch($fk_product);
                 // remove from source
-                $result = $doli_product->correct_stock($user, $fk_warehouse_source, ($new_qty - $previous_qty), 1, $labelmove, 0, $codemove); //, 'order_supplier', $entrepotId);
+                $result = $doli_product->correct_stock($user, $fk_warehouse_source, ($new_qty - $previous_qty), 1, $labelmove, 0, $codemove_source); //, 'order_supplier', $entrepotId);
                 if ($result < 0) {
                     $this->errors = array_merge($this->errors, $doli_product->errors);
                     $this->errors = array_merge($this->errors, $doli_product->errorss);
                 }
                 // add to destination
-                $result2 = $doli_product->correct_stock($user, $fk_warehouse_dest, ($new_qty - $previous_qty), 0, $labelmove, 0, $codemove); //, 'order_supplier', $entrepotId);
+                $result2 = $doli_product->correct_stock($user, $fk_warehouse_dest, ($new_qty - $previous_qty), 0, $labelmove, 0, $codemove_dest); //, 'order_supplier', $entrepotId);
                 if ($result2 < 0) {
                     $this->errors = array_merge($this->errors, $doli_product->errors);
                     $this->errors = array_merge($this->errors, $doli_product->errorss);
@@ -404,7 +406,8 @@ class BimpTransferLine {
                     'id_equipment' => $fk_equipment,
                     'type' => 2,
                     'id_entrepot' => $fk_warehouse_dest,
-                    'infos' => $codemove,
+                    'code_mvt' => $codemove_dest,
+//                    'infos' => $codemove,
                     'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
                 ));
                 $this->errors = array_merge($this->errors, $emplacement->create());

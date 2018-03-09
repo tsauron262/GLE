@@ -24,17 +24,12 @@ function getLineTransferAndOrder() {
                     printErrors(out.errors, 'alertPlaceHolder');
                     return;
                 } else {
-//                    if (out.transfers.length !== 0) {
-//                        out.transfers.forEach(function (transfer) {
-//                            addLineTransfer(transfer);
-//                        });
-//                    }
-//                    if (out.orders.length !== 0) {
-
+                    out.transfers.forEach(function (transfer) {
+                        addLineTransfer(transfer);
+                    });
                     out.orders.forEach(function (order) {
                         addLineOrder(order);
                     });
-//                    }
                 }
             } catch (e) {
                 setMessage('alertPlaceHolder', e + 'Erreur serveur 4355.', 'error');
@@ -99,8 +94,8 @@ function printTable(warehouseElement) {
         $('#allTheFiche').removeClass('fade-in');
         setTimeout(function () {
             $('#ph_links').empty();
-            $('#table_transfer > tr > tbody').empty();
-            $('#table_order > tr > tbody').empty();
+            $('#table_transfer > tbody > tr').empty();
+            $('#table_order > tbody > tr').empty();
             diplayLinks();
             getLineTransferAndOrder();
             $('#allTheFiche').addClass('fade-in');

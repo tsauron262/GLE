@@ -118,7 +118,14 @@ class BimpTransfer {
         return $cnt_line_added;
     }
 
-    public function getTransfers($fk_warehouse_dest = null, $status = null) {
+    /**
+     * 
+     * @param int $fk_warehouse_dest
+     * @param array $status accept all transfert whith status in that array
+     * @param type $human_readable url name and explicit status
+     * @return array of transfer
+     */
+    public function getTransfers($fk_warehouse_dest = null, $status = null, $human_readable = false) {
 
         $transfers = array();
 
@@ -128,22 +135,55 @@ class BimpTransfer {
         if ($fk_warehouse_dest != null) {
             $sql .= ' WHERE fk_warehouse_dest=' . $fk_warehouse_dest;
             if ($status != null)
-                $sql .= ' AND status=' . $status;
+                $sql .= ' AND status IN (\'' . implode("','", $status) . '\')';
         } elseif ($status != null) {
-            $sql .= ' WHERE status=' . $status;
+            $sql .= ' WHERE status IN (\'' . implode("','", $status) . '\')';
         }
+
+//        echo $sql;
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $transfers[] = array(
-                    'id' => $obj->rowid,
-                    'status' => $obj->status,
-                    'fk_warehouse_source' => $obj->fk_warehouse_source,
-                    'fk_warehouse_dest' => $obj->fk_warehouse_dest,
-                    'fk_user_create' => $obj->fk_user_create,
-                    'date_opening' => $obj->date_opening,
-                    'date_closing' => $obj->date_closing);
+                if ($human_readable) {
+                    $user = new User($this->db);
+                    $user->fetch($obj->fk_user_create);
+                    $obj_transfer = new BimpTransfer($this->db);
+                    $obj_transfer->id = $obj->rowid;
+                    $doli_warehouse = new Entrepot($this->db);
+                    $doli_warehouse->fetch($obj->fk_warehouse_source);
+
+                    if ($obj->status == $obj_transfer::STATUS_DRAFT) {
+                        $name_status = 'Bouillon';
+                    } elseif ($obj->status == $obj_transfer::STATUS_SENT) {
+                        $name_status = 'Envoyé';
+                    } elseif ($obj->status == $obj_transfer::STATUS_RECEIVED_PARTIALLY) {
+                        $name_status = 'Reçu partiellement';
+                    } elseif ($obj->status == $obj_transfer::STATUS_RECEIVED) {
+                        $name_status = 'Reçu';
+                    }
+                    $transfers[] = array(
+                        'id' => $obj->rowid,
+                        'status' => $obj->status,
+                        'name_status' => $name_status,
+                        'fk_warehouse_source' => $obj->fk_warehouse_source,
+                        'nb_product_scanned' => $obj_transfer->getProductSent(),
+                        'url_warehouse_source' => $doli_warehouse->getNomUrl(),
+                        'fk_warehouse_dest' => $obj->fk_warehouse_dest,
+                        'fk_user_create' => $obj->fk_user_create,
+                        'url_user' => $user->getNomUrl(-1, '', 0, 0, 24, 0, ''),
+                        'date_opening' => $obj->date_opening,
+                        'date_closing' => ($obj->date_closing != null) ? $obj->date_closing : '');
+                } else {
+                    $transfers[] = array(
+                        'id' => $obj->rowid,
+                        'status' => $obj->status,
+                        'fk_warehouse_source' => $obj->fk_warehouse_source,
+                        'fk_warehouse_dest' => $obj->fk_warehouse_dest,
+                        'fk_user_create' => $obj->fk_user_create,
+                        'date_opening' => $obj->date_opening,
+                        'date_closing' => $obj->date_closing);
+                }
             }
         }
         return $transfers;
@@ -231,7 +271,7 @@ class BimpTransfer {
             $this->errors = array_merge($this->errors, $line->errors);
             $nb_update++;
         }
-        
+
         $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
 
         return $nb_update;

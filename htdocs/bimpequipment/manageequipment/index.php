@@ -7,9 +7,9 @@
  */
 include_once '../../main.inc.php';
 
-include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
-$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css');
+$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/index.js');
 
 
@@ -35,7 +35,42 @@ print '</div>';
 
 print '<br/>';
 
+
 print '<br/><div id="allTheFiche" class="fadeInOut">';
+print '<div id="ph_links"></div>';
+
+print '<h4><strong>Transferts en cours</strong></h4>';
+print '<div id="alertPlaceHolder" style="clear : left"></div>';
+
+print '<div class="object_list_table">';
+print '<table id="table_transfer" class="noborder objectlistTable" style="margin-top:10px">';
+print '<thead>';
+print '<th>Responsable</th>';
+print '<th>Statut</th>';
+print '<th>Date d\'ouverture</th>';
+print '<th>Date de réception</th>';
+print '<th>Nombre de produit envoyés</th>';
+print '<th>Entrepot de départ</th>';
+print '<th>Lien</th>';
+print '</thead>';
+print '<tbody></tbody>';
+print '</table>';
+print '</div>';
+
+print '<h4><strong>Commandes fournisseur en attentes</strong></h4>';
+
+print '<div class="object_list_table">';
+print '<table id="table_order" class="noborder objectlistTable" style="margin-top:10px">';
+print '<thead>';
+print '<th>Fournisseur</th>';
+print '<th>Statut</th>';
+print '<th>Date d\'ouverture</th>';
+//print '<th>Nombre de produit commandé</th>';
+print '<th>Lien livraison</th>';
+print '</thead>';
+print '<tbody></tbody>';
+print '</table>';
+print '</div>';
 
 print '</div>';
 $db->close();

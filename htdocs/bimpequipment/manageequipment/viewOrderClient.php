@@ -59,7 +59,7 @@ if (!$object->fetch($id, $ref) > 0) {
  * Functions
  */
 
-function printTable($id) {
+function printTable($id, $header) {
     print '<div class="object_list_table">';
     print '<table id="' . $id . '" class="noborder objectlistTable" style="margin-bottom:50px">';
     print '<thead><tr class="headerRow">';
@@ -67,11 +67,10 @@ function printTable($id) {
     print '<th>Référence</th>';
     print '<th>Numéro de série</th>';
     print '<th>Label</th>';
-    print '<th>Quantité total</th>';
-    print '<th>Quantité restant</th>';
-    print '<th>Quantité livré</th>';
+    print '<th style="text-align: right">Quantité ' . $header . '</th>';
+    print '<th style="width: 10px"></th>';
     print '<th>Modifier</th>';
-//    print '<th>Prix unitaire</th>';
+//    print '<th>Quantité total</th>';
 //    print '<th>Mettre en stock <input type="checkbox" name="checkAll"></th>';
     print '</tr></thead>';
     print '<tbody></tbody>';
@@ -79,13 +78,13 @@ function printTable($id) {
 }
 
 function printEntryAndTable($header, $status) {
-    print '<h4><strong>' . $header . '<strong></h4>';
-    print '<strong>Ref ou label ou code barre</strong> ';
+    print '<h4><strong>' . $header . '</strong></h4>';
+    print '<span style="width: 175px ; display: inline-block;"><strong>Ref ou label ou code barre</strong></span>';
     print '<input name="scan_' . $status . '" class="custInput" style="width : 300px"><br/>';
-    print '<strong>Quantité </strong>';
-    print '<input id="qty_' . $status . '" type="number" class="custInput" style="width: 60px" value=1 min=1><br/><br/>';
+    print '<span style="width: 175px ; display: inline-block;"><strong>Quantité</strong></span>';
+    print '<input id="qty_' . $status . '" type="number" class="custInput" style="width: 60px ; margin-top: 5px ; margin-bottom: 5px " value=1 min=1>';
     print '<div id="alert_' . $status . '" style="clear:left"></div>';
-    printTable('table_' . $status);
+    printTable('table_' . $status, $header);
 }
 
 /*

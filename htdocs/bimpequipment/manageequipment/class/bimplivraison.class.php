@@ -253,6 +253,41 @@ class BimpLivraison {
         return "BimpLivraison" . $this->id;
     }
 
+    public function getNomUrl($withpicto = 0) {
+        $init_url_ref = $this->commande->getNomUrl($withpicto);
+        return str_replace('/fourn/commande/card', '/bimpequipment/manageequipment/viewOrderSupplier', $init_url_ref);
+    }
+
+    public function getOrders($fk_warehouse, $status_min, $status_max) {
+
+        $orders = array();
+
+        $sql = 'SELECT cf.rowid as id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields as e';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur as cf ON cf.rowid = e.fk_object';
+        $sql .= ' WHERE e.entrepot=' . $fk_warehouse;
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $bl = new BimpLivraison($this->db);
+                $bl->fetch($obj->id);
+
+                $orders[] = array(
+                    'id' => $bl->orderId,
+                    'url_ref' => $bl->commande->getNomUrl(1),
+                    'date_opening' => $bl->commande->date_commande,
+                    'url_livraison' => $bl->getNomUrl(1)
+                );
+            }
+        } elseif (!$result) {
+            $this->errors[] = "Erreur lors de la requête de recherche de commande";
+            return false;
+        }
+
+        return $orders;
+    }
+
 }
 
 class LigneLivraison extends LignePanier {

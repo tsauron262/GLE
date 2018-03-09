@@ -50,9 +50,12 @@ class BimpOrderClient {
                 $parsed_line = array();
 
                 $parsed_line['fk_product'] = $doli_product->id;
+                $parsed_line['ref'] = $doli_product->ref;
+                $parsed_line['barcode'] = $doli_product->barcode;
                 $parsed_line['ref_url'] = $doli_product->getNomUrl(1);
-                $parsed_line['label'] = dol_trunc($doli_product->label, 40);
+                $parsed_line['label'] = dol_trunc($doli_product->label, 70);
                 $parsed_line['qty_total'] = $line->qty;
+                $parsed_line['qty_previous_session'] = 1; // TODO remove
 
                 $order['lines'][] = $parsed_line;
             }

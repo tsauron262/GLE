@@ -141,6 +141,18 @@ switch (GETPOST('action')) {
             break;
         }
 
+    /* Manageequipment - Index - accueil boutique */
+    case 'getLineTransferAndOrder': {
+            $transferstatic = new BimpTransfer($db);
+            $blstatic = new BimpLivraison($db);
+            echo json_encode(array(
+                'transfers' => $transferstatic->getTransfers(GETPOST('fk_warehouse'), array($transferstatic::STATUS_DRAFT,
+                    $transferstatic::STATUS_SENT,
+                    $transferstatic::STATUS_RECEIVED_PARTIALLY), true),
+                'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 0, 5),
+                'errors' => array_merge($transferstatic->errors, $blstatic->errors)));
+            break;
+        }
 
 
     /* Default (catch bad action parameter) */

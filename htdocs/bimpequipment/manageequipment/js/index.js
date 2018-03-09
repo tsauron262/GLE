@@ -22,13 +22,22 @@ function getLineTransferAndOrder() {
                 var out = JSON.parse(rowOut);
                 if (out.errors.length !== 0) {
                     printErrors(out.errors, 'alertPlaceHolder');
-                } else if (out.transfers !== undefined) {
-                    out.transfers.forEach(function (transfer) {
-                        addLineTransfer(transfer);
+                    return;
+                } else {
+//                    if (out.transfers.length !== 0) {
+//                        out.transfers.forEach(function (transfer) {
+//                            addLineTransfer(transfer);
+//                        });
+//                    }
+//                    if (out.orders.length !== 0) {
+
+                    out.orders.forEach(function (order) {
+                        addLineOrder(order);
                     });
+//                    }
                 }
             } catch (e) {
-                setMessage('alertPlaceHolder', 'Erreur serveur 4355.', 'error');
+                setMessage('alertPlaceHolder', e + 'Erreur serveur 4355.', 'error');
             }
         }
     });
@@ -65,6 +74,17 @@ function addLineTransfer(transfer) {
     line += '<td>' + transfer.url_warehouse_source + '</td>';
     line += '<td><input type="button" class="butAction" value="Voir" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReception.php?id=' + transfer.id + '\'" style="margin-top: 5px"></td>';
     $(line).appendTo('#table_transfer tbody');
+}
+
+function addLineOrder(order) {
+
+    var id_tr = order.id;
+    var line = '<tr id=' + id_tr + '>';
+    line += '<td>' + order.url_fourn + '</td>';
+    line += '<td>' + order.name_status + '</td>';
+    line += '<td>' + order.date_opening + '</td>';
+    line += '<td>' + order.url_livraison + '</td>';
+    $(line).appendTo('#table_order tbody');
 }
 
 function printTable(warehouseElement) {

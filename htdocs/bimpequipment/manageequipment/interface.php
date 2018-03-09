@@ -149,7 +149,7 @@ switch (GETPOST('action')) {
                 'transfers' => $transferstatic->getTransfers(GETPOST('fk_warehouse'), array($transferstatic::STATUS_DRAFT,
                     $transferstatic::STATUS_SENT,
                     $transferstatic::STATUS_RECEIVED_PARTIALLY), true),
-                'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 0, 5),
+                'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 0, 4),
                 'errors' => array_merge($transferstatic->errors, $blstatic->errors)));
             break;
         }

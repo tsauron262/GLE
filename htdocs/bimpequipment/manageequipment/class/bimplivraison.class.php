@@ -250,12 +250,16 @@ class BimpLivraison {
     }
 
     private function getcodeMove() {
-        return "BimpLivraison" . $this->id;
+        return "BimpLivraison" . $this->orderId;
     }
 
     public function getNomUrl($withpicto = 0) {
-        $init_url_ref = $this->commande->getNomUrl($withpicto);
-        return str_replace('/fourn/commande/card', '/bimpequipment/manageequipment/viewOrderSupplier', $init_url_ref);
+        $link = DOL_URL_ROOT . '/bimpequipment/manageequipment/viewOrderSupplier.php?id=' . $this->orderId;
+        if ($withpicto == 0)
+            $name = $this->ref;
+        else
+            $name = '<img src="' . DOL_URL_ROOT . '/bimpequipment/manageequipment/css/livraison.png"> ' . $this->ref;
+        return '<a href="' . $link . '">' . $name . '</a>';
     }
 
     public function getOrders($fk_warehouse, $status_min, $status_max) {
@@ -272,11 +276,27 @@ class BimpLivraison {
             while ($obj = $this->db->fetch_object($result)) {
                 $bl = new BimpLivraison($this->db);
                 $bl->fetch($obj->id);
+                $fourn = new Societe($this->db);
+                $fourn->fetch($bl->commande->socid);
+                
+                $status = $bl->commande->statut;
+                if ($status == 0)
+                    $name_status = 'Brouillon';
+                if ($status == 1)
+                    $name_status = 'Validée';
+                if ($status == 2)
+                    $name_status = 'Approuvée';
+                if ($status == 3)
+                    $name_status = 'En cours';
+                if ($status == 4)
+                    $name_status = 'Reçu partiellement';
 
                 $orders[] = array(
                     'id' => $bl->orderId,
+                    'url_fourn' => $fourn->getNomUrl(1),
+                    'name_status' => $name_status,
                     'url_ref' => $bl->commande->getNomUrl(1),
-                    'date_opening' => $bl->commande->date_commande,
+                    'date_opening' => dol_print_date($bl->commande->date_commande),
                     'url_livraison' => $bl->getNomUrl(1)
                 );
             }

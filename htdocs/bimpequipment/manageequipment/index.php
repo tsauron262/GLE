@@ -38,9 +38,9 @@ print '<br/>';
 
 print '<br/><div id="allTheFiche" class="fadeInOut">';
 print '<div id="ph_links"></div>';
-print '<div id="alertPlaceHolder" style="clear : left"></div><br/><br/>';
 
 print '<h4><strong>Transferts en cours</strong></h4>';
+print '<div id="alertPlaceHolder" style="clear : left"></div>';
 
 print '<div class="object_list_table">';
 print '<table id="table_transfer" class="noborder objectlistTable" style="margin-top:10px">';
@@ -56,16 +56,15 @@ print '</thead>';
 print '<tbody>';
 print '</div>';
 
-print '<h4><strong>Commandes fournisseur en attentes</strong></h4>';
+//print '<h4><strong>Commandes fournisseur en attentes</strong></h4>';
 
 print '<div class="object_list_table">';
 print '<table id="table_order" class="noborder objectlistTable" style="margin-top:10px">';
 print '<thead>';
-print '<th>Responsable</th>';
+print '<th>Fournisseur</th>';
 print '<th>Statut</th>';
 print '<th>Date d\'ouverture</th>';
-print '<th>Date de réception</th>';
-print '<th>Nombre de produit envoyés</th>';
+//print '<th>Nombre de produit commandé</th>';
 print '<th>Lien livraison</th>';
 print '</thead>';
 print '<tbody>';

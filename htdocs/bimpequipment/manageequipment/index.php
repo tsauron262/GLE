@@ -53,10 +53,11 @@ print '<th>Nombre de produit envoyés</th>';
 print '<th>Entrepot de départ</th>';
 print '<th>Lien</th>';
 print '</thead>';
-print '<tbody>';
+print '<tbody></tbody>';
+print '</table>';
 print '</div>';
 
-//print '<h4><strong>Commandes fournisseur en attentes</strong></h4>';
+print '<h4><strong>Commandes fournisseur en attentes</strong></h4>';
 
 print '<div class="object_list_table">';
 print '<table id="table_order" class="noborder objectlistTable" style="margin-top:10px">';
@@ -67,7 +68,8 @@ print '<th>Date d\'ouverture</th>';
 //print '<th>Nombre de produit commandé</th>';
 print '<th>Lien livraison</th>';
 print '</thead>';
-print '<tbody>';
+print '<tbody></tbody>';
+print '</table>';
 print '</div>';
 
 print '</div>';

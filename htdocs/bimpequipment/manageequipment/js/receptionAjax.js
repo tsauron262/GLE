@@ -52,7 +52,7 @@ function receiveTransfert(products, equipments) {
             fk_transfert: getUrlParameter('id'),
             products: products,
             equipments: equipments,
-            action: 'receiveTransfert'
+            action: 'receiveTransfer'
         },
         error: function () {
             setMessage('alertTop', 'Erreur interne 1514.', 'error');
@@ -77,7 +77,7 @@ function receiveTransfert(products, equipments) {
     });
 }
 
-function closeTransfer(products, equipments) {
+function receiveAndCloseTransfer(products, equipments) {
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
@@ -85,7 +85,7 @@ function closeTransfer(products, equipments) {
             fk_transfert: getUrlParameter('id'),
             products: products,
             equipments: equipments,
-            action: 'closeTransfer'
+            action: 'receiveAndCloseTransfer'
         },
         error: function () {
             setMessage('alertTop', 'Erreur interne 3514.', 'error');
@@ -103,9 +103,35 @@ function closeTransfer(products, equipments) {
                 setMessage('alertTop', 'Erreur interne 7861.', 'error');
             }
         }
-    });
+    });//closeTransfer
 }
 
+function closeTransfer() {
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+        data: {
+            fk_transfert: getUrlParameter('id'),
+            action: 'closeTransfer'
+        },
+        error: function () {
+            setMessage('alertTop', 'Erreur interne 3854.', 'error');
+        },
+        success: function (rowOut) {
+            try {
+                var out = JSON.parse(rowOut);
+                if (out.errors.length !== 0) {
+                    printErrors(out.errors, 'alertTop');
+                } else if (out.status_changed) {
+                    alert('Transfert fermé');
+                    location.reload();
+                }
+            } catch (e) {
+                setMessage('alertTop', 'Erreur interne 7961.', 'error');
+            }
+        }
+    });
+}
 
 $(document).ready(function () {
 
@@ -143,7 +169,7 @@ function initEvents() {
         receiveTransfert(products, equipments);
     });
 
-    $('#closeTransfer').click(function () {
+    $('#receiveAndCloseTransfer').click(function () {
         var equipments = [];
         var products = [];
         var no_new_scan = true;
@@ -166,12 +192,16 @@ function initEvents() {
             setMessage('alertTop', 'Veuillez scanner des produits avant d\'enregistrer la réception de transfert.', 'error');
             return;
         }
-        closeTransfer(products, equipments);
+        receiveAndCloseTransfer(products, equipments);
+    });
+    
+    $('#closeTransfer').click( function () {
+        closeTransfer();
     });
 }
 
 function addLineProduct(prod) {
- 
+
     cnt_product++;
     var id_tr = "p" + parseInt(prod.fk_product);
     var line = '<tr id=' + id_tr + ' is_equipment=false barcode="' + prod.barcode + '" ref="' + prod.ref + '" qty_received_befor=' + prod.quantity_received + '>';
@@ -184,13 +214,13 @@ function addLineProduct(prod) {
     line += '<td style="padding: 0px"><input name="received_qty"  type="number" class="custInput" style="width: 60px" min=0 value=0> + ' + prod.quantity_received + '</td>';
     $(line).appendTo('#product_table tbody');
     initSetFullQty(id_tr);
- 
+
     initColorEvent(id_tr);
- 
+
     if (prod.quantity_received > 0)
         setColors(id_tr, parseInt(prod.quantity_received), parseInt(prod.quantity_sent));
 }
- 
+
 function initColorEvent(id_tr) {
     $('tr#' + id_tr + ' input[name=received_qty]').bind('keyup mouseup', function () {
         var quantity_received = parseInt($(this).val()) + parseInt($('tr#' + id_tr).attr('qty_received_befor'));

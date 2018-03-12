@@ -75,6 +75,14 @@ class BimpInput
                 $html .= '>' . $value . '</textarea>';
                 break;
 
+            case 'html':
+                if (!class_exists('DolEditor')) {
+                    require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
+                }
+                $doleditor = new DolEditor($field_name, $value, '', 160, 'dolibarr_details', '', false, true, true, ROWS_4, '90%');
+                $html .= $doleditor->Create(1);
+                break;
+
             case 'switch':
                 $html .= '<select class="switch" id="' . $input_id . '" name="' . $field_name . '">';
                 $html .= '<option value="1"' . ($value ? ' selected' : '') . '>OUI</option>';
@@ -110,7 +118,6 @@ class BimpInput
                 if (is_null($options['options']) || !is_array($options['options'])) {
                     $options['options'] = array();
                 }
-
 
                 if (count($options['options'])) {
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
@@ -210,6 +217,85 @@ class BimpInput
                 $formCompany = new FormCompany($db);
                 $country_code = isset($options['country_code']) ? $options['country_code'] : 0;
                 $html .= $formCompany->select_juridicalstatus((int) $value, $country_code, '', $field_name);
+                break;
+
+            case 'search_commande_client':
+                if (isset($options['id_client']) && $options['id_client']) {
+                    global $db;
+                    $bdb = new BimpDb($db);
+                    $rows = $bdb->getRows('commande', '`fk_soc` = ' . (int) $options['id_client'], null, 'array', array(
+                        'rowid', 'ref'
+                    ));
+                    $values = array();
+                    if (!is_null($rows)) {
+                        foreach ($rows as $r) {
+                            $values[(int) $r['rowid']] = $r['ref'];
+                        }
+                    }
+                    return self::renderInput('select', $field_name, $value, array('options' => $values));
+                } else {
+                    $params = array(
+                        'table'              => 'commande cmd',
+                        'field_return_value' => 'cmd.rowid',
+                        'field_return_label' => 'cmd.ref'
+                    );
+                    $params['options'] = array(
+                        'default' => array(
+                            'label'             => 'Recherche par référence commande',
+                            'fields_search'     => 'cmd.ref,cmd.rowid',
+                            'join'              => 'societe s',
+                            'join_on'           => 'cmd.fk_soc = s.rowid',
+                            'join_return_label' => 's.nom',
+                            'help'              => 'Entrez la référence ou l\'id d\'une commande client'
+                        ),
+                        'client'  => array(
+                            'label'             => 'Recherche par client',
+                            'fields_search'     => 's.nom,s.code_client',
+                            'join'              => 'societe s',
+                            'join_on'           => 'cmd.fk_soc = s.rowid',
+                            'join_return_label' => 's.nom',
+                            'filters'           => array('s.client' => 1),
+                            'help'              => 'Entrez le nom ou le code d\'un client'
+                        )
+                    );
+                }
+
+                $html .= self::renderSearchListInput($field_name, $params, $value);
+                break;
+
+            case 'search_commande_fournisseur':
+                $params = array(
+                    'table'              => 'commande_fournisseur cmd',
+                    'field_return_value' => 'cmd.rowid',
+                    'field_return_label' => 'cmd.ref'
+                );
+
+                if (isset($options['id_fournisseur']) && $options['id_fournisseur']) {
+                    $params['fields_search'] = 'cmd.ref,cmd.rowid';
+                    $params['filters'] = array('cmd.kf_soc' => (int) $options['id_fournisseur']);
+                } else {
+                    $params['options'] = array(
+                        'default'     => array(
+                            'label'             => 'Recherche par référence commande',
+                            'fields_search'     => 'cmd.ref,cmd.rowid',
+                            'join'              => 'societe s',
+                            'join_on'           => 'cmd.fk_soc = s.rowid',
+                            'join_return_label' => 's.nom',
+                            'help'              => 'Entrez la référence ou l\'id d\'une commande fournisseur'
+                        ),
+                        'fournisseur' => array(
+                            'label'             => 'Recherche par fournisseur',
+                            'fields_search'     => 's.nom,s.code_fournisseur',
+                            'join'              => 'societe s',
+                            'join_on'           => 'cmd.fk_soc = s.rowid',
+                            'join_return_label' => 's.nom',
+                            'filters'           => array('s.fournisseur' => 1),
+                            'help'              => 'Entrez le nom ou le code d\'un fournisseur'
+                        )
+                    );
+                }
+
+                $html .= self::renderSearchListInput($field_name, $params, $value);
                 break;
 
             case 'check_list':
@@ -444,143 +530,173 @@ class BimpInput
         return $html;
     }
 
-    public static function renderSearchListInput(BimpObject $object, $config_path, $input_name, $value = '', $option = null)
+    public static function renderSearchListInputFromConfig(BimpObject $object, $config_path, $input_name, $value = '', $option = null)
+    {
+        $params = array();
+
+        if (!$object->config->isDefined($config_path . '/search_list')) {
+            return BimpRender::renderAlerts('Paramètres de recherche non définis pour le champ "' . $input_name . '"');
+        }
+
+        $path = $config_path . '/search_list/';
+
+        $params['table'] = $object->getConf($path . 'table', null, true);
+        $params['field_return_label'] = $object->getConf($path . 'field_return_label', null, true);
+        $params['field_return_value'] = $object->getConf($path . 'field_return_value', null, true);
+
+        if (is_null($params['table']) || is_null($params['field_return_label']) || is_null($params['field_return_value'])) {
+            return BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $input_name . '"');
+        }
+
+        $params['join'] = $object->getConf($path . 'join', '');
+        $params['join_on'] = $object->getConf($path . 'join_on', '');
+        $params['join_return_label'] = $object->getConf($path . 'join_return_label', '');
+        $params['label_syntaxe'] = $object->getConf($path . 'label_syntaxe', '<label_1>');
+
+        if ($object->config->isDefined($path . '/filters')) {
+            $params['filters'] = $object->config->getCompiledParams($path . '/filters');
+        } else {
+            $params['filters'] = array();
+        }
+
+        if ($object->config->isDefined($path . 'options')) {
+            $params['options'] = $object->config->getCompiledParams($path . 'options');
+        } else {
+            $params['options'] = array();
+            $params['fields_search'] = $object->getConf($path . 'fields_search', null, true);
+        }
+
+        return self::renderSearchListInput($input_name, $params, $value, $option);
+    }
+
+    public static function renderSearchListInput($input_name, $params, $value = null, $option = null)
     {
         if (is_null($value)) {
             $value = '';
         }
 
-        if (!$object->config->isDefined($config_path . '/search_list')) {
-            $html .= BimpRender::renderAlerts('Paramètres de recherche non définis pour le champ "' . $input_name . '"');
-        } else {
-            $path = $config_path . '/search_list/';
-            $table = $object->getConf($path . 'table', null, true);
-            $join = $object->getConf($path . 'join', '');
-            $join_on = $object->getConf($path . 'join_on', '');
-            $field_return_label = $object->getConf($path . 'field_return_label', null, true);
-            $field_return_value = $object->getConf($path . 'field_return_value', null, true);
-            $join_return_label = $object->getConf($path . 'join_return_label', '');
-            $label_syntaxe = $object->getConf($path . 'label_syntaxe', '<label_1>');
-            if ($object->config->isDefined($path . '/filters')) {
-                $filters = $object->config->getCompiledParams($path . '/filters');
-            } else {
-                $filters = array();
-            }
+        $table = isset($params['table']) ? $params['table'] : null;
+        $join = isset($params['join']) ? $params['join'] : '';
+        $join_on = isset($params['join_on']) ? $params['join_on'] : '';
+        $field_return_label = isset($params['field_return_label']) ? $params['field_return_label'] : null;
+        $field_return_value = isset($params['field_return_value']) ? $params['field_return_value'] : null;
+        $join_return_label = isset($params['join_return_label']) ? $params['join_return_label'] : '';
+        $label_syntaxe = isset($params['label_syntaxe']) ? $params['label_syntaxe'] : '<label_1>';
+        $filters = isset($params['filters']) ? $params['filters'] : array();
 
+        if (is_null($table) || is_null($field_return_label) || is_null($field_return_value)) {
+            return BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $input_name . '"');
+        }
 
-            if (is_null($table) || is_null($field_return_label) || is_null($field_return_value)) {
-                $html .= BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $input_name . '"');
+        $fields_search = array();
+        if (isset($params['options']) && count($params['options'])) {
+            if (!is_null($option) && isset($params['options'][$option])) {
+                $fields_search = isset($params['options'][$option]['fields_search']) ? $params['options'][$option]['fields_search'] : '';
+                $join = isset($params['options'][$option]['join']) ? $params['options'][$option]['join'] : '';
+                $join_on = isset($params['options'][$option]['join_on']) ? $params['options'][$option]['join_on'] : '';
+                $join_return_label = isset($params['options'][$option]['join_return_label']) ? $params['options'][$option]['join_return_label'] : '';
             } else {
-                $fields_search = array();
-                if ($object->config->isDefined($path . 'options')) {
-                    if (!is_null($option) && $object->config->isDefined($path . '/options/' . $option)) {
-                        $fields_search = $object->getConf($path . 'options/' . $option . '/fields_search', null, true);
-                        $join = $object->getConf($path . 'options/' . $option . '/join', '');
-                        $join_on = $object->getConf($path . 'options/' . $option . '/join_on', '');
-                        $join_return_label = $object->getConf($path . 'options/' . $option . '/join_return_label', '');
-                    } else {
-                        $options = $object->getConf($path . 'options', array(), true, 'array');
-                        $html .= '<div class="searchListOptions optionsContainer">';
-                        $html .= '<span class="displayPopupButton optionsButton" data-popup_id="' . $input_name . '_searchListOptionsPopup">Options de recherche</span>';
-                        $html .= '<div id="' . $input_name . '_searchListOptionsPopup" class="tinyPopup searchListOptionsPopup">';
-                        $switchOptions = array();
-                        foreach ($options as $opt_name => $opt_params) {
-                            $opt_label = $object->getConf($path . 'options/' . $opt_name . '/label', '', true);
-                            $opt_fields_search = $object->getConf($path . 'options/' . $opt_name . '/fields_search', null, true);
-                            $opt_join = $object->getConf($path . 'options/' . $opt_name . '/join', '');
-                            $opt_join_on = $object->getConf($path . 'options/' . $opt_name . '/join_on', '');
-                            $opt_join_return_label = $object->getConf($path . 'options/' . $opt_name . '/join_return_label', '');
-                            $opt_help = $object->getConf($path . 'options/' . $opt_name . '/help', '');
-                            $opt_filters = array();
-                            if ($object->config->isDefined($path . 'options/' . $opt_name . '/filters')) {
-                                $opt_filters = $object->config->getCompiledParams($path . 'options/' . $opt_name . '/filters');
-                            }
-                            if (!is_null($opt_fields_search) && !is_null($opt_label)) {
-                                $html .= '<input type="hidden" id="searchList_' . $opt_name . '_fields_search" value="' . $opt_fields_search . '"/>';
-                                if ($opt_join) {
-                                    $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join" value="' . $opt_join . '"/>';
-                                }
-                                if ($opt_join_on) {
-                                    $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_on" value="' . $opt_join_on . '"/>';
-                                }
-                                if ($opt_join_on) {
-                                    $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_return_label" value="' . $opt_join_return_label . '"/>';
-                                }
-                                if (count($opt_filters)) {
-                                    $html .= '<input type="hidden" id="searchList_' . $opt_name . '_filters" value="' . json_encode($opt_filters) . '"/>';
-                                }
-                                if ($opt_help) {
-                                    $html .= '<input type="hidden" id="searchList_' . $opt_name . '_help" value="' . htmlentities($opt_help) . '"/>';
-                                }
-                                $switchOptions[$opt_name] = $opt_label;
-                            }
-                            if ($opt_name === 'default') {
-                                $fields_search = $opt_fields_search;
-                                $join = $opt_join;
-                                $join_on = $opt_join_on;
-                                $join_return_label = $opt_join_return_label;
-                                $filters = $opt_filters;
-                            }
+                $html .= '<div class="searchListOptions optionsContainer">';
+                $html .= '<span class="displayPopupButton optionsButton" data-popup_id="' . $input_name . '_searchListOptionsPopup">Options de recherche</span>';
+                $html .= '<div id="' . $input_name . '_searchListOptionsPopup" class="tinyPopup searchListOptionsPopup">';
+                $switchOptions = array();
+                foreach ($params['options'] as $opt_name => $opt_params) {
+                    $opt_label = isset($opt_params['label']) ? $opt_params['label'] : null;
+                    $opt_fields_search = isset($opt_params['fields_search']) ? $opt_params['fields_search'] : null;
+                    $opt_join = isset($opt_params['join']) ? $opt_params['join'] : '';
+                    $opt_join_on = isset($opt_params['join_on']) ? $opt_params['join_on'] : '';
+                    $opt_join_return_label = isset($opt_params['join_return_label']) ? $opt_params['join_return_label'] : '';
+                    $opt_help = isset($opt_params['help']) ? $opt_params['help'] : '';
+                    $opt_filters = isset($opt_params['filters']) ? $opt_params['filters'] : '';
+
+                    if (!is_null($opt_fields_search) && !is_null($opt_label)) {
+                        $html .= '<input type="hidden" id="searchList_' . $opt_name . '_fields_search" value="' . $opt_fields_search . '"/>';
+                        if ($opt_join) {
+                            $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join" value="' . $opt_join . '"/>';
                         }
-                        $html .= '<div class="title">Options de recherche</div>';
-                        $html .= BimpInput::renderSwitchOptionsInput($input_name . '_search_list_option', $switchOptions, 'default', null, true);
-                        $html .= '</div>';
-                        $html .= '</div>';
+                        if ($opt_join_on) {
+                            $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_on" value="' . $opt_join_on . '"/>';
+                        }
+                        if ($opt_join_on) {
+                            $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_return_label" value="' . $opt_join_return_label . '"/>';
+                        }
+                        if (count($opt_filters)) {
+                            $html .= '<input type="hidden" id="searchList_' . $opt_name . '_filters" value="' . json_encode($opt_filters) . '"/>';
+                        }
+                        if ($opt_help) {
+                            $html .= '<input type="hidden" id="searchList_' . $opt_name . '_help" value="' . htmlentities($opt_help) . '"/>';
+                        }
+                        $switchOptions[$opt_name] = $opt_label;
                     }
-                } else {
-                    $fields_search = $object->getConf($path . 'fields_search', array(), true);
+                    if ($opt_name === 'default') {
+                        $fields_search = $opt_fields_search;
+                        $join = $opt_join;
+                        $join_on = $opt_join_on;
+                        $join_return_label = $opt_join_return_label;
+                        $filters = $opt_filters;
+                    }
                 }
-
-                $search = '';
-                if ($value) {
-                    global $db;
-                    $bdb = new BimpDb($db);
-                    if (!is_array($fields_search)) {
-                        $fields_search = explode(',', $fields_search);
-                    }
-
-                    $sql = 'SELECT ' . $field_return_label . ' as label';
-                    $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
-                    if ($join) {
-                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
-                    }
-                    $sql .= ' WHERE ' . $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
-
-                    $result = $bdb->executeS($sql, 'array');
-
-                    if (is_null($result) || !isset($result[0]['label'])) {
-                        $search = '';
-                    } else {
-                        $search = $result[0]['label'];
-                    }
-                    unset($bdb);
-                }
-
-                if (is_array($fields_search)) {
-                    $fields_search = implode(',', $fields_search);
-                }
-
-                $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
-                $html .= '<input type="hidden" name="' . $input_name . '_label" value="' . $search . '"/>';
-                $html .= '<input type="text" name="' . $input_name . '_search" class="search_list_input" value="" onkeyup="searchObjectList($(this));"';
-                $html .= ' data-table="' . $table . '"';
-                $html .= ' data-join="' . $join . '"';
-                $html .= ' data-join_on="' . $join_on . '"';
-                $html .= ' data-fields_search="' . $fields_search . '"';
-                $html .= ' data-field_return_label="' . $field_return_label . '"';
-                $html .= ' data-field_return_value="' . $field_return_value . '"';
-                $html .= ' data-join_return_label="' . $join_return_label . '"';
-                $html .= ' data-label_syntaxe="' . htmlentities($label_syntaxe) . '"';
-                $html .= ' data-filters="' . htmlentities(json_encode($filters)) . '"';
-                $html .= '/>';
-                $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
-                $html .= '<div class="search_input_results"></div>';
-                $html .= '<div class="search_input_selected_label"' . (!$search ? ' style="display: none"' : '') . '>';
-                $html .= '<i class="fa fa-check iconLeft"></i>';
-                $html .= '<span class="">' . $search . '</span>';
+                $html .= '<div class="title">Options de recherche</div>';
+                $html .= BimpInput::renderSwitchOptionsInput($input_name . '_search_list_option', $switchOptions, 'default', null, true);
+                $html .= '</div>';
                 $html .= '</div>';
             }
+        } else {
+            $fields_search = isset($params['fields_search']) ? $params['fields_search'] : null;
         }
+
+        if (is_null($fields_search)) {
+            return BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $input_name . '" - Aucun champ de recherche défini');
+        }
+
+        $search = '';
+        if ($value) {
+            global $db;
+            $bdb = new BimpDb($db);
+            if (!is_array($fields_search)) {
+                $fields_search = explode(',', $fields_search);
+            }
+
+            $sql = 'SELECT ' . $field_return_label . ' as label';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
+            if ($join) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
+            }
+            $sql .= ' WHERE ' . $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
+
+            $result = $bdb->executeS($sql, 'array');
+
+            if (is_null($result) || !isset($result[0]['label'])) {
+                $search = '';
+            } else {
+                $search = $result[0]['label'];
+            }
+            unset($bdb);
+        }
+
+        if (is_array($fields_search)) {
+            $fields_search = implode(',', $fields_search);
+        }
+
+        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
+        $html .= '<input type="hidden" name="' . $input_name . '_label" value="' . $search . '"/>';
+        $html .= '<input type="text" name="' . $input_name . '_search" class="search_list_input" value="" onkeyup="searchObjectList($(this));"';
+        $html .= ' data-table="' . $table . '"';
+        $html .= ' data-join="' . $join . '"';
+        $html .= ' data-join_on="' . $join_on . '"';
+        $html .= ' data-fields_search="' . $fields_search . '"';
+        $html .= ' data-field_return_label="' . $field_return_label . '"';
+        $html .= ' data-field_return_value="' . $field_return_value . '"';
+        $html .= ' data-join_return_label="' . $join_return_label . '"';
+        $html .= ' data-label_syntaxe="' . htmlentities($label_syntaxe) . '"';
+        $html .= ' data-filters="' . htmlentities(json_encode($filters)) . '"';
+        $html .= '/>';
+        $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
+        $html .= '<div class="search_input_results"></div>';
+        $html .= '<div class="search_input_selected_label"' . (!$search ? ' style="display: none"' : '') . '>';
+        $html .= '<i class="fa fa-check iconLeft"></i>';
+        $html .= '<span class="">' . $search . '</span>';
+        $html .= '</div>';
         return $html;
     }
 

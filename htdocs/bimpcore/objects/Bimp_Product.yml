@@ -1,0 +1,256 @@
+dol_object: 
+    instance: 
+        dol_object: product
+        
+table: product
+primary: rowid
+
+labels: 
+    name: produit
+    
+fields: 
+    ref: 
+        label: Réf.
+    label: 
+        label: Libellé
+    description: 
+        label: Description
+        type: html
+    url: 
+        label: URL publique
+    note: 
+        label: Note
+        type: text
+        dol_prop: note_private
+        
+    fk_product_type: 
+        label: Type
+        dol_prop: type
+        type: int
+        
+    stock: 
+        label: Stock réel
+        dol_prop: stock_reel
+        type: int
+        default_value: 0
+        
+    barcode: 
+        label: Code-barres
+    fk_barcode_type: 
+        label: Type de code-barres
+        dol_prop: barcode_type
+        type: int
+        
+    price: 
+        label: Prix
+        type: money
+    price_ttc: 
+        label: Prix TTC
+        type: money
+    price_min: 
+        label: Prix minimum
+        type: money
+    price_min_ttc: 
+        label: Prix minimum TTC
+        type: money
+    price_base_type: 
+        label: Base du prix
+    cost_price: 
+        label: Prix de revient
+        type: money
+        
+    default_vat_code: 
+        label: Code TVA par défaut
+    tva_tx: 
+        label: Taux de TVA
+        type: float
+    recuperableonly: 
+        label: TVA récupérable seulement
+        dol_prop: tva_npr
+        type: bool
+        
+    tosell: 
+        label: En vente
+        dol_prop: status
+        type: bool
+    tobuy: 
+        label: En achat
+        dol_prop: status_buy
+        type: bool
+        
+    customcode: 
+        label: Code douane
+    fk_country: 
+        label: Pays d'origine
+        dol_prop: country_id
+    
+    weight: 
+        label: Poids 
+        type: float
+    weight_units: 
+        label: Unité de poids
+        type: int
+    length: 
+        label: Longueur
+        type: float
+    length_units: 
+        label: Unité de longueur
+        type: int
+    width: 
+        label: Largeur
+        type: float
+    width_units: 
+        label: Unité de largeur
+        type: int
+    height: 
+        label: Hauteur
+        type: float
+    height_units: 
+        label: Unité de hauteur
+        type: int
+    surface: 
+        label: Surface
+        type: float
+    surface_units: 
+        label: Unité de surface
+        type: int
+    volume: 
+        label: Volume
+        type: float
+    volume_units:
+        label: Unité de volume
+        type: int
+        
+    serialisable: 
+        label: Sérialisable
+        type: bool
+        dol_extra_field: 1
+        default_value: 0
+    type2: 
+        label: Sous-type
+        type: int
+        values: 
+            array: sousTypes
+        dol_extra_field: 1
+        default_value: 0
+        
+#    Champs non gérés
+#    ref_ext
+#    localtax1_tx
+#    localtax2_tx
+#    localtax1_type
+#    localtax2_type
+#    tosell
+#    tobuy
+#    tobatch
+#    duration
+#    finished
+#    seuil_stock_alerte
+#    canvas
+#    accountancy_code_buy
+#    accountancy_code_sell
+#    pmp
+
+forms: 
+    light: 
+        rows: 
+            - field: ref
+            - field: label
+            - field: barcode
+            - field: type2
+            - field: serialisable
+            - field: tosell
+            - field: tobuy
+            - field: description
+            - field: note
+
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: info-circle
+        rows:  
+            - field: ref
+            - field: label
+            - field: type2
+            - field: barcode
+            - field: customcode
+            - field: description
+            - field: note
+            
+    prices: 
+        title: Prix
+        icon: euro
+        rows:  
+            - field: price_ttc
+            - field: price_min_ttc
+            - field: cost_price
+            - field: tva_tx
+        
+    status: 
+        title: statut
+        icon: check-square
+        rows: 
+            - field: serialisable
+            - field: type2
+            - field: tosell
+            - field: tobuy
+            - field: stock
+        
+    measures: 
+        title: Mesures
+
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 12
+                  fields_table: 
+                      name: infos
+                      
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: status
+lists: 
+    default: 
+        title: Produits
+        icon: fa5_box
+        sort_field: id
+        sort_way: desc
+        n: 50
+        page_btn: 1
+        edit_btn: 1
+        edit_form: light
+        add_form_name: light
+        modal_view: default
+        cols: 
+            ref: 
+                field: ref
+            label: 
+                field: label
+            barcode: 
+                field: barcode
+            stock: 
+                field: stock
+            price: 
+                field: price_ttc
+            tva: 
+                field: tva_tx
+                
+cards: 
+    default: 
+        view_btn: 1
+        fields: 
+            - field: ref
+            - field: barcode

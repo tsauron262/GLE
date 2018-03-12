@@ -4428,8 +4428,8 @@ readers do not read off random characters that represent icons */
   font-family: 'FA5B';
   font-style: normal;
   font-weight: normal;
-  src: url("../fonts/fontawesome/fa-brands-400.eot");
-  src: url("../fonts/fontawesome/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fontawesome/fa-brands-400.woff2") format("woff2"), url("../fonts/fontawesome/fa-brands-400.woff") format("woff"), url("../fonts/fontawesome/fa-brands-400.ttf") format("truetype"), url("../fonts/fontawesome/fa-brands-400.svg#fontawesome") format("svg");
+  src: url("../fonts/fontawesome5/fa-brands-400.eot");
+  src: url("../fonts/fontawesome5/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fontawesome5/fa-brands-400.woff2") format("woff2"), url("../fonts/fontawesome5/fa-brands-400.woff") format("woff"), url("../fonts/fontawesome5/fa-brands-400.ttf") format("truetype"), url("../fonts/fontawesome5/fa-brands-400.svg#fontawesome") format("svg");
 }
 
 /* line 19, ../scss/fontawesome5/_fa-brands.scss */
@@ -4445,8 +4445,8 @@ readers do not read off random characters that represent icons */
   font-family: 'FA5';
   font-style: normal;
   font-weight: 400;
-  src: url("../fonts/fontawesome/fa-regular-400.eot");
-  src: url("../fonts/fontawesome/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fontawesome/fa-regular-400.woff2") format("woff2"), url("../fonts/fontawesome/fa-regular-400.woff") format("woff"), url("../fonts/fontawesome/fa-regular-400.ttf") format("truetype"), url("../fonts/fontawesome/fa-regular-400.svg#fontawesome") format("svg");
+  src: url("../fonts/fontawesome5/fa-regular-400.eot");
+  src: url("../fonts/fontawesome5/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fontawesome5/fa-regular-400.woff2") format("woff2"), url("../fonts/fontawesome5/fa-regular-400.woff") format("woff"), url("../fonts/fontawesome5/fa-regular-400.ttf") format("truetype"), url("../fonts/fontawesome5/fa-regular-400.svg#fontawesome") format("svg");
 }
 
 /*.fa,*/
@@ -4464,8 +4464,8 @@ readers do not read off random characters that represent icons */
   font-family: 'FA5S';
   font-style: normal;
   font-weight: 900;
-  src: url("../fonts/fontawesome/fa-solid-900.eot");
-  src: url("../fonts/fontawesome/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../fonts/fontawesome/fa-solid-900.woff2") format("woff2"), url("../fonts/fontawesome/fa-solid-900.woff") format("woff"), url("../fonts/fontawesome/fa-solid-900.ttf") format("truetype"), url("../fonts/fontawesome/fa-solid-900.svg#fontawesome") format("svg");
+  src: url("../fonts/fontawesome5/fa-solid-900.eot");
+  src: url("../fonts/fontawesome5/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../fonts/fontawesome5/fa-solid-900.woff2") format("woff2"), url("../fonts/fontawesome5/fa-solid-900.woff") format("woff"), url("../fonts/fontawesome5/fa-solid-900.ttf") format("truetype"), url("../fonts/fontawesome5/fa-solid-900.svg#fontawesome") format("svg");
 }
 
 /* line 20, ../scss/fontawesome5/_fa-solid.scss */
@@ -4983,7 +4983,7 @@ i.iconRight {
   position: fixed;
   z-index: 99999;
   background-color: transparent;
-  padding: 30px;
+  padding: 0 30px;
   top: 40px;
   right: 0;
   width: 430px;

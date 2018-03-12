@@ -599,7 +599,7 @@ class BimpAssociation
         $html .= ' data-field_name="' . $this->association . '" data-multiple="1">';
 
         if ($input_type === 'search_list') {
-            $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $this->association . '/', $field_name, '');
+            $html .= BimpInput::renderSearchListInputFromConfig($this->object, 'associations/' . $this->association . '/', $field_name, '');
         } else {
             $html .= BimpInput::renderInput($input_type, $field_name, '', array(), null, null);
         }

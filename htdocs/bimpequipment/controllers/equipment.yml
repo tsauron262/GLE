@@ -35,6 +35,17 @@ sections:
                         object: equipment
                         children: logiciels
                         
+          reservations: 
+              label: Réservations
+              url_params:
+                  id: 
+                      request: id
+              sections: 
+                  - type: view
+                    view: 
+                        name: reservations
+                        object: equipment
+                        
                 
     - type: buttons
       buttons:

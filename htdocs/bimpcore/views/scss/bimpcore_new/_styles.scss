@@ -68,6 +68,11 @@
     }
 }
 
+.page_content {
+    background-color: #fff;
+    padding: 15px;
+}
+
 div.tabBar {
     padding-left: 15px;
     padding-right: 15px;
@@ -526,7 +531,7 @@ i.iconRight {
     position: fixed; 
     z-index: 99999;
     background-color: transparent;
-    padding: 30px;
+    padding: 0 30px;
     top: 40px;
     right: 0;
     width: 430px;

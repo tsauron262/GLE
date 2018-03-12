@@ -164,7 +164,7 @@ function reloadObjectList(list_id, callback) {
     });
 }
 
-function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent) {
+function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title) {
     var $list = $('#' + list_id);
     if (!$list.length) {
         bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
@@ -193,7 +193,7 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         data['param_associations_params'] = $asso_filters_input.val();
     }
 
-    loadModalForm($button, data);
+    loadModalForm($button, data, title);
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {

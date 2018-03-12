@@ -235,8 +235,16 @@ views:
                   - type: fields_table
                     col_lg: 9
                     fields_table:
-                        name: default           
+                        name: default  
                         
+    reservations: 
+        panel: 0
+        rows: 
+            - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderReservationsList
+                    
 forms:
     default:
         rows: 

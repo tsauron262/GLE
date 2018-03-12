@@ -14,7 +14,7 @@ function bimp_msg(msg, className, $container) {
     html += '</p>';
 
     if ($container && (typeof ($container) === 'object') && $container.length) {
-        $container.html(html).stop().slideDown(250, function() {
+        $container.html(html).stop().slideDown(250, function () {
             $(this).css('height', 'auto');
         });
     } else {
@@ -32,13 +32,15 @@ function bimp_msg(msg, className, $container) {
             'duration': 250,
             complete: function () {
                 setTimeout(function () {
-                    $p.fadeOut(500, function () {
-                        $p.remove();
-                        if (!$container.find('p').length) {
-                            $container.hide();
-                        }
-                    });
-                }, 5000);
+                    if (!$p.data('hold')) {
+                        $p.fadeOut(500, function () {
+                            $p.remove();
+                            if (!$container.find('p').length) {
+                                $container.hide();
+                            }
+                        });
+                    }
+                }, 8000);
             }
         });
     }
@@ -216,9 +218,9 @@ function setCommonEvents($container) {
         }
     });
     // bootstrap popover:
-    $container.find('.bs-popover').each(function() {
+    $container.find('.bs-popover').each(function () {
         $(this).popover();
-        $(this).click(function() {
+        $(this).click(function () {
             $(this).popover('hide');
         });
     });
@@ -545,4 +547,43 @@ function findParentByTag($element, tag) {
 
 $(document).ready(function () {
     $('body').append('<div id="page_notifications"></div>');
+    var $notifications = $('#page_notifications');
+    $notifications.mouseover(function () {
+        $(this).stop().animate({
+            'width': '5px',
+            'padding': 0
+        }, {
+            'duration': 250,
+            complete: function () {
+                $notifications.find('p').each(function () {
+                    $(this).data('hold', 1);
+                    $(this).stop(false, true);
+                });
+                setTimeout(function () {
+                    $notifications.stop().animate({
+                        'width': '430px',
+                        'padding': '0 30px'
+                    }, {
+                        'duration': 250,
+                        'complete': function () {
+                            $notifications.find('p').each(function () {
+                                var $p = $(this);
+                                $p.data('hold', 0);
+                                setTimeout(function () {
+                                    if (!$p.data('hold')) {
+                                        $p.fadeOut(500, function () {
+                                            $p.remove();
+                                            if (!$notifications.find('p').length) {
+                                                $notifications.hide();
+                                            }
+                                        });
+                                    }
+                                }, 8000);
+                            });
+                        }
+                    });
+                }, 1500);
+            }
+        });
+    });
 });

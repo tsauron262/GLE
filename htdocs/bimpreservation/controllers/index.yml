@@ -1,0 +1,21 @@
+title: Réservations
+bootstrap: 1
+
+js:
+    - /bimpreservation/views/js/reservation.js
+    
+objects: 
+    reservation: 
+        instance: 
+            bimp_object: BR_Reservation
+
+sections: 
+    - type: tabs
+      tabs: 
+        default:
+            label: Réservations
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: reservation

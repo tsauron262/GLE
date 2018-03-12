@@ -5,10 +5,6 @@ objects:
     equipment:
         instance: 
             bimp_object: Equipment
-
-    logiciel: 
-        instance: 
-            bimp_object: BE_Logiciel
             
     user_account:
         instance: 
@@ -22,10 +18,6 @@ objects:
         instance: 
             bimp_object: BE_Connection
             
-    reservation: 
-        instance: 
-            bimp_object: BE_Reservation
-            
 sections:
     - type: tabs
       tabs: 
@@ -36,18 +28,6 @@ sections:
                   list: 
                       panel: 1
                       object: equipment
-                      
-        logiciels:
-            label: Logiciels
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: logiciel
-                - type: list
-                  list: 
-                      panel: 1
-                      object: user_account
                       
         reseaux:
             label: Réseaux
@@ -60,11 +40,3 @@ sections:
                   list: 
                       panel: 1
                       object: connection
-                      
-        reservations: 
-            label: Réservations
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: reservation

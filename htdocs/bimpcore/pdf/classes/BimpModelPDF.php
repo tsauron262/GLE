@@ -34,6 +34,7 @@ Abstract class BimpModelPDF
         $this->langs->load("companies");
 
         $this->pdf = new BimpPDF($orientation, $format);
+        
         $this->fromCompany = $mysoc;
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);

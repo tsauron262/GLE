@@ -857,11 +857,11 @@ class BC_Vente extends BimpObject
 
             if (!count($errors)) {
                 if ($id_equipment) {
-                    $equipment = $article->getChildObject('equipment');
-                    if (is_null($equipment) || !$equipment->isLoaded()) {
-                        $errors[] = 'L\'équipement associé à cet article n\'existe pas (ID ' . $id_equipment . ')';
-                    } else {
+                    $equipment = $this->checkEquipment($id_equipment, $errors);
+                    if (!is_null($equipment)) {
                         $html .= $this->renderCartEquipmentline($article, $product, $equipment);
+                    } else {
+                        $article->delete();
                     }
                 } else {
                     $html .= $this->renderCartProductLine($article, $product);
@@ -966,10 +966,15 @@ class BC_Vente extends BimpObject
             if (is_null($id_product) || !$id_product) {
                 $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '")';
                 return null;
+            } else {
+                $place = $equipment->getCurrentPlace();
+                if (!is_null($place) && $place->isLoaded()) {
+                    if (in_array((int) $place->getData('type'), array(1, 4))) {
+                        $errors[] = 'L\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '") est enregistré comme déjà vendu';
+                        return null;
+                    }
+                }
             }
-//            else {
-////                $place = $equipment->getCurrentPlace();
-//            }
         }
 
         return $equipment;

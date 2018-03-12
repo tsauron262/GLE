@@ -24,6 +24,36 @@ class Equipment extends BimpObject
     );
     protected $current_place = null;
 
+    public function isReserved()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+        $list = $reservation->getList(array(
+            'id_equipment' => (int) $this->id,
+            'status'       => array(
+                'and' => array(
+                    array(
+                        'operator' => '<',
+                        'value'    => 300
+                    ),
+                    array(
+                        'operator' => '>',
+                        'value' => 199
+                    )
+                )
+            )
+        ));
+        
+        if (!is_null($list) && count($list)) {
+            return true;
+        }
+        
+        return false;
+    }
+
     public function getContratsArray()
     {
         $id_soc = isset($this->data['id_soc']) ? $this->data['id_soc'] : 0;
@@ -241,6 +271,23 @@ class Equipment extends BimpObject
         }
 
         return '';
+    }
+
+//    Renders: 
+    public function renderReservationsList()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            $instance = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+            $title = 'Réservation de l\'équipement ' . $this->id . ' - serial ' . $this->getData('serial');
+            $list = new BC_ListTable($instance, 'default', 1, null, $title);
+            $list->params['add_form_name'] = 'equipment';
+            $list->params['edit_form'] = 'equipment';
+            $list->params['add_form_title'] = 'Ajout d\'une réservation pour l\'équipement ' . $this->id . ' (serial: ' . $this->getData('serial') . ')';
+            $list->addFieldFilterValue('id_equipment', $this->id);
+            $html = $list->renderHtml();
+        }
+        return $html;
     }
 
 //    Overrides

@@ -203,7 +203,7 @@ class BC_Field extends BimpComponent
         $html .= '>';
 
         if ($input_type === 'search_list') {
-            $html .= BimpInput::renderSearchListInput($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
+            $html .= BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
         } else {
             $html .= BimpInput::renderInput($input_type, $input_name, null, $options, null, 'default', $input_id);
         }
@@ -235,7 +235,7 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->display_input_value) {
-            $html .= '<input type="hidden" name="' . $this->name . '" value="' . $this->value . '">';
+            $html .= '<input type="hidden" name="' . $this->name . '" value="' . htmlentities($this->value) . '">';
         }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
@@ -324,7 +324,7 @@ class BC_Field extends BimpComponent
         }
         return $html;
     }
-    
+
     public static function getInputType(BimpObject $object, $field)
     {
         $path = 'fields/' . $field . '/';
@@ -353,6 +353,7 @@ class BC_Field extends BimpComponent
             case 'bool':
                 return 'toggle';
 
+            case 'html':
             case 'time':
             case 'date':
             case 'datetime':

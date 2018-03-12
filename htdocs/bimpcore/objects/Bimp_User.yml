@@ -88,7 +88,7 @@ fields:
         dol_extra_field: 1
     signature: 
         label: Signature
-        type: text
+        type: html
     note: 
         label: Note
         type: text
@@ -225,7 +225,6 @@ fields_tables:
         
 views: 
     default: 
-        title: nom
         rows: 
             - cols: 
                 - type: fields_table

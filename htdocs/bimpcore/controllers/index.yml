@@ -10,6 +10,10 @@ objects:
         instance: 
             bimp_object: Bimp_Societe
             
+    products: 
+        instance: 
+            bimp_object: Bimp_Product
+            
 sections:
     - type: tabs
       tabs: 
@@ -28,3 +32,11 @@ sections:
                       panel: 1
                       object: clients
                       name: clients
+        products: 
+            label: Produits
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: products
+                      name: default

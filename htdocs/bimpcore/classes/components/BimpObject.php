@@ -100,6 +100,18 @@ class BimpObject
         return null;
     }
 
+    public static function loadClass($module, $object_name)
+    {
+        if (!class_exists($object_name)) {
+            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
+            if (file_exists($file)) {
+                require_once $file;
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function __construct($module, $object_name)
     {
         global $db;
@@ -433,6 +445,9 @@ class BimpObject
 
     public function isLoaded()
     {
+        if ($this->isDolObject()) {
+            return (isset($this->id) && $this->id && isset($this->dol_object->id) && $this->dol_object->id);
+        }
         return (isset($this->id) && $this->id);
     }
 
@@ -485,7 +500,7 @@ class BimpObject
 
     public function set($field, $value)
     {
-        $this->validateValue($field, $value);
+        return $this->validateValue($field, $value);
     }
 
     public function addMultipleValuesItem($name, $value)
@@ -1242,7 +1257,7 @@ class BimpObject
                 }
             } else {
                 $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
-                $sqlError = $this->db->db->error();
+                $sqlError = $this->db->db->lasterror;
                 if ($sqlError) {
                     $msg .= ' - Erreur SQL: ' . $sqlError;
                 }
@@ -1293,7 +1308,7 @@ class BimpObject
 
             if ($result <= 0) {
                 $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
-                $sqlError = $this->db->db->error();
+                $sqlError = $this->db->db->lasterror;
                 if ($sqlError) {
                     $msg .= ' - Erreur SQL: ' . $sqlError;
                 }
@@ -1604,7 +1619,7 @@ class BimpObject
 
         if ($result <= 0) {
             $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
-            $sqlError = $this->db->db->error();
+            $sqlError = $this->db->db->lasterror;
             if ($sqlError) {
                 $msg .= ' - Erreur SQL: ' . $sqlError;
             }
@@ -1891,6 +1906,9 @@ class BimpObject
             return true;
         }
 
+        echo '<pre>';
+        print_r($errors);
+        exit;
         return false;
     }
 
@@ -2652,10 +2670,7 @@ class BimpObject
     public static function getInstanceUrl($instance)
     {
         if (is_a($instance, 'BimpObject')) {
-            if ($controller = $instance->getController()) {
-                return DOL_URL_ROOT . '/' . $instance->module . '/index.php?fc=' . $controller . (isset($instance->id) && $instance->id ? '&id=' . $instance->id : '');
-            }
-            return '';
+            return $instance->getUrl();
         }
         return BimpTools::getDolObjectUrl($instance);
     }

@@ -8,13 +8,15 @@ labels:
     name: logiciel
     
 objects: 
-    logiciel: 
+    product: 
         relation: hasOne
         delete: 0
         instance: 
-            bimp_object: BE_Logiciel
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
             id_object: 
-                field_value: id_logiciel
+                field_value: id_product
                 
     user_account:
         instance: 
@@ -45,43 +47,28 @@ fields:
         label: Equipement
         type: id_parent
         
-    id_logiciel:
-        label: Logiciel
+    id_product:
+        label: Produit
         type: id_object
-        object: logiciel
-        required: 1
-        create_form: default
+        object: product
+        required_if: use_product=1
         input: 
-            type: search_list
-            search_list: 
-                table: be_logiciel l
-                field_return_label: l.name
-                field_return_value: l.id
-                join: product p
-                join_on: p.rowid = l.id_product
-                join_return_label: p.ref
-                fields_search: l.id,l.name,p.ref
-            help: Entrez l'id, le nom ou la référence d'un logiciel pour effectuer une recherche
+            type: search_product
+            help: Entrez un nom ou une référence pour rechercher un produit
+        display_if: 
+            field_name: use_product
+            show_values: 1
         display: 
-            nom: 
-                type: nom
-                card: default
-        
+            default: 
+                type: nom_url        
     serial: 
-        label: Numéro de série
+        label: Numéro de série / License
         
-forms:
-    default: 
-        rows: 
-            - field: id_logiciel
-            - field: serial
-            - association: user_accounts
-
 fields_table: 
     default: 
         panel: 0
         rows: 
-            - field: id_logiciel
+            - field: id_product
               display: card
             - field: serial
             - association: user_accounts
@@ -99,6 +86,13 @@ views:
                     fields_table:
                         name: default 
 
+forms:
+    default: 
+        rows: 
+            - field: id_product
+            - field: serial
+            - association: user_accounts
+            
 lists: 
     default: 
         title: Logiciels
@@ -118,8 +112,8 @@ lists:
         delete_btn: 1
         enable_search: 0
         cols: 
-            logiciel: 
-                field: id_logiciel
-                display: nom
+            product: 
+                field: id_product
+                display: nom_url
             serial: 
                 field: serial

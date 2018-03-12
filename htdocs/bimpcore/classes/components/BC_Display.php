@@ -66,6 +66,7 @@ class BC_Display extends BimpComponent
                     }
                     break;
 
+                case 'html':
                 case 'time':
                 case 'date':
                 case 'datetime':
@@ -290,6 +291,7 @@ class BC_Display extends BimpComponent
                         break;
 
                     case 'string':
+                    case 'html':
                     default:
                         $html .= $this->value;
                         break;

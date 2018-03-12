@@ -58,8 +58,8 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
 $(document).ready(function () {
 
     var date = new Date(), y = date.getFullYear(), m = date.getMonth();
-    var firstDay = new Date(Date.UTC(y, m, 20, 3, 0, 0));
-    var lastDay = new Date(Date.UTC(y, m + 1, 0, 3, 0, 0));
+    var firstDay = new Date(Date.UTC(y, m-1, 1, 3, 0, 0));
+    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));
 //    var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
 //    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));   // good
 

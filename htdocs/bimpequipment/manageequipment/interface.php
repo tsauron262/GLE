@@ -11,9 +11,11 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/transfert.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimptransfer.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimplivraison.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimpinventory.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/equipmentmanager.class.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimporderclient.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/product.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/equipment.lib.php';
 
@@ -56,7 +58,7 @@ switch (GETPOST('action')) {
         }
     case 'modifyOrder': {
             $bl->fetch(GETPOST('orderId'));
-            echo json_encode($bl->addInStock(GETPOST('products'), GETPOST('orderId', 'int'), GETPOST('entrepotId', 'int'), $user, GETPOST('isTotal')));
+            echo json_encode($bl->addInStock(GETPOST('products'), GETPOST('entrepotId', 'int'), $user, GETPOST('isTotal')));
             break;
         }
     case 'getRemainingLignes': {
@@ -64,6 +66,8 @@ switch (GETPOST('action')) {
             echo json_encode($bl->getRemainingLignes());
             break;
         }
+
+
     /* Inventories - viewInventoryMain */
     case 'getInventoriesForEntrepot': {
             echo json_encode(array('inventories' => $em->getInventories(GETPOST('idEntrepot'), true), 'errors' => $em->errors));
@@ -73,36 +77,87 @@ switch (GETPOST('action')) {
             echo json_encode(array('id_inserted' => $inventory->create(GETPOST('idEntrepotCreate'), $user->id), 'errors' => $inventory->errors));
             break;
         }
+
+
     /* Inventories - viewInventory */
     case 'getAllProducts': {
-            echo json_encode($em->getAllProducts(GETPOST('id_entrepot')));
+            $inventory->fetch(GETPOST('inventory_id'));
+            echo json_encode($inventory->retrieveScannedLignes());
             break;
         }
-        
-        
-    /* Old Inventories */
-    /** @deprecated */
-    case 'getStockAndSerial': {
-            $lp->check(GETPOST('ref'), GETPOST('idEntrepot'));
-            if (!$lp->prodId) {
-                echo json_encode(array('errors' => array($lp->error)));
-                break;
-            }
-            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), $lp->prodId, $lp->serial));
+    case 'addLine': {
+            $inventory->fetch(GETPOST('inventory_id'));
+            echo json_encode($inventory->addLine(GETPOST('ref'), GETPOST('last_inserted_fk_product'), $user->id));
             break;
         }
-    /** @deprecated */
-    case 'getStock': {
-            echo json_encode($em->getStockAndSerial(GETPOST('idEntrepot'), GETPOST('prodId'), ''));
+    case 'closeInventory': {
+            $inventory->fetch(GETPOST('inventory_id'));
+            echo json_encode(array('success' => $inventory->updateStock($user), 'errors' => $inventory->errors));
             break;
         }
-    /** @deprecated */
-    case 'correctStock': {
-//            echo json_encode($em->correctStock(GETPOST('idEntrepot'), GETPOST('products')), $user);
+
+
+    /* Transfer - viewTransfer */
+
+    case 'createTransfer': {
+            $transfert = new BimpTransfer($db);
+            $id_transfer = $transfert->create(GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user->id, $transfert::STATUS_SENT);
+            $transfert->fetch($id_transfer);
+
+            echo json_encode(array('lines_added' => $transfert->addLines(GETPOST('products')), 'errors' => $transfert->errors));
             break;
         }
+
+    /* transfer - viewReception */
+
+    case 'retrieveSentLines': {
+            $transfert = new BimpTransfer($db);
+            $transfert->fetch(GETPOST('fk_transfert'));
+            echo json_encode(array('prods' => $transfert->getLines(true), 'errors' => $transfert->errors));
+            break;
+        }
+
+    case 'receiveTransfert': {
+            $transfert = new BimpTransfer($db);
+            $transfert->fetch(GETPOST('fk_transfert'));
+            echo json_encode(array('nb_update' => $transfert->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')), 'errors' => $transfert->errors));
+            break;
+        }
+
+    case 'closeTransfer': {
+            $transfert = new BimpTransfer($db);
+            $transfert->fetch(GETPOST('fk_transfert'));
+            echo json_encode(array('nb_update' => $transfert->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
+                'status_changed' => $transfert->updateStatut($transfert::STATUS_RECEIVED), 'errors' => $transfert->errors));
+            break;
+        }
+
+    /* OrderClient - viewOrderClient */
+
+    case 'retrieveOrderClient': {
+            $boc = new BimpOrderClient($db);
+            $boc->fetch(GETPOST('fk_order'), GETPOST('ref_order'));
+            echo json_encode(array('order' => $boc->retrieveOrderClient(), 'errors' => $boc->errors));
+            break;
+        }
+
+    /* Manageequipment - Index - accueil boutique */
+    case 'getLineTransferAndOrder': {
+            $transferstatic = new BimpTransfer($db);
+            $blstatic = new BimpLivraison($db);
+            echo json_encode(array(
+                'transfers' => $transferstatic->getTransfers(GETPOST('fk_warehouse'), array($transferstatic::STATUS_DRAFT,
+                    $transferstatic::STATUS_SENT,
+                    $transferstatic::STATUS_RECEIVED_PARTIALLY), true),
+                'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 0, 4),
+                'errors' => array_merge($transferstatic->errors, $blstatic->errors)));
+            break;
+        }
+
+
+    /* Default (catch bad action parameter) */
     default: {
-            echo json_encode(array('errors' => 'Aucune action ne match avec : ' . GETPOST('action')));
+            echo json_encode(array('errors' => array('Aucune action ne match avec : ' . GETPOST('action'))));
             break;
         }
 }

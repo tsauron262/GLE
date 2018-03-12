@@ -1,6 +1,15 @@
 $(window).on("load", function () {
     activeScroll = false;
     cacherMenuConge();
+    
+    
+    
+    $("#search_idprodfournprice").on('keyup keydown', function (e) {
+        if (e.keyCode === 13 || e.keyCode === 9 || e.key === "Enter") { // code for "Enter"
+            e.stopPropagation();
+            return false;
+        }
+    });
 
 
     afficherMargeReduc();

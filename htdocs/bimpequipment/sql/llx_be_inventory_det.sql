@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_inventory_det` (
     `fk_inventory`    INTEGER NOT NULL,
     `fk_user`         INTEGER NOT NULL,
     `fk_product`      INTEGER NOT NULL,
-    `fk_equipment`    INTEGER NOT NULL,
+    `fk_equipment`    INTEGER NULL,
     FOREIGN KEY (`fk_inventory`) REFERENCES `llx_be_inventory`(`rowid`),
     FOREIGN KEY (`fk_user`)      REFERENCES `llx_user`(`rowid`),
     FOREIGN KEY (`fk_product`)   REFERENCES `llx_product`(`rowid`),

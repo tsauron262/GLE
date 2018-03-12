@@ -14,10 +14,10 @@ class LignePanier {
     }
 
     function isProduct($ref) {
-        $ref = str_replace("/", "_", $ref);
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $ref . '"';
+        $sql .= ' OR ref="' . str_replace("/", "_", $ref) . '"';
         $sql .= ' OR barcode="' . $ref . '"';
 
         $result = $this->db->query($sql);
@@ -59,7 +59,7 @@ class LignePanier {
                 $this->error .= "Produit inconnu";
                 return false;
             }
-        } else if ($this->isSerialisable()){
+        } else if ($this->isSerialisable()) {
             $this->error .= "Veuillez scanner le numéro de série au lieu de la référence.";
         }
     }
@@ -79,7 +79,6 @@ class LignePanier {
             }
         }
         return false;
-        //$this->error .= "Identifiant du produit non définit";
     }
 
     function getError() {

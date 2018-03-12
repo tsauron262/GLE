@@ -10,6 +10,7 @@ var cnt_product = 0;
 var green = '#ADFF92';
 var yellow = '#FFFF96';
 var red = '#FF8484';
+var white = '#FFFFFF';
 
 /**
  * Ajax call
@@ -194,8 +195,8 @@ function initEvents() {
         }
         receiveAndCloseTransfer(products, equipments);
     });
-    
-    $('#closeTransfer').click( function () {
+
+    $('#closeTransfer').click(function () {
         closeTransfer();
     });
 }
@@ -231,7 +232,9 @@ function initColorEvent(id_tr) {
 
 function setColors(id_tr, quantity_received, quantity_sent) {
     var color;
-    if (quantity_received === quantity_sent)
+    if (quantity_received === 0)
+        color = white;
+    else if (quantity_received === quantity_sent)
         color = green;
     else if (quantity_received < quantity_sent)
         color = yellow;
@@ -268,6 +271,7 @@ function initSetFullQty(id_tr) {
         if (new_qty < 0)
             new_qty = 0;
         $('#product_table tr#' + id_tr + ' > td > input[name=received_qty]').val(new_qty);
+        setColors(id_tr, new_qty, sent_qty);
     });
 }
 

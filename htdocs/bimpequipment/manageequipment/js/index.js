@@ -45,11 +45,10 @@ function getLineTransferAndOrder() {
 $(document).ready(function () {
 
     $('#warehouseSelect').select2({placeholder: 'Rechercher ...'});
-    $('#warehouseSelect option:selected').prop('selected', true);
+    $('#warehouseSelect option:first').prop('selected', true);
     $('#warehouseSelect').trigger('change');
     initEvents();
 });
-
 
 function initEvents() {
     $('#warehouseSelect').change(function () {

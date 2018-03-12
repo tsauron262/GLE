@@ -242,7 +242,8 @@ class BimpLivraison {
             'type' => 2, // cf $types
             'id_entrepot' => $entrepotId, // si type = 2
             'infos' => $this->getcodeMove(),
-            'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
+            'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'), // date et heure d'arrivée
+            'code_mvt' => $this->getcodeMove()
         ));
         $this->errors = array_merge($this->errors, $emplacement->create());
         if ($length != sizeof($this->errors))

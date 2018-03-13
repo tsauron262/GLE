@@ -64,7 +64,7 @@ class controlStock{
     }
     
     private function getProductSerialisable(){
-        $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1 LIMIT 0,50");
+        $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
         while($ligne = $this->db->fetch_object($sql))
                 $this->prodS[$ligne->rowid] = $ligne->label;
     }

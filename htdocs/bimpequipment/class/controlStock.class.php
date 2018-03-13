@@ -6,6 +6,7 @@ if(isset($_REQUEST['action'])){
     llxHeader();
     $c = new controlStock($db);
     $c->go();
+    llxFooter();
 }
 
 

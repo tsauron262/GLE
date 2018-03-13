@@ -33,15 +33,15 @@ class controlStock{
                 $nbS = $this->getStockProd($idPr, $idEn);
                 
                 if($nbE != $nbS || $nbE != 0){
-                    $debutText .= "  -  Produit : ".$labPr;
+                    $millieuText = $debutText. "  -  Produit : ".$labPr;
                     if($nbE == $nbS)
                         $youpi = true;//echo " OK  : ".$nbE;
                     elseif($nbE > $nbS)
-                        echo $debutText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        echo $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                     elseif($nbE < $nbS)
-                        echo $debutText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        echo $millieuText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                     else
-                        echo $debutText."ATTENTION BIZZARRE<br/>";
+                        echo $millieuText."ATTENTION BIZZARRE<br/>";
                     $nbCorrection = $nbE - $nbS;
                     if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
                         echo "  correction de  ".$nbCorrection."<br/>";

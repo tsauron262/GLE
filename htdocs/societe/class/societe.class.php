@@ -1015,7 +1015,7 @@ class Societe extends CommonObject
     {
         global $langs;
         global $conf;
-dol_syslog("fetch soc ref :".$ref,3);
+
         if (empty($rowid) && empty($ref) && empty($ref_ext) && empty($ref_int) && empty($idprof1) && empty($idprof2) && empty($idprof3) && empty($idprof4) && empty($idprof5) && empty($idprof6) && empty($email)) return -1;
 
         $sql = 'SELECT s.rowid, s.nom as name, s.name_alias, s.entity, s.ref_ext, s.ref_int, s.address, s.datec as date_creation, s.prefix_comm';
@@ -1051,7 +1051,7 @@ dol_syslog("fetch soc ref :".$ref,3);
         $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_typent as te ON s.fk_typent = te.id';
 		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_incoterms as i ON s.fk_incoterms = i.rowid';
         if ($rowid) $sql .= ' WHERE s.rowid = '.$rowid;
-        else if ($ref)   $sql .= " WHERE s.nom = '".$this->db->escape($ref)."' AND s.entity IN (".getEntity($this->element, 1).")";
+        else if ($ref)   $sql .= " WHERE (s.nom = '".$this->db->escape($ref)."' || s.code_fournisseur = '".$this->db->escape($ref)."') AND s.entity IN (".getEntity($this->element, 1).")";
         else if ($ref_ext) $sql .= " WHERE s.ref_ext = '".$this->db->escape($ref_ext)."' AND s.entity IN (".getEntity($this->element, 1).")";
         else if ($ref_int) $sql .= " WHERE s.ref_int = '".$this->db->escape($ref_int)."' AND s.entity IN (".getEntity($this->element, 1).")";
         else if ($idprof1) $sql .= " WHERE s.siren = '".$this->db->escape($idprof1)."' AND s.entity IN (".getEntity($this->element, 1).")";

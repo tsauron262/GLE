@@ -41,6 +41,7 @@ class BimpStatsFacture {
      * 'c' => CSV
      */
     private $mode;
+    private $is_common;
 
     /**
      * 	Constructor
@@ -57,8 +58,9 @@ class BimpStatsFacture {
 
     /* Main function, triggered when the user click on "Valider" button */
 
-    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier) {
+    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $is_common) {
         // TODO MAJ BDD
+        $this->is_common = $is_common;
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);    // apply filter
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
@@ -82,36 +84,45 @@ class BimpStatsFacture {
         return $out;
     }
 
+    private function addExtra($string) {
+        if ($this->is_common)
+            return '';
+        else
+            return $string;
+    }
+
     /* Filter facture */
 
     private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats) {
         $ids = array();
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture' . $this->addExtra('_fourn') . '_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
-        if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
-            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
-            $sql .= ' OR e.type IS NULL)';
-        } else if (!empty($types)) {     // Non renseigné NOT selected
-            $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
-        }
-
-        $sql .= " AND (";
-        if (!empty($centres)) {
-            $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
-            if (in_array('NRS', $centres)) {
-                $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
-                $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
+        if ($this->is_common) {
+            if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
+                $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
+                $sql .= ' OR e.type IS NULL)';
+            } else if (!empty($types)) {     // Non renseigné NOT selected
+                $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
             }
-        } else {
-            $sql .= "1";
+
+            $sql .= " AND (";
+            if (!empty($centres)) {
+                $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
+                $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+                if (in_array('NRS', $centres)) {
+                    $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
+                    $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
+                }
+            } else {
+                $sql .= "1";
+            }
+            $sql .= ")";
         }
-        $sql .= ")";
 
 //        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
 //            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
@@ -187,9 +198,9 @@ class BimpStatsFacture {
                 $hash[$ind]['pai_id'] = $obj->pai_id;
                 $hash[$ind]['ref_paiement'] = $obj->pai_ref;
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
-                if($obj->centre1 != "0" and $obj->centre1 != '' and $obj->centre1 != false)
+                if ($obj->centre1 != "0" and $obj->centre1 != '' and $obj->centre1 != false)
                     $hash[$ind]['ct'] = $obj->centre1;
-                elseif($obj->centre2 != "0" and $obj->centre2 != '' and $obj->centre2 != false)
+                elseif ($obj->centre2 != "0" and $obj->centre2 != '' and $obj->centre2 != false)
                     $hash[$ind]['ct'] = $obj->centre2;
                 else
                     $hash[$ind]['ct'] = 0;
@@ -383,10 +394,9 @@ class BimpStatsFacture {
                 }
 
                 foreach ($facture as $champ) {
-                    if(!is_numeric(str_replace(",", ".", str_replace(" ", "", $champ)))){
+                    if (!is_numeric(str_replace(",", ".", str_replace(" ", "", $champ)))) {
                         $champ = str_replace('"', '', $champ);
-                    }
-                    else{
+                    } else {
                         $champ = str_replace(' ', '', $champ);
                     }
                     $champ = '"' . $champ . '"';
@@ -450,17 +460,16 @@ class BimpStatsFacture {
                 $out[$filtre] = array('title' => $title, 'total_total' => 0, 'total_total_marge' => 0, 'total_payer' => 0, 'factures' => array());
             }
             $out[$filtre]['total_payer'] += $row['paipaye_ttc'];
-            
-            if(!isset($out[$filtre]['nb_facture'][$row['fac_id']])){//La facture n'est pas encore traité sinon deuxieme paiement
+
+            if (!isset($out[$filtre]['nb_facture'][$row['fac_id']])) {//La facture n'est pas encore traité sinon deuxieme paiement
                 $out[$filtre]['total_total'] += $row['factotal'];
                 $out[$filtre]['total_total_marge'] += $row['marge'];
                 $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
-            }
-            else{//deuxieme paiement on vire les montant
+            } else {//deuxieme paiement on vire les montant
                 $row['factotal'] = 0;
                 $row['marge'] = 0;
             }
-            
+
             unset($row['fac_statut']);
             unset($row['soc_id']);
 //            unset($row['pai_id']);
@@ -468,13 +477,13 @@ class BimpStatsFacture {
             unset($row['ty']);
             unset($row['sav_id']);
             unset($row['saf_refid']);
-            
-            if ($this->mode != 'r'){
+
+            if ($this->mode != 'r') {
                 //Formatae des données
                 $row['factotal'] = $this->formatPrice($row['factotal']);
                 $row['marge'] = $this->formatPrice($row['marge']);
                 $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
-                
+
                 $out[$filtre]['factures'][] = $row;
             }
         }

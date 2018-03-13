@@ -7,11 +7,27 @@
  */
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-
 require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFacture.class.php';
 
+$object = GETPOST('object');
+$for_common = false;     // common factures
+$for_fournisseur = false;    // fournisseur facture
+
+if ($object == 'facture')
+    $for_common = true;
+elseif ($object == 'facture_fournisseur')
+    $for_fournisseur = true;
+else
+    $error_parameter = true;
+
+
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
+//if ($for_common)
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpstatsfacture/js/ajax.js');
+//elseif ($for_fournisseur)
+//    $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpstatsfacture/js/ajaxCommande.js');
+
+
 
 $recursif = GETPOST('recursif');
 
@@ -21,9 +37,9 @@ $recursif = GETPOST('recursif');
 
 $staticSF = new BimpStatsFacture($db);
 
-llxHeader('', 'Stats factures', '', '', 0, 0, $arrayofjs, $arrayofcss);
+llxHeader('', 'Stats ' . str_replace('_', ' ', $object), '', '', 0, 0, $arrayofjs, $arrayofcss);
 
-print load_fiche_titre('Stats factures', $linkback);
+print load_fiche_titre('Stats ' . str_replace('_', ' ', $object), $linkback);
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -32,6 +48,10 @@ print '</table>';
 
 print '<table class="tableforField">';
 
+if ($error_parameter) {
+    print '<strong style="color : #b30000">URL incomplet, paramètre manquant : object (facture ou facture_fournisseur)</strong>';
+    return;
+}
 // Dates
 print '<tr class="top"><td rowspan=5 class="allSides">Filtres</td><td>Dates</td><td>';
 print '<div><text>Date de début</text><br>';
@@ -46,7 +66,7 @@ print '<tr><td>Secteurs</td><td>';
 print '<select id="type" class="select2" multiple style="width: 200px;">';
 print '<option  value="NRS">Non renseigné</option>';
 foreach ($type as $val => $name) {
-    print '<option value="'.$val.'">'.$name.'</option>';
+    print '<option value="' . $val . '">' . $name . '</option>';
 }
 print '</select>';
 
@@ -59,31 +79,32 @@ print '<tr><td>Centres</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
 print '<option  value="NRS">Non renseigné</option>';
 foreach ($centre as $val => $name) {
-    print '<option value="'.$val.'">'.$name.'</option>';
+    print '<option value="' . $val . '">' . $name . '</option>';
 }
 print '</select>';
 
 print '<input id="selectAllCentres"   type="button" class="butAction round" value="Tout sélectionner">';
 print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
+//if ($for_common) {
 // Etats
 $facstatic = new Facture($db);
 print '<tr><td>Etat (multiple)</td><td>
 
-<input id="etatBrouillon" name="etat" type="checkbox" value="'.$facstatic::STATUS_DRAFT.'" checked>
+<input id="etatBrouillon" name="etat" type="checkbox" value="' . $facstatic::STATUS_DRAFT . '" checked>
 <label for="etatBrouillon">Brouillons</label>
 
-<input id="etatValider" name="etat" type="checkbox" value="'.$facstatic::STATUS_VALIDATED.'" checked>
+<input id="etatValider" name="etat" type="checkbox" value="' . $facstatic::STATUS_VALIDATED . '" checked>
 <label for="etatValider">Validées</label>
 
-<input id="etatFermer" name="etat" type="checkbox" value="'.$facstatic::STATUS_CLOSED.'" checked>
+<input id="etatFermer" name="etat" type="checkbox" value="' . $facstatic::STATUS_CLOSED . '" checked>
 <label for="etatFermer">Fermées</label>
 
-<input id="etatAbandonner" name="etat" type="checkbox" value="'.$facstatic::STATUS_ABANDONED.'" >
+<input id="etatAbandonner" name="etat" type="checkbox" value="' . $facstatic::STATUS_ABANDONED . '" >
 <label for="etatAbandonner">Abandonnées</label>
 
 </td></tr>';
-
+//}
 // Statuts
 print '<tr><td>Statut (unique)</td><td>
 <input id="paymentAll" name="statutPayment" type="radio" value="a" checked>

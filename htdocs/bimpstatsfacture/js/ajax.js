@@ -7,6 +7,7 @@
 var groupes;
 var taxesOrNot;
 var format;
+var is_common;
 
 /**
  * Ajax functions
@@ -28,6 +29,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             etats: etats,
             format: format,
             nomFichier: nomFichier,
+            is_common: is_common,
             action: 'getFactures'
         },
         error: function () {
@@ -58,10 +60,8 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
 $(document).ready(function () {
 
     var date = new Date(), y = date.getFullYear(), m = date.getMonth();
-    var firstDay = new Date(Date.UTC(y, m-1, 1, 3, 0, 0));
+    var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
     var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));
-//    var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
-//    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));   // good
 
     $('#dateStart').datepicker();
     $('#dateStart').datepicker('setDate', firstDay);
@@ -69,6 +69,14 @@ $(document).ready(function () {
     $('#dateEnd').datepicker('setDate', lastDay);
 
     $('.select2').select2();
+    
+    var object = getUrlParameter('object');
+    if (object === 'facture_fournisseur')
+        is_common = false;
+    else if (object === 'facture')
+        is_common = true;
+    else
+        return;
 
     initSelectMultiple();
     initButtonFillAndEmpty();
@@ -175,7 +183,7 @@ function displayArray(taxesOrNot) {
             prevFactureId = groupes[key].factures[i].fac_id;
         }
         $(sortie).appendTo('#table' + key);
-        
+
         addTotaux(groupes[key], key);
     }
 }
@@ -209,13 +217,13 @@ function fillTable(facture, prevFactureId) {
         arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
     else
         arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
-       
+
     sortie = "";
     arrayOfValue.forEach(function (elt) {
-        sortie += '<td>'+ elt +'</td>';
+        sortie += '<td>' + elt + '</td>';
     });
-    
-     return '<tr id="tr'+ facture.fac_id + facture.pai_id+'">'+sortie+'</tr>';
+
+    return '<tr id="tr' + facture.fac_id + facture.pai_id + '">' + sortie + '</tr>';
 }
 
 function addTotaux(groupe, key) {
@@ -229,4 +237,55 @@ function addTotaux(groupe, key) {
                 .html(elt)
                 .appendTo('#tr' + key + 'end');
     });
+}
+
+
+/*
+ * Annexes functions
+ */
+
+/* Get the parameter sParam */
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+}
+
+/**
+ * 
+ * @param {String} idElement id of the element to append the message in
+ * @param {String} message the message you want to displ  ay
+ * @param {String} type 'msg' => normal message (green) 'warn' +> warning (yellow) else => error message (red)
+ */
+function setMessage(idElement, message, type) {
+    var is_error = false;
+    var backgroundColor;
+    if (type === 'msg')
+        backgroundColor = '#25891c ';
+    else if (type === 'warn')
+        backgroundColor = '#FFFF96 ';
+    else {
+        backgroundColor = '#ff887a ';
+        is_error = true;
+    }
+
+    var id_alert = 'alert' + Math.floor(Math.random() * 10000) + 1;
+    $('#' + idElement).append('<div id="' + id_alert + '" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px; color:black">' + message + ' <span id="cross' + id_alert + '" style="position:relative; top:-8px; right:-5px ; cursor: pointer;">&#10005;</span></div>');
+    $('#cross' + id_alert).click(function () {
+        $(this).parent().fadeOut(500);
+    });
+
+    setTimeout(function () {
+        $("#" + id_alert + "").fadeOut(1000);
+        setTimeout(function () {
+            $("#" + id_alert + "").remove();
+        }, 1000);
+    }, (is_error) ? 3600000 : 10000);
 }

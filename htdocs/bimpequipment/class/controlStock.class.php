@@ -26,21 +26,21 @@ class controlStock{
         $this->getProductSerialisable();
         
         foreach($this->entrepot as $idEn => $labEl){
-            echo "Entrepot : ".$labEl."<br/>";
+            echo $debutText = "Entrepot : ".$labEl."<br/>";
             foreach($this->prodS as $idPr => $labPr){
                 $nbE = $this->getNbEquip($idPr, $idEn);
                 $nbS = $this->getStockProd($idPr, $idEn);
                 
                 if($nbE != $nbS || $nbE != 0){
-                    $prodText = "  -  Produit : ".$labPr;
+                    $debutText .= "  -  Produit : ".$labPr;
                     if($nbE == $nbS)
                         $youpi = true;//echo " OK  : ".$nbE;
                     elseif($nbE > $nbS)
-                        echo $prodText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        echo $debutText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                     elseif($nbE < $nbS)
-                        echo $prodText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        echo $debutText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                     else
-                        echo $prodText."ATTENTION BIZZARRE<br/>";
+                        echo $debutText."ATTENTION BIZZARRE<br/>";
                     $nbCorrection = $nbE - $nbS;
                     if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
                         echo "  correction de  ".$nbCorrection."<br/>";

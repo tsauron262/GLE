@@ -4,6 +4,7 @@ include_once '../../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
+include_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 
 class BimpLivraison {
 

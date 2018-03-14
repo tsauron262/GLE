@@ -157,6 +157,8 @@ switch (GETPOST('action')) {
                     $transferstatic::STATUS_SENT,
                     $transferstatic::STATUS_RECEIVED_PARTIALLY), true),
                 'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 0, 4),
+                'right_caisse_admin' => $user->rights->bimpequipment->caisse_admin->read,
+                'right_caisse' => $user->rights->bimpequipment->caisse->read,
                 'errors' => array_merge($transferstatic->errors, $blstatic->errors)));
             break;
         }

@@ -51,8 +51,8 @@ table.custTable th {
 .fadeInOut {
     opacity: 0;
     visibility: hidden;
-    transition: opacity 600ms ease-in-out;
-    -webkit-transition: opacity 600ms ease-in-out;
+    transition: opacity 500ms ease-in-out;
+    -webkit-transition: opacity 500ms ease-in-out;
 }
 
 .fade-in {

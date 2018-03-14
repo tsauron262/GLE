@@ -24,12 +24,15 @@ function getLineTransferAndOrder() {
                     printErrors(out.errors, 'alertPlaceHolder');
                     return;
                 } else {
+                    right_caisse = out.right_caisse;
+                    right_caisse_admin = out.right_caisse_admin;
                     out.transfers.forEach(function (transfer) {
                         addLineTransfer(transfer);
                     });
                     out.orders.forEach(function (order) {
                         addLineOrder(order);
                     });
+                    diplayLinks(right_caisse, right_caisse_admin);
                 }
             } catch (e) {
                 setMessage('alertPlaceHolder', e + 'Erreur serveur 4355.', 'error');
@@ -43,9 +46,10 @@ function getLineTransferAndOrder() {
  */
 
 $(document).ready(function () {
-
     $('#warehouseSelect').select2({placeholder: 'Rechercher ...'});
-    $('#warehouseSelect option:first').prop('selected', true);
+    if ($('#warehouseSelect option:selected').length === 1 && $( "#warehouseSelect option:selected" ).text() !== '') {
+        printTable($('#warehouseSelect option:selected'));
+    }
     $('#warehouseSelect').trigger('change');
     initEvents();
 });
@@ -81,32 +85,31 @@ function addLineOrder(order) {
     $(line).appendTo('#table_order tbody');
 }
 
-function printTable(warehouseElement) {
+function printTable(option_selected) {
     if (fk_warehouse === undefined) {
         $('#allTheFiche').css('visibility', 'visible');
         $('#allTheFiche').addClass('fade-in');
-        fk_warehouse = warehouseElement.val();
-        diplayLinks();
+        fk_warehouse = option_selected.val();
         getLineTransferAndOrder();
     } else {
-        fk_warehouse = warehouseElement.val();
+        fk_warehouse = option_selected.val();
         $('#allTheFiche').removeClass('fade-in');
         setTimeout(function () {
             $('#ph_links').empty();
             $('#table_transfer > tbody > tr').empty();
             $('#table_order > tbody > tr').empty();
-            diplayLinks();
             getLineTransferAndOrder();
             $('#allTheFiche').addClass('fade-in');
         }, 500);
     }
 }
 
-function diplayLinks() {
-//    $('#allTheFiche').append('<input type="button" class="butAction" value="Réception commande" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'"></td>');
-    $('#ph_links').append('<input type="button" class="butAction" value="Réception transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'"></td>');
+function diplayLinks(right_caisse, right_caisse_admin) {
     $('#ph_links').append('<input type="button" class="butAction" value="Créer transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewTransfer.php\'"></td>');
-    $('#ph_links').append('<input type="button" class="butAction" value="Accéder bimp caisse" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/\'"></td>');
+    if (right_caisse === 1)
+        $('#ph_links').append('<input type="button" class="butAction" value="Accéder bimp caisse" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/\'"></td>');
+    if (right_caisse_admin === 1)
+        $('#ph_links').append('<input type="button" class="butAction" value="Accéder bimp caisse admin" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?fc=admin\'"></td>');
 }
 
 

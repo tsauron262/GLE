@@ -137,6 +137,8 @@ $(document).ready(function () {
     $('#entrepotEnd option:selected').prop('selected', true);
     $('#entrepotEnd').trigger('change');
     initEvents();
+    if ($('#entrepotStart option:selected').text() !== '')
+        changeEntrepotStart($('#entrepotStart option:selected'));
     initIE('input[name=refScan]', 'checkProductByRef', 'input#qty');
 //    idEntrepotStart = getUrlParameter('entrepot_id');
 });
@@ -163,31 +165,7 @@ function initEvents() {
     });
 
     $('#entrepotStart').on('change', function () {
-        if ($(this).prop('preventOnClickEvent')) {
-            $(this).prop('preventOnClickEvent', false);
-        } else if (idEntrepotStart === undefined) {
-            idEntrepotStart = $(this).val();
-            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
-            $('#divEntrepotEnd').css('visibility', 'visible');
-            $('#divEntrepotEnd').addClass('fade-in');
-        } else if (products.length !== 0) {
-            var confirmed = confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?');
-            if (confirmed) {
-                $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
-                idEntrepotStart = $(this).val();
-                $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
-                $('table#productTable tr[id]').remove();
-                products = [];
-                cntProduct = 0;
-            } else {
-                $('#entrepotStart').prop('preventOnClickEvent', true);
-                $('#entrepotStart').select2('val', idEntrepotStart, true);
-            }
-        } else {
-            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
-            idEntrepotStart = $(this).val();
-            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
-        }
+        changeEntrepotStart($(this));
     });
 
     $('#entrepotEnd').on('change', function () {
@@ -216,6 +194,35 @@ function initEvents() {
         }
     });
 
+}
+
+function changeEntrepotStart(element_select) {
+
+    if (element_select.prop('preventOnClickEvent')) {
+        element_select.prop('preventOnClickEvent', false);
+    } else if (idEntrepotStart === undefined) {
+        idEntrepotStart = element_select.val();
+        $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
+        $('#divEntrepotEnd').css('visibility', 'visible');
+        $('#divEntrepotEnd').addClass('fade-in');
+    } else if (products.length !== 0) {
+        var confirmed = confirm('Vous etes sur le point d\'annuler tous les enregistrements, continuer ?');
+        if (confirmed) {
+            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
+            idEntrepotStart = element_select.val();
+            $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
+            $('table#productTable tr[id]').remove();
+            products = [];
+            cntProduct = 0;
+        } else {
+            $('#entrepotStart').prop('preventOnClickEvent', true);
+            $('#entrepotStart').select2('val', idEntrepotStart, true);
+        }
+    } else {
+        $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', false);
+        idEntrepotStart = element_select.val();
+        $('#entrepotEnd option[value=' + idEntrepotStart + ']').prop('disabled', true);
+    }
 }
 
 

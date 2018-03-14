@@ -108,11 +108,11 @@ function printTable(option_selected) {
 }
 
 function diplayLinks(right_caisse, right_caisse_admin) {
-    $('#ph_links').append('<input type="button" class="butAction" value="Créer transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewTransfer.php\'"></td>');
+    $('#ph_links').append('<input type="button" class="butAction" value="Créer transfert" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewTransfer.php?entrepot=' + fk_warehouse + '\'"></td>');
     if (right_caisse === 1)
-        $('#ph_links').append('<input type="button" class="butAction" value="Accéder bimp caisse" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/\'"></td>');
+        $('#ph_links').append('<input type="button" class="butAction" value="Accéder bimp caisse" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?id_entrepot=' + fk_warehouse + '\'"></td>');
     if (right_caisse_admin === 1)
-        $('#ph_links').append('<input type="button" class="butAction" value="Accéder bimp caisse admin" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?fc=admin\'"></td>');
+        $('#ph_links').append('<input type="button" class="butAction" value="Accéder bimp caisse admin" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?fc=admin&id_entrepot=' + fk_warehouse + '\'"></td>');
 }
 
 

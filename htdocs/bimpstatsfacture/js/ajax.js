@@ -36,6 +36,9 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             console.log("Erreur PHP");
         },
         success: function (objOut) {
+//            console.log('return à enlever sortie requête ajax');
+//            return;
+
             groupes = JSON.parse(objOut);
             $('#forArray').empty();
             $('#sommaire').empty();
@@ -61,7 +64,8 @@ $(document).ready(function () {
 
     var date = new Date(), y = date.getFullYear(), m = date.getMonth();
     var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
-    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));
+    var lastDay = new Date(Date.UTC(y, m + 1, 0, 3, 0, 0));
+//    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));
 
     $('#dateStart').datepicker();
     $('#dateStart').datepicker('setDate', firstDay);
@@ -69,7 +73,7 @@ $(document).ready(function () {
     $('#dateEnd').datepicker('setDate', lastDay);
 
     $('.select2').select2();
-    
+
     var object = getUrlParameter('object');
     if (object === 'facture_fournisseur')
         is_common = false;
@@ -204,7 +208,10 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV'];
+    if (is_common)
+        var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV'];
+    else
+        var arrayOfField = ['Fournisseur', 'Facture', taxesOrNot, 'Statut', 'Paiement', 'Payé TTC', 'Centre'];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
@@ -213,10 +220,17 @@ function initTable(taxesOrNot, facture, key) {
 
 function fillTable(facture, prevFactureId) {
 
-    if (prevFactureId === facture.fac_id)
-        arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
-    else
-        arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
+    if (is_common) {
+        if (prevFactureId === facture.fac_id)
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
+        else
+            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
+    } else {
+        if (prevFactureId === facture.fac_id)
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre];
+        else
+            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre];
+    }
 
     sortie = "";
     arrayOfValue.forEach(function (elt) {
@@ -227,8 +241,11 @@ function fillTable(facture, prevFactureId) {
 }
 
 function addTotaux(groupe, key) {
-    arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
-
+    if (is_common)
+        arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
+    else
+        arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', ''];
+    
     $('<tr></tr>')
             .attr('id', 'tr' + key + 'end')
             .appendTo('#table' + key);
@@ -256,36 +273,4 @@ var getUrlParameter = function getUrlParameter(sParam) {
             return sParameterName[1] === undefined ? true : sParameterName[1];
         }
     }
-}
-
-/**
- * 
- * @param {String} idElement id of the element to append the message in
- * @param {String} message the message you want to displ  ay
- * @param {String} type 'msg' => normal message (green) 'warn' +> warning (yellow) else => error message (red)
- */
-function setMessage(idElement, message, type) {
-    var is_error = false;
-    var backgroundColor;
-    if (type === 'msg')
-        backgroundColor = '#25891c ';
-    else if (type === 'warn')
-        backgroundColor = '#FFFF96 ';
-    else {
-        backgroundColor = '#ff887a ';
-        is_error = true;
-    }
-
-    var id_alert = 'alert' + Math.floor(Math.random() * 10000) + 1;
-    $('#' + idElement).append('<div id="' + id_alert + '" style="background-color: ' + backgroundColor + ' ; opacity: 0.9 ; display: inline ; float: left; margin: 5px ; border-radius: 8px; padding: 10px; color:black">' + message + ' <span id="cross' + id_alert + '" style="position:relative; top:-8px; right:-5px ; cursor: pointer;">&#10005;</span></div>');
-    $('#cross' + id_alert).click(function () {
-        $(this).parent().fadeOut(500);
-    });
-
-    setTimeout(function () {
-        $("#" + id_alert + "").fadeOut(1000);
-        setTimeout(function () {
-            $("#" + id_alert + "").remove();
-        }, 1000);
-    }, (is_error) ? 3600000 : 10000);
 }

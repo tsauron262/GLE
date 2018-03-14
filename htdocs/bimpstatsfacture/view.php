@@ -8,34 +8,34 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFacture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFactureFournisseur.class.php';
 
 $object = GETPOST('object');
-$for_common = false;     // common factures
-$for_fournisseur = false;    // fournisseur facture
+$is_common = false;
 
-if ($object == 'facture')
-    $for_common = true;
-elseif ($object == 'facture_fournisseur')
-    $for_fournisseur = true;
-else
+if ($object == 'facture') {
+    $is_common = true;
+    $staticSF = new BimpStatsFacture($db);
+    $centre = $staticSF->getExtrafieldArray('facture', 'centre');
+    $nb_row_filter = 5;
+    $field_place = 'Centre';
+} elseif ($object == 'facture_fournisseur') {
+    $staticSFF = new BimpStatsFactureFournisseur($db);
+    $centre = $staticSFF->getAllEntrepots();
+    $nb_row_filter = 4;
+    $field_place = 'Entrepôt';
+} else
     $error_parameter = true;
 
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
-//if ($for_common)
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpstatsfacture/js/ajax.js');
-//elseif ($for_fournisseur)
-//    $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpstatsfacture/js/ajaxCommande.js');
-
-
 
 $recursif = GETPOST('recursif');
 
 /*
  * 	View
  */
-
-$staticSF = new BimpStatsFacture($db);
 
 llxHeader('', 'Stats ' . str_replace('_', ' ', $object), '', '', 0, 0, $arrayofjs, $arrayofcss);
 
@@ -52,30 +52,34 @@ if ($error_parameter) {
     print '<strong style="color : #b30000">URL incomplet, paramètre manquant : object (facture ou facture_fournisseur)</strong>';
     return;
 }
+
+/**
+ * Filters
+ */
 // Dates
-print '<tr class="top"><td rowspan=5 class="allSides">Filtres</td><td>Dates</td><td>';
+print '<tr class="top"><td rowspan=' . $nb_row_filter . ' class="allSides">Filtres</td><td>Dates</td><td>';
 print '<div><text>Date de début</text><br>';
 print '<input id="dateStart" type="text" class="isDate round"></div>';
 
 print '<div><text>Date de fin</text><br>';
 print '<input id="dateEnd" type="text" class="isDate round"></div></td></tr>';
 
+if ($is_common) {
 // Types
-$type = $staticSF->getExtrafieldArray('facture', 'type');
-print '<tr><td>Secteurs</td><td>';
-print '<select id="type" class="select2" multiple style="width: 200px;">';
-print '<option  value="NRS">Non renseigné</option>';
-foreach ($type as $val => $name) {
-    print '<option value="' . $val . '">' . $name . '</option>';
+    $type = $staticSF->getExtrafieldArray('facture', 'type');
+    print '<tr><td>Secteurs</td><td>';
+    print '<select id="type" class="select2" multiple style="width: 200px;">';
+    print '<option  value="NRS">Non renseigné</option>';
+    foreach ($type as $val => $name) {
+        print '<option value="' . $val . '">' . $name . '</option>';
+    }
+    print '</select>';
+
+    print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
+    print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 }
-print '</select>';
-
-print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
-print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
-
 // Centres
-$centre = $staticSF->getExtrafieldArray('facture', 'centre');
-print '<tr><td>Centres</td><td>';
+print '<tr><td>' . $field_place . '</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
 print '<option  value="NRS">Non renseigné</option>';
 foreach ($centre as $val => $name) {
@@ -86,7 +90,6 @@ print '</select>';
 print '<input id="selectAllCentres"   type="button" class="butAction round" value="Tout sélectionner">';
 print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
-//if ($for_common) {
 // Etats
 $facstatic = new Facture($db);
 print '<tr><td>Etat (multiple)</td><td>
@@ -117,6 +120,9 @@ print '<tr><td>Statut (unique)</td><td>
 <label for="paymentUnpayed">Impayées</label>
 </td></tr>';
 
+/**
+ * Config
+ */
 // Prix
 print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Prix (unique)</td><td>
 <input id="priceHT" name="priceTaxes" type="radio" value="ht" checked>
@@ -129,7 +135,7 @@ print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Prix (uniqu
 // Format
 print '<tr><td>Format (unique)</td><td>
 <input id="formatDetail" name="formatOutput" type="radio" value="d" checked>
-<label for="formatDetail">HTML détailé</label>
+<label for="formatDetail">HTML détaillé</label>
 
 <input id="formatReduit" name="formatOutput" type="radio" value="r">
 <label for="formatReduit">HTML réduit</label>
@@ -140,21 +146,25 @@ print '<tr><td>Format (unique)</td><td>
 <div id="divFichier" style="display:none">Nom du fichier de sortie <input class="round" id="nomFichier"></input><strong>.csv</strong></div>
 </td></tr>';
 
+/**
+ * Tri
+ */
 // Trier par
 print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multiple)</td><td>
 
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >
-<label for="sortByCentre">Centre</label>
+<label for="sortByCentre">' . $field_place . '</label>';
 
-<input id="sortByType" name="sortBy" type="checkbox" value="t">
+if ($is_common) {
+    print '<input id="sortByType" name="sortBy" type="checkbox" value="t">
 <label for="sortByType">Secteur</label>';
 
-print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="g" >
+    print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="g" >
 <label for="sortByTypeGarantie">Type de garantie</label>
 
 <input id="sortByEquipement" name="sortBy" type="checkbox" value="e" >
 <label for="sortByEquipement">Equipement</label>';
-
+}
 print '</td></tr>';
 
 print '</table>';

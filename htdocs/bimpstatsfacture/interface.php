@@ -17,16 +17,13 @@ switch (GETPOST('action')) {
             if (GETPOST('is_common') == 'true') {
                 $factures = $staticSF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('types'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier'));
                 echo json_encode($factures);
-            } else {
-                echo json_encode(array('factures' =>
-                    $staticSF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('types'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier')),
-                    'errors' => $staticSF->errors));
+            } else {    // facture fournisseur
+                echo json_encode($staticSFF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier')));
             }
 //            
 //            
 //                $factures = $staticSF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('types'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier'), GETPOST('is_common'));
 //                echo json_encode($factures);
-            }
             break;
         }
     default: break;

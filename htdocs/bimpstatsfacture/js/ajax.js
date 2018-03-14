@@ -36,8 +36,6 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             console.log("Erreur PHP");
         },
         success: function (objOut) {
-//            console.log('return à enlever sortie requête ajax');
-//            return;
 
             groupes = JSON.parse(objOut);
             $('#forArray').empty();
@@ -64,8 +62,7 @@ $(document).ready(function () {
 
     var date = new Date(), y = date.getFullYear(), m = date.getMonth();
     var firstDay = new Date(Date.UTC(y, m - 1, 1, 3, 0, 0));
-    var lastDay = new Date(Date.UTC(y, m + 1, 0, 3, 0, 0));
-//    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));
+    var lastDay = new Date(Date.UTC(y, m, 0, 3, 0, 0));
 
     $('#dateStart').datepicker();
     $('#dateStart').datepicker('setDate', firstDay);

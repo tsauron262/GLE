@@ -17,6 +17,11 @@ if ($object == 'facture') {
     $is_common = true;
     $staticSF = new BimpStatsFacture($db);
     $centre = $staticSF->getExtrafieldArray('facture', 'centre');
+    if (!$user->rights->BimpStatsFacture->all_factures->read) {
+        $centre = $staticSF->parseCenter($user, $centre);
+        if (empty($centre))
+            $no_center_and_right = true;
+    }
     $nb_row_filter = 5;
     $field_place = 'Centre';
 } elseif ($object == 'facture_fournisseur') {
@@ -51,6 +56,9 @@ print '<table class="tableforField">';
 if ($error_parameter) {
     print '<strong style="color : #b30000">URL incomplet, paramètre manquant : object (facture ou facture_fournisseur)</strong>';
     return;
+} elseif ($no_center_and_right) {
+    print '<strong style="color : #b30000">Vous n\'avez pas le droit de voir toutes les factures et vous n\'avez pas de centre SAV associé à votre profil.</strong>';
+    return;
 }
 
 /**
@@ -78,6 +86,7 @@ if ($is_common) {
     print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
     print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 }
+
 // Centres
 print '<tr><td>' . $field_place . '</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';

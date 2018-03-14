@@ -251,7 +251,7 @@ class BimpStatsFactureFournisseur {
                 $title = 'Toutes les factures';
                 $tag_id = 'all';
             } else {
-                $title = ($grp['centre'] != '') ? $grp['centre'] : 'Non définit';
+                $title = ($grp['centre'] != '') ? $grp['centre'] : 'Non renseigné';
                 $tag_id = $grp['entrepot_id'];
             }
 

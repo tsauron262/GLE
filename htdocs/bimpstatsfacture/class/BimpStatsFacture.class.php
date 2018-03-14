@@ -41,7 +41,8 @@ class BimpStatsFacture {
      * 'c' => CSV
      */
     private $mode;
-    private $is_common;
+
+//    private $is_common;
 
     /**
      * 	Constructor
@@ -58,9 +59,9 @@ class BimpStatsFacture {
 
     /* Main function, triggered when the user click on "Valider" button */
 
-    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $is_common) {
+    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier/* , $is_common */) {
         // TODO MAJ BDD
-        $this->is_common = $is_common;
+//        $this->is_common = $is_common;
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);    // apply filter
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
@@ -84,12 +85,12 @@ class BimpStatsFacture {
         return $out;
     }
 
-    private function addExtra($string) {
-        if ($this->is_common)
-            return '';
-        else
-            return $string;
-    }
+//    private function addExtra($string) {
+//        if ($this->is_common)
+//            return '';
+//        else
+//            return $string;
+//    }
 
     /* Filter facture */
 
@@ -97,33 +98,32 @@ class BimpStatsFacture {
         $ids = array();
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture' . $this->addExtra('_fourn') . '_extrafields as e ON f.rowid = e.fk_object';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture'/* . $this->addExtra('_fourn') . */ . '' . '_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
-        if ($this->is_common) {
-            if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
-                $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
-                $sql .= ' OR e.type IS NULL)';
-            } else if (!empty($types)) {     // Non renseigné NOT selected
-                $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
-            }
-
-            $sql .= " AND (";
-            if (!empty($centres)) {
-                $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
-                $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
-                if (in_array('NRS', $centres)) {
-                    $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
-                    $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
-                }
-            } else {
-                $sql .= "1";
-            }
-            $sql .= ")";
+//        if ($this->is_common) {
+        if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
+            $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
+            $sql .= ' OR e.type IS NULL)';
+        } else if (!empty($types)) {     // Non renseigné NOT selected
+            $sql .= ' AND e.type IN (\'' . implode("','", $types) . '\')';
         }
 
+        $sql .= " AND (";
+        if (!empty($centres)) {
+            $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
+            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+            if (in_array('NRS', $centres)) {
+                $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
+                $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
+            }
+        } else {
+            $sql .= "1";
+        }
+        $sql .= ")";
+//        }
 //        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
 //            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
 //            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
@@ -195,8 +195,8 @@ class BimpStatsFacture {
                 $hash[$ind]['factotal'] = $obj->fac_total;
                 $hash[$ind]['soc_id'] = $obj->soc_id;
                 $hash[$ind]['nom_societe'] = $obj->soc_nom;
-                $hash[$ind]['pai_id'] = $obj->pai_id;
-                $hash[$ind]['ref_paiement'] = $obj->pai_ref;
+                $hash[$ind]['pai_id'] = (isset($obj->pai_id)) ? $obj->pai_id : '';
+                $hash[$ind]['ref_paiement'] = (isset($obj->pai_ref)) ? $obj->pai_ref : '';
                 $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
                 if ($obj->centre1 != "0" and $obj->centre1 != '' and $obj->centre1 != false)
                     $hash[$ind]['ct'] = $obj->centre1;
@@ -205,12 +205,12 @@ class BimpStatsFacture {
                 else
                     $hash[$ind]['ct'] = 0;
                 $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
-                $hash[$ind]['equip_ref'] = $obj->description;
-                $hash[$ind]['numero_serie'] = $obj->numero_serie;
-                $hash[$ind]['type_garantie'] = $obj->type_garantie;
-                $hash[$ind]['sav_id'] = $obj->sav_id;
-                $hash[$ind]['sav_ref'] = $obj->sav_ref;
-                $hash[$ind]['saf_refid'] = $obj->saf_refid;
+                $hash[$ind]['equip_ref'] = (isset($obj->description)) ? $obj->description : '';
+                $hash[$ind]['numero_serie'] = (isset($obj->numero_serie)) ? $obj->numero_serie : '';
+                $hash[$ind]['type_garantie'] = (isset($obj->type_garantie)) ? $obj->type_garantie : '';
+                $hash[$ind]['sav_id'] = (isset($obj->sav_id)) ? $obj->sav_id : '';
+                $hash[$ind]['sav_ref'] = (isset($obj->sav_ref)) ? $obj->sav_ref : '';
+                $hash[$ind]['saf_refid'] = (isset($obj->saf_refid)) ? $obj->saf_refid : '';
                 $ind++;
             }
         }
@@ -312,7 +312,7 @@ class BimpStatsFacture {
 
     private function addPaiementURL($hash) {
         foreach ($hash as $ind => $h) {
-            if (isset($h['pai_id'])) {
+            if (isset($h['pai_id']) && $h['pai_id'] != '') {
                 $pai = new Paiement($this->db);
                 $pai->id = $h['pai_id'];
                 $pai->ref = $h['ref_paiement'];
@@ -334,7 +334,7 @@ class BimpStatsFacture {
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $row_line = $obj->param;
+                $row_line = (isset($obj->param)) ? $obj->param : '';
             }
         }
         preg_match_all('/"(.*?)"/', $row_line, $in);
@@ -352,7 +352,7 @@ class BimpStatsFacture {
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {
-                    $out[$obj->valeur] = $obj->label;
+                    $out[$obj->valeur] = (isset($obj->label)) ? $obj->label : '';
                 }
             }
         }
@@ -434,20 +434,20 @@ class BimpStatsFacture {
             } else {
                 $title = '';
                 $filtre = '';
-                if ($sortCenter) {
+                if ($sortCenter != '') {
                     $filtre .= $row['ct'];
                     $title .= $row['centre'] . ' - ';
                 }
-                if ($sortType) {
+                if ($sortType != '') {
                     $filtre .= $row['ty'];
                     $title .= $row['type'] . ' - ';
                 }
-                if ($sortTypeGarantie) {
+                if ($sortTypeGarantie != '') {
                     $ind = array_search($row['type_garantie'], $allTypeGarantie);
                     $filtre .= $ind . '_';
                     $title .= $row['type_garantie'] . ' - ';
                 }
-                if ($sortEquipement) {
+                if ($sortEquipement != '') {
                     $ind = array_search($row['equip_ref'], $allEquipement);
                     $filtre .= $ind . '_';
                     $title .= $row['equip_ref'] . ' - ';
@@ -527,6 +527,27 @@ class BimpStatsFacture {
             }
         }
         return $equipements;
+    }
+
+    public function parseCenter($user, $centers) {
+
+        $sql = 'SELECT apple_centre';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
+        $sql .= ' WHERE fk_object=' . $user->id;
+
+        echo $sql;
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $ct = explode(' ', $obj->apple_centre);
+            }
+        }
+
+        foreach ($centers as $letter => $inut) {
+            if (!in_array($letter, $ct))
+                unset($centers[$letter]);
+        }
+        return $centers;
     }
 
 }

@@ -5,10 +5,10 @@ class BMP_Event extends BimpObject
 
     // Recettes: 
     public static $id_billets_2_1_type_montant = 21;
-    public static $id_billets_5_5_type_montant = 51;
+    public static $id_billets_5_5_type_montant = 52;
     public static $id_bar20_type_montant = 22;
     public static $id_bar55_type_montant = 23;
-    public static $id_billets_location_montant = 50;
+    public static $id_billets_location_montant = 57;
     // Frais: 
     public static $id_achats_bar_montant = 24;
     public static $id_frais_billets_materiels = 41;

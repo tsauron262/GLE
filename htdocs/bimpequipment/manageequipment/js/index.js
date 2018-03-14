@@ -47,7 +47,7 @@ function getLineTransferAndOrder() {
 
 $(document).ready(function () {
     $('#warehouseSelect').select2({placeholder: 'Rechercher ...'});
-    if ($('#warehouseSelect option:selected').length === 1 && $( "#warehouseSelect option:selected" ).text() !== '') {
+    if ($('#warehouseSelect option:selected').length === 1 && $("#warehouseSelect option:selected").text() !== '') {
         printTable($('#warehouseSelect option:selected'));
     }
     $('#warehouseSelect').trigger('change');
@@ -102,6 +102,9 @@ function printTable(option_selected) {
             $('#allTheFiche').addClass('fade-in');
         }, 500);
     }
+    url = window.location.href;
+    var new_url = replaceUrlParam(url, 'boutique', fk_warehouse);
+    window.history.pushState('Object', 'Accueil Boutique', new_url);
 }
 
 function diplayLinks(right_caisse, right_caisse_admin) {
@@ -182,4 +185,16 @@ function printErrors(errors, idAlertPlaceHolder) {
     for (var i = 0; i < errors.length && i < 100; i++) {
         setMessage(idAlertPlaceHolder, errors[i], 'error');
     }
+}
+
+function replaceUrlParam(url, paramName, paramValue) {
+    if (paramValue === null) {
+        paramValue = '';
+    }
+    var pattern = new RegExp('\\b(' + paramName + '=).*?(&|$)');
+    if (url.search(pattern) >= 0) {
+        return url.replace(pattern, '$1' + paramValue + '$2');
+    }
+    url = url.replace(/\?$/, '');
+    return url + (url.indexOf('?') > 0 ? '&' : '?') + paramName + '=' + paramValue;
 }

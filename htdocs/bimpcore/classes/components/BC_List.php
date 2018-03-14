@@ -27,6 +27,7 @@ class BC_List extends BC_Panel
 
         $this->params_def['add_form_name'] = array();
         $this->params_def['add_form_values'] = array('data_type' => 'array', 'default' => array());
+        $this->params_def['add_form_title'] = array();
         $this->params_def['add_btn_label'] = array('default' => '');
 
         if (is_null($id_parent)) {
@@ -323,7 +324,7 @@ class BC_List extends BC_Panel
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             $primary
                 ), $joins, $extra_order_by, $extra_order_way);
-
+        
         if (method_exists($this->object, 'listItemsOverride')) {
             $this->object->listItemsOverride($this->name, $this->items);
         }
@@ -418,13 +419,24 @@ class BC_List extends BC_Panel
             if (!$label) {
                 $label = 'Ajouter ' . $this->object->getLabel('a');
             }
+            $title = '';
+
+            if (!is_null($this->params['add_form_title']) && $this->params['add_form_title']) {
+                $title = htmlentities(addslashes($this->params['add_form_title']));
+            } elseif ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/title')) {
+                $title = htmlentities(addslashes($this->object->getConf('forms/' . $this->params['add_form_name'] . '/title', '')));
+            }
+
+            $onclick = 'loadModalFormFromList(\'' . $this->identifier . '\', \'' . $this->params['add_form_name'] . '\', ';
+            $onclick .= '$(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
+
             $buttons[] = array(
                 'classes'     => array('btn', 'btn-default'),
                 'label'       => $label,
                 'icon_before' => 'plus-circle',
                 'attr'        => array(
                     'type'    => 'button',
-                    'onclick' => 'loadModalFormFromList(\'' . $this->identifier . '\', \'' . $this->params['add_form_name'] . '\', $(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ')'
+                    'onclick' => $onclick
                 )
             );
         }

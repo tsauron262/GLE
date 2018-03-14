@@ -122,9 +122,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         }
 
         if (bimpAjax.display_success_in_popup_only) {
-            bimp_msg(result.success, 'success');
+            bimp_msg(msg, 'success');
         } else {
-            bimp_msg(result.success, 'success', bimpAjax.$resultContainer);
+            bimp_msg(msg, 'success', bimpAjax.$resultContainer);
         }
     };
 

@@ -5,10 +5,6 @@ objects:
     equipment:
         instance: 
             bimp_object: Equipment
-
-    logiciel: 
-        instance: 
-            bimp_object: BE_Logiciel
             
     user_account:
         instance: 
@@ -32,18 +28,6 @@ sections:
                   list: 
                       panel: 1
                       object: equipment
-                      
-        logiciels:
-            label: Logiciels
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: logiciel
-                - type: list
-                  list: 
-                      panel: 1
-                      object: user_account
                       
         reseaux:
             label: Réseaux

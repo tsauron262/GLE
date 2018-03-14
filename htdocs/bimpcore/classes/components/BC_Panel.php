@@ -53,7 +53,7 @@ class BC_Panel extends BimpComponent
         $this->data['module'] = $this->object->module;
         $this->data['object_name'] = $this->object->object_name;
         $this->data['id_object'] = ($this->object->isLoaded() ? $this->object->id : 0);
-        $this->data['objects_change_reload'] = $this->params['objects_change_reload'];
+        $this->data['objects_change_reload'] = implode(',', $this->params['objects_change_reload']);
     }
 
     public function renderHtml()

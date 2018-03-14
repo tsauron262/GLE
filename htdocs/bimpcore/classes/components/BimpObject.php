@@ -100,6 +100,18 @@ class BimpObject
         return null;
     }
 
+    public static function loadClass($module, $object_name)
+    {
+        if (!class_exists($object_name)) {
+            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
+            if (file_exists($file)) {
+                require_once $file;
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function __construct($module, $object_name)
     {
         global $db;
@@ -218,7 +230,7 @@ class BimpObject
                         )
                     )
                 ),
-                'display'  => array(
+                'display'       => array(
                     'default' => array(
                         'type' => 'nom_url'
                     )
@@ -433,6 +445,9 @@ class BimpObject
 
     public function isLoaded()
     {
+        if ($this->isDolObject()) {
+            return (isset($this->id) && $this->id && isset($this->dol_object->id) && $this->dol_object->id);
+        }
         return (isset($this->id) && $this->id);
     }
 
@@ -485,7 +500,7 @@ class BimpObject
 
     public function set($field, $value)
     {
-        $this->validateValue($field, $value);
+        return $this->validateValue($field, $value);
     }
 
     public function addMultipleValuesItem($name, $value)
@@ -647,7 +662,7 @@ class BimpObject
                     break;
             }
         } else {
-            $type = $this->getConf('fields/' . $field . '/type', '', true);
+            $type = $this->getConf('fields/' . $field . '/type', 'string');
         }
 
         if ($type) {
@@ -725,6 +740,14 @@ class BimpObject
                         $data_type = $this->getCurrentConf('type', '');
                         if (in_array($data_type, array('id_object', 'id'))) {
                             continue;
+                        }
+                    }
+
+                    if ($search_type === 'field_input') {
+                        $input_type = BC_Field::getInputType($this, $field_name);
+
+                        if ($input_type === 'text') {
+                            $search_type = 'value_part';
                         }
                     }
 
@@ -1234,7 +1257,7 @@ class BimpObject
                 }
             } else {
                 $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
-                $sqlError = $this->db->db->error();
+                $sqlError = $this->db->db->lasterror;
                 if ($sqlError) {
                     $msg .= ' - Erreur SQL: ' . $sqlError;
                 }
@@ -1285,7 +1308,7 @@ class BimpObject
 
             if ($result <= 0) {
                 $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
-                $sqlError = $this->db->db->error();
+                $sqlError = $this->db->db->lasterror;
                 if ($sqlError) {
                     $msg .= ' - Erreur SQL: ' . $sqlError;
                 }
@@ -1596,7 +1619,7 @@ class BimpObject
 
         if ($result <= 0) {
             $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
-            $sqlError = $this->db->db->error();
+            $sqlError = $this->db->db->lasterror;
             if ($sqlError) {
                 $msg .= ' - Erreur SQL: ' . $sqlError;
             }
@@ -1860,6 +1883,8 @@ class BimpObject
             if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                 if (isset($this->dol_object->array_options['options_' . $field])) {
                     $value = $this->dol_object->array_options['options_' . $field];
+                } else {
+                    $value = '';
                 }
             } else {
                 $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
@@ -1881,6 +1906,9 @@ class BimpObject
             return true;
         }
 
+        echo '<pre>';
+        print_r($errors);
+        exit;
         return false;
     }
 
@@ -2581,10 +2609,13 @@ class BimpObject
 
         $controller = $this->getController();
         if (!$controller) {
+            if ($this->isDolObject()) {
+                return $this->getInstanceUrl($this->dol_object);
+            }
             return '';
         }
 
-        return $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
+        return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
     }
 
     public function getChildObjectUrl($object_name, $object = null)
@@ -2619,7 +2650,16 @@ class BimpObject
     public static function getInstanceNomUrl($instance)
     {
         if (is_a($instance, 'BimpObject')) {
-            return '<a href="" target="_blank">' . $instance->getInstanceName() . '</a>';
+            if ($instance->isDolObject()) {
+                return $instance->dol_object->getNomUrl(1);
+            } else {
+                $url = $instance->getUrl();
+                if ($url) {
+                    return '<a href="' . $url . '" target="_blank">' . $instance->getInstanceName() . '</a>';
+                } else {
+                    return $instance->getInstanceName();
+                }
+            }
         } elseif (method_exists($instance, 'getNomUrl')) {
             return $instance->getNomUrl(1);
         }
@@ -2630,10 +2670,7 @@ class BimpObject
     public static function getInstanceUrl($instance)
     {
         if (is_a($instance, 'BimpObject')) {
-            if ($controller = $instance->getController()) {
-                return DOL_URL_ROOT . '/' . $instance->module . '/index.php?fc=' . $controller . (isset($instance->id) && $instance->id ? '&id=' . $instance->id : '');
-            }
-            return '';
+            return $instance->getUrl();
         }
         return BimpTools::getDolObjectUrl($instance);
     }

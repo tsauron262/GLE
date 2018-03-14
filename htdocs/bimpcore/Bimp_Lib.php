@@ -12,7 +12,18 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpInput.php';
     require_once $dir . 'BimpRender.php';
 
-    if (defined('BIMP_NEW')) {
+    if (defined('BIMP_OLD')) {
+        require_once $dir . 'BimpCard.php';
+        require_once $dir . 'BimpStruct.php';
+        require_once $dir . 'BimpList.php';
+        require_once $dir . 'BimpForm.php';
+        require_once $dir . 'BimpView.php';
+        require_once $dir . 'BimpViewsList.php';
+        require_once $dir . 'BimpAssociation.php';
+        require_once $dir . 'BimpObject.php';
+        require_once $dir . 'BimpCore.php';
+        require_once $dir . 'BimpController.php';
+    } else {
         require_once $dir . 'components/BimpConfigDefinitions.php';
         require_once $dir . 'components/BimpComponent.php';
         require_once $dir . 'components/BC_Field.php';
@@ -35,17 +46,6 @@ if (!defined('BIMP_LIB')) {
         require_once $dir . 'components/BimpObject.php';
         require_once $dir . 'components/BimpCore.php';
         require_once $dir . 'components/BimpController.php';
-    } else {
-        require_once $dir . 'BimpCard.php';
-        require_once $dir . 'BimpStruct.php';
-        require_once $dir . 'BimpList.php';
-        require_once $dir . 'BimpForm.php';
-        require_once $dir . 'BimpView.php';
-        require_once $dir . 'BimpViewsList.php';
-        require_once $dir . 'BimpAssociation.php';
-        require_once $dir . 'BimpObject.php';
-        require_once $dir . 'BimpCore.php';
-        require_once $dir . 'BimpController.php';
     }
 
     checkBimpCoreVersion();

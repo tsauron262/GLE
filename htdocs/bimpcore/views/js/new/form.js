@@ -45,6 +45,15 @@ function saveObjectFromForm(form_id, $button, successCallback) {
         return;
     }
 
+    // Patch: (problème avec l'éditeur html => le textarea n'es pas alimenté depuis l'éditeur) 
+    $form.find('.inputContainer').each(function () {
+        if ($(this).find('.cke').length) {
+            var field_name = $(this).data('field_name');
+            var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+            $(this).find('[name="' + field_name + '"]').val(html_value);
+        }
+    });
+
     var data = new FormData($formular.get(0));
 
     BimpAjax('saveObject', data, $resultContainer, {
@@ -52,6 +61,9 @@ function saveObjectFromForm(form_id, $button, successCallback) {
         contentType: false,
         display_success_in_popup_only: true,
         success: function (result) {
+            $resultContainer.slideUp(250, function () {
+                $(this).html('');
+            });
             if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
                 var $link = $button.parent().find('.objectViewLink');
                 if ($link.length) {
@@ -446,6 +458,11 @@ function reloadObjectInput(form_id, input_name, fields) {
         custom = 1;
     }
 
+    var value = $container.find('[name="' + input_name + '"]').val();
+    if (typeof (value) === 'undefined') {
+        value = '';
+    }
+
     var data = {
         form_id: form_id,
         module: $form.data('module'),
@@ -455,7 +472,8 @@ function reloadObjectInput(form_id, input_name, fields) {
         id_parent: $form.data('id_parent'),
         field_name: input_name,
         fields: fields,
-        custom_field: custom
+        custom_field: custom,
+        value: value
     };
 
     if (custom) {
@@ -470,9 +488,13 @@ function reloadObjectInput(form_id, input_name, fields) {
                 var $form = $('#' + result.form_id);
                 var $container = $form.find('.' + result.field_name + '_inputContainer').parent();
                 $container.html(result.html).slideDown(250, function () {
+                    $container.removeAttr('style');
+                    setCommonEvents($container);
+                    setInputsEvents($container);
                     var $input = $form.find('[name=' + result.field_name + ']');
                     if ($input.length) {
                         setInputEvents($form, $input);
+                        $input.change();
                     }
                 });
             }
@@ -811,7 +833,9 @@ function toggleInputDisplay($container, $input) {
     }
 
     if (show) {
-        $container.stop().slideDown(250);
+        $container.stop().slideDown(250, function () {
+            $(this).css('height', 'auto');
+        });
     } else {
         var input_name = $container.find('.inputContainer').data('field_name');
         if (input_name) {
@@ -821,7 +845,9 @@ function toggleInputDisplay($container, $input) {
                 $input.val(initial_value);
             }
         }
-        $container.stop().slideUp(250);
+        $container.stop().slideUp(250, function () {
+            $(this).css('height', 'auto');
+        });
     }
 }
 
@@ -937,7 +963,7 @@ function setInputEvents($form, $input) {
         setSwitchInputEvents($input);
     }
 
-    if ($input.hasClass('.toggle_value')) {
+    if ($input.hasClass('toggle_value')) {
         setToggleInputEvent($input);
     }
 

@@ -9,16 +9,17 @@ class BC_ListTable extends BC_List
     protected $colspan = 0;
     protected $cols = null;
     public $item_params = array(
-        'update_btn'  => array('data_type' => 'bool', 'default' => 0),
-        'edit_btn'    => array('data_type' => 'bool', 'default' => 0),
-        'delete_btn'  => array('data_type' => 'bool', 'default' => 0),
-        'page_btn'    => array('data_type' => 'bool', 'default' => 0),
-        'inline_view' => array(),
-        'modal_view'  => array(),
-        'edit_form'   => array('default' => 'default'),
-        'extra_btn'   => array('data_type' => 'array', 'compile' => true),
-        'row_style'   => array('default' => ''),
-        'td_style'    => array('default' => '')
+        'update_btn'      => array('data_type' => 'bool', 'default' => 0),
+        'edit_btn'        => array('data_type' => 'bool', 'default' => 0),
+        'delete_btn'      => array('data_type' => 'bool', 'default' => 0),
+        'page_btn'        => array('data_type' => 'bool', 'default' => 0),
+        'inline_view'     => array(),
+        'modal_view'      => array(),
+        'edit_form'       => array('default' => 'default'),
+        'edit_form_title' => array(),
+        'extra_btn'       => array('data_type' => 'array', 'compile' => true),
+        'row_style'       => array('default' => ''),
+        'td_style'        => array('default' => '')
     );
     public $col_params = array(
         'show'      => array('data_type' => 'bool', 'default' => 1),
@@ -594,7 +595,7 @@ class BC_ListTable extends BC_List
             $html .= ' data-content="' . $btn_params['label'];
         }
         if (isset($btn_params['onclick'])) {
-            $html .= '" onclick="' . $btn_params['onclick'];
+            $html .= '" onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']);
         }
 
         $html .= '"';
@@ -723,9 +724,13 @@ class BC_ListTable extends BC_List
                     ));
                 }
                 if ($item_params['edit_btn']) {
+                    $title = '';
+                    if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
+                        $title = htmlentities(addslashes($item_params['edit_form_title']));
+                    }
                     $onclick = 'loadModalFormFromList(';
                     $onclick .= '\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\'';
-                    $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ')';
+                    $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
                     $html .= $this->renderRowButton(array(
                         'class'   => 'editButton',
                         'label'   => 'Editer',
@@ -733,7 +738,13 @@ class BC_ListTable extends BC_List
                     ));
                 }
                 if (!is_null($item_params['modal_view'])) {
-                    $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this))';
+                    $title = '';
+                    if ($this->object->config->isDefined('views/' . $item_params['modal_view'] . '/title')) {
+                        $title = htmlentities(addslashes($this->object->getConf('views/' . $item_params['modal_view'] . '/title')));
+                    } else {
+                        $title = htmlentities(addslashes($this->object->getInstanceName()));
+                    }
+                    $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
                     $html .= $this->renderRowButton(array(
                         'label'   => 'Vue rapide',
                         'icon'    => 'eye',

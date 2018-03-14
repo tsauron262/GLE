@@ -6,6 +6,13 @@ objects:
         instance: 
             bimp_object: BC_Caisse
             
+    mvts:
+        instance: 
+            bimp_object: BC_CaisseMvt
+            
+    ventes: 
+        instance: 
+            bimp_object: BC_Vente
 sections:
     - type: tabs
       tabs: 
@@ -16,3 +23,20 @@ sections:
                   list: 
                       panel: 1
                       object: caisses
+                      
+        fonds:
+            label: Mouvements de fonds
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: mvts
+                      
+        ventes: 
+            label: Ventes
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      name: full
+                      object: ventes

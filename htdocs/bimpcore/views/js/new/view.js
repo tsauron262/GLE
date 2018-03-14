@@ -266,6 +266,9 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
 }
 
 function loadModalObjectPage($button, url, modal_id, title) {
+    if ($button.hasClass('bs-popover')) {
+        $button.popover('hide');
+    }
     if ($button.hasClass('disabled')) {
         return;
     }

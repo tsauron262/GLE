@@ -164,7 +164,7 @@ function reloadObjectList(list_id, callback) {
     });
 }
 
-function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent) {
+function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title) {
     var $list = $('#' + list_id);
     if (!$list.length) {
         bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
@@ -193,7 +193,7 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         data['param_associations_params'] = $asso_filters_input.val();
     }
 
-    loadModalForm($button, data);
+    loadModalForm($button, data, title);
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {
@@ -919,16 +919,16 @@ function setSearchInputsEvents($list) {
                                     search_on_key_up = 0;
                                 }
                                 if (parseInt(search_on_key_up)) {
-                                    var min_chars = $(this).data('min_chars');
-                                    if (typeof (min_chars) === 'undefined') {
-                                        min_chars = 1;
-                                    }
+//                                    var min_chars = $(this).data('min_chars');
+//                                    if (typeof (min_chars) === 'undefined') {
+//                                        min_chars = 0;
+//                                    }
                                     $input.keyup(function () {
-                                        var val = '' + $input.val();
+//                                        var val = '' + $input.val();
 
-                                        if (val.length >= min_chars) {
+//                                        if (val.length >= min_chars) {
                                             reloadObjectList($list.attr('id'));
-                                        }
+//                                        }
                                     });
                                 } else {
                                     $input.change(function () {

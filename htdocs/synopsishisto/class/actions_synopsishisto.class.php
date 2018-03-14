@@ -118,9 +118,6 @@ class histoNavigation {
     }
 
     static function saveHisto($element_type, $element_id) {
-//        //saveHistoUser($fichinter->id, "FI", $fichinter->ref);
-
-
         if (isset($element_id) && isset($element_type) && $element_type != '' && $element_id > 0) {
             $obj = self::getObj($element_type);
             if ($obj) {
@@ -143,9 +140,7 @@ class histoNavigation {
                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Histo_User
                                 (`user_refid`,`element_id`,`ref`,`element_type`)
                          VALUES (" . $user->id . "," . $element_id . ",'" . addslashes($ref) . "','" . $element_type . "')";
-//        print $requete;
                 }
-//            die($requete);
                 $sql = $db->query($requete);
                 return($sql);
             }
@@ -156,147 +151,7 @@ class histoNavigation {
         global $db, $conf;
         $tabMenu = array(false, false);
         $obj = false;
-//        switch ($type) {
-//            case 'chrono': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
-//                    $obj = new Chrono($db);
-//                    $tabMenu[0] = "Process";
-//                }
-//                break;
-//            case 'propal': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-//                    $obj = new Propal($db);
-//                    $tabMenu[0] = "commercial";
-//                    $tabMenu[1] = "propals";
-//                }
-//                break;
-//            case 'commande': {
-//                    if (isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE))
-//                        $obj = new Synopsis_Commande($db);
-//                    else {
-//                        require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-//                        $obj = new Commande($db);
-//                    }
-//                    $tabMenu[0] = "commercial";
-//                    $tabMenu[1] = "orders";
-//                }
-//                break;
-//            case 'facture': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
-//                    $obj = new Facture($db);
-//                    $tabMenu[0] = "accountancy";
-//                }
-//                break;
-//            case 'prepaCom': {
-////                    require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-////                    $obj = new Commande($db);
-//                }
-//                break;
-//            case 'FI': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
-//                    $obj = new Fichinter($db);
-//                    $tabMenu[0] = "synopsisficheinter";
-//                }
-//                break;
-//            case 'DI': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
-//                    $obj = new Synopsisdemandeinterv($db);
-//                    $tabMenu[0] = "synopsisficheinter";
-//                }
-//                break;
-//            case 'contrat': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
-//                    $obj = new contrat($db);
-//                    $tabMenu[0] = "commercial";
-//                    $tabMenu[1] = "contracts";
-//                }
-//                break;
-//            case 'expedition': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/expedition/class/expedition.class.php");
-//                    $obj = new Expedition($db);
-//                }
-//                break;
-//            case 'livraison': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/livraison/class/livraison.class.php");
-//                    $obj = new Livraison($db);
-//                }
-//                break;
-//            case 'affaire': {
-////                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Affaire/Affaire.class.php");
-////                    $obj = new Affaire($db);
-//                }
-//                break;
-//            case 'banque': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
-//                    $obj = new Account($db);
-//                }
-//                break;
-//            case 'contact': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
-//                    $obj = new Contact($db);
-//                    $tabMenu[0] = "companies";
-//                }
-//                break;
-//            case 'societe': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
-//                    $obj = new Societe($db);
-//                    $tabMenu[0] = "companies";
-//                }
-//                break;
-//            case 'campagne': {
-////                    require_once(DOL_DOCUMENT_ROOT . "/BabelProspect/Campagne.class.php");
-////                    $obj = new Campagne($db);
-//                }
-//                break;
-//            case 'projet': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
-//                    $obj = new Project($db);
-//                    $tabMenu[0] = "synopsisprojet";
-//                }
-//                break;
-//            case 'tache': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/projet/class/task.class.php");
-//                    $obj = new Task($db);
-//                    $tabMenu[0] = "synopsisprojet";
-//                }
-//                break;
-//            case 'groupCom': {
-////                    require_once(DOL_DOCUMENT_ROOT . "/synopsistools/commandeGroup/commandeGroup.class.php");
-////                    $obj = new commandeGroup($db);
-//                }
-//                break;
-//            case 'process': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/class/process.class.php");
-//                    $obj = new processDet($db);
-//                    $tabMenu[0] = "Process";
-//                }
-//                break;
-//            case 'product': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
-//                    $obj = new product($db);
-//                    $tabMenu[0] = "products";
-//                }
-//                break;
-//            case 'user': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/user/class/user.class.php");
-//                    $obj = new user($db);
-//                    $tabMenu[0] = "home";
-//                    $tabMenu[1] = "users";
-//                }
-//                break;
-//            case 'ndfp': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/ndfp/class/ndfp.class.php");
-//                    $obj = new ndfp($db);
-//                    $tabMenu[0] = "accountancy";
-//                }
-//                break;
-//            case 'synopsisholiday': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/synopsisholiday/class/holiday.class.php");
-//                    $obj = new Holiday($db);
-//                    $tabMenu[0] = "hrm";
-//                }
-//                break;
-//        }
+
         $tabTypeObject = getTabTypeObject($type);
 
         if (isset($tabTypeObject[$type])) {

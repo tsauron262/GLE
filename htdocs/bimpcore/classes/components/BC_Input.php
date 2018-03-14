@@ -50,6 +50,12 @@ class BC_Input extends BimpComponent
         ),
         'search_juridicalstatus' => array(
             'country_code' => array('default' => '0')
+        ),
+        'search_commande_client' => array(
+            'id_client' => array('data_type' => 'int', 'default' => 0)
+        ),
+        'search_commande_fournisseur' => array(
+            'id_fournisseur' => array('data_type' => 'int', 'default' => 0)
         )
     );
 
@@ -91,6 +97,7 @@ class BC_Input extends BimpComponent
                         $this->params['type'] = 'toggle';
                         break;
 
+                    case 'html':
                     case 'time':
                     case 'date':
                     case 'datetime':
@@ -201,6 +208,14 @@ class BC_Input extends BimpComponent
             case 'search_juridicalstatus':
                 $options['country_code'] = isset($this->params['country_code']) ? $this->params['country_code'] : '';
                 break;
+
+            case 'search_commande_client':
+                $options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : '';
+                break;
+            
+            case 'search_commande_fournisseur':
+                $options['id_fournisseur'] = isset($this->params['id_fournisseur']) ? $this->params['id_fournisseur'] : '';
+                break;
         }
 
         return $options;
@@ -307,6 +322,6 @@ class BC_Input extends BimpComponent
             $this->value = '';
         }
 
-        return BimpInput::renderSearchListInput($this->object, $this->config_path, $this->input_name, $this->value, $this->option);
+        return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $this->input_name, $this->value, $this->option);
     }
 }

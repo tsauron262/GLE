@@ -529,6 +529,9 @@ class BimpTools
             case 'id_object':
             case 'int':
                 if (is_string($value)) {
+                    if ($value === '') {
+                        $value = 0;
+                    }
                     if (preg_match('/^\-?[0-9]+$/', $value)) {
                         $value = (int) $value;
                     }
@@ -540,7 +543,7 @@ class BimpTools
                     if (in_array(strtolower($value), array('true', 'oui', 'yes', 'vrai', '1'))) {
                         $value = 1;
                     }
-                    if (in_array(strtolower($value), array('false', 'non', 'no', 'faux', '0'))) {
+                    if (in_array(strtolower($value), array('false', 'non', 'no', 'faux', '0', ''))) {
                         $value = 0;
                     }
                 }
@@ -556,6 +559,9 @@ class BimpTools
 
             case 'float':
                 if (is_string($value)) {
+                    if ($value === '') {
+                        $value = 0;
+                    }
                     $value = str_replace(',', '.', $value);
                     if (preg_match('/^\-?[0-9]+\.?[0-9]*$/', $value)) {
                         $value = (float) $value;

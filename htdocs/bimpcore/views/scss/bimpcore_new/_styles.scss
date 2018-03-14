@@ -50,7 +50,27 @@
     #but-menu,
     #id-top .login_block {
         z-index: 10110!important;
+
     }
+
+    body.has_fullscreen {
+        #id-right,
+        #id-left {
+            z-index: 1!important;
+        }
+
+        #tmenu_tooltip,
+        .side-nav,
+        #but-menu,
+        #id-top .login_block {
+            display: none;
+        }
+    }
+}
+
+.page_content {
+    background-color: #fff;
+    padding: 15px;
 }
 
 div.tabBar {
@@ -67,6 +87,12 @@ div.tabBar {
 .modal {
     .modal-dialog {
         margin-top: 5%;
+    }
+}
+
+body.has_fullscreen {
+    .modal {
+        z-index: 11100!important;
     }
 }
 
@@ -241,18 +267,20 @@ i.iconRight {
     }
 }
 .btn-large {
-    font-size: 14px;
-    padding: 12px 20px;
-    
-    i {
-        font-size: 18px;
-        
-        &.iconLeft {
-            margin-right: 12px;
-        }
-        
-        &.iconRight {
-            margin-left: 12px;
+    @media (min-width: $screen-sm-max) {
+        font-size: 14px;
+        padding: 12px 20px;
+
+        i {
+            font-size: 18px;
+
+            &.iconLeft {
+                margin-right: 12px;
+            }
+
+            &.iconRight {
+                margin-left: 12px;
+            }
         }
     }
 }
@@ -503,7 +531,7 @@ i.iconRight {
     position: fixed; 
     z-index: 99999;
     background-color: transparent;
-    padding: 30px;
+    padding: 0 30px;
     top: 40px;
     right: 0;
     width: 430px;

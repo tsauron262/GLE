@@ -384,6 +384,19 @@ select.switch {
     }
 }
 
+input[type=text].large_input {
+    @include transition(all 0.3s ease);
+    min-width: 300px;
+    padding: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    border: 1px solid $gray-dark;
+    
+    &:focus {
+        box-shadow: 0 0 4px #0087B4;
+                    border-color: #005A78;
+    }
+}
 /*Free Forms*/
 
 .freeForm {
@@ -403,7 +416,7 @@ select.switch {
     .freeFormTitle {
         background-color: $secondary;
         color: #fff;
-        font-size: 22px;
+        font-size: 18px;
         padding: 10px 15px;
     }
 

@@ -323,7 +323,7 @@ class BimpForm
             $field_name = $association . '_add_value';
 
             if ($type === 'search_list') {
-                $html .= BimpInput::renderSearchListInput($this->object, 'associations/' . $association, $field_name, '');
+                $html .= BimpInput::renderSearchListInputFromConfig($this->object, 'associations/' . $association, $field_name, '');
             } else {
                 $html .= self::renderInput($this->object, $input_path, $field_name, null, $this->id_parent);
 //                $html .= self::renderInput($this->object, $field_name, '', array(), null, null, $this->form_identifier . '_' . $association);
@@ -576,7 +576,7 @@ class BimpForm
                 break;
 
             case 'search_list':
-                $html .= BimpInput::renderSearchListInput($object, $config_path, $field_name . ($multiple ? '_add_value' : ''), ($multiple ? '' : $value), $option);
+                $html .= BimpInput::renderSearchListInputFromConfig($object, $config_path, $field_name . ($multiple ? '_add_value' : ''), ($multiple ? '' : $value), $option);
                 break;
 
             case 'search_societe':

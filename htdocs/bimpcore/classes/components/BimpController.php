@@ -940,6 +940,7 @@ class BimpController
         $fields = BimpTools::getValue('fields', array());
         $custom_field = BimpTools::getValue('custom_field', false);
         $id_object = BimpTools::getValue('id_object', 0);
+        $value = BimpTools::getValue('value', '');
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type de l\'objet absent';
@@ -965,6 +966,11 @@ class BimpController
             }
 
             if (!count($errors)) {
+
+                if ($value) {
+                    $object->set($field_name, $value);
+                }
+
                 foreach ($fields as $field => $value) {
                     $object->set($field, $value);
                 }

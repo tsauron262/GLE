@@ -404,7 +404,7 @@ class BimpConfig
                     }
                 } elseif (isset($params['id_object'])) {
                     $id_object = $this->get($path . '/id_object', null, true, 'int');
-                    if (!is_null($id_object)) {
+                    if (!is_null($id_object) && $id_object) {
                         if (method_exists($instance, 'fetch')) {
                             if ($result = $instance->fetch((int) $id_object) <= 0) {
                                 $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - ID: ' . $id_object);

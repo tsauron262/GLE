@@ -5,8 +5,6 @@ class BC_FieldsTable extends BC_Panel
 
     public static $type = 'fields_table';
     protected $new_values = array();
-    
-    
     public $row_params = array(
         'show'        => array('data_type' => 'bool', 'default' => 1),
         'field'       => array('default' => ''),
@@ -36,7 +34,7 @@ class BC_FieldsTable extends BC_Panel
                 $path = 'fields_tables';
             }
         }
-        
+
         parent::__construct($object, $name, $path, $content_only, $level, $title, $icon);
     }
 
@@ -56,6 +54,11 @@ class BC_FieldsTable extends BC_Panel
 
         foreach ($this->params['rows'] as $row) {
             $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
+            
+            if (!(int) $row_params['show']) {
+                continue;
+            }
+            
             $label = $row_params['label'];
             $content = '';
             if ($row_params['field']) {

@@ -1,4 +1,5 @@
 <?php
+set_time_limit(300);
 
 
 if(isset($_REQUEST['action'])){
@@ -6,6 +7,7 @@ if(isset($_REQUEST['action'])){
     llxHeader();
     $c = new controlStock($db);
     $c->go();
+    llxFooter();
 }
 
 
@@ -25,22 +27,21 @@ class controlStock{
         $this->getProductSerialisable();
         
         foreach($this->entrepot as $idEn => $labEl){
-            echo "Entrepot : ".$labEl."<br/>";
+            echo $debutText = "Entrepot : ".$labEl."<br/>";
             foreach($this->prodS as $idPr => $labPr){
                 $nbE = $this->getNbEquip($idPr, $idEn);
                 $nbS = $this->getStockProd($idPr, $idEn);
                 
                 if($nbE != $nbS || $nbE != 0){
-                    echo "  -  Produit : ".$labPr;
+                    $millieuText = $debutText. "  -  Produit : ".$labPr;
                     if($nbE == $nbS)
-                        echo " OK  : ".$nbE;
+                        $youpi = true;//echo " OK  : ".$nbE;
                     elseif($nbE > $nbS)
-                        echo " ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")";
+                        echo $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                     elseif($nbE < $nbS)
-                        echo " ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")";
+                        echo $millieuText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                     else
-                        echo "ATTENTION BIZZARRE";
-                    echo "<br/>";
+                        echo $millieuText."ATTENTION BIZZARRE<br/>";
                     $nbCorrection = $nbE - $nbS;
                     if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
                         echo "  correction de  ".$nbCorrection."<br/>";

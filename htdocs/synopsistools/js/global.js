@@ -967,6 +967,12 @@ function afficherMargeReduc() {
             $("#zoneR").html("Total = " + (Math.round((qte * prixVenteR) * 100) / 100) + " Reduc = " + (Math.round((qte * reducP) * 100) / 100) + " Marge = " + Math.round((qte * (prixVenteR - pA)) * 100) / 100 + " Taux de marge = " + Math.round((qte * (prixVenteR - pA)) * 100 * 100 / prixVenteR / qte) / 100 + " %");
         }
     });
+    
+    //CACHER prix
+    $("#addproduct #price_ht").val(0);
+    $("#addproduct #price_ht").css("display", "none");
+    $("#addproduct #price_ht").css("height", "0");
+    $("#addproduct #price_ht").css("width", "0");
 }
 
 function autoClickSearch() {

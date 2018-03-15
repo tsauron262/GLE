@@ -112,29 +112,29 @@ switch (GETPOST('action')) {
 
     case 'retrieveSentLines': {
             $transfer = new BimpTransfer($db);
-            $transfer->fetch(GETPOST('fk_transfert'));
+            $transfer->fetch(GETPOST('fk_transfer'));
             echo json_encode(array('prods' => $transfer->getLines(true), 'errors' => $transfer->errors));
             break;
         }
 
     case 'receiveTransfer': {
             $transfer = new BimpTransfer($db);
-            $transfer->fetch(GETPOST('fk_transfert'));
-            echo json_encode(array('nb_update' => $transfer->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')), 'errors' => $transfer->errors));
+            $transfer->fetch(GETPOST('fk_transfer'));
+            echo json_encode(array('nb_update' => $transfer->receiveTransfert(GETPOST('products'), GETPOST('equipments')), 'errors' => $transfer->errors));
             break;
         }
 
     case 'receiveAndCloseTransfer': {
             $transfer = new BimpTransfer($db);
-            $transfer->fetch(GETPOST('fk_transfert'));
-            echo json_encode(array('nb_update' => $transfer->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
+            $transfer->fetch(GETPOST('fk_transfer'));
+            echo json_encode(array('nb_update' => $transfer->receiveTransfert(GETPOST('products'), GETPOST('equipments')),
                 'status_changed' => $transfer->updateStatut($transfer::STATUS_RECEIVED), 'errors' => $transfer->errors));
             break;
         }
 
     case 'closeTransfer': {
             $transfer = new BimpTransfer($db);
-            $transfer->fetch(GETPOST('fk_transfert'));
+            $transfer->fetch(GETPOST('fk_transfer'));
             echo json_encode(array('status_changed' => $transfer->updateStatut($transfer::STATUS_RECEIVED), 'errors' => $transfer->errors));
             break;
         }

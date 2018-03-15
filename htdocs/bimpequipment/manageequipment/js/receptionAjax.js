@@ -21,7 +21,7 @@ function retrieveSentLines() {
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
-            fk_transfert: getUrlParameter('id'),
+            fk_transfer: getUrlParameter('id'),
             action: 'retrieveSentLines'
         },
         error: function () {
@@ -33,7 +33,7 @@ function retrieveSentLines() {
                 printErrors(out.errors, 'alertTop');
             } else {
                 out.prods.forEach(function (prod) {
-                    if (prod.fk_equipment === '') { // product
+                    if (prod.fk_equipment === '0') { // product
                         addLineProduct(prod);
                     } else { // equipment
                         addLineEquipment(prod);
@@ -50,7 +50,7 @@ function receiveTransfert(products, equipments) {
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
-            fk_transfert: getUrlParameter('id'),
+            fk_transfer: getUrlParameter('id'),
             products: products,
             equipments: equipments,
             action: 'receiveTransfer'
@@ -83,7 +83,7 @@ function receiveAndCloseTransfer(products, equipments) {
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
-            fk_transfert: getUrlParameter('id'),
+            fk_transfer: getUrlParameter('id'),
             products: products,
             equipments: equipments,
             action: 'receiveAndCloseTransfer'
@@ -112,7 +112,7 @@ function closeTransfer() {
         type: "POST",
         url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
         data: {
-            fk_transfert: getUrlParameter('id'),
+            fk_transfer: getUrlParameter('id'),
             action: 'closeTransfer'
         },
         error: function () {

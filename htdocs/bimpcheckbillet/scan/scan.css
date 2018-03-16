@@ -12,8 +12,11 @@ canvas, #input, #result{
 .form-control{
     z-index:10;
 }
-canvas, #input input, #result, #input{
+#input input, #result, #input{
     display:none;
+}
+canvas{
+    top:50px;
 }
 
 

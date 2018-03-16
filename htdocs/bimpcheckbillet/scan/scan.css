@@ -13,15 +13,6 @@ canvas{
     margin: auto;   
 }
 
-.form-control{
-    z-index:10;
-}
-#input input, #result, #input{
-    display:none;
-}
-canvas{
-    top:50px;
-}
 
 
 #input{

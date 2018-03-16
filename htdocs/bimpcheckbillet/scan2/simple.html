@@ -5,7 +5,6 @@
         <title>Demo</title>
     </head>
     <body>
-                        <select class="form-control" id="camera-select"></select>
         <canvas></canvas>
         <hr>
         <ul></ul>
@@ -21,7 +20,7 @@
                 }
             };
             var decoder = new WebCodeCamJS("canvas").init(arg).play();
-            decoder.buildSelectMenu("#camera-select", "environment|back").init();
+            decoder.buildSelectMenu(document.createElement('select'), 'environment|back').init().play(); 
              
         </script>
     <link rel="stylesheet" type="text/css" href="../scan/scan.css">

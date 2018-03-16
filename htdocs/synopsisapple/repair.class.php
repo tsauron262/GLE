@@ -393,7 +393,7 @@ class Repair
 
         $n = count($this->gsx->errors['soap']);
         $datas = array(
-            'repairConfirmationNumber' => isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : '',
+            'repairConfirmationNumber' => '',//isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : '',
             'customerEmailAddress'     => '',
             'customerFirstName'        => '',
             'customerLastName'         => '',
@@ -402,7 +402,7 @@ class Repair
             'incompleteRepair'         => '',
             'pendingShipment'          => '',
             'purchaseOrderNumber'      => '',
-            'repairNumber'             => isset($this->repairNumber) ? $this->repairNumber : '',
+            'repairNumber'             => '',//isset($this->repairNumber) ? $this->repairNumber : '',
             'repairStatus'             => '',
             'repairType'               => '',
             'serialNumber'             => '',

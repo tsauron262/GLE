@@ -9,6 +9,13 @@ canvas, #input, #result{
     z-index: 1;
 }
 
+.form-control{
+    z-index:10;
+}
+canvas, #input input, #result, #input{
+    display:none;
+}
+
 
 #input{
     z-index: 2;

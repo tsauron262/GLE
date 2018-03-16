@@ -85,7 +85,7 @@
             grabImg.classList.remove("disabled");
         }
     };
-    var decoder = new WebCodeCamJS("#webcodecam-canvas").buildSelectMenu("#camera-select", "environment|back").init(args);
+        var decoder = new WebCodeCamJS("#webcodecam-canvas").buildSelectMenu("#camera-select", "environment|back").init(args);
     decodeLocal.addEventListener("click", function() {
         Page.decodeLocalImage();
     }, false);

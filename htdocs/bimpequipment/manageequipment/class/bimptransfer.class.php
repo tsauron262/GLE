@@ -250,7 +250,7 @@ class BimpTransfer {
 
     public function getLines($add_prod_info = false) {
 
-        $ids_product = array();
+        $out = array();
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
         $em = new EquipmentManager($this->db);
 
@@ -265,81 +265,66 @@ class BimpTransfer {
         ));
 
         foreach ($lines as $key => $line) {
-            $is_new_product = true;
-//            if ($line['status'] == 301 and $line['id_equipment'] == 0) {
-//                foreach ($lines as $key2 => $line2) {
-//                    if ($line['id_product'] == $line2['id_product']) {
-//                        if ($line2['status'] == 201) { // check if transfer in process + transfered
-//                            $lines[$key2]['quantity_received'] += $line['qty'];
-//                            $lines[$key2]['quantity_sent'] += $line['qty'];
-//                            unset($lines[$key]);
-//                            $is_new_product = false;
-//                            break;
-//                        } elseif ($line['status'] == 301 and $line2['status'] == 301) {  // check if transfered + transfered
-//                            $lines[$key]['quantity_sent'] = $lines[$key]['qty'] + $lines[$key2]['qty'];
-//                            $lines[$key]['quantity_received'] = $lines[$key]['quantity_sent'];
-//                            unset($lines[$key2]);
-//                            $lines[$key]['restante'] = true;
-////                            $is_new_product = false;
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-
-
-            if ($is_new_product) {
-                $lines[$key]['fk_product'] = $line['id_product'];
-                $lines[$key]['fk_equipment'] = $line['id_equipment'];
-
-                if ($line['id_equipment'] > 0) {
-                    $lines[$key]['serial'] = $em->getSerial($line['id_equipment']);
-                    if ($line['status'] == 301) {
-                        $lines[$key]['quantity_received'] = 1;
-                    }
-                } else {
-                    if ($line['status'] == 201) {
-                        $lines[$key]['quantity_sent'] = $line['qty'];
-                        $lines[$key]['quantity_received'] = 0;
-                    } elseif ($line['status'] == 301) {
-                        $lines[$key]['quantity_sent'] = 0;
-                        $lines[$key]['quantity_received'] = $line['qty'];
-                    }
-                    $ids_product[] = $line['id_product'];
-                }
+            if ($line['id_equipment'] > 0) { // equipments
+                $equipment = array();
+                $equipment['serial'] = $em->getSerial($line['id_equipment']);
+                $equipment['id_reservation'] = $line['id'];
+                $equipment['fk_equipment'] = $line['id_equipment'];
+                if ($line['status'] == 301)
+                    $equipment['quantity_received'] = 1;
+                else
+                    $equipment['quantity_received'] = 0;
 
                 if ($add_prod_info) {
                     $doli_prod = new Product($this->db);
                     $doli_prod->fetch($line['id_product']);
-                    $lines[$key]['ref'] = $doli_prod->ref;
-                    $lines[$key]['refurl'] = $doli_prod->getNomUrl(1);
-                    $lines[$key]['label'] = dol_trunc($doli_prod->label, 25);
-                    $lines[$key]['barcode'] = $doli_prod->barcode;
+                    $equipment['ref'] = $doli_prod->ref;
+                    $equipment['refurl'] = $doli_prod->getNomUrl(1);
+                    $equipment['label'] = dol_trunc($doli_prod->label, 25);
+                    $equipment['barcode'] = $doli_prod->barcode;
                 }
+                $key = 'e' . $line['id_equipment'];
+                $out[$key] = $equipment;
+            } else { // products
+                $key_product = 'p' . $line['id_product'];
+                if (!isset($out[$key_product])) {  // new product
+                    $product = array();
+                    $product['id_reservation'] = $line['id'];
+                    $product['fk_product'] = $line['id_product'];
+                    $product['fk_equipment'] = 0;
+                    if ($add_prod_info) {
+                        $doli_prod = new Product($this->db);
+                        $doli_prod->fetch($line['id_product']);
+                        $product['ref'] = $doli_prod->ref;
+                        $product['refurl'] = $doli_prod->getNomUrl(1);
+                        $product['label'] = dol_trunc($doli_prod->label, 25);
+                        $product['barcode'] = $doli_prod->barcode;
+                    }
 
-//                unset($lines[$key]['id_product']);
-//                unset($lines[$key]['id_equipment']);
-//                unset($lines[$key]['qty']);
+                    if ($line['status'] == 201) {
+                        $product['quantity_sent'] = $line['qty'];
+                        $product['quantity_received'] = 0;
+                    } elseif ($line['status'] == 301) {
+                        $product['quantity_sent'] = 0;
+                        $product['quantity_received'] = $line['qty'];
+                    }
+                    $out[$key_product] = $product;
+                } else {
+                    if ($line['status'] == 201)
+                        $out[$key_product]['quantity_sent'] += $line['qty'];
+                    elseif ($line['status'] == 301)
+                        $out[$key_product]['quantity_received'] += $line['qty'];
+                }
             }
-            unset($lines[$key][0]);
-            unset($lines[$key][1]);
-            unset($lines[$key][2]);
-            unset($lines[$key][3]);
-            unset($lines[$key][4]);
         }
 
-        $lines = $this->removeDuplicates($lines, $ids_product);
-
-        return array_values($lines);
-    }
-    
-    private function removeDuplicates($lines, $ids_product) {
-        foreach ($lines as $line) {
-            if (in_array($line['id_product'], $ids_product)) {
-                
-            }
+        foreach ($out as $key => $line) {
+            if ($line['quantity_sent'] == 0)
+                $out[$key]['quantity_sent'] = $line['quantity_received'];
         }
-        return $lines;
+
+        // array_value()
+        return array_values($out);
     }
 
     public function receiveTransfert($products, $equipments) {

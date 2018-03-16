@@ -33,7 +33,7 @@ function retrieveSentLines() {
                 printErrors(out.errors, 'alertTop');
             } else {
                 out.prods.forEach(function (prod) {
-                    if (prod.fk_equipment === '0') { // product
+                    if (parseInt(prod.fk_equipment) === 0) { // product
                         addLineProduct(prod);
                     } else { // equipment
                         addLineEquipment(prod);

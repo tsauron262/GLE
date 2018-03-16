@@ -8,6 +8,10 @@ canvas, #input, #result{
     height: 100%;
     z-index: 1;
 }
+canvas{
+    height: auto;
+    margin: auto;   
+}
 
 .form-control{
     z-index:10;

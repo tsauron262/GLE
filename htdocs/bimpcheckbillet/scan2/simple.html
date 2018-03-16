@@ -16,8 +16,16 @@
         	var txt = "innerText" in HTMLElement.prototype ? "innerText" : "textContent";
             var arg = {
                 resultFunction: function(result) {
+                    alert(result.code);
                     traiteCode(result.code);
-                }
+                },   // string, DecoderWorker file location
+        brightness: 80,                          // int
+        autoBrightnessValue: false,             // functional when value autoBrightnessValue is int
+        grayScale: false,                       // boolean
+        contrast: 0,                            // int
+        threshold: 0,
+        DecodeQRCodeRate: 5,                    // null to disable OR int > 0 !
+        DecodeBarCodeRate: 5 
             };
             var decoder = new WebCodeCamJS("canvas").buildSelectMenu(document.createElement('select'), 'environment|back').init(arg).play();
              

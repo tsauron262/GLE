@@ -1,4 +1,4 @@
-video, #input, #result{
+canvas, #input, #result{
     position: fixed;
     top: 0;
     bottom: 0;

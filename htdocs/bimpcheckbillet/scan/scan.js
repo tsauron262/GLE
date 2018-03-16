@@ -10,12 +10,6 @@ $(document).ready(function () {
     $("#result").click(function(){
         $(this).hide();
         
-        Quagga.init(this.state, function(err) {
-            if (err) {
-                return self.handleError(err);
-            }
-            Quagga.start();
-        });
     });
 });
 
@@ -24,7 +18,7 @@ $(document).ready(function () {
 function traiteCode(code) {
     $.ajax({
         type: "POST",
-        url: "./ajax.php",
+        url: "../ajax.php",
         data: {
             code: code
         },
@@ -33,7 +27,6 @@ function traiteCode(code) {
         },
         success: function (json) {
             obj = JSON.parse(json);
-            Quagga.stop();
             $("#result").removeClass("red green");
             $("#result").html("Code : " + code+ "<br/>Nom : "+obj.billet.nom);
             if(obj.billet.valid != "OK")

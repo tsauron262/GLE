@@ -9,7 +9,7 @@ $(document).ready(function () {
     
     $("#result").click(function(){
         $(this).hide();
-        
+        decoder.play();
     });
 });
 
@@ -26,6 +26,7 @@ function traiteCode(code) {
             alert("Probléme de connexion");
         },
         success: function (json) {
+            decoder.stop();
             obj = JSON.parse(json);
             $("#result").removeClass("red green");
             $("#result").html("Code : " + code+ "<br/>Nom : "+obj.billet.nom);

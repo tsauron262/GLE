@@ -153,18 +153,22 @@ function initEvents() {
             var previous_qty = parseInt(tr.attr('qty_received_befor'));
             var added_qty = parseInt(tr.find('input[name=received_qty]').val());
             if (tr.attr('is_equipment') === 'true') {
-                equipments.push(getId(tr.attr('id')));
+                equipments.push({
+                    id_reservation: tr.attr('id_reservation'),
+                    fk_equipment: getId(tr.attr('id'))
+                });
             } else {
                 products.push({
+                    id_reservation: tr.attr('id_reservation'),
                     fk_product: getId(tr.attr('id')),
                     previous_qty: previous_qty,
-                    new_qty: previous_qty + added_qty
+                    added_qty: added_qty
                 });
             }
         });
 
         if (no_new_scan) {
-            setMessage('alertTop', 'Veuillez scanner des produits avant d\'enregistrer la réception de transfert.', 'error');
+            setMessage('alertTop', 'Veuillez scanner des produits avant d\'enregistrer la réception du transfert.', 'error');
             return;
         }
         receiveTransfert(products, equipments);
@@ -180,12 +184,16 @@ function initEvents() {
             var previous_qty = parseInt(tr.attr('qty_received_befor'));
             var added_qty = parseInt(tr.find('input[name=received_qty]').val());
             if (tr.attr('is_equipment') === 'true') {
-                equipments.push(getId(tr.attr('id')));
+                equipments.push({
+                    id_reservation: tr.attr('id_reservation'),
+                    fk_equipment: getId(tr.attr('id'))
+                });
             } else {
                 products.push({
+                    id_reservation: tr.attr('id_reservation'),
                     fk_product: getId(tr.attr('id')),
                     previous_qty: previous_qty,
-                    new_qty: previous_qty + added_qty
+                    added_qty: added_qty
                 });
             }
         });
@@ -205,7 +213,7 @@ function addLineProduct(prod) {
 
     cnt_product++;
     var id_tr = "p" + parseInt(prod.fk_product);
-    var line = '<tr id=' + id_tr + ' is_equipment=false barcode="' + prod.barcode + '" ref="' + prod.ref + '" qty_received_befor=' + prod.quantity_received + '>';
+    var line = '<tr id=' + id_tr + ' is_equipment=false barcode="' + prod.barcode + '" id_reservation=' + prod.id + ' ref="' + prod.ref + '" qty_received_befor=' + prod.quantity_received + '>';
     line += '<td>' + cnt_product + '</td>';
     line += '<td>' + prod.refurl + '</td>'; // refUrl
     line += '<td></td>'; // num série
@@ -247,7 +255,7 @@ function addLineEquipment(equip) {
 
     cnt_product++;
     var id_tr = "e" + parseInt(equip.fk_equipment);
-    var line = '<tr id=' + id_tr + ' is_equipment="true" barcode="' +
+    var line = '<tr id=' + id_tr + ' is_equipment="true"  id_reservation=' + equip.id + ' barcode="' +
             equip.barcode + '" ref="' + equip.ref + '" serial="' + equip.serial + '" qty_received_befor=' + equip.quantity_received + '>';
     line += '<td>' + cnt_product + '</td>';
     line += '<td>' + equip.refurl + '</td>'; // refUrl
@@ -258,7 +266,7 @@ function addLineEquipment(equip) {
     line += '<td></td>';
     $(line).appendTo('#product_table tbody');
 
-    if (equip.quantity_received === equip.quantity_sent)
+    if (equip.quantity_received === 1)
         $('#product_table tr#' + id_tr).css('background', green);
 }
 

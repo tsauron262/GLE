@@ -37,6 +37,7 @@ if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<strong>Transfert fermé le : '.$transfer->date_closing.'</strong>';
 }
 
+print '<h4><strong>En attente</strong></h4>';
 print '<div id="alertTop" style="clear:left"></div>';
 
 print '<table id="product_table" class="noborder objectlistTable" style="margin-top:20px">';
@@ -57,8 +58,23 @@ print '<br>';
 if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<input id="register" type="button" class="butAction" value="Enregistrer">';
     print '<input id="receiveAndCloseTransfer" type="button" class="butAction" value="Enregistrer et fermer">';
-    print '<input id="closeTransfer" type="button" class="butAction" value="Fermer">';
+    print '<input id="closeTransfer" type="button" class="butAction" value="Fermer"><br/><br/>';
 }
+print '<h4><strong>Abandonné</strong></h4>';
+print '<table id="canceled_table" class="noborder objectlistTable" style="margin-top:20px">';
+print '<thead>';
+print '<th>Groupes scanné</th>';
+print '<th>Référence</th>';
+print '<th>Numéro de série</th>';
+print '<th>Label</th>';
+print '<th style="text-align:right">Quantité envoyé</th>';
+print '<th style="width:32px"></th>';
+print '<th>Quantité reçu</th>';
+print '</thead>';
+print '<tbody></tbody>';
+print '</table>';
+
+print '<br>';
 
 $db->close();
 

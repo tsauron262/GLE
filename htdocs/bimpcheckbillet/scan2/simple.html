@@ -19,8 +19,8 @@
                     traiteCode(result.code);
                 }
             };
-            var decoder = new WebCodeCamJS("canvas").init(arg).play();
-            decoder.buildSelectMenu(document.createElement('select'), 'environment|back').init().play(); 
+            var decoder = new WebCodeCamJS("canvas");
+            decoder.buildSelectMenu(document.createElement('select'), 'environment|back').init(arg).play(); 
              
         </script>
     <link rel="stylesheet" type="text/css" href="../scan/scan.css">

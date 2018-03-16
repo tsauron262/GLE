@@ -7,13 +7,13 @@ $name = "Nom client classique";
 $valid = "KO";
 
 
-if($code == "APP-661-5941"){
+    if($code == "APP-661-5941"){
     $valid = "OK";
-    $nom = "Biellet de test toujours valid";
+    $name = "Biellet de test toujours valid";
 }
 elseif($code == "12345678910"){
     $valid = "KO";
-    $nom = "Billet de test jamais valid";
+    $name = "Billet de test jamais valid";
 }
 
 

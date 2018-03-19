@@ -47,6 +47,10 @@ class BC_Panel extends BimpComponent
             $this->params['icon'] = $icon;
         }
 
+        if (is_string($this->params['objects_change_reload'])) {
+            $this->params['objects_change_reload'] = array($this->params['objects_change_reload']);
+        }
+
         $this->data['identifier'] = $this->identifier;
         $this->data['type'] = static::$type;
         $this->data['name'] = $this->name;
@@ -58,6 +62,10 @@ class BC_Panel extends BimpComponent
 
     public function renderHtml()
     {
+        if ((int) !$this->params['show']) {
+            return '';
+        }
+        
         $html = '';
         $this->setConfPath();
 

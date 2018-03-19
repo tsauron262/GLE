@@ -1,26 +1,42 @@
 <?php
 
-require_once __DIR__ . '/BimpModelPDF.php';
+require_once __DIR__ . '/BimpDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 
-class InvoicePDF extends BimpModelPDF
+class InvoicePDF extends BimpDocumentPDF
 {
 
     public static $type = 'invoice';
-    public $facture;
+    public $facture = null;
 
-    public function __construct($id_facture)
+    public function __construct($db)
     {
-        parent::__construct();
+        parent::__construct($db);
 
         $this->langs->load("bills");
         $this->langs->load("products");
-        
-        global $db;
-        
         $this->facture = new Facture($db);
-        if ($this->facture->fetch($id_facture) <= 0) {
-            $this->errors[] = 'ID facture invalide: ' . $id_facture;
+    }
+
+    protected function initData()
+    {
+        if (isset($this->object) && is_a($this->object, 'Facture')) {
+            if (isset($this->object->id) && $this->object->id) {
+                $this->facture = $this->object;
+                $this->facture->fetch_thirdparty();
+
+                global $user;
+                
+                $this->pdf->SetTitle($this->langs->convToOutputCharset($this->object->ref));
+                $this->pdf->SetSubject($this->langs->transnoentities("Invoice"));
+                $this->pdf->SetCreator("Dolibarr " . DOL_VERSION);
+                $this->pdf->SetAuthor($this->langs->convToOutputCharset($user->getFullName($this->langs)));
+                $this->pdf->SetKeyWords($this->langs->convToOutputCharset($this->object->ref) . " " . $this->langs->transnoentities("Invoice") . " " . $this->langs->convToOutputCharset($this->object->thirdparty->name));
+            } else {
+                $this->errors[] = 'Facture invalide (ID absent)';
+            }
+        } else {
+            $this->errors[] = 'Aucune facture spécifiée';
         }
     }
 
@@ -157,220 +173,7 @@ class InvoicePDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        $contacts = $this->facture->getIdContact('external', 'BILLING');
-
-        if (count($contacts)) {
-            $this->facture->fetch_contact($contacts[0]);
-            $contact = $this->facture->contact;
-            $thirdparty = $contact;
-        } else {
-            if (is_null($this->facture->thirdparty)) {
-                $this->facture->fetch_thirdparty();
-            }
-            $contact = null;
-            $thirdparty = $this->facture->thirdparty;
-        }
-        
-        $this->writeContent($this->renderAddresses($thirdparty, $contact));
-
-        $table = new BimpPDF_Table($this->pdf);
-        $table->addCol('col1', 'Colonne 1', 80);
-        $table->addCol('col2', 'Colonne 2', 20);
-        $table->addCol('col3', 'Colonne 3', 50);
-        $table->addCol('col4', 'Colonne 4 BLUE', 0, 'color: #0000FF');
-
-        $table->rows = array(
-            array(
-                'col1' => 'CONTENT' . "<br/>" . 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => array(
-                    'content' => 'COLOR RED',
-                    'style' => 'color: #FF0000'
-                ),
-                'col3' => array(
-                    'content' => 'COLOR WHITE',
-                    'style' => 'color: #FFFFFF; background-color: #333333'
-                ),
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => array(
-                    'content' => 'COLSPAN 2',
-                    'colspan' => 2
-                ),
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => array(
-                    'content' => 'COLSPAN 3',
-                    'colspan' => 3
-                ),
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => array(
-                    'content' => 'COLSPAN 4',
-                    'colspan' => 4
-                )
-            ),
-            array(
-                'col1' => array(
-                    'content' => 'COLSPAN 5',
-                    'colspan' => 5
-                )
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => array(
-                    'content' => 'COLSPAN 4 COLOR',
-                    'colspan' => 4,
-                    'style' => 'color: red' 
-                )
-            ),
-            array(
-                'col1' => array(
-                    'content' => 'COLSPAN 2',
-                    'colspan' => 2
-                ),
-                'col3' => array(
-                    'content' => 'COLSPAN 2',
-                    'colspan' => 2
-                ),
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-            array(
-                'col1' => 'CONTENT',
-                'col2' => 'CONTENT',
-                'col3' => 'CONTENT',
-                'col4' => 'CONTENT'
-            ),
-        );
-
-        $table->write();
+        $this->writeContent($this->renderAddresses($this->facture->thirdparty, $this->facture->contact));
+        $this->renderDocumentContent();
     }
 }

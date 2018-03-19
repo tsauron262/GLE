@@ -138,6 +138,10 @@ body.has_fullscreen {
     font-weight: bold;
     color: $danger;
 }
+.important {
+    font-weight: bold;
+    color: $important;
+}
 
 .date, .time, .datetime {
     font-weight: bold;

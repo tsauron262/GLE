@@ -8,6 +8,7 @@ require_once __DIR__ . '/BimpPDF_AmountsTable.php';
 Abstract class BimpModelPDF
 {
 
+    public $db;
     protected $pdf = null;
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/';
     public static $type = '';
@@ -22,11 +23,13 @@ Abstract class BimpModelPDF
     private $isInit = false;
     public $errors = array();
     public $langs;
+    public $typeObject = '';
 
-    public function __construct($orientation = 'P', $format = 'A4')
+    public function __construct($db, $orientation = 'P', $format = 'A4')
     {
-        global $conf, $mysoc, $langs;
+        global $mysoc, $langs;
 
+        $this->db = $db;
         $this->langs = $langs;
 
         $this->langs->load("main");
@@ -34,7 +37,7 @@ Abstract class BimpModelPDF
         $this->langs->load("companies");
 
         $this->pdf = new BimpPDF($orientation, $format);
-        
+
         $this->fromCompany = $mysoc;
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
@@ -43,104 +46,27 @@ Abstract class BimpModelPDF
 
     // Initialisation
 
-    protected function initHeader()
-    {
-        global $conf;
-
-        $this->header_vars = array(
-            'logo_img'     => $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo,
-            'logo_width'   => '120',
-            'header_right' => ''
-        );
-    }
-
-    protected function initfooter()
-    {
-        $line1 = '';
-        $line2 = '';
-
-        global $db, $conf;
-
-        if ($this->fromCompany->forme_juridique_code) {
-            $line1 .= $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->fromCompany->forme_juridique_code));
-        }
-
-        if ($this->fromCompany->capital) {
-            $captital = price2num($this->fromCompany->capital);
-            if (is_numeric($captital) && $captital > 0) {
-                $line1.=($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
-            } else {
-                $line1.=($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", $captital, $this->langs);
-            }
-        }
-
-        if ($this->fromCompany->idprof1 && ($this->fromCompany->country_code != 'FR' || !$this->fromCompany->idprof2)) {
-            $field = $this->langs->transcountrynoentities("ProfId1", $this->fromCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
-            }
-            $line1 .= ($line1 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof1);
-        }
-
-        if ($this->fromCompany->idprof2) {
-            $field = $this->langs->transcountrynoentities("ProfId2", $this->fromCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
-            }
-            $line1 .= ($line1 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof2);
-        }
-
-        if ($this->fromCompany->idprof3) {
-            $field = $this->langs->transcountrynoentities("ProfId3", $this->fromCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg))
-                $field = $reg[1];
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof3);
-        }
-
-        if ($this->fromCompany->idprof4) {
-            $field = $this->langs->transcountrynoentities("ProfId4", $this->fromCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
-            }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof4);
-        }
-
-        if ($this->fromCompany->idprof5) {
-            $field = $this->langs->transcountrynoentities("ProfId5", $this->fromCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
-            }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof5);
-        }
-
-        if ($this->fromCompany->idprof6) {
-            $field = $this->langs->transcountrynoentities("ProfId6", $this->fromCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg))
-                $field = $reg[1];
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof6);
-        }
-        // IntraCommunautary VAT
-        if ($this->fromCompany->tva_intra != '') {
-            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . ": " . $this->langs->convToOutputCharset($this->fromCompany->tva_intra);
-        }
-
-        $this->footer_vars = array(
-            'footer_line_1' => $line1,
-            'footer_line_2' => $line2,
-        );
-    }
-
     protected function initData()
     {
         
     }
 
-    function init($object)
+    protected function initHeader()
+    {
+        
+    }
+
+    protected function initfooter()
+    {
+        
+    }
+
+    public function init($object)
     {
         $this->object = $object;
+        $this->initData();
         $this->initHeader();
         $this->initfooter();
-        $this->initData();
         $this->isInit = true;
     }
 
@@ -152,10 +78,10 @@ Abstract class BimpModelPDF
             $this->init(null);
 
         if (is_null($this->header)) {
-            if (file_exists(self::$tpl_dir . '/' . static::$type . '/header.html')) {
-                $this->header = $this->renderTemplate(self::$tpl_dir . '/' . static::$type . '/header.html', $this->header_vars);
+            if (file_exists(static::$tpl_dir . '/' . static::$type . '/header.html')) {
+                $this->header = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/header.html', $this->header_vars);
             } else {
-                $this->header = $this->renderTemplate(self::$tpl_dir . '/header.html', $this->header_vars);
+                $this->header = $this->renderTemplate(static::$tpl_dir . '/header.html', $this->header_vars);
             }
         }
 
@@ -167,10 +93,10 @@ Abstract class BimpModelPDF
         $this->pdf->createHeader($this->header);
 
         if (is_null($this->footer)) {
-            if (file_exists(self::$tpl_dir . '/' . static::$type . '/footer.html')) {
-                $this->footer = $this->renderTemplate(self::$tpl_dir . '/' . static::$type . '/footer.html', $this->footer_vars);
+            if (file_exists(static::$tpl_dir . '/' . static::$type . '/footer.html')) {
+                $this->footer = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/footer.html', $this->footer_vars);
             } else {
-                $this->footer = $this->renderTemplate(self::$tpl_dir . '/footer.html', $this->footer_vars);
+                $this->footer = $this->renderTemplate(static::$tpl_dir . '/footer.html', $this->footer_vars);
             }
         }
         $this->pdf->createFooter($this->footer);
@@ -190,14 +116,14 @@ Abstract class BimpModelPDF
     public function writeContent($content)
     {
         $styles = '<style>';
-        if (file_exists(self::$tpl_dir . '/styles.css')) {
-            $css = $this->renderTemplate(self::$tpl_dir . '/styles.css');
+        if (file_exists(static::$tpl_dir . '/styles.css')) {
+            $css = $this->renderTemplate(static::$tpl_dir . '/styles.css');
             if ($css) {
                 $styles .= $css;
             }
         }
-        if (file_exists(self::$tpl_dir . '/' . static::$type . '/styles.css')) {
-            $css = $this->renderTemplate(self::$tpl_dir . '/' . static::$type . '/styles.css');
+        if (file_exists(static::$tpl_dir . '/' . static::$type . '/styles.css')) {
+            $css = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/styles.css');
             if ($css) {
                 $styles .= $css;
             }
@@ -267,130 +193,6 @@ Abstract class BimpModelPDF
         return $html;
     }
 
-    public function renderAddresses($thirdparty, $contact = null)
-    {
-        $html = '';
-
-        $sender_infos = pdf_build_address($this->langs, $this->fromCompany, $thirdparty);
-        $sender_infos = str_replace("\n", '<br/>', $sender_infos);
-        $target_infos = pdf_build_address($this->langs, $this->fromCompany, $thirdparty, $contact, !is_null($contact) ? 1 : 0, 'target');
-        $target_infos = str_replace("\n", '<br/>', $target_infos);
-
-        $html .= '<div class="section addresses_section">';
-        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
-        $html .= '<tr>';
-        $html .= '<td style="width: 40%">' . $this->langs->transnoentities('BillFrom') . ': </td>';
-        $html .= '<td style="width: 5%"></td>';
-        $html .= '<td style="width: 55%">' . $this->langs->transnoentities('BillTo') . ': </td>';
-        $html .= '</tr>';
-        $html .= '</table>';
-
-        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="10px">';
-        $html .= '<tr>';
-        $html .= '<td class="sender_address" style="width: 40%">';
-        $html .= '<div class="bold">' . $this->langs->convToOutputCharset($this->fromCompany->name) . '</div>';
-        $html .= $sender_infos;
-        $html .= '</td>';
-        $html .= '<td style="width: 5%"></td>';
-        $html .= '<td style="width: 55%" class="border">';
-        $html .= '<div class="bold">' . pdfBuildThirdpartyName($thirdparty, $this->langs) . '</div>';
-        $html .= $target_infos;
-        $html .= '</td>';
-        $html .= '</tr>';
-        $html .= '</table>';
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    public function renderBank($account, $only_number = false)
-    {
-        global $mysoc, $conf;
-
-        require_once DOL_DOCUMENT_ROOT . '/core/class/html.formbank.class.php';
-
-        $this->langs->load('banks');
-
-        $bickey = "BICNumber";
-
-        if ($account->getCountryCode() == 'IN') {
-            $bickey = "SWIFT";
-        }
-
-        $usedetailedbban = $account->useDetailedBBAN();
-
-        $html = '';
-        if (!$only_number) {
-            $html .= '<p>' . $this->langs->transnoentities('PaymentByTransferOnThisBankAccount') . '</p>';
-        }
-
-        if ($usedetailedbban) {
-            $html .= '<p><strong>' . $this->langs->transnoentities("Bank") . '</strong>: ';
-            $html .= $this->langs->convToOutputCharset($account->bank);
-            $html .= '</p>';
-
-            if (empty($conf->global->PDF_BANK_HIDE_NUMBER_SHOW_ONLY_BICIBAN)) {
-                foreach ($account->getFieldsToShow() as $val) {
-                    $content = '';
-
-                    switch ($val) {
-                        case 'BankCode':
-                            $content = $account->code_banque;
-                            break;
-                        case 'DeskCode':
-                            $content = $account->code_banque;
-                            break;
-                        case 'BankAccountNumber':
-                            $content = $account->code_banque;
-                            break;
-                        case 'BankAccountNumberKey':
-                            $content = $account->code_banque;
-                            break;
-                    }
-
-                    if ($content) {
-                        $html .= '<p><strong>' . $this->langs->transnoentities($val) . '</strong>: ';
-                        $html .= $this->langs->convToOutputCharset($content);
-                        $html .= '</p>';
-                    }
-                }
-            }
-        } else {
-            $html .= '<p><strong>' . $this->langs->transnoentities('Bank') . '</strong>: ' . $this->langs->convToOutputCharset($account->bank) . '</p>';
-            $html .= '<p><strong>' . $this->langs->transnoentities('BankAccountNumber') . '</strong>: ' . $this->langs->convToOutputCharset($account->number) . '</p>';
-        }
-
-        if (!$only_number && !empty($account->domiciliation)) {
-            $html .= '<p><strong>' . $this->langs->transnoentities('Residence') . '</strong>: ' . $this->langs->convToOutputCharset($account->domiciliation) . '</p>';
-        }
-
-        if (!empty($account->proprio)) {
-            $html .= '<p><strong>' . $this->langs->transnoentities('BankAccountOwner') . '</strong>: ' . $this->langs->convToOutputCharset($account->proprio) . '</p>';
-        }
-
-        $ibankey = FormBank::getIBANLabel($account);
-
-        if (!empty($account->iban)) {
-            $ibanDisplay_temp = str_replace(' ', '', $this->langs->convToOutputCharset($account->iban));
-            $ibanDisplay = "";
-
-            $nbIbanDisplay_temp = dol_strlen($ibanDisplay_temp);
-            for ($i = 0; $i < $nbIbanDisplay_temp; $i++) {
-                $ibanDisplay .= $ibanDisplay_temp[$i];
-                if ($i % 4 == 3 && $i > 0)
-                    $ibanDisplay .= " ";
-            }
-
-            $html .= '<p><strong>' . $this->langs->transnoentities($ibankey) . '</strong>: ' . $ibanDisplay . '</p>';
-        }
-
-        if (!empty($account->bic)) {
-            $html .= '<p><strong>' . $this->langs->transnoentities($bickey) . '</strong>: ' . $this->langs->convToOutputCharset($account->bic) . '</p>';
-        }
-
-        return $html;
-    }
-
     // Gestion du fichier de destination
 
     public function getFilePath()
@@ -431,6 +233,7 @@ Abstract class BimpModelPDF
         $file = $this->getFilePath() . $this->getFileName();
 
         $this->render($file, false);
+//        $this->render($file, true);
 
         return 1;
     }

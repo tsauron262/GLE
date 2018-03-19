@@ -3,6 +3,10 @@
 class Bc_CaisseMvt extends BimpObject
 {
 
+    public static $types = array(
+        1 => array('label' => 'Encaissement', 'icon' => 'plus-circle', 'classes' => array('success')),
+        2 => array('label' => 'Décaissement', 'icon' => 'minus-circle', 'classes' => array('danger'))
+    );
     public function getCaissesArray()
     {
         $caisses = array(0 => '');

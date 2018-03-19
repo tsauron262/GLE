@@ -21,9 +21,9 @@ class BimpPDF_Table
     {
         $this->pdf = $pdf;
         if ($borders) {
-            $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table_borders.css');
+            $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table/table_borders.css');
         } else {
-            $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table_no_borders.css');
+            $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table/table_no_borders.css');
         }
     }
 

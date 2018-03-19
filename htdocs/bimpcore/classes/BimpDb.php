@@ -26,7 +26,7 @@ class BimpDb
             $fields .= $name;
             if (is_int($value)) {
                 $values .= (int) $value;
-            } elseif (is_numeric($value)) {
+            } elseif (is_numeric($value) && !preg_match('/[Ee]/', $value)) {
                 $values .= $value;
             } else {
                 $values .= '"' . $this->db->escape($value) . '"';
@@ -67,7 +67,7 @@ class BimpDb
             }
         }
         $sql .= ' WHERE ' . $where;
-
+        
         return $this->execute($sql);
     }
 

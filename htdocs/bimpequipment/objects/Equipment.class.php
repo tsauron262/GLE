@@ -24,14 +24,35 @@ class Equipment extends BimpObject
     );
     protected $current_place = null;
 
-    public function isReserved()
+    public function equipmentExists($serial, $id_product)
+    {
+        $value = $this->db->getValue($this->getTable(), 'id', '`serial` = \'' . $serial . '\' AND `id_product` = ' . (int) $id_product);
+        if (!is_null($value) && $value) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function isSold()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('id_facture')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function getReservationsList()
     {
         if (!$this->isLoaded()) {
-            return 0;
+            return array();
         }
 
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $list = $reservation->getList(array(
+        $rows = $reservation->getList(array(
             'id_equipment' => (int) $this->id,
             'status'       => array(
                 'and' => array(
@@ -41,17 +62,21 @@ class Equipment extends BimpObject
                     ),
                     array(
                         'operator' => '>',
-                        'value' => 199
+                        'value'    => 199
                     )
                 )
             )
-        ));
-        
-        if (!is_null($list) && count($list)) {
-            return true;
+                ), null, null, 'id', 'desc', 'array', array('id'));
+
+        $reservations = array();
+
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $reservations[] = (int) $r['id'];
+            }
         }
-        
-        return false;
+
+        return $reservations;
     }
 
     public function getContratsArray()
@@ -135,6 +160,9 @@ class Equipment extends BimpObject
                         break;
 
                     case BE_Place::BE_PLACE_ENTREPOT:
+                    case BE_Place::BE_PLACE_PRESENTATION:
+                    case BE_Place::BE_PLACE_VOL:
+                    case BE_Place::BE_PLACE_PRET:
                         $new_place_element = 'entrepot';
                         $new_place_id_element = (int) $new_place->getData('id_entrepot');
                         break;
@@ -154,9 +182,14 @@ class Equipment extends BimpObject
                             break;
 
                         case BE_Place::BE_PLACE_ENTREPOT:
+                        case BE_Place::BE_PLACE_PRESENTATION:
+                        case BE_Place::BE_PLACE_VOL:
+                        case BE_Place::BE_PLACE_PRET:
                             $prev_place_element = 'entrepot';
                             $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
-                            $product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element);
+                            if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+                                $product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element);
+                            }
                             break;
 
                         case BE_Place::BE_PLACE_USER:
@@ -303,16 +336,17 @@ class Equipment extends BimpObject
     public function validate()
     {
         $serial = $this->getData('serial');
+        $id_product = (int) $this->getData('id_product');
 
-        if (!is_null($serial) && $serial) {
-            $where = '`serial` = \'' . $serial . '\'';
+        if (!is_null($serial) && $serial && $id_product) {
+            $where = '`serial` = \'' . $serial . '\' AND `id_product` = ' . $id_product;
             if ($this->isLoaded()) {
                 $where .= ' AND `id` != ' . (int) $this->id;
             }
 
             $value = $this->db->getValue($this->getTable(), 'id', $where);
             if (!is_null($value) && (int) $value) {
-                return array('Ce numéro de série est déjà associé à l\'équipement ' . $value);
+                return array('Ce numéro de série pour ce même produit est déjà associé à l\'équipement ' . $value);
             }
         }
 

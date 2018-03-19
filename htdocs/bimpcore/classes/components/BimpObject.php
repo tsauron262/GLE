@@ -1205,12 +1205,19 @@ class BimpObject
 
         if (!count($errors)) {
             if ($this->use_commom_fields) {
-                $this->data['date_create'] = date('Y-m-d H:i:s');
-                global $user;
-                if (isset($user->id)) {
-                    $this->data['user_create'] = (int) $user->id;
-                } else {
-                    $this->data['user_create'] = 0;
+                $dc = $this->getData('date_create');
+                if (is_null($dc) || !$dc) {
+                    $this->data['date_create'] = date('Y-m-d H:i:s');
+                }
+
+                $uc = $this->getData('user_create');
+                if (is_null($uc) || !$uc) {
+                    global $user;
+                    if (isset($user->id)) {
+                        $this->data['user_create'] = (int) $user->id;
+                    } else {
+                        $this->data['user_create'] = 0;
+                    }
                 }
             }
 
@@ -1605,7 +1612,9 @@ class BimpObject
 
         $parent = $this->getParentInstance();
 
-        if (!is_null($this->dol_object)) {
+        if (method_exists($this, 'deleteProcess')) {
+            $result = $this->deleteProcess();
+        } elseif (!is_null($this->dol_object)) {
             $result = $this->deleteDolObject($errors);
         } else {
             $table = $this->getTable();

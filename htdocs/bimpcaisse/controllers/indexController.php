@@ -439,7 +439,7 @@ class indexController extends BimpController
         $html .= '<button id="changeUserButton" class="btn btn-default btn-large" type="button">';
         $html .= '<i class="fa fa-exchange iconLeft"></i>Changer d\'utilisateur';
         $html .= '</button>';
-        
+
         $html .= '<button id="caisseMvtButton" class="btn btn-default btn-large" type="button">';
         $html .= '<i class="fa fa-money iconLeft"></i>Mouvement de fonds';
         $html .= '</button>';
@@ -545,14 +545,21 @@ class indexController extends BimpController
                             $html = BimpRender::renderAlerts($msg, 'warning');
                             $need_confirm_fonds = 1;
                         } else {
-                            // todo: Mettre en place un mouvement pour la correction du fonds. 
-
-                            $caisse->set('fonds', $fonds);
+                            global $user;
+                            $msg = 'Correction du fonds de caisse suite à un différentiel constaté à l\'ouverture par ' . $user->getNomUrl();
+                            $correction_errors = $caisse->correctFonds($fonds, $msg);
+                            if (count($correction_errors)) {
+                                $errors[] = 'Echec de la correction du fonds de caisse';
+                                $errors = array_merge($errors, $correction_errors);
+                            } else {
+                                $fonds = $caisse->getSavedData('fonds');
+                                $caisse->set('fonds', $fonds);
+                            }
                         }
                     }
 
                     // Création de la session: 
-                    if (!$need_confirm_fonds) {
+                    if (!$need_confirm_fonds && !count($errors)) {
                         $session = BimpObject::getInstance($this->module, 'BC_CaisseSession');
                         $session_errors = $session->validateArray(array(
                             'id_caisse'    => (int) $id_caisse,
@@ -631,8 +638,15 @@ class indexController extends BimpController
                             $html = BimpRender::renderAlerts($msg, 'warning');
                             $need_confirm_fonds = 1;
                         } else {
-                            // todo: Mettre en place un mouvement pour la correction du fonds. 
-
+                            global $user;
+                            $msg = 'Correction du fonds de caisse suite à un différentiel constaté à la fermeture par ' . $user->getNomUrl();
+                            $correction_errors = $caisse->correctFonds($fonds, $msg);
+                            if (count($correction_errors)) {
+                                $errors[] = 'Echec de la correction du fonds de caisse';
+                                $errors = array_merge($errors, $correction_errors);
+                            } else {
+                                $fonds = $caisse->getSavedData('fonds');
+                            }
                             $caisse->set('fonds', $fonds);
                         }
                     }
@@ -837,6 +851,7 @@ class indexController extends BimpController
     {
         $errors = array();
         $validate_errors = array();
+        $validate = 0;
 
         $id_vente = (int) BimpTools::getValue('id_vente');
         $status = BimpTools::getValue('status');
@@ -860,21 +875,22 @@ class indexController extends BimpController
         if (!count($errors)) {
             if ((int) $status === 2) {
                 $success = 'Vente validée avec succès';
-                $validate_errors = $vente->validateVente();
+                $validate = (int) $vente->validateVente($validate_errors);
             } else {
                 if ((int) $status === 1) {
                     $success = 'Vente enregistrée avec succès';
                 } else {
                     $success = 'Vente abandonnée';
                 }
+                $vente->set('status', (int) $status);
+                $errors = array_merge($errors, $vente->update());
             }
-            $vente->set('status', (int) $status);
-            $errors = array_merge($errors, $vente->update());
         }
-        
+
         die(json_encode(array(
             'errors'          => $errors,
             'validate_errors' => $validate_errors,
+            'validate'        => $validate,
             'success'         => $success,
             'request_id'      => BimpTools::getValue('request_id', 0),
         )));

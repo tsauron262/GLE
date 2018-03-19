@@ -786,9 +786,9 @@ function onListLoaded($list) {
             setSearchInputsEvents($list);
         });
 
-        $list.find('tbody').find('a').each(function () {
-            $(this).attr('target', '_blank');
-        });
+//        $list.find('tbody').find('a').each(function () {
+//            $(this).attr('target', '_blank');
+//        });
 
         $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
             checkRowModifications($(this));
@@ -841,9 +841,9 @@ function onListLoaded($list) {
 }
 
 function onListRefeshed($list) {
-    $list.find('tbody').find('a').each(function () {
-        $(this).attr('target', '_blank');
-    });
+//    $list.find('tbody').find('a').each(function () {
+//        $(this).attr('target', '_blank');
+//    });
 
     var $tbody = $list.find('tbody.listRows');
     $list.find('input[name=p]').val('');

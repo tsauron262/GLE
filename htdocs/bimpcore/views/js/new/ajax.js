@@ -70,6 +70,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         } else {
             bimp_msg(this.processing_msg, 'info');
         }
+    } else if ((bimpAjax.display_success || bimpAjax.display_errors)) {
+        if (this.$resultContainer) {
+            this.$resultContainer.html('').slideUp();
+        }
     }
 
     this.display_result_errors = function (errors) {

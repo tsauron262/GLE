@@ -35,6 +35,22 @@ class BimpTools
     }
 
     // Gestion des objects Dolibarr:
+    public static function loadDolClass($module, $file = null, $class = null)
+    {
+        if (is_null($file)) {
+            $file = $module;
+        }
+
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+        
+        if (!class_exists($class)) {
+            if (file_exists(DOL_DOCUMENT_ROOT.'/'.$module.'/class/'.$file.'.class.php')) {
+                
+            }
+        }
+    }
 
     public static function getDolObjectList($instance, $filters = array())
     {
@@ -121,6 +137,33 @@ class BimpTools
         }
 
         return '/test2/public/theme/common/nophoto.png';
+    }
+
+    public static function getErrorsFromDolObject($object, &$errors = null, $langs = null)
+    {
+        if (is_null($errors)) {
+            $errors = array();
+        }
+
+        if (isset($object->error)) {
+            if (!is_null($langs)) {
+                $errors[] = $langs->trans($object->error);
+            } else {
+                $errors[] = $object->error;
+            }
+        }
+
+        if (isset($object->errors) && count($object->errors)) {
+            foreach ($object->errors as $e) {
+                if (!is_null($langs)) {
+                    $errors[] = $langs->trans($e);
+                } else {
+                    $errors[] = $e;
+                }
+            }
+        }
+
+        return $errors;
     }
 
     // Gestion générique des objets: 
@@ -500,7 +543,7 @@ class BimpTools
     public static function checkValueByType($type, &$value)
     {
         if (is_null($value)) {
-            return false;
+            return true;
         }
 
         switch ($type) {
@@ -578,31 +621,31 @@ class BimpTools
                 return is_object($value);
 
             case 'date':
-                if ($value === '0000-00-00') {
-                    $value = '';
+                if ($value === '') {
+                    $value = null;
                     return true;
                 }
-                if ($value === '' || preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value)) {
+                if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value)) {
                     return true;
                 }
                 return false;
 
             case 'time':
-                if ($value === '00:00:00') {
-                    $value = '';
+                if ($value === '') {
+                    $value = null;
                     return true;
                 }
-                if ($value === '' || preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value)) {
+                if (preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value)) {
                     return true;
                 }
                 return false;
 
             case 'datetime':
-                if ($value === '0000-00-00 00:00:00') {
-                    $value = '';
+                if ($value === '') {
+                    $value = null;
                     return true;
                 }
-                if ($value === '' || preg_match('/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
+                if (preg_match('/^\d{4}\-\d{2}\-\d{2} \d{2}:\d{2}(:\d{2})?$/', $value)) {
                     return true;
                 }
                 return false;
@@ -791,6 +834,8 @@ class BimpTools
                 return 'E69900';
             case 'danger':
                 return 'A00000';
+            case 'important':
+                return '963E96';
             default:
                 return '636363';
         }

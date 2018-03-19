@@ -34,4 +34,42 @@ class BC_Caisse extends BimpObject
 
         return false;
     }
+
+    public function correctFonds($new_fonds, $msg = '')
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la caisse absent';
+        } else {
+            $current_fonds = (float) $this->getSavedData('fonds');
+
+            if ((float) $new_fonds === $current_fonds) {
+                return array();
+            }
+
+            if ($new_fonds < $current_fonds) {
+                $type = 2;
+                $montant = $current_fonds - (float) $new_fonds;
+            } else {
+                $type = 1;
+                $montant = (float) $new_fonds - $current_fonds;
+            }
+
+            $mvt = BimpObject::getInstance($this->module, 'BC_CaisseMvt');
+            $errors = $mvt->validateArray(array(
+                'id_entrepot' => (int) $this->getData('id_entrepot'),
+                'id_caisse'   => (int) $this->id,
+                'type'        => (int) $type,
+                'montant'     => (float) $montant,
+                'note'        => $msg
+            ));
+
+            if (!count($errors)) {
+                $errors = $mvt->create();
+            }
+        }
+
+        return $errors;
+    }
 }

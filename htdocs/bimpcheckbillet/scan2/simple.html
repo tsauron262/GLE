@@ -19,13 +19,9 @@
                     alert(result.code);
                     traiteCode(result.code);
                 },   // string, DecoderWorker file location
-        brightness: 80,                          // int
-        autoBrightnessValue: false,             // functional when value autoBrightnessValue is int
-        grayScale: false,                       // boolean
-        contrast: 0,                            // int
-        threshold: 0,
-        DecodeQRCodeRate: 5,                    // null to disable OR int > 0 !
-        DecodeBarCodeRate: 5 
+        DecodeQRCodeRate: 50, 
+        zoom: 1,                         // null to disable OR int > 0 !
+        DecodeBarCodeRate: 50 
             };
             var decoder = new WebCodeCamJS("canvas").buildSelectMenu(document.createElement('select'), 'environment|back').init(arg).play();
              

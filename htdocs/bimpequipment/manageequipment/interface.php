@@ -120,7 +120,9 @@ switch (GETPOST('action')) {
     case 'receiveTransfer': {
             $transfer = new BimpTransfer($db);
             $transfer->fetch(GETPOST('fk_transfer'));
-            echo json_encode(array('nb_update' => $transfer->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')), 'errors' => $transfer->errors));
+            echo json_encode(array('nb_update' => $transfer->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
+                'is_now_closed' => $transfer->checkClose(),
+                'errors' => $transfer->errors));
             break;
         }
 
@@ -135,7 +137,7 @@ switch (GETPOST('action')) {
     case 'closeTransfer': {
             $transfer = new BimpTransfer($db);
             $transfer->fetch(GETPOST('fk_transfer'));
-            echo json_encode(array('status_changed' => $transfer->updateStatut($transfer::STATUS_RECEIVED), 'errors' => $transfer->errors));
+            echo json_encode(array('status_changed' => $transfer->closeTransfer(), 'errors' => $transfer->errors));
             break;
         }
         

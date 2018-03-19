@@ -121,8 +121,8 @@ class BimpTransfer {
                     'id_transfert' => $this->id,
 //                    'qty', // quantités si produit non sérialisé
                     'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
-                    'date_update' => '0000-00-00 00:00:00',
-                    'date_to' => '0000-00-00 00:00:00'
+                    'date_update' => '2999-01-01 00:00:00',
+                    'date_to' => '2999-01-01 00:00:00'
 //                    'note' // note facultative
                 ));
             } else {
@@ -136,8 +136,8 @@ class BimpTransfer {
                     'id_transfert' => $this->id,
                     'qty' => $product['qty'], // quantités si produit non sérialiséAAAA-MM-JJ HH:MM:SS
                     'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
-                    'date_update' => '0000-00-00 00:00:00',
-                    'date_to' => '0000-00-00 00:00:00'
+                    'date_update' => '2999-01-01 00:00:00',
+                    'date_to' => '2999-01-01 00:00:00'
 //                    'note' // note facultative
                 ));
             }
@@ -250,83 +250,62 @@ class BimpTransfer {
 
     public function getLines($add_prod_info = false) {
 
-        $out = array();
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
         $em = new EquipmentManager($this->db);
 
         $lines = $reservation->getList(array(
             'id_transfert' => $this->id // ID du transfert
-                ), null, null, 'status', 'asc', 'array', array(
+                ), null, null, 'date_update', 'desc', 'array', array(
             'id', // Mettre ici la liste des champs à retourner
             'qty',
             'id_equipment',
             'id_product',
+            'date_update',
             'status'
         ));
 
         foreach ($lines as $key => $line) {
+            $lines[$key]['id_reservation'] = $line['id'];
+            $lines[$key]['fk_product'] = $line['id_product'];
+            if ($add_prod_info) {
+                $doli_prod = new Product($this->db);
+                $doli_prod->fetch($line['id_product']);
+                $lines[$key]['ref'] = $doli_prod->ref;
+                $lines[$key]['refurl'] = $doli_prod->getNomUrl(1);
+                $lines[$key]['label'] = dol_trunc($doli_prod->label, 25);
+                $lines[$key]['barcode'] = $doli_prod->barcode;
+            }
+
             if ($line['id_equipment'] > 0) { // equipments
-                $equipment = array();
-                $equipment['serial'] = $em->getSerial($line['id_equipment']);
-                $equipment['id_reservation'] = $line['id'];
-                $equipment['fk_equipment'] = $line['id_equipment'];
-                $equipment['fk_product'] = $line['id_product'];
-                if ($line['status'] == 301)
-                    $equipment['quantity_received'] = 1;
-                else
-                    $equipment['quantity_received'] = 0;
-
-                if ($add_prod_info) {
-                    $doli_prod = new Product($this->db);
-                    $doli_prod->fetch($line['id_product']);
-                    $equipment['ref'] = $doli_prod->ref;
-                    $equipment['refurl'] = $doli_prod->getNomUrl(1);
-                    $equipment['label'] = dol_trunc($doli_prod->label, 25);
-                    $equipment['barcode'] = $doli_prod->barcode;
-                }
-                $key = 'e' . $line['id_equipment'];
-                $out[$key] = $equipment;
+                $lines[$key]['serial'] = $em->getSerial($line['id_equipment']);
+                $lines[$key]['fk_equipment'] = $line['id_equipment'];
+                if ($line['status'] == 201 or $line['status'] == 303)
+                    $lines[$key]['quantity_received'] = 0;
+                elseif ($line['status'] == 301)
+                    $lines[$key]['quantity_received'] = 1;
             } else { // products
-                $key_product = 'p' . $line['id_product'];
-                if (!isset($out[$key_product])) {  // new product
-                    $product = array();
-                    $product['id_reservation'] = $line['id'];
-                    $product['fk_product'] = $line['id_product'];
-                    $product['fk_equipment'] = 0;
-                    if ($add_prod_info) {
-                        $doli_prod = new Product($this->db);
-                        $doli_prod->fetch($line['id_product']);
-                        $product['ref'] = $doli_prod->ref;
-                        $product['refurl'] = $doli_prod->getNomUrl(1);
-                        $product['label'] = dol_trunc($doli_prod->label, 25);
-                        $product['barcode'] = $doli_prod->barcode;
-                    }
+                $lines[$key]['fk_equipment'] = 0;
 
-                    if ($line['status'] == 201) {
-                        $product['quantity_sent'] = $line['qty'];
-                        $product['quantity_received'] = 0;
-                    } elseif ($line['status'] == 301) {
-                        $product['quantity_sent'] = 0;
-                        $product['quantity_received'] = $line['qty'];
-                    }
-                    $out[$key_product] = $product;
-                } else {
-                    if ($line['status'] == 201)
-                        $out[$key_product]['quantity_sent'] += $line['qty'];
-                    elseif ($line['status'] == 301)
-                        $out[$key_product]['quantity_received'] += $line['qty'];
+                if ($line['status'] == 201 or $line['status'] == 303) {
+                    $lines[$key]['quantity_sent'] = $line['qty'];
+                    $lines[$key]['quantity_received'] = 0;
+                } elseif ($line['status'] == 301) {
+                    $lines[$key]['quantity_sent'] = $line['qty'];
+                    $lines[$key]['quantity_received'] = $line['qty'];
                 }
             }
+            unset($lines[$key][0]);
+            unset($lines[$key][1]);
+            unset($lines[$key][2]);
+            unset($lines[$key][3]);
+            unset($lines[$key][4]);
+            unset($lines[$key][5]);
         }
 
-        foreach ($out as $key => $line) {
-            if ($line['quantity_sent'] == 0)
-                $out[$key]['quantity_sent'] = $line['quantity_received'];
-        }
-
-        // array_value()
-        return array_values($out);
+        return array_values($lines);
     }
+
+//    Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1
 
     public function receiveTransfert($user, $products, $equipments) {
         $nb_update = 0;
@@ -402,9 +381,8 @@ class BimpTransfer {
             if ($result2 == -1)
                 $this->errors = array_merge($this->errors, $doliProd->errors);
             $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
-
-            return $nb_update;
         }
+        return $nb_update;
     }
 
     public function updateStatut($code_status) {
@@ -451,169 +429,58 @@ class BimpTransfer {
         }
     }
 
+    function closeTransfer() {
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
+
+        $lines = $reservation->getList(array(
+            'id_transfert' => $this->id // ID du transfert
+                ), null, null, 'status', 'asc', 'array', array(
+            'id', // Mettre ici la liste des champs à retourner
+            'qty',
+            'id_equipment',
+            'id_product',
+            'status'
+        ));
+
+        foreach ($lines as $line) {
+            if ($line['status'] == 201) {
+                $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation', $line['id']);
+                $errors = $reservation->setNewStatus(303);
+                if (!count($errors)) {
+                    $reservation->update();
+                }
+            }
+        }
+
+        return $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
+    }
+
+    function checkClose() {
+        $can_be_close = true;
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
+
+        $lines = $reservation->getList(array(
+            'id_transfert' => $this->id // ID du transfert
+                ), null, null, 'status', 'asc', 'array', array(
+            'id', // Mettre ici la liste des champs à retourner
+            'qty',
+            'id_equipment',
+            'id_product',
+            'status'
+        ));
+
+        foreach ($lines as $line) {
+            if ($line['status'] == 201) {
+                $can_be_close = false;
+                break;
+            }
+        }
+        
+        if ($can_be_close) {
+            $this->updateStatut($this::STATUS_RECEIVED);
+        }
+        
+        return $can_be_close;
+    }
+
 }
-
-//class BimpTransferLine {
-//
-//    private $db;
-//    public $errors;
-//    public $id;
-//    public $date_opening;
-//    public $quantity_sent;
-//    public $quantity_received;
-//    public $fk_transfer;
-//    public $fk_user_create;
-//    public $fk_product;
-//    public $fk_equipment;
-//    public $serial;
-//
-//    public function __construct($db) {
-//        $this->db = $db;
-//        $this->errors = array();
-//    }
-//
-//    public function fetch($id) {
-//
-//        if ($id < 0) {
-//            $this->errors[] = "Identifiant de ligne invalide :" . $id;
-//            return false;
-//        }
-//
-//        $sql = 'SELECT date_opening, quantity_sent, quantity_received, fk_transfer, fk_user_create, fk_product, fk_equipment';
-//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
-//        $sql .= ' WHERE rowid=' . $id;
-//
-//
-//        $result = $this->db->query($sql);
-//        if ($result and $this->db->num_rows($result) > 0) {
-//            while ($obj = $this->db->fetch_object($result)) {
-//                $this->id = $id;
-//                $this->date_opening = $this->db->jdate($obj->date_opening);
-//                $this->quantity_sent = $obj->quantity_sent;
-//                $this->quantity_received = $obj->quantity_received;
-//                $this->fk_transfer = $obj->fk_transfer;
-//                $this->fk_user_create = $obj->fk_user_create;
-//                $this->fk_product = $obj->fk_product;
-//                $this->fk_equipment = ($obj->fk_equipment != NULL) ? $obj->fk_equipment : '';
-//                return true;
-//            }
-//        } else {
-//            $this->errors[] = "Impossible de trouver la ligne dont l'identifiant est : $id";
-//            return false;
-//        }
-//    }
-//
-//    public function create($fk_transfer, $fk_user_create, $fk_product, $fk_equipment, $quantity_sent) {
-//
-//        $stop = false;
-//        if ($fk_transfer < 0) {
-//            $this->errors[] = "Identifiant tranfert invalide : " . $fk_transfer;
-//            $stop = true;
-//        }
-//        if ($fk_user_create < 0) {
-//            $this->errors[] = "Identifiant utilisateur invalide : " . $fk_user_create;
-//            $stop = true;
-//        }
-//        if ($fk_product < 0) {
-//            $this->errors[] = "Identifiant produit invalide : " . $fk_product;
-//            $stop = true;
-//        }
-//        if ($stop)
-//            return false;
-//
-//        $this->db->begin();
-//        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_transfer_det (';
-//        $sql.= 'date_opening';
-//        $sql.= ', quantity_sent';
-//        $sql.= ', fk_transfer';
-//        $sql.= ', fk_user_create';
-//        $sql.= ', fk_product';
-//        $sql.= ', fk_equipment';
-//        $sql.= ') ';
-//        $sql.= 'VALUES (' . $this->db->idate(dol_now());
-//        $sql.= ', ' . $quantity_sent;
-//        $sql.= ', ' . $fk_transfer;
-//        $sql.= ', ' . $fk_user_create;
-//        $sql.= ', ' . $fk_product;
-//        $sql.= ', ' . $fk_equipment;
-//        $sql.= ')';
-//
-//        $result = $this->db->query($sql);
-//        if ($result) {
-//            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_transfer_det');
-//            $this->db->commit();
-//            return $last_insert_id;
-//        } else {
-//            $this->errors[] = "Impossible de créer la ligne de transfert avec fk_product=$fk_product";
-//            dol_print_error($this->db);
-//            $this->db->rollback();
-//            return -1;
-//        }
-//    }
-//
-//    function updateQty($user, $fk_transfert, $previous_qty, $new_qty, $fk_product, $fk_equipment, $labelmove, $codemove_source, $codemove_dest, $fk_warehouse_source, $fk_warehouse_dest, $now) {
-//
-//        if ($fk_transfert < 0) {
-//            $this->errors[] = "L'identifiant du transfert est inconnu.";
-//            return false;
-//        }
-//        if ($fk_product < 0 and $fk_equipment < 0) {
-//            $this->errors[] = "Impossible de mettre à jours les quantités de produits sans définir de id_product ni de id_equipment";
-//            return false;
-//        }
-//
-//        $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_transfer_det';
-//        $sql .= ' SET quantity_received=' . $new_qty;
-//        $sql .= ' WHERE fk_transfer=' . $fk_transfert;
-//        if (0 < $fk_product)
-//            $sql .= ' AND fk_product=' . $fk_product;
-//        if (0 < $fk_equipment)
-//            $sql .= ' AND fk_equipment=' . $fk_equipment;
-//
-//        $result = $this->db->query($sql);
-//        if ($result) {
-//            $this->db->commit();
-//            // products
-//            if (0 < $fk_product) {
-//                $doli_product = new Product($this->db);
-//                $doli_product->fetch($fk_product);
-//                // remove from source
-//                $result = $doli_product->correct_stock($user, $fk_warehouse_source, ($new_qty - $previous_qty), 1, $labelmove, 0, $codemove_source); //, 'order_supplier', $entrepotId);
-//                if ($result < 0) {
-//                    $this->errors = array_merge($this->errors, $doli_product->errors);
-//                    $this->errors = array_merge($this->errors, $doli_product->errorss);
-//                }
-//                // add to destination
-//                $result2 = $doli_product->correct_stock($user, $fk_warehouse_dest, ($new_qty - $previous_qty), 0, $labelmove, 0, $codemove_dest); //, 'order_supplier', $entrepotId);
-//                if ($result2 < 0) {
-//                    $this->errors = array_merge($this->errors, $doli_product->errors);
-//                    $this->errors = array_merge($this->errors, $doli_product->errorss);
-//                }
-//            } else if (0 < $fk_equipment) {
-//                $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
-//
-//                $emplacement->validateArray(array(
-//                    'id_equipment' => $fk_equipment,
-//                    'type' => 2,
-//                    'id_entrepot' => $fk_warehouse_dest,
-//                    'code_mvt' => $codemove_dest,
-////                    'infos' => $codemove,
-//                    'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
-//                ));
-//                $this->errors = array_merge($this->errors, $emplacement->create());
-//            }
-//            return true;
-//        } else {
-//            $this->errors[] = "Impossible de changer la quantité de produit avec fk_product = $fk_product et fk_equipment = $fk_equipment";
-//            dol_print_error($this->db);
-//            $this->db->rollback();
-//            return -1;
-//        }
-//    }
-//
-//}
-
-
-
-
-    

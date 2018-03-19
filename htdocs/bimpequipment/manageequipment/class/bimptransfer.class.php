@@ -255,12 +255,12 @@ class BimpTransfer {
 
         $lines = $reservation->getList(array(
             'id_transfert' => $this->id // ID du transfert
-                ), null, null, 'date_update', 'desc', 'array', array(
+                ), null, null, 'date_from', 'desc', 'array', array(
             'id', // Mettre ici la liste des champs à retourner
             'qty',
             'id_equipment',
             'id_product',
-            'date_update',
+            'date_from',
             'status'
         ));
 

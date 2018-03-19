@@ -12,6 +12,37 @@ include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.li
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/index.js');
 
+$fk_boutique = GETPOST('boutique');
+
+if ($fk_boutique == '')
+    $name_boutique = $user->array_options['options_defaultentrepot'];
+
+/**
+ * Functions
+ */
+function printOptionsBoutique($boutiques, $fk_boutique, $name_boutique) {
+    print '<option></option>';
+
+    if ($fk_boutique != '') {
+        foreach ($boutiques as $id => $name) {
+            if ($id == $fk_boutique)
+                print '<option value="' . $id . '" selected>' . $name . '</option>';
+            else
+                print '<option value="' . $id . '">' . $name . '</option>';
+        }
+    } elseif ($name_boutique != '') {
+        foreach ($boutiques as $id => $name) {
+            if ($name_boutique == $name)
+                print '<option value="' . $id . '" selected>' . $name . '</option>';
+            else
+                print '<option value="' . $id . '">' . $name . '</option>';
+        }
+    } else {
+        foreach ($boutiques as $id => $name) {
+            print '<option value="' . $id . '">' . $name . '</option>';
+        }
+    }
+}
 
 /*
  * 	View
@@ -21,15 +52,12 @@ llxHeader('', 'Accueil boutique', '', '', 0, 0, $arrayofjs, $arrayofcss);
 
 print load_fiche_titre('Accueil boutique', $linkback);
 
-$entrepots = getAllEntrepots($db);
+$boutiques = getAllEntrepots($db);
 
 print '<div id="shopDiv" style="float:left">';
 print '<strong>Boutique</strong> ';
 print '<select id="warehouseSelect" class="select2 cust" style="width: 200px;">';
-print '<option></option>';
-foreach ($entrepots as $id => $name) {
-    print '<option value="' . $id . '">' . $name . '</option>';
-}
+printOptionsBoutique($boutiques, $fk_boutique, $name_boutique);
 print '</select> ';
 print '</div>';
 

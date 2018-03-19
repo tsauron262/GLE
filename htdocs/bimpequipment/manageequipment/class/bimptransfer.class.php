@@ -2,6 +2,9 @@
 
 include_once '../../../main.inc.php';
 
+include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+
 class BimpTransfer {
 
     private $db;
@@ -101,17 +104,52 @@ class BimpTransfer {
     public function addLines($products) {
 
         $cnt_line_added = 0;
+        $now = dol_now();
         $em = new EquipmentManager($this->db);
         foreach ($products as $product) {
-            $new_line = new BimpTransferLine($this->db);
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+
             if ($product['is_equipment'] == 'true') {
                 $fk_equipment = $em->getEquipmentBySerial($product['serial']);
-                $id_line = $new_line->create($this->id, $this->fk_user_create, $product['id_product'], $fk_equipment, 1);
+                $errors1 = $reservation->validateArray(array(
+                    'id_entrepot' => $this->fk_warehouse_source,
+                    'status' => 201, // cf status
+                    'type' => 2, // 2 = transfert
+//                'id_commercial', // id user du commercial (facultatif)
+                    'id_equipment' => $fk_equipment, // si produit sérialisé
+                    'id_product' => $product['id_product'], // sinon
+                    'id_transfert' => $this->id,
+//                    'qty', // quantités si produit non sérialisé
+                    'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+                    'date_update' => '2999-01-01 00:00:00',
+                    'date_to' => '2999-01-01 00:00:00'
+//                    'note' // note facultative
+                ));
             } else {
-                $id_line = $new_line->create($this->id, $this->fk_user_create, $product['id_product'], 'NULL', $product['qty']);
+                $errors1 = $reservation->validateArray(array(
+                    'id_entrepot' => $this->fk_warehouse_source, // ID entrepot: obligatoire. 
+                    'status' => 201, // cf status
+                    'type' => 2, // 2 = transfert
+//                'id_commercial', // id user du commercial (facultatif)
+//                'id_equipment', // si produit sérialisé
+                    'id_product' => $product['id_product'], // sinon
+                    'id_transfert' => $this->id,
+                    'qty' => $product['qty'], // quantités si produit non sérialiséAAAA-MM-JJ HH:MM:SS
+                    'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+                    'date_update' => '2999-01-01 00:00:00',
+                    'date_to' => '2999-01-01 00:00:00'
+//                    'note' // note facultative
+                ));
             }
-            if ($id_line < 0) {
-                $this->errors = array_merge($this->errors, $new_line->errors);
+            if (sizeof($errors1) != 0) {
+                $this->errors = array_merge($this->errors, $errors1);
+                $cnt_line_added--;
+            } else {
+                $errors2 = $reservation->create();
+                if (sizeof($errors2) != 0) {
+                    $this->errors = array_merge($this->errors, $errors2);
+                    $cnt_line_added--;
+                }
             }
             $cnt_line_added++;
         }
@@ -212,68 +250,138 @@ class BimpTransfer {
 
     public function getLines($add_prod_info = false) {
 
-        if ($this->id < 0) {
-            $this->errors[] = "L'identifiant du transfert est inconnu.";
-            return false;
-        }
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
+        $em = new EquipmentManager($this->db);
 
+        $lines = $reservation->getList(array(
+            'id_transfert' => $this->id // ID du transfert
+                ), null, null, 'date_update', 'desc', 'array', array(
+            'id', // Mettre ici la liste des champs à retourner
+            'qty',
+            'id_equipment',
+            'id_product',
+            'date_update',
+            'status'
+        ));
 
-        $sql = 'SELECT rowid';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
-        $sql .= ' WHERE fk_transfer=' . $this->id;
-
-
-        $result = $this->db->query($sql);
-        if ($result and $this->db->num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $line = new BimpTransferLine($this->db);
-                $line->fetch($obj->rowid);
-                if ($add_prod_info) {
-                    $doli_prod = new Product($this->db);
-                    $doli_prod->fetch($line->fk_product);
-                    $line->ref = $doli_prod->ref;
-                    $line->refurl = $doli_prod->getNomUrl(1);
-                    $line->label = dol_trunc($doli_prod->label, 25);
-                    $line->barcode = $doli_prod->barcode;
-                    if ($line->fk_equipment > 0) {
-                        $em = new EquipmentManager($this->db);
-                        $line->serial = $em->getSerial($line->fk_equipment);
-                    }
-                }
-
-                $this->lines[] = $line;
-                $this->errors = array_merge($this->errors, $line->errors);
+        foreach ($lines as $key => $line) {
+            $lines[$key]['id_reservation'] = $line['id'];
+            $lines[$key]['fk_product'] = $line['id_product'];
+            if ($add_prod_info) {
+                $doli_prod = new Product($this->db);
+                $doli_prod->fetch($line['id_product']);
+                $lines[$key]['ref'] = $doli_prod->ref;
+                $lines[$key]['refurl'] = $doli_prod->getNomUrl(1);
+                $lines[$key]['label'] = dol_trunc($doli_prod->label, 25);
+                $lines[$key]['barcode'] = $doli_prod->barcode;
             }
-        } if (!$result) {
-            $this->errors[] = "Erreur lors de la requête de recherche de ligne du transfert : $this->id";
-            return false;
+
+            if ($line['id_equipment'] > 0) { // equipments
+                $lines[$key]['serial'] = $em->getSerial($line['id_equipment']);
+                $lines[$key]['fk_equipment'] = $line['id_equipment'];
+                if ($line['status'] == 201 or $line['status'] == 303)
+                    $lines[$key]['quantity_received'] = 0;
+                elseif ($line['status'] == 301)
+                    $lines[$key]['quantity_received'] = 1;
+            } else { // products
+                $lines[$key]['fk_equipment'] = 0;
+
+                if ($line['status'] == 201 or $line['status'] == 303) {
+                    $lines[$key]['quantity_sent'] = $line['qty'];
+                    $lines[$key]['quantity_received'] = 0;
+                } elseif ($line['status'] == 301) {
+                    $lines[$key]['quantity_sent'] = $line['qty'];
+                    $lines[$key]['quantity_received'] = $line['qty'];
+                }
+            }
+            unset($lines[$key][0]);
+            unset($lines[$key][1]);
+            unset($lines[$key][2]);
+            unset($lines[$key][3]);
+            unset($lines[$key][4]);
+            unset($lines[$key][5]);
         }
-        return $this->lines;
+
+        return array_values($lines);
     }
+
+//    Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1
 
     public function receiveTransfert($user, $products, $equipments) {
         $nb_update = 0;
         $now = dol_now();
-        $labelmove = 'Reception transfert bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
-        $codemove_source = "ExepeditionBimpTransfer" . $this->id;
-        $codemove_dest = "ReceptionBimpTransfer" . $this->id;
+        $label_move = 'BimpTransfert' . $this->id . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M:%S');
+        $codemove = 'BimpTransfert' . $this->id;
 
         foreach ($products as $product) {
-            $line = new BimpTransferLine($this->db);
-            $line->updateQty($user, $this->id, $product['previous_qty'], $product['new_qty'], $product['fk_product'], 0, $labelmove, $codemove_source, $codemove_dest, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
-            $this->errors = array_merge($this->errors, $line->errors);
-            $nb_update++;
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+
+            $reservation->fetch($product['id_reservation']);
+
+            $errors1 = $reservation->setNewStatus(301, $product['added_qty']); // $qty : faculatif, seulement pour les produits non sérialisés
+            if (sizeof($errors1) != 0) {
+                $this->errors = array_merge($this->errors, $errors1);
+                $nb_update--;
+            } else {
+                $errors2 = $reservation->update();
+                if (sizeof($errors2) != 0) {
+                    $this->errors = array_merge($this->errors, $errors2);
+                    $nb_update--;
+                }
+                $nb_update++;
+            }
+
+            $doliProd = new Product($this->db);
+            $doliProd->fetch($product['fk_product']);
+            $result1 = $doliProd->correct_stock($user, $this->fk_warehouse_source, $product['added_qty'], 1, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result1 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
+            $result2 = $doliProd->correct_stock($user, $this->fk_warehouse_dest, $product['added_qty'], 0, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result2 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
         }
 
-        foreach ($equipments as $fk_equipment) {
-            $line = new BimpTransferLine($this->db);
-            $line->updateQty($user, $this->id, 0, 1, 0, $fk_equipment, $labelmove, $codemove_source, $codemove_dest, $this->fk_warehouse_source, $this->fk_warehouse_dest, $now);
-            $this->errors = array_merge($this->errors, $line->errors);
-            $nb_update++;
+        foreach ($equipments as $equipment) {
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+
+            $reservation->fetch($equipment['id_reservation']);
+
+            $errors1 = $reservation->setNewStatus(301); // $qty : faculatif, seulement pour les produits non sérialisés
+            if (sizeof($errors1) != 0) {
+                $this->errors = array_merge($this->errors, $errors1);
+                $nb_update--;
+            } else {
+                $errors2 = $reservation->update();
+                if (sizeof($errors2) != 0) {
+                    $this->errors = array_merge($this->errors, $errors2);
+                    $nb_update--;
+                } else {
+                    $nb_update++;
+                }
+            }
+
+            $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+            $emplacement->validateArray(array(
+                'id_equipment' => $equipment['fk_equipment'],
+                'type' => 2,
+                'id_entrepot' => $this->fk_warehouse_dest,
+                'infos' => '...',
+                'code_mvt' => $codemove,
+                'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S')
+            ));
+            $this->errors = array_merge($this->errors, $emplacement->create());
+
+            $doliProd = new Product($this->db);
+            $doliProd->fetch($equipment['fk_product']);
+            $result1 = $doliProd->correct_stock($user, $this->fk_warehouse_source, 1, 1, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result1 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
+            $result2 = $doliProd->correct_stock($user, $this->fk_warehouse_dest, 1, 0, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result2 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
+            $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
         }
-
-        $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
-
         return $nb_update;
     }
 
@@ -281,6 +389,26 @@ class BimpTransfer {
         if ($this->id < 0) {
             $this->errors[] = "L'identifiant du transfert est inconnu.";
             return false;
+        }
+
+        if ($this->status == $this::STATUS_RECEIVED) {
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
+
+            $lines = $reservation->getList(array(
+                'id_transfert' => $this->id // ID du transfert
+                    ), null, null, 'id', 'asc', 'array', array(
+                'id', // Mettre ici la liste des champs à retourner
+                'qty',
+                'id_equipment',
+                'id_product',
+                'status'
+            ));
+
+            foreach ($lines as $line) {
+                if ($line['status'] == 201) {
+                    
+                }
+            }
         }
 
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_transfer';
@@ -301,164 +429,58 @@ class BimpTransfer {
         }
     }
 
-}
+    function closeTransfer() {
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
 
-class BimpTransferLine {
+        $lines = $reservation->getList(array(
+            'id_transfert' => $this->id // ID du transfert
+                ), null, null, 'status', 'asc', 'array', array(
+            'id', // Mettre ici la liste des champs à retourner
+            'qty',
+            'id_equipment',
+            'id_product',
+            'status'
+        ));
 
-    private $db;
-    public $errors;
-    public $id;
-    public $date_opening;
-    public $quantity_sent;
-    public $quantity_received;
-    public $fk_transfer;
-    public $fk_user_create;
-    public $fk_product;
-    public $fk_equipment;
-    public $serial;
-
-    public function __construct($db) {
-        $this->db = $db;
-        $this->errors = array();
-    }
-
-    public function fetch($id) {
-
-        if ($id < 0) {
-            $this->errors[] = "Identifiant de ligne invalide :" . $id;
-            return false;
-        }
-
-        $sql = 'SELECT date_opening, quantity_sent, quantity_received, fk_transfer, fk_user_create, fk_product, fk_equipment';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
-        $sql .= ' WHERE rowid=' . $id;
-
-
-        $result = $this->db->query($sql);
-        if ($result and $this->db->num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $this->id = $id;
-                $this->date_opening = $this->db->jdate($obj->date_opening);
-                $this->quantity_sent = $obj->quantity_sent;
-                $this->quantity_received = $obj->quantity_received;
-                $this->fk_transfer = $obj->fk_transfer;
-                $this->fk_user_create = $obj->fk_user_create;
-                $this->fk_product = $obj->fk_product;
-                $this->fk_equipment = ($obj->fk_equipment != NULL) ? $obj->fk_equipment : '';
-                return true;
-            }
-        } else {
-            $this->errors[] = "Impossible de trouver la ligne dont l'identifiant est : $id";
-            return false;
-        }
-    }
-
-    public function create($fk_transfer, $fk_user_create, $fk_product, $fk_equipment, $quantity_sent) {
-
-        $stop = false;
-        if ($fk_transfer < 0) {
-            $this->errors[] = "Identifiant tranfert invalide : " . $fk_transfer;
-            $stop = true;
-        }
-        if ($fk_user_create < 0) {
-            $this->errors[] = "Identifiant utilisateur invalide : " . $fk_user_create;
-            $stop = true;
-        }
-        if ($fk_product < 0) {
-            $this->errors[] = "Identifiant produit invalide : " . $fk_product;
-            $stop = true;
-        }
-        if ($stop)
-            return false;
-
-        $this->db->begin();
-        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_transfer_det (';
-        $sql.= 'date_opening';
-        $sql.= ', quantity_sent';
-        $sql.= ', fk_transfer';
-        $sql.= ', fk_user_create';
-        $sql.= ', fk_product';
-        $sql.= ', fk_equipment';
-        $sql.= ') ';
-        $sql.= 'VALUES (' . $this->db->idate(dol_now());
-        $sql.= ', ' . $quantity_sent;
-        $sql.= ', ' . $fk_transfer;
-        $sql.= ', ' . $fk_user_create;
-        $sql.= ', ' . $fk_product;
-        $sql.= ', ' . $fk_equipment;
-        $sql.= ')';
-
-        $result = $this->db->query($sql);
-        if ($result) {
-            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_transfer_det');
-            $this->db->commit();
-            return $last_insert_id;
-        } else {
-            $this->errors[] = "Impossible de créer la ligne de transfert avec fk_product=$fk_product";
-            dol_print_error($this->db);
-            $this->db->rollback();
-            return -1;
-        }
-    }
-
-    function updateQty($user, $fk_transfert, $previous_qty, $new_qty, $fk_product, $fk_equipment, $labelmove, $codemove_source, $codemove_dest, $fk_warehouse_source, $fk_warehouse_dest, $now) {
-
-        if ($fk_transfert < 0) {
-            $this->errors[] = "L'identifiant du transfert est inconnu.";
-            return false;
-        }
-        if ($fk_product < 0 and $fk_equipment < 0) {
-            $this->errors[] = "Impossible de mettre à jours les quantités de produits sans définir de id_product ni de id_equipment";
-            return false;
-        }
-
-        $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'be_transfer_det';
-        $sql .= ' SET quantity_received=' . $new_qty;
-        $sql .= ' WHERE fk_transfer=' . $fk_transfert;
-        if (0 < $fk_product)
-            $sql .= ' AND fk_product=' . $fk_product;
-        if (0 < $fk_equipment)
-            $sql .= ' AND fk_equipment=' . $fk_equipment;
-
-        $result = $this->db->query($sql);
-        if ($result) {
-            $this->db->commit();
-            // products
-            if (0 < $fk_product) {
-                $doli_product = new Product($this->db);
-                $doli_product->fetch($fk_product);
-                // remove from source
-                $result = $doli_product->correct_stock($user, $fk_warehouse_source, ($new_qty - $previous_qty), 1, $labelmove, 0, $codemove_source); //, 'order_supplier', $entrepotId);
-                if ($result < 0) {
-                    $this->errors = array_merge($this->errors, $doli_product->errors);
-                    $this->errors = array_merge($this->errors, $doli_product->errorss);
+        foreach ($lines as $line) {
+            if ($line['status'] == 201) {
+                $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation', $line['id']);
+                $errors = $reservation->setNewStatus(303);
+                if (!count($errors)) {
+                    $reservation->update();
                 }
-                // add to destination
-                $result2 = $doli_product->correct_stock($user, $fk_warehouse_dest, ($new_qty - $previous_qty), 0, $labelmove, 0, $codemove_dest); //, 'order_supplier', $entrepotId);
-                if ($result2 < 0) {
-                    $this->errors = array_merge($this->errors, $doli_product->errors);
-                    $this->errors = array_merge($this->errors, $doli_product->errorss);
-                }
-            } else if (0 < $fk_equipment) {
-                $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
-
-                $emplacement->validateArray(array(
-                    'id_equipment' => $fk_equipment,
-                    'type' => 2,
-                    'id_entrepot' => $fk_warehouse_dest,
-                    'code_mvt' => $codemove_dest,
-//                    'infos' => $codemove,
-                    'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
-                ));
-                $this->errors = array_merge($this->errors, $emplacement->create());
             }
-            return true;
-        } else {
-            $this->errors[] = "Impossible de changer la quantité de produit avec fk_product = $fk_product et fk_equipment = $fk_equipment";
-            dol_print_error($this->db);
-            $this->db->rollback();
-            return -1;
         }
+
+        return $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
+    }
+
+    function checkClose() {
+        $can_be_close = true;
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
+
+        $lines = $reservation->getList(array(
+            'id_transfert' => $this->id // ID du transfert
+                ), null, null, 'status', 'asc', 'array', array(
+            'id', // Mettre ici la liste des champs à retourner
+            'qty',
+            'id_equipment',
+            'id_product',
+            'status'
+        ));
+
+        foreach ($lines as $line) {
+            if ($line['status'] == 201) {
+                $can_be_close = false;
+                break;
+            }
+        }
+        
+        if ($can_be_close) {
+            $this->updateStatut($this::STATUS_RECEIVED);
+        }
+        
+        return $can_be_close;
     }
 
 }

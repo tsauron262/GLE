@@ -7,8 +7,31 @@
  */
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-
 require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFacture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFactureFournisseur.class.php';
+
+$object = GETPOST('object');
+$is_common = false;
+
+if ($object == 'facture') {
+    $is_common = true;
+    $staticSF = new BimpStatsFacture($db);
+    $centre = $staticSF->getExtrafieldArray('facture', 'centre');
+    if (!$user->rights->BimpStatsFacture->all_factures->read) {
+        $centre = $staticSF->parseCenter($user, $centre);
+        if (empty($centre))
+            $no_center_and_right = true;
+    }
+    $nb_row_filter = 5;
+    $field_place = 'Centre';
+} elseif ($object == 'facture_fournisseur') {
+    $staticSFF = new BimpStatsFactureFournisseur($db);
+    $centre = $staticSFF->getAllEntrepots();
+    $nb_row_filter = 4;
+    $field_place = 'Entrepôt';
+} else
+    $error_parameter = true;
+
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpstatsfacture/js/ajax.js');
@@ -19,11 +42,9 @@ $recursif = GETPOST('recursif');
  * 	View
  */
 
-$staticSF = new BimpStatsFacture($db);
+llxHeader('', 'Stats ' . str_replace('_', ' ', $object), '', '', 0, 0, $arrayofjs, $arrayofcss);
 
-llxHeader('', 'Stats factures', '', '', 0, 0, $arrayofjs, $arrayofcss);
-
-print load_fiche_titre('Stats factures', $linkback);
+print load_fiche_titre('Stats ' . str_replace('_', ' ', $object), $linkback);
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -32,34 +53,46 @@ print '</table>';
 
 print '<table class="tableforField">';
 
+if ($error_parameter) {
+    print '<strong style="color : #b30000">URL incomplet, paramètre manquant : object (facture ou facture_fournisseur)</strong>';
+    return;
+} elseif ($no_center_and_right) {
+    print '<strong style="color : #b30000">Vous n\'avez pas le droit de voir toutes les factures et vous n\'avez pas de centre SAV associé à votre profil.</strong>';
+    return;
+}
+
+/**
+ * Filters
+ */
 // Dates
-print '<tr class="top"><td rowspan=5 class="allSides">Filtres</td><td>Dates</td><td>';
+print '<tr class="top"><td rowspan=' . $nb_row_filter . ' class="allSides">Filtres</td><td>Dates</td><td>';
 print '<div><text>Date de début</text><br>';
 print '<input id="dateStart" type="text" class="isDate round"></div>';
 
 print '<div><text>Date de fin</text><br>';
 print '<input id="dateEnd" type="text" class="isDate round"></div></td></tr>';
 
+if ($is_common) {
 // Types
-$type = $staticSF->getExtrafieldArray('facture', 'type');
-print '<tr><td>Secteurs</td><td>';
-print '<select id="type" class="select2" multiple style="width: 200px;">';
-print '<option  value="NRS">Non renseigné</option>';
-foreach ($type as $val => $name) {
-    print '<option value="'.$val.'">'.$name.'</option>';
-}
-print '</select>';
+    $type = $staticSF->getExtrafieldArray('facture', 'type');
+    print '<tr><td>Secteurs</td><td>';
+    print '<select id="type" class="select2" multiple style="width: 200px;">';
+    print '<option  value="NRS">Non renseigné</option>';
+    foreach ($type as $val => $name) {
+        print '<option value="' . $val . '">' . $name . '</option>';
+    }
+    print '</select>';
 
-print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
-print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
+    print '<input id="selectAllTypes"   type="button" class="butAction round" value="Tout sélectionner">';
+    print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
+}
 
 // Centres
-$centre = $staticSF->getExtrafieldArray('facture', 'centre');
-print '<tr><td>Centres</td><td>';
+print '<tr><td>' . $field_place . '</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
 print '<option  value="NRS">Non renseigné</option>';
 foreach ($centre as $val => $name) {
-    print '<option value="'.$val.'">'.$name.'</option>';
+    print '<option value="' . $val . '">' . $name . '</option>';
 }
 print '</select>';
 
@@ -70,20 +103,20 @@ print '<input id="deselectAllCentres" type="button" class="butActionDelete round
 $facstatic = new Facture($db);
 print '<tr><td>Etat (multiple)</td><td>
 
-<input id="etatBrouillon" name="etat" type="checkbox" value="'.$facstatic::STATUS_DRAFT.'" checked>
+<input id="etatBrouillon" name="etat" type="checkbox" value="' . $facstatic::STATUS_DRAFT . '" checked>
 <label for="etatBrouillon">Brouillons</label>
 
-<input id="etatValider" name="etat" type="checkbox" value="'.$facstatic::STATUS_VALIDATED.'" checked>
+<input id="etatValider" name="etat" type="checkbox" value="' . $facstatic::STATUS_VALIDATED . '" checked>
 <label for="etatValider">Validées</label>
 
-<input id="etatFermer" name="etat" type="checkbox" value="'.$facstatic::STATUS_CLOSED.'" checked>
+<input id="etatFermer" name="etat" type="checkbox" value="' . $facstatic::STATUS_CLOSED . '" checked>
 <label for="etatFermer">Fermées</label>
 
-<input id="etatAbandonner" name="etat" type="checkbox" value="'.$facstatic::STATUS_ABANDONED.'" >
+<input id="etatAbandonner" name="etat" type="checkbox" value="' . $facstatic::STATUS_ABANDONED . '" >
 <label for="etatAbandonner">Abandonnées</label>
 
 </td></tr>';
-
+//}
 // Statuts
 print '<tr><td>Statut (unique)</td><td>
 <input id="paymentAll" name="statutPayment" type="radio" value="a" checked>
@@ -96,6 +129,9 @@ print '<tr><td>Statut (unique)</td><td>
 <label for="paymentUnpayed">Impayées</label>
 </td></tr>';
 
+/**
+ * Config
+ */
 // Prix
 print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Prix (unique)</td><td>
 <input id="priceHT" name="priceTaxes" type="radio" value="ht" checked>
@@ -108,7 +144,7 @@ print '<tr class="top"><td rowspan=2 class="allSides">Config</td><td>Prix (uniqu
 // Format
 print '<tr><td>Format (unique)</td><td>
 <input id="formatDetail" name="formatOutput" type="radio" value="d" checked>
-<label for="formatDetail">HTML détailé</label>
+<label for="formatDetail">HTML détaillé</label>
 
 <input id="formatReduit" name="formatOutput" type="radio" value="r">
 <label for="formatReduit">HTML réduit</label>
@@ -119,21 +155,25 @@ print '<tr><td>Format (unique)</td><td>
 <div id="divFichier" style="display:none">Nom du fichier de sortie <input class="round" id="nomFichier"></input><strong>.csv</strong></div>
 </td></tr>';
 
+/**
+ * Tri
+ */
 // Trier par
 print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multiple)</td><td>
 
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >
-<label for="sortByCentre">Centre</label>
+<label for="sortByCentre">' . $field_place . '</label>';
 
-<input id="sortByType" name="sortBy" type="checkbox" value="t">
+if ($is_common) {
+    print '<input id="sortByType" name="sortBy" type="checkbox" value="t">
 <label for="sortByType">Secteur</label>';
 
-print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="g" >
+    print '<input id="sortByTypeGarantie" name="sortBy" type="checkbox" value="g" >
 <label for="sortByTypeGarantie">Type de garantie</label>
 
 <input id="sortByEquipement" name="sortBy" type="checkbox" value="e" >
 <label for="sortByEquipement">Equipement</label>';
-
+}
 print '</td></tr>';
 
 print '</table>';

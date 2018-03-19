@@ -33,15 +33,47 @@ if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
 
     print '</table>';
+
+    print '<h4><strong>En attente</strong></h4>';
+    print '<div id="alertTop" style="clear:left"></div>';
+
+    print '<table id="table_pending" class="noborder objectlistTable" style="margin-top:20px">';
+    print '<thead>';
+    print '<th>Date d\'envoie</th>';
+    print '<th>Référence</th>';
+    print '<th>Numéro de série</th>';
+    print '<th>Label</th>';
+    print '<th style="text-align:right">Quantité envoyé</th>';
+    print '<th style="width:32px"></th>';
+    print '<th>Quantité reçu</th>';
+    print '</thead>';
+    print '<tbody></tbody>';
+    print '</table>';
+    print '<br>';
 } else {
-    print '<strong>Transfert fermé le : '.$transfer->date_closing.'</strong>';
+    print '<strong>Transfert fermé le : ' . $transfer->date_closing . '</strong>';
 }
 
-print '<div id="alertTop" style="clear:left"></div>';
-
-print '<table id="product_table" class="noborder objectlistTable" style="margin-top:20px">';
+print '<h4><strong>Reçu</strong></h4>';
+print '<table id="table_received" class="noborder objectlistTable" style="margin-top:20px">';
 print '<thead>';
-print '<th>Groupes scanné</th>';
+print '<th>Date de reception</th>';
+print '<th>Référence</th>';
+print '<th>Numéro de série</th>';
+print '<th>Label</th>';
+print '<th style="text-align:right">Quantité envoyé</th>';
+print '<th style="width:32px"></th>';
+print '<th>Quantité reçu</th>';
+print '</thead>';
+print '<tbody></tbody>';
+print '</table>';
+
+print '<br>';
+
+print '<h4><strong>Abandonné</strong></h4>';
+print '<table id="table_canceled" class="noborder objectlistTable" style="margin-top:20px">';
+print '<thead>';
+print '<th>Date d\'abandon</th>';
 print '<th>Référence</th>';
 print '<th>Numéro de série</th>';
 print '<th>Label</th>';
@@ -56,7 +88,8 @@ print '<br>';
 
 if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<input id="register" type="button" class="butAction" value="Enregistrer">';
-    print '<input id="closeTransfer" type="button" class="butAction" value="Enregistrer et fermer">';
+    if ($user->rights->bimpequipment->transfer->close   )
+        print '<input id="closeTransfer" type="button" class="butActionDelete" value="Fermer"><br/><br/>';
 }
 
 $db->close();

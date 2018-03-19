@@ -48,7 +48,7 @@ class modBimpStatsFacture extends DolibarrModules {
 
         // Id for module (must be unique).
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 754352;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+        $this->numero = 754381;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         // Key text used to identify module (for permissions, menus, etc...)
         $this->rights_class = 'BimpStatsFacture';
 
@@ -165,14 +165,14 @@ class modBimpStatsFacture extends DolibarrModules {
         //                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
         // );
         // Permissions
-//        $this->rights = array();  // Permission array used by this module
-//        $r = 0;
-//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-//        $this->rights[$r][1] = 'Read restrictions'; // Permission label
-//        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
-//        $this->rights[$r][4] = 'contrat';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $this->rights[$r][5] = 'lire';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $r++;
+        $this->rights = array();  // Permission array used by this module
+        $r = 0;
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Voir toutes les factures'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'all_factures';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = 'read';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $r++;
 //        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 //        $this->rights[$r][1] = 'Create/Update objects of My Module'; // Permission label
 //        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
@@ -209,13 +209,15 @@ class modBimpStatsFacture extends DolibarrModules {
         // Example to declare a Left Menu entry into an existing Top menu entry:
         /* BEGIN MODULEBUILDER LEFTMENU MYOBJECT */
 
+        $r = 0;
+
         $this->menu[$r] = array(
             'fk_menu' => 'fk_mainmenu=accountancy,fk_leftmenu=customers_bills', // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode of parent menu
             'type' => 'left', // This is a Left menu entry
             'titre' => 'Bimp stats',
             'mainmenu' => 'accountancy',
             'leftmenu' => 'customers_bills',
-            'url' => '/bimpstatsfacture/view.php',
+            'url' => '/bimpstatsfacture/view.php?object=facture',
             'langs' => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'position' => 100,
             'enabled' => '1', // Define condition to show or hide menu entry. Use '$conf->monmodule->enabled' if entry must be visible if module is enabled.
@@ -224,6 +226,24 @@ class modBimpStatsFacture extends DolibarrModules {
             'user' => 2);    // 0=Menu for internal users,1=external users, 2=both
 
         $r++;
+
+        $this->menu[$r] = array(
+            'fk_menu' => 'fk_mainmenu=accountancy,fk_leftmenu=suppliers_bills', // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode of parent menu
+            'type' => 'left', // This is a Left menu entry
+            'titre' => 'Bimp stats',
+            'mainmenu' => 'accountancy',
+            'leftmenu' => 'suppliers_bills',
+            'url' => '/bimpstatsfacture/view.php?object=facture_fournisseur',
+            'langs' => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+            'position' => 100,
+            'enabled' => '1', // Define condition to show or hide menu entry. Use '$conf->monmodule->enabled' if entry must be visible if module is enabled.
+            'perms' => '1', // Use 'perms'=>'$user->rights->monmodule->level1->level2' if you want your menu with a permission rules
+            'target' => '',
+            'user' => 2);    // 0=Menu for internal users,1=external users, 2=both
+
+        $r++;
+
+
         // END MODULEBUILDER LEFTMENU MYOBJECT */
         // Exports
 //        $r = 1;

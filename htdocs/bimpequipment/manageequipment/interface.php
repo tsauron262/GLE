@@ -41,9 +41,9 @@ switch (GETPOST('action')) {
             break;
         }
     case 'transfertAll': {
-            $transfert = new Transfert($db, GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user);
-            $transfert->addLignes(GETPOST('products'));
-            echo json_encode(array('errors' => $transfert->execute()));
+            $transfer = new Transfert($db, GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user);
+            $transfer->addLignes(GETPOST('products'));
+            echo json_encode(array('errors' => $transfer->execute()));
             break;
         }
     case 'checkEquipment': {
@@ -100,38 +100,47 @@ switch (GETPOST('action')) {
     /* Transfer - viewTransfer */
 
     case 'createTransfer': {
-            $transfert = new BimpTransfer($db);
-            $id_transfer = $transfert->create(GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user->id, $transfert::STATUS_SENT);
-            $transfert->fetch($id_transfer);
+            $transfer = new BimpTransfer($db);
+            $id_transfer = $transfer->create(GETPOST('idEntrepotStart'), GETPOST('idEntrepotEnd'), $user->id, $transfer::STATUS_SENT);
+            $transfer->fetch($id_transfer);
 
-            echo json_encode(array('lines_added' => $transfert->addLines(GETPOST('products')), 'errors' => $transfert->errors));
+            echo json_encode(array('lines_added' => $transfer->addLines(GETPOST('products')), 'errors' => $transfer->errors));
             break;
         }
 
     /* transfer - viewReception */
 
     case 'retrieveSentLines': {
-            $transfert = new BimpTransfer($db);
-            $transfert->fetch(GETPOST('fk_transfert'));
-            echo json_encode(array('prods' => $transfert->getLines(true), 'errors' => $transfert->errors));
+            $transfer = new BimpTransfer($db);
+            $transfer->fetch(GETPOST('fk_transfer'));
+            echo json_encode(array('prods' => $transfer->getLines(true), 'errors' => $transfer->errors));
             break;
         }
 
-    case 'receiveTransfert': {
-            $transfert = new BimpTransfer($db);
-            $transfert->fetch(GETPOST('fk_transfert'));
-            echo json_encode(array('nb_update' => $transfert->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')), 'errors' => $transfert->errors));
+    case 'receiveTransfer': {
+            $transfer = new BimpTransfer($db);
+            $transfer->fetch(GETPOST('fk_transfer'));
+            echo json_encode(array('nb_update' => $transfer->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
+                'is_now_closed' => $transfer->checkClose(),
+                'errors' => $transfer->errors));
             break;
         }
+
+//    case 'receiveAndCloseTransfer': {
+//            $transfer = new BimpTransfer($db);
+//            $transfer->fetch(GETPOST('fk_transfer'));
+//            echo json_encode(array('nb_update' => $transfer->receiveTransfert(GETPOST('products'), GETPOST('equipments')),
+//                'status_changed' => $transfer->updateStatut($transfer::STATUS_RECEIVED), 'errors' => $transfer->errors));
+//            break;
+//        }
 
     case 'closeTransfer': {
-            $transfert = new BimpTransfer($db);
-            $transfert->fetch(GETPOST('fk_transfert'));
-            echo json_encode(array('nb_update' => $transfert->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
-                'status_changed' => $transfert->updateStatut($transfert::STATUS_RECEIVED), 'errors' => $transfert->errors));
+            $transfer = new BimpTransfer($db);
+            $transfer->fetch(GETPOST('fk_transfer'));
+            echo json_encode(array('status_changed' => $transfer->closeTransfer(), 'errors' => $transfer->errors));
             break;
         }
-
+        
     /* OrderClient - viewOrderClient */
 
     case 'retrieveOrderClient': {
@@ -150,6 +159,8 @@ switch (GETPOST('action')) {
                     $transferstatic::STATUS_SENT,
                     $transferstatic::STATUS_RECEIVED_PARTIALLY), true),
                 'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 0, 4),
+                'right_caisse_admin' => $user->rights->bimpequipment->caisse_admin->read,
+                'right_caisse' => $user->rights->bimpequipment->caisse->read,
                 'errors' => array_merge($transferstatic->errors, $blstatic->errors)));
             break;
         }

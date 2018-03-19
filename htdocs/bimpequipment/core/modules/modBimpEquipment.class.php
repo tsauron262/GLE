@@ -93,6 +93,27 @@ class modBimpEquipment extends DolibarrModules {
         $this->rights[$r][4] = 'inventory';
         $this->rights[$r][5] = 'read';
         $r++;
+
+        $this->rights[$r][0] = 88153;
+        $this->rights[$r][1] = 'Accès admin caisse';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'caisse_admin';
+        $this->rights[$r][5] = 'read';
+        $r++;
+
+        $this->rights[$r][0] = 88154;
+        $this->rights[$r][1] = 'Accès caisse';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'caisse';
+        $this->rights[$r][5] = 'read';
+        $r++;
+
+        $this->rights[$r][0] = 88155;
+        $this->rights[$r][1] = 'Fermer transfert';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'transfer';
+        $this->rights[$r][5] = 'close';
+        $r++;
         
         // Array to add new pages in new tabs
         // Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1

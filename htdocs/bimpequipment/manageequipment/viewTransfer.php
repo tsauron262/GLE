@@ -8,11 +8,12 @@
 include_once '../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-include_once DOL_DOCUMENT_ROOT.'/bimpequipment/manageequipment/lib/entrepot.lib.php';
+include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.lib.php';
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/transferAjax.js');
 
+$fk_entrepot = GETPOST('entrepot');
 
 /*
  * 	View
@@ -29,8 +30,12 @@ print '<strong>Entrepôt source</strong></br>';
 print '<select id="entrepotStart" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
 foreach ($entrepots as $id => $name) {
-    print '<option value="' . $id . '">' . $name . '</option>';
+    if ($fk_entrepot == $id)
+        print '<option value="' . $id . '" selected>' . $name . '</option>';
+    else
+        print '<option value="' . $id . '" >' . $name . '</option>';
 }
+
 print '</select> ';
 print '</div>';
 
@@ -48,7 +53,7 @@ foreach ($entrepots as $id => $name) {
 //    if ($name == end($entrepots))
 //        print '<option value="' . $id . '" selected>' . $name . '</option>';
 //    else
-        print '<option value="' . $id . '">' . $name . '</option>';
+    print '<option value="' . $id . '">' . $name . '</option>';
 }
 print '</select></div></div><br/><br/><br/>';
 

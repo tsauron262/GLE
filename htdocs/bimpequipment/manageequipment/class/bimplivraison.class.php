@@ -4,6 +4,7 @@ include_once '../../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
+include_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 
 class BimpLivraison {
 
@@ -242,7 +243,8 @@ class BimpLivraison {
             'type' => 2, // cf $types
             'id_entrepot' => $entrepotId, // si type = 2
             'infos' => $this->getcodeMove(),
-            'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
+            'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'), // date et heure d'arrivée
+            'code_mvt' => $this->getcodeMove()
         ));
         $this->errors = array_merge($this->errors, $emplacement->create());
         if ($length != sizeof($this->errors))
@@ -270,6 +272,7 @@ class BimpLivraison {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur as cf ON cf.rowid = e.fk_object';
         $sql .= ' WHERE e.entrepot=' . $fk_warehouse;
+//        $sql .= ' AND statu'
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {

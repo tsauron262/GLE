@@ -57,8 +57,8 @@ print '<br>';
 
 if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<input id="register" type="button" class="butAction" value="Enregistrer">';
-    print '<input id="receiveAndCloseTransfer" type="button" class="butAction" value="Enregistrer et fermer">';
-    print '<input id="closeTransfer" type="button" class="butAction" value="Fermer"><br/><br/>';
+//    print '<input id="receiveAndCloseTransfer" type="button" class="butAction" value="Enregistrer et fermer">';
+    print '<input id="closeTransfer" type="button" class="butActionDelete" value="Fermer"><br/><br/>';
 }
 print '<h4><strong>Abandonné</strong></h4>';
 print '<table id="canceled_table" class="noborder objectlistTable" style="margin-top:20px">';

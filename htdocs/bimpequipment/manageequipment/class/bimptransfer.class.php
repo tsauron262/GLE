@@ -270,6 +270,7 @@ class BimpTransfer {
                 $equipment['serial'] = $em->getSerial($line['id_equipment']);
                 $equipment['id_reservation'] = $line['id'];
                 $equipment['fk_equipment'] = $line['id_equipment'];
+                $equipment['fk_product'] = $line['id_product'];
                 if ($line['status'] == 301)
                     $equipment['quantity_received'] = 1;
                 else
@@ -327,10 +328,12 @@ class BimpTransfer {
         return array_values($out);
     }
 
-    public function receiveTransfert($products, $equipments) {
+    public function receiveTransfert($user, $products, $equipments) {
         $nb_update = 0;
+        $now = dol_now();
+        $label_move = 'BimpTransfert' . $this->id . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M:%S');
+        $codemove = 'BimpTransfert' . $this->id;
 
-        $em = new EquipmentManager($this->db);
         foreach ($products as $product) {
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
@@ -348,6 +351,15 @@ class BimpTransfer {
                 }
                 $nb_update++;
             }
+
+            $doliProd = new Product($this->db);
+            $doliProd->fetch($product['fk_product']);
+            $result1 = $doliProd->correct_stock($user, $this->fk_warehouse_source, $product['added_qty'], 1, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result1 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
+            $result2 = $doliProd->correct_stock($user, $this->fk_warehouse_dest, $product['added_qty'], 0, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result2 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
         }
 
         foreach ($equipments as $equipment) {
@@ -368,10 +380,31 @@ class BimpTransfer {
                     $nb_update++;
                 }
             }
-        }
-        $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
 
-        return $nb_update;
+            $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+
+            $emplacement->validateArray(array(
+                'id_equipment' => $equipment['fk_equipment'],
+                'type' => 2,
+                'id_entrepot' => $this->fk_warehouse_dest,
+                'infos' => '...',
+                'code_mvt' => $codemove,
+                'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S')
+            ));
+            $this->errors = array_merge($this->errors, $emplacement->create());
+
+            $doliProd = new Product($this->db);
+            $doliProd->fetch($equipment['fk_product']);
+            $result1 = $doliProd->correct_stock($user, $this->fk_warehouse_source, 1, 1, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result1 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
+            $result2 = $doliProd->correct_stock($user, $this->fk_warehouse_dest, 1, 0, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
+            if ($result2 == -1)
+                $this->errors = array_merge($this->errors, $doliProd->errors);
+            $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
+
+            return $nb_update;
+        }
     }
 
     public function updateStatut($code_status) {
@@ -579,6 +612,7 @@ class BimpTransfer {
 //    }
 //
 //}
+
 
 
 

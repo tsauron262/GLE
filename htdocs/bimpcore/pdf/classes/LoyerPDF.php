@@ -215,6 +215,20 @@ class LoyerPDF extends PropalPDF
 
         $info_html .= '</table></div>';
 
+        // *** Totaux:  ***
+
+        $totaux_html = '<div>';
+        $totaux_html .= '<table style="width: 100%" cellpadding="5">';
+        $totaux_html .= '<tr>';
+        $totaux_html .= '<td colspan="2" style="text-align: center;">Cachet, Date, Signature et mention "Bon pour Accord"</td>';
+        $totaux_html .= '</tr>';
+
+        $totaux_html .= '<tr>';
+        $totaux_html .= '<td colspan="2" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/></td>';
+        $totaux_html .= '</tr>';
+        $totaux_html .= '</table>';
+        $totaux_html .= '</div>';
+
         $table = new BimpPDF_Table($this->pdf, false);
         $table->cellpadding = 0;
         $table->remove_empty_cols = false;
@@ -223,7 +237,7 @@ class LoyerPDF extends PropalPDF
 
         $table->rows[] = array(
             'left'  => $info_html,
-            'right' => ''
+            'right' => $totaux_html
         );
 
         $this->writeContent('<br/><br/>');

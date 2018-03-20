@@ -19,11 +19,11 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-        
+
         if (!file_exists($logo_file)) {
             $logo_file = '';
         }
-        
+
         $this->header_vars = array(
             'logo_img'     => $logo_file,
             'logo_width'   => '120',
@@ -318,7 +318,11 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 // Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
                 // Prise en compte si nécessaire de la progression depuis la situation précédente:
-                $prev_progress = $line->get_prev_progress($this->object->id);
+                if ($situationinvoice && method_exists($line, 'get_prev_progress')) {
+                    $prev_progress = $line->get_prev_progress($this->object->id);
+                } else {
+                    $prev_progress = 0;
+                }
                 if ($prev_progress > 0 && !empty($line->situation_percent)) {
                     if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
                         $tva_line = $sign * $line->multicurrency_total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;

@@ -17,6 +17,7 @@ Abstract class BimpModelPDF
     public $header = null;
     public $footer = null;
     public $prefName = "";
+    public $suffixefName = "";
     public $object;
     public $text = '';
     public $fromCompany = null;
@@ -224,7 +225,7 @@ Abstract class BimpModelPDF
             elseif (isset($this->object->id))
                 $name .= "_" . dol_sanitizeFileName($this->object->id);
         }
-        return $this->prefName . $name;
+        return $this->prefName . $name. $this->suffixefName;
     }
 
     public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0)

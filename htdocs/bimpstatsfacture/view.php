@@ -13,25 +13,25 @@ require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFactureFourni
 $object = GETPOST('object');
 $is_common = false;
 
-if ($object == 'facture') {
-    $is_common = true;
-    $staticSF = new BimpStatsFacture($db);
-    $centre = $staticSF->getExtrafieldArray('facture', 'centre');
-    if (!$user->rights->BimpStatsFacture->all_factures->read) {
-        $centre = $staticSF->parseCenter($user, $centre);
-        if (empty($centre))
-            $no_center_and_right = true;
-    }
-    $nb_row_filter = 5;
-    $field_place = 'Centre';
-} elseif ($object == 'facture_fournisseur') {
-    $staticSFF = new BimpStatsFactureFournisseur($db);
-    $centre = $staticSFF->getAllEntrepots();
-    $nb_row_filter = 4;
-    $field_place = 'Entrepôt';
-} else
-    $error_parameter = true;
+$staticSFF = new BimpStatsFactureFournisseur($db);
+$entrepots = $staticSFF->getAllEntrepots();
+$staticSF = new BimpStatsFacture($db);
+$centres = $staticSF->getExtrafieldArray('facture', 'centre');
 
+//var_dump($centres);
+
+if ($user->rights->BimpStatsFacture->facture->limit) {
+    $centres = $staticSF->parseCenter($user, $centres);
+}
+
+if ($object == 'facture_fournisseur') {
+
+    $nb_row_filter = 5;
+} else {
+    $is_common = true;
+
+    $nb_row_filter = 6;
+}
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpstatsfacture/js/ajax.js');
@@ -52,14 +52,6 @@ print '</tr>' . "\n";
 print '</table>';
 
 print '<table class="tableforField">';
-
-if ($error_parameter) {
-    print '<strong style="color : #b30000">URL incomplet, paramètre manquant : object (facture ou facture_fournisseur)</strong>';
-    return;
-} elseif ($no_center_and_right) {
-    print '<strong style="color : #b30000">Vous n\'avez pas le droit de voir toutes les factures et vous n\'avez pas de centre SAV associé à votre profil.</strong>';
-    return;
-}
 
 /**
  * Filters
@@ -87,17 +79,41 @@ if ($is_common) {
     print '<input id="deselectAllTypes" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 }
 
+
+
+print '<tr><td>Type de lieu</td><td>
+<input id="place_centre" name="place" type="radio" value="c" checked>
+<label for="place_centre">Centre</label>
+
+<input id="place_entrepot" name="place" type="radio" value="e">
+<label for="place_entrepot">Entrepôt</label>
+</td></tr>';
+
+
+
 // Centres
-print '<tr><td>' . $field_place . '</td><td>';
+print '<tr id="tr_centre"><td>Centre</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
-print '<option  value="NRS">Non renseigné</option>';
-foreach ($centre as $val => $name) {
+if (!$user->rights->BimpStatsFacture->facture->limit)
+    print '<option  value="NRS">Non renseigné</option>';
+foreach ($centres as $val => $name) {
     print '<option value="' . $val . '">' . $name . '</option>';
 }
 print '</select>';
 
 print '<input id="selectAllCentres"   type="button" class="butAction round" value="Tout sélectionner">';
 print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td></tr>';
+
+print '<tr id="tr_entrepot" style="display:none;"><td>Entrepôt</td><td>';
+print '<select id="entrepot" class="select2 round" multiple style="width: 200px;">';
+print '<option  value="NRS">Non renseigné</option>';
+foreach ($entrepots as $val => $name) {
+    print '<option value="' . $val . '">' . $name . '</option>';
+}
+print '</select>';
+
+print '<input id="selectAllEntrepots"   type="button" class="butAction round" value="Tout sélectionner">';
+print '<input id="deselectAllEntrepots" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
 // Etats
 $facstatic = new Facture($db);
@@ -162,7 +178,7 @@ print '<tr><td>Format (unique)</td><td>
 print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multiple)</td><td>
 
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >
-<label for="sortByCentre">' . $field_place . '</label>';
+<label for="sortByCentre">Centre</label>';
 
 if ($is_common) {
     print '<input id="sortByType" name="sortBy" type="checkbox" value="t">

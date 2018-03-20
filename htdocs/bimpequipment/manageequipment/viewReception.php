@@ -88,7 +88,7 @@ print '<br>';
 
 if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<input id="register" type="button" class="butAction" value="Enregistrer">';
-    if ($user->rights->bimpequipment->transfer->close   )
+    if ($user->rights->bimpequipment->transfer->close)
         print '<input id="closeTransfer" type="button" class="butActionDelete" value="Fermer"><br/><br/>';
 }
 

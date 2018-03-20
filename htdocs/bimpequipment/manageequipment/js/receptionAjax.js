@@ -173,7 +173,7 @@ function addLineProduct(prod) {
     var id_tr = 'p' + parseInt(prod.fk_product) + 'r' + prod.id_reservation;
     var line = '<tr id=' + id_tr + ' fk_product=' + prod.fk_product + ' is_equipment=false barcode="' + prod.barcode + '" id_reservation=' + prod.id_reservation +
             ' ref="' + prod.ref + '" qty_received_befor=' + prod.quantity_received + ' table_suffix="' + table_suffix + '">';
-    line += '<td>' + prod.date_update + '</td>';
+    line += '<td>' + prod.date_from + '</td>';
     line += '<td>' + prod.refurl + '</td>'; // refUrl
     line += '<td></td>'; // num série
     line += '<td>' + prod.label + '</td>'; // label
@@ -239,7 +239,7 @@ function addLineEquipment(equip) {
     var id_tr = "e" + parseInt(equip.fk_equipment);
     var line = '<tr id=' + id_tr + ' fk_product=' + equip.fk_product + ' is_equipment="true" fk_product=' + equip.fk_product + '  id_reservation=' + equip.id_reservation + ' barcode="' +
             equip.barcode + '" ref="' + equip.ref + '" serial="' + equip.serial + '" qty_received_befor=' + equip.quantity_received + ' table_suffix="' + table_suffix + '">';
-    line += '<td>' + equip.date_update + '</td>';
+    line += '<td>' + equip.date_from + '</td>';
     line += '<td>' + equip.refurl + '</td>'; // refUrl
     line += '<td>' + equip.serial + '</td>'; // num série
     line += '<td>' + equip.label + '</td>'; // label

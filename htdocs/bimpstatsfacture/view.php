@@ -18,19 +18,20 @@ $entrepots = $staticSFF->getAllEntrepots();
 $staticSF = new BimpStatsFacture($db);
 $centres = $staticSF->getExtrafieldArray('facture', 'centre');
 
-//var_dump($centres);
-
-if ($user->rights->BimpStatsFacture->facture->limit) {
+if (!$user->rights->BimpStatsFacture->factureCentre->read and !$user->rights->BimpStatsFacture->facture->read)
+    accessforbidden();
+    
+if ($user->rights->BimpStatsFacture->factureCentre->read) {
     $centres = $staticSF->parseCenter($user, $centres);
 }
 
 if ($object == 'facture_fournisseur') {
 
-    $nb_row_filter = 5;
+    $nb_row_filter = 4;
 } else {
     $is_common = true;
 
-    $nb_row_filter = 6;
+    $nb_row_filter = 5;
 }
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
@@ -81,13 +82,13 @@ if ($is_common) {
 
 
 
-print '<tr><td>Type de lieu</td><td>
-<input id="place_centre" name="place" type="radio" value="c" checked>
-<label for="place_centre">Centre</label>
-
-<input id="place_entrepot" name="place" type="radio" value="e">
-<label for="place_entrepot">Entrepôt</label>
-</td></tr>';
+//print '<tr><td>Type de lieu</td><td>
+//<input id="place_centre" name="place" type="radio" value="c" checked>
+//<label for="place_centre">Centre</label>
+//
+//<input id="place_entrepot" name="place" type="radio" value="e">
+//<label for="place_entrepot">Entrepôt</label>
+//</td></tr>';
 
 
 

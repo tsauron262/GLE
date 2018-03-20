@@ -108,7 +108,6 @@ class BimpStatsFacture {
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
-//        if ($this->is_common) {
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
             $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
             $sql .= ' OR e.type IS NULL)';
@@ -134,7 +133,7 @@ class BimpStatsFacture {
         }
         $sql .= ")";
 
-        if ($user->rights->BimpStatsFacture->facture->limit and $placeType == 'c') {
+        if ($user->rights->BimpStatsFacture->factureCentre->read and $user->rights->BimpStatsFacture->facture->read) {
             $sql .= ' AND fs.centre IN (' . substr(str_replace(' ', '", "', $user->array_options['options_apple_centre']), 2) . '")';
         }
 

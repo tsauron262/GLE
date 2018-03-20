@@ -32,7 +32,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             format: format,
             nomFichier: nomFichier,
             is_common: is_common,
-            typePlace: typePlace,
+            typePlace: 'c',
             action: 'getFactures'
         },
         error: function () {

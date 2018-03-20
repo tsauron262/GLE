@@ -412,6 +412,12 @@ class Repair
             'technicianLastName'       => '',
             'unreceivedModules'        => '',
         );
+        if($data == null){
+            $datas['repairNumber'] = isset($this->repairNumber) ? $this->repairNumber : '';
+            $datas['repairConfirmationNumber'] = isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : '';
+        }
+        
+        
         if ($this->isIphone)
             $datas['imeiNumber'] = '';
 

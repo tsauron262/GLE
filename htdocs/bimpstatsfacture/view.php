@@ -112,8 +112,8 @@ foreach ($entrepots as $val => $name) {
 }
 print '</select>';
 
-print '<input id="selectAllCentres"   type="button" class="butAction round" value="Tout sélectionner">';
-print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td></tr>';
+print '<input id="selectAllEntrepots"   type="button" class="butAction round" value="Tout sélectionner">';
+print '<input id="deselectAllEntrepots" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
 // Etats
 $facstatic = new Facture($db);

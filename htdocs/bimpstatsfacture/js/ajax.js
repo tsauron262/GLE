@@ -74,6 +74,7 @@ $(document).ready(function () {
 
     $('.select2').select2();
     id_place = 'centre';
+    name_place = 'Centre';
     $('input#place_centre').prop('checked', 'true');
 
     var object = getUrlParameter('object');
@@ -151,12 +152,21 @@ function initButtonFillAndEmpty() {
     });
 
     $('#selectAllCentres').click(function () {
-        $('#' + id_place).find('option').prop('selected', true);
-        $('#' + id_place).trigger('change');
+        $('#centre').find('option').prop('selected', true);
+        $('#centre').trigger('change');
     });
     $('#deselectAllCentres').click(function () {
-        $('#' + id_place).find('option').prop('selected', false);
-        $('#' + id_place).trigger('change');
+        $('#centre').find('option').prop('selected', false);
+        $('#centre').trigger('change');
+    });
+
+    $('#selectAllEntrepots').click(function () {
+        $('#entrepot').find('option').prop('selected', true);
+        $('#entrepot').trigger('change');
+    });
+    $('#deselectAllEntrepots').click(function () {
+        $('#entrepot').find('option').prop('selected', false);
+        $('#entrepot').trigger('change');
     });
 }
 
@@ -176,14 +186,16 @@ function initButtonPlace() {
     $("input[type='radio'][name='place']").on('click', function () {
         if ($(this).val() === 'c') { // centre
             id_place = 'centre';
+            name_place = 'Centre';
             $('#tr_centre').css('display', '');
             $('#tr_entrepot').css('display', 'none');
-            $('label[for=sortByCentre]').text('Centre');
+            $('label[for=sortByCentre]').text(name_place);
         } else { // entrepot
             id_place = 'entrepot';
+            name_place = 'Entrepôt';
             $('#tr_centre').css('display', 'none');
             $('#tr_entrepot').css('display', '');
-            $('label[for=sortByCentre]').text('Entrepôt');
+            $('label[for=sortByCentre]').text(name_place);
         }
     });
 }

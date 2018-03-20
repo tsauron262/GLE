@@ -94,7 +94,8 @@ print '<tr><td>Type de lieu</td><td>
 // Centres
 print '<tr id="tr_centre"><td>Centre</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
-print '<option  value="NRS">Non renseigné</option>';
+if (!$user->rights->BimpStatsFacture->facture->limit)
+    print '<option  value="NRS">Non renseigné</option>';
 foreach ($centres as $val => $name) {
     print '<option value="' . $val . '">' . $name . '</option>';
 }

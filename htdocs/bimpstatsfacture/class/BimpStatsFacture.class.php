@@ -79,7 +79,6 @@ class BimpStatsFacture {
             $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
             $hash = $this->convertCenter($hash, $c_to_centres);
         } else { // entrepot
-            
         }
         $out = $this->sortHash($hash, $sortBy);
         if ($this->mode == 'c') {
@@ -127,10 +126,11 @@ class BimpStatsFacture {
             $sql .= "1";
         }
         $sql .= ")";
+
+        if ($user->rights->BimpStatsFacture->facture->limit and $placeType == 'c') {
+            $sql .= ' AND fs.centre IN (' . substr(str_replace(' ', '", "', $user->array_options['options_apple_centre']), 2) . '")';
+        }
         
-//        if ($user->rights->BimpStatsFacture->facture->limit and $placeType == 'c') {
-//       $user->array_options['options_apple_centre'];     
-//        }
 //        }
 //        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
 //            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
@@ -366,7 +366,7 @@ class BimpStatsFacture {
         }
         return $out;
     }
-    
+
     private function convertCenter($hash, $centres) {
         foreach ($hash as $ind => $h) {
             $hash[$ind]['centre'] = $centres[$h['ct']];

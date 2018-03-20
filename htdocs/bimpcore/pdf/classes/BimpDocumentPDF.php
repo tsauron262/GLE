@@ -227,16 +227,26 @@ class BimpDocumentPDF extends BimpModelPDF
 
         return $html;
     }
-    
+
     public function renderDocumentContent()
     {
         global $conf, $mysoc;
-        
-        if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
-            $this->writeContent('<p style="font-size: 10px">Objet : <strong>'.$this->object->array_options['options_libelle'].'</strong></p>');
+
+        $situationinvoice = false;
+
+        if (isset($this->object->situation_cycle_ref) && $this->situation_cycle_ref) {
+            $situationinvoice = true;
         }
-        
+
+        if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
+            $this->writeContent('<p style="font-size: 10px">Objet : <strong>' . $this->object->array_options['options_libelle'] . '</strong></p>');
+        }
+
         $table = new BimpPDF_AmountsTable($this->pdf);
+
+        if (method_exists($this, 'setAmountsTableParams')) {
+            $this->setAmountsTableParams($table);
+        }
 
         $lines = $this->object->lines;
         $i = 0;
@@ -278,6 +288,10 @@ class BimpDocumentPDF extends BimpModelPDF
                 $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
                 $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
+                if ($situationinvoice) {
+                    $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);
+                }
+
                 if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
                     $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
                 }
@@ -292,10 +306,26 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $row['total_ht'] = pdf_getlinetotalexcltax($this->object, $i, $this->langs);
 
-                if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1)
-                    $tva_line = $line->multicurrency_total_tva;
-                else
-                    $tva_line = $line->total_tva;
+                $sign = 1;
+                if (isset($this->object->type) && $this->object->type == 2 && !empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE))
+                    $sign = -1;
+
+                // Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
+                // Prise en compte si nécessaire de la progression depuis la situation précédente:
+                $prev_progress = $line->get_prev_progress($this->object->id);
+                if ($prev_progress > 0 && !empty($line->situation_percent)) {
+                    if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
+                        $tva_line = $sign * $line->multicurrency_total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                    } else {
+                        $tva_line = $sign * $line->total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                    }
+                } else {
+                    if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
+                        $tva_line = $sign * $line->multicurrency_total_tva;
+                    } else {
+                        $tva_line = $sign * $line->total_tva;
+                    }
+                }
 
                 $localtax1ligne = $line->total_localtax1;
                 $localtax2ligne = $line->total_localtax2;
@@ -305,7 +335,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $localtax2_type = $line->localtax2_type;
 
                 if ($this->object->remise_percent)
-                    $tvaligne-=($tvaligne * $this->object->remise_percent) / 100;
+                    $tva_line-=($tva_line * $this->object->remise_percent) / 100;
                 if ($this->object->remise_percent)
                     $localtax1ligne-=($localtax1ligne * $this->object->remise_percent) / 100;
                 if ($this->object->remise_percent)
@@ -357,7 +387,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->pdf->addVMargin(1);
         $table->write();
         unset($table);
-        
+
         // *** Informations:  *** 
         $info_html = '<div style="font-size: 7px; line-height: 8px;">';
         $info_html .= '<table style="width: 100%" cellpadding="5">';
@@ -593,7 +623,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $table->remove_empty_cols = false;
         $table->addCol('left', '', 95);
         $table->addCol('right', '', 95);
-        
+
         $table->rows[] = array(
             'left'  => $info_html,
             'right' => $totaux_html

@@ -18,8 +18,14 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         global $conf;
 
+        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        
+        if (!file_exists($logo_file)) {
+            $logo_file = '';
+        }
+        
         $this->header_vars = array(
-            'logo_img'     => $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo,
+            'logo_img'     => $logo_file,
             'logo_width'   => '120',
             'header_right' => ''
         );

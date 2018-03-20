@@ -25,7 +25,7 @@ class PropalPDF extends BimpDocumentPDF
         $this->propal = new Propal($db);
     }
 
-    public function initData()
+    protected function initData()
     {
         if (isset($this->object) && is_a($this->object, 'Propal')) {
             if (isset($this->object->id) && $this->object->id) {
@@ -35,6 +35,7 @@ class PropalPDF extends BimpDocumentPDF
                         $this->propal->fetch_thirdparty();
                     }
                 }
+                
                 global $user; 
                 
                 $this->pdf->SetTitle($this->langs->convToOutputCharset($this->object->ref));
@@ -52,6 +53,8 @@ class PropalPDF extends BimpDocumentPDF
         } else {
             $this->errors[] = 'Aucune proposition commerciale spécifiée';
         }
+        
+        parent::initData();
     }
 
     protected function initHeader()
@@ -126,11 +129,5 @@ class PropalPDF extends BimpDocumentPDF
             'doc_ref'  => $docRef,
             'rows'     => $rows
         ));
-    }
-
-    protected function renderContent()
-    {   
-        $this->writeContent($this->renderAddresses($this->propal->thirdparty, $this->propal->contact));
-        $this->renderDocumentContent();
     }
 }

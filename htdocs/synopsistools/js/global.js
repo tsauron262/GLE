@@ -973,7 +973,8 @@ function afficherMargeReduc() {
     $(".liste_titre_create  #price_ht").css("display", "none");
     $(".liste_titre_create  #price_ht").css("height", "0");
     $(".liste_titre_create  #price_ht").css("width", "0");
-    $("#select_type option").html("info");
+    $("#select_type option").html("infos");
+    $("#select_type option").first().html("");
 }
 
 function autoClickSearch() {

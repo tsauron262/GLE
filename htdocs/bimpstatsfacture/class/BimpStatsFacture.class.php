@@ -59,12 +59,12 @@ class BimpStatsFacture {
 
     /* Main function, triggered when the user click on "Valider" button */
 
-    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier/* , $is_common */) {
+    public function getFactures($user, $dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $placeType/* , $is_common */) {
         // TODO MAJ BDD
 //        $this->is_common = $is_common;
         $this->mode = $format;
-        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);    // apply filter
-        $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
+        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
+        $hash = $this->getFields($facids, $taxes, $placeType);      // get all information about filtered factures
         $hash = $this->addMargin($hash);
         if ($this->mode == 'd') {
             $hash = $this->addSocieteURL($hash);
@@ -74,9 +74,13 @@ class BimpStatsFacture {
         }
         $hash = $this->addStatut($hash);
         $t_to_types = $this->getExtrafieldArray('facture', 'type');
-        $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
         $hash = $this->convertType($hash, $t_to_types);
-        $hash = $this->convertCenter($hash, $c_to_centres);
+        if ($placeType == 'c') {    // centre
+            $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
+            $hash = $this->convertCenter($hash, $c_to_centres);
+        } else { // entrepot
+            
+        }
         $out = $this->sortHash($hash, $sortBy);
         if ($this->mode == 'c') {
             $this->putCsv($out, $nomFichier);
@@ -94,11 +98,11 @@ class BimpStatsFacture {
 
     /* Filter facture */
 
-    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats) {
+    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType) {
         $ids = array();
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture'/* . $this->addExtra('_fourn') . */ . '' . '_extrafields as e ON f.rowid = e.fk_object';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
@@ -123,6 +127,10 @@ class BimpStatsFacture {
             $sql .= "1";
         }
         $sql .= ")";
+        
+//        if ($user->rights->BimpStatsFacture->facture->limit and $placeType == 'c') {
+//       $user->array_options['options_apple_centre'];     
+//        }
 //        }
 //        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
 //            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
@@ -358,7 +366,7 @@ class BimpStatsFacture {
         }
         return $out;
     }
-
+    
     private function convertCenter($hash, $centres) {
         foreach ($hash as $ind => $h) {
             $hash[$ind]['centre'] = $centres[$h['ct']];
@@ -535,7 +543,6 @@ class BimpStatsFacture {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
         $sql .= ' WHERE fk_object=' . $user->id;
 
-        echo $sql;
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {

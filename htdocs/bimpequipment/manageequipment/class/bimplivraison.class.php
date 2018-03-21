@@ -270,7 +270,7 @@ class BimpLivraison {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur as cf ON cf.rowid = e.fk_object';
         $sql .= ' WHERE e.entrepot=' . $fk_warehouse;
-//        $sql .= ' AND statu'
+        $sql .= ' AND statut >= '.$status_min." AND statut <= ".$status_max;
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {

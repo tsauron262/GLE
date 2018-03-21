@@ -170,10 +170,4 @@ class InvoicePDF extends BimpDocumentPDF
             'rows'     => $rows
         ));
     }
-
-    protected function renderContent()
-    {
-        $this->writeContent($this->renderAddresses($this->facture->thirdparty, $this->facture->contact));
-        $this->renderDocumentContent();
-    }
 }

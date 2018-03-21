@@ -105,7 +105,7 @@ class BimpPDF_Table
         foreach ($this->table_classes as $tableClass) {
             $html .= ' ' . $tableClass;
         }
-        $html .= '"';
+        $html .= '" ';
         $html .= 'style="font-size: ' . $this->fontSize . 'px;';
         foreach ($this->table_styles as $prop => $value) {
             $html .= ' ' . $prop . ': ' . $value . ';';
@@ -162,7 +162,7 @@ class BimpPDF_Table
                             $class .= ($class ? ' ' : '') . $row[$key]['class'];
                         }
                         if (isset($row[$key]['colspan'])) {
-                            if ((int) $row[$key]['colspan'] > 1) {
+                            if ((int) $row[$key]['colspan'] > 1 && ($i < $n_cols)) {
                                 $n_continue = (int) $row[$key]['colspan'] - 2;
                                 $multicell_width = $col_width;
                                 $multicell = $row[$key];
@@ -189,7 +189,7 @@ class BimpPDF_Table
 
         $html .= '</tr>';
         $html .= '</table>';
-
+        
         $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html, false, false, true, false, '');
     }
 

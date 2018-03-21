@@ -6,6 +6,7 @@ class BimpDocumentPDF extends BimpModelPDF
 {
 
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
+    public $contact = null;
 
     public function __construct($db)
     {
@@ -13,6 +14,22 @@ class BimpDocumentPDF extends BimpModelPDF
     }
 
     // Initialisation
+
+    protected function initData()
+    {
+        if (!count($this->errors)) {
+            if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
+                $contacts = $this->object->getIdContact('external', 'CUSTOMER');
+                if (isset($contacts[0]) && $contacts[0]) {
+                    BimpTools::loadDolClass('contact');
+                    $contact = new Contact($this->db);
+                    if ($contact->fetch((int) $contacts[0]) > 0) {
+                        $this->contact = $contact;
+                    }
+                }
+            }
+        }
+    }
 
     protected function initHeader()
     {
@@ -234,6 +251,12 @@ class BimpDocumentPDF extends BimpModelPDF
         return $html;
     }
 
+    protected function renderContent()
+    {
+        $this->writeContent($this->renderAddresses($this->object->thirdparty, $this->contact));
+        $this->renderDocumentContent();
+    }
+
     public function renderDocumentContent()
     {
         global $conf, $mysoc;
@@ -256,6 +279,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $lines = $this->object->lines;
         $i = 0;
+
+        $total_remises = 0;
 
         $localtax1 = array();
         $localtax2 = array();
@@ -308,6 +333,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if ($line->remise_percent) {
                     $row['reduc'] = pdf_getlineremisepercent($this->object, $i, $this->langs);
+                    $total_remises += ((float) $line->total_ttc * ((float) $line->remise_percent / 100));
                 }
 
                 $row['total_ht'] = pdf_getlinetotalexcltax($this->object, $i, $this->langs);
@@ -484,6 +510,17 @@ class BimpDocumentPDF extends BimpModelPDF
         $totaux_html = '<div>';
         $totaux_html .= '<table style="width: 100%" cellpadding="5">';
 
+        // Total remises: 
+        if (isset($this->object->remise_absolue) && $this->object->remise_absolue > 0) {
+            $total_remises += (float) $this->object->remise_absolue;
+        }
+        if ($total_remises > 0) {
+            $totaux_html .= '<tr>';
+            $totaux_html .= '<td style="background-color: #F0F0F0;">Total remises</td>';
+            $totaux_html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($total_remises, 0, $this->langs) . '</td>';
+            $totaux_html .= '</tr>';
+        }
+
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
         $totaux_html .= '<tr>';
@@ -618,6 +655,13 @@ class BimpDocumentPDF extends BimpModelPDF
         }
         $totaux_html .= '<tr><td></td><td></td></tr>';
 
+        if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
+            $totaux_html .= '<tr>';
+            $totaux_html .= '<td colspan="2" style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
+            $totaux_html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
+            $totaux_html .= '</tr>';
+        }
+
         $totaux_html .= '<tr>';
         $totaux_html .= '<td colspan="2" style="text-align: center;">Cachet, Date, Signature et mention "Bon pour Accord"</td>';
         $totaux_html .= '</tr>';
@@ -641,5 +685,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $this->writeContent('<br/><br/>');
         $table->write();
+        
+        $this->writeContent('<br/><p style="font-size: 10px; text-align: center; font-weight: bold">Mention "Réserve de propriété"</p>');
     }
 }

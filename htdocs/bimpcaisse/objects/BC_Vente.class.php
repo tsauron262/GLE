@@ -1491,11 +1491,37 @@ class BC_Vente extends BimpObject
             return 0;
         }
 
-        // Ajout des lignes articles: 
 
         $articles = $this->getChildrenObjects('articles');
         $total_ttc = 0;
 
+        foreach ($articles as $article) {
+            $total_ttc += (int) $article->getData('qty') * (float) $article->getData('unit_price_tax_in');
+        }
+
+        // Calcul du total des remise globale en pourcentage: 
+        $globale_remise_percent = 0;
+        $remises = BimpObject::getInstance($this->module, 'BC_VenteRemise');
+
+        foreach ($remises->getList(array(
+            'id_vente'   => (int) $this->id,
+            'id_article' => 0
+        )) as $remise) {
+            switch ((int) $remise['type']) {
+                case 1:
+                    $globale_remise_percent += (float) $remise['percent'];
+                    break;
+
+                case 2:
+                    if ($total_ttc) {
+                        $montant = (float) $remise['montant'];
+                        $globale_remise_percent += (float) ($montant / $total_ttc) * 100;
+                    }
+                    break;
+            }
+        }
+
+        // Ajout des lignes articles: 
         foreach ($articles as $article) {
             $product = $article->getChildObject('product');
             $serial = '';
@@ -1510,8 +1536,7 @@ class BC_Vente extends BimpObject
             $pu_ht = (float) $article->getData('unit_price_tax_ex');
             $pu_ttc = (float) $article->getData('unit_price_tax_in');
             $txtva = (float) $article->getData('tva_tx');
-            $remise_percent = $article->getTotalRemisesPercent();
-            $total_ttc += (float) ($pu_ttc * $qty);
+            $remise_percent = $article->getTotalRemisesPercent($globale_remise_percent);
 
             $txlocaltax1 = 0;
             $txlocaltax2 = 0;
@@ -1530,47 +1555,6 @@ class BC_Vente extends BimpObject
                 $equipment->set('prix_vente', $pu_ttc);
                 $equipment->set('id_facture', $facture->id);
                 $equipment->update();
-            }
-        }
-
-        // Ajout des remises globales: 
-        $remise = BimpObject::getInstance($this->module, 'BC_VenteRemise');
-        $list = $remise->getList(array(
-            'id_vente'   => (int) $this->id,
-            'id_article' => 0
-        ));
-
-        if (!is_null($list) && count($list)) {
-            foreach ($list as $remise) {
-                $montant = 0;
-                $label = $remise['label'];
-                if (is_null($label) || !$label) {
-                    $label = 'Remise';
-                }
-
-                switch ((int) $remise['type']) {
-                    case 1:
-                        $percent = (float) $remise['percent'];
-                        if ($percent) {
-                            $label .= ' (' . BimpTools::displayFloatValue($percent, 6) . ' %)';
-                            $montant = (float) ($total_ttc * ($percent / 100));
-                        }
-                        break;
-
-                    case 2:
-                        $montant = (float) $remise['montant'];
-                        break;
-                }
-
-                if ($montant > 0) {
-                    $desc = $label;
-                    $qty = 1;
-                    $pu_ht = -$montant;
-                    $pu_ttc = (float) $article->getData('unit_price_tax_in');
-                    $txtva = 0;
-
-                    $facture->addline($desc, $pu_ht, $qty, $txtva, 0, 0, 0, 0, '', '', 0, 0, '', 'HT', $pu_ttc);
-                }
             }
         }
 
@@ -1617,8 +1601,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        $total_paid = round($total_paid, 2, PHP_ROUND_HALF_DOWN);
-        $total_facture_ttc = round((float) $this->getData('total_ttc'), 2, PHP_ROUND_HALF_DOWN);
+        $total_facture_ttc = (float) $this->getData('total_ttc');
 
         if ($total_paid > $total_facture_ttc) {
             $returned = $total_facture_ttc - $total_paid;
@@ -1642,11 +1625,12 @@ class BC_Vente extends BimpObject
                     BimpTools::getErrorsFromDolObject($p, $errors, $langs);
                 }
             }
-        } elseif ($total_paid < $total_facture_ttc) {
-            $errors[] = 'Facture non entièrement payée';
         } else {
-            if ($facture->set_paid($user) <= 0) {
-                $errors[] = 'Echec de l\'enregistrement du statut "payé" pour cette facture';
+            $diff = $total_facture_ttc - $total_paid;
+            if ($diff < 0.01) {
+                if ($facture->set_paid($user) <= 0) {
+                    $errors[] = 'Echec de l\'enregistrement du statut "payé" pour cette facture';
+                }
             }
         }
 

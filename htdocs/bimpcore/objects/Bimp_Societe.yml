@@ -395,3 +395,8 @@ lists:
                 field: zip
             town: 
                 field: town
+                
+cards: 
+    default: 
+        type: societe_card
+        view_btn: 1

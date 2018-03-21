@@ -12,12 +12,12 @@ class BC_ListViews extends BC_List
         $this->params_def['edit_form'] = array('default' => '');
         $this->params_def['item_modal_view'] = array('default' => '');
         $this->params_def['item_inline_view'] = array('default' => '');
-        
+
         $this->params_def['item_col_lg'] = array('data_type' => 'int', 'default' => 12);
         $this->params_def['item_col_md'] = array('data_type' => 'int');
         $this->params_def['item_col_sm'] = array('data_type' => 'int');
         $this->params_def['item_col_xs'] = array('data_type' => 'int');
-        
+
         $path = null;
 
         if (!$name || $name === 'default') {
@@ -31,10 +31,10 @@ class BC_ListViews extends BC_List
             $path = 'views_lists';
         }
 
-        parent::__construct($object, $name, $level, $id_parent, $title, $icon);
-        
+        parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
+
         $this->data['item_view_name'] = $this->params['item_view'];
-        
+
         if (is_null($this->params['item_col_lg'])) {
             $this->params['item_col_lg'] = 12;
         }
@@ -63,17 +63,21 @@ class BC_ListViews extends BC_List
     public function renderHtmlContent()
     {
         $html = parent::renderHtmlContent();
-        
+
         if (!$this->isOk()) {
             return $html;
         }
 
+        if (is_null($this->items)) {
+            $this->fetchItems();
+        }
+
         if (!count($this->items)) {
-            return '';
+            return BimpRender::renderAlerts('Aucun élément trouvé', 'info');
         }
 
         $html .= $this->renderItemViews();
-        
+
         return $html;
     }
 
@@ -83,13 +87,13 @@ class BC_ListViews extends BC_List
             return BimpRender::renderAlerts($this->errors);
         }
 
-        if (is_null($this->views_list_path)) {
+        if (is_null($this->config_path)) {
             $this->errors[] = 'Erreur d\'initialisation de la liste';
             return BimpRender::renderAlerts($this->errors);
         }
-        
+
         $html = '';
-        
+
         $html .= '<div class="objectViewContainer" style="display: none"></div>';
 
         $primary = $this->object->getPrimary();
@@ -98,14 +102,14 @@ class BC_ListViews extends BC_List
         foreach ($this->items as $item) {
             $this->object->reset();
             if ($this->object->fetch((int) $item[$primary])) {
-                $view = new BC_View($this->object, $name, true, $this->level + 1);
-                
+                $view = new BC_View($this->object, $this->params['item_view'], true, $this->level + 1);
+
                 $html .= '<div class="' . $this->identifier . '_item';
                 $html .= ' col-xs-' . $this->params['item_col_xs'];
                 $html .= ' col-sm-' . $this->params['item_col_sm'];
                 $html .= ' col-md-' . $this->params['item_col_md'];
                 $html .= ' col-lg-' . $this->params['item_col_lg'] . '">';
-                
+
                 $item_footer = '';
                 if ($this->params['view_btn'] || $this->params['edit_form']) {
                     $item_footer .= '<div style="text-align: right;">';

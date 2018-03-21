@@ -60,7 +60,7 @@ class BC_VenteArticle extends BimpObject
         return true;
     }
 
-    public function getTotalRemisesPercent()
+    public function getTotalRemisesPercent($extra_percent = 0)
     {
         if ($this->isLoaded()) {
             $id_vente = (int) $this->getData('id_vente');
@@ -77,7 +77,7 @@ class BC_VenteArticle extends BimpObject
             $total_ttc = (float) ($unit_price_ttc * $qty);
 
             if (!$total_ttc) {
-                return 0;
+                return $extra_percent;
             }
 
             $total_remises = 0;
@@ -112,9 +112,9 @@ class BC_VenteArticle extends BimpObject
             }
 
             if ($total_remises) {
-                return (float) ($total_remises / $total_ttc) * 100;
+                return (float) (($total_remises / $total_ttc) * 100) + $extra_percent;
             }
         }
-        return 0;
+        return $extra_percent;
     }
 }

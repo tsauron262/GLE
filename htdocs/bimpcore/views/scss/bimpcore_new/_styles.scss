@@ -90,9 +90,18 @@ div.tabBar {
     }
 }
 
+.ui-autocomplete,
+.select2-drop {
+    z-index: 10250!important;
+}
+
 body.has_fullscreen {
     .modal {
         z-index: 11100!important;
+    }
+    .ui-autocomplete,
+    .select2-drop {
+        z-index: 11250!important;
     }
 }
 
@@ -111,10 +120,6 @@ body.has_fullscreen {
     }
 }
 
-.ui-autocomplete,
-.select2-drop {
-    z-index: 10250!important;
-}
 .typeLabel {
     border-radius: 24px;
     padding: 3px 8px;
@@ -141,6 +146,10 @@ body.has_fullscreen {
 .important {
     font-weight: bold;
     color: $important;
+}
+
+div.alert {
+    margin: 10px 0;
 }
 
 .date, .time, .datetime {

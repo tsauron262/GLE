@@ -841,7 +841,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && isset($conf->global->FCKEDITOR_ENABLE_SOCIETE) && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
-            require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('description', $dsc, 280, 'dolibarr_notes', 'In', true);
             $doleditor->Create();
         } else {

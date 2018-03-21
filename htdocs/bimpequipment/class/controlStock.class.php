@@ -35,7 +35,7 @@ class controlStock{
                 if($nbE != $nbS || $nbE != 0){
                     $millieuText = $debutText. "  -  Produit : ".$labPr;
                     if($nbE == $nbS){
-                        if($REQUEST['action'] == "detail")
+                        if($_REQUEST['action'] == "detail")
                             echo $millieuText." OK  : ".$nbE;
                     }
                     elseif($nbE > $nbS)
@@ -57,7 +57,7 @@ class controlStock{
                 }
             }
         }
-        echo "<br/><br/>Fin";
+        echo "<br/><br/>Fin du test";
     }
     
     

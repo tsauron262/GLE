@@ -283,14 +283,18 @@ class BimpLivraison {
                 $status = $bl->commande->statut;
                 if ($status == 0)
                     $name_status = 'Brouillon';
-                if ($status == 1)
+                elseif ($status == 1)
                     $name_status = 'Validée';
-                if ($status == 2)
+                elseif ($status == 2)
                     $name_status = 'Approuvée';
-                if ($status == 3)
+                elseif ($status == 3)
                     $name_status = 'En cours';
-                if ($status == 4)
+                elseif ($status == 4)
                     $name_status = 'Reçu partiellement';
+                elseif ($status == 5)
+                    $name_status = 'Reçu';
+                else 
+                    $name_status = 'Inconnue';
 
                 $orders[] = array(
                     'id' => $bl->orderId,

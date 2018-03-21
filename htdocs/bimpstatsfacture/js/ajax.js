@@ -7,13 +7,15 @@
 var groupes;
 var taxesOrNot;
 var format;
-var is_common;
+var is_customer;
+var id_place;
+var name_place;
 
 /**
  * Ajax functions
  */
 
-function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier) {
+function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier, typePlace) {
 
     $.ajax({
         type: "POST",
@@ -29,7 +31,8 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             etats: etats,
             format: format,
             nomFichier: nomFichier,
-            is_common: is_common,
+            is_customer: is_customer,
+            typePlace: typePlace,
             action: 'getFactures'
         },
         error: function () {
@@ -70,18 +73,21 @@ $(document).ready(function () {
     $('#dateEnd').datepicker('setDate', lastDay);
 
     $('.select2').select2();
+    id_place = 'centre';
+    name_place = 'Centre';
+    $('input#place_centre').prop('checked', 'true');
 
     var object = getUrlParameter('object');
     if (object === 'facture_fournisseur')
-        is_common = false;
-    else if (object === 'facture')
-        is_common = true;
+        is_customer = false;
     else
-        return;
+        is_customer = true;
+
 
     initSelectMultiple();
     initButtonFillAndEmpty();
     initButtonFormat();
+    initButtonPlace();
     $('#go').on('click', function () {
         valider();
     });
@@ -98,11 +104,12 @@ function valider() {
         $('#go').hide();
         $('#waiting').addClass('loading');
         var types = $('#type').val();
-        var centres = $('#centre').val();
+        var centres = $('#' + id_place).val();
         var statut = $("input[type='radio'][name='statutPayment']:checked").val();
         var taxes = $("input[type='radio'][name='priceTaxes']:checked").val();
         var format = $("input[type='radio'][name='formatOutput']:checked").val();
         var nomFichier = $('#nomFichier').val();
+        var typePlace = $("input[type='radio'][name='place']:checked").val();
         var etats = [];
         var sortBy = [];
         $("input[type='checkbox'][name='sortBy']:checked").each(function () {
@@ -111,7 +118,7 @@ function valider() {
         $("input[type='checkbox'][name='etat']:checked").each(function () {
             etats.push($(this).val());
         });
-        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier);
+        getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxes, etats, format, nomFichier, typePlace);
     }
 }
 
@@ -123,8 +130,8 @@ function initSelectMultiple() {
             }
         }
     });
-    $('#centre').change(function () {
-        if ($('#centre option:not(:selected)').length === 0) {
+    $('#' + id_place).change(function () {
+        if ($('#' + id_place + ' option:not(:selected)').length === 0) {
             if ($('#allCentre').prop('checked') === false) {
                 $('#allCentre').prop('checked', true);
             }
@@ -151,6 +158,15 @@ function initButtonFillAndEmpty() {
         $('#centre').find('option').prop('selected', false);
         $('#centre').trigger('change');
     });
+
+    $('#selectAllEntrepots').click(function () {
+        $('#entrepot').find('option').prop('selected', true);
+        $('#entrepot').trigger('change');
+    });
+    $('#deselectAllEntrepots').click(function () {
+        $('#entrepot').find('option').prop('selected', false);
+        $('#entrepot').trigger('change');
+    });
 }
 
 function initButtonFormat() {
@@ -165,6 +181,23 @@ function initButtonFormat() {
     });
 }
 
+function initButtonPlace() {
+    $("input[type='radio'][name='place']").on('click', function () {
+        if ($(this).val() === 'c') { // centre
+            id_place = 'centre';
+            name_place = 'Centre';
+            $('#tr_centre').css('display', '');
+            $('#tr_entrepot').css('display', 'none');
+            $('label[for=sortByCentre]').text(name_place);
+        } else { // entrepot
+            id_place = 'entrepot';
+            name_place = 'Entrepôt';
+            $('#tr_centre').css('display', 'none');
+            $('#tr_entrepot').css('display', '');
+            $('label[for=sortByCentre]').text(name_place);
+        }
+    });
+}
 
 /* Get the date in the datepicker as TMS */
 function getDate(id) {
@@ -205,10 +238,10 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    if (is_common)
-        var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', 'Centre', 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV'];
+    if (is_customer)
+        var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', name_place, 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV'];
     else
-        var arrayOfField = ['Fournisseur', 'Facture', taxesOrNot, 'Statut', 'Paiement', 'Payé TTC', 'Centre'];
+        var arrayOfField = ['Fournisseur', 'Facture', taxesOrNot, 'Statut', 'Paiement', 'Payé TTC', name_place];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
@@ -216,17 +249,17 @@ function initTable(taxesOrNot, facture, key) {
 }
 
 function fillTable(facture, prevFactureId) {
-
-    if (is_common) {
+    var centre = facture.centre_url ? facture.centre_url : (facture.centre ? facture.centre : '');
+    if (is_customer) {
         if (prevFactureId === facture.fac_id)
-            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
         else
-            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
+            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
     } else {
         if (prevFactureId === facture.fac_id)
-            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre];
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre];
         else
-            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre];
+            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, centre];
     }
 
     sortie = "";
@@ -238,11 +271,11 @@ function fillTable(facture, prevFactureId) {
 }
 
 function addTotaux(groupe, key) {
-    if (is_common)
+    if (is_customer)
         arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
     else
         arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', ''];
-    
+
     $('<tr></tr>')
             .attr('id', 'tr' + key + 'end')
             .appendTo('#table' + key);

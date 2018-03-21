@@ -28,11 +28,11 @@ class BimpStatsFactureFournisseur {
         $this->db = $db;
     }
 
-    public function getFactures($dateStart, $dateEnd, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier) {
+    public function getFactures($user, $dateStart, $dateEnd, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $placeType) {
         // TODO MAJ BDD
         $this->mode = $format;
-        $facids = $this->getFactureIds($dateStart, $dateEnd, $centres, $statut, $etats);    // apply filter
-        $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
+        $facids = $this->getFactureIds($dateStart, $dateEnd, $centres, $statut, $etats, $placeType, $user);    // apply filter
+        $hash = $this->getFields($facids, $taxes, $placeType);      // get all information about filtered factures
 //        $hash = $this->addMargin($hash);
         if ($this->mode == 'd') {
             $hash = $this->addSocieteURL($hash);
@@ -55,7 +55,7 @@ class BimpStatsFactureFournisseur {
 
     /* Filter facture */
 
-    private function getFactureIds($dateStart, $dateEnd, $centres, $statut, $etats) {
+    private function getFactureIds($dateStart, $dateEnd, $centres, $statut, $etats, $placeType, $user) {
         $ids = array();
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture_fourn as f';
@@ -113,14 +113,15 @@ class BimpStatsFactureFournisseur {
         return $ids;
     }
 
-    private function getFields($facids, $taxes) {
+    private function getFields($facids, $taxes, $placeType) {
 
         $hash = array();
 
         $sql = 'SELECT f.rowid as fac_id, f.ref as ref, f.fk_statut as fac_statut,';
         $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
-        $sql .= ' e.entrepot as entrepot_id,';
+        if ($placeType == 'e')
+            $sql .= ' e.entrepot as entrepot_id,';
         $sql .= ' en.label as nom_entrepot,';
 //        $sql .= ' fs.centre as centre1, fs.idSav as sav_id, fs.refSav as sav_ref,';
         $sql .= ' pf.amount as pai_paye_ttc,';
@@ -136,7 +137,8 @@ class BimpStatsFactureFournisseur {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiementfourn_facturefourn as pf ON f.rowid              = pf.fk_facturefourn';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiementfourn              as p  ON pf.fk_paiementfourn  = p.rowid';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_extrafields  as e  ON f.rowid              = e.fk_object';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'entrepot                   as en ON e.entrepot           = en.rowid';
+        if ($placeType == 'e')
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'entrepot                   as en ON e.entrepot           = en.rowid';
 //        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
 //        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'synopsischrono     as sy     ON fs.equipmentId = sy.id';
 //        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'synopsischrono_chrono_101 as sy_101 ON fs.equipmentId = sy_101.id';

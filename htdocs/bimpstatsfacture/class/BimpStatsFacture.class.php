@@ -30,6 +30,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/margin/lib/margins.lib.php';
 
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/stock/class/entrepot.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsischrono/class/chrono.class.php';
 
@@ -59,11 +60,10 @@ class BimpStatsFacture {
 
     /* Main function, triggered when the user click on "Valider" button */
 
-    public function getFactures($dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier/* , $is_common */) {
+    public function getFactures($user, $dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $placeType) {
         // TODO MAJ BDD
-//        $this->is_common = $is_common;
         $this->mode = $format;
-        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats);    // apply filter
+        $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
         $hash = $this->addMargin($hash);
         if ($this->mode == 'd') {
@@ -74,10 +74,14 @@ class BimpStatsFacture {
         }
         $hash = $this->addStatut($hash);
         $t_to_types = $this->getExtrafieldArray('facture', 'type');
-        $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
         $hash = $this->convertType($hash, $t_to_types);
-        $hash = $this->convertCenter($hash, $c_to_centres);
-        $out = $this->sortHash($hash, $sortBy);
+        if ($placeType == 'c') {    // centre
+            $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
+            $hash = $this->convertCenter($hash, $c_to_centres);
+        } else { // entrepot
+            $hash = $this->addEntrepotURL($hash);
+        }
+        $out = $this->sortHash($hash, $sortBy, $placeType);
         if ($this->mode == 'c') {
             $this->putCsv($out, $nomFichier);
             $out['urlCsv'] = "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&attachment=1&file=/export/exportGle/" . $nomFichier . ".csv' class='butAction'>Fichier</a>";
@@ -85,25 +89,17 @@ class BimpStatsFacture {
         return $out;
     }
 
-//    private function addExtra($string) {
-//        if ($this->is_common)
-//            return '';
-//        else
-//            return $string;
-//    }
-
     /* Filter facture */
 
-    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats) {
+    private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType) {
         $ids = array();
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture'/* . $this->addExtra('_fourn') . */ . '' . '_extrafields as e ON f.rowid = e.fk_object';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
-//        if ($this->is_common) {
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
             $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
             $sql .= ' OR e.type IS NULL)';
@@ -112,27 +108,28 @@ class BimpStatsFacture {
         }
 
         $sql .= " AND (";
-        if (!empty($centres)) {
+        if (!empty($centres) and $placeType == 'c') {
             $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
             $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
                 $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
             }
+        } elseif (!empty($centres) and $placeType == 'e') {
+            $sql .= 'e.entrepot IN (\'' . implode("','", $centres) . '\')';
+            if (in_array('NRS', $centres)) {
+                $sql .= " OR e.entrepot IS NULL OR e.entrepot = '1'";
+            }
         } else {
             $sql .= "1";
         }
         $sql .= ")";
-//        }
-//        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
-//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
-//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
-//            $sql .= ' OR e.centre IS NULL';
-//            $sql .= ' OR fs.centre IS NULL)';
-//        } else if (!empty($centres)) {
-//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
-//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
-//        }
+
+        if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
+            $tab_center = explode(' ', $user->array_options['options_apple_centre']);
+            $sql .= ' AND (fs.centre IN ("' . implode('","', $tab_center) . '")';
+            $sql .= ' OR e.centre IN ("' . implode('","', $tab_center) . '"))';
+        }
 
         if (!empty($etats)) {
             $sql .= ' AND f.fk_statut IN (\'' . implode("','", $etats) . '\')';
@@ -161,7 +158,7 @@ class BimpStatsFacture {
         $sql = 'SELECT f.rowid as fac_id, f.facnumber as fac_number, f.fk_statut as fac_statut,';
         $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
-        $sql .= ' e.centre as centre2, e.type as type,';
+        $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot,';
         $sql .= ' fs.centre as centre1, fs.idSav as sav_id, fs.refSav as sav_ref,';
         $sql .= ' pf.amount as pai_paye_ttc,';
         $sql .= ' sy.description as description, sy.model_refid as saf_refid,';
@@ -206,6 +203,7 @@ class BimpStatsFacture {
                     $hash[$ind]['ct'] = 0;
                 $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
                 $hash[$ind]['equip_ref'] = (isset($obj->description)) ? $obj->description : '';
+                $hash[$ind]['fk_entrepot'] = (isset($obj->fk_entrepot)) ? $obj->fk_entrepot : '';
                 $hash[$ind]['numero_serie'] = (isset($obj->numero_serie)) ? $obj->numero_serie : '';
                 $hash[$ind]['type_garantie'] = (isset($obj->type_garantie)) ? $obj->type_garantie : '';
                 $hash[$ind]['sav_id'] = (isset($obj->sav_id)) ? $obj->sav_id : '';
@@ -322,6 +320,42 @@ class BimpStatsFacture {
         return $hash;
     }
 
+    private function addEntrepotURL($hash) {
+        $allEntrepots = $this->getAllEntrepots();
+
+        foreach ($hash as $ind => $h) {
+            if (isset($h['fk_entrepot']) && $h['fk_entrepot'] != '') {
+                $entrepot = new Entrepot($this->db);
+                $entrepot->id = $h['fk_entrepot'];
+                $entrepot->libelle = $allEntrepots[$h['fk_entrepot']];
+                if ($this->mode == 'd')
+                    $hash[$ind]['centre_url'] = $entrepot->getNomUrl(1);
+                $hash[$ind]['centre'] = $allEntrepots[$h['fk_entrepot']];
+                $hash[$ind]['ct'] = $h['fk_entrepot'];
+            } else {
+                unset($hash[$ind]['ct']);
+            }
+        }
+
+        return $hash;
+    }
+
+    public function getAllEntrepots() {
+
+        $entrepots = array();
+
+        $sql = 'SELECT rowid, label';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                $entrepots[$obj->rowid] = $obj->label;
+            }
+        }
+        return $entrepots;
+    }
+
     public function getExtrafieldArray($elementtype, $name) { // $elementtype = "facture"
         $out = array();
 
@@ -348,6 +382,7 @@ class BimpStatsFacture {
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list_members';
             $sql .= ' WHERE  list_refid = 11';
 
+            $out['NRS'] = 'Non renseigné';
             dol_syslog(get_class($this) . "::getExtrafieldArray sql=" . $sql, LOG_DEBUG);
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
@@ -368,7 +403,7 @@ class BimpStatsFacture {
 
     private function convertType($hash, $types) {
         foreach ($hash as $ind => $h) {
-            $hash[$ind]['type'] = $types[$h['ty']];
+            $hash[$ind]['type'] = isset($types[$h['ty']]) ? $types[$h['ty']] : '';
         }
         return $hash;
     }
@@ -412,8 +447,12 @@ class BimpStatsFacture {
         file_put_contents(DOL_DATA_ROOT . "/synopsischrono/export/exportGle/" . $nomFichier . ".csv", $sortie);
     }
 
-    private function sortHash($hash, $sortBy) {
+    private function sortHash($hash, $sortBy, $placeType) {
         $out = array();
+        if ($placeType == 'e')
+            $place = 'Entrepôt';
+        else
+            $place = 'Centre';
 
         (in_array('c', $sortBy)) ? $sortCenter = true : $sortCenter = false;
         (in_array('t', $sortBy)) ? $sortType = true : $sortType = false;
@@ -436,21 +475,21 @@ class BimpStatsFacture {
                 $filtre = '';
                 if ($sortCenter != '') {
                     $filtre .= $row['ct'];
-                    $title .= $row['centre'] . ' - ';
+                    $title .= ($row['centre'] != '' ? $row['centre'] . ' - ' : 'Sans ' . $place . ' - ');
                 }
                 if ($sortType != '') {
                     $filtre .= $row['ty'];
-                    $title .= $row['type'] . ' - ';
+                    $title .= ($row['type'] != '' ? $row['type'] . ' - ' : 'Sans type - ');
                 }
                 if ($sortTypeGarantie != '') {
                     $ind = array_search($row['type_garantie'], $allTypeGarantie);
                     $filtre .= $ind . '_';
-                    $title .= $row['type_garantie'] . ' - ';
+                    $title .= ($row['type_garantie'] != '' ? $row['type_garantie'] . ' - ' : 'Sans type de garantie - ');
                 }
                 if ($sortEquipement != '') {
                     $ind = array_search($row['equip_ref'], $allEquipement);
                     $filtre .= $ind . '_';
-                    $title .= $row['equip_ref'] . ' - ';
+                    $title .= ($row['equip_ref'] != '' ? $row['equip_ref'] . ' - ' : 'Sans équipement - ');
                 }
                 $title = substr($title, 0, -2);
             }
@@ -472,18 +511,18 @@ class BimpStatsFacture {
 
             unset($row['fac_statut']);
             unset($row['soc_id']);
-//            unset($row['pai_id']);
+            if ($this->mode != 'd')
+                unset($row['pai_id']);
             unset($row['ct']);
             unset($row['ty']);
             unset($row['sav_id']);
             unset($row['saf_refid']);
 
             if ($this->mode != 'r') {
-                //Formatae des données
+                //Formatage des données
                 $row['factotal'] = $this->formatPrice($row['factotal']);
                 $row['marge'] = $this->formatPrice($row['marge']);
                 $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
-
                 $out[$filtre]['factures'][] = $row;
             }
         }
@@ -535,7 +574,6 @@ class BimpStatsFacture {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
         $sql .= ' WHERE fk_object=' . $user->id;
 
-        echo $sql;
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {

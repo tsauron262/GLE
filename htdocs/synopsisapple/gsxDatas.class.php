@@ -714,7 +714,7 @@ class gsxDatas
             $valDef['billTo'] = $tech->array_options['options_apple_service'];
             $valDef['soldToContact'] = $tech->getFullName($langs);
             $valDef['technicianName'] = $tech->lastname;
-            $valDef['soldToContactPhone'] = $tech->office_phone;
+            $valDef['soldToContactPhone'] = ($tech->office_phone != ""? $tech->office_phone : $tech->user_mobile);
             $valDef['poNumber'] = $chrono->ref;
             $valDef['purchaseOrderNumber'] = $chrono->ref;
 

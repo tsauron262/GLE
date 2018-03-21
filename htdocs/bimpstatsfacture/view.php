@@ -27,11 +27,11 @@ if ($user->rights->BimpStatsFacture->factureCentre->read) {
 
 if ($object == 'facture_fournisseur') {
 
-    $nb_row_filter = 4;
+    $nb_row_filter = 5;
 } else {
     $is_common = true;
 
-    $nb_row_filter = 5;
+    $nb_row_filter = 6;
 }
 
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpstatsfacture/css/styles.css');
@@ -82,20 +82,20 @@ if ($is_common) {
 
 
 
-//print '<tr><td>Type de lieu</td><td>
-//<input id="place_centre" name="place" type="radio" value="c" checked>
-//<label for="place_centre">Centre</label>
-//
-//<input id="place_entrepot" name="place" type="radio" value="e">
-//<label for="place_entrepot">Entrepôt</label>
-//</td></tr>';
+print '<tr><td>Type de lieu</td><td>
+<input id="place_centre" name="place" type="radio" value="c" checked>
+<label for="place_centre">Centre</label>
+
+<input id="place_entrepot" name="place" type="radio" value="e">
+<label for="place_entrepot">Entrepôt</label>
+</td></tr>';
 
 
 
 // Centres
 print '<tr id="tr_centre"><td>Centre</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
-if (!$user->rights->BimpStatsFacture->facture->limit)
+if ($user->rights->BimpStatsFacture->facture->read)
     print '<option  value="NRS">Non renseigné</option>';
 foreach ($centres as $val => $name) {
     print '<option value="' . $val . '">' . $name . '</option>';

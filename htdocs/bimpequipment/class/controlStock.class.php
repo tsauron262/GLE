@@ -27,7 +27,7 @@ class controlStock{
         $this->getProductSerialisable();
         
         foreach($this->entrepot as $idEn => $labEl){
-            echo $debutText = "Entrepot : ".$labEl."<br/>";
+            $debutText = "Entrepot : ".$labEl."<br/>";
             foreach($this->prodS as $idPr => $labPr){
                 $nbE = $this->getNbEquip($idPr, $idEn);
                 $nbS = $this->getStockProd($idPr, $idEn);

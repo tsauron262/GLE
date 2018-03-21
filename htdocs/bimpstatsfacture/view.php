@@ -21,7 +21,7 @@ $centres = $staticSF->getExtrafieldArray('facture', 'centre');
 if (!$user->rights->BimpStatsFacture->factureCentre->read and !$user->rights->BimpStatsFacture->facture->read)
     accessforbidden();
     
-if ($user->rights->BimpStatsFacture->factureCentre->read) {
+if ($user->rights->BimpStatsFacture->factureCentre->read and !$user->rights->BimpStatsFacture->facture->read) {
     $centres = $staticSF->parseCenter($user, $centres);
 }
 
@@ -95,8 +95,6 @@ print '<tr><td>Type de lieu</td><td>
 // Centres
 print '<tr id="tr_centre"><td>Centre</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
-if ($user->rights->BimpStatsFacture->facture->read)
-    print '<option  value="NRS">Non renseigné</option>';
 foreach ($centres as $val => $name) {
     print '<option value="' . $val . '">' . $name . '</option>';
 }

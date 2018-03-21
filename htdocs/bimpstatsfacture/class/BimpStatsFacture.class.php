@@ -126,9 +126,9 @@ class BimpStatsFacture {
         $sql .= ")";
 
         if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
-            $user_center = substr(str_replace(' ', '", "', $user->array_options['options_apple_centre']), 2); // not a real list
-            $sql .= ' AND (fs.centre IN (' . $user_center . '")';
-            $sql .= ' OR e.centre IN (' . $user_center . '"))';
+            $tab_center = explode(' ', $user->array_options['options_apple_centre']);
+            $sql .= ' AND (fs.centre IN ("' . implode('","', $tab_center) . '")';
+            $sql .= ' OR e.centre IN ("' . implode('","', $tab_center) . '"))';
         }
 
         if (!empty($etats)) {
@@ -382,6 +382,7 @@ class BimpStatsFacture {
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list_members';
             $sql .= ' WHERE  list_refid = 11';
 
+            $out['NRS'] = 'Non renseigné';
             dol_syslog(get_class($this) . "::getExtrafieldArray sql=" . $sql, LOG_DEBUG);
             $result = $this->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {

@@ -7,7 +7,7 @@
 var groupes;
 var taxesOrNot;
 var format;
-var is_common;
+var is_customer;
 var id_place;
 var name_place;
 
@@ -31,7 +31,7 @@ function getAllFactures(dateStart, dateEnd, types, centres, statut, sortBy, taxe
             etats: etats,
             format: format,
             nomFichier: nomFichier,
-            is_common: is_common,
+            is_customer: is_customer,
             typePlace: typePlace,
             action: 'getFactures'
         },
@@ -79,11 +79,10 @@ $(document).ready(function () {
 
     var object = getUrlParameter('object');
     if (object === 'facture_fournisseur')
-        is_common = false;
-    else if (object === 'facture')
-        is_common = true;
+        is_customer = false;
     else
-        return;
+        is_customer = true;
+
 
     initSelectMultiple();
     initButtonFillAndEmpty();
@@ -239,7 +238,7 @@ function initTable(taxesOrNot, facture, key) {
             .attr('id', 'thead' + key)
             .appendTo('#table' + key);
 
-    if (is_common)
+    if (is_customer)
         var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', name_place, 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV'];
     else
         var arrayOfField = ['Fournisseur', 'Facture', taxesOrNot, 'Statut', 'Paiement', 'Payé TTC', name_place];
@@ -251,7 +250,7 @@ function initTable(taxesOrNot, facture, key) {
 
 function fillTable(facture, prevFactureId) {
     var centre = facture.centre_url ? facture.centre_url : (facture.centre ? facture.centre : '');
-    if (is_common) {
+    if (is_customer) {
         if (prevFactureId === facture.fac_id)
             arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
         else
@@ -272,7 +271,7 @@ function fillTable(facture, prevFactureId) {
 }
 
 function addTotaux(groupe, key) {
-    if (is_common)
+    if (is_customer)
         arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
     else
         arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', ''];

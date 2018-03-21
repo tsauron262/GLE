@@ -11,7 +11,9 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
-            dol_object: user
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
             id_object: 
                 field_value: tech_id_user
                 
@@ -22,7 +24,6 @@ fields:
         input: 
             type: hidden
         required: 1
-        sortable: 1
         display: 
             default: 
                 type: nom_url
@@ -44,17 +45,6 @@ fields:
         input: 
             type: search_user
         object: tech_user
-        required: 0
-        sortable: 1
-        search: 1
-        display: 
-            default: 
-                type: nom_url
-            id: 
-                type: field_value
-            card: 
-                type: card
-                card: user_card
         sort_option: 
             default: 
                 label: nom utilisateur
@@ -69,8 +59,7 @@ fields:
         display: 
             default: 
                 type: timer
-        sortable: 1
-        search: 0
+        searchable: 0
         
     priorite:
         label: Priorité
@@ -78,8 +67,6 @@ fields:
         values: 
             array: priorities
         required: 1
-        sortable: 1
-        search: 1
     
     status: 
         label: Statut
@@ -87,8 +74,6 @@ fields:
         values: 
             array: status
         required: 1
-        sortable: 1
-        search: 1
                     
     description:
         label: Description
@@ -97,7 +82,7 @@ fields:
             rows: 3
             auto_expand: 1
         sortable: 0
-        search: 0
+        searchable: 0
     
 list:
     title: Interventions
@@ -107,7 +92,7 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: id
+    sort_field: id
     sort_way: desc
     n: 10
     cols:
@@ -131,13 +116,23 @@ list:
         status:
             field: status
             edit: 1
-    add_form: default
+    add_form_name: default
     edit_btn: 1
     update_btn: 1
     delete_btn: 1
-    view_btn: 1
+    inline_view: default
     page_btn: 1
-    
+
+fields_tables: 
+    infos: 
+        rows:
+            - field: tech_id_user
+              display: card
+            - field: timer
+            - field: priorite
+            - field: status
+            - field: description
+
 views:
     default: 
         title: nom
@@ -155,6 +150,7 @@ views:
                 - type: custom
                   custom:
                       callback: renderDefaultView
+                      
     full:
         no_reload: 1
         rows: 
@@ -193,13 +189,7 @@ views:
                     col_lg: 8
                     col_sm: 12
                     fields_table:
-                        rows:
-                            - field: tech_id_user
-                              display: card
-                            - field: timer
-                            - field: priorite
-                            - field: status
-                            - field: description
+                        name: infos
 
     card:
         rows:
@@ -207,18 +197,13 @@ views:
                   - type: fields_table
                     col_lg: 12
                     fields_table:
-                        rows:
-                            - field: id_ticket
-                              display: card
-                            - field: timer
-                            - field: priorite
-                            - field: status
-                            - field: description
+                        panel: 0
+                        name: infos
         
 views_lists: 
     user_currents:
         title: Vos interventions en cours
-        view: card
+        item_view: card
         view_btn: 1
         add_btn: 0
         edit_form: default

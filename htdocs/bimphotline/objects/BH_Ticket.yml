@@ -12,21 +12,28 @@ objects:
             dol_object: contrat
             id_object:
                 field_value: id_contrat
+        card: 
+            title: 
+                object_prop: ref
+            view_btn: 1
     
     client:
         relation: none
         delete: 0
         instance: 
-            dol_object: societe
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
             id_object:
                 field_value: id_client
-        card: societe_card
     
     contact:
         relation: hasOne
         delete: 0
         instance: 
-            dol_object: contact
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
             id_object:
                 field_value: id_contact
                 
@@ -34,7 +41,9 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
-            dol_object: user
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
             id_object: 
                 field_value: id_user_resp
                 
@@ -72,9 +81,7 @@ fields:
         label: Contrat
         type: id_object
         object: contrat
-        required: 1
-        search: 1
-        sortable: 1            
+        required: 1    
         input: 
             type: search_list
             search_list:
@@ -99,15 +106,6 @@ fields:
                         join_on: c.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez le nom ou le code d'un client
-        display:
-            nom_url: 
-                type: nom_url
-            card:
-                type: card
-                card: 
-                    title: 
-                        object_prop: ref
-                    view_btn: 1
         sort_options:
             by_ref: 
                 label: référence
@@ -125,18 +123,10 @@ fields:
             type: custom
             content: 
                 callback: getClientFormInput
-            display_if:
-                input_name: id_contrat
-                hide_values:
-                    array: 0,
+        display_if:
+            field_name: id_contrat
+            hide_values: 0,
         depends_on: id_contrat
-        display: 
-            nom_url: 
-                type: nom_url
-            card: 
-                type: card
-                card: societe_card
-        sortable: 1
         search:
             input: 
                 type: search_societe
@@ -146,22 +136,12 @@ fields:
         label: Contact
         type: id_object
         object: contact
+        values: 
+            array: client_contacts
         depends_on: id_contrat
-        input: 
-            type: select
-            options: 
-                array: client_contacts
-            display_if:
-                input_name: id_contrat
-                hide_values:
-                    array: 0,
-        display: 
-            nom_url: 
-                type: nom_url
-            card: 
-                type: card
-                card: contact_card
-        sortable: 1
+        display_if:
+            field_name: id_contrat
+            hide_values: 0,
         search:
             input:
                 type: search_list
@@ -183,13 +163,6 @@ fields:
                 name: id
                 object: 
                     global: user
-        display: 
-            nom_url: 
-                type: nom_url
-            card:
-                type: card
-                card: user_card
-        sortable: 1
         search:
             input: 
                 type: search_user
@@ -201,12 +174,8 @@ fields:
         search:
             type: value_part
             search_on_key_up: 1
-            input:
-                type: text
-        sortable: 1
         input: 
             type: hidden
-        display: field_value
     
     priorite: 
         label: Priorité
@@ -215,10 +184,7 @@ fields:
         values: 
             array: priorities
         display: 
-            default: 
-                type: array_value
             icon:
-                type: array_value
                 icon_only: 1
         input: 
             type: hidden
@@ -236,13 +202,8 @@ fields:
             array: impacts
         default_value: 1
         display: 
-            default: 
-                type: array_value
             icon:
-                type: array_value
                 icon_only: 1
-        sortable: 1
-        search: 1
         
     cover:
         label: Type de couverture
@@ -278,8 +239,7 @@ fields:
         display: 
             default: 
                 type: timer
-        sortable: 1
-        search: 0
+        searchable: 0
         
 forms: 
     default:
@@ -298,11 +258,9 @@ forms:
             - field: symptomes
             - association: equipments
               label: Equipements concernés
-              input: 
-                display_if: 
-                    input_name: id_contrat
-                    hide_values:
-                        array: 0,
+              display_if: 
+                  field_name: id_contrat
+                  hide_values: 0,
             - label: Notifier par e-mail
               input: 
                   name: mails_to
@@ -329,10 +287,45 @@ forms:
             - field: symptomes
             - association: equipments
               label: Equipements concernés
-              input: 
-                display_if: 
-                    input_name: id_contrat
-                    hide_values:
+              display_if: 
+                  field_name: id_contrat
+                  hide_values:
+                      
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - field: ticket_number
+            - label: Durée totale interventions
+              value:
+                  callback: displayDureeTotale
+            - field: appels_timer
+            - field: priorite
+            - field: impact
+            - field: cover
+            - field: status
+              edit: 1
+            - field: important
+            
+    client:
+        title: Elements liés
+        rows:
+            - field: id_user_resp
+              display: card
+            - field: id_contrat
+              display: card
+            - label: Client
+              field: id_client
+              display: card
+            - field: id_contact
+              display: card
+            - association: equipments
+              label: Equipements concernés
+              edit: 1
+            - field: symptomes
+              edit: 1
+        
 views:
     default:
         title: nom
@@ -357,18 +350,7 @@ views:
                             - type: fields_table
                               col_lg: 12
                               fields_table: 
-                                  rows: 
-                                      - field: ticket_number
-                                      - label: Durée totale interventions
-                                        value:
-                                            callback: displayDureeTotale
-                                      - field: appels_timer
-                                      - field: priorite
-                                      - field: impact
-                                      - field: cover
-                                      - field: status
-                                        edit: 1
-                                      - field: important
+                                  name: infos
                         - cols:
                             - type: custom
                               col_lg: 12
@@ -378,21 +360,7 @@ views:
                   - type: fields_table
                     col_lg: 7
                     fields_table:
-                        rows:
-                            - field: id_user_resp
-                              display: card
-                            - field: id_contrat
-                              display: card
-                            - label: Client
-                              card: 
-                                  object: client
-                            - field: id_contact
-                              display: card
-                            - association: equipments
-                              label: Equipements concernés
-                              edit: 1
-                            - field: symptomes
-                              edit: 1
+                        name: client
                               
 list:
     checkboxes: 1
@@ -401,13 +369,18 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this))
     objects_change_reload: BH_Inter
-    sort_col: date_create
+    sort_field: date_create
     sort_way: desc
     n: 10
+    add_form_name: default
+    edit_btn: 1
+    edit_form: edit
+    delete_btn: 1
+    page_btn: 1
+    modal_view: main
     cols:
-        id:
-            label: ID
-            field: id
+        ticket:
+            field: ticket_number
         priorite:
             label: Prio.
             field: priorite
@@ -416,12 +389,12 @@ list:
             label: Imp.
             field: impact
             display: icon
-        resp:
-            field: id_user_resp
-            display: nom_url
         date_create:
             label: Créé le
             field: date_create
+        resp:
+            field: id_user_resp
+            display: nom_url
         contrat:
             field: id_contrat
             display: nom_url
@@ -431,14 +404,7 @@ list:
         contact:
             field: id_contact
             display: nom_url
-        ticket:
-            field: ticket_number
-            
-    add_form: default
-    edit_btn: 1
-    edit_form: edit
-    delete_btn: 1
-    view_btn: 1
+        
     
 cards:
     default:

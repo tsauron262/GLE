@@ -1,6 +1,8 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpDb.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTools.php';
+
 require_once __DIR__ . '/BimpPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once __DIR__ . '/BimpPDF_AmountsTable.php';
@@ -32,6 +34,7 @@ Abstract class BimpModelPDF
         $this->db = $db;
         $this->langs = $langs;
 
+        $this->langs->load("errors");
         $this->langs->load("main");
         $this->langs->load("dict");
         $this->langs->load("companies");

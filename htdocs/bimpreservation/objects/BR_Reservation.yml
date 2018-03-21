@@ -146,7 +146,7 @@ fields:
                 field_return_label: id,serial
                 field_return_value: id
                 label_syntaxe: Equipement <label_1> - serial "<label_2>"
-            help: Entrez un id d\équipement ou un numéro de série pour effectuer une recherche
+            help: Entrez un id d'équipement ou un numéro de série pour effectuer une recherche
         display_if: 
             field_name: status
             hide_values: 100

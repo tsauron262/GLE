@@ -14,9 +14,16 @@ class BimpConfigDefinitions
         'instance' => array('data_type' => 'array')
     );
     public static $button = array(
+        'id' => array(),
         'label'   => array('required' => true),
-        'icon'    => array(),
-        'onclick' => array('required' => true)
+        'icon' => array(),
+        'onclick' => array(),
+        'icon_before'    => array(),
+        'icon_after'    => array(),
+        'classes' => array('data_type' => 'array'),
+        'attr' => array('data_type' => 'array'),
+        'data' => array('data_type' => 'array'),
+        'styles' => array('data_type' => 'array')
     );
     public static $search = array(
         'type'             => array('default' => 'field_input'),

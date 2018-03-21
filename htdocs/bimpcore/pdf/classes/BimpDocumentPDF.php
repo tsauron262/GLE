@@ -6,7 +6,12 @@ class BimpDocumentPDF extends BimpModelPDF
 {
 
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
+    public $thirdparty = null;
     public $contact = null;
+    public $total_remises = 0;
+    public $localtax1 = array();
+    public $localtax2 = array();
+    public $tva = array();
 
     public function __construct($db)
     {
@@ -25,6 +30,19 @@ class BimpDocumentPDF extends BimpModelPDF
                     $contact = new Contact($this->db);
                     if ($contact->fetch((int) $contacts[0]) > 0) {
                         $this->contact = $contact;
+
+                        if ((int) $this->contact->socid !== $this->object->socid) {
+                            $this->thirdparty = $this->contact;
+                        }
+                    }
+                }
+
+                if (is_null($this->thirdparty)) {
+                    if (!isset($this->object->thirdparty)) {
+                        $this->object->fetch_thirdparty();
+                    }
+                    if (isset($this->object->thirdparty)) {
+                        $this->thirdparty = $this->object->thirdparty;
                     }
                 }
             }
@@ -129,14 +147,42 @@ class BimpDocumentPDF extends BimpModelPDF
 
     // Rendus:
 
-    public function renderAddresses($thirdparty, $contact = null)
+    protected function renderContent()
+    {
+        $this->renderAddresses($this->thirparty, $this->contact);
+        $this->renderTop();
+        $this->renderBeforeLines();
+        $this->renderLines();
+        $this->renderAfterLines();
+        $this->renderBottom();
+    }
+
+    public function getSenderInfosHtml()
+    {
+        $html = '<div class="bold">' . $this->langs->convToOutputCharset($this->fromCompany->name) . '</div>';
+        $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty);
+        $html = str_replace("\n", '<br/>', $html);
+        return $html;
+    }
+
+    public function getTargetInfosHtml()
+    {
+        $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+        $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
+        $html = str_replace("\n", '<br/>', $html);
+
+        return $html;
+    }
+
+    public function renderAddresses()
     {
         $html = '';
 
-        $sender_infos = pdf_build_address($this->langs, $this->fromCompany, $thirdparty);
-        $sender_infos = str_replace("\n", '<br/>', $sender_infos);
-        $target_infos = pdf_build_address($this->langs, $this->fromCompany, $thirdparty, $contact, !is_null($contact) ? 1 : 0, 'target');
-        $target_infos = str_replace("\n", '<br/>', $target_infos);
+//        	if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
+//$thirdparty = $object->contact;
+//} else {
+//$thirdparty = $object->thirdparty;
+//}
 
         $html .= '<div class="section addresses_section">';
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
@@ -150,24 +196,134 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="10px">';
         $html .= '<tr>';
         $html .= '<td class="sender_address" style="width: 40%">';
-        $html .= '<div class="bold">' . $this->langs->convToOutputCharset($this->fromCompany->name) . '</div>';
-        $html .= $sender_infos;
+        $html .= $this->getSenderInfosHtml();
         $html .= '</td>';
         $html .= '<td style="width: 5%"></td>';
         $html .= '<td style="width: 55%" class="border">';
-        $html .= '<div class="bold">' . pdfBuildThirdpartyName($thirdparty, $this->langs) . '</div>';
-        $html .= $target_infos;
+
+        $html .= $this->getTargetInfosHtml();
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</table>';
         $html .= '</div>';
 
-        return $html;
+        $this->writeContent($html);
     }
 
-    public function renderBank($account, $only_number = false)
+    public function renderTop()
     {
-        global $mysoc, $conf;
+        if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
+            $this->writeContent('<p style="font-size: 10px">Objet : <strong>' . $this->object->array_options['options_libelle'] . '</strong></p>');
+        }
+    }
+
+    public function renderBeforeLines()
+    {
+        
+    }
+
+    public function renderLines()
+    {
+        global $conf;
+
+        $table = new BimpPDF_AmountsTable($this->pdf);
+
+        if (method_exists($this, 'setAmountsTableParams')) {
+            $this->setAmountsTableParams($table);
+        }
+
+        $i = 0;
+        foreach ($this->object->lines as $line) {
+            $desc = '';
+            if (is_null($line->desc) || !$line->desc) {
+                if (!is_null($line->fk_product) && $line->fk_product) {
+                    BimpTools::loadDolClass('product');
+                    $product = new Product($this->db);
+                    if ($product->fetch((int) $line->fk_product) > 0) {
+                        $desc = $product->ref;
+                    }
+                    $desc.= ($desc ? ' - ' : '') . $product->label;
+                }
+            } else {
+                $desc = $line->desc;
+            }
+            $desc = str_replace("\n", '<br/>', $desc);
+            if ($line->total_ht == 0) {
+                $row['desc'] = array(
+                    'colspan' => 99,
+                    'content' => $desc,
+                    'style'   => 'font-weight: bold; background-color: #F5F5F5;'
+                );
+            } else {
+                $row = array(
+                    'desc'      => $desc,
+                    'total_ht'  => BimpTools::displayMoneyValue($line->total_ht, ''),
+                    'total_ttc' => BimpTools::displayMoneyValue($line->total_ttc, '')
+                );
+
+                $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
+
+                if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
+                    $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);
+                }
+
+                if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
+                    $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
+                }
+
+                if ($conf->global->PRODUCT_USE_UNITS) {
+                    $row['unite'] = pdf_getlineunit($this->object, $i, $this->langs);
+                }
+
+                if ($line->remise_percent) {
+                    $row['reduc'] = str_replace('.', ',', (string) round($line->remise_percent, 4, PHP_ROUND_HALF_DOWN)) . '%';
+                }
+
+                $row['total_ht'] = pdf_getlinetotalexcltax($this->object, $i, $this->langs);
+            }
+
+            $table->rows[] = $row;
+            $i++;
+        }
+
+        $this->writeContent('<div style="text-align: right; font-size: 6px;">Montants exprimés en Euros</div>');
+        $this->pdf->addVMargin(1);
+        $table->write();
+        unset($table);
+    }
+
+    public function renderAfterLines()
+    {
+        $this->pdf->addVMargin(2);
+        $this->writeContent('<p style="font-size: 10px; text-align: center; font-weight: bold;">Mention "Réserve de propriété"</p>');
+    }
+
+    public function renderBottom()
+    {
+        $table = new BimpPDF_Table($this->pdf, false);
+        $table->cellpadding = 0;
+        $table->remove_empty_cols = false;
+        $table->addCol('left', '', 95);
+        $table->addCol('right', '', 95);
+
+        $table->rows[] = array(
+            'left'  => $this->getBottomLeftHtml(),
+            'right' => $this->getBottomRightHtml()
+        );
+
+        $this->writeContent('<br/><br/>');
+        $table->write();
+    }
+
+    public function getBottomLeftHtml()
+    {
+        return $this->getPaymentInfosHtml();
+    }
+
+    public function getBankHtml($account, $only_number = false)
+    {
+        global $conf;
 
         require_once DOL_DOCUMENT_ROOT . '/core/class/html.formbank.class.php';
 
@@ -251,288 +407,149 @@ class BimpDocumentPDF extends BimpModelPDF
         return $html;
     }
 
-    protected function renderContent()
+    public function getPaymentInfosHtml()
     {
-        $this->writeContent($this->renderAddresses($this->object->thirdparty, $this->contact));
-        $this->renderDocumentContent();
+        return '';
     }
 
-    public function renderDocumentContent()
+    public function getBottomRightHtml()
     {
-        global $conf, $mysoc;
 
-        $situationinvoice = false;
 
-        if (isset($this->object->situation_cycle_ref) && $this->situation_cycle_ref) {
-            $situationinvoice = true;
-        }
+        $html .= $this->getTotauxRowsHtml();
+        $html .= $this->getPaymentsHtml();
+        $html .= $this->getAfterTotauxHtml();
 
-        if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
-            $this->writeContent('<p style="font-size: 10px">Objet : <strong>' . $this->object->array_options['options_libelle'] . '</strong></p>');
-        }
 
-        $table = new BimpPDF_AmountsTable($this->pdf);
 
-        if (method_exists($this, 'setAmountsTableParams')) {
-            $this->setAmountsTableParams($table);
-        }
+        return $html;
+    }
 
-        $lines = $this->object->lines;
+    public function calcTotaux()
+    {
+        global $conf;
+
+        $this->total_remises = 0;
+
+        $this->localtax1 = array();
+        $this->localtax2 = array();
+        $this->tva = array();
+
         $i = 0;
-
-        $total_remises = 0;
-
-        $localtax1 = array();
-        $localtax2 = array();
-        $tva = array();
-
-        // Traitement des lignes: 
-
-        foreach ($lines as $line) {
-            $desc = '';
-            if (is_null($line->desc) || !$line->desc) {
-                if (!is_null($line->fk_product) && $line->fk_product) {
-                    BimpTools::loadDolClass('product');
-                    $product = new Product($this->db);
-                    if ($product->fetch((int) $line->fk_product) > 0) {
-                        $desc = $product->ref;
-                    }
-                    $desc.= ($desc ? ' - ' : '') . $product->label;
-                }
-            } else {
-                $desc = $line->desc;
-            }
-            $desc = str_replace("\n", '<br/>', $desc);
-            if ($line->total_ht == 0) {
-                $row['desc'] = array(
-                    'colspan' => 99,
-                    'content' => $desc,
-                    'style'   => 'font-weight: bold; background-color: #F5F5F5;'
-                );
-            } else {
-                $row = array(
-                    'desc'      => $desc,
-                    'total_ht'  => BimpTools::displayMoneyValue($line->total_ht, ''),
-                    'total_ttc' => BimpTools::displayMoneyValue($line->total_ttc, '')
-                );
-
-                $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
-                $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
-
-                if ($situationinvoice) {
-                    $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);
-                }
-
-                if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
-                    $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
-                }
-
-                if ($conf->global->PRODUCT_USE_UNITS) {
-                    $row['unite'] = pdf_getlineunit($this->object, $i, $this->langs);
-                }
-
-                if ($line->remise_percent) {
-                    $row['reduc'] = pdf_getlineremisepercent($this->object, $i, $this->langs);
-                    $total_remises += ((float) $line->total_ttc * ((float) $line->remise_percent / 100));
-                }
-
-                $row['total_ht'] = pdf_getlinetotalexcltax($this->object, $i, $this->langs);
-
-                $sign = 1;
-                if (isset($this->object->type) && $this->object->type == 2 && !empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE))
-                    $sign = -1;
-
-                // Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
-                // Prise en compte si nécessaire de la progression depuis la situation précédente:
-                if ($situationinvoice && method_exists($line, 'get_prev_progress')) {
-                    $prev_progress = $line->get_prev_progress($this->object->id);
-                } else {
-                    $prev_progress = 0;
-                }
-                if ($prev_progress > 0 && !empty($line->situation_percent)) {
-                    if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
-                        $tva_line = $sign * $line->multicurrency_total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
-                    } else {
-                        $tva_line = $sign * $line->total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
-                    }
-                } else {
-                    if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
-                        $tva_line = $sign * $line->multicurrency_total_tva;
-                    } else {
-                        $tva_line = $sign * $line->total_tva;
-                    }
-                }
-
-                $localtax1ligne = $line->total_localtax1;
-                $localtax2ligne = $line->total_localtax2;
-                $localtax1_rate = $line->localtax1_tx;
-                $localtax2_rate = $line->localtax2_tx;
-                $localtax1_type = $line->localtax1_type;
-                $localtax2_type = $line->localtax2_type;
-
-                if ($this->object->remise_percent)
-                    $tva_line-=($tva_line * $this->object->remise_percent) / 100;
-                if ($this->object->remise_percent)
-                    $localtax1ligne-=($localtax1ligne * $this->object->remise_percent) / 100;
-                if ($this->object->remise_percent)
-                    $localtax2ligne-=($localtax2ligne * $this->object->remise_percent) / 100;
-
-                $vatrate = (string) $line->tva_tx;
-
-                // Retrieve type from database for backward compatibility with old records
-                if ((!isset($localtax1_type) || $localtax1_type == '' || !isset($localtax2_type) || $localtax2_type == '') // if tax type not defined
-                        && (!empty($localtax1_rate) || !empty($localtax2_rate))) { // and there is local tax
-                    $localtaxtmp_array = getLocalTaxesFromRate($vatrate, 0, $this->object->thirdparty, $mysoc);
-                    $localtax1_type = $localtaxtmp_array[0];
-                    $localtax2_type = $localtaxtmp_array[2];
-                }
-
-                if (!isset($localtax1[$localtax1_type])) {
-                    $localtax1[$localtax1_type] = array();
-                }
-                if (!isset($localtax1[$localtax1_type][$localtax1_rate])) {
-                    $localtax1[$localtax1_type][$localtax1_rate] = 0;
-                }
-
-                $localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
-
-                if (!isset($localtax2[$localtax2_type])) {
-                    $localtax2[$localtax2_type] = array();
-                }
-                if (!isset($localtax2[$localtax2_type][$localtax2_rate])) {
-                    $localtax2[$localtax2_type][$localtax2_rate] = 0;
-                }
-
-                $localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
-
-                if (($line->info_bits & 0x01) == 0x01)
-                    $vatrate.='*';
-
-                if (!isset($tva[$vatrate])) {
-                    $tva[$vatrate] = 0;
-                }
-
-                $tva[$vatrate] += $tva_line;
+        foreach ($this->object->lines as $line) {
+            $pu_ht = (float) str_replace(',', '.', pdf_getlineupexcltax($this->object, $i, $this->langs));
+            if ($line->remise_percent) {
+                $this->total_remises += ((float) $pu_ht * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
             }
 
-            $table->rows[] = $row;
+            $sign = 1;
+            if (isset($this->object->type) && $this->object->type == 2 && !empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE))
+                $sign = -1;
+
+            // Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
+            // Prise en compte si nécessaire de la progression depuis la situation précédente:
+            if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref && method_exists($line, 'get_prev_progress')) {
+                $prev_progress = $line->get_prev_progress($this->object->id);
+            } else {
+                $prev_progress = 0;
+            }
+            if ($prev_progress > 0 && !empty($line->situation_percent)) {
+                if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
+                    $tva_line = $sign * $line->multicurrency_total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                } else {
+                    $tva_line = $sign * $line->total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                }
+            } else {
+                if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
+                    $tva_line = $sign * $line->multicurrency_total_tva;
+                } else {
+                    $tva_line = $sign * $line->total_tva;
+                }
+            }
+
+            $localtax1ligne = $line->total_localtax1;
+            $localtax2ligne = $line->total_localtax2;
+            $localtax1_rate = $line->localtax1_tx;
+            $localtax2_rate = $line->localtax2_tx;
+            $localtax1_type = $line->localtax1_type;
+            $localtax2_type = $line->localtax2_type;
+
+            if ($this->object->remise_percent)
+                $tva_line-=($tva_line * $this->object->remise_percent) / 100;
+            if ($this->object->remise_percent)
+                $localtax1ligne-=($localtax1ligne * $this->object->remise_percent) / 100;
+            if ($this->object->remise_percent)
+                $localtax2ligne-=($localtax2ligne * $this->object->remise_percent) / 100;
+
+            $vatrate = (string) $line->tva_tx;
+
+            // Retrieve type from database for backward compatibility with old records
+            if ((!isset($localtax1_type) || $localtax1_type == '' || !isset($localtax2_type) || $localtax2_type == '') // if tax type not defined
+                    && (!empty($localtax1_rate) || !empty($localtax2_rate))) { // and there is local tax
+                $localtaxtmp_array = getLocalTaxesFromRate($vatrate, 0, $this->object->thirdparty, $mysoc);
+                $localtax1_type = $localtaxtmp_array[0];
+                $localtax2_type = $localtaxtmp_array[2];
+            }
+
+            if (!isset($this->localtax1[$localtax1_type])) {
+                $this->localtax1[$localtax1_type] = array();
+            }
+            if (!isset($this->localtax1[$localtax1_type][$localtax1_rate])) {
+                $this->localtax1[$localtax1_type][$localtax1_rate] = 0;
+            }
+
+            $this->localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
+
+            if (!isset($this->localtax2[$localtax2_type])) {
+                $this->localtax2[$localtax2_type] = array();
+            }
+            if (!isset($this->localtax2[$localtax2_type][$localtax2_rate])) {
+                $this->localtax2[$localtax2_type][$localtax2_rate] = 0;
+            }
+
+            $this->localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
+
+            if (($line->info_bits & 0x01) == 0x01)
+                $vatrate.='*';
+
+            if (!isset($this->tva[$vatrate])) {
+                $this->tva[$vatrate] = 0;
+            }
+
+            $this->tva[$vatrate] += $tva_line;
             $i++;
         }
+    }
 
-        $this->writeContent('<div style="text-align: right; font-size: 6px;">Montants exprimés en Euros</div>');
-        $this->pdf->addVMargin(1);
-        $table->write();
-        unset($table);
+    public function getTotauxRowsHtml()
+    {
+        global $conf;
 
-        // *** Informations:  *** 
-        $info_html = '<div style="font-size: 7px; line-height: 8px;">';
-        $info_html .= '<table style="width: 100%" cellpadding="5">';
+        $this->calcTotaux();
 
-        // Date de livraison
-        if (!empty($this->object->date_livraison)) {
-            $info_html .= '<tr><td>';
-            $info_html .= dol_print_date($this->object->date_livraison, "daytext", false, $this->langs, true) . '<br/>';
-            $info_html .= '</td></tr>';
-        } elseif ($this->object->availability_code || (isset($this->object->availability) && $this->object->availability)) {
-            $info_html .= '<tr><td>';
-            $info_html .= '<strong>' . $this->langs->transnoentities("AvailabilityPeriod") . ': </strong>';
-            $label = $this->langs->transnoentities("AvailabilityType" . $this->object->availability_code) != ('AvailabilityType' . $this->object->availability_code) ? $this->langs->transnoentities("AvailabilityType" . $this->object->availability_code) : $this->langs->convToOutputCharset($this->object->availability);
-            $label = str_replace('\n', "\n", $label);
-            $info_html .= $label;
-            $info_html .= '</td></tr>';
-        }
-
-        // Conditions de paiement: 
-        if (empty($conf->global->PROPALE_PDF_HIDE_PAYMENTTERMCOND) && ($this->object->cond_reglement_code || $this->object->cond_reglement)) {
-            $info_html .= '<tr><td>';
-            $info_html .= '<strong>' . $this->langs->transnoentities("PaymentConditions") . ': </strong><br/>';
-            $label = $this->langs->transnoentities("PaymentCondition" . $this->object->cond_reglement_code) != ('PaymentCondition' . $this->object->cond_reglement_code) ? $this->langs->transnoentities("PaymentCondition" . $this->object->cond_reglement_code) : $this->langs->convToOutputCharset($this->object->cond_reglement_doc);
-            $label = str_replace('\n', "\n", $label);
-            $info_html .= '</td></tr>';
-        }
-
-        // Mode de paiement: 
-        if ($this->object->mode_reglement_code && $this->object->mode_reglement_code != 'CHQ' && $this->object->mode_reglement_code != 'VIR') {
-            $info_html .= '<tr><td>';
-            $info_html .= '<strong>' . $this->langs->transnoentities("PaymentMode") . '</strong>:<br/>';
-            $info_html .= $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) != ('PaymentType' . $this->object->mode_reglement_code) ? $this->langs->transnoentities("PaymentType" . $this->object->mode_reglement_code) : $this->langs->convToOutputCharset($this->object->mode_reglement);
-            $info_html .= '</td></tr>';
-        }
-
-        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
-
-            if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
-                if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
-                    $info_html .= '<tr><td>';
-                    if (!class_exists('Account')) {
-                        require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
-                    }
-                    $account = new Account($this->db);
-                    $account->fetch($conf->global->FACTURE_CHQ_NUMBER);
-
-                    $info_html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByChequeOrderedTo', $account->proprio) . ':</span><br/><br/>';
-
-                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
-                        $info_html .= '<strong>' . str_replace("\n", '<br/>', $this->langs->convToOutputCharset($account->owner_address)) . '</strong>';
-                    }
-                    $info_html .= '</td></tr>';
-                } elseif ($conf->global->FACTURE_CHQ_NUMBER == -1) {
-                    $info_html .= '<tr><td>';
-                    $info_html .= $this->langs->transnoentities('PaymentByChequeOrderedTo', $this->fromCompany->name) . '<br/>';
-
-                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
-                        $info_html .= $this->langs->convToOutputCharset($this->fromCompany->getFullAddress()) . '<br/>';
-                    }
-                    $info_html .= '</td></tr>';
-                }
-            }
-        }
-
-        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
-            if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
-                $info_html .= '<tr><td>';
-                $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
-                if (!empty($this->object->fk_bank)) {
-                    $bankid = $this->object->fk_bank;
-                }
-
-                $account = new Account($this->db);
-                $account->fetch($bankid);
-                $info_html .= $this->renderBank($account);
-                $info_html .= '</td></tr>';
-            }
-        }
-
-        $info_html .= '</table></div>';
-
-        // *** Totaux:  ***
-
-        $totaux_html = '<div>';
-        $totaux_html .= '<table style="width: 100%" cellpadding="5">';
+        $html = '<div>';
+        $html .= '<table style="width: 100%" cellpadding="5">';
 
         // Total remises: 
-        if (isset($this->object->remise_absolue) && $this->object->remise_absolue > 0) {
-            $total_remises += (float) $this->object->remise_absolue;
-        }
-        if ($total_remises > 0) {
-            $totaux_html .= '<tr>';
-            $totaux_html .= '<td style="background-color: #F0F0F0;">Total remises</td>';
-            $totaux_html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($total_remises, 0, $this->langs) . '</td>';
-            $totaux_html .= '</tr>';
+        if ($this->total_remises > 0) {
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->total_remises, 0, $this->langs) . '</td>';
+            $html .= '</tr>';
         }
 
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
-        $totaux_html .= '<tr>';
-        $totaux_html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
-        $totaux_html .= '<td style="text-align: right;">' . price($total_ht + (!empty($this->object->remise) ? $this->object->remise : 0), 0, $this->langs) . '</td>';
-        $totaux_html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
+        $html .= '<td style="text-align: right;">' . price($total_ht + (!empty($this->object->remise) ? $this->object->remise : 0), 0, $this->langs) . '</td>';
+        $html .= '</tr>';
 
         if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT)) {
             $tvaisnull = ((!empty($this->tva) && count($this->tva) == 1 && isset($this->tva['0.000']) && is_float($this->tva['0.000'])) ? true : false);
             if (!$tvaisnull || empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_IFNULL)) {
                 // Taxes locales 1 avant TVA
-                foreach ($localtax1 as $localtax_type => $localtax_rate) {
+                foreach ($this->localtax1 as $localtax_type => $localtax_rate) {
                     if (in_array((string) $localtax_type, array('1', '3', '5'))) {
                         continue;
                     }
@@ -547,16 +564,16 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $totaux_html .= '<tr>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
-                            $totaux_html .= '</tr>';
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
 
                 // Taxes locales 2 avant TVA
-                foreach ($localtax2 as $localtax_type => $localtax_rate) {
+                foreach ($this->localtax2 as $localtax_type => $localtax_rate) {
                     if (in_array((string) $localtax_type, array('1', '3', '5'))) {
                         continue;
                     }
@@ -571,16 +588,16 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $totaux_html .= '<tr>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
-                            $totaux_html .= '</tr>';
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
 
                 // TVA
-                foreach ($tva as $tvakey => $tvaval) {
+                foreach ($this->tva as $tvakey => $tvaval) {
                     if ($tvakey != 0) {
                         $tvacompl = '';
                         if (preg_match('/\*/', $tvakey)) {
@@ -590,15 +607,15 @@ class BimpDocumentPDF extends BimpModelPDF
                         $totalvat = $this->langs->transcountrynoentities("TotalVAT", $this->fromCompany->country_code) . ' ';
                         $totalvat .= vatrate($tvakey, 1) . $tvacompl;
 
-                        $totaux_html .= '<tr>';
-                        $totaux_html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                        $totaux_html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
-                        $totaux_html .= '</tr>';
+                        $html .= '<tr>';
+                        $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                        $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                        $html .= '</tr>';
                     }
                 }
 
                 // Taxes locales 1 après TVA
-                foreach ($localtax1 as $localtax_type => $localtax_rate) {
+                foreach ($this->localtax1 as $localtax_type => $localtax_rate) {
                     if (in_array((string) $localtax_type, array('2', '4', '6'))) {
                         continue;
                     }
@@ -613,16 +630,16 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $totaux_html .= '<tr>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
-                            $totaux_html .= '</tr>';
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
 
                 // Taxes locales 2 après TVA
-                foreach ($localtax2 as $localtax_type => $localtax_rate) {
+                foreach ($this->localtax2 as $localtax_type => $localtax_rate) {
                     if (in_array((string) $localtax_type, array('2', '4', '6'))) {
                         continue;
                     }
@@ -637,55 +654,59 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
-                            $totaux_html .= '<tr>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $totaux_html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
-                            $totaux_html .= '</tr>';
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
                         }
                     }
                 }
 
                 // Total TTC
                 $total_ttc = ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $this->object->multicurrency_total_ttc : $this->object->total_ttc;
-                $totaux_html .= '<tr>';
-                $totaux_html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
-                $totaux_html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc, 0, $this->langs) . '</td>';
-                $totaux_html .= '</tr>';
+                $html .= '<tr>';
+                $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc, 0, $this->langs) . '</td>';
+                $html .= '</tr>';
             }
         }
-        $totaux_html .= '<tr><td></td><td></td></tr>';
+
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '<br/>';
+
+        return $html;
+    }
+
+    public function getPaymentsHtml()
+    {
+        return '';
+    }
+
+    public function getAfterTotauxHtml()
+    {
+        $html = '<div>';
+        $html .= '<table style="width: 100%" cellpadding="5">';
 
         if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
-            $totaux_html .= '<tr>';
-            $totaux_html .= '<td colspan="2" style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
-            $totaux_html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
-            $totaux_html .= '</tr>';
+            $html .= '<tr>';
+            $html .= '<td colspan="2" style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
+            $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
+            $html .= '</tr>';
         }
 
-        $totaux_html .= '<tr>';
-        $totaux_html .= '<td colspan="2" style="text-align: center;">Cachet, Date, Signature et mention "Bon pour Accord"</td>';
-        $totaux_html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention "Bon pour Accord"</td>';
+        $html .= '</tr>';
 
-        $totaux_html .= '<tr>';
-        $totaux_html .= '<td colspan="2" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/></td>';
-        $totaux_html .= '</tr>';
-        $totaux_html .= '</table>';
-        $totaux_html .= '</div>';
-
-        $table = new BimpPDF_Table($this->pdf, false);
-        $table->cellpadding = 0;
-        $table->remove_empty_cols = false;
-        $table->addCol('left', '', 95);
-        $table->addCol('right', '', 95);
-
-        $table->rows[] = array(
-            'left'  => $info_html,
-            'right' => $totaux_html
-        );
-
-        $this->writeContent('<br/><br/>');
-        $table->write();
+        $html .= '<tr>';
+        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/></td>';
+        $html .= '</tr>';
         
-        $this->writeContent('<br/><p style="font-size: 10px; text-align: center; font-weight: bold">Mention "Réserve de propriété"</p>');
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '<br/>';
+
+        return $html;
     }
 }

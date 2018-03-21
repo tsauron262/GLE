@@ -55,6 +55,7 @@ class controlStock{
                 }
             }
         }
+        echo "<br/><br/>Fin";
     }
     
     

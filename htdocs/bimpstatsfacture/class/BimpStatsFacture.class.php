@@ -42,6 +42,7 @@ class BimpStatsFacture {
      * 'c' => CSV
      */
     private $mode;
+    private $db;
 
 //    private $is_common;
 
@@ -516,6 +517,7 @@ class BimpStatsFacture {
             unset($row['ct']);
             unset($row['ty']);
             unset($row['sav_id']);
+            unset($row['fk_entrepot']);
             unset($row['saf_refid']);
 
             if ($this->mode != 'r') {

@@ -224,8 +224,6 @@ class BimpLivraison {
             'type' => 2, // cf $types
             'serial' => $serial, // num série
             'reserved' => 0, // réservé ou non
-            'date_purchase' => '2010-10-10', // date d'achat TODO remove
-            'date_warranty_end' => '2010-10-10', // TODO remove
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
             'admin_login' => '',
             'admin_pword' => '',

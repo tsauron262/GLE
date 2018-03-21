@@ -11,11 +11,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFacture.class
 require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFactureFournisseur.class.php';
 
 $object = GETPOST('object');
-$is_common = false;
+$is_customer = false;
 
-$staticSFF = new BimpStatsFactureFournisseur($db);
-$entrepots = $staticSFF->getAllEntrepots();
 $staticSF = new BimpStatsFacture($db);
+$entrepots = $staticSF->getAllEntrepots();
 $centres = $staticSF->getExtrafieldArray('facture', 'centre');
 
 if (!$user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read)
@@ -31,11 +30,9 @@ if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->Bi
 
 
 if ($object == 'facture_fournisseur') {
-
-    $nb_row_filter = 5;
+    $nb_row_filter = 4; // remove type place and sector
 } else {
-    $is_common = true;
-
+    $is_customer = true;
     $nb_row_filter = 6;
 }
 
@@ -57,8 +54,8 @@ print '<tr class="liste_titre">';
 print '</tr>' . "\n";
 print '</table>';
 
-if ($user->rights->BimpStatsFacture->factureCentre->read and !$user->rights->BimpStatsFacture->facture->read)
-    print '<p>Vos droits vous permettent de voir les factures des centres suivants : ' . $centres_string.'</p>';
+if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read and $is_customer)
+    print '<p>Vos droits vous permettent de voir les factures des centres suivants : ' . $centres_string . '</p>';
 
 print '<table class="tableforField">';
 
@@ -73,7 +70,7 @@ print '<input id="dateStart" type="text" class="isDate round"></div>';
 print '<div><text>Date de fin</text><br>';
 print '<input id="dateEnd" type="text" class="isDate round"></div></td></tr>';
 
-if ($is_common) {
+if ($is_customer) {
 // Types
     $type = $staticSF->getExtrafieldArray('facture', 'type');
     print '<tr><td>Secteurs</td><td>';
@@ -89,19 +86,19 @@ if ($is_common) {
 }
 
 
-
-print '<tr><td>Type de lieu</td><td>
-<input id="place_centre" name="place" type="radio" value="c" checked>
+if ($is_customer) {
+    print '<tr><td>Type de lieu</td><td>
+<input id="place_centre" name="place" type="radio" value="c">
 <label for="place_centre">Centre</label>
 
-<input id="place_entrepot" name="place" type="radio" value="e">
+<input id="place_entrepot" name="place" type="radio" value="e" checked>
 <label for="place_entrepot">Entrepôt</label>
 </td></tr>';
-
+}
 
 
 // Centres
-print '<tr id="tr_centre"><td>Centre</td><td>';
+print '<tr id="tr_centre" style="display:none;"><td>Centre</td><td>';
 print '<select id="centre" class="select2 round" multiple style="width: 200px;">';
 foreach ($centres as $val => $name) {
     print '<option value="' . $val . '">' . $name . '</option>';
@@ -111,7 +108,7 @@ print '</select>';
 print '<input id="selectAllCentres"   type="button" class="butAction round" value="Tout sélectionner">';
 print '<input id="deselectAllCentres" type="button" class="butActionDelete round" value="Vider"></td></tr>';
 
-print '<tr id="tr_entrepot" style="display:none;"><td>Entrepôt</td><td>';
+print '<tr id="tr_entrepot"><td>Entrepôt</td><td>';
 print '<select id="entrepot" class="select2 round" multiple style="width: 200px;">';
 print '<option  value="NRS">Non renseigné</option>';
 foreach ($entrepots as $val => $name) {
@@ -185,9 +182,9 @@ print '<tr><td>Format (unique)</td><td>
 print '<tr class="top bottom" ><td class="allSides">Tri</td><td>Trier par (multiple)</td><td>
 
 <input id="sortByCentre" name="sortBy" type="checkbox" value="c" >
-<label for="sortByCentre">Centre</label>';
+<label for="sortByCentre">Entrepôt</label>';
 
-if ($is_common) {
+if ($is_customer) {
     print '<input id="sortByType" name="sortBy" type="checkbox" value="t">
 <label for="sortByType">Secteur</label>';
 

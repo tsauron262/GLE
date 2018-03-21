@@ -73,9 +73,9 @@ $(document).ready(function () {
     $('#dateEnd').datepicker('setDate', lastDay);
 
     $('.select2').select2();
-    id_place = 'centre';
-    name_place = 'Centre';
-    $('input#place_centre').prop('checked', 'true');
+    id_place = 'entrepot';
+    name_place = 'Entrepôt';
+    $('input#place_entrepot').prop('checked', 'true');
 
     var object = getUrlParameter('object');
     if (object === 'facture_fournisseur')

@@ -366,20 +366,12 @@ class BimpTransfer {
                 'id_equipment' => $equipment['fk_equipment'],
                 'type' => 2,
                 'id_entrepot' => $this->fk_warehouse_dest,
-                'infos' => '...',
+                'infos' => 'Transfert de stock',
                 'code_mvt' => $codemove,
                 'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S')
             ));
             $this->errors = array_merge($this->errors, $emplacement->create());
 
-            $doliProd = new Product($this->db);
-            $doliProd->fetch($equipment['fk_product']);
-            $result1 = $doliProd->correct_stock($user, $this->fk_warehouse_source, 1, 1, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
-            if ($result1 == -1)
-                $this->errors = array_merge($this->errors, $doliProd->errors);
-            $result2 = $doliProd->correct_stock($user, $this->fk_warehouse_dest, 1, 0, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
-            if ($result2 == -1)
-                $this->errors = array_merge($this->errors, $doliProd->errors);
             $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
         }
         return $nb_update;

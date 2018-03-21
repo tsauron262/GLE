@@ -20,10 +20,6 @@ switch (GETPOST('action')) {
             } else {    // facture fournisseur
                 echo json_encode($staticSFF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier'), GETPOST('typePlace')));
             }
-//            
-//            
-//                $factures = $staticSF->getFactures(GETPOST('dateStart'), GETPOST('dateEnd'), GETPOST('types'), GETPOST('centres'), GETPOST('statut'), GETPOST('sortBy'), GETPOST('taxes'), GETPOST('etats'), GETPOST('format'), GETPOST('nomFichier'), GETPOST('is_common'));
-//                echo json_encode($factures);
             break;
         }
     default: break;

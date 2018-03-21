@@ -250,17 +250,17 @@ function initTable(taxesOrNot, facture, key) {
 }
 
 function fillTable(facture, prevFactureId) {
-
+    var centre = facture.centre_url ? facture.centre_url : (facture.centre ? facture.centre : '');
     if (is_common) {
         if (prevFactureId === facture.fac_id)
-            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
         else
-            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
+            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
     } else {
         if (prevFactureId === facture.fac_id)
-            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, facture.centre];
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre];
         else
-            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, facture.centre];
+            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, centre];
     }
 
     sortie = "";

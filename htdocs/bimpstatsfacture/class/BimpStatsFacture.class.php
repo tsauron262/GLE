@@ -60,9 +60,8 @@ class BimpStatsFacture {
 
     /* Main function, triggered when the user click on "Valider" button */
 
-    public function getFactures($user, $dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $placeType/* , $is_common */) {
+    public function getFactures($user, $dateStart, $dateEnd, $types, $centres, $statut, $sortBy, $taxes, $etats, $format, $nomFichier, $placeType) {
         // TODO MAJ BDD
-//        $this->is_common = $is_common;
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
@@ -82,20 +81,13 @@ class BimpStatsFacture {
         } else { // entrepot
             $hash = $this->addEntrepotURL($hash);
         }
-        $out = $this->sortHash($hash, $sortBy);
+        $out = $this->sortHash($hash, $sortBy, $placeType);
         if ($this->mode == 'c') {
             $this->putCsv($out, $nomFichier);
             $out['urlCsv'] = "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&attachment=1&file=/export/exportGle/" . $nomFichier . ".csv' class='butAction'>Fichier</a>";
         }
         return $out;
     }
-
-//    private function addExtra($string) {
-//        if ($this->is_common)
-//            return '';
-//        else
-//            return $string;
-//    }
 
     /* Filter facture */
 
@@ -108,7 +100,6 @@ class BimpStatsFacture {
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
-//        if ($this->is_common) {
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
             $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
             $sql .= ' OR e.type IS NULL)';
@@ -134,20 +125,11 @@ class BimpStatsFacture {
         }
         $sql .= ")";
 
-        if ($user->rights->BimpStatsFacture->facture->limit and $placeType == 'c') {
-            $sql .= ' AND fs.centre IN (' . substr(str_replace(' ', '", "', $user->array_options['options_apple_centre']), 2) . '")';
+        if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
+            $user_center = substr(str_replace(' ', '", "', $user->array_options['options_apple_centre']), 2); // not a real list
+            $sql .= ' AND (fs.centre IN (' . $user_center . '")';
+            $sql .= ' OR e.centre IN (' . $user_center . '"))';
         }
-
-//        }
-//        if (!empty($centres) and in_array('NRS', $centres)) {   // Non renseigné selected
-//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\', "0")';
-//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\', "0")';
-//            $sql .= ' OR e.centre IS NULL';
-//            $sql .= ' OR fs.centre IS NULL)';
-//        } else if (!empty($centres)) {
-//            $sql .= ' AND (e.centre IN (\'' . implode("','", $centres) . '\')';
-//            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
-//        }
 
         if (!empty($etats)) {
             $sql .= ' AND f.fk_statut IN (\'' . implode("','", $etats) . '\')';
@@ -343,15 +325,18 @@ class BimpStatsFacture {
 
         foreach ($hash as $ind => $h) {
             if (isset($h['fk_entrepot']) && $h['fk_entrepot'] != '') {
-//                $entrepot = new Entrepot($this->db);
-//                $entrepot->id = $h['fk_entrepot'];
-//                $entrepot->libelle = $allEntrepots[$h['fk_entrepot']];
-//                $hash[$ind]['centre'] = $entrepot->getNomUrl(1);
+                $entrepot = new Entrepot($this->db);
+                $entrepot->id = $h['fk_entrepot'];
+                $entrepot->libelle = $allEntrepots[$h['fk_entrepot']];
+                if ($this->mode == 'd')
+                    $hash[$ind]['centre_url'] = $entrepot->getNomUrl(1);
                 $hash[$ind]['centre'] = $allEntrepots[$h['fk_entrepot']];
-                $hash[$ind]['ct'] = $ind;
+                $hash[$ind]['ct'] = $h['fk_entrepot'];
+            } else {
+                unset($hash[$ind]['ct']);
             }
         }
-        
+
         return $hash;
     }
 
@@ -417,7 +402,7 @@ class BimpStatsFacture {
 
     private function convertType($hash, $types) {
         foreach ($hash as $ind => $h) {
-            $hash[$ind]['type'] = $types[$h['ty']];
+            $hash[$ind]['type'] = isset($types[$h['ty']]) ? $types[$h['ty']] : '';
         }
         return $hash;
     }
@@ -461,8 +446,12 @@ class BimpStatsFacture {
         file_put_contents(DOL_DATA_ROOT . "/synopsischrono/export/exportGle/" . $nomFichier . ".csv", $sortie);
     }
 
-    private function sortHash($hash, $sortBy) {
+    private function sortHash($hash, $sortBy, $placeType) {
         $out = array();
+        if ($placeType == 'e')
+            $place = 'Entrepôt';
+        else
+            $place = 'Centre';
 
         (in_array('c', $sortBy)) ? $sortCenter = true : $sortCenter = false;
         (in_array('t', $sortBy)) ? $sortType = true : $sortType = false;
@@ -485,21 +474,21 @@ class BimpStatsFacture {
                 $filtre = '';
                 if ($sortCenter != '') {
                     $filtre .= $row['ct'];
-                    $title .= $row['centre'] . ' - ';
+                    $title .= ($row['centre'] != '' ? $row['centre'] . ' - ' : 'Sans ' . $place . ' - ');
                 }
                 if ($sortType != '') {
                     $filtre .= $row['ty'];
-                    $title .= $row['type'] . ' - ';
+                    $title .= ($row['type'] != '' ? $row['type'] . ' - ' : 'Sans type - ');
                 }
                 if ($sortTypeGarantie != '') {
                     $ind = array_search($row['type_garantie'], $allTypeGarantie);
                     $filtre .= $ind . '_';
-                    $title .= $row['type_garantie'] . ' - ';
+                    $title .= ($row['type_garantie'] != '' ? $row['type_garantie'] . ' - ' : 'Sans type de garantie - ');
                 }
                 if ($sortEquipement != '') {
                     $ind = array_search($row['equip_ref'], $allEquipement);
                     $filtre .= $ind . '_';
-                    $title .= $row['equip_ref'] . ' - ';
+                    $title .= ($row['equip_ref'] != '' ? $row['equip_ref'] . ' - ' : 'Sans équipement - ');
                 }
                 $title = substr($title, 0, -2);
             }
@@ -521,18 +510,18 @@ class BimpStatsFacture {
 
             unset($row['fac_statut']);
             unset($row['soc_id']);
-//            unset($row['pai_id']);
+            if ($this->mode != 'd')
+                unset($row['pai_id']);
             unset($row['ct']);
             unset($row['ty']);
             unset($row['sav_id']);
             unset($row['saf_refid']);
 
             if ($this->mode != 'r') {
-                //Formatae des données
+                //Formatage des données
                 $row['factotal'] = $this->formatPrice($row['factotal']);
                 $row['marge'] = $this->formatPrice($row['marge']);
                 $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
-
                 $out[$filtre]['factures'][] = $row;
             }
         }

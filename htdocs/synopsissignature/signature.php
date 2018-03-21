@@ -306,7 +306,7 @@ if ($selectedFile) {
             /* $tabFilePc[] = DOL_DATA_ROOT."/ficheinter/".$object->ref."/";
               $tabFilePc2[] = ".pdf";
               $tabFilePc3[] = "PC-" . $chrono->ref . ".pdf"; */
-            mailSyn2("FI Signé", "j.mazet@bimp.fr", null, "Bonjour la FI " . $object->getNomUrl(1) . " est Signé", array(), array(), array());
+            mailSyn2("FI Signé", "j.mazet@bimp.fr, v.gilbert@bimp.fr", null, "Bonjour la FI " . $object->getNomUrl(1) . " est Signé", array(), array(), array());
         } elseif (stripos($signeFile, 'SH') === 0) {
             $pdf->setXY(25, 240);
             $pdf->image($nomSign, 25, 245, 40);

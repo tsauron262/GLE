@@ -253,7 +253,7 @@ llxHeader('',$langs->trans('Fiche PN'),'Fiche PN');
                     // editeur wysiwyg
                     if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS)
                     {
-                        require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
+                        require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
                         $doleditor=new DolEditor('desc',$objp->description,164,'dolibarr_details');
                         $doleditor->Create();
                     }

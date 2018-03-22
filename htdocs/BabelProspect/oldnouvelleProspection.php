@@ -75,7 +75,7 @@ switch ($action)
                     // editeur wysiwyg
                     if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled )
                     {
-                        require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
+                        require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
                         $doleditor=new DolEditor('desc',$objp->description,164,'dolibarr_details');
                         $doleditor->Create();
                     }

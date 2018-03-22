@@ -206,7 +206,7 @@ class BimpTransfer {
                         'name_status' => $name_status,
                         'fk_warehouse_source' => $obj->fk_warehouse_source,
                         'nb_product_scanned' => $obj_transfer->getProductSent(),
-                        'url_warehouse_source' => $doli_warehouse->getNomUrl(),
+                        'url_warehouse_source' => $doli_warehouse->getNomUrl(1),
                         'fk_warehouse_dest' => $obj->fk_warehouse_dest,
                         'fk_user_create' => $obj->fk_user_create,
                         'url_user' => $user->getNomUrl(-1, '', 0, 0, 24, 0, ''),
@@ -235,14 +235,15 @@ class BimpTransfer {
         }
 
 
-        $sql = 'SELECT SUM(quantity_sent) as scanned_product';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer_det';
-        $sql .= ' WHERE fk_transfer=' . $this->id;
+        $sql = 'SELECT SUM(qty) as qty_sent';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'br_reservation';
+        $sql .= ' WHERE id_transfert=' . $this->id;
 
+//        echo $sql . "\n<br/>";
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                return $obj->scanned_product;
+                return $obj->qty_sent > 0 ? $obj->qty_sent : 0 ;
             }
         }
         return false;
@@ -467,11 +468,11 @@ class BimpTransfer {
                 break;
             }
         }
-        
+
         if ($can_be_close) {
             $this->updateStatut($this::STATUS_RECEIVED);
         }
-        
+
         return $can_be_close;
     }
 

@@ -177,6 +177,7 @@ function addLineProduct(prod) {
     line += '<td>' + prod.refurl + '</td>'; // refUrl
     line += '<td></td>'; // num série
     line += '<td>' + prod.label + '</td>'; // label
+    line += '<td></td>'; // price
     line += '<td name="sent_qty" style="text-align: right">' + prod.quantity_sent + '</td>';
     if (parseInt(prod.status) === 201) {
         line += '<td style="padding: 0px; text-align: center"><img name="arrow_fill_qty" class="clickable" src="css/next.png"></img></td>';
@@ -243,6 +244,7 @@ function addLineEquipment(equip) {
     line += '<td>' + equip.refurl + '</td>'; // refUrl
     line += '<td>' + equip.serial + '</td>'; // num série
     line += '<td>' + equip.label + '</td>'; // label
+    line += '<td>' + equip.price + ' €</td>'; // price
     line += '<td></td>';
     line += '<td></td>';
     line += '<td></td>';

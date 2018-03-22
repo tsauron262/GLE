@@ -114,10 +114,15 @@ function saveProducts(localCntProduct) {
             var outParsed = JSON.parse(out);
             if (outParsed.errors.length !== 0) {
                 setMessage('alertEnregistrer', outParsed.errors, 'error');
-            } else if (1 < localCntProduct) {
-                setMessage('alertEnregistrer', localCntProduct + ' Groupes de produit ont été enregistré avec succès.', 'mesgs');
             } else {
-                setMessage('alertEnregistrer', localCntProduct + ' Groupe de produit a été enregistré avec succès.', 'mesgs');
+                $('table#productTable tr[id]').remove();
+                products = [];
+                cntProduct = 0;
+                if (1 < localCntProduct) {
+                    setMessage('alertEnregistrer', localCntProduct + ' Groupes de produit ont été enregistré avec succès.', 'mesgs');
+                } else {
+                    setMessage('alertEnregistrer', localCntProduct + ' Groupe de produit a été enregistré avec succès.', 'mesgs');
+                }
             }
         }
     });
@@ -186,9 +191,6 @@ function initEvents() {
             setMessage('alertEnregistrer', 'L\'entrepot de départ doit être différent de celui d\'arrivé.', 'error');
         } else if (cntProduct !== 0 && confirm('Etes-vous sur de vouloir transférer ' + cntProduct + ' groupes de produit ?')) {
             saveProducts(cntProduct);
-            $('table#productTable tr[id]').remove();
-            products = [];
-            cntProduct = 0;
         } else {
             setMessage('alertEnregistrer', 'Vous devez ajouter des produits avant de les transférer.', 'error');
         }

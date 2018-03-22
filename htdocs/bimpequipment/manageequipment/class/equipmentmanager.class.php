@@ -312,4 +312,20 @@ class EquipmentManager {
         }
     }
 
+    public function getBuyPrice($fk_equipment) {
+        $sql = 'SELECT prix_achat';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
+        $sql .= ' WHERE id=' . $fk_equipment;
+
+        $result = $this->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                return $obj->prix_achat;
+            }
+        } else {
+            $this->errors[] = "Le l'identifiant $fk_equipment n'est pas dans la table des équipements";
+            return false;
+        }
+    }
+
 }

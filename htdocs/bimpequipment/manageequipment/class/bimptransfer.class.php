@@ -95,7 +95,51 @@ class BimpTransfer {
             return $last_insert_id;
         } else {
             $this->errors[] = "Impossible de créer le transfert.";
-            dol_print_error($this->db);
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    private function delete() {
+        if ($this->id < 0) {
+            $this->errors[] = "Identifiant de transfert non valide : " . $this->id;
+            return false;
+        }
+
+        if ($this->deleteLines() == -1)
+            return -2;
+
+        $this->db->begin();
+        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'be_transfer ';
+        $sql.= ' WHERE rowid=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->db->commit();
+            return 1;
+        } else {
+            $this->errors[] = "Impossible de supprimer le transfert.";
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    private function deleteLines() {
+        if ($this->id < 0) {
+            $this->errors[] = "Identifiant de transfert non valide : " . $this->id;
+            return false;
+        }
+
+        $this->db->begin();
+        $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'br_reservation ';
+        $sql.= ' WHERE id_transfert=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->db->commit();
+            return 1;
+        } else {
+            $this->errors[] = "Impossible de supprimer les lignes de transfert.";
             $this->db->rollback();
             return -1;
         }
@@ -121,8 +165,8 @@ class BimpTransfer {
                     'id_transfert' => $this->id,
 //                    'qty', // quantités si produit non sérialisé
                     'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
-                    'date_update' => '2999-01-01 00:00:00',
-                    'date_to' => '2999-01-01 00:00:00'
+//                    'date_update' => '2999-01-01 00:00:00',
+//                    'date_to' => '2999-01-01 00:00:00'
 //                    'note' // note facultative
                 ));
             } else {
@@ -136,19 +180,25 @@ class BimpTransfer {
                     'id_transfert' => $this->id,
                     'qty' => $product['qty'], // quantités si produit non sérialiséAAAA-MM-JJ HH:MM:SS
                     'date_from' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
-                    'date_update' => '2999-01-01 00:00:00',
-                    'date_to' => '2999-01-01 00:00:00'
+//                    'date_update' => '2999-01-01 00:00:00',
+//                    'date_to' => '2999-01-01 00:00:00'
 //                    'note' // note facultative
                 ));
             }
-            if (sizeof($errors1) != 0) {
+            if (count($errors1)) {
                 $this->errors = array_merge($this->errors, $errors1);
+                $this->errors[] = " numéro de série : " . $product['serial'];
+                $this->delete();
                 $cnt_line_added--;
+                return $cnt_line_added;
             } else {
                 $errors2 = $reservation->create();
-                if (sizeof($errors2) != 0) {
+                if (count($errors2)) {
                     $this->errors = array_merge($this->errors, $errors2);
+                    $this->errors[] = " numéro de série : " . $product['serial'];
+                    $this->delete();
                     $cnt_line_added--;
+                    return $cnt_line_added;
                 }
             }
             $cnt_line_added++;
@@ -243,7 +293,7 @@ class BimpTransfer {
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                return $obj->qty_sent > 0 ? $obj->qty_sent : 0 ;
+                return $obj->qty_sent > 0 ? $obj->qty_sent : 0;
             }
         }
         return false;
@@ -279,7 +329,9 @@ class BimpTransfer {
 
             if ($line['id_equipment'] > 0) { // equipments
                 $lines[$key]['serial'] = $em->getSerial($line['id_equipment']);
+                $lines[$key]['price'] = $em->getBuyPrice($line['id_equipment']);
                 $lines[$key]['fk_equipment'] = $line['id_equipment'];
+//                $lines[$key]['price'] = $line['prix_achat'];
                 if ($line['status'] == 201 or $line['status'] == 303)
                     $lines[$key]['quantity_received'] = 0;
                 elseif ($line['status'] == 301)
@@ -305,8 +357,6 @@ class BimpTransfer {
 
         return array_values($lines);
     }
-
-//    Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1,Echec de l'enregistrement de la réservation - Erreur SQL: Incorrect datetime value: '' for column 'date_to' at row 1
 
     public function receiveTransfert($user, $products, $equipments) {
         $nb_update = 0;
@@ -372,9 +422,13 @@ class BimpTransfer {
                 'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S')
             ));
             $this->errors = array_merge($this->errors, $emplacement->create());
-
-            $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
         }
+//        $total_group_product = sizeof($products) + sizeof($products);
+//        if ($nb_update == $total_group_product)
+//            $this->updateStatut($this::STATUS_RECEIVED);
+        if ($nb_update > 0)
+            $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
+        
         return $nb_update;
     }
 
@@ -445,7 +499,7 @@ class BimpTransfer {
             }
         }
 
-        return $this->updateStatut($this::STATUS_RECEIVED_PARTIALLY);
+        return $this->updateStatut($this::STATUS_RECEIVED);
     }
 
     function checkClose() {

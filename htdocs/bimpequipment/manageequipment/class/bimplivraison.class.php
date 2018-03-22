@@ -33,16 +33,18 @@ class BimpLivraison {
     function getLignesOrder() {
         $lignes = array();
 
-        $sql = 'SELECT rowid, fk_product, ref, label, qty, subprice';
+        $sql = 'SELECT rowid, fk_product, ref, label, qty, subprice, total_ht';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet';
         $sql .= ' WHERE fk_commande=' . $this->orderId;
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                if (isset($lignes[$obj->fk_product]))
+                if (isset($lignes[$obj->fk_product])) {
                     $lignes[$obj->fk_product]->remainingQty += $obj->qty;
-                else {
+                    $lignes[$obj->fk_product]->total_ht += $obj->total_ht;
+                    $lignes[$obj->fk_product]->price_unity = price($lignes[$obj->fk_product]->total_ht / $lignes[$obj->fk_product]->remainingQty);
+                } elseif ($obj->fk_product > 0) {
                     $doliProd = new Product($this->db);
                     $doliProd->fetch($obj->fk_product);
                     $ligne = new LigneLivraison($this->db);
@@ -50,6 +52,7 @@ class BimpLivraison {
                     $ligne->label = dol_trunc($obj->label, 25);
                     $ligne->remainingQty = $obj->qty;
                     $ligne->price_unity = price($obj->subprice);
+                    $ligne->total_ht = $obj->total_ht;
                     $ligne->isDelivered = false;
                     $ligne->isEquipment = $ligne->isSerialisable();
                     $ligne->refurl = $doliProd->getNomUrl(1);

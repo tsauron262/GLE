@@ -25,6 +25,10 @@ $action = GETPOST('action', 'aZ09');
 $object = new CommandeFournisseur($db);
 $object->fetch($id, $ref);
 
+//$bl = new BimpLivraison($db);
+//$bl->fetch($orderId);
+//$lignes = $bl->getLignesOrder();
+
 /*
  * View
  */
@@ -117,14 +121,12 @@ $entrepots = getAllEntrepots($db);
 print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
 foreach ($entrepots as $id => $name) {
-    print '<option value="' . $id . '">' . $name . '</option>';
+    if ($id == $object->array_options['options_entrepot'])
+        print '<option value="' . $id . '" selected>' . $name . '</option>';
+    else
+        print '<option value="' . $id . '">' . $name . '</option>';
 }
 print '</select> ';
-
-$bl = new BimpLivraison($db);
-$bl->fetch($orderId);
-$lignes = $bl->getLignesOrder();
-
 
 print '<div class="object_list_table">';
 print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
@@ -143,8 +145,6 @@ print '<th>Mettre en stock <input type="checkbox" name="checkAll"></th>';
 print '</tr></thead>';
 print '<tbody></tbody>';
 print '</table>';
-
-
 
 print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
 

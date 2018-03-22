@@ -2,7 +2,8 @@
 
 class Bimp_Societe extends BimpObject
 {
-
+    public static $client_unknown_id = 209126;
+    
     public static $types_ent_list = null;
     public static $effectifs_list = null;
 

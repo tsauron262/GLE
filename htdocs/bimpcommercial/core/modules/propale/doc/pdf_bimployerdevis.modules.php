@@ -28,17 +28,18 @@
  *	\ingroup    propale
  *	\brief      Fichier de la classe permettant de generer les propales au modele Azur
  */
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/PropalPDF.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/LoyerPDF.php';
 
 
 /**
  *	Class to generate PDF proposal Azur
  */
-class pdf_bimployerdevis extends PropalPDF
+class pdf_bimployerdevis extends LoyerPDF
 {
     public function initData() {
-        $this->mode = "loyer";
+        $this->suffixefName = "_loyer";
         parent::initData();
     }
 }
+
 

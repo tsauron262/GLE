@@ -701,27 +701,28 @@ class BC_ListTable extends BC_List
                     $html .= (isset($row[$col_name]) ? $row[$col_name] : '');
                     $html .= '</td>';
                 }
-                $html .= '<td class="buttons" style="' . $td_style . '">';
+
+                $rowButtons = array();
+                if (count($item_params['extra_btn'])) {
+                    foreach ($item_params['extra_btn'] as $btn_params) {
+                        $rowButtons[] = $btn_params;
+                    }
+                }
 
                 $this->setConfPath();
 
-                if (count($item_params['extra_btn'])) {
-                    foreach ($item_params['extra_btn'] as $btn_params) {
-                        $html .= $this->renderRowButton($btn_params);
-                    }
-                }
                 if ($item_params['update_btn']) {
-                    $html .= $this->renderRowButton(array(
+                    $rowButtons[] = array(
                         'class'   => 'cancelModificationsButton hidden',
                         'icon'    => 'undo',
                         'label'   => 'Annuler les modifications',
                         'onclick' => 'cancelObjectRowModifications(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
-                    ));
-                    $html .= $this->renderRowButton(array(
+                    );
+                    $rowButtons[] = array(
                         'class'   => 'updateButton hidden',
                         'label'   => 'Enregistrer',
                         'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
-                    ));
+                    );
                 }
                 if ($item_params['edit_btn']) {
                     $title = '';
@@ -731,11 +732,11 @@ class BC_ListTable extends BC_List
                     $onclick = 'loadModalFormFromList(';
                     $onclick .= '\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\'';
                     $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
-                    $html .= $this->renderRowButton(array(
+                    $rowButtons[] = array(
                         'class'   => 'editButton',
                         'label'   => 'Editer',
                         'onclick' => $onclick
-                    ));
+                    );
                 }
                 if (!is_null($item_params['modal_view'])) {
                     $title = '';
@@ -745,61 +746,69 @@ class BC_ListTable extends BC_List
                         $title = htmlentities(addslashes($this->object->getInstanceName()));
                     }
                     $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
-                    $html .= $this->renderRowButton(array(
+                    $rowButtons[] = array(
                         'label'   => 'Vue rapide',
                         'icon'    => 'eye',
                         'onclick' => $onclick
-                    ));
+                    );
                 }
                 if (!is_null($item_params['inline_view'])) {
                     $onclick = 'displayObjectView($(\'#' . $this->identifier . '_container\').find(\'.objectViewContainer\'), ';
                     $onclick .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_params['inline_view'] . '\', ' . $id_object . ', \'default\'';
                     $onclick .= ');';
-                    $html .= $this->renderRowButton(array(
+                    $rowButtons[] = array(
                         'label'   => 'Afficher',
                         'icon'    => 'eye',
                         'onclick' => $onclick
-                    ));
+                    );
                 }
                 if ($item_params['page_btn']) {
                     if (!is_null($id_object) && $id_object) {
                         $controller = $this->object->getController();
                         if ($controller) {
                             $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $id_object;
-                            $html .= $this->renderRowButton(array(
+                            $rowButtons[] = array(
                                 'label'   => 'Afficher la page',
                                 'onclick' => 'window.location = \'' . $url . '\';',
                                 'icon'    => 'file-o'
-                            ));
-                            $html .= $this->renderRowButton(array(
+                            );
+                            $rowButtons[] = array(
                                 'label'   => 'Afficher la page dans un nouvel onglet',
                                 'onclick' => 'window.open(\'' . $url . '\');',
                                 'icon'    => 'external-link'
-                            ));
+                            );
                         } elseif ($this->object->isDolObject()) {
                             $url = BimpTools::getDolObjectUrl($this->object->dol_object, $id_object);
                             if ($url) {
-                                $html .= $this->renderRowButton(array(
+                                $rowButtons[] = array(
                                     'label'   => 'Afficher la fiche ' . $this->object->getLabel(),
                                     'onclick' => 'window.location = \'' . $url . '\';',
                                     'icon'    => 'file-o'
-                                ));
-                                $html .= $this->renderRowButton(array(
+                                );
+                                $rowButtons[] = array(
                                     'label'   => 'Afficher la fiche ' . $this->object->getLabel() . ' dans un nouvel onglet',
                                     'onclick' => 'window.open(\'' . $url . '\');',
                                     'icon'    => 'external-link'
-                                ));
+                                );
                             }
                         }
                     }
                 }
                 if ($item_params['delete_btn']) {
-                    $html .= $this->renderRowButton(array(
+                    $rowButtons[] = array(
                         'class'   => 'deleteButton',
                         'label'   => 'Supprimer',
                         'onclick' => 'deleteObjects(\'' . $this->identifier . '\', [' . $id_object . '], $(this))'
-                    ));
+                    );
                 }
+
+                $min_width = ((count($rowButtons) * 36) + 12) . 'px';
+                $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $td_style . '">';
+
+                foreach ($rowButtons as $btn_params) {
+                    $html .= $this->renderRowButton($btn_params);
+                }
+
                 $html .= '</td>';
                 $html .= '</tr>';
             }

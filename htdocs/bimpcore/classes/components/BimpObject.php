@@ -1205,13 +1205,21 @@ class BimpObject
 
         if (!count($errors)) {
             if ($this->use_commom_fields) {
-                $this->data['date_create'] = date('Y-m-d H:i:s');
-                global $user;
-                if (isset($user->id)) {
-                    $this->data['user_create'] = (int) $user->id;
-                } else {
-                    $this->data['user_create'] = 0;
+                $dc = $this->getData('date_create');
+                if (is_null($dc) || !$dc) {
+                    $this->data['date_create'] = date('Y-m-d H:i:s');
                 }
+
+                $uc = (int) $this->getData('user_create');
+                if (is_null($uc) || !$uc) {
+                    global $user;
+                    if (isset($user->id)) {
+                        $uc = (int) $user->id;
+                    } else {
+                        $uc = 0;
+                    }
+                }
+                $this->set('user_create', $uc);
             }
 
             foreach ($this->data as $field => &$value) {
@@ -1605,7 +1613,9 @@ class BimpObject
 
         $parent = $this->getParentInstance();
 
-        if (!is_null($this->dol_object)) {
+        if (method_exists($this, 'deleteProcess')) {
+            $result = $this->deleteProcess();
+        } elseif (!is_null($this->dol_object)) {
             $result = $this->deleteDolObject($errors);
         } else {
             $table = $this->getTable();
@@ -2068,8 +2078,10 @@ class BimpObject
     {
         $list = new BC_ListTable($this, $list_name, $level, null, $title, $icon);
 
-        foreach ($filters as $field_name => $value) {
-            $list->addFieldFilterValue($field_name, $value);
+        if (!is_null($filters)) {
+            foreach ($filters as $field_name => $value) {
+                $list->addFieldFilterValue($field_name, $value);
+            }
         }
 
         return $list->renderHtml();
@@ -2082,10 +2094,18 @@ class BimpObject
         return $form->renderHtml();
     }
 
-    public function renderViewsList($views_list_name = 'default', $panel = false)
+    public function renderViewsList($views_list_name = 'default', $panel = false, $title = null, $icon = null, $filters = array(), $level = 1)
     {
-        $viewsList = new BimpViewsList($this, $views_list_name);
-        return $viewsList->render($panel);
+        $viewsList = new BC_ListViews($this, $views_list_name, $level, null, $title, $icon);
+        $viewsList->params['panel'] = (int) $panel;
+
+        if (!is_null($filters)) {
+            foreach ($filters as $field_name => $value) {
+                $viewsList->addFieldFilterValue($field_name, $value);
+            }
+        }
+
+        return $viewsList->renderHtml();
     }
 
     public function renderCommonFields()

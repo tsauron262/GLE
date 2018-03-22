@@ -239,7 +239,7 @@ function reloadForm(form_id) {
     });
 }
 
-function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button) {
+function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -279,6 +279,10 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
         'id_object': 0,
         'id_parent': id_parent
     };
+
+    if (typeof (values) !== 'undefined' && values) {
+        data['param_values'] = values;
+    }
 
     BimpAjax('loadObjectForm', data, null, {
         display_success: false,
@@ -512,9 +516,12 @@ function searchObjectList($input) {
     var $container = $input.findParentByClass('inputContainer');
 
     if (!$.isOk($container)) {
-        bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger');
-        console.error('$container invalide');
-        return;
+        $container = $input.findParentByClass('searchInputContainer');
+        if (!$.isOk($container)) {
+            bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger');
+            console.error('$container invalide');
+            return;
+        }
     }
 
     var value = $input.val();

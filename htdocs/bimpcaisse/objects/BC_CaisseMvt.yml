@@ -46,8 +46,7 @@ fields:
     type: 
         label: Type
         values: 
-            1: Encaissement
-            2: Décaissement
+            array: types
     montant: 
         label: Montant
         type: money

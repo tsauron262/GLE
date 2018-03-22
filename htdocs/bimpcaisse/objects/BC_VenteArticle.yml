@@ -52,9 +52,17 @@ fields:
         type: int
         default_value: 1
         
+    unit_price_tax_ex: 
+        label: Prix unitaire HT
+        type: money
+            
     unit_price_tax_in: 
         label: Prix unitaire TTC
         type: money
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
         
     
 lists: 

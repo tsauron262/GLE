@@ -247,6 +247,8 @@ lists:
                 field: price_ttc
             tva: 
                 field: tva_tx
+            serialisable: 
+                field: serialisable
                 
 cards: 
     default: 

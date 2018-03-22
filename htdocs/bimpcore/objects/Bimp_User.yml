@@ -116,7 +116,6 @@ fields:
         dol_extra_field: 1
         type: text
         
-        
 forms:
     light: 
         rows:
@@ -132,6 +131,7 @@ forms:
             - field: gsxresa
             - field: comp
             - field: signature
+            
 lists:
     default: 
         checkboxes: 1
@@ -270,4 +270,7 @@ views:
                   fields_table: 
                       name: apple
         
+cards:
+    default: 
+        type: user_card
         

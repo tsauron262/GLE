@@ -13,7 +13,8 @@ class BC_Field extends BimpComponent
     public static $type_params_def = array(
         'id_object' => array(
             'object'      => array('required' => true),
-            'create_form' => array('default' => '')
+            'create_form' => array('default' => ''),
+            'create_form_values' => array('data_type' => 'array')
         ),
         'number'    => array(
             'min'      => array('data_type' => 'float'),
@@ -185,7 +186,6 @@ class BC_Field extends BimpComponent
             case 'date_range':
             case 'datetime_range':
                 $input_type = $this->params['search']['type'];
-                $options['display_now'] = 1;
                 break;
         }
 

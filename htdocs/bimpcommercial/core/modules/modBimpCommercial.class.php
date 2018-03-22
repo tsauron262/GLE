@@ -282,8 +282,9 @@ class modBimpCommercial extends DolibarrModules
 	{
 		$sql = array();
 
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommercial', 1, 'propal', 'Proposition loyer 2', NULL);";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimployerdevis', 1, 'propal', 'Proposition loyer', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommercial', 1, 'propal', 'Proposition loyer', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevis', 1, 'propal', 'NEW Devis BIMP', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimployerdevis', 1, 'propal', 'NEW Proposition loyer', NULL);";
                 
 		//$this->_load_tables('/bimpcommercial/sql/');
 
@@ -304,6 +305,7 @@ class modBimpCommercial extends DolibarrModules
                 
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommercial';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimployerdevis';";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevis';";
 
 		return $this->_remove($sql, $options);
 	}

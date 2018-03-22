@@ -224,8 +224,6 @@ class BimpLivraison {
             'type' => 2, // cf $types
             'serial' => $serial, // num série
             'reserved' => 0, // réservé ou non
-            'date_purchase' => '2010-10-10', // date d'achat TODO remove
-            'date_warranty_end' => '2010-10-10', // TODO remove
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
             'admin_login' => '',
             'admin_pword' => '',
@@ -272,7 +270,7 @@ class BimpLivraison {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur as cf ON cf.rowid = e.fk_object';
         $sql .= ' WHERE e.entrepot=' . $fk_warehouse;
-//        $sql .= ' AND statu'
+        $sql .= ' AND fk_statut >= '.$status_min." AND fk_statut <= ".$status_max;
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
@@ -285,14 +283,18 @@ class BimpLivraison {
                 $status = $bl->commande->statut;
                 if ($status == 0)
                     $name_status = 'Brouillon';
-                if ($status == 1)
+                elseif ($status == 1)
                     $name_status = 'Validée';
-                if ($status == 2)
+                elseif ($status == 2)
                     $name_status = 'Approuvée';
-                if ($status == 3)
+                elseif ($status == 3)
                     $name_status = 'En cours';
-                if ($status == 4)
+                elseif ($status == 4)
                     $name_status = 'Reçu partiellement';
+                elseif ($status == 5)
+                    $name_status = 'Reçu';
+                else 
+                    $name_status = 'Inconnue';
 
                 $orders[] = array(
                     'id' => $bl->orderId,

@@ -1,0 +1,181 @@
+table: br_reservation_cmd_fourn
+common_fields: 0
+
+labels: 
+    name: réservation à commander
+    name_plur: réservations à commander
+    is_female: 1
+    
+objects: 
+    reservation:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BR_Reservation
+            id_object:
+                field_value: id_reservation
+                
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product
+                
+    fournisseur: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                field_value: id_fournisseur
+                
+    fournisseur_price:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+            id_object: 
+                field_value: id_price
+                
+fields:
+    id_reservation: 
+        label: Réservation
+        type: id_object
+        object: reservation
+        input: 
+            type: hidden
+        required: 1
+        
+    id_commande_client: 
+        label: Commande client
+        type: id_object
+        object: commande_client
+        input: 
+            type: hidden
+        required: 1
+            
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        input: 
+            type: hidden
+        required: 1
+        
+    qty: 
+        label: Quantités
+        type: int
+        
+    type: 
+        label: Type de prix
+        type: int
+        values: 
+            1: Prix fournisseur
+            2: Prix d'achat exceptionnel
+        default_value: 1
+        
+    id_price: 
+        label: Prix fournisseur
+        type: id_object
+        object: fournisseur_price
+        create_form: default
+        create_form_values: 
+            fields: 
+                fk_product: 
+                    field_value: id_product
+        values: 
+            array: productFournisseursPrices
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 1
+        depends_on: id_product
+        required_if: type=1
+            
+    id_fournisseur:
+        label: Fournisseur
+        type: id_object
+        object: fournisseur
+        values: 
+            array: productFournisseurs
+        display_if: 
+            field_name: type
+            show_values: 2
+        display: 
+            nom_url: 
+                type: nom_url
+        depends_on: id_product
+        required_if: type=2
+        
+    special_price:
+        label: Prix d'achat exceptionnel
+        type: money
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 2
+        required_if: type=2
+        
+    id_commande_fournisseur:
+        label: Commande fournisseur
+        type: id_object
+        object: commande_fournisseur
+        values: 
+            array: commandesFournisseur
+        depends_on: id_fournisseur,id_price
+        default_value: 0
+        input: 
+            help: Laissez vide pour sélectionner la commande fournisseur ultérieurement
+        
+    id_commande_fournisseur_line:
+        label: Ligne de commande fournisseur
+        type: id
+        default_value: 0
+        input: 
+            type: hidden
+        
+forms: 
+    supplier: 
+        rows: 
+            - field: id_commande_fournisseur
+            
+lists: 
+    default: 
+        sort_field: id_product
+        sort_way: asc
+        n: 25
+        enable_search: 0
+        extra_btn: 
+            callback: getListExtraBtn
+        cols:
+            type: 
+                field: type
+                
+            product: 
+                field: id_product
+                display: nom_url
+                
+            qty: 
+                field: qty
+                
+            fournisseur: 
+                label: Fournisseur
+                value: 
+                    callback: displayFournisseur
+            price: 
+                label: Prix d'achat
+                value: 
+                    callback: displayPrice
+                    
+            commande: 
+                field: id_commande_fournisseur
+                display: nom_url
+        

@@ -729,6 +729,7 @@ function resetListSearchInputs(list_id) {
             $(this).data('DateTimePicker').clear();
             $(this).parent().find('.datepicker_value').val('');
         });
+        $row.find('.search_input_selected_label').html('').hide();
     }
     reloadObjectList(list_id);
 }
@@ -813,9 +814,9 @@ function onListLoaded($list) {
             setSearchInputsEvents($list);
         });
 
-        $list.find('tbody').find('a').each(function () {
-            $(this).attr('target', '_blank');
-        });
+//        $list.find('tbody').find('a').each(function () {
+//            $(this).attr('target', '_blank');
+//        });
 
         $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
             checkRowModifications($(this));
@@ -870,14 +871,14 @@ function onListLoaded($list) {
 }
 
 function onListRefeshed($list) {
-    $list.find('tbody').find('a').each(function () {
-        $(this).attr('target', '_blank');
-    });
+//    $list.find('tbody').find('a').each(function () {
+//        $(this).attr('target', '_blank');
+//    });
 
     var $tbody = $list.find('tbody.listRows');
 
     $tbody.find('a').each(function () {
-        $(this).attr('target', '_blank');
+//        $(this).attr('target', '_blank');
         var link_title = $(this).attr('title');
         if (link_title) {
             $(this).removeAttr('title');

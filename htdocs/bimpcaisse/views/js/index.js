@@ -519,7 +519,7 @@ function saveCurrentVente($button, status) {
                     html += '<button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>';
                     html += 'Des erreurs sont survenues lors de la validation de la vente n°' + bimpAjax.id_vente + '<br/>';
                     for (var i in result.validate_errors) {
-                        html += ' - ' + result.validate_errors[i];
+                        html += ' - ' + result.validate_errors[i] + '<br/>';
                     }
                     html += '</div>';
                     $('#venteErrors').append(html).slideDown(250);
@@ -972,10 +972,6 @@ function addPaiement() {
 
 }
 
-function validateVente() {
-
-}
-
 function displayNewPaiementForm($button) {
     if ($button.hasClass('selected')) {
         return;
@@ -1088,6 +1084,13 @@ function onVenteLoaded() {
     if ($input.length && !$input.data('event_init')) {
         $input.keyup(function (e) {
             if (e.key === 'Enter') {
+                $('#findProductButton').click();
+            }
+        });
+        $input.keydown(function (e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                e.stopPropagation();
                 $('#findProductButton').click();
             }
         });

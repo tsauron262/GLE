@@ -33,6 +33,7 @@ fields:
             array: articles
         input: 
             help: Laisser vide pour appliquer la remise à l'ensemble de la vente
+        default_value: 0
         
     type: 
         label: Type de réduction

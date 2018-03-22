@@ -10,14 +10,15 @@ class BC_Form extends BC_Panel
         'field', 'association', 'custom'
     );
     public static $row_params = array(
-        'show'        => array('data_type' => 'bool', 'default' => 1),
-        'field'       => array('default' => ''),
-        'association' => array('default'),
-        'custom'      => array('data_type' => 'bool', 'default' => 0),
-        'label'       => array('default' => ''),
-        'create_form' => array('default' => ''),
-        'display'     => array('default' => 'default'),
-        'hidden'      => array('data_type' => 'bool', 'default' => 0)
+        'show'               => array('data_type' => 'bool', 'default' => 1),
+        'field'              => array('default' => ''),
+        'association'        => array('default'),
+        'custom'             => array('data_type' => 'bool', 'default' => 0),
+        'label'              => array('default' => ''),
+        'create_form'        => array('default' => ''),
+        'create_form_values' => array('data_type' => 'array'),
+        'display'            => array('default' => 'default'),
+        'hidden'             => array('data_type' => 'bool', 'default' => 0)
     );
     public static $custom_row_params = array(
         'input_name' => array('required' => true, 'default' => ''),
@@ -35,7 +36,7 @@ class BC_Form extends BC_Panel
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
 
         $this->id_parent = $id_parent;
-        
+
         $path = null;
 
         if (!$name || $name === 'default') {
@@ -67,14 +68,14 @@ class BC_Form extends BC_Panel
                     }
                 }
             }
-        } 
+        }
 
         if (!is_null($id_parent) && !is_null($object)) {
             $object->setIdParent($id_parent);
         }
 
         parent::__construct($object, $name, $path, $content_only, $level, $title, 'edit');
-        
+
         if (!is_null($this->id_parent)) {
             $this->data['id_parent'] = $this->id_parent;
         }
@@ -213,8 +214,9 @@ class BC_Form extends BC_Panel
 
         if ($field->params['type'] === 'id_object') {
             $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
+            $form_values = ($params['create_form_values'] ? $params['create_form_values'] : ($field->params['create_form_values'] ? $field->params['create_form_values'] : ''));
             if ($form_name) {
-                $html .= $this->renderCreateObjectButton($field->params['object'], $field->name, $form_name);
+                $html .= $this->renderCreateObjectButton($field->params['object'], $field->name, $form_name, $form_values);
             }
         }
 
@@ -282,7 +284,7 @@ class BC_Form extends BC_Panel
                     $form_name = ($params['create_form'] ? $params['create_form'] : $this->object->getConf('associations/' . $params['association'] . '/create_form', ''));
                     if ($form_name) {
 //                        $html .= $this->renderCreateObjectButton('', $input_name . '_search', $form_name, false, $associate);
-                        $html .= $this->renderCreateObjectButton('', '', $form_name, false, $associate);
+                        $html .= $this->renderCreateObjectButton('', '', $form_name, null, false, $associate);
                     }
                 }
 
@@ -387,7 +389,7 @@ class BC_Form extends BC_Panel
         return $html;
     }
 
-    public function renderCreateObjectButton($object_name, $result_input_name, $form_name, $reload_input = true, $object = null, $successcallBack = '')
+    public function renderCreateObjectButton($object_name, $result_input_name, $form_name, $form_values = null, $reload_input = true, $object = null, $successcallBack = '')
     {
         if (!$form_name) {
             return '';
@@ -419,6 +421,9 @@ class BC_Form extends BC_Panel
         $onclick .= ', \'' . $form_name . '\', ' . $id_parent;
         $onclick .= ', ' . ($reload_input ? 'true' : 'false');
         $onclick .= ', $(this)';
+        if (!is_null($form_values) && is_array($form_values)) {
+            $onclick .= ', \'' . htmlentities(json_encode($form_values)) . '\'';
+        }
         $html .= BimpRender::renderButton(array(
                     'icon_before' => 'plus-circle',
                     'label'       => $label,

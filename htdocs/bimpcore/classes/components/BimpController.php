@@ -121,9 +121,13 @@ class BimpController
             if (count($this->errors)) {
                 echo BimpRender::renderAlerts($this->errors);
             } else {
-                $title = $this->getConf('title', '');
-                if ($title) {
-                    print load_fiche_titre($title, '', 'title_generic.png');
+                if (method_exists($this, 'displayHead')) {
+                    $this->displayHead();
+                } else {
+                    $title = $this->getConf('title', '');
+                    if ($title) {
+                        print load_fiche_titre($title, '', 'title_generic.png');
+                    }
                 }
 
                 if (BimpTools::isSubmit('search')) {

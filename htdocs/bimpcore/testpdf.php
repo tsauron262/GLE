@@ -7,12 +7,26 @@ ini_set('display_errors', 1);
 //require_once './pdf/classes/InvoicePDF.php';
 //$pdf = new InvoicePDF(41051);
 //$pdf->render(DOL_DATA_ROOT.'/facture.pdf', true);
-
 //echo DOL_DATA_ROOT.'/invoice.pdf';
 
 
-require_once './pdf/classes/PropalPDF.php';
-$pdf = new PropalPDF(159);
-$pdf->render(DOL_DATA_ROOT.'/propal.pdf', true);
+require_once './pdf/classes/LoyerPDF.php';
+
+global $db, $langs;
+
+//$pdf = new PropalPDF($db);
+$pdf = new LoyerPDF($db);
+
+$obj = new Propal($db);
+$obj->fetch(92608);
+
+//$pdf = new InvoicePDF($db);
+
+$pdf->init($obj);
+$pdf->render(__DIR__. '/testPropal.pdf', true);
+
+//$pdf->write_file($propal, $langs);
+
+$pdf->render(DOL_DATA_ROOT . '/propal.pdf', true);
 
 

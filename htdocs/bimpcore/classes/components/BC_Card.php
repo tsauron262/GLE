@@ -93,6 +93,11 @@ class BC_Card extends BimpComponent
     public function renderBimpObjectCard()
     {
         $fields = array();
+        
+        if ($this->display_object->isDolObject() && $this->params['type']) {
+            $this->display_object = $this->display_object->dol_object;
+            return $this->renderDolObjectCard();
+        }
 
         if (is_null($this->display_object) || !$this->display_object->isLoaded()) {
             return '';

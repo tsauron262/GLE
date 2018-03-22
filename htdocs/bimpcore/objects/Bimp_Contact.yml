@@ -163,3 +163,8 @@ views:
                   col_lg: 12
                   fields_table: 
                       name: notes
+                      
+cards: 
+    default: 
+        type: contact_card
+        view_btn: 1

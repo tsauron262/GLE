@@ -1,0 +1,76 @@
+table: product_fournisseur_price
+common_fields: 0
+
+primary: rowid
+
+labels: 
+    name: prix d'achat fournisseur
+    name_plur: prix d'achat fournisseur
+    
+objects: 
+    fournisseur: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: Bimp_Societe
+            id_object: 
+                field_value: fk_soc
+                
+fields: 
+    fk_product: 
+        label: Produit
+        type: id
+        input: 
+            type: hidden
+            
+    fk_soc: 
+        label: Fournisseur
+        type: id_object
+        object: fournisseur
+        input: 
+            type: search_societe
+            societe_type: supplier
+            help: Entrez le nom ou la référence d'un fournisseur pour effectuer une recherche
+        required: 1
+        
+    ref_fourn:
+        label: Référence produit fournisseur
+    
+    quantity:
+        label: Quantité minimum
+        type: int
+        default_value: 1
+        
+    price: 
+        label: Prix HT quantité min. (sans remise)
+        type: money
+        required: 1
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        default_value: 20
+        decimals: 4
+        min: 0
+        max: 100
+        unsigned: 1
+    
+    remise_percent: 
+        label: Remise par défaut qté min.
+        type: percent
+        decimals: 6
+        min: 0
+        max: 100
+        default_value: 0
+        
+    unitprice: 
+        label: Prix unitaire HT
+        type: money
+        default_value: 0
+        input: 
+            type: hidden
+
+    
+        
+    
+        

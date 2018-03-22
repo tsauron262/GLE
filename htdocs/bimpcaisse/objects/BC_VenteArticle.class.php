@@ -11,6 +11,7 @@ class BC_VenteArticle extends BimpObject
         return 0;
     }
 
+    
     public function displayTotal()
     {
         if ($this->isLoaded()) {
@@ -57,5 +58,63 @@ class BC_VenteArticle extends BimpObject
         }
 
         return true;
+    }
+
+    public function getTotalRemisesPercent($extra_percent = 0)
+    {
+        if ($this->isLoaded()) {
+            $id_vente = (int) $this->getData('id_vente');
+
+            $remises = BimpObject::getInstance($this->module, 'BC_VenteRemise');
+
+            $list = $remises->getList(array(
+                'id_vente'   => $id_vente,
+                'id_article' => (int) $this->id
+            ));
+
+            $unit_price_ttc = (float) $this->getData('unit_price_tax_in');
+            $qty = (int) $this->getData('qty');
+            $total_ttc = (float) ($unit_price_ttc * $qty);
+
+            if (!$total_ttc) {
+                return $extra_percent;
+            }
+
+            $total_remises = 0;
+
+            if (!is_null($list) && count($list)) {
+                foreach ($list as $remise) {
+                    $per_unit = (int) $remise['per_unit'];
+                    $montant = 0;
+
+                    switch ((int) $remise['type']) {
+                        case 1:
+                            $percent = (float) $remise['percent'];
+                            if ($percent) {
+                                if ($per_unit) {
+                                    $montant = (float) ((float) $total_ttc * ($percent / 100));
+                                } else {
+                                    $montant = (float) ((float) $unit_price_ttc * ($percent / 100));
+                                }
+                            }
+                            break;
+
+                        case 2:
+                            $montant = (float) $remise['montant'];
+                            if ($per_unit) {
+                                $montant *= $qty;
+                            }
+                            break;
+                    }
+
+                    $total_remises += $montant;
+                }
+            }
+
+            if ($total_remises) {
+                return (float) (($total_remises / $total_ttc) * 100) + $extra_percent;
+            }
+        }
+        return $extra_percent;
     }
 }

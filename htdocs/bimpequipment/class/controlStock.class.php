@@ -27,15 +27,17 @@ class controlStock{
         $this->getProductSerialisable();
         
         foreach($this->entrepot as $idEn => $labEl){
-            echo $debutText = "Entrepot : ".$labEl."<br/>";
+            $debutText = "Entrepot : ".$labEl."<br/>";
             foreach($this->prodS as $idPr => $labPr){
                 $nbE = $this->getNbEquip($idPr, $idEn);
                 $nbS = $this->getStockProd($idPr, $idEn);
                 
                 if($nbE != $nbS || $nbE != 0){
                     $millieuText = $debutText. "  -  Produit : ".$labPr;
-                    if($nbE == $nbS)
-                        $youpi = true;//echo " OK  : ".$nbE;
+                    if($nbE == $nbS){
+                        if($_REQUEST['action'] == "detail")
+                            echo $millieuText." OK  : ".$nbE."<br/>";
+                    }
                     elseif($nbE > $nbS)
                         echo $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
                     elseif($nbE < $nbS)
@@ -55,6 +57,7 @@ class controlStock{
                 }
             }
         }
+        echo "<br/><br/>Fin du test";
     }
     
     

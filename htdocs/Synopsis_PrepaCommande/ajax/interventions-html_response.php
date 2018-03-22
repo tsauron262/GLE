@@ -185,7 +185,8 @@ print "<ul><li><a href='#fragment1'>Interventions</a></li><li><a href='#fragment
 print "<div id='fragment1'>";
 print "<table cellpadding=10 width=100%><tr><th class='ui-widget-header ui-state-default'>Date Intervention</td>";
 print "<td class='ui-widget-content' colspan=1>";
-print $form->select_date($com->date_livraison,"datei");
+//print $form->select_date($com->date_livraison,"datei");
+print '<input id="datei" name="datei" type="text" class="maxwidth75" maxlength="11" value="22/03/2018" onchange="dpChangeDay(\'datei\',\'dd/MM/yyyy\'); ">';
 print '<input type="button" value="Répliqué" id="repliDate"/>';
 
 print "<th class='ui-widget-header ui-state-default'>Intervenant</th>";

@@ -494,7 +494,7 @@ global $conf;
         date_default_timezone_set("Europe/Paris");
         
         //DECODAGE
-        $calData = str_replace(array("<br />\r\n", "<br />\r\n", "\r", "\n"), "\n", $calData);
+        $calData = str_replace(array("<br />\r\n", "<br />\r", "<br />\n", "\r", "\n"), "\n", $calData);
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
         

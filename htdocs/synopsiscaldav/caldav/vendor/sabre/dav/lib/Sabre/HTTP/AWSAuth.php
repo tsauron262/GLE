@@ -190,7 +190,7 @@ class AWSAuth extends AbstractAuth {
         $headers = $this->httpRequest->getHeaders();
         foreach($headers as $headerName => $headerValue) {
             if (strpos(strtolower($headerName),'x-amz-')===0) {
-                $amzHeaders[strtolower($headerName)] = str_replace(array("\r\n"),array(''),$headerValue) . "\n";
+                $amzHeaders[strtolower($headerName)] = str_replace(array("\r\n"),array(' '),$headerValue) . "\n";
             }
         }
         ksort($amzHeaders);

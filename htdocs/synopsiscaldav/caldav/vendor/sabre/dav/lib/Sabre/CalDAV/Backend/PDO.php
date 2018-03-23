@@ -493,7 +493,10 @@ global $conf;
         }
         date_default_timezone_set("Europe/Paris");
         
-
+        //DECODAGE
+        $calData = html_entity_decode($calData,ENT_QUOTES);
+        
+        
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],

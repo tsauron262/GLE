@@ -1349,6 +1349,8 @@ class ActionComm extends CommonObject
                     $duration=($datestart && $dateend)?($dateend - $datestart):0;
                     $event['summary']=$obj->label.($obj->socname?" (".$obj->socname.")":"");
                     $obj->note = str_replace("<br />\r\n", "<br />", $obj->note);
+                    $obj->note = str_replace("<br />\n", "<br />", $obj->note);
+                    $obj->note = str_replace("<br />\r", "<br />", $obj->note);
                     $event['desc']=$obj->note;
                     $event['startdate']=$datestart;
                     $event['enddate']=$dateend;		// Not required with type 'journal'

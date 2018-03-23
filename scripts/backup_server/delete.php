@@ -15,6 +15,7 @@ if (isset($_POST['nb_to_keep'])) {
 
     $nb_to_keep = intVal($_POST['nb_to_keep']);
 
+    $files = glob('backups/*.sql');
     usort($files, function($a, $b) {
         return filemtime($a) < filemtime($b);
     });
@@ -27,7 +28,7 @@ if (isset($_POST['nb_to_keep'])) {
         exec($command, $errors, $ret_val);
         if ($ret_val != 0) {
             print 'Une erreur est survenue, la suppression n\'a pas été faite entièrement voici les détails :';
-            print_r($errors);
+            var_dump($errors);
             break;
         }
     }

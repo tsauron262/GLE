@@ -64,7 +64,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             $text .= "<br/><br/>" . $soc->getNomUrl(1);
         }
         $text .= "<br/><br/>" . substr($ligne->note, 0, 40);
-//        $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
+        $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
         $text = str_replace('"', '\"', $text);
         $text = str_replace("'", '\'', $text);
         $text = str_replace("	", ' ', $text);

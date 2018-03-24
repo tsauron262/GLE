@@ -21,8 +21,8 @@ if ($user->id == $id) {//On est dans le form de l'utilisateur
     $object = new User($db);
     $object->fetch($id);
     $object->getrights('user');
-    $droitLire = $object->rights->user->user->lire;
-    $droitModifSimple = $object->rights->user->user->creer;
+    $droitLire = $user->rights->user->user->lire;
+    $droitModifSimple = $user->rights->user->user->creer;
     $droitModif = $droitModifSimple;
 }
 
@@ -60,3 +60,5 @@ if ($droitLire) {
     echo BimpRender::renderAjaxModal('page_modal');
 } else
     echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir cette page');
+
+llxFooter();

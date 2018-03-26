@@ -199,7 +199,7 @@ function validSN(elem){
             } else if (productid.value !== '') {
                 elem.attr('valider', 'true');
                 elem.attr('disabled', 'true');
-                elem.blur(); // unfocus
+                //elem.blur(); // unfocus
                 checkEquipment(serialNumber, elem.attr('cntEquip'));
                 addFieldEquipment();
             } else {

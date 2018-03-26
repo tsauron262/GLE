@@ -184,20 +184,28 @@ function addFieldEquipment() {
 
     $(".serialNumber").keyup(function (e) {
         if (e.keyCode === 13 && $(this).attr('valider') !== 'true') { // code for "Enter"
-            var serialNumber = $("input[cntEquip='" + $(this).attr('cntEquip') + "']").val();
+            validSN($(this));
+        }
+    });
+    $(".serialNumber").focusout(function (e) {
+        validSN($(this));
+    });
+}
+
+function validSN(elem){
+            var serialNumber = $("input[cntEquip='" + elem.attr('cntEquip') + "']").val();
             if (serialNumber === '') {
                 setMessage('alertMessage', 'Veuillez saisir un numéro de série avant de valider.', 'error');
             } else if (productid.value !== '') {
-                $(this).attr('valider', 'true');
-                $(this).attr('disabled', 'true');
-                $(this).blur(); // unfocus
-                checkEquipment(serialNumber, $(this).attr('cntEquip'));
+                elem.attr('valider', 'true');
+                elem.attr('disabled', 'true');
+                elem.blur(); // unfocus
+                checkEquipment(serialNumber, elem.attr('cntEquip'));
                 addFieldEquipment();
             } else {
                 $('#alertProd').text('Veuillez sélectionner un produit.');
             }
-        }
-    });
+    
 }
 
 

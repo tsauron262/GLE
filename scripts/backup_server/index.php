@@ -1,29 +1,11 @@
 <?php
 
 include_once 'param.inc.php';
-session_start();
 
 print '<head>
     <link rel="stylesheet" type="text/css" href="styles.css">
     <title>Accueil sauvegarde</title>
 </head>';
-
-if (($_POST['login'] != LOGIN OR $_POST['pw'] != PASSWORD) and ( $_SESSION['login'] != LOGIN OR $_SESSION['pw'] != PASSWORD)) {
-    print '<div class="container" style="text-align: center">';
-    print "<strong>Login ou mot de passe incorrect.</strong><br/><br/>";
-    print '<form action="index.html">';
-    print '<button style="width:200px" type="submit">Revenir à la page d\'authentification</button>';
-    print '</form>';
-    print '</div>';
-    return;
-}
-
-
-$_SESSION['login'] = $_POST['login'];
-$_SESSION['pw'] = $_POST['pw'];
-
-print $_SESSION['login'];
-print $_SESSION['pw'];
 
 print '<div class="container" style="text-align: center">';
 print '<form action="restore.php"  method="post">';
@@ -48,12 +30,23 @@ print '<button style="width:200px" type="submit">Valider</button>';
 print '</form>';
 print '</div>';
 
-// logout
+
+// Create
 print '<div class="greyBorder">';
-print "<h3>Supprimer les sauvegardes superflues</h3>";
+print "<h3>Créer une sauvegarde</h3>";
+print '<form action="create.php">';
+print '<button style="width:200px" type="submit">Créer</button>';
+print '</form>';
+print '</div><br/>';
+
+
+// Delete
+print '<div class="greyBorder">';
+print "<h3>Supprimer des sauvegardes</h3>";
 print '<form action="delete.php" method="post">';
-print '<label for="nb_to_keep"><b>Nombre de sauvegarde à garder</b></label> : ';
-print '<input style="width:80px" type="number" name="nb_to_keep" value=3 min=3 required><br/>';
+print '<label for="days_to_keep"><b>Garder les sauvegardes de moins de </b></label> ';
+print '<input style="width:80px" type="number" name="days_to_keep" value=2 min=2 required>';
+print '<label for="days_to_keep"><b> jour(s)</b></label><br/>';
 print '<button style="width:200px" type="submit">Supprimer</button>';
 print '</form>';
 print '</div>';
@@ -61,7 +54,7 @@ print '</div>';
 
 
 // logout
-print '<form action="index.html">';
+print '<form action="logout.php">';
 print '<button style="width:200px" type="submit">Se déconnecter</button>';
 print '</form>';
 

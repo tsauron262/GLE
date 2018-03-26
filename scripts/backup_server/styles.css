@@ -23,20 +23,6 @@ button:hover {
     opacity: 0.8;
 }
 
-.container {
-    width: 600px;
-    height: 100%;
-    position:absolute;
-    left:0;
-    right:0;
-    top:0;
-    bottom:0;
-    margin:auto;
-    max-width:100%;
-    max-height:100%;
-    overflow:auto;
-}
-
 /* style your lables/button */
 input[type="radio"] + label, 
 input[type="checkbox"] + label {
@@ -67,4 +53,22 @@ input[type="checkbox"]:not(:checked):hover + label{
 .greyBorder {
     border: 3px solid #c2c2c2;
     border-radius: 8px;
+    padding: 10px;
+}
+
+.container {
+    position: absolute;
+    margin: auto;
+    margin-top: 40px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 600px;
+    height: auto;
+}
+
+body {
+
+    /*vertical-align:middle;*/
 }

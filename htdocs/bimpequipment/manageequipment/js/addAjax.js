@@ -26,6 +26,32 @@ var newEquipments = [];
  * Ajax call
  */
 
+function checkIsSerializable(id_product) {
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpequipment/manageequipment/interface.php",
+        data: {
+            id_product: id_product,
+            action: 'checkIsSerializable'
+        },
+        error: function () {
+            setMessage('alertMessage', 'Erreur serveur.', 'error');
+        },
+        success: function (out) {
+            var outDec = JSON.parse(out);
+            if (outDec.is_serialisable != false) {
+                idCurrentProd = productid.value;
+                $('#hereEquipment tr').last().remove();
+                cntEquip--;
+                addFieldEquipment();
+            } else {
+                setMessage('alertMessage', 'ce produit n\'est pas sérialisable.', 'error');
+            }
+        }
+    });
+}
+
 function checkEquipment(serialNumber, currentEquipCnt) {
 
     $.ajax({
@@ -43,11 +69,7 @@ function checkEquipment(serialNumber, currentEquipCnt) {
         success: function (out) {
             var outDec = JSON.parse(out);
             var responseTd = 'tr#' + currentEquipCnt + ' td text.reponseServeur';
-            if (outDec.is_serialisable === false) {
-                $(responseTd).text('Non sérialisable.');
-                $(responseTd).css('color', 'red');
-                $('tr#' + currentEquipCnt).attr('registered', false);
-            } else if (allSerialNumber.includes(serialNumber)) {
+            if (allSerialNumber.includes(serialNumber)) {
                 $(responseTd).text('Déjà scanné.');
                 $(responseTd).css('color', 'red');
                 $('tr#' + currentEquipCnt).attr('registered', false);
@@ -133,10 +155,7 @@ $(document).ready(function () {
 
 function initEvents() {
     $('#search_productid').on('change', function () {
-        idCurrentProd = productid.value;
-        $('#hereEquipment tr').last().remove();
-        cntEquip--;
-        addFieldEquipment();
+        checkIsSerializable(productid.value);
     });
 
     $('#entrepot').on('change', function () {

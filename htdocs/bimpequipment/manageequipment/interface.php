@@ -47,10 +47,14 @@ switch (GETPOST('action')) {
             break;
         }
     case 'checkEquipment': {
-            $lp->prodId = GETPOST('idCurrentProd');
             $note = getNote($db, GETPOST('idCurrentProd'));
             (!checkIfEquipmentExists($db, GETPOST('serialNumber'))) ? $code = 1 : $code = -1;
-            echo json_encode(array('note' => $note, 'code' => $code, 'is_serialisable' => $lp->isSerialisable()));
+            echo json_encode(array('note' => $note, 'code' => $code));
+            break;
+        }
+    case 'checkIsSerializable': {
+            $lp->prodId = GETPOST('id_product');
+            echo json_encode(array('is_serialisable' => $lp->isSerialisable()));
             break;
         }
     case 'addEquipment': {
@@ -133,7 +137,7 @@ switch (GETPOST('action')) {
             echo json_encode(array('status_changed' => $transfer->closeTransfer(), 'errors' => $transfer->errors));
             break;
         }
-        
+
     /* OrderClient - viewOrderClient */
 
     case 'retrieveOrderClient': {

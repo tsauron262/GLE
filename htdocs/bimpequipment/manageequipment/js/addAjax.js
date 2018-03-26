@@ -193,7 +193,7 @@ function addFieldEquipment() {
 }
 
 function validSN(elem){
-            var serialNumber = $("input[cntEquip='" + elem.attr('cntEquip') + "']").val();
+            var serialNumber = elem.val();
             if (serialNumber === '') {
                 setMessage('alertMessage', 'Veuillez saisir un numéro de série avant de valider.', 'error');
             } else if (productid.value !== '') {

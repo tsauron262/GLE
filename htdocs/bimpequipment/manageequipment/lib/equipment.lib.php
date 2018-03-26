@@ -46,18 +46,6 @@ function addEquipments($db, $newEquipments, $user) {
         if (sizeof($newErrors) == 0)
             $cntEquipment++;
 
-        $product = new product($db);
-        $product->fetch($newEquipment['id_product']);
-        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
-        $label = 'Transférer stock Bimp ' . $newEquipment['serial'];
-        // Add stock
-        $result = $product->correct_stock($user, $newEquipment['id_entrepot'], 1, 0, $label, 0, $codemove);
-        if ($result < 0) {
-           $newErrors = array_merge($newErrors, $product->errors);
-           $newErrors = array_merge($newErrors, $product->errorss);
-        }
-        
-        $errors = array_merge($errors, $newErrors);
     }
     return array('nbNewEquipment' => $cntEquipment, 'errors' => $errors);
 }

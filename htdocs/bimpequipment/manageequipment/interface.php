@@ -47,9 +47,10 @@ switch (GETPOST('action')) {
             break;
         }
     case 'checkEquipment': {
+            $lp->prodId = GETPOST('idCurrentProd');
             $note = getNote($db, GETPOST('idCurrentProd'));
             (!checkIfEquipmentExists($db, GETPOST('serialNumber'))) ? $code = 1 : $code = -1;
-            echo json_encode(array('note' => $note, 'code' => $code));
+            echo json_encode(array('note' => $note, 'code' => $code, 'is_serialisable' => $lp->isSerialisable()));
             break;
         }
     case 'addEquipment': {

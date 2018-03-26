@@ -43,7 +43,11 @@ function checkEquipment(serialNumber, currentEquipCnt) {
         success: function (out) {
             var outDec = JSON.parse(out);
             var responseTd = 'tr#' + currentEquipCnt + ' td text.reponseServeur';
-            if (allSerialNumber.includes(serialNumber)) {
+            if (outDec.is_serialisable === false) {
+                $(responseTd).text('Non sérialisable.');
+                $(responseTd).css('color', 'red');
+                $('tr#' + currentEquipCnt).attr('registered', false);
+            } else if (allSerialNumber.includes(serialNumber)) {
                 $(responseTd).text('Déjà scanné.');
                 $(responseTd).css('color', 'red');
                 $('tr#' + currentEquipCnt).attr('registered', false);

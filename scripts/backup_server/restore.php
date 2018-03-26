@@ -1,0 +1,28 @@
+<?php
+
+print '<head>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <title>Accueil sauvegarde</title>
+</head>
+    <div class="container">
+';
+
+include_once 'param.inc.php';
+
+session_start();
+
+$command = 'mysql --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' \'' . DB_NAME . '\'< \'' . PATH . '/' . $_POST['file'] . '\'';
+
+exec($command, $errors, $ret_val);
+
+if ($ret_val != 0) {
+    print 'Une erreur est survenue, voici les détails :';
+    print_r($errors);
+} else {
+    print '<strong>Sauvegarde restaurée</strong>';
+}
+
+print '<form action="' . URL_ROOT . '/manage_backup.php">';
+print '<button type="submit">Retour accueil</button>';
+print '</form>';
+print '</div>';

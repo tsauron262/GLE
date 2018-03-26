@@ -52,6 +52,11 @@ switch (GETPOST('action')) {
             echo json_encode(array('note' => $note, 'code' => $code));
             break;
         }
+    case 'checkIsSerializable': {
+            $lp->prodId = GETPOST('id_product');
+            echo json_encode(array('is_serialisable' => $lp->isSerialisable()));
+            break;
+        }
     case 'addEquipment': {
             echo json_encode(addEquipments($db, GETPOST('newEquipments'), $user));
             break;
@@ -126,21 +131,13 @@ switch (GETPOST('action')) {
             break;
         }
 
-//    case 'receiveAndCloseTransfer': {
-//            $transfer = new BimpTransfer($db);
-//            $transfer->fetch(GETPOST('fk_transfer'));
-//            echo json_encode(array('nb_update' => $transfer->receiveTransfert(GETPOST('products'), GETPOST('equipments')),
-//                'status_changed' => $transfer->updateStatut($transfer::STATUS_RECEIVED), 'errors' => $transfer->errors));
-//            break;
-//        }
-
     case 'closeTransfer': {
             $transfer = new BimpTransfer($db);
             $transfer->fetch(GETPOST('fk_transfer'));
             echo json_encode(array('status_changed' => $transfer->closeTransfer(), 'errors' => $transfer->errors));
             break;
         }
-        
+
     /* OrderClient - viewOrderClient */
 
     case 'retrieveOrderClient': {

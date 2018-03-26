@@ -12,7 +12,6 @@ include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 function addEquipments($db, $newEquipments, $user) {
 
     $cntEquipment = 0;
-    $errors = array();
     foreach ($newEquipments as $newEquipment) {
         $newErrors = array();
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
@@ -27,6 +26,8 @@ function addEquipments($db, $newEquipments, $user) {
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
             'admin_login' => '',
             'admin_pword' => '',
+//            'date_vente' => '2999-01-01 00:00:00',
+//            'date_update' => '2999-01-01 00:00:00',
             'note' => ''
         ));
 
@@ -39,27 +40,15 @@ function addEquipments($db, $newEquipments, $user) {
             'type' => 2, // cf $types
             'id_entrepot' => $newEquipment['id_entrepot'], // si type = 2
             'infos' => '...',
+//            'date_update' => '2999-01-01 00:00:00',
             'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
         ));
         $newErrors = array_merge($newErrors, $emplacement->create());
 
         if (sizeof($newErrors) == 0)
             $cntEquipment++;
-
-        $product = new product($db);
-        $product->fetch($newEquipment['id_product']);
-        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
-        $label = 'Transférer stock Bimp ' . $newEquipment['serial'];
-        // Add stock
-        $result = $product->correct_stock($user, $newEquipment['id_entrepot'], 1, 0, $label, 0, $codemove);
-        if ($result < 0) {
-           $newErrors = array_merge($newErrors, $product->errors);
-           $newErrors = array_merge($newErrors, $product->errorss);
-        }
-        
-        $errors = array_merge($errors, $newErrors);
     }
-    return array('nbNewEquipment' => $cntEquipment, 'errors' => $errors);
+    return array('nbNewEquipment' => $cntEquipment, 'errors' => $newErrors);
 }
 
 function equipmentExists($db, $id) {

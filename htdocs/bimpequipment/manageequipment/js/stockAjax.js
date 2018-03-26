@@ -82,8 +82,8 @@ function getRemainingLignes() {
                         addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Inconnu');
                 });
                 initEvents();
-                $('#entrepot').val(outP.init_fk_entrepot);
-                $('#entrepot').trigger('change');
+//                $('#entrepot').val(outP.init_fk_entrepot);
+//                $('#entrepot').trigger('change');
             }
         }
     });
@@ -118,6 +118,7 @@ $(document).ready(function () {
         localStorage.clear();
     }
     $('#entrepot').select2({placeholder: 'Rechercher ...'});
+    $('#entrepot option:selected').trigger('change');
     orderId = getUrlParameter('id');
     if (orderId === undefined)
         orderId = $('#id_order_hidden').val();

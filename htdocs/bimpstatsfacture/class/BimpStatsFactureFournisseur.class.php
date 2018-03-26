@@ -222,7 +222,7 @@ class BimpStatsFactureFournisseur {
 
     private function addFactureURL($hash) {
         foreach ($hash as $ind => $h) {
-            $facture = new Facture($this->db);
+            $facture = new FactureFournisseur($this->db);
             $facture->id = $h['fac_id'];
             $facture->ref = $h['nom_facture'];
             $hash[$ind]['nom_facture'] = $facture->getNomUrl(1);

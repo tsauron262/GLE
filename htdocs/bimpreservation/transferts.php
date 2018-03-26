@@ -15,7 +15,7 @@ $errors = $reservation->validateArray(array(
     'status'      => 201, // cf status
     'type'        => 2, // 2 = transfert
     'id_commercial', // id user du commercial (facultatif)
-    'id_equipement', // si produit sérialisé
+    'id_equipment', // si produit sérialisé
     'id_product', // sinon
     'id_transfert',
     'qty', // quantités si produit non sérialisé

@@ -18,31 +18,19 @@ $transfer = new BimpTransfer($db);
 $transfer->fetch(GETPOST('id', 'int'));
 
 /*
- * 	View
+ * Functions
  */
 
-llxHeader('', 'Réception', '', '', 0, 0, $arrayofjs, $arrayofcss);
+function printTable($title, $suffix) {
+    print '<h4><strong>' . $title . '</strong></h4>';
 
-print load_fiche_titre('Réception', $linkback);
-
-if ($transfer->status != $transfer::STATUS_RECEIVED) {
-    print '<table class="entry">';
-    print '<tr><td><strong>Réf. ou code barre ou numéro de série</strong></td>';
-    print '<td><input name="refScan" class="custInput" style="width : 300px"></td></tr>';
-    print '<tr><td style="text-align: right;"><strong> Quantité</strong></td>';
-    print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
-
-    print '</table>';
-
-    print '<h4><strong>En attente</strong></h4>';
-    print '<div id="alertTop" style="clear:left"></div>';
-
-    print '<table id="table_pending" class="noborder objectlistTable" style="margin-top:20px">';
+    print '<table id="table_'.$suffix.'" class="noborder objectlistTable" style="margin-top:20px">';
     print '<thead>';
     print '<th>Date d\'envoie</th>';
     print '<th>Référence</th>';
     print '<th>Numéro de série</th>';
     print '<th>Label</th>';
+    print '<th>Prix</th>';
     print '<th style="text-align:right">Quantité envoyé</th>';
     print '<th style="width:32px"></th>';
     print '<th>Quantité reçu</th>';
@@ -50,41 +38,34 @@ if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<tbody></tbody>';
     print '</table>';
     print '<br>';
+}
+
+/*
+ * View
+ */
+
+llxHeader('', 'Réception', '', '', 0, 0, $arrayofjs, $arrayofcss);
+
+print load_fiche_titre('Réception', $linkback);
+
+
+
+if ($transfer->status != $transfer::STATUS_RECEIVED) {
+    print '<table class="entry">';
+    print '<tr><td><strong>Réf. ou code barre ou numéro de série</strong></td>';
+    print '<td><input name="refScan" class="custInput" style="width : 300px"></td></tr>';
+    print '<tr><td style="text-align: right;"><strong> Quantité</strong></td>';
+    print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
+    print '</table>';
+    print '<div id="alertTop" style="clear:left"></div>';
+
+    printTable('En attente', 'pending');
 } else {
     print '<strong>Transfert fermé le : ' . $transfer->date_closing . '</strong>';
 }
 
-print '<h4><strong>Reçu</strong></h4>';
-print '<table id="table_received" class="noborder objectlistTable" style="margin-top:20px">';
-print '<thead>';
-print '<th>Date de reception</th>';
-print '<th>Référence</th>';
-print '<th>Numéro de série</th>';
-print '<th>Label</th>';
-print '<th style="text-align:right">Quantité envoyé</th>';
-print '<th style="width:32px"></th>';
-print '<th>Quantité reçu</th>';
-print '</thead>';
-print '<tbody></tbody>';
-print '</table>';
-
-print '<br>';
-
-print '<h4><strong>Abandonné</strong></h4>';
-print '<table id="table_canceled" class="noborder objectlistTable" style="margin-top:20px">';
-print '<thead>';
-print '<th>Date d\'abandon</th>';
-print '<th>Référence</th>';
-print '<th>Numéro de série</th>';
-print '<th>Label</th>';
-print '<th style="text-align:right">Quantité envoyé</th>';
-print '<th style="width:32px"></th>';
-print '<th>Quantité reçu</th>';
-print '</thead>';
-print '<tbody></tbody>';
-print '</table>';
-
-print '<br>';
+printTable('Reçu', 'received');
+printTable('Abandonné', 'canceled');
 
 if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<input id="register" type="button" class="butAction" value="Enregistrer">';

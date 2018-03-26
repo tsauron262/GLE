@@ -1,0 +1,70 @@
+form {
+    border: 3px solid #f1f1f1;
+}
+
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 8px;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.container {
+    width: 600px;
+    height: 100%;
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    margin:auto;
+    max-width:100%;
+    max-height:100%;
+    overflow:auto;
+}
+
+/* style your lables/button */
+input[type="radio"] + label, 
+input[type="checkbox"] + label {
+    margin-right: 5px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border: 1px solid #444;
+    background: #aaa;
+    color: white;
+    border-radius: 3px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0);
+    margin-left: -20px;
+}
+
+input[type="radio"]:checked + label,
+input[type="checkbox"]:checked + label{
+    background: #4CAF50;
+    border: 1px solid rgb(80,90,120);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+    color: white;
+}
+
+input[type="radio"]:not(:checked):hover + label,
+input[type="checkbox"]:not(:checked):hover + label{
+    color: black;
+}
+
+.greyBorder {
+    border: 3px solid #c2c2c2;
+    border-radius: 8px;
+}

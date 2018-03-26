@@ -97,10 +97,13 @@ class LignePanier {
     function checkStock() {
         if ($this->equipmentId > 0) {
             $stock = $this->checkStockEquipment();
+            $is_reserved = $this->checkReservation();
+            if ($is_reserved)
+                $this->error .= "Cet équipement est déjà réservé.";
         } else {
             $stock = $this->checkStockProd();
         }
-        return ($stock > 0) ? $stock : 0;
+        return ($stock > 0) ? ($is_reserved ? 0 : $stock) : 0;
     }
 
     function checkStockEquipment() {
@@ -110,6 +113,25 @@ class LignePanier {
         $sql .= ' WHERE id_equipment="' . $this->equipmentId . '"';
         $sql .= ' AND position=1';
         $sql .= ' AND id_entrepot=' . $this->entrepotId;
+
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            while ($obj = $this->db->fetch_object($result)) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * @return true if the equipment is reserved
+     */
+    private function checkReservation() {
+        
+        $sql = 'SELECT id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'br_reservation';
+        $sql .= ' WHERE id_equipment="' . $this->equipmentId . '"';
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {

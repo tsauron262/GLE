@@ -195,7 +195,7 @@ function addFieldEquipment() {
 function validSN(elem){
             var serialNumber = elem.val();
             if (serialNumber === '') {
-                setMessage('alertMessage', 'Veuillez saisir un numéro de série avant de valider.', 'error');
+                //setMessage('alertMessage', 'Veuillez saisir un numéro de série avant de valider.', 'error');
             } else if (productid.value !== '') {
                 elem.attr('valider', 'true');
                 elem.attr('disabled', 'true');

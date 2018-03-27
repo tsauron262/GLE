@@ -59,7 +59,6 @@ class controlStock{
         }
         
         $this->getEquipmentNonSerialisable();
-        print_r($this->equipNonS);
         if(count($this->equipNonS) == 0)
             echo "<br/>AUCUN Equipment NON Serialisable.... OK";
         else{
@@ -89,7 +88,7 @@ class controlStock{
         $this->equipNonS = array();
         $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable = 0");
         while($ligne = $this->db->fetch_object($sql))
-                die($ligne->serial);
+                $this->equipNonS[] = $ligne->serial;
     }
     
     

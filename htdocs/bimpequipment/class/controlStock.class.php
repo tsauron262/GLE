@@ -62,7 +62,7 @@ class controlStock{
         if(count($this->equipNonS) == 0)
             echo "<br/>AUCUN Equipment NON Serialisable.... OK";
         else{
-            echo "<br/><br/>".count($this->equipNonS)." ou plusieurs equipment correspondant a des produits non serialisable";
+            echo "<br/><br/>".count($this->equipNonS)." equipment(s) correspondant a des produits non serialisable";
             foreach($this->equipNonS as $sn)
                 echo "<br/>Equipment non Serilisé....".$sn;
         }

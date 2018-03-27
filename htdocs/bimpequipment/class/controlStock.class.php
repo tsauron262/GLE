@@ -59,8 +59,12 @@ class controlStock{
         }
         
         $this->getEquipmentNonSerialisable();
-        foreach($this->equipNonS as $sn)
-            echo "<br/>Equipment non Serilisé....".$sn;
+        if(count($this->equipNonS) == 0)
+            echo "<br/>AUCUN Equipment NON Serialisable.... OK";
+        else{
+            foreach($this->equipNonS as $sn)
+                echo "<br/>Equipment non Serilisé....".$sn;
+        }
         
         echo "<br/><br/>Fin du test";
     }

@@ -59,6 +59,7 @@ class controlStock{
         }
         
         $this->getEquipmentNonSerialisable();
+        print_r($this->equipNonS);
         if(count($this->equipNonS) == 0)
             echo "<br/>AUCUN Equipment NON Serialisable.... OK";
         else{

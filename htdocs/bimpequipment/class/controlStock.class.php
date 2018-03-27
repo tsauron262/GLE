@@ -38,22 +38,27 @@ class controlStock{
                         if($_REQUEST['action'] == "detail")
                             echo $millieuText." OK  : ".$nbE."<br/>";
                     }
-                    elseif($nbE > $nbS)
-                        echo $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
-                    elseif($nbE < $nbS)
-                        echo $millieuText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
-                    else
-                        echo $millieuText."ATTENTION BIZZARRE<br/>";
-                    $nbCorrection = $nbE - $nbS;
-                    if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
-                        echo "  correction de  ".$nbCorrection."<br/>";
-                        $product = new Product($this->db);
-                        $product->fetch($idPr);
-                        $now = dol_now();
-                        $codemove = dol_print_date($now, '%y%m%d%H%M%S');
-                        $product->correct_stock($user, $idEn, $nbCorrection, 0, "correction Auto Stock en fonction des equipments", 0, $codemove);
+                    else{
+                        $text = "";
+                        if($nbE > $nbS)
+                            $text =  $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        elseif($nbE < $nbS)
+                            $text =  $millieuText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        else
+                            $text =  $millieuText."ATTENTION BIZZARRE<br/>";
+                        $nbCorrection = $nbE - $nbS;
+                        if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
+                            echo "  correction de  ".$nbCorrection."<br/>";
+                            $product = new Product($this->db);
+                            $product->fetch($idPr);
+                            $now = dol_now();
+                            $codemove = dol_print_date($now, '%y%m%d%H%M%S');
+                            $product->correct_stock($user, $idEn, $nbCorrection, 0, "correction Auto Stock en fonction des equipments", 0, $codemove);
+                        }
+                        else
+                            mailSyn2("Probléme stock", "tommy@bimp.fr", '', $text);
+                        echo $text;
                     }
-                    
                 }
             }
         }

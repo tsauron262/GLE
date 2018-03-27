@@ -1,12 +1,12 @@
 <?php
 session_start();
 
-define('LOGIN', 'aa');
+define('LOGIN', 'a');
 define('PASSWORD', 'z');
 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASSWORD', '$mokinU2');
+define('DB_PASSWORD', '');
 define('DB_NAME', 'test');
 
 define('PATH', realpath(dirname(__FILE__)));

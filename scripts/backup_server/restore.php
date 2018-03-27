@@ -6,10 +6,9 @@ print '<head>
     <title>Accueil sauvegarde</title>
 </head>
     <div class="container">
-';
+        <div class="greyBorder">';
 
 include_once 'param.inc.php';
-
 
 $command = 'mysql --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' --host=\'' . DB_HOST . '\' \'' . DB_NAME . '\'< \'' . PATH . '/' . $_POST['file'] . '\'';
 
@@ -25,4 +24,5 @@ if ($ret_val != 0) {
 print '<form action="' . URL_ROOT . '/index.php">';
 print '<button type="submit">Retour accueil</button>';
 print '</form>';
+print '</div>';
 print '</div>';

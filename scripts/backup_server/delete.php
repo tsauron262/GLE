@@ -7,8 +7,7 @@ print '<head>
     <title>Supprimmer sauvegarde</title>
 </head>
     <div class="container">
-    <div class="greyBorder">
-';
+    <div class="greyBorder">';
 
 include_once 'param.inc.php';
 
@@ -16,11 +15,12 @@ $cnt_supression = 0;
 if (isset($_POST['days_to_keep'])) {
 
     $days_to_keep = intVal($_POST['days_to_keep']);
-    $files = glob('backups/*.sql');
+    $files = glob('dump_daily/*.sql');
     $now = time();
-//    $limit_date = 60 * 60 * 24 * $days_to_keep;
+//    $limit_date = 60 * 60 * 24 * $days_to_keep; // TODO
     $limit_date = $days_to_keep;
 
+    
     foreach ($files as $file) {
         $val = $now - filectime($file);
         if (is_file($file)) {
@@ -39,10 +39,10 @@ if (isset($_POST['days_to_keep'])) {
     else
         print "Aucune sauvegardes n'a été supprimé";    
 } else {
-    print 'Le nombre de jours de sauvegarde à garder n\'est pas définit.';
+    print 'Le nombre de jours/semaines de sauvegarde à garder n\'est pas définit.';
 }
 
-print '<form action="' . URL_ROOT . '/manage_backup.php">';
+print '<form action="' . URL_ROOT . '/index.php">';
 print '<button type="submit">Retour accueil</button>';
 print '</form>';
 print '</div>';

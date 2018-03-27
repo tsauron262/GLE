@@ -12,18 +12,23 @@ print '<form action="restore.php"  method="post">';
 print '<div class="greyBorder">';
 
 print "<h3>Restaurer une sauvegarde</h3>";
-$files = glob('backups/*.sql');
+$files = glob('dump_*/*.sql');
 usort($files, function($a, $b) {
-    return filemtime($a) < filemtime($b);
+    return filectime($a) < filectime($b);
 });
 
 
 foreach ($files as $ind => $file) {
+    if (strpos($file, 'monthly') !== false)
+        $class= 'day';
+    else
+        $class = '';
+
     if ($ind == 0)
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '" checked>';
     else
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '">';
-    print '<label for="' . $file . '">Sauvegarde du ' . date("d/m/Y G:i:s", filemtime($file)) . '</label ><br/><br/>';
+    print '<label class="' . $class . '" for="' . $file . '">Sauvegarde du ' . date("d/m/Y G:i:s", filectime($file)) . '</label ><br/><br/>';
 }
 
 print '<button style="width:200px" type="submit">Valider</button>';
@@ -44,13 +49,21 @@ print '</div><br/>';
 print '<div class="greyBorder">';
 print "<h3>Supprimer des sauvegardes</h3>";
 print '<form action="delete.php" method="post">';
-print '<label for="days_to_keep"><b>Garder les sauvegardes de moins de </b></label> ';
-print '<input style="width:80px" type="number" name="days_to_keep" value=2 min=2 required>';
-print '<label for="days_to_keep"><b> jour(s)</b></label><br/>';
+
+print '<input id="delete1" name="days_to_keep" type="radio" value=2 checked>';
+print '<label for="delete1">2 jours</label>';
+
+print '<input id="delete7" name="days_to_keep" type="radio" value=7>';
+print '<label for="delete7">1 semaine</label>';
+
+print '<input id="delete14" name="days_to_keep" type="radio" value=14>';
+print '<label for="delete14">2 semaines</label>';
+
+print '<br/><br/>';
+
 print '<button style="width:200px" type="submit">Supprimer</button>';
 print '</form>';
 print '</div>';
-
 
 
 // logout

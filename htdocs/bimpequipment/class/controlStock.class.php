@@ -57,6 +57,11 @@ class controlStock{
                 }
             }
         }
+        
+        $this->getEquipmentNonSerialisable();
+        foreach($this->equipNonS as $sn)
+            echo "<br/>Equipment non Serilisé....".$sn;
+        
         echo "<br/><br/>Fin du test";
     }
     
@@ -71,6 +76,13 @@ class controlStock{
         $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
         while($ligne = $this->db->fetch_object($sql))
                 $this->prodS[$ligne->rowid] = $ligne->label;
+    }
+    
+    
+    private function getEquipmentNonSerialisable(){
+        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable = 0");
+        while($ligne = $this->db->fetch_object($sql))
+                $this->equipNonS = $ligne->serial;
     }
     
     

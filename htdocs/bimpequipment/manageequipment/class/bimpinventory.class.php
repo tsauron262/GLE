@@ -209,6 +209,10 @@ class BimpInventory {
             }
         }
 
+        $line->fetch($line_id);
+
+        $qty_recently_scanned = $line->quantity;
+
         if ($lp->error != '')
             return array('errors' => $line->errors);
 
@@ -221,7 +225,9 @@ class BimpInventory {
                 'new_equipment' => $new_equipment,
                 'errors' => $this->errors);
         else
-            return array('product_id' => $lp->prodId, 'errors' => $this->errors);
+            return array('product_id' => $lp->prodId,
+                'qty_recently_scanned' => $qty_recently_scanned,
+                'errors' => $this->errors);
     }
 
     public function updateStatut($new_statut_code) {
@@ -361,7 +367,7 @@ class BimpInventory {
                 $doliProd->fetch($id);
                 if ($diff < 0) { // remove
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, -$diff, 1, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
-                } elseif ($product['qty'] > $product['qtyScanned']) { // add
+                } else { // add
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, $diff, 0, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
                 }
                 if ($result == -1)
@@ -512,9 +518,26 @@ class BimpInventoryLigne {
 
         $result = $this->db->query($sql);
         if ($result) {
-            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_inventory_det');
             $this->db->commit();
-            return $last_insert_id;
+            $sql = 'SELECT to_write.rowid as out_rowid';
+            $sql .= ' FROM '. MAIN_DB_PREFIX . 'be_inventory_det as to_write';
+            $sql .= ' WHERE to_write.fk_inventory=' . $fk_inventory;
+            $sql .= ' AND to_write.fk_user=' . $user_id;
+            $sql .= ' AND to_write.fk_product=' . $fk_product;
+            $sql .= ' AND to_write.tms=(';
+            $sql .= '   SELECT MAX(to_read.tms)';
+            $sql .= '   FROM  (SELECT * FROM ' . MAIN_DB_PREFIX . 'be_inventory_det) as to_read';
+            $sql .= '   WHERE to_read.fk_inventory=' . $fk_inventory;
+            $sql .= '   AND to_read.fk_user=' . $user_id;
+            $sql .= '   AND to_read.fk_product=' . $fk_product;
+            $sql .= ')';
+
+            $result = $this->db->query($sql);
+            if ($result and $this->db->num_rows($result) > 0) {
+                $obj = $this->db->fetch_object($result);
+                return $obj->out_rowid;
+            }
+            return -1;
         } else {
             $this->errors[] = "Impossible de mettre à jour une quantité dans la table des ligne d'inventaire";
             dol_print_error($this->db);

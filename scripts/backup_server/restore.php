@@ -1,17 +1,16 @@
 <?php
+session_start();
 
 print '<head>
     <link rel="stylesheet" type="text/css" href="styles.css">
     <title>Accueil sauvegarde</title>
 </head>
     <div class="container">
-';
+        <div class="greyBorder">';
 
 include_once 'param.inc.php';
 
-session_start();
-
-$command = 'mysql --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' \'' . DB_NAME . '\'< \'' . PATH . '/' . $_POST['file'] . '\'';
+$command = 'mysql --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' --host=\'' . DB_HOST . '\' \'' . DB_NAME . '\'< \'' . PATH . '/' . $_POST['file'] . '\'';
 
 exec($command, $errors, $ret_val);
 
@@ -22,7 +21,8 @@ if ($ret_val != 0) {
     print '<strong>Sauvegarde restaurée</strong>';
 }
 
-print '<form action="' . URL_ROOT . '/manage_backup.php">';
+print '<form action="' . URL_ROOT . '/index.php">';
 print '<button type="submit">Retour accueil</button>';
 print '</form>';
+print '</div>';
 print '</div>';

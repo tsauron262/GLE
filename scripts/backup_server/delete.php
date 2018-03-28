@@ -1,42 +1,49 @@
 <?php
 
+session_start();
+
 print '<head>
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <title>Accueil sauvegarde</title>
+    <title>Supprimmer sauvegarde</title>
 </head>
     <div class="container">
-';
+    <div class="greyBorder">';
 
 include_once 'param.inc.php';
 
-session_start();
+$cnt_supression = 0;
+if (isset($_POST['days_to_keep'])) {
 
-if (isset($_POST['nb_to_keep'])) {
+    $days_to_keep = intVal($_POST['days_to_keep']);
+    $files = glob('dump_daily/*.sql');
+    $now = time();
+//    $limit_date = 60 * 60 * 24 * $days_to_keep; // TODO
+    $limit_date = $days_to_keep;
 
-    $nb_to_keep = intVal($_POST['nb_to_keep']);
-
-    $files = glob('backups/*.sql');
-    usort($files, function($a, $b) {
-        return filemtime($a) < filemtime($b);
-    });
-
-    foreach ($files as $ind => $file) {
-        if ($ind < $nb_to_keep - 1)
-            continue;
-
-        $command = 'rm ' . $file;
-        exec($command, $errors, $ret_val);
-        if ($ret_val != 0) {
-            print 'Une erreur est survenue, la suppression n\'a pas été faite entièrement voici les détails :';
-            var_dump($errors);
-            break;
+    
+    foreach ($files as $file) {
+        $val = $now - filectime($file);
+        if (is_file($file)) {
+            if ($now - filectime($file) >= $limit_date) {
+                if (unlink(PATH . '/' . $file))
+                    $cnt_supression++;
+                else
+                    print 'La suppression n\' pas pû avoir lieu<br/>';
+            }
         }
     }
+    if ($cnt_supression == 1)
+        print "$cnt_supression sauvegarde a été supprimée.<br/>";
+    else if ($cnt_supression > 1)
+        print "$cnt_supression sauvegardes ont été été supprimées.<br/>";
+    else
+        print "Aucune sauvegardes n'a été supprimé";    
 } else {
-    'Le nombre de sauvegardes à gardé n\'est pas définit';
+    print 'Le nombre de jours/semaines de sauvegarde à garder n\'est pas définit.';
 }
 
-print '<form action="' . URL_ROOT . '/manage_backup.php">';
+print '<form action="' . URL_ROOT . '/index.php">';
 print '<button type="submit">Retour accueil</button>';
 print '</form>';
+print '</div>';
 print '</div>';

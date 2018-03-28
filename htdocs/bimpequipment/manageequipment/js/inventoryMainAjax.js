@@ -78,12 +78,10 @@ function addLineInventory(id, responsable, statut, date_ouverture, date_fermetur
 $(document).ready(function () {
 
     $('#entrepotTable').select2({placeholder: 'Rechercher ...'});
-    $('#entrepotTable option').first().prop('selected', true);
-    $('#entrepotTable').trigger('change');
+    $('#entrepotTable  option:selected').prop('selected', true);
 
     $('#entrepotCreate').select2({placeholder: 'Rechercher ...'});
-    $('#entrepotCreate option').first().prop('selected', true);
-    $('#entrepotCreate').trigger('change');
+    $('#entrepotCreate  option:selected').prop('selected', true);
 
     initEvents();
 });
@@ -105,16 +103,9 @@ function initEvents() {
     });
 
 
-    $('#entrepotCreate').on('change', function () {
-        if ($(this).prop('preventOnClickEvent')) {
-            $(this).prop('preventOnClickEvent', false);
-        } else {
-            if (confirm('Êtes-vous sûr de vouloir créer un nouveau inventaire ?')) {
-                createInventory($(this).val());
-            } else {
-                $('#entrepotCreate').prop('preventOnClickEvent', true);
-                $('#entrepotCreate').select2('val', '', true);
-            }
+    $('#createInventory').on('click', function () {
+        if (confirm('Êtes-vous sûr de vouloir créer un nouveau inventaire ?')) {
+            createInventory($('#entrepotCreate').val());
         }
     });
 }

@@ -12,6 +12,8 @@ include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.li
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/inputEquipment.js', '/bimpequipment/manageequipment/js/inventoryMainAjax.js');
 
+$fk_entrepot = GETPOST('entrepot');
+
 
 /*
  * 	View
@@ -34,7 +36,10 @@ print '<strong>Entrepôt</strong></br>';
 print '<select id="entrepotTable" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
 foreach ($entrepots as $id => $name) {
-    print '<option value="' . $id . '">' . $name . '</option>';
+    if ($fk_entrepot == $id)
+        print '<option value="' . $id . '" selected>' . $name . '</option>';
+    else
+        print '<option value="' . $id . '" >' . $name . '</option>';
 }
 print '</select> ';
 print '</div><br/>';
@@ -71,11 +76,17 @@ if ($user->rights->bimpequipment->inventory->create) {
     print '<select id="entrepotCreate" class="select2 cust" style="width: 200px;">';
     print '<option></option>';
     foreach ($entrepots as $id => $name) {
-        print '<option value="' . $id . '">' . $name . '</option>';
+        if ($fk_entrepot == $id)
+            print '<option value="' . $id . '" selected>' . $name . '</option>';
+        else
+            print '<option value="' . $id . '" >' . $name . '</option>';
     }
     print '</select> ';
 
-    print '<div id="alertCreate" style="clear:left"></div>';
+    print '<input id="createInventory" type="button" class="butAction" value="Créer inventaire">';
+
+    print '<div id="alertCreate" style="clear:left"></div><br/>';
+
 
     print '</div>';
 } else {

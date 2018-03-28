@@ -66,8 +66,8 @@ function addProductInInventory(entry) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertPlaceHolder');
-            } else if (out.qty_recently_scanned > 0) {
-                setMessage('alertPlaceHolder', "Vous avez scanné ce produit " + out.qty_recently_scanned + " fois.", 'mesgs');
+            } else if (out.qty_scanned > 0) {
+                setMessage('alertPlaceHolder', "Vous avez scanné ce produit " + out.qty_scanned + " fois.", 'mesgs');
             }
             if (is_responsible) {
                 if (out.equipment_id > 0) {
@@ -84,6 +84,7 @@ function addProductInInventory(entry) {
             }
         }
     });
+    
 }
 
 
@@ -134,7 +135,8 @@ $(document).ready(function () {
 
     if (is_responsible) {
         $('#closeInventory').click(function () {
-            closeInventory();
+            if(confirm("Êtes-vous sûr de vouloir fermer cet inventaire, cet action est irréversible."))
+                closeInventory();
         });
     }
 

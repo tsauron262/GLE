@@ -26,7 +26,7 @@
  *  \brief      Descriptor for the module product browser
  */
 include_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
-require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 // The class name should start with a lower case mod for Dolibarr to pick it up
 // so we ignore the Squiz.Classes.ValidClassName.NotCamelCaps rule.

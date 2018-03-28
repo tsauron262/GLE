@@ -135,11 +135,6 @@ fields:
             type: value_part
             part_type: beginning
         
-    reserved:
-        label: Réservé / transfert en cours
-        type: bool
-        default_value: 0
-        
     date_purchase: 
         label: Date d'achat
         type: date
@@ -252,8 +247,9 @@ fields_tables:
             - field: prix_vente_except 
             - field: warranty_type
             - field: date_warranty_end
-            - field: reserved
-              edit: 1
+            - label: Réservé / transfert en cours
+              value: 
+                  callback: displayReserved
             - label: Type d'élément d'origine
               field: origin_element
             - field: origin_id_element
@@ -322,16 +318,15 @@ forms:
             - field: origin_id_element
             - field: warranty_type
             - field: date_warranty_end
-            - field: reserved
-            - association: contrats
+            - association: contrats                  
             
 list:
-    checkboxes: 1
-    bulk_actions: 
-        - label: Supprimer les équipements sélectionnés
-          icon: trash
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
+#    checkboxes: 1
+#    bulk_actions: 
+#        - label: Supprimer les équipements sélectionnés
+#          icon: trash
+#          onclick: deleteSelectedObjects('list_id', $(this));
+#          btn_class: deleteSelectedObjects
     sort_field: id_product
     sort_way: asc
     n: 10
@@ -347,18 +342,17 @@ list:
             display: nom_url
         serial:
             field: serial
-        purchase:
-            field: date_purchase
-        warranty_type:
-            field: warranty_type
-        warranty_end:
-            field: date_warranty_end
+        place: 
+            label: Emplacement
+            value: 
+                callback: displayCurrentPlace
         reserved: 
-            label: Réservé
-            field: reserved
+            label: Réservé / transfert en cours
+            value: 
+                callback: displayReserved
     add_form_name: default
     edit_btn: 1
-    delete_btn: 1
+#    delete_btn: 1
     view_btn: 1
     page_btn: 1
     modal_view: default

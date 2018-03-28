@@ -13,6 +13,12 @@ function setReservationStatus($button, id_reservation, status, doConfirm) {
         }
     }
 
+    if (doConfirm && parseInt(status) === 0) {
+        if (!confirm('Etes-vous sûr de vouloir réinitialiser cette réservation?')) {
+            return;
+        }
+    }
+
     $button.addClass('disabled');
 
     BimpAjax('setReservationStatus', {
@@ -31,6 +37,11 @@ function setReservationStatus($button, id_reservation, status, doConfirm) {
         },
         error: function (result, bimpAjax) {
             bimpAjax.$button.removeClass('disabled');
+            $('body').trigger($.Event('objectChange', {
+                module: 'bimpreservation',
+                object_name: 'BR_Reservation',
+                id_object: bimpAjax.id_reservation
+            }));
         }
     });
 }
@@ -40,7 +51,12 @@ function setSelectedReservationStatus($button, list_id, status) {
         if (!confirm('Etes-vous sûr de vouloir annuler les réservations sélectionnées ?')) {
             return;
         }
+    } else if (status === 0) {
+        if (!confirm('Etes-vous sûr de vouloir réintialiser les réservations sélectionnées ?')) {
+            return;
+        }
     }
+    
     var $list = $('#' + list_id);
 
     if (!$list.length) {
@@ -109,6 +125,32 @@ function findEquipmentToReceive($button, id_commande_client) {
     });
 }
 
+function removeFromCommandeFournisseur($button, id_reservation_cmd_fourn) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    BimpAjax('removeFromCommandeFournisseur', {
+        'id_reservation_cmd_fourn': id_reservation_cmd_fourn
+    }, null, {
+        id_reservation_cmd_fourn: id_reservation_cmd_fourn,
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        success: function (result, bimpAjax) {
+            $('body').trigger($.Event('objectChange', {
+                module: 'bimpreservation',
+                object_name: 'BR_ReservationCmdFourn',
+                id_object: bimpAjax.id_reservation_cmd_fourn
+            }));
+        },
+        error: function (result, bimpAjax) {
+            $button.removeClass('disabled');
+        }
+    });
+}
+
 function hideEquipmentForm() {
     $('#equipmentForm').slideUp(250);
     $('#openEquipmentsFormButton').parent().slideDown(250);
@@ -117,6 +159,10 @@ function hideEquipmentForm() {
 function openEquipmentsForm() {
     $('#equipmentForm').slideDown(250);
     $('#openEquipmentsFormButton').parent().slideUp(250);
+}
+
+function generateBL($button, id_commande) {
+    
 }
 
 $(document).ready(function () {

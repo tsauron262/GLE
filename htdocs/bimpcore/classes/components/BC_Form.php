@@ -29,11 +29,12 @@ class BC_Form extends BC_Panel
         'value'      => array('data_type' => 'any', 'default' => '')
     );
 
-    public function __construct(BimpObject $object, $id_parent = null, $name = '', $level = 1, $content_only = false)
+    public function __construct(BimpObject $object, $id_parent = null, $name = '', $level = 1, $content_only = false, $on_save = null)
     {
         $this->params_def['rows'] = array('type' => 'keys');
         $this->params_def['values'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
+        $this->params_def['on_save'] = array('default' => 'reload');
 
         $this->id_parent = $id_parent;
 
@@ -73,6 +74,10 @@ class BC_Form extends BC_Panel
         if (!is_null($id_parent) && !is_null($object)) {
             $object->setIdParent($id_parent);
         }
+        
+        if (!is_null($on_save)) {
+            $this->params['on_save'] = $on_save;
+        }
 
         parent::__construct($object, $name, $path, $content_only, $level, $title, 'edit');
 
@@ -93,6 +98,8 @@ class BC_Form extends BC_Panel
                 }
             }
         }
+        
+        $this->data['on_save'] = $this->params['on_save'];
     }
 
     public function addAssociationObjectParams($object_module, $object_name, $id_object, $association)

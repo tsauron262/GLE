@@ -232,19 +232,21 @@ class BimpDocumentPDF extends BimpModelPDF
             $this->setAmountsTableParams($table);
         }
 
+        BimpTools::loadDolClass('product');
+
         $i = 0;
         foreach ($this->object->lines as $line) {
             $desc = '';
             if (is_null($line->desc) || !$line->desc) {
                 if (!is_null($line->fk_product) && $line->fk_product) {
-                    BimpTools::loadDolClass('product');
                     $product = new Product($this->db);
                     if ($product->fetch((int) $line->fk_product) > 0) {
                         $desc = $product->ref;
+                        $desc.= ($desc ? ' - ' : '') . $product->label;
                     }
-                    $desc.= ($desc ? ' - ' : '') . $product->label;
                 }
-            } else {
+            }
+            if (!$desc) {
                 $desc = $line->desc;
             }
             $desc = str_replace("\n", '<br/>', $desc);
@@ -296,7 +298,15 @@ class BimpDocumentPDF extends BimpModelPDF
     public function renderAfterLines()
     {
         $this->pdf->addVMargin(2);
-        $this->writeContent('<p style="font-size: 10px; text-align: center; font-weight: bold;">Mention "Réserve de propriété"</p>');
+
+        $html = '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
+        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
+
+        $html .= '<p style="font-size: 6px; font-style: italic">La Société Bimp ne peut être tenue pour responsable de la perte éventuelles de données informatiques.';
+        $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
+        $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.</p>';
+
+        $this->writeContent($html);
     }
 
     public function renderBottom()
@@ -671,6 +681,58 @@ class BimpDocumentPDF extends BimpModelPDF
             }
         }
 
+        if (method_exists($this->object, 'getSommePaiement')) {
+            $deja_regle = $this->object->getSommePaiement(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? 1 : 0);
+        } else {
+            $deja_regle = 0;
+        }
+
+        if (method_exists($this->object, 'getSumCreditNotesUsed')) {
+            $creditnoteamount = $this->object->getSumCreditNotesUsed(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? 1 : 0);
+        } else {
+            $creditnoteamount = 0;
+        }
+
+        if (method_exists($this->object, 'getSumDepositsUsed')) {
+            $depositsamount = $this->object->getSumDepositsUsed(($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? 1 : 0);
+        } else {
+            $depositsamount = 0;
+        }
+
+        if (isset($this->object->paye) && $this->object->paye) {
+            $resteapayer = 0;
+        } else {
+            $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 'MT');
+        }
+
+        if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
+            $html .= '<tr>';
+            $html .= '<td style="">' . $this->langs->transnoentities("Paid") . '</td>';
+            $html .= '<td style="text-align: right;">' . price($deja_regle + $depositsamount, 0, $this->langs) . '</td>';
+            $html .= '</tr>';
+
+            if ($creditnoteamount) {
+                $html .= '<tr>';
+                $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("CreditNotes") . '</td>';
+                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($creditnoteamount, 0, $this->langs) . '</td>';
+                $html .= '</tr>';
+            }
+
+            BimpTools::loadDolClass('compta/facture', 'facture');
+            if (isset($this->object->close_code) && $this->object->close_code == Facture::CLOSECODE_DISCOUNTVAT) {
+                $html .= '<tr>';
+                $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("EscompteOfferedShort") . '</td>';
+                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 0, $this->langs) . '</td>';
+                $html .= '</tr>';
+                $resteapayer = 0;
+            }
+
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
+            $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . price($resteapayer, 0, $this->langs) . '</td>';
+            $html .= '</tr>';
+        }
+
         $html .= '</table>';
         $html .= '</div>';
         $html .= '<br/>';
@@ -690,7 +752,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
             $html .= '<tr>';
-            $html .= '<td colspan="2" style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
+            $html .= '<td style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
             $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
             $html .= '</tr>';
         }
@@ -702,7 +764,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<tr>';
         $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/></td>';
         $html .= '</tr>';
-        
+
         $html .= '</table>';
         $html .= '</div>';
         $html .= '<br/>';

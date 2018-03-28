@@ -357,7 +357,16 @@ function cancelFieldsTableModifications(fields_table_id, $button) {
             var initial_value = $(this).data('initial_value');
             if ($input.length) {
                 if ($input.val() != initial_value) {
-                    $input.val(initial_value).change();
+                    if ($input.hasClass('datepicker_value')) {
+                        if (!initial_value) {
+                            $input.val('').change();
+                            $input.parent().find('input.bs_datetimepicker').val('');
+                        } else {
+                            $input.parent().find('input.bs_datetimepicker').data('DateTimePicker').date(moment(initial_value));
+                        }
+                    } else {
+                        $input.val(initial_value).change();
+                    }
                 }
             }
         }

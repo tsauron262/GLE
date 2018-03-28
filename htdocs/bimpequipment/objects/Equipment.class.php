@@ -223,7 +223,8 @@ class Equipment extends BimpObject
             if (is_null($this->current_place)) {
                 $place = BimpObject::getInstance($this->module, 'BE_Place');
                 $items = $place->getList(array(
-                    'id_equipment' => $this->id
+                    'id_equipment' => $this->id,
+                    'position'     => 1
                         ), 1, 1, 'id', 'desc', 'array', array(
                     'id'
                 ));
@@ -304,6 +305,25 @@ class Equipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayCurrentPlace()
+    {
+        $place = $this->getCurrentPlace();
+        if (!is_null($place) && $place->isLoaded()) {
+            return $place->displayPlace();
+        }
+
+        return '';
+    }
+
+    public function displayReserved()
+    {
+        if (count($this->getReservationsList())) {
+            return '<span class="success">OUI</span>';
+        }
+
+        return '</span class="danger">NON</span>';
     }
 
 //    Renders: 

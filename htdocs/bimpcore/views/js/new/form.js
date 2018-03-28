@@ -26,6 +26,7 @@ function saveObjectFromForm(form_id, $button, successCallback) {
 
     $button.addClass('disabled');
 
+
     var $resultContainer = $('#' + form_id + '_result');
     var $form = $('#' + form_id);
 
@@ -57,31 +58,42 @@ function saveObjectFromForm(form_id, $button, successCallback) {
     var data = new FormData($formular.get(0));
 
     BimpAjax('saveObject', data, $resultContainer, {
+        form_id: form_id,
+        $button: $button,
+        on_save: $form.data('on_save'),
         processData: false,
         contentType: false,
         display_success_in_popup_only: true,
-        success: function (result) {
-            $resultContainer.slideUp(250, function () {
+        success: function (result, bimpAjax) {
+            bimpAjax.$resultContainer.slideUp(250, function () {
                 $(this).html('');
             });
-            if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
-                var $link = $button.parent().find('.objectViewLink');
-                if ($link.length) {
-                    $link.removeClass('hidden').attr('href', result.object_view_url);
-                }
+            switch (bimpAjax.on_save) {
+                case 'reload':
+                    if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
+                        var $link = bimpAjax.$button.parent().find('.objectViewLink');
+                        if ($link.length) {
+                            $link.removeClass('hidden').attr('href', result.object_view_url);
+                        }
+                    }
+                    reloadForm(bimpAjax.form_id);
+                    break;
+
+                case 'close':
+                    closeForm(bimpAjax.form_id);
+                    break;
             }
             $('body').trigger($.Event('objectChange', {
                 module: result.module,
                 object_name: result.object_name,
                 id_object: result.id_object
             }));
-            reloadForm(form_id);
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
         },
-        error: function () {
-            $button.removeClass('disabled');
+        error: function (result, bimpAjax) {
+            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
@@ -200,7 +212,7 @@ function reloadForm(form_id) {
 
     $form.find('.object_form_content').hide();
 
-    var $panel = $form.findParentByClass('panel');
+    var $panel = $('#' + form_id + '_panel');
     var $modal = $();
     if (!$.isOk($panel)) {
         $modal = $form.findParentByClass('modal');
@@ -237,6 +249,25 @@ function reloadForm(form_id) {
             }
         }
     });
+}
+
+function closeForm(form_id) {
+    var $form = $('#' + form_id);
+    if (!$form.length) {
+        return;
+    }
+
+    var $modal = $form.findParentByClass('modal');
+    if ($.isOk($modal)) {
+        $modal.modal('hide');
+    } else {
+        var $container = $('#' + form_id + '_container');
+        if ($container.length) {
+            $container.slideUp(250, function () {
+                $(this).remove();
+            });
+        }
+    }
 }
 
 function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values) {
@@ -584,12 +615,16 @@ function searchObjectList($input) {
                     bimpAjax.$result.find('button').click(function () {
                         $field_input.val($(this).data('value')).change();
                         bimpAjax.$result.html('').hide();
-                        bimpAjax.$input.val('');
                         var label = $(this).text();
-                        $container.find('.search_input_selected_label').find('span').text(label);
-                        $container.find('.search_input_selected_label').slideDown(250);
-                        if ($label_input.length) {
-                            $label_input.val(label);
+                        if (!bimpAjax.$input.parent().hasClass('searchInputContainer')) {
+                            bimpAjax.$input.val('');
+                            $container.find('.search_input_selected_label').find('span').text(label);
+                            $container.find('.search_input_selected_label').slideDown(250);
+                            if ($label_input.length) {
+                                $label_input.val(label);
+                            }
+                        } else {
+                            bimpAjax.$input.val(label);
                         }
                     });
                     bimpAjax.$result.show();

@@ -83,6 +83,11 @@ objects:
                 type: commande_fournisseur_card
                 
 fields: 
+    ref: 
+        label: Référence
+        input: 
+            type: hidden
+            
     id_entrepot:
         label: Centre
         type: id_object
@@ -245,6 +250,13 @@ fields:
             field_name: type
             show_values: 3
         
+    date_shipped:
+        label: Expédié le
+        type: date
+        display_if: 
+            field_name: type
+            show_values: 1
+            
     note: 
         label: Note
         type: text
@@ -254,6 +266,7 @@ fields:
             
 forms: 
     equipment:
+        on_save: close
         title: 
             callback: getEquipmentFormTitle
         rows: 
@@ -268,7 +281,7 @@ forms:
             - field: note
             
     new_status: 
-        title: Réception d'une livraison
+        on_save: close
         rows: 
             - custom: 1
               hidden: 1
@@ -293,6 +306,7 @@ forms:
 fields_tables: 
     default: 
         rows: 
+            - field: ref
             - field: id_entrepot
             - field: type
             - field: status
@@ -355,6 +369,8 @@ lists:
         extra_btn: 
             callback: getListExtraBtn
         cols:
+            ref: 
+                field: ref
             entrepot: 
                 field: id_entrepot
                 display: nom_url
@@ -363,12 +379,6 @@ lists:
                 display: nom_url
             equipment: 
                 field: id_equipment
-                display: nom_url
-            client: 
-                field: id_client
-                display: nom_url
-            commercial: 
-                field: id_commercial
                 display: nom_url
             date_from:
                 label: Du
@@ -383,13 +393,14 @@ lists:
                 
     commandes: 
         checkboxes: 1
+        pagination: 0
         bulk_actions: 
-            - label: Marquer comme livré au client
+            - label: Expédier
               icon: sign-out
               onclick: setSelectedReservationStatus($(this), 'list_id', 300);
-            - label: Annuler
-              icon: times-circle
-              onclick: setSelectedReservationStatus($(this), 'list_id', 303);
+            - label: Réinitialiser
+              icon: undo
+              onclick: setSelectedReservationStatus($(this), 'list_id', 0);
         objects_change_reload: BR_ReservationCmdFourn
         modal_view: default
         sort_field: id_product
@@ -398,6 +409,8 @@ lists:
         extra_btn: 
             callback: getListExtraBtn
         cols:
+            ref: 
+                field: ref
             date_from:
                 label: Date de début
                 field: date_from
@@ -406,6 +419,45 @@ lists:
                 display: nom_url
             equipment: 
                 field: id_equipment
+                display: nom_url
+            commercial: 
+                field: id_commercial
+                display: nom_url
+            qty: 
+                field: qty
+            status:
+                field: status
+                
+    entrepot: 
+        checkboxes: 1
+        bulk_actions: 
+            - label: Marquer comme livré au client
+              icon: sign-out
+              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
+            - label: Réinitialiser
+              icon: undo
+              onclick: setSelectedReservationStatus($(this), 'list_id', 0);
+        objects_change_reload: BR_ReservationCmdFourn
+        modal_view: default
+        sort_field: id_product
+        sort_way: asc
+        n: 25
+        extra_btn: 
+            callback: getListExtraBtn
+        cols:
+            ref: 
+                field: ref
+            date_from:
+                label: Date de début
+                field: date_from
+            product: 
+                field: id_product
+                display: nom_url
+            equipment: 
+                field: id_equipment
+                display: nom_url
+            commande: 
+                field: id_commande_client
                 display: nom_url
             commercial: 
                 field: id_commercial

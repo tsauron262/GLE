@@ -5,7 +5,6 @@ require_once '../bimpcore/main.php';
 ini_set('display_errors', 1);
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-
 $id_commande = (int) BimpTools::getValue('id_commande');
 
 if (!$id_commande) {
@@ -15,7 +14,8 @@ if (!$id_commande) {
 
 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
-$errors = $reservation->createReservationsFromCommandeClient(1, $id_commande);
+$id_entrepot = 1;
+$errors = $reservation->createReservationsFromCommandeClient($id_entrepot, $id_commande);
 
 if (count($errors)) {
     echo BimpRender::renderAlerts($errors);

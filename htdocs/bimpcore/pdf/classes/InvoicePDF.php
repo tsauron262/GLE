@@ -174,6 +174,10 @@ class InvoicePDF extends BimpDocumentPDF
 
     public function getPaymentInfosHtml()
     {
+        if ($this->facture->statut === Facture::STATUS_CLOSED) {
+            return '';
+        }
+        
         global $conf;
 
         $html = '<div style="font-size: 7px; line-height: 8px;">';
@@ -287,16 +291,16 @@ class InvoicePDF extends BimpDocumentPDF
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<td style="background-color: #DCDCDC; font-weight: bold; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Payment");
         $html .= '</td>';
-        $html .= '<td style="background-color: #DCDCDC; font-weight: bold; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Amount");
         $html .= '</td>';
-        $html .= '<td style="background-color: #DCDCDC; font-weight: bold; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Type");
         $html .= '</td>';
-        $html .= '<td style="background-color: #DCDCDC; font-weight: bold; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Num");
         $html .= '</td>';
         $html .= '</tr>';

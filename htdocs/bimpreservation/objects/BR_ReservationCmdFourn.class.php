@@ -68,7 +68,45 @@ class BR_ReservationCmdFourn extends BimpObject
 
     public function getCommandesFournisseurArray()
     {
-        return array();
+        $commandes = array(
+            0 => ''
+        );
+
+        $id_entrepot = (int) $this->getData('id_entrepot');
+        if (!$id_entrepot) {
+            return array();
+        }
+
+        $id_fournisseur = 0;
+        switch ((int) $this->getData('type')) {
+            case 1:
+                $price = $this->getChildObject('fournisseur_price');
+                if (!is_null($price) && $price->isLoaded()) {
+                    $id_fournisseur = (int) $price->getData('fk_soc');
+                }
+                break;
+
+            case 2:
+                $id_fournisseur = (int) $this->getData('id_fournisseur');
+                break;
+        }
+
+        if ($id_fournisseur) {
+            $sql = 'SELECT cf.rowid as id, cf.ref, cf.date_creation as date, s.nom FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur cf';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cfe ON cf.rowid = cfe.fk_object';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON s.rowid = cf.fk_soc';
+            $sql .= ' WHERE cf.fk_soc = ' . (int) $id_fournisseur . ' AND cf.fk_statut = 0 AND cfe.entrepot = ' . (int) $id_entrepot;
+
+            $rows = $this->db->executeS($sql);
+            if (!is_null($rows) && count($rows)) {
+                foreach ($rows as $obj) {
+                    $DT = new DateTime($obj->date);
+                    $commandes[(int) $obj->id] = $obj->nom . ' ' . $obj->ref . ' - Créée le ' . $DT->format('d / m / Y à H:i');
+                }
+            }
+        }
+
+        return $commandes;
     }
 
     public function displayFournisseur()
@@ -112,39 +150,175 @@ class BR_ReservationCmdFourn extends BimpObject
     public function getListExtraBtn()
     {
         $buttons = array();
-        
+
         if (!(int) $this->getData('id_commande_fournisseur')) {
             $title = 'Ajout à une commande fournisseur';
             $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_ReservationCmdFourn\', id_object: ' . $this->id . ', ';
             $onclick .= 'form_name: \'supplier\'}, \'' . $title . '\');';
             $buttons[] = array(
                 'label'   => 'Ajouter à une commande fournisseur',
-                'icon'    => 'plus-circle',
+                'icon'    => 'plus',
                 'onclick' => $onclick
             );
         } else {
-            
+            $commande = $this->getChildObject('commande_fournisseur');
+            if (!is_null($commande) && isset($commande->id) && $commande->id) {
+                if ((int) $commande->statut === 0) {
+                    $buttons[] = array(
+                        'label'   => 'Retirer de la commande fournisseur',
+                        'icon'    => 'times-circle',
+                        'onclick' => 'removeFromCommandeFournisseur($(this), ' . $this->id . ');'
+                    );
+                }
+            }
         }
-        
+
         return $buttons;
+    }
+
+    // Gestion de la commande fournisseur: 
+    public function addToCommandeFournisseur(&$errors)
+    {
+        if ((int) $this->getSavedData('id_commande_fournisseur')) {
+            return false;
+        }
+
+        $id_commande_fournisseur = (int) $this->getData('id_commande_fournisseur');
+        if ($id_commande_fournisseur) {
+            $commande = $this->getChildObject('commande_fournisseur');
+
+            if (is_null($commande) || !isset($commande->id) || !$commande->id) {
+                $errors[] = 'Commande fournisseur absente ou invalide';
+                return false;
+            }
+
+            $product = $this->getChildObject('product');
+            if (is_null($product) || !$product->isLoaded()) {
+                $errors[] = 'Produit absent ou invalide';
+                return false;
+            }
+
+            $type = (int) $this->getData('type');
+            if (!$type) {
+                $errors[] = 'Type de prix absent ou invalide';
+                return false;
+            }
+
+            if ($type === 1) {
+                $fk_prod_fourn_price = (int) $this->getData('id_price');
+                if (!$fk_prod_fourn_price) {
+                    $errors[] = 'Prix fournisseur absent ou invalide';
+                    return false;
+                }
+                $price = $this->getChildObject('fournisseur_price');
+                if (is_null($price) || !$price->isLoaded()) {
+                    $errors[] = 'Prix fournisseur absent ou invalide';
+                    return false;
+                }
+                $pu_ht = (float) $price->getData('price');
+                $txtva = (float) $price->getData('tva_tx');
+                $fourn_ref = $price->getData('ref_fourn');
+            } else {
+                $fk_prod_fourn_price = 0;
+                $pu_ht = (float) $this->getData('special_price');
+                $txtva = (float) $this->getData('special_price_tva_tx');
+                $fourn_ref = '';
+            }
+
+            $desc = $product->getData('ref') . ' - ' . $product->getData('label');
+            $qty = (int) $this->getData('qty');
+            $fk_product = $product->id;
+
+            $remise_percent = 0.0;
+            $price_base_type = 'HT';
+            $txlocaltax1 = 0.0;
+            $txlocaltax2 = 0.0;
+
+            $id_line = (int) $commande->addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $fk_prod_fourn_price, $fourn_ref, $remise_percent, $price_base_type);
+            if ($id_line <= 0) {
+                $errors[] = 'Echec de l\'ajout du produit "' . $desc . '" à la commande fournisseur';
+                BimpTools::getErrorsFromDolObject($commande, $errors);
+                return false;
+            }
+
+            if ($type === 2) {
+                if ($commande->updateline(
+                                $id_line, $desc, $pu_ht, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type
+                        ) < 0) {
+                    $errors[] = 'Echec de l\'enregistrement du prix spécial pour le produit "' . $desc . '"';
+                    $commande->deleteline($id_line);
+                    return false;
+                }
+            }
+
+            $this->set('id_commande_fournisseur_line', $id_line);
+            $this->set('id_commande_fournisseur', (int) $commande->id);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function removeFromCommandeFournisseur(&$errors)
+    {
+        if ($this->isLoaded()) {
+            $commande = $this->getChildObject('commande_fournisseur');
+            if (is_null($commande) || !isset($commande->id) || !$commande->id) {
+                $errors[] = 'ID de la commande fournisseur absent';
+            }
+
+            if ((int) $commande->statut !== 0) {
+                $errors[] = 'La commander fournisseur "'.$commande->ref.'" ne peut plus être modifiée car elle n\'a plus le statut "brouillon"';
+            }
+
+            $id_line = (int) $this->getData('id_commande_fournisseur_line');
+            if (!$id_line) {
+                $errors[] = 'ID de la ligne de commande fournisseur absent';
+            }
+
+            if (!count($errors)) {
+                if ($commande->deleteline($id_line) <= 0) {
+                    $errors[] = 'Echec de la suppression de la ligne de commande fournisseur d\'ID ' . $id_line;
+                    BimpTools::getErrorsFromDolObject($commande, $errors);
+                } else {
+                    $this->set('id_commande_fournisseur', 0);
+                    $this->set('id_commande_fournisseur_line', 0);
+                    $errors = $this->update();
+                    return true;
+                }
+            }
+        } else {
+            $errors[] = 'ID de la réservation absent';
+        }
+
+        return false;
     }
 
     // Overrides:
 
     public function create()
     {
+        $reservation = $this->getChildObject('reservation');
+
+        if (is_null($reservation) || !$reservation->isLoaded()) {
+            return array('ID de la réservation absent ou invalide');
+        }
+
+        $errors = array();
+
+        $this->addToCommandeFournisseur($errors);
+        if (count($errors)) {
+            return $errors;
+        }
+
         $errors = parent::create();
 
         if (!count($errors)) {
             $reservation = $this->getChildObject('reservation');
 
-            $res_errors = array();
-            if (is_null($reservation) || !$reservation->isLoaded()) {
-                $res_errors[] = 'ID de la réservation absent ou invalide';
-            } else {
-                $qty = (int) $this->getData('qty');
-                $res_errors = $reservation->setNewStatus(100, $qty);
-            }
+            $qty = (int) $this->getData('qty');
+            $res_errors = $reservation->setNewStatus(100, $qty);
 
             if (count($res_errors)) {
                 $errors[] = 'Echec de la mise à jour du statut de la réservation';
@@ -153,6 +327,22 @@ class BR_ReservationCmdFourn extends BimpObject
                 $reservation->update();
             }
         }
+
+        return $errors;
+    }
+
+    public function update()
+    {
+        $errors = array();
+
+        if ((int) $this->getData('id_commande_fournisseur')) {
+            $this->addToCommandeFournisseur($errors);
+            if (count($errors)) {
+                return $errors;
+            }
+        }
+
+        $errors = parent::update();
 
         return $errors;
     }

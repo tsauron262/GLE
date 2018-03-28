@@ -606,7 +606,7 @@ class BC_ListTable extends BC_List
 
         $html .= '>';
         if (isset($btn_params['icon'])) {
-            $html .= '<i class="fa fa-' . $btn_params['icon'] . '"></i>';
+            $html .= '<i class="' . BimpRender::renderIconClass($btn_params['icon']) . '"></i>';
         }
         $html .= '</' . $tag . '>';
 

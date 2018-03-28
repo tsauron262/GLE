@@ -357,7 +357,7 @@ class BC_Field extends BimpComponent
             case 'time':
             case 'date':
             case 'datetime':
-                return $this->data_type;
+                return $data_type;
         }
 
         return '';

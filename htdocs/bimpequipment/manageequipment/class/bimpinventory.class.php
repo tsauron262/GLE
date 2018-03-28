@@ -361,7 +361,7 @@ class BimpInventory {
                 $doliProd->fetch($id);
                 if ($diff < 0) { // remove
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, -$diff, 1, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
-                } elseif ($product['qty'] > $product['qtyScanned']) { // add
+                } else { // add
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, $diff, 0, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
                 }
                 if ($result == -1)

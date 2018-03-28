@@ -43,7 +43,7 @@ class ActionsSynopsisHisto {
             $return .= histoNavigation::getBlocHisto($context);
         }
         
-       if($user->array_options['options_mail_sec'] == "" || $user->office_phone == "")
+       if((isset($user->array_options['options_mail_sec']) && $user->array_options['options_mail_sec'] == "") || $user->office_phone == "")
             setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigné votre email de secours et téléphone</a>", null, 'errors');
 
         $this->resprints = $return;

@@ -40,9 +40,11 @@ fields:
         label: Quantité minimum
         type: int
         default_value: 1
+        input: 
+            type: hidden
         
     price: 
-        label: Prix HT quantité min. (sans remise)
+        label: Prix HT (sans remise)
         type: money
         required: 1
         
@@ -62,6 +64,8 @@ fields:
         min: 0
         max: 100
         default_value: 0
+        input: 
+            type: hidden
         
     unitprice: 
         label: Prix unitaire HT

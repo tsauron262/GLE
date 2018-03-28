@@ -1,9 +1,8 @@
 <?php
 
+define('NOLOGIN', '1');
+
 require_once("../main.inc.php");
-
-
-
 
 //
 //$modulepart = 'bimpcore';
@@ -37,23 +36,37 @@ require_once("../main.inc.php");
 //
 
 ini_set('display_errors', 1);
+require_once __DIR__ . '/Bimp_Lib.php';
+require_once __DIR__ . '/classes/BimpTicket.php';
 
-llxHeader();
+//llxHeader();
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-BimpCore::displayHeaderFiles();
+echo '<!DOCTYPE html>';
+echo '<html lang="fr">';
 
-$user = BimpObject::getInstance('bimpcore', 'Bimp_User', 191);
-$view = new BC_View($user, 'default');
+echo '<head>';
+//echo '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/bimpcore/views/css/ticket.css' . '"/>';
+echo '<script src="/test2/includes/jquery/js/jquery.min.js?version=6.0.4" type="text/javascript"></script>';
+echo '</head>';
 
-$full_rights = false;
-if ($full_rights) {
-    $view->params['edit_form'] = 'default';
-} else {
-    $view->params['edit_form'] = 'light';
-}
+echo '<body>';
+BimpTools::loadDolClass('compta/facture', 'facture');
 
-echo $view->renderHtml();
-echo BimpRender::renderAjaxModal('page_modal');
+global $db;
 
-llxFooter();
+$facture = new Facture($db);
+$facture->fetch(86073);
+
+$ticket = new BimpTicket($db, 370, $facture);
+
+echo $ticket->renderHtml();
+
+echo '<script>';
+echo '$(document).ready(function() {';
+echo 'window.print();';
+echo '});';
+echo '</script>';
+echo '</body></html>';
+
+
+//llxFooter();

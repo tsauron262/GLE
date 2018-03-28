@@ -25,6 +25,10 @@ class commandeController extends reservationController
             return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
         }
 
+        if ($commande->statut < 1) {
+            return BimpRender::renderAlerts('Cette commande doit etre validée pour accéder à cet onglet');
+        }
+
         $html = '';
 
         $html .= '<div class="page_content container-fluid">';
@@ -59,32 +63,15 @@ class commandeController extends reservationController
         $html .= ' onclick="openEquipmentsForm();">';
         $html .= '<i class="fa fa-arrow-circle-down iconLeft"></i>Attribuer des équipements';
         $html .= '</button>';
+
+        $html .= '<button id="generateBLButton" type="button" class="btn btn-default btn-large"';
+        $html .= ' onclick="generateBL($(this), ' . (int) $commande->id . ');" style="float: right">';
+        $html .= '<i class="fa fa-file-text iconLeft"></i>Bon de livraison';
+        $html .= '</button>';
+
         $html .= '</div>';
 
-        $rows = array(
-            array(
-                'label' => 'Numéro de série d\'un équipement à attribuer',
-                'input' => '<input type="text" class="large_input" name="serial" id="findEquipmentSerial" value=""/>'
-            )
-        );
-
-        $buttons = array();
-
-        $button = '<button id="hideEquipmentFormButton" type="button" class="btn btn-danger buttonLeft"';
-        $button .= ' onclick="hideEquipmentForm();">';
-        $button .= '<i class="fa fa-times iconLeft"></i>Annuler</button>';
-        $buttons[] = $button;
-
-        $button = '<button id="findEquipmentButton" type="button" class="btn btn-primary"';
-        $button .= ' onclick="findEquipmentToReceive($(this), ' . $commande->id . ');">';
-        $button .= '<i class="fa fa-check iconLeft"></i>Valider</button>';
-        $buttons[] = $button;
-
-        $html .= '<div id="equipmentForm" style="display: none;">';
-        $html .= '<div style="display: inline-block">';
-        $html .= BimpRender::renderFreeForm($rows, $buttons, 'Attribution d\'équipement');
-        $html .= '</div>';
-        $html .= '</div>';
+        $html .= $this->renderEquipmentForm((int) $commande->id);
 
         $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
         $list = new BC_ListTable($reservation, 'commandes', 1, null, 'Liste des réservations');

@@ -24,6 +24,7 @@ class BC_List extends BC_Panel
 
         $this->params_def['list_filters'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
         $this->params_def['association_filters'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
+        $this->params_def['joins'] = array('type' => 'definitions', 'defs_type' => 'join', 'multiple' => true, 'request' => true, 'json' => true);
 
         $this->params_def['add_form_name'] = array();
         $this->params_def['add_form_values'] = array('data_type' => 'array', 'default' => array());
@@ -85,7 +86,19 @@ class BC_List extends BC_Panel
             'name'   => $field_name,
             'filter' => $value
         );
-        $this->params['add_form_values']['fields'][$field_name] = $value;
+
+        if ($this->object->field_exists($field_name)) {
+            $this->params['add_form_values']['fields'][$field_name] = $value;
+        }
+    }
+
+    public function addJoin($table, $on, $alias)
+    {
+        $this->params['joins'][] = array(
+            'table' => $table,
+            'on'    => $on,
+            'alias' => $alias
+        );
     }
 
     // Gestion des filtres associatifs:
@@ -212,7 +225,9 @@ class BC_List extends BC_Panel
         }
 
         $primary = $this->object->getPrimary();
-        $joins = array();
+        
+        // Jointures: 
+        $joins = $this->params['joins'];
 
         // Filtres: 
         if (count($this->params['list_filters'])) {
@@ -324,7 +339,7 @@ class BC_List extends BC_Panel
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             $primary
                 ), $joins, $extra_order_by, $extra_order_way);
-        
+
         if (method_exists($this->object, 'listItemsOverride')) {
             $this->object->listItemsOverride($this->name, $this->items);
         }

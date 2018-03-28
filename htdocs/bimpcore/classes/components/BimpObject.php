@@ -1224,6 +1224,9 @@ class BimpObject
 
             foreach ($this->data as $field => &$value) {
                 $this->checkFieldValueType($field, $value);
+                if (is_null($value)) {
+                    unset($this->data[$field]);
+                }
             }
 
             if (!is_null($this->dol_object)) {
@@ -1299,6 +1302,10 @@ class BimpObject
 
             foreach ($this->data as $field => &$value) {
                 $this->checkFieldValueType($field, $value);
+
+                if (is_null($value)) {
+                    unset($this->data[$field]);
+                }
             }
 
             if (!is_null($this->dol_object)) {
@@ -1539,7 +1546,10 @@ class BimpObject
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-//        echo $sql; exit;
+        if (BimpTools::isSubmit('list_sql')) {
+            echo $sql;
+            exit;
+        }
 
         $rows = $this->db->executeS($sql, $return);
 
@@ -2648,23 +2658,7 @@ class BimpObject
             return '';
         }
 
-        if (is_a($object, 'BimpObject')) {
-            return $object->getUrl();
-        }
-
-        $module = $this->config->getObjectModule("", $object_name);
-        if ($module) {
-            $file = $module . '/card.php';
-            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
-                $primary = 'id';
-                if (is_a($object, 'Societe')) {
-                    $primary = 'socid';
-                }
-                return DOL_URL_ROOT . '/' . $file . (isset($object->id) && $object->id ? '?' . $primary . '=' . $object->id : '');
-            }
-        }
-
-        return '';
+        return $this->getInstanceUrl($object);
     }
 
     public static function getInstanceNomUrl($instance)

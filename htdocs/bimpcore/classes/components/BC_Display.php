@@ -148,7 +148,7 @@ class BC_Display extends BimpComponent
                                             $url = $this->object->getChildObjectUrl($this->field_params['object'], $instance);
                                         } else {
                                             $url = BimpObject::getInstanceUrl($instance);
-                                        }
+                                        }                                        
                                         if ($url) {
                                             $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
                                             $html .= '<i class="fa fa-external-link"></i>';

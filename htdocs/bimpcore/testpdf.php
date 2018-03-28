@@ -18,9 +18,7 @@ global $db, $langs;
 $pdf = new LoyerPDF($db);
 
 $obj = new Propal($db);
-$obj->fetch(92608);
-
-//$pdf = new InvoicePDF($db);
+$obj->fetch(28);
 
 $pdf->init($obj);
 $pdf->render(__DIR__. '/testPropal.pdf', true);

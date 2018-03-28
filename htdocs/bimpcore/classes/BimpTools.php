@@ -44,10 +44,10 @@ class BimpTools
         if (is_null($class)) {
             $class = ucfirst($file);
         }
-        
+
         if (!class_exists($class)) {
-            if (file_exists(DOL_DOCUMENT_ROOT.'/'.$module.'/class/'.$file.'.class.php')) {
-                
+            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php')) {
+                require_once DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php';
             }
         }
     }
@@ -67,8 +67,16 @@ class BimpTools
         }
         $file = strtolower(get_class($object)) . '/card.php';
         $primary = 'id';
-        if (is_a($object, 'Societe')) {
-            $primary = 'socid';
+        switch (get_class($object)) {
+            case 'CommandeFournisseur':
+                return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+
+            case 'Facture':
+                return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
+                
+            case 'Societe':
+                $primary = 'socid';
+                break;
         }
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
             return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');

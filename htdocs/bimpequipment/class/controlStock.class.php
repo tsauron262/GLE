@@ -38,25 +38,40 @@ class controlStock{
                         if($_REQUEST['action'] == "detail")
                             echo $millieuText." OK  : ".$nbE."<br/>";
                     }
-                    elseif($nbE > $nbS)
-                        echo $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
-                    elseif($nbE < $nbS)
-                        echo $millieuText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
-                    else
-                        echo $millieuText."ATTENTION BIZZARRE<br/>";
-                    $nbCorrection = $nbE - $nbS;
-                    if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
-                        echo "  correction de  ".$nbCorrection."<br/>";
-                        $product = new Product($this->db);
-                        $product->fetch($idPr);
-                        $now = dol_now();
-                        $codemove = dol_print_date($now, '%y%m%d%H%M%S');
-                        $product->correct_stock($user, $idEn, $nbCorrection, 0, "correction Auto Stock en fonction des equipments", 0, $codemove);
+                    else{
+                        $text = "";
+                        if($nbE > $nbS)
+                            $text =  $millieuText." ATTENTION PLUS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        elseif($nbE < $nbS)
+                            $text =  $millieuText." ATTENTION MOINS d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                        else
+                            $text =  $millieuText."ATTENTION BIZZARRE<br/>";
+                        $nbCorrection = $nbE - $nbS;
+                        if($nbCorrection != 0 && $_REQUEST['action'] == "corriger"){
+                            echo "  correction de  ".$nbCorrection."<br/>";
+                            $product = new Product($this->db);
+                            $product->fetch($idPr);
+                            $now = dol_now();
+                            $codemove = dol_print_date($now, '%y%m%d%H%M%S');
+                            $product->correct_stock($user, $idEn, $nbCorrection, 0, "correction Auto Stock en fonction des equipments", 0, $codemove);
+                        }
+                        else
+                            mailSyn2("Probléme stock", "tommy@bimp.fr", '', $text);
+                        echo $text;
                     }
-                    
                 }
             }
         }
+        
+        $this->getEquipmentNonSerialisable();
+        if(count($this->equipNonS) == 0)
+            echo "<br/>AUCUN Equipment NON Serialisable.... OK";
+        else{
+            echo "<br/><br/>".count($this->equipNonS)." equipment(s) correspondant a des produits non serialisable";
+            foreach($this->equipNonS as $sn)
+                echo "<br/>Equipment non Serilisé....".$sn;
+        }
+        
         echo "<br/><br/>Fin du test";
     }
     
@@ -71,6 +86,14 @@ class controlStock{
         $sql = $this->db->query("SELECT p.rowid, p.label FROM `llx_product` p, llx_product_extrafields pe WHERE p.rowid = pe.fk_object AND pe.serialisable = 1");
         while($ligne = $this->db->fetch_object($sql))
                 $this->prodS[$ligne->rowid] = $ligne->label;
+    }
+    
+    
+    private function getEquipmentNonSerialisable(){
+        $this->equipNonS = array();
+        $sql = $this->db->query("SELECT serial FROM llx_product_extrafields pe, `llx_be_equipment` be WHERE be.id_product = pe.fk_object AND pe.serialisable = 0");
+        while($ligne = $this->db->fetch_object($sql))
+                $this->equipNonS[] = $ligne->serial;
     }
     
     

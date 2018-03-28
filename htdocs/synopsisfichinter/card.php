@@ -710,7 +710,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('description', '', 280, 'dol_notes', 'In', true);
             $doleditor->Create();
         } else {
@@ -912,7 +912,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('description', '', 280, 'dol_notes', 'In', true);
             $doleditor->Create();
         } else {
@@ -1052,7 +1052,7 @@ EOF;
         print '<td width=340>';
         // editeur wysiwyg
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('np_desc', '', 100, 'dol_details');
             $doleditor->Create();
         } else {
@@ -1298,7 +1298,7 @@ EOF;
         print '<input type="hidden" name="action" value="setdescription">';
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('description', $fichinter->description, 280, 'dol_notes', 'In', true);
             $doleditor->Create();
         } else {
@@ -1323,7 +1323,7 @@ EOF;
         print '<input type="hidden" name="action" value="setdescription2">';
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('description2', $fichinter->note_private, 280, 'dol_notes', 'In', true);
             $doleditor->Create();
         } else {
@@ -1658,7 +1658,7 @@ EOF;
                 print '<a name="' . $objp->rowid . '"></a>'; // ancre pour retourner sur la ligne
                 // editeur wysiwyg
                 if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
-                    require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
                     $doleditor = new DolEditor('desc', $objp->description, 164, 'dol_details');
                     $doleditor->Create();
                 } else {
@@ -1830,7 +1830,7 @@ EOF;
         print '<td>';
         // editeur wysiwyg
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('np_desc', '', 100, 'dol_details');
             $doleditor->Create();
         } else {

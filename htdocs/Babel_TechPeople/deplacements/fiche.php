@@ -202,7 +202,7 @@ if ($_GET["action"] == 'create')
     if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled)
     {
         // Editeur wysiwyg
-        require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
         $doleditor=new DolEditor('note','',180,'dolibarr_notes','In',false);
         $doleditor->Create();
     } else {
@@ -282,7 +282,7 @@ if ($_GET["action"] == 'create')
                 if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled)
                 {
                     // Editeur wysiwyg
-                    require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
+                    require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
                     $doleditor=new DolEditor('note',$deplacement->note,180,'dolibarr_notes','In',false);
                     $doleditor->Create();
                 } else {

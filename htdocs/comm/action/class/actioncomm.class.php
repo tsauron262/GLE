@@ -720,6 +720,8 @@ class ActionComm extends CommonObject
     function update($user,$notrigger=0)
     {
         global $langs,$conf,$hookmanager;
+        
+        $this->note = str_replace("<br />\r\n", "<br />", $this->note);
 
         $error=0;
 
@@ -1346,6 +1348,9 @@ class ActionComm extends CommonObject
                     $dateend=$this->db->jdate($obj->datep2)-(empty($conf->global->AGENDA_EXPORT_FIX_TZ)?0:($conf->global->AGENDA_EXPORT_FIX_TZ*3600));
                     $duration=($datestart && $dateend)?($dateend - $datestart):0;
                     $event['summary']=$obj->label.($obj->socname?" (".$obj->socname.")":"");
+                    $obj->note = str_replace("<br />\r\n", "<br />", $obj->note);
+                    $obj->note = str_replace("<br />\n", "<br />", $obj->note);
+                    $obj->note = str_replace("<br />\r", "<br />", $obj->note);
                     $event['desc']=$obj->note;
                     $event['startdate']=$datestart;
                     $event['enddate']=$dateend;		// Not required with type 'journal'

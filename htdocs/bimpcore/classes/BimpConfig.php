@@ -872,6 +872,6 @@ class BimpConfig
     {
         $message = 'Erreur de configuration pour le fichier "' . $this->dir . $this->file . '" - ' . $msg;
         $this->errors[] = $msg;
-        dol_syslog($message, LOG_ERR);
+        dol_syslog($message, LOG_NOTICE);
     }
 }

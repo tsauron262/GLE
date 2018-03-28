@@ -526,12 +526,12 @@ class modSynopsisChrono extends DolibarrModules {
 //    $this->dirs[0] = $conf->chrono->dir_output;
         
         
-        
+    $result = $this->_init($sql);
         
     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/lib/synopsischrono.lib.php");
     iniTabChronoList();
 
-        return $this->_init($sql);
+        return $result;
     }
 
     /**

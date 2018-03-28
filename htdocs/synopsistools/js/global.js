@@ -158,11 +158,80 @@ $(window).on("load", function () {
     $(".disableadOnClick").click(function () {
         $(this).attr("disabled", "disabled");
     });
+    
+    
+    $("input#NoMachine, input#Chrono1011").focusout(function () {
+        input = $(this);
+        getInfoApple(input);
+    });
+
 
 
 
     traiteLien();
 });
+
+
+function getInfoApple(input) {
+    input.val(input.val().toUpperCase());
+
+    if (input.attr("id") == "NoMachine") {
+        inputM = $("#Machine");
+        inputG = $("#Garantie");
+        inputTG = $("#typeGarantie");
+        inputD = $("#DateAchat");
+    } else {
+        inputM = $('input[name="description"]');
+        inputG = $("#Chrono1015");
+        inputTG = $("#Chrono1064");
+        inputD = $("#Chrono1014");
+        input.parent().append("<div id='reponse'></div>");
+    }
+    zoneRep = $("#reponse");
+    NoSerie = input.val();
+    datas = "serial=" + NoSerie;
+    roue = $("#patientez");
+    reponse = valeurM = valeurG = valeurTG = valeurD = "";
+    roue.show();
+
+    jQuery.ajax({
+        url: DOL_URL_ROOT + '/synopsisapple/ajax/requestProcess.php?action=loadSmallInfoProduct',
+        data: datas,
+        datatype: "xml",
+        type: "POST",
+        cache: false,
+        success: function (msg) {
+            if (msg.indexOf("tabResult") !== -1) {
+                eval(msg);
+                if (typeof (tabResult) != "undefined") {
+                    valeurM = tabResult[0];
+                    valeurTG = tabResult[1];
+                    valeurG = tabResult[2];
+                    valeurD = tabResult[3];
+                    valeurPlus = tabResult[4];
+                    input.parent().append(valeurPlus);
+                }
+            } else {
+                reponse = '<p class="error" id="scroolTo">' + msg + '</p>';
+                $('html, body').animate({
+                    scrollTop: zoneRep.offset().top
+                }, 500);
+            }
+
+            if (valeurM != "")
+                inputM.attr("value", valeurM);
+            if (valeurTG != "")
+                inputTG.attr("value", valeurTG);
+            if (valeurG != "")
+                inputG.attr("value", valeurG);
+            if (valeurD != "")
+                inputD.attr("value", valeurD);
+            zoneRep.html(reponse);
+            roue.hide();
+        }
+    });
+
+}
 
 function ajoutNotification(id, titre, msg) {
     $("div.notificationText").append("<div class='oneNotification'><input type='hidden' class='idNotification' value='" + id + "'/><div class='titreNotification'><table style='width:100%'><tr><td>" + titre + "</td><td style='text-align:right;'><span class='marqueVueNotification editable'>X</span></td></tr></table></div>" + msg + "</div>");

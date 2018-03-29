@@ -69,7 +69,7 @@ class pdf_azurSAV extends ModelePDFPropales
 		$langs->load("bills");
 
 		$this->db = $db;
-		$this->name = "azur";
+		$this->name = "azur_sav";
 		$this->description = $langs->trans('DocModelAzurDescription');
 
 		// Dimension page pour format A4

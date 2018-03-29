@@ -52,7 +52,9 @@ if ($user->rights->bimpequipment->inventory->read) {
     print '</table>';
     print '<div>';
 
-    print '<input id="closeInventory" type="button" class="butAction" value="Fermer l\'inventaire">';
+    if ($inventory->statut != $inventory::STATUT_CLOSED and $user->rights->bimpequipment->inventory->create)
+        print '<input id="closeInventory" type="button" class="butAction" value="Fermer l\'inventaire">';
+    
 }
 
 $db->close();

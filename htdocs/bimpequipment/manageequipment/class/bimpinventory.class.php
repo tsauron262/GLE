@@ -183,7 +183,6 @@ class BimpInventory {
 
         if ($lp->error != '')
             return array('errors' => array($lp->error));
-
         
         $line = new BimpInventoryLigne($this->db);
         if ($lp->serial != '') { // is an equipment

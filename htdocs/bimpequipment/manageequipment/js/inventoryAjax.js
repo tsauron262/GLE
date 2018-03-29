@@ -80,6 +80,7 @@ function addProductInInventory(entry) {
                 } else if (out.product_id > 0) {
                     incrementQty(out.product_id);
                     last_inserted_fk_product = out.product_id;
+                    
                 }
             }
         }
@@ -101,12 +102,13 @@ function closeInventory() {
         },
         success: function (rowOut) {
             console.log(rowOut);
-//            var out = JSON.parse(rowOut);
-//            if (out.errors.length !== 0) {
-//                printErrors(out.errors, 'alertPlaceHolder');
-//            } else if (out.success) {
-//                alert('Inventaire fermé');
-//            }
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertPlaceHolder');
+            } else if (out.success) {
+                alert('Inventaire fermé');
+                location.reload();
+            }
         }
     });
 }

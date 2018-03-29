@@ -68,6 +68,8 @@ function addProductInInventory(entry) {
                 printErrors(out.errors, 'alertPlaceHolder');
             } else if (out.qty_scanned > 0) {
                 setMessage('alertPlaceHolder', "Vous avez scanné ce produit " + out.qty_scanned + " fois.", 'mesgs');
+            } else if (out.equipment_id > 0) {
+                setMessage('alertPlaceHolder', "Equipement scanné.", 'mesgs');
             }
             if (is_responsible) {
                 if (out.equipment_id > 0) {

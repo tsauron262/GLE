@@ -65,6 +65,8 @@ class indexController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
+//        $html .= '<div id="venteTicketContainer"></div>';
+
         return $html;
     }
 
@@ -852,6 +854,8 @@ class indexController extends BimpController
         $errors = array();
         $validate_errors = array();
         $validate = 0;
+        $ticket_html = '';
+        $ticket_errors = array();
 
         $id_vente = (int) BimpTools::getValue('id_vente');
         $status = BimpTools::getValue('status');
@@ -876,6 +880,11 @@ class indexController extends BimpController
             if ((int) $status === 2) {
                 $success = 'Vente validée avec succès';
                 $validate = (int) $vente->validateVente($validate_errors);
+                if (!$validate) {
+                    $errors[] = 'Cette vente ne peut pas être validée';
+                } else {
+                    $ticket_html = $vente->renderTicketHtml($ticket_errors);
+                }
             } else {
                 if ((int) $status === 1) {
                     $success = 'Vente enregistrée avec succès';
@@ -892,6 +901,8 @@ class indexController extends BimpController
             'validate_errors' => $validate_errors,
             'validate'        => $validate,
             'success'         => $success,
+            'ticket_html'     => $ticket_html,
+            'ticket_errors'   => $ticket_errors,
             'request_id'      => BimpTools::getValue('request_id', 0),
         )));
     }
@@ -902,7 +913,6 @@ class indexController extends BimpController
 
         $id_vente = BimpTools::getValue('id_vente', 0);
         $id_client = BimpTools::getValue('id_client', 0);
-        $id_client_contact = BimpTools::getValue('id_client_contact', 0);
 
         $html = '';
 
@@ -910,8 +920,8 @@ class indexController extends BimpController
             $errors[] = 'ID de la vente absent';
         }
 
-        if (!$id_client) {
-            $errors[] = 'Aucun client spécifié';
+        if ($id_client === '') {
+            $id_client = 0;
         }
 
         if (!count($errors)) {
@@ -920,7 +930,7 @@ class indexController extends BimpController
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
                 $vente->set('id_client', (int) $id_client);
-                $vente->set('id_client_contact', (int) $id_client_contact);
+                $vente->set('id_client_contact', 0);
                 $errors = $vente->update();
                 if (!count($errors)) {
                     $html = $vente->renderClientView();

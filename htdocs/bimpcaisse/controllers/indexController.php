@@ -72,7 +72,7 @@ class indexController extends BimpController
 
     public function renderHeaderContent()
     {
-        global $user;
+        global $user, $langs;
         $caisse = $this->getUserCaisse();
 
         $html = '';
@@ -82,7 +82,7 @@ class indexController extends BimpController
             $html .= '<i class="fa fa-user-circle"></i>';
             $html .= '<div class="headerBlockTitle">Caissier:</div>';
             $html .= '<div class="headerBlockContent">';
-            $html .= $user->getFullName();
+            $html .= $user->getFullName($langs);
             $html .= '</div>';
             $html .= '</div>';
         }

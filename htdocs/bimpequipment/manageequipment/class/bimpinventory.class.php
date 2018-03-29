@@ -120,6 +120,7 @@ class BimpInventory {
             return false;
         }
         return true;
+        
     }
 
     public function setProductQuantities() {

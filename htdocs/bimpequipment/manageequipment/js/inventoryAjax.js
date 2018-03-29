@@ -89,7 +89,6 @@ function addProductInInventory(entry) {
             }
         }
     });
-
 }
 
 

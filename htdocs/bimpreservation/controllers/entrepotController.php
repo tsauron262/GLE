@@ -28,9 +28,9 @@ class entrepotController extends reservationController
 
         $html .= BimpRender::renderNavTabs(array(
                     array(
-                        'id'      => 'all_res',
-                        'title'   => 'Toutes les Réservations',
-                        'content' => $this->renderReservationsTab($entrepot, 'Toutes les Réservations', 'all', array())
+                        'id'      => 'res_reserve',
+                        'title'   => 'A réserver',
+                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à traiter', 'to_reserve', 2)
                     ),
                     array(
                         'id'      => 'res_to_process',
@@ -50,8 +50,8 @@ class entrepotController extends reservationController
                                     'value'    => 300
                                 ),
                                 array(
-                                    'operator' => '>',
-                                    'value'    => 199
+                                    'operator' => '>=',
+                                    'value'    => 200
                                 )
                             )
                         ))
@@ -65,14 +65,16 @@ class entrepotController extends reservationController
                         ))
                     ),
                     array(
+                        'id'      => 'all_res',
+                        'title'   => 'Toutes les Réservations',
+                        'content' => $this->renderReservationsTab($entrepot, 'Toutes les Réservations', 'all', array())
+                    ),
+                    array(
                         'id'      => 'supplier_orders',
                         'title'   => 'Gestion des commandes fournisseurs',
                         'content' => $this->renderSupplierOrdersTab($entrepot)
                     )
         ));
-
-
-
         $html .= '</div>';
         return $html;
     }
@@ -106,7 +108,7 @@ class entrepotController extends reservationController
         $html .= '<div class="col-lg-12">';
 
         $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
-        $list = new BC_ListTable($rcf, 'default', 1, null, 'Liste des produits en commande / à commander');
+        $list = new BC_ListTable($rcf, 'default', 1, null, 'Liste des réservations en commande / à commander');
         $list->addFieldFilterValue('id_entrepot', (int) $entrepot->id);
         $html .= $list->renderHtml();
 

@@ -1,0 +1,78 @@
+table: br_commande_shipment
+common_fields: 0
+
+labels: 
+    name: expédition
+    is_female: 1
+    
+objects: 
+    commande_client:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: commande
+            id_object: 
+                field_value: id_commande_client
+                
+    entrepot:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: id_entrepot
+    
+fields: 
+    id_commande_client: 
+        label: Commande client
+        type: id_object
+        object: commande_client
+        required: 1
+        
+    id_entrepot: 
+        label: Centre
+        type: id_object
+        object: entrepot
+        required: 1
+        input: 
+            type: search_entrepot
+        
+    num_livraison:
+        label: Numéro de livraison
+        type: int
+        default_value: 1
+        unsigned: 1
+        
+    qty: 
+        label: Nombre d'article
+        type: int
+        min: 1
+        unsigned: 1
+        default_value: 1
+        
+    date: 
+        label: Date
+        type: datetime
+        required: 1
+
+lists: 
+    commandes: 
+        enable_search: 0
+        pagination: 0
+        sort_field: id
+        sort_way: asc
+        n: 0
+        cols:
+            date: 
+                field: date
+            num_livraison:
+                field: num_livraison
+            qty: 
+                field: qty
+            bl:
+                label: Fichiers
+                value: 
+                    callback: displayBLButton
+                    

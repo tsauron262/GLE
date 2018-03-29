@@ -17,10 +17,10 @@ if ((isset($_GET['ajax']) && $_GET['ajax']) ||
     if (!defined('NOCSRFCHECK'))
         define('NOCSRFCHECK', 1);
 
-    require_once "../main.inc.php";
+    require_once __DIR__ . "/../main.inc.php";
 
     global $db, $user;
-    
+
     if (isset($_SESSION["dol_login"])) {
         $user->fetch(null, $_SESSION["dol_login"]);
         $user->getrights();
@@ -31,5 +31,5 @@ if ((isset($_GET['ajax']) && $_GET['ajax']) ||
         )));
     }
 } else {
-    require_once "../main.inc.php";
+    require_once __DIR__ . "/../main.inc.php";
 }

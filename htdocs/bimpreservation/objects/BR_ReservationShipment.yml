@@ -25,9 +25,29 @@ objects:
             id_object: 
                 field_value: id_user
                 
+    shipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BR_CommandeShipment
+            id_object: 
+                field_value: id_shipment
+                
 fields: 
+    id_commande_client: 
+        label: Commande client
+        type: int
+        unsigned: 1
+        required: 1
+        
     ref_reservation:
         label: Référence réservation
+        
+    id_shipment: 
+        label: Expédition
+        type: id_object
+        object: shipment
+        default_value: 0
         
     date: 
         label: Expédié le

@@ -65,14 +65,12 @@ class indexController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
-//        $html .= '<div id="venteTicketContainer"></div>';
-
         return $html;
     }
 
     public function renderHeaderContent()
     {
-        global $user;
+        global $user, $langs;
         $caisse = $this->getUserCaisse();
 
         $html = '';
@@ -82,7 +80,7 @@ class indexController extends BimpController
             $html .= '<i class="fa fa-user-circle"></i>';
             $html .= '<div class="headerBlockTitle">Caissier:</div>';
             $html .= '<div class="headerBlockContent">';
-            $html .= $user->getFullName();
+            $html .= $user->getFullName($langs);
             $html .= '</div>';
             $html .= '</div>';
         }
@@ -161,9 +159,10 @@ class indexController extends BimpController
 
             if ($id_entrepot) {
                 $caisse_instance = BimpObject::getInstance($this->module, 'BC_Caisse');
+                
                 foreach ($caisse_instance->getList(array(
                     'id_entrepot' => (int) $id_entrepot,
-                    'satus'       => 0
+                    'status'       => 0
                         ), null, null, 'id', 'asc', 'array', array(
                     'id', 'name'
                 )) as $caisse) {

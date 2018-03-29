@@ -64,4 +64,12 @@ class BimpCore
             self::$filesInit = true;
         }
     }
+    
+    public static function getConf($name)
+    {
+        global $db;
+
+        $bdb = new BimpDb($db);
+        return $bdb->getValue('bimpcore_conf', 'value', '`name` = \'' . $name . '\'');
+    }
 }

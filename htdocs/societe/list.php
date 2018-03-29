@@ -649,7 +649,7 @@ if (! empty($arrayfields['s.nom']['checked']))
 {
 	print '<td class="liste_titre">';
 	if (! empty($search_nom_only) && empty($search_nom)) $search_nom=$search_nom_only;
-	print '<input class="flat searchstring" type="text" name="search_nom" size="8" value="'.dol_escape_htmltag($search_nom).'">';
+	print '<input class="flat searchstring" type="text" name="search_nom" value="'.dol_escape_htmltag($search_nom).'">';
 	print '</td>';
 }
 if (! empty($arrayfields['s.name_alias']['checked']))

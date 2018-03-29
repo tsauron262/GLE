@@ -184,9 +184,13 @@ class BimpInventory {
         if ($lp->error != '')
             return array('errors' => array($lp->error));
 
+        
         $line = new BimpInventoryLigne($this->db);
         if ($lp->serial != '') { // is an equipment
             $line_id = $line->create($this->id, $user_id, $lp->prodId, $lp->equipmentId, 1);
+            if ($line_id == false) {
+                return array('errors' => $line->errors);
+            }
             $equipment_id = $lp->equipmentId;
             $em = new EquipmentManager($this->db);
             $position = $em->getPositionEquipmentForEntrepot($lp->serial, $this->fk_entrepot);
@@ -209,6 +213,9 @@ class BimpInventory {
             }
         }
 
+
+        $qty_scanned = $line->getQuantity($lp->prodId, $this->id, $this->db);
+
         if ($lp->error != '')
             return array('errors' => $line->errors);
 
@@ -221,7 +228,9 @@ class BimpInventory {
                 'new_equipment' => $new_equipment,
                 'errors' => $this->errors);
         else
-            return array('product_id' => $lp->prodId, 'errors' => $this->errors);
+            return array('product_id' => $lp->prodId,
+                'qty_scanned' => $qty_scanned,
+                'errors' => $this->errors);
     }
 
     public function updateStatut($new_statut_code) {
@@ -361,7 +370,7 @@ class BimpInventory {
                 $doliProd->fetch($id);
                 if ($diff < 0) { // remove
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, -$diff, 1, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
-                } elseif ($product['qty'] > $product['qtyScanned']) { // add
+                } else { // add
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, $diff, 0, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
                 }
                 if ($result == -1)
@@ -384,9 +393,8 @@ class BimpInventory {
                 ));
                 $this->errors = array_merge($this->errors, $emplacement->create());
             }
-
-            $this->updateStatut($this::STATUT_CLOSED);
         }
+        $this->updateStatut($this::STATUT_CLOSED);
         return true;
     }
 
@@ -439,6 +447,24 @@ class BimpInventoryLigne {
         }
     }
 
+    /**
+     * return true if the equipment is already added in this inventory
+     */
+    public function checkEquipmentDuplicate($fk_equipment, $fk_inventory) {
+
+
+        $sql = 'SELECT fk_equipment';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory_det';
+        $sql .= ' WHERE fk_inventory=' . $fk_inventory;
+        $sql .= ' AND   fk_equipment=' . $fk_equipment;
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0)
+            return true;
+
+        return false;
+    }
+
     public function create($id_inventory, $id_user, $id_product, $id_equipment, $quantity) {
 
         $stop = false;
@@ -454,8 +480,13 @@ class BimpInventoryLigne {
             $this->errors[] = "Identifiant produit invalide : " . $id_user;
             $stop = true;
         }
+        if ($id_equipment != 'NULL' and $this->checkEquipmentDuplicate($id_equipment, $id_inventory)) {
+            $this->errors[] = "Cet équipement a déjà été scanné lors de cet inventaire.";
+            $stop = true;
+        }
         if ($stop)
             return false;
+
 
         $this->db->begin();
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'be_inventory_det (';
@@ -512,15 +543,48 @@ class BimpInventoryLigne {
 
         $result = $this->db->query($sql);
         if ($result) {
-            $last_insert_id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'be_inventory_det');
             $this->db->commit();
-            return $last_insert_id;
+            $sql = 'SELECT to_write.rowid as out_rowid';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory_det as to_write';
+            $sql .= ' WHERE to_write.fk_inventory=' . $fk_inventory;
+            $sql .= ' AND to_write.fk_user=' . $user_id;
+            $sql .= ' AND to_write.fk_product=' . $fk_product;
+            $sql .= ' AND to_write.tms=(';
+            $sql .= '   SELECT MAX(to_read.tms)';
+            $sql .= '   FROM  (SELECT * FROM ' . MAIN_DB_PREFIX . 'be_inventory_det) as to_read';
+            $sql .= '   WHERE to_read.fk_inventory=' . $fk_inventory;
+            $sql .= '   AND to_read.fk_user=' . $user_id;
+            $sql .= '   AND to_read.fk_product=' . $fk_product;
+            $sql .= ')';
+
+            $result = $this->db->query($sql);
+            if ($result and $this->db->num_rows($result) > 0) {
+                $obj = $this->db->fetch_object($result);
+                return $obj->out_rowid;
+            }
+            return -1;
         } else {
             $this->errors[] = "Impossible de mettre à jour une quantité dans la table des ligne d'inventaire";
             dol_print_error($this->db);
             $this->db->rollback();
             return -1;
         }
+    }
+
+    public static function getQuantity($fk_product, $fk_inventory, $db) {
+
+        $sql = 'SELECT SUM(quantity) as qty';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory_det';
+        $sql .= ' WHERE fk_product=' . $fk_product;
+        $sql .= ' AND fk_inventory=' . $fk_inventory;
+
+
+        $result = $db->query($sql);
+        if ($result and $db->num_rows($result) > 0) {
+            $obj = $db->fetch_object($result);
+            return $obj->qty;
+        }
+        return 0;
     }
 
 }

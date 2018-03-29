@@ -1,3 +1,5 @@
+var ticket_url = './ticket.php';
+
 function BC_Vente() {
 
     this.reset = function () {
@@ -348,6 +350,8 @@ function loadNewVente(id_client) {
 
     $button.addClass('disabled');
 
+    $('#venteTicketContainer').html('');
+
     var id_caisse = parseInt($('#current_params').find('[name="id_caisse"]').val());
 
     if (!id_caisse) {
@@ -498,20 +502,10 @@ function saveCurrentVente($button, status) {
         display_success_in_popup_only: true,
         display_errors_in_popup_only: true,
         success: function (result, bimpAjax) {
+
             var $container = $('#currentVenteContainer');
             var $content = $('#currenVenteContent');
             var $listContainer = $('#listVentesContainer');
-
-            $content.slideUp(250, function () {
-                $(this).html('');
-            });
-
-            $container.find('.footer_buttons').hide();
-            $container.stop().slideUp(250);
-            $listContainer.slideDown(250);
-            $('#newVenteButton').removeClass('disabled');
-            Vente.reset();
-            reloadObjectList('BC_Vente_default_list_table');
 
             if (status === 2) {
                 if (typeof (result.validate_errors) !== 'undefined' && result.validate_errors.length) {
@@ -522,12 +516,68 @@ function saveCurrentVente($button, status) {
                         html += ' - ' + result.validate_errors[i] + '<br/>';
                     }
                     html += '</div>';
-                    $('#venteErrors').append(html).slideDown(250);
+                    if (result.validate) {
+                        $('#venteErrors').append(html).slideDown(250);
+                    } else {
+                        $('#currentVenteErrors').html(html).slideDown(250);
+                        return;
+                    }
                 }
             }
 
+            $content.slideUp(250, function () {
+                $(this).html('');
+            });
+
+            $container.find('.footer_buttons').hide();
+            $container.stop().slideUp(250);
+            $listContainer.slideDown(250);
+            $('#newVenteButton').removeClass('disabled');
+            Vente.reset();
+
+            reloadObjectList('BC_Vente_default_list_table');
+            if ((status === 2) && result.validate) {
+                var url = ticket_url + '?id_vente=' + bimpAjax.id_vente;
+                window.open(url, 'Ticket de caisse', "menubar=no, status=no, width=370, height=600");
+
+//                if (result.ticket_errors.length) {
+//                    var errors_html = '<div class="alert alert-danger alert-dismissible">';
+//                    errors_html += '<button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>';
+//                    errors_html += 'Des erreurs sont survenues lors de la création du ticket de caisse<br/>';
+//                    for (var j in result.ticket_errors) {
+//                        errors_html += ' - ' + result.ticket_errors[j] + '<br/>';
+//                    }
+//                    errors_html += '</div>';
+//                    if (result.validate) {
+//                        $('#venteErrors').append(errors_html).slideDown(250);
+//                    }
+//                } else if (result.ticket_html) {
+////                    $('#venteTicketContainer').html(result.ticket_html);
+//                    $('body').append('<div id="venteTicketContainer">' + result.ticket_html + '</div>');
+//                    window.print();
+//                } else {
+//                    bimp_msg('Echec de la création du ticket de caisse', 'danger');
+//                }
+            }
         },
         error: function (result, bimpAjax) {
+            if (status === 2) {
+                if (typeof (result.validate_errors) !== 'undefined' && result.validate_errors.length) {
+                    var html = '<div class="alert alert-danger alert-dismissible">';
+                    html += '<button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>';
+                    html += 'Des erreurs sont survenues lors de la validation de la vente n°' + bimpAjax.id_vente + '<br/>';
+                    for (var i in result.validate_errors) {
+                        html += ' - ' + result.validate_errors[i] + '<br/>';
+                    }
+                    html += '</div>';
+                    if (result.validate) {
+                        $('#venteErrors').append(html).slideDown(250);
+                    } else {
+                        $('#currentVenteErrors').html(html).slideDown(250);
+                        return;
+                    }
+                }
+            }
         }
     });
 }
@@ -629,19 +679,12 @@ function saveClient() {
     }
 
     var id_client = parseInt($container.find('[name="id_client"]').val());
-    var id_client_contact = parseInt($container.find('[name="id_client_contact"]').val());
-
-    if (!id_client) {
-        bimp_msg('Aucun client sélectionné', 'danger');
-        return;
-    }
 
     $button.addClass('disabled');
 
     BimpAjax('saveClient', {
         id_vente: Vente.id_vente,
-        id_client: id_client,
-        id_client_contact: id_client_contact
+        id_client: id_client
     }, $resultContainer, {
         $container: $container,
         $button: $button,
@@ -1113,6 +1156,10 @@ function onVenteLoaded() {
     $('#ventePanierLines').find('.cartArticleLine').each(function () {
         setCartLineEvents($(this));
     });
+    
+    $('#BC_Vente_client_form').find('input[name="id_client"]').change(function() {
+        saveClient();
+    });
 
 }
 
@@ -1179,13 +1226,17 @@ $(document).ready(function () {
         if ($mainContainer.hasClass('fullScreen')) {
             $('#id-left').show();
             $mainContainer.removeClass('fullScreen');
-            $(this).data('content', 'Agrandir').find('i').attr('class', 'fa fa-window-maximize');
+            $(this).attr('data-content', 'Agrandir').find('i').attr('class', 'fa fa-window-maximize');
+            $(this).popover('destroy');
+            $(this).popover();
             $('.fullScreenButton').show();
             $('body').removeClass('has_fullscreen');
         } else {
             $('#id-left').hide();
             $mainContainer.addClass('fullScreen');
-            $(this).data('content', 'Rétrécir').find('i').attr('class', 'fa fa-times');
+            $(this).attr('data-content', 'Quitter le plein écran').find('i').attr('class', 'fa fa-times');
+            $(this).popover('destroy');
+            $(this).popover();
             $('.fullScreenButton').hide();
             $('body').addClass('has_fullscreen');
         }
@@ -1195,7 +1246,9 @@ $(document).ready(function () {
         if ($mainContainer.hasClass('fullScreen')) {
             $('#id-left').show();
             $mainContainer.removeClass('fullScreen');
-            $(this).data('content', 'Plein écran').find('i').attr('class', 'fa5 fa5-expand-arrows-alt');
+            $(this).attr('data-content', 'Plein écran').find('i').attr('class', 'fa5 fa5-expand-arrows-alt');
+            $(this).popover('destroy');
+            $(this).popover();
             if (document.exitFullscreen) {
                 document.exitFullscreen();
             }
@@ -1210,7 +1263,9 @@ $(document).ready(function () {
         } else {
             $('#id-left').hide();
             $mainContainer.addClass('fullScreen');
-            $(this).data('content', 'Quitter le plein écran').find('i').attr('class', 'fa fa-times');
+            $(this).attr('data-content', 'Quitter le plein écran').find('i').attr('class', 'fa fa-times');
+            $(this).popover('destroy');
+            $(this).popover();
 
             var docElm = document.documentElement;
             if (docElm.requestFullscreen) {

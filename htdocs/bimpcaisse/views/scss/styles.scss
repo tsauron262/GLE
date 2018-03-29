@@ -138,6 +138,12 @@ $article_color: #004264;
     }
 }
 
+#venteTicketContainer {
+    display: none;
+    padding: 0;
+    margin: 0;
+}
+
 #openCaisseForm,
 #closeCaisseForm,
 #changeUserForm {
@@ -165,7 +171,8 @@ $article_color: #004264;
     }
 }
 
-#venteErrors {
+#venteErrors,
+#currentVenteErrors {
     display: none;
 
     .alert {
@@ -682,5 +689,23 @@ $article_color: #004264;
         .placeAlert {
             margin-top: 10px;
         }
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden!important;
+    }
+
+    #venteTicketContainer, 
+    #venteTicketContainer * {
+        display: block;
+        visibility: visible!important;
+    }
+
+    #venteTicketContainer {
+        position: absolute;
+        left: 0;
+        top: 0;
     }
 }

@@ -33,6 +33,10 @@ class Interfacevalidateorder extends DolibarrTriggers {
             $code = $bvo->checkValidateRights($user, $object);
             return $code;
         }
+        if ($action == 'ORDER_UNVALIDATE') {
+            setEventMessages("Impossible de dévalidé", null, 'errors');
+            return -2;
+        }
         return 0;
     }
 

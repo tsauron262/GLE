@@ -45,9 +45,13 @@ class BimpValidateOrder {
                 return -2;
             }
         }
-
+        $idEn = $order->array_options['options_entrepot'];
+        if($idEn < 1){
+                setEventMessages("Pas d'entrepot associé", null, 'errors');
+                return -2;
+        }
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($order->entrepot, $order->id));
+        $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $order->id));
 
         if (sizeof($this->errors) != 0) {
             setEventMessages(null, $this->errors, 'errors');

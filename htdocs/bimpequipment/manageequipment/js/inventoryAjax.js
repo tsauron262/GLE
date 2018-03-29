@@ -68,6 +68,8 @@ function addProductInInventory(entry) {
                 printErrors(out.errors, 'alertPlaceHolder');
             } else if (out.qty_scanned > 0) {
                 setMessage('alertPlaceHolder', "Vous avez scanné ce produit " + out.qty_scanned + " fois.", 'mesgs');
+            } else if (out.equipment_id > 0) {
+                setMessage('alertPlaceHolder', "Equipement scanné.", 'mesgs');
             }
             if (is_responsible) {
                 if (out.equipment_id > 0) {
@@ -80,11 +82,15 @@ function addProductInInventory(entry) {
                 } else if (out.product_id > 0) {
                     incrementQty(out.product_id);
                     last_inserted_fk_product = out.product_id;
+                    if (out.need_to_reload === true) {
+                        setMessage('alertPlaceHolder', "Ce type produit n'était pas attendu dans cet entrepôt.", 'error');
+                        $('#productTable > tbody').empty();
+                        getAllProducts();
+                    }
                 }
             }
         }
     });
-    
 }
 
 
@@ -101,12 +107,13 @@ function closeInventory() {
         },
         success: function (rowOut) {
             console.log(rowOut);
-//            var out = JSON.parse(rowOut);
-//            if (out.errors.length !== 0) {
-//                printErrors(out.errors, 'alertPlaceHolder');
-//            } else if (out.success) {
-//                alert('Inventaire fermé');
-//            }
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertPlaceHolder');
+            } else if (out.success) {
+                alert('Inventaire fermé');
+                location.reload();
+            }
         }
     });
 }
@@ -135,7 +142,7 @@ $(document).ready(function () {
 
     if (is_responsible) {
         $('#closeInventory').click(function () {
-            if(confirm("Êtes-vous sûr de vouloir fermer cet inventaire, cet action est irréversible."))
+            if (confirm("Êtes-vous sûr de vouloir fermer cet inventaire, cet action est irréversible."))
                 closeInventory();
         });
     }

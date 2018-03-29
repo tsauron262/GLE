@@ -14,6 +14,8 @@ $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipmen
 
 $fk_entrepot = GETPOST('entrepot');
 
+if ($fk_entrepot == '')
+    $fk_entrepot = $user->array_options['options_defaultentrepot'];
 
 /*
  * 	View
@@ -90,7 +92,7 @@ if ($user->rights->bimpequipment->inventory->create) {
 
     print '</div>';
 } else {
-    print '<strong style="color:red">Vous n\'avez pas les droits requis pour créer un inventaire.</strong>';
+    print '<strong style="color:grey">Vous n\'avez pas les droits requis pour créer un inventaire.</strong>';
 }
 
 $db->close();

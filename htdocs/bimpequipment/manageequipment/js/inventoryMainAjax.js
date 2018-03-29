@@ -76,14 +76,16 @@ function addLineInventory(id, responsable, statut, date_ouverture, date_fermetur
 
 
 $(document).ready(function () {
+    
+    initEvents();
 
     $('#entrepotTable').select2({placeholder: 'Rechercher ...'});
     $('#entrepotTable  option:selected').prop('selected', true);
+    $('#entrepotTable').trigger('change');
 
     $('#entrepotCreate').select2({placeholder: 'Rechercher ...'});
     $('#entrepotCreate  option:selected').prop('selected', true);
 
-    initEvents();
 });
 
 

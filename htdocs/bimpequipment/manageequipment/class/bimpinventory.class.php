@@ -115,11 +115,12 @@ class BimpInventory {
                 $ligne->fetch($obj->rowid);
                 $this->lignes[] = $ligne;
             }
-        } else {
+        } elseif(!$result) {
             $this->errors[] = "Aucune ligne pour l'inventaire dont l'identifiant est " . $this->id;
             return false;
         }
         return true;
+        
     }
 
     public function setProductQuantities() {
@@ -184,7 +185,6 @@ class BimpInventory {
         if ($lp->error != '')
             return array('errors' => array($lp->error));
 
-        
         $line = new BimpInventoryLigne($this->db);
         if ($lp->serial != '') { // is an equipment
             $line_id = $line->create($this->id, $user_id, $lp->prodId, $lp->equipmentId, 1);
@@ -206,9 +206,11 @@ class BimpInventory {
                     'ref' => $doli_product->getNomUrl(1), 'label' => $doli_product->label);
             }
         } else { // is a product
+            $need_to_reload = false;
             if ($last_inserted_fk_product == $lp->prodId) {
                 $line_id = $line->addQty($this->id, $user_id, $lp->prodId, 1);
             } else {
+                $need_to_reload = $line->isUnexpected($lp->prodId, $this->id, $this->fk_entrepot);
                 $line_id = $line->create($this->id, $user_id, $lp->prodId, 'NULL', 1);
             }
         }
@@ -229,6 +231,7 @@ class BimpInventory {
                 'errors' => $this->errors);
         else
             return array('product_id' => $lp->prodId,
+                'need_to_reload' => $need_to_reload,
                 'qty_scanned' => $qty_scanned,
                 'errors' => $this->errors);
     }
@@ -298,6 +301,8 @@ class BimpInventory {
             $allEqui = $out['equipments'];
             $allProd = $out['products'];
 
+            $allProd = $this->addUnexpected($allProd);
+
             foreach ($allEqui as $id => $inut) {
                 if ($this->equipments[$id]) {
                     $allEqui[$id]['scanned'] = true;
@@ -356,6 +361,8 @@ class BimpInventory {
             $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
             return false;
         }
+        
+        
 
         $out = $this->retrieveScannedLignes();
 
@@ -398,6 +405,27 @@ class BimpInventory {
         return true;
     }
 
+    private function addUnexpected($allProd) {
+
+        $this->fetchLignes();
+
+        foreach ($this->lignes as $ligne) {
+            if ($ligne->fk_equipment != '')
+                continue;
+
+            if (!$allProd[$ligne->fk_product]) {
+                $fk_product = $ligne->fk_product;
+                $doli_prod = new Product($this->db);
+                $doli_prod->fetch($fk_product);
+                
+                $allProd[$fk_product]['ref'] = $doli_prod->getNomUrl(1);
+                $allProd[$fk_product]['label'] = dol_trunc($doli_prod->label, 25);
+                $allProd[$fk_product]['qty'] = 0;
+            }
+        }
+
+        return $allProd;
+    }
 }
 
 class BimpInventoryLigne {
@@ -585,6 +613,31 @@ class BimpInventoryLigne {
             return $obj->qty;
         }
         return 0;
+    }
+
+    public function isUnexpected($fk_product, $fk_inventory, $fk_entrepot) {
+
+        $sql = 'SELECT rowid';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_stock';
+        $sql .= ' WHERE fk_product=' . $fk_product;
+        $sql .= ' AND fk_entrepot=' . $fk_entrepot;
+
+        $result = $this->db->query($sql);
+        if ($result and $this->db->num_rows($result) > 0) {
+            return false;
+        }
+
+        $sql2 = 'SELECT rowid';
+        $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'be_inventory_det';
+        $sql2 .= ' WHERE fk_product=' . $fk_product;
+        $sql2 .= ' AND fk_inventory=' . $fk_inventory;
+
+        $result2 = $this->db->query($sql2);
+        if ($result2 and $this->db->num_rows($result2) > 0) {
+            return false;
+        }
+
+        return true;
     }
 
 }

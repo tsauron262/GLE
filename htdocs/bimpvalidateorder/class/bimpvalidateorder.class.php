@@ -104,7 +104,7 @@ class BimpValidateOrder {
 
     private function getFirstResponsibleId($price) {
 
-        $sql = 'SELECT rowid';
+        $sql = 'SELECT fk_object';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
         $sql .= ' WHERE maxpriceorder >=' . $price;
         $sql .= ' ORDER BY maxpriceorder ASC';
@@ -113,7 +113,7 @@ class BimpValidateOrder {
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             $obj = $this->db->fetch_object($result);
-            $id_responsible = $obj->rowid;
+            $id_responsible = $obj->fk_object;
         } elseif (!$result) {
             $this->errors[] = "La requête SQL pour la recherche du responsable.";
             return -1;
@@ -132,7 +132,7 @@ class BimpValidateOrder {
         $msg = "Bonjour, \n\n";
         $msg.= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
         $msg.= $order->getNomUrl();
-        return mailSyn2($subject, $doli_user_responsible->email, '', $msg);
+        return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 
 }

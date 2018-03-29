@@ -18,6 +18,8 @@ class LignePanier {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE ref="' . $ref . '"';
         $sql .= ' OR ref="' . str_replace("/", "_", $ref) . '"';
+        $sql .= ' OR ref LIKE "%' . $ref . '"';
+        $sql .= ' OR ref LIKE "%' . str_replace("/", "_", $ref) . '"';
         $sql .= ' OR barcode="' . $ref . '"';
 
         $result = $this->db->query($sql);

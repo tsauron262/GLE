@@ -15,24 +15,17 @@ $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipmen
 $fk_boutique = GETPOST('boutique');
 
 if ($fk_boutique == '')
-    $name_boutique = $user->array_options['options_defaultentrepot'];
+    $fk_boutique = $user->array_options['options_defaultentrepot'];
 
 /**
  * Functions
  */
-function printOptionsBoutique($boutiques, $fk_boutique, $name_boutique) {
+function printOptionsBoutique($boutiques, $fk_boutique) {
     print '<option></option>';
 
     if ($fk_boutique != '') {
         foreach ($boutiques as $id => $name) {
             if ($id == $fk_boutique)
-                print '<option value="' . $id . '" selected>' . $name . '</option>';
-            else
-                print '<option value="' . $id . '">' . $name . '</option>';
-        }
-    } elseif ($name_boutique != '') {
-        foreach ($boutiques as $id => $name) {
-            if ($name_boutique == $name)
                 print '<option value="' . $id . '" selected>' . $name . '</option>';
             else
                 print '<option value="' . $id . '">' . $name . '</option>';
@@ -57,7 +50,7 @@ $boutiques = getAllEntrepots($db);
 print '<div id="shopDiv" style="float:left">';
 print '<strong>Boutique</strong> ';
 print '<select id="warehouseSelect" class="select2 cust" style="width: 200px;">';
-printOptionsBoutique($boutiques, $fk_boutique, $name_boutique);
+printOptionsBoutique($boutiques, $fk_boutique);
 print '</select> ';
 print '</div>';
 

@@ -14,8 +14,8 @@ $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipmen
 
 $fk_entrepot = GETPOST('entrepot');
 
-if ($fk_boutique == '')
-    $name_boutique = $user->array_options['options_defaultentrepot'];
+if ($fk_entrepot == '')
+    $fk_entrepot = $user->array_options['options_defaultentrepot'];
 
 /*
  * 	View
@@ -38,7 +38,7 @@ print '<strong>Entrepôt</strong></br>';
 print '<select id="entrepotTable" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
 foreach ($entrepots as $id => $name) {
-    if ($fk_entrepot == $id or $name_boutique == $name)
+    if ($fk_entrepot == $id)
         print '<option value="' . $id . '" selected>' . $name . '</option>';
     else
         print '<option value="' . $id . '" >' . $name . '</option>';
@@ -78,7 +78,7 @@ if ($user->rights->bimpequipment->inventory->create) {
     print '<select id="entrepotCreate" class="select2 cust" style="width: 200px;">';
     print '<option></option>';
     foreach ($entrepots as $id => $name) {
-        if ($fk_entrepot == $id or $name_boutique == $name)
+        if ($fk_entrepot == $id)
             print '<option value="' . $id . '" selected>' . $name . '</option>';
         else
             print '<option value="' . $id . '" >' . $name . '</option>';

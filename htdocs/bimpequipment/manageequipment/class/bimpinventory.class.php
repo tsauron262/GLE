@@ -361,6 +361,8 @@ class BimpInventory {
             $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
             return false;
         }
+        
+        
 
         $out = $this->retrieveScannedLignes();
 
@@ -622,7 +624,6 @@ class BimpInventoryLigne {
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
-//            echo "dans la table product stock";
             return false;
         }
 
@@ -633,7 +634,6 @@ class BimpInventoryLigne {
 
         $result2 = $this->db->query($sql2);
         if ($result2 and $this->db->num_rows($result2) > 0) {
-//            echo "dans la table be_inventory_det";
             return false;
         }
 

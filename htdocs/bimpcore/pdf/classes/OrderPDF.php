@@ -607,54 +607,62 @@ class BLPDF extends OrderPDF
             }
             $desc = str_replace("\n", '<br/>', $desc);
 
-            if ($line->total_ht == 0 || is_null($product) || (int) $product->type !== 0) {
-                $i++;
-                unset($product);
-                $product = null;
-                continue;
-            }
-
-            $row = array(
-                'code_article' => $product->ref,
-                'desc'         => $desc,
-                'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
-            );
-
-            if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
-                $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
-            }
-
-            $totalQty = (int) $line->qty;
-            $qty = $totalQty;
-            $shipped = 0;
-            $toShip = $totalQty;
-
-            if (isset($shipped_qties[(int) $line->id])) {
-                $shipped = (int) $shipped_qties[(int) $line->id];
-                $toShip -= $shipped;
-            }
-
-            if (isset($bl_qtie[(int) $line->id])) {
-                $qty = (int) $bl_qtie[(int) $line->id];
-                $shipped -= $qty;
+            if ($line->total_ht == 0) {
+                if (!$desc) {
+                    $i++;
+                    unset($product);
+                    $product = null;
+                    continue;
+                } else {
+                    $row['code_article'] = array(
+                        'colspan' => 99,
+                        'content' => $desc,
+                        'style'   => 'font-weight: bold; background-color: #F5F5F5;'
+                    );
+                }
             } else {
-                $qty = 0;
+                $row = array(
+                    'code_article' => (!is_null($product) ? $product->ref : ''),
+                    'desc'         => $desc,
+                    'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
+                );
+
+                if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
+                    $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
+                }
+
+                $totalQty = (int) $line->qty;
+                $qty = $totalQty;
+                $shipped = '';
+                $toShip = '';
+
+                if (!is_null($product) && (int) $product->type === 0) {
+                    $shipped = 0;
+                    $toShip = $totalQty;
+
+                    if (isset($shipped_qties[(int) $line->id])) {
+                        $shipped = (int) $shipped_qties[(int) $line->id];
+                        $toShip -= $shipped;
+                    }
+
+                    if (isset($bl_qtie[(int) $line->id])) {
+                        $qty = (int) $bl_qtie[(int) $line->id];
+                        $shipped -= $qty;
+                    } else {
+                        $qty = 0;
+                    }
+                }
+
+                $row['qte'] = $qty;
+                $row['dl'] = $shipped;
+                $row['ral'] = $toShip;
+
+                $total_ht = (int) $qty * (float) $line->subprice;
+
+                $row['total_ht'] = price($total_ht);
             }
-            $line->qty = $qty;
-            $line->total_ht = (int) $qty * (float) $row['pu_ht'];
-
-            $row['qte'] = $qty;
-            $row['dl'] = $shipped;
-            $row['ral'] = $toShip;
-
-            $total_ht = (int) $qty * (float) $line->subprice;
-
-            $row['total_ht'] = price($total_ht);
 
             $table->rows[] = $row;
-            $i++;
-            unset($product);
-            $product = null;
 
             // Ajout aux totaux: 
             if (isset($line->remise_percent) && (float) $line->remise_percent) {
@@ -704,6 +712,10 @@ class BLPDF extends OrderPDF
             }
 
             $this->tva[$line->tva_tx] += $tva_line;
+
+            $i++;
+            unset($product);
+            $product = null;
         }
 
         $this->writeContent('<div style="text-align: right; font-size: 8px;">Montants exprimés en Euros - DL : Déjà livré, RAL : Reste à livrer</div>');

@@ -1667,7 +1667,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-//        $facture->generateDocument($modele, $langs)
+        $facture->generateDocument('crabe', $langs);
 
         return $facture->id;
     }

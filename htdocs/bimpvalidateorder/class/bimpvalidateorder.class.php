@@ -132,7 +132,7 @@ class BimpValidateOrder {
         $msg = "Bonjour, \n\n";
         $msg.= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
         $msg.= $order->getNomUrl();
-        return mailSyn2($subject, $doli_user_responsible->email, '', $msg);
+        return mailSyn2($subject, $doli_user_responsible->email, 'bimp-erp@bimp.fr', $msg);
     }
 
 }

@@ -14,6 +14,8 @@ $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipmen
 
 $fk_entrepot = GETPOST('entrepot');
 
+if ($fk_boutique == '')
+    $name_boutique = $user->array_options['options_defaultentrepot'];
 
 /*
  * 	View
@@ -36,7 +38,7 @@ print '<strong>Entrepôt</strong></br>';
 print '<select id="entrepotTable" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
 foreach ($entrepots as $id => $name) {
-    if ($fk_entrepot == $id)
+    if ($fk_entrepot == $id or $name_boutique == $name)
         print '<option value="' . $id . '" selected>' . $name . '</option>';
     else
         print '<option value="' . $id . '" >' . $name . '</option>';
@@ -76,7 +78,7 @@ if ($user->rights->bimpequipment->inventory->create) {
     print '<select id="entrepotCreate" class="select2 cust" style="width: 200px;">';
     print '<option></option>';
     foreach ($entrepots as $id => $name) {
-        if ($fk_entrepot == $id)
+        if ($fk_entrepot == $id or $name_boutique == $name)
             print '<option value="' . $id . '" selected>' . $name . '</option>';
         else
             print '<option value="' . $id . '" >' . $name . '</option>';
@@ -90,7 +92,7 @@ if ($user->rights->bimpequipment->inventory->create) {
 
     print '</div>';
 } else {
-    print '<strong style="color:red">Vous n\'avez pas les droits requis pour créer un inventaire.</strong>';
+    print '<strong style="color:grey">Vous n\'avez pas les droits requis pour créer un inventaire.</strong>';
 }
 
 $db->close();

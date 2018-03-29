@@ -146,22 +146,23 @@ abstract class BimpComponent
 
         $param = null;
 
-        switch ($type) {
-            case 'value':
-                $value = null;
-                $data_type = isset($defs['data_type']) ? $defs['data_type'] : 'string';
-                $request = isset($defs['request']) ? (bool) $defs['request'] : false;
-                if ($request) {
-                    $json = isset($defs['json']) ? (bool) $defs['json'] : false;
-                    if (BimpTools::isSubmit('param_' . $name)) {
-                        $value = BimpTools::getValue('param_' . $name);
-                        if ($json && !is_null($value)) {
-                            $value = json_decode($value, true);
-                        }
-                    }
+        $request = isset($defs['request']) ? (bool) $defs['request'] : false;
+        if ($request) {
+            $json = isset($defs['json']) ? (bool) $defs['json'] : false;
+            if (BimpTools::isSubmit('param_' . $name)) {
+                $param = BimpTools::getValue('param_' . $name);
+                if ($json && !is_null($param)) {
+                    $param = json_decode($param, true);
                 }
+            }
+        }
 
-                if (is_null($value)) {
+        if (is_null($param)) {
+            switch ($type) {
+                case 'value':
+                    $value = null;
+                    $data_type = isset($defs['data_type']) ? $defs['data_type'] : 'string';
+
                     if (!is_null($path)) {
                         if ($data_type === 'array') {
                             $compile = isset($defs['compile']) ? (bool) $defs['compile'] : true;
@@ -174,65 +175,65 @@ abstract class BimpComponent
                     } else {
                         $value = $default_value;
                     }
-                }
-                if (!is_null($value)) {
-                    if (self::validateParam($name, $value, $definitions, $errors)) {
-                        $param = $value;
+                    if (!is_null($value)) {
+                        if (self::validateParam($name, $value, $definitions, $errors)) {
+                            $param = $value;
+                        }
+                    } elseif ($required) {
+                        $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
                     }
-                } elseif ($required) {
-                    $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
-                }
-                break;
+                    break;
 
-            case 'object':
-                if (!is_null($path)) {
-                    $param = $config->getObject($path . '/' . $name);
-                }
-                break;
+                case 'object':
+                    if (!is_null($path)) {
+                        $param = $config->getObject($path . '/' . $name);
+                    }
+                    break;
 
-            case 'keys':
-                if (!is_null($path)) {
-                    $values = $config->get($path . '/' . $name, array(), $required, 'array');
-                    $param = array();
-                    if (!is_null($values)) {
-                        foreach ($values as $key => $val) {
-                            $param[] = $key;
+                case 'keys':
+                    if (!is_null($path)) {
+                        $values = $config->get($path . '/' . $name, array(), $required, 'array');
+                        $param = array();
+                        if (!is_null($values)) {
+                            foreach ($values as $key => $val) {
+                                $param[] = $key;
+                            }
                         }
                     }
-                }
-                break;
+                    break;
 
-            case 'definitions':
-                if (!is_null($path)) {
-                    $defs_type = isset($defs['defs_type']) ? $defs['defs_type'] : null;
-                    $multiple = isset($defs['multiple']) ? (bool) $defs['multiple'] : false;
+                case 'definitions':
+                    if (!is_null($path)) {
+                        $defs_type = isset($defs['defs_type']) ? $defs['defs_type'] : null;
+                        $multiple = isset($defs['multiple']) ? (bool) $defs['multiple'] : false;
 
-                    if (!is_null($defs_type)) {
-                        if (property_exists('BimpConfigDefinitions', $defs_type)) {
-                            if (!$config->isDefined($path . '/' . $name) && $required) {
-                                $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
-                            } else {
-                                if ($multiple) {
-                                    $param = array();
-                                    foreach ($config->get($path . '/' . $name, array(), false, 'array') as $key => $values) {
-                                        $param[$key] = self::fetchParamsStatic($config, $path . '/' . $name . '/' . $key, BimpConfigDefinitions::${$defs_type}, $errors);
-                                    }
+                        if (!is_null($defs_type)) {
+                            if (property_exists('BimpConfigDefinitions', $defs_type)) {
+                                if (!$config->isDefined($path . '/' . $name) && $required) {
+                                    $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
                                 } else {
-                                    $param = self::fetchParamsStatic($config, $path . '/' . $name, BimpConfigDefinitions::${$defs_type}, $errors);
+                                    if ($multiple) {
+                                        $param = array();
+                                        foreach ($config->get($path . '/' . $name, array(), false, 'array') as $key => $values) {
+                                            $param[$key] = self::fetchParamsStatic($config, $path . '/' . $name . '/' . $key, BimpConfigDefinitions::${$defs_type}, $errors);
+                                        }
+                                    } else {
+                                        $param = self::fetchParamsStatic($config, $path . '/' . $name, BimpConfigDefinitions::${$defs_type}, $errors);
+                                    }
                                 }
+                            } else {
+                                $errors[] = 'Type de définitions invalide pour le paramètre "' . $name . '" (' . $defs_type . ')';
                             }
                         } else {
-                            $errors[] = 'Type de définitions invalide pour le paramètre "' . $name . '" (' . $defs_type . ')';
+                            $errors[] = 'Type de définitions absent pour le paramètre "' . $name . '"';
                         }
-                    } else {
-                        $errors[] = 'Type de définitions absent pour le paramètre "' . $name . '"';
                     }
-                }
-                break;
+                    break;
 
-            case 'component':
+                case 'component':
 
-                break;
+                    break;
+            }
         }
 
         return $param;

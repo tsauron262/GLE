@@ -91,6 +91,7 @@ function reloadObjectList(list_id, callback) {
     var sort_option = $list.find('input[name=param_sort_option]').val();
     var n = $list.find('input[name=param_n]').val();
     var p = $list.find('input[name=param_p]').val();
+    var joins = $list.find('input[name=param_joins]').val();
 
     if (sort_col) {
         data['param_sort_field'] = sort_col;
@@ -106,6 +107,9 @@ function reloadObjectList(list_id, callback) {
     }
     if (p) {
         data['param_p'] = p;
+    }
+    if (joins) {
+        data['param_joins'] = joins;
     }
 
     // Filtres: 
@@ -928,7 +932,7 @@ function setSearchInputsEvents($list) {
 //                                        var val = '' + $input.val();
 
 //                                        if (val.length >= min_chars) {
-                                            reloadObjectList($list.attr('id'));
+                                        reloadObjectList($list.attr('id'));
 //                                        }
                                     });
                                 } else {

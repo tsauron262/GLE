@@ -1,0 +1,45 @@
+table: br_reservation_shipment
+common_fields: 0
+
+labels: 
+    name: réservation à commander
+    name_plur: réservations à commander
+    is_female: 1
+    
+objects: 
+    reservation: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BR_Reservation
+            id_object: 
+                field_value: id_reservation
+                
+    user:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+            id_object: 
+                field_value: id_user
+                
+fields: 
+    ref_reservation:
+        label: Référence réservation
+        
+    date: 
+        label: Expédié le
+        type: date
+        
+    qty: 
+        label: Quantité
+        type: int
+        min: 1
+        unsigned: 1
+        
+    id_user: 
+        label: Expédié par
+        type: id_object
+        object: user

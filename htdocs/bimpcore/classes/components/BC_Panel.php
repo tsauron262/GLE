@@ -47,6 +47,8 @@ class BC_Panel extends BimpComponent
             $this->params['icon'] = $icon;
         }
 
+        
+        
         if (is_string($this->params['objects_change_reload'])) {
             $this->params['objects_change_reload'] = array($this->params['objects_change_reload']);
         }

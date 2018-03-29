@@ -303,6 +303,8 @@ lists:
                 label: Nb articles
                 value: 
                     callback: displayNbArticles
+            facture: 
+                field: id_facture   
             total_ttc: 
                 field: total_ttc
 forms: 
@@ -310,5 +312,3 @@ forms:
         rows: 
             - field: id_client
               label: Choix du client
-            - field: id_client_contact
-              label: Choix du contact

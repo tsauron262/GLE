@@ -2,3 +2,4 @@ bootstrap: 1
 
 css: 
     - /bimpcaisse/views/css/styles.css
+    - /bimpcore/views/css/ticket.css

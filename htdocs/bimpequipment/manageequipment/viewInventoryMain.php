@@ -78,7 +78,7 @@ if ($user->rights->bimpequipment->inventory->create) {
     print '<select id="entrepotCreate" class="select2 cust" style="width: 200px;">';
     print '<option></option>';
     foreach ($entrepots as $id => $name) {
-        if ($fk_entrepot == $id or $name_boutique == $name)
+        if ($fk_entrepot == $id)
             print '<option value="' . $id . '" selected>' . $name . '</option>';
         else
             print '<option value="' . $id . '" >' . $name . '</option>';

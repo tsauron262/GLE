@@ -12,20 +12,20 @@ include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.li
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/index.js');
 
-$fk_boutique = GETPOST('boutique');
+$fk_entrepot = GETPOST('boutique');
 
-if ($fk_boutique == '')
-    $fk_boutique = $user->array_options['options_defaultentrepot'];
+if ($fk_entrepot == '')
+    $fk_entrepot = $user->array_options['options_defaultentrepot'];
 
 /**
  * Functions
  */
-function printOptionsBoutique($boutiques, $fk_boutique) {
+function printOptionsBoutique($boutiques, $fk_entrepot) {
     print '<option></option>';
 
-    if ($fk_boutique != '') {
+    if ($fk_entrepot != '') {
         foreach ($boutiques as $id => $name) {
-            if ($id == $fk_boutique)
+            if ($id == $fk_entrepot)
                 print '<option value="' . $id . '" selected>' . $name . '</option>';
             else
                 print '<option value="' . $id . '">' . $name . '</option>';
@@ -50,7 +50,7 @@ $boutiques = getAllEntrepots($db);
 print '<div id="shopDiv" style="float:left">';
 print '<strong>Boutique</strong> ';
 print '<select id="warehouseSelect" class="select2 cust" style="width: 200px;">';
-printOptionsBoutique($boutiques, $fk_boutique);
+printOptionsBoutique($boutiques, $fk_entrepot);
 print '</select> ';
 print '</div>';
 

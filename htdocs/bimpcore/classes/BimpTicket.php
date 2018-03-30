@@ -74,11 +74,10 @@ class BimpTicket
 
             $html .= $this->renderHeader();
 
-            $town = (string) $this->entrepot->town;
-            $town = 'Annecy';
+          
 
-            if ($town) {
-                $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($town) . ', le ' . date('d / m / Y') . '</span>';
+            if ($this->town) {
+                $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($this->town) . ', le ' . date('d / m / Y') . '</span>';
             }
 
             $html .= '<table id="ticket_lines">';
@@ -235,11 +234,14 @@ class BimpTicket
 
         $address = (string) $this->entrepot->address;
         $zip = (string) $this->entrepot->zip;
-        $town = (string) $this->entrepot->town;
+        $this->town = (string) $this->entrepot->town;
 
-        $address = '7, rue de la Poste';
-        $zip = '74000';
-        $town = 'Annecy';
+        if($adress == "")
+            $address = $mysoc->address;
+        if($zip == "")
+            $zip = $mysoc->zip;
+        if($this->town == "")
+            $this->town = $mysoc->town;
 
         if (!$address) {
             $this->errors[] = 'Addresse absente';
@@ -249,7 +251,7 @@ class BimpTicket
             $this->errors[] = 'Code postal absent';
         }
 
-        if (!$town) {
+        if (!$this->town) {
             $this->errors[] = 'Ville absente';
         }
 
@@ -276,7 +278,7 @@ class BimpTicket
 
         $html .= '<div class="header_block">';
         $html .= $address . '<br/>';
-        $html .= $zip . ' ' . strtoupper($town);
+        $html .= $zip . ' ' . strtoupper($this->town);
         $html .= '</div>';
         $html .= '</div>';
 

@@ -146,7 +146,7 @@ class BC_Panel extends BimpComponent
         }
 
         $html .= '</div>';
-
+        
         return $html;
     }
 

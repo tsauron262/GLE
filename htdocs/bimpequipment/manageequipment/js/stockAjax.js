@@ -187,7 +187,7 @@ function addEquipment(ligne) {
 }
 
 function addDeliveredEquipment(ligne, serial) {
-    var line = '<tr style="background : #bfbfbf">';
+    var line = '<tr style="background : #D2D2D2">';
     line += '<td></td>';    // cnt ligne
     line += '<td>' + ligne.prodId + '</td>';    // id
     line += '<td>' + ligne.refurl + '</td>';    // refUrl
@@ -233,7 +233,8 @@ function initEvents() {
 
     $('#enregistrer').click(function () {
         if (!entrepotId) {
-            setMessage('alertEnregistrer', 'Veuillez sélectionner un entrepôt avant d\'enregistrer.', 'error');
+//            setMessage('alertEnregistrer', 'Veuillez sélectionner un entrepôt avant d\'enregistrer.', 'error');
+              bimp_msg('Veuillez sélectionner un entrepôt avant d\'enregistrer', 'danger');
         } else if (confirm('Etes-vous sur de vouloir mettre en stock ces produits ?')) {
             saveProducts();
         }

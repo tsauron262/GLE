@@ -23,6 +23,16 @@ objects:
                 file: entrepot
             id_object:
                 field_value: id_entrepot
+                
+    contact: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
+            id_object: 
+                field_value: id_contact
     
 fields: 
     id_commande_client: 
@@ -56,6 +66,31 @@ fields:
         label: Date
         type: datetime
         required: 1
+        
+    id_contact:
+        label: Contact
+        type: id_object
+        object: contact
+        default_value: 0
+        values: 
+            array: contacts
+        
+forms: 
+    default: 
+        rows: 
+            - field: id_commande_client
+              hidden: 1
+            - custom: 1
+              label: Produits inclus
+              input_name: products 
+              content: 
+                  callback: renderProductsQtiesInputs
+            - custom: 1
+              label: Services inclus
+              input_name: products 
+              content: 
+                  callback: renderServicesQtiesInputs
+            - field: id_contact
 
 lists: 
     commandes: 

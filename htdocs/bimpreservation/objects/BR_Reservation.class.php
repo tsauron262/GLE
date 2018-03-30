@@ -405,8 +405,8 @@ class BR_Reservation extends BimpObject
         return $status;
     }
 
-    // Gestion des réservations: 
-
+    // Gestion des réservations:
+    
     public function createReservationsFromCommandeClient($id_entrepot, $id_commande_client)
     {
         if (is_null($id_commande_client) || !$id_commande_client) {
@@ -1043,7 +1043,7 @@ class BR_Reservation extends BimpObject
         ));
 
         if (!count($rows)) {
-            $errors[] = 'Aucune réservation prete à l\'expédition trouvée pour cette commande client';
+            $errors[] = 'Aucun article prêt à l\'expédition trouvé pour cette commande client';
         } else {
             $qty = 0;
 

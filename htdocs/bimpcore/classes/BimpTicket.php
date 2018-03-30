@@ -317,9 +317,9 @@ class BimpTicket
         if ($mysoc->capital) {
             $captital = price2num($mysoc->capital);
             if (is_numeric($captital) && $captital > 0) {
-                $txt.=($txt ? " - " : "") . $langs->transnoentities("CapitalOf", price($captital, 0, $langs, 0, 0, 0, $conf->currency));
+                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", price($captital, 0, $langs, 0, 0, 0, $conf->currency));
             } else {
-                $txt.=($txt ? " - " : "") . $langs->transnoentities("CapitalOf", $captital, $langs);
+                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", $captital, $langs). " €";
             }
         }
 

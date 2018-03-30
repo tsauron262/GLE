@@ -229,7 +229,7 @@ class BimpTicket
 
     protected function renderHeader()
     {
-        global $mysoc;
+        global $mysoc, $conf;
 
         $html = '';
 
@@ -256,8 +256,18 @@ class BimpTicket
         if (count($this->errors)) {
             return '';
         }
-
-        $url = DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=Bimp_logo_black.jpg';
+        $logo = $mysoc->logo;
+        $logo2 = str_replace(".jpg", "_black.jpg", $logo);
+        if(is_file($conf->mycompany->dir_output . '/logos/' . $logo2))
+                $logo = $logo2;
+        else{
+            $logo2 = str_replace(".png", "_black.png", $logo);
+            if(is_file($conf->mycompany->dir_output . '/logos/' . $logo2))
+                    $logo = $logo2;
+        }
+        
+        
+        $url = DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file='.$logo;
 
         $html .= '<div class="ticket_header">';
         $html .= '<div class="header_block">';
@@ -277,7 +287,7 @@ class BimpTicket
     {
         $html = '';
 
-        $url = DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=apple_reseller.png';
+        $url = DOL_URL_ROOT . '/bimpequipment/img/apple_reseller.png';
         $html .= '<div class="ticket_footer">';
 
         $html .= '<div class="footer_block">';

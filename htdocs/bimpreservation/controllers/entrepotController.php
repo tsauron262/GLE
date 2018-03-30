@@ -30,15 +30,14 @@ class entrepotController extends reservationController
                     array(
                         'id'      => 'res_reserve',
                         'title'   => 'A réserver',
-                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à traiter', 'to_reserve', 2)
+                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à traiter', 'to_reserve', array(
+                            'in' => '2,100'
+                        ))
                     ),
                     array(
                         'id'      => 'res_to_process',
                         'title'   => 'A traiter',
-                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à traiter', 'to_process', array(
-                            'operator' => '<',
-                            'value'    => 200
-                        ))
+                        'content' => $this->renderReservationsTab($entrepot, 'Réservations à traiter', 'to_process', 0)
                     ),
                     array(
                         'id'      => 'res_to_deliver',
@@ -60,8 +59,8 @@ class entrepotController extends reservationController
                         'id'      => 'res_completed',
                         'title'   => 'Terminées',
                         'content' => $this->renderReservationsTab($entrepot, 'Réservations terminées', 'completed', array(
-                            'operator' => '>',
-                            'value'    => 299
+                            'operator' => '>=',
+                            'value'    => 300
                         ))
                     ),
                     array(

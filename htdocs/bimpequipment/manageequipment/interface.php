@@ -96,6 +96,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'closeInventory': {
+            ini_set('max_execution_time', 30000);
             $inventory->fetch(GETPOST('inventory_id'));
             echo json_encode(array('success' => $inventory->updateStock($user), 'errors' => $inventory->errors));
             break;

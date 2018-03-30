@@ -237,11 +237,11 @@ class BimpTicket
         $zip = (string) $this->entrepot->zip;
         $town = (string) $this->entrepot->town;
 
-        if($adress = "")
+        if($adress == "")
             $address = '7, rue de la Poste';
-        if($zip = "")
+        if($zip == "")
             $zip = '74000';
-        if($town = "")
+        if($town == "")
             $town = 'Annecy';
 
         if (!$address) {

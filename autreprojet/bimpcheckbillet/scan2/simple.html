@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Demo</title>
+    </head>
+    <body>
+        <canvas></canvas>
+        <hr>
+        <ul></ul>
+        <script src="../scan/jquery.js" type="text/javascript"></script>
+        <script type="text/javascript" src="js/qrcodelib.js"></script>
+        <script type="text/javascript" src="js/webcodecamjs.js"></script>
+        <script type="text/javascript" src="../scan/scan.js"></script>
+        <script type="text/javascript">
+        	var txt = "innerText" in HTMLElement.prototype ? "innerText" : "textContent";
+            var arg = {
+                resultFunction: function(result) {
+                    alert(result.code);
+                    traiteCode(result.code);
+                },   // string, DecoderWorker file location
+            };
+            var decoder = new WebCodeCamJS("canvas").buildSelectMenu(document.createElement('select'), 'environment|back').init(arg).play();
+             
+        </script>
+    <link rel="stylesheet" type="text/css" href="../scan/scan.css">
+        
+        
+        
+<div id="input">
+    <input type="text" id="code"/>
+</div>
+<div id="result">
+</div>
+    </body>
+</html>

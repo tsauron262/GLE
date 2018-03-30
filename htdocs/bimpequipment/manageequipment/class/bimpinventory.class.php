@@ -115,12 +115,11 @@ class BimpInventory {
                 $ligne->fetch($obj->rowid);
                 $this->lignes[] = $ligne;
             }
-        } elseif(!$result) {
+        } elseif (!$result) {
             $this->errors[] = "Aucune ligne pour l'inventaire dont l'identifiant est " . $this->id;
             return false;
         }
         return true;
-        
     }
 
     public function setProductQuantities() {
@@ -355,14 +354,13 @@ class BimpInventory {
 
         $now = dol_now();
         $codemove = 'InventaireBimp' . $this->id;
-        $label = 'Inventaire Bimp ' . dol_print_date($now, '%Y-%m-%d %H:%M');
 
         if ($this->id < 0) {
             $this->errors[] = "L'identifiant de l'inventaire est inconnu.";
             return false;
         }
-        
-        
+
+
 
         $out = $this->retrieveScannedLignes();
 
@@ -375,6 +373,8 @@ class BimpInventory {
             if ($diff != 0) { // add or remove
                 $doliProd = new Product($this->db);
                 $doliProd->fetch($id);
+                $label = 'Inventaire' . $this->id . '-Produit"' . $doliProd->ref . '"';
+
                 if ($diff < 0) { // remove
                     $result = $doliProd->correct_stock($user, $this->fk_entrepot, -$diff, 1, $label, 0, $codemove, 'entrepot', $this->fk_entrepot);
                 } else { // add
@@ -417,7 +417,7 @@ class BimpInventory {
                 $fk_product = $ligne->fk_product;
                 $doli_prod = new Product($this->db);
                 $doli_prod->fetch($fk_product);
-                
+
                 $allProd[$fk_product]['ref'] = $doli_prod->getNomUrl(1);
                 $allProd[$fk_product]['label'] = dol_trunc($doli_prod->label, 25);
                 $allProd[$fk_product]['qty'] = 0;
@@ -426,6 +426,7 @@ class BimpInventory {
 
         return $allProd;
     }
+
 }
 
 class BimpInventoryLigne {

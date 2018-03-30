@@ -37,7 +37,7 @@ class commandeController extends reservationController
         $html .= BimpRender::renderNavTabs(array(
                     array(
                         'id'      => 'reservations',
-                        'title'   => 'Réservations',
+                        'title'   => 'Articles',
                         'content' => $this->renderReservationsTab($commande)
                     ),
                     array(
@@ -68,7 +68,7 @@ class commandeController extends reservationController
         $html .= $this->renderEquipmentForm((int) $commande->id);
 
         $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
-        $list = new BC_ListTable($reservation, 'commandes', 1, null, 'Liste des réservations');
+        $list = new BC_ListTable($reservation, 'commandes', 1, null, 'Statuts des ');
         $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
         $html .= $list->renderHtml();
 
@@ -81,7 +81,7 @@ class commandeController extends reservationController
         $html .= '<div class="buttonsContainer">';
         $html .= '<button id="createShipmentButton" type="button" class="btn btn-default btn-large bs-popover"';
         $html .= ' onclick="createShipment($(this), ' . (int) $commande->id . ');"';
-        $html .= BimpRender::renderPopoverData(htmlentities('Créer une expédition pour toutes les réservation ayant le statut "prêt pour expédition"'), 'top', 'true');
+        $html .= BimpRender::renderPopoverData(htmlentities('Créer une expédition pour toutes les réservations ayant le statut "prêt pour expédition"'), 'top', 'true');
         $html .= '>';
         $html .= '<i class="fa fa-sign-out iconLeft"></i>Créer une nouvelle expédition';
         $html .= '</button>';

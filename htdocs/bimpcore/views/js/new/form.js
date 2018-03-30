@@ -474,7 +474,7 @@ function saveAssociations(operation, associations, $resultContainer, successCall
     });
 }
 
-// Gestion des formulaires objets: 
+// Gestion des formulaires objets:
 
 function reloadObjectInput(form_id, input_name, fields) {
     var $form = $('#' + form_id);

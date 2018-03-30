@@ -9,6 +9,8 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/lib/entrepot.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/bimplivraison.class.php';
 
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+
 $arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpequipment/manageequipment/css/transfertStyles.css', '/bimpcore/views/css/bimpcore_bootstrap_new.css');
 $arrayofjs = array('/includes/jquery/plugins/select2/select2.js', '/bimpequipment/manageequipment/js/stockAjax.js');
 
@@ -35,6 +37,7 @@ $object->fetch($id, $ref);
 
 $help_url = 'EN:Module_Suppliers_Orders|FR:CommandeFournisseur|ES:Módulo_Pedidos_a_proveedores';
 llxHeader('', 'Livrer', $help_url, '', 0, 0, $arrayofjs, $arrayofcss);
+BimpCore::displayHeaderFiles();
 
 $form = new Form($db);
 
@@ -100,16 +103,18 @@ if ($id > 0 || !empty($ref)) {
 /**
  * Start Fiche
  */
+echo '<div class="page_content container-fluid" style="margin-top: -16px">';
+
 $orderId = $object->id;
 print '<input id="id_order_hidden" hidden type="number" value=' . $orderId . '>';
 
 $facid = $id;
-if ($object->statut < 3) {
-    print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
-    llxFooter();
-    $db->close();
-    return;
-}
+//if ($object->statut < 3) {
+//    print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
+//    llxFooter();
+//    $db->close();
+//    return;
+//}
 
 if ($object->statut == 5) {
     print '<strong>Cette commande a été livrée. Cependant vous pouvez continuer à rajouter des produits supplémentaires.</strong><br/>';
@@ -120,15 +125,14 @@ $entrepots = getAllEntrepots($db);
 
 print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
-foreach ($entrepots as $id => $name) {
-    if ($id == $object->array_options['options_entrepot'])
-        print '<option value="' . $id . '" selected>' . $name . '</option>';
+foreach ($entrepots as $id_entrepot => $name) {
+    if ($id_entrepot == $object->array_options['options_entrepot'])
+        print '<option value="' . $id_entrepot . '" selected>' . $name . '</option>';
     else
-        print '<option value="' . $id . '">' . $name . '</option>';
+        print '<option value="' . $id_entrepot . '">' . $name . '</option>';
 }
 print '</select> ';
 
-print '<div class="object_list_table">';
 print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
 print '<thead><tr class="headerRow">';
 print '<th>Numéro groupe</th>';
@@ -146,13 +150,34 @@ print '</tr></thead>';
 print '<tbody></tbody>';
 print '</table>';
 
-print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
+//print '<br/><input id="enregistrer" type="button" class="butAction" value="Enregistrer">';
+echo '<div class="buttonsContainer">';
+echo '<button type="button" id="enregistrer" class="btn btn-primary"><i class="fa fa-save iconLeft"></i>Enregistrer</button>';
+echo '</div>';
 
-print '<br/><div id="alertEnregistrer"></div><br/><br/><br/>';
+print '<div id="alertEnregistrer"></div>';
 
 print '<audio id="bipAudio" preload="auto"><source src="audio/bip.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipAudio2" preload="auto"><source src="audio/bip2.wav" type="audio/mp3" /></audio>';
 print '<audio id="bipError" preload="auto"><source src="audio/error.wav" type="audio/mp3" /></audio>';
+
+
+// Liste des réservations: 
+echo '<script type="text/javascript">';
+echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
+echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande\';';
+echo '</script>';
+
+echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpreservation/views/js/reservation.js"></script>';
+
+$reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+$list = new BC_ListTable($reservation, 'commandes', 1, null, 'Statuts des produits');
+$list->addFieldFilterValue('rcf.id_commande_fournisseur', (int) $id);
+$list->addJoin('br_reservation_cmd_fourn', 'rcf.ref_reservation = a.ref', 'rcf');
+print $list->renderHtml();
+
+echo BimpRender::renderAjaxModal('page_modal');
+echo '</div>';
 
 llxFooter();
 

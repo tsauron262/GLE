@@ -372,4 +372,39 @@ class Equipment extends BimpObject
 
         return parent::validate();
     }
+
+    public function delete()
+    {
+        $current_place = $this->getCurrentPlace();
+        $id_entrepot = 0;
+        $codemove = '';
+        $label = '';
+        $product = null;
+
+        if (!is_null($current_place) && $current_place->isLoaded()) {
+            if (in_array((int) $current_place->getData('type'), array(
+                        BE_Place::BE_PLACE_ENTREPOT,
+                        BE_Place::BE_PLACE_PRESENTATION,
+                        BE_Place::BE_PLACE_VOL,
+                        BE_Place::BE_PLACE_PRET
+                    ))) {
+                $product = $this->getChildObject('product');
+                $id_entrepot = (int) $current_place->getData('id_entrepot');
+                $codemove = $current_place->getData('code_mvt');
+                if (is_null($codemove) || !$codemove) {
+                    $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+                }
+                $label = 'Suppression de l\'équipement ' . $this->id . ' - serial: ' . $this->getData('serial');
+            }
+        }
+
+        $errors = parent::delete();
+
+        if (is_null($this->id) && $id_entrepot && !is_null($product) && isset($product->id) && $product->id) {
+            global $user;
+            $product->correct_stock($user, $id_entrepot, 1, 1, $label, 0, $codemove, 'entrepot', $id_entrepot);
+        }
+
+        return $errors;
+    }
 }

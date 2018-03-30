@@ -97,7 +97,6 @@ lists:
                 display: nom_url
             name: 
                 field: name
-                display: nom_url
             status:
                 field: status
             fonds: 

@@ -18,8 +18,8 @@ global $db, $langs;
 //$pdf = new LoyerPDF($db);
 //$obj = new Propal($db);
 //$obj->fetch(92608);
-$pdf = new BLPDF($db, 2);
-//$pdf = new OrderPDF($db);
+//$pdf = new BLPDF($db, 2);
+$pdf = new OrderPDF($db);
 
 $obj = new Commande($db);
 $obj->fetch(14116);

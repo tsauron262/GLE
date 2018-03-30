@@ -376,6 +376,18 @@ class OrderPDF extends BimpDocumentPDF
 
         $i = 0;
 
+        $has_shipment = false;
+
+        $sql = 'SELECT `id` FROM ' . MAIN_DB_PREFIX . 'br_commande_shipment';
+        $sql .= ' WHERE `id_commande_client` = ' . (int) $this->commande->id;
+
+        $bdb = new BimpDb($this->db);
+
+        $rows = $bdb->executeS($sql);
+        if (!is_null($rows) && count($rows)) {
+            $has_shipment = true;
+        }
+
         foreach ($this->object->lines as &$line) {
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
@@ -422,22 +434,25 @@ class OrderPDF extends BimpDocumentPDF
                     $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
                 }
 
+                $totalQty = (int) pdf_getlineqty($this->object, $i, $this->langs);
+                $qty = $totalQty;
+                $shipped = 0;
+                $toShip = 0;
+
                 if (!is_null($product) && (int) $product->type === 0) {
-                    $totalQty = (int) pdf_getlineqty($this->object, $i, $this->langs);
-                    $qty = $totalQty;
-                    $shipped = 0;
                     $toShip = $totalQty;
 
                     if (isset($shipped_qties[(int) $line->id])) {
                         $shipped = (int) $shipped_qties[(int) $line->id];
                         $toShip -= $shipped;
                     }
-
-                    $row['qte'] = $qty;
-                    $row['dl'] = $shipped;
-                    $row['ral'] = $toShip;
+                } elseif ($has_shipment) {
+                    $shipped = $qty;
                 }
 
+                $row['qte'] = $qty;
+                $row['dl'] = $shipped;
+                $row['ral'] = $toShip;
                 $row['total_ht'] = pdf_getlinetotalexcltax($this->object, $i, $this->langs);
             }
 

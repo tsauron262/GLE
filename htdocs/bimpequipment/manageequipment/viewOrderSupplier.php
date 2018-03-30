@@ -109,12 +109,12 @@ $orderId = $object->id;
 print '<input id="id_order_hidden" hidden type="number" value=' . $orderId . '>';
 
 $facid = $id;
-//if ($object->statut < 3) {
-//    print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
-//    llxFooter();
-//    $db->close();
-//    return;
-//}
+if ($object->statut < 3) {
+    print '<strong>Veuillez passer cette commande avant de remplir la livraison.</strong>';
+    llxFooter();
+    $db->close();
+    return;
+}
 
 if ($object->statut == 5) {
     print '<strong>Cette commande a été livrée. Cependant vous pouvez continuer à rajouter des produits supplémentaires.</strong><br/>';

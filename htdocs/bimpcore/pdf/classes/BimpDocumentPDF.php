@@ -302,7 +302,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html = '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
         $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
-        $html .= '<p style="font-size: 6px; font-style: italic">La Société Bimp ne peut être tenue pour responsable de la perte éventuelles de données informatiques.';
+        $html .= '<p style="font-size: 6px; font-style: italic">La Société ' . $this->fromCompany->nom . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques.';
         $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
         $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.</p>';
 

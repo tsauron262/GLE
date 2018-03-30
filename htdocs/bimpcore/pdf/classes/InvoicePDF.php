@@ -174,10 +174,10 @@ class InvoicePDF extends BimpDocumentPDF
 
     public function getPaymentInfosHtml()
     {
-        if ($this->facture->statut === Facture::STATUS_CLOSED) {
+        if ($this->facture->statut === Facture::STATUS_CLOSED || $this->facture->paye) {
             return '';
         }
-        
+
         global $conf;
 
         $html = '<div style="font-size: 7px; line-height: 8px;">';
@@ -277,6 +277,27 @@ class InvoicePDF extends BimpDocumentPDF
 
         $bdb = new BimpDb($this->db);
 
+        $sql = "SELECT re.rowid, re.amount_ht, re.multicurrency_amount_ht, re.amount_tva, re.multicurrency_amount_tva,  re.amount_ttc, re.multicurrency_amount_ttc,";
+        $sql.= " re.description, re.fk_facture_source,";
+        $sql.= " f.type, f.datef";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "societe_remise_except as re, " . MAIN_DB_PREFIX . "facture as f";
+        $sql.= " WHERE re.fk_facture_source = f.rowid AND re.fk_facture = " . $this->object->id;
+
+        $remises = $bdb->executeS($sql);
+
+        $sql = "SELECT p.datep as date, p.fk_paiement, p.num_paiement as num, pf.amount as amount, pf.multicurrency_amount,";
+        $sql.= " cp.code";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "paiement_facture as pf, " . MAIN_DB_PREFIX . "paiement as p";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "c_paiement as cp ON p.fk_paiement = cp.id";
+        $sql.= " WHERE pf.fk_paiement = p.rowid AND pf.fk_facture = " . $this->object->id;
+        $sql.= " ORDER BY p.datep";
+
+        $payments = $bdb->executeS($sql);
+
+        if ((is_null($remises) || !count($remises)) && (is_null($payments) || !count($payments))) {
+            return '';
+        }
+
         $html = '<div>';
         $html .= '<table style="width: 100%" cellpadding="3">';
 
@@ -305,21 +326,13 @@ class InvoicePDF extends BimpDocumentPDF
         $html .= '</td>';
         $html .= '</tr>';
 
-        $sql = "SELECT re.rowid, re.amount_ht, re.multicurrency_amount_ht, re.amount_tva, re.multicurrency_amount_tva,  re.amount_ttc, re.multicurrency_amount_ttc,";
-        $sql.= " re.description, re.fk_facture_source,";
-        $sql.= " f.type, f.datef";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "societe_remise_except as re, " . MAIN_DB_PREFIX . "facture as f";
-        $sql.= " WHERE re.fk_facture_source = f.rowid AND re.fk_facture = " . $this->object->id;
-
-        $rows = $bdb->executeS($sql);
-
-        if (is_null($rows)) {
+        if (is_null($remises)) {
             $html .= '<tr><td colspan="4">';
             $html .= '<p style="font-weight: bold; font-size: 7px; color: #C80000">' . $this->db->lasterror() . '</p>';
             $html .= '</td></tr>';
-        } else if (count($rows)) {
+        } else if (count($remises)) {
             $invoice = new Facture($this->db);
-            foreach ($rows as $obj) {
+            foreach ($remises as $obj) {
                 if ($obj->type == 2)
                     $text = $this->langs->trans("CreditNote");
                 elseif ($obj->type == 3)
@@ -347,21 +360,12 @@ class InvoicePDF extends BimpDocumentPDF
         }
 
         // Loop on each payment
-        $sql = "SELECT p.datep as date, p.fk_paiement, p.num_paiement as num, pf.amount as amount, pf.multicurrency_amount,";
-        $sql.= " cp.code";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "paiement_facture as pf, " . MAIN_DB_PREFIX . "paiement as p";
-        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "c_paiement as cp ON p.fk_paiement = cp.id";
-        $sql.= " WHERE pf.fk_paiement = p.rowid AND pf.fk_facture = " . $this->object->id;
-        $sql.= " ORDER BY p.datep";
-
-        $rows = $bdb->executeS($sql);
-
-        if (is_null($rows)) {
+        if (is_null($payments)) {
             $html .= '<tr><td colspan="4">';
             $html .= '<p style="font-weight: bold; font-size: 7px; color: #C80000">' . $this->db->lasterror() . '</p>';
             $html .= '</td></tr>';
-        } elseif (count($rows)) {
-            foreach ($rows as $row) {
+        } elseif (count($payments)) {
+            foreach ($payments as $row) {
                 $html .= '<tr>';
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= dol_print_date($this->db->jdate($row->date), 'day', false, $this->langs, true);

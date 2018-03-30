@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `llx_br_reservation_cmd_fourn` (
 
 ALTER TABLE `llx_bc_vente` ADD `id_facture` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_client_contact`;
 
-ALTER TABLE `llx_bc_vente_article` ADD `unit_price_tax_ex` FLOAT NOT NULL DEFAULT '0.0' AFTER `qty`, 
+ALTER TABLE `llx_bc_vente_article` ADD `unit_price_tax_ex` FLOAT NOT NULL DEFAULT '0.0' AFTER `qty`; 
 ALTER TABLE `llx_bc_vente_article` ADD `tva_tx` FLOAT NOT NULL DEFAULT '0.0' AFTER `unit_price_tax_in`;
 
 ALTER TABLE `llx_be_equipment` ADD `id_facture` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `note`; 

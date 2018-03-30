@@ -74,11 +74,10 @@ class BimpTicket
 
             $html .= $this->renderHeader();
 
-            $town = (string) $this->entrepot->town;
-            $town = 'Annecy';
+          
 
-            if ($town) {
-                $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($town) . ', le ' . date('d / m / Y') . '</span>';
+            if ($this->town) {
+                $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($this->town) . ', le ' . date('d / m / Y') . '</span>';
             }
 
             $html .= '<table id="ticket_lines">';
@@ -229,17 +228,20 @@ class BimpTicket
 
     protected function renderHeader()
     {
-        global $mysoc;
+        global $mysoc, $conf;
 
         $html = '';
 
         $address = (string) $this->entrepot->address;
         $zip = (string) $this->entrepot->zip;
-        $town = (string) $this->entrepot->town;
+        $this->town = (string) $this->entrepot->town;
 
-        $address = '7, rue de la Poste';
-        $zip = '74000';
-        $town = 'Annecy';
+        if($adress == "")
+            $address = $mysoc->address;
+        if($zip == "")
+            $zip = $mysoc->zip;
+        if($this->town == "")
+            $this->town = $mysoc->town;
 
         if (!$address) {
             $this->errors[] = 'Addresse absente';
@@ -249,15 +251,25 @@ class BimpTicket
             $this->errors[] = 'Code postal absent';
         }
 
-        if (!$town) {
+        if (!$this->town) {
             $this->errors[] = 'Ville absente';
         }
 
         if (count($this->errors)) {
             return '';
         }
+        $logo = $mysoc->logo;
+        $logo2 = str_replace(".jpg", "_black.jpg", $logo);
+        if (is_file($conf->mycompany->dir_output . '/logos/' . $logo2))
+            $logo = $logo2;
+        else {
+            $logo2 = str_replace(".png", "_black.png", $logo);
+            if (is_file($conf->mycompany->dir_output . '/logos/' . $logo2))
+                $logo = $logo2;
+        }
 
-        $url = DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=Bimp_logo_black.jpg';
+
+        $url = DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $logo;
 
         $html .= '<div class="ticket_header">';
         $html .= '<div class="header_block">';
@@ -266,7 +278,7 @@ class BimpTicket
 
         $html .= '<div class="header_block">';
         $html .= $address . '<br/>';
-        $html .= $zip . ' ' . strtoupper($town);
+        $html .= $zip . ' ' . strtoupper($this->town);
         $html .= '</div>';
         $html .= '</div>';
 
@@ -277,7 +289,7 @@ class BimpTicket
     {
         $html = '';
 
-        $url = DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=apple_reseller.png';
+        $url = DOL_URL_ROOT . '/bimpequipment/img/apple_reseller.png';
         $html .= '<div class="ticket_footer">';
 
         $html .= '<div class="footer_block">';
@@ -291,7 +303,82 @@ class BimpTicket
         }
         $html .= '</p>';
         $html .= '<p style="font-size: 20px; line-height: 22px; font-weight: bold; font-style: italic">Merci de votre fidélité</p>';
-        $html .= '<p style="font-size: 11px; line-height: 12px; font-weight: bold;">SA OLYS au capital de 954.352 &euro; - 320 387 483 R.C.S Lyon - APE 4741Z - TVA/CEE FR 34 320387 483</p>';
+
+        $txt = '';
+
+        global $mysoc, $langs;
+
+        $langs->load("companies");
+
+        if ($mysoc->forme_juridique_code) {
+            $txt .= $langs->convToOutputCharset(getFormeJuridiqueLabel($mysoc->forme_juridique_code));
+        }
+
+        if ($mysoc->capital) {
+            $captital = price2num($mysoc->capital);
+            if (is_numeric($captital) && $captital > 0) {
+                $txt.=($txt ? " - " : "") . $langs->transnoentities("CapitalOf", price($captital, 0, $langs, 0, 0, 0, $conf->currency));
+            } else {
+                $txt.=($txt ? " - " : "") . $langs->transnoentities("CapitalOf", $captital, $langs);
+            }
+        }
+
+        if ($mysoc->idprof1 && ($mysoc->country_code != 'FR' || !$mysoc->idprof2)) {
+            $field = $langs->transcountrynoentities("ProfId1", $mysoc->country_code);
+            if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                $field = $reg[1];
+            }
+            $txt .= ($txt ? " - " : "") . $field . ": " . $langs->convToOutputCharset($mysoc->idprof1);
+        }
+
+        if ($mysoc->idprof2) {
+            $field = $langs->transcountrynoentities("ProfId2", $mysoc->country_code);
+            if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                $field = $reg[1];
+            }
+            $txt .= ($txt ? " - " : "") . $field . ": " . $langs->convToOutputCharset($mysoc->idprof2);
+        }
+
+        if ($mysoc->idprof3) {
+//            $field = $langs->transcountrynoentities("ProfId3", $mysoc->country_code);
+            $field = 'APE';
+//            if (preg_match('/\((.*)\)/i', $field, $reg)) {
+//                $field = $reg[1];
+//                
+//            }
+            $txt .= ($txt ? " - " : "") . $field . ": " . $langs->convToOutputCharset($mysoc->idprof3);
+        }
+
+        if ($mysoc->idprof4) {
+            $field = $langs->transcountrynoentities("ProfId4", $mysoc->country_code);
+            if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                $field = $reg[1];
+            }
+            $txt .= ($txt ? " - " : "") . $field . ": " . $langs->convToOutputCharset($mysoc->idprof4);
+        }
+
+        if ($mysoc->idprof5) {
+            $field = $langs->transcountrynoentities("ProfId5", $mysoc->country_code);
+            if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                $field = $reg[1];
+            }
+            $txt .= ($txt ? " - " : "") . $field . ": " . $langs->convToOutputCharset($mysoc->idprof5);
+        }
+
+        if ($mysoc->idprof6) {
+            $field = $langs->transcountrynoentities("ProfId6", $mysoc->country_code);
+            if (preg_match('/\((.*)\)/i', $field, $reg))
+                $field = $reg[1];
+            $txt .= ($txt ? " - " : "") . $field . ": " . $langs->convToOutputCharset($mysoc->idprof6);
+        }
+        // IntraCommunautary VAT
+        if ($mysoc->tva_intra != '') {
+            $txt .= ($txt ? "<br/>" : "") . 'TVA/CEE' . ": " . $langs->convToOutputCharset($mysoc->tva_intra);
+        }
+
+//        SA OLYS au capital de 954.352 &euro; - 320 387 483 R.C.S Lyon - APE 4741Z - TVA/CEE FR 34 320387 483
+
+        $html .= '<p style="font-size: 11px; line-height: 12px; font-weight: bold;">' . $txt . '</p>';
         $html .= '</div>';
 
         $html .= 'Tout article déballé ne peut être ni repris ni échangé';

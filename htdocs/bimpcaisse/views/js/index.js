@@ -236,7 +236,7 @@ function closeCaisse($button, confirm_fonds) {
                 bimpAjax.$button.attr('onclick', 'closeCaisse($(this), 1);');
                 bimpAjax.$button.removeClass('disabled');
             } else {
-                window.location = document.location.href.replace(document.location.search, "");
+                window.location = document.location.href.replace(document.location.search, "") + '?id_entrepot=' + result.id_entrepot;
             }
         }, error: function (result, bimpAjax) {
             bimpAjax.$button.removeClass('disabled');
@@ -1156,8 +1156,8 @@ function onVenteLoaded() {
     $('#ventePanierLines').find('.cartArticleLine').each(function () {
         setCartLineEvents($(this));
     });
-    
-    $('#BC_Vente_client_form').find('input[name="id_client"]').change(function() {
+
+    $('#BC_Vente_client_form').find('input[name="id_client"]').change(function () {
         saveClient();
     });
 

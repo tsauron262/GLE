@@ -961,6 +961,16 @@ function setFormEvents($form) {
             }
         }
     }
+    
+    $form.find('.inputContainer').each(function() {
+        var field_name = $(this).data('field_name');
+        var $input = $(this).find('[name="'+field_name+'"]');
+        if ($input.length) {
+            $input.keyup(function(e) {
+                
+            });
+        }
+    });
 }
 
 function setInputsEvents($container) {

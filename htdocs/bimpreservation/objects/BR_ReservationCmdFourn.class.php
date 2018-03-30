@@ -168,7 +168,13 @@ class BR_ReservationCmdFourn extends BimpObject
                     $buttons[] = array(
                         'label'   => 'Retirer de la commande fournisseur',
                         'icon'    => 'times-circle',
-                        'onclick' => 'removeFromCommandeFournisseur($(this), ' . $this->id . ');'
+                        'onclick' => 'removeFromCommandeFournisseur($(this), ' . $this->id . ', 0);'
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'   => 'Forcer le retrait de la commande fournisseur',
+                        'icon'    => 'times-circle',
+                        'onclick' => 'removeFromCommandeFournisseur($(this), ' . $this->id . ', 1);'
                     );
                 }
             }
@@ -261,7 +267,7 @@ class BR_ReservationCmdFourn extends BimpObject
         return false;
     }
 
-    public function removeFromCommandeFournisseur(&$errors)
+    public function removeFromCommandeFournisseur(&$errors, $force_remove = false)
     {
         if ($this->isLoaded()) {
             $commande = $this->getChildObject('commande_fournisseur');
@@ -270,7 +276,14 @@ class BR_ReservationCmdFourn extends BimpObject
             }
 
             if ((int) $commande->statut !== 0) {
-                $errors[] = 'La commander fournisseur "' . $commande->ref . '" ne peut plus être modifiée car elle n\'a plus le statut "brouillon"';
+                if ($force_remove) {
+                    $this->set('id_commande_fournisseur', 0);
+                    $this->set('id_commande_fournisseur_line', 0);
+                    $errors = $this->update();
+                    return true;
+                } else {
+                    $errors[] = 'La commander fournisseur "' . $commande->ref . '" ne peut plus être modifiée car elle n\'a plus le statut "brouillon"';
+                }
             }
 
             $id_line = (int) $this->getData('id_commande_fournisseur_line');

@@ -126,15 +126,28 @@ function findEquipmentToReceive($button, id_commande_client) {
     });
 }
 
-function removeFromCommandeFournisseur($button, id_reservation_cmd_fourn) {
+function removeFromCommandeFournisseur($button, id_reservation_cmd_fourn, force_remove) {
     if ($button.hasClass('disabled')) {
         return;
+    }
+
+    if (typeof (force_remove) === 'undefined') {
+        force_remove = false;
+    }
+
+    if (force_remove) {
+        var msg = 'La commande fournisseur est validée et ne peut plus être modifiée. Veuillez confirmer le retrait forcé.' + "\n";
+        msg += '(L\'article ne sera pas supprimée de la commande mais la réservation ne sera plus associée à celle-ci)';
+        if (!confirm(msg)) {
+            return;
+        }
     }
 
     $button.addClass('disabled');
 
     BimpAjax('removeFromCommandeFournisseur', {
-        'id_reservation_cmd_fourn': id_reservation_cmd_fourn
+        'id_reservation_cmd_fourn': id_reservation_cmd_fourn,
+        'force_remove': force_remove
     }, null, {
         id_reservation_cmd_fourn: id_reservation_cmd_fourn,
         display_success_in_popup_only: true,

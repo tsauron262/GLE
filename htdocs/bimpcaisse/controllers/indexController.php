@@ -159,10 +159,10 @@ class indexController extends BimpController
 
             if ($id_entrepot) {
                 $caisse_instance = BimpObject::getInstance($this->module, 'BC_Caisse');
-                
+
                 foreach ($caisse_instance->getList(array(
                     'id_entrepot' => (int) $id_entrepot,
-                    'status'       => 0
+                    'status'      => 0
                         ), null, null, 'id', 'asc', 'array', array(
                     'id', 'name'
                 )) as $caisse) {
@@ -614,6 +614,7 @@ class indexController extends BimpController
         $fonds = (float) BimpTools::getValue('fonds', 0);
         $confirm_fonds = (int) BimpTools::getValue('confirm_fonds', 0);
         $need_confirm_fonds = 0;
+        $id_entrepot = 0;
 
         if (!$id_caisse) {
             $errors[] = 'Aucune caisse sélectionnée';
@@ -626,6 +627,7 @@ class indexController extends BimpController
             $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
 
             if ($this->isCaisseValide($caisse, $errors)) {
+                $id_entrepot = (int) $caisse->getData('id_entrepot');
                 $session = $caisse->getChildObject('current_session');
                 if (is_null($session) || !$session->isLoaded()) {
                     $errors[] = 'Session de caisse invalide';
@@ -682,6 +684,7 @@ class indexController extends BimpController
             'errors'             => $errors,
             'html'               => $html,
             'need_confirm_fonds' => $need_confirm_fonds,
+            'id_entrepot'        => $id_entrepot,
             'request_id'         => BimpTools::getValue('request_id', 0),
         )));
     }

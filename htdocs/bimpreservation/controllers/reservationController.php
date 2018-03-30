@@ -116,6 +116,7 @@ class reservationController extends BimpController
         $errors = array();
 
         $id_reservation_cmd_fourn = (int) BimpTools::getValue('id_reservation_cmd_fourn', 0);
+        $force_remove = (int) BimpTools::getValue('force_remove', 0);
 
         if (!$id_reservation_cmd_fourn) {
             $errors[] = 'ID de la la réservation absent';
@@ -124,8 +125,12 @@ class reservationController extends BimpController
             if (!$reservation->isLoaded()) {
                 $errors[] = 'ID de la réservation invalide';
             } else {
-                $reservation->removeFromCommandeFournisseur($errors);
-                $success = 'Produits retirés de la commande fournisseur avec succès';
+                $reservation->removeFromCommandeFournisseur($errors, $force_remove);
+                if ($force_remove) {
+                    $success = 'Produits désassociés de la commande fournisseur avec succès';
+                } else {
+                    $success = 'Produits retirés de la commande fournisseur avec succès';
+                }
             }
         }
 

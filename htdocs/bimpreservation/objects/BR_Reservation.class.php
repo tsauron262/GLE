@@ -564,6 +564,10 @@ class BR_Reservation extends BimpObject
 
         $current_status = (int) $this->getSavedData('status');
 
+        if ($status === $current_status) {
+            return array('Cette réservation a déjà ce statut');
+        }
+
         if (in_array($status, self::$need_equipment_status) && ($current_status <= 100) && $this->isProductSerialisable()) {
             if (is_null($id_equipment) || !$id_equipment) {
                 return array('Produit sérialisable: équipement obligatoire');
@@ -1079,7 +1083,7 @@ class BR_Reservation extends BimpObject
                     'id_commande_client' => (int) $id_commande,
                     'id_entrepot'        => (isset($commande->array_options['options_entrepot']) ? (int) $commande->array_options['options_entrepot'] : 1),
                     'qty'                => (int) $qty,
-                    'date'               => date('Y-m-d'),
+                    'date'               => date('Y-m-d H:i:s'),
                     'num_livraison'      => (int) $num
                 ));
 

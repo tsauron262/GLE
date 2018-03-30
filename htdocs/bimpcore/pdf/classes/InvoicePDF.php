@@ -16,6 +16,7 @@ class InvoicePDF extends BimpDocumentPDF
         $this->langs->load("bills");
         $this->langs->load("products");
         $this->facture = new Facture($db);
+        $this->typeObject = "invoice";
     }
 
     protected function initData()

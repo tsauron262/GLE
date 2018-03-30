@@ -131,6 +131,23 @@ class modBimpEquipment extends DolibarrModules {
             $conf->modBimpEquipment = new stdClass();
             $conf->modBimpEquipment->enabled = 0;
         }
+        
+        
+        
+        
+        $this->menus = array();            // List of menus to add
+        $r=0;
+        $this->menu[$r]=array(
+                            'type'=>'top',
+                            'titre'=>'Logistique',
+                            'mainmenu'=>'bimpequipment',
+                            'leftmenu'=>'0',        // To say if we can overwrite leftmenu
+                            'url'=>'/bimpequipment/manageequipment',
+                            'langs'=>'',
+                            'position'=>1099,
+                            'perms'=>'1',
+                            'target'=>'',
+                            'user'=>0);
     }
 
     /**

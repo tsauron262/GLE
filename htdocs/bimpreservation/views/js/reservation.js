@@ -56,7 +56,7 @@ function setSelectedReservationStatus($button, list_id, status) {
             return;
         }
     }
-    
+
     var $list = $('#' + list_id);
 
     if (!$list.length) {
@@ -69,24 +69,25 @@ function setSelectedReservationStatus($button, list_id, status) {
 
     if (!$selected.length) {
         bimp_msg('Aucune réservation sélectionnée', 'danger');
-    } else {
-        $selected.each(function () {
-            var done = false;
-            var $row = $(this).findParentByClass('BR_Reservation_row');
-            var id_reservation = $row.data('id_object');
-            if ($row.length) {
-                $row.find('.newStatusButton').each(function () {
-                    if (!done && parseInt($(this).data('new_status')) === parseInt(status)) {
-                        setReservationStatus($(this), id_reservation, status, false);
-                        done = true;
-                    }
-                });
-                if (!done) {
-                    bimp_msg('Ce statut ne peut pas être attribué à la réservation ' + id_reservation, 'warning');
-                }
-            }
-        });
+        return;
     }
+
+    $selected.each(function () {
+        var done = false;
+        var $row = $(this).findParentByClass('BR_Reservation_row');
+        var id_reservation = $row.data('id_object');
+        if ($row.length) {
+            $row.find('.newStatusButton').each(function () {
+                if (!done && parseInt($(this).data('new_status')) === parseInt(status)) {
+                    setReservationStatus($(this), id_reservation, status, false);
+                    done = true;
+                }
+            });
+            if (!done) {
+                bimp_msg('Ce statut ne peut pas être attribué à la réservation ' + id_reservation, 'warning');
+            }
+        }
+    });
 }
 
 function findEquipmentToReceive($button, id_commande_client) {
@@ -161,8 +162,27 @@ function openEquipmentsForm() {
     $('#openEquipmentsFormButton').parent().slideUp(250);
 }
 
-function generateBL($button, id_commande) {
-    
+function createShipment($button, id_commande) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    BimpAjax('createShipment', {
+        id_commande_client: id_commande
+    }, $('#newShipmentResult'), {
+        $button: $button,
+        display_success_in_popup_only: true,
+        success: function (result, bimpAjax) {
+            bimpAjax.$button.removeClass('disabled');
+            reloadObjectList('BR_Reservation_commandes_list_table');
+            reloadObjectList('BR_CommandeShipment_commandes_list_table');
+        },
+        error: function (result, bimpAjax) {
+            bimpAjax.$button.removeClass('disabled');
+        }
+    });
 }
 
 $(document).ready(function () {
@@ -177,5 +197,10 @@ $(document).ready(function () {
             e.stopPropagation();
             $('#findEquipmentButton').click();
         }
+    });
+
+    $('#createShipmentButton').popover();
+    $('#createShipmentButton').click(function () {
+        $(this).popover('hide');
     });
 });

@@ -15,43 +15,43 @@ class BC_Input extends BimpComponent
     public $extraClasses = array();
     public $extraData = array();
     public static $type_params_def = array(
-        'time'                   => array(
+        'time'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'date'                   => array(
+        'date'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'datetime'               => array(
+        'datetime'                    => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'textarea'               => array(
+        'textarea'                    => array(
             'rows'        => array('data_type' => 'int', 'default' => 3),
             'auto_expand' => array('data_type' => 'bool', 'default' => 0),
             'note'        => array('data_type' => 'bool', 'default' => 0),
         ),
-        'select'                 => array(
+        'select'                      => array(
             'options' => array('data_type' => 'array', 'compile' => true)
         ),
-        'toggle'                 => array(
+        'toggle'                      => array(
             'toggle_on'  => array('default' => 'OUI'),
             'toggle_off' => array('default' => 'NON')
         ),
-        'check_list'             => array(
+        'check_list'                  => array(
             'items' => array('data_type' => 'array', 'default' => array(), 'compile' => 0)
         ),
-        'custom'                 => array(
+        'custom'                      => array(
             'content' => array('default' => '')
         ),
-        'search_societe'         => array(
+        'search_societe'              => array(
             'societe_type' => array('default' => '')
         ),
-        'search_state'           => array(
+        'search_state'                => array(
             'id_country' => array('data_type' => 'int', 'default' => 0)
         ),
-        'search_juridicalstatus' => array(
+        'search_juridicalstatus'      => array(
             'country_code' => array('default' => '0')
         ),
-        'search_commande_client' => array(
+        'search_commande_client'      => array(
             'id_client' => array('data_type' => 'int', 'default' => 0)
         ),
         'search_commande_fournisseur' => array(
@@ -212,7 +212,7 @@ class BC_Input extends BimpComponent
             case 'search_commande_client':
                 $options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : '';
                 break;
-            
+
             case 'search_commande_fournisseur':
                 $options['id_fournisseur'] = isset($this->params['id_fournisseur']) ? $this->params['id_fournisseur'] : '';
                 break;
@@ -275,7 +275,7 @@ class BC_Input extends BimpComponent
         }
         $html .= '"';
         $html .= ' data-field_name="' . $this->input_name . '"';
-        $html .= ' data-initial_value="' . $this->value . '"';
+        $html .= ' data-initial_value="' . htmlentities($this->value) . '"';
         $html .= ' data-multiple="' . ((int) $this->params['multiple'] ? 1 : 0) . '"';
         if (count($this->extraData)) {
             foreach ($this->extraData as $data_name => $data_value) {

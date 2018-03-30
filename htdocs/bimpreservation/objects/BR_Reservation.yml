@@ -347,7 +347,8 @@ views:
                   - type: fields_table
                     col_lg: 9
                     fields_table:
-                        name: default  
+                        name: default
+            
             
 lists: 
     default: 
@@ -395,9 +396,9 @@ lists:
         checkboxes: 1
         pagination: 0
         bulk_actions: 
-            - label: Expédier
+            - label: Prêt pour expédition
               icon: sign-out
-              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
+              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);

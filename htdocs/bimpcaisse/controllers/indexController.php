@@ -65,8 +65,6 @@ class indexController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
-//        $html .= '<div id="venteTicketContainer"></div>';
-
         return $html;
     }
 
@@ -161,9 +159,10 @@ class indexController extends BimpController
 
             if ($id_entrepot) {
                 $caisse_instance = BimpObject::getInstance($this->module, 'BC_Caisse');
+                
                 foreach ($caisse_instance->getList(array(
                     'id_entrepot' => (int) $id_entrepot,
-                    'satus'       => 0
+                    'status'       => 0
                         ), null, null, 'id', 'asc', 'array', array(
                     'id', 'name'
                 )) as $caisse) {

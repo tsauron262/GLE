@@ -34,7 +34,7 @@ class BC_Form extends BC_Panel
         $this->params_def['rows'] = array('type' => 'keys');
         $this->params_def['values'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
-        $this->params_def['on_save'] = array('default' => 'reload');
+        $this->params_def['on_save'] = array('default' => 'close');
 
         $this->id_parent = $id_parent;
 

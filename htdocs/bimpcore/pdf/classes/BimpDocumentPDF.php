@@ -447,7 +447,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            $pu_ht = (float) str_replace(',', '.', pdf_getlineupexcltax($this->object, $i, $this->langs));
+            $pu_ht = (float) $line->subprice;
             if ($line->remise_percent) {
                 $this->total_remises += ((float) $pu_ht * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
             }
@@ -609,18 +609,20 @@ class BimpDocumentPDF extends BimpModelPDF
                 // TVA
                 foreach ($this->tva as $tvakey => $tvaval) {
                     if ($tvakey != 0) {
-                        $tvacompl = '';
-                        if (preg_match('/\*/', $tvakey)) {
-                            $tvakey = str_replace('*', '', $tvakey);
-                            $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
-                        }
-                        $totalvat = $this->langs->transcountrynoentities("TotalVAT", $this->fromCompany->country_code) . ' ';
-                        $totalvat .= vatrate($tvakey, 1) . $tvacompl;
+                        if ((float) $tvaval != 0) {
+                            $tvacompl = '';
+                            if (preg_match('/\*/', $tvakey)) {
+                                $tvakey = str_replace('*', '', $tvakey);
+                                $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
+                            }
+                            $totalvat = $this->langs->transcountrynoentities("TotalVAT", $this->fromCompany->country_code) . ' ';
+                            $totalvat .= vatrate($tvakey, 1) . $tvacompl;
 
-                        $html .= '<tr>';
-                        $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                        $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
-                        $html .= '</tr>';
+                            $html .= '<tr>';
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '</tr>';
+                        }
                     }
                 }
 

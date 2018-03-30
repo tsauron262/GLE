@@ -1493,8 +1493,7 @@ class BC_Vente extends BimpObject
 
         $id_client = (int) $this->getData('id_client');
         if (!$id_client) {
-            BimpObject::loadClass('bimpcore', 'Bimp_Societe');
-            $facture->socid = Bimp_Societe::$client_unknown_id;
+            $facture->socid = (int) BimpCore::getConf('default_id_client');
         } else {
             $facture->socid = $id_client;
         }

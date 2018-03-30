@@ -69,7 +69,8 @@ class BR_ReservationCmdFourn extends BimpObject
     public function getCommandesFournisseurArray()
     {
         $commandes = array(
-            0 => ''
+            0     => '',
+            'new' => 'Nouvelle commande'
         );
 
         $id_entrepot = (int) $this->getData('id_entrepot');
@@ -269,7 +270,7 @@ class BR_ReservationCmdFourn extends BimpObject
             }
 
             if ((int) $commande->statut !== 0) {
-                $errors[] = 'La commander fournisseur "'.$commande->ref.'" ne peut plus être modifiée car elle n\'a plus le statut "brouillon"';
+                $errors[] = 'La commander fournisseur "' . $commande->ref . '" ne peut plus être modifiée car elle n\'a plus le statut "brouillon"';
             }
 
             $id_line = (int) $this->getData('id_commande_fournisseur_line');
@@ -296,6 +297,59 @@ class BR_ReservationCmdFourn extends BimpObject
     }
 
     // Overrides:
+
+    public function validatePost()
+    {
+        $create_commande = false;
+        if (BimpTools::getValue('id_commande_fournisseur', 0) === 'new') {
+            $_POST['id_commande_fournisseur'] = 0;
+            $create_commande = true;
+        }
+
+        $errors = parent::validatePost();
+
+        if (!count($errors) && $create_commande) {
+            BimpTools::loadDolClass('fourn', 'fournisseur.commande', 'CommandeFournisseur');
+            $commande = new CommandeFournisseur($this->db->db);
+
+            $id_fournisseur = 0;
+            switch ((int) $this->getData('type')) {
+                case 1:
+                    $price = $this->getChildObject('fournisseur_price');
+                    if (!is_null($price) && $price->isLoaded()) {
+                        $id_fournisseur = (int) $price->getData('fk_soc');
+                    }
+                    break;
+
+                case 2:
+                    $id_fournisseur = (int) $this->getData('id_fournisseur');
+                    break;
+            }
+
+            if (!$id_fournisseur) {
+                $errors[] = 'Echec de la création de la commande fournisseur - fournisseur absent';
+            } else {
+                $id_entrepot = (int) $this->getData('id_entrepot');
+                if (!$id_entrepot) {
+                    $errors[] = 'Echec de la création de la commande fournisseur - entrepôt absent';
+                } else {
+                    $commande->socid = $id_fournisseur;
+                    $commande->array_options['options_entrepot'] = $id_entrepot;
+
+                    global $user;
+                    $id_commande = $commande->create($user);
+                    if ($id_commande <= 0) {
+                        $errors[] = 'Echec de la création de la commande fournisseur';
+                        BimpTools::getErrorsFromDolObject($commande, $errors);
+                    } else {
+                        $this->set('id_commande_fournisseur', $id_commande);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
 
     public function create()
     {

@@ -237,9 +237,12 @@ class BimpTicket
         $zip = (string) $this->entrepot->zip;
         $town = (string) $this->entrepot->town;
 
-        $address = '7, rue de la Poste';
-        $zip = '74000';
-        $town = 'Annecy';
+        if($adress = "")
+            $address = '7, rue de la Poste';
+        if($zip = "")
+            $zip = '74000';
+        if($town = "")
+            $town = 'Annecy';
 
         if (!$address) {
             $this->errors[] = 'Addresse absente';

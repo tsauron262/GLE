@@ -221,6 +221,12 @@ class BC_Vente extends BimpObject
                             'icon'    => 'fas_file-pdf',
                             'onclick' => 'window.open(\'' . $url . '\', \'_blank\');'
                         );
+                        $url = DOL_URL_ROOT . '/bimpcaisse/ticket.php?id_vente='.$this->id;
+                        $buttons[] = array(
+                            'label'   => 'Ticket de caisse',
+                            'icon'    => 'fas_copy',
+                            'onclick' => 'window.open(\'' . $url . '\', \'_blank\');'
+                        );
                     }
                 }
             } else {

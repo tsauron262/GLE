@@ -204,8 +204,9 @@ class BC_Vente extends BimpObject
 
         return $list;
     }
-    
-    public function getDocumentExtraButtons(){
+
+    public function getDocumentExtraButtons()
+    {
         $buttons = array();
         if ($this->isLoaded()) {
             if ((int) $this->getData('status') === 2) {
@@ -218,13 +219,13 @@ class BC_Vente extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Fichier PDF de la facture',
                             'icon'    => 'fas_file-pdf',
-                            'onclick' => 'window.open(\'' . $url . '\', \'_blank\');'
+                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
                         );
-                        $url = DOL_URL_ROOT . '/bimpcaisse/ticket.php?id_vente='.$this->id;
+                        $url = DOL_URL_ROOT . '/bimpcaisse/ticket.php?id_vente=' . $this->id;
                         $buttons[] = array(
                             'label'   => 'Ticket de caisse',
                             'icon'    => 'fas_copy',
-                            'onclick' => 'window.open(\'' . $url . '\', \'_blank\');'
+                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
                         );
                     }
                 }

@@ -204,9 +204,8 @@ class BC_Vente extends BimpObject
 
         return $list;
     }
-
-    public function getDefaultListExtraButtons()
-    {
+    
+    public function getDocumentExtraButtons(){
         $buttons = array();
         if ($this->isLoaded()) {
             if ((int) $this->getData('status') === 2) {
@@ -229,7 +228,16 @@ class BC_Vente extends BimpObject
                         );
                     }
                 }
-            } else {
+            }
+        }
+        return $buttons;
+    }
+
+    public function getDefaultListExtraButtons()
+    {
+        $buttons = $this->getDocumentExtraButtons();
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') !== 2) {
                 $buttons[] = array(
                     'label'   => 'Abandonner la vente',
                     'icon'    => 'times',

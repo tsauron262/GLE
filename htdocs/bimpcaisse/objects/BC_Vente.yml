@@ -307,6 +307,8 @@ lists:
                 field: id_facture   
             total_ttc: 
                 field: total_ttc
+        extra_btn:
+            callback: getDocumentExtraButtons
 forms: 
     client: 
         rows: 

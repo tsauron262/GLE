@@ -619,7 +619,7 @@ class BLPDF extends OrderPDF
                 $shipped = '';
                 $toShip = '';
 
-                if (!is_null($product) && (int) $product->type === 0) {
+//                if (!is_null($product) && (int) $product->type === 0) {
                     $shipped = 0;
                     $toShip = $totalQty;
 
@@ -634,7 +634,7 @@ class BLPDF extends OrderPDF
                     } else {
                         $qty = 0;
                     }
-                }
+//                }
 
                 $row['qte'] = $qty;
                 $row['dl'] = $shipped;

@@ -13,6 +13,7 @@ class BR_Reservation extends BimpObject
         0   => array('label' => 'A traiter', 'icon' => 'exclamation-circle', 'classes' => array('info')),
 //        1   => array('label' => 'A commander', 'icon' => 'exclamation-circle', 'classes' => array('important')),
         2   => array('label' => 'A réserver', 'icon' => 'exclamation-circle', 'classes' => array('important')),
+        3   => array('label' => 'Commande à finaliser', 'icon' => 'cart-arrow-down', 'classes' => array('important')),
         100 => array('label' => 'En attente de réception', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         200 => array('label' => 'Attribué', 'icon' => 'lock', 'classes' => array('danger')),
         201 => array('label' => 'Transfert en cours', 'icon' => 'lock', 'classes' => array('danger')),
@@ -23,7 +24,7 @@ class BR_Reservation extends BimpObject
         302 => array('label' => 'Reservation terminée', 'icon' => 'sign-out', 'classes' => array('success')),
         303 => array('label' => 'Reservation annulée', 'icon' => 'times', 'classes' => array('success'))
     );
-    public static $commande_status = array(0, 2, 100, 200, 250, 300, 303);
+    public static $commande_status = array(0, 2, 3, 100, 200, 250, 300, 303);
     public static $transfert_status = array(201, 301, 303);
     public static $temp_status = array(202, 302, 303);
     public static $need_equipment_status = array(200, 201, 202, 250, 300);
@@ -264,26 +265,20 @@ class BR_Reservation extends BimpObject
                         break;
 
                     case 200:
-                        if ($qty === 1) {
-                            $onclick = 'setReservationStatus($(this), ' . $this->id . ', 250)';
-                        } else {
-                            $title = 'Produits prêts à être expédiés';
-                            $values = htmlentities('\'{"fields": {"status": 250}}\'');
-                            $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_Reservation\', id_object: ' . $this->id . ', ';
-                            $onclick .= 'form_name: \'new_status\', param_values: ' . $values . '}, \'' . $title . '\');';
-                        }
+                        $id_commande_client = (int) $this->getData('id_commande_client');
+                        $ref = $this->getData('ref');
 
-                        $buttons[] = array(
-                            'label'   => 'Prêt pour expédition',
-                            'icon'    => 'sign-out',
-                            'onclick' => $onclick,
-                            'class'   => 'newStatusButton',
-                            'attrs'   => array(
-                                'data' => array(
-                                    'new_status' => 250
-                                )
-                            )
-                        );
+                        if (!is_null($ref) && $ref && $id_commande_client) {
+                            $title = 'Ajouter à une expédition';
+                            $values = htmlentities('\'{"fields": {"id_commande_client": ' . $id_commande_client . ', "ref_reservation": "' . $ref . '", "qty": ' . $qty . '}}\'');
+                            $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_ReservationShipment\', id_object: 0, ';
+                            $onclick .= 'form_name: \'default\', param_values: ' . $values . '}, \'' . $title . '\');';
+                            $buttons[] = array(
+                                'label'   => 'Ajouter à une expédition',
+                                'icon'    => 'sign-out',
+                                'onclick' => $onclick,
+                            );
+                        }
                         break;
 
                     case 201:
@@ -406,7 +401,7 @@ class BR_Reservation extends BimpObject
     }
 
     // Gestion des réservations:
-    
+
     public function createReservationsFromCommandeClient($id_entrepot, $id_commande_client)
     {
         if (is_null($id_commande_client) || !$id_commande_client) {
@@ -426,8 +421,12 @@ class BR_Reservation extends BimpObject
         if ($commande->fetch($id_commande_client) <= 0) {
             $errors[] = 'Echec du chargement de la commande d\'ID ' . $id_commande_client . ' - ' . $commande->error;
         } else {
-            foreach ($commande->lines as $line) {
-                $this->createFromCommandeClientLine($id_entrepot, $commande, $line);
+            foreach ($commande->lines as $i => $line) {
+                $add_errors = $this->createFromCommandeClientLine($id_entrepot, $commande, $line);
+                if (count($add_errors)) {
+                    $errors[] = 'Echec de l\'ajout de la ligne n°' . $i;
+                    $errors = array_merge($errors, $add_errors);
+                }
             }
         }
         return $errors;
@@ -450,36 +449,49 @@ class BR_Reservation extends BimpObject
         if (is_null($product) || !$product->isLoaded()) {
             return array('Produit d\'ID ' . $line->fk_product . ' invalide');
         } elseif ((int) $product->getData('fk_product_type') !== 0) {
-            return array();
+            $service = BimpObject::getInstance($this->module, 'BR_Service');
+            $service_errors = $service->validateArray(array(
+                'id_commande_client'      => (int) $commande->id,
+                'id_commande_client_line' => (int) $line->id,
+                'qty'                     => (int) $line->qty,
+                'shipped'                 => 0
+            ));
+            if (!count($service_errors)) {
+                $service_errors = $service->create();
+            }
+            if (count($service_errors)) {
+                $errors[] = 'Echec de l\'ajout du service pour la ligne d\'ID ' . $line->id;
+                $errors = array_merge($errors, $service_errors);
+            }
+        } else {
+            if (is_null($commande) || !isset($commande->id) || !$commande->id) {
+                return array('Commande client invalide');
+            }
+
+            $errors = $this->set('id_commande_client_line', $line->id);
+            $this->set('id_commande_client', $line->fk_commande);
+
+            $errors = array_merge($errors, $this->set('id_entrepot', $id_entrepot));
+
+            if (count($errors)) {
+                return $errors;
+            }
+
+            $this->set('id_client', $commande->socid);
+            $this->set('date_from', date('Y-m-d H:i:s'));
+            if (isset($commande->user_author_id)) {
+                $this->set('id_commercial', $commande->user_author_id);
+            }
+
+            $this->set('type', self::BR_RESERVATION_COMMANDE);
+
+            $qty = (int) $line->qty;
+            $this->set('qty', $qty);
+            $this->set('status', 0);
+            $this->set('id_equipment', 0);
+
+            $errors = array_merge($errors, $this->create());
         }
-
-        if (is_null($commande) || !isset($commande->id) || !$commande->id) {
-            return array('Commande client invalide');
-        }
-
-        $errors = $this->set('id_commande_client_line', $line->id);
-        $this->set('id_commande_client', $line->fk_commande);
-
-        $errors = array_merge($errors, $this->set('id_entrepot', $id_entrepot));
-
-        if (count($errors)) {
-            return $errors;
-        }
-
-        $this->set('id_client', $commande->socid);
-        $this->set('date_from', date('Y-m-d H:i:s'));
-        if (isset($commande->user_author_id)) {
-            $this->set('id_commercial', $commande->user_author_id);
-        }
-
-        $this->set('type', self::BR_RESERVATION_COMMANDE);
-
-        $qty = (int) $line->qty;
-        $this->set('qty', $qty);
-        $this->set('status', 0);
-        $this->set('id_equipment', 0);
-
-        $errors = array_merge($errors, $this->create());
 
         return $errors;
     }
@@ -621,6 +633,44 @@ class BR_Reservation extends BimpObject
             }
         }
 
+        if (!$status && ($current_status === 250) && ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE)) {
+            $rs = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
+            $list = $rs->getList(array(
+                'ref_reservation' => $ref
+            ));
+
+            if (!is_null($list) && count($list)) {
+                foreach ($list as $item) {
+                    if ($rs->fetch((int) $item['id'])) {
+                        $delete = true;
+                        $shipment = $rs->getParentInstance();
+                        if ($shipment->isLoaded()) {
+                            if ((int) $shipment->getData('status') === 2) {
+                                $errors[] = $rs->getData('qty') . ' unités ont déjà été expédiées pour la référence "' . $ref . '"';
+                                $delete = false;
+                            }
+                        }
+
+                        if ($delete) {
+                            $delete_errors = $rs->delete();
+                            if (count($delete_errors)) {
+                                $errors[] = 'Echec de la suppression de la ligne d\'expédition d\'ID ' . $item['id'];
+                                $errors = array_merge($errors, $delete_errors);
+                                $qty -= (int) $rs->getData('qty');
+                            }
+                        } else {
+                            $qty -= (int) $rs->getData('qty');
+                        }
+                    }
+                }
+            }
+
+            if ($qty <= 0) {
+                return $errors;
+            }
+        }
+
+
         if ($this->isProductSerialisable()) {
             $this->config->resetObjects();
             $equipment = $this->getChildObject('equipment');
@@ -715,14 +765,6 @@ class BR_Reservation extends BimpObject
             }
         }
 
-        if (!count($errors) && $status === 300) {
-            $shipment_errors = $this->addShipment($ref, $qty);
-            if (count($shipment_errors)) {
-                $errors[] = 'Echec de l\'enregistrement de l\'expédition pour la réservation ' . $this->id;
-                $errors = array_merge($errors, $shipment_errors);
-            }
-        }
-
         return $errors;
     }
 
@@ -781,29 +823,28 @@ class BR_Reservation extends BimpObject
         return 0;
     }
 
-    public function addShipment($ref, $qty)
-    {
-        if ((int) $this->getData('type') !== self::BR_RESERVATION_COMMANDE) {
-            return array('Impossible de créer une expédition pour la réservation ' . $this->id . ' - type invalide');
-        }
-
-        $errors = array();
-        global $user;
-
-        $resShipment = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
-        $errors = $resShipment->validateArray(array(
-            'id_commande_client' => (int) $this->getData('id_commande_client'),
-            'ref_reservation'    => $ref,
-            'date'               => date('Y-m-d'),
-            'qty'                => (int) $qty,
-            'id_user'            => (int) $user->id
-        ));
-        if (!count($errors)) {
-            $errors = $resShipment->create();
-        }
-        return $errors;
-    }
-
+//    public function addShipment($ref, $qty)
+//    {
+//        if ((int) $this->getData('type') !== self::BR_RESERVATION_COMMANDE) {
+//            return array('Impossible de créer une expédition pour la réservation ' . $this->id . ' - type invalide');
+//        }
+//
+//        $errors = array();
+//        global $user;
+//
+//        $resShipment = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
+//        $errors = $resShipment->validateArray(array(
+//            'id_commande_client' => (int) $this->getData('id_commande_client'),
+//            'ref_reservation'    => $ref,
+//            'date'               => date('Y-m-d'),
+//            'qty'                => (int) $qty,
+//            'id_user'            => (int) $user->id
+//        ));
+//        if (!count($errors)) {
+//            $errors = $resShipment->create();
+//        }
+//        return $errors;
+//    }
     // Validation des données: 
 
     protected function validateCommande()
@@ -1016,102 +1057,6 @@ class BR_Reservation extends BimpObject
         return $errors;
     }
 
-//    Statiques
-
-    public static function createShipment($id_commande)
-    {
-        $errors = array();
-
-        if (is_null($id_commande) || !(int) $id_commande) {
-            return array('ID de la commande absent');
-        }
-
-        global $db;
-        BimpTools::loadDolClass('commande');
-        $commande = new Commande($db);
-        if ($commande->fetch((int) $id_commande) <= 0) {
-            return array('Commande d\'ID ' . $id_commande . ' non trouvée');
-        }
-
-        $bdb = new BimpDb($db);
-
-        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-
-        $rows = $reservation->getList(array(
-            'id_commande_client' => (int) $id_commande,
-            'status'             => 250
-        ));
-
-        if (!count($rows)) {
-            $errors[] = 'Aucun article prêt à l\'expédition trouvé pour cette commande client';
-        } else {
-            $qty = 0;
-
-            foreach ($rows as $r) {
-                $reservation->fetch((int) $r['id']);
-                if ($reservation->isLoaded()) {
-                    $res_qty = (int) $reservation->getData('qty');
-                    $status_errors = $reservation->setNewStatus(300, $res_qty);
-                    if (count($status_errors)) {
-                        $errors = array_merge($errors, $status_errors);
-                    } else {
-                        $reservation->update();
-                        $qty += $res_qty;
-                    }
-                } else {
-                    $errors[] = 'Réservation d\'ID ' . $r['id'] . ' non trouvée';
-                }
-            }
-
-            if ($qty > 0) {
-                $sql = 'SELECT MAX(num_livraison) as num FROM ' . MAIN_DB_PREFIX . 'br_commande_shipment ';
-                $sql .= 'WHERE `id_commande_client` = ' . (int) $id_commande;
-
-                $result = $bdb->execute($sql);
-                $result = $bdb->db->fetch_object($result);
-
-                if (is_null($result) || !isset($result->num)) {
-                    $num = 0;
-                } else {
-                    $num = (int) $result->num;
-                }
-
-                $num++;
-
-                $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
-                $shipment_errors = $shipment->validateArray(array(
-                    'id_commande_client' => (int) $id_commande,
-                    'id_entrepot'        => (isset($commande->array_options['options_entrepot']) ? (int) $commande->array_options['options_entrepot'] : 1),
-                    'qty'                => (int) $qty,
-                    'date'               => date('Y-m-d H:i:s'),
-                    'num_livraison'      => (int) $num
-                ));
-
-                if (!count($shipment_errors)) {
-                    $shipment_errors = $shipment->create();
-                }
-
-                if (count($shipment_errors)) {
-                    $errors = array_merge($errors, $shipment_errors);
-                } else {
-                    if ($bdb->update('br_reservation_shipment', array(
-                                'id_shipment' => (int) $shipment->id,
-                                'date'        => date('Y-m-d')
-                                    ), '`id_commande_client` = ' . (int) $id_commande . ' AND `id_shipment` = 0') <= 0) {
-                        $msg = 'Echec de l\'enregistrement du numéro de livraison pour les réservations concernées';
-                        $errorSql = $bdb->db->error();
-                        if ($errorSql) {
-                            $msg .= ' - ' . $errorSql;
-                        }
-                        $errors[] = $msg;
-                    }
-                }
-            }
-        }
-
-        return $errors;
-    }
-
     public static function getProductCounts($id_product, $id_entrepot = null)
     {
         $counts = array(
@@ -1197,6 +1142,51 @@ class BR_Reservation extends BimpObject
                     foreach ($shipments as $shipment) {
                         $data[(int) $r['id_commande_client_line']] += (int) $shipment->qty;
                     }
+                }
+            }
+        }
+
+        $service = BimpObject::getInstance('bimpreservation', 'BR_Service');
+        $serviceShipment = BimpObject::getInstance('bimpreservation', 'BR_ServiceShipment');
+
+        $list = $service->getList(array(
+            'a.id_commande_client' => (int) $id_commande
+                ), null, null, 'id', 'asc', 'object', array('id', 'id_commande_client_line'));
+
+        if (!is_null($list) && count($list)) {
+            foreach ($list as $item) {
+                if (!isset($data[(int) $item->id_commande_client_line])) {
+                    $data[(int) $item->id_commande_client_line] = 0;
+                }
+
+                $filters = array(
+                    'a.id_service' => (int) $item->id
+                );
+                $joins = array();
+
+                if (!is_null($num_bl)) {
+                    $filters['cs.num_livraison'] = (int) $num_bl;
+                    $joins[] = array(
+                        'table' => 'br_commande_shipment',
+                        'alias' => 'cs',
+                        'on'    => 'cs.id = a.id_shipment'
+                    );
+                } elseif (!is_null($num_bl_max)) {
+                    $filters['cs.num_livraison'] = array(
+                        'operator' => '<=',
+                        'value'    => $num_bl_max
+                    );
+                    $joins[] = array(
+                        'table' => 'br_commande_shipment',
+                        'alias' => 'cs',
+                        'on'    => 'cs.id = a.id_shipment'
+                    );
+                }
+
+                $shipments = $serviceShipment->getList($filters, null, null, 'id', 'asc', 'object', array('qty'), $joins);
+
+                foreach ($shipments as $shipment) {
+                    $data[(int) $item->id_commande_client_line] += (int) $shipment->qty;
                 }
             }
         }

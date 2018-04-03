@@ -1059,7 +1059,7 @@ class BC_Vente extends BimpObject
                     'id_equipment'      => (int) $id_equipment,
                     'qty'               => 1,
                     'unit_price_tax_ex' => (float) $prix_ht,
-                    'unit_price_tax_in' => (float) $prix_ttc,
+                    'unit_price_tax_in' => (float) round($prix_ttc, 2),
                     'tva_tx'            => (float) $product->tva_tx
                 ));
 
@@ -1103,7 +1103,7 @@ class BC_Vente extends BimpObject
                 'id_equipment'      => 0,
                 'qty'               => 1,
                 'unit_price_tax_ex' => (float) BimpTools::calculatePriceTaxEx((float) $product->price_ttc, (float) $product->tva_tx),
-                'unit_price_tax_in' => (float) $product->price_ttc,
+                'unit_price_tax_in' => (float) round($product->price_ttc, 2),
                 'tva_tx'            => (float) $product->tva_tx
             ));
 
@@ -1325,7 +1325,11 @@ class BC_Vente extends BimpObject
             if ((int) $this->getData('status') === 2) {
                 $errors[] = 'Cette vente a déjà été validée';
                 return false;
-            }
+            } 
+//            elseif ((int) $this->getData('status') === 0) {
+//                $errors[] = 'Cette vente ne peut pas etre validée car elle a été annulée';
+//                return false;
+//            }
 
             $caisse = $this->getChildObject('caisse');
             $articles = $this->getChildrenObjects('articles');

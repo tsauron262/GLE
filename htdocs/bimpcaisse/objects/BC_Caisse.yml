@@ -78,12 +78,12 @@ forms:
 
 lists: 
     default: 
-        checkboxes: 1
-        bulk_actions: 
-            - label: Supprimer les caisses sélectionnées
-              icon: trash
-              onclick: deleteSelectedObjects('list_id', $(this));
-              btn_class: deleteSelectedObjects
+#        checkboxes: 1
+#        bulk_actions: 
+#            - label: Supprimer les caisses sélectionnées
+#              icon: trash
+#              onclick: deleteSelectedObjects('list_id', $(this));
+#              btn_class: deleteSelectedObjects
         sort_field: id
         sort_way: asc
         n: 25
@@ -107,4 +107,4 @@ lists:
         add_form_name: default
         edit_btn: 1
         edit_form: edit
-        delete_btn: 1
+#        delete_btn: 1

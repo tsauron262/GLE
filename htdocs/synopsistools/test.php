@@ -5,10 +5,6 @@ require("../main.inc.php");
 llxHeader();
 
 
-echo "conf->global->MAIN_SECURITY_SALT : ".$conf->global->MAIN_SECURITY_SALT;
-echo "conf->global->MAIN_SECURITY_HASH_ALGO : ".$conf->global->MAIN_SECURITY_HASH_ALGO;
-echo dol_hash("admin@synopsis");
-
 
 if($_REQUEST['action'] == "caisse"){
     $tabVal = array('SAVA', 'AMP','ACY','ACY','ACY','B07','LYO3','LYO6','CHY','BES','BES','BES','BES','CLE','CLE','CLE','GRE','MAR','MAR','MAU','MAU','MTB','MTP','MTP','NIM','NIM','NIM','PER','PER','PER','STE','STP','STP','VAL');

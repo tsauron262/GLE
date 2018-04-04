@@ -399,7 +399,7 @@ class OrderPDF extends BimpDocumentPDF
                 }
             }
 
-            $desc = $this->getLineDesc($line);
+            $desc = $this->getLineDesc($line, $product);
 
             if ($line->total_ht == 0) {
                 if (!$desc) {

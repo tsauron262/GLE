@@ -53,48 +53,58 @@ class OrderPDF extends BimpDocumentPDF
                 $this->pdf->SetAuthor($this->langs->convToOutputCharset($user->getFullName($this->langs)));
                 $this->pdf->SetKeyWords($this->langs->convToOutputCharset($this->object->ref) . " " . $this->langs->transnoentities("Invoice") . " " . $this->langs->convToOutputCharset($this->object->thirdparty->name));
 
-                $contacts = $this->commande->getIdContact('external', 'CUSTOMER');
-                if (isset($contacts[0]) && $contacts[0]) {
-                    BimpTools::loadDolClass('contact');
-                    $contact = new Contact($this->db);
-                    if ($contact->fetch((int) $contacts[0]) > 0) {
-                        $this->contact = $contact;
+                if (is_null($this->contact)) {
+                    $contacts = $this->commande->getIdContact('external', 'CUSTOMER');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        BimpTools::loadDolClass('contact');
+                        $contact = new Contact($this->db);
+                        if ($contact->fetch((int) $contacts[0]) > 0) {
+                            $this->contact = $contact;
+                        }
                     }
                 }
 
-                $contacts = $this->commande->getIdContact('external', 'BILLING');
-                if (isset($contacts[0]) && $contacts[0]) {
-                    BimpTools::loadDolClass('contact');
-                    $contact = new Contact($this->db);
-                    if ($contact->fetch((int) $contacts[0]) > 0) {
-                        $this->contact_invoice = $contact;
+                if (is_null($this->contact_invoice)) {
+                    $contacts = $this->commande->getIdContact('external', 'BILLING');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        BimpTools::loadDolClass('contact');
+                        $contact = new Contact($this->db);
+                        if ($contact->fetch((int) $contacts[0]) > 0) {
+                            $this->contact_invoice = $contact;
+                        }
                     }
                 }
 
-                $contacts = $this->commande->getIdContact('external', 'SHIPPING');
-                if (isset($contacts[0]) && $contacts[0]) {
-                    BimpTools::loadDolClass('contact');
-                    $contact = new Contact($this->db);
-                    if ($contact->fetch((int) $contacts[0]) > 0) {
-                        $this->contact_shipment = $contact;
+                if (is_null($this->contact_shipment)) {
+                    $contacts = $this->commande->getIdContact('external', 'SHIPPING');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        BimpTools::loadDolClass('contact');
+                        $contact = new Contact($this->db);
+                        if ($contact->fetch((int) $contacts[0]) > 0) {
+                            $this->contact_shipment = $contact;
+                        }
                     }
                 }
 
-                $contacts = $this->commande->getIdContact('internal', 'SALESREPSIGN');
-                if (isset($contacts[0]) && $contacts[0]) {
-                    BimpTools::loadDolClass('contact');
-                    $new_user = new User($this->db);
-                    if ($new_user->fetch((int) $contacts[0]) > 0) {
-                        $this->user_commercial = $new_user;
+                if (is_null($this->user_commercial)) {
+                    $contacts = $this->commande->getIdContact('internal', 'SALESREPSIGN');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        BimpTools::loadDolClass('contact');
+                        $new_user = new User($this->db);
+                        if ($new_user->fetch((int) $contacts[0]) > 0) {
+                            $this->user_commercial = $new_user;
+                        }
                     }
                 }
 
-                $contacts = $this->commande->getIdContact('internal', 'SALESREPFOLL');
-                if (isset($contacts[0]) && $contacts[0]) {
-                    BimpTools::loadDolClass('contact');
-                    $new_user = new User($this->db);
-                    if ($new_user->fetch((int) $contacts[0]) > 0) {
-                        $this->user_suivi = $new_user;
+                if (is_null($this->user_suivi)) {
+                    $contacts = $this->commande->getIdContact('internal', 'SALESREPFOLL');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        BimpTools::loadDolClass('contact');
+                        $new_user = new User($this->db);
+                        if ($new_user->fetch((int) $contacts[0]) > 0) {
+                            $this->user_suivi = $new_user;
+                        }
                     }
                 }
 
@@ -216,7 +226,12 @@ class OrderPDF extends BimpDocumentPDF
                 break;
 
             case 'bl':
-                $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact_shipment, !is_null($this->contact_shipment) ? 1 : 0, 'target');
+                if (!is_null($this->contact_shipment)) {
+                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->contact_shipment, $this->contact_shipment, 1, 'target');
+                } else {
+                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, (!is_null($this->contact) ? 1 : 0), 'target');
+                }
+
                 $address = str_replace("\n", '<br/>', $address);
                 break;
         }
@@ -372,7 +387,7 @@ class OrderPDF extends BimpDocumentPDF
         $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte'));
 
         BimpTools::loadDolClass('product');
-        
+
         $i = 0;
         foreach ($this->object->lines as &$line) {
             $product = null;
@@ -533,7 +548,7 @@ class BLPDF extends OrderPDF
     public $total_ht = 0;
     public $total_ttc = 0;
 
-    public function __construct($db, $num_bl = null)
+    public function __construct($db, $num_bl = null, $id_contact_shipment = null)
     {
         $this->num_bl = $num_bl;
 
@@ -541,6 +556,16 @@ class BLPDF extends OrderPDF
 
         if (is_null($this->num_bl)) {
             $this->errors[] = 'Numéro du bon de livraison absent';
+        }
+
+        if (!is_null($id_contact_shipment) && $id_contact_shipment) {
+            BimpTools::loadDolClass('contact');
+            $this->contact_shipment = new Contact($this->db);
+            if ($this->contact_shipment->fetch($id_contact_shipment) <= 0) {
+                $this->errors[] = 'Contact pour la livraison non trouvé (ID ' . $id_contact_shipment . ')';
+                unset($this->contact_shipment);
+                $this->contact_shipment = null;
+            }
         }
     }
 
@@ -620,20 +645,20 @@ class BLPDF extends OrderPDF
                 $toShip = '';
 
 //                if (!is_null($product) && (int) $product->type === 0) {
-                    $shipped = 0;
-                    $toShip = $totalQty;
+                $shipped = 0;
+                $toShip = $totalQty;
 
-                    if (isset($shipped_qties[(int) $line->id])) {
-                        $shipped = (int) $shipped_qties[(int) $line->id];
-                        $toShip -= $shipped;
-                    }
+                if (isset($shipped_qties[(int) $line->id])) {
+                    $shipped = (int) $shipped_qties[(int) $line->id];
+                    $toShip -= $shipped;
+                }
 
-                    if (isset($bl_qtie[(int) $line->id])) {
-                        $qty = (int) $bl_qtie[(int) $line->id];
-                        $shipped -= $qty;
-                    } else {
-                        $qty = 0;
-                    }
+                if (isset($bl_qtie[(int) $line->id])) {
+                    $qty = (int) $bl_qtie[(int) $line->id];
+                    $shipped -= $qty;
+                } else {
+                    $qty = 0;
+                }
 //                }
 
                 $row['qte'] = $qty;

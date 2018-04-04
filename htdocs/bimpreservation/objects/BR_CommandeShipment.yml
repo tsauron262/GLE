@@ -35,7 +35,7 @@ objects:
                 field_value: id_contact
                 
     reservation_shipments: 
-        relation: haMany
+        relation: hasMany
         delete: 1
         instance: 
             bimp_object: BR_ReservationShipment
@@ -151,14 +151,16 @@ lists:
         extra_btn: 
             callback: getExtraBtn
         cols:
-            status: 
-                field: status
             num_livraison:
                 label: N°
                 field: num_livraison
                 max_width: 45px
+            status: 
+                field: status
             contact: 
-                field: id_contact
+                label: Destinataire
+                value: 
+                    callback: displayContact
             qty: 
                 label: Nb d'articles
                 value: 

@@ -266,7 +266,6 @@ fields:
             
 forms: 
     equipment:
-        on_save: close
         title: 
             callback: getEquipmentFormTitle
         rows: 
@@ -281,7 +280,6 @@ forms:
             - field: note
             
     new_status: 
-        on_save: close
         rows: 
             - custom: 1
               hidden: 1
@@ -401,7 +399,7 @@ lists:
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);
-        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment
+        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BR_CommandeShipment
         modal_view: default
         sort_field: id_product
         sort_way: asc

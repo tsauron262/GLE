@@ -154,7 +154,7 @@ class BC_ListTable extends BC_List
                             }
 
                             $content = $field->renderHtml();
-                        } else if (isset($col_params['value']) && $col_params['value']) {
+                        } else if (isset($col_params['value'])) {
                             $content .= $col_params['value'];
                         }
                     }

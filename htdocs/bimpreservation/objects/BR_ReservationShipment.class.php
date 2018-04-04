@@ -24,7 +24,8 @@ class BR_reservationShipment extends BimpObject
         if ($id_commande_client) {
             $cs = BimpObject::getInstance($this->module, 'BR_CommandeShipment');
             foreach ($cs->getList(array(
-                'id_commande_client' => $id_commande_client
+                'id_commande_client' => $id_commande_client,
+                'status'             => 1
             )) as $row) {
                 $shipments[(int) $row['id']] = 'Expédition n°' . $row['num_livraison'];
             }

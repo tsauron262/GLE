@@ -418,7 +418,7 @@ class BimpObject
                 if ($relation !== 'hasMany') {
                     return array();
                 }
-
+                
                 $instance = $this->config->getObject('', $object_name);
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {

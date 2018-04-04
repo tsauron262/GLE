@@ -266,7 +266,6 @@ fields:
             
 forms: 
     equipment:
-        on_save: close
         title: 
             callback: getEquipmentFormTitle
         rows: 
@@ -281,7 +280,6 @@ forms:
             - field: note
             
     new_status: 
-        on_save: close
         rows: 
             - custom: 1
               hidden: 1
@@ -395,13 +393,13 @@ lists:
         checkboxes: 1
         pagination: 0
         bulk_actions: 
-            - label: Prêt pour expédition
-              icon: sign-out
-              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
+#            - label: Prêt pour expédition
+#              icon: sign-out
+#              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);
-        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment
+        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BR_CommandeShipment
         modal_view: default
         sort_field: id_product
         sort_way: asc
@@ -431,9 +429,9 @@ lists:
     entrepot: 
         checkboxes: 1
         bulk_actions: 
-            - label: Marquer comme livré au client
-              icon: sign-out
-              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
+#            - label: Marquer comme livré au client
+#              icon: sign-out
+#              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);

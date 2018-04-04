@@ -418,7 +418,7 @@ class BimpObject
                 if ($relation !== 'hasMany') {
                     return array();
                 }
-
+                
                 $instance = $this->config->getObject('', $object_name);
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
@@ -1369,7 +1369,7 @@ class BimpObject
         return $errors;
     }
 
-    public function find($filters)
+    public function find($filters, $return_first = false)
     {
         $this->reset();
 
@@ -1398,7 +1398,10 @@ class BimpObject
 
         $rows = $this->db->executeS($sql, 'array');
 
-        if (!is_null($rows) && count($rows) === 1) {
+        if (!is_null($rows) && count($rows)) {
+            if (count($rows) > 1 && !$return_first) {
+                return false;
+            }
             $id_object = $rows[0][$primary];
         }
 

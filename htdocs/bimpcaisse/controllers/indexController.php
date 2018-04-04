@@ -898,7 +898,6 @@ class indexController extends BimpController
                     } else {
                         $ticket_html = $vente->renderTicketHtml($ticket_errors);
                     }
-                    $validate_errors[] = 'TEST';
                     if (count($validate_errors)) {
                         $msg = 'Erreur validation vente ' . $vente->id . "\n";
                         foreach ($validate_errors as $e) {

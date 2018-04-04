@@ -424,8 +424,9 @@ class BR_ReservationCmdFourn extends BimpObject
                     return $errors;
                 }
                 if ($reservation->find(array(
-                            'ref' => $ref_reservation,
-                            'status'          => 3
+                            'ref'          => $ref_reservation,
+                            'status'       => 3,
+                            'id_equipment' => 0
                         ))) {
                     $res_errors = $reservation->setNewStatus(100, $qty);
                     if (count($res_errors)) {
@@ -438,8 +439,9 @@ class BR_ReservationCmdFourn extends BimpObject
             }
         } elseif ($prev_id_commande_fournisseur) {
             if ($reservation->find(array(
-                        'ref' => $ref_reservation,
-                        'status'          => 100
+                        'ref'          => $ref_reservation,
+                        'status'       => 100,
+                        'id_equipment' => 0
                     ))) {
                 $res_errors = $reservation->setNewStatus(3, $qty);
                 if (count($res_errors)) {

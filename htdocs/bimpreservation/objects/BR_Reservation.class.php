@@ -269,8 +269,10 @@ class BR_Reservation extends BimpObject
                         $ref = $this->getData('ref');
 
                         if (!is_null($ref) && $ref && $id_commande_client) {
+                            $id_equipment = (int) $this->getData('id_equipment');
+
                             $title = 'Ajouter à une expédition';
-                            $values = htmlentities('\'{"fields": {"id_commande_client": ' . $id_commande_client . ', "ref_reservation": "' . $ref . '", "qty": ' . $qty . '}}\'');
+                            $values = htmlentities('\'{"fields": {"id_commande_client": ' . $id_commande_client . ', "ref_reservation": "' . $ref . '", "qty": ' . $qty . ', "id_equipment": ' . $id_equipment . '}}\'');
                             $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_ReservationShipment\', id_object: 0, ';
                             $onclick .= 'form_name: \'default\', param_values: ' . $values . '}, \'' . $title . '\');';
                             $buttons[] = array(
@@ -692,6 +694,7 @@ class BR_Reservation extends BimpObject
                     } else {
                         $this->set('status', $current_status);
                         $this->set('qty', $current_qty - 1);
+                        $this->set('id_equipment', 0);
                     }
                 } else {
                     $this->set('qty', 1);
@@ -700,6 +703,7 @@ class BR_Reservation extends BimpObject
             }
         } else {
             $product = $this->getChildObject('product');
+            $id_equipment = (int) $this->getData('id_equipment');
             if (is_null($product) || !$product->isLoaded()) {
                 $errors[] = 'Produit invalide';
             }
@@ -710,7 +714,7 @@ class BR_Reservation extends BimpObject
 
             $old_reservation = BimpObject::getInstance($this->module, $this->object_name);
 
-            if ($old_reservation->find(array(
+            if (!$id_equipment && $old_reservation->find(array(
                         'ref'          => $ref,
                         'status'       => (int) $status,
                         'id_equipment' => 0
@@ -745,7 +749,6 @@ class BR_Reservation extends BimpObject
                 $new_reservation->id = null;
                 $new_reservation->set('qty', $qty);
                 $new_reservation->set('status', $status);
-                $new_reservation->set('id_equipment', 0);
                 $new_reservation->set('ref', $ref);
                 $new_errors = $new_reservation->create();
 
@@ -807,7 +810,10 @@ class BR_Reservation extends BimpObject
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
             if ($reservation->find(array(
                         'id_commande_client' => (int) $id_commande_client,
-                        'status'             => 100,
+                        'status'             => array(
+                            'operator' => '<',
+                            'value'    => 200
+                        ),
                         'id_product'         => $id_product
                     ))) {
                 $errors = $reservation->setNewStatus(200, null, $equipment->id);
@@ -816,35 +822,13 @@ class BR_Reservation extends BimpObject
                     return $reservation->id;
                 }
             } else {
-                $errors[] = 'Aucune réservation en lien avec cette commande trouvée pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
+                $errors[] = 'Aucune réservation en lien avec cette commande trouvée pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')' . ' ' . $id_product . ', ' . $id_commande_client;
             }
         }
 
         return 0;
     }
 
-//    public function addShipment($ref, $qty)
-//    {
-//        if ((int) $this->getData('type') !== self::BR_RESERVATION_COMMANDE) {
-//            return array('Impossible de créer une expédition pour la réservation ' . $this->id . ' - type invalide');
-//        }
-//
-//        $errors = array();
-//        global $user;
-//
-//        $resShipment = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
-//        $errors = $resShipment->validateArray(array(
-//            'id_commande_client' => (int) $this->getData('id_commande_client'),
-//            'ref_reservation'    => $ref,
-//            'date'               => date('Y-m-d'),
-//            'qty'                => (int) $qty,
-//            'id_user'            => (int) $user->id
-//        ));
-//        if (!count($errors)) {
-//            $errors = $resShipment->create();
-//        }
-//        return $errors;
-//    }
     // Validation des données: 
 
     protected function validateCommande()
@@ -1099,6 +1083,20 @@ class BR_Reservation extends BimpObject
     {
         $data = array();
 
+        $date_max = '';
+        if (!is_null($num_bl_max)) {
+            $commandeShipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
+            if ($commandeShipment->find(array(
+                        'id_commande_client' => (int) $id_commande,
+                        'num_livraison'      => (int) $num_bl_max
+                    ))) {
+                $date_max = $commandeShipment->getData('date_shipped');
+            }
+            if (is_null($date_max) || !$date_max) {
+                return $data;
+            }
+        }
+
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
         $resShipment = BimpObject::getInstance('bimpreservation', 'BR_ReservationShipment');
 
@@ -1126,9 +1124,14 @@ class BR_Reservation extends BimpObject
                             'on'    => 'cs.id = a.id_shipment'
                         );
                     } elseif (!is_null($num_bl_max)) {
-                        $filters['cs.num_livraison'] = array(
-                            'operator' => '<=',
-                            'value'    => (int) $num_bl_max
+                        $filters['cs.date_shipped'] = array(
+                            'and' => array(
+                                'IS_NOT_NULL',
+                                array(
+                                    'operator' => '<=',
+                                    'value'    => $date_max
+                                )
+                            )
                         );
                         $joins[] = array(
                             'table' => 'br_commande_shipment',
@@ -1172,9 +1175,14 @@ class BR_Reservation extends BimpObject
                         'on'    => 'cs.id = a.id_shipment'
                     );
                 } elseif (!is_null($num_bl_max)) {
-                    $filters['cs.num_livraison'] = array(
-                        'operator' => '<=',
-                        'value'    => $num_bl_max
+                    $filters['cs.date_shipped'] = array(
+                        'and' => array(
+                            'IS_NOT_NULL',
+                            array(
+                                'operator' => '<=',
+                                'value'    => $date_max
+                            )
+                        )
                     );
                     $joins[] = array(
                         'table' => 'br_commande_shipment',
@@ -1192,5 +1200,42 @@ class BR_Reservation extends BimpObject
         }
 
         return $data;
+    }
+
+    public static function getShippedSerials($id_commande, $id_commande_line, $num_bl)
+    {
+        $resShipment = BimpObject::getInstance('bimpreservation', 'BR_ReservationShipment');
+
+        $filters = array(
+            'a.id_commande_client'      => (int) $id_commande,
+            'a.id_commande_client_line' => $id_commande_line,
+            'a.id_equipment'            => array(
+                'operator' => '>',
+                'value'    => 0
+            ),
+            'cs.num_livraison'          => (int) $num_bl
+        );
+
+        $joins = array(
+            array(
+                'table' => 'br_commande_shipment',
+                'alias' => 'cs',
+                'on'    => 'cs.id = a.id_shipment'
+            ),
+            array(
+                'table' => 'be_equipment',
+                'alias' => 'e',
+                'on'    => 'e.id = a.id_equipment'
+            )
+        );
+
+        $shipments = $resShipment->getList($filters, null, null, 'id', 'asc', 'array', array('e.serial'), $joins);
+
+        $serials = array();
+        foreach ($shipments as $shipment) {
+            $serials[] = $shipment['serial'];
+        }
+
+        return $serials;
     }
 }

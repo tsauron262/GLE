@@ -289,7 +289,7 @@ class BC_Display extends BimpComponent
                     case 'string':
                     case 'html':
                     default:
-                        $html .= $this->value;
+                        $html .= (string) $this->value;
                         break;
                 }
             }

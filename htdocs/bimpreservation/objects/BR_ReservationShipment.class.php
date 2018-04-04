@@ -16,7 +16,7 @@ class BR_reservationShipment extends BimpObject
                 if ($reservation->find(array(
                             'ref'    => $ref,
                             'status' => 200
-                        ))) {
+                                ), true)) {
                     $id_commande_client = $reservation->getData('id_commande_client');
                 }
             }
@@ -51,8 +51,9 @@ class BR_reservationShipment extends BimpObject
         if (!count($errors)) {
             $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
             if ($reservation->find(array(
-                        'ref'    => $ref_reservation,
-                        'status' => 200
+                        'ref'          => $ref_reservation,
+                        'status'       => 200,
+                        'id_equipment' => (int) $this->getData('id_equipment')
                     ))) {
                 if ((int) $this->getData('qty') > (int) $reservation->getData('qty')) {
                     $this->set('qty', (int) $reservation->getData('qty'));

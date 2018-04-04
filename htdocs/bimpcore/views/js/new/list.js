@@ -6,7 +6,7 @@ function reloadObjectList(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-//        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
         return;
     }
 

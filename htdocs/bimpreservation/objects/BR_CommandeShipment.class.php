@@ -271,53 +271,53 @@ class BR_CommandeShipment extends BimpObject
 
     public function cancelShipment()
     {
-        if ($this->isLoaded() && $this->getData('status') === 2) {
-            $service = BimpObject::getInstance($this->module, 'BR_Service');
-            $serviceShipment = BimpObject::getInstance($this->module, 'BR_ServiceShipment');
-
-            $list = $serviceShipment->getList(array(
-                'id_commande' => (int) $this->getData('id_commande_client'),
-                'id_shipment' => (int) $this->id
-                    ), null, null, 'id', 'asc', 'array', array('id', 'id_service'));
-
-            if (!is_null($list) && count($list)) {
-                foreach ($list as $item) {
-                    if ($serviceShipment->fetch((int) $item['id'])) {
-                        $qty = (int) $serviceShipment->getData('qty');
-                        $serviceShipment->delete();
-                        if ($qty > 0 && $serviceShipment->fetch((int) $item['id_service'])) {
-                            $shipped = (int) $serviceShipment->getData('shipped');
-                            $service->set('shipped', $shipped - $qty);
-                            $service->update();
-                        }
-                    }
-                }
-            }
-
-            $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
-            $reservationShipment = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
-
-            $list = $reservationShipment->getList(array(
-                'id_commande_client' => (int) $this->getData('id_commande_client'),
-                'id_shipment'        => (int) $this->id
-                    ), null, null, 'id', 'asc', 'array', array('id', 'ref_reservation', 'qty'));
-
-            if (!is_null($list) && count($list)) {
-                foreach ($list as $item) {
-                    if ($reservation->find(array(
-                                'id_commande_client' => (int) $this->getData('id_commande_client'),
-                                'ref'                => $item['ref_reservation'],
-                                'status'             => 300
-                            ))) {
-                        $reservation->setNewStatus(250, (int) $item['qty']);
-                        $reservation->update();
-                    }
-                }
-            }
-
-            $this->set('status', 1);
-            $this->update();
-        }
+//        if ($this->isLoaded() && $this->getData('status') === 2) {
+//            $service = BimpObject::getInstance($this->module, 'BR_Service');
+//            $serviceShipment = BimpObject::getInstance($this->module, 'BR_ServiceShipment');
+//
+//            $list = $serviceShipment->getList(array(
+//                'id_commande' => (int) $this->getData('id_commande_client'),
+//                'id_shipment' => (int) $this->id
+//                    ), null, null, 'id', 'asc', 'array', array('id', 'id_service'));
+//
+//            if (!is_null($list) && count($list)) {
+//                foreach ($list as $item) {
+//                    if ($serviceShipment->fetch((int) $item['id'])) {
+//                        $qty = (int) $serviceShipment->getData('qty');
+//                        $serviceShipment->delete();
+//                        if ($qty > 0 && $serviceShipment->fetch((int) $item['id_service'])) {
+//                            $shipped = (int) $serviceShipment->getData('shipped');
+//                            $service->set('shipped', $shipped - $qty);
+//                            $service->update();
+//                        }
+//                    }
+//                }
+//            }
+//
+//            $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
+//            $reservationShipment = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
+//
+//            $list = $reservationShipment->getList(array(
+//                'id_commande_client' => (int) $this->getData('id_commande_client'),
+//                'id_shipment'        => (int) $this->id
+//                    ), null, null, 'id', 'asc', 'array', array('id', 'ref_reservation', 'qty'));
+//
+//            if (!is_null($list) && count($list)) {
+//                foreach ($list as $item) {
+//                    if ($reservation->find(array(
+//                                'id_commande_client' => (int) $this->getData('id_commande_client'),
+//                                'ref'                => $item['ref_reservation'],
+//                                'status'             => 300
+//                            ))) {
+//                        $reservation->setNewStatus(250, (int) $item['qty']);
+//                        $reservation->update();
+//                    }
+//                }
+//            }
+//
+//            $this->set('status', 1);
+//            $this->update();
+//        }
     }
 
     public function create()
@@ -463,7 +463,7 @@ class BR_CommandeShipment extends BimpObject
             $list = $reservationShipment->getList(array(
                 'id_commande_client' => (int) $this->getData('id_commande_client'),
                 'id_shipment'        => (int) $this->id
-                    ), null, null, 'id', 'asc', 'array', array('id', 'ref_reservation', 'qty'));
+                    ), null, null, 'id', 'asc', 'array', array('id', 'ref_reservation', 'qty', 'id_equipment'));
 
             if (!is_null($list) && count($list)) {
                 global $user;
@@ -475,13 +475,13 @@ class BR_CommandeShipment extends BimpObject
                         if ($reservation->find(array(
                                     'id_commande_client' => (int) $this->getData('id_commande_client'),
                                     'ref'                => $item['ref_reservation'],
-                                    'status'             => 250
+                                    'status'             => 250,
+                                    'id_equipment'       => (int) $item['id_equipment']
                                 ))) {
                             $res_errors = $reservation->setNewStatus(300, (int) $item['qty']);
                             if (!count($res_errors)) {
                                 $res_errors = $reservation->update();
                             }
-
                             if (count($res_errors)) {
                                 $errors[] = 'Echec de la mise à jour du statut pour la réservation de référence "' . $item['ref_reservation'] . '"';
                                 $errors = array_merge($errors, $res_errors);

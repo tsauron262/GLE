@@ -269,8 +269,10 @@ class BR_Reservation extends BimpObject
                         $ref = $this->getData('ref');
 
                         if (!is_null($ref) && $ref && $id_commande_client) {
+                            $id_equipment = (int) $this->getData('id_equipment');
+
                             $title = 'Ajouter à une expédition';
-                            $values = htmlentities('\'{"fields": {"id_commande_client": ' . $id_commande_client . ', "ref_reservation": "' . $ref . '", "qty": ' . $qty . '}}\'');
+                            $values = htmlentities('\'{"fields": {"id_commande_client": ' . $id_commande_client . ', "ref_reservation": "' . $ref . '", "qty": ' . $qty . ', "id_equipment": ' . $id_equipment . '}}\'');
                             $onclick = 'loadModalForm($(this), {module: \'bimpreservation\', object_name: \'BR_ReservationShipment\', id_object: 0, ';
                             $onclick .= 'form_name: \'default\', param_values: ' . $values . '}, \'' . $title . '\');';
                             $buttons[] = array(
@@ -692,6 +694,7 @@ class BR_Reservation extends BimpObject
                     } else {
                         $this->set('status', $current_status);
                         $this->set('qty', $current_qty - 1);
+                        $this->set('id_equipment', 0);
                     }
                 } else {
                     $this->set('qty', 1);
@@ -700,6 +703,7 @@ class BR_Reservation extends BimpObject
             }
         } else {
             $product = $this->getChildObject('product');
+            $id_equipment = (int) $this->getData('id_equipment');
             if (is_null($product) || !$product->isLoaded()) {
                 $errors[] = 'Produit invalide';
             }
@@ -710,7 +714,7 @@ class BR_Reservation extends BimpObject
 
             $old_reservation = BimpObject::getInstance($this->module, $this->object_name);
 
-            if ($old_reservation->find(array(
+            if (!$id_equipment && $old_reservation->find(array(
                         'ref'          => $ref,
                         'status'       => (int) $status,
                         'id_equipment' => 0
@@ -745,7 +749,6 @@ class BR_Reservation extends BimpObject
                 $new_reservation->id = null;
                 $new_reservation->set('qty', $qty);
                 $new_reservation->set('status', $status);
-                $new_reservation->set('id_equipment', 0);
                 $new_reservation->set('ref', $ref);
                 $new_errors = $new_reservation->create();
 
@@ -807,7 +810,10 @@ class BR_Reservation extends BimpObject
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
             if ($reservation->find(array(
                         'id_commande_client' => (int) $id_commande_client,
-                        'status'             => 100,
+                        'status'             => array(
+                            'operator' => '<',
+                            'value'    => 200
+                        ),
                         'id_product'         => $id_product
                     ))) {
                 $errors = $reservation->setNewStatus(200, null, $equipment->id);
@@ -816,7 +822,7 @@ class BR_Reservation extends BimpObject
                     return $reservation->id;
                 }
             } else {
-                $errors[] = 'Aucune réservation en lien avec cette commande trouvée pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
+                $errors[] = 'Aucune réservation en lien avec cette commande trouvée pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')' . ' ' . $id_product . ', ' . $id_commande_client;
             }
         }
 

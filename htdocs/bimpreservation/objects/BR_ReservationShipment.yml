@@ -77,6 +77,8 @@ fields:
         label: Equipement
         type: id_object
         object: equipment
+        input: 
+            type: hidden
         
     qty: 
         label: Quantité
@@ -98,6 +100,8 @@ forms:
     default: 
         rows: 
             - field: ref_reservation
+              hidden: 1
+            - field: id_equipment
               hidden: 1
             - field: id_shipment
               create_form: default

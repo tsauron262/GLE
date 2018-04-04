@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS `event` (
     `id`            INTEGER AUTO_INCREMENT PRIMARY KEY,
-    `label`         VARCHAR(255),
-    `date_creation` DATETIME,
-    `date_start`    DATETIME,
-    `date_end`      DATETIME
+    `label`         VARCHAR(255) NOT NULL,
+    `date_creation` DATETIME NOT NULL,
+    `date_start`    DATETIME NOT NULL,
+    `date_end`      DATETIME NOT NULL
 ) ENGINE=innodb;

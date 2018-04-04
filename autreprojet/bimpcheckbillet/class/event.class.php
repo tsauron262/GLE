@@ -2,6 +2,7 @@
 
 class Event {
 
+    public $errors;
     private $db;
     private $id;
     private $label;
@@ -47,29 +48,40 @@ class Event {
 
         // TODO test param
 
-        $this->db->begin();
-        $sql = 'INSERT INTO event (';
-        $sql.= 'label';
-        $sql.= ', date_creation';
-        $sql.= ', date_start';
-        $sql.= ', date_end';
+        $date_start_obj = DateTime::createFromFormat('d/m/Y', $date_start);
+        $date_end_obj = DateTime::createFromFormat('d/m/Y', $date_end);
+        
+        if ($date_start_obj > $date_end_obj) {
+            $this->errors[] = "Date de début postérieur à date de fin";
+            return -3;
+        }
+
+        $sql = 'INSERT INTO `event` (';
+        $sql.= '`label`';
+        $sql.= ', `date_creation`';
+        $sql.= ', `date_start`';
+        $sql.= ', `date_end`';
         $sql.= ') ';
-        $sql.= 'VALUES (' . $label;
+        $sql.= 'VALUES ("' . $label . '"';
         $sql.= ', now()';
-        $sql.= ', ' . $date_start;
-        $sql.= ', ' . $date_end;
+        $sql.= ', "' . $date_start_obj->format("Y-m-d") . '"';
+        $sql.= ', "' . $date_end_obj->format("Y-m-d") . '"';
         $sql.= ')';
 
-        $result = $this->db->query($sql);
-        if ($result) {
-            $last_insert_id = $this->db->last_insert_id('event');
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $last_insert_id = $this->db->lastInsertId();
             $this->db->commit();
             return $last_insert_id;
-        } else {
-            $this->errors[] = "Impossible de créer l'évènement.";
-            $this->db->rollback();
-            return -1;
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de créer l'évènement. " . $e;
+            $this->db->rollBack();
+            return -2;
         }
+        return -1;
     }
 
 }

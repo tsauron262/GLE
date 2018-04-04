@@ -244,7 +244,6 @@ class BimpDocumentPDF extends BimpModelPDF
         $i = 0;
         foreach ($this->object->lines as $line) {
             $desc = '';
-//            if (is_null($line->desc) || !$line->desc) {
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
                 if ($product->fetch((int) $line->fk_product) > 0) {
@@ -252,12 +251,10 @@ class BimpDocumentPDF extends BimpModelPDF
                     $desc.= ($desc ? ' - ' : '') . $product->label;
                 }
             }
-//            }
-//            if (!$desc) {
-                if (!is_null($line->desc) && $line->desc) {
-                    $desc .= '<br/>' . $line->desc;
-                }
-//            }
+            if (!is_null($line->desc) && $line->desc) {
+                $desc .= ($desc ? '<br/>' : '') . $line->desc;
+            }
+            
             $desc = str_replace("\n", '<br/>', $desc);
             if ($line->total_ht == 0) {
                 $row['desc'] = array(

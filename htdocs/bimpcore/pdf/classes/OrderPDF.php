@@ -400,15 +400,15 @@ class OrderPDF extends BimpDocumentPDF
             }
 
             $desc = '';
-            if (is_null($line->desc) || !$line->desc) {
-                if (!is_null($product)) {
-                    $desc = $product->ref;
-                    $desc.= ($desc ? ' - ' : '') . $product->label;
-                }
+            if (!is_null($product)) {
+                $desc = $product->ref;
+                $desc.= ($desc ? ' - ' : '') . $product->label;
             }
-            if (!$desc) {
-                $desc = $line->desc;
+
+            if (!is_null($line->desc) && $line->desc) {
+                $desc .= ($desc ? '<br/>' : '') . $line->desc;
             }
+
             $desc = str_replace("\n", '<br/>', $desc);
 
             if ($line->total_ht == 0) {
@@ -604,15 +604,15 @@ class BLPDF extends OrderPDF
             }
 
             $desc = '';
-            if (is_null($line->desc) || !$line->desc) {
-                if (!is_null($product)) {
-                    $desc = $product->ref;
-                    $desc.= ($desc ? ' - ' : '') . $product->label;
-                }
+            if (!is_null($product)) {
+                $desc = $product->ref;
+                $desc.= ($desc ? ' - ' : '') . $product->label;
             }
-            if (!$desc) {
-                $desc = $line->desc;
+
+            if (!is_null($line->desc) && $line->desc) {
+                $desc .= ($desc ? '<br/>' : '') . $line->desc;
             }
+            
             $desc = str_replace("\n", '<br/>', $desc);
 
             if ($line->total_ht == 0) {

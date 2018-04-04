@@ -153,6 +153,17 @@ jQuery(document).ready(function () {
 
 
 
+    //empeché press enter dans recherche pro ppur scannette
+    $("#search_idprod").on('keydown', function (e) {
+        if (e.keyCode === 13 || e.keyCode === 9) {
+            e.keyCode = 32;
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
+
+
     $("a.butAction").click(function () {
         lien = this;
         setTimeout(function () {

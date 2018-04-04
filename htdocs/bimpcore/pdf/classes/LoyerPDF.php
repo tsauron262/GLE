@@ -20,22 +20,17 @@ class LoyerPDF extends PropalPDF
 
         // Traitement des lignes: 
         foreach ($this->object->lines as $line) {
-            $desc = '';
+            $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
-                BimpTools::loadDolClass('product');
                 $product = new Product($this->db);
-                if ($product->fetch((int) $line->fk_product) > 0) {
-                    $desc = $product->ref;
+                if ($product->fetch((int) $line->fk_product) <= 0) {
+                    unset($product);
+                    $product = null;
                 }
-                $desc.= ($desc ? ' - ' : '') . $product->label;
             }
+            
+            $desc = $this->getLineDesc($line, $product);
 
-            if (!is_null($line->desc) && $line->desc) {
-                $desc .= ($desc ? '<br/>' : '') . $line->desc;
-            }
-            
-            $desc = str_replace("\n", '<br/>', $desc);
-            
             if ($line->total_ht == 0) {
                 $row['desc'] = array(
                     'colspan' => 99,

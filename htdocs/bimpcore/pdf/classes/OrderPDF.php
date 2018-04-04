@@ -399,17 +399,7 @@ class OrderPDF extends BimpDocumentPDF
                 }
             }
 
-            $desc = '';
-            if (!is_null($product)) {
-                $desc = $product->ref;
-                $desc.= ($desc ? ' - ' : '') . $product->label;
-            }
-
-            if (!is_null($line->desc) && $line->desc) {
-                $desc .= ($desc ? '<br/>' : '') . $line->desc;
-            }
-
-            $desc = str_replace("\n", '<br/>', $desc);
+            $desc = $this->getLineDesc($line);
 
             if ($line->total_ht == 0) {
                 if (!$desc) {
@@ -603,17 +593,7 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            $desc = '';
-            if (!is_null($product)) {
-                $desc = $product->ref;
-                $desc.= ($desc ? ' - ' : '') . $product->label;
-            }
-
-            if (!is_null($line->desc) && $line->desc) {
-                $desc .= ($desc ? '<br/>' : '') . $line->desc;
-            }
-            
-            $desc = str_replace("\n", '<br/>', $desc);
+            $desc = $this->getLineDesc($line, $product);
 
             if ($line->total_ht == 0) {
                 if (!$desc) {
@@ -633,9 +613,15 @@ class BLPDF extends OrderPDF
                     $serials = BR_Reservation::getShippedSerials($this->commande->id, $line->id, $this->num_bl);
                     if (count($serials)) {
                         $desc .= '<br/>';
-                        $desc .= '<strong>N° de série</strong>: <br/>';
+                        $desc .= '<strong>N° de série</strong>: ';
+                        $first = true;
                         foreach ($serials as $serial) {
-                            $desc .= ' - ' . $serial . '<br/>';
+                            if (!$first) {
+                                $desc .= ', ';
+                            } else {
+                                $first = false;
+                            }
+                            $desc .= $serial;
                         }
                     }
                 }
@@ -918,7 +904,7 @@ class BLPDF extends OrderPDF
         if (isset($this->object->paye) && $this->object->paye) {
             $resteapayer = 0;
         } else {
-            $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 'MT');
+            $resteapayer = price2num($this->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 'MT');
         }
 
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
@@ -938,7 +924,7 @@ class BLPDF extends OrderPDF
             if (isset($this->object->close_code) && $this->object->close_code == Facture::CLOSECODE_DISCOUNTVAT) {
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("EscompteOfferedShort") . '</td>';
-                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 0, $this->langs) . '</td>';
+                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, 0, $this->langs) . '</td>';
                 $html .= '</tr>';
                 $resteapayer = 0;
             }

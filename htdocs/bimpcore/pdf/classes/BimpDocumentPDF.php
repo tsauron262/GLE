@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/BimpModelPDF.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class BimpDocumentPDF extends BimpModelPDF
 {
@@ -229,6 +230,26 @@ class BimpDocumentPDF extends BimpModelPDF
         
     }
 
+    public function getLineDesc($line, Product $product = null)
+    {
+        $desc = '';
+        if (!is_null($product)) {
+            $desc = $product->ref;
+            $desc.= ($desc ? ' - ' : '') . $product->label;
+        }
+
+        if (!is_null($line->desc) && $line->desc) {
+            $line_desc = $line->desc;
+            if (!is_null($product)) {
+                $line_desc = str_replace($product->label, '', $line_desc);
+            }
+            $desc .= ($desc ? '<br/>' : '') . $line_desc;
+        }
+
+        $desc = str_replace("\n", '<br/>', $desc);
+        return $desc;
+    }
+
     public function renderLines()
     {
         global $conf;
@@ -243,19 +264,17 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            $desc = '';
+            $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
-                if ($product->fetch((int) $line->fk_product) > 0) {
-                    $desc = $product->ref;
-                    $desc.= ($desc ? ' - ' : '') . $product->label;
+                if ($product->fetch((int) $line->fk_product) <= 0) {
+                    unset($product);
+                    $product = null;
                 }
             }
-            if (!is_null($line->desc) && $line->desc) {
-                $desc .= ($desc ? '<br/>' : '') . $line->desc;
-            }
-            
-            $desc = str_replace("\n", '<br/>', $desc);
+
+            $desc = $this->getLineDesc($line, $product);
+
             if ($line->total_ht == 0) {
                 $row['desc'] = array(
                     'colspan' => 99,

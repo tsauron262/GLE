@@ -330,8 +330,7 @@ class BR_CommandeShipment extends BimpObject
         } else {
             $commande = $this->getChildObject('commande_client');
 
-//            $id_entrepot = (int) (isset($commande->array_options['options_entrepot'])?$commande->array_options['options_entrepot']:0);
-            $id_entrepot = 1;
+            $id_entrepot = (int) (isset($commande->array_options['options_entrepot']) ? $commande->array_options['options_entrepot'] : 0);
             if (!$id_entrepot) {
                 $errors[] = 'ID de l\'entrepot absent';
             }

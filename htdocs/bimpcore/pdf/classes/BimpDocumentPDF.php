@@ -243,7 +243,9 @@ class BimpDocumentPDF extends BimpModelPDF
             if (!is_null($product)) {
                 $line_desc = str_replace($product->label, '', $line_desc);
             }
-            $desc .= ($desc ? '<br/>' : '') . $line_desc;
+            if ($line_desc) {
+                $desc .= ($desc ? '<br/>' : '') . $line_desc;
+            }
         }
 
         $desc = str_replace("\n", '<br/>', $desc);

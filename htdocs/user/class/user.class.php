@@ -2340,10 +2340,10 @@ class User extends CommonObject
                     mt_srand( (double) microtime() * 1000000 );
                     $salt = mhash_keygen_s2k( MHASH_SHA1, $password_clear, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
                     $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
-                }
+                }dol_hash($password);
                 
                 if($this->pass == ''){
-                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".$this->pass_indatabase_crypted;
+                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{".$conf->global->MAIN_SECURITY_HASH_ALGO."}".$this->pass_indatabase_crypted;
                 }
                 
                 

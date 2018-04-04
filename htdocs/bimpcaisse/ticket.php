@@ -38,6 +38,9 @@ if (!count($errors)) {
     echo '<script>';
     echo '$(document).ready(function() {';
     echo 'window.print();';
+    echo '$(window).click(function() {';
+    echo 'window.close();';
+    echo '});';
     echo '});';
     echo '</script>';
 } else {

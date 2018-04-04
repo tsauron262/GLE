@@ -55,13 +55,20 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
 
+        $logo_height = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';
+        } else {
+            $logo_height = pdf_getHeightForLogo($logo_file, false);
         }
-
+        
+        if ($logo_height > 30 || $logo_height === 22) {
+            $logo_height = 30;
+        }
+        
         $this->header_vars = array(
             'logo_img'     => $logo_file,
-            'logo_width'   => '120',
+            'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
             'header_right' => ''
         );
     }

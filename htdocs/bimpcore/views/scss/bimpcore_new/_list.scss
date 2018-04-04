@@ -2,6 +2,7 @@ table.bimp_list_table,
 table.objectlistTable {
     border: none;
     box-shadow: none;
+    width: 100%;
 
     & > thead > tr > th {
         padding: 10px 6px;
@@ -212,7 +213,7 @@ table.objectlistTable {
         .search_list_input {
             width: 80%
         }
-        
+
         .optionsContainer {
             display: none;
         }

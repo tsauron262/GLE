@@ -38,6 +38,9 @@ class BimpInput
                     if (isset($options['placeholder'])) {
                         $html .= ' placeholder="' . $options['placeholder'] . '"';
                     }
+                    if (isset($options['style'])) {
+                        $html .= ' style="' . $options['style'] . '"';
+                    }
                     $html .= $data;
                     $html .= '/>';
 
@@ -51,6 +54,9 @@ class BimpInput
                     $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"';
                     if (isset($options['placeholder'])) {
                         $html .= ' placeholder="' . $options['placeholder'] . '"';
+                    }
+                    if (isset($options['style'])) {
+                        $html .= ' style="' . $options['style'] . '"';
                     }
                     $html .= $data;
                     $html .= '/>';
@@ -431,13 +437,13 @@ class BimpInput
         if (is_null($input_id)) {
             $input_id = $input_name;
         }
-        
+
         if (is_null($value)) {
             $value = '';
         } elseif (preg_match('/^[0-9]{3}([0-9])\-[0-9]([0-9])\-[0-9]([0-9]).*$/', $value, $matches)) {
             if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3])
                 $value = '';
-        }        
+        }
 
         $display_js_format = '';
         $js_format = '';
@@ -512,7 +518,7 @@ class BimpInput
         $html .= "}";
         $html .= "})";
         $html .= '</script>';
-        
+
         return $html;
     }
 

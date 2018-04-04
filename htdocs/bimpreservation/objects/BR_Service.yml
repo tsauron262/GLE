@@ -1,4 +1,4 @@
-table: br_services
+table: br_service
 common_fields: 0
 
 labels: 
@@ -16,6 +16,11 @@ fields:
         type: int
         unsigned: 1
         required: 1
+    
+    qty: 
+        label: Quantité totale
+        type: int
+        default_value: 1
         
     shipped: 
         label: Quantité délivrée

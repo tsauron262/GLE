@@ -1,0 +1,52 @@
+table: br_service_shipment
+common_fields: 0
+
+labels: 
+    name: service délivré
+    name_plur: services délivrés
+
+objects: 
+    service: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BR_Service
+            id_object: 
+                field_value: id_service
+                
+    shipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BR_CommandeShipment
+            id_object: 
+                field_value: id_shipment
+                
+fields: 
+    id_commande_client: 
+        label: Commande client
+        type: int
+        unsigned: 1
+        required: 1
+        
+    id_commande_client_line: 
+        label: Ligne de commande client
+        type: int
+        unsigned: 1
+        required: 1
+    
+    id_service: 
+        label: Service
+        type: id_object
+        object: service
+        
+    id_shipment:
+        label: Expédition
+        type: id_object
+        object: shipment
+        
+    qty: 
+        label: Quantité totale
+        type: int
+        default_value: 1
+    

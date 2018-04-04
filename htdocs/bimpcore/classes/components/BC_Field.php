@@ -215,7 +215,7 @@ class BC_Field extends BimpComponent
 
     public function displayValue()
     {
-        if (!$this - params['viewable']) {
+        if (!$this->params['viewable']) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce champ', 'warning');
         }
 

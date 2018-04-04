@@ -1,5 +1,5 @@
 table: br_commande_shipment
-common_fields: 0
+common_fields: 1
 
 labels: 
     name: expédition
@@ -33,6 +33,12 @@ objects:
                 name: Bimp_Contact
             id_object: 
                 field_value: id_contact
+                
+    reservation_shipments: 
+        relation: haMany
+        delete: 1
+        instance: 
+            bimp_object: BR_ReservationShipment
     
 fields: 
     id_commande_client: 
@@ -40,14 +46,15 @@ fields:
         type: id_object
         object: commande_client
         required: 1
+        input: 
+            type: hidden
         
     id_entrepot: 
         label: Centre
         type: id_object
         object: entrepot
-        required: 1
         input: 
-            type: search_entrepot
+            type: hidden
         
     num_livraison:
         label: Numéro de livraison
@@ -55,20 +62,19 @@ fields:
         default_value: 1
         unsigned: 1
         
-    qty: 
-        label: Nombre d'article
+    status: 
+        label: Statut
         type: int
-        min: 1
-        unsigned: 1
+        values: 
+            array: status_list
         default_value: 1
         
-    date: 
-        label: Date
+    date_shipped: 
+        label: Date d'expédition
         type: datetime
-        required: 1
         
     id_contact:
-        label: Contact
+        label: Destinataire
         type: id_object
         object: contact
         default_value: 0
@@ -80,17 +86,55 @@ forms:
         rows: 
             - field: id_commande_client
               hidden: 1
+            - field: id_contact
+            
+    validation: 
+        rows: 
             - custom: 1
-              label: Produits inclus
-              input_name: products 
-              content: 
-                  callback: renderProductsQtiesInputs
-            - custom: 1
-              label: Services inclus
-              input_name: products 
+              hidden: 1
+              input_name: validation
+              input:
+                  type: hidden
+              value: 1
+            - label: Services à inclure
+              custom: 1
+              input_name: services
+              data_type: int
               content: 
                   callback: renderServicesQtiesInputs
+                  
+fields_tables: 
+    data: 
+        panel: 0
+        rows: 
+            - field: num_livraison
+            - field: status
             - field: id_contact
+            - field: date_shipped
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_common_fields
+                  col_lg: 4
+                  col_md: 5
+                  col_sm: 12
+                     
+                - type: fields_table
+                  col_lg: 8
+                  col_md: 7
+                  col_sm: 12
+                  fields_table: 
+                      name: data
+    lines: 
+        title: Produits / services inclus dans l'expédition
+        rows: 
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: reservation_shipments
 
 lists: 
     commandes: 
@@ -99,13 +143,32 @@ lists:
         sort_field: id
         sort_way: asc
         n: 0
+        edit_btn: 1
+        add_btn: 1
+        add_form_name: default
+        edit_form: default
+        modal_view: default
+        extra_btn: 
+            callback: getExtraBtn
         cols:
-            date: 
-                field: date
+            status: 
+                field: status
             num_livraison:
+                label: N°
                 field: num_livraison
+                max_width: 45px
+            contact: 
+                field: id_contact
             qty: 
-                field: qty
+                label: Nb d'articles
+                value: 
+                    callback: getNbArticles
+            create:
+                label: Créée le
+                field: date_create
+            date: 
+                label: Expédiée le
+                field: date_shipped
             bl:
                 label: Fichiers
                 value: 

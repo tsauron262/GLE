@@ -22,7 +22,6 @@ abstract class BimpComponent
         $this->object = $object;
         $this->name = $name;
 
-
         if (!$this->isObjectValid()) {
             $this->addError('Objet invalide');
         } else {
@@ -31,6 +30,10 @@ abstract class BimpComponent
             } elseif (!$name && $this->object->config->isDefined($path . '/default')) {
                 $this->config_path = $path . '/default';
                 $this->name = 'default';
+            } else {
+//                echo '<pre>';
+//                print_r($object->config->params);
+//                exit;
             }
         }
 

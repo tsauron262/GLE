@@ -18,6 +18,8 @@ class BC_Panel extends BimpComponent
 
     public function __construct(BimpObject $object, $name, $path, $content_only = false, $level = 1, $title = null, $icon = null)
     {
+        
+        
         $this->params_def['title'] = array();
         $this->params_def['icon'] = array();
         $this->params_def['panel'] = array('data_type' => 'bool', 'default' => 1);

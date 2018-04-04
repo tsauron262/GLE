@@ -5,9 +5,9 @@ require("../main.inc.php");
 llxHeader();
 
 
-echo "$conf->global->MAIN_SECURITY_SALT : ".$conf->global->MAIN_SECURITY_SALT;
-echo "$conf->global->MAIN_SECURITY_HASH_ALGO : ".$conf->global->MAIN_SECURITY_HASH_ALGO;
-
+echo "conf->global->MAIN_SECURITY_SALT : ".$conf->global->MAIN_SECURITY_SALT;
+echo "conf->global->MAIN_SECURITY_HASH_ALGO : ".$conf->global->MAIN_SECURITY_HASH_ALGO;
+echo dol_hash("admin@synopsis");
 
 
 if($_REQUEST['action'] == "caisse"){

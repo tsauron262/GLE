@@ -61,11 +61,11 @@ class BimpDocumentPDF extends BimpModelPDF
         } else {
             $logo_height = pdf_getHeightForLogo($logo_file, false);
         }
-        
+
         if ($logo_height > 30 || $logo_height === 22) {
             $logo_height = 30;
         }
-        
+
         $this->header_vars = array(
             'logo_img'     => $logo_file,
             'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
@@ -244,18 +244,20 @@ class BimpDocumentPDF extends BimpModelPDF
         $i = 0;
         foreach ($this->object->lines as $line) {
             $desc = '';
-            if (is_null($line->desc) || !$line->desc) {
-                if (!is_null($line->fk_product) && $line->fk_product) {
-                    $product = new Product($this->db);
-                    if ($product->fetch((int) $line->fk_product) > 0) {
-                        $desc = $product->ref;
-                        $desc.= ($desc ? ' - ' : '') . $product->label;
-                    }
+//            if (is_null($line->desc) || !$line->desc) {
+            if (!is_null($line->fk_product) && $line->fk_product) {
+                $product = new Product($this->db);
+                if ($product->fetch((int) $line->fk_product) > 0) {
+                    $desc = $product->ref;
+                    $desc.= ($desc ? ' - ' : '') . $product->label;
                 }
             }
-            if (!$desc) {
-                $desc = $line->desc;
-            }
+//            }
+//            if (!$desc) {
+                if (!is_null($line->desc) && $line->desc) {
+                    $desc .= '<br/>' . $line->desc;
+                }
+//            }
             $desc = str_replace("\n", '<br/>', $desc);
             if ($line->total_ht == 0) {
                 $row['desc'] = array(

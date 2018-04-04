@@ -629,6 +629,16 @@ class BLPDF extends OrderPDF
                     );
                 }
             } else {
+                if (!is_null($product)) {
+                    $serials = BR_Reservation::getShippedSerials($this->commande->id, $line->id, $this->num_bl);
+                    if (count($serials)) {
+                        $desc .= '<br/>';
+                        $desc .= '<strong>N° de série</strong>: <br/>';
+                        foreach ($serials as $serial) {
+                            $desc .= ' - ' . $serial . '<br/>';
+                        }
+                    }
+                }
                 $row = array(
                     'code_article' => (!is_null($product) ? $product->ref : ''),
                     'desc'         => $desc,
@@ -668,58 +678,58 @@ class BLPDF extends OrderPDF
                 $total_ht = (int) $qty * (float) $line->subprice;
 
                 $row['total_ht'] = price($total_ht);
+
+                // Ajout aux totaux: 
+                if (isset($line->remise_percent) && (float) $line->remise_percent) {
+                    $remise = (float) ($total_ht * ((float) $line->remise_percent / 100));
+                    $total_ht -= $remise;
+                    $this->total_remises += $remise;
+                }
+
+                $this->total_ht += $total_ht;
+
+                $tva_line = $total_ht * ($line->tva_tx / 100);
+                $localtax1_rate = $line->localtax1_tx;
+                $localtax2_rate = $line->localtax2_tx;
+                $localtax1_type = $line->localtax1_type;
+                $localtax2_type = $line->localtax2_type;
+                $localtax1ligne = $total_ht * ($localtax1_rate / 100);
+                $localtax2ligne = $total_ht * ($localtax2_rate / 100);
+
+                $this->total_ttc += $total_ht + $tva_line + $localtax1ligne + $localtax2ligne;
+
+                if (isset($this->commande->remise_percent) && (float) $this->commande->remise_percent) {
+                    $tva_line -= ($tva_line * $this->object->remise_percent) / 100;
+                    $localtax1ligne -= ($localtax1ligne * $this->object->remise_percent) / 100;
+                    $localtax2ligne -= ($localtax2ligne * $this->object->remise_percent) / 100;
+                }
+
+                if (!isset($this->localtax1[$localtax1_type])) {
+                    $this->localtax1[$localtax1_type] = array();
+                }
+                if (!isset($this->localtax1[$localtax1_type][$localtax1_rate])) {
+                    $this->localtax1[$localtax1_type][$localtax1_rate] = 0;
+                }
+
+                $this->localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
+
+                if (!isset($this->localtax2[$localtax2_type])) {
+                    $this->localtax2[$localtax2_type] = array();
+                }
+                if (!isset($this->localtax2[$localtax2_type][$localtax2_rate])) {
+                    $this->localtax2[$localtax2_type][$localtax2_rate] = 0;
+                }
+
+                $this->localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
+
+                if (!isset($this->tva[$line->tva_tx])) {
+                    $this->tva[$line->tva_tx] = 0;
+                }
+
+                $this->tva[$line->tva_tx] += $tva_line;
             }
 
             $table->rows[] = $row;
-
-            // Ajout aux totaux: 
-            if (isset($line->remise_percent) && (float) $line->remise_percent) {
-                $remise = (float) ($total_ht * ((float) $line->remise_percent / 100));
-                $total_ht -= $remise;
-                $this->total_remises += $remise;
-            }
-
-            $this->total_ht += $total_ht;
-
-            $tva_line = $total_ht * ($line->tva_tx / 100);
-            $localtax1_rate = $line->localtax1_tx;
-            $localtax2_rate = $line->localtax2_tx;
-            $localtax1_type = $line->localtax1_type;
-            $localtax2_type = $line->localtax2_type;
-            $localtax1ligne = $total_ht * ($localtax1_rate / 100);
-            $localtax2ligne = $total_ht * ($localtax2_rate / 100);
-
-            $this->total_ttc += $total_ht + $tva_line + $localtax1ligne + $localtax2ligne;
-
-            if (isset($this->commande->remise_percent) && (float) $this->commande->remise_percent) {
-                $tva_line -= ($tva_line * $this->object->remise_percent) / 100;
-                $localtax1ligne -= ($localtax1ligne * $this->object->remise_percent) / 100;
-                $localtax2ligne -= ($localtax2ligne * $this->object->remise_percent) / 100;
-            }
-
-            if (!isset($this->localtax1[$localtax1_type])) {
-                $this->localtax1[$localtax1_type] = array();
-            }
-            if (!isset($this->localtax1[$localtax1_type][$localtax1_rate])) {
-                $this->localtax1[$localtax1_type][$localtax1_rate] = 0;
-            }
-
-            $this->localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
-
-            if (!isset($this->localtax2[$localtax2_type])) {
-                $this->localtax2[$localtax2_type] = array();
-            }
-            if (!isset($this->localtax2[$localtax2_type][$localtax2_rate])) {
-                $this->localtax2[$localtax2_type][$localtax2_rate] = 0;
-            }
-
-            $this->localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
-
-            if (!isset($this->tva[$line->tva_tx])) {
-                $this->tva[$line->tva_tx] = 0;
-            }
-
-            $this->tva[$line->tva_tx] += $tva_line;
 
             $i++;
             unset($product);

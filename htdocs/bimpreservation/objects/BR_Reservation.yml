@@ -393,9 +393,9 @@ lists:
         checkboxes: 1
         pagination: 0
         bulk_actions: 
-            - label: Prêt pour expédition
-              icon: sign-out
-              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
+#            - label: Prêt pour expédition
+#              icon: sign-out
+#              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);
@@ -429,9 +429,9 @@ lists:
     entrepot: 
         checkboxes: 1
         bulk_actions: 
-            - label: Marquer comme livré au client
-              icon: sign-out
-              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
+#            - label: Marquer comme livré au client
+#              icon: sign-out
+#              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);

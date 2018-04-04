@@ -248,10 +248,8 @@ class BimpDocumentPDF extends BimpModelPDF
             }
         }
 
-        
-        $desc = str_replace("\n", '[RetChar]', $desc);
-        $desc = preg_replace("/(\[RetChar\])?[ \s]*<[ \/]*br[ \/]*>[ \s]*(\[RetChar\])?/", '<br/>', $desc);
-        $desc = str_replace('[RetChar]', '<br/>', $desc);
+        $desc = preg_replace("/(\n)?[ \s]*<[ \/]*br[ \/]*>[ \s]*(\n)?/", '<br/>', $desc);
+        $desc = str_replace("\n", '<br/>', $desc);
         return $desc;
     }
 

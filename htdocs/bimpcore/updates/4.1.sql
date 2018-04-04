@@ -4,10 +4,10 @@ ALTER TABLE `llx_br_commande_shipment` ADD `id_contact` INT UNSIGNED NOT NULL DE
 ALTER TABLE `llx_br_commande_shipment` ADD `status` INT UNSIGNED NOT NULL DEFAULT '1' AFTER `num_livraison`;
 ALTER TABLE `llx_br_commande_shipment` CHANGE `date` `date_shipped` DATETIME NULL DEFAULT NULL;
 
-ALTER TABLE `llx_br_commande_shipment` ADD `date_update` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `date`;
-ALTER TABLE `llx_br_commande_shipment` ADD `user_update` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date`;
-ALTER TABLE `llx_br_commande_shipment` ADD `date_create` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `date`; 
-ALTER TABLE `llx_br_commande_shipment` ADD `user_create` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date`;
+ALTER TABLE `llx_br_commande_shipment` ADD `date_update` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `date_shipped`;
+ALTER TABLE `llx_br_commande_shipment` ADD `user_update` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date_shipped`;
+ALTER TABLE `llx_br_commande_shipment` ADD `date_create` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `date_shipped`; 
+ALTER TABLE `llx_br_commande_shipment` ADD `user_create` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date_shipped`;
 
 ALTER TABLE `llx_br_reservation_shipment` DROP `date`;
 ALTER TABLE `llx_br_reservation_shipment` ADD `id_commande_client_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_commande_client`;

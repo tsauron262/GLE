@@ -97,7 +97,7 @@ function dol_hash($chain,$type=0)
 //            $salt = mhash_keygen_s2k( MHASH_SHA1, $chain, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
 //            return base64_encode( mhash( MHASH_SHA1, $chain.$salt ).$salt );
 //            
-            die("ok".$chain);
+        dol_syslog($chain,3);
             $salt = substr(str_shuffle(str_repeat('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',4)),0,4);
             return '{SSHA}' . base64_encode(sha1( $chain.$salt, TRUE ). $salt);
         }

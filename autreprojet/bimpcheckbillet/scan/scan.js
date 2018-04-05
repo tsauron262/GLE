@@ -6,7 +6,7 @@ $(document).ready(function () {
         }
     });
     
-    
+   
     $("#result").click(function(){
         $(this).hide();
         decoder.play();

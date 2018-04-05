@@ -93,9 +93,13 @@ function dol_hash($chain,$type=0)
         
         /*mod drsi*/
 	else if (! empty($conf->global->MAIN_SECURITY_HASH_ALGO) && $conf->global->MAIN_SECURITY_HASH_ALGO == 'SSHA' && function_exists( 'mhash' ) && function_exists( 'mhash_keygen_s2k' ) ) {
-            mt_srand( (double) microtime() * 1000000 );
-            $salt = mhash_keygen_s2k( MHASH_SHA1, $chain, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
-            return base64_encode( mhash( MHASH_SHA1, $chain.$salt ).$salt );
+//            mt_srand( (double) microtime() * 1000000 );
+//            $salt = mhash_keygen_s2k( MHASH_SHA1, $chain, substr( pack( "h*", md5( mt_rand() ) ), 0, 8 ), 4 );
+//            return base64_encode( mhash( MHASH_SHA1, $chain.$salt ).$salt );
+//            
+            
+            $salt = substr(str_shuffle(str_repeat('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',4)),0,4);
+            return '{SSHA}' . base64_encode(sha1( $chain.$salt, TRUE ). $salt);
         }
         /*fmod drsi*/
 

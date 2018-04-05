@@ -5,6 +5,9 @@ require("../main.inc.php");
 llxHeader();
 
 
+global $user;
+echo "{".$conf->global->MAIN_SECURITY_HASH_ALGO."}".$user->pass_indatabase_crypted."<br/><br/>";
+
 
 if($_REQUEST['action'] == "caisse"){
     $tabVal = array('SAVA', 'AMP','ACY','ACY','ACY','B07','LYO3','LYO6','CHY','BES','BES','BES','BES','CLE','CLE','CLE','GRE','MAR','MAR','MAU','MAU','MTB','MTP','MTP','NIM','NIM','NIM','PER','PER','PER','STE','STP','STP','VAL');

@@ -67,7 +67,7 @@ class BimpDb
             }
         }
         $sql .= ' WHERE ' . $where;
-        
+
         return $this->execute($sql);
     }
 
@@ -130,7 +130,7 @@ class BimpDb
         return false;
     }
 
-    public function getRows($table, $where = '1', $limit = null, $return = 'object', $fields = null)
+    public function getRows($table, $where = '1', $limit = null, $return = 'object', $fields = null, $order_by = null, $order_way = null)
     {
         $sql = 'SELECT ';
 
@@ -150,6 +150,13 @@ class BimpDb
 
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
+
+        if (!is_null($order_by)) {
+            $sql .= ' ORDER BY `' . $order_by . '`';
+            if (!is_null($order_way)) {
+                $sql .= strtoupper($order_way);
+            }
+        }
 
         if (!is_null($limit)) {
             $sql .= ' LIMIT ' . $limit;

@@ -44,6 +44,7 @@ class BC_ListTable extends BC_List
         $this->params_def['cols'] = array('type' => 'keys');
         $this->params_def['extra_cols'] = array('data_type' => 'array');
         $this->params_def['enable_search'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['enable_refresh'] = array('data_type' => 'bool', 'default' => 1);
 
         $path = null;
 
@@ -303,6 +304,9 @@ class BC_ListTable extends BC_List
 
             $html .= '<th class="th_tools">';
             $html .= '<div class="headerTools">';
+            
+            $html .= '<span class="fa-spin loadingIcon"></span>';
+            
             if ($this->search && $this->params['enable_search']) {
                 $html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
             }
@@ -323,8 +327,15 @@ class BC_ListTable extends BC_List
                 $html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
                 $html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
                 $html .= $parametersPopUpHtml;
-                $html .= '</div>';
             }
+            
+            if ($this->params['enable_refresh']) {
+                $html .= '<span class="headerButton refreshListButton bs-popover"';
+                $html .= BimpRender::renderPopoverData('Actualiser la liste', 'top', false);
+                $html .= '></span>';
+            }
+            
+            $html .= '</div>';
             $html .= '</th>';
 
             $html .= '</tr>';

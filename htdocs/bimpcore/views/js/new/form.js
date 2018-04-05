@@ -276,6 +276,29 @@ function closeForm(form_id) {
     }
 }
 
+function submitForm(form_id) {
+    var $form = $('#' + form_id);
+    if (!$form.length) {
+        return;
+    }
+
+    var $modal = $form.findParentByClass('modal');
+    if ($.isOk($modal)) {
+        var $btn = $modal.find('.modal-footer').find('.save_object_button');
+        if ($btn.length) {
+            $btn.click();
+        }
+    } else {
+        var $container = $('#' + form_id + '_container');
+        if ($container.length) {
+            var $btn = $container.find('.save_object_button');
+            if ($btn.length) {
+                $btn.click();
+            }
+        }
+    }
+}
+
 function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values) {
     if ($button.hasClass('disabled')) {
         return;
@@ -982,7 +1005,11 @@ function setFormEvents($form) {
         var $input = $(this).find('[name="' + field_name + '"]');
         if ($input.length) {
             $input.keyup(function (e) {
-
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    submitForm($form.attr('id'));
+                }
             });
         }
     });

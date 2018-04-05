@@ -145,6 +145,14 @@ fields:
             hide_values: 0,
         depends_on: id_client
         
+    id_cond_reglement:
+        label: Condition de réglement
+        type: int
+        values: 
+            array: cond_reglements
+        default_value: 
+            bimpcore_conf: bimpcaisse_id_cond_reglement_default
+            
     id_facture: 
         label: Facture
         type: id_object

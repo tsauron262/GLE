@@ -1221,7 +1221,7 @@ class BimpObject
                 }
                 $this->set('user_create', $uc);
             }
-
+            
             foreach ($this->data as $field => &$value) {
                 $this->checkFieldValueType($field, $value);
                 if (is_null($value)) {

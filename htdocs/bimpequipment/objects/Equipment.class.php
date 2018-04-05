@@ -61,8 +61,8 @@ class Equipment extends BimpObject
                         'value'    => 300
                     ),
                     array(
-                        'operator' => '>',
-                        'value'    => 199
+                        'operator' => '>=',
+                        'value'    => 200
                     )
                 )
             )

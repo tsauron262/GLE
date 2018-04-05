@@ -156,6 +156,74 @@ class BR_CommandeShipment extends BimpObject
         return $buttons;
     }
 
+    public function renderProductsQties()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $resShipment = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
+
+            $rows = $resShipment->getList(array(
+                'id_commande_client' => (int) $this->getData('id_commande_client'),
+                'id_shipment'        => (int) $this->id
+            ));
+
+            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+
+            if (count($rows)) {
+                $html .= '<table class="objectlistTable">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>Ref. réservation</th>';
+                $html .= '<th>Produit</th>';
+                $html .= '<th>N° de série</th>';
+                $html .= '<th>Qté</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                foreach ($rows as $r) {
+                    $product->fetch((int) $r['id_product']);
+                    if ((int) $r['id_equipment']) {
+                        $equipment->fetch((int) $r['id_equipment']);
+                    } else {
+                        $equipment->reset();
+                    }
+                    $html .= '<tr>';
+                    $html .= '<td>' . $r['ref_reservation'] . '</td>';
+                    $html .= '<td>';
+                    if ($product->isLoaded()) {
+                        $html .= $product->getData('ref') . ' - ' . $product->getData('label');
+                    } else {
+                        $html .= '<span class="danger">Erreur: produit invalide' . ((int) $r['id_product'] ? ' (ID ' . $r['id_product'] . ')' : '') . '</span>';
+                    }
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    if ((int) $r['id_equipment']) {
+                        if ($equipment->isLoaded()) {
+                            $html .= $equipment->getData('serial');
+                        } else {
+                            $html .= '<span class="danger">Erreur: équipement invalide (ID ' . $r['id_equipment'] . ')</span>';
+                        }
+                    }
+                    $html .= '</td>';
+                    $html .= '<td>' . $r['qty'] . '</td>';
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+
+                $html .= '</table>';
+            } else {
+                $html .= BimpRender::renderAlerts('Aucun produit inclus dans cette expédition', 'info');
+            }
+        }
+
+        return $html;
+    }
+
     public function renderServicesQtiesInputs()
     {
         $id_commande = (int) $this->getData('id_commande_client');

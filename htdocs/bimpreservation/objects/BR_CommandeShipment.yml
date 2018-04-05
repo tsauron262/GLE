@@ -95,11 +95,15 @@ forms:
               input_name: validation
               input:
                   type: hidden
+            - custom: 1
+              label: Produits inclus
+              input_name: products
+              content: 
+                  callback: renderProductsQties
               value: 1
             - label: Services à inclure
               custom: 1
               input_name: services
-              data_type: int
               content: 
                   callback: renderServicesQtiesInputs
                   

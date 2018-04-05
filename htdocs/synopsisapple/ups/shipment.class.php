@@ -203,7 +203,7 @@ class shipment {
         $sql .= '`options_charges` = ' . (float) $this->upsInfos['charges']['options'] . ', ';
         $sql .= '`total_charges` = ' . (float) $this->upsInfos['charges']['total'] . ', ';
         $sql .= '`billing_weight` = ' . (float) $this->upsInfos['billingWeight'] . ', ';
-        $sql .= '`tracking_number` = ' . str_replace(" ", "",(isset($this->upsInfos['trackingNumber']) ? "'" . $this->upsInfos['trackingNumber'] . "'" : 'NULL')) . ', ';
+        $sql .= '`tracking_number` = ' . (isset($this->upsInfos['trackingNumber']) ? "'" . $this->upsInfos['trackingNumber'] . "'" : 'NULL') . ', ';
         $sql .= '`identification_number` = ' . (isset($this->upsInfos['identificationNumber']) ? "'" . $this->upsInfos['identificationNumber'] . "'" : 'NULL') . ', ';
         $sql .= '`gsx_confirmation` = ' . (isset($this->gsxInfos['confirmation']) ? "'" . $this->gsxInfos['confirmation'] . "'" : 'NULL') . ', ';
         $sql .= '`gsx_return_id` = ' . (isset($this->gsxInfos['bulkReturnId']) ? "'" . $this->gsxInfos['bulkReturnId'] . "'" : 'NULL') . ', ';
@@ -303,7 +303,7 @@ class shipment {
     public function getFilesDir() {
         if (isset($this->ref) && !empty($this->ref)) {
             global $conf;
-            $filesDir = $conf->synopsisapple->dir_output . "/" . $this->ref;
+            $filesDir = $conf->synopsisapple->dir_output . "/" . str_replace(" ", "_", $this->ref);
 
             if (!file_exists($filesDir)) {
                 if (!mkdir($filesDir))

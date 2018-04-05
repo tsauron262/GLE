@@ -1,14 +1,14 @@
 <?php
 
-class Event {
+class Tariff {
 
     public $errors;
     private $db;
     private $id;
     private $label;
     private $date_creation;
-    private $date_start;
-    private $date_end;
+    private $price;
+    private $fk_event;
 
     public function __construct($db) {
         $this->db = $db;
@@ -22,8 +22,8 @@ class Event {
             return false;
         }
 
-        $sql = 'SELECT id, label, date_creation, date_start, date_end';
-        $sql .= ' FROM event';
+        $sql = 'SELECT id, label, date_creation, price, fk_event';
+        $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
 
@@ -33,39 +33,32 @@ class Event {
                 $this->id = $id;
                 $this->label = $obj->label;
                 $this->date_creation = $obj->date_creation;
-                $this->date_start = $obj->date_start;
-                $this->date_end = $obj->date_end;
+                $this->price = $obj->price;
+                $this->fk_event = $obj->fk_event;
                 return 1;
             }
         } else {
-            $this->errors[] = "Aucun évènement n'a l'identifiant " . $id;
+            $this->errors[] = "Aucun tariff n'a l'identifiant " . $id;
             return -2;
         }
         return -1;
     }
 
-    public function create($label, $date_start, $date_end) {
+    public function create($label, $price, $fk_event) {
 
         // TODO test param
 
-        $date_start_obj = DateTime::createFromFormat('d/m/Y', $date_start);
-        $date_end_obj = DateTime::createFromFormat('d/m/Y', $date_end);
 
-        if ($date_start_obj > $date_end_obj) {
-            $this->errors[] = "Date de début postérieur à date de fin";
-            return -3;
-        }
-
-        $sql = 'INSERT INTO `event` (';
+        $sql = 'INSERT INTO `tariff` (';
         $sql.= '`label`';
         $sql.= ', `date_creation`';
-        $sql.= ', `date_start`';
-        $sql.= ', `date_end`';
+        $sql.= ', `price`';
+        $sql.= ', `fk_event`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . $label . '"';
         $sql.= ', now()';
-        $sql.= ', "' . $date_start_obj->format("Y-m-d") . '"';
-        $sql.= ', "' . $date_end_obj->format("Y-m-d") . '"';
+        $sql.= ', "' . $price . '"';
+        $sql.= ', "' . $fk_event . '"';
         $sql.= ')';
 
 
@@ -77,35 +70,36 @@ class Event {
             $this->db->commit();
             return $last_insert_id;
         } catch (Exception $e) {
-            $this->errors[] = "Impossible de créer l'évènement. " . $e;
+            $this->errors[] = "Impossible de créer le tarif. " . $e;
             $this->db->rollBack();
             return -2;
         }
         return -1;
     }
 
-    public function getEvents() {
+    public function getTariffsForEvent($id_event) {
 
-        $events = array();
+        $tariffs = array();
 
-        $sql = 'SELECT id, label, date_creation, date_start, date_end';
-        $sql .= ' FROM event';
+        $sql = 'SELECT id, label, date_creation, price, fk_event';
+        $sql .= ' FROM tariff';
+        $sql .= ' WHERE fk_event=' . $id_event;
 
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $events[] = array(
+                $tariffs[] = array(
                     'id' => $obj->id,
                     'label' => $obj->label,
                     'date_creation' => $obj->date_creation,
-                    'date_start' => $obj->date_start,
-                    'date_end' => $obj->date_end,
+                    'price' => $obj->price,
+                    'fk_event' => $obj->fk_event,
                 );
             }
-            return $events;
+            return $tariffs;
         } else {
-            $this->errors[] = "Erreur SQL";
+            $this->errors[] = "Aucun tarif pour cet évènement.";
             return -2;
         }
         return -1;

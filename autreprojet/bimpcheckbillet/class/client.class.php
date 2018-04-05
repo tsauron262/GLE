@@ -28,8 +28,8 @@ class Client {
 
 
         $result = $this->db->query($sql);
-        if ($result and $this->db->num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
                 $this->id = $id;
                 $this->first_name = $obj->first_name;
                 $this->date_registration = $obj->date_registration;

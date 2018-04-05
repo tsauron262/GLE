@@ -38,8 +38,12 @@ function setMessage(idElement, message, type) {
  * @dependent setMessage()
  */
 function printErrors(errors, idAlertPlaceHolder) {
-    for (var i = 0; i < errors.length && i < 100; i++) {
-        setMessage(idAlertPlaceHolder, errors[i], 'error');
+    if (Array.isArray(errors)) {
+        for (var i = 0; i < errors.length && i < 100; i++) {
+            setMessage(idAlertPlaceHolder, errors[i], 'error');
+        }
+    } else {
+        setMessage(idAlertPlaceHolder, errors, 'error');
     }
 }
 

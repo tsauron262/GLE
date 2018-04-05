@@ -1,13 +1,15 @@
 <?php
 
 
+
+
 $code = $_REQUEST['code'];
 
 $name = "Nom client classique";
 $valid = "KO";
 
 
-    if($code == "APP-661-5941"){
+if($code == "APP-661-5941"){
     $valid = "OK";
     $name = "Biellet de test toujours valid";
 }

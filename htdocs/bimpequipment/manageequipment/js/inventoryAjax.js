@@ -142,8 +142,11 @@ $(document).ready(function () {
 
     if (is_responsible) {
         $('#closeInventory').click(function () {
-            if (confirm("Êtes-vous sûr de vouloir fermer cet inventaire, cet action est irréversible."))
+            if (confirm("Êtes-vous sûr de vouloir fermer cet inventaire, cet action est irréversible.")) {
+                $('input[name=refScan]').hide();
+                $('#closeInventory').hide();
                 closeInventory();
+            }
         });
     }
 

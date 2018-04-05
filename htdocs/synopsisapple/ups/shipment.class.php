@@ -303,7 +303,7 @@ class shipment {
     public function getFilesDir() {
         if (isset($this->ref) && !empty($this->ref)) {
             global $conf;
-            $filesDir = $conf->synopsisapple->dir_output . "/" . $this->ref;
+            $filesDir = $conf->synopsisapple->dir_output . "/" . str_replace(" ", "_", $this->ref);
 
             if (!file_exists($filesDir)) {
                 if (!mkdir($filesDir))

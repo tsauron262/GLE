@@ -750,15 +750,17 @@ class indexController extends BimpController
             if ($this->isCaisseValide($caisse, $errors)) {
                 $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
                 $vente = BimpObject::getInstance($this->module, 'BC_Vente');
-                $vente->set('status', 1);
-                $vente->set('id_caisse', $id_caisse);
-                $vente->set('id_caisse_session', (int) $caisse->getData('id_current_session'));
-                $vente->set('id_entrepot', (int) $caisse->getData('id_entrepot'));
-                if ($id_client) {
-                    $vente->set('id_client', $id_client);
-                }
+                $errors = $vente->validateArray(array(
+                    'status'            => 1,
+                    'id_caisse'         => $id_caisse,
+                    'id_caisse_session' => (int) $caisse->getData('id_current_session'),
+                    'id_entrepot'       => (int) $caisse->getData('id_entrepot'),
+                    'id_client'         => $id_client
+                ));
 
-                $errors = $vente->create();
+                if (!count($errors)) {
+                    $errors = $vente->create();
+                }
 
                 $data = array();
                 $html = '';
@@ -926,6 +928,46 @@ class indexController extends BimpController
             'ticket_html'     => $ticket_html,
             'ticket_errors'   => $ticket_errors,
             'request_id'      => BimpTools::getValue('request_id', 0),
+        )));
+    }
+
+    protected function ajaxProcessSaveCondReglement()
+    {
+        $errors = array();
+
+        $id_vente = BimpTools::getValue('id_vente', 0);
+        $id_cond = BimpTools::getValue('id_cond', 0);
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        if (!$id_cond) {
+            $errors[] = 'Aucune condition de réglement spécifiée';
+        }
+
+        $vente_data = array();
+
+        if (!count($errors)) {
+            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('id_cond_reglement', $id_cond);
+                    $errors = $vente->update();
+                }
+                $vente_data = $vente->getAjaxData();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => 'Conditions de réglement mises à jour avec succès',
+            'vente_data' => $vente_data,
+            'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }
 

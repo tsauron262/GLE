@@ -12,7 +12,7 @@ class BimpConfig
     public $current = null;
     public $errors = array();
     public static $keywords = array(
-        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'dol_list', 'conf'
+        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'dol_list', 'conf', 'bimpcore_conf'
     );
 
     public function __construct($dir, $file_name, $instance)
@@ -274,6 +274,9 @@ class BimpConfig
             if (array_key_exists('conf', $value)) {
                 return $this->getConfValue($value['conf'], $path . '/conf');
             }
+            if (array_key_exists('bimpcore_conf', $value)) {
+                return $this->getBimpcoreConfValue($value['bimpcore_conf'], $path . '/bimpcore_conf');
+            }
             if (array_key_exists('global', $value)) {
                 $global_var = $this->getvalue($value['global'], $path . '/global');
                 global ${$global_var};
@@ -453,7 +456,7 @@ class BimpConfig
             }
             $is_static = (int) $this->get($path . '/is_static', false, false, 'bool');
         }
-        
+
         if (is_null($object)) {
             if (!is_null($prop_name)) {
                 $msg = 'Impossible d\'obtenir la propriété "' . $prop_name . '" - Instance invalide';
@@ -571,7 +574,7 @@ class BimpConfig
         if (is_null($id_list) || !($id_list) || !is_int($id_list)) {
             return array();
         }
-        
+
         return BimpTools::getDolListArray($id_list);
     }
 
@@ -585,6 +588,15 @@ class BimpConfig
             global $db;
             $bdb = new BimpDb($db);
             return $bdb->getValue('bimpcore_conf', 'value', '`name` = \'' . $conf . '\'');
+        }
+
+        return null;
+    }
+
+    protected function getBimpcoreConfValue($bimpcoreConf, $path)
+    {
+        if (is_string($bimpcoreConf)) {
+            return BimpCore::getConf($bimpcoreConf);
         }
 
         return null;

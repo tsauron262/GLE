@@ -402,6 +402,25 @@ class BR_Reservation extends BimpObject
         return $status;
     }
 
+    public function displayEquipment()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('id_equipment')) {
+                return $this->displayData('id_equipment', 'nom_url'); exit;
+            } else {
+                if (in_array((int) $this->getData('status'), self::$need_equipment_status)) {
+                    if ($this->isProductSerialisable()) {
+                        return '<span class="danger">Erreur: aucun n° de série</span>';
+                    } else {
+                        return '<span class="warning">Non sérialisable</span>';
+                    }
+                }
+            }
+        }
+
+        return '';
+    }
+
     // Gestion des réservations:
 
     public function createReservationsFromCommandeClient($id_entrepot, $id_commande_client)

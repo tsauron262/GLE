@@ -418,7 +418,7 @@ class BimpObject
                 if ($relation !== 'hasMany') {
                     return array();
                 }
-                
+
                 $instance = $this->config->getObject('', $object_name);
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
@@ -1019,7 +1019,6 @@ class BimpObject
 
             $errors = array_merge($errors, $this->validateValue($field, $value));
         }
-
         $associations = $this->getConf('associations', array(), false, 'array');
 
         foreach ($associations as $asso_name => $params) {
@@ -1028,6 +1027,7 @@ class BimpObject
             }
         }
         $this->config->setCurrentPath($prev_path);
+        
         return $errors;
     }
 
@@ -1221,7 +1221,7 @@ class BimpObject
                 }
                 $this->set('user_create', $uc);
             }
-            
+
             foreach ($this->data as $field => &$value) {
                 $this->checkFieldValueType($field, $value);
                 if (is_null($value)) {

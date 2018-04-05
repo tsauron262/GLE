@@ -600,7 +600,7 @@ class BimpTools
                 }
 
                 if (is_numeric($value)) {
-                    if ($value !== 0) {
+                    if ((int) $value !== 0) {
                         $value = 1;
                     } else {
                         $value = 0;
@@ -659,6 +659,11 @@ class BimpTools
                 return false;
         }
         return true;
+    }
+    
+    public static function isNumericType($value)
+    {
+        return (is_int($value) || is_float($value) || is_bool($value));
     }
 
     // Gestion des durées:

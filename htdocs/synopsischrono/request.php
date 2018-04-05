@@ -369,7 +369,8 @@ AND  `fk_c_type_contact` =40");
 //        facture_pdf_create($db, $facture, "crabeSav", $langs);
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
             link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
-            envoieMail("Facture", $chrono, $facture, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
+            if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
+                envoieMail("Facture", $chrono, $facture, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
         }
 
 

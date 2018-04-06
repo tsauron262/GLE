@@ -118,7 +118,6 @@ $(document).ready(function () {
     }
     $('#entrepot').select2({placeholder: 'Rechercher ...'});
     $('#entrepot option:selected').trigger('change');
-    entrepotId = $('#entrepot option:selected').val();
     orderId = getUrlParameter('id');
     if (orderId === undefined)
         orderId = $('#id_order_hidden').val();
@@ -206,7 +205,10 @@ function addDeliveredEquipment(ligne, serial) {
 function initEvents() {
 
     $('.modify').click(modifyQuantity);
-
+    
+    if ($('#entrepot').val() > 0)
+        entrepotId = $('#entrepot').val();
+    
     $('#entrepot').change(function () {
         entrepotId = $('#entrepot').val();
         $('input[name=serial]').first().focus();

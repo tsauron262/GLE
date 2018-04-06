@@ -134,7 +134,7 @@ foreach ($entrepots as $id => $name) {
     if ($id == $fk_entrepot)
         print '<option value="' . $id . '" selected>' . $name . '</option>';
     else
-        print '<option value="' . $id_entrepot . '">' . $name . '</option>';
+        print '<option value="' . $id . '">' . $name . '</option>';
 }
 print '</select> ';
 

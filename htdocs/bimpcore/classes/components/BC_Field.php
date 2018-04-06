@@ -11,6 +11,11 @@ class BC_Field extends BimpComponent
     public $container_id = null;
     public $display_input_value = true;
     public static $type_params_def = array(
+        'id_parent' => array(
+            'object'      => array('default' => ''),
+            'create_form' => array('default' => ''),
+            'create_form_values' => array('data_type' => 'array')
+        ),
         'id_object' => array(
             'object'      => array('required' => true),
             'create_form' => array('default' => ''),

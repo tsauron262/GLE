@@ -453,13 +453,10 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getBottomRightHtml()
     {
 
-
         $html .= $this->getTotauxRowsHtml();
         $html .= $this->getPaymentsHtml();
         $html .= $this->getAfterTotauxHtml();
-
-
-
+        
         return $html;
     }
 
@@ -777,8 +774,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml()
     {
-        $html = '<div>';
-        $html .= '<table style="width: 100%" cellpadding="5">';
+        $html .= '<table style="width: 100%" cellpadding="">';
 
         if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
             $html .= '<tr>';
@@ -792,12 +788,10 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/></td>';
+        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
         $html .= '</tr>';
 
         $html .= '</table>';
-        $html .= '</div>';
-        $html .= '<br/>';
 
         return $html;
     }

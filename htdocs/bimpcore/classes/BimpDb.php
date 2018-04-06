@@ -26,7 +26,7 @@ class BimpDb
             $fields .= $name;
             if (is_int($value)) {
                 $values .= (int) $value;
-            } elseif (is_numeric($value) && !preg_match('/[Ee]/', $value)) {
+            } elseif (BimpTools::isNumericType($value) && !preg_match('/[Ee]/', $value)) {
                 $values .= $value;
             } else {
                 $values .= '"' . $this->db->escape($value) . '"';
@@ -60,14 +60,14 @@ class BimpDb
                 $first_loop = false;
             }
             $sql .= '`' . $name . '` = ';
-            if (is_numeric($value)) {
+            if (BimpTools::isNumericType($value)) {
                 $sql .= $value;
             } else {
                 $sql .= '"' . $this->db->escape($value) . '"';
             }
         }
         $sql .= ' WHERE ' . $where;
-
+        
         return $this->execute($sql);
     }
 

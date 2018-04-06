@@ -95,6 +95,7 @@ forms:
               input_name: validation
               input:
                   type: hidden
+              value: 1
             - custom: 1
               label: Produits inclus
               input_name: products

@@ -30,10 +30,6 @@ abstract class BimpComponent
             } elseif (!$name && $this->object->config->isDefined($path . '/default')) {
                 $this->config_path = $path . '/default';
                 $this->name = 'default';
-            } else {
-//                echo '<pre>';
-//                print_r($object->config->params);
-//                exit;
             }
         }
 
@@ -183,7 +179,7 @@ abstract class BimpComponent
                             $param = $value;
                         }
                     } elseif ($required) {
-                        $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
+                        $errors[] = 'Paramètre obligatoire "' . $path . '/' . $name . '" absent du fichier de configuration';
                     }
                     break;
 
@@ -213,7 +209,7 @@ abstract class BimpComponent
                         if (!is_null($defs_type)) {
                             if (property_exists('BimpConfigDefinitions', $defs_type)) {
                                 if (!$config->isDefined($path . '/' . $name) && $required) {
-                                    $errors[] = 'Paramètre obligatoire "' . $name . '" absent du fichier de configuration';
+                                    $errors[] = 'Paramètre obligatoire "' . $path . '/' . $name . '" absent du fichier de configuration';
                                 } else {
                                     if ($multiple) {
                                         $param = array();

@@ -46,7 +46,7 @@ class BimpPDF extends TCPDF
         $this->SetHeaderMargin($this->headerMargin);
         $this->SetFooterMargin($this->footerMargin);
         $this->setMargins($this->sideMargin, $this->topMargin, $this->sideMargin);
-        $this->SetAutoPageBreak(true, $this->footerMargin + 5);
+        $this->SetAutoPageBreak(true, $this->footerMargin);
         $this->AddPage();
     }
 

@@ -118,10 +118,15 @@ print '<strong>Livré dans l\'entrepôt </strong>';
 
 $entrepots = getAllEntrepots($db);
 
+$fk_entrepot = $object->array_options['options_entrepot'];
+
+if ($fk_entrepot == '')
+    $fk_entrepot = $user->array_options['options_defaultentrepot'];
+
 print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
 foreach ($entrepots as $id => $name) {
-    if ($id == $object->array_options['options_entrepot'])
+    if ($id == $fk_entrepot)
         print '<option value="' . $id . '" selected>' . $name . '</option>';
     else
         print '<option value="' . $id . '">' . $name . '</option>';

@@ -8,6 +8,7 @@
 include_once '../../../main.inc.php';
 
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 function addEquipments($db, $newEquipments, $user) {
 
@@ -15,6 +16,9 @@ function addEquipments($db, $newEquipments, $user) {
     foreach ($newEquipments as $newEquipment) {
         $newErrors = array();
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
+        
+        $doli_product = new product($db);
+        $doli_product->fetch($newEquipment['id_product']);
 
         $equipement->validateArray(array(
             'id_product' => $newEquipment['id_product'], // ID du produit. 
@@ -24,6 +28,7 @@ function addEquipments($db, $newEquipments, $user) {
 //            'date_purchase' => '2010-10-10', // date d'achat TODO remove
 //            'date_warranty_end' => '2010-10-10', // TODO remove
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
+            'prix_achat' => $doli_product->price,
             'admin_login' => '',
             'admin_pword' => '',
 //            'date_vente' => '2999-01-01 00:00:00',

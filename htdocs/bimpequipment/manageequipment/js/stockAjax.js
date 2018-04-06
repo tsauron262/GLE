@@ -205,7 +205,10 @@ function addDeliveredEquipment(ligne, serial) {
 function initEvents() {
 
     $('.modify').click(modifyQuantity);
-
+    
+    if ($('#entrepot').val() > 0)
+        entrepotId = $('#entrepot').val();
+    
     $('#entrepot').change(function () {
         entrepotId = $('#entrepot').val();
         $('input[name=serial]').first().focus();

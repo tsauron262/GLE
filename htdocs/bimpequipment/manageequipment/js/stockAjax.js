@@ -118,6 +118,7 @@ $(document).ready(function () {
     }
     $('#entrepot').select2({placeholder: 'Rechercher ...'});
     $('#entrepot option:selected').trigger('change');
+    entrepotId = $('#entrepot option:selected').val();
     orderId = getUrlParameter('id');
     if (orderId === undefined)
         orderId = $('#id_order_hidden').val();

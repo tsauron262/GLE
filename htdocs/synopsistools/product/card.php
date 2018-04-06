@@ -861,7 +861,7 @@ if ($_GET["action"] == 'create' && $user->rights->produit->creer) {
                    <td class="ui-widget-content">';
 
         if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_PRODUCTDESC) {
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('desc', '', 160, 'dol_notes', '', false);
             $doleditor->Create();
         } else {
@@ -1039,7 +1039,7 @@ EOF;
 //
 //        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_PRODUCTDESC)
 //        {
-//            require_once(DOL_DOCUMENT_ROOT."/lib/doleditor.class.php");
+//            require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
 //            $doleditor=new DolEditor('clause','',160,'dol_notes','',false);
 //            $doleditor->Create();
 //        } else {
@@ -1052,7 +1052,7 @@ EOF;
         print '<tr><th valign="top" class="ui-widget-header ui-state-default" >' . $langs->trans("NoteNotVisibleOnBill") . '</th>
                    <td class="ui-widget-content">';
         if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_PRODUCTDESC) {
-            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
             $doleditor = new DolEditor('note', '', 180, 'dol_notes', '', false);
             $doleditor->Create();
         } else {
@@ -1823,7 +1823,7 @@ EOF;
                        <td colspan="2" class="ui-widget-content">';
             print "\n";
             if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_PRODUCTDESC) {
-                require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
                 $doleditor = new DolEditor('desc', $product->description, 160, 'dol_notes', '', false);
                 $doleditor->Create();
             } else {
@@ -2018,7 +2018,7 @@ EOF;
             print '<tr><th class="ui-widget-header ui-state-default" valign="top">' . $langs->trans("Clause") . '</td>
                        <td  class="ui-widget-content" colspan="2">';
             if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_PRODUCTDESC) {
-                require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
                 $doleditor = new DolEditor('clause', $product->note, 200, 'dol_notes', '', false);
                 $doleditor->Create();
             } else {
@@ -2032,7 +2032,7 @@ EOF;
             print '<tr><th class="ui-widget-header ui-state-default" valign="top">' . $langs->trans("NoteNotVisibleOnBill") . '</td>
                        <td  class="ui-widget-content" colspan="2">';
             if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_PRODUCTDESC) {
-                require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/class/doleditor.class.php");
                 $doleditor = new DolEditor('note', $product->note, 200, 'dol_notes', '', false);
                 $doleditor->Create();
             } else {

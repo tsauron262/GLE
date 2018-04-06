@@ -43,8 +43,16 @@ class ActionsSynopsisHisto {
             $return .= histoNavigation::getBlocHisto($context);
         }
         
-       if($user->array_options['options_mail_sec'] == "" || $user->office_phone == "")
+       if($user->array_options['options_mail_sec'] == "" || $user->office_phone == ""){
             setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
+       }
+       
+       if($user->pass_indatabase_crypted == "")
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 20 avril seront désactivés)</a>", null, 'errors');
+       
 
         $this->resprints = $return;
         return 0;

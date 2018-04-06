@@ -2343,7 +2343,7 @@ class User extends CommonObject
                 }
                 
                 if($this->pass_indatabase_crypted != ''){
-                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{".$conf->global->MAIN_SECURITY_HASH_ALGO."}".$this->pass_indatabase_crypted;
+                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = $this->pass_indatabase_crypted;
                 }
                 
                 

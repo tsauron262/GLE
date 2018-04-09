@@ -76,4 +76,24 @@ class Ticket {
         }
         return -1;
     }
+
+    public function check($barcode) {
+
+        $sql = 'SELECT id';
+        $sql .= ' FROM ticket';
+        $sql .= ' WHERE barcode=' . $barcode;
+
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                return $obj->id;
+            }
+        } else {
+            $this->errors[] = "Aucun ticket n'a le code barre : " . $barcode;
+            return -2;
+        }
+        return -1;
+    }
+
 }

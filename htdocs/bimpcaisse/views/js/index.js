@@ -1192,6 +1192,7 @@ $(document).ready(function () {
 
     var $mainContainer = $('#bc_main_container');
     setCommonEvents($mainContainer);
+    setInputsEvents($mainContainer);
 
     $('#openCaisseForm').find('[name="id_entrepot"]').change(function () {
         var id_entrepot = parseInt($(this).val());

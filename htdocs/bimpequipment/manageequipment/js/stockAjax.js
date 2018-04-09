@@ -112,8 +112,7 @@ function getTabEquipment(lignes) {
  */
 
 $(document).ready(function () {
-    if (localStorage.getItem('enregistrementOK'))
-    {
+    if (localStorage.getItem('enregistrementOK')) {
         alert(localStorage.getItem('enregistrementOK'));
         localStorage.clear();
     }

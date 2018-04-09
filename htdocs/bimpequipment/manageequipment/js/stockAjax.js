@@ -75,15 +75,20 @@ function getRemainingLignes() {
                     if (prod.deliveredQty !== 0 && prod.deliveredQty !== null)
                         addDeliveredProduct(prod);
                 });
+                var cntEquipment = [];
                 tabEquipment.forEach(function (equipment) {
-                    for (var j = 0; j < equipment.remainingQty; j++)
-                        addEquipment(equipment);
-                    for (var j = 0; j < equipment.deliveredQty; j++)
-                        addDeliveredEquipment(equipment, (equipment.tabSerial[j] !== undefined) ? equipment.tabSerial[j] : 'Inconnu');
+                    for (var j = 0; j < parseInt(equipment.qty); j++) {
+                        if (cntEquipment[equipment.prodId] === undefined)
+                            cntEquipment[equipment.prodId] = 0;
+                        else
+                            cntEquipment[equipment.prodId]++;
+                        if(equipment.tabSerial[cntEquipment[equipment.prodId]] === undefined)
+                            addEquipment(equipment);
+                        else
+                            addDeliveredEquipment(equipment, equipment.tabSerial[cntEquipment[equipment.prodId]]);
+                    }
                 });
                 initEvents();
-//                $('#entrepot').val(outP.init_fk_entrepot);
-//                $('#entrepot').trigger('change');
             }
         }
     });
@@ -180,7 +185,7 @@ function addEquipment(ligne) {
     line += '<td></td>';
     line += '<td></td>';
     line += '<td></td>';
-    line += '<td>' + ligne.price_unity + ' €</td>';
+    line += '<td name="price">' + ligne.price_unity + ' €</td>';
     line += '<td style="text-align:center"><input type="checkbox" name="stocker"></td></tr>';
     $(line).appendTo('#productTable tbody');
 }
@@ -205,10 +210,10 @@ function addDeliveredEquipment(ligne, serial) {
 function initEvents() {
 
     $('.modify').click(modifyQuantity);
-    
+
     if ($('#entrepot').val() > 0)
         entrepotId = $('#entrepot').val();
-    
+
     $('#entrepot').change(function () {
         entrepotId = $('#entrepot').val();
         $('input[name=serial]').first().focus();
@@ -323,6 +328,7 @@ function saveProducts() {
                 var newEquipment = {
                     id_prod: parseInt($(this).find('td[name=productId]').text()),
                     serial: $(this).find('input[name=serial]').val(),
+                    price: parseInt($(this).find('input[name=price]').text().replace(' €', '')),
                     cnt: cntProduct
                 };
                 products.push(newEquipment);

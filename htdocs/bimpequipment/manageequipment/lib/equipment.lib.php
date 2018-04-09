@@ -17,9 +17,6 @@ function addEquipments($db, $newEquipments, $user) {
         $newErrors = array();
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
         
-        $doli_product = new product($db);
-        $doli_product->fetch($newEquipment['id_product']);
-
         $equipement->validateArray(array(
             'id_product' => $newEquipment['id_product'], // ID du produit. 
             'type' => 2, // cf $types
@@ -28,7 +25,6 @@ function addEquipments($db, $newEquipments, $user) {
 //            'date_purchase' => '2010-10-10', // date d'achat TODO remove
 //            'date_warranty_end' => '2010-10-10', // TODO remove
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
-            'prix_achat' => $doli_product->prix_achat,
             'admin_login' => '',
             'admin_pword' => '',
 //            'date_vente' => '2999-01-01 00:00:00',

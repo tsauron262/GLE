@@ -151,7 +151,7 @@ function resetAllDivs() {
         addErrorDivs();
         return;
     }
-    
+
     addWays();
     addAllNav();
     addDivChoice();
@@ -220,15 +220,38 @@ function addDivChoice() {
                 .attr('class', 'customDiv fixDiv')
                 .text(obj.catAChoisir['labelMere'])
                 .appendTo('#mainContainer');
-        for (var id in obj.catAChoisir) {
-            if (obj.catAChoisir[id].nom != undefined) {
-                $('<div>' + obj.catAChoisir[id].nom + '<a class="fillTheDiv" href=""></a></div>')
-                        .attr("id", id)
-                        .attr('class', 'customDiv divClikable')
-                        .appendTo('#mainContainer');
-            }
+
+        var catAChoisir = sortcatAChoisir(obj.catAChoisir);
+        var cat;
+        catAChoisir.forEach(function (cat) {
+            $('<div>' + cat.nom + '<a class="fillTheDiv" href=""></a></div>')
+                    .attr("id", cat.id)
+                    .attr('class', 'customDiv divClikable')
+                    .appendTo('#mainContainer');
+        });
+    }
+}
+
+function sortcatAChoisir() {
+
+    var catAChoisir = [];
+    var cat;
+
+    for (var id in obj.catAChoisir) {
+        if (obj.catAChoisir[id].nom != undefined) {
+            cat = {
+                nom: obj.catAChoisir[id].nom,
+                id: id
+            };
+            catAChoisir.push(cat);
         }
     }
+
+    catAChoisir.sort(function (a, b) {
+        return a.nom.localeCompare(b.nom);
+    });
+
+    return catAChoisir;
 }
 
 /* Get the parameter sParam */
@@ -243,4 +266,5 @@ var getUrlParameter = function getUrlParameter(sParam) {
             return sParameterName[1] === undefined ? true : sParameterName[1];
         }
     }
-};
+}
+;

@@ -1318,7 +1318,7 @@ class BC_Vente extends BimpObject
         // Vérification de la validité de la vente: 
 
         $data = $this->getAjaxData();
-        
+
         if (is_null($caisse) || !$caisse->isLoaded()) {
             $errors[] = 'Caisse absente ou invalide';
         }
@@ -1341,7 +1341,7 @@ class BC_Vente extends BimpObject
         if (($has_equipment || (int) $data['paiement_differe']) && (is_null($client) || !$client->isLoaded())) {
             $errors[] = 'Compte client obligatoire pour cette vente';
         }
-        
+
         if (!$data['paiement_differe'] && (float) $data['toPay'] > 0) {
             $errors[] = 'Paiements insuffisants';
         }
@@ -1405,7 +1405,12 @@ class BC_Vente extends BimpObject
             }
 
             $fonds_diff = $total_paid_liq;
-            $fonds_diff -= (float) ($total_paid - $total_ttc);
+
+            if ((float) $total_paid > (float) $total_ttc) {
+                
+                // Retrait du rendu monnaie: 
+                $fonds_diff -= (float) ($total_paid - $total_ttc);
+            }
 
             if ($fonds_diff != 0) {
                 $fonds = (float) $caisse->getData('fonds');
@@ -1634,7 +1639,7 @@ class BC_Vente extends BimpObject
                 if ($remise_percent > 0) {
                     $final_price -= (float) ($pu_ttc * ($remise_percent / 100));
                 }
-                $equipment->set('date_vente', $date);
+                $equipment->set('date_vente', date('Y-m-d H:i:s'));
                 $equipment->set('prix_vente', $final_price);
                 $equipment->set('id_facture', $facture->id);
                 $equipment->update();
@@ -1664,7 +1669,7 @@ class BC_Vente extends BimpObject
             $total_paid += $montant;
 
             $p = new Paiement($db);
-            $p->datepaye = $date;
+            $p->datepaye = dol_now();
             $p->amounts = array(
                 $facture->id => $montant
             );
@@ -1691,7 +1696,7 @@ class BC_Vente extends BimpObject
 
             if ($returned < 0) {
                 $p = new Paiement($db);
-                $p->datepaye = $date;
+                $p->datepaye = dol_now();
                 $p->amounts = array(
                     $facture->id => $returned
                 );

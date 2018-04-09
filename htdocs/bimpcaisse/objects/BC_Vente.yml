@@ -177,6 +177,7 @@ fields_tables:
               display: nom_url
             - field: id_client_contact
               display: nom_url
+            - field: id_cond_reglement
             - field: id_facture
               display: nom_url
             

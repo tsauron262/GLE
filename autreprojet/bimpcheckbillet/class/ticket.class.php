@@ -79,17 +79,32 @@ class Ticket {
 
     public function check($barcode) {
 
-        $sql = 'SELECT id';
-        $sql .= ' FROM ticket';
-        $sql .= ' WHERE barcode=' . $barcode;
+        $sql = 'SELECT t.id as id_ticket';
+        $sql .= ' FROM ticket as t';
+        $sql .= ' LEFT JOIN event as e ON e.id = t.fk_event';
+        $sql .= ' WHERE barcode="' . $barcode . '"';
+        $sql .= ' AND   DATE(NOW()) >= DATE(e.date_start)';
+        $sql .= ' AND   DATE(NOW()) <= DATE(e.date_end)';
 
+//        echo $sql;
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                return $obj->id;
+                return $obj->id_ticket;
             }
-        } else {
+        } elseif ($result) {
+            $sql = 'SELECT id';
+            $sql .= ' FROM ticket';
+            $sql .= ' WHERE barcode="' . $barcode . '"';
+
+            $result = $this->db->query($sql);
+            if ($result and $result->rowCount() > 0) {
+                while ($obj = $result->fetchObject()) {
+                    $this->errors[] = "Ticket dépassé.";
+                    return -3;
+                }
+            }
             $this->errors[] = "Aucun ticket n'a le code barre : " . $barcode;
             return -2;
         }

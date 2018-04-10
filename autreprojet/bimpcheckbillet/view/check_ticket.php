@@ -43,6 +43,8 @@ print '
     <input type="text" id="barcode"/>
 </div>
 <br/>
+<br/>
+<br/>
 <div id="alertSubmit">
 </div>
 </body>';

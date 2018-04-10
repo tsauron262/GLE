@@ -78,14 +78,17 @@ function getRemainingLignes() {
                 var cntEquipment = [];
                 tabEquipment.forEach(function (equipment) {
                     for (var j = 0; j < parseInt(equipment.qty); j++) {
-                        if (cntEquipment[equipment.prodId] === undefined)
-                            cntEquipment[equipment.prodId] = 0;
+                        var cle = equipment.prodId + equipment.price_unity;
+                        if (cntEquipment[cle] === undefined)
+                            cntEquipment[cle] = 0;
                         else
-                            cntEquipment[equipment.prodId]++;
-                        if(equipment.tabSerial[cntEquipment[equipment.prodId]] === undefined)
+                            cntEquipment[cle]++;
+
+                        if (equipment.tabSerial == null || equipment.tabSerial[cntEquipment[cle]] === undefined)
                             addEquipment(equipment);
-                        else
-                            addDeliveredEquipment(equipment, equipment.tabSerial[cntEquipment[equipment.prodId]]);
+                        else {
+                            addDeliveredEquipment(equipment, equipment.tabSerial[cntEquipment[cle]]);
+                        }
                     }
                 });
                 initEvents();
@@ -329,7 +332,7 @@ function saveProducts() {
                 var newEquipment = {
                     id_prod: parseInt($(this).find('td[name=productId]').text()),
                     serial: $(this).find('input[name=serial]').val(),
-                    price: parseInt($(this).find('input[name=price]').text().replace(' €', '')),
+                    price: parseFloat($(this).find('td[name=price]').text().replace(' €', '').replace(',', '.')),
                     cnt: cntProduct
                 };
                 products.push(newEquipment);

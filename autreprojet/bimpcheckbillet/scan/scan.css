@@ -1,6 +1,6 @@
 canvas, #input, #result{
     position: fixed;
-    top: 0;
+    top: 40px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -13,23 +13,17 @@ canvas{
     margin: auto;   
 }
 
-
-
 #input{
     z-index: 2;
 }
+
 #input input{
     font-size: 35px;
     border: solid black 2px;
     margin:auto;
 }
+
 #result{
     z-index: 3;
     display:none;
-}
-.red{
-    background: red;
-}
-.green{
-    background: green;
 }

@@ -60,6 +60,16 @@ switch ($_POST['action']) {
         }
 
     /**
+     * check_ticket.php
+     */
+    case 'check_ticket': {
+            echo json_encode(array(
+                'id_inserted' => $ticket->check($_POST['barcode']),
+                'errors' => $ticket->errors));
+            break;
+        }
+
+    /**
      * General
      */
     case 'get_events': {

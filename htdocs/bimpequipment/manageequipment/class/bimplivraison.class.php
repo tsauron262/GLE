@@ -133,7 +133,6 @@ class BimpLivraison {
     function getDeliveredLignes($lignes) {
         $deliveredLignes = array();
         foreach ($lignes as $ligne) {
-            $newLigne = $ligne;
             if ($ligne->isEquipment) {
                 $ligne->tabSerial = $this->getDeliveredSerial($ligne);
 //                if (sizeof($ligne->tabSerial) != $newLigne->deliveredQty) {
@@ -146,11 +145,14 @@ class BimpLivraison {
 
     function getDeliveredSerial($ligne) {
         $prodSerial = array();
-        $sql = 'SELECT e.serial as serial';
+        $sql = 'SELECT e.serial as serial, prix_achat';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
         $sql .= ' WHERE e_place.infos="' . $this->getcodeMove() . '"';
         $sql .= ' AND e.id_product=' . $ligne->prodId;
+        $sql .= ' AND e.prix_achat LIKE ' . str_replace(',', '.', $ligne->price_unity);
+        
+//        echo $sql."\n";
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
@@ -177,7 +179,7 @@ class BimpLivraison {
                 $length = sizeof($this->errors);
 
                 if (!isset($product['qty'])) {   // serialisable
-                    $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
+                    $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId, $product['price']);
                 } else {    // non serialisable
                     $result = $doliProduct->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove, 'order_supplier', $this->commande->id);
                     if ($result < 0) {
@@ -218,7 +220,7 @@ class BimpLivraison {
         return $newErrors;
     }
 
-    function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId) {
+    function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId, $price) {
         $length = sizeof($this->errors);
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 
@@ -230,6 +232,7 @@ class BimpLivraison {
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
             'admin_login' => '',
             'admin_pword' => '',
+            'prix_achat' => $price,
             'note' => '',
             'origin_element' => 'order_supplier',
             'origin_id_element' => $this->commande->id

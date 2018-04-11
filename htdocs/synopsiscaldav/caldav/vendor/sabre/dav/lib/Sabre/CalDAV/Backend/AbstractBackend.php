@@ -143,7 +143,7 @@ abstract class AbstractBackend implements BackendInterface {
             $object = $this->getCalendarObject($object['calendarid'], $object['uri']);
         }
 
-                dol_syslog("Validate For Object row : ".print_r($object,1)." filters : ".print_r($filters,1), 3, 0,"_caldav");
+                dol_syslog("Validate For Object row : ".print_r($object,1), 3, 0,"_caldav");
                 
         $data = is_resource($object['calendardata'])?stream_get_contents($object['calendardata']):$object['calendardata'];
         $vObject = VObject\Reader::read($data);

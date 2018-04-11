@@ -390,7 +390,7 @@ global $conf;
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         
         if (!$row){
-            //dol_syslog('Objet introuvable req : SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
+            dol_syslog('Objet introuvable req : SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
             return null;
         }
         
@@ -498,7 +498,7 @@ global $conf;
         //DECODAGE
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
-        $calData = str_replace("|ln|", "\n", $calData);
+        //$calData = str_replace("|ln|", "\n", $calData);
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],

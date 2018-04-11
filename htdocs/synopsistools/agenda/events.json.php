@@ -65,7 +65,6 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         }
         $text .= "<br/><br/>" . substr($ligne->note, 0, 40);
         $text = str_replace(array("<br />\r\n", "\r\n", "\r", "\n"), "<br/>", $text);
-        $text = str_replace("\n", "<br/>", $text);
         
         $text = str_replace('"', '\"', $text);
         $text = str_replace("'", '\'', $text);

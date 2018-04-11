@@ -1077,12 +1077,12 @@ dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
     }
 
     function forbiden($msg = "") {
-        global $USER_CONNECT;
-        
-        if(is_object($USER_CONNECT))
-            dol_syslog("Caldav Forbiden user connect ".$USER_CONNECT->id,3);
-        else
-            dol_syslog("Caldav Forbiden sans user connect",3);
+//        global $USER_CONNECT;
+//        
+//        if(is_object($USER_CONNECT))
+//            dol_syslog("Caldav Forbiden user connect ".$USER_CONNECT->id,3);
+//        else
+//            dol_syslog("Caldav Forbiden sans user connect",3);
         throw new DAV\Exception\Forbidden('Permission denied to '.$msg);
 //            header('HTTP/1.0 403 Forbidden');
 //            header('Content-type: application/xml');

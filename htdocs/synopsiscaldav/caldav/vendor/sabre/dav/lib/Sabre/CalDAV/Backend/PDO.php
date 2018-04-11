@@ -948,7 +948,8 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
     function traiteIcsTab($tab) {
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
-            $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|");
+            $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|", "\n" => "|ln|", "
+" => "|ln|");
             $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "UID");
             $ligne = strtr($ligne, $tabR);
             if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)

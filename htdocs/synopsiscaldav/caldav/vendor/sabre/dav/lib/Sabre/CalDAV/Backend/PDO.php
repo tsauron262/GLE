@@ -498,7 +498,7 @@ global $conf;
         //DECODAGE
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
-        $calData = str_replace("|ln|", "\n", $calData);
+        $calData = str_replace("|ln|", "\\n", $calData);
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],
@@ -595,8 +595,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             foreach($extraData as $clef => $val)
                 $extraData[$clef] = str_replace($tabR, "", $val);
             
-//             $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
-//             $calendarData2['DESCRIPTION'] = str_replace("\n","|ln|", $calendarData2['DESCRIPTION']);
+             $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
@@ -947,7 +946,6 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
     }
 
     function traiteIcsTab($tab) {
-        dol_syslog("av".print_r($tab,1),3);
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|", "\n" => "|ln|", "
@@ -964,7 +962,6 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             } else
                 $tab2[] = $ligne;
         }
-        dol_syslog("ap".print_r($tab2,1),3);
         return implode("\n", $tab2);
     }
 

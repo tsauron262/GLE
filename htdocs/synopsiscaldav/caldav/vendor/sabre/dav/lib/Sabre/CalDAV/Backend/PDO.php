@@ -595,6 +595,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
             foreach($extraData as $clef => $val)
                 $extraData[$clef] = str_replace($tabR, "", $val);
+            
+             str_replace("\n","
+", $calendarData2['DESCRIPTION']);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
@@ -830,6 +833,10 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
                     $calendarData[$clef] = str_replace($tabR, "", $val);
             else
                 $calendarData = str_replace($tabR, "", $calendarData);
+            
+            $calendarData2['DESCRIPTION'] = str_replace("\n","
+", $calendarData2['DESCRIPTION']);
+            
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))

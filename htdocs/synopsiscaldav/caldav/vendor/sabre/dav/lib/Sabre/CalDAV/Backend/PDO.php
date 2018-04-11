@@ -834,7 +834,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             else
                 $calendarData = str_replace($tabR, "", $calendarData);
             
-            $calendarData2['DESCRIPTION'] = str_replace("\n","
+            $calendarData2['DESCRIPTION'] = str_replace("\\n","
 ", $calendarData2['DESCRIPTION']);
             
             $action->datep = $extraData['firstOccurence'];

@@ -1214,7 +1214,6 @@ dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
         $result = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             if ($requirePostFilter) {
-                dol_syslog("Validate For Object row : ".print_r($row,1)." filters : ".print_r($filters,1), 3, 0,"_caldav");
                 if (!$this->validateFilterForObject($row, $filters)) {
                     continue;
                 }

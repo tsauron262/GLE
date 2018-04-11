@@ -498,7 +498,8 @@ global $conf;
         //DECODAGE
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
-        
+        $calData = str_replace("|ln|", "
+");
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],

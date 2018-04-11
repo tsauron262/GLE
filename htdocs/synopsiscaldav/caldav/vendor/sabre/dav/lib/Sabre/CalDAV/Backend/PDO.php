@@ -482,6 +482,7 @@ global $conf;
         $calData = $this->traiteIcsTab($calendarData2);
         
         
+                dol_syslog("traitetabics : ".print_r($calData,1), 3, 0,"_caldav");
         
         $calendarData2['LAST-MODIFIED'] = $row['lastmodified'];
         $calendarData2['CREATED'] = $row['CREATED'];
@@ -499,9 +500,11 @@ global $conf;
         }
         date_default_timezone_set("Europe/Paris");
         
+                dol_syslog("av html_enti  : ".print_r($calData,1), 3, 0,"_caldav");
         //DECODAGE
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
+                dol_syslog("av str_repl  : ".print_r($calData,1), 3, 0,"_caldav");
         $calData = str_replace("|ln|", "\n", $calData);
         $return = array(
             'id' => $row['id'],
@@ -515,6 +518,7 @@ global $conf;
         if(stripos($objectUri, $this->uriTest) > 0)
 //dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
+                dol_syslog("av return  : ".print_r($return,1), 3, 0,"_caldav");
         return $return;
     }
 

@@ -385,6 +385,8 @@ global $conf;
      */
     public function getCalendarObject($calendarId, $objectUri) {
         global $db;
+        
+                dol_syslog("Deb getCalendarObject row : ".print_r($calendarId,1), 3, 0,"_caldav");
         $stmt = $this->pdo->prepare('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -393,6 +395,7 @@ global $conf;
             dol_syslog('Objet introuvable req : SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
             return null;
         }
+                dol_syslog("app introuvable getCalendarObject row : ".print_r($calendarId,1), 3, 0,"_caldav");
         
 //        $sql = $db->query('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = "'.$calendarId.'" AND uri = "'.$objectUri.'"');
 //        if($db->num_rows($sql) < 1)
@@ -414,6 +417,7 @@ global $conf;
 
         $calData = file_get_contents($outputfile);
 
+                dol_syslog("file_get : ".print_r($calData,1), 3, 0,"_caldav");
         $calendarData2 = array(); //$this->traiteTabIcs($row['agendaplus'], array());
 
         /* Participant */
@@ -948,9 +952,9 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
     function traiteIcsTab($tab) {
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
-//            $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|");
+            $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|");
             $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "UID");
-//            $ligne = strtr($ligne, $tabR);
+            $ligne = strtr($ligne, $tabR);
             if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
                 $ligne = substr($ligne,0,2000);
             if (!is_integer($clef)) {

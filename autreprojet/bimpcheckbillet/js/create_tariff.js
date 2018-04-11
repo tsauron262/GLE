@@ -25,6 +25,10 @@ function getEvents() {
                             '<option value=' + event.id + '>' + event.label + '</option>');
                 });
                 initEvents();
+                $(".chosen-select").chosen({
+                    placeholder_text_single: 'Evènement',
+                    no_results_text: 'Pas de résultat'});
+
             } else {
                 setMessage('alertSubmit', "Créer un évènement avant de définir un tarif.", 'error');
                 $('button[name=create]').hide();

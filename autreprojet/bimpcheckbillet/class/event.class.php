@@ -46,7 +46,14 @@ class Event {
 
     public function create($label, $date_start, $date_end) {
 
-        // TODO test param
+        if ($label == '')
+            $this->errors[] = "Le champ label est obligatoire";
+        if ($date_start == '')
+            $this->errors[] = "Le champ date de début est obligatoire";
+        if ($date_end == '')
+            $this->errors[] = "Le champ date de fin est obligatoire";
+        if (sizeof($this->errors) != 0)
+            return -3;
 
         $date_start_obj = DateTime::createFromFormat('d/m/Y', $date_start);
         $date_end_obj = DateTime::createFromFormat('d/m/Y', $date_end);

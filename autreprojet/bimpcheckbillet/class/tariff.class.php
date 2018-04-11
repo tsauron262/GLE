@@ -9,6 +9,8 @@ class Tariff {
     private $date_creation;
     private $price;
     private $fk_event;
+    private $date_start;
+    private $date_end;
 
     public function __construct($db) {
         $this->db = $db;
@@ -22,7 +24,7 @@ class Tariff {
             return false;
         }
 
-        $sql = 'SELECT id, label, date_creation, price, fk_event';
+        $sql = 'SELECT id, label, date_creation, price, fk_event, date_start, date_end';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
@@ -35,6 +37,8 @@ class Tariff {
                 $this->date_creation = $obj->date_creation;
                 $this->price = $obj->price;
                 $this->fk_event = $obj->fk_event;
+                $this->date_start = $obj->date_start;
+                $this->date_end = $obj->date_end;
                 return 1;
             }
         } else {
@@ -44,10 +48,16 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $fk_event) {
+    public function create($label, $price, $id_event) {
 
-        // TODO test param
-
+        if ($label == '')
+            $this->errors[] = "Le champ label est obligatoire";
+        if ($price == '')
+            $this->errors[] = "Le champ prix est obligatoire";
+        if ($id_event == '')
+            $this->errors[] = "Le champ évènement est obligatoire";
+        if (sizeof($this->errors) != 0)
+            return -3;
 
         $sql = 'INSERT INTO `tariff` (';
         $sql.= '`label`';
@@ -58,7 +68,7 @@ class Tariff {
         $sql.= 'VALUES ("' . $label . '"';
         $sql.= ', now()';
         $sql.= ', "' . $price . '"';
-        $sql.= ', "' . $fk_event . '"';
+        $sql.= ', "' . $id_event . '"';
         $sql.= ')';
 
 
@@ -103,6 +113,10 @@ class Tariff {
             return -2;
         }
         return -1;
+    }
+
+    public function hasItsOwnDate() {
+        return $this->date_start != NULL and $this->date_end != NULL;
     }
 
 }

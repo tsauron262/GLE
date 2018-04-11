@@ -3,19 +3,11 @@
 include_once 'header.php';
 include_once 'footer.php';
 
-
-
-//$arrayofjs = array('../scan/jquery.js', '../scan2/js/qrcodelib.js',
-//    '../scan2/js/webcodecamjs.js', '../js/check_ticket.js', '../js/annexes.js',
-//    '../scan2/js/initScan.js');
-
-   
-//$arrayofcss = array('../scan/scan.css');
-
 printHeader('Valider ticket');
 
 print '
     <body>
+        <h4><strong>Valider ticket</strong></h4>
         <canvas></canvas>
         <ul></ul>
         <script type="text/javascript" src="../scan/jquery.js"></script>

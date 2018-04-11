@@ -3,9 +3,10 @@ CREATE TABLE IF NOT EXISTS `ticket` (
     `date_creation` DATETIME,
     `fk_event`      INTEGER NOT NULL,
     `fk_tariff`     INTEGER NOT NULL,
-    `fk_client`     INTEGER NOT NULL,
+    `fk_user`       INTEGER NOT NULL,
+    `date_scan`     DATETIME,
     `barcode`       VARCHAR(255) NOT NULL,
-    FOREIGN KEY (`fk_event`) REFERENCES `event` (`id`),
+    FOREIGN KEY (`fk_event`)  REFERENCES `event` (`id`),
     FOREIGN KEY (`fk_tariff`) REFERENCES `tariff` (`id`),
-    FOREIGN KEY (`fk_client`) REFERENCES `client` (`id`)
+    FOREIGN KEY (`fk_user`)   REFERENCES `user` (`id`)
 ) ENGINE=innodb;

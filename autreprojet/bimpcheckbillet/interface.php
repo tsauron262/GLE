@@ -2,8 +2,8 @@
 
 include_once 'param.inc.php';
 
+include_once 'class/user.class.php';
 include_once 'class/event.class.php';
-include_once 'class/client.class.php';
 include_once 'class/tariff.class.php';
 include_once 'class/ticket.class.php';
 
@@ -13,8 +13,8 @@ $db = new PDO($dsn, DB_USER, DB_PASSWORD)
         or die("Impossible de se connecter à la base : " . mysql_error());
 
 
-$event = new Event($db);
-$client = new Client($db);
+$user = new User($db);
+$event  = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
 
@@ -29,15 +29,15 @@ switch ($_POST['action']) {
             break;
         }
 
-    /**
-     * registration_user.php
-     */
-    case 'registration_user': {
-            echo json_encode(array(
-                'code_return' => $client->create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['date_born']),
-                'errors' => $client->errors));
-            break;
-        }
+//    /**
+//     * registration_user.php
+//     */
+//    case 'registration_user': {
+//            echo json_encode(array(
+//                'code_return' => $user->create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['date_born']),
+//                'errors' => $user->errors));
+//            break;
+//        }
 
     /**
      * create_tariff.php
@@ -60,12 +60,12 @@ switch ($_POST['action']) {
         }
 
     /**
-     * check_ticket.php
+     * register.php
      */
-    case 'check_ticket': {
+    case 'register': {
             echo json_encode(array(
-                'id_inserted' => $ticket->check($_POST['barcode']),
-                'errors' => $ticket->errors));
+                'id_inserted' => $user->create($_POST['login'], $_POST['password']),
+                'errors' => $user->errors));
             break;
         }
 

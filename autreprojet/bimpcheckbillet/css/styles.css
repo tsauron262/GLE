@@ -1,0 +1,22 @@
+.container_form {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #c2c2c2;
+    border-radius: 8px;
+    box-shadow: 0 1px 10px rgba(0,0,0,.5);
+    width: auto;
+    display: inline-block;
+
+}
+
+legend > span {
+    background: #ffffff;
+    padding: 5px;
+    border: 1px solid #c2c2c2;
+    border-radius: 8px;
+    box-shadow: 0 1px 10px rgba(0,0,0,.5);
+}
+
+label {
+    font-weight: bold;
+}

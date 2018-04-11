@@ -498,7 +498,7 @@ global $conf;
         //DECODAGE
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
-        //$calData = str_replace("|ln|", "\n", $calData);
+        $calData = str_replace("|ln|", "\n", $calData);
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],
@@ -948,9 +948,9 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
     function traiteIcsTab($tab) {
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
-            $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|");
+//            $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|");
             $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "UID");
-            $ligne = strtr($ligne, $tabR);
+//            $ligne = strtr($ligne, $tabR);
             if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
                 $ligne = substr($ligne,0,2000);
             if (!is_integer($clef)) {

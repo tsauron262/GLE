@@ -573,7 +573,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $extraData = $this->getDenormalizedData($calendarData);
 //        dol_syslog(print_r($extraData,1),3);
             $calendarData2 = $this->traiteTabIcs($calendarData, array());
-        dol_syslog("iciciciciicic".print_r($calendarData,1),3);
+//        dol_syslog("iciciciciicic".print_r($calendarData,1),3);
 //        $this->getRappel($calendarData2);
 
             global $db;
@@ -596,8 +596,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             foreach($extraData as $clef => $val)
                 $extraData[$clef] = str_replace($tabR, "", $val);
             
-             str_replace("\\n","
-", $calendarData2['DESCRIPTION']);
+             $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];

@@ -595,8 +595,8 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             foreach($extraData as $clef => $val)
                 $extraData[$clef] = str_replace($tabR, "", $val);
             
-             $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
-             $calendarData2['DESCRIPTION'] = str_replace("\n","|ln|", $calendarData2['DESCRIPTION']);
+//             $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
+//             $calendarData2['DESCRIPTION'] = str_replace("\n","|ln|", $calendarData2['DESCRIPTION']);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];

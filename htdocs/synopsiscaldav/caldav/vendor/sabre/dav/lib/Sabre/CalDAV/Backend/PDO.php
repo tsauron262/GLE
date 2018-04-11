@@ -572,7 +572,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $extraData = $this->getDenormalizedData($calendarData);
 //        dol_syslog(print_r($extraData,1),3);
             $calendarData2 = $this->traiteTabIcs($calendarData, array());
-        dol_syslog("iciciciciicic".print_r($calendarData2,1),3);
+        dol_syslog("iciciciciicic".print_r($calendarData,1),3);
 //        $this->getRappel($calendarData2);
 
             global $db;

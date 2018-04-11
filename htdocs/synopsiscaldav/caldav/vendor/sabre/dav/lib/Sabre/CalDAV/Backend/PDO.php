@@ -946,6 +946,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
     }
 
     function traiteIcsTab($tab) {
+        dol_syslog("av".print_r($tab,1),3);
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
             $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|", "\n" => "|ln|", "
@@ -962,6 +963,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
             } else
                 $tab2[] = $ligne;
         }
+        dol_syslog("ap".print_r($tab2,1),3);
         return implode("\n", $tab2);
     }
 

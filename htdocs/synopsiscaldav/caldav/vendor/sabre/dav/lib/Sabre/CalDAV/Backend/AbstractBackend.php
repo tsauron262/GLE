@@ -136,6 +136,7 @@ abstract class AbstractBackend implements BackendInterface {
      */
     protected function validateFilterForObject(array $object, array $filters) {
 
+                dol_syslog("Validate For Object row : ".print_r($object,1)." filters : ".print_r($filters,1), 3, 0,"_caldav");
         // Unfortunately, setting the 'calendardata' here is optional. If
         // it was excluded, we actually need another call to get this as
         // well.

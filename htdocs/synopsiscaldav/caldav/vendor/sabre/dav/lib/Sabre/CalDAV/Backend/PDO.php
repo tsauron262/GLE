@@ -385,8 +385,6 @@ global $conf;
      */
     public function getCalendarObject($calendarId, $objectUri) {
         global $db;
-        
-                dol_syslog("Deb getCalendarObject row : ".print_r($calendarId,1), 3, 0,"_caldav");
         $stmt = $this->pdo->prepare('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -395,7 +393,6 @@ global $conf;
             dol_syslog('Objet introuvable req : SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
             return null;
         }
-                dol_syslog("app introuvable getCalendarObject row : ".print_r($calendarId,1), 3, 0,"_caldav");
         
 //        $sql = $db->query('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = "'.$calendarId.'" AND uri = "'.$objectUri.'"');
 //        if($db->num_rows($sql) < 1)
@@ -417,7 +414,6 @@ global $conf;
 
         $calData = file_get_contents($outputfile);
 
-                dol_syslog("file_get : ".print_r($calData,1), 3, 0,"_caldav");
         $calendarData2 = array(); //$this->traiteTabIcs($row['agendaplus'], array());
 
         /* Participant */
@@ -482,7 +478,6 @@ global $conf;
         $calData = $this->traiteIcsTab($calendarData2);
         
         
-                dol_syslog("traitetabics : ".print_r($calData,1), 3, 0,"_caldav");
         
         $calendarData2['LAST-MODIFIED'] = $row['lastmodified'];
         $calendarData2['CREATED'] = $row['CREATED'];
@@ -500,11 +495,9 @@ global $conf;
         }
         date_default_timezone_set("Europe/Paris");
         
-                dol_syslog("av html_enti  : ".print_r($calData,1), 3, 0,"_caldav");
         //DECODAGE
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
-                dol_syslog("av str_repl  : ".print_r($calData,1), 3, 0,"_caldav");
         $calData = str_replace("|ln|", "\n", $calData);
         $return = array(
             'id' => $row['id'],
@@ -515,10 +508,9 @@ global $conf;
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-        if(stripos($objectUri, $this->uriTest) > 0)
+//        if(stripos($objectUri, $this->uriTest) > 0)
 //dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
-                dol_syslog("av return  : ".print_r($return,1), 3, 0,"_caldav");
         return $return;
     }
 

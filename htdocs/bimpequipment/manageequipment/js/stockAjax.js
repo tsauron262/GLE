@@ -147,7 +147,7 @@ function addProduct(ligne) {
     if (ligne.deliveredQty === null)
         line += '<td>' + ligne.remainingQty + '</td>';
     else
-        line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
+        line += '<td>' + (parseInt(ligne.remainingQty) + parseInt(ligne.deliveredQty)) + '</td>';
     line += '<td>' + ligne.remainingQty + '</td>';
     line += '<td name="qty" initValue="' + ligne.remainingQty + '">0</td>';
     line += '<td><input initValue=' + ligne.remainingQty + ' name="modify" type="number" class="custInput" min=0 value=' + parseInt(ligne.remainingQty) + ' style="width: 50px" initVal=' + parseInt(ligne.remainingQty) + '> <img src="css/ok.ico" class="clickable modify" style="margin-bottom:3px"></td>';
@@ -166,7 +166,7 @@ function addDeliveredProduct(ligne) {
     if (ligne.deliveredQty === null)
         line += '<td>' + ligne.remainingQty + '</td>';
     else
-        line += '<td>' + (ligne.remainingQty + ligne.deliveredQty) + '</td>';
+        line += '<td>' + (parseInt(ligne.remainingQty) + parseInt(ligne.deliveredQty)) + '</td>';
     line += '<td></td>';
     line += '<td>' + ((ligne.deliveredQty === null) ? 0 : ligne.deliveredQty) + '</td>';
     line += '<td></td>';

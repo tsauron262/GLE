@@ -499,7 +499,7 @@ global $conf;
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
         $calData = str_replace("|ln|", "\\n", $calData);
-        $calData = str_replace("|lna|", "\\n ", $calData);
+        $calData = str_replace("|lna|", "\r\n ", $calData);
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],

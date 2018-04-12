@@ -531,7 +531,7 @@ global $conf;
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        $calendarData = str_replace("\n\r", "", $calendarData);
+        $calendarData = str_replace("\r\n", "", $calendarData);
         
         
         

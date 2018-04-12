@@ -3,7 +3,6 @@
 class BC_Vente extends BimpObject
 {
 
-    public static $facture_cond_reglement_default = 23;
     public static $facture_default_bank_account_id = 1;
     public static $states = array(
         0 => array('label' => 'Abandonnée', 'icon' => 'times', 'classes' => array('danger')),
@@ -44,6 +43,20 @@ class BC_Vente extends BimpObject
         }
 
         return array();
+    }
+
+    public function getCond_reglementsArray()
+    {
+        $rows = $this->db->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle'), 'sortorder');
+
+        $conds = array();
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $conds[(int) $r['rowid']] = $r['libelle'];
+            }
+        }
+
+        return $conds;
     }
 
     public function getAjaxData()
@@ -157,6 +170,13 @@ class BC_Vente extends BimpObject
             $toPay = 0;
         }
 
+        $paiement_differe = 0;
+        $id_cond_default = (int) BimpCore::getConf('bimpcaisse_id_cond_reglement_default');
+
+        if ((int) $this->getData('id_cond_reglement') !== $id_cond_default) {
+            $paiement_differe = 1;
+        }
+
         return array(
             'id_vente'               => (int) $this->id,
             'nb_articles'            => $nb_articles,
@@ -167,7 +187,8 @@ class BC_Vente extends BimpObject
             'toPay'                  => $toPay,
             'toReturn'               => $toReturn,
             'articles'               => $articles,
-            'remises'                => $remises
+            'remises'                => $remises,
+            'paiement_differe'       => $paiement_differe
         );
     }
 
@@ -205,7 +226,7 @@ class BC_Vente extends BimpObject
         return $list;
     }
 
-    public function getDefaultListExtraButtons()
+    public function getDocumentExtraButtons()
     {
         $buttons = array();
         if ($this->isLoaded()) {
@@ -219,11 +240,26 @@ class BC_Vente extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Fichier PDF de la facture',
                             'icon'    => 'fas_file-pdf',
-                            'onclick' => 'window.open(\'' . $url . '\', \'_blank\');'
+                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
+                        );
+                        $url = DOL_URL_ROOT . '/bimpcaisse/ticket.php?id_vente=' . $this->id;
+                        $buttons[] = array(
+                            'label'   => 'Ticket de caisse',
+                            'icon'    => 'fas_copy',
+                            'onclick' => htmlentities('window.open(\'' . $url . '\', \'_blank\', "menubar=no, status=no, width=370, height=600");')
                         );
                     }
                 }
-            } else {
+            }
+        }
+        return $buttons;
+    }
+
+    public function getDefaultListExtraButtons()
+    {
+        $buttons = $this->getDocumentExtraButtons();
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('status') !== 2) {
                 $buttons[] = array(
                     'label'   => 'Abandonner la vente',
                     'icon'    => 'times',
@@ -742,6 +778,17 @@ class BC_Vente extends BimpObject
         $html .= '<div id="ventePaimentsLines">';
         $html .= $this->renderPaiementsLines();
         $html .= '</div>';
+
+        $id_cond = (int) $this->getData('id_cond_reglement');
+        $html .= '<div id="condReglement" style="font-size: 14px">';
+        $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect">';
+        foreach ($this->getCond_reglementsArray() as $id => $label) {
+            $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '</div>';
+
         return $html;
     }
 
@@ -1009,6 +1056,11 @@ class BC_Vente extends BimpObject
                         return null;
                     }
                 }
+
+                if (count($equipment->getReservationsList())) {
+                    $errors[] = 'L\'équipement ' . $id_equipment . ' (n° série "' . $equipment->getData('serial') . '") est réservé';
+                    return null;
+                }
             }
         }
 
@@ -1044,7 +1096,7 @@ class BC_Vente extends BimpObject
                     'id_equipment'      => (int) $id_equipment,
                     'qty'               => 1,
                     'unit_price_tax_ex' => (float) $prix_ht,
-                    'unit_price_tax_in' => (float) $prix_ttc,
+                    'unit_price_tax_in' => (float) round($prix_ttc, 2),
                     'tva_tx'            => (float) $product->tva_tx
                 ));
 
@@ -1088,7 +1140,7 @@ class BC_Vente extends BimpObject
                 'id_equipment'      => 0,
                 'qty'               => 1,
                 'unit_price_tax_ex' => (float) BimpTools::calculatePriceTaxEx((float) $product->price_ttc, (float) $product->tva_tx),
-                'unit_price_tax_in' => (float) $product->price_ttc,
+                'unit_price_tax_in' => (float) round($product->price_ttc, 2),
                 'tva_tx'            => (float) $product->tva_tx
             ));
 
@@ -1265,6 +1317,8 @@ class BC_Vente extends BimpObject
 
         // Vérification de la validité de la vente: 
 
+        $data = $this->getAjaxData();
+
         if (is_null($caisse) || !$caisse->isLoaded()) {
             $errors[] = 'Caisse absente ou invalide';
         }
@@ -1284,13 +1338,11 @@ class BC_Vente extends BimpObject
         }
 
         $client = $this->getChildObject('client');
-        if ($has_equipment && (is_null($client) || !$client->isLoaded())) {
+        if (($has_equipment || (int) $data['paiement_differe']) && (is_null($client) || !$client->isLoaded())) {
             $errors[] = 'Compte client obligatoire pour cette vente';
         }
 
-        $data = $this->getAjaxData();
-
-        if ((float) $data['toPay'] > 0) {
+        if (!$data['paiement_differe'] && (float) $data['toPay'] > 0) {
             $errors[] = 'Paiements insuffisants';
         }
 
@@ -1311,6 +1363,10 @@ class BC_Vente extends BimpObject
                 $errors[] = 'Cette vente a déjà été validée';
                 return false;
             }
+//            elseif ((int) $this->getData('status') === 0) {
+//                $errors[] = 'Cette vente ne peut pas etre validée car elle a été annulée';
+//                return false;
+//            }
 
             $caisse = $this->getChildObject('caisse');
             $articles = $this->getChildrenObjects('articles');
@@ -1349,7 +1405,12 @@ class BC_Vente extends BimpObject
             }
 
             $fonds_diff = $total_paid_liq;
-            $fonds_diff -= (float) ($total_paid - $total_ttc);
+
+            if ((float) $total_paid > (float) $total_ttc) {
+                
+                // Retrait du rendu monnaie: 
+                $fonds_diff -= (float) ($total_paid - $total_ttc);
+            }
 
             if ($fonds_diff != 0) {
                 $fonds = (float) $caisse->getData('fonds');
@@ -1503,8 +1564,8 @@ class BC_Vente extends BimpObject
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
         $facture->note_private = $note;
         $facture->fk_user_author = $user->id;
-        $facture->cond_reglement_id = self::$facture_cond_reglement_default;
-        $facture->array_options['options_type'] = 'X';
+        $facture->cond_reglement_id = (int) $this->getData('id_cond_reglement');
+        $facture->array_options['options_type'] = BimpCore::getConf('bimpcaisse_secteur_code');
         $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
 
         if ($facture->create($user) <= 0) {
@@ -1578,7 +1639,7 @@ class BC_Vente extends BimpObject
                 if ($remise_percent > 0) {
                     $final_price -= (float) ($pu_ttc * ($remise_percent / 100));
                 }
-                $equipment->set('date_vente', $date);
+                $equipment->set('date_vente', date('Y-m-d H:i:s'));
                 $equipment->set('prix_vente', $final_price);
                 $equipment->set('id_facture', $facture->id);
                 $equipment->update();
@@ -1608,7 +1669,7 @@ class BC_Vente extends BimpObject
             $total_paid += $montant;
 
             $p = new Paiement($db);
-            $p->datepaye = $date;
+            $p->datepaye = dol_now();
             $p->amounts = array(
                 $facture->id => $montant
             );
@@ -1635,7 +1696,7 @@ class BC_Vente extends BimpObject
 
             if ($returned < 0) {
                 $p = new Paiement($db);
-                $p->datepaye = $date;
+                $p->datepaye = dol_now();
                 $p->amounts = array(
                     $facture->id => $returned
                 );

@@ -389,8 +389,10 @@ global $conf;
         $stmt->execute(array($calendarId, $objectUri));
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         
-        if (!$row)
+        if (!$row){
+            dol_syslog('Objet introuvable req : SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = ? AND uri = ?');
             return null;
+        }
         
 //        $sql = $db->query('SELECT id, dtstamp, CREATED, sequence, uri, lastmodified, etag, calendarid, participentExt, organisateur, agendaplus, size FROM ' . $this->calendarObjectTableName . ' WHERE calendarid = "'.$calendarId.'" AND uri = "'.$objectUri.'"');
 //        if($db->num_rows($sql) < 1)
@@ -494,10 +496,9 @@ global $conf;
         date_default_timezone_set("Europe/Paris");
         
         //DECODAGE
-        $calData = str_replace(array("<br />\r\n", "<br />\r", "<br />\n", "\r", "\n"), "\n", $calData);
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
-        
+        $calData = str_replace("|ln|", "\\n", $calData);
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],
@@ -507,8 +508,8 @@ global $conf;
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-        if(stripos($objectUri, $this->uriTest) > 0)
-dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
+//        if(stripos($objectUri, $this->uriTest) > 0)
+//dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
     }
@@ -571,7 +572,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $extraData = $this->getDenormalizedData($calendarData);
 //        dol_syslog(print_r($extraData,1),3);
             $calendarData2 = $this->traiteTabIcs($calendarData, array());
-//        dol_syslog("iciciciciicic".print_r($calendarData2,1),3);
+//        dol_syslog("iciciciciicic".print_r($calendarData,1),3);
 //        $this->getRappel($calendarData2);
 
             global $db;
@@ -593,6 +594,8 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             $tabR = array("LANGUAGE=fr-FR:", "LANGUAGE=en-EN:", "LANGUAGE=en-US:");
             foreach($extraData as $clef => $val)
                 $extraData[$clef] = str_replace($tabR, "", $val);
+            
+             $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
@@ -828,6 +831,9 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
                     $calendarData[$clef] = str_replace($tabR, "", $val);
             else
                 $calendarData = str_replace($tabR, "", $calendarData);
+            
+            $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
+            
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
@@ -942,7 +948,8 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
     function traiteIcsTab($tab) {
         $tab2 = array();
         foreach ($tab as $clef => $ligne) {
-            $tabR = array(CHR(13) => " ", CHR(10) => " ");
+            $tabR = array(CHR(13) => "|ln|", CHR(10) => "|ln|", "\n" => "|ln|", "
+" => "|ln|");
             $tabException = array("URL", "SUMMARY", "ORGANIZER", "LOCATION", "CATEGORIES", "DESCRIPTION", "UID");
             $ligne = strtr($ligne, $tabR);
             if (stripos($clef,'SUMMARY') !== false || stripos($ligne,'SUMMARY') !== false)
@@ -1070,6 +1077,12 @@ dol_syslog("Remove : ".$calendarId."    |   ".$objectUri,3, 0, "_caldavLog");
     }
 
     function forbiden($msg = "") {
+//        global $USER_CONNECT;
+//        
+//        if(is_object($USER_CONNECT))
+//            dol_syslog("Caldav Forbiden user connect ".$USER_CONNECT->id,3);
+//        else
+//            dol_syslog("Caldav Forbiden sans user connect",3);
         throw new DAV\Exception\Forbidden('Permission denied to '.$msg);
 //            header('HTTP/1.0 403 Forbidden');
 //            header('Content-type: application/xml');

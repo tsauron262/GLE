@@ -37,13 +37,18 @@ class commandeController extends reservationController
         $html .= BimpRender::renderNavTabs(array(
                     array(
                         'id'      => 'reservations',
-                        'title'   => 'Réservations',
+                        'title'   => 'Gestion des réservations',
                         'content' => $this->renderReservationsTab($commande)
                     ),
                     array(
                         'id'      => 'supplier_orders',
                         'title'   => 'Gestion des commandes fournisseurs',
                         'content' => $this->renderSupplierOrdersTab($commande)
+                    ),
+                    array(
+                        'id' => 'shipments',
+                        'title' => 'Expéditions',
+                        'content' => $this->renderShipmentsTab($commande)
                     )
         ));
 
@@ -68,30 +73,7 @@ class commandeController extends reservationController
         $html .= $this->renderEquipmentForm((int) $commande->id);
 
         $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
-        $list = new BC_ListTable($reservation, 'commandes', 1, null, 'Liste des réservations');
-        $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
-        $html .= $list->renderHtml();
-
-        $html .= '</div>';
-        $html .= '</div>';
-
-        $html .= '<div class="row">';
-        $html .= '<div class="col-lg-12">';
-
-        $html .= '<div class="buttonsContainer">';
-        $html .= '<button id="createShipmentButton" type="button" class="btn btn-default btn-large bs-popover"';
-        $html .= ' onclick="createShipment($(this), ' . (int) $commande->id . ');"';
-        $html .= BimpRender::renderPopoverData(htmlentities('Créer une expédition pour toutes les réservation ayant le statut "prêt pour expédition"'), 'top', 'true');
-        $html .= '>';
-        $html .= '<i class="fa fa-sign-out iconLeft"></i>Créer une nouvelle expédition';
-        $html .= '</button>';
-        $html .= '</div>';
-
-        $html .= '<div id="newShipmentResult" class="ajaxResultContainer" style="display: none">';
-        $html .= '</div>';
-
-        $shipment = BimpObject::getInstance($this->module, 'BR_CommandeShipment');
-        $list = new BC_ListTable($shipment, 'commandes', 1, null, 'Liste des expéditions', 'sign-out');
+        $list = new BC_ListTable($reservation, 'commandes', 1, null, 'Réservations et statuts des produits');
         $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
         $html .= $list->renderHtml();
 
@@ -110,6 +92,23 @@ class commandeController extends reservationController
 
         $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
         $list = new BC_ListTable($rcf, 'default', 1, null, 'Liste des réservations en commande / à commander');
+        $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
+        $html .= $list->renderHtml();
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    protected function renderShipmentsTab($commande)
+    {
+        $html = '';
+        $html .= '<div class="row">';
+        $html .= '<div class="col-lg-12">';
+
+        $shipment = BimpObject::getInstance($this->module, 'BR_CommandeShipment');
+        $list = new BC_ListTable($shipment, 'commandes', 1, null, 'Liste des expéditions', 'sign-out');
         $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
         $html .= $list->renderHtml();
 

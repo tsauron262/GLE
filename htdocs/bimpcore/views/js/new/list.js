@@ -6,9 +6,11 @@ function reloadObjectList(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-//        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
         return;
     }
+
+    $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
 
     var $resultContainer = $('#' + list_id + '_result');
     var object_name = $list.data('object_name');
@@ -135,6 +137,7 @@ function reloadObjectList(list_id, callback) {
         display_success: false,
         error_msg: error_msg,
         success: function (result, bimpAjax) {
+            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (result.rows_html) {
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
                 if (result.pagination_html) {
@@ -161,6 +164,7 @@ function reloadObjectList(list_id, callback) {
             }
         },
         error: function () {
+            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (typeof (callback) === 'function') {
                 callback(false);
             }
@@ -798,6 +802,11 @@ function onListLoaded($list) {
                 var n = parseInt($(this).val());
                 $list.find('input[name="param_n"]').val(n).change();
             });
+
+            $tools.find('.refreshListButton').click(function () {
+                reloadObjectList($list.attr('id'));
+            });
+
             $list.find('input[name="param_n"]').change(function () {
                 var val = parseInt($(this).val());
                 var select_val = parseInt($tools.find('input[name="select_n"]').val());

@@ -218,6 +218,16 @@ $(window).on("load", function () {
             textarea2.val(textarea2.val() + $(this).val() + ', ');
         });
     }
+    
+
+    if ($("textarea#Symptomes").length) {
+        textarea3 = $("textarea#Symptomes");
+        tabAccess = Array("Renouvellement anti virus et maintenance annuelle","Anti virus expiré","Virus ? Eradication? Nettoyage?", "Machine lente","Formatage","Réinstallation système.");
+        textarea3.parent().append(' <select name="sometext" multiple="multiple" class="grand" id="sometext3">    <option>' + tabAccess.join('</option><option>') + '</option></select>');
+        $("#sometext3").click(function () {
+            textarea3.val(textarea3.val() + $(this).val() + ', ');
+        });
+    }
 
 
     if ($("textarea.choixAccess").length) {

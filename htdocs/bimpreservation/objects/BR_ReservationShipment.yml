@@ -1,19 +1,41 @@
 table: br_reservation_shipment
 common_fields: 0
 
+parent_object: BR_CommandeShipment
+parent_id_property: id_shipment
+
 labels: 
-    name: réservation à commander
-    name_plur: réservations à commander
+    name: ligne d'expédition
+    name_plur: lignes d'expédition
     is_female: 1
     
-objects: 
-    reservation: 
+objects:
+    shipment: 
         relation: hasOne
         delete: 0
         instance: 
-            bimp_object: BR_Reservation
+            bimp_object: BR_CommandeShipment
             id_object: 
-                field_value: id_reservation
+                field_value: id_shipment
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product
+                
+    equipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: 
+                field_value: id_equipment
                 
     user:
         relation: hasOne
@@ -25,33 +47,38 @@ objects:
             id_object: 
                 field_value: id_user
                 
-    shipment: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BR_CommandeShipment
-            id_object: 
-                field_value: id_shipment
-                
 fields: 
-    id_commande_client: 
-        label: Commande client
-        type: int
-        unsigned: 1
-        required: 1
-        
-    ref_reservation:
-        label: Référence réservation
-        
     id_shipment: 
         label: Expédition
         type: id_object
         object: shipment
-        default_value: 0
+        values: 
+            array: shipments
+        required: 1
         
-    date: 
-        label: Expédié le
-        type: date
+    id_commande_client: 
+        label: Commande client
+        type: id
+        
+    id_commande_client_line:
+        label: Ligne de la commande client
+        type: id
+        
+    ref_reservation:
+        label: Référence réservation
+        required: 1
+    
+    id_product:
+        label: Produit
+        type: id_object
+        object: product
+        
+    id_equipment:
+        label: Equipement
+        type: id_object
+        object: equipment
+        input: 
+            type: hidden
         
     qty: 
         label: Quantité
@@ -59,7 +86,49 @@ fields:
         min: 1
         unsigned: 1
         
-    id_user: 
-        label: Expédié par
-        type: id_object
-        object: user
+    group_articles: 
+        label: Produits groupés
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: qty
+            hide_values: 0,1
+        input: 
+            help: Si oui, une seule étiquette sera générée
+        
+forms: 
+    default: 
+        rows: 
+            - field: ref_reservation
+              hidden: 1
+            - field: id_equipment
+              hidden: 1
+            - field: id_shipment
+              create_form: default
+              create_form_values: 
+                  fields: 
+                      id_commande_client: 
+                          field_value: id_commande_client
+            - field: qty
+            - field: group_articles
+            
+lists: 
+    default: 
+        title: Liste des produits inclus dans l'expédition
+        enable_search: 0
+        sort_field: id
+        sort_way: asc
+        n: 10
+        cols:
+            ref: 
+                field: ref_reservation
+            id_product: 
+                field: id_product
+                display: nom_url
+            equipment: 
+                field: id_equipment
+                display: nom_url
+            qty:
+                field: qty
+            group: 
+                field: group_articles

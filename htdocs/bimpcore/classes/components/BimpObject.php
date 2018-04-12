@@ -1019,7 +1019,6 @@ class BimpObject
 
             $errors = array_merge($errors, $this->validateValue($field, $value));
         }
-
         $associations = $this->getConf('associations', array(), false, 'array');
 
         foreach ($associations as $asso_name => $params) {
@@ -1028,6 +1027,7 @@ class BimpObject
             }
         }
         $this->config->setCurrentPath($prev_path);
+        
         return $errors;
     }
 
@@ -1369,7 +1369,7 @@ class BimpObject
         return $errors;
     }
 
-    public function find($filters)
+    public function find($filters, $return_first = false)
     {
         $this->reset();
 
@@ -1398,7 +1398,10 @@ class BimpObject
 
         $rows = $this->db->executeS($sql, 'array');
 
-        if (!is_null($rows) && count($rows) === 1) {
+        if (!is_null($rows) && count($rows)) {
+            if (count($rows) > 1 && !$return_first) {
+                return false;
+            }
             $id_object = $rows[0][$primary];
         }
 

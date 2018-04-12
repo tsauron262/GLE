@@ -404,20 +404,17 @@ list:
         contact:
             field: id_contact
             display: nom_url
-        
     
 cards:
     default:
         title: nom
         fields: 
+            - label: N°
+              field: ticket_number
             - label: Contrat
               field: id_contrat
               display: nom_url
             - label: Client
-              value: 
-                  callback: 
-                      method: getNomUrl
-                      params: 
-                          - 1
-                      object: client
+              field: id_client
+              display: nom_url
         view_btn: 1

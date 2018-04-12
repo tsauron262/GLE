@@ -208,14 +208,11 @@ lists:
                 field: ref_reservation
             type: 
                 field: type
-                
             product: 
                 field: id_product
                 display: nom_url
-                
             qty: 
                 field: qty
-                
             fournisseur: 
                 label: Fournisseur
                 value: 
@@ -224,7 +221,6 @@ lists:
                 label: Prix d'achat
                 value: 
                     callback: displayPrice
-                    
             commande: 
                 field: id_commande_fournisseur
                 display: nom_url

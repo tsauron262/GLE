@@ -155,6 +155,10 @@ fields:
         display_if: 
             field_name: status
             hide_values: 100
+        display: 
+            default: 
+                type: callback
+                method: displayEquipment
                 
     id_product: 
         label: Produit
@@ -266,7 +270,6 @@ fields:
             
 forms: 
     equipment:
-        on_save: close
         title: 
             callback: getEquipmentFormTitle
         rows: 
@@ -281,7 +284,6 @@ forms:
             - field: note
             
     new_status: 
-        on_save: close
         rows: 
             - custom: 1
               hidden: 1
@@ -348,8 +350,7 @@ views:
                     col_lg: 9
                     fields_table:
                         name: default
-            
-            
+               
 lists: 
     default: 
         checkboxes: 1
@@ -380,7 +381,6 @@ lists:
                 display: nom_url
             equipment: 
                 field: id_equipment
-                display: nom_url
             date_from:
                 label: Du
                 field: date_from
@@ -396,13 +396,13 @@ lists:
         checkboxes: 1
         pagination: 0
         bulk_actions: 
-            - label: Prêt pour expédition
-              icon: sign-out
-              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
+#            - label: Prêt pour expédition
+#              icon: sign-out
+#              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);
-        objects_change_reload: BR_ReservationCmdFourn
+        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BR_CommandeShipment
         modal_view: default
         sort_field: id_product
         sort_way: asc
@@ -420,7 +420,6 @@ lists:
                 display: nom_url
             equipment: 
                 field: id_equipment
-                display: nom_url
             commercial: 
                 field: id_commercial
                 display: nom_url
@@ -432,9 +431,9 @@ lists:
     entrepot: 
         checkboxes: 1
         bulk_actions: 
-            - label: Marquer comme livré au client
-              icon: sign-out
-              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
+#            - label: Marquer comme livré au client
+#              icon: sign-out
+#              onclick: setSelectedReservationStatus($(this), 'list_id', 300);
             - label: Réinitialiser
               icon: undo
               onclick: setSelectedReservationStatus($(this), 'list_id', 0);
@@ -456,7 +455,6 @@ lists:
                 display: nom_url
             equipment: 
                 field: id_equipment
-                display: nom_url
             commande: 
                 field: id_commande_client
                 display: nom_url

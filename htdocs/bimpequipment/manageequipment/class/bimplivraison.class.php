@@ -150,9 +150,9 @@ class BimpLivraison {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
         $sql .= ' WHERE e_place.infos="' . $this->getcodeMove() . '"';
         $sql .= ' AND e.id_product=' . $ligne->prodId;
-        $sql .= ' AND e.prix_achat LIKE ' . str_replace(',', '.', $ligne->price_unity);
+        $sql .= ' AND ROUND(e.prix_achat,2)  = ROUND(' . str_replace(',', '.', $ligne->price_unity).',2)';
         
-//        echo $sql."\n";
+        //echo $sql."\n";
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {

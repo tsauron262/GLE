@@ -302,6 +302,7 @@ class modSynopsisChrono extends DolibarrModules {
   `hasStatut` tinyint(4) NOT NULL DEFAULT '1',
   `nomDescription` varchar(50) NOT NULL,
   `typeDescription` int(11) NOT NULL,
+  `picto` varchar(50),
   PRIMARY KEY (`id`));",
 //        "INSERT IGNORE INTO `".MAIN_DB_PREFIX."synopsischrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasRevision`, `hasPropal`, `hasProjet`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`, `hasSuivie`, `hasDescription`, `hasStatut`, `nomDescription`, `typeDescription`) VALUES
 //(1, 'Document indiçable', 'Document indiçable', 1, 0, 0, 1, 0, 0, 2, '{yy}I{0000@1}-A', '2011-03-17', '2013-11-18 03:46:10', 0, 1, 1, 1, 'Description', 2),

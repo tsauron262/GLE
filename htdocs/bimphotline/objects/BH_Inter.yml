@@ -7,6 +7,14 @@ labels:
     is_female: 1
 
 objects: 
+    ticket: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BH_Ticket
+            id_object: 
+                field_value: id_ticket
+                
     tech_user: 
         relation: hasOne
         delete: 0
@@ -21,23 +29,13 @@ fields:
     id_ticket:
         label: Ticket
         type: id_parent
+        object: ticket
         input: 
             type: hidden
         required: 1
-        display: 
-            default: 
-                type: nom_url
-            id: 
-                type: field_value
-            number: 
-                type: object_field
-                field: ticket_number
-            card:
-                type: card
-                card: default
-        sort_options: 
-            default: ticket_number
-            id: id
+#        sort_options: 
+#            default: ticket_number
+#            id: id
             
     tech_id_user:
         label: Technicien
@@ -126,7 +124,7 @@ list:
 fields_tables: 
     infos: 
         rows:
-            - field: tech_id_user
+            - field: id_ticket
               display: card
             - field: timer
             - field: priorite
@@ -192,6 +190,7 @@ views:
                         name: infos
 
     card:
+        panel: 0
         rows:
             - cols:
                   - type: fields_table

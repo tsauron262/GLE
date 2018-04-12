@@ -129,11 +129,11 @@ class indexController extends BimpController
                     'title'   => 'Clients',
                     'content' => $this->renderClientsTabHtml()
                 ),
-                array(
-                    'id'      => 'stocks',
-                    'title'   => 'Stocks produits',
-                    'content' => 'Ici, pourquoi pas: consulter les stocks produits'
-                )
+//                array(
+//                    'id'      => 'stocks',
+//                    'title'   => 'Stocks produits',
+//                    'content' => 'Ici, pourquoi pas: consulter les stocks produits'
+//                )
             );
 
 
@@ -750,15 +750,17 @@ class indexController extends BimpController
             if ($this->isCaisseValide($caisse, $errors)) {
                 $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
                 $vente = BimpObject::getInstance($this->module, 'BC_Vente');
-                $vente->set('status', 1);
-                $vente->set('id_caisse', $id_caisse);
-                $vente->set('id_caisse_session', (int) $caisse->getData('id_current_session'));
-                $vente->set('id_entrepot', (int) $caisse->getData('id_entrepot'));
-                if ($id_client) {
-                    $vente->set('id_client', $id_client);
-                }
+                $errors = $vente->validateArray(array(
+                    'status'            => 1,
+                    'id_caisse'         => $id_caisse,
+                    'id_caisse_session' => (int) $caisse->getData('id_current_session'),
+                    'id_entrepot'       => (int) $caisse->getData('id_entrepot'),
+                    'id_client'         => $id_client
+                ));
 
-                $errors = $vente->create();
+                if (!count($errors)) {
+                    $errors = $vente->create();
+                }
 
                 $data = array();
                 $html = '';
@@ -825,20 +827,25 @@ class indexController extends BimpController
             if ($this->isCaisseValide($caisse, $errors)) {
                 $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
                 $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
-                $vente->set('status', 1);
-                $vente->set('id_caisse', $id_caisse);
-                $vente->set('id_caisse_session', (int) $caisse->getData('id_current_session'));
-                $vente->set('id_entrepot', (int) $caisse->getData('id_entrepot'));
 
-                $errors = $vente->update();
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('status', 1);
+                    $vente->set('id_caisse', $id_caisse);
+                    $vente->set('id_caisse_session', (int) $caisse->getData('id_current_session'));
+                    $vente->set('id_entrepot', (int) $caisse->getData('id_entrepot'));
 
-                $data = array();
-                $html = '';
+                    $errors = $vente->update();
 
-                if (!count($errors)) {
-                    $view = new BC_View($vente, 'creation');
-                    $html = $view->renderHtml();
-                    $data = $vente->getAjaxData();
+                    $data = array();
+                    $html = '';
+
+                    if (!count($errors)) {
+                        $view = new BC_View($vente, 'creation');
+                        $html = $view->renderHtml();
+                        $data = $vente->getAjaxData();
+                    }
                 }
             }
         }
@@ -879,22 +886,37 @@ class indexController extends BimpController
 
         $success = '';
         if (!count($errors)) {
-            if ((int) $status === 2) {
-                $success = 'Vente validée avec succès';
-                $validate = (int) $vente->validateVente($validate_errors);
-                if (!$validate) {
-                    $errors[] = 'Cette vente ne peut pas être validée';
-                } else {
-                    $ticket_html = $vente->renderTicketHtml($ticket_errors);
-                }
+            if ($vente->getData('status') === 2) {
+                $errors[] = 'Cette vente ne peut pas être modifiée car elle a été validée';
             } else {
-                if ((int) $status === 1) {
-                    $success = 'Vente enregistrée avec succès';
+                if ((int) $status === 2) {
+//                    if ($vente->getData('status') === 0) {
+//                        $errors[] = 'Cette vente ne peut pas être validée car elle a été annulée';
+//                    } else {
+                    $success = 'Vente validée avec succès';
+                    $validate = (int) $vente->validateVente($validate_errors);
+                    if (!$validate) {
+                        $errors[] = 'Cette vente ne peut pas être validée';
+                    } else {
+                        $ticket_html = $vente->renderTicketHtml($ticket_errors);
+                    }
+                    if (count($validate_errors)) {
+                        $msg = 'Erreur validation vente ' . $vente->id . "\n";
+                        foreach ($validate_errors as $e) {
+                            $msg .= ' - ' . $e . "\n";
+                        }
+                        dol_syslog($msg, LOG_ERR);
+                    }
+//                    }
                 } else {
-                    $success = 'Vente abandonnée';
+                    if ((int) $status === 1) {
+                        $success = 'Vente enregistrée avec succès';
+                    } else {
+                        $success = 'Vente abandonnée';
+                    }
+                    $vente->set('status', (int) $status);
+                    $errors = array_merge($errors, $vente->update());
                 }
-                $vente->set('status', (int) $status);
-                $errors = array_merge($errors, $vente->update());
             }
         }
 
@@ -906,6 +928,46 @@ class indexController extends BimpController
             'ticket_html'     => $ticket_html,
             'ticket_errors'   => $ticket_errors,
             'request_id'      => BimpTools::getValue('request_id', 0),
+        )));
+    }
+
+    protected function ajaxProcessSaveCondReglement()
+    {
+        $errors = array();
+
+        $id_vente = BimpTools::getValue('id_vente', 0);
+        $id_cond = BimpTools::getValue('id_cond', 0);
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        if (!$id_cond) {
+            $errors[] = 'Aucune condition de réglement spécifiée';
+        }
+
+        $vente_data = array();
+
+        if (!count($errors)) {
+            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('id_cond_reglement', $id_cond);
+                    $errors = $vente->update();
+                }
+                $vente_data = $vente->getAjaxData();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => 'Conditions de réglement mises à jour avec succès',
+            'vente_data' => $vente_data,
+            'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }
 
@@ -931,11 +993,15 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $vente->set('id_client', (int) $id_client);
-                $vente->set('id_client_contact', 0);
-                $errors = $vente->update();
-                if (!count($errors)) {
-                    $html = $vente->renderClientView();
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('id_client', (int) $id_client);
+                    $vente->set('id_client_contact', 0);
+                    $errors = $vente->update();
+                    if (!count($errors)) {
+                        $html = $vente->renderClientView();
+                    }
                 }
             }
         }
@@ -965,10 +1031,14 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $vente->set('id_client_contact', (int) $id_contact);
-                $errors = $vente->update();
-                if (!count($errors)) {
-                    $html = $vente->renderContactView();
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('id_client_contact', (int) $id_contact);
+                    $errors = $vente->update();
+                    if (!count($errors)) {
+                        $html = $vente->renderContactView();
+                    }
                 }
             }
         }
@@ -1049,8 +1119,12 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $html = $vente->selectArticle($id_object, $object_name, $errors);
-                $vente_data = $vente->getAjaxData();
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $html = $vente->selectArticle($id_object, $object_name, $errors);
+                    $vente_data = $vente->getAjaxData();
+                }
             }
         }
 
@@ -1091,15 +1165,19 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $id_article);
-                if (!$article->isLoaded()) {
-                    $errors[] = 'Article non trouvé';
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $article->set('qty', (int) $qty);
-                    $errors = $article->update();
+                    $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $id_article);
+                    if (!$article->isLoaded()) {
+                        $errors[] = 'Article non trouvé';
+                    } else {
+                        $article->set('qty', (int) $qty);
+                        $errors = $article->update();
 
-                    $total_ttc = (float) ((int) $article->getData('qty') * (float) $article->getData('unit_price_tax_in'));
-                    $stock = (int) $article->getProductStock((int) $vente->getData('id_entrepot'));
+                        $total_ttc = (float) ((int) $article->getData('qty') * (float) $article->getData('unit_price_tax_in'));
+                        $stock = (int) $article->getProductStock((int) $vente->getData('id_entrepot'));
+                    }
                 }
                 $vente_data = $vente->getAjaxData();
             }
@@ -1136,11 +1214,15 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $id_article);
-                if (!$article->isLoaded()) {
-                    $errors[] = 'Article non trouvé';
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $errors = $article->delete();
+                    $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $id_article);
+                    if (!$article->isLoaded()) {
+                        $errors[] = 'Article non trouvé';
+                    } else {
+                        $errors = $article->delete();
+                    }
                 }
                 $vente_data = $vente->getAjaxData();
             }
@@ -1176,9 +1258,13 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $remise = BimpObject::getInstance($this->module, 'BC_VenteRemise', $id_remise);
-                $errors = $remise->delete();
-                $vente_data = $vente->getAjaxData();
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $remise = BimpObject::getInstance($this->module, 'BC_VenteRemise', $id_remise);
+                    $errors = $remise->delete();
+                    $vente_data = $vente->getAjaxData();
+                }
             }
         }
 
@@ -1217,7 +1303,11 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $html = $vente->addPaiement($code, $montant, $errors);
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $html = $vente->addPaiement($code, $montant, $errors);
+                }
                 $vente_data = $vente->getAjaxData();
             }
         }
@@ -1253,9 +1343,13 @@ class indexController extends BimpController
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
-                $paiement = BimpObject::getInstance($this->module, 'BC_VentePaiement', $id_paiement);
-                $errors = $paiement->delete();
-                $html = $vente->renderPaiementsLines();
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $paiement = BimpObject::getInstance($this->module, 'BC_VentePaiement', $id_paiement);
+                    $errors = $paiement->delete();
+                    $html = $vente->renderPaiementsLines();
+                }
                 $vente_data = $vente->getAjaxData();
             }
         }

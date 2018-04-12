@@ -12,22 +12,8 @@ objects:
             id_object:
                 field_value: id_product
         cards: 
-            default:
-                title:
-                    object_prop: label
-                image: 
-                    callback: 
-                        method: getProductImageUrl
-                        params: 
-                            id_product:
-                                field_value: id_product
-                        instance: BimpTools
-                        is_static: 1
-                fields:
-                    - label: Réf.
-                      prop: ref
-                view_btn: 1
-                    
+            default: 
+                type: product_card
     contrat:
         instance:
             dol_object: contrat

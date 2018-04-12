@@ -139,7 +139,7 @@ function bouttonEtatSav($idChrono) {
             $return .= ob_get_clean();
             $return .= "</br>";
         }
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(this).parent().find(\"#selectpaiementtype\").val();' >Restitué".($propId?" (Payer)":"")."</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(this).parent().find(\"#selectpaiementtype\").val();\"".$sms."\"' >Restitué".($propId?" (Payer)":"")."</a>";
     }
     
     if($propId && ($propStatut == 0 || $propStatut == 1)){

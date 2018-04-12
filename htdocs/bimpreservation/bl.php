@@ -12,6 +12,7 @@ global $db, $langs;
 
 $id_commande = (int) BimpTools::getValue('id_commande');
 $num_bl = (int) BimpTools::getValue('num_bl');
+$id_contact = (int) BimpTools::getValue('id_contact_shipment', 0);
 
 $errors = array();
 
@@ -24,7 +25,7 @@ if (!$num_bl) {
 }
 
 if (!count($errors)) {
-    $pdf = new BLPDF($db, $num_bl);
+    $pdf = new BLPDF($db, $num_bl, $id_contact);
 
     $obj = new Commande($db);
     if ($obj->fetch($id_commande) <= 0) {

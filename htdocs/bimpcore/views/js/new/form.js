@@ -19,13 +19,12 @@ function addInputEvent(form_id, input_name, event, callback) {
 
 // Enregistrements ajax des objets: 
 
-function saveObjectFromForm(form_id, $button, successCallback) {
+function saveObjectFromForm(form_id, $button, successCallback, on_save) {
     if ($button.hasClass('disabled')) {
         return;
     }
 
     $button.addClass('disabled');
-
 
     var $resultContainer = $('#' + form_id + '_result');
     var $form = $('#' + form_id);
@@ -57,10 +56,14 @@ function saveObjectFromForm(form_id, $button, successCallback) {
 
     var data = new FormData($formular.get(0));
 
+    if (typeof (on_save) === 'undefined') {
+        on_save = $form.data('on_save');
+    }
+
     BimpAjax('saveObject', data, $resultContainer, {
         form_id: form_id,
         $button: $button,
-        on_save: $form.data('on_save'),
+        on_save: on_save,
         processData: false,
         contentType: false,
         display_success_in_popup_only: true,
@@ -81,6 +84,9 @@ function saveObjectFromForm(form_id, $button, successCallback) {
 
                 case 'close':
                     closeForm(bimpAjax.form_id);
+                    break;
+
+                case 'none':
                     break;
             }
             $('body').trigger($.Event('objectChange', {
@@ -270,6 +276,29 @@ function closeForm(form_id) {
     }
 }
 
+function submitForm(form_id) {
+    var $form = $('#' + form_id);
+    if (!$form.length) {
+        return;
+    }
+
+    var $modal = $form.findParentByClass('modal');
+    if ($.isOk($modal)) {
+        var $btn = $modal.find('.modal-footer').find('.save_object_button');
+        if ($btn.length) {
+            $btn.click();
+        }
+    } else {
+        var $container = $('#' + form_id + '_container');
+        if ($container.length) {
+            var $btn = $container.find('.save_object_button');
+            if ($btn.length) {
+                $btn.click();
+            }
+        }
+    }
+}
+
 function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values) {
     if ($button.hasClass('disabled')) {
         return;
@@ -377,6 +406,15 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                             if (bimpAjax.result_input_name) {
                                                 if (bimpAjax.reload_input) {
                                                     var fields = {};
+                                                    bimpAjax.$parentForm.find('.inputContainer').each(function () {
+                                                        var field_name = $(this).data('field_name');
+                                                        if (field_name && (field_name !== bimpAjax.result_input_name)) {
+                                                            var $input = $(this).find('[name="' + field_name + '"]');
+                                                            if ($input.length) {
+                                                                fields[field_name] = $input.val();
+                                                            }
+                                                        }
+                                                    });
                                                     fields[bimpAjax.result_input_name] = saveResult.id_object;
                                                     reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields);
                                                 } else {
@@ -388,7 +426,7 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                             }
                                         });
                                     });
-                                });
+                                }, 'none');
                             });
                         }
                     });
@@ -474,7 +512,7 @@ function saveAssociations(operation, associations, $resultContainer, successCall
     });
 }
 
-// Gestion des formulaires objets: 
+// Gestion des formulaires objets:
 
 function reloadObjectInput(form_id, input_name, fields) {
     var $form = $('#' + form_id);
@@ -961,13 +999,17 @@ function setFormEvents($form) {
             }
         }
     }
-    
-    $form.find('.inputContainer').each(function() {
+
+    $form.find('.inputContainer').each(function () {
         var field_name = $(this).data('field_name');
-        var $input = $(this).find('[name="'+field_name+'"]');
+        var $input = $(this).find('[name="' + field_name + '"]');
         if ($input.length) {
-            $input.keyup(function(e) {
-                
+            $input.keyup(function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    submitForm($form.attr('id'));
+                }
             });
         }
     });

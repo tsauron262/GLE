@@ -12,7 +12,8 @@ function BC_Vente() {
         this.total_remises = 0;
         this.toPay = 0;
         this.toReturn = 0;
-        this.remises = []
+        this.remises = [];
+        this.paiement_differe = 0;
     };
 
     this.ajaxResult = function (result) {
@@ -51,6 +52,10 @@ function BC_Vente() {
 
         if (typeof (result.vente_data.remises) !== 'undefined') {
             this.remises = result.vente_data.remises;
+        }
+
+        if (typeof (result.vente_data.paiement_differe) !== 'undefined') {
+            this.paiement_differe = parseInt(result.vente_data.paiement_differe);
         }
 
         if (typeof (result.vente_data.toPay) !== 'undefined') {
@@ -128,7 +133,7 @@ function BC_Vente() {
             $('#venteToPay').slideDown(250);
         }
 
-        if (this.nb_articles > 0 && this.toPay <= 0) {
+        if (this.nb_articles > 0 && (this.paiement_differe || this.toPay <= 0)) {
             $('#validateCurrentVenteButton').removeClass('disabled');
             $('#saveCurrentVenteButton').addClass('disabled');
         } else {
@@ -702,6 +707,22 @@ function saveClient() {
     });
 }
 
+function saveCondReglement() {
+    if (!Vente.id_vente) {
+        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
+        return;
+    }
+
+    BimpAjax('saveCondReglement', {
+        id_cond: $('#condReglementSelect').val(),
+        id_vente: Vente.id_vente
+    }, null, {
+        success: function (result, bimpAjax) {
+            Vente.ajaxResult(result);
+        }
+    });
+}
+
 function editClient($button, id_client, client_name) {
     var title = 'Edition du client "' + client_name + '"';
     loadModalForm($button, {
@@ -1161,12 +1182,17 @@ function onVenteLoaded() {
         saveClient();
     });
 
+    $('#condReglementSelect').change(function () {
+        saveCondReglement();
+    });
+
 }
 
 $(document).ready(function () {
 
     var $mainContainer = $('#bc_main_container');
     setCommonEvents($mainContainer);
+    setInputsEvents($mainContainer);
 
     $('#openCaisseForm').find('[name="id_entrepot"]').change(function () {
         var id_entrepot = parseInt($(this).val());

@@ -2,6 +2,7 @@ table.bimp_list_table,
 table.objectlistTable {
     border: none;
     box-shadow: none;
+    width: 100%;
 
     & > thead > tr > th {
         padding: 10px 6px;
@@ -212,7 +213,7 @@ table.objectlistTable {
         .search_list_input {
             width: 80%
         }
-        
+
         .optionsContainer {
             display: none;
         }
@@ -286,6 +287,29 @@ th.th_tools {
     }
     .openParametersPopupButton:before {
         content: '\f013';
+    }
+    .refreshListButton:before {
+        content: '\f01e';
+    }
+    .loadingIcon {
+        display: inline-block;
+        margin: 5px;
+        color: #fff;
+        font-weight: bold;
+        margin: 0 3px;
+        padding: 2px 6px;
+        height: 100%;
+        opacity: 0;
+        font-size: 16px;
+        
+        &:before {
+            font-family: 'FontAwesome';
+            content: '\f110';
+        }
+        
+        &.visible {
+            opacity: 1;
+        }
     }
 }
 td.buttons {

@@ -2342,6 +2342,10 @@ class User extends CommonObject
                     $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = "{SSHA}".base64_encode( mhash( MHASH_SHA1, $password_clear.$salt ).$salt );
                 }
                 
+                if($this->pass_indatabase_crypted != ''){
+                    $info[$conf->global->LDAP_FIELD_PASSWORD_CRYPTED] = $this->pass_indatabase_crypted;
+                }
+                
                 
                 $info['postalAddress'] = $this->address;
                 $info['postalCode'] = ($this->zip != "")? $this->zip : "00000";

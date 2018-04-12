@@ -1,0 +1,29 @@
+table: br_service
+common_fields: 0
+
+labels: 
+    name: service
+    
+fields: 
+    id_commande_client: 
+        label: Commande client
+        type: int
+        unsigned: 1
+        required: 1
+        
+    id_commande_client_line: 
+        label: Ligne de commande client
+        type: int
+        unsigned: 1
+        required: 1
+    
+    qty: 
+        label: Quantité totale
+        type: int
+        default_value: 1
+        
+    shipped: 
+        label: Quantité délivrée
+        type: float
+        default_value: 0
+    

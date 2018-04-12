@@ -184,6 +184,7 @@ class BR_ReservationCmdFourn extends BimpObject
     }
 
     // Gestion de la commande fournisseur: 
+
     public function addToCommandeFournisseur(&$errors)
     {
         if ((int) $this->getSavedData('id_commande_fournisseur')) {
@@ -385,7 +386,12 @@ class BR_ReservationCmdFourn extends BimpObject
             $reservation = $this->getChildObject('reservation');
 
             $qty = (int) $this->getData('qty');
-            $res_errors = $reservation->setNewStatus(100, $qty);
+            $id_commande_fournisseur = (int) $this->getData('id_commande_fournisseur');
+            if ($id_commande_fournisseur) {
+                $res_errors = $reservation->setNewStatus(100, $qty);
+            } else {
+                $res_errors = $reservation->setNewStatus(3, $qty);
+            }
 
             if (count($res_errors)) {
                 $errors[] = 'Echec de la mise à jour du statut de la réservation';
@@ -402,10 +408,48 @@ class BR_ReservationCmdFourn extends BimpObject
     {
         $errors = array();
 
+        $prev_id_commande_fournisseur = (int) $this->getSavedData('id_commande_fournisseur');
+
+        $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
+        $ref_reservation = $this->getData('ref_reservation');
+        $qty = (int) $this->getData('qty');
+
         if ((int) $this->getData('id_commande_fournisseur')) {
-            $this->addToCommandeFournisseur($errors);
-            if (count($errors)) {
-                return $errors;
+            if (!$prev_id_commande_fournisseur) {
+                $add_errors = array();
+                $this->addToCommandeFournisseur($add_errors);
+                if (count($add_errors)) {
+                    $errors[] = 'Echec de l\'ajout à la commande fournisseur';
+                    $errors = array_merge($errors, $add_errors);
+                    return $errors;
+                }
+                if ($reservation->find(array(
+                            'ref'          => $ref_reservation,
+                            'status'       => 3,
+                            'id_equipment' => 0
+                        ))) {
+                    $res_errors = $reservation->setNewStatus(100, $qty);
+                    if (count($res_errors)) {
+                        $errors[] = 'Echec de la mise à jour du statut de la réservation';
+                        $errors = array_merge($errors, $res_errors);
+                    } else {
+                        $reservation->update();
+                    }
+                }
+            }
+        } elseif ($prev_id_commande_fournisseur) {
+            if ($reservation->find(array(
+                        'ref'          => $ref_reservation,
+                        'status'       => 100,
+                        'id_equipment' => 0
+                    ))) {
+                $res_errors = $reservation->setNewStatus(3, $qty);
+                if (count($res_errors)) {
+                    $errors[] = 'Echec de la mise à jour du statut de la réservation';
+                    $errors = array_merge($errors, $res_errors);
+                } else {
+                    $reservation->update();
+                }
             }
         }
 

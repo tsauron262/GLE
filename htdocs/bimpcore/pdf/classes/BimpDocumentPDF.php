@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/BimpModelPDF.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class BimpDocumentPDF extends BimpModelPDF
 {
@@ -55,13 +56,20 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
 
+        $logo_height = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';
+        } else {
+            $logo_height = pdf_getHeightForLogo($logo_file, false);
+        }
+
+        if ($logo_height > 30 || $logo_height === 22) {
+            $logo_height = 30;
         }
 
         $this->header_vars = array(
             'logo_img'     => $logo_file,
-            'logo_width'   => '120',
+            'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
             'header_right' => ''
         );
     }
@@ -222,6 +230,29 @@ class BimpDocumentPDF extends BimpModelPDF
         
     }
 
+    public function getLineDesc($line, Product $product = null)
+    {
+        $desc = '';
+        if (!is_null($product)) {
+            $desc = $product->ref;
+            $desc.= ($desc ? ' - ' : '') . $product->label;
+        }
+
+        if (!is_null($line->desc) && $line->desc) {
+            $line_desc = $line->desc;
+            if (!is_null($product)) {
+                $line_desc = str_replace($product->label, '', $line_desc);
+            }
+            if ($line_desc) {
+                $desc .= ($desc ? '<br/>' : '') . $line_desc;
+            }
+        }
+
+        $desc = preg_replace("/(\n)?[ \s]*<[ \/]*br[ \/]*>[ \s]*(\n)?/", '<br/>', $desc);
+        $desc = str_replace("\n", '<br/>', $desc);
+        return $desc;
+    }
+
     public function renderLines()
     {
         global $conf;
@@ -236,20 +267,17 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            $desc = '';
-            if (is_null($line->desc) || !$line->desc) {
-                if (!is_null($line->fk_product) && $line->fk_product) {
-                    $product = new Product($this->db);
-                    if ($product->fetch((int) $line->fk_product) > 0) {
-                        $desc = $product->ref;
-                        $desc.= ($desc ? ' - ' : '') . $product->label;
-                    }
+            $product = null;
+            if (!is_null($line->fk_product) && $line->fk_product) {
+                $product = new Product($this->db);
+                if ($product->fetch((int) $line->fk_product) <= 0) {
+                    unset($product);
+                    $product = null;
                 }
             }
-            if (!$desc) {
-                $desc = $line->desc;
-            }
-            $desc = str_replace("\n", '<br/>', $desc);
+
+            $desc = $this->getLineDesc($line, $product);
+
             if ($line->total_ht == 0) {
                 $row['desc'] = array(
                     'colspan' => 99,
@@ -425,13 +453,10 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getBottomRightHtml()
     {
 
-
         $html .= $this->getTotauxRowsHtml();
         $html .= $this->getPaymentsHtml();
         $html .= $this->getAfterTotauxHtml();
-
-
-
+        
         return $html;
     }
 
@@ -749,27 +774,43 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml()
     {
-        $html = '<div>';
-        $html .= '<table style="width: 100%" cellpadding="5">';
+        $html .= '<table style="width: 95%" cellpadding="3">';
 
-        if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
+        /*if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
             $html .= '<tr>';
             $html .= '<td style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
             $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
             $html .= '</tr>';
-        }
+        }*/
 
         $html .= '<tr>';
-        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention "Bon pour Accord"</td>';
+//        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
+        $html .= '<td style="text-align:center;"><i><b>Bon pour Commande</b></i></td>';
+        
+        $html .= '<td>Signature + Cachet avec SIRET :</td>';
         $html .= '</tr>';
-
+        
         $html .= '<tr>';
-        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/></td>';
+        $html .= '<td>Nom :</td>';
+        
+        $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
         $html .= '</tr>';
+        
+        $html .= '<tr>';
+        $html .= '<td>Prénom :</td>';
+        $html .= '</tr>';
+        
+        $html .= '<tr>';
+        $html .= '<td>Fonction :</td>';
+        $html .= '</tr>';
+        
+        $html .= '<tr>';
+        $html .= '<td>Date :</td>';
+        $html .= '</tr>';
+        
+        
 
         $html .= '</table>';
-        $html .= '</div>';
-        $html .= '<br/>';
 
         return $html;
     }

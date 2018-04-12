@@ -867,7 +867,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
 
     function traiteTabIcs($tab, $tabResult = array()) {
 //        $tabT = preg_replace("(mailto:[a-z1-9]+)\n ([a-z1-9]+[@])", "$1$2", $tabT);
-        $tab = str_replace("\n ", "", $tab);
+        $tab = str_replace("\r\n ", "", $tab);
         $tabT = explode("\n", $tab);
         foreach ($tabT as $ligneT) {
             $tabT2 = array();

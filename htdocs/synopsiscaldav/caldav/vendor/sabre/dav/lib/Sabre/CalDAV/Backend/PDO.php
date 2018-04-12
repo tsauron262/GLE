@@ -499,6 +499,7 @@ global $conf;
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
         $calData = str_replace("|ln|", "\\n", $calData);
+        $calData = str_replace("|ln|", "\\r\\n ", $calData);
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],
@@ -867,7 +868,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
 
     function traiteTabIcs($tab, $tabResult = array()) {
 //        $tabT = preg_replace("(mailto:[a-z1-9]+)\n ([a-z1-9]+[@])", "$1$2", $tabT);
-        $tab = str_replace("\r\n ", "", $tab);
+        $tab = str_replace("\r\n ", "|lna|", $tab);
         $tabT = explode("\n", $tab);
         foreach ($tabT as $ligneT) {
             $tabT2 = array();

@@ -499,6 +499,7 @@ global $conf;
         $calData = html_entity_decode($calData,ENT_QUOTES);
         
         $calData = str_replace("|ln|", "\\n", $calData);
+        $calData = str_replace("|lna|", "\r\n ", $calData);
         $return = array(
             'id' => $row['id'],
             'uri' => $row['uri'],
@@ -531,6 +532,10 @@ global $conf;
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
+        $calendarData = str_replace("\r\n ", "", $calendarData);
+        
+        
+        
         if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
@@ -782,8 +787,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-        if(stripos($objectUri, $this->uriTest) > 0)
-dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
+        $calendarData = str_replace("\r\n ", "", $calendarData);
 
         $extraData = $this->getDenormalizedData($calendarData);
 
@@ -864,7 +868,7 @@ dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($
 
     function traiteTabIcs($tab, $tabResult = array()) {
 //        $tabT = preg_replace("(mailto:[a-z1-9]+)\n ([a-z1-9]+[@])", "$1$2", $tabT);
-        $tab = str_replace("\n ", "", $tab);
+        $tab = str_replace("\r\n ", "|lna|", $tab);
         $tabT = explode("\n", $tab);
         foreach ($tabT as $ligneT) {
             $tabT2 = array();

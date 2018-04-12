@@ -531,6 +531,10 @@ global $conf;
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
+        $calendarData = str_replace("\n\r", "", $calendarData);
+        
+        
+        
         if(stripos($objectUri, $this->uriTest) > 0)
 dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);

@@ -152,7 +152,7 @@ class BimpLivraison {
         $sql .= ' AND e.id_product=' . $ligne->prodId;
         $sql .= ' AND ROUND(e.prix_achat,2)  = ROUND(' . str_replace(',', '.', $ligne->price_unity).',2)';
         
-        echo $sql."\n";
+        //echo $sql."\n";
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {

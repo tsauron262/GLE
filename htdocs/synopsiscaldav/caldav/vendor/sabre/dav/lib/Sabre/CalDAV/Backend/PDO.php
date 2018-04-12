@@ -786,8 +786,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-        if(stripos($objectUri, $this->uriTest) > 0)
-dol_syslog("UPDATE OBJECT : ".$calendarId."    |   ".$objectUri."   |".print_r($calendarData,1),3, 0, "_caldavLog");
+        $calendarData = str_replace("\r\n ", "", $calendarData);
 
         $extraData = $this->getDenormalizedData($calendarData);
 

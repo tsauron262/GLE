@@ -340,7 +340,7 @@ li.tmenusel a.tmenusel{
     color: black;
 }
 
-textarea.grand{
+textarea.grand, select.grand{
     width: 600px;
     height: 120px;
 }

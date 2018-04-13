@@ -2470,6 +2470,8 @@ if ($action == 'create')
 					$contactstatic = new Contact($db);
 					$contactstatic->fetch($contact ['id']);
 					$custcontact = $contactstatic->getFullName($langs, 1);
+                                        if($contactstatic->email != "" && !isset($_REQUEST["receiver"]))
+                                            $_POST["receiver"] = array($contactstatic->id, "");
 				}
 			}
 

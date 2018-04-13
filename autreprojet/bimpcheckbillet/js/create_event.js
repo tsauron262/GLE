@@ -24,7 +24,7 @@ function createEvent(label, date_start, date_end) {
             } else if (out.code_return > 0) {
                 setMessage('alertSubmit', "L'évènement a été créée.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 1495.', 'error');
+                setMessage('alertSubmit', 'Erreur serveur 1853.', 'error');
             }
         }
     });
@@ -34,8 +34,8 @@ function createEvent(label, date_start, date_end) {
  * Ready
  */
 $(document).ready(function () {
-    $('input[name=date_start]').datepicker({ dateFormat: 'dd/mm/yy' })
-    $('input[name=date_end]').datepicker({ dateFormat: 'dd/mm/yy' })
+    $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
+    $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})
     initEvents();
 });
 

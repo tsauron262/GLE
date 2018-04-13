@@ -3,7 +3,7 @@
 
 
 
-$code = $_REQUEST['code'];
+$code = $_REQUEST['barcode'];
 
 $name = "Nom client classique";
 $valid = "KO";

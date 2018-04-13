@@ -40,24 +40,24 @@ class BimpLivraison {
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                if (isset($lignes[$obj->fk_product])) {
+                /*if (isset($lignes[$obj->fk_product])) {
                     $lignes[$obj->fk_product]->remainingQty += $obj->qty;
                     $lignes[$obj->fk_product]->total_ht += $obj->total_ht;
                     $lignes[$obj->fk_product]->price_unity = price($lignes[$obj->fk_product]->total_ht / $lignes[$obj->fk_product]->remainingQty);
-                } elseif ($obj->fk_product > 0) {
+                } else*/if ($obj->fk_product > 0) {
                     $doliProd = new Product($this->db);
                     $doliProd->fetch($obj->fk_product);
                     $ligne = new LigneLivraison($this->db);
                     $ligne->prodId = $obj->fk_product;
                     $ligne->label = dol_trunc($obj->label, 25);
                     $ligne->remainingQty = $obj->qty;
-                    $ligne->price_unity = price($obj->subprice);
+                    $ligne->qty = $obj->qty;
+                    $ligne->price_unity = price($obj->total_ht / $obj->qty);
                     $ligne->total_ht = $obj->total_ht;
-                    $ligne->isDelivered = false;
                     $ligne->isEquipment = $ligne->isSerialisable();
                     $ligne->refurl = $doliProd->getNomUrl(1);
 
-                    $lignes[$obj->fk_product] = $ligne;
+                    $lignes[] = $ligne;
                 }
             }
         } else if (!$result) {
@@ -133,7 +133,6 @@ class BimpLivraison {
     function getDeliveredLignes($lignes) {
         $deliveredLignes = array();
         foreach ($lignes as $ligne) {
-            $newLigne = $ligne;
             if ($ligne->isEquipment) {
                 $ligne->tabSerial = $this->getDeliveredSerial($ligne);
 //                if (sizeof($ligne->tabSerial) != $newLigne->deliveredQty) {
@@ -146,11 +145,14 @@ class BimpLivraison {
 
     function getDeliveredSerial($ligne) {
         $prodSerial = array();
-        $sql = 'SELECT e.serial as serial';
+        $sql = 'SELECT e.serial as serial, prix_achat';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
         $sql .= ' WHERE e_place.infos="' . $this->getcodeMove() . '"';
         $sql .= ' AND e.id_product=' . $ligne->prodId;
+        $sql .= ' AND ROUND(e.prix_achat,2)  = ROUND(' . str_replace(',', '.', $ligne->price_unity).',2)';
+        
+        //echo $sql."\n";
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
@@ -177,7 +179,7 @@ class BimpLivraison {
                 $length = sizeof($this->errors);
 
                 if (!isset($product['qty'])) {   // serialisable
-                    $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId);
+                    $this->addEquipmentsLivraison($now, $product['id_prod'], $product['serial'], $entrepotId, $product['price']);
                 } else {    // non serialisable
                     $result = $doliProduct->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove, 'order_supplier', $this->commande->id);
                     if ($result < 0) {
@@ -218,7 +220,7 @@ class BimpLivraison {
         return $newErrors;
     }
 
-    function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId) {
+    function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId, $price) {
         $length = sizeof($this->errors);
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 
@@ -230,6 +232,7 @@ class BimpLivraison {
             'warranty_type' => 0, // type de garantie (liste non définie actuellement)
             'admin_login' => '',
             'admin_pword' => '',
+            'prix_achat' => $price,
             'note' => '',
             'origin_element' => 'order_supplier',
             'origin_id_element' => $this->commande->id

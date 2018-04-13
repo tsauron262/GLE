@@ -56,21 +56,28 @@ class ActionsSynopsisHisto {
             setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 20 avril seront désactivés)</a>", null, 'errors');
             setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 20 avril seront désactivés)</a>", null, 'errors');
        }
+
         
        if($user->array_options['options_mail_sec'] == "" || $user->office_phone == ""){
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
+            if($user->office_phone == ""){
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+            }
+
+            if($user->array_options['options_mail_sec'] == ""){
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+            }
        }
        
        

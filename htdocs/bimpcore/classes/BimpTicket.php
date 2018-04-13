@@ -74,7 +74,7 @@ class BimpTicket
 
             $html .= $this->renderHeader();
 
-          
+
 
             if ($this->town) {
                 $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($this->town) . ', le ' . date('d / m / Y') . '</span>';
@@ -235,13 +235,17 @@ class BimpTicket
         $address = (string) $this->entrepot->address;
         $zip = (string) $this->entrepot->zip;
         $this->town = (string) $this->entrepot->town;
+        $phone = (string) $this->entrepot->array_options['options_phone'];
 
-        if($adress == "")
+        if ($adress == "")
             $address = $mysoc->address;
-        if($zip == "")
+        if ($zip == "")
             $zip = $mysoc->zip;
-        if($this->town == "")
+        if ($this->town == "")
             $this->town = $mysoc->town;
+        if ($phone == "") {
+            $phone = $mysoc->phone;
+        }
 
         if (!$address) {
             $this->errors[] = 'Addresse absente';
@@ -258,6 +262,7 @@ class BimpTicket
         if (count($this->errors)) {
             return '';
         }
+
         $logo = $mysoc->logo;
         $logo2 = str_replace(".jpg", "_black.jpg", $logo);
         if (is_file($conf->mycompany->dir_output . '/logos/' . $logo2))
@@ -279,6 +284,9 @@ class BimpTicket
         $html .= '<div class="header_block">';
         $html .= $address . '<br/>';
         $html .= $zip . ' ' . strtoupper($this->town);
+        if ($phone) {
+            $html .= '<br/><br/><span style="font-size: 16px; font-weight: bold">Tél : ' . $phone . '</span>';
+        }
         $html .= '</div>';
         $html .= '</div>';
 
@@ -317,9 +325,9 @@ class BimpTicket
         if ($mysoc->capital) {
             $captital = price2num($mysoc->capital);
             if (is_numeric($captital) && $captital > 0) {
-                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", price($captital, 0, $langs, 0, 0, 0, $conf->currency)). " €";
+                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", price($captital, 0, $langs, 0, 0, 0, $conf->currency)) . " €";
             } else {
-                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", $captital, $langs). " €";
+                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", $captital, $langs) . " €";
             }
         }
 

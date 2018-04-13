@@ -28,7 +28,10 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<link rel="icon" href="../img/logo.png">';
     print '</head>';
 
-    if (isset($_SESSION['id_user'])) {
+    if (isset($_SESSION['user'])) {
+        global $user;
+        $user = json_decode($_SESSION['user']);
+//        var_dump($user);
         print '<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <div class="navbar-header">
@@ -55,38 +58,21 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         </div>
       </li>
     </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li>
+        <a class="nav-link" href="index.php">Se déconnecter</a>
+      </li>
+    </ul>
   </div>
 </nav>';
     } else {
         $page = basename($_SERVER['PHP_SELF']);
-        if ($page != 'login.php' && $page != 'register.php') {
+        if ($page != 'index.php' && $page != 'register.php') {
             print '<fieldset class="container_form">';
             print '<h4>Veuillez vous connecter</h4>';
-            print '<input type="button" class="btn btn-primary" value="Accéder à la page de connection" onClick="document.location.href=\'login.php\'"/>';
+            print '<input type="button" class="btn btn-primary" value="Accéder à la page de connection" onClick="document.location.href=\'index.php\'"/>';
             print '</fieldset>';
             exit();
         }
     }
 }
-
-//<div class="container">
-//   <div class="menubar">
-//      <ul>
-//         <li class="product">
-//            <a href="#">Utilisateur<i class="fa fa-angle-down" aria-hidden="true"></i></a>
-//            <ul class="submenu1">
-//               <li><a href="registration_user.php">S\'inscrire</a></li>
-//            </ul>
-//         </li>
-//         <li class="service">
-//            <a href="#">Evènement<i class="fa fa-angle-down" aria-hidden="true"></i></a>
-//            <ul class="submenu2">
-//               <li><a href="create_event.php">Créer</a></li>
-//               <li><a href="create_tariff.php">Créer tarif</a></li>
-//               <li><a href="create_ticket.php">Réserver ticket</a></li>
-//               <li><a href="check_ticket.php">Valider ticket</a></li>
-//            </ul>
-//         </li>
-//      </ul>
-//   </div>
-//</div>

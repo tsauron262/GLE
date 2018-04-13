@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 include_once 'param.inc.php';
 
 include_once 'class/user.class.php';
@@ -9,12 +11,13 @@ include_once 'class/ticket.class.php';
 
 $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
 
-$db = new PDO($dsn, DB_USER, DB_PASSWORD)
+$db = new PDO($dsn, DB_USER, DB_PASS_WORD)
         or die("Impossible de se connecter à la base : " . mysql_error());
 
+$user_session = json_decode($_SESSION['user']);
 
 $user = new User($db);
-$event  = new Event($db);
+$event = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
 
@@ -23,21 +26,12 @@ switch ($_POST['action']) {
      * create_event.php
      */
     case 'create_event': {
+            $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->create($_POST['label'], $_POST['date_start'], $_POST['date_end']),
+                'code_return' => $event->create($_POST['label'], $_POST['date_start'], $_POST['date_end'], $user->id),
                 'errors' => $event->errors));
             break;
         }
-
-//    /**
-//     * registration_user.php
-//     */
-//    case 'registration_user': {
-//            echo json_encode(array(
-//                'code_return' => $user->create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['date_born']),
-//                'errors' => $user->errors));
-//            break;
-//        }
 
     /**
      * create_tariff.php
@@ -54,8 +48,31 @@ switch ($_POST['action']) {
      */
     case 'create_ticket': {
             echo json_encode(array(
-                'code_return' => $ticket->create($_POST['id_tariff'], $_POST['id_client'], $_POST['id_event']),
+                'code_return' => $ticket->create($_POST['id_tariff'], 1, $_POST['id_event']),
                 'errors' => $ticket->errors));
+            break;
+        }
+
+    /**
+     * index.php
+     */
+    case 'login': {
+            $id_user = $user->connect($_POST['login'], $_POST['pass_word']);
+            if ($id_user > 0) {
+                $user->fetch($id_user);
+                unset($user->db);
+                $_SESSION['user'] = json_encode($user);
+            }
+            echo json_encode(array('errors' => $user->errors));
+            break;
+        }
+
+    /**
+     * check_ticket.php
+     */
+    case 'check_ticket': {
+            $ticket->check($_POST['barcode'], $_POST['id_event']);
+            echo json_encode(array('errors' => $ticket->errors));
             break;
         }
 
@@ -63,12 +80,29 @@ switch ($_POST['action']) {
      * register.php
      */
     case 'register': {
+            $id_user = $user->create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['login'], $_POST['pass_word']);
+            if ($id_user > 0) {
+                $user->fetch($id_user);
+                unset($user->db);
+                $_SESSION['user'] = json_encode($user);
+            }
             echo json_encode(array(
-                'id_inserted' => $user->create($_POST['login'], $_POST['password']),
+                'id_inserted' => $id_user,
                 'errors' => $user->errors));
             break;
         }
 
+    /**
+     * home.php
+     */
+    case 'get_events_user': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user->id);
+            echo json_encode(array(
+                'events' => $event->getEvents($user->id, true, $user->status == $user::STATUT_SUPER_ADMIN),
+                'errors' => $event->errors));
+            break;
+        }
     /**
      * General
      */
@@ -94,6 +128,5 @@ switch ($_POST['action']) {
             break;
         }
 }
-
 
 //mysql_close($db);

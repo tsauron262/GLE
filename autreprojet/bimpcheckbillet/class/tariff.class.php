@@ -108,8 +108,8 @@ class Tariff {
                 );
             }
             return $tariffs;
-        } else {
-            $this->errors[] = "Aucun tarif pour cet évènement.";
+        } elseif (!$result) {
+            $this->errors[] = "Erreur SQL 1567.";
             return -2;
         }
         return -1;

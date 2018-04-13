@@ -4,27 +4,28 @@
  * Ajax call
  */
 
-function connect(login, password) {
+function login(login, pass_word) {
 
     $.ajax({
         type: "POST",
         url: "../interface.php",
         data: {
             login: login,
-            password: password,
-            action: 'connect'
+            pass_word: pass_word,
+            action: 'login'
         },
         error: function () {
             setMessage('alertSubmit', 'Erreur serveur 3185.', 'error');
         },
         success: function (rowOut) {
+            console.log(rowOut);
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.code_return.length !== 0) {
-                setMessage('alertSubmit', 'Connection.', 'msg');
+            } else if (out.errors === undefined) {
+                setMessage('alertSubmit', 'Erreur serveur 3174.', 'error');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 3186.', 'error');
+                window.location.replace('home.php');
             }
         }
     });
@@ -42,8 +43,8 @@ $(document).ready(function () {
  */
 
 function initEvents() {
-    $('select[name=connect]').click(function () {
-        connect($('input[name=login]').val(), $('input[name=password]').val());
+    $('button[name=connect]').click(function () {
+        login($('input[name=login]').val(), $('input[name=pass_word]').val());
     });
 }
 

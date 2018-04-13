@@ -1,11 +1,11 @@
 <?php
 
-include_once '../param.inc.php';
-
 include_once 'header.php';
 include_once 'footer.php';
 
 $arrayofjs = array('../js/login.js', '../js/annexes.js');
+
+session_destroy();
 
 printHeader('Billetterie', $arrayofjs);
 
@@ -19,8 +19,8 @@ print '<legend><span>Connection<span></legend>';
 print '<label for="login">Identifiant</label>';
 print '<input class="form-control" placeholder="Identifiant" name="login" maxlength=256 style="width: 300px"><br/>';
 
-print '<label for="password">Mot de passe </label>';
-print '<input type="password" class="form-control" placeholder="Mot de passe" name="password" maxlength=256 style="width: 300px"><br/>';
+print '<label for="pass_word">Mot de passe </label>';
+print '<input type="password" class="form-control" placeholder="Mot de passe" name="pass_word" maxlength=256 style="width: 300px"><br/>';
 
 print '<button class="btn btn-primary" name="connect" style="margin-right: 40px">Se connecter</button>';
 print '<input type="button" class="btn btn-primary" value="S\'inscrire" onClick="document.location.href=\'register.php\'"/>';

@@ -5,7 +5,7 @@ include_once '../param.inc.php';
 include_once 'header.php';
 include_once 'footer.php';
 
-$arrayofjs = array('../js/registration_user.js', '../js/annexes.js');
+$arrayofjs = array('../js/registration_user.js');
 
 printHeader('Inscrire utilisateur', $arrayofjs);
 

@@ -44,7 +44,24 @@ class Event {
         return -1;
     }
 
-    public function create($label, $date_start, $date_end, $id_user) {
+    public function create($label, $date_start, $date_end, $id_user, $file) {
+//      'name' => string 'Capture d’écran de 2017-11-29 12-04-24.png' (length=45)
+//      'type' => string 'image/png' (length=9)
+//      'tmp_name' => string '/tmp/phpmisqHb' (length=14)
+//      'error' => int 0
+//      'size' => int 265517
+
+        if ($file['error'] != 0) {
+            $this->errors[] = "Fichier mal chargé.";
+            return -5;
+        }
+        $source = $file['tmp_name'];
+        $destination = PATH . '/img/event/1.png';
+//        $destination = '/tmp/';
+
+        echo 'source: ' . $source . '<br/>';
+        echo 'destination: ' . $destination . '<br/>';
+        return move_uploaded_file($source, $destination);
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -53,7 +70,7 @@ class Event {
         if ($date_end == '')
             $this->errors[] = "Le champ date de fin est obligatoire";
         if (sizeof($this->errors) != 0)
-            return -3;
+            return -4;
 
         $date_start_obj = DateTime::createFromFormat('d/m/Y', $date_start);
         $date_end_obj = DateTime::createFromFormat('d/m/Y', $date_end);
@@ -103,7 +120,7 @@ class Event {
         $sql = 'SELECT e.id as id, e.label as label, e.date_creation as date_creation,'
                 . ' e.date_start as date_start, e.date_end as date_end';
         $sql .= ' FROM event as e';
-        if ($id_user != null and !$is_super_admin) {
+        if ($id_user != null and ! $is_super_admin) {
             $sql .= ' LEFT JOIN event_admin as e_a ON e_a.fk_event=e.id';
             $sql .= ' WHERE e_a.fk_user=' . $id_user;
         }

@@ -21,6 +21,7 @@ $event = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
 
+
 switch ($_POST['action']) {
     /**
      * create_event.php
@@ -28,7 +29,7 @@ switch ($_POST['action']) {
     case 'create_event': {
             $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->create($_POST['label'], $_POST['date_start'], $_POST['date_end'], $user->id),
+                'code_return' => $event->create($_POST['label'], $_POST['date_start'], $_POST['date_end'], $user->id, $_FILES['file']),
                 'errors' => $event->errors));
             break;
         }

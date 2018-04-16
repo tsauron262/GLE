@@ -3,7 +3,7 @@
 include_once 'header.php';
 include_once 'footer.php';
 
-$arrayofjs = array('../js/register.js', '../js/annexes.js');
+$arrayofjs = array('../js/register.js');
 
 printHeader('Billetterie', $arrayofjs);
 

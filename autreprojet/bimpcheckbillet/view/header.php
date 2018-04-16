@@ -11,7 +11,8 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
 // CSS
     print '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
     print '<link rel="stylesheet" href="../css/styles.css">';
-    print '<link rel="stylesheet" href="../css/bootstrap.min.css">';
+    print '<link rel="stylesheet" href="../lib/css/bootstrap.min.css">';
+    print '<link rel="stylesheet" href="../lib/css/chosen.min">';
     foreach ($arrayofcss as $cssfile)
         print '<link rel="stylesheet" type="text/css" href="' . $cssfile . '">';
 
@@ -20,7 +21,9 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
     crossorigin="anonymous"></script>';
     print '<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>';
-    print '<script type="text/javascript" src="../js/bootstrap.min.js"></script>';
+    print '<script type="text/javascript" src="../lib/js/bootstrap.min.js"></script>';
+    print '<script type="text/javascript" src="../lib/js/chosen.jquery.min.js"></script>';
+    print '<script type="text/javascript" src="../js/annexes.js"></script>';
 
     foreach ($arrayofjs as $jsfile)
         print '<script type="text/javascript" src="' . $jsfile . '"></script>';

@@ -3,7 +3,7 @@
 include_once 'header.php';
 include_once 'footer.php';
 
-$arrayofjs = array('../js/home.js', '../js/annexes.js');
+$arrayofjs = array('../js/home.js');
 
 printHeader('Accueil', $arrayofjs);
 

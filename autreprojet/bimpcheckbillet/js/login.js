@@ -18,7 +18,6 @@ function login(login, pass_word) {
             setMessage('alertSubmit', 'Erreur serveur 3185.', 'error');
         },
         success: function (rowOut) {
-            console.log(rowOut);
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');

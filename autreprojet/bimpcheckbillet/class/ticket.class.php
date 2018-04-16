@@ -156,6 +156,7 @@ class Ticket {
         $sql.= ' SET date_scan=now()';
         $sql.= ' WHERE id=' . $this->id;
 
+        
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->db->beginTransaction();

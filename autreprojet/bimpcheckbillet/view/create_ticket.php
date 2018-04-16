@@ -5,7 +5,7 @@ include_once '../param.inc.php';
 include_once 'header.php';
 include_once 'footer.php';
 
-$arrayofjs = array('../js/create_ticket.js', '../js/annexes.js');
+$arrayofjs = array('../js/create_ticket.js');
 
 printHeader('Réserver ticket', $arrayofjs);
 

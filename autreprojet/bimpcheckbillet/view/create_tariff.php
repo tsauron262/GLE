@@ -5,10 +5,9 @@ include_once '../param.inc.php';
 include_once 'header.php';
 include_once 'footer.php';
 
-$arrayofjs = array('../js/create_tariff.js', '../js/annexes.js', '../js/chosen.jquery.min.js');
-$arrayofcss = array('../css/chosen.min.css');
+$arrayofjs = array('../js/create_tariff.js');
 
-printHeader('Créer tarif', $arrayofjs, $arrayofcss);
+printHeader('Créer tarif', $arrayofjs);
 
 
 print '<body>';

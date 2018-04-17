@@ -529,7 +529,7 @@ if (is_dir($dir)) {
                             $typeLigne = "propal";
                         $paysGlobal = processPays($val['PysCode']);
                         $externalUserId = $val['PcvGPriID'];
-                        $internalUserId = processUser($externalUserId);
+                        $internalUserId = processUser($externalUserId, $val["PcvCode"]);
                         if (!$internalUserId)
                             $OKFile = false;
                         else {
@@ -2369,7 +2369,7 @@ function processPays($codePays) {
     }
 }
 
-function processUser($import_key) {
+function processUser($import_key, $nomCom) {
 //    return 59;
     global $remUserArray, $db;
     if ($import_key > 0) {
@@ -2380,7 +2380,7 @@ function processUser($import_key) {
         if (isset($result[0]['d']))
             return $result[0]['d'];
         else
-            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key);
+            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key." commande ".$nomCom);
 //        if (!isset($remUserArray[$import_key])) {
 //            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
 //            $sql = requeteWithCache($requete);

@@ -489,13 +489,14 @@ class GSX
         );
 
         
-        if(isset($_SESSION['soapClient'])){
-            $this->soapClient = unserialize($_SESSION['soapClient']);
-            return $this->soapClient;
-        }
+//        if(isset($_SESSION['soapClient'])){
+//            $this->soapClient = unserialize($_SESSION['soapClient']);
+//            return $this->soapClient;
+//        }
         
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
+            print_r($this->soapClient);die;
             $_SESSION['soapClient'] = serialize($this->soapClient);
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);

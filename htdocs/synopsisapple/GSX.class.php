@@ -489,6 +489,7 @@ class GSX
         );
 //print_r($connectionOptions);die;
         try {
+            die("av");
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);

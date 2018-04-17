@@ -487,9 +487,17 @@ class GSX
             , 'exceptions'         => TRUE
                 //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
         );
-//print_r($connectionOptions);die;
+
+        
+//        if(isset($_SESSION['soapClient'])){
+//            $this->soapClient = unserialize($_SESSION['soapClient']);
+//            return $this->soapClient;
+//        }
+        
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
+            print_r($this->soapClient);die;
+            $_SESSION['soapClient'] = serialize($this->soapClient);
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }

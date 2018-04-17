@@ -529,7 +529,7 @@ if (is_dir($dir)) {
                             $typeLigne = "propal";
                         $paysGlobal = processPays($val['PysCode']);
                         $externalUserId = $val['PcvGPriID'];
-                        $internalUserId = processUser($externalUserId);
+                        $internalUserId = processUser($externalUserId, $val["PcvCode"], $file);
                         if (!$internalUserId)
                             $OKFile = false;
                         else {
@@ -1535,7 +1535,7 @@ if (is_dir($dir)) {
                                             if ($sql) {
                                                 $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
                                                 $mode = "ORDER_CREATE";
-                                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
+                                                $webContent .= "<td  class='ui-widget-content'><a href='".DOL_URL_ROOT."/commande/card.php?id=".$comId."'>Cr&eacute;ation commande OK</a></td>";
                                                 $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
                                             } else {
                                                 $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
@@ -2369,7 +2369,7 @@ function processPays($codePays) {
     }
 }
 
-function processUser($import_key) {
+function processUser($import_key, $nomCom, $file) {
 //    return 59;
     global $remUserArray, $db;
     if ($import_key > 0) {
@@ -2380,7 +2380,7 @@ function processUser($import_key) {
         if (isset($result[0]['d']))
             return $result[0]['d'];
         else
-            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key);
+            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key." commande ".$nomCom. " fichier ".$file);
 //        if (!isset($remUserArray[$import_key])) {
 //            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
 //            $sql = requeteWithCache($requete);

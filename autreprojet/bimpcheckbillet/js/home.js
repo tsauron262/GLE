@@ -71,8 +71,10 @@ function displayEvent(event) {
         html += '</button>';
         html += '<strong>Information : </strong>Aucun tariff n\'a été créer pour cet évènement.'
         html += '</div>';
+        html += '</div>';
     }
 
-    html += '</div></div>';
+    html += '</div>';
+//    console.log(html+"\n\n\n\n");
     $('#container_event').append(html);
 }

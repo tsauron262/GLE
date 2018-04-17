@@ -7,9 +7,9 @@
     width: auto;
     display: inline-block;
     min-width: 600px;
-    position:absolute;
-    left:40%;
-    /*top:50%;*/
+    position: absolute;
+    left: 40%;
+    top: 0%;
     margin: 100px 0 0 -150px;
 
 }

@@ -5,7 +5,7 @@ class Event {
     public $errors;
     private $db;
     private $id;
-    private $label;
+    public $label;
     private $date_creation;
     private $date_start;
     private $date_end;
@@ -45,23 +45,6 @@ class Event {
     }
 
     public function create($label, $date_start, $date_end, $id_user, $file) {
-//      'name' => string 'Capture d’écran de 2017-11-29 12-04-24.png' (length=45)
-//      'type' => string 'image/png' (length=9)
-//      'tmp_name' => string '/tmp/phpmisqHb' (length=14)
-//      'error' => int 0
-//      'size' => int 265517
-
-        if ($file['error'] != 0) {
-            $this->errors[] = "Fichier mal chargé.";
-            return -5;
-        }
-        $source = $file['tmp_name'];
-        $destination = PATH . '/img/event/1.png';
-//        $destination = '/tmp/';
-
-        echo 'source: ' . $source . '<br/>';
-        echo 'destination: ' . $destination . '<br/>';
-        return move_uploaded_file($source, $destination);
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -69,6 +52,8 @@ class Event {
             $this->errors[] = "Le champ date de début est obligatoire";
         if ($date_end == '')
             $this->errors[] = "Le champ date de fin est obligatoire";
+        if ($file['error'] != 0)
+            $this->errors[] = "Erreur lors du chargement de l'image";
         if (sizeof($this->errors) != 0)
             return -4;
 
@@ -100,7 +85,14 @@ class Event {
             $last_insert_id = $this->db->lastInsertId();
             $this->db->commit();
             if ($last_insert_id > 0 and $this->createEventAdmin($last_insert_id, $id_user) > 0) {
-                return $last_insert_id;
+                $source = $file['tmp_name'];
+                $destination = PATH . '/img/event/' . $last_insert_id . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
+                if (move_uploaded_file($source, $destination) == true)
+                    return $last_insert_id;
+                else {
+                    $this->errors[] = "Erreur lors du déplacement de l'image";
+                    return -6;
+                }
             } else {
                 return -4;
             }

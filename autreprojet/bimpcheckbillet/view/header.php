@@ -12,7 +12,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
     print '<link rel="stylesheet" href="../css/styles.css">';
     print '<link rel="stylesheet" href="../lib/css/bootstrap.min.css">';
-    print '<link rel="stylesheet" href="../lib/css/chosen.min">';
+    print '<link rel="stylesheet" href="../lib/css/chosen.min.css">';
     foreach ($arrayofcss as $cssfile)
         print '<link rel="stylesheet" type="text/css" href="' . $cssfile . '">';
 
@@ -40,16 +40,17 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     <div class="navbar-header">
       <a class="navbar-brand" href="home.php">Billetterie</a>
     </div>
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item dropdown">
+    <ul class="navbar-nav mr-auto">';
+        if ($user->status == 2)
+            print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Utilisateur
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="registration_user.php">S\'inscrire</a>
+          <a class="dropdown-item" href="manage_user.php">Gestion droit</a>
         </div>
-      </li>
-      <li class="nav-item dropdown">
+      </li>';
+        print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Évènement
         </a>

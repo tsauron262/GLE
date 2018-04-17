@@ -21,6 +21,8 @@ $event = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
 
+//var_dump($_POST);
+//return;
 
 switch ($_POST['action']) {
     /**
@@ -39,7 +41,7 @@ switch ($_POST['action']) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['id_event']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['id_event'], $_FILES['file'], ($_POST['date_start'] == '') ? null : $_POST['date_start'], ($_POST['date_end'] == '') ? null : $_POST['date_end']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -98,7 +100,7 @@ switch ($_POST['action']) {
      */
     case 'get_events_user': {
             $user_session = json_decode($_SESSION['user']);
-            $user->fetch($user->id);
+            $user->fetch($user_session->id);
             echo json_encode(array(
                 'events' => $event->getEvents($user->id, true, $user->status == $user::STATUT_SUPER_ADMIN),
                 'errors' => $event->errors));
@@ -108,8 +110,10 @@ switch ($_POST['action']) {
      * General
      */
     case 'get_events': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
             echo json_encode(array(
-                'events' => $event->getEvents(),
+                'events' => $event->getEvents($user->id, false, $user->status == $user::STATUT_SUPER_ADMIN),
                 'errors' => $event->errors));
             break;
         }

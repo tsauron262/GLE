@@ -65,7 +65,7 @@ class Ticket {
         $sql.= ', now()';
         $sql.= ', "' . $id_user . '"';
         $sql.= ', "' . $id_event . '"';
-        $sql.= ', "' . substr(md5(mt_rand()), 0, 31) . '"';
+        $sql.= ', "' . $this->getRandomString() . '"';
         $sql.= ')';
 
         try {
@@ -93,25 +93,42 @@ class Ticket {
             return -4;
         }
 
-        $sql = 'SELECT ti.id as id_ticket';
+        $sql = 'SELECT ti.id as id_ticket, (DATE(NOW()) >= DATE(x.date_start)) as constr_date_start, (DATE(NOW()) <= DATE(x.date_end)) as constr_date_end, ti.date_scan as date_scan, ti.fk_event as fk_event';
         $sql .= ' FROM ticket as ti';
 
         $tariff = new Tariff($this->db);
         $tariff->fetch($this->id_tariff);
         if ($tariff->hasItsOwnDate()) {
-            $sql .= ' LEFT JOIN tariff as x ON x.id = ti.fk_event';
+            $sql .= ' LEFT JOIN tariff as x ON x.id = ti.fk_tariff';
         } else {
             $sql .= ' LEFT JOIN event as x ON x.id = ti.fk_event';
         }
         $sql .= ' WHERE ti.id=' . $this->id;
-        $sql .= ' AND DATE(NOW()) >= DATE(x.date_start)';
-        $sql .= ' AND DATE(NOW()) <= DATE(x.date_end)';
-        $sql .= ' AND ti.date_scan IS NULL';
-        $sql .= ' AND ti.fk_event=' . $id_event;
 
+        
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
+                if ($obj->fk_event != $id_event) {
+                    $event = new Event($this->db);
+                    $event->fetch($obj->fk_event);
+                    $this->errors[] = "Ce ticket appartient à l'évènement: <strong>" . $event->label . "</strong>";
+                    return -6;
+                }
+                if ($obj->date_scan != NULL) {
+                    $date_scan_obj = strtotime($obj->date_scan);
+                    $this->errors[] = "Ticket déjà scanné le: <strong>" . date('d/m/Y H:i:s', $date_scan_obj) . "</strong>";
+                    return -8;
+                }
+                if ($obj->constr_date_start != true) {
+                    $this->errors[] = "Date de début de validité n'est pas encore atteinte.";
+                    return -9;
+                }
+                if ($obj->constr_date_end != true) {
+                    $this->errors[] = "Date de fin de validité atteinte.";
+                    return -7;
+                }
+
                 $out = $this->setScanned();
                 if ($out > 0)
                     return $this->id;
@@ -156,7 +173,7 @@ class Ticket {
         $sql.= ' SET date_scan=now()';
         $sql.= ' WHERE id=' . $this->id;
 
-        
+
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->db->beginTransaction();
@@ -169,6 +186,17 @@ class Ticket {
             return -2;
         }
         return -1;
+    }
+
+    private function getRandomString($length = 32) {
+        $str = "";
+        $characters = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
+        $max = count($characters) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $rand = mt_rand(0, $max);
+            $str .= $characters[$rand];
+        }
+        return $str;
     }
 
 }

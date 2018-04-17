@@ -3,8 +3,9 @@
 include_once 'header.php';
 include_once 'footer.php';
 
+//$arryofjs = array('../js/check_ticket');
 
-printHeader('Valider ticket');
+printHeader('Valider ticket'/*, $arryofjs */);
 
 print '<body>';
 print '<fieldset class="container_form">';
@@ -31,12 +32,11 @@ print '
             var decoder = new WebCodeCamJS("canvas").buildSelectMenu(document.createElement(\'select\'), \'environment|back\').init(arg).play();
              
         </script>
+        <link rel="stylesheet" type="text/css" href="../lib/css/chosen.min.css">
+        <script type="text/javascript" src="../lib/js/chosen.jquery.min.js"></script>
         <script type="text/javascript" src="../js/check_ticket.js"></script>
         <script type="text/javascript" src="../js/annexes.js"></script>
-        <script type="text/javascript" src="../js/chosen.jquery.min.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="../scan/scan.css">
-    <link rel="stylesheet" type="text/css" href="../css/chosen.min.css">
+        <link rel="stylesheet" type="text/css" href="../scan/scan.css">
 
 
 <div id="input">

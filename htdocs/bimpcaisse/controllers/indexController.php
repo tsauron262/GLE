@@ -243,12 +243,17 @@ class indexController extends BimpController
             $html .= '<div class="freeFormRow">';
             $html .= '<div class="freeFormLabel">Montant du fonds de caisse: </div>';
             $html .= '<div class="freeFormInput">';
-            $html .= '<input type="text" value="" name="fonds" id="fonds"';
-            $html .= ' data-data_type="number"';
-            $html .= ' data-decimals="2"';
-            $html .= ' data-min="0"';
-            $html .= ' data-unsigned="1"';
-            $html .= '/><i class="fa fa-euro iconRight"></i>';
+
+            $html .= BimpInput::renderInput('text', 'fonds', '', array(
+                        'data'        => array(
+                            'data_type' => 'number',
+                            'decimals'  => 2,
+                            'min'       => 0,
+                            'unsigned'  => 1
+                        ),
+                        'addon_right' => '<i class="fa fa-euro"></i>'
+            ));
+
             $html .= '</div>';
             $html .= '</div>';
         } else {

@@ -24,7 +24,7 @@ global $db, $langs;
 $pdf = new InvoicePDF($db);
 
 $obj = new Facture($db);
-$obj->fetch(86134);
+$obj->fetch(86570);
 
 $pdf->init($obj);
 $pdf->render(__DIR__. '/testFacture.pdf', true);

@@ -568,7 +568,8 @@ class BimpController
                 if (!count($errors)) {
                     $errors = $object->update();
                     if (!count($errors)) {
-                        $success = 'Mise à jour du champ "' . $field . '" pour ' . $object->getLabel('the') . ' n° ' . $id_object . ' effectuée avec succès';
+                        $field_name = $object->config->get('fields/' . $field . '/label', $field);
+                        $success = 'Mise à jour du champ "' . $field_name . '" pour ' . $object->getLabel('the') . ' ' . $id_object . ' effectuée avec succès';
                     }
                 }
             }
@@ -1121,10 +1122,10 @@ class BimpController
 
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
-            $bimpViewsList = new BimpViewsList($object, $views_list_name);
+            $bimpViewsList = new BC_ListViews($object, $views_list_name);
             $html = $bimpViewsList->renderItemViews();
             $pagination = $bimpViewsList->renderPagination();
-            $views_list_id = $bimpViewsList->views_list_identifier;
+            $views_list_id = $bimpViewsList->identifier;
         }
 
         die(json_encode(array(
@@ -1306,6 +1307,47 @@ class BimpController
             'errors'     => $errors,
             'success'    => 'Associations correctement enregistrées',
             'done'       => $done,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessSetObjectNewStatus()
+    {
+        $errors = array();
+        $success = '';
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name', '');
+        $id_object = (int) BimpTools::getValue('id_object', 0);
+
+        $status = BimpTools::getValue('new_status');
+        $extra_data = BimpTools::getValue('extra_data', array());
+
+        if (!$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+
+        if (is_null($status)) {
+            $errors[] = 'Nouveau statut non spécifié';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name, $id_object);
+            if (is_null($object) || !$object->isLoaded()) {
+                $errors[] = 'ID de l\'objet invalide';
+            } else {
+                $errors = $object->setNewStatus($status, $extra_data);
+                $success = 'Mise à jour du statut ' . $object->getLabel('of_the') . ' ' . $object->id . ' effectué avec succès';
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => $success,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }

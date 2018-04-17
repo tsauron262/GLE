@@ -225,7 +225,7 @@ class BC_List extends BC_Panel
         }
 
         $primary = $this->object->getPrimary();
-        
+
         // Jointures: 
         $joins = $this->params['joins'];
 

@@ -25,16 +25,20 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         if (!count($this->errors)) {
             if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
-                $contacts = $this->object->getIdContact('external', 'CUSTOMER');
-                if (isset($contacts[0]) && $contacts[0]) {
-                    BimpTools::loadDolClass('contact');
-                    $contact = new Contact($this->db);
-                    if ($contact->fetch((int) $contacts[0]) > 0) {
-                        $this->contact = $contact;
-
-                        if ((int) $this->contact->socid !== $this->object->socid) {
-                            $this->thirdparty = $this->contact;
+                if (is_null($this->contact)) {
+                    $contacts = $this->object->getIdContact('external', 'CUSTOMER');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        BimpTools::loadDolClass('contact');
+                        $contact = new Contact($this->db);
+                        if ($contact->fetch((int) $contacts[0]) > 0) {
+                            $this->contact = $contact;
                         }
+                    }
+                }
+
+                if (!is_null($this->contact)) {
+                    if ((int) $this->contact->socid !== $this->object->socid) {
+                        $this->thirdparty = $this->contact;
                     }
                 }
 
@@ -456,7 +460,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= $this->getTotauxRowsHtml();
         $html .= $this->getPaymentsHtml();
         $html .= $this->getAfterTotauxHtml();
-        
+
         return $html;
     }
 
@@ -776,39 +780,39 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         $html .= '<table style="width: 95%" cellpadding="3">';
 
-        /*if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
-            $html .= '<tr>';
-            $html .= '<td style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
-            $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
-            $html .= '</tr>';
-        }*/
+        /* if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
+          $html .= '<tr>';
+          $html .= '<td style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
+          $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
+          $html .= '</tr>';
+          } */
 
         $html .= '<tr>';
 //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
         $html .= '<td style="text-align:center;"><i><b>Bon pour Commande</b></i></td>';
-        
+
         $html .= '<td>Signature + Cachet avec SIRET :</td>';
         $html .= '</tr>';
-        
+
         $html .= '<tr>';
         $html .= '<td>Nom :</td>';
-        
+
         $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
         $html .= '</tr>';
-        
+
         $html .= '<tr>';
         $html .= '<td>Prénom :</td>';
         $html .= '</tr>';
-        
+
         $html .= '<tr>';
         $html .= '<td>Fonction :</td>';
         $html .= '</tr>';
-        
+
         $html .= '<tr>';
         $html .= '<td>Date :</td>';
         $html .= '</tr>';
-        
-        
+
+
 
         $html .= '</table>';
 

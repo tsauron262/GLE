@@ -48,6 +48,12 @@ class BC_ListTable extends BC_List
 
         $path = null;
 
+//        if ($object->object_name === 'BimpNote') {
+//            echo '<pre>';
+//            print_r($object->config->params);
+//            exit;
+//        }
+
         if (!$name || $name === 'default') {
             if ($object->config->isDefined('list')) {
                 $path = 'list';
@@ -304,9 +310,9 @@ class BC_ListTable extends BC_List
 
             $html .= '<th class="th_tools">';
             $html .= '<div class="headerTools">';
-            
+
             $html .= '<span class="fa-spin loadingIcon"></span>';
-            
+
             if ($this->search && $this->params['enable_search']) {
                 $html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
             }
@@ -328,13 +334,13 @@ class BC_ListTable extends BC_List
                 $html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
                 $html .= $parametersPopUpHtml;
             }
-            
+
             if ($this->params['enable_refresh']) {
                 $html .= '<span class="headerButton refreshListButton bs-popover"';
                 $html .= BimpRender::renderPopoverData('Actualiser la liste', 'top', false);
                 $html .= '></span>';
             }
-            
+
             $html .= '</div>';
             $html .= '</th>';
 

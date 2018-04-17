@@ -6,7 +6,7 @@ function reloadObjectList(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
+//        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
         return;
     }
 

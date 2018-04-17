@@ -10,6 +10,8 @@ class BC_Field extends BimpComponent
     public $display_name = 'default';
     public $container_id = null;
     public $display_input_value = true;
+    public $no_html = false;
+    
     public static $type_params_def = array(
         'id_parent' => array(
             'object'      => array('default' => ''),
@@ -244,7 +246,8 @@ class BC_Field extends BimpComponent
         }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
-
+        $display->no_html = $this->no_html;
+        
         $html .= $display->renderHtml();
 
         if ($history_html) {

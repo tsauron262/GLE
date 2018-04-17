@@ -92,6 +92,10 @@ class BC_ListViews extends BC_List
             return BimpRender::renderAlerts($this->errors);
         }
 
+        if (is_null($this->items)) {
+            $this->fetchItems();
+        }
+        
         $html = '';
 
         $html .= '<div class="objectViewContainer" style="display: none"></div>';

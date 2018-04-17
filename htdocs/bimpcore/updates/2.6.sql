@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_logiciel` (
 
 CREATE TABLE IF NOT EXISTS `llx_be_user_account` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(128) NOT NULL DEFAULT ''
+  `name` VARCHAR(128) NOT NULL DEFAULT '',
   `login` varchar(128) NOT NULL DEFAULT '',
   `pword` varchar(128) NOT NULL DEFAULT '',
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

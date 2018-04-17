@@ -8,6 +8,7 @@ class BC_Display extends BimpComponent
     public $field_name = null;
     public $field_params = null;
     public $value = null;
+    public $no_html = false;
     public static $type_params_def = array(
         'syntaxe'     => array(
             'syntaxe' => array('default' => '<value>')
@@ -101,7 +102,7 @@ class BC_Display extends BimpComponent
             $this->value = '';
         }
 
-        if ($this->value === '') {
+        if (($this->value === '') && ($this->params['type'] !== 'callback')) {
             $html .= '';
         } else {
             if (isset($this->params['type']) && !is_null($this->params['type'])) {
@@ -126,7 +127,7 @@ class BC_Display extends BimpComponent
                             switch ($this->params['type']) {
                                 case 'nom':
                                     $html .= BimpObject::getInstanceNom($instance);
-                                    if ($this->params['card']) {
+                                    if (!$this->no_html && $this->params['card']) {
                                         $card = new BC_Card($this->object, $this->field_params['object'], $this->params['card']);
                                         if ($card->isOk()) {
                                             $card_content = $card->renderHtml();
@@ -141,14 +142,14 @@ class BC_Display extends BimpComponent
                                     break;
 
                                 case 'nom_url':
-
                                     $html .= BimpObject::getInstanceNomUrl($instance);
                                     if ($this->params['external_link']) {
                                         if (isset($this->field_params['object'])) {
                                             $url = $this->object->getChildObjectUrl($this->field_params['object'], $instance);
                                         } else {
                                             $url = BimpObject::getInstanceUrl($instance);
-                                        }                                        
+                                        }
+
                                         if ($url) {
                                             $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
                                             $html .= '<i class="fa fa-external-link"></i>';
@@ -180,18 +181,36 @@ class BC_Display extends BimpComponent
                         break;
 
                     case 'check':
-                        if ((int) $this->value) {
-                            $html .= '<span class="check_on"></span>';
+                        if ($this->no_html) {
+                            if ((int) $this->value) {
+                                $html .= 'OUI';
+                            } else {
+                                $html .= 'NON';
+                            }
+                            break;
                         } else {
-                            $html .= '</span class="check_off"></span>';
+                            if ((int) $this->value) {
+                                $html .= '<span class="check_on"></span>';
+                            } else {
+                                $html .= '</span class="check_off"></span>';
+                            }
+                            break;
                         }
-                        break;
+
 
                     case 'yes_no':
-                        if ((int) $this->value) {
-                            $html .= '<span class="success">OUI</span>';
+                        if ($this->no_html) {
+                            if ((int) $this->value) {
+                                $html .= 'OUI';
+                            } else {
+                                $html .= 'NON';
+                            }
                         } else {
-                            $html .= '</span class="danger">NON</span>';
+                            if ((int) $this->value) {
+                                $html .= '<span class="success">OUI</span>';
+                            } else {
+                                $html .= '</span class="danger">NON</span>';
+                            }
                         }
                         break;
 
@@ -208,32 +227,39 @@ class BC_Display extends BimpComponent
 
                         if (isset($array[$this->value])) {
                             if (is_array($array[$this->value])) {
-                                if ($this->params['icon_only'] && isset($array[$this->value]['icon'])) {
-                                    if (!isset($array[$this->value]['classes'])) {
-                                        $array[$this->value]['classes'] = array();
-                                    }
-                                    $array[$this->value]['classes'] = array_merge($array[$this->value]['classes'], array('fa', 'fa-' . $array[$this->value]['icon'], 'iconLeft', 'bs-popover'));
-                                    $html .= '<div style="text-align: center">';
-                                    $html .= '<i ' . BimpRender::displayTagAttrs($array[$this->value]);
-                                    $html .= ' data-toggle="popover"';
-                                    $html .= ' data-trigger="hover"';
-                                    $html .= ' data-content="' . $array[$this->value]['label'] . '"';
-                                    $html .= ' data-container="body"';
-                                    $html .= ' data-placement="top"></i>';
-                                    $html .= '</div>';
-                                    $check = true;
-                                } else {
-                                    $html .= '<span';
-                                    $html .= BimpRender::displayTagAttrs($array[$this->value]);
-                                    $html .= '>';
-                                    if (isset($array[$this->value]['icon'])) {
-                                        $html .= '<i class="fa fa-' . $array[$this->value]['icon'] . ' iconLeft"></i>';
-                                    }
+                                if ($this->no_html) {
                                     if (isset($array[$this->value]['label'])) {
                                         $html .= $array[$this->value]['label'];
+                                        $check = true;
                                     }
-                                    $html .= '</span>';
-                                    $check = true;
+                                } else {
+                                    if ($this->params['icon_only'] && isset($array[$this->value]['icon'])) {
+                                        if (!isset($array[$this->value]['classes'])) {
+                                            $array[$this->value]['classes'] = array();
+                                        }
+                                        $array[$this->value]['classes'] = array_merge($array[$this->value]['classes'], array('fa', 'fa-' . $array[$this->value]['icon'], 'iconLeft', 'bs-popover'));
+                                        $html .= '<div style="text-align: center">';
+                                        $html .= '<i ' . BimpRender::displayTagAttrs($array[$this->value]);
+                                        $html .= ' data-toggle="popover"';
+                                        $html .= ' data-trigger="hover"';
+                                        $html .= ' data-content="' . $array[$this->value]['label'] . '"';
+                                        $html .= ' data-container="body"';
+                                        $html .= ' data-placement="top"></i>';
+                                        $html .= '</div>';
+                                        $check = true;
+                                    } else {
+                                        $html .= '<span';
+                                        $html .= BimpRender::displayTagAttrs($array[$this->value]);
+                                        $html .= '>';
+                                        if (isset($array[$this->value]['icon'])) {
+                                            $html .= '<i class="fa fa-' . $array[$this->value]['icon'] . ' iconLeft"></i>';
+                                        }
+                                        if (isset($array[$this->value]['label'])) {
+                                            $html .= $array[$this->value]['label'];
+                                        }
+                                        $html .= '</span>';
+                                        $check = true;
+                                    }
                                 }
                             } else {
                                 $html .= $array[$this->value];
@@ -249,21 +275,33 @@ class BC_Display extends BimpComponent
                     case 'time':
                         if ($this->value !== '00:00:00') {
                             $time = new DateTime($this->value);
-                            $html .= '<span class="time">' . $time->format($this->params['format']) . '</span>';
+                            if ($this->no_html) {
+                                $html .= $time->format($this->params['format']);
+                            } else {
+                                $html .= '<span class="time">' . $time->format($this->params['format']) . '</span>';
+                            }
                         }
                         break;
 
                     case 'date':
                         if ($this->value !== '0000-00-00') {
                             $date = new DateTime($this->value);
-                            $html .= '<span class="date">' . $date->format($this->params['format']) . '</span>';
+                            if ($this->no_html) {
+                                $html .= $date->format($this->params['format']);
+                            } else {
+                                $html .= '<span class="date">' . $date->format($this->params['format']) . '</span>';
+                            }
                         }
                         break;
 
                     case 'datetime':
                         if ($this->value !== '0000-00-00 00:00:00') {
                             $date = new DateTime($this->value);
-                            $html .= '<span class="datetime">' . $date->format($this->params['format']) . '</span>';
+                            if ($this->no_html) {
+                                $html .= $date->format($this->params['format']);
+                            } else {
+                                $html .= '<span class="datetime">' . $date->format($this->params['format']) . '</span>';
+                            }
                         }
                         break;
 
@@ -272,7 +310,16 @@ class BC_Display extends BimpComponent
                         break;
 
                     case 'money':
-                        $html .= BimpTools::displayMoneyValue($this->value, $this->field_params['currency']);
+                        if ($this->no_html) {
+                            $html .= price($this->value);
+                            switch ($this->field_params['currency']) {
+                                case 'EUR':
+                                    $html .= ' €';
+                                    break;
+                            }
+                        } else {
+                            $html .= BimpTools::displayMoneyValue($this->value, $this->field_params['currency']);
+                        }
                         break;
 
                     case 'percent':

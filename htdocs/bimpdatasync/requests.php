@@ -1,6 +1,6 @@
 <?php
 
-require_once '../master.inc.php';
+require_once '../main.inc.php';
 
 require_once DOL_DOCUMENT_ROOT . '/core/lib/ws.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
@@ -35,7 +35,6 @@ function display_debug($msg)
         echo $msg . '<br/>';
     }
 }
-
 $soap_server = new nusoap_server();
 //$soap_server->soap_defencoding = 'UTF-8';
 //$soap_server->decode_utf8 = false;
@@ -59,6 +58,10 @@ $soap_server->register('set', array(
 //    'errors'  => 'tns:errors',
 //    'return'  => 'tns:return'
 //));
+
+if (count($errors)) {
+    display_debug($errors);
+}
 
 function authenticate($authentication, &$errors, &$fuser)
 {

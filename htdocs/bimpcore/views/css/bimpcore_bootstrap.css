@@ -10311,13 +10311,14 @@ tbody.collapse.in {
 /* line 76, ../scss/bootstrap/_navs.scss */
 .nav-tabs {
   border-bottom: 1px solid #b4b4b4;
+  background-color: #fff;
 }
-/* line 78, ../scss/bootstrap/_navs.scss */
+/* line 79, ../scss/bootstrap/_navs.scss */
 .nav-tabs > li {
   float: left;
   margin-bottom: -1px;
 }
-/* line 84, ../scss/bootstrap/_navs.scss */
+/* line 85, ../scss/bootstrap/_navs.scss */
 .nav-tabs > li > a {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -10329,13 +10330,13 @@ tbody.collapse.in {
   border-radius: 0 0 0 0;
   font-weight: bold;
 }
-/* line 92, ../scss/bootstrap/_navs.scss */
+/* line 93, ../scss/bootstrap/_navs.scss */
 .nav-tabs > li > a:hover {
   color: #282828 !important;
   background-color: #e8e8e8 !important;
   border-color: whitesmoke whitesmoke #b4b4b4;
 }
-/* line 103, ../scss/bootstrap/_navs.scss */
+/* line 104, ../scss/bootstrap/_navs.scss */
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
   color: white !important;
   background-color: #ef7d00 !important;
@@ -10344,74 +10345,74 @@ tbody.collapse.in {
   cursor: default;
 }
 
-/* line 123, ../scss/bootstrap/_navs.scss */
+/* line 124, ../scss/bootstrap/_navs.scss */
 .nav-pills > li {
   float: left;
 }
-/* line 127, ../scss/bootstrap/_navs.scss */
+/* line 128, ../scss/bootstrap/_navs.scss */
 .nav-pills > li > a {
   border-radius: 0;
 }
-/* line 130, ../scss/bootstrap/_navs.scss */
+/* line 131, ../scss/bootstrap/_navs.scss */
 .nav-pills > li + li {
   margin-left: 2px;
 }
-/* line 138, ../scss/bootstrap/_navs.scss */
+/* line 139, ../scss/bootstrap/_navs.scss */
 .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
   color: white;
   background-color: #ef7d00;
 }
 
-/* line 149, ../scss/bootstrap/_navs.scss */
+/* line 150, ../scss/bootstrap/_navs.scss */
 .nav-stacked > li {
   float: none;
 }
-/* line 151, ../scss/bootstrap/_navs.scss */
+/* line 152, ../scss/bootstrap/_navs.scss */
 .nav-stacked > li + li {
   margin-top: 2px;
   margin-left: 0;
 }
 
-/* line 165, ../scss/bootstrap/_navs.scss */
+/* line 166, ../scss/bootstrap/_navs.scss */
 .nav-justified, .nav-tabs.nav-justified {
   width: 100%;
 }
-/* line 168, ../scss/bootstrap/_navs.scss */
+/* line 169, ../scss/bootstrap/_navs.scss */
 .nav-justified > li, .nav-tabs.nav-justified > li {
   float: none;
 }
-/* line 170, ../scss/bootstrap/_navs.scss */
+/* line 171, ../scss/bootstrap/_navs.scss */
 .nav-justified > li > a, .nav-tabs.nav-justified > li > a {
   text-align: center;
   margin-bottom: 5px;
 }
-/* line 176, ../scss/bootstrap/_navs.scss */
+/* line 177, ../scss/bootstrap/_navs.scss */
 .nav-justified > .dropdown .dropdown-menu {
   top: auto;
   left: auto;
 }
 @media (min-width: 768px) {
-  /* line 182, ../scss/bootstrap/_navs.scss */
+  /* line 183, ../scss/bootstrap/_navs.scss */
   .nav-justified > li, .nav-tabs.nav-justified > li {
     display: table-cell;
     width: 1%;
   }
-  /* line 185, ../scss/bootstrap/_navs.scss */
+  /* line 186, ../scss/bootstrap/_navs.scss */
   .nav-justified > li > a, .nav-tabs.nav-justified > li > a {
     margin-bottom: 0;
   }
 }
 
-/* line 195, ../scss/bootstrap/_navs.scss */
+/* line 196, ../scss/bootstrap/_navs.scss */
 .nav-tabs-justified, .nav-tabs.nav-justified {
   border-bottom: 0;
 }
-/* line 198, ../scss/bootstrap/_navs.scss */
+/* line 199, ../scss/bootstrap/_navs.scss */
 .nav-tabs-justified > li > a, .nav-tabs.nav-justified > li > a {
   margin-right: 0;
   border-radius: 0;
 }
-/* line 206, ../scss/bootstrap/_navs.scss */
+/* line 207, ../scss/bootstrap/_navs.scss */
 .nav-tabs-justified > .active > a, .nav-tabs.nav-justified > .active > a,
 .nav-tabs-justified > .active > a:hover,
 .nav-tabs.nav-justified > .active > a:hover,
@@ -10420,12 +10421,12 @@ tbody.collapse.in {
   border: 1px solid white;
 }
 @media (min-width: 768px) {
-  /* line 211, ../scss/bootstrap/_navs.scss */
+  /* line 212, ../scss/bootstrap/_navs.scss */
   .nav-tabs-justified > li > a, .nav-tabs.nav-justified > li > a {
     border-bottom: 1px solid white;
     border-radius: 0 0 0 0;
   }
-  /* line 217, ../scss/bootstrap/_navs.scss */
+  /* line 218, ../scss/bootstrap/_navs.scss */
   .nav-tabs-justified > .active > a, .nav-tabs.nav-justified > .active > a,
   .nav-tabs-justified > .active > a:hover,
   .nav-tabs.nav-justified > .active > a:hover,
@@ -10435,20 +10436,21 @@ tbody.collapse.in {
   }
 }
 
-/* line 228, ../scss/bootstrap/_navs.scss */
+/* line 229, ../scss/bootstrap/_navs.scss */
 .tab-content {
-  padding-top: 10px;
+  padding: 10px;
+  background-color: #fff;
 }
-/* line 231, ../scss/bootstrap/_navs.scss */
+/* line 233, ../scss/bootstrap/_navs.scss */
 .tab-content > .tab-pane {
   display: none;
 }
-/* line 234, ../scss/bootstrap/_navs.scss */
+/* line 236, ../scss/bootstrap/_navs.scss */
 .tab-content > .active {
   display: block;
 }
 
-/* line 244, ../scss/bootstrap/_navs.scss */
+/* line 246, ../scss/bootstrap/_navs.scss */
 .nav-tabs .dropdown-menu {
   margin-top: -1px;
   border-top-right-radius: 0;

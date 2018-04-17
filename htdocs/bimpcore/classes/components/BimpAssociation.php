@@ -64,7 +64,7 @@ class BimpAssociation
 
         $list = array();
         foreach ($rows as $r) {
-            $list[] = $r['dest_id_object'];
+            $list[] = (int) $r['dest_id_object'];
         }
 
         return $list;

@@ -15,7 +15,6 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "CFC" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
     "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
     
-    
     "P" => array("09 71 002 450", "sav66@bimp.fr", "Perpignan", 215, "1187559", "66000", "Perpignan", "9 Boulevard Georges Clemenceau"),
     "N" => array("04 66 842 974", "sav30@bimp.fr", "Nîmes", 217, "1187562", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet"),
     "MONTP" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem"),
@@ -24,7 +23,6 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "BB" => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1046075", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire")
     
     );
-
 
 $tabCentre["GB"] = $tabCentre["GA"];
 $tabCentre["GB"]['2'] = "Grenoble boutique";

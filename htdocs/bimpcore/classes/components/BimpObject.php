@@ -8,6 +8,7 @@ class BimpObject
     public $object_name = '';
     public $config = null;
     public $id = null;
+    public static $status_list = array();
     public static $common_fields = array(
         'id',
         'date_create',
@@ -278,7 +279,7 @@ class BimpObject
 
     public function association_exists($association)
     {
-        return array_key_exists($association, $this->params['associations']);
+        return in_array($association, $this->params['associations']);
     }
 
     public function getParentIdProperty()
@@ -844,12 +845,51 @@ class BimpObject
         return $return;
     }
 
+    public function setNewStatus($new_status, $extra_data = array())
+    {
+        $new_status = (int) $new_status;
+
+        if (!array_key_exists($new_status, static::$status_list)) {
+            return array('Erreur: ce statut n\'existe pas');
+        }
+
+        $status_label = is_array(static::$status_list[$new_status]) ? static::$status_list[$new_status]['label'] : static::$status_list[$new_status];
+        $object_label = $this->getLabel('the') . (isset($this->id) && $this->id ? ' ' . $this->id : '');
+
+        $error_msg = 'Impossible de passer ' . $object_label;
+        $error_msg .= ' au statut "' . $status_label . '"';
+
+        if (!$this->isLoaded()) {
+            return array($error_msg . ' ID ' . $this->getLabel('of_the') . ' absent');
+        }
+
+        $current_status = (int) $this->getSavedData('status');
+
+        if ($current_status === $new_status) {
+            return array($object_label . ' a déjà le statut "' . $status_label . '"');
+        }
+
+        $errors = array();
+        if (method_exists($this, 'onNewStatus')) {
+            $errors = $this->onNewStatus($new_status, $current_status, $extra_data);
+        }
+
+        if (!count($errors)) {
+            $this->set('status', $new_status);
+            $errors = $this->update();
+        }
+
+        return $errors;
+    }
+
     // Affichage des données:
 
-    public function displayData($field, $display_name = 'default', $item = null)
+    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
     {
         $bc_field = new BC_Field($this, $field);
         $bc_field->display_name = $display_name;
+        $bc_field->display_input_value = $display_input_value;
+        $bc_field->no_html = $no_html;
 
         $display = $bc_field->renderHtml();
         unset($bc_field);
@@ -875,7 +915,11 @@ class BimpObject
                         $prev_path = $this->config->current_path;
                         $this->config->setCurrentPath('associations/' . $association . '/display/' . $display_name);
 
-                        $type = $this->getCurrentConf('type', 'object_prop');
+                        $type = $this->getCurrentConf('type', null);
+
+                        if (is_null($type)) {
+                            $type = $display_name;
+                        }
 
                         switch ($type) {
                             case 'card':
@@ -888,6 +932,10 @@ class BimpObject
 
                             case 'nom':
                                 $html .= self::getInstanceNom($instance);
+                                break;
+
+                            case 'nom_url':
+                                $html .= self::getInstanceNomUrl($instance);
                                 break;
 
                             case 'callback':
@@ -1027,7 +1075,7 @@ class BimpObject
             }
         }
         $this->config->setCurrentPath($prev_path);
-        
+
         return $errors;
     }
 
@@ -2073,6 +2121,58 @@ class BimpObject
             }
         }
         return 1;
+    }
+
+    // Gestion des notes:
+
+    public function addNote($content, $visibility = null)
+    {
+        if (!$this->isLoaded()) {
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
+        }
+        $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+
+        if (is_null($visibility)) {
+            $visibility = BimpNote::BIMP_NOTE_MEMBERS;
+        }
+
+        $errors = $note->validateArray(array(
+            'obj_type'   => 'bimp_object',
+            'obj_module' => $this->module,
+            'obj_name'   => $this->object_name,
+            'id_obj'     => (int) $this->id,
+            'visibility' => (int) $visibility,
+            'content'    => $content
+        ));
+
+        if (!count($errors)) {
+            $errors = $note->create();
+        }
+
+        return $errors;
+    }
+
+    public function renderNotesList($visibility = null)
+    {
+        if ($this->isLoaded()) {
+            $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+            $list = new BC_ListTable($note);
+            $list->addFieldFilterValue('obj_type', 'bimp_object');
+            $list->addFieldFilterValue('obj_module', $this->module);
+            $list->addFieldFilterValue('obj_name', $this->object_name);
+            $list->addFieldFilterValue('id_obj', $this->id);
+            $list->addObjectChangeReload($this->object_name);
+            if (!is_null($visibility)) {
+                $list->addFieldFilterValue('visibility', array(
+                    'operator' => '<=',
+                    'value'    => (int) $visibility
+                ));
+            }
+
+            return $list->renderHtml();
+        }
+
+        return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');
     }
 
     // Rendus HTML

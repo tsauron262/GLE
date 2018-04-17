@@ -26,6 +26,10 @@ class Equipment extends BimpObject
 
     public function equipmentExists($serial, $id_product)
     {
+        if (is_null($id_product)) {
+            $id_product = 0;
+        }
+
         $value = $this->db->getValue($this->getTable(), 'id', '`serial` = \'' . $serial . '\' AND `id_product` = ' . (int) $id_product);
         if (!is_null($value) && $value) {
             return true;
@@ -326,6 +330,15 @@ class Equipment extends BimpObject
         return '</span class="danger">NON</span>';
     }
 
+    public function displayProduct($display_name = 'default', $no_html = false)
+    {
+        if ((int) $this->getData('id_product')) {
+            return $this->displayData('id_product', $display_name, ($no_html ? 0 : 1), $no_html);
+        }
+
+        return $this->displayData('product_label', 'default', ($no_html ? 0 : 1), $no_html);
+    }
+
 //    Renders: 
     public function renderReservationsList()
     {
@@ -368,6 +381,10 @@ class Equipment extends BimpObject
             if (!is_null($value) && (int) $value) {
                 return array('Ce numéro de série pour ce même produit est déjà associé à l\'équipement ' . $value);
             }
+        }
+
+        if ($id_product) {
+            $this->set('product_label', '');
         }
 
         return parent::validate();

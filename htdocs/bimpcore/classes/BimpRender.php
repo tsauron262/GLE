@@ -13,7 +13,7 @@ class BimpRender
 
     public static function renderIcon($icon, $class = '')
     {
-        return '<i class="fa fa-' . $icon . ($class ? ' ' . $class : '') . '"></i>';
+        return '<i class="'. self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
     }
 
     public static function displayTagAttrs($params)

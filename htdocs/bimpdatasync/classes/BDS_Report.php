@@ -340,7 +340,7 @@ class BDS_Report
             $date = new DateTime($datetime);
 
             if ($date->format('Y-m-d') <= $deleteDate) {
-                unlink($this->dir . $f);
+                unlink($dir . $f);
                 unset($report);
                 continue;
             }

@@ -513,7 +513,7 @@ class GSX
      */
     public function authenticate()
     {
-
+die("eeee");
         if (!is_object($this->soapClient)) {
             $this->initiate_soap_client();
         }

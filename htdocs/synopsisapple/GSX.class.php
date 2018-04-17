@@ -497,7 +497,7 @@ class GSX
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
             $_SESSION['soapClient'] = $this->soapClient;
-            print_r($this->soapClient);die;
+            print_r($this->soapClient->__getCookies());die;
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }

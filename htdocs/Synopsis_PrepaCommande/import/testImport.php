@@ -1535,7 +1535,7 @@ if (is_dir($dir)) {
                                             if ($sql) {
                                                 $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
                                                 $mode = "ORDER_CREATE";
-                                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
+                                                $webContent .= "<td  class='ui-widget-content'><a href='".DOL_URL_ROOT."/commande/card.php?id=".$comId."'>Cr&eacute;ation commande OK</a></td>";
                                                 $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
                                             } else {
                                                 $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";

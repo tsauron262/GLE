@@ -886,7 +886,7 @@ class GSX
     {
         $this->last_response = null;
         $response = array();
-
+die("hh");
         if (!$this->userSessionId) {
             $this->authenticate();
         }

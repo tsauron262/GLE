@@ -462,6 +462,10 @@ class GSX
      */
     private function initiate_soap_client()
     {
+        if(isset($_SESSION['soapClient'])){
+            $this->soapClient = $_SESSION['soapClient'];
+            return $this->soapClient;
+        }
         if (empty($this->wsdlUrl)) {
             $this->assign_wsdl();
         }
@@ -490,7 +494,7 @@ class GSX
 //print_r($connectionOptions);die;
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
-            die("ap2");
+            $_SESSION['soapClient'] = $this->soapClient;
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }
@@ -518,7 +522,6 @@ class GSX
         if (!is_object($this->soapClient)) {
             $this->initiate_soap_client();
         }
-        die("ap");
         if (!is_object($this->soapClient)) {
             return 0;
         }
@@ -888,7 +891,7 @@ class GSX
     {
         $this->last_response = null;
         $response = array();
-die("hh");
+
         if (!$this->userSessionId) {
             $this->authenticate();
         }
@@ -903,7 +906,6 @@ die("hh");
 //echo "<pre>"; print_r($requestData);
         $SOAPRequest = array();
         try {
-            die("ici");
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
             $response = $this->_objToArr($SOAPRequest);
             $this->last_response = $response;

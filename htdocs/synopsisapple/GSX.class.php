@@ -901,6 +901,7 @@ class GSX
 //echo "<pre>"; print_r($requestData);
         $SOAPRequest = array();
         try {
+            die("ici");
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
             $response = $this->_objToArr($SOAPRequest);
             $this->last_response = $response;

@@ -462,12 +462,14 @@ class GSX
      */
     private function initiate_soap_client()
     {
+        if (empty($this->wsdlUrl)) {
+            $this->assign_wsdl();
+        }
+        
+        
         if(isset($_SESSION['soapClient'])){
             $this->soapClient = $_SESSION['soapClient'];
             return $this->soapClient;
-        }
-        if (empty($this->wsdlUrl)) {
-            $this->assign_wsdl();
         }
 
         require_once DOL_DOCUMENT_ROOT . '/synopsisapple/certifs.php';

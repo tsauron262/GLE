@@ -465,12 +465,6 @@ class GSX
         if (empty($this->wsdlUrl)) {
             $this->assign_wsdl();
         }
-        
-        
-        if(isset($_SESSION['soapClient'])){
-            $this->soapClient = $_SESSION['soapClient'];
-            return $this->soapClient;
-        }
 
         require_once DOL_DOCUMENT_ROOT . '/synopsisapple/certifs.php';
         global $tabCert;
@@ -493,7 +487,13 @@ class GSX
             , 'exceptions'         => TRUE
                 //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
         );
-//print_r($connectionOptions);die;
+
+        
+        if(isset($_SESSION['soapClient'])){
+            $this->soapClient = $_SESSION['soapClient'];
+            return $this->soapClient;
+        }
+        
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
             $_SESSION['soapClient'] = $this->soapClient;

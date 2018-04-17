@@ -489,10 +489,10 @@ class GSX
         );
 
         
-//        if(isset($_SESSION['soapClient'])){
-//            $this->soapClient = $_SESSION['soapClient'];
-//            return $this->soapClient;
-//        }
+        if(isset($_SESSION['soapClient'])){
+            $this->soapClient = $_SESSION['soapClient'];
+            return $this->soapClient;
+        }
         
         try {
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);

@@ -9,6 +9,13 @@ class Ticket {
     private $id_tariff;
     private $id_user;
     private $id_event;
+    // option
+    private $price;
+    // extra
+    private $extra_int1;
+    private $extra_int2;
+    private $extra_string1;
+    private $extra_string2;
 
     public function __construct($db) {
         $this->db = $db;
@@ -22,7 +29,8 @@ class Ticket {
             return false;
         }
 
-        $sql = 'SELECT id, date_creation, fk_event, fk_tariff, fk_user, date_scan';
+        $sql = 'SELECT date_creation, fk_event, fk_tariff, fk_user, date_scan, ';
+        $sql .= 'barcode, first_name, last_name, price, extra_int1, extra_int2, extra_string1, extra_string2';
         $sql .= ' FROM ticket';
         $sql .= ' WHERE id=' . $id;
 
@@ -31,8 +39,14 @@ class Ticket {
             while ($obj = $result->fetchObject()) {
                 $this->id = $id;
                 $this->date_creation = $obj->date_creation;
+                $this->id_event = $obj->fk_event;
                 $this->id_user = $obj->fk_user;
                 $this->id_tariff = $obj->fk_tariff;
+                $this->id_event = $obj->fk_event;
+                $this->id_event = $obj->fk_event;
+                $this->id_event = $obj->fk_event;
+                $this->id_event = $obj->fk_event;
+                $this->id_event = $obj->fk_event;
                 $this->id_event = $obj->fk_event;
                 return 1;
             }
@@ -43,7 +57,7 @@ class Ticket {
         return -1;
     }
 
-    public function create($id_tariff, $id_user, $id_event) {
+    public function create($id_tariff, $id_user, $id_event, $price = '', $extra_int1 = '', $extra_int2 = '', $extra_string1 = '', $extra_string2 = '') {
 
         if ($id_tariff == '')
             $this->errors[] = "Le champ id tariff est obligatoire";
@@ -60,12 +74,22 @@ class Ticket {
         $sql.= ', `fk_user`';
         $sql.= ', `fk_event`';
         $sql.= ', `barcode`';
+        $sql.= ($price != '') ? ', `price`' : '';
+        $sql.= ($extra_int1 != '') ? ', `extra_int1`' : '';
+        $sql.= ($extra_int2 != '') ? ', `extra_int2`' : '';
+        $sql.= ($extra_string1 != '') ? ', `extra_string1`' : '';
+        $sql.= ($extra_string2 != '') ? ', `extra_string2`' : '';
         $sql.= ') ';
         $sql.= 'VALUES ("' . $id_tariff . '"';
         $sql.= ', now()';
         $sql.= ', "' . $id_user . '"';
         $sql.= ', "' . $id_event . '"';
         $sql.= ', "' . $this->getRandomString() . '"';
+        $sql.= ($price != '') ? ', "' . $price . '"' : '';
+        $sql.= ($extra_int1 != '') ? ', "' . $extra_int1 . '"' : '';
+        $sql.= ($extra_int2 != '') ? ', "' . $extra_int2 . '"' : '';
+        $sql.= ($extra_string1 != '') ? ', "' . $extra_string1 . '"' : '';
+        $sql.= ($extra_string2 != '') ? ', "' . $extra_string2 . '"' : '';
         $sql.= ')';
 
         try {
@@ -105,7 +129,7 @@ class Ticket {
         }
         $sql .= ' WHERE ti.id=' . $this->id;
 
-        
+
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {

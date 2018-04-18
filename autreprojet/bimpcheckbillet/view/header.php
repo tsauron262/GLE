@@ -42,26 +42,22 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     </div>
     <ul class="navbar-nav mr-auto">';
         if ($user->status == 2)
-            print '<li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Utilisateur
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="manage_user.php">Gestion droit</a>
-        </div>
-      </li>';
-        print '<li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Évènement
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="create_event.php">Créer</a>
-          <a class="dropdown-item" href="create_tariff.php">Créer tarif</a>
-          <a class="dropdown-item" href="create_ticket.php">Réserver ticket</a>
-          <a class="dropdown-item" href="check_ticket.php">Valider ticket</a>
-        </div>
-      </li>
-    </ul>
+            print '<li><a class="nav-link" href="manage_user.php">Gestion droit</a></li>';
+            print '<li><a class="nav-link" href="stats_event.php">Statistique évènement</a></li>';
+            print '<li><a class="nav-link" href="create_event.php">Créer évènement</a></li>';
+            print '<li><a class="nav-link" href="create_tariff.php">Créer tarif</a></li>';
+            print '<li><a class="nav-link" href="create_ticket.php">Réserver ticket</a></li>';
+            print '<li><a class="nav-link" href="check_ticket.php">Valider ticket</a></li>';
+//        print '<li class="nav-item dropdown">
+//        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Évènement</a>
+//        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+//          <a class="dropdown-item" href="create_event.php">Créer</a>
+//          <a class="dropdown-item" href="create_tariff.php">Créer tarif</a>
+//          <a class="dropdown-item" href="create_ticket.php">Réserver ticket</a>
+//          <a class="dropdown-item" href="check_ticket.php">Valider ticket</a>
+//        </div>
+//      </li>';
+    print '</ul>
     <ul class="nav navbar-nav navbar-right">
       <li>
         <a class="nav-link" href="index.php">Se déconnecter</a>

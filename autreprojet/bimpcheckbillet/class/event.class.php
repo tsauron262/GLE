@@ -4,11 +4,11 @@ class Event {
 
     public $errors;
     private $db;
-    private $id;
+    public $id;
     public $label;
-    private $date_creation;
-    private $date_start;
-    private $date_end;
+    public $date_creation;
+    public $date_start;
+    public $date_end;
 
     public function __construct($db) {
         $this->db = $db;
@@ -148,7 +148,7 @@ class Event {
         return array();
     }
 
-    private function createEventAdmin($id_event, $id_user) {
+    public function createEventAdmin($id_event, $id_user) {
 
         if ($id_event == '')
             $this->errors[] = "Le champ identifiant évènement est obligatoire";
@@ -180,5 +180,40 @@ class Event {
         }
         return -1;
     }
+
+    public function deleteEventAdmin($id_event, $id_user) {
+
+        if ($id_event == '')
+            $this->errors[] = "Le champ identifiant évènement est obligatoire";
+        if ($id_user == '')
+            $this->errors[] = "Le champ identifiant utilisateur est obligatoire";
+        if (sizeof($this->errors) != 0)
+            return -3;
+
+        $sql = 'DELETE FROM `event_admin`';
+        $sql.= ' WHERE fk_event=' . $id_event;
+        $sql.= ' AND fk_user=' . $id_user;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+            return 1;
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer la liaison évènement - utilisateur. " . $e;
+            $this->db->rollBack();
+            return -2;
+        }
+        return -1;
+    }
+
+    function getStats($id_event) {
+        
+        $this->fetch($id_event);
+        
+        $sql = 'SELECT ti.date_creation, ti.fk_tariff as id_tariff, ti.price,';
+        $sql .= ' FROM ticket as ti';
+        $sql .= ' WHERE id=' . $id;    }
 
 }

@@ -50,8 +50,10 @@ switch ($_POST['action']) {
      * create_ticket.php
      */
     case 'create_ticket': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
             echo json_encode(array(
-                'code_return' => $ticket->create($_POST['id_tariff'], 1, $_POST['id_event']),
+                'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['extra_int1'], $_POST['extra_int2'], $_POST['extra_string1'], $_POST['extra_string2']),
                 'errors' => $ticket->errors));
             break;
         }
@@ -103,6 +105,70 @@ switch ($_POST['action']) {
             $user->fetch($user_session->id);
             echo json_encode(array(
                 'events' => $event->getEvents($user->id, true, $user->status == $user::STATUT_SUPER_ADMIN),
+                'errors' => $event->errors));
+            break;
+        }
+
+    /**
+     * manage_user.php
+     */
+    case 'get_users': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->status != $user::STATUT_SUPER_ADMIN) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit d'accéder à ces données"));
+                break;
+            } else {
+                $static_user = new User($db);
+                echo json_encode(array(
+                    'users' => $static_user->getUser(),
+                    'errors' => $static_user->errors));
+                break;
+            }
+        }
+
+    case 'change_event_admin': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->status != $user::STATUT_SUPER_ADMIN) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit de modifier ces données"));
+                break;
+            } else {
+                if ($_POST['new_status'] == 'true') {
+                    echo json_encode(array(
+                        'code_return' => $event->createEventAdmin($_POST['id_event'], $_POST['id_user']),
+                        'errors' => $event->errors));
+                } elseif ($_POST['new_status'] == 'false') {
+                    echo json_encode(array(
+                        'code_return' => $event->deleteEventAdmin($_POST['id_event'], $_POST['id_user']),
+                        'errors' => $event->errors));
+                } else {
+                    echo json_encode(array('errors' => "Mauvais statut: " . $_POST['new_status']));
+                }
+            }
+            break;
+        }
+
+    case 'change_login_and_pass_word': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->status != $user::STATUT_SUPER_ADMIN) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit d'accéder à ces données"));
+                break;
+            } else {
+                $static_user = new User($db);
+                echo json_encode(array(
+                    'code_return' => $static_user->changeLoginAndPassWord($_POST['id_user'], $_POST['login'], $_POST['pass_word']),
+                    'errors' => $static_user->errors));
+                break;
+            }
+        }
+    /**
+     * stats_event.php
+     */
+    case 'get_stats': {
+            echo json_encode(array(
+                'event' => $event->getStats($_POST['id_event']),
                 'errors' => $event->errors));
             break;
         }

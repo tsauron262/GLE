@@ -19,15 +19,8 @@ print '<legend><span>Créer tarif<span></legend>';
 print '<form id="create_form" action="../interface.php" method="post" enctype="multipart/form-data" >';
 print '<input name="action" value="create_tariff" style="display: none;"/>';
 
-if (!isset($_SESSION['id_event'])) {
-    print '<label for="price">Evènement </label><br/>';
-    print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
-} else {
-    print '<select class="chosen-select" name="id_event" style="display:none">';
-    print '<option value=' . $_SESSION['id_event'] . ' selected>Celui-là</option>';
-    print '</select><br/><br/>';
-}
-
+print '<label for="event">Evènement </label><br/>';
+print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
 
 print '<label for="label">Libellé </label>';
 print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';

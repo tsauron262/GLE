@@ -24,8 +24,8 @@ function getEvents() {
                     $('select[name=event]').append(
                             '<option value=' + event.id + '>' + event.label + '</option>');
                 });
+                $(".chosen-select").chosen({no_results_text: 'Pas de résultat'});
                 initEvents();
-                $('select[name=event]').trigger('change');
             } else {
                 setMessage('alertSubmit', "Créer un évènement avant de réserver une place.", 'error');
                 $('button[name=create]').hide();
@@ -57,6 +57,7 @@ function getTariffsForEvent(id_event) {
                             + tariff.label + ' ' +
                             +tariff.price + ' €</option>');
                 });
+                $(".chosen-select").trigger("chosen:updated");
             } else {
                 setMessage('alertSubmit', "Erreur serveur 5851.", 'error');
                 $('button[name=create]').hide();
@@ -66,7 +67,7 @@ function getTariffsForEvent(id_event) {
 }
 
 
-function createTicket(id_event, id_tariff, id_client) {
+function createTicket(id_event, id_tariff, price, extra_int1, extra_int2, extra_string1, extra_string2) {
 
     $.ajax({
         type: "POST",
@@ -74,7 +75,11 @@ function createTicket(id_event, id_tariff, id_client) {
         data: {
             id_event: id_event,
             id_tariff: id_tariff,
-            id_client: id_client,
+            price: price,
+            extra_int1: extra_int1,
+            extra_int2: extra_int2,
+            extra_string1: extra_string1,
+            extra_string2: extra_string2,
             action: 'create_ticket'
         },
         error: function () {
@@ -109,12 +114,16 @@ function initEvents() {
     $('select[name=event]').change(function () {
         getTariffsForEvent($('select[name=event] > option:selected').val());
     });
-    
+
     /* Create ticket */
     $('button[name=create]').click(function () {
         createTicket($('select[name=event] > option:selected').val(),
                 $('select[name=tariff] > option:selected').val(),
-                1); // TODO id utilisateur
+                $('input[name=price]').val(),
+                $('input[name=extra_int1]').val(),
+                $('input[name=extra_int2]').val(),
+                $('input[name=extra_string1]').val(),
+                $('input[name=extra_string2]').val());
     });
 }
 

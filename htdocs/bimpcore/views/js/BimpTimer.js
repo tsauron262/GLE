@@ -39,7 +39,7 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
     this.startSession = function () {
         var date = new Date();
         timer.session_start = Math.floor(date.getTime() / 1000);
-        saveObjectField('bimpcore', 'BimpTimer', timer.id, 'session_start', timer.session_start, null, 'testest');
+        saveObjectField('bimpcore', 'BimpTimer', timer.id, 'session_start', timer.session_start, null, null, false);
     };
 
     this.stopSession = function () {
@@ -48,28 +48,53 @@ function BimpTimer(id, timer_id, object_module, object_name, id_object, field_na
             'time_session': timer.time_current,
             'session_start': 0
         };
-        saveObject('bimpcore', 'BimpTimer', timer.id, fields, null, '');
+        saveObject('bimpcore', 'BimpTimer', timer.id, fields, null, null, false);
     };
 
     this.save = function () {
-        saveObjectField(timer.object_module, timer.object_name, timer.id_object, timer.field_name, timer.time_total, null, function () {
-            timer.initial_time_total = timer.time_total;
-            timer.session_start_time_total = timer.time_total;
-            timer.initial_time_current = 0;
-            timer.time_current = 0;
-            timer.session_start_time_current = 0;
-            if (!timer.is_pause) {
-                var date = new Date();
-                timer.session_start = Math.floor(date.getTime() / 1000);
-                saveObjectField('bimpcore', 'BimpTimer', timer.id, 'session_start', timer.session_start, null, 'Enregistrement effectué');
-            } else {
-                var fields = {
-                    'time_session': 0,
-                    'session_start': 0
-                };
-                saveObject('bimpcore', 'BimpTimer', timer.id, fields, null, 'Enregistrement effectué');
+        BimpAjax('saveObjectField', {
+            module: timer.object_module,
+            object_name: timer.object_name,
+            id_object: timer.id_object,
+            field: timer.field_name,
+            value: timer.time_total
+        }, null, {
+            timer: timer,
+            display_success: false,
+            display_errors_in_popup_only: true,
+            success_msg: 'Enregistrement de la durée totale effectué',
+            success: function (result, bimpAjax) {
+                bimpAjax.timer.initial_time_total = bimpAjax.timer.time_total;
+                bimpAjax.timer.session_start_time_total = bimpAjax.timer.time_total;
+                bimpAjax.timer.initial_time_current = 0;
+                bimpAjax.timer.time_current = 0;
+                bimpAjax.timer.session_start_time_current = 0;
+
+                if (!bimpAjax.timer.is_pause) {
+                    var date = new Date();
+                    bimpAjax.timer.session_start = Math.floor(date.getTime() / 1000);
+                    saveObjectField('bimpcore', 'BimpTimer', bimpAjax.timer.id, 'session_start', bimpAjax.timer.session_start, null, function () {
+                        $('body').trigger($.Event('objectChange', {
+                            module: bimpAjax.timer.object_module,
+                            object_name: bimpAjax.timer.object_name,
+                            id_object: bimpAjax.timer.id_object
+                        }));
+                    }, false);
+                } else {
+                    var fields = {
+                        'time_session': 0,
+                        'session_start': 0
+                    };
+                    saveObject('bimpcore', 'BimpTimer', bimpAjax.timer.id, fields, null, function () {
+                        $('body').trigger($.Event('objectChange', {
+                            module: bimpAjax.timer.object_module,
+                            object_name: bimpAjax.timer.object_name,
+                            id_object: bimpAjax.timer.id_object
+                        }));
+                    });
+                }
+                bimpAjax.timer.updateTimer();
             }
-            timer.updateTimer();
         });
     };
 

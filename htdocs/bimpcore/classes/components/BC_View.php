@@ -74,7 +74,7 @@ class BC_View extends BC_Panel
             if ($this->params['edit_form']) {
                 $title = 'Edition ' . $this->object->getLabel('of_the') . ' ' . $this->object->getInstanceName();
                 $html .= '<button type="button" class="btn btn-primary"';
-                $html .= ' onclick="loadModalFormFromView(\'' . $this->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this), \''.  addslashes($title).'\');"';
+                $html .= ' onclick="loadModalFormFromView(\'' . $this->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this), \'' . addslashes($title) . '\');"';
                 $html .= '><i class="fa fa-edit iconLeft"></i>Editer</button>';
             }
             if ($this->params['delete_btn']) {
@@ -94,6 +94,9 @@ class BC_View extends BC_Panel
                     $html .= BimpRender::renderButtonFromConfig($this->object->config, $this->config_path . '/buttons/' . $idx, $buttons_params, 'button');
                 }
             }
+
+            $html .= parent::renderFooterExtraBtn();
+
             $html .= '</div>';
         }
 

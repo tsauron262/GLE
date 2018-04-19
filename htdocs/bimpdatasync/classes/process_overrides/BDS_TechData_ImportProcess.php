@@ -99,6 +99,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
                 }
             }
         }
+        
         ftp_close($this->ftp);
         $this->ftp = null;
         $data['result_html'] = $html;

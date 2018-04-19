@@ -22,7 +22,7 @@
 
 /*Styles génériques*/
 #id-right {
-    background-color: $gray-light;
+    background-color: #F0F0F0;
 }
 
 @media (max-width: $screen-sm-max) {
@@ -206,6 +206,7 @@ div.alert {
 }
 
 /*Objects Components*/
+
 .object_component {
     @media (max-width: $screen-sm-max) {
         overflow-x: auto;

@@ -1,5 +1,7 @@
 <?php
 
+include_once DOL_DOCUMENT_ROOT.'/synopsistools/SynDiversFunction.php';
+
 abstract class BDS_Process
 {
 
@@ -1141,31 +1143,31 @@ abstract class BDS_Process
 
     protected function cleanTempDirectory($subDir = '')
     {
-        $dir = DOL_DOCUMENT_ROOT . 'bimpdatasync/temp_files' . ($subDir ? '/' . $subDir : '');
-
-        if (!file_exists($dir)) {
-            return;
-        }
-
-        $files = scandir($dir);
-
-        if (is_array($files)) {
-            foreach ($files as $f) {
-                if (in_array($f, array('.', '..'))) {
-                    continue;
-                }
-
-                if (is_dir($dir . '/' . $f)) {
-                    $this->cleanTempDirectory($subDir . '/' . $f);
-                } else {
-                    unlink($dir . '/' . $f);
-                }
-            }
-        }
-
-        if ($subDir) {
-            rmdir($dir);
-        }
+//        $dir = DOL_DOCUMENT_ROOT . 'bimpdatasync/temp_files' . ($subDir ? '/' . $subDir : '');
+//
+//        if (!file_exists($dir)) {
+//            return;
+//        }
+//
+//        $files = scandir($dir);
+//
+//        if (is_array($files)) {
+//            foreach ($files as $f) {
+//                if (in_array($f, array('.', '..'))) {
+//                    continue;
+//                }
+//
+//                if (is_dir($dir . '/' . $f)) {
+//                    $this->cleanTempDirectory($subDir . '/' . $f);
+//                } else {
+//                    unlink($dir . '/' . $f);
+//                }
+//            }
+//        }
+//
+//        if ($subDir) {
+//            rmdir($dir);
+//        }
     }
 
     protected function ObjectError($object, $unset_errors = true)

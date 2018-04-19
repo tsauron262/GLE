@@ -373,6 +373,23 @@ function checkSelectColor($select) {
     }
 }
 
+// Components: 
+
+function getComponentParams($component) {
+    var params = {};
+
+    if ($.isOk($component)) {
+        var $container = $component.children('.object_component_params');
+        if ($.isOk($container)) {
+            $container.find('input.object_component_param').each(function () {
+                params[$(this).attr('name')] = $(this).val();
+            });
+        }
+    }
+
+    return params;
+}
+
 // Affichages: 
 
 function displayMoneyValue(value, $container, classCss, currency) {

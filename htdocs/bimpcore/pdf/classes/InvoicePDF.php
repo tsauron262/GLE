@@ -33,6 +33,15 @@ class InvoicePDF extends BimpDocumentPDF
                 $this->pdf->SetCreator("Dolibarr " . DOL_VERSION);
                 $this->pdf->SetAuthor($this->langs->convToOutputCharset($user->getFullName($this->langs)));
                 $this->pdf->SetKeyWords($this->langs->convToOutputCharset($this->object->ref) . " " . $this->langs->transnoentities("Invoice") . " " . $this->langs->convToOutputCharset($this->object->thirdparty->name));
+
+                $contacts = $this->facture->getIdContact('external', 'BILLING');
+                if (isset($contacts[0]) && $contacts[0]) {
+                    BimpTools::loadDolClass('contact');
+                    $contact = new Contact($this->db);
+                    if ($contact->fetch((int) $contacts[0]) > 0) {
+                        $this->contact = $contact;
+                    }
+                }
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }

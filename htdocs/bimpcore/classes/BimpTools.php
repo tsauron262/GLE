@@ -35,7 +35,7 @@ class BimpTools
     }
 
     // Gestion des objects Dolibarr:
-    
+
     public static function loadDolClass($module, $file = null, $class = null)
     {
         if (is_null($file)) {
@@ -75,6 +75,12 @@ class BimpTools
             case 'Facture':
                 return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
 
+            case 'Propal':
+                return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
+
+            case 'Entrepot':
+                return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
+                
             case 'Societe':
                 $primary = 'socid';
                 break;
@@ -607,7 +613,7 @@ class BimpTools
                     } else {
                         $value = 0;
                     }
-                    
+
                     $value = (int) $value;
                 }
                 return is_int($value);

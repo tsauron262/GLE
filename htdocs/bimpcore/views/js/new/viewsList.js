@@ -6,26 +6,29 @@ function reloadObjectViewsList(list_views_id) {
         return;
     }
 
-    var data = {
-        list_views_id: list_views_id,
-        module_name: $listViews.data('module_name'),
-        object_name: $listViews.data('object_name'),
-        views_list_name: $listViews.data('views_list_name')
-    };
+    var data = getComponentParams($listViews);
 
-    BimpAjax('loadObjectViewsList', data, null, function (result) {
-        if (typeof (result.html) !== 'undefined') {
-            var $listViews = $('#'+list_views_id);
-            $listViews.html(result.html);
-            var $container = $listViews.findParentByClass('list_views_container');
+    data['list_views_id'] = list_views_id;
+    data['module_name'] = $listViews.data('module');
+    data['object_name'] = $listViews.data('object_name');
+    data['views_list_name'] = $listViews.data('name');
 
-            if (typeof (result.pagination) !== 'undefined' && result.pagination) {
-                $container.children('.paginationContainer').html(result.pagination).show();
-            } else {
-                $container.children('.paginationContainer').hide().html('');
+    BimpAjax('loadObjectViewsList', data, null, {
+        $listViews: $listViews,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined') {
+                bimpAjax.$listViews.children('.object_list_view_content').html(result.html);
+                var $container = bimpAjax.$listViews.findParentByClass('list_views_container');
+
+                if (typeof (result.pagination) !== 'undefined' && result.pagination) {
+                    $container.children('.paginationContainer').html(result.pagination).show();
+                } else {
+                    $container.children('.paginationContainer').hide().html('');
+                }
+
+                onListViewsRefresh($listViews);
             }
-
-            onListViewsRefresh($listViews);
         }
     });
 }
@@ -42,7 +45,7 @@ function onListViewsLoaded($listViews) {
     }
 
     if (!$listViews.data('object_change_event_init')) {
-        var module = $listViews.data('module_name');
+        var module = $listViews.data('module');
         var object_name = $listViews.data('object_name');
         var objects = $listViews.data('objects_change_reload');
         if (objects) {
@@ -76,13 +79,13 @@ function onListViewsRefresh($listViews) {
 }
 
 $(document).ready(function () {
-    $('.objectViewslist').each(function () {
+    $('.object_list_view').each(function () {
         onListViewsLoaded($(this));
     });
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
-            e.$container.find('.objectViewslist').each(function () {
+            e.$container.find('.object_list_view').each(function () {
                 onListViewsLoaded($(this));
             });
         }

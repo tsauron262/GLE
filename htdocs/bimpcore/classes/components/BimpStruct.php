@@ -96,6 +96,12 @@ class BimpStruct
                 }
                 break;
 
+            case 'notes':
+                if ($config->isDefined($path . '/notes')) {
+                    $html = self::renderNotes($config, $path . '/notes', $parent_component);
+                }
+                break;
+
             case 'button':
                 if ($config->isDefined($path . '/button')) {
                     $html = self::renderButton($config, $path . '/button', $parent_component);
@@ -366,6 +372,17 @@ class BimpStruct
 
         $config->setCurrentPath($prev_path);
         return $html;
+    }
+
+    public static function renderNotes(BimpConfig $config, $path, &$parent_component = null)
+    {
+        $object = $config->getObject($path . '/object');
+        $visibility = $config->get($path . '/visibility', null);
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            return $object->renderNotesList($visibility);
+        }
+
+        return BimpRender::renderAlerts('Erreur de configuration, impossible d\'afficher la liste des notes (objet invalide)');
     }
 
     public static function renderButton(BimpConfig $config, $path, &$parent_component = null)

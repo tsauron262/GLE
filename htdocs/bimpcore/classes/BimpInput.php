@@ -160,6 +160,32 @@ class BimpInput
                 }
                 break;
 
+            case 'select_payment':
+                if (!isset($options['value_type'])) {
+                    $option['value_type'] = 'id';
+                }
+                if (!isset($options['active_only'])) {
+                    $options['active_only'] = 1;
+                }
+                $form->load_cache_types_paiements();
+                $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
+                foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
+                    if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
+                        switch ($options['value_type']) {
+                            case 'code':
+                                $html .= '<option value="' . $payment_data['code'] . '" data-id_payment="' . $id_payment . '">' . $payment_data['label'] . '</option>';
+                                break;
+
+                            case 'id':
+                            default:
+                                $html .= '<option value="' . $id_payment . '" data-code="' . $payment_data['code'] . '">' . $payment_data['label'] . '</option>';
+                                break;
+                        }
+                    }
+                }
+                $html .= '</select>';
+                break;
+
             case 'search_product':
                 global $conf;
                 ob_start();

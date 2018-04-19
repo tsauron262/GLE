@@ -322,7 +322,7 @@ class BDS_Tools
     public static function makeDirectories($dir_tree, $root_dir = null)
     {
         if (is_null($root_dir)) {
-            $root_dir = DOL_DATA_ROOT . '/bimpdatasync';
+            $root_dir = DOL_DOCUMENT_ROOT . '/bimpdatasync';
         }
 
         if (!file_exists($root_dir)) {
@@ -331,10 +331,14 @@ class BDS_Tools
             }
         }
 
+        chmod($root_dir, 777);
+
         foreach ($dir_tree as $dir => $sub_dir_tree) {
             if (!file_exists($root_dir . '/' . $dir)) {
                 if (!mkdir($root_dir . '/' . $dir, 0777)) {
                     return 'Echec de la création du dossier "' . $root_dir . '/' . $dir . '"';
+                } else {
+                    chmod($root_dir . '/' . $dir, 777);
                 }
             }
             if (!is_null($sub_dir_tree)) {
@@ -347,6 +351,8 @@ class BDS_Tools
                     if (!file_exists($root_dir . '/' . $dir . '/' . $sub_dir_tree)) {
                         if (!mkdir($root_dir . '/' . $dir . '/' . $sub_dir_tree, 0777)) {
                             return 'Echec de la création du dossier "' . $root_dir . '/' . $dir . '/' . $sub_dir_tree . '"';
+                        } else {
+                            chmod($root_dir . '/' . $dir . '/' . $sub_dir_tree, 777);
                         }
                     }
                 }

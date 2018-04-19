@@ -1,0 +1,585 @@
+table: bs_sav
+controller: sav
+
+labels:
+    name: sav
+    name_plur: sav
+
+objects:
+    contrat:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: contrat
+            id_object:
+                field_value: id_contrat
+        card: 
+            title: 
+                object_prop: ref
+            view_btn: 1
+    
+    client:
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: id_client
+    
+    contact:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
+            id_object:
+                field_value: id_contact
+                
+    user_tech: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+            id_object: 
+                field_value: id_user_tech
+        
+    notes:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object: BS_Note
+
+    equipment: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: 
+                field_value: id_equipment
+                
+    entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: id_entrepot
+                
+    propal: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Propal
+            id_object: 
+                field_value: id_propal
+                
+    facture: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Facture
+            id_object: 
+                field_value: id_facture
+        cards: 
+            default: 
+                type: facture_card
+            
+fields: 
+    ref:
+        label: Référence
+        type: string
+        required: 0
+        search:
+            type: value_part
+            search_on_key_up: 1
+        input: 
+            type: hidden
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        display: 
+            actions: 
+                type: callback
+                method: displayStatusWithActions
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        required: 1
+        input: 
+            type: search_list
+            search_list:
+                table: be_equipment e
+                field_return_value: e.id
+                field_return_label: e.serial
+                fields_search: e.serial,e.id
+            help: Numéro de série ou ID d'un équipement
+        create_form: default
+    id_entrepot:
+        label: Centre
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot    
+    id_user_tech: 
+        label: Technicien
+        type: id_object
+        object: user_tech
+        input: 
+            type: hidden
+        search:
+            input: 
+                type: search_user
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        required: 1
+        input: 
+            type: search_societe
+            societe_type: customer
+        search:
+            input: 
+                type: search_societe
+                societe_type: customer    
+                
+    id_contact:
+        label: Contact
+        type: id_object
+        object: contact
+        values: 
+            array: client_contacts
+        depends_on: id_client
+        display_if:
+            field_name: id_client
+            hide_values: 0,
+        search:
+            input:
+                type: search_list
+                search_list:
+                    table: socpeople
+                    field_return_value: rowid
+                    field_return_label: lastname,firstname
+                    fields_search: lastname,firstname
+                    label_syntaxe: <label_1> <label_2>               
+    id_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+        values: 
+            array: contrats
+        depends_on: id_client
+        display_if: 
+            field_name: id_client
+            hide_values: 0,
+    id_propal: 
+        label: Proposition commerciale
+        type: id_object
+        object: propal
+        values: 
+            array: propals
+        display: 
+            default: 
+                type: callback
+                method: displayPropal
+        display_if: 
+            field_name: id_client
+            hide_values: 0,
+        depends_on: id_client
+    id_facture: 
+        label: Facture
+        type: id_object
+        object: facture
+    date_problem: 
+        label: Date problème
+        type: datetime
+    date_close: 
+        label: Date / Heure Fin
+        type: datetime
+    prestataire_number: 
+        label: N° de dossier prestataire
+    sav_pro: 
+        label: SAV Pro
+        type: bool
+        default_value: 0
+    accident: 
+        label: Accident
+        type: bool
+        default_value: 0
+    prioritaire: 
+        label: Prioritaire
+        type: bool
+        default_value: 0
+    cover:
+        label: Type de couverture
+        type: int
+        values: 
+            array: cover_types
+    save_option: 
+        label: Sauvegarde
+        type: int
+        values: 
+            array: save_options
+    contact_pref: 
+        label: Préférence de contact retour
+        type: int
+        values: 
+            array: contact_prefs
+    etat_materiel: 
+        label: Etat matériel
+        type: int
+        values: 
+            array: etats_materiel
+    etat_materiel_desc: 
+        label: Description état matériel
+        type: text
+        input:
+            auto_expand: 1
+            rows: 1
+    accessoires: 
+        label: Accessoires
+        type: text
+        input:
+            auto_expand: 1
+            rows: 2
+    symptomes: 
+        label: Symptômes
+        type: text
+        input:
+            auto_expand: 1
+            rows: 4
+    diagnostic: 
+        label: Diagnostic
+        type: text
+        input:
+            auto_expand: 1
+            rows: 4
+    resolution: 
+        label: Résolution
+        type: text
+        input:
+            auto_expand: 1
+            rows: 4
+    system: 
+        label: Système
+    login_admin: 
+        label: Login admin
+    pword_admin: 
+        label: Mot de passe admin
+    
+forms: 
+    default:
+        rows: 
+            - field: id_entrepot
+            - field: id_client
+            - field: id_contact
+            - field: id_equipment
+            - field: id_contrat
+            - field: prioritaire
+            - label: Acompte
+              custom: 1
+              input_name: acompte
+              data_type: money
+              input: 
+                  type: text
+              min: 0
+              value: 0
+            - label: Mode de paiement de l'acompte
+              custom: 1
+              data_type: int
+              input_name: mode_paiement_acompte
+              input: 
+                  type: select_payment
+              display_if: 
+                  field_name: acompte
+                  hide_values: 0,
+            - field: system
+            - field: login_admin
+            - field: pword_admin
+            - field: contact_pref
+            - field: cover
+            - field: accessoires
+            - field: etat_materiel
+            - field: etat_materiel_desc
+            - field: date_problem
+            - field: save_option
+            - field: sav_pro
+            - field: prestataire_number
+            
+    edit: 
+        rows: 
+            - field: id_entrepot
+            - field: id_client
+            - field: id_contact
+            - field: id_equipment
+            - field: id_contrat
+            - field: id_propal
+            - field: date_problem
+            - field: system
+            - field: login_admin
+            - field: pword_admin
+            
+    restitute:
+        title: Restituer
+        rows: 
+            - custom: 1
+              label: Restituer
+              hidden: 1
+              input: 
+                  type: hidden
+              input_name: restitute
+              value: 1
+            - custom: 1
+              label: Mode de paiement
+              input_name: mode_paiement
+              input: 
+                  type: select_payment
+            - custom: 1
+              label: Montant payé
+              input_name: paid
+              data_type: money
+              input: 
+                  type: text
+              value: 
+                  callback: getFactureAmountToPay
+                  
+    close: 
+        title: Fermeture
+        rows: 
+            - custom: 1
+              label: Fermeture
+              input_name: close
+              input: 
+                  type: hidden
+              hidden: 1
+              value: 1
+            - custom: 1
+              label: Frais de gestion
+              input_name: frais
+              data_type: money
+              input: 
+                  type: text
+              value:
+                  request: frais
+            - custom: 1
+              label: Dispo sous
+              input_name: nbJours
+              data_type: int
+              min: 0
+              value: 0
+              input: 
+                  addon_right: 
+                      text: jour(s)
+            - custom: 1
+              label: Notifier le client
+              input_name: send_msg
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              
+    contact: 
+        title: Recontacter
+        rows: 
+            - custom: 1
+              hidden: 1
+              input_name: recontact
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Notification
+              input_name: msg_type
+              input: 
+                  type: select
+                  options: 
+                      Facture: Facture
+                      Devis: Devis
+                      debut: PC
+                      debDiago: Diagnostic
+                      commOk: Pièce commandée
+                      repOk: Réparation terminée
+                      revPropRefu: Devis refusé
+                      pieceOk: Piéce reçue
+              
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: info-circle
+        footer_extra_btn: 
+            callback: getInfosExtraBtn
+        rows: 
+            - field: ref
+            - field: status
+              display: actions
+            - field: id_entrepot
+              display: nom_url
+            - field: id_user_tech
+              display: card
+            - field: prioritaire
+            - field: cover
+              edit: 1
+            - field: sav_pro
+              edit: 1
+            - field: id_propal
+              display: card
+            - field: id_facture
+              display: card
+              show: 
+                  field_value: id_facture
+              
+    client: 
+        title: Client
+        icon: user-circle
+        footer_extra_btn: 
+            callback: getClientExtraBtn
+        rows:
+            - field: id_contrat
+              display: card
+            - label: Client
+              field: id_client
+              display: card
+            - field: id_contact
+              display: card
+            - field: contact_pref
+              edit: 1
+              
+    materiel: 
+        title: Matériel
+        icon: fas_box
+        rows: 
+            - field: id_equipment
+              display: card
+            - field: accessoires
+              edit: 1
+            - field: etat_materiel
+              edit: 1
+            - field: etat_materiel_desc
+              edit: 1
+            - field: save_option
+              edit: 1
+            - field: system
+            - field: login_admin
+            - field: pword_admin
+              
+    suivi:
+        title: Suivi
+        icon: file-text
+        rows: 
+            - field: date_problem
+              show: 
+                  callback: isSAV
+            - field: symptomes
+              edit: 1
+            - field: diagnostic
+              edit: 1
+            - field: resolution
+              edit: 1
+              
+views: 
+    default:
+        title: nom
+        delete_btn: 1
+        edit_form: edit
+#        footer_extra_btn:
+#            callback: getViewExtraBtn
+        rows:
+            - cols: 
+                  - type: rows
+                    col_lg: 6
+                    col_md: 6
+                    rows: 
+                        - cols:
+                            - type: object_common_fields
+                              col_lg: 12
+                        - cols:
+                            - type: fields_table
+                              col_lg: 12
+                              fields_table: 
+                                  name: infos
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: client
+                        
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: materiel
+                        
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: suivi
+                        
+lists: 
+    default: 
+        title: Liste des SAV
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les SAV sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_btn_label: Nouveau SAV
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            ref:
+                field: ref
+            status: 
+                field: status
+            prioritaire:
+                field: prioritaire
+            date_create:
+                label: Créé le
+                field: date_create
+            tech:
+                field: id_user_tech
+                display: nom_url
+            client: 
+                field: id_client
+                display: nom_url
+            contact:
+                field: id_contact
+                display: nom_url
+    
+cards:
+    default:
+        title: nom
+        status: status
+        fields: 
+            - label: Technicien
+              field: id_user_tech
+              display: nom_url
+            - label: Matériel
+              field: id_equipment
+              display: nom_url
+            - label: Client
+              field: id_client
+              display: nom_url
+        view_btn: 1

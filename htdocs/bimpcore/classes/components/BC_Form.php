@@ -20,12 +20,15 @@ class BC_Form extends BC_Panel
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0)
     );
+    public static $association_params = array(
+        'display_if' => array('data_type' => 'array'),
+        'depends_on' => array(),
+    );
     public static $custom_row_params = array(
         'input_name' => array('required' => true, 'default' => ''),
         'display_if' => array('data_type' => 'array'),
         'depends_on' => array(),
         'data_type'  => array('default' => 'string'),
-        'hidden'     => array('data_type' => 'bool', 'default' => 0),
         'value'      => array('data_type' => 'any', 'default' => '')
     );
 
@@ -74,7 +77,7 @@ class BC_Form extends BC_Panel
         if (!is_null($id_parent) && !is_null($object)) {
             $object->setIdParent($id_parent);
         }
-        
+
         if (!is_null($on_save)) {
             $this->params['on_save'] = $on_save;
         }
@@ -98,7 +101,7 @@ class BC_Form extends BC_Panel
                 }
             }
         }
-        
+
         $this->data['on_save'] = $this->params['on_save'];
     }
 
@@ -158,6 +161,7 @@ class BC_Form extends BC_Panel
                 if ($row_params['field']) {
                     $html .= $this->renderFieldRow($row_params['field'], $row_params);
                 } elseif ($row_params['association']) {
+                    $row_params = array_merge($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$association_params));
                     $html .= $this->renderAssociationRow($row_params);
                 } elseif ((int) $row_params['custom']) {
                     $html .= $this->renderCustomRow($row, $row_params);
@@ -255,7 +259,11 @@ class BC_Form extends BC_Panel
             $items = $asso->getAssociatesList();
         }
 
-        $html .= '<div class="row formRow">';
+        $html .= '<div class="row formRow' . ($params['hidden'] ? ' hidden' : '') . (!is_null($params['display_if']) ? ' display_if' : '') . '"';
+        if (!is_null($params['display_if'])) {
+            $html .= BC_Field::renderDisplayifDataStatic($params['display_if']);
+        }
+        $html .= '>';
 
         $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
         if ($params['label']) {
@@ -320,6 +328,10 @@ class BC_Form extends BC_Panel
         }
         $html .= '</div>';
         $html .= '</div>';
+
+        if (!is_null($params['depends_on'])) {
+            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['association'], $params['depends_on']);
+        }
 
         unset($asso);
 

@@ -11,22 +11,22 @@ $tabCentre = array("25" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray
     "27" => array("03 81 95 19 20", "sav252@bimp.fr", "Montbeliard", 84, "484926", "25200", "Montbeliard", "37 place Denfert Rochereau", "MO"),
     "30" => array("03 44 200 200", "sav60@bimp.fr", "Compiegne", 106, "1040727", "60200", "Compiègne", "10 rue de l’étoile", "C"),
     "32" => array("04 96 11 29 40", "sav13@bimp.fr", "Marseille", 116, "1046076", "13011", "Marseille", "Route de la Sablière", "MA"),
-    "AB" => array("04 50 22 15 55", "sav74@bimp.fr", "Annecy Boutique", 60, "1046075", "74000", "Annecy", "7 rue de la poste"),
-    "CFC" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
-    "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
+//    "AB" => array("04 50 22 15 55", "sav74@bimp.fr", "Annecy Boutique", 60, "1046075", "74000", "Annecy", "7 rue de la poste"),
+//    "CFC" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
+//    "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
     
     "40" => array("09 71 002 450", "sav66@bimp.fr", "Perpignan", 215, "1187559", "66000", "Perpignan", "9 Boulevard Georges Clemenceau", "P"),
     "39" => array("04 66 842 974", "sav30@bimp.fr", "Nîmes", 217, "1187562", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet", "N"),
     "38" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem", "MONTP"),
     "37" => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck", "MAU"),
     
-    "BB" => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1046075", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire"),
+//    "BB" => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1046075", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire"),
     
     
     );
 
-$tabCentre["GB"] = $tabCentre["GA"];
-$tabCentre["GB"]['2'] = "Grenoble boutique";
+//$tabCentre["GB"] = $tabCentre["GA"];
+//$tabCentre["GB"]['2'] = "Grenoble boutique";
 
 //$tabCentre["AB"] = $tabCentre["M"];
 //$tabCentre["AB"]['2'] = "Annecy Boutique";
@@ -34,12 +34,12 @@ $tabCentre["GB"]['2'] = "Grenoble boutique";
 //$tabCentre["CB"]['2'] = "Chambery boutique";
 
 
-$tabCentre["VB"] = $tabCentre["V"];
-$tabCentre["VB"]['2'] = "Valence Boutique";
+//$tabCentre["VB"] = $tabCentre["V"];
+//$tabCentre["VB"]['2'] = "Valence Boutique";
 
 
 
-$tabCentre["M"] = $tabCentre["AB"];
+//$tabCentre["M"] = $tabCentre["AB"];
 
 
 

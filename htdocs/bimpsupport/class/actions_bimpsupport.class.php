@@ -84,27 +84,30 @@ class ActionsBimpsupport {
             
 
             require_once DOL_DOCUMENT_ROOT.'/bimpsupport/centre.inc.php';
-            
-            $centreUser = explode(" ", $user->array_options['options_apple_centre']);//Transforme lettre centre en id centre
-            foreach($centreUser as $idT=> $CT){
+            if($user->array_options['options_apple_centre'] == ""){//Ajout de tous les centre
+                $centreUser = array();
                 foreach($tabCentre as $idT2 => $tabCT)
-                    if($tabCT[8] == $CT)
-                        $centreUser[$idT] = $idT2;
+                    if(is_int($idT2))
+                        $centreUser[] = $idT2;
             }
-
-//            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
-//            if($db->num_rows($result3) > 1)
+            else{
+                $centreUser = explode(" ", $user->array_options['options_apple_centre']);//Transforme lettre centre en id centre
+                foreach($centreUser as $idT=> $CT){
+                    foreach($tabCentre as $idT2 => $tabCT)
+                        if($tabCT[8] == $CT)
+                            $centreUser[$idT] = $idT2;
+                }
+            }
             
+
+
             if(count($centreUser) > 1)
                 $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => implode($centreUser,"-")));
-//            while ($ligne3 = $db->fetch_object($result3)) {
-//                $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
-//            }
+
             foreach($tabCentre as $idGr => $tabOneCentr){
                 if(count($centreUser) == 0 || in_array($idGr, $centreUser))
                     $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
             }
-            
             $tabResult = array();
             $result2 = $db->query("SELECT COUNT(id) as nb, id_entrepot as CentreVal, status as EtatVal FROM `".MAIN_DB_PREFIX."bs_sav` WHERE 1 ".(count($centreUser)>0 ? "AND id_entrepot IN ('".implode($centreUser, "','")."')" : "")." GROUP BY id_entrepot, status");
             while ($ligne2 = $db->fetch_object($result2)) {
@@ -113,13 +116,11 @@ class ActionsBimpsupport {
                     $tabResult['Tous'][$ligne2->EtatVal] = 0;
                 $tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
             }
-            
-
 
             foreach ($tabGroupe as $ligne3) {
-                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
+                $centre = $ligne3['valeur'];
                 $href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&id_entrepot=' . $ligne3['forUrl'] : "");
-                $return .= '<div class="menu_contenu ' . ($ligne3['forUrl'] != "Tous" ? 'menu_contenueCache' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
+                $return .= '<div class="menu_contenu ' . ($ligne3['valeur'] != "Tous" ? 'menu_contenueCache2' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
                 foreach($tabStatutSav as $idStat => $labelStat){
@@ -134,12 +135,12 @@ class ActionsBimpsupport {
                 $return .= '</div>';
             }
             if(count($tabGroupe) > 3){
-            $return .= "<div style='width:100%;text-align:center;'><a id='showDetailChrono'>(...)</a></div>";
+            $return .= "<div style='width:100%;text-align:center;'><a id='showDetailChrono2'>(...)</a></div>";
 
             $return .= "<script type='text/javascript'>$(document).ready(function(){"
-                    . "$('.menu_contenueCache').hide();"
-                    . "$('#showDetailChrono').click(function(){"
-                    . "$('.menu_contenueCache').show();"
+                    . "$('.menu_contenueCache2').hide();"
+                    . "$('#showDetailChrono2').click(function(){"
+                    . "$('.menu_contenueCache2').show();"
                     . "$(this).hide();"
                     . "});"
                     . "});</script>";
@@ -157,14 +158,6 @@ class ActionsBimpsupport {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Hotline", $user->id)) {
             $hrefFin = "#pangridChronoDet100";
             $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
-//            $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
-//            $tabGroupe = array(array('label'=>"Tous", 'valeur'=>0));
-//            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur='" . $centre . "'" : ""));
-//            while ($ligne3 = $db->fetch_object($result3)) {
-//                $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur);
-//            }
-//            foreach ($tabGroupe as $ligne3) {
-//                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
             $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=100&mainmenu=Process';
             $return .= '<div class="menu_titre"><a class="vmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("Hotline", "phoning") . ' Appel </a><br></div>';

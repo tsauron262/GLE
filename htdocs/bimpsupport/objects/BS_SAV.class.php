@@ -318,7 +318,14 @@ class BS_SAV extends BimpObject
 
             $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'destruction\');';
             $buttons[] = array(
-                'label'   => 'Générer Bon de destruction',
+                'label'   => 'Générer Bon de destruction client',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $onclick
+            );
+
+            $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'destruction2\');';
+            $buttons[] = array(
+                'label'   => 'Générer Bon de destruction tribunal',
                 'icon'    => 'fas_file-pdf',
                 'onclick' => $onclick
             );
@@ -1269,7 +1276,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     {
         $url = '';
 
-        if (!in_array($file_type, array('pc', 'destruction', 'pret'))) {
+        if (!in_array($file_type, array('pc', 'destruction', 'destruction2', 'pret'))) {
             $errors[] = 'Type de fichier PDF invalide';
             return '';
         }
@@ -1286,6 +1293,9 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     break;
                 case 'destruction':
                     $ref = 'Destruction-' . $this->getData('ref');
+                    break;
+                case 'destruction2':
+                    $ref = 'Destruction2-' . $this->getData('ref');
                     break;
                 case 'pret':
                     $ref = 'Pret-' . $this->getData('ref');

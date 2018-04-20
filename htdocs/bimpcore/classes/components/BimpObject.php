@@ -884,6 +884,22 @@ class BimpObject
         return $errors;
     }
 
+    public function setObjectAction($action, $extra_data = array(), &$success = '')
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $method = 'action' . ucfirst($action);
+            if (method_exists($this, $method)) {
+                $this->{$method}($extra_data, $success);
+            } else {
+                $errors[] = 'Action invalide: "' . $action . '"';
+            }
+        }
+
+        return $errors;
+    }
+
     // Affichage des données:
 
     public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)

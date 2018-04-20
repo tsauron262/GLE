@@ -8,12 +8,22 @@ labels:
     name: produit / service
     name_plur: produits / services
     
+objects: 
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product
 fields: 
     id_sav: 
         label: SAV
         type: id_parent
     id_product: 
-        label: Produit
+        label: Référence
         type: id_object
         object: product
         input: 
@@ -25,4 +35,41 @@ fields:
         unsigned: 1
         min: 1
         default_value: 1
-    
+        
+lists: 
+    default: 
+        title: Produits / Services
+        icon: bars
+        checkboxes: 1
+        bulk_actions:
+            - label: Retirer les produits / services sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 1
+        update_btn: 1
+        add_form_name: default
+        cols: 
+            product: 
+                field: id_product
+                display: nom_url
+            desc: 
+                label: Désignation
+                value: 
+                    callback: displayProduct
+            unit_price: 
+                label: PU TTC
+                value: 
+                    callback: displayUnitPrice
+            qty: 
+                field: qty
+                edit: 1
+            price: 
+                label: Total TTC
+                value: 
+                    callback: displayTotal
+            
+            

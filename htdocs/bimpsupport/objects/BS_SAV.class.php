@@ -277,6 +277,14 @@ class BS_SAV extends BimpObject
             }
         }
 
+        $object_data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: \'' . $this->id . '\'}';
+        $onclick = 'setObjectAction($(this), '.$object_data.', \'testAction\', {test: 1}, \'restitute\')';
+        $buttons[] = array(
+            'label'   => 'Test action',
+            'icon'    => 'file-text',
+            'onclick' => $onclick
+        );
+
         return $buttons;
     }
 
@@ -576,7 +584,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     $factureA->generateDocument(self::$facture_model_pdf, $langs);
                     $this->set('id_facture_acompte', $factureA->id);
 
-                    link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
+//                    link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
 
                     BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                     $discount = new DiscountAbsolute($this->db->db);
@@ -609,8 +617,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                 require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
                 $prop->generateDocument(self::$propal_model_pdf, $langs);
-                link(DOL_DATA_ROOT . "/propale/" . $prop->ref . "/" . $prop->ref . ".pdf", $repDest . $prop->ref . ".pdf");
-
+//                link(DOL_DATA_ROOT . "/propale/" . $prop->ref . "/" . $prop->ref . ".pdf", $repDest . $prop->ref . ".pdf");
 //                require_once DOL_DOCUMENT_ROOT . "/bimpsupport/core/modules/bimpsupport/modules_bimpsupport.php";
 //                bimpsupport_pdf_create($db, $this, "pc");
             }
@@ -947,6 +954,10 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         return $errors;
     }
 
+    // Action: 
+    
+    // Overrides: 
+    
     public function create()
     {
         $this->data['ref'] = $this->getNextNumRef();

@@ -350,7 +350,7 @@ class BimpController
 
             if (isset($button['url'])) {
                 $tag = 'a';
-                $params['attr']['href'] = $this->makeUrlFromConfig($section_path . '/buttons/' . $idx . '/url');
+                $params['attr']['href'] = BimpTools::makeUrlFromConfig($this->config, $section_path . '/buttons/' . $idx . '/url', $this->module, $this->controller);
             } elseif (isset($button['onclick'])) {
                 $params['attr']['onclick'] = $this->getCurrentConf('onclick', '');
                 $tag = 'button';
@@ -993,7 +993,10 @@ class BimpController
                         }
                     } elseif ($object->config->isDefined('fields/' . $field_name)) {
                         $field = new BC_Field($object, $field_name, true);
-                        $html = $field->renderInput();
+                        if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
+                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
+                        }
+                        $html .= $field->renderInput();
                         unset($field);
                     } elseif ($object->config->isDefined('associations/' . $field_name)) {
                         $bimpAsso = new BimpAssociation($object, $field_name);
@@ -1019,6 +1022,39 @@ class BimpController
         )));
     }
 
+    protected function ajaxProcessLoadObjectListFullPanel()
+    {
+        $errors = array();
+        $html = '';
+        $list_id = '';
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_name = BimpTools::getValue('list_name', 'default');
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $list = new BC_ListTable($object, $list_name, 1, $id_parent);
+            $html = $list->renderHtml();
+            $list_id = $list->identifier;
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'list_id'    => $list_id,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+    
     protected function ajaxProcessLoadObjectList()
     {
         $errors = array();
@@ -1357,38 +1393,5 @@ class BimpController
     protected function getObjectIdFromPost($object_name)
     {
         return BimpTools::getValue('id_' . $object_name, null);
-    }
-
-    // Outils:
-    public function makeUrlFromConfig($path)
-    {
-        $url = DOL_URL_ROOT . '/';
-
-        $params = $this->getConf($path, null, true, 'array');
-        if (is_null($params)) {
-            return '';
-        }
-
-        if (isset($params['url'])) {
-            $url .= $this->getConf($path . '/url', '');
-        } else {
-            $module = $this->getConf($path . '/module', $this->module);
-            $controller = $this->getConf($path . '/controller', $this->controller);
-            $url .= $module . '/index.php?fc=' . $controller;
-        }
-
-        if (isset($params['url_params'])) {
-            $url_params = $this->getConf($path . '/url_params', array(), false, 'array');
-            foreach ($url_params as $name => $value) {
-                if (!preg_match('/\?/', $url)) {
-                    $url .= '?';
-                } else {
-                    $url .= '&';
-                }
-                $url .= $name . '=' . $value;
-            }
-        }
-
-        return $url;
     }
 }

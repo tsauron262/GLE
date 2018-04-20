@@ -167,6 +167,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderLines();
         $this->renderAfterLines();
         $this->renderBottom();
+        $this->renderAfterBottom();
     }
 
     public function getSenderInfosHtml()
@@ -812,10 +813,13 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<td>Date :</td>';
         $html .= '</tr>';
 
-
-
         $html .= '</table>';
 
         return $html;
+    }
+
+    public function renderAfterBottom()
+    {
+        
     }
 }

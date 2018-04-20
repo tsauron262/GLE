@@ -1,0 +1,71 @@
+table: bimp_gsx_repair
+
+labels: 
+    name: réparation GSX
+    name_plur: réparations GSX
+    is_female: 1
+    
+objects: 
+    sav: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_SAV
+            id_object: 
+                field_value: id_sav
+fields: 
+    serial: 
+        label: N° de série
+    id_sav: 
+        label: SAV
+        type: id_object
+        object: sav
+    rapair_number: 
+        label: N° de réparation
+    repair_confirm_number: 
+        label: N° de confirmation
+    serial_update_confirm_number:
+        label: N° de confirmation (màj S/N)
+    repair_type: 
+        label: Type de réparation
+    total_from_order: 
+        label: Total De la commande
+        type: money
+    ready_for_pick_up: 
+        label: Prêt pour enlèvement
+        type: bool
+        default_value: 0
+    reimbursed: 
+        label: Remboursée
+        type: bool
+        default_value: 0
+    repair_complete: 
+        label: Réparation terminée
+        type: boold
+        default_value: 0
+    closed: 
+        label: Fermée
+        type: bool
+        default_value: 0
+    date_closed: 
+        label: Date de fermeture
+        type: date
+        
+    
+fields_tables:
+    infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - field: date_create
+            - field: rapair_number
+            - field: repair_confirm_number
+            - field: serial_update_confirm_number
+            - field: total_from_order
+            - field: ready_for_pick_up
+            - field: reimbursed
+            - field: repair_complete
+            - field: closed
+            - field: date_closed

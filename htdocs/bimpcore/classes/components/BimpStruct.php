@@ -16,6 +16,14 @@ class BimpStruct
         }
 
         switch ($type) {
+            case 'object_header':
+                if ($config->isDefined($path . '/object_header')) {
+                    $html = self::renderObjectHeader($config, $path . '/object_header', $parent_component);
+                } else {
+                    // logError
+                }
+                break;
+
             case 'view':
                 if ($config->isDefined($path . '/view')) {
                     $html = self::renderView($config, $path . '/view', $parent_component);
@@ -119,6 +127,25 @@ class BimpStruct
                 break;
         }
         $config->setCurrentPath($prev_path);
+        return $html;
+    }
+
+    public static function renderObjectHeader(BimpConfig $config, $path, &$parent_component = null)
+    {
+        $html = '';
+        
+        if ($config->isDefined($path . '/object')) {
+            $object = $config->getObject($path . '/object');
+        } else {
+            $object = $config->instance;
+        }
+        
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $html .= $object->renderHeader();
+        } else {
+            $html .= BimpRender::renderAlerts('Objet non trouvé');
+        }
+        
         return $html;
     }
 

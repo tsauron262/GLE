@@ -18,37 +18,12 @@ function _softErrorMessage($value, $key)
 
 class GSX
 {
-
-    /**
-     *
-     * Valid Region Codes
-     *
-     * @var array Contains valid names for all the regions in which GSX is available
-     *
-     * @access protected
-     *
-     */
     protected $validRegionCodes = array(
         'am',
         'emea',
         'apac',
         'la',
     );
-
-    /**
-     *
-     * Valid Language Codes
-     *
-     * This array of valid language codes is from the GSX API
-     * documentation.  This GSX class does its own checking of
-     * certain values since it's much faster to do validation
-     * on our end.
-     *
-     * @var array Array of valid language codes
-     *
-     * @access protected
-     *
-     */
     protected $validLanguageCodes = array(
         'en', // English
         'fr', // Frence
@@ -60,19 +35,6 @@ class GSX
         'zf', // Traditional Chinese
         'zh' // Simple Chinese
     );
-
-    /**
-     *
-     * Valid Time Zones
-     *
-     * This array contains a list of all the valid timezone codes
-     * that GSX allows.
-     *
-     * @var array Array of valid timezones according to GSX
-     *
-     * @access protected
-     *
-     */
     protected $validTimeZones = array(
         'PDT', // Pacific Daylight Time					UTC-7
         'GMT', // Greenwich Mean Time						UTC
@@ -93,38 +55,11 @@ class GSX
         'NZST'  // New Zealand Standard Time				UTC+12
     );
 
-    /**
-     *
-     * Valid API Modes
-     *
-     * This array contains the three valid modes for the GSX Web Services
-     * API - GSXIT (Testing), GSXUT (Testing) and GSX Production (Live)
-     *
-     * @var array Array of GSX testing and production modes.
-     *
-     * @access protected
-     *
-     */
     protected $validApiModes = array(
         'it',
         'ut',
         'production'
     );
-
-    /**
-     *
-     * Valid Part Search
-     *
-     * This array contains all the variables we can search for in
-     * the PartsLookup function of the GSX Web Services API.
-     *
-     * @var array Array of the valid variables for Part Search
-     *
-     * @see $this->part_lookup
-     *
-     * @access protected
-     *
-     */
     protected $validPartSearch = array(
         'eeeCode',
         'partNumber',
@@ -132,21 +67,6 @@ class GSX
         'productName',
         'serialNumber'
     );
-
-    /**
-     *
-     * Valid Repair Lookup
-     *
-     * This array contains all the variables we can search for in
-     * the RepairLookup function of the GSX Web Services API.
-     *
-     * @var array Array of the valid variables for Repair Lookup
-     *
-     * @see $this->repair_lookup
-     *
-     * @access protected
-     *
-     */
     protected $validRepairLookup = array(
         'serialNumber',
         'repairConfirmationNumber',
@@ -168,19 +88,6 @@ class GSX
         'customerEmailAddress'
     );
 
-    /**
-     *
-     * Valid Repair Statuses
-     *
-     * This array contains all possible repair statuses in a GSX repair
-     *
-     * @var array Array of the valid Repair Statuses
-     *
-     * @see $this->repair_lookup()
-     *
-     * @access protected
-     *
-     */
     protected $validRepairStatus = array(
         'New',
         'Saved',
@@ -190,54 +97,18 @@ class GSX
         'Closed'
     );
 
-    /**
-     *
-     * Valid Repair Type
-     *
-     * This array contains all the repairType possibilities for the
-     * RepairLookup function.
-     *
-     * @var array Array of the valid Repair Types
-     *
-     * @see $this->repair_lookup()
-     *
-     * @access protected
-     *
-     */
     protected $validRepairType = array(
         'ON',
         'WH',
         'CA'
     );
 
-    /**
-     *
-     * @var array Array of the valid Warranty Status Parameters
-     *
-     * @see $this->warranty_status()
-     *
-     * @access protected
-     *
-     */
     protected $validWarrantyParams = array(
         'serialNumber',
         'unitReceivedDate',
         'partNumbers'
     );
 
-    /**
-     *
-     * GSX Details
-     *
-     * This array contains all our important details regarding
-     * the usage of the GSX Web Services API including login details
-     * and localisation data.
-     *
-     * @var array Array that contains all the GSX authentication details
-     *
-     * @access protected
-     *
-     */
     protected $gsxDetails = array(
         'apiMode'          => 'ut',
         'regionCode'       => 'apac',
@@ -250,81 +121,25 @@ class GSX
         'gsxWsdl'          => '',
     );
 
-    /**
-     *
-     * WSDL Url
-     *
-     * This is our URL for the WSDL.  It can change depending on
-     * users location and their needs (APS, iPhone etc.)
-     *
-     * @var string WSDL URL
-     *
-     * @access protected
-     *
-     */
     protected $wsdlUrl;
 
-    /**
-     *
-     * User Session ID
-     *
-     * Class variable for our GSX Authentication token.
-     *
-     * @var string Authentication ID
-     *
-     * @access protected
-     *
-     */
     protected $userSessionId;
 
-    /**
-     *
-     * SOAP Client
-     *
-     * Class object for our GSX SOAP Client.
-     *
-     * @var object SOAP Client Object
-     *
-     * @access protected
-     *
-     */
     protected $soapClient;
+    
     public $errors = array(
         'init' => array(),
         'soap' => array()
     );
 
-    /**
-     *
-     * Constructor
-     *
-     * Builds the class and checks to see if all the details provided
-     * through the constructor are valid so we can authenticate without
-     * problems.
-     *
-     * $_gsxDetailsArray = array (
-     * 		'apiMode'			=> 'production',
-     * 		'regionCode'		=> 'apac',
-     * 		'userId'			=> 'username@apple.com',
-     * 		'password'			=> 'apple',
-     * 		'serviceAccountNo'	=> '0000000000',
-     * 		'languageCode'		=> 'en',
-     * 		'userTimeZone'		=> 'AEST'
-     * );
-     *
-     * @param array GSX Details array which contains authentication and regional information
-     *
-     * @access public
-     *
-     */
     public $isIphone = false;
     public $last_response = null;
 
     public function __construct($_gsxDetailsArray = array(), $isIphone = false, $apiMode)
     {
-// We default to using production mode for GSX
         $this->isIphone = $isIphone;
         $this->apiMode = $apiMode;
+        
         if (!isset($_gsxDetailsArray['apiMode'])) {
             $_gsxDetailsArray['apiMode'] = 'production';
         }
@@ -382,39 +197,11 @@ class GSX
             $this->authenticate();
     }
 
-    /**
-     *
-     * Destruct
-     *
-     * Destructs a number of important class-related variables
-     *
-     * @param null
-     *
-     * @todo MOAR garbage collection.
-     *
-     * @access public
-     *
-     */
     public function __destruct()
     {
-// We can destruct class settings, but I don't want to log out, purely for the reason if someone
-// uses this class with a custom AJAX environment.
         unset($this->userSessionId);
     }
 
-    /**
-     *
-     * Assign WSDL
-     *
-     * Checks to see if it should use the official GSX WSDL or a custom, user-supplied WSDL link.
-     *
-     * @param null
-     *
-     * @return string The WSDL URI for GSX.
-     *
-     * @access protected
-     *
-     */
     protected function assign_wsdl()
     {
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
@@ -447,19 +234,6 @@ class GSX
 //        }
     }
 
-    /**
-     *
-     * Initiate SOAP Client
-     *
-     * This here function initialises the SOAP Client for use with GSX.
-     *
-     * @param null
-     *
-     * @return object soapClient object.
-     *
-     * @access private
-     *
-     */
     private function initiate_soap_client()
     {
         if (empty($this->wsdlUrl)) {
@@ -497,20 +271,6 @@ class GSX
         return $this->soapClient;
     }
 
-    /**
-     *
-     * Authenticate
-     *
-     * Authenticates details with GSX Web Services and gets a session ID if
-     * the operation was successful
-     *
-     * @param null
-     *
-     * @return string Returns the userSessionId as created by GSX.
-     *
-     * @access public
-     *
-     */
     public function authenticate()
     {
 
@@ -541,24 +301,6 @@ class GSX
         return $this->userSessionId = $authentication['AuthenticateResponse']['userSessionId'];
     }
 
-    /**
-     *
-     * Lookup
-     *
-     * Lookup either the model identifier or warranty information for a given unit.
-     * * If you leave lookup type blank, it defaults to warranty lookup.
-     *
-     * @param string The serial number of the Apple product
-     *
-     * @param string Lookup type (model|warranty)
-     *
-     * @param string Format to return data (optional)
-     *
-     * @return mixed Returns array of data if successful or string on error
-     *
-     * @access public
-     *
-     */
     public function lookup($serial, $lookupType, $returnFormat = false)
     {
         if (!preg_match($this->_regex('serialNumber'), $serial)) {

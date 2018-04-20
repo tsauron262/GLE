@@ -14,16 +14,9 @@ objects:
                 request: id
         
 sections:
-    - type: buttons
-      buttons:
-          - label: Liste des SAV
-            url:
-                controller: index
-                url_params: 
-                    tab: sav
-            icon_before: chevron-left
-            classes: 
-                array: btn,btn-primary
+    - type: object_header
+      object_header:
+          object: sav
     - type: nav_tabs
       nav_tabs: 
           - id: card
@@ -37,6 +30,23 @@ sections:
                               name: default
                               panel: 1
                               object: sav
+                              
+          - id: materiel
+            title: Matériel
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              object: sav
+                              name: materiel
+                    - cols: 
+                        - type: list
+                          list: 
+                              object: sav
+                              children: apple_parts
+            
           - id: notes
             title: Notes
             struct:

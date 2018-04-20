@@ -28,6 +28,39 @@ table.objectlistTable {
         }
     }
 
+    & > tbody > tr {
+        & > th {
+            padding: 5px 12px 5px 6px;
+            background-color: $primary;
+            color: #fff;
+            border-bottom: 1px solid #fff;
+        }
+
+        & > td {
+            padding: 5px 6px;
+            border-bottom: 1px solid #ddd;
+
+            .inputContainer {
+                display: inline-block;
+                width: 100%;
+
+                input, textarea, select {
+                    width: 100%;
+                    color: $input-color;
+                    font-weight: normal;
+                }
+
+                .inputHelp {
+                    display: none;
+                }
+            }
+
+            .popover {
+                color: $gray-darker;
+            }
+        }
+    }
+
     & > tbody > tr.objectListItemRow {
         @include transition(all 0.3s ease);
 
@@ -87,29 +120,6 @@ table.objectlistTable {
             & > td {
                 background-color: #CDEFFF!important;
             }
-        }
-    }
-
-    td {
-        padding: 5px 6px;
-
-        .inputContainer {
-            display: inline-block;
-            width: 100%;
-
-            input, textarea, select {
-                width: 100%;
-                color: $input-color;
-                font-weight: normal;
-            }
-
-            .inputHelp {
-                display: none;
-            }
-        }
-
-        .popover {
-            color: $gray-darker;
         }
     }
 
@@ -301,12 +311,12 @@ th.th_tools {
         height: 100%;
         opacity: 0;
         font-size: 16px;
-        
+
         &:before {
             font-family: 'FontAwesome';
             content: '\f110';
         }
-        
+
         &.visible {
             opacity: 1;
         }

@@ -8,6 +8,9 @@ primary: rowid
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
+labels: 
+    name: contact
+    
 fields: 
     fk_soc: 
         label: Societe

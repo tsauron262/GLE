@@ -1,6 +1,8 @@
 <?php
 
-class savController extends BimpController
+require_once DOL_DOCUMENT_ROOT . '/bimpapple/controllers/gsxController.php';
+
+class savController extends gsxController
 {
 
     public function renderGsx()
@@ -8,7 +10,7 @@ class savController extends BimpController
         $sav = BimpObject::getInstance($this->module, 'BS_SAV', (int) BimpTools::getValue('id'));
 
         if (!$sav->isLoaded()) {
-            return BimpRender::renderAlerts('ID du ticket SAV absent ou invalide');
+            return BimpRender::renderAlerts('ID du SAV absent ou invalide');
         }
 
         $id_equipment = (int) $sav->getData('id_equipment');
@@ -38,7 +40,7 @@ class savController extends BimpController
         );
 
         $buttons = array(
-            '<button id="loadGSXButton" type="button" class="btn btn-primary btn-large"><i class="fa fa-download iconLeft"></i>Charger les données GSX</button>'
+            '<button id="loadGSXButton" type="button" class="btn btn-primary btn-large" onclick="loadGSXView($(this), ' . $sav->id . ')"><i class="fa fa-download iconLeft"></i>Charger les données GSX</button>'
         );
 
         $html .= BimpRender::renderFreeForm($rows, $buttons, 'Chargement des données Apple GSX', 'download');

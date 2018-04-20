@@ -33,7 +33,7 @@
         font-size: 15px;
         font-weight: normal;
     }
-    
+
     & > thead > tr.col_headers > th {
         padding: 5px 8px;
         background-color: $primary;
@@ -70,7 +70,7 @@
                 .inputContainer,
                 .inputGroupContainer {
                     margin-right: 10px;
-                    
+
                     textarea {
                         width: 100%;
                     }
@@ -79,7 +79,7 @@
                     width: auto!important;
                 }
             }
-            
+
             &.modified  {
                 background-color: #E1F5FF!important;
                 border-color: #A9C5D2!important;
@@ -99,6 +99,27 @@
     }
 }
 
+.object_header {
+    padding: 15px;
+    background-color: #fff;
+
+    h1, h2 {
+        margin-top: 0;
+    }
+
+    .header_status {
+        display: inline-block;
+        font-size: 15px;
+        margin: 5px 10px;
+    }
+
+    .header_button {
+        vertical-align: top;
+        display: inline-block;
+        margin: 2px 25px 0 0;
+    }
+}
+
 .object_card {
     .object_card_status {
         display: inline-block;
@@ -110,7 +131,7 @@
 .object_card_table {    
     width: 100%;
     margin-top: 10px;
-    
+
     tbody tr {
         th, td {
             padding: 0 5px;
@@ -169,7 +190,7 @@
 }
 .multiple_values_items_list {
     padding: 5px;
-    
+
     .multiple_values_item {
         margin: 5px 0;
         border: 1px solid $gray;

@@ -603,4 +603,8 @@ $(document).ready(function () {
             }
         });
     });
+
+    $('.object_header').each(function () {
+        setCommonEvents($(this));
+    });
 });

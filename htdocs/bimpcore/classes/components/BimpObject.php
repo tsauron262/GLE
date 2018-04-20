@@ -24,6 +24,8 @@ class BimpObject
         'controller'         => array('default' => ''),
         'primary'            => array('default' => 'id'),
         'common_fields'      => array('data_type' => 'bool', 'default' => 1),
+        'header_list_name'   => array('default' => 'default'),
+        'list_page_url'      => array('data_type' => 'array'),
         'parent_object'      => array('default' => ''),
         'parent_id_property' => array('defautl' => ''),
         'parent_module'      => array('default' => ''),
@@ -2176,6 +2178,117 @@ class BimpObject
     }
 
     // Rendus HTML
+
+    public function renderHeader()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            $name = $this->getInstanceName();
+
+            $html .= '<div class="object_header container-fluid">';
+            $html .= '<div class="row">';
+
+            $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
+            if (!is_null($this->params['header_list_name']) && $this->params['header_list_name']) {
+                $html .= '<div class="header_button">';
+                $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+                if ($url) {
+                    $items = array(
+                        '<span class="dropdown-title">Liste des ' . $this->getLabel('name_plur') . '</span>'
+                    );
+                    $items[] = BimpRender::renderButton(array(
+                                'label'       => 'Vue rapide',
+                                'icon_before' => 'eye',
+                                'classes'     => array(
+                                    'btn', 'btn-light-default'
+                                ),
+                                'attr'        => array(
+                                    'onclick' => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))'
+                                )
+                                    ), 'button');
+                    $items[] = BimpRender::renderButton(array(
+                                'label'       => 'Afficher la page',
+                                'icon_before' => 'file-text-o',
+                                'classes'     => array(
+                                    'btn', 'btn-light-default'
+                                ),
+                                'attr'        => array(
+                                    'onclick' => 'window.location = \'' . $url . '\''
+                                )
+                                    ), 'button');
+                    $items[] = BimpRender::renderButton(array(
+                                'label'       => 'Afficher la page dans un nouvel onglet',
+                                'icon_before' => 'external-link',
+                                'classes'     => array(
+                                    'btn', 'btn-light-default'
+                                ),
+                                'attr'        => array(
+                                    'onclick' => 'window.open(\'' . $url . '\');'
+                                )
+                                    ), 'button');
+                    $html .= BimpRender::renderDropDownButton('', $items, array(
+                                'icon' => 'bars'
+                    ));
+                } else {
+                    $html .= BimpRender::renderButton(array(
+                                'icon_before' => 'bars',
+                                'classes'     => array(
+                                    'btn', 'btn-default', 'bs-popover'
+                                ),
+                                'attr'        => array(
+                                    'onclick'        => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))',
+                                    'data-toggle'    => 'popover',
+                                    'data-trigger'   => 'hover',
+                                    'data-placement' => 'top',
+                                    'data-container' => 'body',
+                                    'data-content'   => 'Afficher la liste des ' . $this->getLabel('name_plur')
+                                )
+                                    ), 'button');
+                }
+                $html .= '</div>';
+            }
+
+            $html .= '<div style="display: inline-block">';
+            $html .= '<h1>' . $name . '</h1>';
+
+            if ($this->field_exists('reference')) {
+                $ref = $this->displayData('reference');
+            } elseif ($this->field_exists('ref')) {
+                $ref = $this->displayData('ref');
+            }
+
+            if ($ref) {
+                $html .= '<h2>';
+                $html .= $ref;
+                $html .= '</h2>';
+            }
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="col-lg-6 col-sm-4 col-xs-12" style="text-align: right">';
+
+            $status = '';
+            if ($this->field_exists('status')) {
+                $status = $this->displayData('status');
+            } elseif ($this->field_exists('statut')) {
+                $status = $this->displayData('statut');
+            } elseif ($this->field_exists('fk_statut')) {
+                $status = $this->displayData('fk_statut');
+            }
+            if ($status) {
+                $html .= '<div class="header_status">';
+                $html .= $status;
+                $html .= '</div>';
+            }
+
+            $html .= '</div>';
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
 
     public function renderView($view_name = 'default', $panel = false, $level = 1)
     {

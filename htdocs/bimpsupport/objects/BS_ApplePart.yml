@@ -1,0 +1,64 @@
+table: bs_apple_part
+common_fields: 0
+
+parent_object: BS_SAV
+parent_id_property: id_sav
+
+labels: 
+    name: pièce Apple
+    name_plur: pièces Apple
+    is_female: 1
+    
+fields: 
+    label: 
+        label: Libellé
+    part_number:
+        label: Numéro
+    comptia_code: 
+        label: Code CompTIA
+    comptia_modifier: 
+        label: Modificateur CompTIA
+    qty: 
+        label: Quantité
+        type: int
+        unsigned: 1
+        min: 1
+        default_value: 1
+    component_code: 
+        label: Code pièce
+    stock_price: 
+        label: Prix
+        type: money
+    
+lists: 
+    default: 
+        title: Panier de composants Apple
+        icon: shopping-basket
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les composants sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 1
+        cols: 
+            label: 
+                label: Nom
+                field: label
+            num: 
+                label: Réf.
+                field: part_number
+            compTIAcode: 
+                field: comptia_code
+            compTIAmod: 
+                field: comptia_modifier
+            qty: 
+                field: qty
+            code: 
+                field: component_code
+            price: 
+                field: stock_price
+                

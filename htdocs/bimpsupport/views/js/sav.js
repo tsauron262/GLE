@@ -78,7 +78,7 @@ function generatePDFFile($button, id_sav, file_type) {
     }
 
     $button.addClass('disabled');
-    
+
     BimpAjax('generatePDFFile', {
         id_sav: id_sav,
         file_type: file_type
@@ -102,31 +102,67 @@ function generatePDFFile($button, id_sav, file_type) {
     });
 }
 
-$(document).ready(function () {
+function loadGSXView($button, id_sav) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
     var $gsxForm = $('#loadGSXForm');
+    var $container = $('#gsxResultContainer');
+    var serial = $gsxForm.find('#gsx_equipment_serial').val();
+    serial = 'C02QL8SEFVH5';
 
-    if ($.isOk($gsxForm)) {
-        $gsxForm.find('#loadGSXButton').click(function () {
-            var $container = $('#gsxContainer');
-
-            var serial = $gsxForm.find('#gsx_equipment_serial').val();
-            serial = 'C02QL8SEFVH5';
-            var ok = false;
-            if (/^[A-Z0-9]{11,12}$/.test(serial)) {
-                GSX.loadProduct(serial, 'gsxResultContainer');
-//                        setRequest('newSerial', '&serial=' + serial);
-                ok = true;
-            }
-            if (/^[0-9]{15}$/.test(serial)) {
-                GSX.loadProduct(serial, 'gsxResultContainer');
-//                        setRequest('newSerial', '&serial=' + serial);
-                ok = true;
-            }
-            if (!ok) {
-                $('#gsxResultContainer').html('<p class="alert alert-danger">Pas de numéro de série correct</p>');
+    if (/^[A-Z0-9]{11,12}$/.test(serial) || /^[0-9]{15}$/.test(serial)) {
+        BimpAjax('loadGSXView', {
+            serial: serial,
+            id_sav: id_sav
+        }, $container, {
+            append_html: true,
+            display_processing: true,
+            processing_msg: 'Chargement en cours',
+            $gsxForm: $gsxForm,
+            $button: $button,
+            success: function (result, bimpAjax) {
+                bimpAjax.$button.removeClass('disabled');
+                bimpAjax.$gsxForm.slideUp(250);
+            }, 
+            error: function(result, bimpAjax) {
+                bimpAjax.$button.removeClass('disabled');
             }
         });
+    } else {
+        $container.html('<p class="alert alert-danger">Numéro de série invalide</p>');
     }
+
+}
+
+$(document).ready(function () {
+
+//    var $gsxForm = $('#loadGSXForm');
+//    if ($.isOk($gsxForm)) {
+//        $gsxForm.find('#loadGSXButton').click(function () {
+//            var $container = $('#gsxContainer');
+//
+//            var serial = $gsxForm.find('#gsx_equipment_serial').val();
+//            serial = 'C02QL8SEFVH5';
+//            var ok = false;
+//            if (/^[A-Z0-9]{11,12}$/.test(serial)) {
+//                GSX.loadProduct(serial, 'gsxResultContainer');
+////                        setRequest('newSerial', '&serial=' + serial);
+//                ok = true;
+//            }
+//            if (/^[0-9]{15}$/.test(serial)) {
+//                GSX.loadProduct(serial, 'gsxResultContainer');
+////                        setRequest('newSerial', '&serial=' + serial);
+//                ok = true;
+//            }
+//            if (!ok) {
+//                $('#gsxResultContainer').html('<p class="alert alert-danger">Pas de numéro de série correct</p>');
+//            }
+//        });
+//    }
 });
 //
 // if ($("textarea#Descr").length) {

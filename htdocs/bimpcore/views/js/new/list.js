@@ -172,6 +172,74 @@ function reloadObjectList(list_id, callback) {
     });
 }
 
+function loadModalList(module, object_name, list_name, id_parent, $button, title) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var $modal = $('#page_modal');
+    var $resultContainer = $modal.find('.modal-ajax-content');
+    $resultContainer.html('').hide();
+
+    if (typeof (title) === 'undefined' || !title) {
+        title = '<i class="fa fa-bars iconLeft"></i>Liste des ';
+        if (typeof (object_labels[object_name].name_plur) !== 'undefined') {
+            title += object_labels[object_name].name_plur;
+        } else {
+            title += 'Objet "' + object_name + '"';
+        }
+    }
+
+    $modal.find('.modal-title').html(title);
+    $modal.find('.loading-text').text('Chargement');
+    $modal.find('.content-loading').show();
+    $modal.modal('show');
+
+    var isCancelled = false;
+
+    $modal.on('hide.bs.modal', function (e) {
+        $modal.find('.extra_button').remove();
+        $modal.find('.content-loading').hide();
+        isCancelled = true;
+        $button.removeClass('disabled');
+    });
+
+    if (typeof (id_parent) === 'undefined') {
+        id_parent = 0;
+    }
+    var data = {
+        'module': module,
+        'object_name': object_name,
+        'list_name': list_name,
+        'id_parent': id_parent
+    };
+
+    BimpAjax('loadObjectListFullPanel', data, null, {
+        $modal: $modal,
+        $resultContainer: $resultContainer,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            bimpAjax.$modal.find('.content-loading').hide();
+            if (!isCancelled) {
+                if (typeof (result.html) !== 'undefined') {
+                    bimpAjax.$resultContainer.html(result.html).slideDown(250);
+                    var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
+                    if ($new_list.length) {
+                        onListLoaded($new_list);
+                    }
+                }
+                bimpAjax.$modal.modal('handleUpdate');
+            }
+        },
+        error: function (result, bimpAjax) {
+            bimpAjax.$modal.find('.content-loading').hide();
+            bimpAjax.$modal.modal('handleUpdate');
+        }
+    });
+}
+
 function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title) {
     var $list = $('#' + list_id);
     if (!$list.length) {

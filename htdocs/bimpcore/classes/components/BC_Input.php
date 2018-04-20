@@ -333,4 +333,5 @@ class BC_Input extends BimpComponent
 
         return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $this->input_name, $this->value, $this->option);
     }
+    
 }

@@ -64,9 +64,9 @@ class BimpRender
     public static function renderButton($params, $tag = 'span')
     {
         $html = '<' . $tag . self::displayTagAttrs($params) . '>';
-        $html .= (isset($params['icon_before']) ? self::renderIcon($params['icon_before'], 'iconLeft') : '');
+        $html .= (isset($params['icon_before']) ? self::renderIcon($params['icon_before'], isset($params['label']) ? 'iconLeft' : '') : '');
         $html .= (isset($params['label']) ? $params['label'] : '');
-        $html .= (isset($params['icon_after']) ? self::renderIcon($params['icon_after'], 'iconRight') : '');
+        $html .= (isset($params['icon_after']) ? self::renderIcon($params['icon_after'], isset($params['label']) ? 'iconRight' : '') : '');
         $html .= '</' . $tag . '>';
         return $html;
     }

@@ -225,11 +225,11 @@ class BS_SAV extends BimpObject
                         );
                     }
 
-                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_EXAM_EN_COURS . ', 0)';
+                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_EXAM_EN_COURS . ', 0, {revision: 1})';
                     $buttons[] = array(
                         'label'   => 'Réviser le devis',
                         'icon'    => 'edit',
-                        'onclick' => ' '
+                        'onclick' => $onclick
                     );
                     break;
 
@@ -354,7 +354,7 @@ class BS_SAV extends BimpObject
         if ($this->isLoaded()) {
             $equipment = $this->getChildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
-                return $equipment->displayProduct();
+                return $equipment->displayProduct('default', true);
             }
         }
 
@@ -378,6 +378,24 @@ class BS_SAV extends BimpObject
         }
 
         return 0;
+    }
+
+    public function getListFilters()
+    {
+        $filters = array();
+        if (BimpTools::isSubmit('id_entrepot')) {
+            $entrepots = explode('-', BimpTools::getValue('id_entrepot'));
+
+            $filters[] = array('name'   => 'id_entrepot', 'filter' => array(
+                    'IN' => implode(',', $entrepots)
+            ));
+        }
+
+        if (BimpTools::isSubmit('status')) {
+            $filters[] = array('name' => 'status', 'filter' => (int) BimpTools::getValue('status'));
+        }
+
+        return $filters;
     }
 
     public function displayStatusWithActions()
@@ -549,6 +567,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                     include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
                     $factureA->generateDocument(self::$facture_model_pdf, $langs);
+                    $this->set('id_facture_acompte', $factureA->id);
 
                     link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
 
@@ -911,12 +930,12 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 break;
         }
 
-//        if (!count($errors)) {
-//            if ($extra_data['send_msg'] || $msg_type === 'commercialRefuse') {
-//                // todo: à retourner via $this->warnings. 
-//                $warnings = $this->sendMsg($msg_type);
-//            }
-//        }
+        if (!count($errors)) {
+            if ($extra_data['send_msg'] || $msg_type === 'commercialRefuse') {
+                // todo: à retourner via $this->warnings. 
+                $warnings = $this->sendMsg($msg_type);
+            }
+        }
 
         return $errors;
     }
@@ -998,22 +1017,28 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         $propal = $this->getChildObject('propal');
 
+        $tabFile = $tabFile2 = $tabFile3 = array();
+
         if (!is_null($propal)) {
             if ($propal->isLoaded()) {
-                $tabFilePc = $tabFilePc2 = $tabFilePc3 = array();
                 $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $this->getData('ref') . ".pdf";
                 if (is_file($fileProp)) {
-                    $tabFilePc[] = $fileProp;
-                    $tabFilePc2[] = ".pdf";
-                    $tabFilePc3[] = "PC-" . $this->getData('ref') . ".pdf";
+                    $tabFile[] = $fileProp;
+                    $tabFile2[] = ".pdf";
+                    $tabFile3[] = "PC-" . $this->getData('ref') . ".pdf";
                 }
 
-                $tabFileProp = $tabFileProp2 = $tabFileProp3 = array();
                 $fileProp = DOL_DATA_ROOT . "/propale/" . $propal->dol_object->ref . "/" . $propal->dol_object->ref . ".pdf";
                 if (is_file($fileProp)) {
-                    $tabFileProp[] = $fileProp;
-                    $tabFileProp2[] = ".pdf";
-                    $tabFileProp3[] = $propal->dol_object->ref . ".pdf";
+                    $tabFile[] = $fileProp;
+                    $tabFile2[] = ".pdf";
+                    $tabFile3[] = $propal->dol_object->ref . ".pdf";
+
+//                    echo '<pre>';
+//                    print_r($tabFileProp);
+//                    print_r($tabFileProp2);
+//                    print_r($tabFileProp3);
+//                    exit;
                 }
             } else {
                 unset($propal);
@@ -1040,7 +1065,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             }
         }
 
-        $subjet = '';
+        $subject = '';
         $mail_msg = '';
         $sms = '';
         $nomMachine = $this->getNomMachine();
@@ -1061,6 +1086,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         switch ($msg_type) {
             case 'Facture':
                 $facture = null;
+                $tabFile = $tabFile2 = $tabFile3 = array();
                 if ((int) $this->getData('id_facture')) {
                     $facture = (int) $this->getChildObject('facture');
                 } elseif (!is_null($propal)) {
@@ -1075,19 +1101,21 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 if (!is_null($facture)) {
                     $fileProp = DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf";
                     if (is_file($fileProp)) {
-                        $tabFileFact[] = $fileProp;
-                        $tabFileFact2[] = ".pdf";
-                        $tabFileFact3[] = $facture->ref . ".pdf";
+                        $tabFile[] = $fileProp;
+                        $tabFile2[] = ".pdf";
+                        $tabFile3[] = $facture->ref . ".pdf";
                     }
+                } else {
+                    $errors[] = $error_msg . ' - Fichier PDF de la facture absent';
                 }
-                $subjet = "Fermeture du dossier " . $this->getData('ref');
+                $subject = "Fermeture du dossier " . $this->getData('ref');
                 $mail_msg = 'Nous vous remercions d\'avoir choisi Bimp pour votre ' . $nomMachine . "\n";
                 $mail_msg .= 'Dans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d\'APPLE, votre retour est important afin d\'améliorer la qualité de notre Centre de Services.' . "\n";
                 break;
 
             case 'Devis':
                 if (!is_null($propal)) {
-                    $subjet = 'Devis ' . $this->getData('ref');
+                    $subject = 'Devis ' . $this->getData('ref');
                     $mail_msg = "Voici le devis pour la réparation de votre '" . $nomMachine . "'.\n";
                     $mail_msg .= "Veuillez nous communiquer votre accord ou votre refus par retour de ce Mail.\n";
                     $mail_msg .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
@@ -1171,16 +1199,13 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $errors[] = $error_msg . ' (E-mail du client absent)';
             }
 
-            $toMail = 'f.martinez@bimp.fr';
-            $fromMail = 'f-martinez@laposte.net';
-
             if ($tech) {
                 $mail_msg .= "\n" . "Technicien en charge de la réparation : " . $tech;
             }
 
             $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
-            if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFilePc, $tabFilePc2, $tabFilePc3)) {
+            if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
                 $errors[] = 'Echec envoi du mail';
             }
         } else {
@@ -1250,7 +1275,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         require_once DOL_DOCUMENT_ROOT . "/bimpsupport/core/modules/bimpsupport/modules_bimpsupport.php";
-        
+
         $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type);
 
         if (!count($errors)) {

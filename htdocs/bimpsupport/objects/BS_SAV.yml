@@ -1,6 +1,12 @@
 table: bs_sav
 controller: sav
 
+list_page_url: 
+    controller: index
+    url_params: 
+        tab: sav
+        id_entrepot: 
+            field_value: id_entrepot
 labels:
     name: sav
     name_plur: sav
@@ -94,6 +100,25 @@ objects:
         cards: 
             default: 
                 type: facture_card
+                
+    facture_acompte: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Facture
+            id_object: 
+                field_value: id_facture_acompte
+        cards: 
+            default: 
+                type: facture_card
+            
+    apple_parts: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BS_ApplePart
             
 fields: 
     ref:
@@ -128,13 +153,15 @@ fields:
                 field_return_label: e.serial
                 fields_search: e.serial,e.id
             help: Numéro de série ou ID d'un équipement
-        create_form: default
+        create_form: light
     id_entrepot:
         label: Centre
         type: id_object
         object: entrepot
         input: 
             type: search_entrepot    
+        default_value: 
+            request: id_entrepot
     id_user_tech: 
         label: Technicien
         type: id_object
@@ -156,7 +183,7 @@ fields:
             input: 
                 type: search_societe
                 societe_type: customer    
-                
+        create_form: client_light
     id_contact:
         label: Contact
         type: id_object
@@ -175,7 +202,12 @@ fields:
                     field_return_value: rowid
                     field_return_label: lastname,firstname
                     fields_search: lastname,firstname
-                    label_syntaxe: <label_1> <label_2>               
+                    label_syntaxe: <label_1> <label_2>    
+        create_form: default
+        create_form_values:
+            fields: 
+                fk_soc: 
+                    field_value: id_client
     id_contrat:
         label: Contrat
         type: id_object
@@ -200,6 +232,10 @@ fields:
             field_name: id_client
             hide_values: 0,
         depends_on: id_client
+    id_facture_acompte:
+        label: Facture d'acompte
+        type: id_object
+        object: facture_acompte
     id_facture: 
         label: Facture
         type: id_object
@@ -285,6 +321,8 @@ forms:
     default:
         rows: 
             - field: id_entrepot
+              value: 
+                  request: id_entrepot
             - field: id_client
             - field: id_contact
             - field: id_equipment
@@ -400,6 +438,7 @@ forms:
               input_name: recontact
               input: 
                   type: hidden
+              value: 1
             - custom: 1
               label: Notification
               input_name: msg_type
@@ -436,6 +475,10 @@ fields_tables:
               edit: 1
             - field: id_propal
               display: card
+            - field: id_facture_acompte
+              display: card
+              show: 
+                  field_value: id_facture_acompte
             - field: id_facture
               display: card
               show: 
@@ -449,11 +492,15 @@ fields_tables:
         rows:
             - field: id_contrat
               display: card
+              show: 
+                  field_value: id_contrat
             - label: Client
               field: id_client
               display: card
             - field: id_contact
               display: card
+              show: 
+                  field_value: id_contact
             - field: contact_pref
               edit: 1
               
@@ -498,25 +545,23 @@ views:
 #            callback: getViewExtraBtn
         rows:
             - cols: 
-                  - type: rows
+                  - type: fields_table
                     col_lg: 6
                     col_md: 6
-                    rows: 
-                        - cols:
-                            - type: object_common_fields
-                              col_lg: 12
-                        - cols:
-                            - type: fields_table
-                              col_lg: 12
-                              fields_table: 
-                                  name: infos
+                    fields_table: 
+                        name: infos
+                              
                   
                   - type: fields_table
                     col_lg: 6
                     col_md: 6
                     fields_table:
                         name: client
-                        
+    materiel:
+        panel: 0
+#        footer_extra_btn:
+#            callback: getViewExtraBtn
+        rows:    
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -538,6 +583,8 @@ lists:
             - label: supprimer les SAV sélectionnés
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
         sort_field: date_create
         sort_way: desc
         n: 10

@@ -205,6 +205,15 @@ div.alert {
     }
 }
 
+.dropdown-title {
+    display: block;
+    margin: 10px 0;
+    padding: 0 10px 10px 10px;
+    border-bottom: 1px solid $gray;
+    color: $gray-darker;
+    font-weight: bold;
+    font-size: 12px;
+}
 /*Objects Components*/
 
 .object_component {

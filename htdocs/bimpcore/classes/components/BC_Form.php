@@ -74,8 +74,8 @@ class BC_Form extends BC_Panel
             }
         }
 
-        if (!is_null($id_parent) && !is_null($object)) {
-            $object->setIdParent($id_parent);
+        if (!is_null($this->id_parent) && $this->id_parent && !is_null($object)) {
+            $object->setIdParent($this->id_parent);
         }
 
         if (!is_null($on_save)) {
@@ -83,10 +83,6 @@ class BC_Form extends BC_Panel
         }
 
         parent::__construct($object, $name, $path, $content_only, $level, $title, 'edit');
-
-        if (!is_null($this->id_parent)) {
-            $this->data['id_parent'] = $this->id_parent;
-        }
 
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
@@ -102,6 +98,15 @@ class BC_Form extends BC_Panel
             }
         }
 
+        // $id_parent a pu être fourni via params['values']. 
+        if (!is_null($object)) {
+            $this->id_parent = (int) $object->getParentId();
+        }
+        
+        if (!is_null($this->id_parent)) {
+            $this->data['id_parent'] = (int) $this->id_parent;
+        }
+        
         $this->data['on_save'] = $this->params['on_save'];
     }
 
@@ -140,7 +145,7 @@ class BC_Form extends BC_Panel
         $html .= '<input type="hidden" name="object_name" value="' . $this->object->object_name . '"/>';
         $html .= '<input type="hidden" name="id_object" value="' . ((isset($this->object->id) && $this->object->id) ? $this->object->id : 0) . '"/>';
 
-        if (!is_null($parent_id_property) && !is_null($this->id_parent)) {
+        if (!is_null($parent_id_property)) {
             $html .= '<input type="hidden" name="' . $parent_id_property . '" value="' . $this->id_parent . '"/>';
         }
 
@@ -227,11 +232,11 @@ class BC_Form extends BC_Panel
             $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
             $form_values = ($params['create_form_values'] ? $params['create_form_values'] : ($field->params['create_form_values'] ? $field->params['create_form_values'] : ''));
             if ($form_name) {
-                $html .= $this->renderCreateObjectButton($field->params['object'], $field->name, $form_name, $form_values);
+                $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $field->name, $form_name, $form_values);
             }
         }
-
         $html .= $field->renderHtml();
+
         $html .= '</div>';
 
         $html .= '</div>';
@@ -299,7 +304,7 @@ class BC_Form extends BC_Panel
                     $form_name = ($params['create_form'] ? $params['create_form'] : $this->object->getConf('associations/' . $params['association'] . '/create_form', ''));
                     if ($form_name) {
 //                        $html .= $this->renderCreateObjectButton('', $input_name . '_search', $form_name, false, $associate);
-                        $html .= $this->renderCreateObjectButton('', '', $form_name, null, false, $associate);
+                        $html .= $this->renderCreateObjectButton($this->object, $this->identifier, '', '', $form_name, null, false, $associate);
                     }
                 }
 
@@ -408,14 +413,14 @@ class BC_Form extends BC_Panel
         return $html;
     }
 
-    public function renderCreateObjectButton($object_name, $result_input_name, $form_name, $form_values = null, $reload_input = true, $object = null, $successcallBack = '')
+    public static function renderCreateObjectButton(BimpObject $parent, $parent_form_id, $object_name, $result_input_name, $form_name, $form_values = null, $reload_input = true, $object = null, $successcallBack = '')
     {
         if (!$form_name) {
             return '';
         }
 
         if (is_null($object) && $object_name) {
-            $object = $this->object->config->getObject('', $object_name);
+            $object = $parent->config->getObject('', $object_name);
         }
 
         if (is_null($object) || !is_a($object, 'BimpObject')) {
@@ -425,8 +430,8 @@ class BC_Form extends BC_Panel
         $label = 'Créer ' . $object->getLabel('a');
         $title = 'Ajout ' . addslashes($object->getLabel('of_a'));
 
-        if ($this->object->isLoaded() && $object->getParentObjectName() === $this->object->object_name) {
-            $id_parent = $this->object->id;
+        if ($parent->isLoaded() && $object->getParentObjectName() === $parent->object_name) {
+            $id_parent = $parent->id;
         } else {
             $id_parent = 0;
         }
@@ -435,7 +440,7 @@ class BC_Form extends BC_Panel
 
         $html .= '<div style="text-align: right">';
 
-        $onclick = '\'' . $title . '\', \'' . $result_input_name . '\', \'' . $this->identifier . '\'';
+        $onclick = '\'' . $title . '\', \'' . $result_input_name . '\', \'' . $parent_form_id . '\'';
         $onclick .= ', \'' . $object->module . '\', \'' . $object->object_name . '\'';
         $onclick .= ', \'' . $form_name . '\', ' . $id_parent;
         $onclick .= ', ' . ($reload_input ? 'true' : 'false');

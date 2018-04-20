@@ -1,0 +1,28 @@
+table: bs_sav_product
+common_fields: 0
+
+parent_object: BS_SAV
+parent_id_property: id_sav
+
+labels: 
+    name: produit / service
+    name_plur: produits / services
+    
+fields: 
+    id_sav: 
+        label: SAV
+        type: id_parent
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        input: 
+            type: search_product
+        required: 1
+    qty: 
+        label: Quantité
+        type: int
+        unsigned: 1
+        min: 1
+        default_value: 1
+    

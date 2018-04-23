@@ -64,6 +64,10 @@ function getTabTypeObject($typeFiltre = null) {
         'commandeFournisseur' => array('urls' => array("fourn/commande/card.php"),
             'path' => '/fourn/class/fournisseur.commande.class.php',
             'obj' => 'CommandeFournisseur'),
+        'BS_SAV' => array('urls' => array("bimpsupport/index.php?fc=sav"),
+            'path' => '/bimpsupport/objects/BS_SAV.class.php'),
+        'Equipment' => array('urls' => array("bimpequipment/index.php?fc=equipment"),
+            'path' => '/bimpequipment/objects/Equipment.class.php'),
     );
 
     $tabTypeObject2 = array();

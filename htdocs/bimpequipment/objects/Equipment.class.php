@@ -1,4 +1,5 @@
 <?php
+require_once DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php";
 
 class Equipment extends BimpObject
 {
@@ -23,6 +24,16 @@ class Equipment extends BimpObject
         3 => 'Commande Fournisseur'
     );
     protected $current_place = null;
+    
+    public function __construct($db){
+        parent::__construct("bimpequipment", get_class($this));
+    }
+    public function getNomUrl($withpicto = true){
+        return "<a href='".$this->getUrl()."'>".'<span><i class="fa fa-laptop iconLeft"></i>'.$this->ref.'</span></a>';
+    }
+    public function getRef(){
+        return $this->data["serial"];
+    }
 
     public function equipmentExists($serial, $id_product)
     {

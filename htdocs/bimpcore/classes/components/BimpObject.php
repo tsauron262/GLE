@@ -8,6 +8,7 @@ class BimpObject
     public $object_name = '';
     public $config = null;
     public $id = null;
+    public $ref = "";
     public static $status_list = array();
     public static $common_fields = array(
         'id',
@@ -47,6 +48,11 @@ class BimpObject
     protected $history = array();
     protected $parent = null;
     public $dol_object = null;
+    
+    
+    public function getRef(){
+        return get_class($this)."_".$this->id;
+    }
 
     public static function getInstance($module, $object_name, $id_object = null)
     {
@@ -1488,6 +1494,7 @@ class BimpObject
                     $this->data[$field] = $value;
                 }
             }
+            $this->ref = $this->getRef();
             return true;
         }
         return false;

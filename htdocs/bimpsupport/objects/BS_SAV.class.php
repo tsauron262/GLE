@@ -1,4 +1,5 @@
 <?php
+require_once DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php";
 
 class BS_SAV extends BimpObject
 {
@@ -17,6 +18,18 @@ class BS_SAV extends BimpObject
     const BS_SAV_DEVIS_REFUSE = 6;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
+    
+    
+    public function __construct($db){
+        parent::__construct("bimpsupport", get_class($this));
+    }
+    public function getNomUrl($withpicto = true){
+        $statut = self::$status_list[$this->data["status"]];
+        return "<a href='".$this->getUrl()."'>".'<span class="'.implode(" ", $statut['classes']).'"><i class="fa fa-'.$statut['icon'].' iconLeft"></i>'.$this->ref.'</span></a>';
+    }
+    public function getRef(){
+        return $this->data["ref"];
+    }
 
     public static $status_list = array(
         self::BS_SAV_NEW           => array('label' => 'Nouveau', 'icon' => 'file-o', 'classes' => array('info')),

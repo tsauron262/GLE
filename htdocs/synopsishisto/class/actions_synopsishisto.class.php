@@ -196,20 +196,20 @@ class histoNavigation {
         if (isset($tabTypeObject[$type])) {
             $data = $tabTypeObject[$type];
             if(is_file(DOL_DOCUMENT_ROOT . $data['path'])){
-            require_once DOL_DOCUMENT_ROOT . $data['path'];
-            $nomObj = $data['obj'];
-            if(class_exists($nomObj)){
-                $obj = new $nomObj($db);
-                if(!method_exists($obj, "getNomUrl")){
-                    dol_syslog("Pas de methode getNomUrl dans la class ".$nomObj,3);
-                    $obj = false;
+                require_once DOL_DOCUMENT_ROOT . $data['path'];
+                $nomObj = $data['obj'];
+                if(class_exists($nomObj)){
+                    $obj = new $nomObj($db);
+                    if(!method_exists($obj, "getNomUrl")){
+                        dol_syslog("Pas de methode getNomUrl dans la class ".$nomObj,3);
+                        $obj = false;
+                    }
                 }
-            }
-            else{
-                dol_syslog("Impossible de charger l'object ".$nomObj,3);
-            }
-            $tabMenu[0] = $data['tabMenu1'];
-            $tabMenu[1] = $data['tabMenu2'];
+                else{
+                    dol_syslog("Impossible de charger l'object ".$nomObj,3);
+                }
+                $tabMenu[0] = $data['tabMenu1'];
+                $tabMenu[1] = $data['tabMenu2'];
             }
             else
                 dol_syslog("Impossible de chargger le fichier ".DOL_DOCUMENT_ROOT . $data['path'],3);

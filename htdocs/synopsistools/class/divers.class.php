@@ -24,6 +24,8 @@ class synopsisHook {//FA1506-0369
 
         if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;
+        
+        ini_set("soap.wsdl_cache_limit", "30");
 
 
 

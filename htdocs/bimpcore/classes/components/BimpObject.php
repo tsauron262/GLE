@@ -50,8 +50,17 @@ class BimpObject
     public $dol_object = null;
     
     
-    public function getRef(){
-        return get_class($this)."_".$this->id;
+    public function getRef($withGenrique = true){
+        if($this->field_exists("ref"))
+            return $this->getData("ref");
+        elseif($this->field_exists("reference"))
+            return $this->getData("reference");
+        elseif($withGenrique)
+            return get_class($this)."_".$this->id;
+    }
+    
+    public function getNomUrl($withpicto = true){
+        return "<a href='".$this->getInstanceUrl($this)."'><span>".($withpicto ? '<i class="fa '.$this->iconeDef.' iconLeft"></i>' : '').$this->ref.'</span></a>';
     }
 
     public static function getInstance($module, $object_name, $id_object = null)

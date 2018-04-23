@@ -24,11 +24,8 @@ class BS_SAV extends BimpObject
         parent::__construct("bimpsupport", get_class($this));
     }
     public function getNomUrl($withpicto = true){
-        $statut = self::$status_list[$this->data["status"]];
-        return "<a href='".$this->getUrl()."'>".'<span class="'.implode(" ", $statut['classes']).'"><i class="fa fa-'.$statut['icon'].' iconLeft"></i>'.$this->ref.'</span></a>';
-    }
-    public function getRef(){
-        return $this->data["ref"];
+        $statut = self::$status_list[$this->getData("status")];
+        return "<a href='".$this->getInstanceUrl($this)."'>".'<span class="'.implode(" ", $statut['classes']).'"><i class="fa fa-'.$statut['icon'].' iconLeft"></i>'.$this->ref.'</span></a>';
     }
 
     public static $status_list = array(

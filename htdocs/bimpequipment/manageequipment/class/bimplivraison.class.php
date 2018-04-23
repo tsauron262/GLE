@@ -234,7 +234,7 @@ class BimpLivraison {
             'admin_pword' => '',
             'prix_achat' => $price,
             'note' => '',
-            'origin_element' => 'order_supplier',
+            'origin_element' => 3,
             'origin_id_element' => $this->commande->id
         ));
 

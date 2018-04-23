@@ -463,7 +463,7 @@ if (is_dir($dir)) {
                                             case 'TaxTaux': {
                                                     $val2 = preg_replace('/,/', '.', $val2);
                                                     if ($val2 . "x" == "x")
-                                                        $val2 = "19.6";
+                                                        $val2 = "0";
                                                 }
                                                 break;
                                             default: {

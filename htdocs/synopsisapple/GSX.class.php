@@ -454,6 +454,8 @@ class GSX
         }
         $typeCertif = ($this->apiMode == 'ut') ? 0 : 1;
         $certif = $tabCert[$soldTo][$typeCertif];
+        
+        ini_set("soap.wsdl_cache_limit", "30");
 
 
         $connectionOptions = array(

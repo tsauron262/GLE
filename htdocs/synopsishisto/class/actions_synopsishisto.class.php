@@ -94,7 +94,9 @@ class histoNavigation {
         global $db, $user, $conf, $langs;
         $langs->load("histo@synopsishisto");
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
-        $return = '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
+        $return = '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/bimpcore/views/css/bimpcore_bootstrap_new.css">';
+        
+        $return .= '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
         $return .= '<div class="menu_titre">';
         $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTONAV") . '</a>';
         $return .= "</div>";

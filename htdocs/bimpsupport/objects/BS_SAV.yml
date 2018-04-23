@@ -120,6 +120,12 @@ objects:
         instance: 
             bimp_object: BS_ApplePart
             
+    products: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BS_SavProduct
+            
 fields: 
     ref:
         label: Référence

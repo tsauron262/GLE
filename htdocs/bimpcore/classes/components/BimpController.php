@@ -1387,6 +1387,46 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
+    
+    protected function ajaxProcessSetObjectAction()
+    {
+        $errors = array();
+        $success = '';
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name', '');
+        $id_object = (int) BimpTools::getValue('id_object', 0);
+
+        $object_action = BimpTools::getValue('object_action');
+        $extra_data = BimpTools::getValue('extra_data', array());
+
+        if (!$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+
+        if (is_null($object_action)) {
+            $errors[] = 'Type d\'action absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name, $id_object);
+            if (is_null($object) || !$object->isLoaded()) {
+                $errors[] = 'ID de l\'objet invalide';
+            } else {
+                $errors = $object->setObjectAction($object_action, $extra_data, $success);
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => $success,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
 
     // Callbacks: 
 

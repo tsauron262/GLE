@@ -12,11 +12,6 @@ class Equipment extends BimpObject
         5 => 'Matériel réseau',
         6 => 'Autre'
     );
-    public static $warranty_types = array(
-        0 => ' - ',
-        1 => 'Type 1',
-        2 => 'Type 2'
-    );
     public static $origin_elements = array(
         0 => '',
         1 => 'Fournisseur',

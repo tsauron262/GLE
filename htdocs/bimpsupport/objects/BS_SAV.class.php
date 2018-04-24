@@ -1,5 +1,7 @@
 <?php
-require_once DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php";
+
+require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
+require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 
 class BS_SAV extends BimpObject
 {
@@ -18,15 +20,6 @@ class BS_SAV extends BimpObject
     const BS_SAV_DEVIS_REFUSE = 6;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
-    
-    
-    public function __construct($db){
-        parent::__construct("bimpsupport", get_class($this));
-    }
-    public function getNomUrl($withpicto = true){
-        $statut = self::$status_list[$this->getData("status")];
-        return "<a href='".$this->getInstanceUrl($this)."'>".'<span class="'.implode(" ", $statut['classes']).'"><i class="fa fa-'.$statut['icon'].' iconLeft"></i>'.$this->ref.'</span></a>';
-    }
 
     public static $status_list = array(
         self::BS_SAV_NEW           => array('label' => 'Nouveau', 'icon' => 'file-o', 'classes' => array('info')),
@@ -62,6 +55,21 @@ class BS_SAV extends BimpObject
         2 => array('label' => 'Bon état général', 'classes' => array('info')),
         3 => array('label' => 'Usagé', 'classes' => array('warning'))
     );
+
+    public function __construct($db)
+    {
+        parent::__construct("bimpsupport", get_class($this));
+    }
+
+    public function getNomUrl($withpicto = true)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $statut = self::$status_list[$this->data["status"]];
+        return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->ref . '</span></a>';
+    }
 
     public function getClient_contactsArray()
     {
@@ -125,6 +133,19 @@ class BS_SAV extends BimpObject
         }
 
         return $propals;
+    }
+
+    public function getCentresArray()
+    {
+        global $tabCentre;
+
+        $centres = array();
+
+        foreach ($tabCentre as $code => $centre) {
+            $centres[$code] = $centre[2];
+        }
+
+        return $centres;
     }
 
     public function getViewExtraBtn()
@@ -287,13 +308,13 @@ class BS_SAV extends BimpObject
             }
         }
 
-        $object_data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: \'' . $this->id . '\'}';
-        $onclick = 'setObjectAction($(this), '.$object_data.', \'testAction\', {test: 1}, \'restitute\')';
-        $buttons[] = array(
-            'label'   => 'Test action',
-            'icon'    => 'file-text',
-            'onclick' => $onclick
-        );
+//        $object_data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: \'' . $this->id . '\'}';
+//        $onclick = 'setObjectAction($(this), ' . $object_data . ', \'testAction\', {test: 1}, \'restitute\')';
+//        $buttons[] = array(
+//            'label'   => 'Test action',
+//            'icon'    => 'file-text',
+//            'onclick' => $onclick
+//        );
 
         return $buttons;
     }
@@ -352,26 +373,25 @@ class BS_SAV extends BimpObject
         return $buttons;
     }
 
-    public function getCodeEntrepot()
+    public function getCentreData()
     {
-        $id_entrepot = (int) $this->getData('id_entrepot');
-        if (!$id_entrepot) {
-            $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
-        }
+        if ($code_centre = (string) $this->getData('code_centre')) {
+            global $tabCentre;
 
-        $code_entrepot = '';
-        if ($id_entrepot) {
-            $code_entrepot = $this->db->getValue('entrepot', 'label', '`rowid` = ' . (int) $id_entrepot);
-            if ($code_entrepot) {
-                $code_entrepot = preg_replace('/^SAV(.+)$/', '$1', $code_entrepot);
-
-                if ($code_entrepot === 'CF') {
-                    $code_entrepot = 'CFC';
-                }
+            if (isset($tabCentre[$code_centre])) {
+                return array(
+                    'tel'         => $tabCentre[$code_centre][0],
+                    'mail'        => $tabCentre[$code_centre][1],
+                    'label'       => $tabCentre[$code_centre][2],
+                    'zip'         => $tabCentre[$code_centre][5],
+                    'town'        => $tabCentre[$code_centre][6],
+                    'address'     => $tabCentre[$code_centre][7],
+                    'id_entrepot' => $tabCentre[$code_centre][8]
+                );
             }
         }
 
-        return $code_entrepot;
+        return null;
     }
 
     public function getNomMachine()
@@ -413,6 +433,14 @@ class BS_SAV extends BimpObject
 
             $filters[] = array('name'   => 'id_entrepot', 'filter' => array(
                     'IN' => implode(',', $entrepots)
+            ));
+        }
+        
+        if (BimpTools::isSubmit('code_centre')) {
+            $codes = explode('-', BimpTools::getValue('code_centre'));
+
+            $filters[] = array('name'   => 'code_centre', 'filter' => array(
+                    'IN' => implode(',', $codes)
             ));
         }
 
@@ -964,14 +992,19 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         return $errors;
     }
 
-    // Action: 
-    
+    // Action:
     // Overrides: 
-    
+
     public function create()
     {
         if($this->getData('ref') == '')
             $this->data['ref'] = $this->getNextNumRef();
+
+        $centre = $this->getCentreData();
+        if (!is_null($centre)) {
+            $this->set('id_entrepot', (int) $centre['id_entrepot']);
+        }
+
         $errors = parent::create();
 
         if (!count($errors) && $this->getData("id_propal") < 1) {
@@ -982,6 +1015,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     public function update()
     {
         $errors = array();
+
+        $centre = $this->getCentreData();
+        if (!is_null($centre)) {
+            $this->set('id_entrepot', (int) $centre['id_entrepot']);
+        }
 
         if ((int) BimpTools::getValue('restitute', 0)) {
             $_POST['restitute'] = 0;
@@ -1041,6 +1079,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             return array($error_msg . ' (ID du client absent)');
         }
 
+        $centre = $this->getCentreData();
+        if (is_null($centre)) {
+            return array($error_msg . ' - Centre absent');
+        }
+
 //    $signature = '<div id="signature_Bimp"><div style="font-family: Arial, sans-serif; font-size: 13px;"><div style="margin: 0 0 8px 0;"><table border="0"><tbody><tr valign="middle"><td><a href="http://www.bimp.fr/" target="_blank"><img alt="" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/bimpcomputer.png"></a></td><td style="text-align: left;"><span style="font-size: large;"><span style="color: #181818;"><strong class="text-color theme-font">BIMP SAV</strong><span style="color: #181818;"> </span></span></span><br><div style="margin-bottom: 0px; margin-top: 8px;"><span style="font-size: medium;"><span style="color: #cb6c09;"></span></span></div><div style="margin-bottom: 0px; margin-top: 0px;"><span style="font-size: medium;"><span style="color: #808080;">Centre de Services Agrées Apple</span></span></div><div style="color: #828282; font: 13px Arial; margin-top: 10px; text-transform: none;"><a href="https://plus.google.com/+BimpFr/posts" style="text-decoration: underline;"><img alt="Google Plus Page" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/googlepluspage.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="https://twitter.com/BimpComputer" style="text-decoration: underline;"><img alt="Twitter" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/twitter.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="https://www.linkedin.com/company/bimp" style="text-decoration: underline;"><img alt="LinkedIn" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/linkedin.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="http://www.viadeo.com/fr/company/bimp" style="text-decoration: underline;"><img alt="Viadeo" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/viadeo.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a> <a href="https://www.facebook.com/bimpcomputer" style="text-decoration: underline;"><img alt="Facebook" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/facebook.png" style="padding: 0px 0px 5px 0px; vertical-align: middle;" height="16" border="0" width="16"></a><br></div></td></tr></tbody></table><table border="0"><tbody><tr valign="middle"><td><a href="http://bit.ly/1MsmSB8"><img moz-do-not-send="true" src="http://www.bimp.fr/emailing/signatures/evenementiel2.png" alt=""></td></tr></tbody></table><table border="0"><tbody><tr valign="middle"><td><img alt="" moz-do-not-send="true" src="http://bimp.fr/emailing/signatures/pictoarbre.png"></td><td style="text-align: left;"><span style="font-size: small;"><span style="color: #009933;"> Merci de n\'imprimer cet e-mail que si nécessaire</span></span></td></tr></tbody></table><table border="0"><tbody><tr valign="middle"><td style="text-align: justify;"><span style="font-size: small;"><span style="color: #888888;"><small>Ce message et éventuellement les pièces jointes, sont exclusivement transmis à l\'usage de leur destinataire et leur contenu est strictement confidentiel. Une quelconque copie, retransmission, diffusion ou autre usage, ainsi que toute utilisation par des personnes physiques ou morales ou entités autres que le destinataire sont formellement interdits. Si vous recevez ce message par erreur, merci de le détruire et d\'en avertir immédiatement l\'expéditeur. L\'Internet ne permettant pas d\'assurer l\'intégrité de ce message, l\'expéditeur décline toute responsabilité au cas où il aurait été intercepté ou modifié par quiconque.<br> This electronic message and possibly any attachment are transmitted for the exclusive use of their addressee; their content is strictly confidential. Any copy, forward, release or any other use, is prohibited, as well as any use by any unauthorized individual or legal entity. Should you receive this message by mistake, please delete it and notify the sender at once. Because of the nature of the Internet the sender is not in a position to ensure the integrity of this message, therefore the sender disclaims any liability whatsoever, in the event of this message having been intercepted and/or altered.</small></span> </span></td></tr></tbody></table></div></div></div>';
         $signature = file_get_contents("http://bimp.fr/emailing/signatures/signevenementiel2.php?prenomnom=BIMP%20SAV&adresse=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple");
 
@@ -1062,12 +1105,6 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     $tabFile[] = $fileProp;
                     $tabFile2[] = ".pdf";
                     $tabFile3[] = $propal->dol_object->ref . ".pdf";
-
-//                    echo '<pre>';
-//                    print_r($tabFileProp);
-//                    print_r($tabFileProp2);
-//                    print_r($tabFileProp3);
-//                    exit;
                 }
             } else {
                 unset($propal);
@@ -1098,19 +1135,9 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         $mail_msg = '';
         $sms = '';
         $nomMachine = $this->getNomMachine();
-        $tabFileFact = $tabFileFact2 = $tabFileFact3 = array();
-        $nomCentre = 'N/C';
-        $tel = 'N/C';
-        $fromMail = "SAV BIMP<no-replay@bimp.fr>";
-
-        $code_entrepot = $this->getCodeEntrepot();
-        if ($code_entrepot) {
-            if (isset($tabCentre[$code_entrepot])) {
-                $nomCentre = $tabCentre[$code_entrepot][2];
-                $tel = $tabCentre[$code_entrepot][0];
-                $fromMail = "SAV BIMP<" . $tabCentre[$code_entrepot][1] . ">";
-            }
-        }
+        $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
+        $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
+        $fromMail = "SAV BIMP<" . ($centre['mail'] ? $centre['mail'] : 'no-replay@bimp.fr') . ">";
 
         switch ($msg_type) {
             case 'Facture':
@@ -1287,9 +1314,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         $mask = self::$ref_model;
 
-
-
-        $mask = str_replace('{CENTRE}', $this->getCodeEntrepot(), $mask);
+        $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre'), $mask);
 
         return($tmp->getNextValue($objsoc, $this, $mask));
     }

@@ -12,15 +12,15 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "C" => array("03 44 200 200", "sav60@bimp.fr", "Compiegne", 106, "1040727", "60200", "Compiègne", "10 rue de l’étoile",30),
     "MA" => array("04 96 11 29 40", "sav13@bimp.fr", "Marseille", 116, "1046076", "13011", "Marseille", "Route de la Sablière",32),
     "AB" => array("04 50 22 15 55", "sav74@bimp.fr", "Annecy Boutique", 60, "1046075", "74000", "Annecy", "7 rue de la poste",21),
-    "CFC" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
-    "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
+    "CFC" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue", 35),
+    "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue", 35),
     
     "P" => array("09 71 002 450", "sav66@bimp.fr", "Perpignan", 215, "1187559", "66000", "Perpignan", "9 Boulevard Georges Clemenceau",40),
     "N" => array("04 66 842 974", "sav30@bimp.fr", "Nîmes", 217, "1187562", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet",39),
     "MONTP" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem",38),
     "MAU" => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck",37),
     
-    "BB" => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1046075", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire")
+    "BB" => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1046075", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire", 1)
     
     );
 

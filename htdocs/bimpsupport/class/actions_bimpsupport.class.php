@@ -74,7 +74,7 @@ class ActionsBimpsupport {
 //        $groupSav = new UserGroup($db);
 //        $groupSav->fetch('', "XX SAV");
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
-            $hrefFin = "#sav";
+            $hrefFin = "";
             $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
             $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
             $return .= '<div class="menu_contenu">';
@@ -84,20 +84,21 @@ class ActionsBimpsupport {
             
 
             require_once DOL_DOCUMENT_ROOT.'/bimpsupport/centre.inc.php';
+            global $tabCentre;
             if($user->array_options['options_apple_centre'] == ""){//Ajout de tous les centre
                 $centreUser = array();
                 foreach($tabCentre as $idT2 => $tabCT)
-                    if(is_int($idT2))
-                        $centreUser[] = $idT2;
+                    $centreUser[] = $idT2;
             }
             else{
                 $centreUser = explode(" ", $user->array_options['options_apple_centre']);//Transforme lettre centre en id centre
-                foreach($centreUser as $idT=> $CT){
+                foreach($centreUser as $idT=> $CT){//Va devenir inutille
                     foreach($tabCentre as $idT2 => $tabCT)
                         if($tabCT[8] == $CT)
                             $centreUser[$idT] = $idT2;
                 }
             }
+            
             
 
 
@@ -109,27 +110,29 @@ class ActionsBimpsupport {
                     $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
             }
             $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(id) as nb, id_entrepot as CentreVal, status as EtatVal FROM `".MAIN_DB_PREFIX."bs_sav` WHERE 1 ".(count($centreUser)>0 ? "AND id_entrepot IN ('".implode($centreUser, "','")."')" : "")." GROUP BY id_entrepot, status");
+            $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `".MAIN_DB_PREFIX."bs_sav` WHERE 1 ".(count($centreUser)>0 ? "AND code_centre IN ('".implode($centreUser, "','")."')" : "")." GROUP BY code_centre, status");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                 if (!isset($tabResult['Tous'][$ligne2->EtatVal]))
                     $tabResult['Tous'][$ligne2->EtatVal] = 0;
                 $tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
             }
-
+            require_once DOL_DOCUMENT_ROOT."/bimpsupport/objects/BS_SAV.class.php";
+            $tabStatutSav = BS_SAV::$status_list;
+            
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur'];
-                $href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&id_entrepot=' . $ligne3['forUrl'] : "");
+                $href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&code_centre=' . $ligne3['forUrl'] : "");
                 $return .= '<div class="menu_contenu ' . ($ligne3['valeur'] != "Tous" ? 'menu_contenueCache2' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
-                foreach($tabStatutSav as $idStat => $labelStat){
+                foreach($tabStatutSav as $idStat => $tabStat){
                     $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     if ($nb == "")
                         $nb = "0";
                     $nbStr = ($nb < 10 ? "&nbsp;&nbsp;" . $nb : ($nb < 100 ? "&nbsp;" . $nb : $nb));
-                    $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . " : " . $labelStat . "</a>";
+                    $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . " : " . $tabStat['label'] . "</a>";
                     $return .= "</span><br/>";
                 }
                 $return .= '</div>';

@@ -4,13 +4,13 @@ class Tariff {
 
     public $errors;
     private $db;
-    private $id;
-    private $label;
-    private $date_creation;
-    private $price;
+    public $id;
+    public $label;
+    public $date_creation;
+    public $price;
     private $fk_event;
-    private $date_start;
-    private $date_end;
+    public $date_start;
+    public $date_end;
 
     public function __construct($db) {
         $this->db = $db;
@@ -24,7 +24,7 @@ class Tariff {
             return false;
         }
 
-        $sql = 'SELECT id, label, date_creation, price, fk_event, date_start, date_end';
+        $sql = 'SELECT label, date_creation, date_start, date_end, price, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, id_prod_extern, fk_event';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
@@ -32,13 +32,25 @@ class Tariff {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $this->id = $id;
+                $this->id = intVal($id);
                 $this->label = $obj->label;
                 $this->date_creation = $obj->date_creation;
-                $this->price = $obj->price;
+                $this->price = floatVal($obj->price);
                 $this->fk_event = $obj->fk_event;
                 $this->date_start = $obj->date_start;
                 $this->date_end = $obj->date_end;
+                $this->type_extra_1 = intVal($obj->type_extra_1);
+                $this->type_extra_2 = intVal($obj->type_extra_2);
+                $this->type_extra_3 = intVal($obj->type_extra_3);
+                $this->type_extra_4 = intVal($obj->type_extra_4);
+                $this->type_extra_5 = intVal($obj->type_extra_5);
+                $this->type_extra_6 = intVal($obj->type_extra_6);
+                $this->name_extra_1 = $obj->name_extra_1;
+                $this->name_extra_2 = $obj->name_extra_2;
+                $this->name_extra_3 = $obj->name_extra_3;
+                $this->name_extra_4 = $obj->name_extra_4;
+                $this->name_extra_5 = $obj->name_extra_5;
+                $this->name_extra_6 = $obj->name_extra_6;
                 return 1;
             }
         } else {
@@ -48,7 +60,14 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $id_event, $file, $date_start = null, $date_end = null) {
+    public function create($label, $price, $id_event, $file, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
+
+//        $numargs = func_num_args();
+//        $arg_list = func_get_args();
+//        for ($i = 0; $i < $numargs; $i++) {
+//            $this->errors[] = "L'argument $i est : " . $arg_list[$i] . "\n";
+//        }
+//        return -1111;
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -61,10 +80,18 @@ class Tariff {
         if (sizeof($this->errors) != 0)
             return -3;
 
-        if ($date_start != null)
-            $date_start_obj = DateTime::createFromFormat('d/m/Y', $date_start);
-        if ($date_end != null)
-            $date_end_obj = DateTime::createFromFormat('d/m/Y', $date_end);
+        if ($time_start == '')
+            $time_start = '00:00';
+        if ($time_end == '')
+            $time_end = '00:00';
+
+        $full_date_start = $date_start . ' ' . $time_start . ':00';
+        $full_date_end = $date_end . ' ' . $time_end . ':00';
+
+        if ($date_start != '')
+            $date_start_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_start);
+        if ($date_end != '')
+            $date_end_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_end);
 
 
         $sql = 'INSERT INTO `tariff` (';
@@ -72,23 +99,46 @@ class Tariff {
         $sql.= ', `date_creation`';
         $sql.= ', `price`';
         $sql.= ', `fk_event`';
-        if ($date_start != null)
+        if ($date_start != '')
             $sql.= ', `date_start`';
-        if ($date_end != null)
+        if ($date_end != '')
             $sql.= ', `date_end`';
+        if ($type_extra_1 != '' and $name_extra_1 != '')
+            $sql .= ', `type_extra_1`, `name_extra_1`';
+        if ($type_extra_2 != '' and $name_extra_2 != '')
+            $sql .= ', `type_extra_2`, `name_extra_2`';
+        if ($type_extra_3 != '' and $name_extra_3 != '')
+            $sql .= ', `type_extra_3`, `name_extra_3`';
+        if ($type_extra_4 != '' and $name_extra_4 != '')
+            $sql .= ', `type_extra_4`, `name_extra_4`';
+        if ($type_extra_5 != '' and $name_extra_5 != '')
+            $sql .= ', `type_extra_5`, `name_extra_5`';
+        if ($type_extra_6 != '' and $name_extra_6 != '')
+            $sql .= ', `type_extra_6`, `name_extra_6`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . $label . '"';
         $sql.= ', now()';
         $sql.= ', "' . $price . '"';
         $sql.= ', "' . $id_event . '"';
-        if ($date_start != null)
-            $sql.= ', "' . $date_start_obj->format("Y-m-d") . '"';
-        if ($date_end != null)
-            $sql.= ', "' . $date_end_obj->format("Y-m-d") . '"';
+        if ($date_start != '')
+            $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
+        if ($date_end != '')
+            $sql.= ', "' . $date_end_obj->format('Y-m-d H:i:s') . '"';
+        if ($type_extra_1 != '' and $name_extra_1 != '')
+            $sql.= ', "' . $type_extra_1 . '", "' . $name_extra_1 . '"';
+        if ($type_extra_2 != '' and $name_extra_2 != '')
+            $sql.= ', "' . $type_extra_2 . '", "' . $name_extra_2 . '"';
+        if ($type_extra_3 != '' and $name_extra_3 != '')
+            $sql.= ', "' . $type_extra_3 . '", "' . $name_extra_3 . '"';
+        if ($type_extra_4 != '' and $name_extra_4 != '')
+            $sql.= ', "' . $type_extra_4 . '", "' . $name_extra_4 . '"';
+        if ($type_extra_5 != '' and $name_extra_5 != '')
+            $sql.= ', "' . $type_extra_5 . '", "' . $name_extra_5 . '"';
+        if ($type_extra_6 != '' and $name_extra_6 != '')
+            $sql.= ', "' . $type_extra_6 . '", "' . $name_extra_6 . '"';
         $sql.= ')';
 
 
-//        echo $sql;
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->db->beginTransaction();
@@ -116,11 +166,39 @@ class Tariff {
         return -1;
     }
 
+//    public function getTariffsForEvent($id_event) {
+//
+//        $tariffs = array();
+//
+//        $sql = 'SELECT id, label, date_creation, price, fk_event';
+//        $sql .= ' FROM tariff';
+//        $sql .= ' WHERE fk_event=' . $id_event;
+//
+//
+//        $result = $this->db->query($sql);
+//        if ($result and $result->rowCount() > 0) {
+//            while ($obj = $result->fetchObject()) {
+//                $tariffs[] = array(
+//                    'id' => intVal($obj->id),
+//                    'label' => $obj->label,
+//                    'date_creation' => $obj->date_creation,
+//                    'price' => intVal($obj->price),
+//                    'fk_event' => intVal($obj->fk_event)
+//                );
+//            }
+//            return $tariffs;
+//        } elseif (!$result) {
+//            $this->errors[] = "Erreur SQL 1567.";
+//            return -2;
+//        }
+//        return -1;
+//    }
+
     public function getTariffsForEvent($id_event) {
 
         $tariffs = array();
 
-        $sql = 'SELECT id, label, date_creation, price, fk_event';
+        $sql = 'SELECT id';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE fk_event=' . $id_event;
 
@@ -128,13 +206,9 @@ class Tariff {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $tariffs[] = array(
-                    'id' => $obj->id,
-                    'label' => $obj->label,
-                    'date_creation' => $obj->date_creation,
-                    'price' => $obj->price,
-                    'fk_event' => $obj->fk_event,
-                );
+                $tariff = new Tariff($this->db);
+                $tariff->fetch($obj->id);
+                $tariffs[] = $tariff;
             }
             return $tariffs;
         } elseif (!$result) {

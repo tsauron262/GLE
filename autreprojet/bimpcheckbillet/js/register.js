@@ -5,7 +5,6 @@
  */
 
 function register(first_name, last_name, email, login, pass_word) {
-    console.log('envoyé');
     $.ajax({
         type: "POST",
         url: "../interface.php",

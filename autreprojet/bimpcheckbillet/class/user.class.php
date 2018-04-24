@@ -13,6 +13,9 @@ class User {
     public $events;
     public $login;
     public $pass_word;
+    public $create_event_tariff;
+    public $reserve_ticket;
+    public $validate_event;
 
     const STATUT_ADMIN = 1;
     const STATUT_SUPER_ADMIN = 2;
@@ -31,7 +34,7 @@ class User {
             return false;
         }
 
-        $sql = 'SELECT id, first_name, last_name, email, login, pass_word, status';
+        $sql = 'SELECT id, first_name, last_name, email, login, pass_word, status, create_event_tariff, reserve_ticket, validate_event';
         $sql .= ' FROM user';
         $sql .= ' WHERE id=' . $id;
 
@@ -46,6 +49,9 @@ class User {
                 $this->login = $obj->login;
                 $this->pass_word = $obj->pass_word;
                 $this->status = $obj->status;
+                $this->create_event_tariff = $obj->create_event_tariff;
+                $this->reserve_ticket = $obj->reserve_ticket;
+                $this->validate_event = $obj->validate_event;
                 if ($fetchEvent)
                     $this->fetchEvent();
                 return 1;
@@ -82,60 +88,11 @@ class User {
         return -1;
     }
 
-//    public function create($first_name, $last_name, $email, $date_born) {
-//
-//        if ($first_name == '')
-//            $this->errors[] = "Le champ prénom est obligatoire";
-//        if ($last_name == '')
-//            $this->errors[] = "Le champ nom est obligatoire";
-//        if ($email == '')
-//            $this->errors[] = "Le champ email est obligatoire";
-//        if ($date_born == '')
-//            $this->errors[] = "Le champ date de naissance est obligatoire";
-//        if (sizeof($this->errors) != 0)
-//            return -3;
-//
-//        $date_born_obj = DateTime::createFromFormat('d/m/Y', $date_born);
-//
-//
-//        $sql = 'INSERT INTO `user` (';
-//        $sql.= '`first_name`';
-//        $sql.= ', `date_registration`';
-//        $sql.= ', `date_born`';
-//        $sql.= ', `last_name`';
-//        $sql.= ', `email`';
-//        $sql.= ') ';
-//        $sql.= 'VALUES ("' . $first_name . '"';
-//        $sql.= ', now()';
-//        $sql.= ', "' . $date_born_obj->format("Y-m-d") . '"';
-//        $sql.= ', "' . $last_name . '"';
-//        $sql.= ', "' . $email . '"';
-//        $sql.= ')';
-//
-//
-//        try {
-//            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-//            $this->db->beginTransaction();
-//            $this->db->exec($sql);
-//            $last_insert_id = $this->db->lastInsertId();
-//            $this->db->commit();
-//            return $last_insert_id;
-//        } catch (Exception $e) {
-//            if ($e->errorInfo[1] == 1062)
-//                $this->errors[] = "Cet email est déjà utilisé.";
-//            else
-//                $this->errors[] = "Impossible de créer l'évènement. " . $e;
-//            $this->db->rollBack();
-//            return -2;
-//        }
-//        return -1;
-//    }
-
     public function create($first_name, $last_name, $email, $login, $pass_word, $status = null) {
         if ($first_name == '')
             $this->errors[] = "Le champ prénom est obligatoire";
         if ($last_name == '')
-            $this->errors[] = "Le champ nomest obligatoire";
+            $this->errors[] = "Le champ nom est obligatoire";
         if ($email == '')
             $this->errors[] = "Le champ email est obligatoire";
         if ($login == '')
@@ -255,6 +212,38 @@ class User {
             return 1;
         } catch (Exception $e) {
             $this->errors[] = "Impossible de modifier le login et mot de passe de l'utilisateur. " . $e;
+            $this->db->rollBack();
+            return -2;
+        }
+        return -1;
+    }
+
+    public function updateUser($id_user, $field, $value) {
+
+        if ($id_user < 0) {
+            $this->errors[] = "L'identifiant de l'utilisateur est invalie: " . $id_user;
+            return -3;
+        }
+
+        if ($value == "true")
+            $value = 1;
+        else if ($value == "false")
+            $value = 0;
+
+        $sql = 'UPDATE user';
+        $sql .= ' SET ' . $field . '="' . $value . '"';
+        $sql .= ' WHERE id=' . $id_user;
+
+//        echo $sql;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+            return 1;
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de modifier profil de l'utilisateur. " . $e;
             $this->db->rollBack();
             return -2;
         }

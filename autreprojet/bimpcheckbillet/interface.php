@@ -31,7 +31,7 @@ switch ($_POST['action']) {
     case 'create_event': {
             $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->create($_POST['label'], $_POST['date_start'], $_POST['date_end'], $user->id, $_FILES['file']),
+                'code_return' => $event->create($_POST['label'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file']),
                 'errors' => $event->errors));
             break;
         }
@@ -41,7 +41,7 @@ switch ($_POST['action']) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['id_event'], $_FILES['file'], ($_POST['date_start'] == '') ? null : $_POST['date_start'], ($_POST['date_end'] == '') ? null : $_POST['date_end']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['id_event'], $_FILES['file'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -53,7 +53,7 @@ switch ($_POST['action']) {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
             echo json_encode(array(
-                'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['extra_int1'], $_POST['extra_int2'], $_POST['extra_string1'], $_POST['extra_string2']),
+                'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6']),
                 'errors' => $ticket->errors));
             break;
         }
@@ -163,12 +163,41 @@ switch ($_POST['action']) {
                 break;
             }
         }
+
+    case 'change_right_user': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->status != $user::STATUT_SUPER_ADMIN) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit d'accéder à ces données"));
+                break;
+            } else {
+                $static_user = new User($db);
+                echo json_encode(array(
+                    'code_return' => $static_user->updateUser($_POST['id_user'], $_POST['right'], $_POST['new_status']),
+                    'errors' => $static_user->errors));
+                break;
+            }
+        }
+        
+        
+    /**
+     * modify_event.php
+     */
+    case 'modify_event': {
+            $user = json_decode($_SESSION['user']);
+            echo json_encode(array(
+                'code_return' => $event->update($_POST['id_event'], $_POST['label'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id),
+                'errors' => $event->errors));
+            break;
+    }
+        
+
     /**
      * stats_event.php
      */
     case 'get_stats': {
             echo json_encode(array(
-                'event' => $event->getStats($_POST['id_event']),
+                'tab' => $event->getStats($_POST['id_event']),
                 'errors' => $event->errors));
             break;
         }
@@ -183,12 +212,35 @@ switch ($_POST['action']) {
                 'errors' => $event->errors));
             break;
         }
-    case 'get_tariffs_for_event' : {
+    case 'get_tariffs_for_event': {
             echo json_encode(array(
                 'tariffs' => $tariff->getTariffsForEvent($_POST['id_event']),
                 'errors' => $tariff->errors));
             break;
         }
+
+//    case 'get_image': {
+//            $file = $_POST['folder'] . $_POST['name'] . '.png';
+            // A few settings
+// Read image path, convert to base64 encoding
+//            $imageData = base64_encode(file_get_contents($file));
+//
+//// Format the image SRC:  data:{mime};base64,{data};
+//            $src = 'data: ' . mime_content_type($image) . ';base64,' . $imageData;
+//            $img_data = file_get_contents($file);
+//            imagejpeg($img_data, $file);
+//            echo '<img src=' . $file . '>';
+//            $image = base64_encode($file);
+//            echo $img_data;
+//
+//            $img_binary = fread(fopen($file, "r"), filesize($file));
+//            $img_string = base64_encode($img_binary);
+//
+//            echo json_encode(array('src' => $img_string,
+//                'errors' => array()));
+//
+//            break;
+//        }
 
     /**
      * Default

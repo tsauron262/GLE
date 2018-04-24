@@ -9,7 +9,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<head>';
     print '<title>' . $title . '</title>';
 // CSS
-    print '<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">';
+    print '<link rel="stylesheet" href="../lib/css/jquery-ui.css">';
     print '<link rel="stylesheet" href="../css/styles.css">';
     print '<link rel="stylesheet" href="../lib/css/bootstrap.min.css">';
     print '<link rel="stylesheet" href="../lib/css/chosen.min.css">';
@@ -17,10 +17,8 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         print '<link rel="stylesheet" type="text/css" href="' . $cssfile . '">';
 
 // JS
-    print '<script src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-    crossorigin="anonymous"></script>';
-    print '<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>';
+    print '<script src="../lib/js/jquery-3.3.1.min.js"></script>';
+    print '<script src="../lib/js/jquery-ui.js"></script>';
     print '<script type="text/javascript" src="../lib/js/bootstrap.min.js"></script>';
     print '<script type="text/javascript" src="../lib/js/chosen.jquery.min.js"></script>';
     print '<script type="text/javascript" src="../js/annexes.js"></script>';
@@ -45,6 +43,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
             print '<li><a class="nav-link" href="manage_user.php">Gestion droit</a></li>';
             print '<li><a class="nav-link" href="stats_event.php">Statistique évènement</a></li>';
             print '<li><a class="nav-link" href="create_event.php">Créer évènement</a></li>';
+            print '<li><a class="nav-link" href="modify_event.php">Modifier évènement</a></li>';
             print '<li><a class="nav-link" href="create_tariff.php">Créer tarif</a></li>';
             print '<li><a class="nav-link" href="create_ticket.php">Réserver ticket</a></li>';
             print '<li><a class="nav-link" href="check_ticket.php">Valider ticket</a></li>';

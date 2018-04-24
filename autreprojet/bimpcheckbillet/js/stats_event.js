@@ -1,3 +1,4 @@
+var google;
 
 
 /**
@@ -25,7 +26,7 @@ function getEvents() {
                             '<option value=' + event.id + '>' + event.label + '</option>');
                 });
                 $(".chosen-select").chosen({no_results_text: 'Pas de résultat'});
-                initEvents(events);
+                initEvents();
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3716.', 'error');
             }
@@ -39,6 +40,7 @@ function getStats(id_event) {
         type: "POST",
         url: "../interface.php",
         data: {
+            id_event: id_event,
             action: 'get_stats'
         },
         error: function () {
@@ -48,8 +50,8 @@ function getStats(id_event) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.event.length !== undefined) {
-                alert('retour');
+            } else if (out.tab !== undefined) {
+                displayStats(out.tab);
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 7255.', 'error');
 
@@ -65,13 +67,84 @@ function getStats(id_event) {
  */
 
 $(document).ready(function () {
+    google.charts.load('current', {'packages': ['corechart']});
     getEvents();
-}
-);
-function initEvents(events) {
+
+});
+
+function initEvents() {
     $('select[name=event]').change(function () {
         var id_event = $('select[name=event] > option:selected').val();
         if (id_event > 0)
             getStats(id_event);
     });
+}
+
+function displayStats(tab) {
+    var tariff;
+
+    var dataForGraphTariff = getTariffArray(tab.tariffs);
+    var dataForGraphTicket = getTicketArray(tab.tickets);
+    
+    $('#container_event').empty();
+    var html = '<p>';
+    html += 'Label : <strong>' + tab.event.label + '</strong><br/>';
+    html += 'Date de création : <strong>' + tab.event.date_creation + '</strong></br>';
+    html += 'Date de début : <strong>' + tab.event.date_start + '</strong></br>';
+    html += 'Date de fin : <strong>' + tab.event.date_end + '</strong></br>';
+    html += 'Total vendu : <strong>' + tab.event.price_total + ' €</strong></br>';
+    html += '</p>';
+    html += '<label>Tarifs </label>';
+    html += '<div id="char_tariff"></div>';
+    html += '<label>Tickets </label><br/>';
+    html += 'Nombre de ticket vendu : <strong>' + (parseInt(dataForGraphTicket[1][1]) + parseInt(dataForGraphTicket[2][1])) + '</strong></br>';
+    html += '<div id="char_ticket"></div>';
+    $('#container_event').append(html);
+
+    google.charts.setOnLoadCallback(drawChart(dataForGraphTariff, 'char_tariff', 'Répartition des tarifs dans les ventes'));
+    google.charts.setOnLoadCallback(drawChart(dataForGraphTicket, 'char_ticket', 'Validation des tickets'));
+}
+
+function drawChart(data_in, id_div, title) {
+    var data = google.visualization.arrayToDataTable(data_in);
+    var options = {
+        'title': title,
+        'width': 500,
+        'height': 250};
+    var chart = new google.visualization.PieChart(document.getElementById(id_div));
+    chart.draw(data, options);
+}
+
+function getTariffArray(tariffs) {
+    var out = [];
+    var couple;
+    var tariff;
+    out.push(['Label', 'Nombre de vente']);
+
+    for (var id in tariffs) {
+        tariff = tariffs[id];
+        couple = [];
+        couple.push(tariff.label);
+        couple.push(tariff.sold);
+        out.push(couple);
+    }
+    return out;
+}
+
+function getTicketArray(tickets) {
+    var out = [];
+    var scanned = 0;
+    var not_scanned = 0;
+    out.push(['Statut', 'Nombre']);
+
+    for (var id in tickets) {
+        if (tickets[id].date_scan === null)
+            not_scanned++;
+        else
+            scanned++;
+    }
+    out.push(['Validé', scanned]);
+    out.push(['Attendu', not_scanned]);
+
+    return out;
 }

@@ -12,11 +12,14 @@ class Ticket {
     // option
     private $price;
     // extra
-    private $extra_int1;
-    private $extra_int2;
-    private $extra_string1;
-    private $extra_string2;
-
+    private $extra_1;
+    private $extra_2;
+    private $extra_3;
+    private $extra_4;
+    private $extra_5;
+    private $extra_6;
+    
+    
     public function __construct($db) {
         $this->db = $db;
         $this->errors = array();
@@ -30,9 +33,10 @@ class Ticket {
         }
 
         $sql = 'SELECT date_creation, fk_event, fk_tariff, fk_user, date_scan, ';
-        $sql .= 'barcode, first_name, last_name, price, extra_int1, extra_int2, extra_string1, extra_string2';
+        $sql .= 'barcode, first_name, last_name, price, extra_1, extra_2, extra_3, extra_4, extra_5, extra_6';
         $sql .= ' FROM ticket';
         $sql .= ' WHERE id=' . $id;
+        
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
@@ -40,14 +44,19 @@ class Ticket {
                 $this->id = $id;
                 $this->date_creation = $obj->date_creation;
                 $this->id_event = $obj->fk_event;
-                $this->id_user = $obj->fk_user;
                 $this->id_tariff = $obj->fk_tariff;
-                $this->id_event = $obj->fk_event;
-                $this->id_event = $obj->fk_event;
-                $this->id_event = $obj->fk_event;
-                $this->id_event = $obj->fk_event;
-                $this->id_event = $obj->fk_event;
-                $this->id_event = $obj->fk_event;
+                $this->id_user = $obj->fk_user;
+                $this->date_scan = $obj->date_scan;
+                $this->barcode = $obj->barcode;
+                $this->first_name = $obj->first_name;
+                $this->last_name = $obj->last_name;
+                $this->price = $obj->price;
+                $this->extra_1 = $obj->extra_1;
+                $this->extra_2 = $obj->extra_2;
+                $this->extra_3 = $obj->extra_3;
+                $this->extra_4 = $obj->extra_4;
+                $this->extra_5 = $obj->extra_5;
+                $this->extra_6 = $obj->extra_6;
                 return 1;
             }
         } elseif ($result) {
@@ -57,7 +66,7 @@ class Ticket {
         return -1;
     }
 
-    public function create($id_tariff, $id_user, $id_event, $price = '', $extra_int1 = '', $extra_int2 = '', $extra_string1 = '', $extra_string2 = '') {
+    public function create($id_tariff, $id_user, $id_event, $price, $first_name, $last_name, $extra_1, $extra_2, $extra_3, $extra_4, $extra_5, $extra_6) {
 
         if ($id_tariff == '')
             $this->errors[] = "Le champ id tariff est obligatoire";
@@ -75,10 +84,14 @@ class Ticket {
         $sql.= ', `fk_event`';
         $sql.= ', `barcode`';
         $sql.= ($price != '') ? ', `price`' : '';
-        $sql.= ($extra_int1 != '') ? ', `extra_int1`' : '';
-        $sql.= ($extra_int2 != '') ? ', `extra_int2`' : '';
-        $sql.= ($extra_string1 != '') ? ', `extra_string1`' : '';
-        $sql.= ($extra_string2 != '') ? ', `extra_string2`' : '';
+        $sql.= ($first_name != '') ? ', `first_name`' : '';
+        $sql.= ($last_name != '') ? ', `last_name`' : '';
+        $sql.= ($extra_1 != '') ? ', `extra_1`' : '';
+        $sql.= ($extra_2 != '') ? ', `extra_2`' : '';
+        $sql.= ($extra_3 != '') ? ', `extra_3`' : '';
+        $sql.= ($extra_4 != '') ? ', `extra_4`' : '';
+        $sql.= ($extra_5 != '') ? ', `extra_5`' : '';
+        $sql.= ($extra_6 != '') ? ', `extra_6`' : '';
         $sql.= ') ';
         $sql.= 'VALUES ("' . $id_tariff . '"';
         $sql.= ', now()';
@@ -86,10 +99,14 @@ class Ticket {
         $sql.= ', "' . $id_event . '"';
         $sql.= ', "' . $this->getRandomString() . '"';
         $sql.= ($price != '') ? ', "' . $price . '"' : '';
-        $sql.= ($extra_int1 != '') ? ', "' . $extra_int1 . '"' : '';
-        $sql.= ($extra_int2 != '') ? ', "' . $extra_int2 . '"' : '';
-        $sql.= ($extra_string1 != '') ? ', "' . $extra_string1 . '"' : '';
-        $sql.= ($extra_string2 != '') ? ', "' . $extra_string2 . '"' : '';
+        $sql.= ($first_name != '') ? ', "' . $first_name . '"' : '';
+        $sql.= ($last_name != '') ? ', "' . $last_name . '"' : '';
+        $sql.= ($extra_1 != '') ? ', "' . $extra_1 . '"' : '';
+        $sql.= ($extra_2 != '') ? ', "' . $extra_2 . '"' : '';
+        $sql.= ($extra_3 != '') ? ', "' . $extra_3 . '"' : '';
+        $sql.= ($extra_4 != '') ? ', "' . $extra_4 . '"' : '';
+        $sql.= ($extra_5 != '') ? ', "' . $extra_5 . '"' : '';
+        $sql.= ($extra_6 != '') ? ', "' . $extra_6 . '"' : '';
         $sql.= ')';
 
         try {
@@ -109,10 +126,9 @@ class Ticket {
 
     public function check($barcode, $id_event) {
 
-        if ($this->setTicketByBarcode($barcode) < 0)
-            return -2;
+        $this->setTicketByBarcode($barcode);
 
-        if ($this->id < 0) {
+        if (!($this->id > 0)) {
             $this->errors[] = "Identifiant ticket inconnu : " . $this->id;
             return -4;
         }
@@ -128,6 +144,7 @@ class Ticket {
             $sql .= ' LEFT JOIN event as x ON x.id = ti.fk_event';
         }
         $sql .= ' WHERE ti.id=' . $this->id;
+
 
 
         $result = $this->db->query($sql);
@@ -176,8 +193,7 @@ class Ticket {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $this->fetch($obj->id);
-                return 1;
+                return $this->fetch(intVal($obj->id));
             }
         } elseif ($result) {
             $this->errors[] = "Aucun ticket n'a le code barre : " . $barcode;

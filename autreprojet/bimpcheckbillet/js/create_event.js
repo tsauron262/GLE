@@ -32,12 +32,10 @@ function createEvent() {
  * Ready
  */
 $(document).ready(function () {
-    $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
-    $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})
+    $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'});
+    $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'});
     initEvents();
-
-}
-);
+});
 /**
  * Function
  */

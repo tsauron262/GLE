@@ -1,4 +1,5 @@
 var events;
+var users;
 
 /**
  * Ajax call
@@ -46,12 +47,13 @@ function getUser() {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.users.length !== 0) {
+                users = out.users;
                 for (var id in out.users) {
-                    user = out.users[id];
+                    var user = out.users[id];
                     $('select[name=user]').append(
                             '<option value=' + user.id + '>' + user.last_name + ' ' + user.first_name + '</option>');
                 }
-                initEvents(out.users);
+                initEvents();
                 $(".chosen-select").chosen({no_results_text: 'Pas de résultat'});
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 6441.', 'error');
@@ -79,6 +81,13 @@ function changeEventAdmin(new_status, id_event, id_user) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
+                if (new_status === true)    // add event
+                    users[id_user].id_events.push(id_event);
+                else {  // remove event
+                    var index = users[id_user].id_events.indexOf(id_event);
+                    if (index !== -1)
+                        users[id_user].id_events.splice(index, 1);
+                }
                 $('input[type=checkbox][value=' + id_event + ']+label').addClass('pulse');
                 setTimeout(function () {
                     $('input[type=checkbox][value=' + id_event + ']+label').removeClass('pulse');
@@ -109,6 +118,8 @@ function changeLoginAndPassWord(id_user, login, pass_word) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
                 setMessage('alertSubmit', 'Login et mot de passe changé.', 'msg');
+                users[id_user].login = login;
+                users[id_user].pass_word = pass_word;
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 6811.', 'error');
             }
@@ -116,6 +127,40 @@ function changeLoginAndPassWord(id_user, login, pass_word) {
     });
 }
 
+function changeRightUser(new_status, id_user, id_checkbox) {
+    $.ajax({
+        url: '../interface.php',
+        type: 'POST',
+        data: {
+            id_user: id_user,
+            right: id_checkbox,
+            new_status: new_status,
+            action: 'change_right_user'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 3465.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.code_return > 0) {
+                if (new_status === true)
+                    users[id_user][id_checkbox] = '1';
+                if (new_status === false)
+                    users[id_user][id_checkbox] = '0';
+                console.log(users[id_user]);
+
+                $('input[type=checkbox]#' + id_checkbox + '+label').addClass('pulse');
+                setTimeout(function () {
+                    $('input[type=checkbox]#' + id_checkbox + '+label').removeClass('pulse');
+                }, 1000);
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 6811.', 'error');
+            }
+        }
+    });
+}
 
 /**
  * Ready
@@ -131,7 +176,7 @@ $(document).ready(function () {
  */
 
 
-function initEvents(users) {
+function initEvents() {
     $('select[name=user]').change(function () {
         var id_user = $('select[name=user] > option:selected').val();
         var user = users[id_user];
@@ -143,9 +188,18 @@ function initEvents(users) {
             $('input[name=login]').val(user.login);
             $('input[name=pass_word]').val(user.pass_word);
 
-            // Event
             if (user.status === '1') {
                 $('input[type=checkbox]').prop('disabled', false);
+
+                // Rights
+                if (user.create_event_tariff === '1')
+                    $('input#create_event_tariff').prop('checked', true);
+                if (user.reserve_ticket === '1')
+                    $('input#reserve_ticket').prop('checked', true);
+                if (user.validate_event === '1')
+                    $('input#validate_event').prop('checked', true);
+
+                // Event
                 $('input[type=checkbox]').each(function () {
                     if (user.id_events.includes($(this).val()))
                         $(this).prop('checked', true);
@@ -154,14 +208,22 @@ function initEvents(users) {
                 $('input[type=checkbox]').prop('disabled', true);
                 $('input[type=checkbox]').prop('checked', true);
             }
+
         }
     });
 
-    $('input[type=checkbox]').change(function () {
+    $('input[type=checkbox].change_event').change(function () {
         var new_status = $(this).prop('checked');
         var id_event = $(this).val();
         var id_user = $('select[name=user] > option:selected').val();
         changeEventAdmin(new_status, id_event, id_user);
+    });
+
+    $('input[type=checkbox].change_right').change(function () {
+        var new_status = $(this).prop('checked');
+        var id_checkbox = $(this).attr('id');
+        var id_user = $('select[name=user] > option:selected').val();
+        changeRightUser(new_status, id_user, id_checkbox);
     });
 
     $('button[name=modify]').click(function () {
@@ -179,7 +241,7 @@ function initEvents(users) {
 function displayCheckboxes(events) {
     var html = '';
     events.forEach(function (event) {
-        html += '<input type="checkbox" id=' + event.id + ' value=' + event.id + ' disabled>';
+        html += '<input class="change_event" type="checkbox" id=' + event.id + ' value=' + event.id + ' disabled>';
         html += '<label for=' + event.id + '>' + event.label + '</label>';
     });
     html += '';

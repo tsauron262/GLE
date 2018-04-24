@@ -37,7 +37,19 @@ print '</fieldset>';
 // Events
 print '<fieldset id="container_event" class="sub_container_form">';
 print '<legend><span>Evènement<span></legend>';
-print '<label>Accès évènements admin</label>';
+print '<label>Droit évènements</label>';
+
+print '<input class="change_right" type="checkbox" id="create_event_tariff" value="create_event_tariff" disabled>';
+print '<label for="create_event_tariff">Créer évènement/tarif</label>';
+
+print '<input class="change_right" type="checkbox" id="reserve_ticket" value="reserve_ticket" disabled>';
+print '<label for="reserve_ticket">Réserver tickets</label>';
+
+print '<input class="change_right" type="checkbox" id="validate_event" value="validate_event" disabled>';
+print '<label for="validate_event">Valider évènement</label>';
+
+
+print '<label>Accès évènements</label>';
 
 print '</fieldset>';
 

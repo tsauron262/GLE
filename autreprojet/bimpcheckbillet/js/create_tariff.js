@@ -55,6 +55,7 @@ function createTariff() {
                 $('input[name=file]').val('');
                 $('input[name=date_start]').val('');
                 $('input[name=date_end]').val('');
+                $('#img_display').attr('src', '');
                 
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 1853.', 'error');
@@ -68,30 +69,7 @@ function createTariff() {
         processData: false
     });
 }
-//    $.ajax({
-//        type: "POST",
-//        url: "../interface.php",
-//        data: {
-//            label: label,
-//            price: price,
-//            id_event: id_event,
-//            action: 'create_tariff'
-//        },
-//        error: function () {
-//            setMessage('alertSubmit', 'Erreur serveur 1492.', 'error');
-//        },
-//        success: function (rowOut) {
-//            var out = JSON.parse(rowOut);
-//            if (out.errors.length !== 0) {
-//                printErrors(out.errors, 'alertSubmit');
-//            } else if (out.code_return > 0) {
-//                setMessage('alertSubmit', "Le tariff a été créée.", 'msg');
-//            } else {
-//                setMessage('alertSubmit', 'Erreur serveur 3285.', 'error');
-//            }
-//        }
-//    });
-//}
+
 
 /**
  * Ready

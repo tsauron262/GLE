@@ -470,6 +470,9 @@ forms:
                       repOk: Réparation terminée
                       revPropRefu: Devis refusé
                       pieceOk: Piéce reçue
+                      
+    diagnostic: 
+        
               
 fields_tables: 
     infos: 

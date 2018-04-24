@@ -210,6 +210,10 @@ table.objectlistTable {
     }
     td.searchTools {
         text-align: right;
+        
+        .btn {
+            margin-right: 10px;
+        }
     }
 
     .searchInputContainer {

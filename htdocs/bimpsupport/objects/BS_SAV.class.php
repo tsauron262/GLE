@@ -435,10 +435,12 @@ class BS_SAV extends BimpObject
                     'IN' => implode(',', $entrepots)
             ));
         }
-        
+
         if (BimpTools::isSubmit('code_centre')) {
             $codes = explode('-', BimpTools::getValue('code_centre'));
-
+            foreach ($codes as &$code) {
+                $code = "'" . $code . "'";
+            }
             $filters[] = array('name'   => 'code_centre', 'filter' => array(
                     'IN' => implode(',', $codes)
             ));
@@ -781,16 +783,6 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     $propal->dol_object->cloture($user, 3, "Auto via SAV");
                     $msg_type = 'commercialRefuse';
                 }
-
-                // todo: 
-//                if ($chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
-//                    $req = "SELECT `nom` FROM `" . MAIN_DB_PREFIX . "usergroup` WHERE rowid IN (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $chrono->extraValue[$chrono->id]['Technicien']['value'] . ") ANd `nom` REGEXP 'Sav([0-9])'";
-//                    $sql = $db->query($req);
-//                    while ($ln = $db->fetch_object($sql)) {
-//                        $toMail = str_ireplace("Sav", "Boutique", $ln->nom) . "@bimp.fr";
-//                        envoieMail("commercialRefuse", $chrono, null, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
-//                    }
-//                }
                 break;
 
             case self::BS_SAV_EXAM_EN_COURS:
@@ -997,7 +989,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
     public function create()
     {
-        if($this->getData('ref') == '')
+        if ($this->data['ref'] == '')
             $this->data['ref'] = $this->getNextNumRef();
 
         $centre = $this->getCentreData();

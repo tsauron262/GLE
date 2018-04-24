@@ -74,7 +74,7 @@ if ($loadEquip == true) {
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT *  FROM `llx_element_element`, `llx_synopsischrono_chrono_105` s, `llx_synopsischrono` c WHERE c.id = s.id AND `sourcetype` LIKE 'SAV' AND `targettype` LIKE 'productCli' AND `fk_source` = s.id LIMIT 0,100");
+    $sql = $db->query("SELECT *  FROM `llx_element_element`, `llx_synopsischrono_chrono_105` s, `llx_synopsischrono` c WHERE c.id = s.id AND `sourcetype` LIKE 'SAV' AND `targettype` LIKE 'productCli' AND `fk_source` = s.id LIMIT 0,1000");
 
     require_once DOL_DOCUMENT_ROOT . "/synopsisapple/centre.inc.php";
 
@@ -83,11 +83,11 @@ if ($loadSav) {
 
         $sav = BimpObject::getInstance('bimpsupport', 'BS_Sav');
 
-        $idEntrepot = 0;
+        $code_centre = 0;
         if (isset($tabCentre[$ligne->Centre]) && isset($tabCentre[$ligne->Centre][7]))
-            $idEntrepot = $tabCentre[$ligne->Centre][8];
+            $code_centre = $ligne->Centre;
 
-        if ($idEntrepot == 0)
+        if ($code_centre == "")
             die("Pas de correspondance pour le centre " . $ligne->Centre);
 
         $idP = 17; //Prod par default
@@ -108,7 +108,7 @@ if ($loadSav) {
         $arraySav = array(
             'ref' => $ligne->ref,
             'id_equipment' => $idP, //TODO
-            'id_entrepot' => $idEntrepot,
+            'code_centre' => $code_centre,
             'id_user_tech' => $ligne->Technicien,
             'id_client' => $ligne->fk_soc,
             'id_contrat' => $ligne->Contract,

@@ -6,7 +6,7 @@ require("../../main.inc.php");
 
 llxHeader();
 
-$db->query("DELETE FROM llx_synopsisfichinter_User_PrixTypeInterv WHERE user_refid != 49");
+//$db->query("DELETE FROM llx_synopsisfichinter_User_PrixTypeInterv WHERE user_refid != 49");
 
 
 $sql = $db->query("SELECT * FROM `llx_synopsisfichinter_User_PrixTypeInterv` WHERE `user_refid` = 49");

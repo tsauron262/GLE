@@ -43,7 +43,7 @@ fields:
         default_value: 0
     repair_complete: 
         label: Réparation terminée
-        type: boold
+        type: bool
         default_value: 0
     closed: 
         label: Fermée
@@ -53,7 +53,29 @@ fields:
         label: Date de fermeture
         type: date
         
-    
+forms: 
+    import: 
+        title: Importer depuis GSX
+        icon: dowload
+        rows: 
+            - custom: 1
+              label: Identifiant
+              input_name: import_number
+              data_type: string
+              input: 
+                  type: text
+            - custom: 1
+              label: De type
+              data_type: string
+              input_name: import_number_type
+              input: 
+                  type: select
+                  options: 
+                      prop: 
+                          name: lookupNumbers
+                          is_static: 1
+                          
+                
 fields_tables:
     infos: 
         title: Informations
@@ -69,3 +91,19 @@ fields_tables:
             - field: repair_complete
             - field: closed
             - field: date_closed
+            
+views: 
+    default:
+        title: nom
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  - type: custom
+                    col_lg: 6
+                    col_md: 6
+                    custom: 
+                        callback: renderPartsPendingReturn

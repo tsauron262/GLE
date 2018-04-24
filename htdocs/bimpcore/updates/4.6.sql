@@ -20,3 +20,5 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_gsx_repair` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `llx_bs_apple_part` ADD `id_sav` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id`;
+
+ALTER TABLE `llx_bs_sav` ADD `code_centre` VARCHAR(128) NOT NULL DEFAULT '' AFTER `status`;

@@ -168,6 +168,8 @@ fields:
         type: string
         required: 0
         search:
+            input: 
+                type: text
             type: value_part
             search_on_key_up: 1
         input: 

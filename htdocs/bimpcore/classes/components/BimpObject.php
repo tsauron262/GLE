@@ -26,6 +26,7 @@ class BimpObject
         'primary'            => array('default' => 'id'),
         'common_fields'      => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'   => array('default' => 'default'),
+        'header_btn'         => array('data_type' => 'array', 'default' => array()),
         'list_page_url'      => array('data_type' => 'array'),
         'parent_object'      => array('default' => ''),
         'parent_id_property' => array('defautl' => ''),
@@ -1340,7 +1341,8 @@ class BimpObject
             }
 
             if ($result > 0) {
-                $this->id = $result;
+                $this->id = (int) $result;
+                $this->set($this->getPrimary(), (int) $result);
 
                 if ($this->getConf('positions', false, false, 'bool')) {
                     $insert_mode = $this->getConf('position_insert', 'before');
@@ -1417,8 +1419,10 @@ class BimpObject
                 }
 
                 unset($this->data[$primary]);
-                
+
                 $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
+
+                $this->set($primary, $this->id);
             }
 
             if ($result <= 0) {
@@ -2230,13 +2234,15 @@ class BimpObject
 
     // Rendus HTML
 
-    public function renderHeader()
+    public function renderHeader($content_only = false)
     {
         $html = '';
         if ($this->isLoaded()) {
             $name = $this->getInstanceName();
 
-            $html .= '<div class="object_header container-fluid">';
+            if (!$content_only) {
+                $html .= '<div id="' . $this->object_name . '_' . $this->id . '_header" class="object_header container-fluid">';
+            }
             $html .= '<div class="row">';
 
             $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
@@ -2332,9 +2338,13 @@ class BimpObject
                 $html .= '</div>';
             }
 
+            $this->params['header_btn'] = $this->config->getCompiledParams('header_btn');
+            if (is_null($this->params['header_btn'])) {
+                $this->params['header_btn'] = array();
+            }
+
             if (count($this->params['header_btn'])) {
                 $header_buttons = array();
-
                 foreach ($this->params['header_btn'] as $header_btn) {
                     $button = null;
                     $label = isset($header_btn['label']) ? $header_btn['label'] : '';
@@ -2361,8 +2371,8 @@ class BimpObject
                 }
 
                 $html .= '<div class="header_buttons">';
-                if (count($items)) {
-                    if (count($items) > 4) {
+                if (count($header_buttons)) {
+                    if (count($header_buttons) > 4) {
                         $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
                                     'icon' => 'cogs'
                         ));
@@ -2378,7 +2388,12 @@ class BimpObject
             $html .= '</div>';
 
             $html .= '</div>';
-            $html .= '</div>';
+            
+            $html .= '<div class="row header_bottom"></div>';
+
+            if (!$content_only) {
+                $html .= '</div>';
+            }
         }
 
         return $html;

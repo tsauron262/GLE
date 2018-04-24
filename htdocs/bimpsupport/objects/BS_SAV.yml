@@ -7,6 +7,10 @@ list_page_url:
         tab: sav
         id_entrepot: 
             field_value: id_entrepot
+
+header_btn: 
+    callback: getViewExtraBtn
+        
 labels:
     name: sav
     name_plur: sav
@@ -132,6 +136,8 @@ fields:
         type: string
         required: 0
         search:
+            input: 
+                type: text
             type: value_part
             search_on_key_up: 1
         input: 
@@ -146,6 +152,11 @@ fields:
             actions: 
                 type: callback
                 method: displayStatusWithActions
+    code_centre: 
+        label: Centre
+        values: 
+            array: centres
+        required: 1
     id_equipment: 
         label: Equipement
         type: id_object
@@ -161,7 +172,7 @@ fields:
             help: Numéro de série ou ID d'un équipement
         create_form: light
     id_entrepot:
-        label: Centre
+        label: Entrepot (stock)
         type: id_object
         object: entrepot
         input: 
@@ -326,9 +337,9 @@ fields:
 forms: 
     default:
         rows: 
-            - field: id_entrepot
+            - field: code_centre
               value: 
-                  request: id_entrepot
+                  request: code_centre
             - field: id_client
             - field: id_contact
             - field: id_equipment
@@ -366,7 +377,7 @@ forms:
             
     edit: 
         rows: 
-            - field: id_entrepot
+            - field: code_centre
             - field: id_client
             - field: id_contact
             - field: id_equipment
@@ -470,6 +481,7 @@ fields_tables:
             - field: ref
             - field: status
               display: actions
+            - field: code_centre
             - field: id_entrepot
               display: nom_url
             - field: id_user_tech

@@ -100,9 +100,8 @@
 }
 
 .object_header {
-    padding: 15px;
+    padding: 15px 15px 0 15px;
     background-color: #fff;
-
     h1, h2 {
         margin-top: 0;
     }
@@ -118,11 +117,26 @@
         display: inline-block;
         margin: 2px 25px 0 0;
     }
+
+    .header_buttons {
+        text-align: right;
+        margin-top: 10px;
+
+        .btn {
+            margin: 3px 5px;
+        }
+    }
+
+    .header_bottom {
+        margin-top: 10px;
+        padding: 5px;
+        border-top: 2px solid $gray-dark;
+    }
 }
 
 .object_card {
     margin-top: 0;
-    
+
     .object_card_status {
         display: inline-block;
         text-align: right;

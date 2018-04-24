@@ -1100,6 +1100,7 @@ class BimpController
     {
         $errors = array();
         $html = '';
+        $header_html = '';
         $view_id = '';
 
         $id_parent = BimpTools::getValue('id_parent', null);
@@ -1127,14 +1128,16 @@ class BimpController
             $view->content_only = $content_only;
             $view->setNewValues($new_values);
             $html = $view->renderHtml();
+            $header_html = $object->renderHeader(true);
             $view_id = $view->identifier;
         }
 
         die(json_encode(array(
-            'errors'     => $errors,
-            'html'       => $html,
-            'view_id'    => $view_id,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'errors'      => $errors,
+            'html'        => $html,
+            'header_html' => $header_html,
+            'view_id'     => $view_id,
+            'request_id'  => BimpTools::getValue('request_id', 0)
         )));
     }
 

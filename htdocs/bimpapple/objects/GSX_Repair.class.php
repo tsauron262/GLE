@@ -677,8 +677,9 @@ class GSX_Repair extends BimpObject
         }
 
         return BimpRender::renderPanel('Composants en attente de retour', $html, '', array(
-                    'type'     => 'default',
-                    'foldable' => true
+                    'type'     => 'secondary',
+                    'foldable' => true,
+                    'icon'     => 'fas_box'
         ));
     }
 

@@ -13,7 +13,7 @@ class BimpRender
 
     public static function renderIcon($icon, $class = '')
     {
-        return '<i class="'. self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
+        return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
     }
 
     public static function displayTagAttrs($params)
@@ -174,7 +174,19 @@ class BimpRender
             $params['type'] = 'default';
         }
 
-        $html .= '<div class="panel panel-' . $params['type'] . (isset($params['foldable']) && $params['foldable'] ? ' foldable open' : '') . '"';
+        if (!isset($params['open'])) {
+            $params['open'] = true;
+        }
+
+        if (!isset($params['foldable'])) {
+            $params['foldable'] = false;
+        }
+
+        if (!isset($params['panel_class'])) {
+            $params['panel_class'] = '';
+        }
+
+        $html .= '<div class="panel panel-' . $params['type'] . ($params['foldable'] ? ' foldable ' . ($params['open'] ? 'open' : 'closed') : '') . ($params['panel_class'] ? ' ' . $params['panel_class'] : '') . '"';
         if (isset($params['panel_id']) && $params['panel_id']) {
             $html .= ' id="' . $params['panel_id'] . '"';
         }
@@ -199,20 +211,20 @@ class BimpRender
             }
         }
 
-        if (isset($params['foldable']) && $params['foldable']) {
+        if ($params['foldable']) {
             $html .= '<span class="panel-caret"></span>';
         }
         $html .= '</div>';
         $html .= '</div>';
 
         // Corps:
-        $html .= '<div class="panel-body">';
+        $html .= '<div class="panel-body"' . ($params['foldable'] && !$params['open'] ? ' style="display: none"' : '') . '>';
         $html .= $body_content;
         $html .= '</div>';
 
         // Footer:
         if ($footer_content) {
-            $html .= '<div class="panel-footer">';
+            $html .= '<div class="panel-footer"' . ($params['foldable'] && !$params['open'] ? ' style="display: none"' : '') . '>';
             $html .= $footer_content;
             $html .= '</div>';
         }
@@ -222,7 +234,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderFreeForm($rows, $buttons, $title, $icon = '')
+    public static function renderFreeForm($rows, $buttons, $title, $icon = '', $infos = array())
     {
         $html = '<div class="freeForm">';
         $html .= '<div class="freeFormTitle">';
@@ -232,6 +244,14 @@ class BimpRender
         $html .= $title;
         $html .= '</div>';
         $html .= '<div class="freeFormContent">';
+
+        if (count($infos)) {
+            foreach ($infos as $info) {
+                $html .= '<p class="alert alert-info">';
+                $html .= $info;
+                $html .= '</p>';
+            }
+        }
 
         foreach ($rows as $row) {
             $html .= '<div class="freeFormRow">';

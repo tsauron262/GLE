@@ -1054,7 +1054,7 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
-    
+
     protected function ajaxProcessLoadObjectList()
     {
         $errors = array();
@@ -1100,6 +1100,7 @@ class BimpController
     {
         $errors = array();
         $html = '';
+        $header_html = '';
         $view_id = '';
 
         $id_parent = BimpTools::getValue('id_parent', null);
@@ -1127,14 +1128,16 @@ class BimpController
             $view->content_only = $content_only;
             $view->setNewValues($new_values);
             $html = $view->renderHtml();
+            $header_html = $object->renderHeader(true);
             $view_id = $view->identifier;
         }
 
         die(json_encode(array(
-            'errors'     => $errors,
-            'html'       => $html,
-            'view_id'    => $view_id,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'errors'      => $errors,
+            'html'        => $html,
+            'header_html' => $header_html,
+            'view_id'     => $view_id,
+            'request_id'  => BimpTools::getValue('request_id', 0)
         )));
     }
 
@@ -1387,7 +1390,7 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
-    
+
     protected function ajaxProcessSetObjectAction()
     {
         $errors = array();
@@ -1404,22 +1407,20 @@ class BimpController
             $errors[] = 'Type d\'objet absent';
         }
 
-        if (!$id_object) {
-            $errors[] = 'ID de l\'objet absent';
-        }
-
         if (is_null($object_action)) {
             $errors[] = 'Type d\'action absent';
         }
 
         if (!count($errors)) {
-            $object = BimpObject::getInstance($module, $object_name, $id_object);
-            if (is_null($object) || !$object->isLoaded()) {
-                $errors[] = 'ID de l\'objet invalide';
+            $object = BimpObject::getInstance($module, $object_name);
+            if (is_null($object)) {
+                $errors[] = 'Type d\'objet invalide';
             } else {
-                $errors = $object->setObjectAction($object_action, $extra_data, $success);
+                $errors = $object->setObjectAction($object_action, $id_object, $extra_data, $success);
             }
         }
+
+        ini_set('display_errors', 1);
 
         die(json_encode(array(
             'errors'     => $errors,

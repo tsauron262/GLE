@@ -188,8 +188,23 @@ class BimpInput
 
             case 'search_product':
                 global $conf;
+                $filter_type = 0;
+                if (isset($options['filter_type'])) {
+                    switch ($options['filter_type']) {
+                        case 'both':
+                            $filter_type = '';
+                            break;
+
+                        case 'product':
+                            $filter_type = 0;
+                            break;
+
+                        case 'service':
+                            $filter_type = 1;
+                    }
+                }
                 ob_start();
-                $form->select_produits((int) $value, $field_name, 0, $conf->product->limit_size, 0, -1, 2, '', 1);
+                $form->select_produits((int) $value, $field_name, $filter_type, $conf->product->limit_size, 0, -1, 2, '', 1);
                 $html .= ob_get_clean();
                 break;
 

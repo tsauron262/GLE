@@ -26,6 +26,7 @@ class BimpObject
         'primary'            => array('default' => 'id'),
         'common_fields'      => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'   => array('default' => 'default'),
+        'header_btn'         => array('data_type' => 'array', 'default' => array()),
         'list_page_url'      => array('data_type' => 'array'),
         'parent_object'      => array('default' => ''),
         'parent_id_property' => array('defautl' => ''),
@@ -48,20 +49,6 @@ class BimpObject
     protected $history = array();
     protected $parent = null;
     public $dol_object = null;
-    
-    
-    public function getRef($withGenrique = true){
-        if($this->field_exists("ref"))
-            return $this->getData("ref");
-        elseif($this->field_exists("reference"))
-            return $this->getData("reference");
-        elseif($withGenrique)
-            return get_class($this)."_".$this->id;
-    }
-    
-    public function getNomUrl($withpicto = true){
-        return "<a href='".$this->getInstanceUrl($this)."'><span>".($withpicto ? '<i class="fa '.$this->iconeDef.' iconLeft"></i>' : '').$this->ref.'</span></a>';
-    }
 
     public static function getInstance($module, $object_name, $id_object = null)
     {
@@ -308,6 +295,31 @@ class BimpObject
             }
         }
         return $property;
+    }
+
+    public function getRef()
+    {
+        if ($this->field_exists('ref')) {
+            return $this->getData('ref');
+        }
+
+        if ($this->field_exists('reference')) {
+            return $this->getData('reference');
+        }
+
+        return get_class($this) . "_" . $this->id;
+    }
+
+    public function getNomUrl($withpicto = true)
+    {
+        $html = '<a href="' . $this->getUrl() . '">';
+        if ($withpicto) {
+            $icon = $this->getIcon();
+            if ($icon) {
+                $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+            }
+        }
+        $html .= $this->ref . '</a>';
     }
 
     public function getParentId()
@@ -623,6 +635,7 @@ class BimpObject
         $this->data = array();
         $this->associations = array();
         $this->id = null;
+        $this->ref = '';
     }
 
     public function getAssociatesList($association)
@@ -899,17 +912,22 @@ class BimpObject
         return $errors;
     }
 
-    public function setObjectAction($action, $extra_data = array(), &$success = '')
+    public function setObjectAction($action, $id_object = 0, $extra_data = array(), &$success = '')
     {
         $errors = array();
 
-        if ($this->isLoaded()) {
-            $method = 'action' . ucfirst($action);
-            if (method_exists($this, $method)) {
-                $this->{$method}($extra_data, $success);
-            } else {
-                $errors[] = 'Action invalide: "' . $action . '"';
+        if ($id_object) {
+            if (!$this->fetch($id_object)) {
+                $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                return $errors;
             }
+        }
+
+        $method = 'action' . ucfirst($action);
+        if (method_exists($this, $method)) {
+            $errors = $this->{$method}($extra_data, $success);
+        } else {
+            $errors[] = 'Action invalide: "' . $action . '"';
         }
 
         return $errors;
@@ -1323,7 +1341,8 @@ class BimpObject
             }
 
             if ($result > 0) {
-                $this->id = $result;
+                $this->id = (int) $result;
+                $this->set($this->getPrimary(), (int) $result);
 
                 if ($this->getConf('positions', false, false, 'bool')) {
                     $insert_mode = $this->getConf('position_insert', 'before');
@@ -1400,8 +1419,10 @@ class BimpObject
                 }
 
                 unset($this->data[$primary]);
-                
+
                 $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
+
+                $this->set($primary, $this->id);
             }
 
             if ($result <= 0) {
@@ -2213,13 +2234,15 @@ class BimpObject
 
     // Rendus HTML
 
-    public function renderHeader()
+    public function renderHeader($content_only = false)
     {
         $html = '';
         if ($this->isLoaded()) {
             $name = $this->getInstanceName();
 
-            $html .= '<div class="object_header container-fluid">';
+            if (!$content_only) {
+                $html .= '<div id="' . $this->object_name . '_' . $this->id . '_header" class="object_header container-fluid">';
+            }
             $html .= '<div class="row">';
 
             $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
@@ -2315,10 +2338,62 @@ class BimpObject
                 $html .= '</div>';
             }
 
+            $this->params['header_btn'] = $this->config->getCompiledParams('header_btn');
+            if (is_null($this->params['header_btn'])) {
+                $this->params['header_btn'] = array();
+            }
+
+            if (count($this->params['header_btn'])) {
+                $header_buttons = array();
+                foreach ($this->params['header_btn'] as $header_btn) {
+                    $button = null;
+                    $label = isset($header_btn['label']) ? $header_btn['label'] : '';
+                    $onclick = isset($header_btn['onclick']) ? $header_btn['onclick'] : '';
+                    $icon = isset($header_btn['icon']) ? $header_btn['icon'] : '';
+                    $onclick = str_replace('component_id', $this->identifier, $onclick);
+                    if ($label && $onclick) {
+                        $button = array(
+                            'classes' => array('btn', 'btn-light-default'),
+                            'label'   => $label,
+                            'attr'    => array(
+                                'type'    => 'button',
+                                'onclick' => $onclick
+                            )
+                        );
+                        if ($icon) {
+                            $button['icon_before'] = $icon;
+                        }
+                    }
+
+                    if (!is_null($button)) {
+                        $header_buttons[] = BimpRender::renderButton($button, 'button');
+                    }
+                }
+
+                $html .= '<div class="header_buttons">';
+                if (count($header_buttons)) {
+                    if (count($header_buttons) > 4) {
+                        $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
+                                    'icon' => 'cogs'
+                        ));
+                    } else {
+                        foreach ($header_buttons as $btn) {
+                            $html .= str_replace('btn-light-default', 'btn-default', $btn);
+                        }
+                    }
+                }
+                $html .= '</div>';
+            }
+
             $html .= '</div>';
 
             $html .= '</div>';
-            $html .= '</div>';
+            
+            $html .= '<div class="row header_bottom"></div>';
+
+            if (!$content_only) {
+                $html .= '</div>';
+            }
         }
 
         return $html;

@@ -61,7 +61,7 @@ table.objectlistTable {
         }
     }
 
-    & > tbody > tr.objectListItemRow {
+    & > tbody > tr {
         @include transition(all 0.3s ease);
 
         background-color: #fff!important;

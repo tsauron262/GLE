@@ -15,7 +15,7 @@ function saveObject(module, object_name, id_object, fields, $resultContainer, su
 
     BimpAjax('saveObject', data, $resultContainer, {
         display_success: display_success,
-        success: function (result) {
+        success: function (result, bimpAjax) {
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
@@ -185,7 +185,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
     if (typeof (extra_data) === 'undefined') {
         extra_data = {};
     }
-    
+
     if (typeof ($resultContainer) === 'undefined') {
         $resultContainer = null;
     }
@@ -201,6 +201,12 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
             if ($modal.length) {
                 var $form = $modal.find('.modal-ajax-content').find('.object_form');
                 if ($form.length) {
+                    for (var field_name in extra_data) {
+                        var $input = $form.find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            $input.val(extra_data[field_name]);
+                        }
+                    }
                     $modal.find('.modal-footer').find('.save_object_button').remove();
                     $modal.find('.modal-footer').find('.objectViewLink').remove();
 

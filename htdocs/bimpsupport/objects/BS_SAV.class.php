@@ -970,11 +970,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     
     public function create()
     {
-        if($this->data['ref'] == '')
+        if($this->getData('ref') == '')
             $this->data['ref'] = $this->getNextNumRef();
         $errors = parent::create();
 
-        if (!count($errors)) {
+        if (!count($errors) && $this->getData("id_propal") < 1) {
             $this->createPropal();
         }
     }
